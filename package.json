@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "web": "npm run dev --workspace=apps/web",
-    "mobile": "npm run start --workspace=apps/mobile"
+    "web": "cd apps/web && npx vite",
+    "mobile": "cd apps/mobile && npx expo start"
   }
 }

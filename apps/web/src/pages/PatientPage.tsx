@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
@@ -163,7 +164,7 @@ export function PatientPage() {
                         <div className="module-card__desc">{MODULE_DESCRIPTIONS[type]}</div>
                       </div>
                       {unlocked ? (
-                        <span className="module-card__badge">✓ Actif</span>
+                        <span className="module-card__badge"><Check size={14} /> Actif</span>
                       ) : (
                         <Button
                           size="sm"

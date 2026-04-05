@@ -23,8 +23,10 @@
 }
 
 .login-card__logo {
-  font-size: 48px;
+  display: flex;
+  justify-content: center;
   margin-bottom: 12px;
+  color: var(--color-primary);
 }
 
 .login-card__title {
@@ -79,4 +81,28 @@
 
 .login-card__link:hover {
   text-decoration: underline;
+}
+
+.login-card__confirm-email {
+  text-align: center;
+  padding: 8px 0 16px;
+}
+
+.login-card__confirm-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+.login-card__confirm-email h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 12px;
+}
+
+.login-card__confirm-email p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
 }

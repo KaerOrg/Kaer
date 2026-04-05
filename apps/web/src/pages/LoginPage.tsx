@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from '../components/Button'
 import { InputField } from '../components/InputField'
@@ -7,6 +8,7 @@ import './LoginPage.css'
 export function LoginPage() {
   const { login, register, loading, error, clearError } = useAuthStore()
   const [mode, setMode] = useState<'login' | 'register'>('login')
+  const [registered, setRegistered] = useState(false)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,6 +22,10 @@ export function LoginPage() {
       await login(email, password)
     } else {
       await register(email, password, name, title)
+      // Si pas d'erreur après register, l'email de confirmation a été envoyé
+      if (!useAuthStore.getState().error) {
+        setRegistered(true)
+      }
     }
   }
 
@@ -28,11 +34,32 @@ export function LoginPage() {
     setMode(m => m === 'login' ? 'register' : 'login')
   }
 
+  if (registered) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-card__header">
+            <div className="login-card__logo"><BrainCircuit size={36} /></div>
+            <h1 className="login-card__title">PsyTool</h1>
+          </div>
+          <div className="login-card__confirm-email">
+            <div className="login-card__confirm-icon">📧</div>
+            <h2>Vérifiez votre email</h2>
+            <p>Un lien de confirmation a été envoyé à <strong>{email}</strong>. Cliquez sur ce lien pour activer votre compte, puis revenez vous connecter.</p>
+            <button type="button" className="login-card__link" onClick={() => { setRegistered(false); setMode('login') }}>
+              Retour à la connexion
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="login-page">
       <div className="login-card">
         <div className="login-card__header">
-          <div className="login-card__logo">🧠</div>
+          <div className="login-card__logo"><BrainCircuit size={36} /></div>
           <h1 className="login-card__title">PsyTool</h1>
           <p className="login-card__subtitle">
             {mode === 'login' ? 'Connexion — Espace praticien' : 'Créer votre compte praticien'}

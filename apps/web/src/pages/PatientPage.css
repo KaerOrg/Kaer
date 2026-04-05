@@ -171,6 +171,9 @@
 }
 
 .module-card__badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   color: var(--color-success);
   font-weight: 600;

@@ -50,6 +50,10 @@ npm run mobile
 
 ## Schéma de base de données
 
+> **Règle :** `supabase/schema.sql` est la source de vérité du modèle de données.
+> À chaque modification du schéma (nouvelle table, colonne, policy, trigger, index),
+> mettre à jour ce fichier ET la section ci-dessous pour qu'ils restent synchronisés.
+
 5 tables principales :
 
 - **practitioners** — profils praticiens (liés à auth.users)
@@ -108,6 +112,10 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 
 À terme : SaaS B2B vendu à d'autres praticiens (psychologues, IPA, médecins).
 Migration vers hébergement HDS (OVHcloud) requise avant mise en production commerciale.
+
+## Règles de développement
+
+- Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
 
 ## MCP disponible
 

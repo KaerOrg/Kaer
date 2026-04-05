@@ -1,0 +1,39 @@
+.patient-register__invalid,
+.patient-register__success {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+
+.patient-register__invalid-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: var(--color-warning, #f59e0b);
+}
+
+.patient-register__success-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.patient-register__invalid h2,
+.patient-register__success h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10px;
+}
+
+.patient-register__invalid p,
+.patient-register__success p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}

@@ -4,6 +4,7 @@ import { useAuthStore } from './store/authStore'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PatientPage } from './pages/PatientPage'
+import { PatientRegisterPage } from './pages/PatientRegisterPage'
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -30,6 +31,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/register" element={<PatientRegisterPage />} />
         {practitioner ? (
           <>
             <Route path="/" element={<DashboardPage />} />
