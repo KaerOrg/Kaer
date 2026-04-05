@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 interface Patient {
   id: string
   email: string
+  avatar_url: string | null
 }
 
 interface AuthState {
@@ -13,6 +14,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, token: string) => Promise<void>
   logout: () => Promise<void>
+  updateAvatar: (avatarUrl: string) => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -26,8 +28,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     } = await supabase.auth.getSession()
 
     if (session?.user) {
+      const { data: profile } = await supabase
+        .from('patients')
+        .select('avatar_url')
+        .eq('id', session.user.id)
+        .single()
+
       set({
-        patient: { id: session.user.id, email: session.user.email! },
+        patient: {
+          id: session.user.id,
+          email: session.user.email!,
+          avatar_url: profile?.avatar_url ?? null,
+        },
         loading: false,
       })
     } else {
@@ -37,7 +49,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Écoute les changements d'authentification (connexion / déconnexion)
     supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        set({ patient: { id: session.user.id, email: session.user.email! } })
+        set((state) => ({
+          patient: {
+            id: session.user!.id,
+            email: session.user!.email!,
+            avatar_url: state.patient?.avatar_url ?? null,
+          },
+        }))
       } else {
         set({ patient: null })
       }
@@ -78,7 +96,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     // 3. Crée le profil patient dans la base de données
     const { error: profileError } = await supabase
       .from('patients')
-      .insert({ id: authData.user.id, email })
+      .insert({ id: authData.user.id, email, avatar_url: null })
     if (profileError) throw new Error(profileError.message)
 
     // 4. Marque l'invitation comme acceptée
@@ -90,5 +108,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await supabase.auth.signOut()
+  },
+
+  updateAvatar: (avatarUrl: string) => {
+    set((state) => ({
+      patient: state.patient ? { ...state.patient, avatar_url: avatarUrl } : null,
+    }))
   },
 }))

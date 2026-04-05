@@ -27,6 +27,7 @@ create table if not exists public.practitioners (
 create table if not exists public.patients (
   id               uuid        primary key references auth.users(id) on delete cascade,
   email            text        not null,
+  avatar_url       text,
   created_at       timestamptz not null default now()
 );
 
@@ -198,3 +199,43 @@ create policy "modules_practitioner" on public.patient_modules
 drop policy if exists "modules_patient" on public.patient_modules;
 create policy "modules_patient" on public.patient_modules
   for select using (auth.uid() = patient_id and revoked_at is null);
+
+
+-- ============================================================
+-- STORAGE — Bucket avatars (photos de profil patients)
+-- ============================================================
+
+-- Bucket public : les URLs sont lisibles sans authentification
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- Chaque patient ne peut écrire que dans son propre dossier : avatars/{user_id}/
+drop policy if exists "avatars_insert_own" on storage.objects;
+create policy "avatars_insert_own" on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "avatars_update_own" on storage.objects;
+create policy "avatars_update_own" on storage.objects
+  for update to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "avatars_delete_own" on storage.objects;
+create policy "avatars_delete_own" on storage.objects
+  for delete to authenticated
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- Lecture publique (bucket public, cohérence explicite)
+drop policy if exists "avatars_select_public" on storage.objects;
+create policy "avatars_select_public" on storage.objects
+  for select using (bucket_id = 'avatars');

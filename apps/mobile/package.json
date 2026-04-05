@@ -16,6 +16,7 @@
     "@react-navigation/native-stack": "^7.14.10",
     "@supabase/supabase-js": "^2.101.1",
     "expo": "~54.0.33",
+    "expo-image-picker": "~16.0.6",
     "expo-linking": "~8.0.11",
     "expo-notifications": "~0.32.16",
     "expo-secure-store": "^55.0.11",
@@ -38,7 +39,8 @@
     ],
     "moduleNameMapper": {
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts",
-      "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts"
+      "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts",
+      "^expo-image-picker$": "<rootDir>/src/__mocks__/expo-image-picker.ts"
     }
   },
   "devDependencies": {
