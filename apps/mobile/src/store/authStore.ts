@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 interface Patient {
   id: string
   email: string
+  first_name: string
+  last_name: string
   avatar_url: string | null
 }
 
@@ -12,7 +14,7 @@ interface AuthState {
   loading: boolean
   loadSession: () => Promise<void>
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, token: string) => Promise<void>
+  register: (email: string, password: string, token: string, firstName: string, lastName: string) => Promise<void>
   logout: () => Promise<void>
   updateAvatar: (avatarUrl: string) => void
 }
@@ -68,7 +70,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   // Inscription via code d'invitation fourni par le praticien
-  register: async (email: string, password: string, token: string) => {
+  register: async (email: string, password: string, token: string, firstName: string, lastName: string) => {
     // 1. Vérifie que le token existe, correspond à cet email et n'est pas expiré
     const { data: invitation, error: invError } = await supabase
       .from('invitations')
@@ -89,21 +91,20 @@ export const useAuthStore = create<AuthState>((set) => ({
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          role: 'patient',
+          first_name: firstName,
+          last_name: lastName,
+          invitation_token: token,
+        },
+      },
     })
     if (authError) throw new Error(authError.message)
     if (!authData.user) throw new Error('Erreur lors de la création du compte')
 
-    // 3. Crée le profil patient dans la base de données
-    const { error: profileError } = await supabase
-      .from('patients')
-      .insert({ id: authData.user.id, email, avatar_url: null })
-    if (profileError) throw new Error(profileError.message)
-
-    // 4. Marque l'invitation comme acceptée
-    await supabase
-      .from('invitations')
-      .update({ accepted_at: new Date().toISOString() })
-      .eq('id', invitation.id)
+    // Le trigger handle_new_user gère automatiquement la création du profil
+    // et le marquage de l'invitation comme acceptée
   },
 
   logout: async () => {

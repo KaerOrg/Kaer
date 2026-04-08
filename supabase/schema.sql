@@ -27,6 +27,8 @@ create table if not exists public.practitioners (
 create table if not exists public.patients (
   id               uuid        primary key references auth.users(id) on delete cascade,
   email            text        not null,
+  first_name       text        not null default '',
+  last_name        text        not null default '',
   avatar_url       text,
   created_at       timestamptz not null default now()
 );
@@ -119,8 +121,13 @@ begin
     on conflict (id) do nothing;
 
   elsif v_role = 'patient' then
-    insert into public.patients (id, email)
-    values (new.id, new.email)
+    insert into public.patients (id, email, first_name, last_name)
+    values (
+      new.id,
+      new.email,
+      coalesce(new.raw_user_meta_data ->> 'first_name', ''),
+      coalesce(new.raw_user_meta_data ->> 'last_name', '')
+    )
     on conflict (id) do nothing;
 
     -- Marquer l'invitation comme acceptée et créer la relation praticien-patient

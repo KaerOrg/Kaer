@@ -25,13 +25,15 @@ export default function RegisterScreen({ navigation, route }: Props) {
   // Le token et l'email peuvent être pré-remplis depuis un deep link
   const [token, setToken] = useState(route.params?.token ?? '')
   const [email, setEmail] = useState(route.params?.email ?? '')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const register = useAuthStore((s) => s.register)
 
   const handleRegister = async () => {
-    if (!token.trim() || !email.trim() || !password || !confirm) {
+    if (!token.trim() || !email.trim() || !firstName.trim() || !lastName.trim() || !password || !confirm) {
       Alert.alert('Champs manquants', 'Veuillez remplir tous les champs.')
       return
     }
@@ -45,7 +47,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
     }
     setLoading(true)
     try {
-      await register(email.trim().toLowerCase(), password, token.trim())
+      await register(email.trim().toLowerCase(), password, token.trim(), firstName.trim(), lastName.trim())
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Une erreur est survenue."
       Alert.alert("Erreur d'inscription", message)
@@ -75,6 +77,20 @@ export default function RegisterScreen({ navigation, route }: Props) {
             Saisissez-le ci-dessous pour créer votre compte.
           </Text>
 
+          <InputField
+            label="Prénom"
+            value={firstName}
+            onChangeText={setFirstName}
+            autoCapitalize="words"
+            placeholder="Votre prénom"
+          />
+          <InputField
+            label="Nom"
+            value={lastName}
+            onChangeText={setLastName}
+            autoCapitalize="words"
+            placeholder="Votre nom de famille"
+          />
           <InputField
             label="Code d'invitation"
             value={token}
