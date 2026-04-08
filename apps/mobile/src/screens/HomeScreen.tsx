@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { AppStackParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
@@ -19,48 +20,48 @@ import { colors, spacing, radius } from '../theme'
 // Configuration des modules disponibles dans l'app
 const MODULE_CONFIG: Record<
   string,
-  { label: string; description: string; icon: string; available: boolean }
+  { label: string; description: string; icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; available: boolean }
 > = {
   sleep_diary: {
     label: 'Agenda du sommeil',
     description: 'Notez votre sommeil chaque matin',
-    icon: '🌙',
+    icon: 'weather-night',
     available: true,
   },
   beck_columns: {
     label: 'Colonnes de Beck',
     description: 'Restructurer les pensées négatives',
-    icon: '🧠',
+    icon: 'brain',
     available: false, // à venir
   },
   fear_thermometer: {
     label: 'Thermomètre de la peur',
     description: 'Mesurer votre niveau d\'anxiété',
-    icon: '🌡️',
+    icon: 'thermometer',
     available: false,
   },
   emotion_wheel: {
     label: 'Roue des émotions',
     description: 'Explorer et nommer vos émotions',
-    icon: '🎨',
+    icon: 'palette',
     available: false,
   },
   crisis_plan: {
     label: 'Plan de crise',
     description: 'Plan pour les moments difficiles',
-    icon: '🆘',
+    icon: 'lifebuoy',
     available: false,
   },
   rim: {
     label: 'RIM – Imagerie mentale',
     description: 'Retraitement par l\'imagerie',
-    icon: '🌊',
+    icon: 'waves',
     available: false,
   },
   cognitive_saturation: {
     label: 'Saturation cognitive',
     description: 'Interrompre les ruminations',
-    icon: '💭',
+    icon: 'chat-processing-outline',
     available: false,
   },
 }
@@ -136,7 +137,7 @@ export default function HomeScreen() {
 
         {modules.length === 0 ? (
           <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>📭</Text>
+            <MaterialCommunityIcons name="inbox-remove-outline" size={52} color={colors.border} />
             <Text style={styles.emptyTitle}>Aucun module disponible</Text>
             <Text style={styles.emptyText}>
               Votre praticien n'a pas encore activé de modules pour vous.{'\n'}
@@ -158,7 +159,9 @@ export default function HomeScreen() {
                   onPress={() => config.available && handleModulePress(mod.module_type)}
                   activeOpacity={config.available ? 0.75 : 1}
                 >
-                  <Text style={styles.cardIcon}>{config.icon}</Text>
+                  <View style={styles.cardIcon}>
+                    <MaterialCommunityIcons name={config.icon} size={30} color={config.available ? colors.primary : colors.textMuted} />
+                  </View>
                   <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>{config.label}</Text>
                     <Text style={styles.cardDesc}>{config.description}</Text>
@@ -200,7 +203,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardComingSoon: { opacity: 0.55 },
-  cardIcon: { fontSize: 34, width: 42, textAlign: 'center' },
+  cardIcon: { width: 42, alignItems: 'center', justifyContent: 'center' },
   cardContent: { flex: 1 },
   cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text },
   cardDesc: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
@@ -216,7 +219,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl * 2,
     gap: spacing.md,
   },
-  emptyIcon: { fontSize: 52 },
+  emptyIcon: {},
   emptyTitle: { fontSize: 20, fontWeight: '600', color: colors.text },
   emptyText: {
     fontSize: 15,

@@ -9,6 +9,7 @@ import {
   Platform,
   TextInput,
 } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'
@@ -75,7 +76,7 @@ function TimeField({
         onPress={() => setShowPicker(true)}
         activeOpacity={0.7}
       >
-        <Text style={timeStyles.clockIcon}>🕐</Text>
+        <MaterialCommunityIcons name="clock-outline" size={20} color={colors.textMuted} />
         <Text style={timeStyles.value}>{toHHMM(value)}</Text>
         <Text style={timeStyles.hint}>Appuyer pour modifier</Text>
       </TouchableOpacity>
@@ -117,7 +118,6 @@ const timeStyles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  clockIcon: { fontSize: 20 },
   value: { fontSize: 22, fontWeight: '700', color: colors.primary },
   hint: { fontSize: 13, color: colors.textMuted, marginLeft: spacing.xs },
   confirm: {
@@ -202,9 +202,11 @@ function StarRating({
       <View style={starStyles.stars}>
         {[1, 2, 3, 4, 5].map((n) => (
           <TouchableOpacity key={n} onPress={() => onChange(n)} activeOpacity={0.7}>
-            <Text style={[starStyles.star, n <= (value ?? 0) && starStyles.starFilled]}>
-              {n <= (value ?? 0) ? '★' : '☆'}
-            </Text>
+            <MaterialCommunityIcons
+              name={n <= (value ?? 0) ? 'star' : 'star-outline'}
+              size={36}
+              color={n <= (value ?? 0) ? colors.stars : colors.border}
+            />
           </TouchableOpacity>
         ))}
       </View>
@@ -219,8 +221,6 @@ const starStyles = StyleSheet.create({
   container: { gap: spacing.xs },
   label: { fontSize: 14, fontWeight: '600', color: colors.text },
   stars: { flexDirection: 'row', gap: spacing.sm },
-  star: { fontSize: 36, color: colors.border },
-  starFilled: { color: colors.stars },
   ratingLabel: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic' },
 })
 

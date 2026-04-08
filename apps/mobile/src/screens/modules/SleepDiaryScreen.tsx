@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -50,9 +51,16 @@ function getLast14Days(): string[] {
 function QualityStars({ quality }: { quality: number | null }) {
   if (!quality) return <Text style={styles.entryMeta}>– non renseigné</Text>
   return (
-    <Text style={styles.stars}>
-      {Array.from({ length: 5 }, (_, i) => (i < quality ? '★' : '☆')).join('')}
-    </Text>
+    <View style={styles.starsRow}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <MaterialCommunityIcons
+          key={i}
+          name={i < quality ? 'star' : 'star-outline'}
+          size={14}
+          color={i < quality ? colors.stars : colors.border}
+        />
+      ))}
+    </View>
   )
 }
 
@@ -95,7 +103,7 @@ export default function SleepDiaryScreen() {
           onPress={() => navigation.navigate('SleepDiaryEntry', { date: yesterday() })}
           activeOpacity={0.8}
         >
-          <Text style={styles.ctaIcon}>🌙</Text>
+          <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
           <View>
             <Text style={styles.ctaTitle}>Saisir ma nuit d'hier</Text>
             <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
   },
-  ctaIcon: { fontSize: 32 },
+  starsRow: { flexDirection: 'row', gap: 2 },
   ctaTitle: { fontSize: 17, fontWeight: '700', color: colors.white },
   ctaSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
   list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
@@ -207,7 +215,6 @@ const styles = StyleSheet.create({
   entryDetails: { marginTop: 2, gap: 1 },
   entryMeta: { fontSize: 13, color: colors.textMuted },
   duration: { fontWeight: '600', color: colors.primary },
-  stars: { fontSize: 13, color: colors.stars, letterSpacing: 1 },
   emptyDay: { fontSize: 13, color: colors.border, fontStyle: 'italic', marginTop: 2 },
   chevron: { fontSize: 22, color: colors.textMuted, fontWeight: '300' },
 })
