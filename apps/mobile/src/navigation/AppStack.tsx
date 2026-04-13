@@ -6,12 +6,22 @@ import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import SleepDiaryScreen from '../screens/modules/SleepDiaryScreen'
 import SleepDiaryEntryScreen from '../screens/modules/SleepDiaryEntryScreen'
+import SleepDiaryMonthScreen from '../screens/modules/SleepDiaryMonthScreen'
+import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
+import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
+import CardDetailScreen from '../screens/modules/CardDetailScreen'
+import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
 import { colors } from '../theme'
 
 export type AppStackParamList = {
   Tabs: undefined
   SleepDiary: undefined
   SleepDiaryEntry: { date?: string }
+  SleepDiaryMonth: undefined
+  CrisisPlan: undefined
+  Psychoeducation: undefined
+  CardDetail: { cardId: string; isRead: boolean }
+  DecisionalBalance: undefined
 }
 
 export type TabParamList = {
@@ -68,6 +78,35 @@ export default function AppStack() {
         name="SleepDiaryEntry"
         component={SleepDiaryEntryScreen}
         options={{ title: 'Saisir ma nuit' }}
+      />
+      <Stack.Screen
+        name="SleepDiaryMonth"
+        component={SleepDiaryMonthScreen}
+        options={{ title: 'Vue mensuelle' }}
+      />
+      <Stack.Screen
+        name="CrisisPlan"
+        component={CrisisPlanScreen}
+        options={{ title: 'Plan de crise' }}
+      />
+      <Stack.Screen
+        name="Psychoeducation"
+        component={PsychoeducationScreen}
+        options={{ title: 'Psychoéducation' }}
+      />
+      <Stack.Screen
+        name="CardDetail"
+        component={CardDetailScreen}
+        options={({ route }) => ({
+          title: route.params.cardId
+            ? (require('../constants/psychoeducationCards').PSYCHOEDUCATION_CARDS[route.params.cardId]?.title ?? 'Carte')
+            : 'Carte',
+        })}
+      />
+      <Stack.Screen
+        name="DecisionalBalance"
+        component={DecisionalBalanceScreen}
+        options={{ title: 'Balance décisionnelle' }}
       />
     </Stack.Navigator>
   )

@@ -10,6 +10,7 @@ export type ModuleType =
   | 'crisis_plan'
   | 'rim'
   | 'cognitive_saturation'
+  | 'psychoeducation'
 
 export interface Module {
   id: string
@@ -18,6 +19,13 @@ export interface Module {
   description: string
   unlockedAt: string
   config?: ModuleConfig
+}
+
+// Entrée d'observance pour une carte de psychoéducation
+export interface PsychoeducationCardEntry {
+  card_id: string
+  is_read: boolean
+  unlocked_at: string // ISO 8601
 }
 
 export interface ModuleConfig {
@@ -29,6 +37,10 @@ export interface ModuleConfig {
   fearThermometer?: {
     maxLevel?: number
     customLabels?: string[]
+  }
+  // Psychoéducation — liste des cartes débloquées avec suivi de lecture
+  psychoeducation?: {
+    unlocked_cards: PsychoeducationCardEntry[]
   }
 }
 

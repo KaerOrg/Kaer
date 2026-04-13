@@ -57,7 +57,11 @@ create table if not exists public.invitations (
 
 -- 5. Modules thérapeutiques débloqués par le praticien pour un patient
 --    module_type : 'sleep_diary' | 'beck_columns' | 'fear_thermometer' |
---                  'emotion_wheel' | 'crisis_plan' | 'rim' | 'cognitive_saturation'
+--                  'emotion_wheel' | 'crisis_plan' | 'rim' | 'cognitive_saturation' |
+--                  'psychoeducation'
+--
+--    Pour psychoeducation, le champ config suit le schéma :
+--      { "unlocked_cards": [{ "card_id": "...", "is_read": false, "unlocked_at": "..." }] }
 create table if not exists public.patient_modules (
   id               uuid        primary key default gen_random_uuid(),
   patient_id       uuid        not null references public.patients(id) on delete cascade,
@@ -177,6 +181,17 @@ drop policy if exists "patients_own" on public.patients;
 create policy "patients_own" on public.patients
   for all using (auth.uid() = id);
 
+-- Praticien : lecture des profils de ses patients liés
+drop policy if exists "patients_read_by_practitioner" on public.patients;
+create policy "patients_read_by_practitioner" on public.patients
+  for select using (
+    exists (
+      select 1 from public.practitioner_patients
+      where practitioner_patients.patient_id = patients.id
+        and practitioner_patients.practitioner_id = auth.uid()
+    )
+  );
+
 -- Praticien voit et gère les patients qui lui sont liés
 drop policy if exists "ptp_practitioner" on public.practitioner_patients;
 create policy "ptp_practitioner" on public.practitioner_patients
@@ -206,6 +221,12 @@ create policy "modules_practitioner" on public.patient_modules
 drop policy if exists "modules_patient" on public.patient_modules;
 create policy "modules_patient" on public.patient_modules
   for select using (auth.uid() = patient_id and revoked_at is null);
+
+-- Patient peut mettre à jour la config de ses propres modules actifs
+-- (usage : marquer une carte de psychoéducation comme lue)
+drop policy if exists "modules_patient_update" on public.patient_modules;
+create policy "modules_patient_update" on public.patient_modules
+  for update using (auth.uid() = patient_id and revoked_at is null);
 
 
 -- ============================================================
@@ -246,3 +267,40 @@ create policy "avatars_delete_own" on storage.objects
 drop policy if exists "avatars_select_public" on storage.objects;
 create policy "avatars_select_public" on storage.objects
   for select using (bucket_id = 'avatars');
+
+
+-- ============================================================
+-- TABLE : patient_engagement_logs (Observance / Engagement)
+-- ============================================================
+
+-- Suivi anonymisé de l'activité patient (aucune donnée clinique)
+-- event_type : ex. 'READ_CARD', 'FILL_SLEEP_DIARY', 'UPDATE_DECISIONAL_BALANCE'
+-- metadata   : données contextuelles optionnelles (ex. { "card_id": "card_sleep_01" })
+
+create table if not exists public.patient_engagement_logs (
+  id          uuid        default gen_random_uuid() primary key,
+  patient_id  uuid        references auth.users(id) on delete cascade,
+  event_type  text        not null,
+  metadata    jsonb       default '{}'::jsonb,
+  created_at  timestamptz default now()
+);
+
+alter table public.patient_engagement_logs enable row level security;
+
+-- Le patient peut insérer ses propres logs
+drop policy if exists "Patients can insert their own logs" on public.patient_engagement_logs;
+create policy "Patients can insert their own logs"
+  on public.patient_engagement_logs for insert
+  with check (auth.uid() = patient_id);
+
+-- Le praticien peut voir les logs de ses patients liés
+drop policy if exists "Practitioners can view logs of their patients" on public.patient_engagement_logs;
+create policy "Practitioners can view logs of their patients"
+  on public.patient_engagement_logs for select
+  using (
+    exists (
+      select 1 from public.practitioner_patients
+      where practitioner_id = auth.uid()
+        and patient_id = public.patient_engagement_logs.patient_id
+    )
+  );

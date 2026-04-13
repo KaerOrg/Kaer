@@ -90,9 +90,10 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `beck_columns` | Colonnes de Beck (TCC) | Prévu |
 | `fear_thermometer` | Thermomètre de la peur | Prévu |
 | `emotion_wheel` | Roue des émotions | Prévu |
-| `crisis_plan` | Plan de crise | Prévu |
+| `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
 | `cognitive_saturation` | Saturation cognitive | Prévu |
+| `decisional_balance` | Balance décisionnelle | Implémenté — grille 2×2 + jauge de motivation, SQLite local, signal Supabase |
 
 ## État d'avancement
 
@@ -106,6 +107,9 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 - [ ] Clés Supabase dans les fichiers `.env`
 - [ ] App mobile patient (navigation, auth, modules)
 - [ ] Module Agenda du sommeil
+- [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL
+- [x] Module Balance décisionnelle (`decisional_balance`) — grille 2×2 + jauge de motivation, SQLite local, signal d'observance Supabase, 10 tests Jest
+- [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -116,6 +120,7 @@ Migration vers hébergement HDS (OVHcloud) requise avant mise en production comm
 ## Règles de développement
 
 - Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
+- **Synchronisation mobile → web obligatoire** : toute nouvelle feature ajoutée dans l'app mobile doit systématiquement être intégrée dans l'app web praticien. Exemples : nouvelle carte de psychoéducation → l'ajouter dans `PSYCHO_CARD_CATALOG` de `database.types.ts` ; nouveau module → l'ajouter dans `MODULE_LABELS`, `MODULE_DESCRIPTIONS`, `ALL_MODULES` et la logique de `PatientPage.tsx`.
 
 ## MCP disponible
 

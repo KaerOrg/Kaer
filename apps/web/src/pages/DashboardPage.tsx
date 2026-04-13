@@ -28,7 +28,6 @@ export function DashboardPage() {
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [inviteError, setInviteError] = useState('')
-  const [lastInviteLink, setLastInviteLink] = useState('')
 
   useEffect(() => {
     loadPatients()
@@ -83,23 +82,32 @@ export function DashboardPage() {
     setInviteLoading(true)
     setInviteError('')
 
-    const token = crypto.randomUUID()
-    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-
-    const { error } = await supabase.from('invitations').insert({
-      practitioner_id: practitioner.id,
-      patient_email: inviteEmail.toLowerCase().trim(),
-      token,
-      expires_at: expiresAt,
+    const { data, error } = await supabase.functions.invoke('send-invitation', {
+      body: {
+        practitioner_id: practitioner.id,
+        patient_email: inviteEmail.toLowerCase().trim(),
+        alias: inviteAlias.trim() || null,
+      },
     })
 
     if (error) {
-      setInviteError('Erreur lors de l\'envoi. Vérifiez que cet email n\'a pas déjà été invité.')
+      // Extraire le vrai message d'erreur depuis la réponse HTTP
+      let errorMessage = 'Erreur lors de l\'envoi.'
+      try {
+        const body = await (error as any).context?.json?.()
+        if (body?.error) errorMessage = body.error
+      } catch { /* utiliser le message par défaut */ }
+      setInviteError(errorMessage)
       setInviteLoading(false)
       return
     }
 
-    setLastInviteLink(`${window.location.origin}/register?token=${token}`)
+    if (!data?.success) {
+      setInviteError(data?.error ?? 'Erreur lors de l\'envoi.')
+      setInviteLoading(false)
+      return
+    }
+
     setInviteSuccess(true)
     setInviteLoading(false)
     setInviteEmail('')
@@ -153,17 +161,7 @@ export function DashboardPage() {
               )}
               {inviteSuccess && (
                 <div className="invite-card__success">
-                  <div><Check size={14} /> Invitation enregistrée. Envoyez ce lien au patient :</div>
-                  <div className="invite-card__link-box">
-                    <span className="invite-card__link-text">{lastInviteLink}</span>
-                    <button
-                      type="button"
-                      className="invite-card__copy-btn"
-                      onClick={() => navigator.clipboard.writeText(lastInviteLink)}
-                    >
-                      Copier
-                    </button>
-                  </div>
+                  <Check size={14} /> Email d'invitation envoyé à {inviteEmail || 'votre patient'}.
                 </div>
               )}
               <div className="invite-card__actions">

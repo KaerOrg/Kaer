@@ -50,7 +50,7 @@ const MODULE_CONFIG: Record<
     label: 'Plan de crise',
     description: 'Plan pour les moments difficiles',
     icon: 'lifebuoy',
-    available: false,
+    available: true,
   },
   rim: {
     label: 'RIM – Imagerie mentale',
@@ -63,6 +63,18 @@ const MODULE_CONFIG: Record<
     description: 'Interrompre les ruminations',
     icon: 'chat-processing-outline',
     available: false,
+  },
+  psychoeducation: {
+    label: 'Psychoéducation',
+    description: 'Cartes de savoir sur votre santé mentale',
+    icon: 'book-open-page-variant',
+    available: true,
+  },
+  decisional_balance: {
+    label: 'Balance décisionnelle',
+    description: 'Explorer votre ambivalence face au changement',
+    icon: 'scale-balance',
+    available: true,
   },
 }
 
@@ -106,8 +118,13 @@ export default function HomeScreen() {
   const handleModulePress = (moduleType: string) => {
     if (moduleType === 'sleep_diary') {
       navigation.navigate('SleepDiary')
+    } else if (moduleType === 'crisis_plan') {
+      navigation.navigate('CrisisPlan')
+    } else if (moduleType === 'psychoeducation') {
+      navigation.navigate('Psychoeducation')
+    } else if (moduleType === 'decisional_balance') {
+      navigation.navigate('DecisionalBalance')
     }
-    // Les autres modules seront ajoutés progressivement
   }
 
   if (loading) {

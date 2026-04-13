@@ -1,84 +1,29 @@
-import * as Notifications from 'expo-notifications'
-import { Platform } from 'react-native'
+// expo-notifications (push remote) n'est plus supporté dans Expo Go SDK 53+.
+// Ces fonctions sont des stubs temporaires — elles ne font rien mais ne bloquent pas l'app.
+// Les vraies implémentations seront restaurées lors de la création d'un development build.
 
-// Comportement des notifications quand l'app est au premier plan
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-})
-
-// Demande la permission d'envoyer des notifications
 export async function requestNotificationPermission(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync()
-  if (existing === 'granted') return true
-
-  const { status } = await Notifications.requestPermissionsAsync()
-  return status === 'granted'
+  return false
 }
 
-// Configure le canal Android (obligatoire sur Android 8+)
 export async function setupAndroidChannel(): Promise<void> {
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('psytool', {
-      name: 'PsyTool',
-      importance: Notifications.AndroidImportance.HIGH,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#4F46E5',
-    })
-  }
+  // stub
 }
 
-// Programme un rappel quotidien pour l'agenda du sommeil
-// hour et minute : heure locale (ex: 8, 0 pour 08:00)
 export async function scheduleSleepDiaryReminder(
-  hour: number,
-  minute: number
+  _hour: number,
+  _minute: number
 ): Promise<string> {
-  await cancelSleepDiaryReminder()
-  const id = await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Agenda du sommeil 🌙',
-      body: "N'oubliez pas de noter votre nuit d'hier.",
-      data: { type: 'sleep_diary' },
-      sound: true,
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour,
-      minute,
-    },
-  })
-  return id
+  return ''
 }
 
-// Annule tous les rappels de l'agenda du sommeil
 export async function cancelSleepDiaryReminder(): Promise<void> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync()
-  for (const notif of scheduled) {
-    if ((notif.content.data as { type?: string })?.type === 'sleep_diary') {
-      await Notifications.cancelScheduledNotificationAsync(notif.identifier)
-    }
-  }
+  // stub
 }
 
-// Vérifie si un rappel est déjà programmé et retourne son heure
 export async function getSleepDiaryReminderTime(): Promise<{
   hour: number
   minute: number
 } | null> {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync()
-  for (const notif of scheduled) {
-    if ((notif.content.data as { type?: string })?.type === 'sleep_diary') {
-      const trigger = notif.trigger as { hour?: number; minute?: number }
-      if (trigger.hour !== undefined && trigger.minute !== undefined) {
-        return { hour: trigger.hour, minute: trigger.minute }
-      }
-    }
-  }
   return null
 }

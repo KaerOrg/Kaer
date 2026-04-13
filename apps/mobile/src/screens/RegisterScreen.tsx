@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native'
+import * as Linking from 'expo-linking'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RouteProp } from '@react-navigation/native'
 import { AuthStackParamList } from '../navigation/AuthStack'
@@ -22,18 +23,34 @@ type Props = {
 }
 
 export default function RegisterScreen({ navigation, route }: Props) {
-  // Le token et l'email peuvent être pré-remplis depuis un deep link
   const [token, setToken] = useState(route.params?.token ?? '')
-  const [email, setEmail] = useState(route.params?.email ?? '')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const register = useAuthStore((s) => s.register)
 
+  // Récupère le token depuis le deep link si l'app est ouverte via un lien
+  useEffect(() => {
+    // Lien initial (app fermée au moment du clic)
+    Linking.getInitialURL().then((url) => {
+      if (url) extractToken(url)
+    })
+
+    // Lien entrant (app déjà ouverte au moment du clic)
+    const sub = Linking.addEventListener('url', ({ url }) => extractToken(url))
+    return () => sub.remove()
+  }, [])
+
+  function extractToken(url: string) {
+    try {
+      const parsed = Linking.parse(url)
+      const t = parsed.queryParams?.token
+      if (typeof t === 'string' && t) setToken(t)
+    } catch { /* ignore */ }
+  }
+
   const handleRegister = async () => {
-    if (!token.trim() || !email.trim() || !firstName.trim() || !lastName.trim() || !password || !confirm) {
+    if (!token.trim() || !password || !confirm) {
       Alert.alert('Champs manquants', 'Veuillez remplir tous les champs.')
       return
     }
@@ -47,7 +64,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
     }
     setLoading(true)
     try {
-      await register(email.trim().toLowerCase(), password, token.trim(), firstName.trim(), lastName.trim())
+      await register(token.trim(), password)
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Une erreur est survenue."
       Alert.alert("Erreur d'inscription", message)
@@ -78,35 +95,12 @@ export default function RegisterScreen({ navigation, route }: Props) {
           </Text>
 
           <InputField
-            label="Prénom"
-            value={firstName}
-            onChangeText={setFirstName}
-            autoCapitalize="words"
-            placeholder="Votre prénom"
-          />
-          <InputField
-            label="Nom"
-            value={lastName}
-            onChangeText={setLastName}
-            autoCapitalize="words"
-            placeholder="Votre nom de famille"
-          />
-          <InputField
             label="Code d'invitation"
             value={token}
             onChangeText={setToken}
             autoCapitalize="none"
             autoCorrect={false}
             placeholder="Le code reçu par email"
-          />
-          <InputField
-            label="Votre email (identique à votre invitation)"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-            placeholder="votre@email.com"
           />
           <InputField
             label="Choisir un mot de passe"

@@ -15,6 +15,7 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import {
   getAllSleepEntries,
   computeSleepDuration,
+  computeSleepEfficiency,
   SleepEntry,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
@@ -96,7 +97,7 @@ export default function SleepDiaryScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      {/* Bouton principal : saisir la nuit passée */}
+      {/* Boutons d'action */}
       <View style={styles.ctaContainer}>
         <TouchableOpacity
           style={styles.ctaButton}
@@ -104,10 +105,20 @@ export default function SleepDiaryScreen() {
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.ctaTitle}>Saisir ma nuit d'hier</Text>
             <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
           </View>
+          <Text style={styles.chevron}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.monthButton}
+          onPress={() => navigation.navigate('SleepDiaryMonth')}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
+          <Text style={styles.monthButtonText}>Vue mensuelle</Text>
           <Text style={styles.chevron}>›</Text>
         </TouchableOpacity>
       </View>
@@ -145,7 +156,24 @@ export default function SleepDiaryScreen() {
                         ({computeSleepDuration(entry.bedtime, entry.wake_time, entry.sleep_onset_minutes)})
                       </Text>
                     </Text>
-                    <QualityStars quality={entry.quality} />
+                    <View style={styles.metaRow}>
+                      <QualityStars quality={entry.quality} />
+                      {(() => {
+                        const se = computeSleepEfficiency(
+                          entry.bedtime,
+                          entry.wake_time,
+                          entry.sleep_onset_minutes,
+                          entry.awakenings_duration_minutes
+                        )
+                        if (se === null) return null
+                        const seColor = se >= 85 ? colors.success : se >= 70 ? '#F59E0B' : colors.danger
+                        return (
+                          <View style={[styles.seBadge, { backgroundColor: seColor }]}>
+                            <Text style={styles.seBadgeText}>SE {se} %</Text>
+                          </View>
+                        )
+                      })()}
+                    </View>
                   </View>
                 ) : filled ? (
                   <Text style={styles.entryMeta}>Saisie incomplète</Text>
@@ -175,6 +203,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
   },
+  monthButton: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  monthButtonText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.primary },
   starsRow: { flexDirection: 'row', gap: 2 },
   ctaTitle: { fontSize: 17, fontWeight: '700', color: colors.white },
   ctaSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
@@ -217,4 +257,11 @@ const styles = StyleSheet.create({
   duration: { fontWeight: '600', color: colors.primary },
   emptyDay: { fontSize: 13, color: colors.border, fontStyle: 'italic', marginTop: 2 },
   chevron: { fontSize: 22, color: colors.textMuted, fontWeight: '300' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 2 },
+  seBadge: {
+    borderRadius: radius.full,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  seBadgeText: { fontSize: 11, fontWeight: '700', color: colors.white },
 })

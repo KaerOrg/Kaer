@@ -20,6 +20,8 @@ import {
   deleteSleepEntry,
   generateId,
   SleepEntry,
+  computeSleepEfficiency,
+  sleepEfficiencyLabel,
 } from '../../lib/database'
 import Button from '../../components/Button'
 import { colors, spacing, radius } from '../../theme'
@@ -128,6 +130,75 @@ const timeStyles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   confirmText: { color: colors.primary, fontWeight: '600' },
+})
+
+// Saisie directe en minutes avec conversion heures affichée en dessous
+function MinutesInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (v: number) => void
+}) {
+  const [text, setText] = useState(value > 0 ? String(value) : '')
+
+  const handleChange = (raw: string) => {
+    setText(raw)
+    const parsed = parseInt(raw, 10)
+    if (!isNaN(parsed) && parsed >= 0) onChange(parsed)
+    else if (raw === '') onChange(0)
+  }
+
+  const hours = Math.floor(value / 60)
+  const mins = value % 60
+  const conversion =
+    value === 0 ? null
+    : hours > 0 && mins > 0 ? `= ${hours}h${String(mins).padStart(2, '0')}`
+    : hours > 0 ? `= ${hours}h00`
+    : null
+
+  return (
+    <View style={minuteStyles.container}>
+      <Text style={minuteStyles.label}>{label}</Text>
+      <View style={minuteStyles.row}>
+        <TextInput
+          style={minuteStyles.input}
+          value={text}
+          onChangeText={handleChange}
+          keyboardType="numeric"
+          placeholder="0"
+          placeholderTextColor={colors.border}
+          maxLength={3}
+          returnKeyType="done"
+        />
+        <Text style={minuteStyles.unit}>minutes</Text>
+        {conversion && <Text style={minuteStyles.conversion}>{conversion}</Text>}
+      </View>
+    </View>
+  )
+}
+
+const minuteStyles = StyleSheet.create({
+  container: { gap: spacing.xs },
+  label: { fontSize: 14, fontWeight: '600', color: colors.text },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  input: {
+    width: 72,
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.primary,
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    textAlign: 'center',
+  },
+  unit: { fontSize: 15, color: colors.textMuted },
+  conversion: { fontSize: 15, fontWeight: '600', color: colors.primary },
 })
 
 // Compteur pour le nombre de réveils
@@ -243,9 +314,16 @@ export default function SleepDiaryEntryScreen() {
   const [wakeTime, setWakeTime] = useState(new Date(new Date().setHours(7, 0, 0, 0)))
   const [onsetMinutes, setOnsetMinutes] = useState(0)
   const [awakenings, setAwakenings] = useState(0)
+  const [awakeningsDuration, setAwakeningsDuration] = useState(0)
+  const [nightmares, setNightmares] = useState(false)
   const [quality, setQuality] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
+
+  // Calcul temps réel de l'efficacité du sommeil
+  const se = computeSleepEfficiency(toHHMM(bedtime), toHHMM(wakeTime), onsetMinutes, awakeningsDuration)
+  const seLabel = se !== null ? sleepEfficiencyLabel(se) : null
+  const seColor = seLabel === 'bon' ? colors.success : seLabel === 'moyen' ? '#F59E0B' : colors.danger
 
   // Si une entrée existe déjà pour cette date, la pré-remplit
   useEffect(() => {
@@ -256,6 +334,8 @@ export default function SleepDiaryEntryScreen() {
         if (entry.wake_time) setWakeTime(fromHHMM(entry.wake_time))
         setOnsetMinutes(entry.sleep_onset_minutes ?? 0)
         setAwakenings(entry.awakenings ?? 0)
+        setAwakeningsDuration(entry.awakenings_duration_minutes ?? 0)
+        setNightmares(!!entry.nightmares)
         setQuality(entry.quality)
         setNotes(entry.notes ?? '')
       }
@@ -276,6 +356,8 @@ export default function SleepDiaryEntryScreen() {
         wake_time: toHHMM(wakeTime),
         sleep_onset_minutes: onsetMinutes,
         awakenings,
+        awakenings_duration_minutes: awakeningsDuration,
+        nightmares: nightmares ? 1 : 0,
         quality,
         notes: notes.trim() || null,
       })
@@ -334,11 +416,10 @@ export default function SleepDiaryEntryScreen() {
               onChange={setWakeTime}
             />
             <View style={styles.divider} />
-            <Counter
-              label="Temps pour s'endormir (minutes)"
+            <MinutesInput
+              label="Temps pour s'endormir"
               value={onsetMinutes}
               onChange={setOnsetMinutes}
-              max={120}
             />
           </View>
         </View>
@@ -352,7 +433,35 @@ export default function SleepDiaryEntryScreen() {
               value={awakenings}
               onChange={setAwakenings}
             />
+            <View style={styles.divider} />
+            <MinutesInput
+              label="Durée totale des réveils"
+              value={awakeningsDuration}
+              onChange={setAwakeningsDuration}
+            />
           </View>
+        </View>
+
+        {/* Section cauchemars */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Cauchemars</Text>
+          <TouchableOpacity
+            style={[styles.card, styles.toggleRow]}
+            onPress={() => setNightmares(!nightmares)}
+            activeOpacity={0.75}
+          >
+            <View style={styles.toggleLeft}>
+              <MaterialCommunityIcons
+                name="ghost"
+                size={22}
+                color={nightmares ? colors.danger : colors.textMuted}
+              />
+              <Text style={styles.toggleLabel}>Cauchemars cette nuit</Text>
+            </View>
+            <View style={[styles.toggleSwitch, nightmares && styles.toggleSwitchOn]}>
+              <View style={[styles.toggleThumb, nightmares && styles.toggleThumbOn]} />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Section qualité */}
@@ -379,6 +488,22 @@ export default function SleepDiaryEntryScreen() {
             />
           </View>
         </View>
+
+        {/* Efficacité du sommeil — calculée en temps réel */}
+        {se !== null && (
+          <View style={[styles.seCard, { borderColor: seColor }]}>
+            <View style={styles.seRow}>
+              <MaterialCommunityIcons name="sleep" size={20} color={seColor} />
+              <Text style={styles.seTitle}>Efficacité du sommeil</Text>
+              <Text style={[styles.seScore, { color: seColor }]}>{se} %</Text>
+            </View>
+            <Text style={styles.seSubtitle}>
+              {seLabel === 'bon' && 'Bonne efficacité (≥ 85 %) — objectif TCC-I atteint'}
+              {seLabel === 'moyen' && 'Efficacité moyenne (70–84 %) — à améliorer'}
+              {seLabel === 'insuffisant' && 'Efficacité insuffisante (< 70 %) — à travailler en consultation'}
+            </Text>
+          </View>
+        )}
 
         {/* Actions */}
         <Button
@@ -430,5 +555,70 @@ const styles = StyleSheet.create({
     color: colors.text,
     minHeight: 90,
     lineHeight: 22,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+  },
+  toggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  toggleLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  toggleSwitch: {
+    width: 48,
+    height: 28,
+    borderRadius: radius.full,
+    backgroundColor: colors.border,
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleSwitchOn: {
+    backgroundColor: colors.danger,
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: radius.full,
+    backgroundColor: colors.white,
+    alignSelf: 'flex-start',
+  },
+  toggleThumbOn: {
+    alignSelf: 'flex-end',
+  },
+  seCard: {
+    borderWidth: 2,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    backgroundColor: colors.card,
+    gap: spacing.xs,
+  },
+  seRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  seTitle: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  seScore: {
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  seSubtitle: {
+    fontSize: 13,
+    color: colors.textMuted,
+    fontStyle: 'italic',
+    lineHeight: 18,
   },
 })
