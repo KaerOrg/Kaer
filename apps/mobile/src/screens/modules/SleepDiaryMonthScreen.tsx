@@ -194,14 +194,17 @@ export default function SleepDiaryMonthScreen() {
   const [entries, setEntries] = useState<SleepEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    const data = await getSleepEntriesForMonth(toYearMonth(year, month))
-    setEntries(data)
-    setLoading(false)
-  }, [year, month])
-
-  useFocusEffect(load)
+  useFocusEffect(
+    useCallback(() => {
+      async function load() {
+        setLoading(true)
+        const data = await getSleepEntriesForMonth(toYearMonth(year, month))
+        setEntries(data)
+        setLoading(false)
+      }
+      load()
+    }, [year, month])
+  )
 
   const goToPrev = () => {
     if (month === 1) { setYear(y => y - 1); setMonth(12) }
