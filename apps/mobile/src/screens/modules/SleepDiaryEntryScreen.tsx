@@ -377,7 +377,7 @@ export default function SleepDiaryEntryScreen() {
               <Text style={{ fontSize: 16, fontWeight: '700', color: seColor }}>{se} %</Text>
             </View>
           )}
-          <TouchableOpacity onPress={handleSave} activeOpacity={0.7}>
+          <TouchableOpacity onPress={handleSave} activeOpacity={0.7} testID="header-save-btn">
             <MaterialCommunityIcons name="content-save" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
