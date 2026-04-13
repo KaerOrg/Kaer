@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import {
   View,
   Text,
@@ -65,25 +65,24 @@ function TimeField({
   const [showPicker, setShowPicker] = useState(false)
 
   const handleChange = (_: unknown, date?: Date) => {
-    // Sur Android, le picker se ferme automatiquement après sélection
     if (Platform.OS === 'android') setShowPicker(false)
     if (date) onChange(date)
   }
 
   return (
-    <View style={timeStyles.container}>
-      <Text style={timeStyles.label}>{label}</Text>
+    <View>
       <TouchableOpacity
-        style={timeStyles.button}
+        style={timeStyles.row}
         onPress={() => setShowPicker(true)}
-        activeOpacity={0.7}
+        activeOpacity={0.6}
       >
-        <MaterialCommunityIcons name="clock-outline" size={20} color={colors.textMuted} />
-        <Text style={timeStyles.value}>{toHHMM(value)}</Text>
-        <Text style={timeStyles.hint}>Appuyer pour modifier</Text>
+        <Text style={timeStyles.label}>{label}</Text>
+        <View style={timeStyles.valueGroup}>
+          <Text style={timeStyles.value}>{toHHMM(value)}</Text>
+          <MaterialCommunityIcons name="chevron-right" size={18} color={colors.textMuted} />
+        </View>
       </TouchableOpacity>
 
-      {/* iOS : picker inline ; Android : dialog modal */}
       {showPicker && (
         <DateTimePicker
           value={value}
@@ -93,7 +92,6 @@ function TimeField({
           onChange={handleChange}
         />
       )}
-      {/* Sur iOS, bouton pour confirmer et fermer */}
       {showPicker && Platform.OS === 'ios' && (
         <TouchableOpacity
           style={timeStyles.confirm}
@@ -107,21 +105,19 @@ function TimeField({
 }
 
 const timeStyles = StyleSheet.create({
-  container: { gap: spacing.xs },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text },
-  button: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
   },
-  value: { fontSize: 22, fontWeight: '700', color: colors.primary },
-  hint: { fontSize: 13, color: colors.textMuted, marginLeft: spacing.xs },
+  label: { fontSize: 15, fontWeight: '500', color: colors.text, flex: 1 },
+  valueGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  value: { fontSize: 20, fontWeight: '700', color: colors.primary },
   confirm: {
     backgroundColor: colors.primaryLight,
     borderRadius: radius.md,
@@ -132,73 +128,74 @@ const timeStyles = StyleSheet.create({
   confirmText: { color: colors.primary, fontWeight: '600' },
 })
 
-// Saisie directe en minutes avec conversion heures affichée en dessous
+// Stepper en minutes (pas de 5 min), cohérent avec le design inline
 function MinutesInput({
   label,
   value,
   onChange,
+  step = 5,
+  max = 180,
 }: {
   label: string
   value: number
   onChange: (v: number) => void
+  step?: number
+  max?: number
 }) {
-  const [text, setText] = useState(value > 0 ? String(value) : '')
-
-  const handleChange = (raw: string) => {
-    setText(raw)
-    const parsed = parseInt(raw, 10)
-    if (!isNaN(parsed) && parsed >= 0) onChange(parsed)
-    else if (raw === '') onChange(0)
-  }
-
   const hours = Math.floor(value / 60)
   const mins = value % 60
-  const conversion =
-    value === 0 ? null
-    : hours > 0 && mins > 0 ? `= ${hours}h${String(mins).padStart(2, '0')}`
-    : hours > 0 ? `= ${hours}h00`
-    : null
+  const display =
+    value === 0 ? '0 min'
+    : hours > 0 && mins > 0 ? `${hours}h${String(mins).padStart(2, '0')}`
+    : hours > 0 ? `${hours}h00`
+    : `${value} min`
 
   return (
-    <View style={minuteStyles.container}>
+    <View style={minuteStyles.row}>
       <Text style={minuteStyles.label}>{label}</Text>
-      <View style={minuteStyles.row}>
-        <TextInput
-          style={minuteStyles.input}
-          value={text}
-          onChangeText={handleChange}
-          keyboardType="numeric"
-          placeholder="0"
-          placeholderTextColor={colors.border}
-          maxLength={3}
-          returnKeyType="done"
-        />
-        <Text style={minuteStyles.unit}>minutes</Text>
-        {conversion && <Text style={minuteStyles.conversion}>{conversion}</Text>}
+      <View style={minuteStyles.stepper}>
+        <TouchableOpacity
+          style={[minuteStyles.btn, value <= 0 && minuteStyles.btnDisabled]}
+          onPress={() => value > 0 && onChange(Math.max(0, value - step))}
+          activeOpacity={0.7}
+        >
+          <Text style={minuteStyles.btnText}>−</Text>
+        </TouchableOpacity>
+        <Text style={minuteStyles.value}>{display}</Text>
+        <TouchableOpacity
+          style={[minuteStyles.btn, value >= max && minuteStyles.btnDisabled]}
+          onPress={() => value < max && onChange(Math.min(max, value + step))}
+          activeOpacity={0.7}
+        >
+          <Text style={minuteStyles.btnText}>+</Text>
+        </TouchableOpacity>
       </View>
     </View>
   )
 }
 
 const minuteStyles = StyleSheet.create({
-  container: { gap: spacing.xs },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  input: {
-    width: 72,
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.primary,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.xs,
+  },
+  label: { fontSize: 15, fontWeight: '500', color: colors.text, flex: 1 },
+  stepper: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  btn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
     backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  unit: { fontSize: 15, color: colors.textMuted },
-  conversion: { fontSize: 15, fontWeight: '600', color: colors.primary },
+  btnDisabled: { opacity: 0.35 },
+  btnText: { fontSize: 20, fontWeight: '300', color: colors.text, lineHeight: 24 },
+  value: { fontSize: 18, fontWeight: '700', color: colors.primary, minWidth: 60, textAlign: 'center' },
 })
 
 // Compteur pour le nombre de réveils
@@ -342,7 +339,7 @@ export default function SleepDiaryEntryScreen() {
     })
   }, [targetDate])
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (quality === null) {
       Alert.alert('Qualité manquante', 'Veuillez évaluer la qualité de votre nuit (les étoiles).')
       return
@@ -367,7 +364,34 @@ export default function SleepDiaryEntryScreen() {
     } finally {
       setSaving(false)
     }
-  }
+  }, [existingId, targetDate, bedtime, wakeTime, onsetMinutes, awakenings, awakeningsDuration, nightmares, quality, notes, navigation])
+
+  // Injecte le titre et le bouton sauvegarde dans le header
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginRight: 4 }}>
+          {se !== null && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+              <MaterialCommunityIcons name="lightning-bolt" size={22} color={seColor} />
+              <Text style={{ fontSize: 16, fontWeight: '700', color: seColor }}>{se} %</Text>
+            </View>
+          )}
+          <TouchableOpacity onPress={handleSave} activeOpacity={0.7}>
+            <MaterialCommunityIcons name="content-save" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      ),
+      headerTitle: () => (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <MaterialCommunityIcons name="moon-waning-crescent" size={16} color={colors.primary} />
+          <Text style={{ fontSize: 17, fontWeight: '700', color: colors.text }}>
+            {new Date(targetDate + 'T00:00:00').toLocaleDateString('fr-FR')}
+          </Text>
+        </View>
+      ),
+    })
+  }, [navigation, targetDate, handleSave, se, seColor])
 
   const handleDelete = () => {
     if (!existingId) return
@@ -394,33 +418,15 @@ export default function SleepDiaryEntryScreen() {
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
       >
-        {/* En-tête avec la date */}
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>Nuit du</Text>
-          <Text style={styles.dateValue}>{formatFullDate(targetDate)}</Text>
-        </View>
-
         {/* Section horaires */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Horaires</Text>
           <View style={styles.card}>
-            <TimeField
-              label="Heure du coucher"
-              value={bedtime}
-              onChange={setBedtime}
-            />
+            <TimeField label="Heure du coucher" value={bedtime} onChange={setBedtime} />
             <View style={styles.divider} />
-            <TimeField
-              label="Heure du lever"
-              value={wakeTime}
-              onChange={setWakeTime}
-            />
+            <TimeField label="Heure du lever" value={wakeTime} onChange={setWakeTime} />
             <View style={styles.divider} />
-            <MinutesInput
-              label="Temps pour s'endormir"
-              value={onsetMinutes}
-              onChange={setOnsetMinutes}
-            />
+            <MinutesInput label="Temps pour s'endormir" value={onsetMinutes} onChange={setOnsetMinutes} />
           </View>
         </View>
 
@@ -428,17 +434,9 @@ export default function SleepDiaryEntryScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Réveils nocturnes</Text>
           <View style={styles.card}>
-            <Counter
-              label="Nombre de fois réveillé(e)"
-              value={awakenings}
-              onChange={setAwakenings}
-            />
+            <Counter label="Nombre de fois réveillé(e)" value={awakenings} onChange={setAwakenings} />
             <View style={styles.divider} />
-            <MinutesInput
-              label="Durée totale des réveils"
-              value={awakeningsDuration}
-              onChange={setAwakeningsDuration}
-            />
+            <MinutesInput label="Durée totale des réveils" value={awakeningsDuration} onChange={setAwakeningsDuration} />
           </View>
         </View>
 
@@ -489,28 +487,7 @@ export default function SleepDiaryEntryScreen() {
           </View>
         </View>
 
-        {/* Efficacité du sommeil — calculée en temps réel */}
-        {se !== null && (
-          <View style={[styles.seCard, { borderColor: seColor }]}>
-            <View style={styles.seRow}>
-              <MaterialCommunityIcons name="sleep" size={20} color={seColor} />
-              <Text style={styles.seTitle}>Efficacité du sommeil</Text>
-              <Text style={[styles.seScore, { color: seColor }]}>{se} %</Text>
-            </View>
-            <Text style={styles.seSubtitle}>
-              {seLabel === 'bon' && 'Bonne efficacité (≥ 85 %) — objectif TCC-I atteint'}
-              {seLabel === 'moyen' && 'Efficacité moyenne (70–84 %) — à améliorer'}
-              {seLabel === 'insuffisant' && 'Efficacité insuffisante (< 70 %) — à travailler en consultation'}
-            </Text>
-          </View>
-        )}
 
-        {/* Actions */}
-        <Button
-          label={existingId ? 'Mettre à jour' : 'Enregistrer ma nuit'}
-          onPress={handleSave}
-          loading={saving}
-        />
         {existingId && (
           <Button label="Supprimer cette saisie" onPress={handleDelete} variant="danger" />
         )}
@@ -521,16 +498,8 @@ export default function SleepDiaryEntryScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
-  dateHeader: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: 2,
-  },
-  dateLabel: { fontSize: 13, fontWeight: '600', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
-  dateValue: { fontSize: 18, fontWeight: '700', color: colors.text },
-  section: { gap: spacing.sm },
+  container: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  section: { gap: spacing.xs },
   sectionTitle: {
     fontSize: 12,
     fontWeight: '700',
@@ -592,33 +561,5 @@ const styles = StyleSheet.create({
   },
   toggleThumbOn: {
     alignSelf: 'flex-end',
-  },
-  seCard: {
-    borderWidth: 2,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    backgroundColor: colors.card,
-    gap: spacing.xs,
-  },
-  seRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  seTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  seScore: {
-    fontSize: 24,
-    fontWeight: '800',
-  },
-  seSubtitle: {
-    fontSize: 13,
-    color: colors.textMuted,
-    fontStyle: 'italic',
-    lineHeight: 18,
   },
 })
