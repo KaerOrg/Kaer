@@ -3,14 +3,35 @@
 export type UserRole = 'practitioner' | 'patient'
 
 export type ModuleType =
-  | 'sleep_diary'
-  | 'beck_columns'
-  | 'fear_thermometer'
-  | 'emotion_wheel'
+  // Sécurité & Gestion de Crise
   | 'crisis_plan'
-  | 'rim'
-  | 'cognitive_saturation'
+  | 'therapeutic_commitment'
+  | 'distress_tolerance'
+  // Surveillance Iatrogénique & Somatique
+  | 'medication_side_effects'
+  | 'medication_adherence'
   | 'psychoeducation'
+  // Hygiène de Vie & Rythmes Biologiques
+  | 'sleep_diary'
+  | 'diet_weight_psycho'
+  | 'chronobiology_tracker'
+  // Régulation Émotionnelle & Humeur
+  | 'mood_tracker'
+  | 'emotion_wheel'
+  | 'behavioral_activation'
+  // Restructuration Cognitive
+  | 'beck_columns'
+  | 'cognitive_distortions'
+  | 'grounding'
+  | 'rim'
+  // Anxiété, Phobies & TOC
+  | 'fear_thermometer'
+  | 'exposure_hierarchy'
+  | 'breathing_techniques'
+  | 'cognitive_saturation'
+  // Addictologie & Impulsivité
+  | 'craving_journal'
+  | 'decisional_balance'
 
 export interface Module {
   id: string
