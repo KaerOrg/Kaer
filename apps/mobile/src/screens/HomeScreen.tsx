@@ -17,27 +17,76 @@ import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import { colors, spacing, radius } from '../theme'
 
-// Configuration des modules disponibles dans l'app
+// Configuration des modules disponibles dans l'app.
+// RÈGLE : tout ModuleType débloquable côté web doit avoir une entrée ici.
+// available: true  = écran implémenté, navigable
+// available: false = à venir, affiché grisé sans navigation
 const MODULE_CONFIG: Record<
   string,
   { label: string; description: string; icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; available: boolean }
 > = {
+  // ── Sécurité & Gestion de Crise ───────────────────────────────────────────
+  crisis_plan: {
+    label: 'Plan de crise',
+    description: 'Plan personnalisé pour les moments difficiles',
+    icon: 'lifebuoy',
+    available: true,
+  },
+  therapeutic_commitment: {
+    label: 'Contrat d\'engagement thérapeutique',
+    description: 'Mon engagement à utiliser les ressources d\'urgence',
+    icon: 'handshake-outline',
+    available: false,
+  },
+  distress_tolerance: {
+    label: 'Tolérance à la détresse',
+    description: 'Techniques d\'urgence pour traverser une crise',
+    icon: 'shield-half-full',
+    available: false,
+  },
+  // ── Surveillance Iatrogénique & Somatique ─────────────────────────────────
+  medication_side_effects: {
+    label: 'Effets du traitement',
+    description: 'Suivi des effets secondaires (sédation, akathisie…)',
+    icon: 'pill',
+    available: false,
+  },
+  medication_adherence: {
+    label: 'Observance du traitement',
+    description: 'Ai-je pris mon traitement cette semaine ?',
+    icon: 'calendar-check-outline',
+    available: false,
+  },
+  psychoeducation: {
+    label: 'Psychoéducation',
+    description: 'Cartes de savoir sur votre santé mentale',
+    icon: 'book-open-page-variant',
+    available: true,
+  },
+  // ── Hygiène de Vie & Rythmes Biologiques ──────────────────────────────────
   sleep_diary: {
     label: 'Agenda du sommeil',
     description: 'Notez votre sommeil chaque matin',
     icon: 'weather-night',
     available: true,
   },
-  beck_columns: {
-    label: 'Colonnes de Beck',
-    description: 'Restructurer les pensées négatives',
-    icon: 'brain',
-    available: false, // à venir
+  diet_weight_psycho: {
+    label: 'Alimentation & poids',
+    description: 'Gérer les fringales liées au traitement',
+    icon: 'food-apple-outline',
+    available: false,
   },
-  fear_thermometer: {
-    label: 'Thermomètre de la peur',
-    description: 'Mesurer votre niveau d\'anxiété',
-    icon: 'thermometer',
+  chronobiology_tracker: {
+    label: 'Régularité chronobiologique',
+    description: 'Heure de lever, coucher, premier repas',
+    icon: 'clock-outline',
+    available: false,
+  },
+  // ── Régulation Émotionnelle & Humeur ─────────────────────────────────────
+  mood_tracker: {
+    label: 'Humeur & énergie',
+    description: 'Suivi quotidien de votre humeur',
+    icon: 'emoticon-outline',
     available: false,
   },
   emotion_wheel: {
@@ -46,16 +95,54 @@ const MODULE_CONFIG: Record<
     icon: 'palette',
     available: false,
   },
-  crisis_plan: {
-    label: 'Plan de crise',
-    description: 'Plan pour les moments difficiles',
-    icon: 'lifebuoy',
+  behavioral_activation: {
+    label: 'Activation comportementale',
+    description: 'Planifier des activités source de plaisir',
+    icon: 'run-fast',
+    available: false,
+  },
+  // ── Restructuration Cognitive ─────────────────────────────────────────────
+  beck_columns: {
+    label: 'Colonnes de Beck',
+    description: 'Journal de restructuration cognitive',
+    icon: 'brain',
     available: true,
+  },
+  cognitive_distortions: {
+    label: 'Distorsions cognitives',
+    description: 'Identifier les pièges de la pensée automatique',
+    icon: 'head-cog-outline',
+    available: false,
+  },
+  grounding: {
+    label: 'Techniques d\'ancrage',
+    description: 'Revenir au présent avec la méthode 5-4-3-2-1',
+    icon: 'hand-heart-outline',
+    available: false,
   },
   rim: {
     label: 'RIM – Imagerie mentale',
     description: 'Retraitement par l\'imagerie',
     icon: 'waves',
+    available: false,
+  },
+  // ── Anxiété, Phobies & TOC ────────────────────────────────────────────────
+  fear_thermometer: {
+    label: 'Thermomètre de la peur',
+    description: 'Mesurer votre niveau d\'anxiété (0–100)',
+    icon: 'thermometer',
+    available: false,
+  },
+  exposure_hierarchy: {
+    label: 'Hiérarchie d\'exposition',
+    description: 'Construire vos paliers d\'exposition graduelle',
+    icon: 'stairs-up',
+    available: false,
+  },
+  breathing_techniques: {
+    label: 'Techniques de respiration',
+    description: 'Respiration carrée et cohérence cardiaque',
+    icon: 'lungs',
     available: false,
   },
   cognitive_saturation: {
@@ -64,11 +151,12 @@ const MODULE_CONFIG: Record<
     icon: 'chat-processing-outline',
     available: false,
   },
-  psychoeducation: {
-    label: 'Psychoéducation',
-    description: 'Cartes de savoir sur votre santé mentale',
-    icon: 'book-open-page-variant',
-    available: true,
+  // ── Addictologie & Impulsivité ────────────────────────────────────────────
+  craving_journal: {
+    label: 'Journal de craving',
+    description: 'Intensité de l\'envie, déclencheur, stratégie',
+    icon: 'lightning-bolt-outline',
+    available: false,
   },
   decisional_balance: {
     label: 'Balance décisionnelle',
@@ -124,6 +212,8 @@ export default function HomeScreen() {
       navigation.navigate('Psychoeducation')
     } else if (moduleType === 'decisional_balance') {
       navigation.navigate('DecisionalBalance')
+    } else if (moduleType === 'beck_columns') {
+      navigation.navigate('BeckColumns')
     }
   }
 

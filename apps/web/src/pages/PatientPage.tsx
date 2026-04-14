@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Check, ChevronDown, ChevronRight } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Eye, EyeOff, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
@@ -13,6 +13,11 @@ import {
   type PatientModule,
   type PsychoeducationCardEntry,
 } from '../lib/database.types'
+import {
+  MODULE_PREVIEW,
+  markdownToHtml,
+  type ModulePreview,
+} from '../lib/modulePreviewContent'
 import './PatientPage.css'
 
 // ─── Structure en catégories ─────────────────────────────────────────────────
@@ -91,6 +96,15 @@ export function PatientPage() {
 
   // Accordéons ouverts — 'safety' ouvert par défaut
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(['safety']))
+
+  // Aperçu de module ouvert
+  const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
+  const [expandedPreviewCard, setExpandedPreviewCard] = useState<string | null>(null)
+
+  const togglePreview = useCallback((type: ModuleType) => {
+    setPreviewModule(prev => (prev === type ? null : type))
+    setExpandedPreviewCard(null)
+  }, [])
 
   // État du sélecteur de cartes psychoéducation
   const [psychoPickerMode, setPsychoPickerMode] = useState<'off' | 'unlock' | 'edit'>('off')
@@ -247,6 +261,106 @@ export function PatientPage() {
     : 0
   const totalPsychoCards = psychoModule ? getPsychoCards(psychoModule).length : 0
 
+  // ── Rendu du panneau d'aperçu ────────────────────────────────────────────
+
+  const renderPreviewPanel = (preview: ModulePreview) => {
+    if (preview.kind === 'coming_soon') {
+      return (
+        <div className="preview-panel__coming-soon">
+          Module en cours de développement — aperçu non disponible.
+        </div>
+      )
+    }
+
+    if (preview.kind === 'steps') {
+      return (
+        <>
+          <ol className="preview-steps">
+            {preview.steps.map(step => (
+              <li key={step.number} className="preview-step">
+                <span className="preview-step__num" style={{ backgroundColor: step.color }}>{step.number}</span>
+                <div>
+                  <div className="preview-step__title">{step.title}</div>
+                  <div className="preview-step__hint">"{step.hint}"</div>
+                </div>
+              </li>
+            ))}
+          </ol>
+          {preview.footer && <p className="preview-panel__footer">{preview.footer}</p>}
+        </>
+      )
+    }
+
+    if (preview.kind === 'fields') {
+      return (
+        <>
+          <ul className="preview-fields">
+            {preview.fields.map(field => (
+              <li key={field.label} className="preview-field">
+                <span className="preview-field__icon">{field.icon}</span>
+                <span className="preview-field__label">{field.label}</span>
+                {field.detail && <span className="preview-field__detail">{field.detail}</span>}
+              </li>
+            ))}
+          </ul>
+          {preview.footer && (
+            <div className="preview-panel__info">
+              <Info size={13} className="preview-panel__info-icon" />
+              <p>{preview.footer}</p>
+            </div>
+          )}
+        </>
+      )
+    }
+
+    if (preview.kind === 'grid2x2') {
+      return (
+        <>
+          <div className="preview-grid2x2">
+            {preview.quadrants.map(q => (
+              <div key={q.title} className="preview-quadrant" style={{ borderTopColor: q.color }}>
+                <div className="preview-quadrant__title" style={{ color: q.color }}>{q.title}</div>
+                <div className="preview-quadrant__subtitle">{q.subtitle}</div>
+              </div>
+            ))}
+          </div>
+          {preview.footer && <p className="preview-panel__footer">{preview.footer}</p>}
+        </>
+      )
+    }
+
+    if (preview.kind === 'cards') {
+      return (
+        <div className="preview-cards">
+          {preview.cards.map(card => (
+            <div key={card.id} className="preview-card">
+              <button
+                className="preview-card__header"
+                onClick={() => setExpandedPreviewCard(prev => prev === card.id ? null : card.id)}
+              >
+                <div className="preview-card__meta">
+                  <span className="preview-card__title">{card.title}</span>
+                  <span className="preview-card__summary">{card.summary}</span>
+                </div>
+                <span className="preview-card__toggle">
+                  {expandedPreviewCard === card.id ? '▲' : '▼'}
+                </span>
+              </button>
+              {expandedPreviewCard === card.id && (
+                <div
+                  className="preview-card__body"
+                  dangerouslySetInnerHTML={{ __html: markdownToHtml(card.content) }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return null
+  }
+
   // ── Rendu d'une carte module ─────────────────────────────────────────────
 
   const renderModuleCard = (moduleType: ModuleType) => {
@@ -258,7 +372,7 @@ export function PatientPage() {
       const readCount = cards.filter(c => c.is_read).length
 
       return (
-        <div key="psychoeducation" className="module-card-wrapper">
+        <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
           <div className={`module-card ${unlocked ? 'module-card--active module-card--psycho' : ''}`}>
             <div className="module-card__content">
               <div className="module-card__name">{MODULE_LABELS['psychoeducation']}</div>
@@ -299,6 +413,16 @@ export function PatientPage() {
               )}
             </div>
             <div className="module-card__actions">
+              {MODULE_PREVIEW['psychoeducation'] && (
+                <button
+                  className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview('psychoeducation')}
+                  title="Aperçu du contenu patient"
+                >
+                  {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
+                  Aperçu
+                </button>
+              )}
               {unlocked && mod ? (
                 <>
                   <span className="module-card__badge"><Check size={14} /> Actif</span>
@@ -328,6 +452,17 @@ export function PatientPage() {
               )}
             </div>
           </div>
+
+          {/* Panneau d'aperçu psychoéducation */}
+          {previewModule === 'psychoeducation' && MODULE_PREVIEW['psychoeducation'] && (
+            <div className="preview-panel">
+              <div className="preview-panel__header">
+                <Eye size={14} />
+                Ce que verra votre patient
+              </div>
+              {renderPreviewPanel(MODULE_PREVIEW['psychoeducation'])}
+            </div>
+          )}
 
           {/* Sélecteur de cartes inline */}
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
@@ -372,40 +507,65 @@ export function PatientPage() {
       )
     }
 
+    const preview = MODULE_PREVIEW[moduleType]
+
     return (
-      <div key={moduleType} className={`module-card ${unlocked ? 'module-card--active' : ''}`}>
-        <div className="module-card__content">
-          <div className="module-card__name">{MODULE_LABELS[moduleType]}</div>
-          <div className="module-card__desc">{MODULE_DESCRIPTIONS[moduleType]}</div>
-          {unlocked && mod && (
-            <div className="module-card__date">
-              Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
-            </div>
-          )}
-        </div>
-        <div className="module-card__actions">
-          {unlocked && mod ? (
-            <>
-              <span className="module-card__badge"><Check size={14} /> Actif</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="module-card__revoke"
-                onClick={() => revokeModule(mod.id)}
+      <div key={moduleType} className="module-card-wrapper-block">
+        <div className={`module-card ${unlocked ? 'module-card--active' : ''}`}>
+          <div className="module-card__content">
+            <div className="module-card__name">{MODULE_LABELS[moduleType]}</div>
+            <div className="module-card__desc">{MODULE_DESCRIPTIONS[moduleType]}</div>
+            {unlocked && mod && (
+              <div className="module-card__date">
+                Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+              </div>
+            )}
+          </div>
+          <div className="module-card__actions">
+            {preview && (
+              <button
+                className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                onClick={() => togglePreview(moduleType)}
+                title="Aperçu du contenu patient"
               >
-                Révoquer
+                {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                Aperçu
+              </button>
+            )}
+            {unlocked && mod ? (
+              <>
+                <span className="module-card__badge"><Check size={14} /> Actif</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="module-card__revoke"
+                  onClick={() => revokeModule(mod.id)}
+                >
+                  Révoquer
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                loading={unlockingModule === moduleType}
+                onClick={() => unlockModule(moduleType)}
+              >
+                Débloquer
               </Button>
-            </>
-          ) : (
-            <Button
-              size="sm"
-              loading={unlockingModule === moduleType}
-              onClick={() => unlockModule(moduleType)}
-            >
-              Débloquer
-            </Button>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* Panneau d'aperçu inline */}
+        {previewModule === moduleType && preview && (
+          <div className="preview-panel">
+            <div className="preview-panel__header">
+              <Eye size={14} />
+              Ce que verra votre patient
+            </div>
+            {renderPreviewPanel(preview)}
+          </div>
+        )}
       </div>
     )
   }

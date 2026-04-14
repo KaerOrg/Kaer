@@ -37,6 +37,7 @@ export async function initDatabase(): Promise<void> {
     );
   `)
   await createDecisionalBalanceTable(database)
+  await createBeckColumnsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -334,4 +335,103 @@ export async function saveDecisionalBalance(balance: DecisionalBalance): Promise
       new Date().toISOString(),
     ]
   )
+}
+
+// ─── Types Colonnes de Beck ───────────────────────────────────────────────────
+
+/**
+ * Enregistrement de pensée dysfonctionnelle (DTR) — 5 colonnes de Beck.
+ * Référence : Beck, Rush, Shaw & Emery (1979). Cognitive Therapy of Depression.
+ *
+ * Les valeurs d'intensité (0–100) sont des chiffres bruts saisis par le patient,
+ * sans interprétation algorithmique — conformité MDR 2017/745.
+ */
+export interface ThoughtRecord {
+  id: string
+  date: string                  // ISO 8601
+  // Colonne 1 : Situation
+  situation: string
+  // Colonne 2 : Émotion
+  emotion: string
+  emotion_intensity: number     // 0–100, brut
+  // Colonne 3 : Pensée automatique
+  automatic_thought: string
+  thought_belief: number        // 0–100, conviction initiale, brut
+  // Colonne 4 : Réponse rationnelle
+  rational_response: string
+  // Colonne 5 : Résultat
+  outcome_emotion: string
+  outcome_intensity: number     // 0–100, brut
+  outcome_belief: number        // 0–100, conviction en la PA, brut
+  created_at: string
+}
+
+// ─── SQLite Colonnes de Beck ──────────────────────────────────────────────────
+
+export async function createBeckColumnsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS beck_thought_records (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      situation TEXT NOT NULL DEFAULT '',
+      emotion TEXT NOT NULL DEFAULT '',
+      emotion_intensity INTEGER NOT NULL DEFAULT 50,
+      automatic_thought TEXT NOT NULL DEFAULT '',
+      thought_belief INTEGER NOT NULL DEFAULT 50,
+      rational_response TEXT NOT NULL DEFAULT '',
+      outcome_emotion TEXT NOT NULL DEFAULT '',
+      outcome_intensity INTEGER NOT NULL DEFAULT 50,
+      outcome_belief INTEGER NOT NULL DEFAULT 50,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+/** Récupère tous les enregistrements, du plus récent au plus ancien */
+export async function getAllThoughtRecords(): Promise<ThoughtRecord[]> {
+  const database = getDb()
+  return database.getAllAsync<ThoughtRecord>(
+    'SELECT * FROM beck_thought_records ORDER BY date DESC, created_at DESC'
+  )
+}
+
+/** Récupère un enregistrement par son identifiant */
+export async function getThoughtRecord(id: string): Promise<ThoughtRecord | null> {
+  const database = getDb()
+  return database.getFirstAsync<ThoughtRecord>(
+    'SELECT * FROM beck_thought_records WHERE id = ?',
+    [id]
+  )
+}
+
+/** Sauvegarde (insert ou replace) un enregistrement */
+export async function saveThoughtRecord(record: Omit<ThoughtRecord, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO beck_thought_records
+      (id, date, situation, emotion, emotion_intensity,
+       automatic_thought, thought_belief,
+       rational_response,
+       outcome_emotion, outcome_intensity, outcome_belief)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      record.id,
+      record.date,
+      record.situation,
+      record.emotion,
+      record.emotion_intensity,
+      record.automatic_thought,
+      record.thought_belief,
+      record.rational_response,
+      record.outcome_emotion,
+      record.outcome_intensity,
+      record.outcome_belief,
+    ]
+  )
+}
+
+/** Supprime un enregistrement */
+export async function deleteThoughtRecord(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM beck_thought_records WHERE id = ?', [id])
 }

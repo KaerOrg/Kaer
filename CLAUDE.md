@@ -117,10 +117,43 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 À terme : SaaS B2B vendu à d'autres praticiens (psychologues, IPA, médecins).
 Migration vers hébergement HDS (OVHcloud) requise avant mise en production commerciale.
 
+## RÈGLE D'OR — Statut Non-Dispositif Médical (MDR 2017/745)
+
+> **Cette règle s'applique à chaque ligne de code produite pour PsyTool, sans exception.**
+
+PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
+
+**Principe fondamental : le code affiche, jamais il ne conclut.** L'interprétation appartient exclusivement au patient ou au soignant.
+
+**INTERDIT — provoque une requalification en Dispositif Médical :**
+
+| Cas interdit | Exemple concret |
+|---|---|
+| Algorithme qui interprète et suggère une action | "Vous avez mal dormi, faites ceci" |
+| Alerte automatique déclenchée par les données | Notification si score dépasse un seuil |
+| Score affiché avec un label interprétatif | "Score 18 = dépression sévère" |
+| Graphique de tendance qui implique une dégradation | Flèche rouge, message "état en baisse" |
+| Notification conditionnelle aux données saisies | "Tu n'as pas dormi 3 nuits, pense à…" |
+| Seuil numérique qui déclenche quoi que ce soit | `if (score > 7) then...` |
+| Comparaison à une norme ou à une population | "Vous dormez moins que la moyenne" |
+
+**AUTORISÉ :**
+- Afficher le chiffre brut saisi par le patient, sans label ni couleur interprétative
+- Afficher un historique neutre (liste, graphique sans commentaire)
+- Calculer un score uniquement pour que le praticien le lise et l'interprète en consultation
+- Envoyer un rappel d'horaire fixe programmé à l'avance par le praticien (non conditionnel aux données)
+
+Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le risque de requalification, et proposer une alternative d'affichage passif conforme.
+
+---
+
 ## Règles de développement
 
 - Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
-- **Synchronisation mobile → web obligatoire** : toute nouvelle feature ajoutée dans l'app mobile doit systématiquement être intégrée dans l'app web praticien. Exemples : nouvelle carte de psychoéducation → l'ajouter dans `PSYCHO_CARD_CATALOG` de `database.types.ts` ; nouveau module → l'ajouter dans `MODULE_LABELS`, `MODULE_DESCRIPTIONS`, `ALL_MODULES` et la logique de `PatientPage.tsx`.
+- **Nouveau module = web + mobile simultanément, dans cet ordre :**
+  1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
+  2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
+  3. Ne jamais livrer un module mobile sans son pendant web, ni vice-versa : un module invisible dans l'armoire praticien ne peut pas être débloqué pour le patient.
 
 ## MCP disponible
 
