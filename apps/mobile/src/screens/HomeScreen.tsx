@@ -182,11 +182,14 @@ export default function HomeScreen() {
 
   const fetchModules = async () => {
     if (!patient) return
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('patient_modules')
       .select('*')
       .eq('patient_id', patient.id)
       .order('unlocked_at', { ascending: true })
+    console.log('[HomeScreen] patient_id:', patient.id)
+    console.log('[HomeScreen] modules from DB:', JSON.stringify(data))
+    console.log('[HomeScreen] error:', JSON.stringify(error))
     setModules(data ?? [])
   }
 
