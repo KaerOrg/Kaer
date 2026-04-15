@@ -16,7 +16,8 @@ jest.mock('@react-navigation/native', () => {
       }, [])
     },
     useNavigation: () => ({ navigate: jest.fn() }),
-    useRoute: () => ({
+    // jest.fn() permet de surcharger via mockReturnValueOnce dans les tests CardDetailScreen
+    useRoute: jest.fn().mockReturnValue({
       params: { cardId: 'card_sleep_01', isRead: false },
     }),
   }
@@ -136,7 +137,8 @@ describe('PsychoeducationScreen', () => {
     render(<PsychoeducationScreen />)
 
     await waitFor(() => {
-      expect(screen.getByText('1/2 cartes lues')).toBeTruthy()
+      // 1 carte lue sur 2 : "cartes" (pluriel) + "lue" (singulier, 1 carte lue)
+      expect(screen.getByText('1/2 cartes lue')).toBeTruthy()
     })
   })
 

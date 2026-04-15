@@ -13,7 +13,21 @@ import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
 import BeckColumnsScreen from '../screens/modules/BeckColumnsScreen'
 import BeckEntryScreen from '../screens/modules/BeckEntryScreen'
+import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
+import MedicationAdherenceScreen from '../screens/modules/MedicationAdherenceScreen'
+import MedicationSideEffectsScreen from '../screens/modules/MedicationSideEffectsScreen'
+import FearThermometerScreen from '../screens/modules/FearThermometerScreen'
+import FearEntryScreen from '../screens/modules/FearEntryScreen'
+import BehavioralActivationScreen from '../screens/modules/BehavioralActivationScreen'
+import BehavioralActivationEntryScreen from '../screens/modules/BehavioralActivationEntryScreen'
+import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
+import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
+import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
+
+function getTechniqueTitle(key: string): string {
+  return getTechnique(key)?.name ?? 'Exercice de respiration'
+}
 
 export type AppStackParamList = {
   Tabs: undefined
@@ -26,6 +40,15 @@ export type AppStackParamList = {
   DecisionalBalance: undefined
   BeckColumns: undefined
   BeckEntry: { recordId?: string }
+  MoodTracker: undefined
+  MedicationAdherence: undefined
+  MedicationSideEffects: undefined
+  FearThermometer: undefined
+  FearEntry: { entryId?: string }
+  BehavioralActivation: undefined
+  BehavioralActivationEntry: { recordId?: string }
+  BreathingTechniques: undefined
+  BreathingExercise: { techniqueKey: string }
 }
 
 export type TabParamList = {
@@ -122,6 +145,57 @@ export default function AppStack() {
         component={BeckEntryScreen}
         options={({ route }) => ({
           title: route.params?.recordId ? 'Modifier l\'enregistrement' : 'Nouvel enregistrement',
+        })}
+      />
+      <Stack.Screen
+        name="MoodTracker"
+        component={MoodTrackerScreen}
+        options={{ title: 'Thermomètre de l\'humeur' }}
+      />
+      <Stack.Screen
+        name="MedicationAdherence"
+        component={MedicationAdherenceScreen}
+        options={{ title: 'Observance du traitement' }}
+      />
+      <Stack.Screen
+        name="MedicationSideEffects"
+        component={MedicationSideEffectsScreen}
+        options={{ title: 'Effets du traitement' }}
+      />
+      <Stack.Screen
+        name="FearThermometer"
+        component={FearThermometerScreen}
+        options={{ title: 'Thermomètre de la peur' }}
+      />
+      <Stack.Screen
+        name="FearEntry"
+        component={FearEntryScreen}
+        options={({ route }) => ({
+          title: route.params?.entryId ? 'Modifier la saisie' : 'Nouvelle saisie SUDs',
+        })}
+      />
+      <Stack.Screen
+        name="BehavioralActivation"
+        component={BehavioralActivationScreen}
+        options={{ title: 'Activation comportementale' }}
+      />
+      <Stack.Screen
+        name="BehavioralActivationEntry"
+        component={BehavioralActivationEntryScreen}
+        options={({ route }) => ({
+          title: route.params?.recordId ? 'Modifier l\'activité' : 'Nouvelle activité',
+        })}
+      />
+      <Stack.Screen
+        name="BreathingTechniques"
+        component={BreathingTechniquesScreen}
+        options={{ title: 'Techniques de respiration' }}
+      />
+      <Stack.Screen
+        name="BreathingExercise"
+        component={BreathingExerciseScreen}
+        options={({ route }) => ({
+          title: getTechniqueTitle(route.params.techniqueKey),
         })}
       />
     </Stack.Navigator>

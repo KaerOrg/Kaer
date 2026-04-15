@@ -15,7 +15,6 @@ jest.mock('../../lib/database', () => ({
   deleteSleepEntry: jest.fn().mockResolvedValue(undefined),
   generateId: jest.fn().mockReturnValue('test-id-123'),
   computeSleepEfficiency: jest.requireActual('../../lib/database').computeSleepEfficiency,
-  sleepEfficiencyLabel: jest.requireActual('../../lib/database').sleepEfficiencyLabel,
 }))
 
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
@@ -66,22 +65,26 @@ describe('SleepDiaryEntryScreen — Efficacité du Sommeil', () => {
     expect(updatedScore).toBeTruthy()
   })
 
-  it('affiche le message clinique "Bonne efficacité" pour une SE ≥ 85 %', async () => {
+  it('affiche le score SE brut pour une SE ≥ 85 % (conformité MDR — aucun label interprétatif)', async () => {
     render(<SleepDiaryEntryScreen />)
 
-    // Valeurs par défaut → SE 100 % → message "Bonne efficacité"
-    const message = await screen.findByText(/Bonne efficacité/i)
-    expect(message).toBeTruthy()
+    // Valeurs par défaut → SE 100 % — seul le chiffre brut est affiché, pas de label
+    const score = await screen.findByText(/100 %/)
+    expect(score).toBeTruthy()
+    // Aucun label interprétatif ne doit apparaître
+    expect(screen.queryByText(/Bonne efficacité/i)).toBeNull()
   })
 
-  it('affiche le message "Efficacité insuffisante" pour une SE < 70 %', async () => {
+  it('affiche le score SE brut pour une SE < 70 % (conformité MDR — aucun label interprétatif)', async () => {
     render(<SleepDiaryEntryScreen />)
 
-    // 200 minutes d'endormissement (premier champ) → TST = 480 - 200 = 280 min → SE = 58 %
+    // 200 minutes d'endormissement → TST = 480 - 200 = 280 min → SE = 58 %
     const allInputs = screen.getAllByPlaceholderText('0')
     fireEvent.changeText(allInputs[0], '200')
 
-    const message = await screen.findByText(/Efficacité insuffisante/i)
-    expect(message).toBeTruthy()
+    const score = await screen.findByText(/58 %/)
+    expect(score).toBeTruthy()
+    // Aucun label interprétatif ne doit apparaître
+    expect(screen.queryByText(/Efficacité insuffisante/i)).toBeNull()
   })
 })

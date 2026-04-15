@@ -96,9 +96,8 @@ describe('BeckColumnsScreen', () => {
     render(<BeckColumnsScreen />)
 
     await waitFor(() => {
-      expect(screen.getByText('Anxiété')).toBeTruthy()
-      // L'intensité est affichée en chiffre brut (70%), sans label interprétatif
-      expect(screen.getByText('(70%)')).toBeTruthy()
+      // L'émotion et son intensité sont dans un <Text> imbriqué : texte combiné "Anxiété (70%)"
+      expect(screen.getByText('Anxiété (70%)')).toBeTruthy()
     })
   })
 
@@ -108,8 +107,8 @@ describe('BeckColumnsScreen', () => {
     render(<BeckColumnsScreen />)
 
     await waitFor(() => {
-      expect(screen.getByText('Anxiété légère')).toBeTruthy()
-      expect(screen.getByText('(30%)')).toBeTruthy()
+      // Texte combiné du <Text> parent : "Anxiété légère (30%)"
+      expect(screen.getByText('Anxiété légère (30%)')).toBeTruthy()
     })
   })
 
@@ -186,16 +185,18 @@ describe('BeckColumnsScreen', () => {
 
   // ── Conformité MDR ─────────────────────────────────────────────────────────
 
-  it('n\'affiche aucun label interprétatif sur les intensités (conformité MDR)', async () => {
-    ;(database.getAllThoughtRecords as jest.Mock).mockResolvedValue([RECORD_FIXTURE])
+  it('n\'affiche aucun label interprétatif généré par l\'app (conformité MDR)', async () => {
+    // Test avec liste vide : vérifie que le code de l'app n'ajoute aucun label interprétatif.
+    // (Les données saisies par l'utilisateur peuvent contenir ces termes — c'est son droit.)
+    ;(database.getAllThoughtRecords as jest.Mock).mockResolvedValue([])
 
     render(<BeckColumnsScreen />)
 
     await waitFor(() => {
-      expect(screen.getByText('Réunion difficile au travail')).toBeTruthy()
+      expect(screen.getByText('Aucun enregistrement')).toBeTruthy()
     })
 
-    // Ces labels seraient une requalification en Dispositif Médical
+    // Ces labels dans le code de l'app déclencheraient une requalification en Dispositif Médical
     expect(screen.queryByText(/sévère/i)).toBeNull()
     expect(screen.queryByText(/modér/i)).toBeNull()
     expect(screen.queryByText(/léger/i)).toBeNull()

@@ -349,6 +349,22 @@ Le Lithium est un traitement extrêmement efficace, mais il nécessite un équil
   ],
 }
 
+// ─── Thermomètre de l'Humeur ──────────────────────────────────────────────────
+// Source : CANMAT 2018 / Basco & Rush (2005) / NIMH Life Chart Method.
+// 3 dimensions quotidiennes : humeur, énergie, anxiété — échelle 1–10.
+
+const MOOD_TRACKER_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l\'appareil.',
+  fields: [
+    { icon: '😊', label: 'Humeur', detail: 'Échelle 1–10' },
+    { icon: '⚡', label: 'Énergie', detail: 'Échelle 1–10' },
+    { icon: '💓', label: 'Anxiété', detail: 'Échelle 1–10' },
+    { icon: '🌿', label: 'Plaisir', detail: 'Échelle 1–10 — dimension anhédonique (SHAPS 1995)' },
+    { icon: '📝', label: 'Notes libres', detail: 'Champ texte optionnel' },
+  ],
+}
+
 // ─── Colonnes de Beck ─────────────────────────────────────────────────────────
 // Source : Beck, Rush, Shaw & Emery (1979). Cognitive Therapy of Depression.
 // Version 5 colonnes (DTR standard) — outil central de la TCC.
@@ -390,6 +406,91 @@ const BECK_COLUMNS_PREVIEW: ModulePreview = {
   ],
 }
 
+// ─── Effets Secondaires Médicamenteux ────────────────────────────────────────
+// Source : apps/mobile/src/screens/modules/MedicationSideEffectsScreen.tsx
+// Inspiré UKU Side Effect Rating Scale (Lingjaerde et al., 1987)
+// 6 effets — échelle 0–3 brute, sans interprétation algorithmique
+
+const MEDICATION_SIDE_EFFECTS_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Échelle inspirée de l\'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l\'app.',
+  fields: [
+    { icon: '😴', label: 'Sédation', detail: 'Somnolence, lenteur, difficultés de concentration — échelle 0–3' },
+    { icon: '🏃', label: 'Akathisie', detail: 'Agitation intérieure, impossibilité de rester immobile — échelle 0–3' },
+    { icon: '🤝', label: 'Tremblements', detail: 'Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3' },
+    { icon: '💧', label: 'Sécheresse buccale', detail: 'Anticholinergiques, tricycliques — échelle 0–3' },
+    { icon: '🌙', label: 'Troubles du sommeil', detail: 'Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3' },
+    { icon: '🤢', label: 'Nausées / troubles digestifs', detail: 'Lithium, valproate, ISRS — échelle 0–3' },
+    { icon: '📝', label: 'Notes libres', detail: 'Contexte, remarque, moment de la journée' },
+  ],
+}
+
+// ─── Observance Médicamenteuse ────────────────────────────────────────────────
+// Source : apps/mobile/src/screens/modules/MedicationAdherenceScreen.tsx
+// Affichage neutre des 3 statuts déclarés par le patient. Aucune interprétation.
+
+const MEDICATION_ADHERENCE_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L\'historique des 30 derniers jours est disponible dans l\'app.',
+  fields: [
+    { icon: '✅', label: 'Pris', detail: 'Traitement pris dans son intégralité' },
+    { icon: '◑', label: 'Partiellement', detail: 'Traitement pris en partie (oubli, difficulté)' },
+    { icon: '○', label: 'Non pris', detail: 'Traitement non pris ce jour' },
+    { icon: '📝', label: 'Notes libres', detail: 'Champ texte optionnel (oubli, remarque…)' },
+    { icon: '📅', label: 'Historique', detail: 'Liste brute des 30 derniers jours (date, statut, note)' },
+  ],
+}
+
+// ─── Activation Comportementale ───────────────────────────────────────────────
+// Source : apps/mobile/src/screens/modules/BehavioralActivationScreen.tsx
+// Référence : Martell, Dimidjian & Herman-Dunn (2010). BATD-R (Lejuez et al., 2011).
+
+const BEHAVIORAL_ACTIVATION_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l\'entretien motivationnel.',
+  fields: [
+    { icon: '📅', label: 'Date', detail: 'Date de l\'activité (passée ou à venir)' },
+    { icon: '🏃', label: 'Nom de l\'activité', detail: 'Texte libre — ex : Marche 20 min, Appel à un ami' },
+    { icon: '✅', label: 'Réalisée / Planifiée', detail: 'Le patient coche quand l\'activité est accomplie' },
+    { icon: 'P', label: 'Plaisir (0–10)', detail: 'Satisfaction retirée de l\'activité — brut, sans interprétation' },
+    { icon: 'M', label: 'Maîtrise (0–10)', detail: 'Sentiment d\'accomplissement — brut, sans interprétation' },
+    { icon: '📝', label: 'Notes libres', detail: 'Contexte, ressenti, remarque' },
+  ],
+}
+
+// ─── Thermomètre de la Peur ───────────────────────────────────────────────────
+// Source : apps/mobile/src/screens/modules/FearEntryScreen.tsx
+// Référence : Wolpe, J. (1969). The Practice of Behavior Therapy. SUDs scale.
+
+const FEAR_THERMOMETER_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l\'efficacité des expositions et des stratégies.',
+  fields: [
+    { icon: '📍', label: 'Situation déclenchante', detail: 'Sélection dans le catalogue personnel ou texte libre' },
+    { icon: '🌡️', label: 'SUDs avant (0–100)', detail: 'Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation' },
+    { icon: '🛠️', label: 'Stratégies utilisées', detail: 'Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre' },
+    { icon: '✅', label: 'SUDs après (0–100)', detail: 'Niveau de détresse après la stratégie — optionnel (remplissage différé possible)' },
+    { icon: '📝', label: 'Notes libres', detail: 'Contexte, observations, remarque' },
+  ],
+}
+
+// ─── Techniques de Respiration ────────────────────────────────────────────────
+// Source : apps/mobile/src/constants/breathingTechniques.ts
+// 5 techniques validées : cohérence cardiaque, diaphragmatique, carrée, 4-7-8, pleine conscience
+
+const BREATHING_TECHNIQUES_PREVIEW: ModulePreview = {
+  kind: 'fields',
+  footer: 'Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L\'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique.',
+  fields: [
+    { icon: '💙', label: 'Cohérence cardiaque', detail: 'Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées' },
+    { icon: '🟢', label: 'Respiration diaphragmatique', detail: 'HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées' },
+    { icon: '🟠', label: 'Respiration carrée', detail: 'VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées' },
+    { icon: '🟣', label: 'Technique 4-7-8', detail: 'Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min' },
+    { icon: '🔵', label: 'Pleine conscience respiratoire', detail: 'MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées' },
+    { icon: '📅', label: 'Historique des sessions', detail: 'Technique utilisée + durée effective — données brutes, sans interprétation' },
+  ],
+}
+
 // ─── Index général ────────────────────────────────────────────────────────────
 
 export const MODULE_PREVIEW: Partial<Record<ModuleType, ModulePreview>> = {
@@ -398,4 +499,10 @@ export const MODULE_PREVIEW: Partial<Record<ModuleType, ModulePreview>> = {
   decisional_balance: DECISIONAL_BALANCE_PREVIEW,
   psychoeducation: PSYCHO_CARDS_PREVIEW,
   beck_columns: BECK_COLUMNS_PREVIEW,
+  mood_tracker: MOOD_TRACKER_PREVIEW,
+  medication_adherence: MEDICATION_ADHERENCE_PREVIEW,
+  medication_side_effects: MEDICATION_SIDE_EFFECTS_PREVIEW,
+  fear_thermometer: FEAR_THERMOMETER_PREVIEW,
+  behavioral_activation: BEHAVIORAL_ACTIVATION_PREVIEW,
+  breathing_techniques: BREATHING_TECHNIQUES_PREVIEW,
 }

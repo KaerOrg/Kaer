@@ -21,7 +21,6 @@ import {
   generateId,
   SleepEntry,
   computeSleepEfficiency,
-  sleepEfficiencyLabel,
 } from '../../lib/database'
 import Button from '../../components/Button'
 import { colors, spacing, radius } from '../../theme'
@@ -322,8 +321,7 @@ export default function SleepDiaryEntryScreen() {
 
   // Calcul temps réel de l'efficacité du sommeil
   const se = computeSleepEfficiency(toHHMM(bedtime), toHHMM(wakeTime), onsetMinutes, awakeningsDuration)
-  const seLabel = se !== null ? sleepEfficiencyLabel(se) : null
-  const seColor = seLabel === 'bon' ? colors.success : seLabel === 'moyen' ? '#F59E0B' : colors.danger
+  const seColor = se === null ? colors.danger : se >= 85 ? colors.success : se >= 70 ? '#F59E0B' : colors.danger
 
   // Si une entrée existe déjà pour cette date, la pré-remplit
   useEffect(() => {
@@ -497,11 +495,6 @@ export default function SleepDiaryEntryScreen() {
               <Text style={styles.seTitle}>Efficacité du sommeil</Text>
               <Text style={[styles.seScore, { color: seColor }]}>{se} %</Text>
             </View>
-            <Text style={styles.seSubtitle}>
-              {seLabel === 'bon' && 'Bonne efficacité (≥ 85 %) — objectif TCC-I atteint'}
-              {seLabel === 'moyen' && 'Efficacité moyenne (70–84 %) — à améliorer'}
-              {seLabel === 'insuffisant' && 'Efficacité insuffisante (< 70 %) — à travailler en consultation'}
-            </Text>
           </View>
         )}
 

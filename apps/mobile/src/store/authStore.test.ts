@@ -40,10 +40,13 @@ describe('authStore — loadSession', () => {
       error: null,
     } as never)
 
+    // loadSession fetches avatar_url from the patients table after getting the session
+    mockFrom({ avatar_url: null })
+
     await useAuthStore.getState().loadSession()
 
     const state = useAuthStore.getState()
-    expect(state.patient).toEqual({ id: 'pat-1', email: 'patient@example.com' })
+    expect(state.patient).toEqual({ id: 'pat-1', email: 'patient@example.com', avatar_url: null })
     expect(state.loading).toBe(false)
   })
 

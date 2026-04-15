@@ -49,13 +49,13 @@ const MODULE_CONFIG: Record<
     label: 'Effets du traitement',
     description: 'Suivi des effets secondaires (sédation, akathisie…)',
     icon: 'pill',
-    available: false,
+    available: true,
   },
   medication_adherence: {
     label: 'Observance du traitement',
     description: 'Ai-je pris mon traitement cette semaine ?',
     icon: 'calendar-check-outline',
-    available: false,
+    available: true,
   },
   psychoeducation: {
     label: 'Psychoéducation',
@@ -84,10 +84,10 @@ const MODULE_CONFIG: Record<
   },
   // ── Régulation Émotionnelle & Humeur ─────────────────────────────────────
   mood_tracker: {
-    label: 'Humeur & énergie',
-    description: 'Suivi quotidien de votre humeur',
+    label: 'Thermomètre de l\'humeur',
+    description: 'Suivi quotidien humeur, énergie et anxiété (1–10)',
     icon: 'emoticon-outline',
-    available: false,
+    available: true,
   },
   emotion_wheel: {
     label: 'Roue des émotions',
@@ -99,7 +99,7 @@ const MODULE_CONFIG: Record<
     label: 'Activation comportementale',
     description: 'Planifier des activités source de plaisir',
     icon: 'run-fast',
-    available: false,
+    available: true,
   },
   // ── Restructuration Cognitive ─────────────────────────────────────────────
   beck_columns: {
@@ -129,9 +129,9 @@ const MODULE_CONFIG: Record<
   // ── Anxiété, Phobies & TOC ────────────────────────────────────────────────
   fear_thermometer: {
     label: 'Thermomètre de la peur',
-    description: 'Mesurer votre niveau d\'anxiété (0–100)',
+    description: 'Mesurer votre niveau de détresse (SUDs 0–100)',
     icon: 'thermometer',
-    available: false,
+    available: true,
   },
   exposure_hierarchy: {
     label: 'Hiérarchie d\'exposition',
@@ -141,9 +141,9 @@ const MODULE_CONFIG: Record<
   },
   breathing_techniques: {
     label: 'Techniques de respiration',
-    description: 'Respiration carrée et cohérence cardiaque',
+    description: 'Cohérence cardiaque, pleine conscience, 4-7-8…',
     icon: 'lungs',
-    available: false,
+    available: true,
   },
   cognitive_saturation: {
     label: 'Saturation cognitive',
@@ -217,6 +217,18 @@ export default function HomeScreen() {
       navigation.navigate('DecisionalBalance')
     } else if (moduleType === 'beck_columns') {
       navigation.navigate('BeckColumns')
+    } else if (moduleType === 'mood_tracker') {
+      navigation.navigate('MoodTracker')
+    } else if (moduleType === 'medication_adherence') {
+      navigation.navigate('MedicationAdherence')
+    } else if (moduleType === 'medication_side_effects') {
+      navigation.navigate('MedicationSideEffects')
+    } else if (moduleType === 'fear_thermometer') {
+      navigation.navigate('FearThermometer')
+    } else if (moduleType === 'behavioral_activation') {
+      navigation.navigate('BehavioralActivation')
+    } else if (moduleType === 'breathing_techniques') {
+      navigation.navigate('BreathingTechniques')
     }
   }
 
