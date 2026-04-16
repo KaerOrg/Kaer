@@ -149,7 +149,7 @@ const MODULE_CONFIG: Record<
     label: 'Saturation cognitive',
     description: 'Interrompre les ruminations',
     icon: 'chat-processing-outline',
-    available: false,
+    available: true,
   },
   // ── Addictologie & Impulsivité ────────────────────────────────────────────
   craving_journal: {
@@ -233,6 +233,8 @@ export default function HomeScreen() {
       navigation.navigate('Rim')
     } else if (moduleType === 'grounding') {
       navigation.navigate('Grounding')
+    } else if (moduleType === 'cognitive_saturation') {
+      navigation.navigate('CognitiveSaturation')
     } else if (moduleType === 'emotion_wheel') {
       navigation.navigate('EmotionWheel')
     }

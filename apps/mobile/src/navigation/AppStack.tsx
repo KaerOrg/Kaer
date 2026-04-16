@@ -24,6 +24,8 @@ import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScr
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import RimScreen from '../screens/modules/RimScreen'
 import GroundingScreen from '../screens/modules/GroundingScreen'
+import CognitiveSaturationScreen from '../screens/modules/CognitiveSaturationScreen'
+import CognitiveSaturationExerciseScreen from '../screens/modules/CognitiveSaturationExerciseScreen'
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
 import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
 import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
@@ -56,6 +58,8 @@ export type AppStackParamList = {
   BreathingExercise: { techniqueKey: string }
   Rim: undefined
   Grounding: undefined
+  CognitiveSaturation: undefined
+  CognitiveSaturationExercise: undefined
   EmotionWheel: undefined
   EmotionEntry: undefined
   EmotionMonth: undefined
@@ -217,6 +221,16 @@ export default function AppStack() {
         name="Grounding"
         component={GroundingScreen}
         options={{ title: 'Ancrage 5-4-3-2-1' }}
+      />
+      <Stack.Screen
+        name="CognitiveSaturation"
+        component={CognitiveSaturationScreen}
+        options={{ title: 'Saturation cognitive' }}
+      />
+      <Stack.Screen
+        name="CognitiveSaturationExercise"
+        component={CognitiveSaturationExerciseScreen}
+        options={{ title: 'Exercice de saturation' }}
       />
       <Stack.Screen
         name="EmotionWheel"

@@ -45,6 +45,7 @@ export async function initDatabase(): Promise<void> {
   await createBehavioralActivationTable(database)
   await createBreathingSessionsTable(database)
   await createEmotionEntriesTable(database)
+  await createCognitiveSaturationTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1049,5 +1050,67 @@ export async function getEmotionEntriesForMonth(yearMonth: string): Promise<Emot
   return database.getAllAsync<EmotionEntry>(
     `SELECT * FROM emotion_entries WHERE created_at LIKE ? ORDER BY created_at ASC`,
     [`${yearMonth}%`]
+  )
+}
+
+// ─── Types Saturation Cognitive ───────────────────────────────────────────────
+//
+// Technique de saturation sémantique (Hayes et al., 1999 — ACT, défusion cognitive).
+// Le patient répète un mot/pensée rapidement jusqu'à ce qu'il perde sa charge
+// émotionnelle. Aucun score interprété — conformité MDR 2017/745.
+
+export interface CognitiveSaturationSession {
+  id: string
+  word: string            // mot ou courte pensée travaillée (max 40 chars)
+  repetitions: number     // nombre de tapotements enregistrés
+  duration_seconds: number // durée effective de l'exercice
+  created_at: string
+}
+
+// ─── SQLite Saturation Cognitive ─────────────────────────────────────────────
+
+export async function createCognitiveSaturationTable(
+  database: SQLite.SQLiteDatabase
+): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS cognitive_saturation_sessions (
+      id TEXT PRIMARY KEY,
+      word TEXT NOT NULL,
+      repetitions INTEGER NOT NULL DEFAULT 0,
+      duration_seconds INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+/** Enregistre une session terminée */
+export async function saveCognitiveSaturationSession(
+  session: Omit<CognitiveSaturationSession, 'created_at'>
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO cognitive_saturation_sessions (id, word, repetitions, duration_seconds)
+     VALUES (?, ?, ?, ?)`,
+    [session.id, session.word, session.repetitions, session.duration_seconds]
+  )
+}
+
+/** Récupère les N dernières sessions, de la plus récente à la plus ancienne */
+export async function getAllCognitiveSaturationSessions(
+  limit = 30
+): Promise<CognitiveSaturationSession[]> {
+  const database = getDb()
+  return database.getAllAsync<CognitiveSaturationSession>(
+    'SELECT * FROM cognitive_saturation_sessions ORDER BY created_at DESC LIMIT ?',
+    [limit]
+  )
+}
+
+/** Supprime une session */
+export async function deleteCognitiveSaturationSession(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'DELETE FROM cognitive_saturation_sessions WHERE id = ?',
+    [id]
   )
 }
