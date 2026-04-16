@@ -93,7 +93,7 @@ const MODULE_CONFIG: Record<
     label: 'Roue des émotions',
     description: 'Explorer et nommer vos émotions',
     icon: 'palette',
-    available: false,
+    available: true,
   },
   behavioral_activation: {
     label: 'Activation comportementale',
@@ -118,13 +118,13 @@ const MODULE_CONFIG: Record<
     label: 'Techniques d\'ancrage',
     description: 'Revenir au présent avec la méthode 5-4-3-2-1',
     icon: 'hand-heart-outline',
-    available: false,
+    available: true,
   },
   rim: {
     label: 'RIM – Imagerie mentale',
     description: 'Retraitement par l\'imagerie',
     icon: 'waves',
-    available: false,
+    available: true,
   },
   // ── Anxiété, Phobies & TOC ────────────────────────────────────────────────
   fear_thermometer: {
@@ -229,6 +229,12 @@ export default function HomeScreen() {
       navigation.navigate('BehavioralActivation')
     } else if (moduleType === 'breathing_techniques') {
       navigation.navigate('BreathingTechniques')
+    } else if (moduleType === 'rim') {
+      navigation.navigate('Rim')
+    } else if (moduleType === 'grounding') {
+      navigation.navigate('Grounding')
+    } else if (moduleType === 'emotion_wheel') {
+      navigation.navigate('EmotionWheel')
     }
   }
 

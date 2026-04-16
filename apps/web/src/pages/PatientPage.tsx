@@ -112,6 +112,13 @@ export function PatientPage() {
   const [savingPsycho, setSavingPsycho] = useState(false)
   const [psychoError, setPsychoError] = useState<string | null>(null)
 
+  // État de l'éditeur de scénarios RIM
+  const [rimEditorMode, setRimEditorMode] = useState<'off' | 'unlock' | 'edit'>('off')
+  const [rimAlternative, setRimAlternative] = useState('')
+  const [rimOriginal, setRimOriginal] = useState('')
+  const [savingRim, setSavingRim] = useState(false)
+  const [rimError, setRimError] = useState<string | null>(null)
+
   useEffect(() => {
     loadPatient()
   }, [id])
@@ -252,6 +259,62 @@ export function PatientPage() {
   const cancelPsychoPicker = () => {
     setPsychoPickerMode('off')
     setPsychoError(null)
+  }
+
+  // ── RIM : éditeur de scénarios ──────────────────────────────────────────
+
+  const rimModule = modules.find(m => m.module_type === 'rim')
+
+  const openRimEditor = (mode: 'unlock' | 'edit') => {
+    setRimError(null)
+    setOpenCategories(prev => new Set([...prev, 'cognitive']))
+    if (mode === 'edit' && rimModule) {
+      const cfg = rimModule.config as { alternative_scenario?: string; original_scenario?: string }
+      setRimAlternative(cfg.alternative_scenario ?? '')
+      setRimOriginal(cfg.original_scenario ?? '')
+    } else {
+      setRimAlternative('')
+      setRimOriginal('')
+    }
+    setRimEditorMode(mode)
+  }
+
+  const cancelRimEditor = () => {
+    setRimEditorMode('off')
+    setRimError(null)
+  }
+
+  const confirmRim = async () => {
+    if (!id || !practitioner) return
+    if (!rimAlternative.trim()) {
+      setRimError('Le scénario alternatif est obligatoire.')
+      return
+    }
+    setSavingRim(true)
+    setRimError(null)
+    const alt = rimAlternative.trim()
+    const orig = rimOriginal.trim()
+    const rimCfg: Record<string, unknown> = { alternative_scenario: alt }
+    if (orig) rimCfg['original_scenario'] = orig
+
+    if (rimEditorMode === 'unlock') {
+      const { error } = await supabase.from('patient_modules').insert({
+        patient_id: id,
+        practitioner_id: practitioner.id,
+        module_type: 'rim',
+        config: rimCfg,
+      })
+      if (error) { setRimError("Erreur lors du déverrouillage. Réessayez."); setSavingRim(false); return }
+    } else if (rimEditorMode === 'edit' && rimModule) {
+      const { error } = await supabase
+        .from('patient_modules')
+        .update({ config: rimCfg })
+        .eq('id', rimModule.id)
+      if (error) { setRimError("Erreur lors de la mise à jour. Réessayez."); setSavingRim(false); return }
+    }
+    setSavingRim(false)
+    setRimEditorMode('off')
+    await loadPatient()
   }
 
   // ── Radar ────────────────────────────────────────────────────────────────
@@ -498,6 +561,103 @@ export function PatientPage() {
                     : 'Enregistrer les modifications'}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancelPsychoPicker}>
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (moduleType === 'rim') {
+      const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
+      return (
+        <div key="rim" className="module-card-wrapper module-card-wrapper-block">
+          <div className={`module-card ${unlocked ? 'module-card--active module-card--psycho' : ''}`}>
+            <div className="module-card__content">
+              <div className="module-card__name">{MODULE_LABELS['rim']}</div>
+              <div className="module-card__desc">{MODULE_DESCRIPTIONS['rim']}</div>
+              {unlocked && mod && (
+                <div className="module-card__date">
+                  Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+                  {cfg?.alternative_scenario && (
+                    <span className="psycho-observance-summary"> · Scénario configuré</span>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="module-card__actions">
+              {unlocked && mod ? (
+                <>
+                  <span className="module-card__badge"><Check size={14} /> Actif</span>
+                  {rimEditorMode !== 'edit' && (
+                    <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
+                      Modifier le scénario
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="module-card__revoke"
+                    onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
+                  >
+                    Révoquer
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
+                  }
+                >
+                  {rimEditorMode === 'unlock' ? 'Annuler' : 'Débloquer'}
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Éditeur de scénarios RIM inline */}
+          {(rimEditorMode === 'unlock' || rimEditorMode === 'edit') && (
+            <div className="psycho-card-picker">
+              <p className="psycho-card-picker__label">
+                {rimEditorMode === 'unlock'
+                  ? 'Rédigez le scénario alternatif pour ce patient :'
+                  : 'Modifier le scénario alternatif :'}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    Scénario alternatif <span style={{ color: '#DC2626' }}>*</span>
+                  </label>
+                  <textarea
+                    rows={5}
+                    placeholder="Décrivez ici le scénario positif de substitution au cauchemar..."
+                    value={rimAlternative}
+                    onChange={e => setRimAlternative(e.target.value)}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    Scénario initial (optionnel — référence)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Description du cauchemar original, pour référence..."
+                    value={rimOriginal}
+                    onChange={e => setRimOriginal(e.target.value)}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              {rimError && <p className="psycho-card-picker__error">{rimError}</p>}
+              <div className="psycho-card-picker__actions">
+                <Button size="sm" loading={savingRim} onClick={confirmRim}>
+                  {rimEditorMode === 'unlock' ? 'Débloquer avec ce scénario' : 'Enregistrer le scénario'}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={cancelRimEditor}>
                   Annuler
                 </Button>
               </div>

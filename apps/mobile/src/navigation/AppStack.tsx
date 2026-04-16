@@ -22,6 +22,10 @@ import BehavioralActivationScreen from '../screens/modules/BehavioralActivationS
 import BehavioralActivationEntryScreen from '../screens/modules/BehavioralActivationEntryScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
+import RimScreen from '../screens/modules/RimScreen'
+import GroundingScreen from '../screens/modules/GroundingScreen'
+import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
+import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -49,6 +53,10 @@ export type AppStackParamList = {
   BehavioralActivationEntry: { recordId?: string }
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
+  Rim: undefined
+  Grounding: undefined
+  EmotionWheel: undefined
+  EmotionEntry: undefined
 }
 
 export type TabParamList = {
@@ -197,6 +205,26 @@ export default function AppStack() {
         options={({ route }) => ({
           title: getTechniqueTitle(route.params.techniqueKey),
         })}
+      />
+      <Stack.Screen
+        name="Rim"
+        component={RimScreen}
+        options={{ title: 'RIM — Imagerie mentale' }}
+      />
+      <Stack.Screen
+        name="Grounding"
+        component={GroundingScreen}
+        options={{ title: 'Ancrage 5-4-3-2-1' }}
+      />
+      <Stack.Screen
+        name="EmotionWheel"
+        component={EmotionWheelScreen}
+        options={{ title: 'Roue des émotions' }}
+      />
+      <Stack.Screen
+        name="EmotionEntry"
+        component={EmotionEntryScreen}
+        options={{ title: 'Identifier une émotion' }}
       />
     </Stack.Navigator>
   )
