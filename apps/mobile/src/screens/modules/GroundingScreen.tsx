@@ -142,7 +142,7 @@ export default function GroundingScreen() {
           <View style={styles.noteCard}>
             <MaterialCommunityIcons name="information-outline" size={16} color={colors.textMuted} />
             <Text style={styles.noteText}>
-              Grade B — Recommandé en TCC, ACT et TCD pour la gestion de la détresse aiguë.
+              Exercice reconnu et validé pour gérer l'anxiété intense.
             </Text>
           </View>
 

@@ -224,7 +224,7 @@ export default function CrisisPlanScreen() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mon Plan de Crise</Text>
           <Text style={styles.headerSubtitle}>
-            Remplis ce plan avec ton praticien. Il t'aidera à traverser les moments difficiles.
+            Remplissez ce plan avec votre praticien. Il vous aidera dans les moments difficiles.
           </Text>
         </View>
 

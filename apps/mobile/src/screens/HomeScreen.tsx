@@ -129,7 +129,7 @@ const MODULE_CONFIG: Record<
   // ── Anxiété, Phobies & TOC ────────────────────────────────────────────────
   fear_thermometer: {
     label: 'Thermomètre de la peur',
-    description: 'Mesurer votre niveau de détresse (SUDs 0–100)',
+    description: 'Mesurer votre niveau de détresse (0 à 100)',
     icon: 'thermometer',
     available: true,
   },

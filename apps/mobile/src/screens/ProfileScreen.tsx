@@ -257,7 +257,7 @@ export default function ProfileScreen() {
               <View style={styles.rowInfo}>
                 <Text style={styles.rowLabel}>Partager mes données</Text>
                 <Text style={styles.rowHint}>
-                  Autorise votre praticien à consulter vos saisies
+                  Votre praticien pourra voir tout ce que vous notez dans l'application.
                 </Text>
               </View>
               <Switch

@@ -329,7 +329,7 @@ export default function BeckEntryScreen() {
             onChange={(v) => set('automatic_thought', v)}
           />
           <IntensitySlider
-            label="Conviction initiale"
+            label="À quel point y croyiez-vous ?"
             value={record.thought_belief}
             accentColor="#EF4444"
             onChange={(v) => set('thought_belief', v)}
@@ -372,7 +372,7 @@ export default function BeckEntryScreen() {
             onChange={(v) => set('outcome_intensity', v)}
           />
           <IntensitySlider
-            label="Conviction en la pensée alternative"
+            label="À quel point croyez-vous à cette nouvelle pensée ?"
             value={record.outcome_belief}
             accentColor="#D97706"
             onChange={(v) => set('outcome_belief', v)}

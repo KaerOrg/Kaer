@@ -305,32 +305,17 @@ interface MotivationGaugeProps {
 }
 
 function MotivationGauge({ motivationPercent, changeScore, statusQuoScore }: MotivationGaugeProps) {
-  const label =
-    motivationPercent >= 65
-      ? 'Motivation au changement forte'
-      : motivationPercent >= 50
-      ? 'Ambivalence — à explorer'
-      : 'Attachement au statu quo'
-
-  const barColor =
-    motivationPercent >= 65
-      ? colors.success
-      : motivationPercent >= 50
-      ? colors.warning
-      : colors.danger
-
   return (
     <View style={gaugeStyles.container}>
       <Text style={gaugeStyles.title}>Jauge de motivation</Text>
       <View style={gaugeStyles.labels}>
-        <Text style={gaugeStyles.labelLeft}>Statu quo ({statusQuoScore})</Text>
+        <Text style={gaugeStyles.labelLeft}>Rester comme je suis ({statusQuoScore})</Text>
         <Text style={gaugeStyles.labelRight}>Changement ({changeScore})</Text>
       </View>
       <View style={gaugeStyles.track}>
-        <View style={[gaugeStyles.fill, { width: `${motivationPercent}%` as `${number}%`, backgroundColor: barColor }]} />
+        <View style={[gaugeStyles.fill, { width: `${motivationPercent}%` as `${number}%`, backgroundColor: colors.primary }]} />
         <View style={[gaugeStyles.marker, { left: '50%' as const }]} />
       </View>
-      <Text style={[gaugeStyles.statusLabel, { color: barColor }]}>{label}</Text>
     </View>
   )
 }

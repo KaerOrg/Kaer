@@ -83,7 +83,7 @@ function ActivityCard({ record, onToggleDone, onEdit, onDelete }: ActivityCardPr
             <Text style={cardStyles.scoreValue}>{record.pleasure}</Text>
           </View>
           <View style={cardStyles.scorePill}>
-            <Text style={cardStyles.scoreIcon}>M</Text>
+            <Text style={cardStyles.scoreIcon}>A</Text>
             <Text style={cardStyles.scoreValue}>{record.mastery}</Text>
           </View>
         </View>
@@ -488,7 +488,7 @@ export default function BehavioralActivationScreen() {
                 <Text style={styles.emptyTitle}>Aucune activité</Text>
                 <Text style={styles.emptyText}>
                   Ajoutez des activités à planifier ou réalisées.{'\n'}
-                  Évaluez chaque activité en Plaisir (P) et Maîtrise (M).
+                  Évaluez chaque activité en Plaisir (P) et Accomplissement (A).
                 </Text>
               </View>
             ) : viewMode === 'month' && !selectedDay ? (

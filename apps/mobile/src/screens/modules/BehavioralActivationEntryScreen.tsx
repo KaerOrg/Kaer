@@ -338,7 +338,7 @@ export default function BehavioralActivationEntryScreen() {
               />
               <View style={styles.divider} />
               <ScalePicker
-                label="Maîtrise (M)"
+                label="Accomplissement (A)"
                 sublabel="Sentiment d'accomplissement"
                 value={mastery}
                 color="#4F46E5"

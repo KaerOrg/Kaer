@@ -303,7 +303,7 @@ export default function EmotionMonthScreen() {
           {/* ── Légende ────────────────────────────────────────────────────── */}
           <View style={styles.legendRow}>
             <MaterialCommunityIcons name="circle" size={10} color={colors.primary} />
-            <Text style={styles.legendText}>Point = émotion saisie ce jour (1 couleur = 1 émotion primaire)</Text>
+            <Text style={styles.legendText}>Chaque point = une émotion notée ce jour-là. La couleur indique l'émotion principale.</Text>
           </View>
 
           {/* ── Résumé chiffré ──────────────────────────────────────────────── */}

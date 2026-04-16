@@ -52,25 +52,25 @@ const EFFECTS: ReadonlyArray<EffectMeta> = [
   {
     key: 'tremors',
     label: 'Tremblements',
-    detail: 'Mains, membres — fréquent sous lithium, valproate, antipsychotiques',
+    detail: 'Mains, membres — peut survenir avec certains médicaments psychiatriques',
     icon: 'hand-wave-outline',
   },
   {
     key: 'dry_mouth',
     label: 'Sécheresse buccale',
-    detail: 'Bouche sèche — anticholinergiques, tricycliques',
+    detail: 'Bouche sèche — peut survenir avec certains médicaments',
     icon: 'water-off-outline',
   },
   {
     key: 'sleep_disturbance',
     label: 'Troubles du sommeil',
-    detail: 'Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs',
+    detail: 'Insomnie ou difficultés à dormir — peut survenir avec certains antidépresseurs ou régulateurs d\'humeur',
     icon: 'moon-waning-crescent',
   },
   {
     key: 'nausea',
     label: 'Nausées / troubles digestifs',
-    detail: 'Nausées, douleurs abdominales — lithium, valproate, ISRS',
+    detail: 'Nausées, douleurs abdominales — peut survenir avec certains médicaments',
     icon: 'stomach',
   },
 ] as const

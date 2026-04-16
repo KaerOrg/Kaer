@@ -516,7 +516,7 @@ export default function MoodTrackerScreen() {
             <View style={styles.empty}>
               <MaterialCommunityIcons name="chart-line" size={48} color={colors.border} />
               <Text style={styles.emptyText}>
-                L'historique s'affichera dès que vous aurez enregistré au moins 2 saisies.
+                Continuez à noter votre humeur : votre historique apparaîtra à partir de 2 saisies.
               </Text>
             </View>
           ) : (

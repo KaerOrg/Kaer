@@ -535,7 +535,7 @@ export default function FearEntryScreen() {
         {/* 2. SUDs avant */}
         <Section title="Niveau de détresse — Avant">
           <SudsPicker
-            label="SUDs avant"
+            label="Niveau de détresse"
             hint="0 = aucune détresse  ·  100 = détresse maximale imaginable"
             value={sudsBefore}
             accentColor="#EF4444"
@@ -557,7 +557,7 @@ export default function FearEntryScreen() {
         {/* 4. SUDs après — optionnel */}
         <Section title="Niveau de détresse — Après (optionnel)">
           <SudsPicker
-            label="SUDs après"
+            label="Niveau de détresse"
             hint="À renseigner une fois la stratégie terminée. Vous pouvez revenir plus tard."
             value={sudsAfter}
             accentColor="#059669"
