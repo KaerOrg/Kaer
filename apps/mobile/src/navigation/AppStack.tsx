@@ -26,6 +26,7 @@ import RimScreen from '../screens/modules/RimScreen'
 import GroundingScreen from '../screens/modules/GroundingScreen'
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
 import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
+import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -57,6 +58,7 @@ export type AppStackParamList = {
   Grounding: undefined
   EmotionWheel: undefined
   EmotionEntry: undefined
+  EmotionMonth: undefined
 }
 
 export type TabParamList = {
@@ -225,6 +227,11 @@ export default function AppStack() {
         name="EmotionEntry"
         component={EmotionEntryScreen}
         options={{ title: 'Identifier une émotion' }}
+      />
+      <Stack.Screen
+        name="EmotionMonth"
+        component={EmotionMonthScreen}
+        options={{ title: 'Bilan mensuel' }}
       />
     </Stack.Navigator>
   )

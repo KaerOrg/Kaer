@@ -44,6 +44,7 @@ export async function initDatabase(): Promise<void> {
   await createFearThermometerTables(database)
   await createBehavioralActivationTable(database)
   await createBreathingSessionsTable(database)
+  await createEmotionEntriesTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -963,5 +964,90 @@ export async function getAllBreathingSessions(limit = 30): Promise<BreathingSess
   return database.getAllAsync<BreathingSession>(
     'SELECT * FROM breathing_sessions ORDER BY created_at DESC LIMIT ?',
     [limit]
+  )
+}
+
+// ─── Types Roue des Émotions ──────────────────────────────────────────────────
+//
+// Entrée journalisée : émotion primaire + secondaire + spécifique + intensité brute.
+// Valeurs brutes déclarées par le patient, sans label interprétatif (conformité MDR 2017/745).
+
+export interface EmotionEntry {
+  id: string
+  created_at: string           // ISO 8601 — horodatage complet
+  primary_key: string          // clé émotion primaire (ex: 'joy')
+  primary_label: string        // libellé copié au moment de la saisie
+  secondary_key: string        // clé émotion secondaire
+  secondary_label: string
+  specific_key: string         // clé émotion spécifique
+  specific_label: string
+  intensity: number            // 1–10, brut, sans interprétation
+  notes: string | null
+}
+
+// ─── SQLite Roue des Émotions ─────────────────────────────────────────────────
+
+export async function createEmotionEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS emotion_entries (
+      id TEXT PRIMARY KEY,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      primary_key TEXT NOT NULL,
+      primary_label TEXT NOT NULL,
+      secondary_key TEXT NOT NULL,
+      secondary_label TEXT NOT NULL,
+      specific_key TEXT NOT NULL,
+      specific_label TEXT NOT NULL,
+      intensity INTEGER NOT NULL,
+      notes TEXT
+    );
+  `)
+}
+
+/** Enregistre une nouvelle entrée d'émotion */
+export async function saveEmotionEntry(
+  entry: Omit<EmotionEntry, 'created_at'>
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO emotion_entries
+       (id, primary_key, primary_label, secondary_key, secondary_label,
+        specific_key, specific_label, intensity, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      entry.primary_key,
+      entry.primary_label,
+      entry.secondary_key,
+      entry.secondary_label,
+      entry.specific_key,
+      entry.specific_label,
+      entry.intensity,
+      entry.notes,
+    ]
+  )
+}
+
+/** Récupère les N dernières entrées, de la plus récente à la plus ancienne */
+export async function getAllEmotionEntries(limit = 50): Promise<EmotionEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<EmotionEntry>(
+    'SELECT * FROM emotion_entries ORDER BY created_at DESC LIMIT ?',
+    [limit]
+  )
+}
+
+/** Supprime une entrée d'émotion */
+export async function deleteEmotionEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM emotion_entries WHERE id = ?', [id])
+}
+
+/** Récupère toutes les entrées d'un mois donné (format YYYY-MM) */
+export async function getEmotionEntriesForMonth(yearMonth: string): Promise<EmotionEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<EmotionEntry>(
+    `SELECT * FROM emotion_entries WHERE created_at LIKE ? ORDER BY created_at ASC`,
+    [`${yearMonth}%`]
   )
 }
