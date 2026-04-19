@@ -10,6 +10,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Données cliniques ────────────────────────────────────────────────────────
 //
@@ -78,6 +80,7 @@ type Mode = 'intro' | 'guided' | 'done'
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function GroundingScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const [mode, setMode] = useState<Mode>('intro')
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -106,20 +109,26 @@ export default function GroundingScreen() {
   if (mode === 'intro') {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <TeenAccent color={teenColor('grounding')} />
         <ScrollView contentContainerStyle={styles.container}>
 
           {/* Introduction */}
           <View style={styles.introCard} testID="intro-card">
             <MaterialCommunityIcons name="hand-heart-outline" size={40} color={colors.primary} />
-            <Text style={styles.introTitle}>Technique 5-4-3-2-1</Text>
-            <Text style={styles.introText}>
-              Cet exercice guide votre attention vers vos cinq sens, l'un après l'autre,
-              pour vous aider à revenir dans le moment présent.
+            <Text style={styles.introTitle}>
+              {tt('grounding', 'title') || 'Technique 5-4-3-2-1'}
             </Text>
             <Text style={styles.introText}>
-              Utilisez-le quand vous ressentez une forte anxiété, des pensées envahissantes
-              ou une sensation de décalage par rapport à votre environnement.
+              {isTeenMode
+                ? tt('grounding', 'intro')
+                : "Cet exercice guide votre attention vers vos cinq sens, l'un après l'autre, pour vous aider à revenir dans le moment présent."}
             </Text>
+            {!isTeenMode && (
+              <Text style={styles.introText}>
+                Utilisez-le quand vous ressentez une forte anxiété, des pensées envahissantes
+                ou une sensation de décalage par rapport à votre environnement.
+              </Text>
+            )}
           </View>
 
           {/* Aperçu des étapes */}

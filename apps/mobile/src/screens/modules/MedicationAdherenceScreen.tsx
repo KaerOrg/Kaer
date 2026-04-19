@@ -23,6 +23,8 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Métadonnées des statuts de prise ────────────────────────────────────────
 // Affichage neutre : le statut est un fait déclaré par le patient, sans jugement.
@@ -190,6 +192,7 @@ const historyStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function MedicationAdherenceScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const todayDate = today()
 
@@ -270,6 +273,7 @@ export default function MedicationAdherenceScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('medication_adherence')} />
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
@@ -284,7 +288,9 @@ export default function MedicationAdherenceScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Mon traitement du jour</Text>
           <View style={styles.card}>
-            <Text style={styles.question}>Avez-vous pris votre traitement ?</Text>
+            <Text style={styles.question}>
+              {isTeenMode ? tt('medication_adherence', 'intro') : 'Avez-vous pris votre traitement ?'}
+            </Text>
             <View style={styles.statusRow}>
               {STATUS_META.map((meta) => (
                 <StatusButton

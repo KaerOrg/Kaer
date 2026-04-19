@@ -39,6 +39,7 @@ create table if not exists public.practitioner_patients (
   practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
   patient_id       uuid        not null references public.patients(id) on delete cascade,
   patient_alias    text,
+  teen_mode        boolean     not null default false,
   created_at       timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
@@ -72,6 +73,21 @@ create table if not exists public.patient_modules (
   revoked_at       timestamptz,                        -- null = actif
   unique(patient_id, module_type)
 );
+
+
+-- Migration idempotente : ajoute teen_mode si la colonne n'existe pas encore
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'practitioner_patients'
+      and column_name  = 'teen_mode'
+  ) then
+    alter table public.practitioner_patients
+      add column teen_mode boolean not null default false;
+  end if;
+end $$;
 
 
 -- ============================================================

@@ -21,6 +21,8 @@ import {
   CrisisPlanItem,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Métadonnées des 6 étapes (Stanley & Brown, 2012) ─────────────────────────
 
@@ -87,6 +89,7 @@ const STEPS: ReadonlyArray<StepMeta> = [
 // ─── Composant écran ──────────────────────────────────────────────────────────
 
 export default function CrisisPlanScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const [items, setItems] = useState<CrisisPlanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSteps, setExpandedSteps] = useState<ReadonlySet<number>>(new Set())
@@ -215,6 +218,7 @@ export default function CrisisPlanScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('crisis_plan')} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -222,9 +226,13 @@ export default function CrisisPlanScreen() {
       >
         {/* En-tête */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Mon Plan de Crise</Text>
+          <Text style={styles.headerTitle}>
+            {tt('crisis_plan', 'title') || 'Mon Plan de Crise'}
+          </Text>
           <Text style={styles.headerSubtitle}>
-            Remplissez ce plan avec votre praticien. Il vous aidera dans les moments difficiles.
+            {isTeenMode
+              ? tt('crisis_plan', 'intro')
+              : "Remplissez ce plan avec votre praticien. Il vous aidera dans les moments difficiles."}
           </Text>
         </View>
 

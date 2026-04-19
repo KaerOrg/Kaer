@@ -20,6 +20,8 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -382,6 +384,7 @@ const calStyles = StyleSheet.create({
 type ViewMode = 'list' | 'month'
 
 export default function BehavioralActivationScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [records, setRecords] = useState<ActivityRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -437,6 +440,7 @@ export default function BehavioralActivationScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('behavioral_activation')} />
       {/* Toggle Liste / Mois */}
       <View style={styles.tabBar}>
         <Pressable
@@ -487,8 +491,9 @@ export default function BehavioralActivationScreen() {
                 <MaterialCommunityIcons name="run-fast" size={52} color={colors.border} />
                 <Text style={styles.emptyTitle}>Aucune activité</Text>
                 <Text style={styles.emptyText}>
-                  Ajoutez des activités à planifier ou réalisées.{'\n'}
-                  Évaluez chaque activité en Plaisir (P) et Accomplissement (A).
+                  {isTeenMode
+                    ? tt('behavioral_activation', 'intro')
+                    : "Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Accomplissement (A)."}
                 </Text>
               </View>
             ) : viewMode === 'month' && !selectedDay ? (

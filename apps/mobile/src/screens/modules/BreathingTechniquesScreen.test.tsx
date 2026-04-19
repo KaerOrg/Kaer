@@ -1,3 +1,7 @@
+jest.mock('../../hooks/useTeen', () => ({
+  useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
+}))
+
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import BreathingTechniquesScreen from './BreathingTechniquesScreen'

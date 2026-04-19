@@ -16,6 +16,8 @@ import { getAllEmotionEntries, deleteEmotionEntry, type EmotionEntry } from '../
 import { EMOTION_WHEEL } from '../../constants/emotionWheel'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -97,6 +99,7 @@ function EntryCard({ entry, onDelete }: EntryCardProps) {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function EmotionWheelScreen() {
+  const { teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [entries, setEntries] = useState<EmotionEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -128,6 +131,7 @@ export default function EmotionWheelScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('emotion_wheel')} />
 
       {/* ── Boutons d'action ──────────────────────────────────────────────── */}
       <View style={styles.actionsRow}>

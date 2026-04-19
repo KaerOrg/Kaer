@@ -26,6 +26,8 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -284,6 +286,7 @@ const panelStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function FearThermometerScreen() {
+  const { teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [entries, setEntries] = useState<FearEntry[]>([])
   const [situations, setSituations] = useState<FearSituation[]>([])
@@ -347,6 +350,7 @@ export default function FearThermometerScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('fear_thermometer')} />
       {/* Onglets */}
       <View style={styles.tabs}>
         <Pressable

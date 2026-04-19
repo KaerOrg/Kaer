@@ -15,6 +15,8 @@ import { BREATHING_TECHNIQUES, getTechnique, type BreathingTechnique } from '../
 import { getAllBreathingSessions, type BreathingSession } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -79,6 +81,7 @@ function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps)
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BreathingTechniquesScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [sessions, setSessions] = useState<BreathingSession[]>([])
   const [loading, setLoading] = useState(true)
@@ -106,9 +109,12 @@ export default function BreathingTechniquesScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('breathing_techniques')} />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.intro}>
-          Choisissez une technique. Un guide animé vous accompagne, cycle par cycle.
+          {isTeenMode
+            ? tt('breathing_techniques', 'intro')
+            : 'Choisissez une technique. Un guide animé vous accompagne, cycle par cycle.'}
         </Text>
 
         {BREATHING_TECHNIQUES.map((technique) => (

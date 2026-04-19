@@ -14,6 +14,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,6 +64,7 @@ const AMBIENT_SOUNDS: AmbientSound[] = [
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function RimScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
 
   const [config, setConfig] = useState<RimConfig | null>(null)
@@ -135,6 +138,7 @@ export default function RimScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('rim')} />
       <ScrollView contentContainerStyle={styles.container}>
 
         {/* ── Avertissement ──────────────────────────────────────────────── */}
@@ -164,7 +168,9 @@ export default function RimScreen() {
 
         {/* ── Consignes du protocole ─────────────────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Consignes de pratique</Text>
+          <Text style={styles.sectionLabel}>
+            {isTeenMode ? tt('rim', 'intro') : 'Consignes de pratique'}
+          </Text>
           <View style={styles.card} testID="protocol-steps">
             {PROTOCOL_STEPS.map((step, i) => (
               <View key={i} style={styles.stepRow}>

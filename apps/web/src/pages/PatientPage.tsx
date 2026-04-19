@@ -93,6 +93,8 @@ export function PatientPage() {
   const [modules, setModules] = useState<PatientModule[]>([])
   const [loading, setLoading] = useState(true)
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
+  const [teenMode, setTeenMode] = useState(false)
+  const [togglingTeen, setTogglingTeen] = useState(false)
 
   // Accordéons ouverts — 'safety' ouvert par défaut
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(['safety']))
@@ -129,7 +131,7 @@ export function PatientPage() {
 
     const { data: relation } = await supabase
       .from('practitioner_patients')
-      .select('patient_alias, patients(email)')
+      .select('patient_alias, teen_mode, patients(email)')
       .eq('practitioner_id', practitioner.id)
       .eq('patient_id', id)
       .single()
@@ -139,6 +141,7 @@ export function PatientPage() {
     const patient = Array.isArray(relation.patients) ? relation.patients[0] : relation.patients
     setPatientEmail((patient as { email: string } | null)?.email ?? '')
     setPatientAlias(relation.patient_alias)
+    setTeenMode((relation as unknown as { teen_mode: boolean }).teen_mode ?? false)
 
     const { data: mods } = await supabase
       .from('patient_modules')
@@ -170,6 +173,20 @@ export function PatientPage() {
   }
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
+
+  const toggleTeenMode = async () => {
+    if (!id || !practitioner) return
+    setTogglingTeen(true)
+    const next = !teenMode
+    // teen_mode n'est pas encore dans les types générés — cast nécessaire
+    const { error } = await supabase
+      .from('practitioner_patients')
+      .update({ teen_mode: next } as never)
+      .eq('practitioner_id', practitioner.id)
+      .eq('patient_id', id)
+    if (!error) setTeenMode(next)
+    setTogglingTeen(false)
+  }
 
   // ── Accordéons ──────────────────────────────────────────────────────────
 
@@ -745,10 +762,22 @@ export function PatientPage() {
           <div className="patient-page__avatar">
             {displayName[0]?.toUpperCase()}
           </div>
-          <div>
+          <div className="patient-page__header-info">
             <h1 className="patient-page__name">{displayName}</h1>
             <p className="patient-page__email">{patientEmail}</p>
           </div>
+          <button
+            className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
+            onClick={toggleTeenMode}
+            disabled={togglingTeen}
+            title={teenMode ? 'Désactiver le mode ado' : 'Activer le mode ado'}
+          >
+            <span className="teen-mode-toggle__icon">🎨</span>
+            <span className="teen-mode-toggle__label">Mode ado</span>
+            <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
+              {teenMode ? 'ON' : 'OFF'}
+            </span>
+          </button>
         </div>
 
         {loading ? (

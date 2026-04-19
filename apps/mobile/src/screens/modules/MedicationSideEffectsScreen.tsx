@@ -22,6 +22,8 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Définition des 6 effets ──────────────────────────────────────────────────
 // Inspiré UKU Side Effect Rating Scale (Lingjaerde et al., 1987)
@@ -294,6 +296,7 @@ const EMPTY_VALUES: Record<EffectKey, number> = {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function MedicationSideEffectsScreen() {
+  const { teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const todayDate = today()
 
@@ -371,6 +374,7 @@ export default function MedicationSideEffectsScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('medication_side_effects')} />
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"

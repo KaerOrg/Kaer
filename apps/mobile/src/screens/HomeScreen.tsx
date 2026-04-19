@@ -16,6 +16,7 @@ import { AppStackParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import { colors, spacing, radius } from '../theme'
+import { useTeen } from '../hooks/useTeen'
 
 // Configuration des modules disponibles dans l'app.
 // RÈGLE : tout ModuleType débloquable côté web doit avoir une entrée ici.
@@ -176,6 +177,7 @@ interface UnlockedModule {
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const patient = useAuthStore((s) => s.patient)
+  const { isTeenMode, tg, teenColor } = useTeen()
   const [modules, setModules] = useState<UnlockedModule[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -260,9 +262,11 @@ export default function HomeScreen() {
           />
         }
       >
-        <Text style={styles.heading}>Mes modules</Text>
+        <Text style={styles.heading}>
+          {isTeenMode ? tg('modulesTitle') || 'Tes modules' : 'Mes modules'}
+        </Text>
         <Text style={styles.subheading}>
-          Activés par votre praticien
+          {isTeenMode ? 'Activés par ton soignant' : 'Activés par votre praticien'}
         </Text>
 
         {modules.length === 0 ? (
@@ -270,11 +274,12 @@ export default function HomeScreen() {
             <MaterialCommunityIcons name="inbox-remove-outline" size={52} color={colors.border} />
             <Text style={styles.emptyTitle}>Aucun module disponible</Text>
             <Text style={styles.emptyText}>
-              Votre praticien n'a pas encore activé de modules pour vous.{'\n'}
-              Ils apparaîtront ici dès qu'il en déverrouille un.
+              {isTeenMode
+                ? "Pas encore d'outil débloqué — ton soignant s'en occupe."
+                : "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un."}
             </Text>
             <Text style={styles.emptyHint}>
-              Tirez vers le bas pour actualiser.
+              {isTeenMode ? 'Tire vers le bas pour actualiser.' : 'Tirez vers le bas pour actualiser.'}
             </Text>
           </View>
         ) : (
@@ -282,15 +287,27 @@ export default function HomeScreen() {
             {modules.map((mod) => {
               const config = MODULE_CONFIG[mod.module_type]
               if (!config) return null
+              const accentColor = teenColor(mod.module_type)
               return (
                 <TouchableOpacity
                   key={mod.id}
-                  style={[styles.card, !config.available && styles.cardComingSoon]}
+                  style={[
+                    styles.card,
+                    !config.available && styles.cardComingSoon,
+                    isTeenMode && accentColor && { borderLeftWidth: 4, borderLeftColor: accentColor },
+                  ]}
                   onPress={() => config.available && handleModulePress(mod.module_type)}
                   activeOpacity={config.available ? 0.75 : 1}
                 >
-                  <View style={styles.cardIcon}>
-                    <MaterialCommunityIcons name={config.icon} size={30} color={config.available ? colors.primary : colors.textMuted} />
+                  <View style={[
+                    styles.cardIcon,
+                    isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
+                  ]}>
+                    <MaterialCommunityIcons
+                      name={config.icon}
+                      size={30}
+                      color={config.available ? (accentColor ?? colors.primary) : colors.textMuted}
+                    />
                   </View>
                   <View style={styles.cardContent}>
                     <Text style={styles.cardTitle}>{config.label}</Text>
@@ -300,7 +317,7 @@ export default function HomeScreen() {
                     )}
                   </View>
                   {config.available && (
-                    <Text style={styles.chevron}>›</Text>
+                    <Text style={[styles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
                   )}
                 </TouchableOpacity>
               )

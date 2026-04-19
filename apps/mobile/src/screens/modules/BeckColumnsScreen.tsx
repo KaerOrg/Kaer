@@ -19,6 +19,8 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -136,6 +138,7 @@ const cardStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BeckColumnsScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [records, setRecords] = useState<ThoughtRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -180,13 +183,16 @@ export default function BeckColumnsScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('beck_columns')} />
       <ScrollView contentContainerStyle={styles.content}>
         {records.length === 0 ? (
           <View style={styles.empty}>
             <MaterialCommunityIcons name="thought-bubble-outline" size={52} color={colors.border} />
             <Text style={styles.emptyTitle}>Aucun enregistrement</Text>
             <Text style={styles.emptyText}>
-              Appuyez sur le bouton ci-dessous pour noter votre première pensée automatique.
+              {isTeenMode
+                ? tt('beck_columns', 'intro')
+                : 'Appuyez sur le bouton ci-dessous pour noter votre première pensée automatique.'}
             </Text>
           </View>
         ) : (

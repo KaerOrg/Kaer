@@ -24,6 +24,8 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Métadonnées des 4 quadrants ─────────────────────────────────────────────
 
@@ -366,6 +368,7 @@ const EMPTY_BALANCE: Omit<DecisionalBalance, 'id' | 'updated_at'> = {
 }
 
 export default function DecisionalBalanceScreen() {
+  const { teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
 
   const [balance, setBalance] = useState<DecisionalBalance>({
@@ -460,6 +463,7 @@ export default function DecisionalBalanceScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('decisional_balance')} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}

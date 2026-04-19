@@ -1,3 +1,7 @@
+jest.mock('../../hooks/useTeen', () => ({
+  useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
+}))
+
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import EmotionWheelScreen from './EmotionWheelScreen'

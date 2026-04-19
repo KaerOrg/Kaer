@@ -25,6 +25,8 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Helpers date ─────────────────────────────────────────────────────────────
 
@@ -313,6 +315,7 @@ type FormState = { mood: number; energy: number; anxiety: number; pleasure: numb
 const DEFAULT_FORM: FormState = { mood: 5, energy: 5, anxiety: 5, pleasure: 5, notes: '' }
 
 export default function MoodTrackerScreen() {
+  const { teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const today = todayISO()
 
@@ -437,6 +440,7 @@ export default function MoodTrackerScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={88}
     >
+      <TeenAccent color={teenColor('mood_tracker')} />
       {/* Onglets Aujourd'hui / Historique */}
       <View style={styles.tabs}>
         <Pressable
