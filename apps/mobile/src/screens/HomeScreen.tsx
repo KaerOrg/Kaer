@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   RefreshControl,
   ActivityIndicator,
 } from 'react-native'
@@ -16,6 +16,8 @@ import { AppStackParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
 import { supabase } from '../lib/supabase'
 import { colors, spacing, radius } from '../theme'
+import { Card } from '../components/Card'
+import { EmptyState } from '../components/EmptyState'
 
 // Configuration des modules disponibles dans l'app.
 // RÈGLE : tout ModuleType débloquable côté web doit avoir une entrée ici.
@@ -264,43 +266,40 @@ export default function HomeScreen() {
         </Text>
 
         {modules.length === 0 ? (
-          <View style={styles.empty}>
-            <MaterialCommunityIcons name="inbox-remove-outline" size={52} color={colors.border} />
-            <Text style={styles.emptyTitle}>Aucun module disponible</Text>
-            <Text style={styles.emptyText}>
-              Votre praticien n'a pas encore activé de modules pour vous.{'\n'}
-              Ils apparaîtront ici dès qu'il en déverrouille un.
-            </Text>
-            <Text style={styles.emptyHint}>
-              Tirez vers le bas pour actualiser.
-            </Text>
-          </View>
+          <EmptyState
+            icon="📭"
+            title="Aucun module disponible"
+            description={`Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.`}
+          />
         ) : (
           <View style={styles.list}>
             {modules.map((mod) => {
               const config = MODULE_CONFIG[mod.module_type]
               if (!config) return null
               return (
-                <TouchableOpacity
+                <Pressable
                   key={mod.id}
-                  style={[styles.card, !config.available && styles.cardComingSoon]}
-                  onPress={() => config.available && handleModulePress(mod.module_type)}
-                  activeOpacity={config.available ? 0.75 : 1}
+                  onPress={() => config.available ? handleModulePress(mod.module_type) : undefined}
+                  disabled={!config.available}
                 >
-                  <View style={styles.cardIcon}>
-                    <MaterialCommunityIcons name={config.icon} size={30} color={config.available ? colors.primary : colors.textMuted} />
-                  </View>
-                  <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{config.label}</Text>
-                    <Text style={styles.cardDesc}>{config.description}</Text>
-                    {!config.available && (
-                      <Text style={styles.comingSoon}>Bientôt disponible</Text>
-                    )}
-                  </View>
-                  {config.available && (
-                    <Text style={styles.chevron}>›</Text>
-                  )}
-                </TouchableOpacity>
+                  <Card state={!config.available ? 'disabled' : undefined}>
+                    <View style={styles.cardRow}>
+                      <View style={styles.cardIcon}>
+                        <MaterialCommunityIcons name={config.icon} size={30} color={config.available ? colors.primary : colors.textMuted} />
+                      </View>
+                      <View style={styles.cardContent}>
+                        <Text style={styles.cardTitle}>{config.label}</Text>
+                        <Text style={styles.cardDesc}>{config.description}</Text>
+                        {!config.available && (
+                          <Text style={styles.comingSoon}>Bientôt disponible</Text>
+                        )}
+                      </View>
+                      {config.available && (
+                        <Text style={styles.chevron}>›</Text>
+                      )}
+                    </View>
+                  </Card>
+                </Pressable>
               )
             })}
           </View>
@@ -317,20 +316,11 @@ const styles = StyleSheet.create({
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
   subheading: { fontSize: 14, color: colors.textMuted, marginTop: -spacing.xs },
   list: { gap: spacing.sm },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.md,
+  cardRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
-  cardComingSoon: { opacity: 0.55 },
   cardIcon: { width: 42, alignItems: 'center', justifyContent: 'center' },
   cardContent: { flex: 1 },
   cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text },
@@ -342,18 +332,4 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl * 2,
-    gap: spacing.md,
-  },
-  emptyIcon: {},
-  emptyTitle: { fontSize: 20, fontWeight: '600', color: colors.text },
-  emptyText: {
-    fontSize: 15,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  emptyHint: { fontSize: 13, color: colors.border },
 })
