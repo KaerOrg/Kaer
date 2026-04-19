@@ -1,10 +1,14 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Check, ChevronDown, ChevronRight, Eye, EyeOff, Info } from 'lucide-react'
+import { Eye, EyeOff, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
+import { Card } from '../components/Card'
+import { EmptyState } from '../components/EmptyState'
+import { Accordion } from '../components/Accordion'
+import { StatusBadge } from '../components/StatusBadge'
 import {
   MODULE_LABELS,
   MODULE_DESCRIPTIONS,
@@ -94,9 +98,6 @@ export function PatientPage() {
   const [loading, setLoading] = useState(true)
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
 
-  // Accordéons ouverts — 'safety' ouvert par défaut
-  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(['safety']))
-
   // Aperçu de module ouvert
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
   const [expandedPreviewCard, setExpandedPreviewCard] = useState<string | null>(null)
@@ -170,16 +171,6 @@ export function PatientPage() {
   }
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
-
-  // ── Accordéons ──────────────────────────────────────────────────────────
-
-  const toggleCategory = (categoryId: string) => {
-    setOpenCategories(prev => {
-      const next = new Set(prev)
-      next.has(categoryId) ? next.delete(categoryId) : next.add(categoryId)
-      return next
-    })
-  }
 
   // ── Psychoéducation : sélecteur de cartes ────────────────────────────────
 
@@ -436,85 +427,81 @@ export function PatientPage() {
 
       return (
         <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
-          <div className={`module-card ${unlocked ? 'module-card--active module-card--psycho' : ''}`}>
-            <div className="module-card__content">
-              <div className="module-card__name">{MODULE_LABELS['psychoeducation']}</div>
-              <div className="module-card__desc">{MODULE_DESCRIPTIONS['psychoeducation']}</div>
-              {unlocked && mod && (
-                <>
-                  <div className="module-card__date">
-                    Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
-                    {' · '}
-                    <span className="psycho-observance-summary">
-                      {readCount}/{cards.length} carte{cards.length > 1 ? 's' : ''} lue{readCount > 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  {cards.length > 0 && (
-                    <ul className="psycho-observance-list">
-                      {cards.map(card => {
-                        const meta = PSYCHO_CARD_CATALOG.find(c => c.id === card.card_id)
-                        return (
-                          <li key={card.card_id} className="psycho-observance-item">
-                            <span className="psycho-observance-item__title">
-                              {meta?.title ?? card.card_id}
-                            </span>
-                            {card.is_read ? (
-                              <span className="psycho-observance-item__badge psycho-observance-item__badge--read">
-                                ✓ Lu
-                              </span>
-                            ) : (
-                              <span className="psycho-observance-item__badge psycho-observance-item__badge--unread">
-                                Non lu
-                              </span>
-                            )}
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  )}
-                </>
-              )}
-            </div>
-            <div className="module-card__actions">
-              {MODULE_PREVIEW['psychoeducation'] && (
-                <button
-                  className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
-                  onClick={() => togglePreview('psychoeducation')}
-                  title="Aperçu du contenu patient"
-                >
-                  {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
-                  Aperçu
-                </button>
-              )}
-              {unlocked && mod ? (
-                <>
-                  <span className="module-card__badge"><Check size={14} /> Actif</span>
-                  {psychoPickerMode !== 'edit' && (
-                    <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
-                      Modifier les cartes
-                    </Button>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="module-card__revoke"
-                    onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
+          <Card
+            variant={unlocked ? 'active' : 'default'}
+            header={{ title: MODULE_LABELS['psychoeducation'], subtitle: MODULE_DESCRIPTIONS['psychoeducation'] }}
+            actions={
+              <>
+                {MODULE_PREVIEW['psychoeducation'] && (
+                  <button
+                    className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
+                    onClick={() => togglePreview('psychoeducation')}
+                    title="Aperçu du contenu patient"
                   >
-                    Révoquer
+                    {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
+                    Aperçu
+                  </button>
+                )}
+                {unlocked && mod ? (
+                  <>
+                    <StatusBadge variant="success" label="Actif" />
+                    {psychoPickerMode !== 'edit' && (
+                      <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
+                        Modifier les cartes
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="module-card__revoke"
+                      onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
+                    >
+                      Révoquer
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
+                    }
+                  >
+                    {psychoPickerMode === 'unlock' ? 'Annuler' : 'Débloquer'}
                   </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
-                  }
-                >
-                  {psychoPickerMode === 'unlock' ? 'Annuler' : 'Débloquer'}
-                </Button>
-              )}
-            </div>
-          </div>
+                )}
+              </>
+            }
+          >
+            {unlocked && mod && (
+              <>
+                <div className="module-card__date">
+                  Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+                  {' · '}
+                  <span className="psycho-observance-summary">
+                    {readCount}/{cards.length} carte{cards.length > 1 ? 's' : ''} lue{readCount > 1 ? 's' : ''}
+                  </span>
+                </div>
+                {cards.length > 0 && (
+                  <ul className="psycho-observance-list">
+                    {cards.map(card => {
+                      const meta = PSYCHO_CARD_CATALOG.find(c => c.id === card.card_id)
+                      return (
+                        <li key={card.card_id} className="psycho-observance-item">
+                          <span className="psycho-observance-item__title">
+                            {meta?.title ?? card.card_id}
+                          </span>
+                          {card.is_read
+                            ? <StatusBadge variant="success" label="Lu" />
+                            : <StatusBadge variant="neutral" label="Non lu" />
+                          }
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </>
+            )}
+          </Card>
 
           {/* Panneau d'aperçu psychoéducation */}
           {previewModule === 'psychoeducation' && MODULE_PREVIEW['psychoeducation'] && (
@@ -574,49 +561,50 @@ export function PatientPage() {
       const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
       return (
         <div key="rim" className="module-card-wrapper module-card-wrapper-block">
-          <div className={`module-card ${unlocked ? 'module-card--active module-card--psycho' : ''}`}>
-            <div className="module-card__content">
-              <div className="module-card__name">{MODULE_LABELS['rim']}</div>
-              <div className="module-card__desc">{MODULE_DESCRIPTIONS['rim']}</div>
-              {unlocked && mod && (
-                <div className="module-card__date">
-                  Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
-                  {cfg?.alternative_scenario && (
-                    <span className="psycho-observance-summary"> · Scénario configuré</span>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="module-card__actions">
-              {unlocked && mod ? (
-                <>
-                  <span className="module-card__badge"><Check size={14} /> Actif</span>
-                  {rimEditorMode !== 'edit' && (
-                    <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
-                      Modifier le scénario
+          <Card
+            variant={unlocked ? 'active' : 'default'}
+            header={{ title: MODULE_LABELS['rim'], subtitle: MODULE_DESCRIPTIONS['rim'] }}
+            actions={
+              <>
+                {unlocked && mod ? (
+                  <>
+                    <StatusBadge variant="success" label="Actif" />
+                    {rimEditorMode !== 'edit' && (
+                      <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
+                        Modifier le scénario
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="module-card__revoke"
+                      onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
+                    >
+                      Révoquer
                     </Button>
-                  )}
+                  </>
+                ) : (
                   <Button
-                    variant="ghost"
                     size="sm"
-                    className="module-card__revoke"
-                    onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
+                    onClick={() =>
+                      rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
+                    }
                   >
-                    Révoquer
+                    {rimEditorMode === 'unlock' ? 'Annuler' : 'Débloquer'}
                   </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
-                  }
-                >
-                  {rimEditorMode === 'unlock' ? 'Annuler' : 'Débloquer'}
-                </Button>
-              )}
-            </div>
-          </div>
+                )}
+              </>
+            }
+          >
+            {unlocked && mod && (
+              <div className="module-card__date">
+                Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+                {cfg?.alternative_scenario && (
+                  <span className="psycho-observance-summary"> · Scénario configuré</span>
+                )}
+              </div>
+            )}
+          </Card>
 
           {/* Éditeur de scénarios RIM inline */}
           {(rimEditorMode === 'unlock' || rimEditorMode === 'edit') && (
@@ -671,50 +659,51 @@ export function PatientPage() {
 
     return (
       <div key={moduleType} className="module-card-wrapper-block">
-        <div className={`module-card ${unlocked ? 'module-card--active' : ''}`}>
-          <div className="module-card__content">
-            <div className="module-card__name">{MODULE_LABELS[moduleType]}</div>
-            <div className="module-card__desc">{MODULE_DESCRIPTIONS[moduleType]}</div>
-            {unlocked && mod && (
-              <div className="module-card__date">
-                Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
-              </div>
-            )}
-          </div>
-          <div className="module-card__actions">
-            {preview && (
-              <button
-                className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
-                onClick={() => togglePreview(moduleType)}
-                title="Aperçu du contenu patient"
-              >
-                {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
-                Aperçu
-              </button>
-            )}
-            {unlocked && mod ? (
-              <>
-                <span className="module-card__badge"><Check size={14} /> Actif</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="module-card__revoke"
-                  onClick={() => revokeModule(mod.id)}
+        <Card
+          variant={unlocked ? 'active' : 'default'}
+          header={{ title: MODULE_LABELS[moduleType], subtitle: MODULE_DESCRIPTIONS[moduleType] }}
+          actions={
+            <>
+              {preview && (
+                <button
+                  className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview(moduleType)}
+                  title="Aperçu du contenu patient"
                 >
-                  Révoquer
+                  {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                  Aperçu
+                </button>
+              )}
+              {unlocked && mod ? (
+                <>
+                  <StatusBadge variant="success" label="Actif" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="module-card__revoke"
+                    onClick={() => revokeModule(mod.id)}
+                  >
+                    Révoquer
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  loading={unlockingModule === moduleType}
+                  onClick={() => unlockModule(moduleType)}
+                >
+                  Débloquer
                 </Button>
-              </>
-            ) : (
-              <Button
-                size="sm"
-                loading={unlockingModule === moduleType}
-                onClick={() => unlockModule(moduleType)}
-              >
-                Débloquer
-              </Button>
-            )}
-          </div>
-        </div>
+              )}
+            </>
+          }
+        >
+          {unlocked && mod && (
+            <div className="module-card__date">
+              Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+            </div>
+          )}
+        </Card>
 
         {/* Panneau d'aperçu inline */}
         {previewModule === moduleType && preview && (
@@ -767,43 +756,28 @@ export function PatientPage() {
               </h2>
 
               {modules.length === 0 ? (
-                <div className="radar__empty">
-                  Aucun outil débloqué — utilisez l'armoire thérapeutique ci-dessous.
-                </div>
+                <EmptyState description="Aucun outil débloqué — utilisez l'armoire thérapeutique ci-dessous." title="" />
               ) : (
                 <div className="radar__grid">
                   {isUnlocked('crisis_plan') && (
-                    <div className="radar__alert radar__alert--info">
-                      <div className="radar__alert-label">Plan de crise</div>
-                      <div className="radar__alert-value">Actif</div>
-                    </div>
+                    <StatusBadge variant="info" label="Plan de crise" value="Actif" />
                   )}
                   {psychoModule && (
-                    <div className={`radar__alert ${unreadPsychoCards > 0 ? 'radar__alert--warning' : 'radar__alert--info'}`}>
-                      <div className="radar__alert-label">Psychoéducation</div>
-                      <div className="radar__alert-value">
-                        {totalPsychoCards - unreadPsychoCards}/{totalPsychoCards} lues
-                      </div>
-                    </div>
+                    <StatusBadge
+                      variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
+                      label="Psychoéducation"
+                      value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards} lues`}
+                    />
                   )}
                   {isUnlocked('sleep_diary') && (
-                    <div className="radar__alert radar__alert--info">
-                      <div className="radar__alert-label">Agenda du sommeil</div>
-                      <div className="radar__alert-value">Actif</div>
-                    </div>
+                    <StatusBadge variant="info" label="Agenda du sommeil" value="Actif" />
                   )}
                   {modules
                     .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
                     .map(m => (
-                      <div key={m.id} className="radar__alert radar__alert--info">
-                        <div className="radar__alert-label">{MODULE_LABELS[m.module_type]}</div>
-                        <div className="radar__alert-value">Actif</div>
-                      </div>
+                      <StatusBadge key={m.id} variant="info" label={MODULE_LABELS[m.module_type]} value="Actif" />
                     ))}
-                  <div className="radar__alert radar__alert--placeholder">
-                    <div className="radar__alert-label">Données temps réel</div>
-                    <div className="radar__alert-value">Bientôt disponible</div>
-                  </div>
+                  <StatusBadge variant="neutral" label="Données temps réel" value="Bientôt disponible" />
                 </div>
               )}
             </section>
@@ -817,41 +791,17 @@ export function PatientPage() {
 
               <div className="category-list">
                 {MODULE_CATEGORIES.map(category => {
-                  const isOpen = openCategories.has(category.id)
                   const activeCount = category.modules.filter(m => isUnlocked(m)).length
-
                   return (
-                    <div
+                    <Accordion
                       key={category.id}
-                      className={`category-accordion ${isOpen ? 'category-accordion--open' : ''}`}
+                      title={category.label}
+                      subtitle={category.subtitle}
+                      badge={activeCount > 0 ? activeCount : undefined}
+                      defaultOpen={category.id === 'safety'}
                     >
-                      <button
-                        className="category-accordion__header"
-                        onClick={() => toggleCategory(category.id)}
-                        aria-expanded={isOpen}
-                      >
-                        <div className="category-accordion__heading">
-                          <span className="category-accordion__label">{category.label}</span>
-                        </div>
-                        <div className="category-accordion__meta">
-                          {activeCount > 0 && (
-                            <span className="category-accordion__badge">
-                              {activeCount} actif{activeCount > 1 ? 's' : ''}
-                            </span>
-                          )}
-                          {isOpen
-                            ? <ChevronDown size={18} className="category-accordion__chevron" />
-                            : <ChevronRight size={18} className="category-accordion__chevron" />
-                          }
-                        </div>
-                      </button>
-
-                      {isOpen && (
-                        <div className="category-accordion__body">
-                          {category.modules.map(renderModuleCard)}
-                        </div>
-                      )}
-                    </div>
+                      {category.modules.map(renderModuleCard)}
+                    </Accordion>
                   )
                 })}
               </div>
