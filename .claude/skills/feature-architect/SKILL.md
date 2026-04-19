@@ -5,7 +5,13 @@ description: Senior architect skill invoked before implementing any new feature.
 
 # Feature Architect — PsyTool
 
-Tu es un **architecte senior**. Avant d'écrire la moindre ligne de code, exécute ce protocole dans l'ordre.
+Tu es un **architecte logiciel expert**. Trois impératifs guident chaque décision :
+
+1. **Scalabilité** — la solution doit tenir à 10× la charge actuelle sans refonte.
+2. **Réutilisabilité** — zéro duplication ; tout composant/fonction partageable est extrait dès la conception.
+3. **Testabilité** — toute logique est unit-testée avant livraison ; concevoir pour la testabilité dès le départ.
+
+Avant d'écrire la moindre ligne de code, exécute ce protocole dans l'ordre.
 
 ---
 
@@ -60,35 +66,17 @@ Pour chaque fichier : **CREATE / MODIFY / DELETE**. Signaler :
 **Ne jamais écrire de logique praticien dans l'app mobile, ni vice-versa.**
 Les types partagés vivent dans `packages/shared/` — ne pas les dupliquer.
 
-### 2.2 Layers — ne jamais mélanger
+### 2.2 Règles de codage
 
-**App web (praticien) :**
+> Appliquer `.claude/rules/coding-standards.md` en intégralité (layers, TypeScript strict, render, design system, React Native, React perf, sécurité, schéma).
 
-| Layer | Emplacement | Règle |
-|-------|-------------|-------|
-| UI | `apps/web/src/pages/`, `apps/web/src/components/` | Affichage uniquement, zéro logique métier |
-| Accès données | `apps/web/src/lib/supabase.ts` | Toutes les opérations Supabase ici |
-| Types locaux | `apps/web/src/lib/database.types.ts` | Générés — ne pas éditer à la main |
-
-**App mobile (patient) :**
-
-| Layer | Emplacement | Règle |
-|-------|-------------|-------|
-| UI | `apps/mobile/src/screens/`, `apps/mobile/src/components/` | Affichage uniquement |
-| Données locales | `apps/mobile/src/lib/database.ts` | expo-sqlite pour données persistantes des modules |
-| Données distantes | `apps/mobile/src/lib/supabase.ts` | Uniquement pour auth et sync optionnelle |
-| Navigation | `apps/mobile/src/navigation/` | Stacks séparés auth / app |
-
-### 2.3 TypeScript — types forts en premier
-Avant toute implémentation :
+Points spécifiques à PsyTool :
 - Types partagés web+mobile → `packages/shared/src/index.ts`
 - Types spécifiques à une app → dans l'app elle-même
-- `strict: true` — zéro `any`, zéro `as unknown`
-- `readonly` pour les données venant de Supabase
-- Discriminated unions pour les états (`| { status: 'idle' } | { status: 'loading' } | { status: 'error'; error: string }`)
 - Étendre `ModuleConfig` dans `packages/shared/` pour tout nouveau module thérapeutique
+- Types locaux web `apps/web/src/lib/database.types.ts` — générés, ne pas éditer à la main
 
-### 2.4 Règles métier — à vérifier pour chaque feature
+### 2.3 Règles métier — à vérifier pour chaque feature
 
 - **Aucune donnée clinique** stockée côté serveur (pas de diagnostic, pas de notes de séance)
 - Un patient **ne peut pas s'inscrire seul** — le flux d'invitation doit être respecté
@@ -97,57 +85,28 @@ Avant toute implémentation :
 - Le praticien peut **révoquer** un module à tout moment → gérer côté mobile
 - Les **notifications** sont programmées par le praticien, ajustables par le patient
 
-### 2.5 Scalabilité
-- Requêtes Supabase : pagination pour les listes longues (patients, modules)
-- Listeners temps réel : nettoyés au unmount
-- Grandes listes mobile : `FlashList` > `FlatList`
-- Données locales : schéma expo-sqlite versionné, migrations explicites
+### 2.5 Scalabilité — au cœur de chaque décision
+
+Concevoir pour 10× la charge actuelle :
+- Requêtes Supabase : pagination obligatoire pour toute liste (patients, modules, logs)
+- Listeners temps réel : nettoyés au unmount — jamais de fuite mémoire
+- Grandes listes mobile : `FlashList` > `FlatList` ; items mémoïsés, callbacks stables
+- Données locales : schéma expo-sqlite versionné, migrations explicites, index sur les colonnes filtrées
 - Async : guarder contre les états stale (pattern `isMounted` ou `AbortController`)
+- Composants : extraire dès que partagé dans ≥2 écrans → `src/components/` ; si partagé web+mobile → `packages/shared/`
+- Services : fonctions pures, paramètres typés, sans side-effects — conçus pour être testables isolément
 
-### 2.6 Sécurité
+### 2.6 Sécurité — compléments PsyTool
 
-- **RLS Supabase** : nouvelle table → nouvelles policies dans `supabase/schema.sql`
-- `user_id` toujours depuis `auth.uid()` Supabase, **jamais** depuis le payload client
-- Tokens dans `expo-secure-store` uniquement (jamais AsyncStorage pour secrets)
-- Input utilisateur validé avant écriture en base
+En plus des règles de `coding-standards.md` :
 - Vérifier que le praticien est bien lié au patient avant toute opération (`practitioner_patients`)
 - Tokens d'invitation : usage unique, expiration 48h, vérifiés côté Supabase
 
-### 2.7 Render — zéro déclaration inline
-- Objets, tableaux et fonctions déclarés dans le render → re-créés à chaque rendu → **jamais**
-- Lookup maps statiques → constantes **module-level**
-- Styles dynamiques dépendant de props/state → `useMemo`
-- Callbacks passés à des enfants → `useCallback`
-- Items de liste complexes → composant dédié avec `React.memo`
-
-### 2.8 Design system PsyTool
+### 2.7 Design system PsyTool
 - Couleurs, spacing, radius, typography depuis `apps/mobile/src/theme/index.ts` — **ne pas hardcoder**
 - Primary : `#4F46E5` — utiliser `colors.primary`
 - Composants existants : `Button`, `InputField` (web et mobile)
-- Animations mobile : `React Native Reanimated` (pas `Animated` de base)
 - **Après l'implémentation UI** : audit `web-design-guidelines` sur tous les composants créés/modifiés
-
-### 2.9 React Native Best Practices — `vercel-react-native-skills`
-
-Appliquer selon ce qui est touché par la feature :
-
-| Catégorie | Priorité | Règles clés |
-|-----------|----------|-------------|
-| **List Performance** | CRITICAL | `FlashList` pour listes longues ; items mémoïsés ; callbacks stables ; zéro inline style dans items |
-| **Animation** | HIGH | Animer uniquement `transform` et `opacity` ; `useDerivedValue` pour valeurs calculées |
-| **Navigation** | HIGH | `createNativeStackNavigator`, native bottom tabs — jamais JS navigators |
-| **UI Patterns** | HIGH | `expo-image` pour les images ; `Pressable` > `TouchableOpacity` ; safe areas dans ScrollViews ; `StyleSheet.create` — jamais de styles inline ad hoc |
-| **State** | MEDIUM | Minimiser les abonnements état ; dispatcher pattern pour callbacks |
-| **Rendering** | MEDIUM | Texte toujours dans `<Text>` ; éviter `&&` avec valeurs falsy |
-
-### 2.10 React Performance — `vercel-react-best-practices`
-
-| Catégorie | Priorité | Règles clés |
-|-----------|----------|-------------|
-| **Async** | CRITICAL | `Promise.all` pour fetches indépendants ; démarrer les promises tôt, await tard |
-| **Re-render** | MEDIUM | `React.memo` pour composants coûteux ; dépendances primitives dans `useEffect` ; dériver l'état pendant le render |
-| **Rendering** | MEDIUM | JSX statique extrait hors du composant ; ternaire plutôt que `&&` |
-| **JS Perf** | LOW | `Map` pour lookups répétés ; sortie anticipée ; `Set`/`Map` pour O(1) |
 
 ---
 
@@ -156,20 +115,21 @@ Appliquer selon ce qui est touché par la feature :
 Produire un plan numéroté :
 
 ```
+0. [GIT]      Créer la branche feat/<kebab-case> depuis main à jour — AVANT tout code
 1. [TYPES]    Définir/mettre à jour les interfaces dans packages/shared/src/index.ts
 2. [SCHEMA]   Mettre à jour supabase/schema.sql (table, RLS, triggers, index)
-3. [SECURITY] Audit sécurité — checklist §2.6 complète avant toute UI
+3. [SECURITY] Audit sécurité — checklist §2.6 + coding-standards.md avant toute UI
 4. [SERVICE WEB]  Implémenter les fonctions Supabase dans apps/web/src/lib/
 5. [SERVICE MOB]  Implémenter l'accès local dans apps/mobile/src/lib/database.ts
-6. [TEST]     Écrire les tests unitaires
-7. [RN-AUDIT] Audit vercel-react-native-skills (§2.9) avant d'écrire les composants mobile
+6. [TEST]     Écrire les tests unitaires (avant ou en parallèle de l'implémentation)
+7. [RN-AUDIT] Audit vercel-react-native-skills avant d'écrire les composants mobile
 8. [UI WEB]   Construire la page dans apps/web/src/pages/<Feature>Page.tsx
 9. [UI MOB]   Construire l'écran dans apps/mobile/src/screens/<Feature>Screen.tsx
 10.[COMPONENT] Extraire les composants réutilisables vers src/components/ (web ou mobile)
-11.[REACT]    Audit vercel-react-best-practices (§2.10) sur services, hooks et composants
-12.[DESIGN]   Audit web-design-guidelines sur tous les fichiers UI créés/modifiés (§2.8)
+11.[REACT]    Audit vercel-react-best-practices sur services, hooks et composants
+12.[DESIGN]   Audit web-design-guidelines sur tous les fichiers UI créés/modifiés (§2.7)
 13.[CLAUDE]   Mettre à jour CLAUDE.md si nouveau pattern ou décision archi
-14.[GIT]      Créer branche + PR via github-versioning skill
+14.[PR]       Ouvrir la PR via github-versioning skill — merge uniquement par PR, jamais direct sur main
 ```
 
 Pour chaque étape : fichier concerné + changement + raison.
@@ -215,9 +175,19 @@ Uniquement pour la logique non-évidente (ex. race conditions, logique de révoc
 
 ## Phase 6 — Versioning
 
+**Règle absolue : zéro commit sur `main` directement. Toute feature part d'une branche dédiée.**
+
 Utiliser le skill `github-versioning` (gh CLI + git) pour toutes les opérations git :
+
+```bash
+# Toujours créer la branche AVANT d'écrire du code
+git checkout main && git pull origin main
+git checkout -b feat/<kebab-case-feature-name>
+```
+
 - Branche : `feat/<kebab-case-feature-name>`
 - PR title : `feat: <description courte>`
+- Merge uniquement via PR — jamais de push direct sur `main`
 
 ---
 

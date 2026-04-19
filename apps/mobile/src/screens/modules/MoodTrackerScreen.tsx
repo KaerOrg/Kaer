@@ -27,6 +27,9 @@ import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
+import { Card } from '../../components/Card'
+import { EmptyState } from '../../components/EmptyState'
+import { StatusBadge } from '../../components/StatusBadge'
 
 // ─── Helpers date ─────────────────────────────────────────────────────────────
 
@@ -463,9 +466,7 @@ export default function MoodTrackerScreen() {
             Historique
           </Text>
           {pastEntries.length > 0 && (
-            <View style={styles.tabBadge}>
-              <Text style={styles.tabBadgeText}>{pastEntries.length}</Text>
-            </View>
+            <StatusBadge variant="info" label="" value={pastEntries.length} />
           )}
         </Pressable>
       </View>
@@ -479,14 +480,17 @@ export default function MoodTrackerScreen() {
         >
           {/* Indicateur saisie déjà effectuée */}
           {existingId && (
-            <View style={styles.alreadySaved} testID="already-saved-banner">
-              <MaterialCommunityIcons name="check-circle-outline" size={16} color={colors.success} />
-              <Text style={styles.alreadySavedText}>Saisie du jour déjà enregistrée — vous pouvez la modifier.</Text>
+            <View testID="already-saved-banner">
+              <StatusBadge
+                variant="success"
+                label="Saisie du jour déjà enregistrée — vous pouvez la modifier."
+                style={styles.alreadySavedBadge}
+              />
             </View>
           )}
 
           {/* Les 3 dimensions */}
-          <View style={styles.card}>
+          <Card>
             {DIMENSIONS.map((meta, i) => (
               <React.Fragment key={meta.key}>
                 <ScalePicker
@@ -497,7 +501,7 @@ export default function MoodTrackerScreen() {
                 {i < DIMENSIONS.length - 1 && <View style={styles.divider} />}
               </React.Fragment>
             ))}
-          </View>
+          </Card>
 
           {/* Notes libres */}
           <View style={styles.notesSection}>
@@ -517,16 +521,15 @@ export default function MoodTrackerScreen() {
         // ── Onglet historique ────────────────────────────────────────────────
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           {entries.length < 2 ? (
-            <View style={styles.empty}>
-              <MaterialCommunityIcons name="chart-line" size={48} color={colors.border} />
-              <Text style={styles.emptyText}>
-                Continuez à noter votre humeur : votre historique apparaîtra à partir de 2 saisies.
-              </Text>
-            </View>
+            <EmptyState
+              icon="📈"
+              title=""
+              description="L'historique s'affichera dès que vous aurez enregistré au moins 2 saisies."
+            />
           ) : (
             <>
               {/* Mini graphiques — 3 sparklines */}
-              <View style={styles.card}>
+              <Card>
                 <Text style={styles.sectionTitle}>30 derniers jours</Text>
                 {DIMENSIONS.map((d) => (
                   <Sparkline
@@ -537,7 +540,7 @@ export default function MoodTrackerScreen() {
                     label={d.label}
                   />
                 ))}
-              </View>
+              </Card>
 
               {/* Liste chronologique */}
               <View style={styles.histList}>
@@ -608,38 +611,10 @@ const styles = StyleSheet.create({
   tabActive: { borderBottomColor: colors.primary },
   tabText: { fontSize: 14, fontWeight: '500', color: colors.textMuted },
   tabTextActive: { color: colors.primary, fontWeight: '700' },
-  tabBadge: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-    minWidth: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  tabBadgeText: { fontSize: 11, fontWeight: '700', color: colors.white },
-
-  // Carte principale
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    gap: spacing.md,
-  },
   divider: { height: 1, backgroundColor: colors.border },
 
   // Déjà sauvegardé
-  alreadySaved: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.success + '18',
-    borderRadius: radius.md,
-    padding: spacing.sm,
-  },
-  alreadySavedText: { flex: 1, fontSize: 13, color: colors.success },
+  alreadySavedBadge: { marginBottom: spacing.sm },
 
   // Notes
   notesSection: { gap: spacing.xs },
@@ -658,13 +633,6 @@ const styles = StyleSheet.create({
   // Historique
   sectionTitle: { fontSize: 13, fontWeight: '700', color: colors.text, textTransform: 'uppercase', letterSpacing: 0.5 },
   histList: { gap: spacing.sm },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl * 2,
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  emptyText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 22 },
 
   // Footer
   footer: {
