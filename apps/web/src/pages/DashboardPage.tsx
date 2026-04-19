@@ -6,6 +6,9 @@ import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
 import { InputField } from '../components/InputField'
+import { Card } from '../components/Card'
+import { EmptyState } from '../components/EmptyState'
+import { StatusBadge } from '../components/StatusBadge'
 import type { PatientSummary } from '../lib/database.types'
 import './DashboardPage.css'
 
@@ -135,12 +138,14 @@ export function DashboardPage() {
         </div>
 
         {showInviteForm && (
-          <div className="invite-card">
-            <h2 className="invite-card__title">Inviter un nouveau patient</h2>
-            <p className="invite-card__desc">
-              Le patient recevra un lien par email pour créer son compte et accéder à l'application.
-            </p>
-            <form onSubmit={sendInvitation} className="invite-card__form">
+          <Card
+            variant="outlined"
+            header={{
+              title: 'Inviter un nouveau patient',
+              subtitle: "Le patient recevra un lien par email pour créer son compte et accéder à l'application.",
+            }}
+          >
+            <form onSubmit={sendInvitation} className="invite-form">
               <InputField
                 label="Email du patient"
                 type="email"
@@ -157,14 +162,14 @@ export function DashboardPage() {
                 placeholder="Ex: Patient A, ou initiales"
               />
               {inviteError && (
-                <div className="invite-card__error">{inviteError}</div>
+                <div className="invite-form__error">{inviteError}</div>
               )}
               {inviteSuccess && (
-                <div className="invite-card__success">
+                <div className="invite-form__success">
                   <Check size={14} /> Email d'invitation envoyé à {inviteEmail || 'votre patient'}.
                 </div>
               )}
-              <div className="invite-card__actions">
+              <div className="invite-form__actions">
                 <Button type="button" variant="secondary" onClick={() => setShowInviteForm(false)}>
                   Annuler
                 </Button>
@@ -173,7 +178,7 @@ export function DashboardPage() {
                 </Button>
               </div>
             </form>
-          </div>
+          </Card>
         )}
 
         {pendingInvitations.length > 0 && (
@@ -188,7 +193,7 @@ export function DashboardPage() {
                   <span className="pending-invitation-row__expires">
                     Expire le {new Date(inv.expires_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                   </span>
-                  <span className="pending-invitation-row__badge">En attente</span>
+                  <StatusBadge variant="warning" label="En attente" />
                 </div>
               ))}
             </div>
@@ -198,33 +203,35 @@ export function DashboardPage() {
         {loadingPatients ? (
           <div className="dashboard__loading">Chargement des patients…</div>
         ) : patients.length === 0 ? (
-          <div className="dashboard__empty">
-            <div className="dashboard__empty-icon"><Users size={48} /></div>
-            <h3>Aucun patient pour l'instant</h3>
-            <p>Commencez par inviter votre premier patient.</p>
-          </div>
+          <EmptyState
+            icon={<Users size={48} />}
+            title="Aucun patient pour l'instant"
+            description="Commencez par inviter votre premier patient."
+          />
         ) : (
           <div className="patient-grid">
             {patients.map(patient => (
               <button
                 key={patient.id}
-                className="patient-card"
+                className="patient-grid__item"
                 onClick={() => navigate(`/patient/${patient.id}`)}
               >
-                <div className="patient-card__avatar">
-                  {(patient.patient_alias || patient.email || '?')[0]?.toUpperCase() ?? '?'}
-                </div>
-                <div className="patient-card__info">
-                  <div className="patient-card__name">
-                    {patient.patient_alias ?? patient.email}
+                <Card variant="default" className="patient-card">
+                  <div className="patient-card__avatar">
+                    {(patient.patient_alias || patient.email || '?')[0]?.toUpperCase() ?? '?'}
                   </div>
-                  <div className="patient-card__email">{patient.email}</div>
-                </div>
-                <div className="patient-card__modules">
-                  <span className="patient-card__module-count">
-                    {patient.modules.length} module{patient.modules.length !== 1 ? 's' : ''}
-                  </span>
-                </div>
+                  <div className="patient-card__info">
+                    <div className="patient-card__name">
+                      {patient.patient_alias ?? patient.email}
+                    </div>
+                    <div className="patient-card__email">{patient.email}</div>
+                  </div>
+                  <div className="patient-card__modules">
+                    <span className="patient-card__module-count">
+                      {patient.modules.length} module{patient.modules.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </Card>
               </button>
             ))}
           </div>

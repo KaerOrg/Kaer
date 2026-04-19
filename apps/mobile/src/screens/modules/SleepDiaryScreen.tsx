@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -19,6 +19,8 @@ import {
   SleepEntry,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { Card } from '../../components/Card'
+import { StatusBadge } from '../../components/StatusBadge'
 
 // Formate YYYY-MM-DD en "Lun. 7 avr."
 function formatDate(dateStr: string): string {
@@ -99,28 +101,28 @@ export default function SleepDiaryScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       {/* Boutons d'action */}
       <View style={styles.ctaContainer}>
-        <TouchableOpacity
-          style={styles.ctaButton}
-          onPress={() => navigation.navigate('SleepDiaryEntry', { date: yesterday() })}
-          activeOpacity={0.8}
-        >
-          <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.ctaTitle}>Saisir ma nuit d'hier</Text>
-            <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
-          </View>
-          <Text style={styles.chevron}>›</Text>
-        </TouchableOpacity>
+        <Pressable onPress={() => navigation.navigate('SleepDiaryEntry', { date: yesterday() })}>
+          <Card style={styles.ctaCard}>
+            <View style={styles.ctaRow}>
+              <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
+              <View style={styles.ctaTexts}>
+                <Text style={styles.ctaTitle}>Saisir ma nuit d'hier</Text>
+                <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
+              </View>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Card>
+        </Pressable>
 
-        <TouchableOpacity
-          style={styles.monthButton}
-          onPress={() => navigation.navigate('SleepDiaryMonth')}
-          activeOpacity={0.8}
-        >
-          <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
-          <Text style={styles.monthButtonText}>Vue mensuelle</Text>
-          <Text style={styles.chevron}>›</Text>
-        </TouchableOpacity>
+        <Pressable onPress={() => navigation.navigate('SleepDiaryMonth')}>
+          <Card variant="outlined" style={styles.monthCard}>
+            <View style={styles.ctaRow}>
+              <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
+              <Text style={styles.monthButtonText}>Vue mensuelle</Text>
+              <Text style={styles.chevron}>›</Text>
+            </View>
+          </Card>
+        </Pressable>
       </View>
 
       <FlatList
@@ -167,10 +169,9 @@ export default function SleepDiaryScreen() {
                         )
                         if (se === null) return null
                         const seColor = se >= 85 ? colors.success : se >= 70 ? '#F59E0B' : colors.danger
+                        const seVariant = se >= 85 ? 'success' as const : se >= 70 ? 'warning' as const : 'danger' as const
                         return (
-                          <View style={[styles.seBadge, { backgroundColor: seColor }]}>
-                            <Text style={styles.seBadgeText}>SE {se} %</Text>
-                          </View>
+                          <StatusBadge variant={seVariant} label="SE" value={`${se} %`} />
                         )
                       })()}
                     </View>
@@ -194,26 +195,11 @@ export default function SleepDiaryScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
-  ctaContainer: { padding: spacing.lg, paddingBottom: spacing.sm },
-  ctaButton: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  monthButton: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
+  ctaContainer: { padding: spacing.lg, paddingBottom: spacing.sm, gap: spacing.sm },
+  ctaCard: { backgroundColor: colors.primary },
+  monthCard: {},
+  ctaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  ctaTexts: { flex: 1 },
   monthButtonText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.primary },
   starsRow: { flexDirection: 'row', gap: 2 },
   ctaTitle: { fontSize: 17, fontWeight: '700', color: colors.white },
@@ -258,10 +244,4 @@ const styles = StyleSheet.create({
   emptyDay: { fontSize: 13, color: colors.border, fontStyle: 'italic', marginTop: 2 },
   chevron: { fontSize: 22, color: colors.textMuted, fontWeight: '300' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 2 },
-  seBadge: {
-    borderRadius: radius.full,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-  },
-  seBadgeText: { fontSize: 11, fontWeight: '700', color: colors.white },
 })

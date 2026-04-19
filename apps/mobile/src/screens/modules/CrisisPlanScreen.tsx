@@ -21,6 +21,8 @@ import {
   CrisisPlanItem,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { Card } from '../../components/Card'
+import { StatusBadge } from '../../components/StatusBadge'
 
 // ─── Métadonnées des 6 étapes (Stanley & Brown, 2012) ─────────────────────────
 
@@ -234,7 +236,7 @@ export default function CrisisPlanScreen() {
           const isExpanded = expandedSteps.has(step.number)
 
           return (
-            <View key={step.number} style={styles.stepCard}>
+            <Card key={step.number}>
               <Pressable
                 style={styles.stepHeader}
                 onPress={() => toggleStep(step.number)}
@@ -252,9 +254,7 @@ export default function CrisisPlanScreen() {
                 </View>
                 <View style={styles.stepRight}>
                   {stepItems.length > 0 && (
-                    <View style={styles.countBadge}>
-                      <Text style={styles.countBadgeText}>{stepItems.length}</Text>
-                    </View>
+                    <StatusBadge variant="info" label="" value={stepItems.length} />
                   )}
                   <MaterialCommunityIcons
                     name={isExpanded ? 'chevron-up' : 'chevron-down'}
@@ -365,7 +365,7 @@ export default function CrisisPlanScreen() {
                   )}
                 </View>
               )}
-            </View>
+            </Card>
           )
         })}
       </ScrollView>
@@ -420,14 +420,6 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
 
   // Carte étape
-  stepCard: {
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
-  },
   stepHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -451,16 +443,6 @@ const styles = StyleSheet.create({
   },
   stepTitle: { fontSize: 15, fontWeight: '600', color: colors.text, marginTop: 1 },
   stepRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  countBadge: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.full,
-    minWidth: 22,
-    height: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-  },
-  countBadgeText: { fontSize: 12, fontWeight: '700', color: colors.primary },
 
   // Contenu de l'étape
   stepContent: {

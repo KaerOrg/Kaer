@@ -71,7 +71,7 @@ Les objets, tableaux et fonctions déclarés dans le render sont re-créés à c
 - Dépendances primitives dans `useEffect` (pas d'objets instables)
 - Dériver l'état pendant le render, pas dans les effets
 - `functional setState` pour les callbacks stables
-- **`useRef` > `useState`** quand la valeur ne pilote pas le rendu. Avant chaque `useState`, se demander : « est-ce que modifier cette valeur *seule* doit mettre à jour l'UI ? » Si non → `useRef`. Cas typiques :
+- **`useState` est INTERDIT si la valeur ne provoque pas de changement de rendu.** Avant chaque `useState`, se demander : « modifier cette valeur *seule* doit-il mettre à jour l'UI ? » Si non → `useRef` obligatoire. `useState` inutile provoque des re-rendus parasites et masque la vraie intention du code. Cas typiques où `useRef` est obligatoire :
   - `Animated.Value` (opère hors du cycle React)
   - Conteneurs mutés directement (`Map`, `Set`, array avec `splice`)
   - Snapshot de `route.params` ou props qui ne changent jamais
