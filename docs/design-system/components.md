@@ -2,6 +2,62 @@
 
 Composants partagés entre `apps/web` et `apps/mobile`. Les tokens (couleurs, spacing, radius) viennent de `packages/shared/src/theme.ts`.
 
+Chaque composant est compartimenté dans son propre dossier : `tsx · styles/css · types · test · index`.
+
+---
+
+## Button
+
+Bouton d'action principal. 4 variantes, état loading intégré.
+
+### Props
+
+| Prop | Type | Défaut | Description |
+|---|---|---|---|
+| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost'` | `'primary'` | Apparence |
+| `size` *(web)* | `'sm' \| 'md' \| 'lg'` | `'md'` | Taille |
+| `loading` | `boolean` | `false` | Affiche un spinner, désactive le bouton |
+| `disabled` | `boolean` | `false` | Désactive le bouton |
+| `label` *(mobile)* | `string` | *requis* | Texte du bouton |
+| `onPress` *(mobile)* | `() => void` | *requis* | Callback |
+| `children` *(web)* | `ReactNode` | *requis* | Contenu |
+
+### Usage
+
+```tsx
+// Web
+<Button variant="primary" size="md" loading={isSubmitting}>Enregistrer</Button>
+<Button variant="danger" onClick={handleDelete}>Supprimer</Button>
+
+// Mobile
+<Button label="Enregistrer" onPress={handleSave} variant="primary" loading={isSubmitting} />
+```
+
+---
+
+## InputField
+
+Champ de saisie avec label, gestion du focus et affichage d'erreur.
+
+### Props
+
+| Prop | Type | Description |
+|---|---|---|
+| `label` | `string` | Label affiché au-dessus du champ |
+| `error` | `string` | Message d'erreur affiché en rouge |
+| `containerStyle` *(mobile)* | `ViewStyle` | Style du conteneur |
+| `...rest` | `InputHTMLAttributes` / `TextInputProps` | Toutes les props natives |
+
+### Usage
+
+```tsx
+// Web
+<InputField label="Email" type="email" error={errors.email} onChange={handleChange} />
+
+// Mobile
+<InputField label="Email" value={email} onChangeText={setEmail} error={errors.email} keyboardType="email-address" />
+```
+
 ---
 
 ## Card
