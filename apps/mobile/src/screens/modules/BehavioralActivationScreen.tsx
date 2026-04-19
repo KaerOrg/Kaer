@@ -20,6 +20,9 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { Card } from '../../components/Card'
+import { EmptyState } from '../../components/EmptyState'
+import { StatusBadge } from '../../components/StatusBadge'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -57,84 +60,56 @@ interface ActivityCardProps {
 
 function ActivityCard({ record, onToggleDone, onEdit, onDelete }: ActivityCardProps) {
   return (
-    <View style={[cardStyles.container, record.done === 1 && cardStyles.containerDone]}>
-      <Pressable
-        style={cardStyles.checkbox}
-        onPress={onToggleDone}
-        hitSlop={8}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: record.done === 1 }}
-        accessibilityLabel={record.done === 1 ? 'Marquer comme non réalisée' : 'Marquer comme réalisée'}
-      >
-        <MaterialCommunityIcons
-          name={record.done === 1 ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
-          size={26}
-          color={record.done === 1 ? colors.success : colors.border}
-        />
-      </Pressable>
+    <Card state={record.done === 1 ? 'disabled' : undefined}>
+      <View style={cardStyles.row}>
+        <Pressable
+          style={cardStyles.checkbox}
+          onPress={onToggleDone}
+          hitSlop={8}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: record.done === 1 }}
+          accessibilityLabel={record.done === 1 ? 'Marquer comme non réalisée' : 'Marquer comme réalisée'}
+        >
+          <MaterialCommunityIcons
+            name={record.done === 1 ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
+            size={26}
+            color={record.done === 1 ? colors.success : colors.border}
+          />
+        </Pressable>
 
-      <View style={cardStyles.content}>
-        <Text style={[cardStyles.label, record.done === 1 && cardStyles.labelDone]}>
-          {record.label}
-        </Text>
-        <View style={cardStyles.scores}>
-          <View style={cardStyles.scorePill}>
-            <Text style={cardStyles.scoreIcon}>P</Text>
-            <Text style={cardStyles.scoreValue}>{record.pleasure}</Text>
+        <View style={cardStyles.content}>
+          <Text style={[cardStyles.label, record.done === 1 && cardStyles.labelDone]}>
+            {record.label}
+          </Text>
+          <View style={cardStyles.scores}>
+            <StatusBadge variant="info" label="P" value={record.pleasure} />
+            <StatusBadge variant="info" label="M" value={record.mastery} />
           </View>
-          <View style={cardStyles.scorePill}>
-            <Text style={cardStyles.scoreIcon}>M</Text>
-            <Text style={cardStyles.scoreValue}>{record.mastery}</Text>
-          </View>
+          {!!record.notes && (
+            <Text style={cardStyles.notes} numberOfLines={1}>{record.notes}</Text>
+          )}
         </View>
-        {!!record.notes && (
-          <Text style={cardStyles.notes} numberOfLines={1}>{record.notes}</Text>
-        )}
-      </View>
 
-      <View style={cardStyles.actions}>
-        <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Modifier">
-          <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
-        </Pressable>
-        <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer">
-          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-        </Pressable>
+        <View style={cardStyles.actions}>
+          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Modifier">
+            <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
+          </Pressable>
+          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer">
+            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </Card>
   )
 }
 
 const cardStyles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  containerDone: { opacity: 0.65 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   checkbox: { width: 32, alignItems: 'center' },
   content: { flex: 1, gap: 4 },
   label: { fontSize: 15, fontWeight: '600', color: colors.text },
   labelDone: { textDecorationLine: 'line-through', color: colors.textMuted },
   scores: { flexDirection: 'row', gap: spacing.xs },
-  scorePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.full,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  scoreIcon: { fontSize: 11, fontWeight: '700', color: colors.primary },
-  scoreValue: { fontSize: 12, fontWeight: '700', color: colors.primary },
   notes: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
   actions: { gap: spacing.sm, alignItems: 'center' },
 })
@@ -483,14 +458,11 @@ export default function BehavioralActivationScreen() {
 
             {/* Liste vide */}
             {records.length === 0 ? (
-              <View style={styles.empty}>
-                <MaterialCommunityIcons name="run-fast" size={52} color={colors.border} />
-                <Text style={styles.emptyTitle}>Aucune activité</Text>
-                <Text style={styles.emptyText}>
-                  Ajoutez des activités à planifier ou réalisées.{'\n'}
-                  Évaluez chaque activité en Plaisir (P) et Maîtrise (M).
-                </Text>
-              </View>
+              <EmptyState
+                icon="🏃"
+                title="Aucune activité"
+                description={`Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).`}
+              />
             ) : viewMode === 'month' && !selectedDay ? (
               // En vue mois sans jour sélectionné : invite à toucher un jour
               <View style={styles.monthHint}>
@@ -576,19 +548,6 @@ const styles = StyleSheet.create({
 
   container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 96 },
   loader: { marginTop: spacing.xl * 2 },
-
-  empty: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl * 2,
-    gap: spacing.md,
-  },
-  emptyTitle: { fontSize: 20, fontWeight: '600', color: colors.text },
-  emptyText: {
-    fontSize: 15,
-    color: colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
 
   monthHint: {
     flexDirection: 'row',
