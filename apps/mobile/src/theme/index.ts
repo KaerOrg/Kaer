@@ -1,37 +1,28 @@
-export const colors = {
-  primary: '#4F46E5',
-  primaryLight: '#EEF2FF',
-  background: '#F8F9FA',
-  card: '#FFFFFF',
-  text: '#111827',
-  textMuted: '#6B7280',
-  border: '#E5E7EB',
-  success: '#10B981',
-  warning: '#F59E0B',
-  danger: '#EF4444',
-  white: '#FFFFFF',
-  stars: '#F59E0B',
-}
+import { colors, spacing, radius, fontSize } from '@psytool/shared'
 
-export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-}
-
-export const radius = {
-  sm: 6,
-  md: 10,
-  lg: 16,
-  full: 999,
-}
+export { colors, spacing, radius, fontSize }
 
 export const typography = {
-  h1: { fontSize: 28, fontWeight: '700' as const, color: '#111827' },
-  h2: { fontSize: 22, fontWeight: '700' as const, color: '#111827' },
-  h3: { fontSize: 18, fontWeight: '600' as const, color: '#111827' },
-  body: { fontSize: 16, fontWeight: '400' as const, color: '#111827' },
-  caption: { fontSize: 14, fontWeight: '400' as const, color: '#6B7280' },
+  h1: { fontSize: fontSize.h1, fontWeight: '700' as const, color: colors.text },
+  h2: { fontSize: fontSize.h2, fontWeight: '700' as const, color: colors.text },
+  h3: { fontSize: fontSize.h3, fontWeight: '600' as const, color: colors.text },
+  body: { fontSize: fontSize.body, fontWeight: '400' as const, color: colors.text },
+  caption: { fontSize: fontSize.caption, fontWeight: '400' as const, color: colors.textMuted },
+}
+
+export const shadows = {
+  sm: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 5,
+  },
 }
