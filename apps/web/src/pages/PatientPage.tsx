@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import type { Database } from '../lib/database.types'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -28,52 +30,52 @@ import './PatientPage.css'
 
 interface ModuleCategory {
   id: string
-  label: string
-  subtitle: string
+  labelKey: string
+  subtitleKey: string
   modules: ModuleType[]
 }
 
 const MODULE_CATEGORIES: ModuleCategory[] = [
   {
     id: 'safety',
-    label: 'Sécurité & Gestion de Crise',
-    subtitle: 'Le bouclier vital',
+    labelKey: 'patient.cat_safety_label',
+    subtitleKey: 'patient.cat_safety_subtitle',
     modules: ['crisis_plan', 'therapeutic_commitment', 'distress_tolerance'],
   },
   {
     id: 'iatrogenic',
-    label: 'Surveillance Iatrogénique & Somatique',
-    subtitle: 'Cœur de métier IPA',
+    labelKey: 'patient.cat_iatrogenic_label',
+    subtitleKey: 'patient.cat_iatrogenic_subtitle',
     modules: ['medication_side_effects', 'medication_adherence', 'psychoeducation'],
   },
   {
     id: 'lifestyle',
-    label: 'Hygiène de Vie & Rythmes Biologiques',
-    subtitle: 'Le socle métabolique',
+    labelKey: 'patient.cat_lifestyle_label',
+    subtitleKey: 'patient.cat_lifestyle_subtitle',
     modules: ['sleep_diary', 'diet_weight_psycho', 'chronobiology_tracker'],
   },
   {
     id: 'emotion',
-    label: 'Régulation Émotionnelle & Humeur',
-    subtitle: '',
+    labelKey: 'patient.cat_emotion_label',
+    subtitleKey: 'patient.cat_emotion_subtitle',
     modules: ['mood_tracker', 'emotion_wheel', 'behavioral_activation'],
   },
   {
     id: 'cognitive',
-    label: 'Restructuration Cognitive',
-    subtitle: 'Le moteur de la TCC',
+    labelKey: 'patient.cat_cognitive_label',
+    subtitleKey: 'patient.cat_cognitive_subtitle',
     modules: ['beck_columns', 'cognitive_distortions', 'grounding', 'rim'],
   },
   {
     id: 'anxiety',
-    label: 'Anxiété, Phobies & TOC',
-    subtitle: '',
+    labelKey: 'patient.cat_anxiety_label',
+    subtitleKey: 'patient.cat_anxiety_subtitle',
     modules: ['fear_thermometer', 'exposure_hierarchy', 'breathing_techniques', 'cognitive_saturation'],
   },
   {
     id: 'addiction',
-    label: 'Addictologie & Impulsivité',
-    subtitle: 'Le module souvent oublié',
+    labelKey: 'patient.cat_addiction_label',
+    subtitleKey: 'patient.cat_addiction_subtitle',
     modules: ['craving_journal', 'decisional_balance'],
   },
 ]
@@ -91,6 +93,7 @@ export function PatientPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { practitioner } = useAuthStore()
+  const { t, i18n } = useTranslation()
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
@@ -100,7 +103,6 @@ export function PatientPage() {
   const [teenMode, setTeenMode] = useState(false)
   const [togglingTeen, setTogglingTeen] = useState(false)
 
-  // Aperçu de module ouvert
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
   const [expandedPreviewCard, setExpandedPreviewCard] = useState<string | null>(null)
 
@@ -109,13 +111,11 @@ export function PatientPage() {
     setExpandedPreviewCard(null)
   }, [])
 
-  // État du sélecteur de cartes psychoéducation
   const [psychoPickerMode, setPsychoPickerMode] = useState<'off' | 'unlock' | 'edit'>('off')
   const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set())
   const [savingPsycho, setSavingPsycho] = useState(false)
   const [psychoError, setPsychoError] = useState<string | null>(null)
 
-  // État de l'éditeur de scénarios RIM
   const [rimEditorMode, setRimEditorMode] = useState<'off' | 'unlock' | 'edit'>('off')
   const [rimAlternative, setRimAlternative] = useState('')
   const [rimOriginal, setRimOriginal] = useState('')
@@ -130,19 +130,20 @@ export function PatientPage() {
     if (!id || !practitioner) return
     setLoading(true)
 
+    interface RelationRow { patient_alias: string | null; teen_mode: boolean; patients: { email: string } | { email: string }[] | null }
     const { data: relation } = await supabase
       .from('practitioner_patients')
       .select('patient_alias, teen_mode, patients(email)')
       .eq('practitioner_id', practitioner.id)
       .eq('patient_id', id)
-      .single()
+      .single() as { data: RelationRow | null }
 
     if (!relation) { navigate('/'); return }
 
     const patient = Array.isArray(relation.patients) ? relation.patients[0] : relation.patients
     setPatientEmail((patient as { email: string } | null)?.email ?? '')
     setPatientAlias(relation.patient_alias)
-    setTeenMode((relation as unknown as { teen_mode: boolean }).teen_mode ?? false)
+    setTeenMode(relation.teen_mode ?? false)
 
     const { data: mods } = await supabase
       .from('patient_modules')
@@ -158,12 +159,10 @@ export function PatientPage() {
   const unlockModule = async (moduleType: ModuleType) => {
     if (!id || !practitioner) return
     setUnlockingModule(moduleType)
-    const { error } = await supabase.from('patient_modules').insert({
-      patient_id: id,
-      practitioner_id: practitioner.id,
-      module_type: moduleType,
-      config: {},
-    })
+    const insertRow: Database['public']['Tables']['patient_modules']['Insert'] = {
+      patient_id: id, practitioner_id: practitioner.id, module_type: moduleType,
+    }
+    const { error } = await supabase.from('patient_modules').insert(insertRow)
     if (!error) await loadPatient()
     setUnlockingModule(null)
   }
@@ -179,7 +178,6 @@ export function PatientPage() {
     if (!id || !practitioner) return
     setTogglingTeen(true)
     const next = !teenMode
-    // teen_mode n'est pas encore dans les types générés — cast nécessaire
     const { error } = await supabase
       .from('practitioner_patients')
       .update({ teen_mode: next } as never)
@@ -189,25 +187,12 @@ export function PatientPage() {
     setTogglingTeen(false)
   }
 
-  // ── Accordéons ──────────────────────────────────────────────────────────
-
-  const toggleCategory = (categoryId: string) => {
-    setOpenCategories(prev => {
-      const next = new Set(prev)
-      next.has(categoryId) ? next.delete(categoryId) : next.add(categoryId)
-      return next
-    })
-  }
-
-
   // ── Psychoéducation : sélecteur de cartes ────────────────────────────────
 
   const psychoModule = modules.find(m => m.module_type === 'psychoeducation')
 
   const openPsychoPicker = (mode: 'unlock' | 'edit') => {
     setPsychoError(null)
-    // S'assurer que la catégorie Surveillance est ouverte
-    setOpenCategories(prev => new Set([...prev, 'iatrogenic']))
     if (mode === 'edit' && psychoModule) {
       setSelectedCardIds(new Set(getPsychoCards(psychoModule).map(c => c.card_id)))
     } else {
@@ -227,7 +212,7 @@ export function PatientPage() {
   const confirmPsycho = async () => {
     if (!id || !practitioner) return
     if (selectedCardIds.size === 0) {
-      setPsychoError('Sélectionnez au moins une carte.')
+      setPsychoError(t('patient.psycho_pick_error'))
       return
     }
 
@@ -241,14 +226,13 @@ export function PatientPage() {
         is_read: false,
         unlocked_at: now,
       }))
-      const { error } = await supabase.from('patient_modules').insert({
-        patient_id: id,
-        practitioner_id: practitioner.id,
-        module_type: 'psychoeducation',
-        config: { unlocked_cards: cards },
-      })
+      const psychoInsert: Database['public']['Tables']['patient_modules']['Insert'] = {
+        patient_id: id, practitioner_id: practitioner.id, module_type: 'psychoeducation',
+        config: { unlocked_cards: cards } as Record<string, unknown>,
+      }
+      const { error } = await supabase.from('patient_modules').insert(psychoInsert)
       if (error) {
-        setPsychoError("Erreur lors du déverrouillage. Réessayez.")
+        setPsychoError(t('patient.psycho_error_unlock'))
         setSavingPsycho(false)
         return
       }
@@ -259,12 +243,15 @@ export function PatientPage() {
       const cards: PsychoeducationCardEntry[] = [...selectedCardIds].map(card_id =>
         existingById[card_id] ?? { card_id, is_read: false, unlocked_at: now }
       )
+      const psychoUpdate: Database['public']['Tables']['patient_modules']['Update'] = {
+        config: { unlocked_cards: cards } as Record<string, unknown>,
+      }
       const { error } = await supabase
         .from('patient_modules')
-        .update({ config: { unlocked_cards: cards } })
+        .update(psychoUpdate)
         .eq('id', psychoModule.id)
       if (error) {
-        setPsychoError("Erreur lors de la mise à jour. Réessayez.")
+        setPsychoError(t('patient.psycho_error_update'))
         setSavingPsycho(false)
         return
       }
@@ -286,7 +273,6 @@ export function PatientPage() {
 
   const openRimEditor = (mode: 'unlock' | 'edit') => {
     setRimError(null)
-    setOpenCategories(prev => new Set([...prev, 'cognitive']))
     if (mode === 'edit' && rimModule) {
       const cfg = rimModule.config as { alternative_scenario?: string; original_scenario?: string }
       setRimAlternative(cfg.alternative_scenario ?? '')
@@ -306,7 +292,7 @@ export function PatientPage() {
   const confirmRim = async () => {
     if (!id || !practitioner) return
     if (!rimAlternative.trim()) {
-      setRimError('Le scénario alternatif est obligatoire.')
+      setRimError(t('patient.rim_error_required'))
       return
     }
     setSavingRim(true)
@@ -317,19 +303,18 @@ export function PatientPage() {
     if (orig) rimCfg['original_scenario'] = orig
 
     if (rimEditorMode === 'unlock') {
-      const { error } = await supabase.from('patient_modules').insert({
-        patient_id: id,
-        practitioner_id: practitioner.id,
-        module_type: 'rim',
-        config: rimCfg,
-      })
-      if (error) { setRimError("Erreur lors du déverrouillage. Réessayez."); setSavingRim(false); return }
+      const rimInsert: Database['public']['Tables']['patient_modules']['Insert'] = {
+        patient_id: id, practitioner_id: practitioner.id, module_type: 'rim', config: rimCfg,
+      }
+      const { error } = await supabase.from('patient_modules').insert(rimInsert)
+      if (error) { setRimError(t('patient.rim_error_unlock')); setSavingRim(false); return }
     } else if (rimEditorMode === 'edit' && rimModule) {
+      const rimUpdate: Database['public']['Tables']['patient_modules']['Update'] = { config: rimCfg }
       const { error } = await supabase
         .from('patient_modules')
-        .update({ config: rimCfg })
+        .update(rimUpdate)
         .eq('id', rimModule.id)
-      if (error) { setRimError("Erreur lors de la mise à jour. Réessayez."); setSavingRim(false); return }
+      if (error) { setRimError(t('patient.rim_error_update')); setSavingRim(false); return }
     }
     setSavingRim(false)
     setRimEditorMode('off')
@@ -349,7 +334,7 @@ export function PatientPage() {
     if (preview.kind === 'coming_soon') {
       return (
         <div className="preview-panel__coming-soon">
-          Module en cours de développement — aperçu non disponible.
+          {t('patient.coming_soon')}
         </div>
       )
     }
@@ -456,7 +441,7 @@ export function PatientPage() {
       return (
         <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
           <Card
-            variant={unlocked ? 'active' : 'default'}
+            state={unlocked ? 'active' : undefined}
             header={{ title: MODULE_LABELS['psychoeducation'], subtitle: MODULE_DESCRIPTIONS['psychoeducation'] }}
             actions={
               <>
@@ -464,18 +449,18 @@ export function PatientPage() {
                   <button
                     className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
                     onClick={() => togglePreview('psychoeducation')}
-                    title="Aperçu du contenu patient"
+                    title={t('patient.patient_view')}
                   >
                     {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
-                    Aperçu
+                    {t('patient.preview_button')}
                   </button>
                 )}
                 {unlocked && mod ? (
                   <>
-                    <StatusBadge variant="success" label="Actif" />
+                    <StatusBadge variant="success" label={t('patient.active_badge')} />
                     {psychoPickerMode !== 'edit' && (
                       <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
-                        Modifier les cartes
+                        {t('patient.psycho_edit_cards')}
                       </Button>
                     )}
                     <Button
@@ -484,7 +469,7 @@ export function PatientPage() {
                       className="module-card__revoke"
                       onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
                     >
-                      Révoquer
+                      {t('patient.revoke_button')}
                     </Button>
                   </>
                 ) : (
@@ -494,7 +479,7 @@ export function PatientPage() {
                       psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
                     }
                   >
-                    {psychoPickerMode === 'unlock' ? 'Annuler' : 'Débloquer'}
+                    {psychoPickerMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
                   </Button>
                 )}
               </>
@@ -503,10 +488,12 @@ export function PatientPage() {
             {unlocked && mod && (
               <>
                 <div className="module-card__date">
-                  Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+                  {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
                   {' · '}
                   <span className="psycho-observance-summary">
-                    {readCount}/{cards.length} carte{cards.length > 1 ? 's' : ''} lue{readCount > 1 ? 's' : ''}
+                    {cards.length === 1
+                      ? t('patient.psycho_read_count', { read: readCount, total: cards.length })
+                      : t('patient.psycho_read_count_plural', { read: readCount, total: cards.length })}
                   </span>
                 </div>
                 {cards.length > 0 && (
@@ -531,24 +518,22 @@ export function PatientPage() {
             )}
           </Card>
 
-          {/* Panneau d'aperçu psychoéducation */}
           {previewModule === 'psychoeducation' && MODULE_PREVIEW['psychoeducation'] && (
             <div className="preview-panel">
               <div className="preview-panel__header">
                 <Eye size={14} />
-                Ce que verra votre patient
+                {t('patient.patient_view')}
               </div>
               {renderPreviewPanel(MODULE_PREVIEW['psychoeducation'])}
             </div>
           )}
 
-          {/* Sélecteur de cartes inline */}
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
             <div className={`psycho-card-picker ${psychoPickerMode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
               <p className="psycho-card-picker__label">
                 {psychoPickerMode === 'unlock'
-                  ? 'Choisissez les cartes à débloquer pour ce patient :'
-                  : 'Modifier les cartes débloquées pour ce patient :'}
+                  ? t('patient.psycho_pick_unlock')
+                  : t('patient.psycho_pick_edit')}
               </p>
               <ul className="psycho-card-picker__list">
                 {PSYCHO_CARD_CATALOG.map(card => (
@@ -572,11 +557,13 @@ export function PatientPage() {
               <div className="psycho-card-picker__actions">
                 <Button size="sm" loading={savingPsycho} onClick={confirmPsycho}>
                   {psychoPickerMode === 'unlock'
-                    ? `Débloquer ${selectedCardIds.size} carte${selectedCardIds.size > 1 ? 's' : ''}`
-                    : 'Enregistrer les modifications'}
+                    ? (selectedCardIds.size === 1
+                        ? t('patient.psycho_unlock_btn', { count: selectedCardIds.size })
+                        : t('patient.psycho_unlock_btn_plural', { count: selectedCardIds.size }))
+                    : t('patient.psycho_save_btn')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancelPsychoPicker}>
-                  Annuler
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -590,16 +577,16 @@ export function PatientPage() {
       return (
         <div key="rim" className="module-card-wrapper module-card-wrapper-block">
           <Card
-            variant={unlocked ? 'active' : 'default'}
+            state={unlocked ? 'active' : undefined}
             header={{ title: MODULE_LABELS['rim'], subtitle: MODULE_DESCRIPTIONS['rim'] }}
             actions={
               <>
                 {unlocked && mod ? (
                   <>
-                    <StatusBadge variant="success" label="Actif" />
+                    <StatusBadge variant="success" label={t('patient.active_badge')} />
                     {rimEditorMode !== 'edit' && (
                       <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
-                        Modifier le scénario
+                        {t('patient.rim_edit_scenario')}
                       </Button>
                     )}
                     <Button
@@ -608,7 +595,7 @@ export function PatientPage() {
                       className="module-card__revoke"
                       onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
                     >
-                      Révoquer
+                      {t('patient.revoke_button')}
                     </Button>
                   </>
                 ) : (
@@ -618,7 +605,7 @@ export function PatientPage() {
                       rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
                     }
                   >
-                    {rimEditorMode === 'unlock' ? 'Annuler' : 'Débloquer'}
+                    {rimEditorMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
                   </Button>
                 )}
               </>
@@ -626,30 +613,29 @@ export function PatientPage() {
           >
             {unlocked && mod && (
               <div className="module-card__date">
-                Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+                {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
                 {cfg?.alternative_scenario && (
-                  <span className="psycho-observance-summary"> · Scénario configuré</span>
+                  <span className="psycho-observance-summary"> · {t('patient.rim_scenario_configured')}</span>
                 )}
               </div>
             )}
           </Card>
 
-          {/* Éditeur de scénarios RIM inline */}
           {(rimEditorMode === 'unlock' || rimEditorMode === 'edit') && (
             <div className="psycho-card-picker">
               <p className="psycho-card-picker__label">
                 {rimEditorMode === 'unlock'
-                  ? 'Rédigez le scénario alternatif pour ce patient :'
-                  : 'Modifier le scénario alternatif :'}
+                  ? t('patient.rim_write_unlock')
+                  : t('patient.rim_write_edit')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    Scénario alternatif <span style={{ color: '#DC2626' }}>*</span>
+                    {t('patient.rim_alt_label')} <span style={{ color: '#DC2626' }}>*</span>
                   </label>
                   <textarea
                     rows={5}
-                    placeholder="Décrivez ici le scénario positif de substitution au cauchemar..."
+                    placeholder={t('patient.rim_alt_placeholder')}
                     value={rimAlternative}
                     onChange={e => setRimAlternative(e.target.value)}
                     style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
@@ -657,11 +643,11 @@ export function PatientPage() {
                 </div>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    Scénario initial (optionnel — référence)
+                    {t('patient.rim_orig_label')}
                   </label>
                   <textarea
                     rows={3}
-                    placeholder="Description du cauchemar original, pour référence..."
+                    placeholder={t('patient.rim_orig_placeholder')}
                     value={rimOriginal}
                     onChange={e => setRimOriginal(e.target.value)}
                     style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
@@ -671,10 +657,10 @@ export function PatientPage() {
               {rimError && <p className="psycho-card-picker__error">{rimError}</p>}
               <div className="psycho-card-picker__actions">
                 <Button size="sm" loading={savingRim} onClick={confirmRim}>
-                  {rimEditorMode === 'unlock' ? 'Débloquer avec ce scénario' : 'Enregistrer le scénario'}
+                  {rimEditorMode === 'unlock' ? t('patient.rim_btn_unlock') : t('patient.rim_btn_save')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancelRimEditor}>
-                  Annuler
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -688,7 +674,7 @@ export function PatientPage() {
     return (
       <div key={moduleType} className="module-card-wrapper-block">
         <Card
-          variant={unlocked ? 'active' : 'default'}
+          state={unlocked ? 'active' : undefined}
           header={{ title: MODULE_LABELS[moduleType], subtitle: MODULE_DESCRIPTIONS[moduleType] }}
           actions={
             <>
@@ -696,22 +682,22 @@ export function PatientPage() {
                 <button
                   className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
                   onClick={() => togglePreview(moduleType)}
-                  title="Aperçu du contenu patient"
+                  title={t('patient.patient_view')}
                 >
                   {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
-                  Aperçu
+                  {t('patient.preview_button')}
                 </button>
               )}
               {unlocked && mod ? (
                 <>
-                  <StatusBadge variant="success" label="Actif" />
+                  <StatusBadge variant="success" label={t('patient.active_badge')} />
                   <Button
                     variant="ghost"
                     size="sm"
                     className="module-card__revoke"
                     onClick={() => revokeModule(mod.id)}
                   >
-                    Révoquer
+                    {t('patient.revoke_button')}
                   </Button>
                 </>
               ) : (
@@ -720,7 +706,7 @@ export function PatientPage() {
                   loading={unlockingModule === moduleType}
                   onClick={() => unlockModule(moduleType)}
                 >
-                  Débloquer
+                  {t('patient.unlock_button')}
                 </Button>
               )}
             </>
@@ -728,17 +714,16 @@ export function PatientPage() {
         >
           {unlocked && mod && (
             <div className="module-card__date">
-              Débloqué le {new Date(mod.unlocked_at).toLocaleDateString('fr-FR')}
+              {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
             </div>
           )}
         </Card>
 
-        {/* Panneau d'aperçu inline */}
         {previewModule === moduleType && preview && (
           <div className="preview-panel">
             <div className="preview-panel__header">
               <Eye size={14} />
-              Ce que verra votre patient
+              {t('patient.patient_view')}
             </div>
             {renderPreviewPanel(preview)}
           </div>
@@ -755,7 +740,7 @@ export function PatientPage() {
     <Layout>
       <div className="patient-page">
         <button className="patient-page__back" onClick={() => navigate('/')}>
-          ← Retour à mes patients
+          {t('patient.back')}
         </button>
 
         <div className="patient-page__header">
@@ -770,10 +755,10 @@ export function PatientPage() {
             className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
             onClick={toggleTeenMode}
             disabled={togglingTeen}
-            title={teenMode ? 'Désactiver le mode ado' : 'Activer le mode ado'}
+            title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
           >
             <span className="teen-mode-toggle__icon">🎨</span>
-            <span className="teen-mode-toggle__label">Mode ado</span>
+            <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
             <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
               {teenMode ? 'ON' : 'OFF'}
             </span>
@@ -781,53 +766,51 @@ export function PatientPage() {
         </div>
 
         {loading ? (
-          <div className="patient-page__loading">Chargement…</div>
+          <div className="patient-page__loading">{t('common.loading')}</div>
         ) : (
           <>
-            {/* ── Radar ─────────────────────────────────────────────────── */}
             <section className="radar">
               <h2 className="radar__title">
-                Tableau de bord
+                {t('patient.dashboard_title')}
                 {modules.length > 0 && (
                   <span className="radar__count">
-                    {modules.length} outil{modules.length > 1 ? 's' : ''} actif{modules.length > 1 ? 's' : ''}
+                    {modules.length === 1
+                      ? t('patient.tools_active_one', { count: modules.length })
+                      : t('patient.tools_active_other', { count: modules.length })}
                   </span>
                 )}
               </h2>
 
               {modules.length === 0 ? (
-                <EmptyState description="Aucun outil débloqué — utilisez l'armoire thérapeutique ci-dessous." title="" />
+                <EmptyState description={t('patient.empty_tools')} title="" />
               ) : (
                 <div className="radar__grid">
                   {isUnlocked('crisis_plan') && (
-                    <StatusBadge variant="info" label="Plan de crise" value="Actif" />
+                    <StatusBadge variant="info" label={MODULE_LABELS['crisis_plan']} value={t('patient.active_badge')} />
                   )}
                   {psychoModule && (
                     <StatusBadge
                       variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
-                      label="Psychoéducation"
-                      value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards} lues`}
+                      label={MODULE_LABELS['psychoeducation']}
+                      value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards}`}
                     />
                   )}
                   {isUnlocked('sleep_diary') && (
-                    <StatusBadge variant="info" label="Agenda du sommeil" value="Actif" />
+                    <StatusBadge variant="info" label={MODULE_LABELS['sleep_diary']} value={t('patient.active_badge')} />
                   )}
                   {modules
                     .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
                     .map(m => (
-                      <StatusBadge key={m.id} variant="info" label={MODULE_LABELS[m.module_type]} value="Actif" />
+                      <StatusBadge key={m.id} variant="info" label={MODULE_LABELS[m.module_type]} value={t('patient.active_badge')} />
                     ))}
-                  <StatusBadge variant="neutral" label="Données temps réel" value="Bientôt disponible" />
+                  <StatusBadge variant="neutral" label={t('patient.realtime_label')} value={t('patient.realtime_soon')} />
                 </div>
               )}
             </section>
 
-            {/* ── Armoire Thérapeutique ──────────────────────────────────── */}
             <section className="therapeutic-wardrobe">
-              <h2 className="wardrobe__title">Armoire Thérapeutique</h2>
-              <p className="wardrobe__desc">
-                Cliquez sur une catégorie pour voir les outils disponibles et les débloquer pour ce patient.
-              </p>
+              <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
+              <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
 
               <div className="category-list">
                 {MODULE_CATEGORIES.map(category => {
@@ -835,8 +818,8 @@ export function PatientPage() {
                   return (
                     <Accordion
                       key={category.id}
-                      title={category.label}
-                      subtitle={category.subtitle}
+                      title={t(category.labelKey)}
+                      subtitle={t(category.subtitleKey)}
                       badge={activeCount > 0 ? activeCount : undefined}
                       defaultOpen={category.id === 'safety'}
                     >

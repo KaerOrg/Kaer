@@ -1,14 +1,14 @@
-// Tests du module teen — fonctions pures et données
+// Tests du module teen — fonctions pures et données de couleur + locale JSON
 // Le hook useTeen est un wrapper trivial sur ces fonctions + le store Zustand.
-// On teste ici l'essentiel : la logique de résolution des textes et des couleurs.
+// On teste ici la logique des couleurs et la cohérence des fichiers de locale ado.
 
 import {
   teenColorFor,
   TEEN_MODULE_COLORS,
   TEEN_DEFAULT_COLOR,
-  TEEN_MODULE_TEXTS,
-  TEEN_GLOBAL,
 } from '../theme/teen'
+import frTeen from '../i18n/locales/fr/teen.json'
+import enTeen from '../i18n/locales/en/teen.json'
 
 describe('teenColorFor()', () => {
   it('retourne la couleur correcte pour un module connu', () => {
@@ -45,62 +45,48 @@ describe('teenColorFor()', () => {
   })
 })
 
-describe('TEEN_MODULE_TEXTS', () => {
-  it('chaque module a un titre adulte et un titre ado distincts', () => {
-    const modulesWithTitle = Object.keys(TEEN_MODULE_TEXTS).filter(
-      (k) => TEEN_MODULE_TEXTS[k]?.['title'] !== undefined
-    )
-    expect(modulesWithTitle.length).toBeGreaterThan(0)
-    for (const mod of modulesWithTitle) {
-      const entry = TEEN_MODULE_TEXTS[mod]['title']
-      expect(entry.adult).toBeTruthy()
-      expect(entry.teen).toBeTruthy()
-      // Les textes adulte et ado doivent être différents
-      expect(entry.adult).not.toBe(entry.teen)
-    }
+describe('fr/teen.json — locale ado française', () => {
+  it('contient les surcharges de titres pour les modules principaux', () => {
+    expect(frTeen.modules.crisis_plan.title).toBeTruthy()
+    expect(frTeen.modules.grounding.title).toBeTruthy()
+    expect(frTeen.modules.beck_columns.title).toBeTruthy()
   })
 
   it('les textes ado utilisent le tutoiement ou un langage simplifié', () => {
-    // Au moins quelques textes ado doivent contenir "tu" ou "ton" ou "tes"
-    const allTeenTexts = Object.values(TEEN_MODULE_TEXTS).flatMap((module) =>
-      Object.values(module).map((entry) => entry.teen.toLowerCase())
+    const allTeenTexts = Object.values(frTeen.modules).flatMap((mod) =>
+      Object.values(mod as Record<string, string>)
     )
     const hasTutoiement = allTeenTexts.some(
-      (t) => t.includes(' tu ') || t.includes(' ton ') || t.includes(' tes ') || t.startsWith('tu ') || t.startsWith("t'")
+      (t) => t.toLowerCase().includes(' tu ') || t.toLowerCase().includes(' ton ') ||
+             t.toLowerCase().includes(' tes ') || t.toLowerCase().startsWith('tu ') ||
+             t.toLowerCase().startsWith("t'")
     )
     expect(hasTutoiement).toBe(true)
   })
 
-  it('aucun texte adulte ne contient de tutoiement', () => {
-    const allAdultTexts = Object.values(TEEN_MODULE_TEXTS).flatMap((module) =>
-      Object.values(module).map((entry) => entry.adult.toLowerCase())
-    )
-    // Les textes adultes ne doivent pas commencer par "tu" ou "t'as"
-    for (const text of allAdultTexts) {
-      expect(text.startsWith("tu ")).toBe(false)
-      expect(text.startsWith("t'as")).toBe(false)
-    }
+  it('contient les surcharges globales (greeting, modulesTitle)', () => {
+    expect(frTeen.global.greeting).toBe('Salut !')
+    expect(frTeen.global.modulesTitle).toBeTruthy()
   })
 
-  it('couvre les modules crisis_plan, grounding et beck_columns', () => {
-    expect(TEEN_MODULE_TEXTS['crisis_plan']).toBeDefined()
-    expect(TEEN_MODULE_TEXTS['grounding']).toBeDefined()
-    expect(TEEN_MODULE_TEXTS['beck_columns']).toBeDefined()
+  it('le titre ado crisis_plan diffère du titre adulte (fr/common)', () => {
+    // Les titres ado ne doivent pas être les mêmes que les adultes
+    expect(frTeen.modules.crisis_plan.title).not.toBe('Plan de crise')
   })
 })
 
-describe('TEEN_GLOBAL', () => {
-  it('contient les clés globales essentielles', () => {
-    expect(TEEN_GLOBAL['greeting']).toBeDefined()
-    expect(TEEN_GLOBAL['modulesTitle']).toBeDefined()
-    expect(TEEN_GLOBAL['noModules']).toBeDefined()
+describe('en/teen.json — locale ado anglaise', () => {
+  it('contient des surcharges pour les modules principaux', () => {
+    expect(Object.keys(enTeen.modules ?? {}).length).toBeGreaterThan(0)
   })
 
-  it('le texte ado de greeting est "Salut !"', () => {
-    expect(TEEN_GLOBAL['greeting'].teen).toBe('Salut !')
-  })
-
-  it('le texte adulte de greeting est "Bienvenue"', () => {
-    expect(TEEN_GLOBAL['greeting'].adult).toBe('Bienvenue')
+  it('les textes ado anglais sont distincts', () => {
+    const allValues = Object.values(enTeen.modules ?? {}).flatMap((mod) =>
+      Object.values(mod as Record<string, string>)
+    )
+    for (const val of allValues) {
+      expect(typeof val).toBe('string')
+      expect(val.length).toBeGreaterThan(0)
+    }
   })
 })

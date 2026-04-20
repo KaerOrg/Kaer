@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from '../components/Button'
@@ -7,6 +8,7 @@ import './LoginPage.css'
 
 export function LoginPage() {
   const { login, register, loading, error, clearError } = useAuthStore()
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [registered, setRegistered] = useState(false)
 
@@ -22,7 +24,6 @@ export function LoginPage() {
       await login(email, password)
     } else {
       await register(email, password, name, title)
-      // Si pas d'erreur après register, l'email de confirmation a été envoyé
       if (!useAuthStore.getState().error) {
         setRegistered(true)
       }
@@ -44,10 +45,10 @@ export function LoginPage() {
           </div>
           <div className="login-card__confirm-email">
             <div className="login-card__confirm-icon">📧</div>
-            <h2>Vérifiez votre email</h2>
-            <p>Un lien de confirmation a été envoyé à <strong>{email}</strong>. Cliquez sur ce lien pour activer votre compte, puis revenez vous connecter.</p>
+            <h2>{t('auth.confirm_email_title')}</h2>
+            <p dangerouslySetInnerHTML={{ __html: t('auth.confirm_email_text', { email }) }} />
             <button type="button" className="login-card__link" onClick={() => { setRegistered(false); setMode('login') }}>
-              Retour à la connexion
+              {t('auth.back_to_login')}
             </button>
           </div>
         </div>
@@ -62,7 +63,7 @@ export function LoginPage() {
           <div className="login-card__logo"><BrainCircuit size={36} /></div>
           <h1 className="login-card__title">PsyTool</h1>
           <p className="login-card__subtitle">
-            {mode === 'login' ? 'Connexion — Espace praticien' : 'Créer votre compte praticien'}
+            {mode === 'login' ? t('auth.login_subtitle') : t('auth.register_subtitle')}
           </p>
         </div>
 
@@ -70,39 +71,39 @@ export function LoginPage() {
           {mode === 'register' && (
             <>
               <InputField
-                label="Votre nom complet"
+                label={t('auth.full_name_label')}
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Dr. Marie Dupont"
+                placeholder={t('auth.full_name_placeholder')}
                 required
               />
               <InputField
-                label="Titre professionnel"
+                label={t('auth.professional_title_label')}
                 type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder="Infirmier en pratique avancée"
+                placeholder={t('auth.professional_title_placeholder')}
               />
             </>
           )}
 
           <InputField
-            label="Adresse email"
+            label={t('auth.email_label')}
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="vous@exemple.fr"
+            placeholder={t('auth.email_placeholder')}
             autoComplete="email"
             required
           />
 
           <InputField
-            label="Mot de passe"
+            label={t('auth.password_label')}
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={t('auth.password_placeholder')}
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             minLength={8}
             required
@@ -115,21 +116,21 @@ export function LoginPage() {
           )}
 
           <Button type="submit" size="lg" loading={loading} className="login-card__submit">
-            {mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
+            {mode === 'login' ? t('auth.login_button') : t('auth.register_button')}
           </Button>
         </form>
 
         <div className="login-card__footer">
           {mode === 'login' ? (
-            <p>Pas encore de compte ?{' '}
+            <p>{t('auth.no_account')}{' '}
               <button type="button" className="login-card__link" onClick={switchMode}>
-                Créer un compte
+                {t('auth.create_account')}
               </button>
             </p>
           ) : (
-            <p>Déjà un compte ?{' '}
+            <p>{t('auth.already_account')}{' '}
               <button type="button" className="login-card__link" onClick={switchMode}>
-                Se connecter
+                {t('auth.sign_in')}
               </button>
             </p>
           )}

@@ -14,9 +14,11 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
 import Button from '../components/Button'
 import { colors, spacing, radius } from '../theme'
+import { SUPPORTED } from '../i18n'
 import {
   requestNotificationPermission,
   scheduleSleepDiaryReminder,
@@ -25,9 +27,16 @@ import {
 } from '../lib/notifications'
 import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../lib/avatar'
 
-// ─── Avatar section ────────────────────────────────────────────────────────────
-
 const AVATAR_SIZE = 84
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  fr: 'Français',
+  en: 'English',
+  es: 'Español',
+  de: 'Deutsch',
+  it: 'Italiano',
+  pt: 'Português',
+}
 
 interface AvatarSectionProps {
   uri: string | null
@@ -36,22 +45,29 @@ interface AvatarSectionProps {
 }
 
 function AvatarSection({ uri, uploading, onPickSource }: AvatarSectionProps) {
+  const { t } = useTranslation()
+
   const handlePress = useCallback(() => {
-    Alert.alert('Changer la photo', 'Choisissez une source', [
-      { text: 'Galerie photo', onPress: () => onPickSource('library') },
-      { text: 'Appareil photo', onPress: () => onPickSource('camera') },
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('profile.avatar_change_title'), t('profile.avatar_source_prompt'), [
+      { text: t('profile.avatar_gallery'), onPress: () => onPickSource('library') },
+      { text: t('profile.avatar_camera'), onPress: () => onPickSource('camera') },
+      { text: t('common.cancel'), style: 'cancel' },
     ])
-  }, [onPickSource])
+  }, [onPickSource, t])
 
   return (
     <View style={avatarStyles.wrapper}>
-      <Pressable onPress={handlePress} style={avatarStyles.container} accessibilityRole="button" accessibilityLabel="Modifier la photo de profil">
+      <Pressable
+        onPress={handlePress}
+        style={avatarStyles.container}
+        accessibilityRole="button"
+        accessibilityLabel={t('profile.avatar_edit_label')}
+      >
         {uri ? (
           <Image source={{ uri }} style={avatarStyles.image} />
         ) : (
           <View style={avatarStyles.placeholder}>
-            <Text style={avatarStyles.placeholderText}>Photo</Text>
+            <Text style={avatarStyles.placeholderText}>{t('profile.avatar_placeholder')}</Text>
           </View>
         )}
         <View style={avatarStyles.badge}>
@@ -59,11 +75,7 @@ function AvatarSection({ uri, uploading, onPickSource }: AvatarSectionProps) {
         </View>
       </Pressable>
       {uploading && (
-        <ActivityIndicator
-          size="small"
-          color={colors.primary}
-          style={avatarStyles.spinner}
-        />
+        <ActivityIndicator size="small" color={colors.primary} style={avatarStyles.spinner} />
       )}
     </View>
   )
@@ -72,45 +84,17 @@ function AvatarSection({ uri, uploading, onPickSource }: AvatarSectionProps) {
 const avatarStyles = StyleSheet.create({
   wrapper: { alignItems: 'center', gap: spacing.xs },
   container: { width: AVATAR_SIZE, height: AVATAR_SIZE },
-  image: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  placeholder: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: colors.primaryLight,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  image: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, borderWidth: 2, borderColor: colors.primary },
+  placeholder: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, backgroundColor: colors.primaryLight, borderWidth: 2, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   placeholderText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
-  badge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.white,
-  },
+  badge: { position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: 13, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.white },
   badgeText: { color: colors.white, fontSize: 12 },
   spinner: { marginTop: spacing.xs },
 })
 
-// ─── Main screen ───────────────────────────────────────────────────────────────
-
 export default function ProfileScreen() {
-  const { patient, logout, updateAvatar } = useAuthStore()
+  const { t } = useTranslation()
+  const { patient, logout, updateAvatar, language, setLanguage } = useAuthStore()
   const [shareData, setShareData] = useState(false)
   const [notifEnabled, setNotifEnabled] = useState(false)
   const [notifTime, setNotifTime] = useState(new Date(new Date().setHours(8, 0, 0, 0)))
@@ -132,10 +116,7 @@ export default function ProfileScreen() {
     if (value) {
       const granted = await requestNotificationPermission()
       if (!granted) {
-        Alert.alert(
-          'Permission refusée',
-          'Autorisez les notifications dans les paramètres de votre téléphone pour activer les rappels.'
-        )
+        Alert.alert(t('profile.notif_denied_title'), t('profile.notif_denied_message'))
         return
       }
       await scheduleSleepDiaryReminder(notifTime.getHours(), notifTime.getMinutes())
@@ -162,59 +143,75 @@ export default function ProfileScreen() {
     if (!patient) return
     const uri = await pickAvatarImage(source)
     if (!uri) return
-
     setAvatarUploading(true)
     try {
       const publicUrl = await uploadAvatar(patient.id, uri)
       await saveAvatarUrl(patient.id, publicUrl)
       updateAvatar(publicUrl)
     } catch {
-      Alert.alert('Erreur', "Impossible de mettre à jour la photo. Réessayez.")
+      Alert.alert(t('common.error'), t('profile.avatar_error'))
     } finally {
       setAvatarUploading(false)
     }
-  }, [patient, updateAvatar])
+  }, [patient, updateAvatar, t])
 
   const handleLogout = () => {
-    Alert.alert('Déconnexion', 'Êtes-vous sûr(e) de vouloir vous déconnecter ?', [
-      { text: 'Annuler', style: 'cancel' },
-      { text: 'Déconnecter', style: 'destructive', onPress: logout },
+    Alert.alert(t('profile.logout_title'), t('profile.logout_message'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('profile.logout_confirm'), style: 'destructive', onPress: logout },
+    ])
+  }
+
+  const handleLanguageChange = () => {
+    const options = SUPPORTED.map((lng) => ({
+      text: LANGUAGE_LABELS[lng] ?? lng,
+      onPress: () => setLanguage(lng),
+      style: language === lng ? ('default' as const) : ('default' as const),
+    }))
+    Alert.alert(t('profile.language_label'), undefined, [
+      ...options,
+      { text: t('common.cancel'), style: 'cancel' },
     ])
   }
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>Mon profil</Text>
+        <Text style={styles.heading}>{t('profile.title')}</Text>
 
-        {/* Avatar */}
         <AvatarSection
           uri={patient?.avatar_url ?? null}
           uploading={avatarUploading}
           onPickSource={handlePickSource}
         />
 
-        {/* Compte */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mon compte</Text>
+          <Text style={styles.sectionTitle}>{t('profile.section_account')}</Text>
           <View style={styles.card}>
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>Email</Text>
+              <Text style={styles.rowLabel}>{t('profile.email_label')}</Text>
               <Text style={styles.rowValue} numberOfLines={1}>{patient?.email}</Text>
             </View>
           </View>
         </View>
 
-        {/* Notifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Rappels</Text>
+          <Text style={styles.sectionTitle}>{t('profile.section_language')}</Text>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.row} onPress={handleLanguageChange}>
+              <Text style={styles.rowLabel}>{t('profile.language_label')}</Text>
+              <Text style={styles.timeValue}>{LANGUAGE_LABELS[language] ?? language}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.section_reminders')}</Text>
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.rowInfo}>
-                <Text style={styles.rowLabel}>Rappel agenda du sommeil</Text>
-                <Text style={styles.rowHint}>
-                  Notification quotidienne pour noter votre nuit
-                </Text>
+                <Text style={styles.rowLabel}>{t('profile.sleep_reminder_label')}</Text>
+                <Text style={styles.rowHint}>{t('profile.sleep_reminder_hint')}</Text>
               </View>
               <Switch
                 value={notifEnabled}
@@ -227,11 +224,8 @@ export default function ProfileScreen() {
             {notifEnabled && (
               <>
                 <View style={styles.separator} />
-                <TouchableOpacity
-                  style={styles.row}
-                  onPress={() => setShowTimePicker(true)}
-                >
-                  <Text style={styles.rowLabel}>Heure du rappel</Text>
+                <TouchableOpacity style={styles.row} onPress={() => setShowTimePicker(true)}>
+                  <Text style={styles.rowLabel}>{t('profile.reminder_time_label')}</Text>
                   <Text style={styles.timeValue}>{formatTime(notifTime)}</Text>
                 </TouchableOpacity>
               </>
@@ -249,16 +243,13 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Confidentialité */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Confidentialité</Text>
+          <Text style={styles.sectionTitle}>{t('profile.section_privacy')}</Text>
           <View style={styles.card}>
             <View style={styles.row}>
               <View style={styles.rowInfo}>
-                <Text style={styles.rowLabel}>Partager mes données</Text>
-                <Text style={styles.rowHint}>
-                  Votre praticien pourra voir tout ce que vous notez dans l'application.
-                </Text>
+                <Text style={styles.rowLabel}>{t('profile.share_data_label')}</Text>
+                <Text style={styles.rowHint}>{t('profile.share_data_hint')}</Text>
               </View>
               <Switch
                 value={shareData}
@@ -268,17 +259,14 @@ export default function ProfileScreen() {
               />
             </View>
           </View>
-          <Text style={styles.disclaimer}>
-            Par défaut, vos données restent uniquement sur votre téléphone. Vous choisissez librement ce que vous partagez avec votre praticien.
-          </Text>
+          <Text style={styles.disclaimer}>{t('profile.privacy_disclaimer')}</Text>
         </View>
 
-        {/* Déconnexion */}
         <View style={styles.section}>
-          <Button label="Se déconnecter" onPress={handleLogout} variant="danger" />
+          <Button label={t('profile.logout_button')} onPress={handleLogout} variant="danger" />
         </View>
 
-        <Text style={styles.version}>PsyTool v1.0 · Données sécurisées sur votre appareil</Text>
+        <Text style={styles.version}>{t('profile.version')}</Text>
       </ScrollView>
     </SafeAreaView>
   )
@@ -289,41 +277,15 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
   section: { gap: spacing.sm },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+  sectionTitle: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
   separator: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.md },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-    minHeight: 56,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.md, minHeight: 56 },
   rowInfo: { flex: 1, marginRight: spacing.md },
   rowLabel: { fontSize: 16, fontWeight: '500', color: colors.text },
   rowValue: { fontSize: 14, color: colors.textMuted, maxWidth: 200 },
   rowHint: { fontSize: 13, color: colors.textMuted, marginTop: 2, lineHeight: 17 },
   timeValue: { fontSize: 18, fontWeight: '600', color: colors.primary },
   disclaimer: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-  version: {
-    fontSize: 12,
-    color: colors.border,
-    textAlign: 'center',
-    marginTop: spacing.md,
-  },
+  version: { fontSize: 12, color: colors.border, textAlign: 'center', marginTop: spacing.md },
 })

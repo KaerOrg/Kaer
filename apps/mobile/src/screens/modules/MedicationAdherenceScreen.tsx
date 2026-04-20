@@ -23,6 +23,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -32,7 +33,7 @@ import { TeenAccent } from '../../components/TeenAccent'
 
 type StatusMeta = {
   readonly value: AdherenceStatus
-  readonly label: string
+  readonly labelKey: string
   readonly icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
   readonly color: string
   readonly bgColor: string
@@ -41,21 +42,21 @@ type StatusMeta = {
 const STATUS_META: ReadonlyArray<StatusMeta> = [
   {
     value: 'taken',
-    label: 'Pris',
+    labelKey: 'modules.medication_adherence.status_taken',
     icon: 'check-circle-outline',
     color: colors.success,
     bgColor: '#ECFDF5',
   },
   {
     value: 'partial',
-    label: 'Partiellement',
+    labelKey: 'modules.medication_adherence.status_partial',
     icon: 'circle-half-full',
     color: colors.warning,
     bgColor: '#FFFBEB',
   },
   {
     value: 'missed',
-    label: 'Non pris',
+    labelKey: 'modules.medication_adherence.status_missed',
     icon: 'circle-outline',
     color: colors.textMuted,
     bgColor: '#F3F4F6',
@@ -97,6 +98,7 @@ interface StatusButtonProps {
 }
 
 function StatusButton({ meta, selected, onPress }: StatusButtonProps) {
+  const { t } = useTranslation()
   return (
     <TouchableOpacity
       style={[
@@ -107,7 +109,7 @@ function StatusButton({ meta, selected, onPress }: StatusButtonProps) {
       activeOpacity={0.75}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      accessibilityLabel={meta.label}
+      accessibilityLabel={t(meta.labelKey)}
     >
       <MaterialCommunityIcons
         name={meta.icon}
@@ -115,7 +117,7 @@ function StatusButton({ meta, selected, onPress }: StatusButtonProps) {
         color={selected ? meta.color : colors.border}
       />
       <Text style={[statusStyles.label, selected && { color: meta.color }]}>
-        {meta.label}
+        {t(meta.labelKey)}
       </Text>
     </TouchableOpacity>
   )
@@ -147,6 +149,7 @@ interface HistoryRowProps {
 }
 
 function HistoryRow({ entry }: HistoryRowProps) {
+  const { t } = useTranslation()
   const meta = STATUS_META.find((m) => m.value === entry.status) ?? STATUS_META[2]
   return (
     <View style={historyStyles.row}>
@@ -155,7 +158,7 @@ function HistoryRow({ entry }: HistoryRowProps) {
       </View>
       <View style={[historyStyles.statusBadge, { backgroundColor: meta.bgColor }]}>
         <MaterialCommunityIcons name={meta.icon} size={14} color={meta.color} />
-        <Text style={[historyStyles.statusText, { color: meta.color }]}>{meta.label}</Text>
+        <Text style={[historyStyles.statusText, { color: meta.color }]}>{t(meta.labelKey)}</Text>
       </View>
       {entry.notes ? (
         <Text style={historyStyles.notes} numberOfLines={1}>
@@ -192,7 +195,8 @@ const historyStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function MedicationAdherenceScreen() {
-  const { isTeenMode, tt, teenColor } = useTeen()
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const todayDate = today()
 
@@ -237,7 +241,7 @@ export default function MedicationAdherenceScreen() {
 
   const handleSave = async () => {
     if (!selectedStatus) {
-      Alert.alert('Statut manquant', 'Indiquez si vous avez pris votre traitement.')
+      Alert.alert(t('modules.medication_adherence.status_missing'), t('modules.medication_adherence.status_missing_msg'))
       return
     }
     setSaving(true)
@@ -261,9 +265,9 @@ export default function MedicationAdherenceScreen() {
 
       setExistingId(entry.id)
       await loadData()
-      Alert.alert('Enregistré', 'Votre saisie a été sauvegardée.')
+      Alert.alert(t('common.saved'), t('common.saved'))
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -280,16 +284,16 @@ export default function MedicationAdherenceScreen() {
       >
         {/* En-tête */}
         <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>Aujourd'hui</Text>
+          <Text style={styles.dateLabel}>{t('modules.medication_adherence.today_label')}</Text>
           <Text style={styles.dateValue}>{formatFullDate(todayDate)}</Text>
         </View>
 
         {/* Saisie du jour */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Mon traitement du jour</Text>
+          <Text style={styles.sectionTitle}>{t('modules.medication_adherence.section_today')}</Text>
           <View style={styles.card}>
             <Text style={styles.question}>
-              {isTeenMode ? tt('medication_adherence', 'intro') : 'Avez-vous pris votre traitement ?'}
+              {tt('medication_adherence', 'intro') || t('modules.medication_adherence.intro')}
             </Text>
             <View style={styles.statusRow}>
               {STATUS_META.map((meta) => (
@@ -306,13 +310,13 @@ export default function MedicationAdherenceScreen() {
 
         {/* Notes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes (facultatif)</Text>
+          <Text style={styles.sectionTitle}>{t('common.notes_optional')}</Text>
           <View style={styles.card}>
             <TextInput
               style={styles.notesInput}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Ex : oubli, difficulté, remarque…"
+              placeholder={t('modules.medication_adherence.notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={3}
@@ -328,7 +332,7 @@ export default function MedicationAdherenceScreen() {
           disabled={saving}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel="Enregistrer ma saisie du jour"
+          accessibilityLabel={existingId ? t('common.update') : t('modules.medication_adherence.save')}
         >
           {saving ? (
             <ActivityIndicator color={colors.white} size="small" />
@@ -336,7 +340,7 @@ export default function MedicationAdherenceScreen() {
             <>
               <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
               <Text style={styles.saveBtnText}>
-                {existingId ? 'Mettre à jour' : 'Enregistrer'}
+                {existingId ? t('common.update') : t('modules.medication_adherence.save')}
               </Text>
             </>
           )}
@@ -344,14 +348,12 @@ export default function MedicationAdherenceScreen() {
 
         {/* Historique */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Historique (30 derniers jours)</Text>
+          <Text style={styles.sectionTitle}>{t('modules.medication_adherence.history_30')}</Text>
           <View style={styles.card}>
             {loadingHistory ? (
               <ActivityIndicator color={colors.primary} />
             ) : history.length === 0 ? (
-              <Text style={styles.emptyHistory}>
-                Aucune saisie pour l'instant.
-              </Text>
+              <Text style={styles.emptyHistory}>{t('modules.medication_adherence.empty_history')}</Text>
             ) : (
               history.map((entry) => (
                 <HistoryRow key={entry.id} entry={entry} />

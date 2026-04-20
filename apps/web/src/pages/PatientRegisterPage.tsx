@@ -26,11 +26,12 @@ export function PatientRegisterPage() {
   }, [token])
 
   const checkToken = async () => {
+    interface InvitationRow { patient_email: string; expires_at: string; accepted_at: string | null }
     const { data } = await supabase
       .from('invitations')
       .select('patient_email, expires_at, accepted_at')
       .eq('token', token)
-      .single()
+      .single() as { data: InvitationRow | null; error: unknown }
 
     if (!data || data.accepted_at || new Date(data.expires_at) < new Date()) {
       setStep('invalid')

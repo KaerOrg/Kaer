@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
@@ -25,52 +26,52 @@ import { TeenAccent } from '../../components/TeenAccent'
 
 interface GroundingStep {
   count: number
-  sense: string
+  senseKey: string
   icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
-  instruction: string
-  tip: string
+  instructionKey: string
+  tipKey: string
   color: string
 }
 
 const GROUNDING_STEPS: readonly GroundingStep[] = [
   {
     count: 5,
-    sense: 'Voir',
+    senseKey: 'modules.grounding.step_see_sense',
     icon: 'eye-outline',
-    instruction: 'Repérez 5 choses que vous voyez autour de vous.',
-    tip: 'Ex. une lampe, une fenêtre, un livre, une chaise, vos mains.',
+    instructionKey: 'modules.grounding.step_see_instruction',
+    tipKey: 'modules.grounding.step_see_tip',
     color: '#7C3AED',
   },
   {
     count: 4,
-    sense: 'Toucher',
+    senseKey: 'modules.grounding.step_touch_sense',
     icon: 'hand-back-left-outline',
-    instruction: 'Trouvez 4 textures ou surfaces que vous pouvez toucher.',
-    tip: 'Ex. la texture de vos vêtements, le sol sous vos pieds, l\'air sur votre visage.',
+    instructionKey: 'modules.grounding.step_touch_instruction',
+    tipKey: 'modules.grounding.step_touch_tip',
     color: '#2563EB',
   },
   {
     count: 3,
-    sense: 'Entendre',
+    senseKey: 'modules.grounding.step_hear_sense',
     icon: 'ear-hearing',
-    instruction: 'Écoutez 3 sons dans votre environnement.',
-    tip: 'Ex. votre respiration, un bruit extérieur, le silence lui-même.',
+    instructionKey: 'modules.grounding.step_hear_instruction',
+    tipKey: 'modules.grounding.step_hear_tip',
     color: '#059669',
   },
   {
     count: 2,
-    sense: 'Sentir',
+    senseKey: 'modules.grounding.step_smell_sense',
     icon: 'flower-tulip-outline',
-    instruction: 'Repérez 2 odeurs autour de vous.',
-    tip: 'Ex. l\'air ambiant, votre peau, un tissu. Si rien, imaginez une odeur apaisante.',
+    instructionKey: 'modules.grounding.step_smell_instruction',
+    tipKey: 'modules.grounding.step_smell_tip',
     color: '#D97706',
   },
   {
     count: 1,
-    sense: 'Goûter',
+    senseKey: 'modules.grounding.step_taste_sense',
     icon: 'tongue',
-    instruction: 'Prenez conscience d\'1 goût dans votre bouche.',
-    tip: 'Ex. le goût de votre salive, d\'une boisson ou d\'un aliment récent.',
+    instructionKey: 'modules.grounding.step_taste_instruction',
+    tipKey: 'modules.grounding.step_taste_tip',
     color: '#DC2626',
   },
 ] as const
@@ -80,7 +81,8 @@ type Mode = 'intro' | 'guided' | 'done'
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function GroundingScreen() {
-  const { isTeenMode, tt, teenColor } = useTeen()
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const [mode, setMode] = useState<Mode>('intro')
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -116,24 +118,19 @@ export default function GroundingScreen() {
           <View style={styles.introCard} testID="intro-card">
             <MaterialCommunityIcons name="hand-heart-outline" size={40} color={colors.primary} />
             <Text style={styles.introTitle}>
-              {tt('grounding', 'title') || 'Technique 5-4-3-2-1'}
+              {tt('grounding', 'title') || t('modules.grounding.technique_title')}
             </Text>
             <Text style={styles.introText}>
-              {isTeenMode
-                ? tt('grounding', 'intro')
-                : "Cet exercice guide votre attention vers vos cinq sens, l'un après l'autre, pour vous aider à revenir dans le moment présent."}
+              {tt('grounding', 'intro') || t('modules.grounding.intro_text_1')}
             </Text>
-            {!isTeenMode && (
-              <Text style={styles.introText}>
-                Utilisez-le quand vous ressentez une forte anxiété, des pensées envahissantes
-                ou une sensation de décalage par rapport à votre environnement.
-              </Text>
-            )}
+            <Text style={styles.introText}>
+              {t('modules.grounding.intro_text_2')}
+            </Text>
           </View>
 
           {/* Aperçu des étapes */}
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Les 5 étapes</Text>
+            <Text style={styles.sectionLabel}>{t('modules.grounding.steps_section')}</Text>
             <View style={styles.stepsPreviewCard} testID="steps-preview">
               {GROUNDING_STEPS.map((s) => (
                 <View key={s.count} style={styles.previewRow}>
@@ -141,7 +138,7 @@ export default function GroundingScreen() {
                     <Text style={[styles.previewCount, { color: s.color }]}>{s.count}</Text>
                   </View>
                   <MaterialCommunityIcons name={s.icon} size={18} color={s.color} />
-                  <Text style={styles.previewSense}>{s.sense}</Text>
+                  <Text style={styles.previewSense}>{t(s.senseKey)}</Text>
                 </View>
               ))}
             </View>
@@ -150,9 +147,7 @@ export default function GroundingScreen() {
           {/* Note clinique */}
           <View style={styles.noteCard}>
             <MaterialCommunityIcons name="information-outline" size={16} color={colors.textMuted} />
-            <Text style={styles.noteText}>
-              Exercice reconnu et validé pour gérer l'anxiété intense.
-            </Text>
+            <Text style={styles.noteText}>{t('modules.grounding.clinical_note')}</Text>
           </View>
 
           {/* Bouton démarrer */}
@@ -161,11 +156,11 @@ export default function GroundingScreen() {
             onPress={handleStart}
             activeOpacity={0.85}
             accessibilityRole="button"
-            accessibilityLabel="Commencer l'exercice de grounding"
+            accessibilityLabel={t('modules.grounding.start_btn')}
             testID="start-button"
           >
             <MaterialCommunityIcons name="play-circle-outline" size={22} color={colors.white} />
-            <Text style={styles.startBtnText}>Commencer l'exercice</Text>
+            <Text style={styles.startBtnText}>{t('modules.grounding.start_btn')}</Text>
           </TouchableOpacity>
 
           {/* Urgences */}
@@ -191,7 +186,7 @@ export default function GroundingScreen() {
             <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: step.color }]} />
           </View>
           <Text style={styles.progressLabel}>
-            Étape {currentStep + 1} sur {GROUNDING_STEPS.length}
+            {t('modules.grounding.step_progress', { current: currentStep + 1, total: GROUNDING_STEPS.length })}
           </Text>
 
           {/* Carte de l'étape */}
@@ -204,11 +199,11 @@ export default function GroundingScreen() {
               <Text style={styles.stepCountText}>{step.count}</Text>
             </View>
 
-            <Text style={[styles.stepSense, { color: step.color }]}>{step.sense}</Text>
+            <Text style={[styles.stepSense, { color: step.color }]}>{t(step.senseKey)}</Text>
             <Text style={styles.stepInstruction} testID={`step-instruction-${currentStep}`}>
-              {step.instruction}
+              {t(step.instructionKey)}
             </Text>
-            <Text style={styles.stepTip}>{step.tip}</Text>
+            <Text style={styles.stepTip}>{t(step.tipKey)}</Text>
           </View>
 
           {/* Bouton suivant / terminer */}
@@ -217,11 +212,11 @@ export default function GroundingScreen() {
             onPress={handleNext}
             activeOpacity={0.85}
             accessibilityRole="button"
-            accessibilityLabel={isLast ? 'Terminer l\'exercice' : 'Étape suivante'}
+            accessibilityLabel={isLast ? t('modules.grounding.finish') : t('modules.grounding.next_step')}
             testID="next-button"
           >
             <Text style={styles.nextBtnText}>
-              {isLast ? 'Terminer' : 'Étape suivante'}
+              {isLast ? t('modules.grounding.finish') : t('modules.grounding.next_step')}
             </Text>
             <MaterialCommunityIcons
               name={isLast ? 'check-circle-outline' : 'arrow-right'}
@@ -235,9 +230,9 @@ export default function GroundingScreen() {
             onPress={handleRestart}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Arrêter l'exercice"
+            accessibilityLabel={t('modules.grounding.stop_btn')}
           >
-            <Text style={styles.cancelBtnText}>Arrêter</Text>
+            <Text style={styles.cancelBtnText}>{t('modules.grounding.stop_btn')}</Text>
           </TouchableOpacity>
 
         </View>
@@ -253,11 +248,8 @@ export default function GroundingScreen() {
 
         <View style={styles.doneCard} testID="done-card">
           <MaterialCommunityIcons name="check-circle-outline" size={56} color={colors.success} />
-          <Text style={styles.doneTitle}>Exercice terminé</Text>
-          <Text style={styles.doneText}>
-            Vous avez traversé les 5 étapes. Prenez un moment pour observer
-            comment vous vous sentez maintenant.
-          </Text>
+          <Text style={styles.doneTitle}>{t('common.done_title')}</Text>
+          <Text style={styles.doneText}>{t('modules.grounding.done_text')}</Text>
         </View>
 
         <TouchableOpacity
@@ -265,11 +257,11 @@ export default function GroundingScreen() {
           onPress={handleRestart}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel="Recommencer l'exercice"
+          accessibilityLabel={t('common.restart')}
           testID="restart-button"
         >
           <MaterialCommunityIcons name="refresh" size={20} color={colors.primary} />
-          <Text style={styles.restartBtnText}>Recommencer</Text>
+          <Text style={styles.restartBtnText}>{t('common.restart')}</Text>
         </TouchableOpacity>
 
         <SafetySection />
@@ -282,26 +274,27 @@ export default function GroundingScreen() {
 // ─── Composant urgences ───────────────────────────────────────────────────────
 
 function SafetySection() {
+  const { t } = useTranslation()
   return (
     <View style={styles.safetySection} testID="safety-section">
-      <Text style={styles.safetyTitle}>En cas de détresse</Text>
+      <Text style={styles.safetyTitle}>{t('modules.grounding.safety_title')}</Text>
       <TouchableOpacity
         style={styles.safetyBtn}
         onPress={() => Linking.openURL('tel:3114')}
         accessibilityRole="button"
-        accessibilityLabel="Appeler le 3114, numéro national de prévention du suicide"
+        accessibilityLabel={t('modules.grounding.safety_3114')}
       >
         <MaterialCommunityIcons name="phone" size={18} color="#DC2626" />
-        <Text style={styles.safetyBtnText}>3114 — Numéro national prévention suicide</Text>
+        <Text style={styles.safetyBtnText}>{t('modules.grounding.safety_3114')}</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.safetyBtn}
         onPress={() => Linking.openURL('tel:15')}
         accessibilityRole="button"
-        accessibilityLabel="Appeler le SAMU, le 15"
+        accessibilityLabel={t('modules.grounding.safety_15')}
       >
         <MaterialCommunityIcons name="ambulance" size={18} color="#DC2626" />
-        <Text style={styles.safetyBtnText}>15 — SAMU</Text>
+        <Text style={styles.safetyBtnText}>{t('modules.grounding.safety_15')}</Text>
       </TouchableOpacity>
     </View>
   )

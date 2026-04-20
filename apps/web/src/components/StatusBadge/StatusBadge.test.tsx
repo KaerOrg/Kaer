@@ -27,7 +27,7 @@ describe('StatusBadge', () => {
     expect(container.firstChild).toHaveClass('status-badge--neutral')
   })
 
-  it('affiche l'icône si fournie', () => {
+  it("affiche l'icône si fournie", () => {
     render(<StatusBadge label="L" icon="⚠️" />)
     expect(screen.getByText('⚠️')).toBeInTheDocument()
   })

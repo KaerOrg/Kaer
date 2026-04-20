@@ -16,6 +16,7 @@ import { getAllEmotionEntries, deleteEmotionEntry, type EmotionEntry } from '../
 import { EMOTION_WHEEL } from '../../constants/emotionWheel'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -48,16 +49,17 @@ interface EntryCardProps {
 }
 
 function EntryCard({ entry, onDelete }: EntryCardProps) {
+  const { t } = useTranslation()
   const color = PRIMARY_COLOR_MAP.get(entry.primary_key) ?? colors.primary
   const icon = PRIMARY_ICON_MAP.get(entry.primary_key) ?? 'emoticon-outline'
 
   function handleDelete() {
     Alert.alert(
-      'Supprimer cette entrée ?',
-      'Cette action est irréversible.',
+      t('modules.emotion_wheel.delete_entry_title'),
+      t('common.irreversible'),
       [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => onDelete(entry.id) },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => onDelete(entry.id) },
       ]
     )
   }
@@ -81,7 +83,7 @@ function EntryCard({ entry, onDelete }: EntryCardProps) {
           <TouchableOpacity
             onPress={handleDelete}
             accessibilityRole="button"
-            accessibilityLabel="Supprimer cette entrée"
+            accessibilityLabel={t('common.delete')}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
@@ -99,6 +101,7 @@ function EntryCard({ entry, onDelete }: EntryCardProps) {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function EmotionWheelScreen() {
+  const { t } = useTranslation()
   const { teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [entries, setEntries] = useState<EmotionEntry[]>([])
@@ -140,18 +143,18 @@ export default function EmotionWheelScreen() {
           onPress={() => navigation.navigate('EmotionEntry')}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel="Ajouter une nouvelle entrée d'émotion"
+          accessibilityLabel={t('modules.emotion_wheel.identify_btn')}
           testID="add-entry-button"
         >
           <MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.white} />
-          <Text style={styles.addBtnText}>Identifier une émotion</Text>
+          <Text style={styles.addBtnText}>{t('modules.emotion_wheel.identify_btn')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.monthBtn}
           onPress={() => navigation.navigate('EmotionMonth')}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel="Voir le bilan mensuel"
+          accessibilityLabel={t('modules.emotion_wheel.view_monthly')}
           testID="month-view-button"
         >
           <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
@@ -163,23 +166,19 @@ export default function EmotionWheelScreen() {
         {/* ── Intro ─────────────────────────────────────────────────────────── */}
         <View style={styles.introCard} testID="intro-card">
           <MaterialCommunityIcons name="palette" size={24} color={colors.primary} />
-          <Text style={styles.introText}>
-            Nommez vos émotions avec précision pour mieux les reconnaître et les communiquer à votre praticien.
-          </Text>
+          <Text style={styles.introText}>{t('modules.emotion_wheel.intro')}</Text>
         </View>
 
         {/* ── Historique ────────────────────────────────────────────────────── */}
         {entries.length === 0 ? (
           <View style={styles.empty} testID="empty-state">
             <MaterialCommunityIcons name="palette-outline" size={52} color={colors.border} />
-            <Text style={styles.emptyTitle}>Aucune entrée</Text>
-            <Text style={styles.emptyText}>
-              Appuyez sur le bouton ci-dessus pour identifier votre première émotion.
-            </Text>
+            <Text style={styles.emptyTitle}>{t('modules.emotion_wheel.empty_title')}</Text>
+            <Text style={styles.emptyText}>{t('modules.emotion_wheel.empty_text')}</Text>
           </View>
         ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Historique ({entries.length})</Text>
+            <Text style={styles.sectionLabel}>{t('common.history')} ({entries.length})</Text>
             {entries.map((entry) => (
               <EntryCard key={entry.id} entry={entry} onDelete={handleDelete} />
             ))}

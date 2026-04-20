@@ -22,6 +22,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -33,56 +34,55 @@ type EffectKey = keyof Omit<SideEffectsEntry, 'id' | 'date' | 'notes' | 'created
 
 type EffectMeta = {
   readonly key: EffectKey
-  readonly label: string
-  readonly detail: string
+  readonly labelKey: string
+  readonly detailKey: string
   readonly icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
 }
 
 const EFFECTS: ReadonlyArray<EffectMeta> = [
   {
     key: 'sedation',
-    label: 'Sédation',
-    detail: 'Somnolence, lenteur, difficultés de concentration',
+    labelKey: 'modules.medication_side_effects.effect_sedation_label',
+    detailKey: 'modules.medication_side_effects.effect_sedation_detail',
     icon: 'sleep',
   },
   {
     key: 'akathisia',
-    label: 'Akathisie',
-    detail: 'Agitation intérieure, impossibilité de rester immobile',
+    labelKey: 'modules.medication_side_effects.effect_akathisia_label',
+    detailKey: 'modules.medication_side_effects.effect_akathisia_detail',
     icon: 'run',
   },
   {
     key: 'tremors',
-    label: 'Tremblements',
-    detail: 'Mains, membres — peut survenir avec certains médicaments psychiatriques',
+    labelKey: 'modules.medication_side_effects.effect_tremors_label',
+    detailKey: 'modules.medication_side_effects.effect_tremors_detail',
     icon: 'hand-wave-outline',
   },
   {
     key: 'dry_mouth',
-    label: 'Sécheresse buccale',
-    detail: 'Bouche sèche — peut survenir avec certains médicaments',
+    labelKey: 'modules.medication_side_effects.effect_dry_mouth_label',
+    detailKey: 'modules.medication_side_effects.effect_dry_mouth_detail',
     icon: 'water-off-outline',
   },
   {
     key: 'sleep_disturbance',
-    label: 'Troubles du sommeil',
-    detail: 'Insomnie ou difficultés à dormir — peut survenir avec certains antidépresseurs ou régulateurs d\'humeur',
+    labelKey: 'modules.medication_side_effects.effect_sleep_label',
+    detailKey: 'modules.medication_side_effects.effect_sleep_detail',
     icon: 'moon-waning-crescent',
   },
   {
     key: 'nausea',
-    label: 'Nausées / troubles digestifs',
-    detail: 'Nausées, douleurs abdominales — peut survenir avec certains médicaments',
+    labelKey: 'modules.medication_side_effects.effect_nausea_label',
+    detailKey: 'modules.medication_side_effects.effect_nausea_detail',
     icon: 'stomach',
   },
 ] as const
 
-// Labels de l'échelle 0–3
-const SCALE_LABELS: Record<number, string> = {
-  0: 'Absent',
-  1: 'Léger',
-  2: 'Modéré',
-  3: 'Sévère',
+const SCALE_LABEL_KEYS: Record<number, string> = {
+  0: 'modules.medication_side_effects.scale_absent',
+  1: 'modules.medication_side_effects.scale_mild',
+  2: 'modules.medication_side_effects.scale_moderate',
+  3: 'modules.medication_side_effects.scale_severe',
 }
 
 const SCALE_COLORS: Record<number, string> = {
@@ -125,6 +125,7 @@ interface ScalePickerProps {
 }
 
 function ScalePicker({ value, onChange }: ScalePickerProps) {
+  const { t } = useTranslation()
   return (
     <View style={scaleStyles.row}>
       {[0, 1, 2, 3].map((n) => {
@@ -141,13 +142,13 @@ function ScalePicker({ value, onChange }: ScalePickerProps) {
             activeOpacity={0.75}
             accessibilityRole="radio"
             accessibilityState={{ checked: selected }}
-            accessibilityLabel={`${n} — ${SCALE_LABELS[n]}`}
+            accessibilityLabel={`${n} — ${t(SCALE_LABEL_KEYS[n])}`}
           >
             <Text style={[scaleStyles.num, selected && scaleStyles.numSelected]}>
               {n}
             </Text>
             <Text style={[scaleStyles.label, selected && { color: colors.white }]}>
-              {SCALE_LABELS[n]}
+              {t(SCALE_LABEL_KEYS[n])}
             </Text>
           </TouchableOpacity>
         )
@@ -182,14 +183,15 @@ interface EffectCardProps {
 }
 
 function EffectCard({ meta, value, onChange }: EffectCardProps) {
+  const { t } = useTranslation()
   const color = SCALE_COLORS[value]
   return (
     <View style={[effectStyles.card, value > 0 && { borderLeftColor: color }]}>
       <View style={effectStyles.header}>
         <MaterialCommunityIcons name={meta.icon} size={20} color={value > 0 ? color : colors.textMuted} />
         <View style={effectStyles.headerText}>
-          <Text style={effectStyles.label}>{meta.label}</Text>
-          <Text style={effectStyles.detail}>{meta.detail}</Text>
+          <Text style={effectStyles.label}>{t(meta.labelKey)}</Text>
+          <Text style={effectStyles.detail}>{t(meta.detailKey)}</Text>
         </View>
         {value > 0 && (
           <View style={[effectStyles.badge, { backgroundColor: color }]}>
@@ -237,14 +239,14 @@ interface HistoryRowProps {
 }
 
 function HistoryRow({ entry }: HistoryRowProps) {
-  // Résumé des effets non nuls
+  const { t } = useTranslation()
   const active = EFFECTS.filter((e) => entry[e.key] > 0)
   return (
     <View style={histStyles.row}>
       <Text style={histStyles.date}>{formatShortDate(entry.date)}</Text>
       <View style={histStyles.pills}>
         {active.length === 0 ? (
-          <Text style={histStyles.none}>Aucun effet</Text>
+          <Text style={histStyles.none}>{t('modules.medication_side_effects.no_effects')}</Text>
         ) : (
           active.map((e) => {
             const val = entry[e.key] as number
@@ -252,7 +254,7 @@ function HistoryRow({ entry }: HistoryRowProps) {
             return (
               <View key={e.key} style={[histStyles.pill, { backgroundColor: color + '22', borderColor: color }]}>
                 <Text style={[histStyles.pillText, { color }]}>
-                  {e.label} {val}
+                  {t(e.labelKey)} {val}
                 </Text>
               </View>
             )
@@ -296,7 +298,8 @@ const EMPTY_VALUES: Record<EffectKey, number> = {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function MedicationSideEffectsScreen() {
-  const { teenColor } = useTeen()
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const todayDate = today()
 
@@ -364,9 +367,9 @@ export default function MedicationSideEffectsScreen() {
 
       setExistingId(entry.id)
       await loadData()
-      Alert.alert('Enregistré', 'Votre saisie a été sauvegardée.')
+      Alert.alert(t('common.saved'), t('common.saved'))
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -381,20 +384,20 @@ export default function MedicationSideEffectsScreen() {
       >
         {/* En-tête */}
         <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>Aujourd'hui</Text>
+          <Text style={styles.dateLabel}>{t('modules.medication_side_effects.today_label')}</Text>
           <Text style={styles.dateValue}>{formatFullDate(todayDate)}</Text>
         </View>
 
         {/* Rappel échelle */}
         <View style={styles.scaleInfo}>
           <Text style={styles.scaleInfoText}>
-            0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère
+            {t('modules.medication_side_effects.scale_info')}
           </Text>
         </View>
 
         {/* Les 6 effets */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Effets ressentis aujourd'hui</Text>
+          <Text style={styles.sectionTitle}>{tt('medication_side_effects', 'section_effects') || t('modules.medication_side_effects.section_effects')}</Text>
           {EFFECTS.map((meta) => (
             <EffectCard
               key={meta.key}
@@ -407,13 +410,13 @@ export default function MedicationSideEffectsScreen() {
 
         {/* Notes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes (facultatif)</Text>
+          <Text style={styles.sectionTitle}>{t('common.notes_optional')}</Text>
           <View style={styles.card}>
             <TextInput
               style={styles.notesInput}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Contexte, remarque, moment de la journée…"
+              placeholder={t('modules.medication_side_effects.notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={3}
@@ -429,7 +432,7 @@ export default function MedicationSideEffectsScreen() {
           disabled={saving}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel="Enregistrer ma saisie du jour"
+          accessibilityLabel={existingId ? t('common.update') : t('modules.medication_side_effects.save')}
         >
           {saving ? (
             <ActivityIndicator color={colors.white} size="small" />
@@ -437,7 +440,7 @@ export default function MedicationSideEffectsScreen() {
             <>
               <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
               <Text style={styles.saveBtnText}>
-                {existingId ? 'Mettre à jour' : 'Enregistrer'}
+                {existingId ? t('common.update') : t('modules.medication_side_effects.save')}
               </Text>
             </>
           )}
@@ -445,12 +448,12 @@ export default function MedicationSideEffectsScreen() {
 
         {/* Historique */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Historique (30 derniers jours)</Text>
+          <Text style={styles.sectionTitle}>{t('modules.medication_side_effects.history_30')}</Text>
           <View style={styles.card}>
             {loadingHistory ? (
               <ActivityIndicator color={colors.primary} />
             ) : history.length === 0 ? (
-              <Text style={styles.emptyHistory}>Aucune saisie pour l'instant.</Text>
+              <Text style={styles.emptyHistory}>{t('modules.medication_side_effects.empty_history')}</Text>
             ) : (
               history.map((entry) => <HistoryRow key={entry.id} entry={entry} />)
             )}

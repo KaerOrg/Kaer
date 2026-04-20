@@ -25,6 +25,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 import { Card } from '../../components/Card'
@@ -61,45 +62,45 @@ type DimensionKey = 'mood' | 'energy' | 'anxiety' | 'pleasure'
 
 interface DimensionMeta {
   key: DimensionKey
-  label: string
+  labelKey: string
   icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
   color: string
-  lowHint: string   // affiché à l'extrémité basse (1) — décrit sans juger
-  highHint: string  // affiché à l'extrémité haute (10)
+  lowHintKey: string
+  highHintKey: string
 }
 
 const DIMENSIONS: DimensionMeta[] = [
   {
     key: 'mood',
-    label: 'Humeur',
+    labelKey: 'modules.mood_tracker.dim_mood',
     icon: 'emoticon-outline',
     color: '#8B5CF6',
-    lowHint: 'Très basse',
-    highHint: 'Très élevée',
+    lowHintKey: 'modules.mood_tracker.dim_mood_low',
+    highHintKey: 'modules.mood_tracker.dim_mood_high',
   },
   {
     key: 'energy',
-    label: 'Énergie',
+    labelKey: 'modules.mood_tracker.dim_energy',
     icon: 'lightning-bolt-outline',
     color: '#F59E0B',
-    lowHint: 'Épuisé(e)',
-    highHint: 'Plein(e) d\'énergie',
+    lowHintKey: 'modules.mood_tracker.dim_energy_low',
+    highHintKey: 'modules.mood_tracker.dim_energy_high',
   },
   {
     key: 'anxiety',
-    label: 'Anxiété',
+    labelKey: 'modules.mood_tracker.dim_anxiety',
     icon: 'pulse',
     color: '#EF4444',
-    lowHint: 'Aucune',
-    highHint: 'Très intense',
+    lowHintKey: 'modules.mood_tracker.dim_anxiety_low',
+    highHintKey: 'modules.mood_tracker.dim_anxiety_high',
   },
   {
     key: 'pleasure',
-    label: 'Plaisir',
+    labelKey: 'modules.mood_tracker.dim_pleasure',
     icon: 'heart-outline',
     color: '#059669',
-    lowHint: 'Rien ne m\'a touché',
-    highHint: 'Pleinement ressenti',
+    lowHintKey: 'modules.mood_tracker.dim_pleasure_low',
+    highHintKey: 'modules.mood_tracker.dim_pleasure_high',
   },
 ]
 
@@ -112,13 +113,14 @@ interface ScalePickerProps {
 }
 
 function ScalePicker({ value, meta, onChange }: ScalePickerProps) {
+  const { t } = useTranslation()
   return (
     <View style={scaleStyles.container}>
       {/* En-tête */}
       <View style={scaleStyles.header}>
         <View style={scaleStyles.labelRow}>
           <MaterialCommunityIcons name={meta.icon} size={18} color={meta.color} />
-          <Text style={[scaleStyles.label, { color: meta.color }]}>{meta.label}</Text>
+          <Text style={[scaleStyles.label, { color: meta.color }]}>{t(meta.labelKey)}</Text>
         </View>
         <Text style={[scaleStyles.value, { color: meta.color }]}>{value}</Text>
       </View>
@@ -132,14 +134,14 @@ function ScalePicker({ value, meta, onChange }: ScalePickerProps) {
               key={n}
               style={[
                 scaleStyles.pip,
-                n <= value && { backgroundColor: meta.color + '33' }, // fond léger pour les valeurs ≤ sélection
+                n <= value && { backgroundColor: meta.color + '33' },
                 selected && { backgroundColor: meta.color, borderColor: meta.color },
               ]}
               onPress={() => onChange(n)}
               hitSlop={4}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
-              accessibilityLabel={`${meta.label} : ${n}`}
+              accessibilityLabel={`${t(meta.labelKey)} : ${n}`}
             >
               <Text style={[scaleStyles.pipText, selected && scaleStyles.pipTextSelected]}>
                 {n}
@@ -151,8 +153,8 @@ function ScalePicker({ value, meta, onChange }: ScalePickerProps) {
 
       {/* Libellés extrémités */}
       <View style={scaleStyles.hints}>
-        <Text style={scaleStyles.hint}>{meta.lowHint}</Text>
-        <Text style={scaleStyles.hint}>{meta.highHint}</Text>
+        <Text style={scaleStyles.hint}>{t(meta.lowHintKey)}</Text>
+        <Text style={scaleStyles.hint}>{t(meta.highHintKey)}</Text>
       </View>
     </View>
   )
@@ -265,11 +267,12 @@ interface HistoryCardProps {
 }
 
 function HistoryCard({ entry, onDelete }: HistoryCardProps) {
+  const { t } = useTranslation()
   return (
     <View style={histStyles.card}>
       <View style={histStyles.header}>
         <Text style={histStyles.date}>{formatDateLabel(entry.date)}</Text>
-        <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer cette saisie">
+        <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
           <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
         </Pressable>
       </View>
@@ -318,6 +321,7 @@ type FormState = { mood: number; energy: number; anxiety: number; pleasure: numb
 const DEFAULT_FORM: FormState = { mood: 5, energy: 5, anxiety: 5, pleasure: 5, notes: '' }
 
 export default function MoodTrackerScreen() {
+  const { t } = useTranslation()
   const { teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
   const today = todayISO()
@@ -395,9 +399,9 @@ export default function MoodTrackerScreen() {
       const all = await getAllMoodEntries()
       setEntries(all)
       setExistingId(entry.id)
-      Alert.alert('Enregistré', 'Votre saisie du jour a été sauvegardée.')
+      Alert.alert(t('common.saved'), t('modules.mood_tracker.saved_message'))
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -407,12 +411,12 @@ export default function MoodTrackerScreen() {
 
   const handleDelete = useCallback((entry: MoodEntry) => {
     Alert.alert(
-      'Supprimer cette saisie ?',
-      'Cette action est irréversible.',
+      t('modules.mood_tracker.delete_entry_title'),
+      t('common.irreversible'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await deleteMoodEntry(entry.id)
@@ -453,7 +457,7 @@ export default function MoodTrackerScreen() {
           accessibilityState={{ selected: tab === 'today' }}
         >
           <Text style={[styles.tabText, tab === 'today' && styles.tabTextActive]}>
-            Aujourd'hui
+            {t('modules.mood_tracker.tab_today')}
           </Text>
         </Pressable>
         <Pressable
@@ -463,7 +467,7 @@ export default function MoodTrackerScreen() {
           accessibilityState={{ selected: tab === 'history' }}
         >
           <Text style={[styles.tabText, tab === 'history' && styles.tabTextActive]}>
-            Historique
+            {t('modules.mood_tracker.tab_history')}
           </Text>
           {pastEntries.length > 0 && (
             <StatusBadge variant="info" label="" value={pastEntries.length} />
@@ -483,7 +487,7 @@ export default function MoodTrackerScreen() {
             <View testID="already-saved-banner">
               <StatusBadge
                 variant="success"
-                label="Saisie du jour déjà enregistrée — vous pouvez la modifier."
+                label={t('modules.mood_tracker.already_saved')}
                 style={styles.alreadySavedBadge}
               />
             </View>
@@ -505,13 +509,13 @@ export default function MoodTrackerScreen() {
 
           {/* Notes libres */}
           <View style={styles.notesSection}>
-            <Text style={styles.notesLabel}>Notes libres (optionnel)</Text>
+            <Text style={styles.notesLabel}>{t('modules.mood_tracker.notes_label')}</Text>
             <TextInput
               style={styles.notesInput}
-              placeholder="Contexte, événement du jour, remarque..."
+              placeholder={t('modules.mood_tracker.notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               value={form.notes}
-              onChangeText={(t) => setForm((prev) => ({ ...prev, notes: t }))}
+              onChangeText={(v) => setForm((prev) => ({ ...prev, notes: v }))}
               multiline
               textAlignVertical="top"
             />
@@ -524,20 +528,20 @@ export default function MoodTrackerScreen() {
             <EmptyState
               icon="📈"
               title=""
-              description="L'historique s'affichera dès que vous aurez enregistré au moins 2 saisies."
+              description={t('modules.mood_tracker.history_empty')}
             />
           ) : (
             <>
               {/* Mini graphiques — 3 sparklines */}
               <Card>
-                <Text style={styles.sectionTitle}>30 derniers jours</Text>
+                <Text style={styles.sectionTitle}>{t('modules.mood_tracker.history_title')}</Text>
                 {DIMENSIONS.map((d) => (
                   <Sparkline
                     key={d.key}
                     entries={entries}
                     dimensionKey={d.key}
                     color={d.color}
-                    label={d.label}
+                    label={t(d.labelKey)}
                   />
                 ))}
               </Card>
@@ -565,7 +569,7 @@ export default function MoodTrackerScreen() {
             onPress={handleSave}
             disabled={saving}
             accessibilityRole="button"
-            accessibilityLabel="Sauvegarder la saisie du jour"
+            accessibilityLabel={existingId ? t('common.update') : t('common.save')}
             testID="save-button"
           >
             {saving ? (
@@ -574,7 +578,7 @@ export default function MoodTrackerScreen() {
               <>
                 <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
                 <Text style={styles.saveBtnText}>
-                  {existingId ? 'Mettre à jour' : 'Enregistrer'}
+                  {existingId ? t('common.update') : t('common.save')}
                 </Text>
               </>
             )}

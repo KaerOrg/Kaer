@@ -50,6 +50,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 type RouteType = RouteProp<AppStackParamList, 'BehavioralActivationEntry'>
 
@@ -120,6 +121,7 @@ const pickerStyles = StyleSheet.create({
 // ─── Sélecteur de date ────────────────────────────────────────────────────────
 
 function DateField({ value, onChange }: { value: Date; onChange: (d: Date) => void }) {
+  const { t } = useTranslation()
   const [showPicker, setShowPicker] = useState(false)
 
   const handleChange = (_: unknown, date?: Date) => {
@@ -129,7 +131,7 @@ function DateField({ value, onChange }: { value: Date; onChange: (d: Date) => vo
 
   return (
     <View style={dateStyles.container}>
-      <Text style={dateStyles.label}>Date</Text>
+      <Text style={dateStyles.label}>{t('modules.behavioral_activation.date_label')}</Text>
       <TouchableOpacity
         style={dateStyles.button}
         onPress={() => setShowPicker(true)}
@@ -151,7 +153,7 @@ function DateField({ value, onChange }: { value: Date; onChange: (d: Date) => vo
       )}
       {showPicker && Platform.OS === 'ios' && (
         <TouchableOpacity style={dateStyles.confirm} onPress={() => setShowPicker(false)}>
-          <Text style={dateStyles.confirmText}>Confirmer</Text>
+          <Text style={dateStyles.confirmText}>{t('modules.behavioral_activation.date_confirm')}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -186,6 +188,7 @@ const dateStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BehavioralActivationEntryScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
   const patient = useAuthStore((s) => s.patient)
@@ -218,7 +221,7 @@ export default function BehavioralActivationEntryScreen() {
 
   const handleSave = async () => {
     if (!label.trim()) {
-      Alert.alert('Nom manquant', 'Donnez un nom à cette activité.')
+      Alert.alert(t('modules.behavioral_activation.name_missing'), t('modules.behavioral_activation.name_missing_msg'))
       return
     }
     setSaving(true)
@@ -244,7 +247,7 @@ export default function BehavioralActivationEntryScreen() {
 
       navigation.goBack()
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -267,13 +270,13 @@ export default function BehavioralActivationEntryScreen() {
 
           {/* Nom de l'activité */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Activité</Text>
+            <Text style={styles.sectionTitle}>{t('modules.behavioral_activation.section_activity')}</Text>
             <View style={styles.card}>
               <TextInput
                 style={styles.labelInput}
                 value={label}
                 onChangeText={setLabel}
-                placeholder="Ex : Marche 20 min, Appel à un ami, Lecture…"
+                placeholder={t('modules.behavioral_activation.activity_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 autoFocus={!recordId}
                 returnKeyType="done"
@@ -321,25 +324,25 @@ export default function BehavioralActivationEntryScreen() {
               color={done ? colors.success : colors.textMuted}
             />
             <Text style={[styles.doneLabel, done && { color: colors.success }]}>
-              {done ? 'Activité réalisée' : 'Marquer comme réalisée'}
+              {done ? t('modules.behavioral_activation.done_label') : t('modules.behavioral_activation.mark_done')}
             </Text>
           </TouchableOpacity>
 
           {/* Plaisir */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Évaluation</Text>
+            <Text style={styles.sectionTitle}>{t('modules.behavioral_activation.section_evaluation')}</Text>
             <View style={styles.card}>
               <ScalePicker
-                label="Plaisir (P)"
-                sublabel="Satisfaction retirée de l'activité"
+                label={t('modules.behavioral_activation.pleasure_label')}
+                sublabel={t('modules.behavioral_activation.pleasure_sublabel')}
                 value={pleasure}
                 color="#059669"
                 onChange={setPleasure}
               />
               <View style={styles.divider} />
               <ScalePicker
-                label="Accomplissement (A)"
-                sublabel="Sentiment d'accomplissement"
+                label={t('modules.behavioral_activation.mastery_label')}
+                sublabel={t('modules.behavioral_activation.mastery_sublabel')}
                 value={mastery}
                 color="#4F46E5"
                 onChange={setMastery}
@@ -349,13 +352,13 @@ export default function BehavioralActivationEntryScreen() {
 
           {/* Notes */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notes (facultatif)</Text>
+            <Text style={styles.sectionTitle}>{t('common.notes_optional')}</Text>
             <View style={styles.card}>
               <TextInput
                 style={styles.notesInput}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Contexte, ressenti, remarque…"
+                placeholder={t('common.notes_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
@@ -378,7 +381,7 @@ export default function BehavioralActivationEntryScreen() {
               <>
                 <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
                 <Text style={styles.saveBtnText}>
-                  {existingId ? 'Mettre à jour' : 'Enregistrer'}
+                  {existingId ? t('common.update') : t('modules.behavioral_activation.save')}
                 </Text>
               </>
             )}

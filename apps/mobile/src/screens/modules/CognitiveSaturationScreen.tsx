@@ -19,6 +19,7 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 // ─── Données cliniques ────────────────────────────────────────────────────────
 //
@@ -58,13 +59,14 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session, onDelete }: SessionCardProps) {
+  const { t } = useTranslation()
   function handleDelete() {
     Alert.alert(
-      'Supprimer cette session ?',
-      'Cette action est irréversible.',
+      t('modules.cognitive_saturation.delete_session_title'),
+      t('common.irreversible'),
       [
-        { text: 'Annuler', style: 'cancel' },
-        { text: 'Supprimer', style: 'destructive', onPress: () => onDelete(session.id) },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('common.delete'), style: 'destructive', onPress: () => onDelete(session.id) },
       ]
     )
   }
@@ -78,7 +80,7 @@ function SessionCard({ session, onDelete }: SessionCardProps) {
         <TouchableOpacity
           onPress={handleDelete}
           accessibilityRole="button"
-          accessibilityLabel="Supprimer cette session"
+          accessibilityLabel={t('modules.cognitive_saturation.delete_session_title')}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
@@ -87,7 +89,7 @@ function SessionCard({ session, onDelete }: SessionCardProps) {
       <View style={styles.sessionStats}>
         <View style={styles.statItem}>
           <MaterialCommunityIcons name="gesture-tap" size={14} color={colors.textMuted} />
-          <Text style={styles.statText}>{session.repetitions} répétitions</Text>
+          <Text style={styles.statText}>{session.repetitions} {t('modules.cognitive_saturation.repetitions')}</Text>
         </View>
         <View style={styles.statItem}>
           <MaterialCommunityIcons name="clock-outline" size={14} color={colors.textMuted} />
@@ -103,6 +105,7 @@ function SessionCard({ session, onDelete }: SessionCardProps) {
 
 export default function CognitiveSaturationScreen() {
   const navigation = useNavigation<Nav>()
+  const { t } = useTranslation()
   const [sessions, setSessions] = useState<CognitiveSaturationSession[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -140,11 +143,11 @@ export default function CognitiveSaturationScreen() {
         onPress={() => navigation.navigate('CognitiveSaturationExercise')}
         activeOpacity={0.85}
         accessibilityRole="button"
-        accessibilityLabel="Démarrer un exercice de saturation cognitive"
+        accessibilityLabel={t('modules.cognitive_saturation.start_btn')}
         testID="start-exercise-button"
       >
         <MaterialCommunityIcons name="repeat" size={20} color={colors.white} />
-        <Text style={styles.startBtnText}>Démarrer un exercice</Text>
+        <Text style={styles.startBtnText}>{t('modules.cognitive_saturation.start_btn')}</Text>
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.container}>
@@ -152,24 +155,19 @@ export default function CognitiveSaturationScreen() {
         {/* ── Intro ─────────────────────────────────────────────────────────── */}
         <View style={styles.introCard} testID="intro-card">
           <MaterialCommunityIcons name="chat-processing-outline" size={24} color={colors.primary} />
-          <Text style={styles.introText}>
-            Répétez un mot ou une pensée rapidement et de nombreuses fois pour qu'il perde
-            progressivement sa charge émotionnelle et devienne « juste des sons ».
-          </Text>
+          <Text style={styles.introText}>{t('modules.cognitive_saturation.intro_text')}</Text>
         </View>
 
         {/* ── Historique ────────────────────────────────────────────────────── */}
         {sessions.length === 0 ? (
           <View style={styles.empty} testID="empty-state">
             <MaterialCommunityIcons name="chat-processing-outline" size={52} color={colors.border} />
-            <Text style={styles.emptyTitle}>Aucune session</Text>
-            <Text style={styles.emptyText}>
-              Appuyez sur le bouton ci-dessus pour démarrer votre premier exercice.
-            </Text>
+            <Text style={styles.emptyTitle}>{t('modules.cognitive_saturation.empty_title')}</Text>
+            <Text style={styles.emptyText}>{t('modules.cognitive_saturation.empty_text')}</Text>
           </View>
         ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Historique ({sessions.length})</Text>
+            <Text style={styles.sectionLabel}>{t('modules.cognitive_saturation.history_label', { count: sessions.length })}</Text>
             {sessions.map((session) => (
               <SessionCard key={session.id} session={session} onDelete={handleDelete} />
             ))}

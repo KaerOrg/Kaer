@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import i18next, { initialLanguage } from '../i18n'
 
 interface Patient {
   id: string
@@ -10,9 +11,11 @@ interface Patient {
 interface AuthState {
   patient: Patient | null
   teenMode: boolean
+  language: string
   loading: boolean
   loadSession: () => Promise<void>
   fetchTeenMode: () => Promise<void>
+  setLanguage: (lng: string) => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (token: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -22,6 +25,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   patient: null,
   teenMode: false,
+  language: initialLanguage,
   loading: true,
 
   // Appelé au démarrage de l'app pour restaurer la session existante
@@ -77,6 +81,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ patient: null, teenMode: false })
       }
     })
+  },
+
+  setLanguage: async (lng: string) => {
+    await i18next.changeLanguage(lng)
+    set({ language: lng })
   },
 
   // Récupère le flag teen_mode depuis la relation praticien ↔ patient

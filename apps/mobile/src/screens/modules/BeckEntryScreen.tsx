@@ -22,6 +22,7 @@ import {
 } from '../../lib/database'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 
@@ -205,6 +206,7 @@ function newRecord(): Omit<ThoughtRecord, 'created_at'> {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BeckEntryScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
   const patient = useAuthStore((s) => s.patient)
@@ -235,7 +237,7 @@ export default function BeckEntryScreen() {
 
   const handleSave = useCallback(async () => {
     if (!record.situation.trim() && !record.automatic_thought.trim()) {
-      Alert.alert('Enregistrement vide', 'Renseignez au moins la situation ou la pensée automatique.')
+      Alert.alert(t('modules.beck_columns.empty_alert_title'), t('modules.beck_columns.empty_alert_msg'))
       return
     }
 
@@ -254,7 +256,7 @@ export default function BeckEntryScreen() {
 
       navigation.goBack()
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -283,12 +285,12 @@ export default function BeckEntryScreen() {
         {/* Colonne 1 — Situation */}
         <ColumnSection
           number={1}
-          title="Situation"
-          hint="Où étiez-vous ? Que se passait-il ? Qui était présent ?"
+          title={t('modules.beck_columns.entry_col_1_title')}
+          hint={t('modules.beck_columns.entry_col_1_hint')}
           accentColor="#0EA5E9"
         >
           <Field
-            placeholder="Décrivez la situation..."
+            placeholder={t('modules.beck_columns.entry_col_1_placeholder')}
             value={record.situation}
             onChange={(v) => set('situation', v)}
           />
@@ -297,19 +299,19 @@ export default function BeckEntryScreen() {
         {/* Colonne 2 — Émotion */}
         <ColumnSection
           number={2}
-          title="Émotion(s)"
-          hint="Quelle émotion avez-vous ressentie ?"
+          title={t('modules.beck_columns.entry_col_2_title')}
+          hint={t('modules.beck_columns.entry_col_2_hint')}
           accentColor="#8B5CF6"
         >
           <Field
-            placeholder="Ex : anxiété, tristesse, colère..."
+            placeholder={t('modules.beck_columns.entry_col_2_placeholder')}
             value={record.emotion}
             onChange={(v) => set('emotion', v)}
             multiline={false}
             minHeight={0}
           />
           <IntensitySlider
-            label="Intensité initiale"
+            label={t('modules.beck_columns.entry_col_2_intensity')}
             value={record.emotion_intensity}
             accentColor="#8B5CF6"
             onChange={(v) => set('emotion_intensity', v)}
@@ -319,17 +321,17 @@ export default function BeckEntryScreen() {
         {/* Colonne 3 — Pensée automatique */}
         <ColumnSection
           number={3}
-          title="Pensée automatique"
-          hint="Quelle pensée est passée dans votre tête à ce moment-là ?"
+          title={t('modules.beck_columns.entry_col_3_title')}
+          hint={t('modules.beck_columns.entry_col_3_hint')}
           accentColor="#EF4444"
         >
           <Field
-            placeholder="Ex : Je suis nul(le), ça va mal se passer..."
+            placeholder={t('modules.beck_columns.entry_col_3_placeholder')}
             value={record.automatic_thought}
             onChange={(v) => set('automatic_thought', v)}
           />
           <IntensitySlider
-            label="À quel point y croyiez-vous ?"
+            label={t('modules.beck_columns.entry_col_3_belief')}
             value={record.thought_belief}
             accentColor="#EF4444"
             onChange={(v) => set('thought_belief', v)}
@@ -339,12 +341,12 @@ export default function BeckEntryScreen() {
         {/* Colonne 4 — Réponse rationnelle */}
         <ColumnSection
           number={4}
-          title="Réponse rationnelle"
-          hint="Quelle autre façon de voir la situation ? Quels faits contredisent cette pensée ?"
+          title={t('modules.beck_columns.entry_col_4_title')}
+          hint={t('modules.beck_columns.entry_col_4_hint')}
           accentColor="#059669"
         >
           <Field
-            placeholder="Rédigez une pensée alternative plus équilibrée..."
+            placeholder={t('modules.beck_columns.entry_col_4_placeholder')}
             value={record.rational_response}
             onChange={(v) => set('rational_response', v)}
             minHeight={88}
@@ -354,25 +356,25 @@ export default function BeckEntryScreen() {
         {/* Colonne 5 — Résultat */}
         <ColumnSection
           number={5}
-          title="Résultat"
-          hint="Comment vous sentez-vous maintenant, après ce travail ?"
+          title={t('modules.beck_columns.entry_col_5_title')}
+          hint={t('modules.beck_columns.entry_col_5_hint')}
           accentColor="#D97706"
         >
           <Field
-            placeholder="Émotion après réexamen..."
+            placeholder={t('modules.beck_columns.entry_col_5_placeholder')}
             value={record.outcome_emotion}
             onChange={(v) => set('outcome_emotion', v)}
             multiline={false}
             minHeight={0}
           />
           <IntensitySlider
-            label="Intensité de l'émotion maintenant"
+            label={t('modules.beck_columns.entry_col_5_intensity')}
             value={record.outcome_intensity}
             accentColor="#D97706"
             onChange={(v) => set('outcome_intensity', v)}
           />
           <IntensitySlider
-            label="À quel point croyez-vous à cette nouvelle pensée ?"
+            label={t('modules.beck_columns.entry_col_5_belief')}
             value={record.outcome_belief}
             accentColor="#D97706"
             onChange={(v) => set('outcome_belief', v)}
@@ -388,14 +390,14 @@ export default function BeckEntryScreen() {
           onPress={handleSave}
           disabled={saving}
           accessibilityRole="button"
-          accessibilityLabel="Sauvegarder cet enregistrement"
+          accessibilityLabel={t('modules.beck_columns.save')}
         >
           {saving ? (
             <ActivityIndicator color={colors.white} size="small" />
           ) : (
             <>
               <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>Sauvegarder</Text>
+              <Text style={styles.saveBtnText}>{t('modules.beck_columns.save')}</Text>
             </>
           )}
         </Pressable>

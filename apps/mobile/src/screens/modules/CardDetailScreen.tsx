@@ -16,6 +16,7 @@ import { useAuthStore } from '../../store/authStore'
 import { markCardAsRead } from '../../lib/psychoeducation'
 import { PSYCHOEDUCATION_CARDS } from '../../constants/psychoeducationCards'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 type RouteProps = RouteProp<AppStackParamList, 'CardDetail'>
 
@@ -25,6 +26,7 @@ export default function CardDetailScreen() {
   const route = useRoute<RouteProps>()
   const { cardId, isRead: initialIsRead } = route.params
   const patient = useAuthStore((s) => s.patient)
+  const { t } = useTranslation()
 
   const [readStatus, setReadStatus] = useState<ReadStatus>(
     initialIsRead ? 'done' : 'idle'
@@ -47,7 +49,7 @@ export default function CardDetailScreen() {
   if (!card) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>Contenu introuvable.</Text>
+        <Text style={styles.errorText}>{t('modules.psychoeducation.content_not_found')}</Text>
       </View>
     )
   }
@@ -68,7 +70,7 @@ export default function CardDetailScreen() {
       <View style={styles.footer}>
         {readStatus === 'error' && (
           <Text style={styles.errorBanner} testID="read-error-banner">
-            Une erreur est survenue. Veuillez réessayer.
+            {t('modules.psychoeducation.read_error')}
           </Text>
         )}
         <TouchableOpacity
@@ -87,10 +89,10 @@ export default function CardDetailScreen() {
           ) : readStatus === 'done' ? (
             <>
               <MaterialCommunityIcons name="check-circle" size={20} color={colors.white} />
-              <Text style={styles.readButtonText}>Lu et compris</Text>
+              <Text style={styles.readButtonText}>{t('modules.psychoeducation.already_read')}</Text>
             </>
           ) : (
-            <Text style={styles.readButtonText}>J'ai lu et compris</Text>
+            <Text style={styles.readButtonText}>{t('modules.psychoeducation.mark_as_read')}</Text>
           )}
         </TouchableOpacity>
       </View>

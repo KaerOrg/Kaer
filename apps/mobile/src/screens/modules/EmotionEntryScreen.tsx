@@ -21,6 +21,7 @@ import {
   type SpecificEmotion,
 } from '../../constants/emotionWheel'
 import { AppStackParamList } from '../../navigation/AppStack'
+import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
@@ -30,12 +31,12 @@ type Step = 'primary' | 'secondary' | 'specific' | 'intensity' | 'notes'
 // ─── Composant barre de progression ──────────────────────────────────────────
 
 const STEPS: Step[] = ['primary', 'secondary', 'specific', 'intensity', 'notes']
-const STEP_LABELS: Record<Step, string> = {
-  primary: 'Émotion principale',
-  secondary: 'Nuance',
-  specific: 'Précision',
-  intensity: 'Intensité',
-  notes: 'Note',
+const STEP_LABEL_KEYS: Record<Step, string> = {
+  primary: 'modules.emotion_wheel.step_label_primary',
+  secondary: 'modules.emotion_wheel.step_label_secondary',
+  specific: 'modules.emotion_wheel.step_label_specific',
+  intensity: 'modules.emotion_wheel.step_label_intensity',
+  notes: 'modules.emotion_wheel.step_label_notes',
 }
 
 interface ProgressBarProps {
@@ -44,6 +45,7 @@ interface ProgressBarProps {
 }
 
 function ProgressBar({ current, color }: ProgressBarProps) {
+  const { t } = useTranslation()
   const idx = STEPS.indexOf(current)
   const progress = (idx + 1) / STEPS.length
 
@@ -52,7 +54,7 @@ function ProgressBar({ current, color }: ProgressBarProps) {
       <View style={styles.progressTrack}>
         <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: color }]} />
       </View>
-      <Text style={styles.progressLabel}>{STEP_LABELS[current]}</Text>
+      <Text style={styles.progressLabel}>{t(STEP_LABEL_KEYS[current])}</Text>
     </View>
   )
 }
@@ -60,6 +62,7 @@ function ProgressBar({ current, color }: ProgressBarProps) {
 // ─── Écran de saisie ──────────────────────────────────────────────────────────
 
 export default function EmotionEntryScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation<Nav>()
 
   const [step, setStep] = useState<Step>('primary')
@@ -136,7 +139,7 @@ export default function EmotionEntryScreen() {
               onPress={handleBack}
               style={styles.backBtn}
               accessibilityRole="button"
-              accessibilityLabel="Étape précédente"
+              accessibilityLabel={t('common.back')}
               testID="back-button"
             >
               <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
@@ -150,8 +153,8 @@ export default function EmotionEntryScreen() {
           {/* ── Étape 1 : Émotion primaire ──────────────────────────────────── */}
           {step === 'primary' && (
             <View testID="step-primary">
-              <Text style={styles.stepTitle}>Qu'est-ce que vous ressentez ?</Text>
-              <Text style={styles.stepHint}>Choisissez l'émotion qui vous semble la plus proche.</Text>
+              <Text style={styles.stepTitle}>{t('modules.emotion_wheel.step_primary_title')}</Text>
+              <Text style={styles.stepHint}>{t('modules.emotion_wheel.step_primary_hint')}</Text>
               <View style={styles.gridContainer}>
                 {EMOTION_WHEEL.map((emotion) => (
                   <TouchableOpacity
@@ -176,8 +179,8 @@ export default function EmotionEntryScreen() {
           {/* ── Étape 2 : Émotion secondaire ────────────────────────────────── */}
           {step === 'secondary' && primary && (
             <View testID="step-secondary">
-              <Text style={styles.stepTitle}>Quelle nuance de {primary.label.toLowerCase()} ?</Text>
-              <Text style={styles.stepHint}>Choisissez l'intensité qui correspond le mieux.</Text>
+              <Text style={styles.stepTitle}>{primary.label}</Text>
+              <Text style={styles.stepHint}>{t('modules.emotion_wheel.step_secondary_hint')}</Text>
               <View style={styles.listContainer}>
                 {primary.secondaries.map((sec) => (
                   <TouchableOpacity
@@ -200,8 +203,8 @@ export default function EmotionEntryScreen() {
           {/* ── Étape 3 : Émotion spécifique ────────────────────────────────── */}
           {step === 'specific' && secondary && (
             <View testID="step-specific">
-              <Text style={styles.stepTitle}>Quel mot vous correspond le mieux ?</Text>
-              <Text style={styles.stepHint}>Précisez votre ressenti avec un terme plus exact.</Text>
+              <Text style={styles.stepTitle}>{t('modules.emotion_wheel.step_specific_title')}</Text>
+              <Text style={styles.stepHint}>{t('modules.emotion_wheel.step_specific_hint')}</Text>
               <View style={styles.listContainer}>
                 {secondary.specifics.map((spec) => (
                   <TouchableOpacity
@@ -224,8 +227,8 @@ export default function EmotionEntryScreen() {
           {/* ── Étape 4 : Intensité ─────────────────────────────────────────── */}
           {step === 'intensity' && specific && (
             <View testID="step-intensity">
-              <Text style={styles.stepTitle}>Quelle est l'intensité de ce ressenti ?</Text>
-              <Text style={styles.stepHint}>De 1 (très faible) à 10 (très fort). Valeur brute.</Text>
+              <Text style={styles.stepTitle}>{t('modules.emotion_wheel.step_intensity_title')}</Text>
+              <Text style={styles.stepHint}>{t('modules.emotion_wheel.step_intensity_hint')}</Text>
 
               <View style={styles.intensityCard}>
                 <View style={[styles.intensityDisplay, { backgroundColor: activeColor + '1A' }]}>
@@ -264,10 +267,10 @@ export default function EmotionEntryScreen() {
                 onPress={() => setStep('notes')}
                 activeOpacity={0.85}
                 accessibilityRole="button"
-                accessibilityLabel="Continuer vers la note"
+                accessibilityLabel={t('common.continue')}
                 testID="continue-to-notes"
               >
-                <Text style={styles.continueBtnText}>Continuer</Text>
+                <Text style={styles.continueBtnText}>{t('common.continue')}</Text>
                 <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
               </TouchableOpacity>
             </View>
@@ -276,29 +279,27 @@ export default function EmotionEntryScreen() {
           {/* ── Étape 5 : Note libre ────────────────────────────────────────── */}
           {step === 'notes' && (
             <View testID="step-notes">
-              <Text style={styles.stepTitle}>Une note à ajouter ? (optionnel)</Text>
-              <Text style={styles.stepHint}>
-                Contexte, situation, pensée associée… Ce champ est libre.
-              </Text>
+              <Text style={styles.stepTitle}>{t('modules.emotion_wheel.step_notes_title')}</Text>
+              <Text style={styles.stepHint}>{t('modules.emotion_wheel.step_notes_hint')}</Text>
 
               {/* Récapitulatif */}
               <View style={[styles.summaryCard, { borderLeftColor: activeColor }]}>
                 <Text style={[styles.summaryPrimary, { color: activeColor }]}>
                   {primary?.label} — {secondary?.label} — {specific?.label}
                 </Text>
-                <Text style={styles.summaryIntensity}>Intensité : {intensity}/10</Text>
+                <Text style={styles.summaryIntensity}>{t('modules.emotion_wheel.intensity_label')} {intensity}/10</Text>
               </View>
 
               <TextInput
                 style={styles.notesInput}
-                placeholder="Note libre (facultatif)"
+                placeholder={t('modules.emotion_wheel.notes_free_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 value={notes}
                 onChangeText={setNotes}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
-                accessibilityLabel="Note libre"
+                accessibilityLabel={t('modules.emotion_wheel.notes_free_placeholder')}
                 testID="notes-input"
               />
 
@@ -308,11 +309,11 @@ export default function EmotionEntryScreen() {
                 activeOpacity={0.85}
                 disabled={saving}
                 accessibilityRole="button"
-                accessibilityLabel="Enregistrer l'entrée"
+                accessibilityLabel={t('common.save')}
                 testID="save-button"
               >
                 <Text style={styles.continueBtnText}>
-                  {saving ? 'Enregistrement…' : 'Enregistrer'}
+                  {saving ? t('common.loading') : t('common.save')}
                 </Text>
                 {!saving && (
                   <MaterialCommunityIcons name="check-circle-outline" size={20} color={colors.white} />

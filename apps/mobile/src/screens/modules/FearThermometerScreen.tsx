@@ -26,6 +26,7 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -95,6 +96,7 @@ interface EntryCardProps {
 }
 
 function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
+  const { t } = useTranslation()
   const { selected, custom } = deserializeStrategies(entry.strategies)
   const allStrategies = custom.trim()
     ? [...selected, custom.trim()]
@@ -108,10 +110,10 @@ function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
           <Text style={cardStyles.date}>{formatDate(entry.date)}</Text>
         </View>
         <View style={cardStyles.actions}>
-          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Modifier cette saisie">
+          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('common.modify')}>
             <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
           </Pressable>
-          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer cette saisie">
+          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
             <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
           </Pressable>
         </View>
@@ -119,8 +121,8 @@ function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
 
       {/* SUDs avant / après */}
       <View style={cardStyles.suds}>
-        <SudsBar label="Avant" value={entry.suds_before} color="#EF4444" />
-        <SudsBar label="Après" value={entry.suds_after} color="#059669" />
+        <SudsBar label={t('modules.fear_thermometer.suds_before')} value={entry.suds_before} color="#EF4444" />
+        <SudsBar label={t('modules.fear_thermometer.suds_after')} value={entry.suds_after} color="#059669" />
       </View>
 
       {/* Stratégies utilisées */}
@@ -176,6 +178,7 @@ interface SituationsPanelProps {
 }
 
 function SituationsPanel({ situations, onAdd, onDelete }: SituationsPanelProps) {
+  const { t } = useTranslation()
   const [newLabel, setNewLabel] = useState('')
 
   const handleAdd = () => {
@@ -187,16 +190,14 @@ function SituationsPanel({ situations, onAdd, onDelete }: SituationsPanelProps) 
 
   return (
     <View style={panelStyles.container}>
-      <Text style={panelStyles.title}>Mes situations</Text>
-      <Text style={panelStyles.hint}>
-        Nommez les situations qui déclenchent votre peur pour les réutiliser à chaque saisie.
-      </Text>
+      <Text style={panelStyles.title}>{t('modules.fear_thermometer.situations_title')}</Text>
+      <Text style={panelStyles.hint}>{t('modules.fear_thermometer.situations_hint')}</Text>
 
       {/* Champ d'ajout */}
       <View style={panelStyles.addRow}>
         <TextInput
           style={panelStyles.input}
-          placeholder="Ex : Prendre le métro…"
+          placeholder={t('modules.fear_thermometer.situation_placeholder')}
           placeholderTextColor={colors.textMuted}
           value={newLabel}
           onChangeText={setNewLabel}
@@ -208,7 +209,7 @@ function SituationsPanel({ situations, onAdd, onDelete }: SituationsPanelProps) 
           style={panelStyles.addBtn}
           onPress={handleAdd}
           accessibilityRole="button"
-          accessibilityLabel="Ajouter cette situation"
+          accessibilityLabel={t('common.add')}
           testID="add-situation-btn"
         >
           <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
@@ -217,7 +218,7 @@ function SituationsPanel({ situations, onAdd, onDelete }: SituationsPanelProps) 
 
       {/* Liste */}
       {situations.length === 0 ? (
-        <Text style={panelStyles.empty}>Aucune situation enregistrée.</Text>
+        <Text style={panelStyles.empty}>{t('modules.fear_thermometer.situation_empty')}</Text>
       ) : (
         <View style={panelStyles.list}>
           {situations.map((s) => (
@@ -227,7 +228,7 @@ function SituationsPanel({ situations, onAdd, onDelete }: SituationsPanelProps) 
               <Pressable
                 onPress={() => onDelete(s.id)}
                 hitSlop={8}
-                accessibilityLabel={`Supprimer la situation ${s.label}`}
+                accessibilityLabel={`${t('common.delete')} ${s.label}`}
               >
                 <MaterialCommunityIcons name="close" size={14} color={colors.textMuted} />
               </Pressable>
@@ -286,6 +287,7 @@ const panelStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function FearThermometerScreen() {
+  const { t } = useTranslation()
   const { teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [entries, setEntries] = useState<FearEntry[]>([])
@@ -313,10 +315,10 @@ export default function FearThermometerScreen() {
   }, [])
 
   const handleDeleteSituation = useCallback((id: string) => {
-    Alert.alert('Supprimer cette situation ?', '', [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('modules.fear_thermometer.delete_situation_title'), '', [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Supprimer',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await deleteFearSituation(id)
@@ -324,13 +326,13 @@ export default function FearThermometerScreen() {
         },
       },
     ])
-  }, [])
+  }, [t])
 
   const handleDeleteEntry = useCallback((id: string) => {
-    Alert.alert('Supprimer cette saisie ?', 'Cette action est irréversible.', [
-      { text: 'Annuler', style: 'cancel' },
+    Alert.alert(t('modules.fear_thermometer.delete_entry_title'), t('common.irreversible'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Supprimer',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           await deleteFearEntry(id)
@@ -338,7 +340,7 @@ export default function FearThermometerScreen() {
         },
       },
     ])
-  }, [])
+  }, [t])
 
   if (loading) {
     return (
@@ -359,7 +361,7 @@ export default function FearThermometerScreen() {
           accessibilityRole="tab"
           accessibilityState={{ selected: tab === 'entries' }}
         >
-          <Text style={[styles.tabText, tab === 'entries' && styles.tabTextActive]}>Saisies</Text>
+          <Text style={[styles.tabText, tab === 'entries' && styles.tabTextActive]}>{t('modules.fear_thermometer.tab_entries')}</Text>
           {entries.length > 0 && (
             <View style={styles.tabBadge}>
               <Text style={styles.tabBadgeText}>{entries.length}</Text>
@@ -372,7 +374,7 @@ export default function FearThermometerScreen() {
           accessibilityRole="tab"
           accessibilityState={{ selected: tab === 'situations' }}
         >
-          <Text style={[styles.tabText, tab === 'situations' && styles.tabTextActive]}>Mes situations</Text>
+          <Text style={[styles.tabText, tab === 'situations' && styles.tabTextActive]}>{t('modules.fear_thermometer.tab_situations')}</Text>
           {situations.length > 0 && (
             <View style={styles.tabBadge}>
               <Text style={styles.tabBadgeText}>{situations.length}</Text>
@@ -386,10 +388,8 @@ export default function FearThermometerScreen() {
           entries.length === 0 ? (
             <View style={styles.empty}>
               <MaterialCommunityIcons name="thermometer" size={52} color={colors.border} />
-              <Text style={styles.emptyTitle}>Aucune saisie</Text>
-              <Text style={styles.emptyText}>
-                Appuyez sur le bouton ci-dessous pour enregistrer votre première mesure de détresse.
-              </Text>
+              <Text style={styles.emptyTitle}>{t('modules.fear_thermometer.empty_title')}</Text>
+              <Text style={styles.emptyText}>{t('modules.fear_thermometer.empty_text')}</Text>
             </View>
           ) : (
             <View style={styles.list}>
@@ -419,11 +419,11 @@ export default function FearThermometerScreen() {
             style={styles.addBtn}
             onPress={() => navigation.navigate('FearEntry', {})}
             accessibilityRole="button"
-            accessibilityLabel="Nouvelle saisie SUDs"
+            accessibilityLabel={t('modules.fear_thermometer.new_entry')}
             testID="new-entry-btn"
           >
             <MaterialCommunityIcons name="thermometer-plus" size={22} color={colors.white} />
-            <Text style={styles.addBtnText}>Nouvelle saisie</Text>
+            <Text style={styles.addBtnText}>{t('modules.fear_thermometer.new_entry')}</Text>
           </Pressable>
         </SafeAreaView>
       )}

@@ -5,8 +5,10 @@ import {
   StyleSheet,
   FlatList,
   Pressable,
+  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
@@ -52,7 +54,8 @@ function getLast14Days(): string[] {
 
 // Affiche des étoiles de qualité de sommeil
 function QualityStars({ quality }: { quality: number | null }) {
-  if (!quality) return <Text style={styles.entryMeta}>– non renseigné</Text>
+  const { t } = useTranslation()
+  if (!quality) return <Text style={styles.entryMeta}>{t('modules.sleep_diary.quality_not_set')}</Text>
   return (
     <View style={styles.starsRow}>
       {Array.from({ length: 5 }, (_, i) => (
@@ -68,6 +71,7 @@ function QualityStars({ quality }: { quality: number | null }) {
 }
 
 export default function SleepDiaryScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const [entries, setEntries] = useState<SleepEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -106,7 +110,7 @@ export default function SleepDiaryScreen() {
             <View style={styles.ctaRow}>
               <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
               <View style={styles.ctaTexts}>
-                <Text style={styles.ctaTitle}>Saisir ma nuit d'hier</Text>
+                <Text style={styles.ctaTitle}>{t('modules.sleep_diary.cta_title')}</Text>
                 <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
               </View>
               <Text style={styles.chevron}>›</Text>
@@ -118,7 +122,7 @@ export default function SleepDiaryScreen() {
           <Card variant="outlined" style={styles.monthCard}>
             <View style={styles.ctaRow}>
               <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
-              <Text style={styles.monthButtonText}>Vue mensuelle</Text>
+              <Text style={styles.monthButtonText}>{t('modules.sleep_diary.monthly_button')}</Text>
               <Text style={styles.chevron}>›</Text>
             </View>
           </Card>
@@ -130,7 +134,7 @@ export default function SleepDiaryScreen() {
         keyExtractor={(item) => item}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
-          <Text style={styles.listHeader}>Les 14 dernières nuits</Text>
+          <Text style={styles.listHeader}>{t('modules.sleep_diary.list_header')}</Text>
         }
         renderItem={({ item: date }) => {
           const entry = entryByDate[date]
@@ -177,9 +181,9 @@ export default function SleepDiaryScreen() {
                     </View>
                   </View>
                 ) : filled ? (
-                  <Text style={styles.entryMeta}>Saisie incomplète</Text>
+                  <Text style={styles.entryMeta}>{t('modules.sleep_diary.incomplete')}</Text>
                 ) : (
-                  <Text style={styles.emptyDay}>Non renseigné — appuyer pour saisir</Text>
+                  <Text style={styles.emptyDay}>{t('modules.sleep_diary.empty_day')}</Text>
                 )}
               </View>
 

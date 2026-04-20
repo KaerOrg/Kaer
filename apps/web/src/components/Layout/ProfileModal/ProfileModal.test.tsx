@@ -24,7 +24,7 @@ describe('ProfileModal', () => {
     expect(defaultProps.onClose).toHaveBeenCalledOnce()
   })
 
-  it('appelle onClose en cliquant sur l'overlay', async () => {
+  it("appelle onClose en cliquant sur l'overlay", async () => {
     render(<ProfileModal {...defaultProps} />)
     await userEvent.click(document.querySelector('.profile-modal__overlay')!)
     expect(defaultProps.onClose).toHaveBeenCalledOnce()
@@ -38,7 +38,7 @@ describe('ProfileModal', () => {
     await waitFor(() => expect(defaultProps.onSave).toHaveBeenCalledWith('Jean Martin', 'IPA'))
   })
 
-  it('affiche le message d'erreur retourné par onSave', async () => {
+  it("affiche le message d'erreur retourné par onSave", async () => {
     const onSave = vi.fn().mockResolvedValue('Erreur réseau')
     render(<ProfileModal {...defaultProps} onSave={onSave} />)
     await userEvent.click(screen.getByText('Enregistrer'))

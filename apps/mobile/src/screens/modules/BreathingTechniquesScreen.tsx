@@ -15,6 +15,7 @@ import { BREATHING_TECHNIQUES, getTechnique, type BreathingTechnique } from '../
 import { getAllBreathingSessions, type BreathingSession } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -29,7 +30,12 @@ interface TechniqueCardProps {
 }
 
 function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps) {
+  const { t } = useTranslation()
   const cycleDuration = technique.phases.reduce((acc, p) => acc + p.seconds, 0)
+  const name = t(`modules.breathing_techniques.${technique.key}_name`)
+  const subtitle = t(`modules.breathing_techniques.${technique.key}_subtitle`)
+  const description = t(`modules.breathing_techniques.${technique.key}_description`)
+  const evidence = t(`modules.breathing_techniques.${technique.key}_evidence`)
 
   return (
     <TouchableOpacity
@@ -37,12 +43,12 @@ function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps)
       onPress={onPress}
       activeOpacity={0.75}
       accessibilityRole="button"
-      accessibilityLabel={`Commencer ${technique.name}`}
+      accessibilityLabel={name}
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardText}>
-          <Text style={styles.cardName}>{technique.name}</Text>
-          <Text style={styles.cardSubtitle}>{technique.subtitle}</Text>
+          <Text style={styles.cardName}>{name}</Text>
+          <Text style={styles.cardSubtitle}>{subtitle}</Text>
         </View>
         <View style={[styles.durationBadge, { backgroundColor: technique.color + '1A' }]}>
           <Text style={[styles.durationText, { color: technique.color }]}>
@@ -51,15 +57,15 @@ function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps)
         </View>
       </View>
 
-      <Text style={styles.cardDesc} numberOfLines={2}>{technique.description}</Text>
+      <Text style={styles.cardDesc} numberOfLines={2}>{description}</Text>
 
       <View style={styles.cardFooter}>
-        <Text style={styles.evidenceText}>{technique.evidence}</Text>
+        <Text style={styles.evidenceText}>{evidence}</Text>
         {sessionCount > 0 && (
           <View style={styles.sessionBadge}>
             <MaterialCommunityIcons name="history" size={12} color={colors.textMuted} />
             <Text style={styles.sessionCount}>
-              {sessionCount} session{sessionCount > 1 ? 's' : ''}
+              {t('modules.breathing_techniques.session_count', { count: sessionCount })}
             </Text>
           </View>
         )}
@@ -81,7 +87,8 @@ function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps)
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BreathingTechniquesScreen() {
-  const { isTeenMode, tt, teenColor } = useTeen()
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [sessions, setSessions] = useState<BreathingSession[]>([])
   const [loading, setLoading] = useState(true)
@@ -112,9 +119,7 @@ export default function BreathingTechniquesScreen() {
       <TeenAccent color={teenColor('breathing_techniques')} />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.intro}>
-          {isTeenMode
-            ? tt('breathing_techniques', 'intro')
-            : 'Choisissez une technique. Un guide animé vous accompagne, cycle par cycle.'}
+          {tt('breathing_techniques', 'intro') || t('modules.breathing_techniques.intro_guide')}
         </Text>
 
         {BREATHING_TECHNIQUES.map((technique) => (
@@ -131,7 +136,7 @@ export default function BreathingTechniquesScreen() {
         {/* Historique récent */}
         {sessions.length > 0 && (
           <View style={styles.historySection}>
-            <Text style={styles.historyTitle}>Sessions récentes</Text>
+            <Text style={styles.historyTitle}>{t('modules.breathing_techniques.recent_sessions')}</Text>
             {sessions.slice(0, 10).map((s) => {
               const tech = getTechnique(s.technique_key)
               const mins = Math.floor(s.duration_seconds / 60)
@@ -142,7 +147,7 @@ export default function BreathingTechniquesScreen() {
               return (
                 <View key={s.id} style={styles.historyRow}>
                   <View style={[styles.historyDot, { backgroundColor: tech?.color ?? colors.border }]} />
-                  <Text style={styles.historyName}>{tech?.name ?? s.technique_key}</Text>
+                  <Text style={styles.historyName}>{tech ? t(`modules.breathing_techniques.${tech.key}_name`) : s.technique_key}</Text>
                   <Text style={styles.historyDuration}>
                     {mins > 0 ? `${mins}min ` : ''}{secs > 0 ? `${secs}s` : ''}
                   </Text>

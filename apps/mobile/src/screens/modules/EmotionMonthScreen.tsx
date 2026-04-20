@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
 import { getEmotionEntriesForMonth, type EmotionEntry } from '../../lib/database'
 import { EMOTION_WHEEL } from '../../constants/emotionWheel'
+import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 
 // ─── Helpers calendrier ───────────────────────────────────────────────────────
@@ -211,6 +212,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function EmotionMonthScreen() {
+  const { t } = useTranslation()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -264,7 +266,7 @@ export default function EmotionMonthScreen() {
           style={styles.navBtn}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Mois précédent"
+          accessibilityLabel={t('common.back')}
           testID="prev-month"
         >
           <MaterialCommunityIcons name="chevron-left" size={28} color={colors.primary} />
@@ -277,7 +279,7 @@ export default function EmotionMonthScreen() {
           style={[styles.navBtn, isCurrentMonth && styles.navBtnDisabled]}
           activeOpacity={isCurrentMonth ? 1 : 0.7}
           accessibilityRole="button"
-          accessibilityLabel="Mois suivant"
+          accessibilityLabel={t('common.continue')}
           testID="next-month"
         >
           <MaterialCommunityIcons
@@ -303,29 +305,29 @@ export default function EmotionMonthScreen() {
           {/* ── Légende ────────────────────────────────────────────────────── */}
           <View style={styles.legendRow}>
             <MaterialCommunityIcons name="circle" size={10} color={colors.primary} />
-            <Text style={styles.legendText}>Chaque point = une émotion notée ce jour-là. La couleur indique l'émotion principale.</Text>
+            <Text style={styles.legendText}>{t('modules.emotion_wheel.calendar_legend')}</Text>
           </View>
 
           {/* ── Résumé chiffré ──────────────────────────────────────────────── */}
-          <Text style={styles.sectionTitle}>Résumé du mois</Text>
+          <Text style={styles.sectionTitle}>{t('modules.emotion_wheel.month_summary')}</Text>
           {stats.totalEntries === 0 ? (
             <View style={styles.empty} testID="empty-state">
               <MaterialCommunityIcons name="palette-outline" size={40} color={colors.border} />
-              <Text style={styles.emptyText}>Aucune entrée ce mois-ci</Text>
+              <Text style={styles.emptyText}>{t('modules.emotion_wheel.empty_month')}</Text>
             </View>
           ) : (
             <>
               <View style={styles.statsGrid}>
-                <StatCard label="Entrées" value={String(stats.totalEntries)} />
-                <StatCard label="Jours concernés" value={String(stats.distinctDays)} />
+                <StatCard label={t('modules.emotion_wheel.stat_entries')} value={String(stats.totalEntries)} />
+                <StatCard label={t('modules.emotion_wheel.stat_days')} value={String(stats.distinctDays)} />
                 <StatCard
-                  label="Intensité moy."
+                  label={t('modules.emotion_wheel.stat_intensity')}
                   value={stats.avgIntensity !== null ? `${stats.avgIntensity}/10` : '–'}
                 />
               </View>
 
               {/* ── Fréquences par émotion primaire ──────────────────────── */}
-              <Text style={styles.sectionTitle}>Fréquence par émotion</Text>
+              <Text style={styles.sectionTitle}>{t('modules.emotion_wheel.freq_by_emotion')}</Text>
               <View style={styles.card} testID="emotion-bars">
                 {stats.primaryCounts.map((pc) => (
                   <EmotionBar
@@ -340,7 +342,7 @@ export default function EmotionMonthScreen() {
               </View>
 
               {/* ── Liste détaillée des jours ─────────────────────────────── */}
-              <Text style={styles.sectionTitle}>Détail par jour</Text>
+              <Text style={styles.sectionTitle}>{t('modules.emotion_wheel.detail_by_day')}</Text>
               {[...entriesByDate.entries()]
                 .sort((a, b) => b[0].localeCompare(a[0]))
                 .map(([date, dayEntries]) => (

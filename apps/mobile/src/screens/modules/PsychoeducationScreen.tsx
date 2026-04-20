@@ -17,6 +17,7 @@ import { supabase } from '../../lib/supabase'
 import { PSYCHOEDUCATION_CARDS } from '../../constants/psychoeducationCards'
 import type { UnlockedCard } from '../../lib/psychoeducation'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -55,6 +56,7 @@ function CardRow({ card, onPress }: CardRowProps) {
 export default function PsychoeducationScreen() {
   const navigation = useNavigation<Nav>()
   const patient = useAuthStore((s) => s.patient)
+  const { t } = useTranslation()
 
   const [unlockedCards, setUnlockedCards] = useState<UnlockedCard[]>([])
   const [loading, setLoading] = useState(true)
@@ -73,7 +75,7 @@ export default function PsychoeducationScreen() {
       .single<{ config: { unlocked_cards?: UnlockedCard[] } }>()
 
     if (fetchError) {
-      setError('Impossible de charger les cartes. Vérifiez votre connexion.')
+      setError(t('modules.psychoeducation.load_error'))
       return
     }
 
@@ -115,20 +117,18 @@ export default function PsychoeducationScreen() {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.heading}>Psychoéducation</Text>
+            <Text style={styles.heading}>{t('modules.psychoeducation.title')}</Text>
             <Text style={styles.subheading}>
-              {visibleCards.filter((c) => c.is_read).length}/{visibleCards.length} carte
-              {visibleCards.length > 1 ? 's' : ''} lue
-              {visibleCards.filter((c) => c.is_read).length > 1 ? 's' : ''}
+              {t('modules.psychoeducation.cards_progress', { read: visibleCards.filter((c) => c.is_read).length, total: visibleCards.length })}
             </Text>
           </View>
         }
         ListEmptyComponent={
           <View style={styles.empty}>
             <MaterialCommunityIcons name="book-open-blank-variant" size={52} color={colors.border} />
-            <Text style={styles.emptyTitle}>Aucune carte disponible</Text>
+            <Text style={styles.emptyTitle}>{t('modules.psychoeducation.empty_title')}</Text>
             <Text style={styles.emptyText}>
-              Votre praticien n'a pas encore débloqué de cartes pour vous.
+              {t('modules.psychoeducation.empty_text')}
             </Text>
           </View>
         }

@@ -18,6 +18,7 @@ import {
   generateId,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -29,6 +30,7 @@ type Mode = 'input' | 'exercise' | 'done'
 // ─── Écran d'exercice ─────────────────────────────────────────────────────────
 
 export default function CognitiveSaturationExerciseScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation()
 
   const [mode, setMode] = useState<Mode>('input')
@@ -126,23 +128,22 @@ export default function CognitiveSaturationExerciseScreen() {
                 color={colors.primary}
               />
               <Text style={styles.inputTitle}>
-                Quel mot ou pensée souhaitez-vous travailler ?
+                {t('modules.cognitive_saturation.input_title')}
               </Text>
               <Text style={styles.inputHint}>
-                Choisissez un mot court ou une pensée brève qui vous envahit.
-                Exemples : « inutile », « danger », « je vais échouer ».
+                {t('modules.cognitive_saturation.input_hint')}
               </Text>
 
               <TextInput
                 style={styles.wordInput}
-                placeholder="Saisissez un mot ou une courte pensée…"
+                placeholder={t('modules.cognitive_saturation.input_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 value={word}
-                onChangeText={(t) => setWord(t.slice(0, MAX_WORD_LENGTH))}
+                onChangeText={(v) => setWord(v.slice(0, MAX_WORD_LENGTH))}
                 maxLength={MAX_WORD_LENGTH}
                 returnKeyType="done"
                 autoFocus
-                accessibilityLabel="Mot ou pensée à travailler"
+                accessibilityLabel={t('modules.cognitive_saturation.input_title')}
                 testID="word-input"
               />
               <Text style={styles.charCount} testID="char-count">
@@ -151,13 +152,9 @@ export default function CognitiveSaturationExerciseScreen() {
             </View>
 
             <View style={styles.instructionCard}>
-              <Text style={styles.instructionTitle}>Comment ça fonctionne</Text>
+              <Text style={styles.instructionTitle}>{t('modules.cognitive_saturation.how_it_works')}</Text>
               <Text style={styles.instructionText}>
-                1. Répétez votre mot à voix haute, aussi rapidement que possible.{'\n'}
-                2. Appuyez sur le mot à chaque répétition pour comptabiliser.{'\n'}
-                3. Continuez pendant {EXERCISE_DURATION_SECONDS} secondes.{'\n\n'}
-                À force de répétitions, le mot perd son sens et sa charge émotionnelle
-                — c'est l'effet de saturation sémantique.
+                {t('modules.cognitive_saturation.instructions', { seconds: EXERCISE_DURATION_SECONDS })}
               </Text>
             </View>
 
@@ -167,11 +164,11 @@ export default function CognitiveSaturationExerciseScreen() {
               activeOpacity={0.85}
               disabled={!word.trim()}
               accessibilityRole="button"
-              accessibilityLabel="Démarrer l'exercice"
+              accessibilityLabel={t('modules.cognitive_saturation.start_btn')}
               testID="confirm-start-button"
             >
               <MaterialCommunityIcons name="play-circle-outline" size={22} color={colors.white} />
-              <Text style={styles.startBtnText}>Démarrer l'exercice</Text>
+              <Text style={styles.startBtnText}>{t('modules.cognitive_saturation.start_btn')}</Text>
             </TouchableOpacity>
 
           </ScrollView>
@@ -201,7 +198,7 @@ export default function CognitiveSaturationExerciseScreen() {
           <Text style={styles.repCounter} testID="rep-counter">
             {repetitions}
           </Text>
-          <Text style={styles.repLabel}>répétitions</Text>
+          <Text style={styles.repLabel}>{t('modules.cognitive_saturation.repetitions')}</Text>
 
           {/* Zone de tap — le mot */}
           <TouchableOpacity
@@ -209,13 +206,13 @@ export default function CognitiveSaturationExerciseScreen() {
             onPress={handleTap}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel={`Appuyez pour compter une répétition de ${word}`}
+            accessibilityLabel={t('modules.cognitive_saturation.tap_hint')}
             testID="word-tap-button"
           >
             <Text style={styles.wordDisplay} adjustsFontSizeToFit numberOfLines={2}>
               {word}
             </Text>
-            <Text style={styles.tapHint}>Appuyez à chaque répétition</Text>
+            <Text style={styles.tapHint}>{t('modules.cognitive_saturation.tap_hint')}</Text>
           </TouchableOpacity>
 
           {/* Bouton stop */}
@@ -224,10 +221,10 @@ export default function CognitiveSaturationExerciseScreen() {
             onPress={handleStopEarly}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Terminer l'exercice maintenant"
+            accessibilityLabel={t('modules.breathing_techniques.stop_btn')}
             testID="stop-button"
           >
-            <Text style={styles.stopBtnText}>Terminer</Text>
+            <Text style={styles.stopBtnText}>{t('modules.breathing_techniques.stop_btn')}</Text>
           </TouchableOpacity>
 
         </View>
@@ -243,9 +240,9 @@ export default function CognitiveSaturationExerciseScreen() {
 
         <View style={styles.doneCard} testID="done-card">
           <MaterialCommunityIcons name="check-circle-outline" size={56} color={colors.success} />
-          <Text style={styles.doneTitle}>Exercice terminé</Text>
+          <Text style={styles.doneTitle}>{t('modules.cognitive_saturation.done_title')}</Text>
           <Text style={styles.doneText}>
-            Observez si le mot vous semble différent maintenant.
+            {t('modules.cognitive_saturation.done_text')}
           </Text>
         </View>
 
@@ -260,14 +257,14 @@ export default function CognitiveSaturationExerciseScreen() {
               <Text style={styles.summaryStatValue} testID="done-repetitions">
                 {repetitions}
               </Text>
-              <Text style={styles.summaryStatLabel}>répétitions</Text>
+              <Text style={styles.summaryStatLabel}>{t('modules.cognitive_saturation.repetitions_stat')}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryStatItem}>
               <Text style={styles.summaryStatValue} testID="done-duration">
                 {EXERCISE_DURATION_SECONDS - timeLeft}s
               </Text>
-              <Text style={styles.summaryStatLabel}>durée</Text>
+              <Text style={styles.summaryStatLabel}>{t('modules.cognitive_saturation.duration_stat')}</Text>
             </View>
           </View>
         </View>
@@ -279,11 +276,11 @@ export default function CognitiveSaturationExerciseScreen() {
           activeOpacity={0.85}
           disabled={saving}
           accessibilityRole="button"
-          accessibilityLabel="Enregistrer et terminer"
+          accessibilityLabel={t('modules.cognitive_saturation.start_btn')}
           testID="save-button"
         >
           <Text style={styles.saveBtnText}>
-            {saving ? 'Enregistrement…' : 'Enregistrer et terminer'}
+            {saving ? '…' : t('common.save')}
           </Text>
           {!saving && (
             <MaterialCommunityIcons name="check" size={20} color={colors.white} />
@@ -295,11 +292,11 @@ export default function CognitiveSaturationExerciseScreen() {
           onPress={handleRestart}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel="Recommencer avec un nouveau mot"
+          accessibilityLabel={t('common.restart')}
           testID="restart-button"
         >
           <MaterialCommunityIcons name="refresh" size={20} color={colors.primary} />
-          <Text style={styles.restartBtnText}>Recommencer</Text>
+          <Text style={styles.restartBtnText}>{t('common.restart')}</Text>
         </TouchableOpacity>
 
       </ScrollView>

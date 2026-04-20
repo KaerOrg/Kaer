@@ -55,13 +55,13 @@ describe('CrisisPlanScreen', () => {
     // Attendre la fin du chargement via un testID stable
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
-    // Vérifier les 6 titres de façon synchrone (le rendu est terminé)
-    expect(screen.getByText('Signes avant-coureurs')).toBeTruthy()
-    expect(screen.getByText("Stratégies d'apaisement internes")).toBeTruthy()
-    expect(screen.getByText('Personnes ou lieux de distraction')).toBeTruthy()
-    expect(screen.getByText('Proches à contacter')).toBeTruthy()
-    expect(screen.getByText('Professionnels et urgences')).toBeTruthy()
-    expect(screen.getByText('Sécuriser mon environnement')).toBeTruthy()
+    // Vérifier les 6 titres via leurs clés i18n (le mock t() retourne la clé)
+    expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_2_title')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_3_title')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_4_title')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_5_title')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_6_title')).toBeTruthy()
   })
 
   it('affiche les labels "Étape N" pour chaque étape', async () => {
@@ -69,9 +69,9 @@ describe('CrisisPlanScreen', () => {
 
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
-    for (let n = 1; n <= 6; n++) {
-      expect(screen.getByText(`Étape ${n}`)).toBeTruthy()
-    }
+    // Le mock t() retourne la clé — 'modules.crisis_plan.step_label' apparaît 6 fois
+    const labels = screen.getAllByText('modules.crisis_plan.step_label')
+    expect(labels).toHaveLength(6)
   })
 
   // ── Test 2 : Ajout d'un élément dans l'Étape 1 ─────────────────────────────

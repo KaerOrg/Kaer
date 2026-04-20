@@ -14,6 +14,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
 
@@ -32,12 +33,12 @@ interface RimConfig {
 // Ces consignes sont génériques et non-interprétatives (conformité MDR 2017/745).
 // L'interprétation et l'adaptation appartiennent exclusivement au praticien.
 
-const PROTOCOL_STEPS = [
-  'Installez-vous confortablement dans un endroit calme, idéalement allongé.',
-  'Respirez lentement et profondément quelques instants avant de commencer.',
-  'Lisez votre scénario alternatif une ou deux fois, en prenant votre temps.',
-  'Fermez les yeux et visualisez mentalement les images du scénario.',
-  'Pratiquez chaque soir, de préférence peu avant le coucher.',
+const PROTOCOL_STEP_KEYS = [
+  'modules.rim.protocol_step_1',
+  'modules.rim.protocol_step_2',
+  'modules.rim.protocol_step_3',
+  'modules.rim.protocol_step_4',
+  'modules.rim.protocol_step_5',
 ] as const
 
 // ─── Sons d'ambiance ──────────────────────────────────────────────────────────
@@ -48,23 +49,24 @@ const PROTOCOL_STEPS = [
 
 interface AmbientSound {
   key: string
-  label: string
+  labelKey: string
   icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
   available: boolean
 }
 
 const AMBIENT_SOUNDS: AmbientSound[] = [
-  { key: 'pluie', label: 'Pluie douce', icon: 'weather-rainy', available: false },
-  { key: 'vagues', label: 'Vagues', icon: 'waves', available: false },
-  { key: 'foret', label: 'Forêt', icon: 'tree', available: false },
-  { key: 'vent', label: 'Vent doux', icon: 'weather-windy', available: false },
-  { key: 'ruisseau', label: 'Ruisseau', icon: 'water', available: false },
+  { key: 'pluie', labelKey: 'modules.rim.sound_rain', icon: 'weather-rainy', available: false },
+  { key: 'vagues', labelKey: 'modules.rim.sound_waves', icon: 'waves', available: false },
+  { key: 'foret', labelKey: 'modules.rim.sound_forest', icon: 'tree', available: false },
+  { key: 'vent', labelKey: 'modules.rim.sound_wind', icon: 'weather-windy', available: false },
+  { key: 'ruisseau', labelKey: 'modules.rim.sound_stream', icon: 'water', available: false },
 ]
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function RimScreen() {
-  const { isTeenMode, tt, teenColor } = useTeen()
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
 
   const [config, setConfig] = useState<RimConfig | null>(null)
@@ -88,7 +90,7 @@ export default function RimScreen() {
       .single<{ config: RimConfig }>()
 
     if (fetchError) {
-      setError('Impossible de charger le module. Vérifiez votre connexion.')
+      setError(t('modules.rim.load_error'))
       return
     }
 
@@ -125,11 +127,8 @@ export default function RimScreen() {
     return (
       <View style={styles.center}>
         <MaterialCommunityIcons name="playlist-edit" size={52} color={colors.border} />
-        <Text style={styles.emptyTitle}>Scénario non configuré</Text>
-        <Text style={styles.emptyText}>
-          Votre praticien n'a pas encore renseigné votre scénario alternatif.{'\n'}
-          Il sera disponible ici après votre prochaine consultation.
-        </Text>
+        <Text style={styles.emptyTitle}>{t('modules.rim.empty_title')}</Text>
+        <Text style={styles.emptyText}>{t('modules.rim.empty_text')}</Text>
       </View>
     )
   }
@@ -144,15 +143,12 @@ export default function RimScreen() {
         {/* ── Avertissement ──────────────────────────────────────────────── */}
         <View style={styles.warningCard} testID="rim-disclaimer">
           <MaterialCommunityIcons name="shield-account-outline" size={20} color="#B45309" />
-          <Text style={styles.warningText}>
-            À utiliser exclusivement avec l'accompagnement d'un professionnel de
-            santé formé en psychiatrie ou psychologie.
-          </Text>
+          <Text style={styles.warningText}>{t('modules.rim.disclaimer')}</Text>
         </View>
 
         {/* ── Scénario alternatif ────────────────────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Votre scénario alternatif</Text>
+          <Text style={styles.sectionLabel}>{t('modules.rim.section_scenario')}</Text>
           <View style={styles.scenarioCard} testID="alternative-scenario-card">
             <MaterialCommunityIcons
               name="script-text-outline"
@@ -169,15 +165,15 @@ export default function RimScreen() {
         {/* ── Consignes du protocole ─────────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>
-            {isTeenMode ? tt('rim', 'intro') : 'Consignes de pratique'}
+            {tt('rim', 'intro') || t('modules.rim.intro')}
           </Text>
           <View style={styles.card} testID="protocol-steps">
-            {PROTOCOL_STEPS.map((step, i) => (
+            {PROTOCOL_STEP_KEYS.map((key, i) => (
               <View key={i} style={styles.stepRow}>
                 <View style={styles.stepBadge}>
                   <Text style={styles.stepBadgeText}>{i + 1}</Text>
                 </View>
-                <Text style={styles.stepText}>{step}</Text>
+                <Text style={styles.stepText}>{t(key)}</Text>
               </View>
             ))}
           </View>
@@ -191,9 +187,9 @@ export default function RimScreen() {
               onPress={() => setShowOriginal((prev) => !prev)}
               activeOpacity={0.7}
               accessibilityRole="button"
-              accessibilityLabel={showOriginal ? 'Masquer le scénario initial' : 'Afficher le scénario initial'}
+              accessibilityLabel={showOriginal ? t('modules.rim.hide_original') : t('modules.rim.show_original')}
             >
-              <Text style={styles.collapsibleLabel}>Scénario initial (référence)</Text>
+              <Text style={styles.collapsibleLabel}>{t('modules.rim.section_original')}</Text>
               <MaterialCommunityIcons
                 name={showOriginal ? 'chevron-up' : 'chevron-down'}
                 size={20}
@@ -210,10 +206,8 @@ export default function RimScreen() {
 
         {/* ── Sons d'ambiance ────────────────────────────────────────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Sons d'ambiance</Text>
-          <Text style={styles.sectionHint}>
-            Jouez un son pour accompagner votre lecture. (Disponible prochainement)
-          </Text>
+          <Text style={styles.sectionLabel}>{t('modules.rim.section_sounds')}</Text>
+          <Text style={styles.sectionHint}>{t('modules.rim.sounds_hint')}</Text>
           <View style={styles.soundsGrid}>
             {AMBIENT_SOUNDS.map((sound) => (
               <TouchableOpacity
@@ -228,7 +222,7 @@ export default function RimScreen() {
                   setActiveSound((prev) => (prev === sound.key ? null : sound.key))
                 }
                 activeOpacity={sound.available ? 0.75 : 1}
-                accessibilityLabel={`Son : ${sound.label}`}
+                accessibilityLabel={t(sound.labelKey)}
                 accessibilityState={{ disabled: !sound.available }}
               >
                 <MaterialCommunityIcons
@@ -249,10 +243,10 @@ export default function RimScreen() {
                     activeSound === sound.key && styles.soundLabelActive,
                   ]}
                 >
-                  {sound.label}
+                  {t(sound.labelKey)}
                 </Text>
                 {!sound.available && (
-                  <Text style={styles.soundComingSoon}>Bientôt</Text>
+                  <Text style={styles.soundComingSoon}>{t('common.coming_soon')}</Text>
                 )}
               </TouchableOpacity>
             ))}
@@ -261,26 +255,24 @@ export default function RimScreen() {
 
         {/* ── Urgence ────────────────────────────────────────────────────── */}
         <View style={styles.safetySection} testID="safety-section">
-          <Text style={styles.safetyTitle}>En cas de détresse</Text>
+          <Text style={styles.safetyTitle}>{t('modules.rim.safety_title')}</Text>
           <TouchableOpacity
             style={styles.safetyBtn}
             onPress={() => Linking.openURL('tel:3114')}
             accessibilityRole="button"
-            accessibilityLabel="Appeler le 3114, numéro national de prévention du suicide"
+            accessibilityLabel={t('modules.rim.safety_3114')}
           >
             <MaterialCommunityIcons name="phone" size={18} color="#DC2626" />
-            <Text style={styles.safetyBtnText}>
-              3114 — Numéro national prévention suicide
-            </Text>
+            <Text style={styles.safetyBtnText}>{t('modules.rim.safety_3114')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.safetyBtn}
             onPress={() => Linking.openURL('tel:15')}
             accessibilityRole="button"
-            accessibilityLabel="Appeler le SAMU, le 15"
+            accessibilityLabel={t('modules.rim.safety_15')}
           >
             <MaterialCommunityIcons name="ambulance" size={18} color="#DC2626" />
-            <Text style={styles.safetyBtnText}>15 — SAMU</Text>
+            <Text style={styles.safetyBtnText}>{t('modules.rim.safety_15')}</Text>
           </TouchableOpacity>
         </View>
 
