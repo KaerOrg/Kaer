@@ -21,6 +21,7 @@ import {
 } from '../lib/database.types'
 import {
   MODULE_PREVIEW,
+  getModulePreview,
   markdownToHtml,
   type ModulePreview,
 } from '../lib/modulePreviewContent'
@@ -518,15 +519,19 @@ export function PatientPage() {
             )}
           </Card>
 
-          {previewModule === 'psychoeducation' && MODULE_PREVIEW['psychoeducation'] && (
-            <div className="preview-panel">
-              <div className="preview-panel__header">
-                <Eye size={14} />
-                {t('patient.patient_view')}
+          {previewModule === 'psychoeducation' && (() => {
+            const mp = getModulePreview('psychoeducation', teenMode)
+            if (!mp) return null
+            return (
+              <div className="preview-panel" style={{ borderTopColor: mp.accentColor }}>
+                <div className="preview-panel__header" style={{ color: mp.accentColor }}>
+                  <Eye size={14} />
+                  {t('patient.patient_view')}
+                </div>
+                {renderPreviewPanel(mp.preview)}
               </div>
-              {renderPreviewPanel(MODULE_PREVIEW['psychoeducation'])}
-            </div>
-          )}
+            )
+          })()}
 
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
             <div className={`psycho-card-picker ${psychoPickerMode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
@@ -669,7 +674,7 @@ export function PatientPage() {
       )
     }
 
-    const preview = MODULE_PREVIEW[moduleType]
+    const mp = getModulePreview(moduleType, teenMode)
 
     return (
       <div key={moduleType} className="module-card-wrapper-block">
@@ -678,7 +683,7 @@ export function PatientPage() {
           header={{ title: MODULE_LABELS[moduleType], subtitle: MODULE_DESCRIPTIONS[moduleType] }}
           actions={
             <>
-              {preview && (
+              {mp && (
                 <button
                   className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
                   onClick={() => togglePreview(moduleType)}
@@ -719,13 +724,13 @@ export function PatientPage() {
           )}
         </Card>
 
-        {previewModule === moduleType && preview && (
-          <div className="preview-panel">
-            <div className="preview-panel__header">
+        {previewModule === moduleType && mp && (
+          <div className="preview-panel" style={{ borderTopColor: mp.accentColor }}>
+            <div className="preview-panel__header" style={{ color: mp.accentColor }}>
               <Eye size={14} />
               {t('patient.patient_view')}
             </div>
-            {renderPreviewPanel(preview)}
+            {renderPreviewPanel(mp.preview)}
           </div>
         )}
       </div>

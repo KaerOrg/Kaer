@@ -506,3 +506,103 @@ export const MODULE_PREVIEW: Partial<Record<ModuleType, ModulePreview>> = {
   behavioral_activation: BEHAVIORAL_ACTIVATION_PREVIEW,
   breathing_techniques: BREATHING_TECHNIQUES_PREVIEW,
 }
+
+// ─── Mode Ado — couleurs et textes adaptés ────────────────────────────────────
+// Source textes : apps/mobile/src/i18n/locales/fr/teen.json
+// Source couleurs : apps/mobile/src/theme/teen.ts
+
+export const TEEN_MODULE_COLORS: Record<string, string> = {
+  crisis_plan:             '#FF4D6D',
+  therapeutic_commitment:  '#FF4D6D',
+  distress_tolerance:      '#FF4D6D',
+  medication_side_effects: '#8B5CF6',
+  medication_adherence:    '#8B5CF6',
+  psychoeducation:         '#8B5CF6',
+  sleep_diary:             '#06B6D4',
+  diet_weight_psycho:      '#06B6D4',
+  chronobiology_tracker:   '#06B6D4',
+  mood_tracker:            '#F97316',
+  emotion_wheel:           '#F97316',
+  behavioral_activation:   '#F97316',
+  beck_columns:            '#10B981',
+  cognitive_distortions:   '#10B981',
+  grounding:               '#10B981',
+  rim:                     '#10B981',
+  fear_thermometer:        '#F59E0B',
+  exposure_hierarchy:      '#F59E0B',
+  breathing_techniques:    '#F59E0B',
+  cognitive_saturation:    '#F59E0B',
+  craving_journal:         '#EC4899',
+  decisional_balance:      '#EC4899',
+}
+
+const TEEN_DEFAULT_COLOR = '#6366F1'
+
+const CRISIS_PLAN_TEEN: ModulePreview = {
+  kind: 'steps',
+  footer: CRISIS_PLAN_PREVIEW.footer,
+  steps: [
+    { number: 1, title: 'Quand je sens que ça tourne mal',    hint: 'Comment est-ce que je me sens quand une crise approche ?', color: '#D97706' },
+    { number: 2, title: 'Ce qui m\'aide à me calmer',         hint: 'Que puis-je faire seul(e) pour me calmer ?',               color: '#059669' },
+    { number: 3, title: 'Ce qui me change les idées',         hint: 'Qui puis-je voir ou où puis-je aller pour me distraire ?', color: '#4F46E5' },
+    { number: 4, title: 'À qui je peux parler',               hint: 'Qui peut m\'écouter et m\'aider si je me sens en danger ?', color: '#9333EA' },
+    { number: 5, title: 'Mon équipe soignante',               hint: 'Quels professionnels ou services puis-je contacter ?',      color: '#1D4ED8' },
+    { number: 6, title: 'Rendre mon espace plus sûr',         hint: 'Comment rendre mon entourage plus sûr ?',                  color: '#15803D' },
+  ],
+}
+
+const BECK_COLUMNS_TEEN: ModulePreview = {
+  kind: 'steps',
+  footer: BECK_COLUMNS_PREVIEW.footer,
+  steps: [
+    { number: 1, title: 'Ce qui s\'est passé',         hint: 'Où j\'étais ? Qu\'est-ce qui se passait ? Qui était là ?',     color: '#0EA5E9' },
+    { number: 2, title: 'Ce que j\'ai ressenti',       hint: 'Quelle émotion j\'ai ressentie ? Intensité (0–100) ?',         color: '#8B5CF6' },
+    { number: 3, title: 'Ce que j\'ai pensé direct',   hint: 'Quelle pensée est passée dans ma tête ? J\'y croyais à (0–100) ?', color: '#EF4444' },
+    { number: 4, title: 'Une autre façon de voir',     hint: 'Quelle autre façon de voir ? Quels faits contredisent cette pensée ?', color: '#059669' },
+    { number: 5, title: 'Résultat',                    hint: 'Quelle émotion maintenant ? Intensité (0–100) ? Conviction (0–100) ?', color: '#D97706' },
+  ],
+}
+
+const MOOD_TRACKER_TEEN: ModulePreview = {
+  kind: 'fields',
+  footer: MOOD_TRACKER_PREVIEW.footer,
+  fields: [
+    { icon: '😊', label: 'Humeur',            detail: 'Échelle 1–10' },
+    { icon: '⚡', label: 'Énergie',           detail: 'Échelle 1–10' },
+    { icon: '💓', label: 'Stress / Anxiété',  detail: 'Échelle 1–10' },
+    { icon: '🌿', label: 'Plaisir',           detail: 'Échelle 1–10' },
+    { icon: '📝', label: 'Notes libres',      detail: 'Champ texte optionnel' },
+  ],
+}
+
+const DECISIONAL_BALANCE_TEEN: ModulePreview = {
+  kind: 'grid2x2',
+  footer: DECISIONAL_BALANCE_PREVIEW.footer,
+  quadrants: [
+    { title: 'Pourquoi changer serait bien',          subtitle: 'Raisons de changer',    color: '#059669' },
+    { title: 'Ce que ça m\'coûterait de changer',     subtitle: 'Coûts du changement',   color: '#EA580C' },
+    { title: 'Pourquoi rester comme je suis',         subtitle: 'Raisons de rester',     color: '#2563EB' },
+    { title: 'Ce que ça me coûte de pas changer',     subtitle: 'Coûts de rester',       color: '#9333EA' },
+  ],
+}
+
+const MODULE_PREVIEW_TEEN: Partial<Record<ModuleType, ModulePreview>> = {
+  crisis_plan:         CRISIS_PLAN_TEEN,
+  beck_columns:        BECK_COLUMNS_TEEN,
+  mood_tracker:        MOOD_TRACKER_TEEN,
+  decisional_balance:  DECISIONAL_BALANCE_TEEN,
+}
+
+export function getModulePreview(
+  moduleType: ModuleType,
+  isTeenMode: boolean,
+): { preview: ModulePreview; accentColor: string } | null {
+  const preview = isTeenMode
+    ? (MODULE_PREVIEW_TEEN[moduleType] ?? MODULE_PREVIEW[moduleType])
+    : MODULE_PREVIEW[moduleType]
+  if (!preview) return null
+  const accentColor = isTeenMode
+    ? (TEEN_MODULE_COLORS[moduleType] ?? TEEN_DEFAULT_COLOR)
+    : 'var(--color-primary)'
+  return { preview, accentColor }
+}
