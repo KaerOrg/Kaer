@@ -622,3 +622,85 @@
   font-style: italic;
   color: var(--color-text-secondary);
 }
+
+/* ── Sous-groupes d'échelles cliniques ─────────────────────────────────────── */
+
+.scale-subgroup {
+  margin-bottom: 8px;
+}
+
+.scale-subgroup:last-child {
+  margin-bottom: 0;
+}
+
+.scale-subgroup__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  padding: 8px 0 6px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 4px;
+}
+
+/* ── Entrée Dispensaire Clinique ────────────────────────────────────────────── */
+
+.dispensaire-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 18px;
+  margin-top: 8px;
+  background: #FDF2F8;
+  border: 1.5px solid #FBCFE8;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  text-align: left;
+}
+
+.dispensaire-entry:hover {
+  background: #FCE7F3;
+  border-color: #F9A8D4;
+}
+
+.dispensaire-entry__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dispensaire-entry__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #FBCFE8;
+  border-radius: var(--radius-sm);
+  color: #9D174D;
+  flex-shrink: 0;
+}
+
+.dispensaire-entry__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9D174D;
+}
+
+.dispensaire-entry__sub {
+  display: block;
+  font-size: 12px;
+  color: #BE185D;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
+.dispensaire-entry__chevron {
+  color: #BE185D;
+  opacity: 0.6;
+  flex-shrink: 0;
+}

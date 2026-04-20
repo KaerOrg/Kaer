@@ -28,6 +28,14 @@ export type ModuleType =
   // Addictologie & Impulsivité
   | 'craving_journal'
   | 'decisional_balance'
+  // Échelles & Questionnaires cliniques
+  | 'phq9'
+  | 'gad7'
+  | 'epds'
+  | 'rcads'
+  | 'bsl23'
+  | 'cape42'
+  | 'audit'
 
 export interface Database {
   public: {
@@ -186,6 +194,14 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   // Addictologie & Impulsivité
   craving_journal: 'Journal de craving',
   decisional_balance: 'Balance décisionnelle',
+  // Échelles & Questionnaires cliniques
+  phq9: 'PHQ-9 — Dépression',
+  gad7: 'GAD-7 — Anxiété généralisée',
+  epds: 'EPDS — Dépression périnatale',
+  rcads: 'RCADS — Anxiété & dépression (enfant/ado)',
+  bsl23: 'BSL-23 — Symptômes borderline',
+  cape42: 'CAPE-42 — Expériences psychotiques',
+  audit: "AUDIT — Consommation d'alcool",
 }
 
 export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
@@ -218,6 +234,14 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   // Addictologie & Impulsivité
   craving_journal: 'Noter l\'intensité de l\'envie (0-10), le déclencheur et la stratégie d\'évitement utilisée.',
   decisional_balance: 'Outil d\'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.',
+  // Échelles & Questionnaires cliniques
+  phq9: 'Questionnaire de dépistage et mesure de la sévérité de la dépression en 9 items.',
+  gad7: 'Évaluation rapide en 7 items du trouble anxieux généralisé.',
+  epds: 'Dépistage de la dépression périnatale (ante et post-partum). Recommandé par la HAS.',
+  rcads: "Mesure des symptômes anxieux et dépressifs chez l'enfant et l'adolescent (8-18 ans).",
+  bsl23: 'Mesure de la sévérité des symptômes du trouble de personnalité borderline.',
+  cape42: 'Évaluation des expériences psychotiques subcliniques positives, négatives et dépressives.',
+  audit: "Dépistage OMS de la consommation d'alcool problématique en 10 items.",
 }
 
 // Métadonnées des cartes disponibles (contenu Markdown côté mobile uniquement)

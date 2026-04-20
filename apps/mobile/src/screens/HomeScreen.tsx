@@ -48,6 +48,13 @@ const MODULE_CONFIG: Record<
   cognitive_saturation:     { icon: 'chat-processing-outline',   available: true  },
   craving_journal:          { icon: 'lightning-bolt-outline',    available: false },
   decisional_balance:       { icon: 'scale-balance',             available: true  },
+  phq9:                     { icon: 'clipboard-text-outline',    available: true  },
+  gad7:                     { icon: 'clipboard-text-outline',    available: false },
+  epds:                     { icon: 'clipboard-text-outline',    available: false },
+  rcads:                    { icon: 'clipboard-text-outline',    available: false },
+  bsl23:                    { icon: 'clipboard-text-outline',    available: true  },
+  cape42:                   { icon: 'clipboard-text-outline',    available: false },
+  audit:                    { icon: 'clipboard-text-outline',    available: false },
 }
 
 interface UnlockedModule {
@@ -105,6 +112,8 @@ export default function HomeScreen() {
       grounding:               'Grounding',
       cognitive_saturation:    'CognitiveSaturation',
       emotion_wheel:           'EmotionWheel',
+      phq9:                    'PHQ9',
+      bsl23:                   'BSL23',
     }
     const route = routes[moduleType]
     if (route) navigation.navigate(route as never)

@@ -29,6 +29,10 @@ import CognitiveSaturationExerciseScreen from '../screens/modules/CognitiveSatur
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
 import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
 import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
+import PHQ9Screen from '../screens/modules/PHQ9Screen'
+import PHQ9EntryScreen from '../screens/modules/PHQ9EntryScreen'
+import BSL23Screen from '../screens/modules/BSL23Screen'
+import BSL23EntryScreen from '../screens/modules/BSL23EntryScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -63,6 +67,10 @@ export type AppStackParamList = {
   EmotionWheel: undefined
   EmotionEntry: undefined
   EmotionMonth: undefined
+  PHQ9: undefined
+  PHQ9Entry: { entryId?: string }
+  BSL23: undefined
+  BSL23Entry: { entryId?: string }
 }
 
 export type TabParamList = {
@@ -246,6 +254,26 @@ export default function AppStack() {
         name="EmotionMonth"
         component={EmotionMonthScreen}
         options={{ title: 'Bilan mensuel' }}
+      />
+      <Stack.Screen
+        name="PHQ9"
+        component={PHQ9Screen}
+        options={{ title: 'PHQ-9' }}
+      />
+      <Stack.Screen
+        name="PHQ9Entry"
+        component={PHQ9EntryScreen}
+        options={{ title: 'Nouveau PHQ-9' }}
+      />
+      <Stack.Screen
+        name="BSL23"
+        component={BSL23Screen}
+        options={{ title: 'BSL-23' }}
+      />
+      <Stack.Screen
+        name="BSL23Entry"
+        component={BSL23EntryScreen}
+        options={{ title: 'Nouveau BSL-23' }}
       />
     </Stack.Navigator>
   )

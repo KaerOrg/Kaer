@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Info } from 'lucide-react'
+import { BookOpen, ChevronRight, Eye, EyeOff, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
 import { useAuthStore } from '../store/authStore'
@@ -29,11 +29,17 @@ import './PatientPage.css'
 
 // ─── Structure en catégories ─────────────────────────────────────────────────
 
+interface ModuleSubgroup {
+  label: string
+  modules: ModuleType[]
+}
+
 interface ModuleCategory {
   id: string
   labelKey: string
   subtitleKey: string
   modules: ModuleType[]
+  subgroups?: ModuleSubgroup[]
 }
 
 const MODULE_CATEGORIES: ModuleCategory[] = [
@@ -832,6 +838,23 @@ export function PatientPage() {
                     </Accordion>
                   )
                 })}
+
+                {/* ── Entrée Dispensaire Clinique ────────────────────────── */}
+                <button
+                  className="dispensaire-entry"
+                  onClick={() => navigate('/dispensaire')}
+                >
+                  <div className="dispensaire-entry__left">
+                    <span className="dispensaire-entry__icon">
+                      <BookOpen size={18} />
+                    </span>
+                    <div>
+                      <span className="dispensaire-entry__label">Échelles et questionnaires</span>
+                      <span className="dispensaire-entry__sub">Gérer les questionnaires cliniques de ce patient</span>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="dispensaire-entry__chevron" />
+                </button>
               </div>
             </section>
           </>
