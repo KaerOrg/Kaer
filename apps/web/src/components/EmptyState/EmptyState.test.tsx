@@ -18,7 +18,7 @@ describe('EmptyState', () => {
     expect(document.querySelector('.empty-state__description')).toBeNull()
   })
 
-  it('affiche l'icône si fournie', () => {
+  it("affiche l'icône si fournie", () => {
     render(<EmptyState title="T" icon="📭" />)
     expect(screen.getByText('📭')).toBeInTheDocument()
   })

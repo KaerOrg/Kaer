@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { LoginPage } from './pages/LoginPage'
@@ -8,6 +9,7 @@ import { PatientRegisterPage } from './pages/PatientRegisterPage'
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
+  const { t } = useTranslation()
 
   useEffect(() => {
     loadSession()
@@ -23,7 +25,7 @@ function App() {
         color: 'var(--color-text-muted)',
         fontSize: '15px',
       }}>
-        Chargement…
+        {t('common.loading')}
       </div>
     )
   }

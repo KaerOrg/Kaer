@@ -23,6 +23,59 @@
   margin-bottom: 40px;
 }
 
+.patient-page__header-info {
+  flex: 1;
+}
+
+/* ── Toggle Mode ado ─────────────────────────────────────────────────────── */
+
+.teen-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.teen-mode-toggle:hover {
+  border-color: #8B5CF6;
+}
+
+.teen-mode-toggle--active {
+  border-color: #8B5CF6;
+  background: #F5F3FF;
+}
+
+.teen-mode-toggle__icon {
+  font-size: 16px;
+}
+
+.teen-mode-toggle__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.teen-mode-toggle__pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+
+.teen-mode-toggle__pill--on {
+  background: #8B5CF6;
+  color: white;
+}
+
 .patient-page__avatar {
   width: 60px;
   height: 60px;

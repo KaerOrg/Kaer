@@ -13,7 +13,7 @@ describe('Accordion', () => {
     expect(screen.queryByText('corps')).toBeNull()
   })
 
-  it('s'ouvre au clic', async () => {
+  it("s'ouvre au clic", async () => {
     render(<Accordion title="S"><p>corps</p></Accordion>)
     await userEvent.click(screen.getByRole('button'))
     expect(screen.getByText('corps')).toBeInTheDocument()
@@ -26,7 +26,7 @@ describe('Accordion', () => {
     expect(screen.queryByText('corps')).toBeNull()
   })
 
-  it('s'ouvre par défaut si defaultOpen=true', () => {
+  it("s'ouvre par défaut si defaultOpen=true", () => {
     render(<Accordion title="S" defaultOpen><p>corps</p></Accordion>)
     expect(screen.getByText('corps')).toBeInTheDocument()
   })

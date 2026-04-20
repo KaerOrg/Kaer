@@ -29,7 +29,7 @@ export function Layout({ children }: LayoutProps) {
             initials={initials}
             name={practitioner?.name ?? ''}
             email={practitioner?.email ?? ''}
-            professionalTitle={practitioner?.professional_title}
+            professionalTitle={practitioner?.professional_title ?? undefined}
             onEditProfile={openModal}
             onLogout={logout}
           />

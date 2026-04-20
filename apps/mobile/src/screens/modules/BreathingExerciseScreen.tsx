@@ -15,6 +15,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 type RouteType = RouteProp<AppStackParamList, 'BreathingExercise'>
 
@@ -30,6 +31,7 @@ interface BreathCircleProps {
 }
 
 function BreathCircle({ phase, progress, color, countdown }: BreathCircleProps) {
+  const { t } = useTranslation()
   // Scale : inspiration → grandit, expiration → rétrécit, rétentions → stable
   const getScale = () => {
     switch (phase.type) {
@@ -59,7 +61,7 @@ function BreathCircle({ phase, progress, color, countdown }: BreathCircleProps) 
         ]}
       >
         <Text style={[circleStyles.countdown, { color }]}>{countdown}</Text>
-        <Text style={[circleStyles.phaseLabel, { color }]}>{phase.label}</Text>
+        <Text style={[circleStyles.phaseLabel, { color }]}>{t(`modules.breathing_techniques.phase_${phase.type}`)}</Text>
       </View>
     </View>
   )
@@ -127,6 +129,7 @@ const phaseBarStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BreathingExerciseScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
   const patient = useAuthStore((s) => s.patient)
@@ -172,12 +175,12 @@ export default function BreathingExerciseScreen() {
 
   const handleStop = useCallback(() => {
     Alert.alert(
-      'Arrêter la session ?',
-      'Votre progression sera enregistrée.',
+      t('modules.breathing_techniques.stop_confirm_title'),
+      t('modules.breathing_techniques.stop_confirm_msg'),
       [
-        { text: 'Continuer', style: 'cancel' },
+        { text: t('modules.breathing_techniques.stop_confirm_continue'), style: 'cancel' },
         {
-          text: 'Terminer',
+          text: t('modules.breathing_techniques.stop_confirm_finish'),
           onPress: async () => {
             await stop(true)
             navigation.goBack()
@@ -221,7 +224,7 @@ export default function BreathingExerciseScreen() {
   if (!technique) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>Technique introuvable.</Text>
+        <Text style={styles.errorText}>{t('modules.breathing_techniques.technique_not_found')}</Text>
       </View>
     )
   }
@@ -240,10 +243,10 @@ export default function BreathingExerciseScreen() {
         {/* En-tête */}
         <View style={styles.header}>
           <Text style={[styles.techniqueName, { color: technique.color }]}>
-            {technique.name}
+            {t(`modules.breathing_techniques.${technique.key}_name`)}
           </Text>
           <Text style={styles.cycleInfo}>
-            Cycle {cycleCount + 1} · {cycleDuration}s par cycle
+            {t('modules.breathing_techniques.cycle_label', { count: cycleCount + 1, duration: cycleDuration })}
           </Text>
         </View>
 
@@ -274,7 +277,7 @@ export default function BreathingExerciseScreen() {
                   i === phaseIndex && { color: technique.color, fontWeight: '700' },
                 ]}
               >
-                {p.label}
+                {t(`modules.breathing_techniques.phase_${p.type}`)}
               </Text>
             ))}
           </View>
@@ -284,13 +287,13 @@ export default function BreathingExerciseScreen() {
         <View style={styles.counters}>
           <View style={styles.counter}>
             <Text style={styles.counterValue}>{cycleCount}</Text>
-            <Text style={styles.counterLabel}>cycle{cycleCount > 1 ? 's' : ''}</Text>
+            <Text style={styles.counterLabel}>{cycleCount > 1 ? t('modules.breathing_techniques.cycles_label_plural') : t('modules.breathing_techniques.cycles_label')}</Text>
           </View>
           <View style={styles.counter}>
             <Text style={styles.counterValue}>
               {totalMins > 0 ? `${totalMins}:${String(totalSecs).padStart(2, '0')}` : `${totalSecs}s`}
             </Text>
-            <Text style={styles.counterLabel}>durée</Text>
+            <Text style={styles.counterLabel}>{t('modules.breathing_techniques.duration_label')}</Text>
           </View>
         </View>
 
@@ -306,11 +309,11 @@ export default function BreathingExerciseScreen() {
               }}
               activeOpacity={0.8}
               accessibilityRole="button"
-              accessibilityLabel="Démarrer la session"
+              accessibilityLabel={totalSeconds === 0 ? t('modules.breathing_techniques.start_btn') : t('modules.breathing_techniques.resume_btn')}
             >
               <MaterialCommunityIcons name="play" size={28} color={colors.white} />
               <Text style={styles.mainBtnText}>
-                {totalSeconds === 0 ? 'Démarrer' : 'Reprendre'}
+                {totalSeconds === 0 ? t('modules.breathing_techniques.start_btn') : t('modules.breathing_techniques.resume_btn')}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -322,10 +325,10 @@ export default function BreathingExerciseScreen() {
               }}
               activeOpacity={0.8}
               accessibilityRole="button"
-              accessibilityLabel="Mettre en pause"
+              accessibilityLabel={t('modules.breathing_techniques.pause_btn')}
             >
               <MaterialCommunityIcons name="pause" size={28} color={colors.white} />
-              <Text style={styles.mainBtnText}>Pause</Text>
+              <Text style={styles.mainBtnText}>{t('modules.breathing_techniques.pause_btn')}</Text>
             </TouchableOpacity>
           )}
 
@@ -334,16 +337,19 @@ export default function BreathingExerciseScreen() {
             onPress={handleStop}
             activeOpacity={0.7}
             accessibilityRole="button"
-            accessibilityLabel="Terminer la session"
+            accessibilityLabel={t('modules.breathing_techniques.stop_btn')}
           >
             <MaterialCommunityIcons name="stop" size={22} color={colors.textMuted} />
-            <Text style={styles.stopBtnText}>Terminer</Text>
+            <Text style={styles.stopBtnText}>{t('modules.breathing_techniques.stop_btn')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Durée recommandée */}
         <Text style={styles.hint}>
-          Durée recommandée : {technique.recommended_duration_min} min · {technique.evidence}
+          {t('modules.breathing_techniques.recommended_hint', {
+            min: technique.recommended_duration_min,
+            evidence: t(`modules.breathing_techniques.${technique.key}_evidence`),
+          })}
         </Text>
       </View>
     </SafeAreaView>

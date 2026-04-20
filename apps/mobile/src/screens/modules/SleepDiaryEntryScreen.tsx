@@ -24,6 +24,7 @@ import {
 } from '../../lib/database'
 import Button from '../../components/Button'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 type Route = RouteProp<AppStackParamList, 'SleepDiaryEntry'>
 
@@ -61,6 +62,7 @@ function TimeField({
   value: Date
   onChange: (date: Date) => void
 }) {
+  const { t } = useTranslation()
   const [showPicker, setShowPicker] = useState(false)
 
   const handleChange = (_: unknown, date?: Date) => {
@@ -79,7 +81,7 @@ function TimeField({
       >
         <MaterialCommunityIcons name="clock-outline" size={20} color={colors.textMuted} />
         <Text style={timeStyles.value}>{toHHMM(value)}</Text>
-        <Text style={timeStyles.hint}>Appuyer pour modifier</Text>
+        <Text style={timeStyles.hint}>{t('modules.sleep_diary.tap_to_modify')}</Text>
       </TouchableOpacity>
 
       {/* iOS : picker inline ; Android : dialog modal */}
@@ -98,7 +100,7 @@ function TimeField({
           style={timeStyles.confirm}
           onPress={() => setShowPicker(false)}
         >
-          <Text style={timeStyles.confirmText}>Confirmer</Text>
+          <Text style={timeStyles.confirmText}>{t('modules.sleep_diary.confirm_label')}</Text>
         </TouchableOpacity>
       )}
     </View>
@@ -141,6 +143,7 @@ function MinutesInput({
   value: number
   onChange: (v: number) => void
 }) {
+  const { t } = useTranslation()
   const [text, setText] = useState(value > 0 ? String(value) : '')
 
   const handleChange = (raw: string) => {
@@ -172,7 +175,7 @@ function MinutesInput({
           maxLength={3}
           returnKeyType="done"
         />
-        <Text style={minuteStyles.unit}>minutes</Text>
+        <Text style={minuteStyles.unit}>{t('modules.sleep_diary.minutes_unit')}</Text>
         {conversion && <Text style={minuteStyles.conversion}>{conversion}</Text>}
       </View>
     </View>
@@ -265,10 +268,17 @@ function StarRating({
   value: number | null
   onChange: (v: number) => void
 }) {
-  const labels = ['Très mauvaise', 'Mauvaise', 'Moyenne', 'Bonne', 'Excellente']
+  const { t } = useTranslation()
+  const labels = [
+    t('modules.sleep_diary.quality_very_bad'),
+    t('modules.sleep_diary.quality_bad'),
+    t('modules.sleep_diary.quality_average'),
+    t('modules.sleep_diary.quality_good'),
+    t('modules.sleep_diary.quality_excellent'),
+  ]
   return (
     <View style={starStyles.container}>
-      <Text style={starStyles.label}>Qualité de la nuit</Text>
+      <Text style={starStyles.label}>{t('modules.sleep_diary.quality_label')}</Text>
       <View style={starStyles.stars}>
         {[1, 2, 3, 4, 5].map((n) => (
           <TouchableOpacity key={n} onPress={() => onChange(n)} activeOpacity={0.7}>
@@ -297,6 +307,7 @@ const starStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function SleepDiaryEntryScreen() {
+  const { t } = useTranslation()
   const route = useRoute<Route>()
   const navigation = useNavigation()
 
@@ -342,7 +353,7 @@ export default function SleepDiaryEntryScreen() {
 
   const handleSave = async () => {
     if (quality === null) {
-      Alert.alert('Qualité manquante', 'Veuillez évaluer la qualité de votre nuit (les étoiles).')
+      Alert.alert(t('modules.sleep_diary.quality_missing'), t('modules.sleep_diary.quality_missing_msg'))
       return
     }
     setSaving(true)
@@ -361,7 +372,7 @@ export default function SleepDiaryEntryScreen() {
       })
       navigation.goBack()
     } catch {
-      Alert.alert('Erreur', "Impossible d'enregistrer la saisie. Réessayez.")
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -370,12 +381,12 @@ export default function SleepDiaryEntryScreen() {
   const handleDelete = () => {
     if (!existingId) return
     Alert.alert(
-      'Supprimer cette saisie ?',
-      'Cette action est irréversible.',
+      t('modules.sleep_diary.delete_entry'),
+      t('common.irreversible'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await deleteSleepEntry(existingId)
@@ -394,28 +405,28 @@ export default function SleepDiaryEntryScreen() {
       >
         {/* En-tête avec la date */}
         <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>Nuit du</Text>
+          <Text style={styles.dateLabel}>{t('modules.sleep_diary.date_label')}</Text>
           <Text style={styles.dateValue}>{formatFullDate(targetDate)}</Text>
         </View>
 
         {/* Section horaires */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Horaires</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.section_schedule')}</Text>
           <View style={styles.card}>
             <TimeField
-              label="Heure du coucher"
+              label={t('modules.sleep_diary.bedtime_label')}
               value={bedtime}
               onChange={setBedtime}
             />
             <View style={styles.divider} />
             <TimeField
-              label="Heure du lever"
+              label={t('modules.sleep_diary.wake_time_label')}
               value={wakeTime}
               onChange={setWakeTime}
             />
             <View style={styles.divider} />
             <MinutesInput
-              label="Temps pour s'endormir"
+              label={t('modules.sleep_diary.onset_label')}
               value={onsetMinutes}
               onChange={setOnsetMinutes}
             />
@@ -424,16 +435,16 @@ export default function SleepDiaryEntryScreen() {
 
         {/* Section réveils */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Réveils nocturnes</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.section_awakenings')}</Text>
           <View style={styles.card}>
             <Counter
-              label="Nombre de fois réveillé(e)"
+              label={t('modules.sleep_diary.awakenings_label')}
               value={awakenings}
               onChange={setAwakenings}
             />
             <View style={styles.divider} />
             <MinutesInput
-              label="Durée totale des réveils"
+              label={t('modules.sleep_diary.awakenings_duration_label')}
               value={awakeningsDuration}
               onChange={setAwakeningsDuration}
             />
@@ -442,7 +453,7 @@ export default function SleepDiaryEntryScreen() {
 
         {/* Section cauchemars */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Cauchemars</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.section_nightmares')}</Text>
           <TouchableOpacity
             style={[styles.card, styles.toggleRow]}
             onPress={() => setNightmares(!nightmares)}
@@ -454,7 +465,7 @@ export default function SleepDiaryEntryScreen() {
                 size={22}
                 color={nightmares ? colors.danger : colors.textMuted}
               />
-              <Text style={styles.toggleLabel}>Cauchemars cette nuit</Text>
+              <Text style={styles.toggleLabel}>{t('modules.sleep_diary.nightmares_label')}</Text>
             </View>
             <View style={[styles.toggleSwitch, nightmares && styles.toggleSwitchOn]}>
               <View style={[styles.toggleThumb, nightmares && styles.toggleThumbOn]} />
@@ -464,7 +475,7 @@ export default function SleepDiaryEntryScreen() {
 
         {/* Section qualité */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ressenti</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.section_quality')}</Text>
           <View style={styles.card}>
             <StarRating value={quality} onChange={setQuality} />
           </View>
@@ -472,13 +483,13 @@ export default function SleepDiaryEntryScreen() {
 
         {/* Notes libres */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notes (facultatif)</Text>
+          <Text style={styles.sectionTitle}>{t('common.notes_optional')}</Text>
           <View style={styles.card}>
             <TextInput
               style={styles.notesInput}
               value={notes}
               onChangeText={setNotes}
-              placeholder="Rêves, stress, médicaments... notez ce qui vous semble utile."
+              placeholder={t('common.notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={4}
@@ -492,7 +503,7 @@ export default function SleepDiaryEntryScreen() {
           <View style={[styles.seCard, { borderColor: seColor }]}>
             <View style={styles.seRow}>
               <MaterialCommunityIcons name="sleep" size={20} color={seColor} />
-              <Text style={styles.seTitle}>Efficacité du sommeil</Text>
+              <Text style={styles.seTitle}>{t('modules.sleep_diary.sleep_efficiency')}</Text>
               <Text style={[styles.seScore, { color: seColor }]}>{se} %</Text>
             </View>
           </View>
@@ -500,12 +511,12 @@ export default function SleepDiaryEntryScreen() {
 
         {/* Actions */}
         <Button
-          label={existingId ? 'Mettre à jour' : 'Enregistrer ma nuit'}
+          label={existingId ? t('modules.sleep_diary.update_entry') : t('modules.sleep_diary.save_night')}
           onPress={handleSave}
           loading={saving}
         />
         {existingId && (
-          <Button label="Supprimer cette saisie" onPress={handleDelete} variant="danger" />
+          <Button label={t('modules.sleep_diary.delete_entry')} onPress={handleDelete} variant="danger" />
         )}
       </ScrollView>
     </SafeAreaView>

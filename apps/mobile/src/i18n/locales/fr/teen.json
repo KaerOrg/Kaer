@@ -1,0 +1,104 @@
+{
+  "global": {
+    "greeting": "Salut !",
+    "modulesTitle": "Tes outils",
+    "noModules": "Pas encore d'outil débloqué — ton soignant s'en occupe."
+  },
+  "home": {
+    "title": "Tes modules",
+    "subheading": "Activés par ton soignant",
+    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe."
+  },
+  "modules": {
+    "crisis_plan": {
+      "title": "Mon plan si ça va pas",
+      "subtitle": "Ce plan est là pour t'aider quand ça devient trop dur.",
+      "step_1_title": "Quand je sens que ça tourne mal",
+      "step_2_title": "Ce qui m'aide à me calmer",
+      "step_3_title": "Ce qui me change les idées",
+      "step_4_title": "À qui je peux parler",
+      "step_5_title": "Mon équipe soignante",
+      "step_6_title": "Rendre mon espace plus sûr"
+    },
+    "beck_columns": {
+      "title": "Démêler mes pensées",
+      "intro": "Note ta pensée négative et on va la décortiquer ensemble.",
+      "col_situation": "Ce qui s'est passé",
+      "col_emotion": "Ce que j'ai ressenti",
+      "col_thought": "Ce que j'ai pensé direct",
+      "col_distortion": "Le piège de la pensée",
+      "col_reframe": "Une autre façon de voir",
+      "save": "Valider"
+    },
+    "grounding": {
+      "title": "Revenir ici et maintenant",
+      "intro": "Quand tout s'emballe, cette technique te ramène dans le présent.",
+      "step_see": "5 trucs que tu vois",
+      "step_touch": "4 trucs que tu touches",
+      "step_hear": "3 trucs que tu entends",
+      "step_smell": "2 odeurs autour de toi",
+      "step_taste": "1 goût dans ta bouche"
+    },
+    "mood_tracker": {
+      "title": "Comment tu vas ?",
+      "intro": "Dis-moi comment tu te sens aujourd'hui.",
+      "dim_anxiety": "Stress / Anxiété",
+      "save": "Valider"
+    },
+    "fear_thermometer": {
+      "title": "Mon niveau de stress",
+      "intro": "Donne un chiffre à ton stress en ce moment (0 = super calme, 100 = panique totale).",
+      "save": "Valider"
+    },
+    "decisional_balance": {
+      "title": "Le pour et le contre",
+      "intro": "Tu hésites ? Mettons tout à plat pour y voir plus clair.",
+      "quadrant_pros_change_title": "Pourquoi changer serait bien",
+      "quadrant_cons_change_title": "Ce que ça m'coûterait de changer",
+      "quadrant_pros_status_title": "Pourquoi rester comme je suis",
+      "quadrant_cons_status_title": "Ce que ça me coûte de pas changer",
+      "gauge_title": "Mon envie de changer",
+      "save": "Valider"
+    },
+    "sleep_diary": {
+      "title": "Mon journal de nuit",
+      "intro": "Note chaque matin comment tu as dormi.",
+      "save": "Valider"
+    },
+    "medication_side_effects": {
+      "title": "Mon traitement — effets ressentis",
+      "intro": "Tu ressens des effets bizarres avec ton traitement ? Note-les ici.",
+      "save": "Valider"
+    },
+    "medication_adherence": {
+      "title": "Mes prises de traitement",
+      "intro": "T'as pris ton traitement cette semaine ?",
+      "save": "Valider"
+    },
+    "behavioral_activation": {
+      "title": "Mes activités plaisir",
+      "intro": "On va trouver des activités qui te font du bien et les planifier.",
+      "save": "Valider"
+    },
+    "breathing_techniques": {
+      "title": "Respirer pour se calmer",
+      "intro": "Choisis un exercice — ça peut vraiment aider à redescendre."
+    },
+    "rim": {
+      "title": "Réécrire le cauchemar",
+      "intro": "On va transformer ton cauchemar en quelque chose de mieux."
+    },
+    "cognitive_saturation": {
+      "title": "Stop aux ruminations",
+      "intro": "Cette technique coupe les pensées qui tournent en boucle."
+    },
+    "emotion_wheel": {
+      "title": "Ce que je ressens vraiment",
+      "intro": "Explore et mets des mots sur ce que tu ressens."
+    },
+    "psychoeducation": {
+      "title": "Comprendre ma santé mentale",
+      "intro": "Lis ces fiches pour mieux comprendre ce que tu vis."
+    }
+  }
+}

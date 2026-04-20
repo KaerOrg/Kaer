@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native'
 import * as Linking from 'expo-linking'
+import { useTranslation } from 'react-i18next'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RouteProp } from '@react-navigation/native'
 import { AuthStackParamList } from '../navigation/AuthStack'
@@ -23,20 +24,17 @@ type Props = {
 }
 
 export default function RegisterScreen({ navigation, route }: Props) {
+  const { t } = useTranslation()
   const [token, setToken] = useState(route.params?.token ?? '')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
   const register = useAuthStore((s) => s.register)
 
-  // Récupère le token depuis le deep link si l'app est ouverte via un lien
   useEffect(() => {
-    // Lien initial (app fermée au moment du clic)
     Linking.getInitialURL().then((url) => {
       if (url) extractToken(url)
     })
-
-    // Lien entrant (app déjà ouverte au moment du clic)
     const sub = Linking.addEventListener('url', ({ url }) => extractToken(url))
     return () => sub.remove()
   }, [])
@@ -44,30 +42,30 @@ export default function RegisterScreen({ navigation, route }: Props) {
   function extractToken(url: string) {
     try {
       const parsed = Linking.parse(url)
-      const t = parsed.queryParams?.token
-      if (typeof t === 'string' && t) setToken(t)
+      const tok = parsed.queryParams?.token
+      if (typeof tok === 'string' && tok) setToken(tok)
     } catch { /* ignore */ }
   }
 
   const handleRegister = async () => {
     if (!token.trim() || !password || !confirm) {
-      Alert.alert('Champs manquants', 'Veuillez remplir tous les champs.')
+      Alert.alert(t('auth.missing_fields_title'), t('auth.register_missing_fields'))
       return
     }
     if (password !== confirm) {
-      Alert.alert('Mots de passe différents', 'Les deux mots de passe ne correspondent pas.')
+      Alert.alert(t('auth.passwords_mismatch_title'), t('auth.passwords_mismatch_message'))
       return
     }
     if (password.length < 8) {
-      Alert.alert('Mot de passe trop court', 'Votre mot de passe doit contenir au moins 8 caractères.')
+      Alert.alert(t('auth.password_too_short_title'), t('auth.password_too_short_message'))
       return
     }
     setLoading(true)
     try {
       await register(token.trim(), password)
     } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : "Une erreur est survenue."
-      Alert.alert("Erreur d'inscription", message)
+      const message = e instanceof Error ? e.message : t('common.error')
+      Alert.alert(t('auth.register_error_title'), message)
     } finally {
       setLoading(false)
     }
@@ -84,42 +82,39 @@ export default function RegisterScreen({ navigation, route }: Props) {
       >
         <View style={styles.header}>
           <Text style={styles.logo}>PsyTool</Text>
-          <Text style={styles.subtitle}>Créer mon espace patient</Text>
+          <Text style={styles.subtitle}>{t('auth.register_subtitle')}</Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.title}>Inscription</Text>
-          <Text style={styles.intro}>
-            Votre praticien vous a envoyé un code d'invitation par email.{'\n'}
-            Saisissez-le ci-dessous pour créer votre compte.
-          </Text>
+          <Text style={styles.title}>{t('auth.register_title')}</Text>
+          <Text style={styles.intro}>{t('auth.register_intro')}</Text>
 
           <InputField
-            label="Code d'invitation"
+            label={t('auth.token_label')}
             value={token}
             onChangeText={setToken}
             autoCapitalize="none"
             autoCorrect={false}
-            placeholder="Le code reçu par email"
+            placeholder={t('auth.token_placeholder')}
           />
           <InputField
-            label="Choisir un mot de passe"
+            label={t('auth.password_new_label')}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholder="Minimum 8 caractères"
+            placeholder={t('auth.password_min_placeholder')}
           />
           <InputField
-            label="Confirmer le mot de passe"
+            label={t('auth.password_confirm_label')}
             value={confirm}
             onChangeText={setConfirm}
             secureTextEntry
-            placeholder="••••••••"
+            placeholder={t('auth.password_placeholder')}
           />
 
-          <Button label="Créer mon compte" onPress={handleRegister} loading={loading} />
+          <Button label={t('auth.register_button')} onPress={handleRegister} loading={loading} />
           <Button
-            label="J'ai déjà un compte"
+            label={t('auth.already_account')}
             onPress={() => navigation.goBack()}
             variant="ghost"
           />
@@ -133,12 +128,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
   container: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: spacing.xl },
-  logo: {
-    fontSize: 40,
-    fontWeight: '800',
-    color: colors.primary,
-    letterSpacing: -1,
-  },
+  logo: { fontSize: 40, fontWeight: '800', color: colors.primary, letterSpacing: -1 },
   subtitle: { fontSize: 16, color: colors.textMuted, marginTop: 4 },
   form: { gap: spacing.md },
   title: { fontSize: 24, fontWeight: '700', color: colors.text },

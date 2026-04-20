@@ -24,13 +24,16 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 // ─── Métadonnées des 4 quadrants ─────────────────────────────────────────────
 
 type QuadrantMeta = {
   readonly key: BalanceQuadrant
-  readonly title: string
-  readonly subtitle: string
+  readonly titleKey: string
+  readonly subtitleKey: string
   readonly bgColor: string
   readonly accentColor: string
   readonly icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']
@@ -39,32 +42,32 @@ type QuadrantMeta = {
 const QUADRANTS: ReadonlyArray<QuadrantMeta> = [
   {
     key: 'pros_change',
-    title: 'Avantages',
-    subtitle: 'du changement',
+    titleKey: 'modules.decisional_balance.quadrant_pros_change_title',
+    subtitleKey: 'modules.decisional_balance.quadrant_pros_change_subtitle',
     bgColor: '#ECFDF5',
     accentColor: '#059669',
     icon: 'thumb-up-outline',
   },
   {
     key: 'cons_change',
-    title: 'Inconvénients',
-    subtitle: 'du changement',
+    titleKey: 'modules.decisional_balance.quadrant_cons_change_title',
+    subtitleKey: 'modules.decisional_balance.quadrant_cons_change_subtitle',
     bgColor: '#FFF7ED',
     accentColor: '#EA580C',
     icon: 'thumb-down-outline',
   },
   {
     key: 'pros_status_quo',
-    title: 'Avantages',
-    subtitle: 'à rester comme je suis',
+    titleKey: 'modules.decisional_balance.quadrant_pros_status_title',
+    subtitleKey: 'modules.decisional_balance.quadrant_pros_status_subtitle',
     bgColor: '#EFF6FF',
     accentColor: '#2563EB',
     icon: 'shield-check-outline',
   },
   {
     key: 'cons_status_quo',
-    title: 'Inconvénients',
-    subtitle: 'à rester comme je suis',
+    titleKey: 'modules.decisional_balance.quadrant_cons_status_title',
+    subtitleKey: 'modules.decisional_balance.quadrant_cons_status_subtitle',
     bgColor: '#FDF4FF',
     accentColor: '#9333EA',
     icon: 'alert-outline',
@@ -80,8 +83,9 @@ interface WeightPickerProps {
 }
 
 function WeightPicker({ value, accentColor, onChange }: WeightPickerProps) {
+  const { t } = useTranslation()
   return (
-    <View style={weightStyles.row} accessibilityLabel={`Importance : ${value} sur 5`}>
+    <View style={weightStyles.row} accessibilityLabel={`${t('modules.decisional_balance.weight_label')} ${value} / 5`}>
       {[1, 2, 3, 4, 5].map((n) => (
         <Pressable
           key={n}
@@ -89,7 +93,7 @@ function WeightPicker({ value, accentColor, onChange }: WeightPickerProps) {
           hitSlop={6}
           accessibilityRole="radio"
           accessibilityState={{ checked: value === n }}
-          accessibilityLabel={`Importance ${n}`}
+          accessibilityLabel={`${n}`}
         >
           <MaterialCommunityIcons
             name={n <= value ? 'star' : 'star-outline'}
@@ -123,6 +127,7 @@ function QuadrantCard({
   onDeleteArgument,
   onWeightChange,
 }: QuadrantCardProps) {
+  const { t } = useTranslation()
   const [adding, setAdding] = useState(false)
   const [newText, setNewText] = useState('')
   const [newWeight, setNewWeight] = useState(3)
@@ -148,8 +153,8 @@ function QuadrantCard({
       <View style={[quadrantStyles.header, { backgroundColor: meta.bgColor }]}>
         <MaterialCommunityIcons name={meta.icon} size={18} color={meta.accentColor} />
         <View style={quadrantStyles.headerText}>
-          <Text style={[quadrantStyles.title, { color: meta.accentColor }]}>{meta.title}</Text>
-          <Text style={quadrantStyles.subtitle}>{meta.subtitle}</Text>
+          <Text style={[quadrantStyles.title, { color: meta.accentColor }]}>{t(meta.titleKey)}</Text>
+          <Text style={quadrantStyles.subtitle}>{t(meta.subtitleKey)}</Text>
         </View>
         {args.length > 0 && (
           <View style={[quadrantStyles.countBadge, { backgroundColor: meta.accentColor }]}>
@@ -173,7 +178,7 @@ function QuadrantCard({
             <Pressable
               onPress={() => onDeleteArgument(meta.key, arg.id)}
               hitSlop={8}
-              accessibilityLabel={`Supprimer : ${arg.text}`}
+              accessibilityLabel={`${t('common.delete')} : ${arg.text}`}
             >
               <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
             </Pressable>
@@ -185,27 +190,27 @@ function QuadrantCard({
           <View style={quadrantStyles.addForm}>
             <TextInput
               style={quadrantStyles.input}
-              placeholder="Saisir un argument..."
+              placeholder={t('modules.decisional_balance.arg_placeholder')}
               placeholderTextColor={colors.textMuted}
               value={newText}
               onChangeText={setNewText}
               autoFocus
               multiline
             />
-            <Text style={quadrantStyles.weightLabel}>Importance :</Text>
+            <Text style={quadrantStyles.weightLabel}>{t('modules.decisional_balance.weight_label')}</Text>
             <WeightPicker value={newWeight} accentColor={meta.accentColor} onChange={setNewWeight} />
             <View style={quadrantStyles.addActions}>
               <Pressable
                 style={[quadrantStyles.btn, { backgroundColor: meta.accentColor }]}
                 onPress={handleConfirm}
               >
-                <Text style={quadrantStyles.btnTextWhite}>Valider</Text>
+                <Text style={quadrantStyles.btnTextWhite}>{t('common.validate')}</Text>
               </Pressable>
               <Pressable
                 style={[quadrantStyles.btn, quadrantStyles.btnGhost]}
                 onPress={handleCancel}
               >
-                <Text style={quadrantStyles.btnTextGhost}>Annuler</Text>
+                <Text style={quadrantStyles.btnTextGhost}>{t('common.cancel')}</Text>
               </Pressable>
             </View>
           </View>
@@ -214,11 +219,11 @@ function QuadrantCard({
             style={quadrantStyles.addTrigger}
             onPress={() => setAdding(true)}
             accessibilityRole="button"
-            accessibilityLabel={`Ajouter un argument — ${meta.title} ${meta.subtitle}`}
+            accessibilityLabel={`${t('common.add')} — ${t(meta.titleKey)} ${t(meta.subtitleKey)}`}
           >
             <MaterialCommunityIcons name="plus-circle-outline" size={16} color={meta.accentColor} />
             <Text style={[quadrantStyles.addTriggerText, { color: meta.accentColor }]}>
-              Ajouter
+              {t('modules.decisional_balance.add_trigger')}
             </Text>
           </Pressable>
         )}
@@ -305,32 +310,18 @@ interface MotivationGaugeProps {
 }
 
 function MotivationGauge({ motivationPercent, changeScore, statusQuoScore }: MotivationGaugeProps) {
-  const label =
-    motivationPercent >= 65
-      ? 'Motivation au changement forte'
-      : motivationPercent >= 50
-      ? 'Ambivalence — à explorer'
-      : 'Attachement au statu quo'
-
-  const barColor =
-    motivationPercent >= 65
-      ? colors.success
-      : motivationPercent >= 50
-      ? colors.warning
-      : colors.danger
-
+  const { t } = useTranslation()
   return (
     <View style={gaugeStyles.container}>
-      <Text style={gaugeStyles.title}>Jauge de motivation</Text>
+      <Text style={gaugeStyles.title}>{t('modules.decisional_balance.gauge_title')}</Text>
       <View style={gaugeStyles.labels}>
-        <Text style={gaugeStyles.labelLeft}>Statu quo ({statusQuoScore})</Text>
-        <Text style={gaugeStyles.labelRight}>Changement ({changeScore})</Text>
+        <Text style={gaugeStyles.labelLeft}>{t('modules.decisional_balance.gauge_label_status')} ({statusQuoScore})</Text>
+        <Text style={gaugeStyles.labelRight}>{t('modules.decisional_balance.gauge_label_change')} ({changeScore})</Text>
       </View>
       <View style={gaugeStyles.track}>
-        <View style={[gaugeStyles.fill, { width: `${motivationPercent}%` as `${number}%`, backgroundColor: barColor }]} />
+        <View style={[gaugeStyles.fill, { width: `${motivationPercent}%` as `${number}%`, backgroundColor: colors.primary }]} />
         <View style={[gaugeStyles.marker, { left: '50%' as const }]} />
       </View>
-      <Text style={[gaugeStyles.statusLabel, { color: barColor }]}>{label}</Text>
     </View>
   )
 }
@@ -381,6 +372,8 @@ const EMPTY_BALANCE: Omit<DecisionalBalance, 'id' | 'updated_at'> = {
 }
 
 export default function DecisionalBalanceScreen() {
+  const { t } = useTranslation()
+  const { teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
 
   const [balance, setBalance] = useState<DecisionalBalance>({
@@ -455,9 +448,9 @@ export default function DecisionalBalanceScreen() {
         })
       }
 
-      Alert.alert('Enregistré', 'Votre balance a été sauvegardée.')
+      Alert.alert(t('common.saved'), t('modules.decisional_balance.saved_message'))
     } catch {
-      Alert.alert('Erreur', 'Impossible de sauvegarder. Réessayez.')
+      Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
@@ -475,6 +468,7 @@ export default function DecisionalBalanceScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('decisional_balance')} />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
@@ -482,13 +476,13 @@ export default function DecisionalBalanceScreen() {
       >
         {/* Comportement cible */}
         <View style={styles.behaviorSection}>
-          <Text style={styles.behaviorLabel}>Comportement ciblé</Text>
+          <Text style={styles.behaviorLabel}>{t('modules.decisional_balance.behavior_label')}</Text>
           <TextInput
             style={styles.behaviorInput}
-            placeholder="Ex : Prendre mon traitement chaque jour"
+            placeholder={t('modules.decisional_balance.behavior_placeholder')}
             placeholderTextColor={colors.textMuted}
             value={balance.target_behavior}
-            onChangeText={(t) => setBalance((prev) => ({ ...prev, target_behavior: t }))}
+            onChangeText={(v) => setBalance((prev) => ({ ...prev, target_behavior: v }))}
           />
         </View>
 
@@ -543,14 +537,14 @@ export default function DecisionalBalanceScreen() {
           onPress={handleSave}
           disabled={saving}
           accessibilityRole="button"
-          accessibilityLabel="Sauvegarder la balance décisionnelle"
+          accessibilityLabel={t('modules.decisional_balance.save')}
         >
           {saving ? (
             <ActivityIndicator color={colors.white} size="small" />
           ) : (
             <>
               <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>Sauvegarder</Text>
+              <Text style={styles.saveBtnText}>{t('modules.decisional_balance.save')}</Text>
             </>
           )}
         </Pressable>

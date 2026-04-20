@@ -29,6 +29,7 @@ import {
 } from '../../lib/database'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 
@@ -48,6 +49,7 @@ interface SudsPickerProps {
 }
 
 function SudsPicker({ label, hint, value, accentColor = colors.primary, nullable = false, onChange }: SudsPickerProps) {
+  const { t } = useTranslation()
   const steps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
   return (
@@ -97,10 +99,10 @@ function SudsPicker({ label, hint, value, accentColor = colors.primary, nullable
           style={pickerStyles.skipBtn}
           onPress={() => onChange(null)}
           accessibilityRole="button"
-          accessibilityLabel="Je ne sais pas encore / à compléter plus tard"
+          accessibilityLabel={t('modules.fear_thermometer.suds_skip_later')}
         >
           <Text style={[pickerStyles.skipText, value === null && { color: accentColor, fontWeight: '700' }]}>
-            {value === null ? 'Non renseigné (appuyer pour confirmer)' : 'Passer / à renseigner plus tard'}
+            {value === null ? t('modules.fear_thermometer.suds_skip_null') : t('modules.fear_thermometer.suds_skip_later')}
           </Text>
         </Pressable>
       )}
@@ -149,6 +151,7 @@ interface SituationPickerProps {
 }
 
 function SituationPicker({ situations, selectedId, freeText, onSelectId, onChangeFreeText }: SituationPickerProps) {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'catalogue' | 'free'>(situations.length > 0 ? 'catalogue' : 'free')
 
   useEffect(() => {
@@ -157,7 +160,7 @@ function SituationPicker({ situations, selectedId, freeText, onSelectId, onChang
 
   return (
     <View style={sitStyles.container}>
-      <Text style={sitStyles.label}>Situation</Text>
+      <Text style={sitStyles.label}>{t('modules.fear_thermometer.section_trigger')}</Text>
 
       {/* Toggle catalogue / texte libre */}
       <View style={sitStyles.toggle}>
@@ -167,7 +170,7 @@ function SituationPicker({ situations, selectedId, freeText, onSelectId, onChang
             onPress={() => { setMode('catalogue'); onChangeFreeText('') }}
           >
             <Text style={[sitStyles.toggleText, mode === 'catalogue' && sitStyles.toggleTextActive]}>
-              Mes situations
+              {t('modules.fear_thermometer.situation_mode_catalogue')}
             </Text>
           </Pressable>
         )}
@@ -176,7 +179,7 @@ function SituationPicker({ situations, selectedId, freeText, onSelectId, onChang
           onPress={() => { setMode('free'); onSelectId(null) }}
         >
           <Text style={[sitStyles.toggleText, mode === 'free' && sitStyles.toggleTextActive]}>
-            Texte libre
+            {t('modules.fear_thermometer.situation_mode_free')}
           </Text>
         </Pressable>
       </View>
@@ -205,15 +208,13 @@ function SituationPicker({ situations, selectedId, freeText, onSelectId, onChang
             </Pressable>
           ))}
           {situations.length === 0 && (
-            <Text style={sitStyles.empty}>
-              Aucune situation dans votre catalogue. Créez-en depuis l'écran principal.
-            </Text>
+            <Text style={sitStyles.empty}>{t('modules.fear_thermometer.situation_catalogue_empty')}</Text>
           )}
         </View>
       ) : (
         <TextInput
           style={sitStyles.input}
-          placeholder="Décrivez la situation déclenchante…"
+          placeholder={t('modules.fear_thermometer.situation_free_placeholder')}
           placeholderTextColor={colors.textMuted}
           value={freeText}
           onChangeText={onChangeFreeText}
@@ -280,6 +281,7 @@ interface StrategyPickerProps {
 }
 
 function StrategyPicker({ selected, custom, onChangeSelected, onChangeCustom }: StrategyPickerProps) {
+  const { t } = useTranslation()
   const toggle = (strategy: CopingStrategy) => {
     if (selected.includes(strategy)) {
       onChangeSelected(selected.filter((s) => s !== strategy))
@@ -290,8 +292,8 @@ function StrategyPicker({ selected, custom, onChangeSelected, onChangeCustom }: 
 
   return (
     <View style={stratStyles.container}>
-      <Text style={stratStyles.label}>Stratégies utilisées</Text>
-      <Text style={stratStyles.hint}>Sélectionnez toutes celles que vous avez mises en place.</Text>
+      <Text style={stratStyles.label}>{t('modules.fear_thermometer.strategies_label')}</Text>
+      <Text style={stratStyles.hint}>{t('modules.fear_thermometer.strategies_hint')}</Text>
 
       <View style={stratStyles.chips}>
         {COPING_STRATEGIES.map((strategy) => {
@@ -318,7 +320,7 @@ function StrategyPicker({ selected, custom, onChangeSelected, onChangeCustom }: 
 
       <TextInput
         style={stratStyles.input}
-        placeholder="Autre stratégie (texte libre)…"
+        placeholder={t('modules.fear_thermometer.strategy_custom_placeholder')}
         placeholderTextColor={colors.textMuted}
         value={custom}
         onChangeText={onChangeCustom}
@@ -404,6 +406,7 @@ const sectionStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function FearEntryScreen() {
+  const { t } = useTranslation()
   const navigation = useNavigation<Nav>()
   const route = useRoute<Route>()
   const entryId = route.params?.entryId
@@ -458,7 +461,7 @@ export default function FearEntryScreen() {
   const handleSave = useCallback(async () => {
     const label = resolvedSituationLabel()
     if (!label) {
-      Alert.alert('Situation manquante', 'Décrivez la situation déclenchante avant d\'enregistrer.')
+      Alert.alert(t('modules.fear_thermometer.situation_missing'), t('modules.fear_thermometer.situation_missing_msg'))
       return
     }
 
@@ -490,14 +493,12 @@ export default function FearEntryScreen() {
       }
 
       Alert.alert(
-        isEdit ? 'Mis à jour' : 'Enregistré',
-        isEdit
-          ? 'Votre saisie a été mise à jour.'
-          : 'Votre mesure de détresse a été enregistrée.',
+        isEdit ? t('modules.fear_thermometer.saved_updated') : t('common.saved'),
+        isEdit ? t('modules.fear_thermometer.saved_updated_msg') : t('modules.fear_thermometer.saved_new_msg'),
       )
       navigation.goBack()
-    } catch (err) {
-      Alert.alert('Erreur', 'Impossible d\'enregistrer la saisie. Veuillez réessayer.')
+    } catch {
+      Alert.alert(t('common.error'), t('modules.fear_thermometer.save_error_msg'))
     } finally {
       setSaving(false)
     }
@@ -522,30 +523,29 @@ export default function FearEntryScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
 
         {/* 1. Situation */}
-        <Section title="Situation déclenchante">
+        <Section title={t('modules.fear_thermometer.section_trigger')}>
           <SituationPicker
             situations={situations}
             selectedId={situationId}
             freeText={situationFreeText}
             onSelectId={setSituationId}
-            onChangeFreeText={(t) => { setSituationFreeText(t); setSituationId(null) }}
+            onChangeFreeText={(v) => { setSituationFreeText(v); setSituationId(null) }}
           />
         </Section>
 
         {/* 2. SUDs avant */}
-        <Section title="Niveau de détresse — Avant">
+        <Section title={t('modules.fear_thermometer.section_before')}>
           <SudsPicker
-            label="SUDs avant"
-            hint="0 = aucune détresse  ·  100 = détresse maximale imaginable"
+            label={t('modules.fear_thermometer.suds_before')}
+            hint={t('modules.fear_thermometer.suds_hint_before')}
             value={sudsBefore}
             accentColor="#EF4444"
             onChange={(v) => setSudsBefore(v ?? 0)}
-            testID="suds-before-picker"
           />
         </Section>
 
         {/* 3. Stratégies */}
-        <Section title="Stratégies mises en place">
+        <Section title={t('modules.fear_thermometer.section_strategies')}>
           <StrategyPicker
             selected={selectedStrategies}
             custom={customStrategy}
@@ -555,23 +555,22 @@ export default function FearEntryScreen() {
         </Section>
 
         {/* 4. SUDs après — optionnel */}
-        <Section title="Niveau de détresse — Après (optionnel)">
+        <Section title={t('modules.fear_thermometer.section_after')}>
           <SudsPicker
-            label="SUDs après"
-            hint="À renseigner une fois la stratégie terminée. Vous pouvez revenir plus tard."
+            label={t('modules.fear_thermometer.suds_after')}
+            hint={t('modules.fear_thermometer.suds_hint_after')}
             value={sudsAfter}
             accentColor="#059669"
             nullable
             onChange={setSudsAfter}
-            testID="suds-after-picker"
           />
         </Section>
 
         {/* 5. Notes libres */}
-        <Section title="Notes (optionnel)">
+        <Section title={t('modules.fear_thermometer.section_notes')}>
           <TextInput
             style={styles.notesInput}
-            placeholder="Observations, contexte supplémentaire…"
+            placeholder={t('modules.fear_thermometer.notes_placeholder')}
             placeholderTextColor={colors.textMuted}
             value={notes}
             onChangeText={setNotes}
@@ -590,7 +589,7 @@ export default function FearEntryScreen() {
           onPress={handleSave}
           disabled={saving}
           accessibilityRole="button"
-          accessibilityLabel={isEdit ? 'Mettre à jour la saisie' : 'Enregistrer la saisie'}
+          accessibilityLabel={isEdit ? t('common.update') : t('modules.fear_thermometer.save')}
           testID="save-button"
         >
           {saving ? (
@@ -598,7 +597,7 @@ export default function FearEntryScreen() {
           ) : (
             <>
               <MaterialCommunityIcons name="thermometer-check" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>{isEdit ? 'Mettre à jour' : 'Enregistrer'}</Text>
+              <Text style={styles.saveBtnText}>{isEdit ? t('common.update') : t('modules.fear_thermometer.save')}</Text>
             </>
           )}
         </Pressable>

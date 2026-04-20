@@ -4,13 +4,23 @@
 
 | Clé | Nom | Statut |
 |-----|-----|--------|
-| `sleep_diary` | Agenda du sommeil | **MVP — disponible** |
-| `beck_columns` | Colonnes de Beck (TCC) | Prévu |/
-| `fear_thermometer` | Thermomètre de la peur | Prévu |
-| `emotion_wheel` | Roue des émotions | Prévu |
-| `crisis_plan` | Plan de crise | Prévu |
-| `rim` | RIM — Imagerie mentale | Prévu |
-| `cognitive_saturation` | Saturation cognitive | Prévu |
+| `sleep_diary` | Agenda du sommeil | **Implémenté** — SQLite local, vue 14 nuits, bilan mensuel |
+| `beck_columns` | Colonnes de Beck (TCC) | **Implémenté** — SQLite local, 7 colonnes, tests |
+| `fear_thermometer` | Thermomètre de la peur | **Implémenté** — SUDs 0–100, situations, SQLite, tests |
+| `emotion_wheel` | Roue des émotions | **Implémenté** — taxonomie Plutchik, 3 niveaux, SQLite, 22 tests — [doc](modules/emotion_wheel.md) |
+| `crisis_plan` | Plan de crise | **Implémenté** — protocole Stanley & Brown (2012), 6 étapes, SQLite |
+| `rim` | RIM — Imagerie mentale | **Implémenté** — IRT Krakow & Zadra (2006), scénario praticien, tests — [doc](modules/rim.md) |
+| `cognitive_saturation` | Saturation cognitive | **Implémenté** — défusion ACT, timer 90s, tap counter, SQLite, 22 tests — [doc](modules/cognitive_saturation.md) |
+| `grounding` | Ancrage 5-4-3-2-1 | **Implémenté** — DBT Linehan (1993), 5 sens guidés, 17 tests — [doc](modules/grounding.md) |
+| `decisional_balance` | Balance décisionnelle | **Implémenté** — grille 2×2, jauge motivation, SQLite, signal Supabase |
+| `mood_tracker` | Thermomètre de l'humeur | **Implémenté** — humeur/énergie/anxiété/plaisir (1–10), SQLite, graphique |
+| `medication_adherence` | Observance du traitement | **Implémenté** — SQLite, tests — [doc](modules/medication_adherence.md) |
+| `medication_side_effects` | Effets du traitement | **Implémenté** — SQLite, tests — [doc](modules/medication_side_effects.md) |
+| `behavioral_activation` | Activation comportementale | **Implémenté** — SQLite, tests — [doc](modules/behavioral_activation.md) |
+| `breathing_techniques` | Techniques de respiration | **Implémenté** — 6 techniques, timer guidé, tests — [doc](modules/breathing_techniques.md) |
+| `psychoeducation` | Psychoéducation | **Implémenté** — cartes thématiques, lecture, tests |
+| `exposure_hierarchy` | Hiérarchie d'exposition | À construire |
+| `craving_journal` | Journal des envies | À construire |
 
 ## Module Agenda du sommeil (`sleep_diary`)
 

@@ -155,6 +155,35 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
   3. Ne jamais livrer un module mobile sans son pendant web, ni vice-versa : un module invisible dans l'armoire praticien ne peut pas être débloqué pour le patient.
 
+## Pattern : Mode Ado (teen mode)
+
+Le mode ado adapte l'interface de l'app mobile pour les patients adolescents — tutoiement et palette visuelle vive. Il est activé par le praticien depuis la fiche patient web.
+
+### Architecture
+
+| Fichier | Rôle |
+|---|---|
+| `supabase/schema.sql` | Colonne `teen_mode boolean default false` sur `practitioner_patients` |
+| `apps/mobile/src/store/authStore.ts` | Champ `teenMode: boolean` + `fetchTeenMode()` appelé au login |
+| `apps/mobile/src/theme/teen.ts` | Palette vive par module, textes bilingues adulte/ado |
+| `apps/mobile/src/hooks/useTeen.ts` | Hook `useTeen()` → `{ isTeenMode, tt, tg, teenColor }` |
+| `apps/mobile/src/components/TeenAccent.tsx` | Bande colorée en haut d'un écran (4px, invisible si mode adulte) |
+| `apps/web/src/pages/PatientPage.tsx` | Bouton toggle "Mode ado" dans le header patient |
+
+### Règles
+
+- **Le praticien** active/désactive le mode via le bouton de la fiche patient. Le patient n'a pas accès à ce réglage.
+- **Le mode ne change pas la structure** des écrans, ni la navigation, ni les données.
+- **Tout nouveau écran de module** doit importer `useTeen` et `TeenAccent`, et passer `teenColor('nom_du_module')` au composant.
+- **Tout nouveau texte adaptable** doit être ajouté dans `TEEN_MODULE_TEXTS` de `teen.ts` sous la forme `{ adult: '...', teen: '...' }`.
+- **Tout test d'écran** qui importe un écran module doit mocker `useTeen` :
+  ```ts
+  jest.mock('../../hooks/useTeen', () => ({
+    useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
+  }))
+  ```
+- **Conformité MDR** : le mode ado modifie uniquement le lexique et la palette — aucune logique conditionnelle sur les données cliniques.
+
 ## MCP disponible
 
 Le MCP Supabase est configuré dans `~/.claude/settings.json` via token personnel.

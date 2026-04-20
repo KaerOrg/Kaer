@@ -20,6 +20,9 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 import { Card } from '../../components/Card'
 import { EmptyState } from '../../components/EmptyState'
 import { StatusBadge } from '../../components/StatusBadge'
@@ -59,6 +62,7 @@ interface ActivityCardProps {
 }
 
 function ActivityCard({ record, onToggleDone, onEdit, onDelete }: ActivityCardProps) {
+  const { t } = useTranslation()
   return (
     <Card state={record.done === 1 ? 'disabled' : undefined}>
       <View style={cardStyles.row}>
@@ -68,7 +72,7 @@ function ActivityCard({ record, onToggleDone, onEdit, onDelete }: ActivityCardPr
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: record.done === 1 }}
-          accessibilityLabel={record.done === 1 ? 'Marquer comme non réalisée' : 'Marquer comme réalisée'}
+          accessibilityLabel={record.done === 1 ? t('modules.behavioral_activation.mark_undone') : t('modules.behavioral_activation.mark_done')}
         >
           <MaterialCommunityIcons
             name={record.done === 1 ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
@@ -91,10 +95,10 @@ function ActivityCard({ record, onToggleDone, onEdit, onDelete }: ActivityCardPr
         </View>
 
         <View style={cardStyles.actions}>
-          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Modifier">
+          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('common.edit')}>
             <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
           </Pressable>
-          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer">
+          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
             <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
           </Pressable>
         </View>
@@ -125,6 +129,7 @@ interface MonthCalendarProps {
 }
 
 function MonthCalendarView({ records, selectedDay, onDayPress }: MonthCalendarProps) {
+  const { t } = useTranslation()
   const [month, setMonth] = useState(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
@@ -178,7 +183,7 @@ function MonthCalendarView({ records, selectedDay, onDayPress }: MonthCalendarPr
         <Pressable
           onPress={() => setMonth(new Date(year, m - 1, 1))}
           hitSlop={12}
-          accessibilityLabel="Mois précédent"
+          accessibilityLabel={t('common.prev_month')}
         >
           <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
         </Pressable>
@@ -186,7 +191,7 @@ function MonthCalendarView({ records, selectedDay, onDayPress }: MonthCalendarPr
         <Pressable
           onPress={() => setMonth(new Date(year, m + 1, 1))}
           hitSlop={12}
-          accessibilityLabel="Mois suivant"
+          accessibilityLabel={t('common.next_month')}
         >
           <MaterialCommunityIcons name="chevron-right" size={26} color={colors.primary} />
         </Pressable>
@@ -241,16 +246,16 @@ function MonthCalendarView({ records, selectedDay, onDayPress }: MonthCalendarPr
         <View style={calStyles.legend}>
           <View style={calStyles.legendItem}>
             <View style={[calStyles.dot, calStyles.dotDone]} />
-            <Text style={calStyles.legendText}>Réalisée</Text>
+            <Text style={calStyles.legendText}>{t('modules.behavioral_activation.legend_done')}</Text>
           </View>
           <View style={calStyles.legendItem}>
             <View style={[calStyles.dot, calStyles.dotPlanned]} />
-            <Text style={calStyles.legendText}>Planifiée</Text>
+            <Text style={calStyles.legendText}>{t('modules.behavioral_activation.legend_planned')}</Text>
           </View>
         </View>
         {(monthDone > 0 || monthPlanned > 0) && (
           <Text style={calStyles.stat}>
-            {monthDone} réalisée{monthDone > 1 ? 's' : ''} · {monthPlanned} planifiée{monthPlanned > 1 ? 's' : ''}
+            {monthDone} {t('modules.behavioral_activation.legend_done').toLowerCase()} · {monthPlanned} {t('modules.behavioral_activation.legend_planned').toLowerCase()}
           </Text>
         )}
       </View>
@@ -357,6 +362,8 @@ const calStyles = StyleSheet.create({
 type ViewMode = 'list' | 'month'
 
 export default function BehavioralActivationScreen() {
+  const { t } = useTranslation()
+  const { isTeenMode, tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [records, setRecords] = useState<ActivityRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -383,12 +390,12 @@ export default function BehavioralActivationScreen() {
 
   const handleDelete = (record: ActivityRecord) => {
     Alert.alert(
-      'Supprimer cette activité ?',
-      `"${record.label}" sera supprimée définitivement.`,
+      t('modules.behavioral_activation.delete_activity_title'),
+      `"${record.label}"`,
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await deleteActivityRecord(record.id)
@@ -412,6 +419,7 @@ export default function BehavioralActivationScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('behavioral_activation')} />
       {/* Toggle Liste / Mois */}
       <View style={styles.tabBar}>
         <Pressable
@@ -425,7 +433,7 @@ export default function BehavioralActivationScreen() {
             size={16}
             color={viewMode === 'list' ? colors.primary : colors.textMuted}
           />
-          <Text style={[styles.tabText, viewMode === 'list' && styles.tabTextActive]}>Liste</Text>
+          <Text style={[styles.tabText, viewMode === 'list' && styles.tabTextActive]}>{t('modules.behavioral_activation.tab_list')}</Text>
         </Pressable>
         <Pressable
           style={[styles.tab, viewMode === 'month' && styles.tabActive]}
@@ -438,7 +446,7 @@ export default function BehavioralActivationScreen() {
             size={16}
             color={viewMode === 'month' ? colors.primary : colors.textMuted}
           />
-          <Text style={[styles.tabText, viewMode === 'month' && styles.tabTextActive]}>Mois</Text>
+          <Text style={[styles.tabText, viewMode === 'month' && styles.tabTextActive]}>{t('modules.behavioral_activation.tab_month')}</Text>
         </Pressable>
       </View>
 
@@ -460,21 +468,20 @@ export default function BehavioralActivationScreen() {
             {records.length === 0 ? (
               <EmptyState
                 icon="🏃"
-                title="Aucune activité"
-                description={`Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).`}
+                title={t('modules.behavioral_activation.empty_title')}
+                description={tt('behavioral_activation', 'intro') || t('modules.behavioral_activation.empty_description')}
               />
             ) : viewMode === 'month' && !selectedDay ? (
-              // En vue mois sans jour sélectionné : invite à toucher un jour
               <View style={styles.monthHint}>
                 <MaterialCommunityIcons name="gesture-tap" size={24} color={colors.textMuted} />
                 <Text style={styles.monthHintText}>
-                  Touchez un jour du calendrier pour voir ses activités
+                  {t('modules.behavioral_activation.month_hint_tap')}
                 </Text>
               </View>
             ) : viewMode === 'month' && selectedDay && groups.length === 0 ? (
               <View style={styles.monthHint}>
                 <MaterialCommunityIcons name="calendar-blank-outline" size={24} color={colors.textMuted} />
-                <Text style={styles.monthHintText}>Aucune activité ce jour-là</Text>
+                <Text style={styles.monthHintText}>{t('modules.behavioral_activation.month_hint_empty')}</Text>
               </View>
             ) : (
               // Groupes d'activités
@@ -507,7 +514,7 @@ export default function BehavioralActivationScreen() {
         style={styles.fab}
         onPress={() => navigation.navigate('BehavioralActivationEntry', {})}
         accessibilityRole="button"
-        accessibilityLabel="Ajouter une activité"
+        accessibilityLabel={t('modules.behavioral_activation.empty_title')}
       >
         <MaterialCommunityIcons name="plus" size={28} color={colors.white} />
       </Pressable>

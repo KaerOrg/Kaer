@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import i18next, { initialLanguage } from '../i18n'
 
 interface Patient {
   id: string
@@ -9,16 +10,22 @@ interface Patient {
 
 interface AuthState {
   patient: Patient | null
+  teenMode: boolean
+  language: string
   loading: boolean
   loadSession: () => Promise<void>
+  fetchTeenMode: () => Promise<void>
+  setLanguage: (lng: string) => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (token: string, password: string) => Promise<void>
   logout: () => Promise<void>
   updateAvatar: (avatarUrl: string) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   patient: null,
+  teenMode: false,
+  language: initialLanguage,
   loading: true,
 
   // Appelé au démarrage de l'app pour restaurer la session existante
@@ -48,6 +55,8 @@ export const useAuthStore = create<AuthState>((set) => ({
           },
           loading: false,
         })
+        // Charger le mode ado après la restauration de session
+        await get().fetchTeenMode()
       } else {
         set({ patient: null, loading: false })
       }
@@ -58,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     // Écoute les changements d'authentification (connexion / déconnexion)
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         set((state) => ({
           patient: {
@@ -67,10 +76,28 @@ export const useAuthStore = create<AuthState>((set) => ({
             avatar_url: state.patient?.avatar_url ?? null,
           },
         }))
+        await get().fetchTeenMode()
       } else {
-        set({ patient: null })
+        set({ patient: null, teenMode: false })
       }
     })
+  },
+
+  setLanguage: async (lng: string) => {
+    await i18next.changeLanguage(lng)
+    set({ language: lng })
+  },
+
+  // Récupère le flag teen_mode depuis la relation praticien ↔ patient
+  fetchTeenMode: async () => {
+    const { patient } = get()
+    if (!patient) return
+    const { data } = await supabase
+      .from('practitioner_patients')
+      .select('teen_mode')
+      .eq('patient_id', patient.id)
+      .single()
+    set({ teenMode: data?.teen_mode ?? false })
   },
 
   login: async (email: string, password: string) => {

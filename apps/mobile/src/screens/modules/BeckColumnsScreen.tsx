@@ -18,7 +18,10 @@ import {
   type ThoughtRecord,
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
+import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
+import { useTeen } from '../../hooks/useTeen'
+import { TeenAccent } from '../../components/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -31,6 +34,7 @@ interface RecordCardProps {
 }
 
 function RecordCard({ record, onEdit, onDelete }: RecordCardProps) {
+  const { t } = useTranslation()
   const dateLabel = new Date(record.date).toLocaleDateString('fr-FR', {
     weekday: 'short',
     day: 'numeric',
@@ -44,10 +48,10 @@ function RecordCard({ record, onEdit, onDelete }: RecordCardProps) {
       <View style={cardStyles.header}>
         <Text style={cardStyles.date}>{dateLabel}</Text>
         <View style={cardStyles.actions}>
-          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Modifier cet enregistrement">
+          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('common.modify')}>
             <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
           </Pressable>
-          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Supprimer cet enregistrement">
+          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
             <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
           </Pressable>
         </View>
@@ -136,6 +140,8 @@ const cardStyles = StyleSheet.create({
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BeckColumnsScreen() {
+  const { t } = useTranslation()
+  const { tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [records, setRecords] = useState<ThoughtRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -154,12 +160,12 @@ export default function BeckColumnsScreen() {
 
   const handleDelete = useCallback((id: string) => {
     Alert.alert(
-      'Supprimer cet enregistrement ?',
-      'Cette action est irréversible.',
+      t('modules.beck_columns.delete_record_title'),
+      t('common.irreversible'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             await deleteThoughtRecord(id)
@@ -168,7 +174,7 @@ export default function BeckColumnsScreen() {
         },
       ]
     )
-  }, [])
+  }, [t])
 
   if (loading) {
     return (
@@ -180,14 +186,13 @@ export default function BeckColumnsScreen() {
 
   return (
     <View style={styles.container}>
+      <TeenAccent color={teenColor('beck_columns')} />
       <ScrollView contentContainerStyle={styles.content}>
         {records.length === 0 ? (
           <View style={styles.empty}>
             <MaterialCommunityIcons name="thought-bubble-outline" size={52} color={colors.border} />
-            <Text style={styles.emptyTitle}>Aucun enregistrement</Text>
-            <Text style={styles.emptyText}>
-              Appuyez sur le bouton ci-dessous pour noter votre première pensée automatique.
-            </Text>
+            <Text style={styles.emptyTitle}>{t('modules.beck_columns.empty_title')}</Text>
+            <Text style={styles.emptyText}>{t('modules.beck_columns.intro')}</Text>
           </View>
         ) : (
           <View style={styles.list}>
@@ -209,10 +214,10 @@ export default function BeckColumnsScreen() {
           style={styles.addBtn}
           onPress={() => navigation.navigate('BeckEntry', {})}
           accessibilityRole="button"
-          accessibilityLabel="Nouvel enregistrement de pensée"
+          accessibilityLabel={t('modules.beck_columns.new_thought')}
         >
           <MaterialCommunityIcons name="plus" size={22} color={colors.white} />
-          <Text style={styles.addBtnText}>Nouvelle pensée</Text>
+          <Text style={styles.addBtnText}>{t('modules.beck_columns.new_thought')}</Text>
         </Pressable>
       </SafeAreaView>
     </View>

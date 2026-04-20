@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (!user) return 'Non authentifié.'
     const { error } = await supabase
       .from('practitioners')
-      .update({ name, professional_title: title || null })
+      .update({ name, professional_title: title || null } as never)
       .eq('id', user.id)
     if (error) return 'Erreur lors de la mise à jour.'
     const { data } = await supabase.from('practitioners').select('*').eq('id', user.id).single()

@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { getInitials } from './Layout.utils'
 
 describe('getInitials', () => {
-  it('retourne les initiales d'un nom complet', () => {
+  it("retourne les initiales d'un nom complet", () => {
     expect(getInitials('Marie Dupont')).toBe('MD')
   })
 

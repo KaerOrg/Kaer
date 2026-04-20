@@ -1,0 +1,104 @@
+{
+  "global": {
+    "greeting": "Hey!",
+    "modulesTitle": "Your tools",
+    "noModules": "No tools unlocked yet — your care team is on it."
+  },
+  "home": {
+    "title": "Your modules",
+    "subheading": "Activated by your care team",
+    "empty_description": "No tools unlocked yet — your care team is on it."
+  },
+  "modules": {
+    "crisis_plan": {
+      "title": "My plan for tough times",
+      "subtitle": "This plan is here to help when things get too hard.",
+      "step_1_title": "When I feel things going wrong",
+      "step_2_title": "What helps me calm down",
+      "step_3_title": "What takes my mind off things",
+      "step_4_title": "Who I can talk to",
+      "step_5_title": "My care team",
+      "step_6_title": "Making my space safer"
+    },
+    "beck_columns": {
+      "title": "Untangling my thoughts",
+      "intro": "Write down a negative thought and we'll break it down together.",
+      "col_situation": "What happened",
+      "col_emotion": "What I felt",
+      "col_thought": "What I thought right away",
+      "col_distortion": "The thought trap",
+      "col_reframe": "Another way to see it",
+      "save": "Done"
+    },
+    "grounding": {
+      "title": "Back to the present",
+      "intro": "When everything feels overwhelming, this technique brings you back.",
+      "step_see": "5 things you see",
+      "step_touch": "4 things you can touch",
+      "step_hear": "3 things you hear",
+      "step_smell": "2 smells around you",
+      "step_taste": "1 taste in your mouth"
+    },
+    "mood_tracker": {
+      "title": "How are you doing?",
+      "intro": "Tell me how you're feeling today.",
+      "dim_anxiety": "Stress / Anxiety",
+      "save": "Done"
+    },
+    "fear_thermometer": {
+      "title": "My stress level",
+      "intro": "Rate your stress right now (0 = super calm, 100 = total panic).",
+      "save": "Done"
+    },
+    "decisional_balance": {
+      "title": "The pros and cons",
+      "intro": "Not sure? Let's lay it all out to see things clearly.",
+      "quadrant_pros_change_title": "Why changing would be good",
+      "quadrant_cons_change_title": "What changing would cost me",
+      "quadrant_pros_status_title": "Why staying the same works",
+      "quadrant_cons_status_title": "What staying the same costs me",
+      "gauge_title": "My motivation to change",
+      "save": "Done"
+    },
+    "sleep_diary": {
+      "title": "My night journal",
+      "intro": "Log each morning how you slept.",
+      "save": "Done"
+    },
+    "medication_side_effects": {
+      "title": "My treatment — side effects",
+      "intro": "Feeling weird effects from your meds? Log them here.",
+      "save": "Done"
+    },
+    "medication_adherence": {
+      "title": "My medication log",
+      "intro": "Did you take your medication this week?",
+      "save": "Done"
+    },
+    "behavioral_activation": {
+      "title": "My fun activities",
+      "intro": "Let's find activities that make you feel good and plan them.",
+      "save": "Done"
+    },
+    "breathing_techniques": {
+      "title": "Breathing to calm down",
+      "intro": "Pick an exercise — it can really help you come down."
+    },
+    "rim": {
+      "title": "Rewriting the nightmare",
+      "intro": "We'll turn your nightmare into something better."
+    },
+    "cognitive_saturation": {
+      "title": "Stop the rumination",
+      "intro": "This technique cuts through thoughts that keep looping."
+    },
+    "emotion_wheel": {
+      "title": "What I really feel",
+      "intro": "Explore and put words to what you're feeling."
+    },
+    "psychoeducation": {
+      "title": "Understanding my mental health",
+      "intro": "Read these cards to better understand what you're going through."
+    }
+  }
+}

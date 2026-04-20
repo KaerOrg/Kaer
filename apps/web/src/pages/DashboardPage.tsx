@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Check, Users } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
@@ -22,6 +23,7 @@ interface PendingInvitation {
 export function DashboardPage() {
   const { practitioner } = useAuthStore()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
   const [patients, setPatients] = useState<PatientSummary[]>([])
   const [loadingPatients, setLoadingPatients] = useState(true)
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([])
@@ -41,17 +43,18 @@ export function DashboardPage() {
     if (!practitioner) return
     setLoadingPatients(true)
 
+    interface RelationRow { patient_id: string; patient_alias: string | null; patients: { id: string; email: string } | { id: string; email: string }[] | null }
     const { data: relations } = await supabase
       .from('practitioner_patients')
       .select('patient_id, patient_alias, patients(id, email)')
-      .eq('practitioner_id', practitioner.id)
+      .eq('practitioner_id', practitioner.id) as { data: RelationRow[] | null }
 
     if (!relations) { setLoadingPatients(false); return }
 
     const patientIds = relations.map(r => r.patient_id)
     const { data: modules } = patientIds.length > 0
       ? await supabase.from('patient_modules').select('*').in('patient_id', patientIds)
-      : { data: [] }
+      : { data: [] as import('../lib/database.types').PatientModule[] }
 
     const list: PatientSummary[] = relations.map(rel => {
       const patient = Array.isArray(rel.patients) ? rel.patients[0] : rel.patients
@@ -94,19 +97,18 @@ export function DashboardPage() {
     })
 
     if (error) {
-      // Extraire le vrai message d'erreur depuis la réponse HTTP
-      let errorMessage = 'Erreur lors de l\'envoi.'
+      let errorMessage = t('dashboard.invite_error_generic')
       try {
         const body = await (error as any).context?.json?.()
         if (body?.error) errorMessage = body.error
-      } catch { /* utiliser le message par défaut */ }
+      } catch { /* use default */ }
       setInviteError(errorMessage)
       setInviteLoading(false)
       return
     }
 
     if (!data?.success) {
-      setInviteError(data?.error ?? 'Erreur lors de l\'envoi.')
+      setInviteError(data?.error ?? t('dashboard.invite_error_generic'))
       setInviteLoading(false)
       return
     }
@@ -122,18 +124,20 @@ export function DashboardPage() {
     }, 3000)
   }
 
+  const patientSubtitle = patients.length === 1
+    ? t('dashboard.subtitle_one', { count: patients.length })
+    : t('dashboard.subtitle_other', { count: patients.length })
+
   return (
     <Layout>
       <div className="dashboard">
         <div className="dashboard__header">
           <div>
-            <h1 className="dashboard__title">Mes patients</h1>
-            <p className="dashboard__subtitle">
-              {patients.length} patient{patients.length !== 1 ? 's' : ''} suivi{patients.length !== 1 ? 's' : ''}
-            </p>
+            <h1 className="dashboard__title">{t('dashboard.title')}</h1>
+            <p className="dashboard__subtitle">{patientSubtitle}</p>
           </div>
           <Button onClick={() => setShowInviteForm(true)}>
-            + Inviter un patient
+            {t('dashboard.invite_button')}
           </Button>
         </div>
 
@@ -141,40 +145,40 @@ export function DashboardPage() {
           <Card
             variant="outlined"
             header={{
-              title: 'Inviter un nouveau patient',
-              subtitle: "Le patient recevra un lien par email pour créer son compte et accéder à l'application.",
+              title: t('dashboard.invite_card_title'),
+              subtitle: t('dashboard.invite_card_subtitle'),
             }}
           >
             <form onSubmit={sendInvitation} className="invite-form">
               <InputField
-                label="Email du patient"
+                label={t('dashboard.invite_email_label')}
                 type="email"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
-                placeholder="patient@exemple.fr"
+                placeholder={t('dashboard.invite_email_placeholder')}
                 required
               />
               <InputField
-                label="Alias / Pseudonyme (optionnel)"
+                label={t('dashboard.invite_alias_label')}
                 type="text"
                 value={inviteAlias}
                 onChange={e => setInviteAlias(e.target.value)}
-                placeholder="Ex: Patient A, ou initiales"
+                placeholder={t('dashboard.invite_alias_placeholder')}
               />
               {inviteError && (
                 <div className="invite-form__error">{inviteError}</div>
               )}
               {inviteSuccess && (
                 <div className="invite-form__success">
-                  <Check size={14} /> Email d'invitation envoyé à {inviteEmail || 'votre patient'}.
+                  <Check size={14} /> {t('dashboard.invite_success', { email: inviteEmail || '…' })}
                 </div>
               )}
               <div className="invite-form__actions">
                 <Button type="button" variant="secondary" onClick={() => setShowInviteForm(false)}>
-                  Annuler
+                  {t('common.cancel')}
                 </Button>
                 <Button type="submit" loading={inviteLoading}>
-                  Envoyer l'invitation
+                  {t('dashboard.send_invitation')}
                 </Button>
               </div>
             </form>
@@ -184,16 +188,18 @@ export function DashboardPage() {
         {pendingInvitations.length > 0 && (
           <div className="pending-invitations">
             <h2 className="pending-invitations__title">
-              Invitations en attente ({pendingInvitations.length})
+              {t('dashboard.pending_title', { count: pendingInvitations.length })}
             </h2>
             <div className="pending-invitations__list">
               {pendingInvitations.map(inv => (
                 <div key={inv.id} className="pending-invitation-row">
                   <span className="pending-invitation-row__email">{inv.patient_email}</span>
                   <span className="pending-invitation-row__expires">
-                    Expire le {new Date(inv.expires_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                    {t('dashboard.pending_expires', {
+                      date: new Date(inv.expires_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),
+                    })}
                   </span>
-                  <StatusBadge variant="warning" label="En attente" />
+                  <StatusBadge variant="warning" label={t('dashboard.pending_badge')} />
                 </div>
               ))}
             </div>
@@ -201,12 +207,12 @@ export function DashboardPage() {
         )}
 
         {loadingPatients ? (
-          <div className="dashboard__loading">Chargement des patients…</div>
+          <div className="dashboard__loading">{t('dashboard.loading_patients')}</div>
         ) : patients.length === 0 ? (
           <EmptyState
             icon={<Users size={48} />}
-            title="Aucun patient pour l'instant"
-            description="Commencez par inviter votre premier patient."
+            title={t('dashboard.empty_title')}
+            description={t('dashboard.empty_description')}
           />
         ) : (
           <div className="patient-grid">
@@ -228,7 +234,9 @@ export function DashboardPage() {
                   </div>
                   <div className="patient-card__modules">
                     <span className="patient-card__module-count">
-                      {patient.modules.length} module{patient.modules.length !== 1 ? 's' : ''}
+                      {patient.modules.length === 1
+                        ? t('dashboard.module_count_one', { count: patient.modules.length })
+                        : t('dashboard.module_count_other', { count: patient.modules.length })}
                     </span>
                   </div>
                 </Card>

@@ -50,6 +50,7 @@ export interface Database {
           name?: string
           professional_title?: string | null
         }
+        Relationships: []
       }
       patients: {
         Row: {
@@ -62,6 +63,7 @@ export interface Database {
           email: string
         }
         Update: Record<string, never>
+        Relationships: []
       }
       practitioner_patients: {
         Row: {
@@ -79,6 +81,7 @@ export interface Database {
         Update: {
           patient_alias?: string | null
         }
+        Relationships: []
       }
       invitations: {
         Row: {
@@ -99,6 +102,7 @@ export interface Database {
         Update: {
           accepted_at?: string | null
         }
+        Relationships: []
       }
       patient_modules: {
         Row: {
@@ -118,8 +122,13 @@ export interface Database {
         Update: {
           config?: Record<string, unknown>
         }
+        Relationships: []
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }
 
@@ -140,6 +149,8 @@ export interface PatientSummary {
 
 export interface PatientModule {
   id: string
+  patient_id: string
+  practitioner_id: string
   module_type: ModuleType
   config: Record<string, unknown>
   unlocked_at: string

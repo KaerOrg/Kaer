@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
 import { getSleepEntriesForMonth, computeSleepDuration, SleepEntry } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { useTranslation } from 'react-i18next'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -163,11 +164,12 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 }
 
 function Legend() {
+  const { t } = useTranslation()
   const items = [
-    { color: colors.success, label: 'Bonne nuit (4-5★)' },
-    { color: '#F59E0B', label: 'Nuit moyenne (3★)' },
-    { color: colors.danger, label: 'Mauvaise nuit (1-2★)' },
-    { color: colors.border, label: 'Non renseigné' },
+    { color: colors.success, label: t('modules.sleep_diary.legend_good') },
+    { color: '#F59E0B', label: t('modules.sleep_diary.legend_average') },
+    { color: colors.danger, label: t('modules.sleep_diary.legend_bad') },
+    { color: colors.border, label: t('modules.sleep_diary.legend_empty') },
   ]
   return (
     <View style={legStyles.container}>
@@ -179,7 +181,7 @@ function Legend() {
       ))}
       <View style={legStyles.row}>
         <MaterialCommunityIcons name="ghost" size={13} color={colors.textMuted} />
-        <Text style={legStyles.label}>Cauchemar cette nuit</Text>
+        <Text style={legStyles.label}>{t('modules.sleep_diary.legend_nightmare')}</Text>
       </View>
     </View>
   )
@@ -188,6 +190,7 @@ function Legend() {
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function SleepDiaryMonthScreen() {
+  const { t } = useTranslation()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -248,28 +251,28 @@ export default function SleepDiaryMonthScreen() {
           </View>
 
           {/* Statistiques */}
-          <Text style={styles.sectionTitle}>Résumé du mois</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.month_summary')}</Text>
           <View style={styles.statsGrid}>
             <StatCard
-              label="Durée moy."
+              label={t('modules.sleep_diary.stat_avg_duration')}
               value={stats.avgSleepMinutes !== null ? formatMinutes(stats.avgSleepMinutes) : '–'}
             />
             <StatCard
-              label="Réveils moy."
+              label={t('modules.sleep_diary.stat_avg_awakenings')}
               value={stats.avgAwakenings !== null ? String(stats.avgAwakenings) : '–'}
             />
             <StatCard
-              label="Nuits saisies"
+              label={t('modules.sleep_diary.stat_nights_filled')}
               value={`${stats.filledDays}/${stats.totalDays}`}
             />
             <StatCard
-              label="Cauchemars"
+              label={t('modules.sleep_diary.stat_nightmares')}
               value={String(stats.nightmaresCount)}
             />
           </View>
 
           {/* Légende */}
-          <Text style={styles.sectionTitle}>Légende</Text>
+          <Text style={styles.sectionTitle}>{t('modules.sleep_diary.legend')}</Text>
           <View style={styles.card}>
             <Legend />
           </View>
