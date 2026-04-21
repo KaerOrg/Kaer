@@ -219,11 +219,13 @@ export default function EmotionMonthScreen() {
   const [entries, setEntries] = useState<EmotionEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    const data = await getEmotionEntriesForMonth(toYearMonth(year, month))
-    setEntries(data)
-    setLoading(false)
+  const load = useCallback(() => {
+    void (async () => {
+      setLoading(true)
+      const data = await getEmotionEntriesForMonth(toYearMonth(year, month))
+      setEntries(data)
+      setLoading(false)
+    })()
   }, [year, month])
 
   useFocusEffect(load)

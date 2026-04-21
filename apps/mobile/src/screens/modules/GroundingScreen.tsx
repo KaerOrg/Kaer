@@ -69,7 +69,7 @@ const GROUNDING_STEPS: readonly GroundingStep[] = [
   {
     count: 1,
     senseKey: 'modules.grounding.step_taste_sense',
-    icon: 'tongue',
+    icon: 'food-variant',
     instructionKey: 'modules.grounding.step_taste_instruction',
     tipKey: 'modules.grounding.step_taste_tip',
     color: '#DC2626',

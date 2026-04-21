@@ -8,7 +8,7 @@ describe('InputField', () => {
     expect(screen.getByText('Email')).toBeTruthy()
   })
 
-  it('affiche le message d'erreur', () => {
+  it("affiche le message d'erreur", () => {
     render(<InputField label="Email" error="Champ requis" />)
     expect(screen.getByText('Champ requis')).toBeTruthy()
   })

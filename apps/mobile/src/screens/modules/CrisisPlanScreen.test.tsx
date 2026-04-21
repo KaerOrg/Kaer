@@ -17,7 +17,7 @@ jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
     // Simule useFocusEffect comme un useEffect standard pour les tests
-    useFocusEffect: (cb) => {
+    useFocusEffect: (cb: () => void) => {
       React.useEffect(() => {
         cb()
       }, [])
@@ -26,7 +26,7 @@ jest.mock('@react-navigation/native', () => {
 })
 
 jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => children,
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')

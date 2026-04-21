@@ -18,7 +18,7 @@ describe('EmptyState', () => {
     expect(screen.queryByText('Description')).toBeNull()
   })
 
-  it('affiche l'icône si fournie', () => {
+  it("affiche l'icône si fournie", () => {
     render(<EmptyState title="T" icon="📭" />)
     expect(screen.getByText('📭')).toBeTruthy()
   })
