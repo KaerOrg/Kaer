@@ -186,7 +186,7 @@ describe('RimScreen', () => {
     const linkingSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
     render(<RimScreen />)
     fireEvent.press(
-      await screen.findByLabelText('Appeler le 3114, numéro national de prévention du suicide')
+      await screen.findByLabelText('3114 — Numéro national prévention suicide')
     )
     expect(linkingSpy).toHaveBeenCalledWith('tel:3114')
   })

@@ -514,7 +514,8 @@ export default function BehavioralActivationScreen() {
         style={styles.fab}
         onPress={() => navigation.navigate('BehavioralActivationEntry', {})}
         accessibilityRole="button"
-        accessibilityLabel={t('modules.behavioral_activation.empty_title')}
+        accessibilityLabel={t('modules.behavioral_activation.add_btn')}
+        testID="fab-add-button"
       >
         <MaterialCommunityIcons name="plus" size={28} color={colors.white} />
       </Pressable>

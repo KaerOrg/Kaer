@@ -8,6 +8,7 @@
   "scripts": {
     "web": "cd apps/web && npx vite",
     "mobile": "cd apps/mobile && npx expo start",
-    "test:mobile": "cd apps/mobile && npx jest --no-coverage"
+    "test:mobile": "cd apps/mobile && npx jest --no-coverage",
+    "test:web": "cd apps/web && npx vitest run"
   }
 }

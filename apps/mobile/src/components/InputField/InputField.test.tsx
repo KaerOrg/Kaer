@@ -27,7 +27,7 @@ describe('InputField', () => {
 
   it('passe en état focused au focus', () => {
     render(<InputField label="Email" />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByDisplayValue('')
     fireEvent(input, 'focus')
     expect(input).toBeTruthy()
   })

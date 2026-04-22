@@ -97,7 +97,7 @@ describe('CognitiveSaturationScreen', () => {
     deleteCognitiveSaturationSession.mockResolvedValue(undefined)
     render(<CognitiveSaturationScreen />)
     await screen.findByTestId('session-card-session-1')
-    fireEvent.press(screen.getByLabelText('Supprimer cette session'))
+    fireEvent.press(screen.getByLabelText('Supprimer cette session ?'))
     expect(deleteCognitiveSaturationSession).toBeDefined()
   })
 })

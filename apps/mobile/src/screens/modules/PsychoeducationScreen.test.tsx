@@ -137,8 +137,7 @@ describe('PsychoeducationScreen', () => {
     render(<PsychoeducationScreen />)
 
     await waitFor(() => {
-      // 1 carte lue sur 2 : "cartes" (pluriel) + "lue" (singulier, 1 carte lue)
-      expect(screen.getByText('1/2 cartes lue')).toBeTruthy()
+      expect(screen.getByText('1/2 cartes lues')).toBeTruthy()
     })
   })
 

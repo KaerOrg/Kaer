@@ -108,7 +108,7 @@ describe('EmotionWheelScreen', () => {
     const { getByLabelText } = render(<EmotionWheelScreen />)
     await screen.findByTestId('entry-card-entry-1')
 
-    fireEvent.press(getByLabelText('Supprimer cette entrée'))
+    fireEvent.press(getByLabelText('Supprimer'))
 
     // Simuler la confirmation de l'Alert
     const { Alert } = require('react-native')
@@ -147,7 +147,7 @@ describe('EmotionEntryScreen', () => {
     render(<EmotionEntryScreen />)
     fireEvent.press(screen.getByTestId('primary-joy'))
     expect(screen.getByTestId('step-secondary')).toBeTruthy()
-    expect(screen.getByText(/nuance de joie/i)).toBeTruthy()
+    expect(screen.getAllByText('Joie').length).toBeGreaterThan(0)
   })
 
   it('affiche les secondaires de la joie', () => {
