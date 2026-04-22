@@ -13,7 +13,7 @@ function App() {
 
   useEffect(() => {
     loadSession()
-  }, [])
+  }, [loadSession])
 
   if (loading) {
     return (

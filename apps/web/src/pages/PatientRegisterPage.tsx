@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BrainCircuit, CheckCircle, TriangleAlert } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -20,12 +20,7 @@ export function PatientRegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!token) { setStep('invalid'); return }
-    checkToken()
-  }, [token])
-
-  const checkToken = async () => {
+  const checkToken = useCallback(async () => {
     interface InvitationRow { patient_email: string; expires_at: string; accepted_at: string | null }
     const { data } = await supabase
       .from('invitations')
@@ -40,7 +35,12 @@ export function PatientRegisterPage() {
 
     setPrefillEmail(data.patient_email)
     setStep('form')
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (!token) { setStep('invalid'); return }
+    checkToken()
+  }, [token, checkToken])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

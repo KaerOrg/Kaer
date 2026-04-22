@@ -123,11 +123,7 @@ export function PatientPage() {
   const [savingRim, setSavingRim] = useState(false)
   const [rimError, setRimError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadPatient()
-  }, [id])
-
-  const loadPatient = async () => {
+  const loadPatient = useCallback(async () => {
     if (!id || !practitioner) return
     setLoading(true)
 
@@ -153,7 +149,11 @@ export function PatientPage() {
 
     setModules(mods ?? [])
     setLoading(false)
-  }
+  }, [id, practitioner, navigate])
+
+  useEffect(() => {
+    loadPatient()
+  }, [loadPatient])
 
   // ── Module standard ──────────────────────────────────────────────────────
 
@@ -205,7 +205,7 @@ export function PatientPage() {
   const toggleCard = (cardId: string) => {
     setSelectedCardIds(prev => {
       const next = new Set(prev)
-      next.has(cardId) ? next.delete(cardId) : next.add(cardId)
+      if (next.has(cardId)) { next.delete(cardId) } else { next.add(cardId) }
       return next
     })
   }
