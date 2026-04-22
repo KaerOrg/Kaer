@@ -43,8 +43,8 @@ Cette commande installe les dépendances de toutes les apps en une seule fois (m
 Créer le fichier `apps/web/.env` avec :
 
 ```env
-VITE_SUPABASE_URL=https://phitpvzzhseucqprdtzh.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoaXRwdnp6aHNldWNxcHJkdHpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTA5MDcsImV4cCI6MjA5MDk2NjkwN30.NpAVJqXbQU71joFiJgQak4CiNs8PNtoBFnRwSDaxCnk
+VITE_SUPABASE_URL=https://VOTRE_ID_PROJET.supabase.co
+VITE_SUPABASE_ANON_KEY=VOTRE_ANON_KEY
 ```
 
 #### App mobile (`apps/mobile/.env`)
@@ -52,8 +52,8 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 Créer le fichier `apps/mobile/.env` avec :
 
 ```env
-EXPO_PUBLIC_SUPABASE_URL=https://phitpvzzhseucqprdtzh.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoaXRwdnp6aHNldWNxcHJkdHpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTA5MDcsImV4cCI6MjA5MDk2NjkwN30.NpAVJqXbQU71joFiJgQak4CiNs8PNtoBFnRwSDaxCnk
+EXPO_PUBLIC_SUPABASE_URL=https://VOTRE_ID_PROJET.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=VOTRE_ANON_KEY
 ```
 
 ---
