@@ -16,7 +16,7 @@ jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
     useNavigation: () => ({ navigate: jest.fn() }),
-    useFocusEffect: (cb) => {
+    useFocusEffect: (cb: () => void) => {
       React.useEffect(() => { cb() }, [])
     },
   }
@@ -187,7 +187,7 @@ describe('FearThermometerScreen', () => {
     render(<FearThermometerScreen />)
 
     await waitFor(() => {
-      const deleteBtn = screen.getAllByLabelText('Supprimer cette saisie')[0]
+      const deleteBtn = screen.getAllByLabelText('Supprimer')[0]
       expect(deleteBtn).toBeTruthy()
       fireEvent.press(deleteBtn)
     })

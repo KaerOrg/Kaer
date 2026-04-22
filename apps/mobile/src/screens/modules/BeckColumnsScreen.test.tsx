@@ -140,7 +140,7 @@ describe('BeckColumnsScreen', () => {
     })
 
     // Presse le bouton d'édition (accessibilityLabel="Modifier cet enregistrement")
-    fireEvent.press(screen.getByLabelText('Modifier cet enregistrement'))
+    fireEvent.press(screen.getByLabelText('Modifier'))
 
     expect(mockNavigate).toHaveBeenCalledWith('BeckEntry', { recordId: 'rec-1' })
   })
@@ -157,7 +157,7 @@ describe('BeckColumnsScreen', () => {
       expect(screen.getByText('Réunion difficile au travail')).toBeTruthy()
     })
 
-    fireEvent.press(screen.getByLabelText('Supprimer cet enregistrement'))
+    fireEvent.press(screen.getByLabelText('Supprimer'))
 
     expect(alertSpy).toHaveBeenCalledWith(
       'Supprimer cet enregistrement ?',
@@ -180,7 +180,7 @@ describe('BeckColumnsScreen', () => {
       expect(screen.getByText('Réunion difficile au travail')).toBeTruthy()
     })
 
-    fireEvent.press(screen.getByLabelText('Supprimer cet enregistrement'))
+    fireEvent.press(screen.getByLabelText('Supprimer'))
 
     await waitFor(() => {
       expect(database.deleteThoughtRecord).toHaveBeenCalledWith('rec-1')

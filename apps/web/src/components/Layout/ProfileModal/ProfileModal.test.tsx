@@ -46,7 +46,7 @@ describe('ProfileModal', () => {
   })
 
   it('affiche le succès puis ferme après sauvegarde', async () => {
-    vi.useFakeTimers()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
     render(<ProfileModal {...defaultProps} />)
     await userEvent.click(screen.getByText('Enregistrer'))
     await waitFor(() => expect(screen.getByText('✓ Profil mis à jour')).toBeInTheDocument())

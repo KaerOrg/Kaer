@@ -339,6 +339,7 @@
       "tab_list": "Liste",
       "tab_month": "Mois",
       "empty_title": "Aucune activité",
+      "add_btn": "Ajouter une activité",
       "empty_description": "Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).",
       "month_hint_tap": "Touchez un jour du calendrier pour voir ses activités",
       "month_hint_empty": "Aucune activité ce jour-là",

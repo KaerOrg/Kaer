@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Check, Users } from 'lucide-react'
@@ -34,14 +34,8 @@ export function DashboardPage() {
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [inviteError, setInviteError] = useState('')
 
-  useEffect(() => {
-    loadPatients()
-    loadPendingInvitations()
-  }, [])
-
-  const loadPatients = async () => {
+  const loadPatients = useCallback(async () => {
     if (!practitioner) return
-    setLoadingPatients(true)
 
     interface RelationRow { patient_id: string; patient_alias: string | null; patients: { id: string; email: string } | { id: string; email: string }[] | null }
     const { data: relations } = await supabase
@@ -68,9 +62,9 @@ export function DashboardPage() {
 
     setPatients(list)
     setLoadingPatients(false)
-  }
+  }, [practitioner])
 
-  const loadPendingInvitations = async () => {
+  const loadPendingInvitations = useCallback(async () => {
     if (!practitioner) return
     const { data } = await supabase
       .from('invitations')
@@ -80,7 +74,12 @@ export function DashboardPage() {
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
     setPendingInvitations(data ?? [])
-  }
+  }, [practitioner])
+
+  useEffect(() => {
+    loadPatients()
+    loadPendingInvitations()
+  }, [loadPatients, loadPendingInvitations])
 
   const sendInvitation = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -99,7 +98,8 @@ export function DashboardPage() {
     if (error) {
       let errorMessage = t('dashboard.invite_error_generic')
       try {
-        const body = await (error as any).context?.json?.()
+        interface FnError { context?: { json?: () => Promise<{ error?: string }> } }
+        const body = await (error as FnError).context?.json?.()
         if (body?.error) errorMessage = body.error
       } catch { /* use default */ }
       setInviteError(errorMessage)

@@ -24,7 +24,7 @@ function mockFrom(data: unknown, error: unknown = null) {
     gt: jest.fn().mockReturnThis(),
     single: jest.fn().mockResolvedValue({ data, error }),
   }
-  jest.mocked(supabase.from).mockReturnValue(chain as ReturnType<typeof supabase.from>)
+  ;(supabase.from as jest.Mock).mockReturnValue(chain)
   return chain
 }
 
@@ -109,10 +109,10 @@ describe('authStore — register', () => {
       eq: jest.fn().mockResolvedValue({ error: null }),
     }
 
-    jest.mocked(supabase.from)
-      .mockReturnValueOnce(invChain as ReturnType<typeof supabase.from>)
-      .mockReturnValueOnce(patientsChain as ReturnType<typeof supabase.from>)
-      .mockReturnValueOnce(updateChain as ReturnType<typeof supabase.from>)
+    ;(supabase.from as jest.Mock)
+      .mockReturnValueOnce(invChain)
+      .mockReturnValueOnce(patientsChain)
+      .mockReturnValueOnce(updateChain)
 
     jest.mocked(supabase.auth.signUp).mockResolvedValue({
       data: { user: { id: 'pat-1' } },
@@ -120,7 +120,7 @@ describe('authStore — register', () => {
     } as never)
 
     await expect(
-      useAuthStore.getState().register('patient@example.com', 'pass123', 'tok-abc')
+      useAuthStore.getState().register('tok-abc', 'pass123')
     ).resolves.not.toThrow()
   })
 
@@ -132,10 +132,10 @@ describe('authStore — register', () => {
       gt: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({ data: null, error: { message: 'not found' } }),
     }
-    jest.mocked(supabase.from).mockReturnValue(chain as ReturnType<typeof supabase.from>)
+    ;(supabase.from as jest.Mock).mockReturnValue(chain)
 
     await expect(
-      useAuthStore.getState().register('patient@example.com', 'pass', 'bad-token')
+      useAuthStore.getState().register('bad-token', 'pass')
     ).rejects.toThrow("Code d'invitation invalide ou expiré")
   })
 })

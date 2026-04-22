@@ -8,7 +8,7 @@ describe('InputField', () => {
     expect(screen.getByText('Email')).toBeTruthy()
   })
 
-  it('affiche le message d'erreur', () => {
+  it("affiche le message d'erreur", () => {
     render(<InputField label="Email" error="Champ requis" />)
     expect(screen.getByText('Champ requis')).toBeTruthy()
   })
@@ -27,7 +27,7 @@ describe('InputField', () => {
 
   it('passe en état focused au focus', () => {
     render(<InputField label="Email" />)
-    const input = screen.getByRole('textbox')
+    const input = screen.getByDisplayValue('')
     fireEvent(input, 'focus')
     expect(input).toBeTruthy()
   })

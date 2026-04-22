@@ -221,7 +221,8 @@
       "description": "Plan activities that bring pleasure",
       "title": "Behavioural activation",
       "intro": "Plan activities that bring pleasure or satisfaction.",
-      "save": "Save"
+      "save": "Save",
+      "add_btn": "Add an activity"
     },
     "beck_columns": {
       "label": "Beck columns",
