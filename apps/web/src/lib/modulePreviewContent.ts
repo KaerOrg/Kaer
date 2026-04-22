@@ -24,7 +24,7 @@ export function markdownToHtml(md: string): string {
     // Horizontal rule (avant les listes pour éviter conflit)
     .replace(/^---$/gm, '<hr />')
     // Listes non ordonnées (bullet * ou -)
-    .replace(/^[*\-] (.+)$/gm, '<li>$1</li>')
+    .replace(/^[*-] (.+)$/gm, '<li>$1</li>')
     // Listes numérotées
     .replace(/^\d+\. (.+)$/gm, '<li>$2</li>')
 

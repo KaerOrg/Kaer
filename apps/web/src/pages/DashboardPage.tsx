@@ -34,11 +34,6 @@ export function DashboardPage() {
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [inviteError, setInviteError] = useState('')
 
-  useEffect(() => {
-    loadPatients()
-    loadPendingInvitations()
-  }, [])
-
   const loadPatients = async () => {
     if (!practitioner) return
     setLoadingPatients(true)
@@ -81,6 +76,11 @@ export function DashboardPage() {
       .order('created_at', { ascending: false })
     setPendingInvitations(data ?? [])
   }
+
+  useEffect(() => {
+    loadPatients()
+    loadPendingInvitations()
+  }, [])
 
   const sendInvitation = async (e: React.FormEvent) => {
     e.preventDefault()
