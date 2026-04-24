@@ -109,6 +109,11 @@
       "new_btn": "Remplir le questionnaire",
       "empty_title": "Rien pour l'instant",
       "empty_text": "Appuie sur le bouton pour commencer."
+    },
+    "gad7": {
+      "new_btn": "Remplir le questionnaire",
+      "empty_title": "Rien pour l'instant",
+      "empty_text": "Appuie sur le bouton pour commencer."
     }
   }
 }

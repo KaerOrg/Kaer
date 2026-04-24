@@ -53,7 +53,7 @@ const MODULE_CONFIG: Record<
   craving_journal:          { icon: 'lightning-bolt-outline',    available: false },
   decisional_balance:       { icon: 'scale-balance',             available: true  },
   phq9:                     { icon: 'clipboard-text-outline',    available: true  },
-  gad7:                     { icon: 'clipboard-text-outline',    available: false },
+  gad7:                     { icon: 'clipboard-text-outline',    available: true  },
   epds:                     { icon: 'clipboard-text-outline',    available: false },
   rcads:                    { icon: 'clipboard-text-outline',    available: false },
   bsl23:                    { icon: 'clipboard-text-outline',    available: true  },
@@ -116,7 +116,9 @@ function ModuleCard({
           </View>
           <View style={cardStyles.content}>
             <Text style={cardStyles.title}>{t(`modules.${mod.module_type}.label`)}</Text>
-            <Text style={cardStyles.desc}>{t(`modules.${mod.module_type}.description`)}</Text>
+            {Boolean(t(`modules.${mod.module_type}.description`)) && (
+              <Text style={cardStyles.desc}>{t(`modules.${mod.module_type}.description`)}</Text>
+            )}
             {!config.available && (
               <Text style={cardStyles.comingSoon}>{t('home.coming_soon')}</Text>
             )}
@@ -253,6 +255,7 @@ export default function HomeScreen() {
       emotion_wheel:           'EmotionWheel',
       phq9:                    'PHQ9',
       bsl23:                   'BSL23',
+      gad7:                    'GAD7',
     }
     const route = routes[moduleType]
     if (route) navigation.navigate(route as never)

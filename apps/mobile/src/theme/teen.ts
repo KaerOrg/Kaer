@@ -30,6 +30,10 @@ export const TEEN_MODULE_COLORS: Record<string, string> = {
   // Addictologie → rose fuchsia
   craving_journal:          '#EC4899',
   decisional_balance:       '#EC4899',
+  // Échelles & Questionnaires → turquoise
+  phq9:                     '#0EA5E9',
+  gad7:                     '#0EA5E9',
+  bsl23:                    '#0EA5E9',
 }
 
 export const TEEN_DEFAULT_COLOR = '#6366F1'

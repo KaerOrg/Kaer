@@ -597,17 +597,24 @@
     },
     "phq9": {
       "label": "PHQ-9",
-      "description": "Questionnaire dépression (9 items)",
+      "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9."
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "Questionnaire borderline (23 items)",
+      "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier BSL-23."
+    },
+    "gad7": {
+      "label": "GAD-7",
+      "description": "",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier GAD-7."
     },
     "decisional_balance": {
       "label": "Balance décisionnelle",

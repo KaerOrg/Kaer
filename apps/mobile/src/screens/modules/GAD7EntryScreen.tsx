@@ -10,35 +10,19 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { savePHQ9Entry, generateId } from '../../lib/database'
+import { saveGAD7Entry, generateId } from '../../lib/database'
+import { GAD7_DATA } from '../../data/gad7'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
-// ─── Contenu du PHQ-9 ────────────────────────────────────────────────────────
+const QUESTIONS = GAD7_DATA.questions
+const OPTIONS = GAD7_DATA.options
+const TOTAL = QUESTIONS.length
 
-const QUESTIONS = [
-  "Peu d'intérêt ou de plaisir à faire les choses",
-  "Vous sentir triste, déprimé(e) ou sans espoir",
-  "Difficultés à vous endormir ou à rester endormi(e), ou au contraire dormir trop",
-  "Se sentir fatigué(e) ou manquer d'énergie",
-  "Manque d'appétit ou au contraire manger trop",
-  "Vous sentir négatif(ve) par rapport à vous-même — avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
-  "Avoir du mal à vous concentrer — lire ou regarder la télévision par exemple",
-  "Bouger ou parler si lentement que les autres ont pu le remarquer — ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
-  "Avoir des pensées comme quoi vous seriez mieux mort(e) ou que vous souhaiteriez vous faire du mal d'une façon ou d'une autre",
-] as const
-
-const OPTIONS = [
-  { value: 0, label: 'Jamais' },
-  { value: 1, label: 'Plusieurs jours' },
-  { value: 2, label: 'Plus de la moitié\ndes jours' },
-  { value: 3, label: 'Presque\ntous les jours' },
-] as const
-
-// ─── Composant question ───────────────────────────────────────────────────────
+// ─── Composant ligne de question ─────────────────────────────────────────────
 
 interface QuestionRowProps {
   index: number
@@ -70,7 +54,7 @@ function QuestionRow({ index, question, value, accentColor, onChange }: Question
               accessibilityState={{ selected }}
             >
               <Text style={[qStyles.optionText, selected && qStyles.optionTextSelected]}>
-                {opt.label}
+                {opt.text}
               </Text>
             </Pressable>
           )
@@ -114,12 +98,12 @@ const qStyles = StyleSheet.create({
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
-export default function PHQ9EntryScreen() {
+export default function GAD7EntryScreen() {
   const navigation = useNavigation<Nav>()
-  const { isTeenMode, tt, teenColor } = useTeen()
-  const accentColor = teenColor('phq9')
+  const { isTeenMode, teenColor } = useTeen()
+  const accentColor = teenColor('gad7')
 
-  const [answers, setAnswers] = useState<(number | null)[]>(Array(9).fill(null))
+  const [answers, setAnswers] = useState<(number | null)[]>(Array(TOTAL).fill(null))
   const [saving, setSaving] = useState(false)
 
   const setAnswer = (index: number, value: number) => {
@@ -131,24 +115,25 @@ export default function PHQ9EntryScreen() {
   }
 
   const answeredCount = answers.filter(a => a !== null).length
-  const allAnswered = answeredCount === 9
+  const allAnswered = answeredCount === TOTAL
   const score = answers.reduce<number>((sum, a) => sum + (a ?? 0), 0)
 
   const handleSubmit = async () => {
     if (!allAnswered) {
       Alert.alert(
         'Questionnaire incomplet',
-        `Il reste ${9 - answeredCount} question${9 - answeredCount > 1 ? 's' : ''} sans réponse.`
+        `Il reste ${TOTAL - answeredCount} question${TOTAL - answeredCount > 1 ? 's' : ''} sans réponse.`
       )
       return
     }
     setSaving(true)
-    await savePHQ9Entry({
+    await saveGAD7Entry({
       id: generateId(),
       answers: answers as number[],
       score,
       created_at: new Date().toISOString(),
     })
+    console.log('Génération PDF')
     setSaving(false)
     navigation.goBack()
   }
@@ -186,22 +171,20 @@ export default function PHQ9EntryScreen() {
         {/* Pied de page */}
         <View style={styles.footer}>
           <Text style={styles.progress}>
-            {answeredCount} / 9 {tt('réponses', 'réponses')}
+            {answeredCount} / {TOTAL} réponses
           </Text>
 
           <Pressable
             style={[
               styles.submitBtn,
               !allAnswered && styles.submitBtnDisabled,
-              isActiveColor(accentColor) && allAnswered && { backgroundColor: accentColor },
+              accentColor != null && allAnswered && { backgroundColor: accentColor },
             ]}
             onPress={handleSubmit}
             disabled={saving}
           >
             <Text style={styles.submitBtnText}>
-              {saving
-                ? tt('Enregistrement…', 'Enregistrement…')
-                : tt('Valider le questionnaire', 'Envoyer mes réponses')}
+              {saving ? 'Enregistrement…' : 'Valider le questionnaire'}
             </Text>
           </Pressable>
         </View>
@@ -209,10 +192,6 @@ export default function PHQ9EntryScreen() {
       </ScrollView>
     </SafeAreaView>
   )
-}
-
-function isActiveColor(c: string | undefined): c is string {
-  return typeof c === 'string'
 }
 
 const styles = StyleSheet.create({

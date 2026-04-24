@@ -351,17 +351,24 @@
     },
     "phq9": {
       "label": "PHQ-9",
-      "description": "Depression questionnaire (9 items)",
+      "description": "",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first PHQ-9."
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "Borderline symptoms questionnaire (23 items)",
+      "description": "",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first BSL-23."
+    },
+    "gad7": {
+      "label": "GAD-7",
+      "description": "",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first GAD-7."
     }
   }
 }

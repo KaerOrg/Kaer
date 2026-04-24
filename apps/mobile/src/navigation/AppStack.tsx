@@ -33,6 +33,8 @@ import PHQ9Screen from '../screens/modules/PHQ9Screen'
 import PHQ9EntryScreen from '../screens/modules/PHQ9EntryScreen'
 import BSL23Screen from '../screens/modules/BSL23Screen'
 import BSL23EntryScreen from '../screens/modules/BSL23EntryScreen'
+import GAD7Screen from '../screens/modules/GAD7Screen'
+import GAD7EntryScreen from '../screens/modules/GAD7EntryScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -71,6 +73,8 @@ export type AppStackParamList = {
   PHQ9Entry: { entryId?: string }
   BSL23: undefined
   BSL23Entry: { entryId?: string }
+  GAD7: undefined
+  GAD7Entry: { entryId?: string }
 }
 
 export type TabParamList = {
@@ -274,6 +278,16 @@ export default function AppStack() {
         name="BSL23Entry"
         component={BSL23EntryScreen}
         options={{ title: 'Nouveau BSL-23' }}
+      />
+      <Stack.Screen
+        name="GAD7"
+        component={GAD7Screen}
+        options={{ title: 'GAD-7' }}
+      />
+      <Stack.Screen
+        name="GAD7Entry"
+        component={GAD7EntryScreen}
+        options={{ title: 'Nouveau GAD-7' }}
       />
     </Stack.Navigator>
   )

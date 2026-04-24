@@ -48,6 +48,7 @@ export async function initDatabase(): Promise<void> {
   await createCognitiveSaturationTable(database)
   await createPHQ9Table(database)
   await createBSL23Table(database)
+  await createGAD7Table(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1197,4 +1198,45 @@ export async function saveBSL23Entry(entry: BSL23Entry): Promise<void> {
 export async function deleteBSL23Entry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM bsl23_entries WHERE id = ?', [id])
+}
+
+// ─── GAD-7 ────────────────────────────────────────────────────────────────────
+
+export async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS gad7_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface GAD7Entry {
+  id: string
+  answers: number[]   // 7 valeurs 0-3
+  score: number       // somme des réponses (0-21)
+  created_at: string
+}
+
+export async function getAllGAD7Entries(): Promise<GAD7Entry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
+    'SELECT * FROM gad7_entries ORDER BY created_at DESC'
+  )
+  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
+}
+
+export async function saveGAD7Entry(entry: GAD7Entry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO gad7_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
+  )
+}
+
+export async function deleteGAD7Entry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM gad7_entries WHERE id = ?', [id])
 }
