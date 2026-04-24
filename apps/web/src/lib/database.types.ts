@@ -46,6 +46,7 @@ export interface Database {
           email: string
           name: string
           professional_title: string | null
+          language_preference: string
           created_at: string
         }
         Insert: {
@@ -53,10 +54,12 @@ export interface Database {
           email: string
           name: string
           professional_title?: string | null
+          language_preference?: string
         }
         Update: {
           name?: string
           professional_title?: string | null
+          language_preference?: string
         }
         Relationships: []
       }
@@ -146,6 +149,7 @@ export interface Practitioner {
   email: string
   name: string
   professional_title: string | null
+  language_preference: string
 }
 
 export interface PatientSummary {

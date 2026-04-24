@@ -10,7 +10,7 @@ Le praticien invite ses patients par email. Les patients installent l'app, s'ins
 
 ## Utilisateur principal
 
-Infirmier en Pratique Avancée (IPA) en psychiatrie. **Novice complet en développement** — toujours expliquer les étapes, donner des commandes exactes à copier-coller, ne jamais supposer de connaissance technique préalable. La qualité du code doit rester optimale malgré cela.
+Consultant ou thérapeute parmi les corps de métier suivants : IDE, IPA, psychiatre, pédopsychiatre, addictologue, médecin généraliste, psychologue. **Novice complet en développement** — toujours expliquer les étapes, donner des commandes exactes à copier-coller, ne jamais supposer de connaissance technique préalable. La qualité du code doit rester optimale malgré cela.
 
 ## Stack technique
 

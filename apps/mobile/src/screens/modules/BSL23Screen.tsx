@@ -88,7 +88,7 @@ export default function BSL23Screen() {
         >
           <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
           <Text style={styles.newBtnText}>
-            {tt('Nouveau questionnaire', 'Remplir le questionnaire')}
+            {tt('bsl23', 'new_btn')}
           </Text>
         </Pressable>
 
@@ -96,13 +96,10 @@ export default function BSL23Screen() {
           <View style={styles.empty}>
             <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={colors.border} />
             <Text style={styles.emptyTitle}>
-              {tt('Aucun questionnaire rempli', 'Rien pour l\'instant')}
+              {tt('bsl23', 'empty_title')}
             </Text>
             <Text style={styles.emptyText}>
-              {tt(
-                'Utilisez le bouton ci-dessus pour compléter votre premier BSL-23.',
-                'Appuie sur le bouton pour commencer.'
-              )}
+              {tt('bsl23', 'empty_text')}
             </Text>
           </View>
         ) : (

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+import { setLanguage, type SupportedLang } from '../i18n'
 import type { Practitioner } from '../lib/database.types'
 
 interface AuthState {
@@ -9,6 +10,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, name: string, title: string) => Promise<void>
   updateProfile: (name: string, title: string) => Promise<string | null>
+  updateLanguagePreference: (lang: SupportedLang) => Promise<void>
   logout: () => Promise<void>
   loadSession: () => Promise<void>
   clearError: () => void
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       .select('*')
       .eq('id', session.user.id)
       .single()
+    if (data?.language_preference) setLanguage(data.language_preference as SupportedLang)
     set({ practitioner: data ?? null, loading: false })
   },
 
@@ -48,6 +51,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       .select('*')
       .eq('id', user.id)
       .single()
+    if (data?.language_preference) setLanguage(data.language_preference as SupportedLang)
     set({ practitioner: data ?? null, loading: false })
   },
 
@@ -67,6 +71,19 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Le trigger handle_new_user crée le profil automatiquement via les métadonnées
     const { data } = await supabase.from('practitioners').select('*').eq('id', user.id).single()
     set({ practitioner: data ?? null, loading: false })
+  },
+
+  updateLanguagePreference: async (lang) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    setLanguage(lang)
+    await supabase
+      .from('practitioners')
+      .update({ language_preference: lang } as never)
+      .eq('id', user.id)
+    set(state => ({
+      practitioner: state.practitioner ? { ...state.practitioner, language_preference: lang } : null,
+    }))
   },
 
   updateProfile: async (name, title) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -20,6 +20,10 @@ import { colors, spacing, radius } from '../theme'
 import { useTeen } from '../hooks/useTeen'
 import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
+
+const SCALES_TYPES = new Set([
+  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit',
+])
 
 // icon + disponibilité par module. Labels et descriptions viennent de i18n.
 const MODULE_CONFIG: Record<
@@ -63,6 +67,141 @@ interface UnlockedModule {
   config: Record<string, unknown>
   unlocked_at: string
 }
+
+interface ModuleSectionsProps {
+  modules: UnlockedModule[]
+  moduleConfig: typeof MODULE_CONFIG
+  scalesTypes: Set<string>
+  isTeenMode: boolean
+  teenColor: (moduleType: string) => string | undefined
+  handleModulePress: (moduleType: string) => void
+  t: (key: string) => string
+}
+
+function ModuleCard({
+  mod,
+  config,
+  isTeenMode,
+  accentColor,
+  onPress,
+  t,
+}: {
+  mod: UnlockedModule
+  config: { icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; available: boolean }
+  isTeenMode: boolean
+  accentColor: string | undefined
+  onPress: () => void
+  t: (key: string) => string
+}) {
+  return (
+    <Pressable
+      key={mod.id}
+      onPress={config.available ? onPress : undefined}
+      disabled={!config.available}
+    >
+      <Card
+        state={!config.available ? 'disabled' : undefined}
+        accentColor={isTeenMode ? accentColor : undefined}
+      >
+        <View style={cardStyles.row}>
+          <View style={[
+            cardStyles.icon,
+            isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
+          ]}>
+            <MaterialCommunityIcons
+              name={config.icon}
+              size={30}
+              color={config.available ? (accentColor ?? colors.primary) : colors.textMuted}
+            />
+          </View>
+          <View style={cardStyles.content}>
+            <Text style={cardStyles.title}>{t(`modules.${mod.module_type}.label`)}</Text>
+            <Text style={cardStyles.desc}>{t(`modules.${mod.module_type}.description`)}</Text>
+            {!config.available && (
+              <Text style={cardStyles.comingSoon}>{t('home.coming_soon')}</Text>
+            )}
+          </View>
+          {config.available && (
+            <Text style={[cardStyles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
+          )}
+        </View>
+      </Card>
+    </Pressable>
+  )
+}
+
+const cardStyles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  icon: { width: 42, alignItems: 'center', justifyContent: 'center' },
+  content: { flex: 1 },
+  title: { fontSize: 17, fontWeight: '600', color: colors.text },
+  desc: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  comingSoon: { fontSize: 12, color: colors.primary, fontWeight: '500', marginTop: 4 },
+  chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
+})
+
+function ModuleSections({ modules, moduleConfig, scalesTypes, isTeenMode, teenColor, handleModulePress, t }: ModuleSectionsProps) {
+  const tools = modules.filter(m => !scalesTypes.has(m.module_type))
+  const scales = modules.filter(m => scalesTypes.has(m.module_type))
+
+  return (
+    <View style={{ gap: spacing.md }}>
+      {tools.length > 0 && (
+        <View style={{ gap: spacing.sm }}>
+          {scales.length > 0 && (
+            <Text style={sectionStyles.header}>{t('home.section_tools')}</Text>
+          )}
+          {tools.map(mod => {
+            const config = moduleConfig[mod.module_type]
+            if (!config) return null
+            return (
+              <ModuleCard
+                key={mod.id}
+                mod={mod}
+                config={config}
+                isTeenMode={isTeenMode}
+                accentColor={teenColor(mod.module_type)}
+                onPress={() => handleModulePress(mod.module_type)}
+                t={t}
+              />
+            )
+          })}
+        </View>
+      )}
+      {scales.length > 0 && (
+        <View style={{ gap: spacing.sm }}>
+          <Text style={sectionStyles.header}>{t('home.section_scales')}</Text>
+          {scales.map(mod => {
+            const config = moduleConfig[mod.module_type]
+            if (!config) return null
+            return (
+              <ModuleCard
+                key={mod.id}
+                mod={mod}
+                config={config}
+                isTeenMode={isTeenMode}
+                accentColor={teenColor(mod.module_type)}
+                onPress={() => handleModulePress(mod.module_type)}
+                t={t}
+              />
+            )
+          })}
+        </View>
+      )}
+    </View>
+  )
+}
+
+const sectionStyles = StyleSheet.create({
+  header: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: spacing.xs,
+  },
+})
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
@@ -151,48 +290,15 @@ export default function HomeScreen() {
             description={isTeenMode ? t('home.empty_description', { ns: 'teen' }) : t('home.empty_description')}
           />
         ) : (
-          <View style={styles.list}>
-            {modules.map((mod) => {
-              const config = MODULE_CONFIG[mod.module_type]
-              if (!config) return null
-              const accentColor = teenColor(mod.module_type)
-              return (
-                <Pressable
-                  key={mod.id}
-                  onPress={() => config.available ? handleModulePress(mod.module_type) : undefined}
-                  disabled={!config.available}
-                >
-                  <Card
-                    state={!config.available ? 'disabled' : undefined}
-                    accentColor={isTeenMode ? accentColor : undefined}
-                  >
-                    <View style={styles.cardRow}>
-                      <View style={[
-                        styles.cardIcon,
-                        isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
-                      ]}>
-                        <MaterialCommunityIcons
-                          name={config.icon}
-                          size={30}
-                          color={config.available ? (accentColor ?? colors.primary) : colors.textMuted}
-                        />
-                      </View>
-                      <View style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>{t(`modules.${mod.module_type}.label`)}</Text>
-                        <Text style={styles.cardDesc}>{t(`modules.${mod.module_type}.description`)}</Text>
-                        {!config.available && (
-                          <Text style={styles.comingSoon}>{t('home.coming_soon')}</Text>
-                        )}
-                      </View>
-                      {config.available && (
-                        <Text style={[styles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
-                      )}
-                    </View>
-                  </Card>
-                </Pressable>
-              )
-            })}
-          </View>
+          <ModuleSections
+            modules={modules}
+            moduleConfig={MODULE_CONFIG}
+            scalesTypes={SCALES_TYPES}
+            isTeenMode={isTeenMode}
+            teenColor={teenColor}
+            handleModulePress={handleModulePress}
+            t={t}
+          />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -205,12 +311,4 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
   subheading: { fontSize: 14, color: colors.textMuted, marginTop: -spacing.xs },
-  list: { gap: spacing.sm },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  cardIcon: { width: 42, alignItems: 'center', justifyContent: 'center' },
-  cardContent: { flex: 1 },
-  cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text },
-  cardDesc: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
-  comingSoon: { fontSize: 12, color: colors.primary, fontWeight: '500', marginTop: 4 },
-  chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
 })

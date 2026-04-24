@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react'
-import { Check, X, Loader } from 'lucide-react'
+import { Check, X, Loader, Info } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
 import { supabase } from '../lib/supabase'
@@ -78,6 +78,16 @@ const ScaleCard = memo(function ScaleCard({ scale, onPropose }: ScaleCardProps) 
         <Button size="sm" onClick={handlePropose}>
           Proposer à un patient
         </Button>
+        <a
+          href={scale.reference.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="scale-card__ref-btn"
+          title={scale.reference.label}
+          aria-label={`Référence validée : ${scale.reference.label}`}
+        >
+          <Info size={15} />
+        </a>
       </div>
     </div>
   )

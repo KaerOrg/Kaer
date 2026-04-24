@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BookOpen, ChevronRight, Eye, EyeOff, Info } from 'lucide-react'
+import { BookOpen, Eye, EyeOff, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
 import { useAuthStore } from '../store/authStore'
@@ -25,7 +25,10 @@ import {
   markdownToHtml,
   type ModulePreview,
 } from '../lib/modulePreviewContent'
+import { CLINICAL_SCALES } from '../data/scales'
 import './PatientPage.css'
+
+const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
 
 // ─── Structure en catégories ─────────────────────────────────────────────────
 
@@ -107,6 +110,7 @@ export function PatientPage() {
   const [modules, setModules] = useState<PatientModule[]>([])
   const [loading, setLoading] = useState(true)
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
+  const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
   const [teenMode, setTeenMode] = useState(false)
   const [togglingTeen, setTogglingTeen] = useState(false)
 
@@ -178,6 +182,15 @@ export function PatientPage() {
     await supabase.from('patient_modules').delete().eq('id', moduleId)
     await loadPatient()
   }
+
+  const revokeScale = async (moduleId: string) => {
+    setRevokingModuleId(moduleId)
+    await supabase.from('patient_modules').delete().eq('id', moduleId)
+    await loadPatient()
+    setRevokingModuleId(null)
+  }
+
+  const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -830,31 +843,62 @@ export function PatientPage() {
                     <Accordion
                       key={category.id}
                       title={t(category.labelKey)}
-                      subtitle={t(category.subtitleKey)}
                       badge={activeCount > 0 ? activeCount : undefined}
-                      defaultOpen={category.id === 'safety'}
+                      defaultOpen={false}
                     >
                       {category.modules.map(renderModuleCard)}
                     </Accordion>
                   )
                 })}
 
-                {/* ── Entrée Dispensaire Clinique ────────────────────────── */}
-                <button
-                  className="dispensaire-entry"
-                  onClick={() => navigate('/dispensaire')}
-                >
-                  <div className="dispensaire-entry__left">
-                    <span className="dispensaire-entry__icon">
-                      <BookOpen size={18} />
-                    </span>
-                    <div>
-                      <span className="dispensaire-entry__label">Échelles et questionnaires</span>
-                      <span className="dispensaire-entry__sub">Gérer les questionnaires cliniques de ce patient</span>
+                {/* ── Échelles et questionnaires ─────────────────────────── */}
+                <div className="scales-section">
+                  <div className="scales-section__header">
+                    <div className="scales-section__left">
+                      <span className="dispensaire-entry__icon">
+                        <BookOpen size={18} />
+                      </span>
+                      <div>
+                        <span className="dispensaire-entry__label">Échelles et questionnaires</span>
+                        <span className="dispensaire-entry__sub">
+                          {activeScales.length > 0
+                            ? `${activeScales.length} questionnaire${activeScales.length > 1 ? 's' : ''} actif${activeScales.length > 1 ? 's' : ''}`
+                            : 'Aucun questionnaire actif pour ce patient'}
+                        </span>
+                      </div>
                     </div>
+                    <button className="scales-section__add-btn" onClick={() => navigate('/dispensaire')}>
+                      + Ajouter
+                    </button>
                   </div>
-                  <ChevronRight size={18} className="dispensaire-entry__chevron" />
-                </button>
+
+                  {activeScales.length > 0 && (
+                    <ul className="scales-section__list">
+                      {activeScales.map(mod => {
+                        const scale = CLINICAL_SCALES.find(s => s.id === mod.module_type)
+                        return (
+                          <li key={mod.id} className="scales-section__item">
+                            <div className="scales-section__item-info">
+                              <span className="scales-section__item-name">{scale?.name ?? mod.module_type}</span>
+                              <span className="scales-section__item-date">
+                                depuis le {new Date(mod.unlocked_at).toLocaleDateString(i18n.language)}
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="module-card__revoke"
+                              loading={revokingModuleId === mod.id}
+                              onClick={() => revokeScale(mod.id)}
+                            >
+                              Révoquer
+                            </Button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
+                </div>
               </div>
             </section>
           </>

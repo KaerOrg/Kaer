@@ -79,7 +79,9 @@
     "subheading": "Activés par votre praticien",
     "coming_soon": "Bientôt disponible",
     "empty_title": "Aucun module disponible",
-    "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un."
+    "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.",
+    "section_tools": "Outils thérapeutiques",
+    "section_scales": "Échelles et questionnaires"
   },
   "profile": {
     "title": "Mon profil",
@@ -592,6 +594,20 @@
     "craving_journal": {
       "label": "Journal de craving",
       "description": "Intensité de l'envie, déclencheur, stratégie"
+    },
+    "phq9": {
+      "label": "PHQ-9",
+      "description": "Questionnaire dépression (9 items)",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9."
+    },
+    "bsl23": {
+      "label": "BSL-23",
+      "description": "Questionnaire borderline (23 items)",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier BSL-23."
     },
     "decisional_balance": {
       "label": "Balance décisionnelle",

@@ -89,6 +89,20 @@ begin
   end if;
 end $$;
 
+-- Migration idempotente : ajoute language_preference sur practitioners
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'practitioners'
+      and column_name  = 'language_preference'
+  ) then
+    alter table public.practitioners
+      add column language_preference text not null default 'fr';
+  end if;
+end $$;
+
 
 -- ============================================================
 -- INDEX

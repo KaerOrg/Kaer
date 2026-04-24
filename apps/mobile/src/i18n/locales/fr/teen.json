@@ -99,6 +99,16 @@
     "psychoeducation": {
       "title": "Comprendre ma santé mentale",
       "intro": "Lis ces fiches pour mieux comprendre ce que tu vis."
+    },
+    "phq9": {
+      "new_btn": "Remplir le questionnaire",
+      "empty_title": "Rien pour l'instant",
+      "empty_text": "Appuie sur le bouton pour commencer."
+    },
+    "bsl23": {
+      "new_btn": "Remplir le questionnaire",
+      "empty_title": "Rien pour l'instant",
+      "empty_text": "Appuie sur le bouton pour commencer."
     }
   }
 }

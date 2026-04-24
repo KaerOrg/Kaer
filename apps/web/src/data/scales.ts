@@ -17,6 +17,10 @@ export interface ClinicalScale {
   readonly targetAges: readonly TargetAge[]
   readonly validatedAgeRange: string
   readonly description: string
+  readonly reference: {
+    readonly label: string
+    readonly url: string
+  }
 }
 
 // Type pour la transmission mobile — category EXCLUE par construction
@@ -68,6 +72,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '18+ ans',
     description:
       'Questionnaire de dépistage et de mesure de la sévérité de la dépression en 9 items. Référence mondiale pour le suivi longitudinal.',
+    reference: {
+      label: "NICE NG222 — Dépression adulte : PHQ-9 recommandé pour le suivi régulier (2022). Également recommandé par l'APA Clinical Practice Guidelines.",
+      url: 'https://www.nice.org.uk/guidance/ng222',
+    },
   },
   {
     id: 'gad7',
@@ -78,6 +86,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '18+ ans',
     description:
       'Évaluation rapide en 7 items du trouble anxieux généralisé. Sensible au changement thérapeutique.',
+    reference: {
+      label: 'NICE CG113 — Trouble anxieux généralisé et trouble panique adulte : GAD-7 recommandé en première intention.',
+      url: 'https://www.nice.org.uk/guidance/cg113',
+    },
   },
   {
     id: 'epds',
@@ -88,6 +100,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '18+ ans (post-partum)',
     description:
       'Dépistage de la dépression périnatale (ante et post-partum). Référence internationale recommandée par la HAS.',
+    reference: {
+      label: "HAS — Repérage, diagnostic et prise en charge des troubles psychiques périnatals. EPDS exigé dans l'entretien postnatal précoce obligatoire depuis juillet 2022.",
+      url: 'https://www.has-sante.fr/jcms/p_3234406/fr/reperage-diagnostic-et-prise-en-charge-des-troubles-psychiques-perinatals-note-de-cadrage',
+    },
   },
   {
     id: 'rcads',
@@ -98,6 +114,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '8 - 18 ans',
     description:
       "Mesure des symptômes anxieux et dépressifs chez l'enfant et l'adolescent. Versions auto-rapportée et parentale disponibles.",
+    reference: {
+      label: 'CORC (Child Outcomes Research Consortium) — fiche RCADS. Outil de référence des recommandations NICE pour la santé mentale pédiatrique (CG28/NG134).',
+      url: 'https://www.corc.uk.net/outcome-measures-guidance/directory-of-outcome-measures/revised-childrens-anxiety-and-depression-scale-rcads/',
+    },
   },
   {
     id: 'bsl23',
@@ -108,6 +128,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '18+ ans',
     description:
       'Mesure de la sévérité des symptômes du trouble de personnalité borderline. Outil de suivi longitudinal en TCD.',
+    reference: {
+      label: 'Bohus et al. — Psychopathology, 2009 (validation BSL-23, n=694)',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/19023232/',
+    },
   },
   {
     id: 'cape42',
@@ -118,6 +142,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '15+ ans',
     description:
       'Évaluation des expériences subcliniques positives, négatives et dépressives en population générale et clinique.',
+    reference: {
+      label: 'Capra et al. — Front Psychiatry, 2015 (revue systématique des propriétés psychométriques du CAPE)',
+      url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4681550/',
+    },
   },
   {
     id: 'audit',
@@ -128,6 +156,10 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     validatedAgeRange: '18+ ans',
     description:
       "Dépistage OMS de la consommation d'alcool problématique en 10 items. Recommandé par la HAS pour le repérage précoce.",
+    reference: {
+      label: "OMS — Manuel officiel AUDIT, lignes directrices d'utilisation en soins primaires (2001)",
+      url: 'https://www.who.int/publications/i/item/WHO-MSD-MSB-01.6a',
+    },
   },
 ] as const
 

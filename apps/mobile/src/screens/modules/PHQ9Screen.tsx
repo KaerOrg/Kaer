@@ -90,7 +90,7 @@ export default function PHQ9Screen() {
         >
           <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
           <Text style={styles.newBtnText}>
-            {tt('Nouveau questionnaire', 'Remplir le questionnaire')}
+            {tt('phq9', 'new_btn')}
           </Text>
         </Pressable>
 
@@ -99,13 +99,10 @@ export default function PHQ9Screen() {
           <View style={styles.empty}>
             <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={colors.border} />
             <Text style={styles.emptyTitle}>
-              {tt('Aucun questionnaire rempli', 'Rien pour l\'instant')}
+              {tt('phq9', 'empty_title')}
             </Text>
             <Text style={styles.emptyText}>
-              {tt(
-                'Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9.',
-                'Appuie sur le bouton pour commencer.'
-              )}
+              {tt('phq9', 'empty_text')}
             </Text>
           </View>
         ) : (

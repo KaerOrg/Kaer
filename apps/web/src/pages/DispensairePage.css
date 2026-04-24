@@ -224,6 +224,30 @@
 .scale-card__footer {
   padding: 12px 18px;
   border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scale-card__ref-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  position: relative;
+}
+
+.scale-card__ref-btn:hover {
+  background: #eff6ff;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 /* ── Empty state ───────────────────────────────────────────────────────────── */

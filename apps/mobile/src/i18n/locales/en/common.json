@@ -60,7 +60,9 @@
     "subheading": "Activated by your practitioner",
     "coming_soon": "Coming soon",
     "empty_title": "No modules available",
-    "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked."
+    "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
+    "section_tools": "Therapeutic tools",
+    "section_scales": "Scales & questionnaires"
   },
   "profile": {
     "title": "My profile",
@@ -346,6 +348,20 @@
       "add_trigger": "Add",
       "saved_message": "Your balance has been saved.",
       "save": "Save"
+    },
+    "phq9": {
+      "label": "PHQ-9",
+      "description": "Depression questionnaire (9 items)",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first PHQ-9."
+    },
+    "bsl23": {
+      "label": "BSL-23",
+      "description": "Borderline symptoms questionnaire (23 items)",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first BSL-23."
     }
   }
 }
