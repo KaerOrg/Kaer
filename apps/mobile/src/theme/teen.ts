@@ -34,6 +34,10 @@ export const TEEN_MODULE_COLORS: Record<string, string> = {
   phq9:                     '#0EA5E9',
   gad7:                     '#0EA5E9',
   bsl23:                    '#0EA5E9',
+  rcads:                    '#0EA5E9',
+  epds:                     '#0EA5E9',
+  nsi:                      '#0EA5E9',
+  snap_iv:                  '#0EA5E9',
 }
 
 export const TEEN_DEFAULT_COLOR = '#6366F1'

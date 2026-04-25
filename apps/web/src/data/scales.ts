@@ -6,6 +6,7 @@ export type ScaleCategory =
   | 'Psychose'
   | 'Personnalité'
   | 'Neurodev'
+  | 'Trauma'
 
 export type TargetAge = 'perinatal' | 'enfant' | 'ado' | 'adulte' | 'senior'
 
@@ -49,6 +50,7 @@ export const SCALE_CATEGORIES: readonly ScaleCategory[] = [
   'Psychose',
   'Personnalité',
   'Neurodev',
+  'Trauma',
 ] as const
 
 export const AGE_BADGE_CONFIG: Record<
@@ -159,6 +161,34 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     reference: {
       label: "OMS — Manuel officiel AUDIT, lignes directrices d'utilisation en soins primaires (2001)",
       url: 'https://www.who.int/publications/i/item/WHO-MSD-MSB-01.6a',
+    },
+  },
+  {
+    id: 'nsi',
+    name: 'NSI',
+    fullTitle: 'Nightmare Severity Index',
+    category: 'Sommeil',
+    targetAges: ['adulte'],
+    validatedAgeRange: '18+ ans',
+    description:
+      "Évaluation multidimensionnelle de la sévérité des cauchemars en 9 items (score 0–45). Mesure la fréquence des réveils, l'intensité émotionnelle et l'impact diurne sur l'humeur, la concentration, la somnolence et le sommeil.",
+    reference: {
+      label: "Geoffroy PA et al. — The nightmare severity index (NSI): A short new multidimensional tool for assessing nightmares. J Sleep Res, 2023. CC BY-NC.",
+      url: 'https://www.ghu-paris.fr/fr/actualites/index-de-severite-des-cauchemars',
+    },
+  },
+  {
+    id: 'snap_iv',
+    name: 'SNAP-IV',
+    fullTitle: 'Swanson, Nolan and Pelham Rating Scale – version IV',
+    category: 'Neurodev',
+    targetAges: ['enfant', 'ado'],
+    validatedAgeRange: '6 – 18 ans',
+    description:
+      "Grille comportementale de dépistage du TDAH en 26 items (18 critères DSM-IV TDAH + 8 critères TOD). Trois sous-scores : Inattention (I, 0–27), Hyperactivité-Impulsivité (H/I, 0–27) et Opposition-Défiance (TOD, 0–24). Hétéro-évaluation par le parent ou l'enseignant.",
+    reference: {
+      label: "Swanson JM et al. — Clinical relevance of the primary findings of the MTA: success rates based on severity of ADHD and ODD symptoms at the end of treatment. J Am Acad Child Adolesc Psychiatry, 2001. CADDRA — Lignes directrices canadiennes pour le TDAH (2023).",
+      url: 'https://www.caddra.ca',
     },
   },
 ] as const

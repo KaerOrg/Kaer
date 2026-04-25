@@ -369,6 +369,34 @@
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first GAD-7."
+    },
+    "rcads": {
+      "label": "RCADS-25",
+      "description": "",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first RCADS-25."
+    },
+    "epds": {
+      "label": "EPDS",
+      "description": "",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first EPDS."
+    },
+    "nsi": {
+      "label": "NSI",
+      "description": "",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first NSI."
+    },
+    "snap_iv": {
+      "label": "SNAP-IV",
+      "description": "ADHD screening (child/teen)",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first SNAP-IV."
     }
   }
 }

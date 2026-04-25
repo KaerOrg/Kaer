@@ -94,6 +94,22 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `rim` | RIM — Imagerie mentale | Prévu |
 | `cognitive_saturation` | Saturation cognitive | Prévu |
 | `decisional_balance` | Balance décisionnelle | Implémenté — grille 2×2 + jauge de motivation, SQLite local, signal Supabase |
+| `phq9` | PHQ-9 — Dépression | Implémenté — 9 items, score 0-27, SQLite local, tests RNTL |
+| `gad7` | GAD-7 — Anxiété généralisée | Implémenté — 7 items, score 0-21, SQLite local, tests RNTL |
+| `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, SQLite local, tests RNTL |
+| `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | Implémenté — 25 items Ebesutani (2012), 6 sous-échelles (TAG/TP/TS/PS/TOC/TD), SQLite local, 20 tests Jest |
+| `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest |
+
+## Pattern : Questionnaires cliniques (échelles)
+
+Les questionnaires suivent un pattern uniforme à 3 fichiers :
+- `apps/mobile/src/data/<scale>.ts` — items, options, calcul des scores (exporté et testé unitairement)
+- `apps/mobile/src/screens/modules/<Scale>Screen.tsx` — historique, suppression, mini-cartes de résultats
+- `apps/mobile/src/screens/modules/<Scale>EntryScreen.tsx` — saisie avec `QuestionRow` + validation
+
+**Échelles multi-dimensionnelles (RCADS-25, SNAP-IV)** : contrairement aux échelles à score unique, elles stockent un objet JSON de sous-scores en plus du `total_score`. L'écran liste affiche les sous-scores sous forme de chips. Toute nouvelle échelle multi-dimensionnelle doit suivre ce pattern.
+
+**SNAP-IV spécificité** : hétéro-évaluation obligatoire (parent/enseignant, pas l'enfant). L'écran de saisie affiche un bandeau d'avertissement jaune et groupe les 26 items en 3 sections visuelles avec `SectionHeader`.
 
 ## État d'avancement
 
@@ -110,6 +126,11 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 - [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL
 - [x] Module Balance décisionnelle (`decisional_balance`) — grille 2×2 + jauge de motivation, SQLite local, signal d'observance Supabase, 10 tests Jest
 - [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
+- [x] Module PHQ-9 (`phq9`) — 9 items, SQLite local, tests RNTL
+- [x] Module GAD-7 (`gad7`) — 7 items, SQLite local, tests RNTL
+- [x] Module BSL-23 (`bsl23`) — 23 items, SQLite local, tests RNTL
+- [x] Module RCADS-25 (`rcads`) — 25 items, 6 sous-échelles, SQLite local, 20 tests Jest
+- [x] Module SNAP-IV (`snap_iv`) — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale

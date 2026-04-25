@@ -22,7 +22,7 @@ import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 
 const SCALES_TYPES = new Set([
-  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit',
+  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit', 'nsi', 'snap_iv',
 ])
 
 // icon + disponibilité par module. Labels et descriptions viennent de i18n.
@@ -54,11 +54,13 @@ const MODULE_CONFIG: Record<
   decisional_balance:       { icon: 'scale-balance',             available: true  },
   phq9:                     { icon: 'clipboard-text-outline',    available: true  },
   gad7:                     { icon: 'clipboard-text-outline',    available: true  },
-  epds:                     { icon: 'clipboard-text-outline',    available: false },
-  rcads:                    { icon: 'clipboard-text-outline',    available: false },
+  epds:                     { icon: 'clipboard-text-outline',    available: true  },
+  rcads:                    { icon: 'clipboard-text-outline',    available: true  },
   bsl23:                    { icon: 'clipboard-text-outline',    available: true  },
   cape42:                   { icon: 'clipboard-text-outline',    available: false },
   audit:                    { icon: 'clipboard-text-outline',    available: false },
+  nsi:                      { icon: 'clipboard-text-outline',    available: true  },
+  snap_iv:                  { icon: 'clipboard-text-outline',    available: true  },
 }
 
 interface UnlockedModule {
@@ -256,6 +258,10 @@ export default function HomeScreen() {
       phq9:                    'PHQ9',
       bsl23:                   'BSL23',
       gad7:                    'GAD7',
+      rcads:                   'RCADS25',
+      epds:                    'EPDS',
+      nsi:                     'NSI',
+      snap_iv:                 'SNAPIV',
     }
     const route = routes[moduleType]
     if (route) navigation.navigate(route as never)

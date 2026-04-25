@@ -36,6 +36,7 @@ export type ModuleType =
   | 'bsl23'
   | 'cape42'
   | 'audit'
+  | 'snap_iv'
 
 export interface Database {
   public: {
@@ -206,6 +207,7 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   bsl23: 'BSL-23 — Symptômes borderline',
   cape42: 'CAPE-42 — Expériences psychotiques',
   audit: "AUDIT — Consommation d'alcool",
+  snap_iv: 'SNAP-IV — Dépistage TDAH (enfant/ado)',
 }
 
 export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
@@ -246,6 +248,7 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   bsl23: 'Mesure de la sévérité des symptômes du trouble de personnalité borderline.',
   cape42: 'Évaluation des expériences psychotiques subcliniques positives, négatives et dépressives.',
   audit: "Dépistage OMS de la consommation d'alcool problématique en 10 items.",
+  snap_iv: 'Grille comportementale de dépistage du TDAH en 26 items — 3 sous-scores : Inattention, Hyperactivité-Impulsivité, Opposition-Défiance. À compléter par un parent ou un enseignant.',
 }
 
 // Métadonnées des cartes disponibles (contenu Markdown côté mobile uniquement)

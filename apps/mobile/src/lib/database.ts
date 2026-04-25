@@ -49,6 +49,10 @@ export async function initDatabase(): Promise<void> {
   await createPHQ9Table(database)
   await createBSL23Table(database)
   await createGAD7Table(database)
+  await createRCADS25Table(database)
+  await createEPDSTable(database)
+  await createNSITable(database)
+  await createSNAPIVTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1239,4 +1243,224 @@ export async function saveGAD7Entry(entry: GAD7Entry): Promise<void> {
 export async function deleteGAD7Entry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM gad7_entries WHERE id = ?', [id])
+}
+
+// ─── RCADS-25 ──────────────────────────────────────────────────────────────────
+
+export async function createRCADS25Table(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS rcads25_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      subscale_scores TEXT NOT NULL,
+      total_score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface RCADS25SubScaleScores {
+  tag: number
+  tp:  number
+  ts:  number
+  ps:  number
+  toc: number
+  td:  number
+}
+
+export interface RCADS25Entry {
+  id: string
+  answers: number[]                  // 25 valeurs 0-3
+  subscale_scores: RCADS25SubScaleScores
+  total_score: number                // somme 0-75
+  created_at: string
+}
+
+export async function getAllRCADS25Entries(): Promise<RCADS25Entry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    answers: string
+    subscale_scores: string
+    total_score: number
+    created_at: string
+  }>('SELECT * FROM rcads25_entries ORDER BY created_at DESC')
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+    subscale_scores: JSON.parse(r.subscale_scores) as RCADS25SubScaleScores,
+  }))
+}
+
+export async function saveRCADS25Entry(entry: RCADS25Entry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO rcads25_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
+  )
+}
+
+export async function deleteRCADS25Entry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM rcads25_entries WHERE id = ?', [id])
+}
+
+// ─── EPDS ─────────────────────────────────────────────────────────────────────
+
+export async function createEPDSTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS epds_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface EPDSEntry {
+  id: string
+  answers: number[]   // 10 valeurs 0-3
+  score: number       // somme des réponses (0-30)
+  created_at: string
+}
+
+export async function getAllEPDSEntries(): Promise<EPDSEntry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
+    'SELECT * FROM epds_entries ORDER BY created_at DESC'
+  )
+  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
+}
+
+export async function saveEPDSEntry(entry: EPDSEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO epds_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
+  )
+}
+
+export async function deleteEPDSEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM epds_entries WHERE id = ?', [id])
+}
+
+// ─── NSI ──────────────────────────────────────────────────────────────────────
+
+export async function createNSITable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS nsi_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      score INTEGER NOT NULL,
+      recurrent_pct INTEGER,
+      themes TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface NSIEntry {
+  id: string
+  answers: number[]        // 9 valeurs 0-5 (items 1-9)
+  score: number            // somme des réponses (0-45)
+  recurrent_pct: number | null  // item 10 : % cauchemars récurrents (0-100)
+  themes: string[]         // item 11 : thèmes récurrents (0-3 entrées)
+  created_at: string
+}
+
+export async function getAllNSIEntries(): Promise<NSIEntry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    answers: string
+    score: number
+    recurrent_pct: number | null
+    themes: string
+    created_at: string
+  }>('SELECT * FROM nsi_entries ORDER BY created_at DESC')
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+    themes: JSON.parse(r.themes) as string[],
+  }))
+}
+
+export async function saveNSIEntry(entry: NSIEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO nsi_entries (id, answers, score, recurrent_pct, themes, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      JSON.stringify(entry.answers),
+      entry.score,
+      entry.recurrent_pct ?? null,
+      JSON.stringify(entry.themes),
+      entry.created_at,
+    ]
+  )
+}
+
+export async function deleteNSIEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM nsi_entries WHERE id = ?', [id])
+}
+
+// ─── SNAP-IV ──────────────────────────────────────────────────────────────────
+
+export async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS snapiv_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      subscale_scores TEXT NOT NULL,
+      total_score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface SNAPIVSubScaleScores {
+  inattention:   number
+  hyperactivite: number
+  tod:           number
+}
+
+export interface SNAPIVEntry {
+  id: string
+  answers: number[]             // 26 valeurs 0-3
+  subscale_scores: SNAPIVSubScaleScores
+  total_score: number           // somme 0-78
+  created_at: string
+}
+
+export async function getAllSNAPIVEntries(): Promise<SNAPIVEntry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    answers: string
+    subscale_scores: string
+    total_score: number
+    created_at: string
+  }>('SELECT * FROM snapiv_entries ORDER BY created_at DESC')
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+    subscale_scores: JSON.parse(r.subscale_scores) as SNAPIVSubScaleScores,
+  }))
+}
+
+export async function saveSNAPIVEntry(entry: SNAPIVEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO snapiv_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
+  )
+}
+
+export async function deleteSNAPIVEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM snapiv_entries WHERE id = ?', [id])
 }

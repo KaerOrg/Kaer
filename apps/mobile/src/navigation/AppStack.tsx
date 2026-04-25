@@ -35,6 +35,14 @@ import BSL23Screen from '../screens/modules/BSL23Screen'
 import BSL23EntryScreen from '../screens/modules/BSL23EntryScreen'
 import GAD7Screen from '../screens/modules/GAD7Screen'
 import GAD7EntryScreen from '../screens/modules/GAD7EntryScreen'
+import RCADS25Screen from '../screens/modules/RCADS25Screen'
+import RCADS25EntryScreen from '../screens/modules/RCADS25EntryScreen'
+import EPDSScreen from '../screens/modules/EPDSScreen'
+import EPDSEntryScreen from '../screens/modules/EPDSEntryScreen'
+import NSIScreen from '../screens/modules/NSIScreen'
+import NSIEntryScreen from '../screens/modules/NSIEntryScreen'
+import SNAPIVScreen from '../screens/modules/SNAPIVScreen'
+import SNAPIVEntryScreen from '../screens/modules/SNAPIVEntryScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -75,6 +83,14 @@ export type AppStackParamList = {
   BSL23Entry: { entryId?: string }
   GAD7: undefined
   GAD7Entry: { entryId?: string }
+  RCADS25: undefined
+  RCADS25Entry: { entryId?: string }
+  EPDS: undefined
+  EPDSEntry: { entryId?: string }
+  NSI: undefined
+  NSIEntry: {}
+  SNAPIV: undefined
+  SNAPIVEntry: {}
 }
 
 export type TabParamList = {
@@ -288,6 +304,46 @@ export default function AppStack() {
         name="GAD7Entry"
         component={GAD7EntryScreen}
         options={{ title: 'Nouveau GAD-7' }}
+      />
+      <Stack.Screen
+        name="RCADS25"
+        component={RCADS25Screen}
+        options={{ title: 'RCADS-25' }}
+      />
+      <Stack.Screen
+        name="RCADS25Entry"
+        component={RCADS25EntryScreen}
+        options={{ title: 'Nouveau RCADS-25' }}
+      />
+      <Stack.Screen
+        name="EPDS"
+        component={EPDSScreen}
+        options={{ title: 'EPDS' }}
+      />
+      <Stack.Screen
+        name="EPDSEntry"
+        component={EPDSEntryScreen}
+        options={{ title: 'Nouveau EPDS' }}
+      />
+      <Stack.Screen
+        name="NSI"
+        component={NSIScreen}
+        options={{ title: 'NSI' }}
+      />
+      <Stack.Screen
+        name="NSIEntry"
+        component={NSIEntryScreen}
+        options={{ title: 'Nouveau NSI' }}
+      />
+      <Stack.Screen
+        name="SNAPIV"
+        component={SNAPIVScreen}
+        options={{ title: 'SNAP-IV' }}
+      />
+      <Stack.Screen
+        name="SNAPIVEntry"
+        component={SNAPIVEntryScreen}
+        options={{ title: 'Nouveau SNAP-IV' }}
       />
     </Stack.Navigator>
   )
