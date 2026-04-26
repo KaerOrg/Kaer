@@ -38,6 +38,8 @@ export const TEEN_MODULE_COLORS: Record<string, string> = {
   epds:                     '#0EA5E9',
   nsi:                      '#0EA5E9',
   snap_iv:                  '#0EA5E9',
+  asrs6:                    '#0EA5E9',
+  asrs18:                   '#0EA5E9',
 }
 
 export const TEEN_DEFAULT_COLOR = '#6366F1'

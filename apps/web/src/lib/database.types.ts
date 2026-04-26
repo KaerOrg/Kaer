@@ -37,6 +37,8 @@ export type ModuleType =
   | 'cape42'
   | 'audit'
   | 'snap_iv'
+  | 'asrs6'
+  | 'asrs18'
 
 export interface Database {
   public: {
@@ -136,6 +138,61 @@ export interface Database {
         }
         Relationships: []
       }
+      cssrs_screen_assessments: {
+        Row: {
+          id: string
+          patient_id: string
+          practitioner_id: string
+          ideation_answers: Array<{ value: number; description: string }>
+          intensite_ideation: {
+            frequence: number | null
+            duree: number | null
+            maitrise: number | null
+            dissuasifs: number | null
+            causes: number | null
+          } | null
+          behavior_answers: Array<{ value: number; description: string }>
+          nssi: number | null
+          nb_tentatives_averees: number | null
+          nb_tentatives_interrompues: number | null
+          nb_tentatives_avortees: number | null
+          comportement_observe: number | null
+          suicide_reussi: number | null
+          date_tentative_plus_letale: string | null
+          letalite_observee: number | null
+          letalite_potentielle: number | null
+          ideation_level: number
+          behavior_count: number
+          assessed_at: string
+        }
+        Insert: {
+          patient_id: string
+          practitioner_id: string
+          ideation_answers: Array<{ value: number; description: string }>
+          intensite_ideation?: {
+            frequence: number | null
+            duree: number | null
+            maitrise: number | null
+            dissuasifs: number | null
+            causes: number | null
+          } | null
+          behavior_answers: Array<{ value: number; description: string }>
+          nssi?: number | null
+          nb_tentatives_averees?: number | null
+          nb_tentatives_interrompues?: number | null
+          nb_tentatives_avortees?: number | null
+          comportement_observe?: number | null
+          suicide_reussi?: number | null
+          date_tentative_plus_letale?: string | null
+          letalite_observee?: number | null
+          letalite_potentielle?: number | null
+          ideation_level: number
+          behavior_count: number
+          assessed_at?: string
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -208,6 +265,8 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   cape42: 'CAPE-42 — Expériences psychotiques',
   audit: "AUDIT — Consommation d'alcool",
   snap_iv: 'SNAP-IV — Dépistage TDAH (enfant/ado)',
+  asrs6: 'ASRS v1.1 — Dépistage',
+  asrs18: 'ASRS v1.1 — Bilan Complet',
 }
 
 export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
@@ -249,6 +308,8 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   cape42: 'Évaluation des expériences psychotiques subcliniques positives, négatives et dépressives.',
   audit: "Dépistage OMS de la consommation d'alcool problématique en 10 items.",
   snap_iv: 'Grille comportementale de dépistage du TDAH en 26 items — 3 sous-scores : Inattention, Hyperactivité-Impulsivité, Opposition-Défiance. À compléter par un parent ou un enseignant.',
+  asrs6: 'Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l\'ASRS v1.1). Score total 0–24. Validé par l\'OMS.',
+  asrs18: 'Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l\'ASRS v1.1). Score total 0–72.',
 }
 
 // Métadonnées des cartes disponibles (contenu Markdown côté mobile uniquement)

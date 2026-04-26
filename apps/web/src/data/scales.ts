@@ -61,7 +61,7 @@ export const AGE_BADGE_CONFIG: Record<
   enfant:    { label: 'Enfant',    bg: '#BFDBFE', text: '#1E40AF' },
   ado:       { label: 'Ado',       bg: '#DDD6FE', text: '#5B21B6' },
   adulte:    { label: 'Adulte',    bg: '#BBF7D0', text: '#15803D' },
-  senior:    { label: 'Senior',    bg: '#C7D2FE', text: '#3730A3' },
+  senior:    { label: 'Senior',    bg: '#FEF08A', text: '#854D0E' },
 }
 
 export const CLINICAL_SCALES: readonly ClinicalScale[] = [
@@ -175,6 +175,34 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     reference: {
       label: "Geoffroy PA et al. — The nightmare severity index (NSI): A short new multidimensional tool for assessing nightmares. J Sleep Res, 2023. CC BY-NC.",
       url: 'https://www.ghu-paris.fr/fr/actualites/index-de-severite-des-cauchemars',
+    },
+  },
+  {
+    id: 'asrs18',
+    name: 'ASRS v1.1 — Bilan Complet',
+    fullTitle: 'Adult ADHD Self-Report Scale v1.1 — Full Assessment (18 items)',
+    category: 'Neurodev',
+    targetAges: ['adulte'],
+    validatedAgeRange: '18+ ans',
+    description:
+      "Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l'ASRS v1.1). Score total 0–72, Partie A 0–24, Partie B 0–48. Validé par l'OMS pour une évaluation approfondie en consultation.",
+    reference: {
+      label: "Kessler RC et al. — The World Health Organization Adult ADHD Self-Report Scale (ASRS): a short screening scale for use in the general population. Psychol Med 2005;35(2):245-256.",
+      url: 'https://pubmed.ncbi.nlm.nih.gov/15841682/',
+    },
+  },
+  {
+    id: 'asrs6',
+    name: 'ASRS v1.1 — Dépistage',
+    fullTitle: 'Adult ADHD Self-Report Scale v1.1 — Screener (6 items)',
+    category: 'Neurodev',
+    targetAges: ['adulte'],
+    validatedAgeRange: '18+ ans',
+    description:
+      "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0–24. Validé par l'OMS et recommandé pour le repérage rapide en consultation.",
+    reference: {
+      label: "Kessler RC et al. — The World Health Organization Adult ADHD Self-Report Scale (ASRS): a short screening scale for use in the general population. Psychol Med 2005;35(2):245-256.",
+      url: 'https://pubmed.ncbi.nlm.nih.gov/15841682/',
     },
   },
   {

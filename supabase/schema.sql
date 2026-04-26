@@ -259,6 +259,76 @@ create policy "modules_patient_update" on public.patient_modules
   for update using (auth.uid() = patient_id and revoked_at is null);
 
 
+-- 6. Évaluations C-SSRS (Columbia Suicide Severity Rating Scale — « Depuis la dernière visite »)
+--    Outil d'hétéro-évaluation : rempli par le praticien pendant la consultation.
+--    Données cliniques praticien — JAMAIS accessibles au patient.
+--    ⚠️ Requiert un hébergement HDS pour usage commercial (données de santé sensibles).
+--
+--    Structure du formulaire :
+--      ideation_answers  — 5 items binaires (Oui/Non) + champ texte libre « Si oui, décrivez »
+--      intensite_ideation — 5 dimensions Likert (Fréquence, Durée, Maîtrise, Dissuasifs, Causes)
+--                           NULL si Q1 = Non ET Q2 = Non
+--      behavior_answers  — 4 items binaires + champ texte libre
+--      nssi              — comportement auto-agressif non suicidaire (0/1)
+--      nb_tentatives_*   — compteurs de tentatives
+--      comportement_observe — comportement suicidaire observé par le praticien (0/1)
+--      suicide_reussi    — (0/1)
+--      date_tentative_plus_letale — date ISO
+--      letalite_observee — 0–5 (lésions médicales observées)
+--      letalite_potentielle — 0–2 (si létalité observée = 0 uniquement)
+--      ideation_level    — niveau le plus élevé endorsé (0–5), calculé
+--      behavior_count    — comportements endorsés (0–4), calculé
+create table if not exists public.cssrs_screen_assessments (
+  id                            uuid        primary key default gen_random_uuid(),
+  patient_id                    uuid        not null references public.patients(id) on delete cascade,
+  practitioner_id               uuid        not null references public.practitioners(id) on delete cascade,
+
+  -- Idéation suicidaire (5 items)
+  -- Format : [{"value": 0|1, "description": "..."}]
+  ideation_answers              jsonb       not null default '[]',
+
+  -- Intensité de l'idéation (null si Q1 = Non ET Q2 = Non)
+  -- Format : {"frequence": 1-5, "duree": 1-5, "maitrise": 0-5, "dissuasifs": 0-5, "causes": 0-5}
+  intensite_ideation            jsonb,
+
+  -- Comportements suicidaires (4 items)
+  -- Format : [{"value": 0|1, "description": "..."}]
+  behavior_answers              jsonb       not null default '[]',
+
+  -- Section complémentaire
+  nssi                          smallint,   -- 0 = Non, 1 = Oui
+  nb_tentatives_averees         smallint,
+  nb_tentatives_interrompues    smallint,
+  nb_tentatives_avortees        smallint,
+  comportement_observe          smallint,   -- 0 = Non, 1 = Oui
+  suicide_reussi                smallint,   -- 0 = Non, 1 = Oui
+  date_tentative_plus_letale    date,
+  letalite_observee             smallint,   -- 0–5
+  letalite_potentielle          smallint,   -- 0–2 (uniquement si létalité observée = 0)
+
+  -- Scores calculés (pour affichage rapide dans l'historique)
+  ideation_level                smallint    not null default 0,
+  behavior_count                smallint    not null default 0,
+
+  assessed_at                   timestamptz not null default now()
+);
+
+create index if not exists idx_cssrs_patient
+  on public.cssrs_screen_assessments(patient_id);
+
+create index if not exists idx_cssrs_practitioner
+  on public.cssrs_screen_assessments(practitioner_id);
+
+alter table public.cssrs_screen_assessments enable row level security;
+
+-- Praticien : accès total à ses propres évaluations
+drop policy if exists "cssrs_practitioner" on public.cssrs_screen_assessments;
+create policy "cssrs_practitioner" on public.cssrs_screen_assessments
+  for all using (auth.uid() = practitioner_id);
+
+-- Le patient n'a AUCUN accès (données cliniques praticien uniquement)
+
+
 -- ============================================================
 -- STORAGE — Bucket avatars (photos de profil patients)
 -- ============================================================

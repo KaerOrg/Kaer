@@ -43,6 +43,10 @@ import NSIScreen from '../screens/modules/NSIScreen'
 import NSIEntryScreen from '../screens/modules/NSIEntryScreen'
 import SNAPIVScreen from '../screens/modules/SNAPIVScreen'
 import SNAPIVEntryScreen from '../screens/modules/SNAPIVEntryScreen'
+import ASRS6Screen from '../screens/modules/ASRS6Screen'
+import ASRS6EntryScreen from '../screens/modules/ASRS6EntryScreen'
+import ASRS18Screen from '../screens/modules/ASRS18Screen'
+import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -91,6 +95,10 @@ export type AppStackParamList = {
   NSIEntry: {}
   SNAPIV: undefined
   SNAPIVEntry: {}
+  ASRS6: undefined
+  ASRS6Entry: {}
+  ASRS18: undefined
+  ASRS18Entry: {}
 }
 
 export type TabParamList = {
@@ -344,6 +352,26 @@ export default function AppStack() {
         name="SNAPIVEntry"
         component={SNAPIVEntryScreen}
         options={{ title: 'Nouveau SNAP-IV' }}
+      />
+      <Stack.Screen
+        name="ASRS6"
+        component={ASRS6Screen}
+        options={{ title: 'ASRS v1.1 — Dépistage' }}
+      />
+      <Stack.Screen
+        name="ASRS6Entry"
+        component={ASRS6EntryScreen}
+        options={{ title: 'Nouveau ASRS v1.1' }}
+      />
+      <Stack.Screen
+        name="ASRS18"
+        component={ASRS18Screen}
+        options={{ title: 'ASRS v1.1 — Bilan Complet' }}
+      />
+      <Stack.Screen
+        name="ASRS18Entry"
+        component={ASRS18EntryScreen}
+        options={{ title: 'Nouveau ASRS v1.1 — Bilan' }}
       />
     </Stack.Navigator>
   )

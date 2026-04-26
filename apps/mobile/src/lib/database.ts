@@ -53,6 +53,8 @@ export async function initDatabase(): Promise<void> {
   await createEPDSTable(database)
   await createNSITable(database)
   await createSNAPIVTable(database)
+  await createASRS6Table(database)
+  await createASRS18Table(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1464,3 +1466,107 @@ export async function deleteSNAPIVEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM snapiv_entries WHERE id = ?', [id])
 }
+
+// ─── ASRS v1.1 — Dépistage Rapide (6 items) ──────────────────────────────────
+
+export async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS asrs6_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      total_score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface ASRS6Entry {
+  id: string
+  answers: number[]   // 6 valeurs 0-4
+  total_score: number // somme 0-24
+  created_at: string
+}
+
+export async function getAllASRS6Entries(): Promise<ASRS6Entry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    answers: string
+    total_score: number
+    created_at: string
+  }>('SELECT * FROM asrs6_entries ORDER BY created_at DESC')
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+  }))
+}
+
+export async function saveASRS6Entry(entry: ASRS6Entry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO asrs6_entries (id, answers, total_score, created_at) VALUES (?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), entry.total_score, entry.created_at]
+  )
+}
+
+export async function deleteASRS6Entry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM asrs6_entries WHERE id = ?', [id])
+}
+
+// ─── ASRS v1.1 — Bilan Complet (18 items) ────────────────────────────────────
+
+export async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS asrs18_entries (
+      id TEXT PRIMARY KEY,
+      answers TEXT NOT NULL,
+      sub_scores TEXT NOT NULL,
+      total_score INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface ASRS18SubScores {
+  part_a: number
+  part_b: number
+}
+
+export interface ASRS18Entry {
+  id: string
+  answers: number[]        // 18 valeurs 0-4
+  sub_scores: ASRS18SubScores
+  total_score: number      // somme 0-72
+  created_at: string
+}
+
+export async function getAllASRS18Entries(): Promise<ASRS18Entry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    answers: string
+    sub_scores: string
+    total_score: number
+    created_at: string
+  }>('SELECT * FROM asrs18_entries ORDER BY created_at DESC')
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+    sub_scores: JSON.parse(r.sub_scores) as ASRS18SubScores,
+  }))
+}
+
+export async function saveASRS18Entry(entry: ASRS18Entry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO asrs18_entries (id, answers, sub_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
+    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.sub_scores), entry.total_score, entry.created_at]
+  )
+}
+
+export async function deleteASRS18Entry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM asrs18_entries WHERE id = ?', [id])
+}
+

@@ -99,6 +99,8 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, SQLite local, tests RNTL |
 | `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | Implémenté — 25 items Ebesutani (2012), 6 sous-échelles (TAG/TP/TS/PS/TOC/TD), SQLite local, 20 tests Jest |
 | `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest |
+| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, auto-évaluation, bouton info PubMed, SQLite local, tests Jest |
+| `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, bouton info PubMed, SQLite local, tests Jest |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -131,6 +133,8 @@ Les questionnaires suivent un pattern uniforme à 3 fichiers :
 - [x] Module BSL-23 (`bsl23`) — 23 items, SQLite local, tests RNTL
 - [x] Module RCADS-25 (`rcads`) — 25 items, 6 sous-échelles, SQLite local, 20 tests Jest
 - [x] Module SNAP-IV (`snap_iv`) — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest
+- [x] Module ASRS v1.1 Dépistage (`asrs6`) — 6 items, score 0-24, auto-évaluation adulte, bouton info référence PubMed, SQLite local, tests Jest
+- [x] Module ASRS v1.1 Bilan Complet (`asrs18`) — 18 items (Parties A+B), score 0-72 + sous-scores, bouton info PubMed, SQLite local, tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale

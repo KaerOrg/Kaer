@@ -26,6 +26,7 @@ import {
   type ModulePreview,
 } from '../lib/modulePreviewContent'
 import { CLINICAL_SCALES } from '../data/scales'
+import { CSSRSScreenPanel } from '../components/CSSRSScreenPanel'
 import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
@@ -900,6 +901,14 @@ export function PatientPage() {
                   )}
                 </div>
               </div>
+            </section>
+
+            {/* ── C-SSRS — Outil d'hétéro-évaluation praticien ─────────── */}
+            <section className="patient-section">
+              <CSSRSScreenPanel
+                patientId={id!}
+                practitionerId={practitioner!.id}
+              />
             </section>
           </>
         )}

@@ -22,7 +22,7 @@ import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 
 const SCALES_TYPES = new Set([
-  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit', 'nsi', 'snap_iv',
+  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit', 'nsi', 'snap_iv', 'asrs6', 'asrs18',
 ])
 
 // icon + disponibilité par module. Labels et descriptions viennent de i18n.
@@ -61,6 +61,8 @@ const MODULE_CONFIG: Record<
   audit:                    { icon: 'clipboard-text-outline',    available: false },
   nsi:                      { icon: 'clipboard-text-outline',    available: true  },
   snap_iv:                  { icon: 'clipboard-text-outline',    available: true  },
+  asrs6:                    { icon: 'clipboard-text-outline',    available: true  },
+  asrs18:                   { icon: 'clipboard-text-outline',    available: true  },
 }
 
 interface UnlockedModule {
@@ -262,6 +264,8 @@ export default function HomeScreen() {
       epds:                    'EPDS',
       nsi:                     'NSI',
       snap_iv:                 'SNAPIV',
+      asrs6:                   'ASRS6',
+      asrs18:                  'ASRS18',
     }
     const route = routes[moduleType]
     if (route) navigation.navigate(route as never)

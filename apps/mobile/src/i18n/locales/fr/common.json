@@ -644,6 +644,20 @@
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier SNAP-IV."
     },
+    "asrs6": {
+      "label": "ASRS v1.1 — Dépistage",
+      "description": "",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1."
+    },
+    "asrs18": {
+      "label": "ASRS v1.1 — Bilan Complet",
+      "description": "",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1 Bilan Complet."
+    },
     "decisional_balance": {
       "label": "Balance décisionnelle",
       "description": "Explorer votre ambivalence face au changement",
