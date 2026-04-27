@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BookOpen, Eye, EyeOff, Info } from 'lucide-react'
@@ -192,6 +192,12 @@ export function PatientPage() {
   }
 
   const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
+  const autoScales = activeScales.filter(
+    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'auto'
+  )
+  const heteroScales = activeScales.filter(
+    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'hetero'
+  )
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -757,6 +763,66 @@ export function PatientPage() {
     )
   }
 
+  const renderScalesGroup = (type: 'auto' | 'hetero', extra?: ReactNode) => {
+    const scales = type === 'auto' ? autoScales : heteroScales
+    const label = type === 'auto' ? 'Auto-questionnaires' : 'Hétéro-questionnaires'
+    const subtitle = scales.length > 0
+      ? `${scales.length} questionnaire${scales.length > 1 ? 's' : ''} actif${scales.length > 1 ? 's' : ''}`
+      : 'Aucun questionnaire actif pour ce patient'
+
+    return (
+      <div className={`scales-section scales-section--${type}`}>
+        <div className="scales-section__header">
+          <div className="scales-section__left">
+            <span className="scales-section__icon">
+              <BookOpen size={18} />
+            </span>
+            <div>
+              <span className="scales-section__label">{label}</span>
+              <span className="scales-section__sub">{subtitle}</span>
+            </div>
+          </div>
+          <button className="scales-section__add-btn" onClick={() => navigate('/dispensaire')}>
+            + Ajouter
+          </button>
+        </div>
+
+        {scales.length > 0 && (
+          <ul className="scales-section__list">
+            {scales.map(mod => {
+              const scale = CLINICAL_SCALES.find(s => s.id === mod.module_type)
+              return (
+                <li key={mod.id} className="scales-section__item">
+                  <div className="scales-section__item-info">
+                    <span className="scales-section__item-name">{scale?.name ?? mod.module_type}</span>
+                    <span className="scales-section__item-date">
+                      depuis le {new Date(mod.unlocked_at).toLocaleDateString(i18n.language)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="module-card__revoke"
+                    loading={revokingModuleId === mod.id}
+                    onClick={() => revokeScale(mod.id)}
+                  >
+                    Révoquer
+                  </Button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+
+        {extra !== undefined && (
+          <div className="scales-section__extra">
+            {extra}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
 
   const displayName = patientAlias ?? patientEmail
@@ -853,63 +919,16 @@ export function PatientPage() {
                 })}
 
                 {/* ── Échelles et questionnaires ─────────────────────────── */}
-                <div className="scales-section">
-                  <div className="scales-section__header">
-                    <div className="scales-section__left">
-                      <span className="dispensaire-entry__icon">
-                        <BookOpen size={18} />
-                      </span>
-                      <div>
-                        <span className="dispensaire-entry__label">Échelles et questionnaires</span>
-                        <span className="dispensaire-entry__sub">
-                          {activeScales.length > 0
-                            ? `${activeScales.length} questionnaire${activeScales.length > 1 ? 's' : ''} actif${activeScales.length > 1 ? 's' : ''}`
-                            : 'Aucun questionnaire actif pour ce patient'}
-                        </span>
-                      </div>
-                    </div>
-                    <button className="scales-section__add-btn" onClick={() => navigate('/dispensaire')}>
-                      + Ajouter
-                    </button>
-                  </div>
-
-                  {activeScales.length > 0 && (
-                    <ul className="scales-section__list">
-                      {activeScales.map(mod => {
-                        const scale = CLINICAL_SCALES.find(s => s.id === mod.module_type)
-                        return (
-                          <li key={mod.id} className="scales-section__item">
-                            <div className="scales-section__item-info">
-                              <span className="scales-section__item-name">{scale?.name ?? mod.module_type}</span>
-                              <span className="scales-section__item-date">
-                                depuis le {new Date(mod.unlocked_at).toLocaleDateString(i18n.language)}
-                              </span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="module-card__revoke"
-                              loading={revokingModuleId === mod.id}
-                              onClick={() => revokeScale(mod.id)}
-                            >
-                              Révoquer
-                            </Button>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  )}
-                </div>
+                {renderScalesGroup('auto')}
+                {renderScalesGroup('hetero', (
+                  <CSSRSScreenPanel
+                    patientId={id!}
+                    practitionerId={practitioner!.id}
+                  />
+                ))}
               </div>
             </section>
 
-            {/* ── C-SSRS — Outil d'hétéro-évaluation praticien ─────────── */}
-            <section className="patient-section">
-              <CSSRSScreenPanel
-                patientId={id!}
-                practitionerId={practitioner!.id}
-              />
-            </section>
           </>
         )}
       </div>
