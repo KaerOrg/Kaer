@@ -14,10 +14,6 @@ export default defineConfig({
   resolve: {
     // Force Vite à n'utiliser qu'une seule copie de React (évite les conflits monorepo)
     dedupe: ['react', 'react-dom'],
-    alias: {
-      react: path.resolve('./node_modules/react'),
-      'react-dom': path.resolve('./node_modules/react-dom'),
-    },
   },
   test: {
     globals: true,
