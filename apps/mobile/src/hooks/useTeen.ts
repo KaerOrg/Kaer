@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
-import { teenColorFor } from '../theme/teen'
+import { TEEN_DEFAULT_COLOR } from '../theme/teen'
 
 interface UseTeenReturn {
   isTeenMode: boolean
@@ -11,12 +11,13 @@ interface UseTeenReturn {
 
 export function useTeen(): UseTeenReturn {
   const isTeenMode = useAuthStore((s) => s.teenMode)
+  const moduleColors = useAuthStore((s) => s.moduleColors)
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
 
   return {
     isTeenMode,
     tt: (moduleKey, textKey) => t(`modules.${moduleKey}.${textKey}`),
     tg: (textKey) => t(`global.${textKey}`),
-    teenColor: (moduleType) => (isTeenMode ? teenColorFor(moduleType) : undefined),
+    teenColor: (moduleType) => isTeenMode ? (moduleColors[moduleType] ?? TEEN_DEFAULT_COLOR) : undefined,
   }
 }

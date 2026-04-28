@@ -498,6 +498,99 @@ on conflict (id) do nothing;
 
 
 -- ============================================================
+-- MIGRATION : ajouter icon, mobile_icon, color sur modules
+-- ============================================================
+
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'modules' and column_name = 'icon') then
+    alter table public.modules add column icon        text not null default '';
+    alter table public.modules add column mobile_icon text not null default '';
+    alter table public.modules add column color       text not null default '#6366F1';
+  end if;
+end $$;
+
+update public.modules set
+  icon = case id
+    when 'crisis_plan'             then 'shield'
+    when 'therapeutic_commitment'  then 'handshake'
+    when 'distress_tolerance'      then 'zap'
+    when 'medication_side_effects' then 'pill'
+    when 'medication_adherence'    then 'clipboard-list'
+    when 'psychoeducation'         then 'book-open'
+    when 'sleep_diary'             then 'moon'
+    when 'diet_weight_psycho'      then 'apple'
+    when 'chronobiology_tracker'   then 'clock'
+    when 'mood_tracker'            then 'smile'
+    when 'emotion_wheel'           then 'target'
+    when 'behavioral_activation'   then 'activity'
+    when 'beck_columns'            then 'brain'
+    when 'cognitive_distortions'   then 'search'
+    when 'grounding'               then 'leaf'
+    when 'rim'                     then 'waves'
+    when 'fear_thermometer'        then 'thermometer'
+    when 'exposure_hierarchy'      then 'trending-up'
+    when 'breathing_techniques'    then 'wind'
+    when 'cognitive_saturation'    then 'refresh-cw'
+    when 'craving_journal'         then 'bookmark'
+    when 'decisional_balance'      then 'scale'
+    else ''
+  end,
+  mobile_icon = case id
+    when 'crisis_plan'             then 'lifebuoy'
+    when 'therapeutic_commitment'  then 'handshake-outline'
+    when 'distress_tolerance'      then 'shield-half-full'
+    when 'medication_side_effects' then 'pill'
+    when 'medication_adherence'    then 'calendar-check-outline'
+    when 'psychoeducation'         then 'book-open-page-variant'
+    when 'sleep_diary'             then 'weather-night'
+    when 'diet_weight_psycho'      then 'food-apple-outline'
+    when 'chronobiology_tracker'   then 'clock-outline'
+    when 'mood_tracker'            then 'emoticon-outline'
+    when 'emotion_wheel'           then 'palette'
+    when 'behavioral_activation'   then 'run-fast'
+    when 'beck_columns'            then 'brain'
+    when 'cognitive_distortions'   then 'head-cog-outline'
+    when 'grounding'               then 'hand-heart-outline'
+    when 'rim'                     then 'waves'
+    when 'fear_thermometer'        then 'thermometer'
+    when 'exposure_hierarchy'      then 'stairs-up'
+    when 'breathing_techniques'    then 'lungs'
+    when 'cognitive_saturation'    then 'chat-processing-outline'
+    when 'craving_journal'         then 'lightning-bolt-outline'
+    when 'decisional_balance'      then 'scale-balance'
+    else ''
+  end,
+  color = case id
+    when 'crisis_plan'             then '#FF4D6D'
+    when 'therapeutic_commitment'  then '#FF4D6D'
+    when 'distress_tolerance'      then '#FF4D6D'
+    when 'medication_side_effects' then '#8B5CF6'
+    when 'medication_adherence'    then '#8B5CF6'
+    when 'psychoeducation'         then '#8B5CF6'
+    when 'sleep_diary'             then '#06B6D4'
+    when 'diet_weight_psycho'      then '#06B6D4'
+    when 'chronobiology_tracker'   then '#06B6D4'
+    when 'mood_tracker'            then '#F97316'
+    when 'emotion_wheel'           then '#F97316'
+    when 'behavioral_activation'   then '#F97316'
+    when 'beck_columns'            then '#10B981'
+    when 'cognitive_distortions'   then '#10B981'
+    when 'grounding'               then '#10B981'
+    when 'rim'                     then '#10B981'
+    when 'fear_thermometer'        then '#F59E0B'
+    when 'exposure_hierarchy'      then '#F59E0B'
+    when 'breathing_techniques'    then '#F59E0B'
+    when 'cognitive_saturation'    then '#F59E0B'
+    when 'craving_journal'         then '#EC4899'
+    when 'decisional_balance'      then '#EC4899'
+    else '#6366F1'
+  end
+where icon = '';
+
+
+-- ============================================================
 -- TABLE : module_content_fields (Champs de contenu — 1 ligne = 1 champ)
 -- ============================================================
 

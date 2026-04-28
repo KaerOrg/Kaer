@@ -140,6 +140,9 @@ export interface Database {
           preview_kind: string
           sort_order: number
           is_invite_excluded: boolean
+          icon: string
+          mobile_icon: string
+          color: string
         }
         Insert: {
           id: string
@@ -147,11 +150,17 @@ export interface Database {
           preview_kind?: string
           sort_order?: number
           is_invite_excluded?: boolean
+          icon?: string
+          mobile_icon?: string
+          color?: string
         }
         Update: {
           preview_kind?: string
           sort_order?: number
           is_invite_excluded?: boolean
+          icon?: string
+          mobile_icon?: string
+          color?: string
         }
         Relationships: []
       }

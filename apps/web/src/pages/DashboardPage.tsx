@@ -334,19 +334,19 @@ export function DashboardPage() {
                     <div key={cat.id} className="invite-module-category">
                       <div className="invite-module-category__title">{t(cat.labelKey)}</div>
                       <div className="invite-module-category__grid">
-                        {cat.modules.map(moduleType => (
+                        {cat.modules.map(mod => (
                           <label
-                            key={moduleType}
-                            className={`invite-module-option${inviteModules.has(moduleType) ? ' invite-module-option--selected' : ''}`}
+                            key={mod.id}
+                            className={`invite-module-option${inviteModules.has(mod.id) ? ' invite-module-option--selected' : ''}`}
                           >
                             <input
                               type="checkbox"
-                              checked={inviteModules.has(moduleType)}
-                              onChange={() => toggleInviteModule(moduleType)}
+                              checked={inviteModules.has(mod.id)}
+                              onChange={() => toggleInviteModule(mod.id)}
                             />
                             <div className="invite-module-option__content">
-                              <span className="invite-module-option__name">{t(`module.${moduleType}.label`)}</span>
-                              <span className="invite-module-option__desc">{t(`module.${moduleType}.description`)}</span>
+                              <span className="invite-module-option__name">{t(`module.${mod.id}.label`)}</span>
+                              <span className="invite-module-option__desc">{t(`module.${mod.id}.description`)}</span>
                             </div>
                           </label>
                         ))}

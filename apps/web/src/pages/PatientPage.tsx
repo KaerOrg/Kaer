@@ -18,7 +18,7 @@ import {
 } from '../lib/database.types'
 import { fetchPsychoCards, type PsychoCardInfo } from '../lib/moduleService'
 import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
-import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../lib/moduleCategories'
+import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory, type ModuleItem } from '../lib/moduleCategories'
 import './PatientPage.css'
 
 // ─── Helpers psychoéducation ─────────────────────────────────────────────────
@@ -284,7 +284,8 @@ export function PatientPage() {
 
   // ── Rendu d'une carte module ─────────────────────────────────────────────
 
-  const renderModuleCard = (moduleType: ModuleType) => {
+  const renderModuleCard = (modItem: ModuleItem) => {
+    const moduleType = modItem.id as ModuleType
     if (comingSoonIds.has(moduleType)) {
       return (
         <div key={moduleType} className="module-card-wrapper-block">
@@ -383,7 +384,7 @@ export function PatientPage() {
           </Card>
 
           {previewModule === 'psychoeducation' && (
-            <ModulePreviewPanel moduleType="psychoeducation" isTeenMode={teenMode} />
+            <ModulePreviewPanel moduleType="psychoeducation" isTeenMode={teenMode} color={modItem.color} />
           )}
 
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
@@ -574,7 +575,7 @@ export function PatientPage() {
         </Card>
 
         {previewModule === moduleType && (
-          <ModulePreviewPanel moduleType={moduleType} isTeenMode={teenMode} />
+          <ModulePreviewPanel moduleType={moduleType} isTeenMode={teenMode} color={modItem.color} />
         )}
       </div>
     )
@@ -664,9 +665,9 @@ export function PatientPage() {
                 {categories.map(category => {
                   const visibleModules = enabledModules === null
                     ? category.modules
-                    : category.modules.filter(m => enabledModules.has(m))
+                    : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
                   if (visibleModules.length === 0) return null
-                  const activeCount = visibleModules.filter(m => isUnlocked(m)).length
+                  const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
                   return (
                     <Accordion
                       key={category.id}

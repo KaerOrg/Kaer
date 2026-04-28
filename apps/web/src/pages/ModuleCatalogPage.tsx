@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
-  Eye, Shield, Handshake, Zap, Pill, ClipboardList, BookOpen,
+  Eye,
+  Shield, Handshake, Zap, Pill, ClipboardList, BookOpen,
   Moon, Apple, Clock, Smile, Target, Activity, Brain, Search,
   Leaf, Waves, Thermometer, TrendingUp, Wind, RefreshCw, BookMarked, Scale,
 } from 'lucide-react'
@@ -15,29 +16,30 @@ import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } 
 import { Toggle } from '../components/Toggle/Toggle'
 import './ModuleCatalogPage.css'
 
-const MODULE_ICONS: Record<string, React.FC<{ size?: number }>> = {
-  crisis_plan:             Shield,
-  therapeutic_commitment:  Handshake,
-  distress_tolerance:      Zap,
-  medication_side_effects: Pill,
-  medication_adherence:    ClipboardList,
-  psychoeducation:         BookOpen,
-  sleep_diary:             Moon,
-  diet_weight_psycho:      Apple,
-  chronobiology_tracker:   Clock,
-  mood_tracker:            Smile,
-  emotion_wheel:           Target,
-  behavioral_activation:   Activity,
-  beck_columns:            Brain,
-  cognitive_distortions:   Search,
-  grounding:               Leaf,
-  rim:                     Waves,
-  fear_thermometer:        Thermometer,
-  exposure_hierarchy:      TrendingUp,
-  breathing_techniques:    Wind,
-  cognitive_saturation:    RefreshCw,
-  craving_journal:         BookMarked,
-  decisional_balance:      Scale,
+// Bridge architectural : mappe les noms d'icônes stockés en BDD vers les composants Lucide.
+const LUCIDE_ICONS: Record<string, React.FC<{ size?: number; className?: string }>> = {
+  shield:        Shield,
+  handshake:     Handshake,
+  zap:           Zap,
+  pill:          Pill,
+  'clipboard-list': ClipboardList,
+  'book-open':   BookOpen,
+  moon:          Moon,
+  apple:         Apple,
+  clock:         Clock,
+  smile:         Smile,
+  target:        Target,
+  activity:      Activity,
+  brain:         Brain,
+  search:        Search,
+  leaf:          Leaf,
+  waves:         Waves,
+  thermometer:   Thermometer,
+  'trending-up': TrendingUp,
+  wind:          Wind,
+  'refresh-cw':  RefreshCw,
+  bookmark:      BookMarked,
+  scale:         Scale,
 }
 
 export function ModuleCatalogPage() {
@@ -65,8 +67,8 @@ export function ModuleCatalogPage() {
       fetchComingSoonModuleIds(),
     ])
     setCategories(cats)
-    const allModules = cats.flatMap(c => c.modules)
-    setEnabled(data ? new Set(data.enabled_modules as ModuleType[]) : new Set(allModules))
+    const allModuleIds = cats.flatMap(c => c.modules).map(m => m.id)
+    setEnabled(data ? new Set(data.enabled_modules as ModuleType[]) : new Set(allModuleIds))
     setComingSoonIds(comingSoon)
     setLoading(false)
   }, [practitioner])
@@ -86,7 +88,7 @@ export function ModuleCatalogPage() {
 
   const enableAll = useCallback(() => {
     setSaveSuccess(false)
-    setEnabled(new Set(categories.flatMap(c => c.modules)))
+    setEnabled(new Set(categories.flatMap(c => c.modules).map(m => m.id)))
   }, [categories])
 
   const disableAll = useCallback(() => {
@@ -168,22 +170,23 @@ export function ModuleCatalogPage() {
                 </div>
 
                 <div className="catalog-grid">
-                  {category.modules.map(moduleType => {
-                    const isEnabled = enabled.has(moduleType)
-                    const isComingSoon = comingSoonIds.has(moduleType)
+                  {category.modules.map(mod => {
+                    const isEnabled = enabled.has(mod.id)
+                    const isComingSoon = comingSoonIds.has(mod.id)
+                    const IconComponent = LUCIDE_ICONS[mod.icon]
                     return (
                       <div
-                        key={moduleType}
+                        key={mod.id}
                         className={`catalog-card ${isComingSoon ? 'catalog-card--coming-soon' : (isEnabled ? 'catalog-card--enabled' : 'catalog-card--disabled')}`}
                       >
                         <div className="catalog-card__body">
                           <div className="catalog-card__top">
                             <span className="catalog-card__name-row">
-                              {MODULE_ICONS[moduleType] && React.createElement(MODULE_ICONS[moduleType], { size: 16, className: 'catalog-card__icon' })}
-                              <span className="catalog-card__name">{t(`module.${moduleType}.label`)}</span>
+                              {IconComponent && <IconComponent size={16} className="catalog-card__icon" />}
+                              <span className="catalog-card__name">{t(`module.${mod.id}.label`)}</span>
                             </span>
                           </div>
-                          <p className="catalog-card__desc">{t(`module.${moduleType}.description`)}</p>
+                          <p className="catalog-card__desc">{t(`module.${mod.id}.description`)}</p>
                         </div>
                         <div className="catalog-card__footer">
                           {isComingSoon ? (
@@ -192,15 +195,15 @@ export function ModuleCatalogPage() {
                             <>
                               <button
                                 className="preview-toggle-btn"
-                                onClick={() => navigate(`/modules/preview/${moduleType}`)}
-                              title={t('patient.patient_view')}
-                            >
+                                onClick={() => navigate(`/modules/preview/${mod.id}`)}
+                                title={t('patient.patient_view')}
+                              >
                                 <Eye size={12} />
                                 {t('patient.preview_button')}
                               </button>
                               <button
                                 className="catalog-card__toggle-btn"
-                                onClick={() => toggleModule(moduleType)}
+                                onClick={() => toggleModule(mod.id)}
                                 aria-pressed={isEnabled}
                                 type="button"
                               >
