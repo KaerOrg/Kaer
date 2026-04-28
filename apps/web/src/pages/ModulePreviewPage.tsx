@@ -47,7 +47,7 @@ export function ModulePreviewPage() {
         )}
 
         {previewKind !== null && previewKind !== 'coming_soon' && (
-          <ModulePreviewPanel moduleType={moduleType} isTeenMode={false} />
+          <ModulePreviewPanel moduleType={moduleType} />
         )}
       </div>
     </Layout>

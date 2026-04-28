@@ -9,11 +9,10 @@ const DEFAULT_ACCENT = '#6366F1'
 
 interface Props {
   moduleType: string
-  isTeenMode: boolean
   color?: string
 }
 
-export function ModulePreviewPanel({ moduleType, isTeenMode: _isTeenMode, color }: Props) {
+export function ModulePreviewPanel({ moduleType, color }: Props) {
   const { t } = useTranslation()
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)

@@ -384,7 +384,7 @@ export function PatientPage() {
           </Card>
 
           {previewModule === 'psychoeducation' && (
-            <ModulePreviewPanel moduleType="psychoeducation" isTeenMode={teenMode} color={modItem.color} />
+            <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
           )}
 
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
@@ -575,7 +575,7 @@ export function PatientPage() {
         </Card>
 
         {previewModule === moduleType && (
-          <ModulePreviewPanel moduleType={moduleType} isTeenMode={teenMode} color={modItem.color} />
+          <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
         )}
       </div>
     )
