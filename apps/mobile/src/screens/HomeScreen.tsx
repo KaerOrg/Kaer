@@ -89,7 +89,7 @@ export default function HomeScreen() {
   }
 
   const handleModulePress = (moduleType: string) => {
-    const routes: Record<string, keyof AppStackParamList> = {
+    const routes: Partial<Record<string, keyof AppStackParamList>> = {
       sleep_diary:             'SleepDiary',
       crisis_plan:             'CrisisPlan',
       psychoeducation:         'Psychoeducation',
@@ -107,7 +107,11 @@ export default function HomeScreen() {
       emotion_wheel:           'EmotionWheel',
     }
     const route = routes[moduleType]
-    if (route) navigation.navigate(route as never)
+    if (route) {
+      navigation.navigate(route as never)
+    } else {
+      navigation.navigate('ModuleContent', { moduleType })
+    }
   }
 
   if (loading) {
@@ -150,8 +154,7 @@ export default function HomeScreen() {
               return (
                 <Pressable
                   key={mod.id}
-                  onPress={() => config.available ? handleModulePress(mod.module_type) : undefined}
-                  disabled={!config.available}
+                  onPress={() => handleModulePress(mod.module_type)}
                 >
                   <Card
                     state={!config.available ? 'disabled' : undefined}

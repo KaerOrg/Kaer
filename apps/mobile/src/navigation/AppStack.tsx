@@ -29,6 +29,7 @@ import CognitiveSaturationExerciseScreen from '../screens/modules/CognitiveSatur
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
 import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
 import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
+import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -63,6 +64,7 @@ export type AppStackParamList = {
   EmotionWheel: undefined
   EmotionEntry: undefined
   EmotionMonth: undefined
+  ModuleContent: { moduleType: string }
 }
 
 export type TabParamList = {
@@ -246,6 +248,16 @@ export default function AppStack() {
         name="EmotionMonth"
         component={EmotionMonthScreen}
         options={{ title: 'Bilan mensuel' }}
+      />
+      <Stack.Screen
+        name="ModuleContent"
+        component={ModuleContentScreen}
+        options={({ route }) => ({
+          title: route.params.moduleType
+            .split('_')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+        })}
       />
     </Stack.Navigator>
   )
