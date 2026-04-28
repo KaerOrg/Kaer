@@ -1,0 +1,1 @@
+export { StarsWidget } from "./StarsWidget"

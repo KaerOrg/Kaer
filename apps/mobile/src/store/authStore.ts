@@ -11,6 +11,7 @@ interface Patient {
 interface AuthState {
   patient: Patient | null
   teenMode: boolean
+  moduleColors: Record<string, string>
   language: string
   loading: boolean
   loadSession: () => Promise<void>
@@ -25,6 +26,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   patient: null,
   teenMode: false,
+  moduleColors: {},
   language: initialLanguage,
   loading: true,
 
@@ -78,7 +80,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         }))
         await get().fetchTeenMode()
       } else {
-        set({ patient: null, teenMode: false })
+        set({ patient: null, teenMode: false, moduleColors: {} })
       }
     })
   },
@@ -88,16 +90,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ language: lng })
   },
 
-  // Récupère le flag teen_mode depuis la relation praticien ↔ patient
+  // Récupère le flag teen_mode et les couleurs des modules depuis la BDD
   fetchTeenMode: async () => {
     const { patient } = get()
     if (!patient) return
-    const { data } = await supabase
-      .from('practitioner_patients')
-      .select('teen_mode')
-      .eq('patient_id', patient.id)
-      .single()
-    set({ teenMode: data?.teen_mode ?? false })
+    const [{ data: ppData }, { data: modulesData }] = await Promise.all([
+      supabase.from('practitioner_patients').select('teen_mode').eq('patient_id', patient.id).single(),
+      supabase.from('modules').select('id, color'),
+    ])
+    const moduleColors: Record<string, string> = {}
+    for (const m of modulesData ?? []) {
+      if (m.color) moduleColors[m.id] = m.color
+    }
+    set({ teenMode: ppData?.teen_mode ?? false, moduleColors })
   },
 
   login: async (email: string, password: string) => {

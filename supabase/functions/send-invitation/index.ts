@@ -11,11 +11,19 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { practitioner_id, patient_email, alias } = await req.json()
+    const { practitioner_id, patient_email, first_name, last_name, birth_date, sex, teen_mode, modules } = await req.json()
 
     if (!practitioner_id || !patient_email) {
       return new Response(
         JSON.stringify({ error: 'practitioner_id et patient_email sont requis' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!EMAIL_RE.test(patient_email.trim())) {
+      return new Response(
+        JSON.stringify({ error: 'Adresse email invalide.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -40,13 +48,54 @@ Deno.serve(async (req) => {
       )
     }
 
+    const normalizedEmail = patient_email.toLowerCase().trim()
+
+    // Vérifications de doublon en parallèle
+    const [{ data: existingPatient }, { data: pendingInvite }] = await Promise.all([
+      // Patient déjà inscrit et lié à ce praticien
+      supabase
+        .from('patients')
+        .select('id, practitioner_patients!inner(patient_id)')
+        .eq('email', normalizedEmail)
+        .eq('practitioner_patients.practitioner_id', practitioner_id)
+        .maybeSingle(),
+      // Invitation en cours non expirée pour ce praticien + cet email
+      supabase
+        .from('invitations')
+        .select('id')
+        .eq('practitioner_id', practitioner_id)
+        .eq('patient_email', normalizedEmail)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle(),
+    ])
+
+    if (existingPatient) {
+      return new Response(
+        JSON.stringify({ error: 'patient_already_registered' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (pendingInvite) {
+      return new Response(
+        JSON.stringify({ error: 'invitation_already_pending' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Générer le token et créer l'invitation
     const token = crypto.randomUUID()
     const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
 
     const { error: insertError } = await supabase.from('invitations').insert({
       practitioner_id,
-      patient_email: patient_email.toLowerCase().trim(),
+      patient_email: normalizedEmail,
+      patient_first_name: first_name?.trim() || null,
+      patient_last_name: last_name?.trim() || null,
+      patient_birth_date: birth_date || null,
+      patient_sex: sex || null,
+      teen_mode: teen_mode === true,
+      pre_selected_modules: Array.isArray(modules) ? modules : [],
       token,
       expires_at: expiresAt,
     })
@@ -66,7 +115,7 @@ Deno.serve(async (req) => {
     const practitionerName = practitioner.name || 'Votre praticien'
     // En mode développement, on envoie au praticien lui-même
     // (Resend gratuit sans domaine vérifié ne peut envoyer qu'à l'email du compte Resend)
-    const recipientEmail = Deno.env.get('DEV_EMAIL') ?? patient_email.toLowerCase().trim()
+    const recipientEmail = Deno.env.get('DEV_EMAIL') ?? normalizedEmail
 
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',

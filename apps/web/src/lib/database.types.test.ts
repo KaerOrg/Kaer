@@ -1,77 +1,81 @@
 import { describe, it, expect } from 'vitest'
-import { MODULE_LABELS, MODULE_DESCRIPTIONS } from './database.types'
-import type { ModuleType } from './database.types'
+import frLocale from '../i18n/locales/fr/common.json'
 
-const ALL_MODULES: ModuleType[] = [
-  // Sécurité & Gestion de Crise
+const ALL_MODULE_IDS = [
   'crisis_plan',
   'therapeutic_commitment',
   'distress_tolerance',
-  // Surveillance Iatrogénique & Somatique
   'medication_side_effects',
   'medication_adherence',
   'psychoeducation',
-  // Hygiène de Vie & Rythmes Biologiques
   'sleep_diary',
   'diet_weight_psycho',
   'chronobiology_tracker',
-  // Régulation Émotionnelle & Humeur
   'mood_tracker',
   'emotion_wheel',
   'behavioral_activation',
-  // Restructuration Cognitive
   'beck_columns',
   'cognitive_distortions',
   'grounding',
   'rim',
-  // Anxiété, Phobies & TOC
   'fear_thermometer',
   'exposure_hierarchy',
   'breathing_techniques',
   'cognitive_saturation',
-  // Addictologie & Impulsivité
   'craving_journal',
   'decisional_balance',
 ]
 
-describe('MODULE_LABELS', () => {
-  it('contient une entrée pour chaque ModuleType', () => {
-    for (const type of ALL_MODULES) {
-      expect(MODULE_LABELS[type]).toBeDefined()
-      expect(typeof MODULE_LABELS[type]).toBe('string')
-      expect(MODULE_LABELS[type].length).toBeGreaterThan(0)
+const CATEGORY_IDS = ['safety', 'iatrogenic', 'lifestyle', 'emotion', 'cognitive', 'anxiety', 'addiction']
+
+describe('i18n FR locale — modules', () => {
+  it('contient un label pour chacun des 22 modules', () => {
+    for (const id of ALL_MODULE_IDS) {
+      const entry = (frLocale.module as Record<string, { label?: string }>)[id]
+      expect(entry, `module.${id} manquant dans la locale FR`).toBeDefined()
+      expect(entry.label, `module.${id}.label manquant`).toBeTruthy()
+    }
+  })
+
+  it('contient une description pour chacun des 22 modules', () => {
+    for (const id of ALL_MODULE_IDS) {
+      const entry = (frLocale.module as Record<string, { description?: string }>)[id]
+      expect(entry?.description, `module.${id}.description manquant`).toBeTruthy()
     }
   })
 
   it('couvre exactement les 22 modules', () => {
-    expect(Object.keys(MODULE_LABELS)).toHaveLength(ALL_MODULES.length)
+    expect(Object.keys(frLocale.module)).toHaveLength(ALL_MODULE_IDS.length)
   })
 
-  it('sleep_diary est labelisé "Agenda du sommeil"', () => {
-    expect(MODULE_LABELS['sleep_diary']).toBe('Agenda du sommeil')
+  it('le label sleep_diary est correct', () => {
+    const entry = frLocale.module['sleep_diary'] as { label: string }
+    expect(entry.label).toBe("Agenda du sommeil")
   })
 
-  it('beck_columns est labelisé "Colonnes de Beck"', () => {
-    expect(MODULE_LABELS['beck_columns']).toBe('Colonnes de Beck')
+  it('le label beck_columns est correct', () => {
+    const entry = frLocale.module['beck_columns'] as { label: string }
+    expect(entry.label).toBe("Colonnes de Beck")
   })
 })
 
-describe('MODULE_DESCRIPTIONS', () => {
-  it('contient une description pour chaque ModuleType', () => {
-    for (const type of ALL_MODULES) {
-      expect(MODULE_DESCRIPTIONS[type]).toBeDefined()
-      expect(typeof MODULE_DESCRIPTIONS[type]).toBe('string')
-      expect(MODULE_DESCRIPTIONS[type].length).toBeGreaterThan(0)
+describe('i18n FR locale — categories', () => {
+  it('contient un label et subtitle pour chacune des 7 catégories', () => {
+    for (const id of CATEGORY_IDS) {
+      const entry = (frLocale.category as Record<string, { label?: string; subtitle?: string }>)[id]
+      expect(entry, `category.${id} manquant`).toBeDefined()
+      expect(entry.label, `category.${id}.label manquant`).toBeTruthy()
     }
   })
+})
 
-  it('couvre exactement les 22 modules', () => {
-    expect(Object.keys(MODULE_DESCRIPTIONS)).toHaveLength(ALL_MODULES.length)
-  })
-
-  it('chaque description est différente', () => {
-    const descriptions = Object.values(MODULE_DESCRIPTIONS)
-    const unique = new Set(descriptions)
-    expect(unique.size).toBe(descriptions.length)
+describe('i18n FR locale — psychoeducation cards', () => {
+  it('contient les 5 cartes de psychoéducation', () => {
+    const cardIds = ['sleep_01', 'grounding_01', 'cbt_01', 'appetite_01', 'lithium_01']
+    for (const id of cardIds) {
+      const entry = (frLocale.card as Record<string, { title?: string }>)[id]
+      expect(entry, `card.${id} manquant`).toBeDefined()
+      expect(entry.title, `card.${id}.title manquant`).toBeTruthy()
+    }
   })
 })

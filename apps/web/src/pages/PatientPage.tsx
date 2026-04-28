@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Info } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
 import { useAuthStore } from '../store/authStore'
@@ -12,74 +12,14 @@ import { EmptyState } from '../components/EmptyState'
 import { Accordion } from '../components/Accordion'
 import { StatusBadge } from '../components/StatusBadge'
 import {
-  MODULE_LABELS,
-  MODULE_DESCRIPTIONS,
-  PSYCHO_CARD_CATALOG,
   type ModuleType,
   type PatientModule,
   type PsychoeducationCardEntry,
 } from '../lib/database.types'
-import {
-  MODULE_PREVIEW,
-  getModulePreview,
-  markdownToHtml,
-  type ModulePreview,
-} from '../lib/modulePreviewContent'
+import { fetchPsychoCards, type PsychoCardInfo } from '../lib/moduleService'
+import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
+import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory, type ModuleItem } from '../lib/moduleCategories'
 import './PatientPage.css'
-
-// ─── Structure en catégories ─────────────────────────────────────────────────
-
-interface ModuleCategory {
-  id: string
-  labelKey: string
-  subtitleKey: string
-  modules: ModuleType[]
-}
-
-const MODULE_CATEGORIES: ModuleCategory[] = [
-  {
-    id: 'safety',
-    labelKey: 'patient.cat_safety_label',
-    subtitleKey: 'patient.cat_safety_subtitle',
-    modules: ['crisis_plan', 'therapeutic_commitment', 'distress_tolerance'],
-  },
-  {
-    id: 'iatrogenic',
-    labelKey: 'patient.cat_iatrogenic_label',
-    subtitleKey: 'patient.cat_iatrogenic_subtitle',
-    modules: ['medication_side_effects', 'medication_adherence', 'psychoeducation'],
-  },
-  {
-    id: 'lifestyle',
-    labelKey: 'patient.cat_lifestyle_label',
-    subtitleKey: 'patient.cat_lifestyle_subtitle',
-    modules: ['sleep_diary', 'diet_weight_psycho', 'chronobiology_tracker'],
-  },
-  {
-    id: 'emotion',
-    labelKey: 'patient.cat_emotion_label',
-    subtitleKey: 'patient.cat_emotion_subtitle',
-    modules: ['mood_tracker', 'emotion_wheel', 'behavioral_activation'],
-  },
-  {
-    id: 'cognitive',
-    labelKey: 'patient.cat_cognitive_label',
-    subtitleKey: 'patient.cat_cognitive_subtitle',
-    modules: ['beck_columns', 'cognitive_distortions', 'grounding', 'rim'],
-  },
-  {
-    id: 'anxiety',
-    labelKey: 'patient.cat_anxiety_label',
-    subtitleKey: 'patient.cat_anxiety_subtitle',
-    modules: ['fear_thermometer', 'exposure_hierarchy', 'breathing_techniques', 'cognitive_saturation'],
-  },
-  {
-    id: 'addiction',
-    labelKey: 'patient.cat_addiction_label',
-    subtitleKey: 'patient.cat_addiction_subtitle',
-    modules: ['craving_journal', 'decisional_balance'],
-  },
-]
 
 // ─── Helpers psychoéducation ─────────────────────────────────────────────────
 
@@ -98,18 +38,20 @@ export function PatientPage() {
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
+  const [categories, setCategories] = useState<ModuleCategory[]>([])
   const [modules, setModules] = useState<PatientModule[]>([])
   const [loading, setLoading] = useState(true)
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
   const [teenMode, setTeenMode] = useState(false)
   const [togglingTeen, setTogglingTeen] = useState(false)
+  const [enabledModules, setEnabledModules] = useState<Set<ModuleType> | null>(null)
+  const [psychoCards, setPsychoCards] = useState<PsychoCardInfo[]>([])
+  const [comingSoonIds, setComingSoonIds] = useState<Set<string>>(new Set())
 
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
-  const [expandedPreviewCard, setExpandedPreviewCard] = useState<string | null>(null)
 
   const togglePreview = useCallback((type: ModuleType) => {
     setPreviewModule(prev => (prev === type ? null : type))
-    setExpandedPreviewCard(null)
   }, [])
 
   const [psychoPickerMode, setPsychoPickerMode] = useState<'off' | 'unlock' | 'edit'>('off')
@@ -142,12 +84,23 @@ export function PatientPage() {
     setPatientAlias(relation.patient_alias)
     setTeenMode(relation.teen_mode ?? false)
 
-    const { data: mods } = await supabase
-      .from('patient_modules')
-      .select('*')
-      .eq('patient_id', id)
+    const [{ data: mods }, { data: settings }, cats, cards, comingSoon] = await Promise.all([
+      supabase.from('patient_modules').select('*').eq('patient_id', id),
+      supabase
+        .from('practitioner_module_settings')
+        .select('enabled_modules')
+        .eq('practitioner_id', practitioner.id)
+        .maybeSingle(),
+      fetchModuleCategories(),
+      fetchPsychoCards(),
+      fetchComingSoonModuleIds(),
+    ])
 
     setModules(mods ?? [])
+    setCategories(cats)
+    setEnabledModules(settings ? new Set(settings.enabled_modules as ModuleType[]) : null)
+    setPsychoCards(cards)
+    setComingSoonIds(comingSoon)
     setLoading(false)
   }, [id, practitioner, navigate])
 
@@ -197,7 +150,7 @@ export function PatientPage() {
     if (mode === 'edit' && psychoModule) {
       setSelectedCardIds(new Set(getPsychoCards(psychoModule).map(c => c.card_id)))
     } else {
-      setSelectedCardIds(new Set(PSYCHO_CARD_CATALOG.map(c => c.id)))
+      setSelectedCardIds(new Set(psychoCards.map(c => c.id)))
     }
     setPsychoPickerMode(mode)
   }
@@ -329,109 +282,22 @@ export function PatientPage() {
     : 0
   const totalPsychoCards = psychoModule ? getPsychoCards(psychoModule).length : 0
 
-  // ── Rendu du panneau d'aperçu ────────────────────────────────────────────
-
-  const renderPreviewPanel = (preview: ModulePreview) => {
-    if (preview.kind === 'coming_soon') {
-      return (
-        <div className="preview-panel__coming-soon">
-          {t('patient.coming_soon')}
-        </div>
-      )
-    }
-
-    if (preview.kind === 'steps') {
-      return (
-        <>
-          <ol className="preview-steps">
-            {preview.steps.map(step => (
-              <li key={step.number} className="preview-step">
-                <span className="preview-step__num" style={{ backgroundColor: step.color }}>{step.number}</span>
-                <div>
-                  <div className="preview-step__title">{step.title}</div>
-                  <div className="preview-step__hint">"{step.hint}"</div>
-                </div>
-              </li>
-            ))}
-          </ol>
-          {preview.footer && <p className="preview-panel__footer">{preview.footer}</p>}
-        </>
-      )
-    }
-
-    if (preview.kind === 'fields') {
-      return (
-        <>
-          <ul className="preview-fields">
-            {preview.fields.map(field => (
-              <li key={field.label} className="preview-field">
-                <span className="preview-field__icon">{field.icon}</span>
-                <span className="preview-field__label">{field.label}</span>
-                {field.detail && <span className="preview-field__detail">{field.detail}</span>}
-              </li>
-            ))}
-          </ul>
-          {preview.footer && (
-            <div className="preview-panel__info">
-              <Info size={13} className="preview-panel__info-icon" />
-              <p>{preview.footer}</p>
-            </div>
-          )}
-        </>
-      )
-    }
-
-    if (preview.kind === 'grid2x2') {
-      return (
-        <>
-          <div className="preview-grid2x2">
-            {preview.quadrants.map(q => (
-              <div key={q.title} className="preview-quadrant" style={{ borderTopColor: q.color }}>
-                <div className="preview-quadrant__title" style={{ color: q.color }}>{q.title}</div>
-                <div className="preview-quadrant__subtitle">{q.subtitle}</div>
-              </div>
-            ))}
-          </div>
-          {preview.footer && <p className="preview-panel__footer">{preview.footer}</p>}
-        </>
-      )
-    }
-
-    if (preview.kind === 'cards') {
-      return (
-        <div className="preview-cards">
-          {preview.cards.map(card => (
-            <div key={card.id} className="preview-card">
-              <button
-                className="preview-card__header"
-                onClick={() => setExpandedPreviewCard(prev => prev === card.id ? null : card.id)}
-              >
-                <div className="preview-card__meta">
-                  <span className="preview-card__title">{card.title}</span>
-                  <span className="preview-card__summary">{card.summary}</span>
-                </div>
-                <span className="preview-card__toggle">
-                  {expandedPreviewCard === card.id ? '▲' : '▼'}
-                </span>
-              </button>
-              {expandedPreviewCard === card.id && (
-                <div
-                  className="preview-card__body"
-                  dangerouslySetInnerHTML={{ __html: markdownToHtml(card.content) }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )
-    }
-
-    return null
-  }
-
   // ── Rendu d'une carte module ─────────────────────────────────────────────
 
-  const renderModuleCard = (moduleType: ModuleType) => {
+  const renderModuleCard = (modItem: ModuleItem) => {
+    const moduleType = modItem.id as ModuleType
+    if (comingSoonIds.has(moduleType)) {
+      return (
+        <div key={moduleType} className="module-card-wrapper-block">
+          <Card
+            state="disabled"
+            header={{ title: t(`module.${moduleType}.label`), subtitle: t(`module.${moduleType}.description`) }}
+            actions={<StatusBadge variant="neutral" label={t('patient.realtime_soon')} />}
+          />
+        </div>
+      )
+    }
+
     const mod = modules.find(m => m.module_type === moduleType)
     const unlocked = !!mod
 
@@ -443,19 +309,17 @@ export function PatientPage() {
         <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
           <Card
             state={unlocked ? 'active' : undefined}
-            header={{ title: MODULE_LABELS['psychoeducation'], subtitle: MODULE_DESCRIPTIONS['psychoeducation'] }}
+            header={{ title: t('module.psychoeducation.label'), subtitle: t('module.psychoeducation.description') }}
             actions={
               <>
-                {MODULE_PREVIEW['psychoeducation'] && (
-                  <button
-                    className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
-                    onClick={() => togglePreview('psychoeducation')}
-                    title={t('patient.patient_view')}
-                  >
-                    {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
-                    {t('patient.preview_button')}
-                  </button>
-                )}
+                <button
+                  className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview('psychoeducation')}
+                  title={t('patient.patient_view')}
+                >
+                  {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {t('patient.preview_button')}
+                </button>
                 {unlocked && mod ? (
                   <>
                     <StatusBadge variant="success" label={t('patient.active_badge')} />
@@ -500,11 +364,11 @@ export function PatientPage() {
                 {cards.length > 0 && (
                   <ul className="psycho-observance-list">
                     {cards.map(card => {
-                      const meta = PSYCHO_CARD_CATALOG.find(c => c.id === card.card_id)
+                      const meta = psychoCards.find(c => c.id === card.card_id)
                       return (
                         <li key={card.card_id} className="psycho-observance-item">
                           <span className="psycho-observance-item__title">
-                            {meta?.title ?? card.card_id}
+                            {meta ? t(meta.titleKey) : card.card_id}
                           </span>
                           {card.is_read
                             ? <StatusBadge variant="success" label="Lu" />
@@ -519,19 +383,9 @@ export function PatientPage() {
             )}
           </Card>
 
-          {previewModule === 'psychoeducation' && (() => {
-            const mp = getModulePreview('psychoeducation', teenMode)
-            if (!mp) return null
-            return (
-              <div className="preview-panel" style={{ borderTopColor: mp.accentColor }}>
-                <div className="preview-panel__header" style={{ color: mp.accentColor }}>
-                  <Eye size={14} />
-                  {t('patient.patient_view')}
-                </div>
-                {renderPreviewPanel(mp.preview)}
-              </div>
-            )
-          })()}
+          {previewModule === 'psychoeducation' && (
+            <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
+          )}
 
           {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
             <div className={`psycho-card-picker ${psychoPickerMode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
@@ -541,7 +395,7 @@ export function PatientPage() {
                   : t('patient.psycho_pick_edit')}
               </p>
               <ul className="psycho-card-picker__list">
-                {PSYCHO_CARD_CATALOG.map(card => (
+                {psychoCards.map(card => (
                   <li key={card.id} className="psycho-card-option">
                     <label className="psycho-card-option__label">
                       <input
@@ -551,8 +405,8 @@ export function PatientPage() {
                         onChange={() => toggleCard(card.id)}
                       />
                       <div>
-                        <div className="psycho-card-option__title">{card.title}</div>
-                        <div className="psycho-card-option__desc">{card.description}</div>
+                        <div className="psycho-card-option__title">{t(card.titleKey)}</div>
+                        <div className="psycho-card-option__desc">{t(card.summaryKey)}</div>
                       </div>
                     </label>
                   </li>
@@ -583,7 +437,7 @@ export function PatientPage() {
         <div key="rim" className="module-card-wrapper module-card-wrapper-block">
           <Card
             state={unlocked ? 'active' : undefined}
-            header={{ title: MODULE_LABELS['rim'], subtitle: MODULE_DESCRIPTIONS['rim'] }}
+            header={{ title: t('module.rim.label'), subtitle: t('module.rim.description') }}
             actions={
               <>
                 {unlocked && mod ? (
@@ -674,25 +528,21 @@ export function PatientPage() {
       )
     }
 
-    const mp = getModulePreview(moduleType, teenMode)
-
     return (
       <div key={moduleType} className="module-card-wrapper-block">
         <Card
           state={unlocked ? 'active' : undefined}
-          header={{ title: MODULE_LABELS[moduleType], subtitle: MODULE_DESCRIPTIONS[moduleType] }}
+          header={{ title: t(`module.${moduleType}.label`), subtitle: t(`module.${moduleType}.description`) }}
           actions={
             <>
-              {mp && (
-                <button
-                  className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
-                  onClick={() => togglePreview(moduleType)}
-                  title={t('patient.patient_view')}
-                >
-                  {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
-                  {t('patient.preview_button')}
-                </button>
-              )}
+              <button
+                className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                onClick={() => togglePreview(moduleType)}
+                title={t('patient.patient_view')}
+              >
+                {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                {t('patient.preview_button')}
+              </button>
               {unlocked && mod ? (
                 <>
                   <StatusBadge variant="success" label={t('patient.active_badge')} />
@@ -724,14 +574,8 @@ export function PatientPage() {
           )}
         </Card>
 
-        {previewModule === moduleType && mp && (
-          <div className="preview-panel" style={{ borderTopColor: mp.accentColor }}>
-            <div className="preview-panel__header" style={{ color: mp.accentColor }}>
-              <Eye size={14} />
-              {t('patient.patient_view')}
-            </div>
-            {renderPreviewPanel(mp.preview)}
-          </div>
+        {previewModule === moduleType && (
+          <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
         )}
       </div>
     )
@@ -791,22 +635,22 @@ export function PatientPage() {
               ) : (
                 <div className="radar__grid">
                   {isUnlocked('crisis_plan') && (
-                    <StatusBadge variant="info" label={MODULE_LABELS['crisis_plan']} value={t('patient.active_badge')} />
+                    <StatusBadge variant="info" label={t('module.crisis_plan.label')} value={t('patient.active_badge')} />
                   )}
                   {psychoModule && (
                     <StatusBadge
                       variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
-                      label={MODULE_LABELS['psychoeducation']}
+                      label={t('module.psychoeducation.label')}
                       value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards}`}
                     />
                   )}
                   {isUnlocked('sleep_diary') && (
-                    <StatusBadge variant="info" label={MODULE_LABELS['sleep_diary']} value={t('patient.active_badge')} />
+                    <StatusBadge variant="info" label={t('module.sleep_diary.label')} value={t('patient.active_badge')} />
                   )}
                   {modules
                     .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
                     .map(m => (
-                      <StatusBadge key={m.id} variant="info" label={MODULE_LABELS[m.module_type]} value={t('patient.active_badge')} />
+                      <StatusBadge key={m.id} variant="info" label={t(`module.${m.module_type}.label`)} value={t('patient.active_badge')} />
                     ))}
                   <StatusBadge variant="neutral" label={t('patient.realtime_label')} value={t('patient.realtime_soon')} />
                 </div>
@@ -818,8 +662,12 @@ export function PatientPage() {
               <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
 
               <div className="category-list">
-                {MODULE_CATEGORIES.map(category => {
-                  const activeCount = category.modules.filter(m => isUnlocked(m)).length
+                {categories.map(category => {
+                  const visibleModules = enabledModules === null
+                    ? category.modules
+                    : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
+                  if (visibleModules.length === 0) return null
+                  const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
                   return (
                     <Accordion
                       key={category.id}
@@ -828,7 +676,7 @@ export function PatientPage() {
                       badge={activeCount > 0 ? activeCount : undefined}
                       defaultOpen={category.id === 'safety'}
                     >
-                      {category.modules.map(renderModuleCard)}
+                      {visibleModules.map(renderModuleCard)}
                     </Accordion>
                   )
                 })}

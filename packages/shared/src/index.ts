@@ -1,5 +1,7 @@
 // Types partagés entre l'app web (praticien) et l'app mobile (patient)
 
+export { logger } from './logger'
+
 export { colors, spacing, radius, fontSize } from './theme'
 
 export type UserRole = 'practitioner' | 'patient'

@@ -76,11 +76,7 @@ Row Level Security (RLS) activée sur toutes les tables.
 
 ## Flux d'invitation patient
 
-```
-Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BDD
-→ Patient reçoit lien → crée son compte → lié au praticien → espace vide
-→ Praticien débloque des modules → patient y accède dans l'app
-```
+Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma complet, les étapes détaillées et les cas d'erreur.
 
 ## Modules thérapeutiques
 
@@ -183,6 +179,16 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
   }))
   ```
 - **Conformité MDR** : le mode ado modifie uniquement le lexique et la palette — aucune logique conditionnelle sur les données cliniques.
+
+## Documentation technique
+
+| Document | Contenu |
+|---|---|
+| `docs/design-system.md` | Tokens partagés (couleurs, spacing, radius, fontSize) — source de vérité cross-platform |
+| `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
+| `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |
+| `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
+| `apps/web/docs/components/module-renderer.md` | Détails web : table `FieldText CONFIG`, extensions field_type/preview_kind |
 
 ## MCP disponible
 
