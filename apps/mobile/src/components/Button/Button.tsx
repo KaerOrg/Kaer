@@ -14,7 +14,7 @@ export const Button = React.memo(function Button({ label, onPress, variant = 'pr
       disabled={isDisabled}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary} size="small" />
+        <ActivityIndicator testID="activity-indicator" color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary} size="small" />
       ) : (
         <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text>
       )}

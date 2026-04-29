@@ -65,11 +65,17 @@ const MODULE_CONFIG: Record<
   asrs18:                   { icon: 'clipboard-text-outline',    available: true  },
 }
 
+
 interface UnlockedModule {
   id: string
   module_type: string
   config: Record<string, unknown>
   unlocked_at: string
+  module: {
+    mobile_icon: string
+    color: string
+    preview_kind: string
+  } | null
 }
 
 interface ModuleSectionsProps {
@@ -222,10 +228,10 @@ export default function HomeScreen() {
     if (!patient) return
     const { data } = await supabase
       .from('patient_modules')
-      .select('*')
+      .select('*, module:modules(mobile_icon, color, preview_kind)')
       .eq('patient_id', patient.id)
       .order('unlocked_at', { ascending: true })
-    setModules(data ?? [])
+    setModules((data ?? []) as UnlockedModule[])
   }
 
   useFocusEffect(
@@ -241,7 +247,7 @@ export default function HomeScreen() {
   }
 
   const handleModulePress = (moduleType: string) => {
-    const routes: Record<string, keyof AppStackParamList> = {
+    const routes: Partial<Record<string, keyof AppStackParamList>> = {
       sleep_diary:             'SleepDiary',
       crisis_plan:             'CrisisPlan',
       psychoeducation:         'Psychoeducation',
@@ -268,7 +274,11 @@ export default function HomeScreen() {
       asrs18:                  'ASRS18',
     }
     const route = routes[moduleType]
-    if (route) navigation.navigate(route as never)
+    if (route) {
+      navigation.navigate(route as never)
+    } else {
+      navigation.navigate('ModuleContent', { moduleType })
+    }
   }
 
   if (loading) {

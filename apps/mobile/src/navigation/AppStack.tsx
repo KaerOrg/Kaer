@@ -47,6 +47,7 @@ import ASRS6Screen from '../screens/modules/ASRS6Screen'
 import ASRS6EntryScreen from '../screens/modules/ASRS6EntryScreen'
 import ASRS18Screen from '../screens/modules/ASRS18Screen'
 import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
+import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -99,6 +100,7 @@ export type AppStackParamList = {
   ASRS6Entry: {}
   ASRS18: undefined
   ASRS18Entry: {}
+  ModuleContent: { moduleType: string }
 }
 
 export type TabParamList = {
@@ -372,6 +374,16 @@ export default function AppStack() {
         name="ASRS18Entry"
         component={ASRS18EntryScreen}
         options={{ title: 'Nouveau ASRS v1.1 — Bilan' }}
+      />
+      <Stack.Screen
+        name="ModuleContent"
+        component={ModuleContentScreen}
+        options={({ route }) => ({
+          title: route.params.moduleType
+            .split('_')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+        })}
       />
     </Stack.Navigator>
   )

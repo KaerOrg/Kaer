@@ -221,7 +221,8 @@
       "description": "Planear atividades que trazem prazer",
       "title": "Ativação comportamental",
       "intro": "Planeie atividades que tragam prazer ou satisfação.",
-      "save": "Guardar"
+      "save": "Guardar",
+      "add_btn": "Adicionar uma atividade"
     },
     "beck_columns": {
       "label": "Colunas de Beck",

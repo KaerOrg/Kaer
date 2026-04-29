@@ -14,4 +14,5 @@ export interface CardProps {
   variant?: 'default' | 'outlined' | 'elevated'
   state?: 'active' | 'disabled'
   style?: ViewStyle
+  accentColor?: string
 }

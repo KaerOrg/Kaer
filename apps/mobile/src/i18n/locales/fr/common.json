@@ -341,6 +341,7 @@
       "tab_list": "Liste",
       "tab_month": "Mois",
       "empty_title": "Aucune activité",
+      "add_btn": "Ajouter une activité",
       "empty_description": "Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).",
       "month_hint_tap": "Touchez un jour du calendrier pour voir ses activités",
       "month_hint_empty": "Aucune activité ce jour-là",
@@ -681,6 +682,538 @@
       "add_trigger": "Ajouter",
       "saved_message": "Votre balance a été sauvegardée.",
       "save": "Sauvegarder"
+    }
+  },
+  "module": {
+    "crisis_plan": {
+      "label": "Plan de crise",
+      "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
+      "step_1": {
+        "title": "Signes avant-coureurs",
+        "hint": "Comment est-ce que je me sens quand une crise approche ?"
+      },
+      "step_2": {
+        "title": "Stratégies d'apaisement internes",
+        "hint": "Que puis-je faire seul(e) pour me calmer ?"
+      },
+      "step_3": {
+        "title": "Personnes ou lieux de distraction",
+        "hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?"
+      },
+      "step_4": {
+        "title": "Proches à contacter",
+        "hint": "Qui peut m'écouter et m'aider si je me sens en danger ?"
+      },
+      "step_5": {
+        "title": "Professionnels et urgences",
+        "hint": "Quels professionnels ou services puis-je contacter ?"
+      },
+      "step_6": {
+        "title": "Sécuriser mon environnement",
+        "hint": "Comment rendre mon entourage plus sûr ?"
+      },
+      "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide"
+    },
+    "therapeutic_commitment": {
+      "label": "Contrat d'engagement thérapeutique",
+      "description": "Alliance thérapeutique : engagement à utiliser les ressources avant tout passage à l'acte."
+    },
+    "distress_tolerance": {
+      "label": "Boîte à outils de tolérance à la détresse",
+      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
+    },
+    "medication_side_effects": {
+      "label": "Thermomètre de tolérance aux psychotropes",
+      "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
+      "field_1": {
+        "label": "Sédation",
+        "detail": "Somnolence, lenteur, difficultés de concentration — échelle 0–3"
+      },
+      "field_2": {
+        "label": "Akathisie",
+        "detail": "Agitation intérieure, impossibilité de rester immobile — échelle 0–3"
+      },
+      "field_3": {
+        "label": "Tremblements",
+        "detail": "Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3"
+      },
+      "field_4": {
+        "label": "Sécheresse buccale",
+        "detail": "Anticholinergiques, tricycliques — échelle 0–3"
+      },
+      "field_5": {
+        "label": "Troubles du sommeil",
+        "detail": "Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3"
+      },
+      "field_6": {
+        "label": "Nausées / troubles digestifs",
+        "detail": "Lithium, valproate, ISRS — échelle 0–3"
+      },
+      "field_7": {
+        "label": "Notes libres",
+        "detail": "Contexte, remarque, moment de la journée"
+      },
+      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
+    },
+    "medication_adherence": {
+      "label": "Module Observance",
+      "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
+      "field_1": {
+        "label": "Pris",
+        "detail": "Traitement pris dans son intégralité"
+      },
+      "field_2": {
+        "label": "Partiellement",
+        "detail": "Traitement pris en partie (oubli, difficulté)"
+      },
+      "field_3": {
+        "label": "Non pris",
+        "detail": "Traitement non pris ce jour"
+      },
+      "field_4": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel (oubli, remarque…)"
+      },
+      "field_5": {
+        "label": "Historique",
+        "detail": "Liste brute des 30 derniers jours (date, statut, note)"
+      },
+      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+    },
+    "psychoeducation": {
+      "label": "Psychoéducation",
+      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+    },
+    "sleep_diary": {
+      "label": "Agenda du sommeil",
+      "description": "Suivi quotidien du sommeil : heure de coucher, lever, efficacité.",
+      "field_1": {
+        "label": "Heure de coucher",
+        "detail": "Sélecteur horaire"
+      },
+      "field_2": {
+        "label": "Heure de lever",
+        "detail": "Sélecteur horaire"
+      },
+      "field_3": {
+        "label": "Temps pour s'endormir",
+        "detail": "Curseur en minutes (0–120)"
+      },
+      "field_4": {
+        "label": "Nombre de réveils nocturnes",
+        "detail": "Curseur (0–10)"
+      },
+      "field_5": {
+        "label": "Durée totale des réveils",
+        "detail": "Curseur en minutes (0–120)"
+      },
+      "field_6": {
+        "label": "Qualité du sommeil",
+        "detail": "Échelle 1 à 5 étoiles"
+      },
+      "field_7": {
+        "label": "Cauchemars",
+        "detail": "Oui / Non"
+      },
+      "field_8": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel"
+      },
+      "footer": "Formule TCC-I (Morin, 1993) — SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70–84 % · < 70 %."
+    },
+    "diet_weight_psycho": {
+      "label": "Psychoéducation diététique & poids",
+      "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
+    },
+    "chronobiology_tracker": {
+      "label": "Traqueur de régularité chronobiologique",
+      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires."
+    },
+    "mood_tracker": {
+      "label": "Thermomètre de l'humeur & énergie",
+      "description": "Suivi quotidien de l'humeur et du niveau d'énergie sur une échelle visuelle.",
+      "field_1": {
+        "label": "Humeur",
+        "detail": "Échelle 1–10"
+      },
+      "field_2": {
+        "label": "Énergie",
+        "detail": "Échelle 1–10"
+      },
+      "field_3": {
+        "label": "Anxiété",
+        "detail": "Échelle 1–10"
+      },
+      "field_4": {
+        "label": "Plaisir",
+        "detail": "Échelle 1–10 — dimension anhédonique (SHAPS 1995)"
+      },
+      "field_5": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel"
+      },
+      "footer": "Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l'appareil."
+    },
+    "emotion_wheel": {
+      "label": "Roue des émotions",
+      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie."
+    },
+    "behavioral_activation": {
+      "label": "Journal d'activation comportementale",
+      "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
+      "field_1": {
+        "label": "Date",
+        "detail": "Date de l'activité (passée ou à venir)"
+      },
+      "field_2": {
+        "label": "Nom de l'activité",
+        "detail": "Texte libre — ex : Marche 20 min, Appel à un ami"
+      },
+      "field_3": {
+        "label": "Réalisée / Planifiée",
+        "detail": "Le patient coche quand l'activité est accomplie"
+      },
+      "field_4": {
+        "label": "Plaisir (0–10)",
+        "detail": "Satisfaction retirée de l'activité — brut, sans interprétation"
+      },
+      "field_5": {
+        "label": "Maîtrise (0–10)",
+        "detail": "Sentiment d'accomplissement — brut, sans interprétation"
+      },
+      "field_6": {
+        "label": "Notes libres",
+        "detail": "Contexte, ressenti, remarque"
+      },
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+    },
+    "beck_columns": {
+      "label": "Colonnes de Beck",
+      "description": "Journal des pensées : Situation, Émotion, Pensée automatique, Pensée alternative.",
+      "step_1": {
+        "title": "Situation",
+        "hint": "Où étais-je ? Que se passait-il ? Qui était présent ?"
+      },
+      "step_2": {
+        "title": "Émotion(s)",
+        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0–100) ?"
+      },
+      "step_3": {
+        "title": "Pensée automatique",
+        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0–100) ?"
+      },
+      "step_4": {
+        "title": "Réponse rationnelle",
+        "hint": "Quelle autre façon de voir la situation ? Quels faits contredisent cette pensée ?"
+      },
+      "step_5": {
+        "title": "Résultat",
+        "hint": "Quelle émotion maintenant ? Intensité (0–100) ? Conviction en la pensée alternative (0–100) ?"
+      },
+      "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
+    },
+    "cognitive_distortions": {
+      "label": "Détecteur de distorsions cognitives",
+      "description": "Cartes éducatives sur les pièges de la pensée (tout-ou-rien, surgénéralisation, lecture de pensée…)"
+    },
+    "grounding": {
+      "label": "Techniques d'ancrage",
+      "description": "Exercice 5-4-3-2-1 pour revenir au présent en cas de dissociation ou de rumination sévère."
+    },
+    "rim": {
+      "label": "RIM – Imagerie mentale",
+      "description": "Technique de retraitement par l'imagerie mentale."
+    },
+    "fear_thermometer": {
+      "label": "Thermomètre de la peur",
+      "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
+      "field_1": {
+        "label": "Situation déclenchante",
+        "detail": "Sélection dans le catalogue personnel ou texte libre"
+      },
+      "field_2": {
+        "label": "SUDs avant (0–100)",
+        "detail": "Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation"
+      },
+      "field_3": {
+        "label": "Stratégies utilisées",
+        "detail": "Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre"
+      },
+      "field_4": {
+        "label": "SUDs après (0–100)",
+        "detail": "Niveau de détresse après la stratégie — optionnel (remplissage différé possible)"
+      },
+      "field_5": {
+        "label": "Notes libres",
+        "detail": "Contexte, observations, remarque"
+      },
+      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
+    },
+    "exposure_hierarchy": {
+      "label": "Hiérarchie d'exposition",
+      "description": "Constructeur de paliers d'exposition graduelle pour phobies et TOC."
+    },
+    "breathing_techniques": {
+      "label": "Techniques de respiration",
+      "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
+      "field_1": {
+        "label": "Cohérence cardiaque",
+        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
+      },
+      "field_2": {
+        "label": "Respiration diaphragmatique",
+        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
+      },
+      "field_3": {
+        "label": "Respiration carrée",
+        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées"
+      },
+      "field_4": {
+        "label": "Technique 4-7-8",
+        "detail": "Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
+      },
+      "field_5": {
+        "label": "Pleine conscience respiratoire",
+        "detail": "MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
+      },
+      "field_6": {
+        "label": "Historique des sessions",
+        "detail": "Technique utilisée + durée effective — données brutes, sans interprétation"
+      },
+      "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+    },
+    "cognitive_saturation": {
+      "label": "Saturation cognitive",
+      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+    },
+    "craving_journal": {
+      "label": "Journal de craving",
+      "description": "Noter l'intensité de l'envie (0-10), le déclencheur et la stratégie d'évitement utilisée."
+    },
+    "decisional_balance": {
+      "label": "Balance décisionnelle",
+      "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
+      "q1": {
+        "title": "Avantages du changement",
+        "subtitle": "Raisons de changer"
+      },
+      "q2": {
+        "title": "Inconvénients du changement",
+        "subtitle": "Coûts du changement"
+      },
+      "q3": {
+        "title": "Avantages du statu quo",
+        "subtitle": "Raisons de rester"
+      },
+      "q4": {
+        "title": "Inconvénients du statu quo",
+        "subtitle": "Coûts de rester"
+      },
+      "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
+    }
+  },
+  "category": {
+    "safety": {
+      "label": "Sécurité & Gestion de Crise",
+      "subtitle": "Le bouclier vital"
+    },
+    "iatrogenic": {
+      "label": "Surveillance Iatrogénique & Somatique",
+      "subtitle": "Cœur de métier IPA"
+    },
+    "lifestyle": {
+      "label": "Hygiène de Vie & Rythmes Biologiques",
+      "subtitle": "Le socle métabolique"
+    },
+    "emotion": {
+      "label": "Régulation Émotionnelle & Humeur",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Restructuration Cognitive",
+      "subtitle": "Le moteur de la TCC"
+    },
+    "anxiety": {
+      "label": "Anxiété, Phobies & TOC",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictologie & Impulsivité",
+      "subtitle": "Le module souvent oublié"
+    }
+  },
+  "card": {
+    "sleep_01": {
+      "title": "Règles d'hygiène du sommeil",
+      "summary": "10 conseils pour améliorer la qualité de votre sommeil",
+      "intro": "Un sommeil de qualité repose sur des habitudes régulières. Voici les principes fondamentaux à appliquer progressivement.",
+      "h_horaires": "1. Horaires réguliers",
+      "p_horaires": "Couchez-vous et levez-vous à la même heure tous les jours, même le week-end. La régularité est le pilier le plus important.",
+      "h_lumiere": "2. Lumière et obscurité",
+      "li_l1_seg1": "Le matin, ",
+      "li_l1_seg2": "exposez-vous à la lumière naturelle",
+      "li_l1_seg3": " dans les 30 minutes après le réveil.",
+      "li_l2_seg1": "Le soir, ",
+      "li_l2_seg2": "réduisez les lumières",
+      "li_l2_seg3": " 1 à 2 heures avant de dormir.",
+      "li_lumiere_3": "Évitez les écrans (téléphone, tablette, ordinateur) dans les 30 minutes précédant le coucher.",
+      "h_temp": "3. Température",
+      "p_temp_seg1": "La température idéale pour dormir est entre ",
+      "p_temp_seg2": "16 °C et 18 °C",
+      "p_temp_seg3": ". Un corps frais favorise l'endormissement.",
+      "h_alim": "4. Alimentation et stimulants",
+      "li_a1_seg1": "Évitez la ",
+      "li_a1_seg2": "caféine",
+      "li_a1_seg3": " après 14h (café, thé, sodas).",
+      "li_a2_seg1": "Évitez l'",
+      "li_a2_seg2": "alcool",
+      "li_a2_seg3": " : il perturbe les cycles du sommeil profond.",
+      "li_alim_3": "Ne mangez pas de repas copieux dans les 2 heures précédant le coucher.",
+      "h_sport": "5. Activité physique",
+      "p_sport_seg1": "L'activité physique régulière améliore le sommeil — mais évitez le sport intense dans les ",
+      "p_sport_seg2": "3 heures avant le coucher",
+      "p_sport_seg3": ".",
+      "h_lit": "6. Le lit = sommeil",
+      "p_lit": "Utilisez votre lit uniquement pour dormir. Évitez d'y travailler ou de regarder des écrans.",
+      "h_rituel": "7. Rituel du coucher",
+      "p_rituel": "Créez un rituel apaisant : lecture, respiration lente, étirements doux... Ce signal conditionne votre cerveau à s'endormir.",
+      "h_insomnie": "8. Si vous ne dormez pas",
+      "p_ins_seg1": "Si vous n'êtes pas endormi(e) après 20 minutes, ",
+      "p_ins_seg2": "levez-vous",
+      "p_ins_seg3": ". Faites une activité calme dans une pièce peu éclairée, puis revenez au lit quand la somnolence revient.",
+      "h_sieste": "9. Sieste",
+      "p_sie_seg1": "Si vous faites la sieste, limitez-la à ",
+      "p_sie_seg2": "20 minutes",
+      "p_sie_seg3": " avant 14h. Une sieste longue ou tardive perturbe le sommeil nocturne.",
+      "h_agenda": "10. Agenda du sommeil",
+      "p_agenda": "Utiliser l'agenda du sommeil de l'application vous permet de repérer vos rythmes et d'ajuster vos habitudes progressivement.",
+      "note": "Ces règles ne remplacent pas l'avis de votre praticien. Parlez-lui de vos difficultés de sommeil."
+    },
+    "grounding_01": {
+      "title": "Technique d'ancrage 5-4-3-2-1",
+      "summary": "Revenir au moment présent en cas d'anxiété ou de dissociation",
+      "h_main": "Technique d'ancrage 5-4-3-2-1",
+      "intro_1_s1": "C'est un ",
+      "intro_1_s2": "frein d'urgence",
+      "intro_1_s3": " pour le cerveau. Cette technique utilise vos cinq sens pour forcer votre système nerveux à revenir dans l'instant présent. Elle est particulièrement utile en cas d'anxiété intense, de flashback ou de dissociation.",
+      "h_quand": "Quand l'utiliser ?",
+      "li_q1": "Lors d'une montée d'angoisse",
+      "li_q2": "Quand vos pensées s'emballent",
+      "li_q3": "Lors d'un flashback ou d'une dissociation",
+      "li_q4": "Pour vous recentrer avant un moment stressant",
+      "h_comment": "Comment pratiquer",
+      "p_inspir": "Prenez une profonde inspiration. Puis parcourez chaque sens :",
+      "h_1": "5 choses que vous voyez",
+      "p_1": "Regardez autour de vous et nommez mentalement (ou à voix haute) 5 éléments.",
+      "h_2": "4 choses que vous touchez",
+      "p_2": "Portez attention aux textures et sensations physiques.",
+      "h_3": "3 choses que vous entendez",
+      "p_3": "Fermez les yeux et identifiez 3 sons.",
+      "h_4": "2 choses que vous sentez",
+      "p_4": "Identifiez deux odeurs, même subtiles.",
+      "h_5": "1 chose que vous goûtez",
+      "p_5": "Notez le goût présent dans votre bouche.",
+      "p_retenir_1": "Prenez à nouveau une grande inspiration. Si l'angoisse est toujours là, recommencez le cycle avec d'autres objets.",
+      "h_retenir": "À retenir",
+      "li_r1": "Prenez votre temps à chaque étape.",
+      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse — l'important est de ",
+      "li_r2_s2": "focaliser votre attention",
+      "li_r2_s3": ".",
+      "li_r3": "Cette technique demande un peu de pratique. Entraînez-vous avant les moments de crise.",
+      "note": "Partagez votre expérience avec cette technique à votre praticien lors de votre prochain rendez-vous."
+    },
+    "cbt_01": {
+      "title": "Identifier les distorsions cognitives",
+      "summary": "Reconnaître les pièges de la pensée automatique",
+      "h_main": "Identifier les distorsions cognitives",
+      "intro": "Les distorsions cognitives sont des façons automatiques et déformées d'interpréter la réalité. Les reconnaître est la première étape pour les modifier.",
+      "h_10": "Les 10 distorsions les plus courantes",
+      "d1": {
+        "heading": "1. La pensée tout-ou-rien",
+        "body": "Vous voyez les choses de façon extrême, sans nuance.",
+        "example": "\"Si je ne réussis pas parfaitement, je suis un(e) raté(e).\""
+      },
+      "d2": {
+        "heading": "2. La surgénéralisation",
+        "body": "Un événement négatif devient une règle universelle.",
+        "example": "\"J'ai échoué une fois → j'échoue toujours.\""
+      },
+      "d3": {
+        "heading": "3. Le filtre mental",
+        "body": "Vous ne voyez que les aspects négatifs d'une situation."
+      },
+      "d4": {
+        "heading": "4. La disqualification du positif",
+        "body": "Les expériences positives \"ne comptent pas\"."
+      },
+      "d5": {
+        "heading": "5. La lecture de pensée",
+        "body": "Vous supposez savoir ce que les autres pensent."
+      },
+      "d6": {
+        "heading": "6. La prédiction négative",
+        "body": "Vous anticipez que les choses vont mal se passer."
+      },
+      "d7": {
+        "heading": "7. La catastrophisation",
+        "body": "Vous exagérez l'importance d'un problème."
+      },
+      "d8": {
+        "heading": "8. Le raisonnement émotionnel",
+        "body": "\"Je me sens incompétent(e) → donc je suis incompétent(e).\""
+      },
+      "d9": {
+        "heading": "9. Les \"il faut / je dois\"",
+        "body": "Des règles rigides et exigeantes envers vous-même ou les autres."
+      },
+      "d10": {
+        "heading": "10. L'étiquetage",
+        "body": "\"J'ai fait une erreur → je suis nul(le).\""
+      },
+      "h_comment": "Comment les utiliser ?",
+      "li_c1": "Quelle pensée automatique est apparue ?",
+      "li_c2": "Cette pensée correspond-elle à une distorsion ?",
+      "li_c3": "Quelle serait une façon plus réaliste de voir la situation ?",
+      "note": "Votre praticien peut vous accompagner dans ce travail, notamment avec les Colonnes de Beck."
+    },
+    "appetite_01": {
+      "title": "Traitements et Appétit : Reprendre le contrôle",
+      "summary": "Comprendre et gérer la faim liée aux traitements",
+      "h_main": "Traitements et Appétit : Reprendre le contrôle",
+      "intro_s1": "Certains traitements (comme les antipsychotiques ou les thymorégulateurs) peuvent modifier votre métabolisme et bloquer le signal de satiété envoyé à votre cerveau. ",
+      "intro_s2": "Vous n'êtes pas coupable d'avoir faim, c'est un effet biologique du traitement.",
+      "intro_s3": "Voici des stratégies comportementales pour limiter la prise de poids sans faire de régime restrictif :",
+      "def_1": {
+        "term": "La règle des 20 minutes",
+        "body": "Le cerveau met 20 minutes à comprendre que l'estomac est plein. Mangez lentement, posez votre fourchette entre chaque bouchée."
+      },
+      "def_2": {
+        "term": "Volume et Fibres",
+        "body": "Augmentez le volume de votre repas avec des légumes verts ou des aliments riches en fibres."
+      },
+      "def_3": {
+        "term": "Le piège de la soif",
+        "body": "Les traitements assèchent la bouche. On confond souvent cette soif avec une envie de sucre. Buvez un grand verre d'eau avant chaque grignotage et attendez 10 minutes."
+      },
+      "def_4": {
+        "term": "Mouvement doux",
+        "body": "Une marche de 15 minutes après le repas aide à réguler le pic de glycémie."
+      },
+      "callout": "Ne modifiez ou n'arrêtez jamais votre traitement sans en parler à votre praticien."
+    },
+    "lithium_01": {
+      "title": "Lithium : Hydratation et règles de sécurité",
+      "summary": "Les 3 règles essentielles pour rester en sécurité sous Lithium",
+      "h_main": "Traitement par Lithium : Les règles de sécurité",
+      "h_3regles": "Les 3 règles d'or de l'hydratation",
+      "li_r1": "Buvez régulièrement : Visez 1,5 à 2 litres d'eau par jour.",
+      "li_r2": "Ne changez pas vos habitudes de sel : Un régime sans sel soudain fait monter dangereusement le taux de lithium.",
+      "li_r3": "Compensez les pertes : En cas de forte chaleur, de sport intense, ou de diarrhée/vomissements, buvez davantage d'eau riche en minéraux.",
+      "h_eviter": "Ce qu'il faut absolument éviter",
+      "li_e1": "Les anti-inflammatoires (Ibuprofène, Advil, Nurofen). Ils sont toxiques avec le Lithium. Préférez le Paracétamol.",
+      "li_e2": "Les régimes \"détox\" ou diurétiques.",
+      "note": "Signes d'alerte (Surdosage) : Tremblements importants, soif extrême, nausées sévères ou confusion → contactez immédiatement votre médecin ou le 15.",
+      "callout": "Ne modifiez jamais votre dose ou votre traitement sans en parler à votre praticien."
     }
   }
 }

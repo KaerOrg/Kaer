@@ -18,7 +18,7 @@ describe('StatusBadge', () => {
     expect(screen.queryByText('42')).toBeNull()
   })
 
-  it('affiche l'icône si fournie', () => {
+  it("affiche l'icône si fournie", () => {
     render(<StatusBadge label="L" icon="⚠️" />)
     expect(screen.getByText('⚠️')).toBeTruthy()
   })

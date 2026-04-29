@@ -49,6 +49,12 @@
   letter-spacing: 0.05em;
 }
 
+.layout__left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
 .layout__main {
   flex: 1;
   max-width: 1200px;

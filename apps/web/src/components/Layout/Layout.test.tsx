@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react'
 import { getInitials } from './Layout.utils'
 
 describe('getInitials', () => {

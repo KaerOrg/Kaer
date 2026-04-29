@@ -34,7 +34,7 @@ describe('pickAvatarImage', () => {
 
   it("retourne l'URI quand l'utilisateur choisit une image depuis la galerie", async () => {
     jest.spyOn(ImagePicker, 'requestMediaLibraryPermissionsAsync').mockResolvedValue({
-      status: 'granted', granted: true, canAskAgain: true, expires: 'never',
+      status: ImagePicker.PermissionStatus.GRANTED, granted: true, canAskAgain: true, expires: 'never',
     })
     jest.spyOn(ImagePicker, 'launchImageLibraryAsync').mockResolvedValue({
       canceled: false,
@@ -47,7 +47,7 @@ describe('pickAvatarImage', () => {
 
   it('retourne null si la permission galerie est refusee', async () => {
     jest.spyOn(ImagePicker, 'requestMediaLibraryPermissionsAsync').mockResolvedValue({
-      status: 'denied', granted: false, canAskAgain: false, expires: 'never',
+      status: ImagePicker.PermissionStatus.DENIED, granted: false, canAskAgain: false, expires: 'never',
     })
 
     const result = await pickAvatarImage('library')
@@ -56,11 +56,11 @@ describe('pickAvatarImage', () => {
 
   it("retourne null si l'utilisateur annule la galerie", async () => {
     jest.spyOn(ImagePicker, 'requestMediaLibraryPermissionsAsync').mockResolvedValue({
-      status: 'granted', granted: true, canAskAgain: true, expires: 'never',
+      status: ImagePicker.PermissionStatus.GRANTED, granted: true, canAskAgain: true, expires: 'never',
     })
     jest.spyOn(ImagePicker, 'launchImageLibraryAsync').mockResolvedValue({
       canceled: true,
-      assets: [],
+      assets: null,
     })
 
     const result = await pickAvatarImage('library')
@@ -69,7 +69,7 @@ describe('pickAvatarImage', () => {
 
   it("retourne l'URI depuis la camera", async () => {
     jest.spyOn(ImagePicker, 'requestCameraPermissionsAsync').mockResolvedValue({
-      status: 'granted', granted: true, canAskAgain: true, expires: 'never',
+      status: ImagePicker.PermissionStatus.GRANTED, granted: true, canAskAgain: true, expires: 'never',
     })
     jest.spyOn(ImagePicker, 'launchCameraAsync').mockResolvedValue({
       canceled: false,
@@ -82,7 +82,7 @@ describe('pickAvatarImage', () => {
 
   it('retourne null si la permission camera est refusee', async () => {
     jest.spyOn(ImagePicker, 'requestCameraPermissionsAsync').mockResolvedValue({
-      status: 'denied', granted: false, canAskAgain: false, expires: 'never',
+      status: ImagePicker.PermissionStatus.DENIED, granted: false, canAskAgain: false, expires: 'never',
     })
 
     const result = await pickAvatarImage('camera')

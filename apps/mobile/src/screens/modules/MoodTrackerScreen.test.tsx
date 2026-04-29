@@ -235,7 +235,7 @@ describe('MoodTrackerScreen', () => {
     fireEvent.press(screen.getByText('Historique'))
 
     await waitFor(() => {
-      const deleteBtn = screen.getAllByLabelText('Supprimer cette saisie')[0]
+      const deleteBtn = screen.getAllByLabelText('Supprimer')[0]
       expect(deleteBtn).toBeTruthy()
       fireEvent.press(deleteBtn)
     })
