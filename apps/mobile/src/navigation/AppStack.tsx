@@ -49,6 +49,7 @@ import ASRS18Screen from '../screens/modules/ASRS18Screen'
 import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
 import DietWeightPsychoScreen from '../screens/modules/DietWeightPsychoScreen'
 import DietWeightPsychoDetailScreen from '../screens/modules/DietWeightPsychoDetailScreen'
+import PsyEduModuleScreen from '../screens/modules/PsyEduModuleScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -101,6 +102,7 @@ export type AppStackParamList = {
   ASRS6Entry: {}
   ASRS18: undefined
   ASRS18Entry: {}
+  PsyEduModule: { moduleKey: string }
   DietWeightPsycho: undefined
   DietWeightPsychoDetail: { topicId: string; topicTitle: string }
 }
@@ -378,9 +380,20 @@ export default function AppStack() {
         options={{ title: 'Nouveau ASRS v1.1 — Bilan' }}
       />
       <Stack.Screen
+        name="PsyEduModule"
+        component={PsyEduModuleScreen}
+        options={({ route }) => ({
+          title: route.params.moduleKey === 'psyedu_sleep'
+            ? 'Sommeil & récupération'
+            : route.params.moduleKey === 'psyedu_nutrition'
+            ? 'Alimentation & cerveau'
+            : 'Activité physique douce',
+        })}
+      />
+      <Stack.Screen
         name="DietWeightPsycho"
         component={DietWeightPsychoScreen}
-        options={{ title: 'Alimentation et psychotropes' }}
+        options={{ title: 'Psychotropes & alimentation' }}
       />
       <Stack.Screen
         name="DietWeightPsychoDetail"

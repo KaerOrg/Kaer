@@ -259,14 +259,30 @@
       "quality_good": "Bonne",
       "quality_excellent": "Excellente"
     },
+    "psyedu_sleep": {
+      "label": "Sommeil & récupération",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
+    "psyedu_nutrition": {
+      "label": "Alimentation & cerveau",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
+    "psyedu_activity": {
+      "label": "Activité physique douce",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
     "diet_weight_psycho": {
-      "label": "Alimentation et psychotropes",
+      "label": "Psychotropes & alimentation",
       "description": "",
       "topics_count_one": "{{count}} fiche",
       "topics_count_other": "{{count}} fiches",
-      "content_not_found": "Contenu introuvable.",
-      "section_lifestyle": "Hygiène de vie",
-      "section_meds": "Médicaments & alimentation"
+      "content_not_found": "Contenu introuvable."
     },
     "chronobiology_tracker": {
       "label": "Régularité chronobiologique",

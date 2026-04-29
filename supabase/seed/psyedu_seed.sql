@@ -1,12 +1,12 @@
 -- ============================================================
 -- SEED — psyedu_topics + psyedu_blocks
--- Module : diet_weight_psycho (8 fiches)
+-- Modules : psyedu_sleep, psyedu_nutrition, psyedu_activity, diet_weight_psycho
 -- Idempotent : DELETE + INSERT avec topic_key comme clé stable
 -- ============================================================
 
 -- Nettoyage (cascade supprime les blocs liés)
 delete from public.psyedu_topics
-where module_key = 'diet_weight_psycho';
+where module_key in ('diet_weight_psycho', 'psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity');
 
 -- ────────────────────────────────────────────────────────────
 -- TOPICS
@@ -14,14 +14,18 @@ where module_key = 'diet_weight_psycho';
 
 insert into public.psyedu_topics (id, module_key, topic_key, icon_name, sort_order)
 values
-  ('00000001-0000-0000-0000-000000000001', 'diet_weight_psycho', 'sleep_chrono',   'Moon',       1),
-  ('00000001-0000-0000-0000-000000000002', 'diet_weight_psycho', 'nutrition_brain','Apple',      2),
-  ('00000001-0000-0000-0000-000000000003', 'diet_weight_psycho', 'gentle_activity','Footprints', 3),
-  ('00000001-0000-0000-0000-000000000004', 'diet_weight_psycho', 'general',        'Info',       4),
-  ('00000001-0000-0000-0000-000000000005', 'diet_weight_psycho', 'antipsychotics', 'Pill',       5),
-  ('00000001-0000-0000-0000-000000000006', 'diet_weight_psycho', 'methylphenidate','Zap',        6),
-  ('00000001-0000-0000-0000-000000000007', 'diet_weight_psycho', 'antidepressants','SmilePlus',  7),
-  ('00000001-0000-0000-0000-000000000008', 'diet_weight_psycho', 'mood_stabilizers','HeartPulse',8);
+  -- Sommeil & récupération
+  ('00000001-0000-0000-0000-000000000001', 'psyedu_sleep',      'sleep_chrono',    'Moon',       1),
+  -- Alimentation & cerveau
+  ('00000001-0000-0000-0000-000000000002', 'psyedu_nutrition',  'nutrition_brain', 'Apple',      1),
+  -- Activité physique douce
+  ('00000001-0000-0000-0000-000000000003', 'psyedu_activity',   'gentle_activity', 'Footprints', 1),
+  -- Psychotropes & alimentation (fiches médicaments)
+  ('00000001-0000-0000-0000-000000000004', 'diet_weight_psycho','general',         'Info',       1),
+  ('00000001-0000-0000-0000-000000000005', 'diet_weight_psycho','antipsychotics',  'Pill',       2),
+  ('00000001-0000-0000-0000-000000000006', 'diet_weight_psycho','methylphenidate', 'Zap',        3),
+  ('00000001-0000-0000-0000-000000000007', 'diet_weight_psycho','antidepressants', 'SmilePlus',  4),
+  ('00000001-0000-0000-0000-000000000008', 'diet_weight_psycho','mood_stabilizers','HeartPulse', 5);
 
 -- ────────────────────────────────────────────────────────────
 -- BLOCS — sleep_chrono

@@ -4,6 +4,24 @@
     "how": "Comment faire concrètement",
     "sources": "Pour aller plus loin"
   },
+  "psyedu_sleep": {
+    "sleep_chrono": {
+      "title": "Le sommeil et la récupération",
+      "summary": "Chronobiologie, écrans et rythmes biologiques pour mieux récupérer"
+    }
+  },
+  "psyedu_nutrition": {
+    "nutrition_brain": {
+      "title": "L'alimentation et le cerveau",
+      "summary": "Le rôle du microbiote, des neurotransmetteurs et d'une alimentation équilibrée"
+    }
+  },
+  "psyedu_activity": {
+    "gentle_activity": {
+      "title": "L'activité physique douce",
+      "summary": "Endorphines, BDNF et micro-habitudes pour bouger sans se forcer"
+    }
+  },
   "diet_weight_psycho": {
     "sleep_chrono": {
       "title": "Le sommeil et la récupération",

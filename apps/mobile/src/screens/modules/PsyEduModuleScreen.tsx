@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { Info, Pill, Zap, SmilePlus, HeartPulse, ChevronRight } from 'lucide-react-native'
+import { ChevronRight, Moon, Apple, Footprints } from 'lucide-react-native'
 import i18next from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
@@ -21,20 +21,22 @@ import { colors, spacing, radius } from '../../theme'
 import type { PsyEduTopic } from 'shared'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
+type RouteProps = RouteProp<AppStackParamList, 'PsyEduModule'>
 
 type LucideIcon = React.ComponentType<{ size?: number; color?: string }>
 
-const LUCIDE_ICONS: Record<string, LucideIcon> = { Info, Pill, Zap, SmilePlus, HeartPulse }
+const LUCIDE_ICONS: Record<string, LucideIcon> = { Moon, Apple, Footprints }
 
 interface TopicRowProps {
   topic: PsyEduTopic
+  moduleKey: string
   onPress: () => void
 }
 
-const TopicRow = React.memo(function TopicRow({ topic, onPress }: TopicRowProps) {
+const TopicRow = React.memo(function TopicRow({ topic, moduleKey, onPress }: TopicRowProps) {
   const Icon = LUCIDE_ICONS[topic.icon_name]
-  const title = i18next.t(`diet_weight_psycho.${topic.topic_key}.title`, { ns: 'psyedu' })
-  const summary = i18next.t(`diet_weight_psycho.${topic.topic_key}.summary`, { ns: 'psyedu' })
+  const title = i18next.t(`${moduleKey}.${topic.topic_key}.title`, { ns: 'psyedu' })
+  const summary = i18next.t(`${moduleKey}.${topic.topic_key}.summary`, { ns: 'psyedu' })
 
   return (
     <Pressable
@@ -53,8 +55,10 @@ const TopicRow = React.memo(function TopicRow({ topic, onPress }: TopicRowProps)
   )
 })
 
-export default function DietWeightPsychoScreen() {
+export default function PsyEduModuleScreen() {
   const navigation = useNavigation<Nav>()
+  const route = useRoute<RouteProps>()
+  const { moduleKey } = route.params
   const { t } = useTranslation()
   const { teenColor } = useTeen()
 
@@ -64,7 +68,7 @@ export default function DietWeightPsychoScreen() {
 
   useEffect(() => {
     let active = true
-    fetchTopicsByModule('diet_weight_psycho')
+    fetchTopicsByModule(moduleKey)
       .then((data) => {
         if (!active) return
         setTopics(data)
@@ -76,14 +80,14 @@ export default function DietWeightPsychoScreen() {
         setLoading(false)
       })
     return () => { active = false }
-  }, [t])
+  }, [moduleKey, t])
 
   const handlePress = useCallback(
     (topic: PsyEduTopic) => {
-      const topicTitle = i18next.t(`diet_weight_psycho.${topic.topic_key}.title`, { ns: 'psyedu' })
+      const topicTitle = i18next.t(`${moduleKey}.${topic.topic_key}.title`, { ns: 'psyedu' })
       navigation.navigate('DietWeightPsychoDetail', { topicId: topic.id, topicTitle })
     },
-    [navigation]
+    [navigation, moduleKey]
   )
 
   if (loading) {
@@ -110,23 +114,23 @@ export default function DietWeightPsychoScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <TeenAccent color={teenColor('diet_weight_psycho')} />
+      <TeenAccent color={teenColor(moduleKey)} />
       <FlatList
         data={topics}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text style={styles.heading}>{t('modules.diet_weight_psycho.label')}</Text>
+            <Text style={styles.heading}>{t(`modules.${moduleKey}.label`)}</Text>
             <Text style={styles.subheading}>
               {count === 1
-                ? t('modules.diet_weight_psycho.topics_count_one', { count })
-                : t('modules.diet_weight_psycho.topics_count_other', { count })}
+                ? t(`modules.${moduleKey}.topics_count_one`, { count })
+                : t(`modules.${moduleKey}.topics_count_other`, { count })}
             </Text>
           </View>
         }
         renderItem={({ item }) => (
-          <TopicRow topic={item} onPress={() => handlePress(item)} />
+          <TopicRow topic={item} moduleKey={moduleKey} onPress={() => handlePress(item)} />
         )}
       />
     </SafeAreaView>

@@ -63,7 +63,7 @@ const MODULE_CATEGORIES: ModuleCategory[] = [
     id: 'lifestyle',
     labelKey: 'patient.cat_lifestyle_label',
     subtitleKey: 'patient.cat_lifestyle_subtitle',
-    modules: ['sleep_diary', 'diet_weight_psycho', 'chronobiology_tracker'],
+    modules: ['sleep_diary', 'psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity', 'diet_weight_psycho', 'chronobiology_tracker'],
   },
   {
     id: 'emotion',

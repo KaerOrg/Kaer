@@ -9,6 +9,9 @@ export type ModuleType =
   | 'psychoeducation'
   // Hygiène de Vie & Rythmes Biologiques
   | 'sleep_diary'
+  | 'psyedu_sleep'
+  | 'psyedu_nutrition'
+  | 'psyedu_activity'
   | 'diet_weight_psycho'
   | 'chronobiology_tracker'
   // Régulation Émotionnelle & Humeur
@@ -237,7 +240,10 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   psychoeducation: 'Psychoéducation',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Agenda du sommeil',
-  diet_weight_psycho: 'Alimentation et psychotropes',
+  psyedu_sleep: 'Sommeil & récupération',
+  psyedu_nutrition: 'Alimentation & cerveau',
+  psyedu_activity: 'Activité physique douce',
+  diet_weight_psycho: 'Psychotropes & alimentation',
   chronobiology_tracker: 'Traqueur de régularité chronobiologique',
   // Régulation Émotionnelle & Humeur
   mood_tracker: 'Thermomètre de l\'humeur & énergie',
@@ -280,6 +286,9 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   psychoeducation: 'Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Suivi quotidien du sommeil : heure de coucher, lever, efficacité.',
+  psyedu_sleep: 'Fiches psychoéducatives sur le sommeil, la chronobiologie et la récupération psychiatrique.',
+  psyedu_nutrition: 'Fiches psychoéducatives sur l\'axe intestin-cerveau, le microbiote et une alimentation équilibrée.',
+  psyedu_activity: 'Fiches psychoéducatives sur l\'activité physique douce, le BDNF, les endorphines et le NEAT.',
   diet_weight_psycho: 'Fiches psychoéducatives sur les interactions entre psychotropes et alimentation : antipsychotiques, méthylphénidate, ISRS, thymorégulateurs.',
   chronobiology_tracker: 'Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires.',
   // Régulation Émotionnelle & Humeur
