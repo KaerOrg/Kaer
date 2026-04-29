@@ -17,7 +17,7 @@ jest.mock('@react-navigation/native', () => ({
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => children,
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')

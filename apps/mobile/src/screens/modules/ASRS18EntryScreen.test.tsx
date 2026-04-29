@@ -38,8 +38,8 @@ describe('ASRS18EntryScreen', () => {
 
   it('affiche les séparateurs de section Partie A et Partie B', () => {
     render(<ASRS18EntryScreen />)
-    expect(screen.getByText('PARTIE A')).toBeTruthy()
-    expect(screen.getByText('PARTIE B')).toBeTruthy()
+    expect(screen.getByText('Partie A')).toBeTruthy()
+    expect(screen.getByText('Partie B')).toBeTruthy()
   })
 
   it('affiche les 5 options de fréquence', () => {

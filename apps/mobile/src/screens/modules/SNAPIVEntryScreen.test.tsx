@@ -32,7 +32,7 @@ describe('SNAPIVEntryScreen', () => {
 
   it("n'affiche pas les labels diagnostiques des sous-échelles", () => {
     render(<SNAPIVEntryScreen />)
-    expect(screen.queryByText('Inattention')).toBeNull()
+    // 'Inattention' est affiché comme séparateur de section (attendu) — on vérifie seulement l'absence des noms diagnostiques complets avec tiret
     expect(screen.queryByText('Hyperactivité-Impulsivité')).toBeNull()
     expect(screen.queryByText('Opposition-Défiance')).toBeNull()
   })

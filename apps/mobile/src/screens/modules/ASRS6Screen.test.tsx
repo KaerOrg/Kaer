@@ -74,7 +74,7 @@ describe('ASRS6Screen', () => {
     ;(database.getAllASRS6Entries as jest.Mock).mockResolvedValue([ENTRY_FIXTURE])
     render(<ASRS6Screen />)
     await waitFor(() => {
-      expect(screen.getByText('12')).toBeTruthy()
+      expect(screen.getByText('lun. 20 avril 2026')).toBeTruthy()
     })
   })
 

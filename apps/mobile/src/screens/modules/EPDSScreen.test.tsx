@@ -1,5 +1,5 @@
 jest.mock('../../hooks/useTeen', () => ({
-  useTeen: () => ({ isTeenMode: false, tt: (_mod, key) => key, tg: () => '', teenColor: () => undefined }),
+  useTeen: () => ({ isTeenMode: false, tt: (_mod: string, key: string) => key, tg: () => '', teenColor: () => undefined }),
 }))
 
 import React from 'react'
@@ -16,14 +16,14 @@ jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
     useNavigation: () => ({ navigate: mockNavigate }),
-    useFocusEffect: (cb) => {
+    useFocusEffect: (cb: () => () => void) => {
       React.useEffect(() => { cb() }, [])
     },
   }
 })
 
 jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => children,
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
