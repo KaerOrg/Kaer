@@ -37,7 +37,7 @@ const MODULE_CONFIG: Record<
   medication_adherence:     { icon: 'calendar-check-outline',    available: true  },
   psychoeducation:          { icon: 'book-open-page-variant',    available: true  },
   sleep_diary:              { icon: 'weather-night',             available: true  },
-  diet_weight_psycho:       { icon: 'food-apple-outline',        available: false },
+  diet_weight_psycho:       { icon: 'food-apple-outline',        available: true  },
   chronobiology_tracker:    { icon: 'clock-outline',             available: false },
   mood_tracker:             { icon: 'emoticon-outline',          available: true  },
   emotion_wheel:            { icon: 'palette',                   available: true  },
@@ -266,6 +266,7 @@ export default function HomeScreen() {
       snap_iv:                 'SNAPIV',
       asrs6:                   'ASRS6',
       asrs18:                  'ASRS18',
+      diet_weight_psycho:      'DietWeightPsycho',
     }
     const route = routes[moduleType]
     if (route) navigation.navigate(route as never)

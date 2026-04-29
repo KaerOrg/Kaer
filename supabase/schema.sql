@@ -404,3 +404,62 @@ create policy "Practitioners can view logs of their patients"
         and patient_id = public.patient_engagement_logs.patient_id
     )
   );
+
+
+-- ============================================================
+-- TABLES : psyedu_topics + psyedu_blocks
+-- Contenu psychoéducatif structuré (fiches du module diet_weight_psycho et futurs modules)
+-- Aucune donnée clinique — contenu éditorial global accessible à tout utilisateur authentifié
+-- ============================================================
+
+create table if not exists public.psyedu_topics (
+  id           uuid        primary key default gen_random_uuid(),
+  module_key   text        not null,
+  topic_key    text        not null,
+  icon_name    text        not null,
+  sort_order   int         not null default 0,
+  is_active    boolean     not null default true,
+  created_at   timestamptz not null default now(),
+
+  unique (module_key, topic_key)
+);
+
+create table if not exists public.psyedu_blocks (
+  id           uuid        primary key default gen_random_uuid(),
+  topic_id     uuid        not null references public.psyedu_topics(id) on delete cascade,
+  section_key  text        not null,
+  block_type   text        not null,
+  text_code    text,
+  items_codes  text[],
+  href         text,
+  sort_order   int         not null default 0,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists idx_psyedu_topics_module_key
+  on public.psyedu_topics(module_key);
+
+create index if not exists idx_psyedu_blocks_topic_id
+  on public.psyedu_blocks(topic_id);
+
+create index if not exists idx_psyedu_blocks_topic_section
+  on public.psyedu_blocks(topic_id, section_key, sort_order);
+
+alter table public.psyedu_topics enable row level security;
+alter table public.psyedu_blocks  enable row level security;
+
+-- Tout utilisateur authentifié peut lire les fiches actives
+drop policy if exists "psyedu_topics_authenticated_select" on public.psyedu_topics;
+create policy "psyedu_topics_authenticated_select" on public.psyedu_topics
+  for select to authenticated
+  using (is_active = true);
+
+drop policy if exists "psyedu_blocks_authenticated_select" on public.psyedu_blocks;
+create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
+  for select to authenticated
+  using (
+    exists (
+      select 1 from public.psyedu_topics t
+      where t.id = topic_id and t.is_active = true
+    )
+  );

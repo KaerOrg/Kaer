@@ -237,7 +237,7 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   psychoeducation: 'Psychoéducation',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Agenda du sommeil',
-  diet_weight_psycho: 'Psychoéducation diététique & poids',
+  diet_weight_psycho: 'Alimentation et psychotropes',
   chronobiology_tracker: 'Traqueur de régularité chronobiologique',
   // Régulation Émotionnelle & Humeur
   mood_tracker: 'Thermomètre de l\'humeur & énergie',
@@ -280,7 +280,7 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   psychoeducation: 'Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Suivi quotidien du sommeil : heure de coucher, lever, efficacité.',
-  diet_weight_psycho: 'Comprendre et gérer les fringales et la prise de poids sous antipsychotiques.',
+  diet_weight_psycho: 'Fiches psychoéducatives sur les interactions entre psychotropes et alimentation : antipsychotiques, méthylphénidate, ISRS, thymorégulateurs.',
   chronobiology_tracker: 'Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires.',
   // Régulation Émotionnelle & Humeur
   mood_tracker: 'Suivi quotidien de l\'humeur et du niveau d\'énergie sur une échelle visuelle.',

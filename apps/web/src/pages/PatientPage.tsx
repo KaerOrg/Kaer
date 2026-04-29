@@ -128,6 +128,8 @@ export function PatientPage() {
   const [savingPsycho, setSavingPsycho] = useState(false)
   const [psychoError, setPsychoError] = useState<string | null>(null)
 
+  const [showDietSources, setShowDietSources] = useState(false)
+
   const [rimEditorMode, setRimEditorMode] = useState<'off' | 'unlock' | 'edit'>('off')
   const [rimAlternative, setRimAlternative] = useState('')
   const [rimOriginal, setRimOriginal] = useState('')
@@ -702,6 +704,8 @@ export function PatientPage() {
 
     const mp = getModulePreview(moduleType, teenMode)
 
+    const isDietWeight = moduleType === 'diet_weight_psycho'
+
     return (
       <div key={moduleType} className="module-card-wrapper-block">
         <Card
@@ -718,6 +722,50 @@ export function PatientPage() {
                   {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
                 </button>
+              )}
+              {isDietWeight && (
+                <div style={{ position: 'relative' }}>
+                  <button
+                    className={`preview-toggle-btn ${showDietSources ? 'preview-toggle-btn--active' : ''}`}
+                    onClick={() => setShowDietSources(p => !p)}
+                    title="Sources & références"
+                  >
+                    <Info size={14} />
+                    Sources
+                  </button>
+                  {showDietSources && (
+                    <div className="diet-sources-popover">
+                      <p className="diet-sources-popover__title">Références bibliographiques</p>
+                      <ul className="diet-sources-popover__list">
+                        <li>
+                          <strong>HAS (2017).</strong> Recommandations de bonne pratique — Antipsychotiques.
+                          Surveillance métabolique systématique (glycémie, lipides, IMC, tour de taille).{' '}
+                          <em>has-sante.fr</em>
+                        </li>
+                        <li>
+                          <strong>ANSM.</strong> Résumés des caractéristiques du produit (RCP) — psychotropes.
+                          Sections 4.4 (mises en garde) et 4.8 (effets indésirables).{' '}
+                          <em>base-donnees-publique.medicaments.gouv.fr</em>
+                        </li>
+                        <li>
+                          <strong>OMS (2013–2030).</strong> Plan d'action pour la santé mentale.
+                          Recommandations sur la prise en charge des comorbidités somatiques et métaboliques.{' '}
+                          <em>who.int</em>
+                        </li>
+                        <li>
+                          <strong>De Hert M. et al. (2011).</strong> Metabolic and cardiovascular adverse effects
+                          associated with antipsychotic drugs.{' '}
+                          <em>Nature Reviews Endocrinology, 7(2), 114–126.</em>
+                        </li>
+                        <li>
+                          <strong>Werneke U. et al. (2003).</strong> Options for pharmacological management of
+                          obesity in patients treated with atypical antipsychotics.{' '}
+                          <em>International Clinical Psychopharmacology, 18(3), 145–160.</em>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
               {unlocked && mod ? (
                 <>

@@ -899,3 +899,49 @@
 .scales-section--hetero .scales-section__item-date {
   color: #22C55E;
 }
+
+/* ── Popover Sources (diet_weight_psycho) ────────────────────────────────── */
+
+.diet-sources-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  background: var(--color-card, #fff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 14px 16px;
+  width: 380px;
+  max-width: 90vw;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+.diet-sources-popover__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 10px;
+}
+
+.diet-sources-popover__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diet-sources-popover__list li {
+  font-size: 12px;
+  color: var(--color-text, #111827);
+  line-height: 1.5;
+  padding-left: 10px;
+  border-left: 3px solid var(--color-primary, #6366f1);
+}
+
+.diet-sources-popover__list em {
+  color: var(--color-text-secondary, #6b7280);
+}

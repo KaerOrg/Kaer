@@ -260,8 +260,13 @@
       "quality_excellent": "Excellente"
     },
     "diet_weight_psycho": {
-      "label": "Alimentation & poids",
-      "description": "Gérer les fringales liées au traitement"
+      "label": "Alimentation et psychotropes",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches",
+      "content_not_found": "Contenu introuvable.",
+      "section_lifestyle": "Hygiène de vie",
+      "section_meds": "Médicaments & alimentation"
     },
     "chronobiology_tracker": {
       "label": "Régularité chronobiologique",

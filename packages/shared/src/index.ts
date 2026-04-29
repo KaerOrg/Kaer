@@ -82,3 +82,35 @@ export interface PatientModule {
   unlockedAt: string
   config: ModuleConfig
 }
+
+// ─── Psychoéducation structurée (contenu en base) ───────────────────────────
+
+export interface PsyEduTopic {
+  readonly id: string
+  readonly module_key: string
+  readonly topic_key: string
+  readonly icon_name: string
+  readonly sort_order: number
+  readonly is_active: boolean
+}
+
+export type PsyEduBlockType =
+  | 'heading'
+  | 'paragraph'
+  | 'bullet_list'
+  | 'tip'
+  | 'blockquote'
+  | 'source_link'
+
+export type PsyEduSectionKey = 'why' | 'how' | 'sources'
+
+export interface PsyEduBlock {
+  readonly id: string
+  readonly topic_id: string
+  readonly section_key: PsyEduSectionKey
+  readonly block_type: PsyEduBlockType
+  readonly text_code: string | null
+  readonly items_codes: string[] | null
+  readonly href: string | null
+  readonly sort_order: number
+}

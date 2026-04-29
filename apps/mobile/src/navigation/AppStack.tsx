@@ -47,6 +47,8 @@ import ASRS6Screen from '../screens/modules/ASRS6Screen'
 import ASRS6EntryScreen from '../screens/modules/ASRS6EntryScreen'
 import ASRS18Screen from '../screens/modules/ASRS18Screen'
 import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
+import DietWeightPsychoScreen from '../screens/modules/DietWeightPsychoScreen'
+import DietWeightPsychoDetailScreen from '../screens/modules/DietWeightPsychoDetailScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -99,6 +101,8 @@ export type AppStackParamList = {
   ASRS6Entry: {}
   ASRS18: undefined
   ASRS18Entry: {}
+  DietWeightPsycho: undefined
+  DietWeightPsychoDetail: { topicId: string; topicTitle: string }
 }
 
 export type TabParamList = {
@@ -372,6 +376,18 @@ export default function AppStack() {
         name="ASRS18Entry"
         component={ASRS18EntryScreen}
         options={{ title: 'Nouveau ASRS v1.1 — Bilan' }}
+      />
+      <Stack.Screen
+        name="DietWeightPsycho"
+        component={DietWeightPsychoScreen}
+        options={{ title: 'Alimentation et psychotropes' }}
+      />
+      <Stack.Screen
+        name="DietWeightPsychoDetail"
+        component={DietWeightPsychoDetailScreen}
+        options={({ route }) => ({
+          title: route.params.topicTitle,
+        })}
       />
     </Stack.Navigator>
   )
