@@ -102,6 +102,7 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, auto-évaluation, bouton info PubMed, SQLite local, tests Jest |
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, bouton info PubMed, SQLite local, tests Jest |
 | `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — 8 fiches psychoéducatives, contenu en base Supabase, rendu bloc par bloc, teen mode |
+| `chronobiology_tracker` | Régularité chronobiologique | Implémenté — 7 fiches psyedu (zeitgebers, IPSRT, lumière, repas, rythme social, lever/coucher, perturbations) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets, teen mode |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -137,6 +138,7 @@ Les questionnaires suivent un pattern uniforme à 3 fichiers :
 - [x] Module ASRS v1.1 Dépistage (`asrs6`) — 6 items, score 0-24, auto-évaluation adulte, bouton info référence PubMed, SQLite local, tests Jest
 - [x] Module ASRS v1.1 Bilan Complet (`asrs18`) — 18 items (Parties A+B), score 0-72 + sous-scores, bouton info PubMed, SQLite local, tests Jest
 - [x] Module Alimentation et psychotropes (`diet_weight_psycho`) — 8 fiches, contenu Supabase (psyedu_topics + psyedu_blocks), rendu bloc custom, teen mode, 10 tests Jest
+- [x] Module Régularité chronobiologique (`chronobiology_tracker`) — 7 fiches psyedu (Supabase) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets Fiches/Journal, teen mode, 8 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -181,6 +183,28 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
   1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
   3. Ne jamais livrer un module mobile sans son pendant web, ni vice-versa : un module invisible dans l'armoire praticien ne peut pas être débloqué pour le patient.
+
+## Pattern : Module mixte psyedu + journal (chronobiology_tracker)
+
+Ce pattern combine fiches psychoéducatives et tracker de données locales dans un même module, avec deux onglets.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/mobile/src/screens/modules/ChronoBioScreen.tsx` | Écran principal — segment control Fiches / Journal |
+| `apps/mobile/src/screens/modules/ChronoBioDetailScreen.tsx` | Détail d'une fiche psyedu (BlockRenderer) |
+| `apps/mobile/src/screens/modules/ChronoBioEntryScreen.tsx` | Formulaire de saisie des 5 ancrages horaires |
+| `apps/mobile/src/lib/database.ts` | Table `chrono_entries` + CRUD (`ChronoEntry`, `saveChronoEntry`, etc.) |
+| `supabase/seed/chrono_seed.sql` | Seed idempotent — 7 topics + blocs |
+| `apps/mobile/src/i18n/locales/fr/psyedu.json` | Namespace `chronobiology_tracker` |
+| `apps/mobile/src/i18n/locales/fr/psyedu_teen.json` | Surcharges tutoiement |
+
+### Règles
+
+- **Onglets** : implémentés avec un segment control maison (2 `Pressable` + `activeTab` state), pas de React Navigation Tab imbriqué.
+- **Journal** : données 100% locales (SQLite). Aucune donnée de timing envoyée à Supabase.
+- **Champs optionnels** : chaque ancrage peut être nul — composant `OptionalTimeField` avec bouton clear.
+- **MDR** : aucun score, aucun calcul, aucun seuil — le journal affiche uniquement les horaires bruts saisis par le patient.
+- **Reload** : `useFocusEffect` + `listChronoEntries(14)` pour actualiser l'historique au retour depuis `ChronoBioEntryScreen`.
 
 ## Pattern : Mode Ado (teen mode)
 

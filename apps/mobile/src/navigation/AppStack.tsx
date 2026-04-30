@@ -48,6 +48,10 @@ import ASRS18Screen from '../screens/modules/ASRS18Screen'
 import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
 import DietWeightPsychoScreen from '../screens/modules/DietWeightPsychoScreen'
 import DietWeightPsychoDetailScreen from '../screens/modules/DietWeightPsychoDetailScreen'
+import ChronoBioScreen from '../screens/modules/ChronoBioScreen'
+import ChronoBioDetailScreen from '../screens/modules/ChronoBioDetailScreen'
+import ChronoBioEntryScreen from '../screens/modules/ChronoBioEntryScreen'
+import ChronoBioMonthScreen from '../screens/modules/ChronoBioMonthScreen'
 import PsyEduModuleScreen from '../screens/modules/PsyEduModuleScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
@@ -103,6 +107,10 @@ export type AppStackParamList = {
   PsyEduModule: { moduleKey: string }
   DietWeightPsycho: undefined
   DietWeightPsychoDetail: { topicId: string; topicTitle: string }
+  ChronoBio: undefined
+  ChronoBioDetail: { topicId: string; topicTitle: string }
+  ChronoBioEntry: { date: string }
+  ChronoBioMonth: undefined
 }
 
 export type TabParamList = {
@@ -392,6 +400,26 @@ export default function AppStack() {
         options={({ route }) => ({
           title: route.params.topicTitle,
         })}
+      />
+      <Stack.Screen
+        name="ChronoBio"
+        component={ChronoBioScreen}
+        options={{ title: 'Régularité chronobiologique' }}
+      />
+      <Stack.Screen
+        name="ChronoBioDetail"
+        component={ChronoBioDetailScreen}
+        options={({ route }) => ({ title: route.params.topicTitle })}
+      />
+      <Stack.Screen
+        name="ChronoBioEntry"
+        component={ChronoBioEntryScreen}
+        options={{ title: 'Ancrages du jour' }}
+      />
+      <Stack.Screen
+        name="ChronoBioMonth"
+        component={ChronoBioMonthScreen}
+        options={{ title: 'Vue mensuelle' }}
       />
     </Stack.Navigator>
   )

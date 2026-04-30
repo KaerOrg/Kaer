@@ -1,4 +1,55 @@
 {
+  "chronobiology_tracker": {
+    "what_is_chrono": {
+      "how": {
+        "p1": "Chaque personne a un **chronotype** — une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le tien t'aide à mieux organiser tes journées en accord avec ta biologie.",
+        "p2": "Ton horloge biologique peut être **resynchronisée** progressivement. Des ancres horaires régulières — heure de lever, repas, activités — envoient des signaux stables à ton cerveau.",
+        "item3": "En parler avec ton soignant pour adapter cet outil à ta situation"
+      }
+    },
+    "why_regularity": {
+      "how": {
+        "p1": "L'objectif n'est pas la perfection mais la **cohérence**. Même deux ou trois ancrages réguliers par jour ont un effet mesurable sur la stabilité de tes rythmes.",
+        "p2": "L'heure de **lever** est l'ancre la plus efficace. Elle détermine le point de départ de toute ta cascade hormonale de la journée."
+      }
+    },
+    "light_anchor": {
+      "how": {
+        "p1": "**Objectif principal** : t'exposer à la lumière naturelle dans les 30 minutes après ton réveil, si possible."
+      }
+    },
+    "meals_timing": {
+      "how": {
+        "p1": "L'objectif est la **régularité des horaires**, pas la restriction alimentaire. Le but n'est pas de changer ce que tu manges, mais **quand** tu manges.",
+        "p2": "Le premier repas après ton réveil est un ancrage fort pour ton horloge digestive. Essaie de le prendre dans un créneau horaire stable d'un jour à l'autre."
+      }
+    },
+    "social_rhythm": {
+      "why": {
+        "tip1": "Ton soignant peut t'aider à identifier quels événements sociaux sont les plus importants pour ton équilibre et comment les préserver."
+      },
+      "how": {
+        "p1": "Identifie **2 à 3 ancrages sociaux** réguliers dans ta semaine. Il peut s'agir de n'importe quel contact prévisible : café avec un ami, repas en famille, cours de sport.",
+        "p2": "En période de changement (nouveau lycée, déménagement, rupture), essaie de **maintenir au moins un ou deux ancrages sociaux** stables pour amortir la désynchronisation."
+      }
+    },
+    "sleep_wake": {
+      "how": {
+        "p1": "**Si tu ne peux maintenir qu'une seule ancre**, privilégie l'heure de lever plutôt que l'heure de coucher.",
+        "p2": "Le week-end, essaie de te lever dans un créneau de ±1 heure par rapport à ton horaire de semaine.",
+        "p3": "Si une nuit difficile t'empêche de te lever à ton heure habituelle, une **sieste courte** (20 minutes maximum, avant 15h) est préférable à un lever tardif."
+      }
+    },
+    "disruptions": {
+      "why": {
+        "tip1": "Si tu remarques qu'un événement a significativement bouleversé tes horaires habituels, c'est une information utile à partager avec ton soignant."
+      },
+      "how": {
+        "p1": "La perturbation est inévitable. L'objectif n'est pas de l'éviter, mais de **récupérer la régularité aussi vite que possible** après.",
+        "p2": "Après une perturbation, l'ancre la plus efficace pour te resynchroniser est le **lever matinal** à heure fixe, combiné à la lumière du jour."
+      }
+    }
+  },
   "diet_weight_psycho": {
     "sleep_chrono": {
       "why": {

@@ -40,7 +40,7 @@ const MODULE_CONFIG: Record<
   psyedu_nutrition:         { icon: 'food-apple-outline',        available: true  },
   psyedu_activity:          { icon: 'walk',                      available: true  },
   diet_weight_psycho:       { icon: 'pill',                      available: true  },
-  chronobiology_tracker:    { icon: 'clock-outline',             available: false },
+  chronobiology_tracker:    { icon: 'clock-outline',             available: true  },
   mood_tracker:             { icon: 'emoticon-outline',          available: true  },
   emotion_wheel:            { icon: 'palette',                   available: true  },
   behavioral_activation:    { icon: 'run-fast',                  available: true  },
@@ -268,6 +268,7 @@ export default function HomeScreen() {
       asrs6:                   'ASRS6',
       asrs18:                  'ASRS18',
       diet_weight_psycho:      'DietWeightPsycho',
+      chronobiology_tracker:   'ChronoBio',
     }
     if (['psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity', 'cognitive_distortions'].includes(moduleType)) {
       navigation.navigate('PsyEduModule', { moduleKey: moduleType })

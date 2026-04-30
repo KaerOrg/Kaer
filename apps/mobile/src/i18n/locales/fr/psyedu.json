@@ -259,6 +259,159 @@
       }
     }
   },
+  "chronobiology_tracker": {
+    "what_is_chrono": {
+      "title": "C'est quoi un rythme circadien ?",
+      "summary": "L'horloge biologique interne qui régule le sommeil, l'humeur et l'énergie",
+      "why": {
+        "p1": "Le corps humain possède une **horloge biologique interne** d'environ 24 heures : le rythme circadien. Elle est pilotée par le noyau suprachiasmatique, une structure de la taille d'un grain de riz dans l'hypothalamus.",
+        "p2": "Cette horloge régule des dizaines de fonctions : cycle veille-sommeil, température corporelle, sécrétion de cortisol, vigilance, humeur et métabolisme.",
+        "p3": "Les signaux extérieurs qui synchronisent cette horloge s'appellent des **zeitgebers** (mot allemand : « donneurs de temps »). La lumière du matin est le zeitgeber le plus puissant.",
+        "tip1": "La chronobiologie est une discipline scientifique reconnue. Ses applications en santé mentale font l'objet de recommandations dans plusieurs pays."
+      },
+      "how": {
+        "p1": "Chaque personne a un **chronotype** — une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le vôtre aide à mieux organiser vos journées en accord avec votre biologie.",
+        "p2": "L'horloge biologique peut être **resynchronisée** progressivement. Les ancres horaires régulières — heure de lever, repas, activités — envoient des signaux stables à votre cerveau.",
+        "item1": "Identifier vos zeitgebers personnels : lever, premier repas, activité principale, coucher",
+        "item2": "Observer vos horaires habituels sans les juger",
+        "item3": "En parler avec votre soignant pour adapter cet outil à votre situation"
+      },
+      "sources": {
+        "s1": "Aschoff J. (1965). Circadian rhythms in man. Science.",
+        "s2": "Wirz-Justice A. et al. (2013). Chronotherapeutics for affective disorders. Karger."
+      }
+    },
+    "why_regularity": {
+      "title": "Pourquoi la régularité aide le cerveau",
+      "summary": "Comment des horaires stables réduisent le stress et renforcent la résilience",
+      "why": {
+        "p1": "Quand les horaires sont réguliers, les différentes horloges de l'organisme — cerveau, foie, cœur, intestin — restent **synchronisées entre elles**. Cette cohérence améliore la qualité du sommeil, la gestion du stress et la stabilité de l'humeur.",
+        "p2": "Le « **social jet lag** » désigne le décalage entre l'horloge biologique et l'horloge sociale. Il survient typiquement quand on se couche et lève beaucoup plus tard le week-end que la semaine.",
+        "p3": "Un social jet lag chronique est associé à une fatigue persistante, des difficultés de concentration et une humeur plus instable.",
+        "tip1": "La thérapie IPSRT (Frank et al., 2005, Arch Gen Psychiatry) montre que structurer les rythmes quotidiens réduit significativement les rechutes chez les patients bipolaires — une des preuves scientifiques les mieux documentées dans ce domaine."
+      },
+      "how": {
+        "p1": "L'objectif n'est pas la perfection mais la **cohérence**. Même deux ou trois ancrages réguliers par jour ont un effet mesurable sur la stabilité des rythmes.",
+        "p2": "L'heure de **lever** est l'ancre la plus efficace. Elle détermine le point de départ de toute la cascade hormonale de la journée.",
+        "item1": "Choisir une heure de lever et la maintenir 7 jours sur 7 (±30 min)",
+        "item2": "Prendre le petit-déjeuner à heure fixe si possible",
+        "item3": "Limiter le décalage du week-end à 1 heure maximum"
+      },
+      "sources": {
+        "s1": "Frank E. et al. (2005). Two-year outcomes for IPSRT in bipolar I. Arch Gen Psychiatry. PMID: 16143731",
+        "s2": "Phillips A.J.K. et al. (2024). Sleep regularity and mental health outcomes. Psychological Medicine. PMID: 40814280",
+        "s3": "Roenneberg T. et al. (2012). Social jetlag and obesity. Current Biology. PMID: 22578422"
+      }
+    },
+    "light_anchor": {
+      "title": "La lumière du matin, ancre principale",
+      "summary": "Le signal le plus puissant pour synchroniser votre horloge biologique",
+      "why": {
+        "p1": "La lumière du matin est le **zeitgeber le plus puissant** pour l'horloge biologique. Des cellules spécialisées de la rétine transmettent directement le signal lumineux au noyau suprachiasmatique.",
+        "p2": "L'exposition à la lumière au réveil déclenche la **réponse cortisolique matinale** : une montée naturelle de cortisol qui prépare le corps à l'éveil et à l'action.",
+        "p3": "En soirée, la lumière artificielle (surtout bleue) **retarde** l'horloge interne en bloquant la sécrétion de mélatonine — l'effet inverse de la lumière matinale.",
+        "tip1": "Un ciel couvert délivre encore 10 000 à 20 000 lux — bien plus que l'éclairage intérieur (300–500 lux). Quelques minutes dehors suffisent."
+      },
+      "how": {
+        "p1": "**Objectif principal** : s'exposer à la lumière naturelle dans les 30 minutes après le réveil, si possible.",
+        "p2": "En hiver ou lors de journées sans soleil, une lampe de luminothérapie à 10 000 lux (20 à 30 minutes le matin) peut compléter l'exposition naturelle.",
+        "item1": "Ouvrir les volets dès le réveil et rester quelques minutes près d'une fenêtre",
+        "item2": "Sortir 10 à 20 minutes le matin, même par temps gris",
+        "item3": "Éviter les écrans les 30 à 60 premières minutes après le réveil",
+        "item4": "Réduire les éclairages vifs après 21h"
+      },
+      "sources": {
+        "s1": "Leproult R. & Van Cauter E. (2010). Role of sleep and sleep loss in hormonal release. Prog Brain Res.",
+        "s2": "Rosenthal N.E. et al. (1984). Seasonal affective disorder + light therapy. Arch Gen Psychiatry. PMID: 6581756",
+        "s3": "HAS — Prise en charge de l'insomnie en médecine générale (2006)."
+      }
+    },
+    "meals_timing": {
+      "title": "Les repas, horloges secondaires",
+      "summary": "Les horaires des repas envoient des signaux de timing à tous les organes",
+      "why": {
+        "p1": "Chaque organe — foie, intestin, pancréas, cœur — possède sa propre **horloge périphérique**. Ces horloges sont synchronisées à la fois par la lumière et par l'heure des repas.",
+        "p2": "Manger à des heures régulières envoie des signaux de timing cohérents à l'ensemble du tube digestif et au foie. À l'inverse, des repas à heures très variables peuvent **désynchroniser** ces horloges périphériques.",
+        "p3": "La **chrono-nutrition** étudie les interactions entre les horaires alimentaires et l'horloge biologique. Des repas régulièrement décalés (manger très tard le soir) peuvent perturber le sommeil et le métabolisme."
+      },
+      "how": {
+        "p1": "L'objectif est la **régularité des horaires**, pas la restriction alimentaire. Le but n'est pas de changer ce que vous mangez, mais **quand** vous mangez.",
+        "p2": "Le premier repas après le réveil est un ancrage fort pour l'horloge digestive. Essayez de le prendre dans un créneau horaire stable d'un jour à l'autre.",
+        "item1": "Prendre 3 repas à des horaires réguliers quand c'est possible",
+        "item2": "Éviter les repas très tardifs (après 21h) si cela vous est accessible",
+        "item3": "Un repas léger en soirée favorise un endormissement plus facile"
+      },
+      "sources": {
+        "s1": "Asher G. & Schibler U. (2011). Crosstalk between circadian and metabolic cycles. Cell Metab. PMID: 21284980",
+        "s2": "Pot G.K. et al. (2016). Meal irregularity and cardiometabolic consequences. Proc Nutr Soc."
+      }
+    },
+    "social_rhythm": {
+      "title": "L'activité sociale comme régulateur",
+      "summary": "Les contacts sociaux réguliers synchronisent l'horloge biologique",
+      "why": {
+        "p1": "Les interactions sociales régulières agissent comme des **zeitgebers** : un repas à heure fixe avec des proches, un travail avec des horaires stables, une activité récurrente — ces événements envoient des signaux de timing au cerveau.",
+        "p2": "Des perturbations du rythme social — perte d'emploi, rupture sentimentale, isolement, voyage prolongé — peuvent déstabiliser l'horloge biologique et être des **déclencheurs de difficultés psychiques**.",
+        "p3": "C'est le fondement de l'IPSRT (Thérapie Interpersonnelle et des Rythmes Sociaux) : identifier ses « zeitgebers sociaux » personnels et les protéger autant que possible.",
+        "tip1": "Votre soignant peut vous aider à identifier quels événements sociaux sont les plus importants pour votre équilibre et comment les préserver."
+      },
+      "how": {
+        "p1": "Identifiez **2 à 3 ancrages sociaux** réguliers dans votre semaine. Il peut s'agir de n'importe quel contact prévisible : café avec un ami, repas en famille, cours de sport.",
+        "p2": "En période de changement (nouveau travail, déménagement, rupture), essayez de **maintenir au moins un ou deux ancrages sociaux** stables pour amortir la désynchronisation.",
+        "item1": "Repérer vos zeitgebers sociaux habituels",
+        "item2": "Anticiper les périodes de perturbation et en parler avec votre soignant",
+        "item3": "Protéger 1 à 2 contacts sociaux réguliers chaque semaine"
+      },
+      "sources": {
+        "s1": "Frank E. et al. (2005). Two-year outcomes for IPSRT in bipolar I. Arch Gen Psychiatry. PMID: 16143731",
+        "s2": "Monk T.H. et al. (1990). The Social Rhythm Metric. J Nerv Ment Dis. PMID: 2299336"
+      }
+    },
+    "sleep_wake": {
+      "title": "Lever et coucher : les deux piliers",
+      "summary": "L'heure de lever est l'ancre la plus puissante — comprendre pourquoi",
+      "why": {
+        "p1": "Le **lever à heure fixe** est l'ancre circadienne la plus puissante — plus encore que l'heure de coucher. Il déclenche la réponse cortisolique matinale et synchronise l'ensemble des rythmes de la journée.",
+        "p2": "Plus la **pression de sommeil** (adénosine accumulée pendant l'éveil) est construite de manière prévisible, plus l'endormissement et la qualité du sommeil sont stables. Un lever régulier est le fondement de cette construction.",
+        "p3": "Se lever à des horaires très variables décale progressivement l'horloge interne et peut rendre l'endormissement le soir plus difficile.",
+        "tip1": "Étude UK Biobank (Phillips et al., 2024, n > 79 000) : la régularité des horaires de sommeil est associée à une réduction de 38 % du risque de dépression — indépendamment de la durée de sommeil."
+      },
+      "how": {
+        "p1": "**Si vous ne pouvez maintenir qu'une seule ancre**, privilégiez l'heure de lever plutôt que l'heure de coucher.",
+        "p2": "Le week-end, essayez de vous lever dans un créneau de ±1 heure par rapport à votre horaire de semaine.",
+        "p3": "Si une nuit difficile vous empêche de vous lever à votre heure habituelle, une **sieste courte** (20 minutes maximum, avant 15h) est préférable à un lever tardif.",
+        "item1": "Choisir une heure de lever et la tenir 7j/7 autant que possible",
+        "item2": "Pas de grasse matinée de plus de 1 heure le week-end",
+        "item3": "Compenser les nuits courtes par une sieste courte plutôt qu'un lever tardif"
+      },
+      "sources": {
+        "s1": "Phillips A.J.K. et al. (2024). Sleep regularity and mental health outcomes. Psychological Medicine. PMID: 40814280",
+        "s2": "HAS — Prise en charge de l'insomnie en médecine générale (2006). Recommandations professionnelles.",
+        "s3": "Borbély A.A. (1982). A two process model of sleep regulation. Hum Neurobiol. PMID: 7185792"
+      }
+    },
+    "disruptions": {
+      "title": "Ce qui perturbe les rythmes",
+      "summary": "Comprendre les sources de désynchronisation pour mieux s'en remettre",
+      "why": {
+        "p1": "Plusieurs situations connues **déstabilisent** l'horloge circadienne : le décalage horaire (jet lag), les nuits blanches, le travail en horaires décalés ou de nuit, les changements de saison.",
+        "p2": "Les **événements de vie** peuvent également perturber les rythmes : deuil, rupture, changement d'emploi, déménagement. Ces perturbations sociales se traduisent souvent par une désynchronisation biologique.",
+        "p3": "Comprendre ce qui a perturbé vos rythmes vous permet d'anticiper, de récupérer plus vite et de vous adapter lors des prochaines perturbations.",
+        "tip1": "Si vous remarquez qu'un événement a significativement bouleversé vos horaires habituels, c'est une information utile à partager avec votre soignant."
+      },
+      "how": {
+        "p1": "La perturbation est inévitable. L'objectif n'est pas de l'éviter, mais de **récupérer la régularité aussi vite que possible** après.",
+        "p2": "Après une perturbation, l'ancre la plus efficace pour resynchroniser est le **lever matinal** à heure fixe, combiné à la lumière du jour.",
+        "item1": "Après une nuit blanche ou un décalage horaire : reprendre l'heure de lever habituelle dès le lendemain",
+        "item2": "Ne pas cumuler les ancres décalées (lever tardif + repas tardifs + coucher tardif)",
+        "item3": "Après un décalage prolongé : récupérer progressivement (30 min plus tôt chaque jour)"
+      },
+      "sources": {
+        "s1": "Wirz-Justice A. (2006). Biological rhythm disturbances in mood disorders. International Clinical Psychopharmacology.",
+        "s2": "Roenneberg T. et al. (2012). Social jetlag and obesity. Current Biology."
+      }
+    }
+  },
   "cognitive_distortions": {
     "cog_distortions_intro": {
       "title": "Les distorsions cognitives",

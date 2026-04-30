@@ -55,6 +55,7 @@ export async function initDatabase(): Promise<void> {
   await createSNAPIVTable(database)
   await createASRS6Table(database)
   await createASRS18Table(database)
+  await createChronoEntriesTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1568,5 +1569,84 @@ export async function saveASRS18Entry(entry: ASRS18Entry): Promise<void> {
 export async function deleteASRS18Entry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM asrs18_entries WHERE id = ?', [id])
+}
+
+
+// ─── ChronoBio — Journal des ancrages quotidiens ─────────────────────────────
+
+export async function createChronoEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS chrono_entries (
+      id            TEXT PRIMARY KEY,
+      date          TEXT NOT NULL UNIQUE,
+      wake_time     TEXT,
+      first_meal    TEXT,
+      main_activity TEXT,
+      last_meal     TEXT,
+      bedtime       TEXT,
+      created_at    TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_chrono_entries_date ON chrono_entries(date);
+  `)
+}
+
+export interface ChronoEntry {
+  id: string
+  date: string               // 'YYYY-MM-DD'
+  wake_time: string | null   // 'HH:MM' ou null
+  first_meal: string | null
+  main_activity: string | null
+  last_meal: string | null
+  bedtime: string | null
+  created_at: string
+}
+
+export async function getChronoEntryByDate(date: string): Promise<ChronoEntry | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<ChronoEntry>(
+    'SELECT * FROM chrono_entries WHERE date = ?',
+    [date]
+  )
+  return row ?? null
+}
+
+export async function listChronoEntries(limit = 30): Promise<ChronoEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<ChronoEntry>(
+    'SELECT * FROM chrono_entries ORDER BY date DESC LIMIT ?',
+    [limit]
+  )
+}
+
+export async function getChronoEntriesForMonth(yearMonth: string): Promise<ChronoEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<ChronoEntry>(
+    'SELECT * FROM chrono_entries WHERE date LIKE ? ORDER BY date ASC',
+    [`${yearMonth}-%`]
+  )
+}
+
+export async function saveChronoEntry(entry: ChronoEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO chrono_entries
+       (id, date, wake_time, first_meal, main_activity, last_meal, bedtime, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      entry.date,
+      entry.wake_time ?? null,
+      entry.first_meal ?? null,
+      entry.main_activity ?? null,
+      entry.last_meal ?? null,
+      entry.bedtime ?? null,
+      entry.created_at,
+    ]
+  )
+}
+
+export async function deleteChronoEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM chrono_entries WHERE id = ?', [id])
 }
 
