@@ -35,7 +35,6 @@ const MODULE_CONFIG: Record<
   distress_tolerance:       { icon: 'shield-half-full',          available: false },
   medication_side_effects:  { icon: 'pill',                      available: true  },
   medication_adherence:     { icon: 'calendar-check-outline',    available: true  },
-  psychoeducation:          { icon: 'book-open-page-variant',    available: true  },
   sleep_diary:              { icon: 'weather-night',             available: true  },
   psyedu_sleep:             { icon: 'moon-waning-crescent',      available: true  },
   psyedu_nutrition:         { icon: 'food-apple-outline',        available: true  },
@@ -46,7 +45,7 @@ const MODULE_CONFIG: Record<
   emotion_wheel:            { icon: 'palette',                   available: true  },
   behavioral_activation:    { icon: 'run-fast',                  available: true  },
   beck_columns:             { icon: 'brain',                     available: true  },
-  cognitive_distortions:    { icon: 'head-cog-outline',          available: false },
+  cognitive_distortions:    { icon: 'head-cog-outline',          available: true  },
   grounding:                { icon: 'hand-heart-outline',        available: true  },
   rim:                      { icon: 'waves',                     available: true  },
   fear_thermometer:         { icon: 'thermometer',               available: true  },
@@ -247,7 +246,6 @@ export default function HomeScreen() {
     const routes: Record<string, keyof AppStackParamList> = {
       sleep_diary:             'SleepDiary',
       crisis_plan:             'CrisisPlan',
-      psychoeducation:         'Psychoeducation',
       decisional_balance:      'DecisionalBalance',
       beck_columns:            'BeckColumns',
       mood_tracker:            'MoodTracker',
@@ -271,7 +269,7 @@ export default function HomeScreen() {
       asrs18:                  'ASRS18',
       diet_weight_psycho:      'DietWeightPsycho',
     }
-    if (['psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity'].includes(moduleType)) {
+    if (['psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity', 'cognitive_distortions'].includes(moduleType)) {
       navigation.navigate('PsyEduModule', { moduleKey: moduleType })
       return
     }

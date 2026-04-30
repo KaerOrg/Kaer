@@ -96,10 +96,6 @@
       "title": "What I really feel",
       "intro": "Explore and put words to what you're feeling."
     },
-    "psychoeducation": {
-      "title": "Understanding my mental health",
-      "intro": "Read these cards to better understand what you're going through."
-    },
     "phq9": {
       "new_btn": "Fill in the questionnaire",
       "empty_title": "Nothing yet",

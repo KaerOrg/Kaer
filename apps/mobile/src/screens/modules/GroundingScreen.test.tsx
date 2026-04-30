@@ -2,6 +2,12 @@ jest.mock('../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
+const mockNavigate = jest.fn()
+
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate }),
+}))
+
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { Linking } from 'react-native'
@@ -167,7 +173,7 @@ describe('GroundingScreen', () => {
   it('revient en mode intro après avoir appuyé sur Arrêter', () => {
     render(<GroundingScreen />)
     fireEvent.press(screen.getByTestId('start-button'))
-    fireEvent.press(screen.getByLabelText('Arrêter l\'exercice'))
+    fireEvent.press(screen.getByLabelText('Arrêter'))
     expect(screen.getByTestId('intro-card')).toBeTruthy()
   })
 
@@ -175,13 +181,13 @@ describe('GroundingScreen', () => {
 
   it('appelle le 3114 quand on appuie sur le bouton urgence', () => {
     render(<GroundingScreen />)
-    fireEvent.press(screen.getByLabelText('Appeler le 3114, numéro national de prévention du suicide'))
+    fireEvent.press(screen.getByLabelText('3114 — Numéro national prévention suicide'))
     expect(Linking.openURL).toHaveBeenCalledWith('tel:3114')
   })
 
   it('appelle le 15 quand on appuie sur SAMU', () => {
     render(<GroundingScreen />)
-    fireEvent.press(screen.getByLabelText('Appeler le SAMU, le 15'))
+    fireEvent.press(screen.getByLabelText('15 — SAMU'))
     expect(Linking.openURL).toHaveBeenCalledWith('tel:15')
   })
 })

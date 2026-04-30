@@ -6,7 +6,6 @@ export type ModuleType =
   // Surveillance Iatrogénique & Somatique
   | 'medication_side_effects'
   | 'medication_adherence'
-  | 'psychoeducation'
   // Hygiène de Vie & Rythmes Biologiques
   | 'sleep_diary'
   | 'psyedu_sleep'
@@ -237,7 +236,6 @@ export const MODULE_LABELS: Record<ModuleType, string> = {
   // Surveillance Iatrogénique & Somatique
   medication_side_effects: 'Thermomètre de tolérance aux psychotropes',
   medication_adherence: 'Module Observance',
-  psychoeducation: 'Psychoéducation',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Agenda du sommeil',
   psyedu_sleep: 'Sommeil & récupération',
@@ -283,7 +281,6 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   // Surveillance Iatrogénique & Somatique
   medication_side_effects: 'Jauges d\'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.',
   medication_adherence: 'Auto-rapport hebdomadaire d\'observance du traitement médicamenteux.',
-  psychoeducation: 'Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.',
   // Hygiène de Vie & Rythmes Biologiques
   sleep_diary: 'Suivi quotidien du sommeil : heure de coucher, lever, efficacité.',
   psyedu_sleep: 'Fiches psychoéducatives sur le sommeil, la chronobiologie et la récupération psychiatrique.',
@@ -321,44 +318,3 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   asrs18: 'Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l\'ASRS v1.1). Score total 0–72.',
 }
 
-// Métadonnées des cartes disponibles (contenu Markdown côté mobile uniquement)
-export interface PsychoCardMeta {
-  id: string
-  title: string
-  description: string
-}
-
-export const PSYCHO_CARD_CATALOG: PsychoCardMeta[] = [
-  {
-    id: 'card_sleep_01',
-    title: "Règles d'hygiène du sommeil",
-    description: '10 conseils pour améliorer la qualité du sommeil',
-  },
-  {
-    id: 'card_grounding_01',
-    title: "Technique d'ancrage 5-4-3-2-1",
-    description: "Revenir au moment présent en cas d'anxiété ou de dissociation",
-  },
-  {
-    id: 'card_cbt_01',
-    title: 'Identifier les distorsions cognitives',
-    description: 'Reconnaître les pièges de la pensée automatique (TCC)',
-  },
-  {
-    id: 'card_medication_appetite_01',
-    title: 'Traitements et Appétit : Reprendre le contrôle',
-    description: 'Comprendre et gérer la faim liée aux traitements',
-  },
-  {
-    id: 'card_medication_lithium_01',
-    title: 'Lithium : Hydratation et règles de sécurité',
-    description: 'Les 3 règles essentielles pour rester en sécurité sous Lithium',
-  },
-]
-
-// Entrée d'observance pour une carte (miroir du type côté mobile et shared)
-export interface PsychoeducationCardEntry {
-  card_id: string
-  is_read: boolean
-  unlocked_at: string // ISO 8601
-}

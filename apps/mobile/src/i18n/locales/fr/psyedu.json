@@ -8,6 +8,33 @@
     "sleep_chrono": {
       "title": "Le sommeil et la récupération",
       "summary": "Chronobiologie, écrans et rythmes biologiques pour mieux récupérer"
+    },
+    "sleep_hygiene_rules": {
+      "title": "Règles d'hygiène du sommeil",
+      "summary": "10 repères pratiques pour améliorer la qualité de votre sommeil",
+      "why": {
+        "p1": "Un sommeil de qualité repose sur des habitudes régulières. Le cerveau a besoin de **signaux stables** pour synchroniser son horloge biologique.",
+        "p2": "La **régularité** — surtout l'heure de lever — est le pilier le plus efficace. Elle synchronise le rythme circadien mieux que n'importe quelle autre intervention.",
+        "tip1": "Ces repères sont issus des recommandations de la HAS et de l'INSV. Parlez à votre soignant si vous avez des difficultés persistantes avec le sommeil."
+      },
+      "how": {
+        "intro": "Choisissez une ou deux règles à mettre en place cette semaine. Progressivement, pas tout d'un coup.",
+        "item1": "Se lever à la même heure chaque matin, y compris le week-end",
+        "item2": "S'exposer à la lumière naturelle dans les 30 minutes après le réveil",
+        "item3": "Réduire les lumières 1 à 2 heures avant le coucher",
+        "item4": "Éteindre les écrans 30 minutes avant de dormir",
+        "item5": "Garder la chambre entre 16 °C et 18 °C",
+        "item6": "Éviter la caféine après 14h (café, thé, sodas)",
+        "item7": "Éviter l'alcool — il perturbe le sommeil profond",
+        "item8": "Utiliser le lit uniquement pour dormir",
+        "item9": "Créer un rituel apaisant avant de se coucher (lecture, respiration lente…)",
+        "item10": "Se lever après 20 minutes d'insomnie, faire une activité calme, puis revenir au lit",
+        "tip1": "Si vous faites la sieste, limitez-la à 20 minutes avant 14h."
+      },
+      "sources": {
+        "s1": "HAS (2017) — Prise en charge des troubles du sommeil",
+        "s2": "INSV — Institut National du Sommeil et de la Vigilance"
+      }
     }
   },
   "psyedu_nutrition": {
@@ -229,6 +256,38 @@
       "sources": {
         "s1": "ANSM — RCP lithium, valproate, lamotrigine, carbamazépine",
         "s2": "Gitlin M (2016) — Lithium side effects and toxicity — International Journal of Bipolar Disorders"
+      }
+    }
+  },
+  "cognitive_distortions": {
+    "cog_distortions_intro": {
+      "title": "Les distorsions cognitives",
+      "summary": "Reconnaître les 10 pièges de la pensée automatique",
+      "why": {
+        "p1": "Les **distorsions cognitives** sont des façons automatiques et déformées d'interpréter la réalité. Elles sont présentes chez tout le monde — mais peuvent s'intensifier en période de stress ou de détresse.",
+        "p2": "Les reconnaître est la **première étape** pour modifier leur influence. Ce travail est au cœur de la **Thérapie Cognitive et Comportementale (TCC)**, développée par Aaron Beck.",
+        "tip1": "Les 10 distorsions les plus courantes :",
+        "d1": "**Pensée tout-ou-rien** — voir les choses en noir ou blanc, sans nuance. *« Si je ne réussis pas parfaitement, je suis un raté. »*",
+        "d2": "**Surgénéralisation** — un échec devient une règle universelle. *« J'ai échoué une fois → j'échoue toujours. »*",
+        "d3": "**Filtre mental** — ne retenir que les aspects négatifs d'une situation.",
+        "d4": "**Disqualification du positif** — les expériences positives « ne comptent pas ».",
+        "d5": "**Lecture de pensée** — supposer savoir ce que les autres pensent. *« Il ne m'a pas répondu, il est énervé contre moi. »*",
+        "d6": "**Prédiction négative** — anticiper que les choses vont mal se passer.",
+        "d7": "**Catastrophisation** — exagérer l'importance d'un problème.",
+        "d8": "**Raisonnement émotionnel** — confondre une émotion avec une réalité. *« Je me sens incompétent(e), donc je le suis. »*",
+        "d9": "**Les « il faut / je dois »** — des règles rigides envers soi-même ou les autres.",
+        "d10": "**Étiquetage** — s'assigner une identité négative globale. *« J'ai fait une erreur → je suis nul(le). »*"
+      },
+      "how": {
+        "p1": "Quand vous ressentez une émotion intense, posez-vous ces trois questions :",
+        "step1": "Quelle pensée automatique est apparue ?",
+        "step2": "Cette pensée correspond-elle à une distorsion de la liste ?",
+        "step3": "Quelle serait une façon plus réaliste et nuancée de voir la situation ?",
+        "bq1": "Votre soignant peut vous accompagner dans ce travail, notamment avec les Colonnes de Beck."
+      },
+      "sources": {
+        "s1": "Beck AT (1979) — Cognitive Therapy of Depression — Guilford Press",
+        "s2": "Burns DD (1980) — Feeling Good: The New Mood Therapy — Harper Collins"
       }
     }
   }

@@ -148,13 +148,6 @@
       "notes_placeholder": "E.g.: missed dose, difficulty, note…",
       "empty_history": "No entries yet."
     },
-    "psychoeducation": {
-      "label": "Psychoeducation",
-      "description": "Knowledge cards about your mental health",
-      "title": "Psychoeducation",
-      "intro": "Browse your knowledge cards.",
-      "cards_progress": "{{read}}/{{total}} cards read"
-    },
     "sleep_diary": {
       "label": "Sleep diary",
       "description": "Log your sleep every morning",
@@ -411,6 +404,6 @@
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first ASRS v1.1 Full Assessment."
-    },
+    }
   }
 }

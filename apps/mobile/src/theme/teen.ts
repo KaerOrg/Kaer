@@ -8,7 +8,6 @@ export const TEEN_MODULE_COLORS: Record<string, string> = {
   // Surveillance & Somatique → violet moyen
   medication_side_effects:  '#8B5CF6',
   medication_adherence:     '#8B5CF6',
-  psychoeducation:          '#8B5CF6',
   // Hygiène de vie → bleu-cyan
   sleep_diary:              '#06B6D4',
   diet_weight_psycho:       '#06B6D4',

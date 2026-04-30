@@ -14,10 +14,8 @@ import { StatusBadge } from '../components/StatusBadge'
 import {
   MODULE_LABELS,
   MODULE_DESCRIPTIONS,
-  PSYCHO_CARD_CATALOG,
   type ModuleType,
   type PatientModule,
-  type PsychoeducationCardEntry,
 } from '../lib/database.types'
 import {
   MODULE_PREVIEW,
@@ -57,7 +55,7 @@ const MODULE_CATEGORIES: ModuleCategory[] = [
     id: 'iatrogenic',
     labelKey: 'patient.cat_iatrogenic_label',
     subtitleKey: 'patient.cat_iatrogenic_subtitle',
-    modules: ['medication_side_effects', 'medication_adherence', 'psychoeducation'],
+    modules: ['medication_side_effects', 'medication_adherence'],
   },
   {
     id: 'lifestyle',
@@ -91,12 +89,6 @@ const MODULE_CATEGORIES: ModuleCategory[] = [
   },
 ]
 
-// ─── Helpers psychoéducation ─────────────────────────────────────────────────
-
-function getPsychoCards(mod: PatientModule): PsychoeducationCardEntry[] {
-  const config = mod.config as { unlocked_cards?: PsychoeducationCardEntry[] }
-  return config?.unlocked_cards ?? []
-}
 
 // ─── Composant ───────────────────────────────────────────────────────────────
 
@@ -122,11 +114,6 @@ export function PatientPage() {
     setPreviewModule(prev => (prev === type ? null : type))
     setExpandedPreviewCard(null)
   }, [])
-
-  const [psychoPickerMode, setPsychoPickerMode] = useState<'off' | 'unlock' | 'edit'>('off')
-  const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set())
-  const [savingPsycho, setSavingPsycho] = useState(false)
-  const [psychoError, setPsychoError] = useState<string | null>(null)
 
   const [showDietSources, setShowDietSources] = useState(false)
 
@@ -216,86 +203,6 @@ export function PatientPage() {
     setTogglingTeen(false)
   }
 
-  // ── Psychoéducation : sélecteur de cartes ────────────────────────────────
-
-  const psychoModule = modules.find(m => m.module_type === 'psychoeducation')
-
-  const openPsychoPicker = (mode: 'unlock' | 'edit') => {
-    setPsychoError(null)
-    if (mode === 'edit' && psychoModule) {
-      setSelectedCardIds(new Set(getPsychoCards(psychoModule).map(c => c.card_id)))
-    } else {
-      setSelectedCardIds(new Set(PSYCHO_CARD_CATALOG.map(c => c.id)))
-    }
-    setPsychoPickerMode(mode)
-  }
-
-  const toggleCard = (cardId: string) => {
-    setSelectedCardIds(prev => {
-      const next = new Set(prev)
-      next.has(cardId) ? next.delete(cardId) : next.add(cardId)
-      return next
-    })
-  }
-
-  const confirmPsycho = async () => {
-    if (!id || !practitioner) return
-    if (selectedCardIds.size === 0) {
-      setPsychoError(t('patient.psycho_pick_error'))
-      return
-    }
-
-    setSavingPsycho(true)
-    setPsychoError(null)
-    const now = new Date().toISOString()
-
-    if (psychoPickerMode === 'unlock') {
-      const cards: PsychoeducationCardEntry[] = [...selectedCardIds].map(card_id => ({
-        card_id,
-        is_read: false,
-        unlocked_at: now,
-      }))
-      const psychoInsert: Database['public']['Tables']['patient_modules']['Insert'] = {
-        patient_id: id, practitioner_id: practitioner.id, module_type: 'psychoeducation',
-        config: { unlocked_cards: cards } as Record<string, unknown>,
-      }
-      const { error } = await supabase.from('patient_modules').insert(psychoInsert)
-      if (error) {
-        setPsychoError(t('patient.psycho_error_unlock'))
-        setSavingPsycho(false)
-        return
-      }
-    } else if (psychoPickerMode === 'edit' && psychoModule) {
-      const existingById: Record<string, PsychoeducationCardEntry> = Object.fromEntries(
-        getPsychoCards(psychoModule).map(c => [c.card_id, c])
-      )
-      const cards: PsychoeducationCardEntry[] = [...selectedCardIds].map(card_id =>
-        existingById[card_id] ?? { card_id, is_read: false, unlocked_at: now }
-      )
-      const psychoUpdate: Database['public']['Tables']['patient_modules']['Update'] = {
-        config: { unlocked_cards: cards } as Record<string, unknown>,
-      }
-      const { error } = await supabase
-        .from('patient_modules')
-        .update(psychoUpdate)
-        .eq('id', psychoModule.id)
-      if (error) {
-        setPsychoError(t('patient.psycho_error_update'))
-        setSavingPsycho(false)
-        return
-      }
-    }
-
-    setSavingPsycho(false)
-    setPsychoPickerMode('off')
-    await loadPatient()
-  }
-
-  const cancelPsychoPicker = () => {
-    setPsychoPickerMode('off')
-    setPsychoError(null)
-  }
-
   // ── RIM : éditeur de scénarios ──────────────────────────────────────────
 
   const rimModule = modules.find(m => m.module_type === 'rim')
@@ -349,13 +256,6 @@ export function PatientPage() {
     setRimEditorMode('off')
     await loadPatient()
   }
-
-  // ── Radar ────────────────────────────────────────────────────────────────
-
-  const unreadPsychoCards = psychoModule
-    ? getPsychoCards(psychoModule).filter(c => !c.is_read).length
-    : 0
-  const totalPsychoCards = psychoModule ? getPsychoCards(psychoModule).length : 0
 
   // ── Rendu du panneau d'aperçu ────────────────────────────────────────────
 
@@ -462,148 +362,6 @@ export function PatientPage() {
   const renderModuleCard = (moduleType: ModuleType) => {
     const mod = modules.find(m => m.module_type === moduleType)
     const unlocked = !!mod
-
-    if (moduleType === 'psychoeducation') {
-      const cards = mod ? getPsychoCards(mod) : []
-      const readCount = cards.filter(c => c.is_read).length
-
-      return (
-        <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
-          <Card
-            state={unlocked ? 'active' : undefined}
-            header={{ title: MODULE_LABELS['psychoeducation'], subtitle: MODULE_DESCRIPTIONS['psychoeducation'] }}
-            actions={
-              <>
-                {MODULE_PREVIEW['psychoeducation'] && (
-                  <button
-                    className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
-                    onClick={() => togglePreview('psychoeducation')}
-                    title={t('patient.patient_view')}
-                  >
-                    {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
-                    {t('patient.preview_button')}
-                  </button>
-                )}
-                {unlocked && mod ? (
-                  <>
-                    <StatusBadge variant="success" label={t('patient.active_badge')} />
-                    {psychoPickerMode !== 'edit' && (
-                      <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
-                        {t('patient.psycho_edit_cards')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="module-card__revoke"
-                      onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
-                    >
-                      {t('patient.revoke_button')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
-                    }
-                  >
-                    {psychoPickerMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
-                  </Button>
-                )}
-              </>
-            }
-          >
-            {unlocked && mod && (
-              <>
-                <div className="module-card__date">
-                  {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-                  {' · '}
-                  <span className="psycho-observance-summary">
-                    {cards.length === 1
-                      ? t('patient.psycho_read_count', { read: readCount, total: cards.length })
-                      : t('patient.psycho_read_count_plural', { read: readCount, total: cards.length })}
-                  </span>
-                </div>
-                {cards.length > 0 && (
-                  <ul className="psycho-observance-list">
-                    {cards.map(card => {
-                      const meta = PSYCHO_CARD_CATALOG.find(c => c.id === card.card_id)
-                      return (
-                        <li key={card.card_id} className="psycho-observance-item">
-                          <span className="psycho-observance-item__title">
-                            {meta?.title ?? card.card_id}
-                          </span>
-                          {card.is_read
-                            ? <StatusBadge variant="success" label="Lu" />
-                            : <StatusBadge variant="neutral" label="Non lu" />
-                          }
-                        </li>
-                      )
-                    })}
-                  </ul>
-                )}
-              </>
-            )}
-          </Card>
-
-          {previewModule === 'psychoeducation' && (() => {
-            const mp = getModulePreview('psychoeducation', teenMode)
-            if (!mp) return null
-            return (
-              <div className="preview-panel" style={{ borderTopColor: mp.accentColor }}>
-                <div className="preview-panel__header" style={{ color: mp.accentColor }}>
-                  <Eye size={14} />
-                  {t('patient.patient_view')}
-                </div>
-                {renderPreviewPanel(mp.preview)}
-              </div>
-            )
-          })()}
-
-          {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
-            <div className={`psycho-card-picker ${psychoPickerMode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
-              <p className="psycho-card-picker__label">
-                {psychoPickerMode === 'unlock'
-                  ? t('patient.psycho_pick_unlock')
-                  : t('patient.psycho_pick_edit')}
-              </p>
-              <ul className="psycho-card-picker__list">
-                {PSYCHO_CARD_CATALOG.map(card => (
-                  <li key={card.id} className="psycho-card-option">
-                    <label className="psycho-card-option__label">
-                      <input
-                        type="checkbox"
-                        className="psycho-card-option__checkbox"
-                        checked={selectedCardIds.has(card.id)}
-                        onChange={() => toggleCard(card.id)}
-                      />
-                      <div>
-                        <div className="psycho-card-option__title">{card.title}</div>
-                        <div className="psycho-card-option__desc">{card.description}</div>
-                      </div>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              {psychoError && <p className="psycho-card-picker__error">{psychoError}</p>}
-              <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={savingPsycho} onClick={confirmPsycho}>
-                  {psychoPickerMode === 'unlock'
-                    ? (selectedCardIds.size === 1
-                        ? t('patient.psycho_unlock_btn', { count: selectedCardIds.size })
-                        : t('patient.psycho_unlock_btn_plural', { count: selectedCardIds.size }))
-                    : t('patient.psycho_save_btn')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={cancelPsychoPicker}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      )
-    }
 
     if (moduleType === 'rim') {
       const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
@@ -927,18 +685,12 @@ export function PatientPage() {
                   {isUnlocked('crisis_plan') && (
                     <StatusBadge variant="info" label={MODULE_LABELS['crisis_plan']} value={t('patient.active_badge')} />
                   )}
-                  {psychoModule && (
-                    <StatusBadge
-                      variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
-                      label={MODULE_LABELS['psychoeducation']}
-                      value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards}`}
-                    />
-                  )}
+
                   {isUnlocked('sleep_diary') && (
                     <StatusBadge variant="info" label={MODULE_LABELS['sleep_diary']} value={t('patient.active_badge')} />
                   )}
                   {modules
-                    .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
+                    .filter(m => !['crisis_plan', 'sleep_diary'].includes(m.module_type))
                     .map(m => (
                       <StatusBadge key={m.id} variant="info" label={MODULE_LABELS[m.module_type]} value={t('patient.active_badge')} />
                     ))}

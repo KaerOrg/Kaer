@@ -146,13 +146,6 @@
       "notes_placeholder": "Z.B.: vergessen, Schwierigkeit, Anmerkung…",
       "empty_history": "Noch keine Einträge."
     },
-    "psychoeducation": {
-      "label": "Psychoedukation",
-      "description": "Wissenskarten über Ihre psychische Gesundheit",
-      "title": "Psychoedukation",
-      "intro": "Lesen Sie Ihre Wissenskarten.",
-      "cards_progress": "{{read}}/{{total}} Karten gelesen"
-    },
     "sleep_diary": {
       "label": "Schlaftagebuch",
       "description": "Erfassen Sie Ihren Schlaf jeden Morgen",

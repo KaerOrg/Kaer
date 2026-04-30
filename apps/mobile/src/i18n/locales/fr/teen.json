@@ -96,10 +96,6 @@
       "title": "Ce que je ressens vraiment",
       "intro": "Explore et mets des mots sur ce que tu ressens."
     },
-    "psychoeducation": {
-      "title": "Comprendre ma santé mentale",
-      "intro": "Lis ces fiches pour mieux comprendre ce que tu vis."
-    },
     "phq9": {
       "new_btn": "Remplir le questionnaire",
       "empty_title": "Rien pour l'instant",

@@ -9,10 +9,15 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
+import { AppStackParamList } from '../../navigation/AppStack'
+
+type Nav = NativeStackNavigationProp<AppStackParamList>
 
 // ─── Données cliniques ────────────────────────────────────────────────────────
 //
@@ -83,6 +88,7 @@ type Mode = 'intro' | 'guided' | 'done'
 export default function GroundingScreen() {
   const { t } = useTranslation()
   const { tt, teenColor } = useTeen()
+  const navigation = useNavigation<Nav>()
   const [mode, setMode] = useState<Mode>('intro')
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -149,6 +155,19 @@ export default function GroundingScreen() {
             <MaterialCommunityIcons name="information-outline" size={16} color={colors.textMuted} />
             <Text style={styles.noteText}>{t('modules.grounding.clinical_note')}</Text>
           </View>
+
+          {/* Bouton éducatif */}
+          <TouchableOpacity
+            style={styles.learnBtn}
+            onPress={() => navigation.navigate('GroundingLearn')}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel={t('modules.grounding.learn_btn')}
+            testID="learn-button"
+          >
+            <MaterialCommunityIcons name="lightbulb-outline" size={18} color={colors.primary} />
+            <Text style={styles.learnBtnText}>{t('modules.grounding.learn_btn')}</Text>
+          </TouchableOpacity>
 
           {/* Bouton démarrer */}
           <TouchableOpacity
@@ -388,6 +407,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     lineHeight: 18,
+  },
+
+  // ── Bouton éducatif
+  learnBtn: {
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryLight,
+  },
+  learnBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.primary,
   },
 
   // ── Bouton démarrer

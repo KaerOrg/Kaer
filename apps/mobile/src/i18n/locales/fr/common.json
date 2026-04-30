@@ -196,20 +196,6 @@
       "notes_placeholder": "Ex : oubli, difficulté, remarque…",
       "empty_history": "Aucune saisie pour l'instant."
     },
-    "psychoeducation": {
-      "label": "Psychoéducation",
-      "description": "Cartes de savoir sur votre santé mentale",
-      "title": "Psychoéducation",
-      "intro": "Consultez vos fiches de savoir.",
-      "empty_title": "Aucune carte disponible",
-      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
-      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
-      "mark_as_read": "J'ai lu et compris",
-      "already_read": "Lu et compris",
-      "read_error": "Une erreur est survenue. Veuillez réessayer.",
-      "content_not_found": "Contenu introuvable.",
-      "cards_progress": "{{read}}/{{total}} cartes lues"
-    },
     "sleep_diary": {
       "label": "Agenda du sommeil",
       "description": "Notez votre sommeil chaque matin",
@@ -421,7 +407,9 @@
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",
-      "description": "Identifier les pièges de la pensée automatique"
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
     },
     "grounding": {
       "label": "Techniques d'ancrage",
@@ -461,7 +449,23 @@
       "step_smell_tip": "Ex. l'air ambiant, votre peau, un tissu. Si rien, imaginez une odeur apaisante.",
       "step_taste_sense": "Goûter",
       "step_taste_instruction": "Prenez conscience d'1 goût dans votre bouche.",
-      "step_taste_tip": "Ex. le goût de votre salive, d'une boisson ou d'un aliment récent."
+      "step_taste_tip": "Ex. le goût de votre salive, d'une boisson ou d'un aliment récent.",
+      "learn_btn": "Comprendre cette technique",
+      "learn_title": "Pourquoi ça fonctionne ?",
+      "learn_what_title": "Qu'est-ce que l'ancrage 5-4-3-2-1 ?",
+      "learn_what_p1": "C'est un **frein d'urgence** pour le cerveau. Cette technique utilise vos **cinq sens** pour forcer votre système nerveux à revenir dans l'instant présent.",
+      "learn_what_p2": "Elle est particulièrement efficace en cas d'anxiété intense, de pensées envahissantes, de flashback ou de sensation de dissociation.",
+      "learn_when_title": "Quand l'utiliser ?",
+      "learn_when_1": "Lors d'une montée d'angoisse",
+      "learn_when_2": "Quand les pensées s'emballent ou deviennent envahissantes",
+      "learn_when_3": "Lors d'un flashback ou d'une dissociation",
+      "learn_when_4": "Pour se recentrer avant un moment stressant",
+      "learn_why_title": "Pourquoi ça marche ?",
+      "learn_why_p1": "En mobilisant les cinq sens simultanément, vous obligez votre cerveau à traiter des informations concrètes et immédiates. Cette surcharge sensorielle interrompt le circuit des pensées automatiques.",
+      "learn_why_p2": "Cette technique mobilise le cortex préfrontal — la zone de la pensée rationnelle — et diminue l'activité de l'amygdale, responsable de la réponse de peur.",
+      "learn_practice_title": "Comment progresser ?",
+      "learn_practice_p1": "La technique demande un peu de pratique pour devenir automatique. L'idéal est de s'entraîner **avant** les moments de crise, afin qu'elle soit disponible quand vous en avez vraiment besoin.",
+      "learn_ref": "Référence : Linehan MM (1993) — DBT Skills Training. Grade B — recommandé par la HAS et le NICE pour la gestion de l'anxiété et des états dissociatifs."
     },
     "rim": {
       "label": "RIM – Imagerie mentale",

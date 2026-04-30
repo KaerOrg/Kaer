@@ -34,7 +34,7 @@ describe('teenColorFor()', () => {
   it('couvre tous les modules actifs disponibles', () => {
     const activeModules = [
       'crisis_plan', 'medication_side_effects', 'medication_adherence',
-      'psychoeducation', 'sleep_diary', 'mood_tracker', 'emotion_wheel',
+      'sleep_diary', 'mood_tracker', 'emotion_wheel',
       'behavioral_activation', 'beck_columns', 'grounding', 'rim',
       'fear_thermometer', 'breathing_techniques', 'cognitive_saturation',
       'decisional_balance',

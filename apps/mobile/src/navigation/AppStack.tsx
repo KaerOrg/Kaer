@@ -8,8 +8,6 @@ import SleepDiaryScreen from '../screens/modules/SleepDiaryScreen'
 import SleepDiaryEntryScreen from '../screens/modules/SleepDiaryEntryScreen'
 import SleepDiaryMonthScreen from '../screens/modules/SleepDiaryMonthScreen'
 import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
-import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
-import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
 import BeckColumnsScreen from '../screens/modules/BeckColumnsScreen'
 import BeckEntryScreen from '../screens/modules/BeckEntryScreen'
@@ -24,6 +22,7 @@ import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScr
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import RimScreen from '../screens/modules/RimScreen'
 import GroundingScreen from '../screens/modules/GroundingScreen'
+import GroundingLearnScreen from '../screens/modules/GroundingLearnScreen'
 import CognitiveSaturationScreen from '../screens/modules/CognitiveSaturationScreen'
 import CognitiveSaturationExerciseScreen from '../screens/modules/CognitiveSaturationExerciseScreen'
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
@@ -63,8 +62,6 @@ export type AppStackParamList = {
   SleepDiaryEntry: { date?: string }
   SleepDiaryMonth: undefined
   CrisisPlan: undefined
-  Psychoeducation: undefined
-  CardDetail: { cardId: string; isRead: boolean }
   DecisionalBalance: undefined
   BeckColumns: undefined
   BeckEntry: { recordId?: string }
@@ -79,6 +76,7 @@ export type AppStackParamList = {
   BreathingExercise: { techniqueKey: string }
   Rim: undefined
   Grounding: undefined
+  GroundingLearn: undefined
   CognitiveSaturation: undefined
   CognitiveSaturationExercise: undefined
   EmotionWheel: undefined
@@ -173,20 +171,6 @@ export default function AppStack() {
         options={{ title: 'Plan de crise' }}
       />
       <Stack.Screen
-        name="Psychoeducation"
-        component={PsychoeducationScreen}
-        options={{ title: 'Psychoéducation' }}
-      />
-      <Stack.Screen
-        name="CardDetail"
-        component={CardDetailScreen}
-        options={({ route }) => ({
-          title: route.params.cardId
-            ? (require('../constants/psychoeducationCards').PSYCHOEDUCATION_CARDS[route.params.cardId]?.title ?? 'Carte')
-            : 'Carte',
-        })}
-      />
-      <Stack.Screen
         name="DecisionalBalance"
         component={DecisionalBalanceScreen}
         options={{ title: 'Balance décisionnelle' }}
@@ -263,6 +247,11 @@ export default function AppStack() {
         name="Grounding"
         component={GroundingScreen}
         options={{ title: 'Ancrage 5-4-3-2-1' }}
+      />
+      <Stack.Screen
+        name="GroundingLearn"
+        component={GroundingLearnScreen}
+        options={{ title: 'Pourquoi ça fonctionne ?' }}
       />
       <Stack.Screen
         name="CognitiveSaturation"
@@ -387,7 +376,9 @@ export default function AppStack() {
             ? 'Sommeil & récupération'
             : route.params.moduleKey === 'psyedu_nutrition'
             ? 'Alimentation & cerveau'
-            : 'Activité physique douce',
+            : route.params.moduleKey === 'psyedu_activity'
+            ? 'Activité physique douce'
+            : 'Distorsions cognitives',
         })}
       />
       <Stack.Screen

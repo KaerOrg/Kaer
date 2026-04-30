@@ -146,13 +146,6 @@
       "notes_placeholder": "Ex.: esquecimento, dificuldade, nota…",
       "empty_history": "Ainda sem registos."
     },
-    "psychoeducation": {
-      "label": "Psicoeducação",
-      "description": "Fichas de conhecimento sobre a sua saúde mental",
-      "title": "Psicoeducação",
-      "intro": "Consulte as suas fichas de conhecimento.",
-      "cards_progress": "{{read}}/{{total}} fichas lidas"
-    },
     "sleep_diary": {
       "label": "Diário do sono",
       "description": "Registe o seu sono todas as manhãs",
