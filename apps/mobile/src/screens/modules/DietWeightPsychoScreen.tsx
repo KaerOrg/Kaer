@@ -1,16 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  SectionList,
   Pressable,
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { Info, Pill, Zap, SmilePlus, HeartPulse, ChevronRight } from 'lucide-react-native'
+import {
+  Info, Pill, Zap, SmilePlus, HeartPulse,
+  Moon, Apple, Footprints,
+  ChevronRight,
+} from 'lucide-react-native'
 import i18next from 'i18next'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
@@ -21,10 +25,20 @@ import { colors, spacing, radius } from '../../theme'
 import type { PsyEduTopic } from 'shared'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
-
 type LucideIcon = React.ComponentType<{ size?: number; color?: string }>
 
-const LUCIDE_ICONS: Record<string, LucideIcon> = { Info, Pill, Zap, SmilePlus, HeartPulse }
+const LUCIDE_ICONS: Record<string, LucideIcon> = {
+  Info, Pill, Zap, SmilePlus, HeartPulse, Moon, Apple, Footprints,
+}
+
+const LIFESTYLE_KEYS = new Set(['sleep_chrono', 'nutrition_brain', 'gentle_activity'])
+
+interface Section {
+  title: string
+  data: PsyEduTopic[]
+}
+
+// ─── Composant : ligne topic ──────────────────────────────────────────────────
 
 interface TopicRowProps {
   topic: PsyEduTopic
@@ -52,6 +66,14 @@ const TopicRow = React.memo(function TopicRow({ topic, onPress }: TopicRowProps)
     </Pressable>
   )
 })
+
+// ─── Composant : en-tête de section ──────────────────────────────────────────
+
+const SectionHeader = React.memo(function SectionHeader({ title }: { title: string }) {
+  return <Text style={styles.sectionHeader}>{title}</Text>
+})
+
+// ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function DietWeightPsychoScreen() {
   const navigation = useNavigation<Nav>()
@@ -83,8 +105,21 @@ export default function DietWeightPsychoScreen() {
       const topicTitle = i18next.t(`diet_weight_psycho.${topic.topic_key}.title`, { ns: 'psyedu' })
       navigation.navigate('DietWeightPsychoDetail', { topicId: topic.id, topicTitle })
     },
-    [navigation]
+    [navigation],
   )
+
+  const sections = useMemo((): Section[] => {
+    const lifestyle = topics.filter(tp => LIFESTYLE_KEYS.has(tp.topic_key))
+    const medication = topics.filter(tp => !LIFESTYLE_KEYS.has(tp.topic_key))
+    const result: Section[] = []
+    if (lifestyle.length > 0) {
+      result.push({ title: t('modules.diet_weight_psycho.section_lifestyle'), data: lifestyle })
+    }
+    if (medication.length > 0) {
+      result.push({ title: t('modules.diet_weight_psycho.section_medication'), data: medication })
+    }
+    return result
+  }, [topics, t])
 
   if (loading) {
     return (
@@ -106,28 +141,20 @@ export default function DietWeightPsychoScreen() {
     )
   }
 
-  const count = topics.length
-
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <TeenAccent color={teenColor('diet_weight_psycho')} />
-      <FlatList
-        data={topics}
+      <SectionList
+        sections={sections}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={styles.heading}>{t('modules.diet_weight_psycho.label')}</Text>
-            <Text style={styles.subheading}>
-              {count === 1
-                ? t('modules.diet_weight_psycho.topics_count_one', { count })
-                : t('modules.diet_weight_psycho.topics_count_other', { count })}
-            </Text>
-          </View>
-        }
+        renderSectionHeader={({ section }) => (
+          <SectionHeader title={section.title} />
+        )}
         renderItem={({ item }) => (
           <TopicRow topic={item} onPress={() => handlePress(item)} />
         )}
+        stickySectionHeadersEnabled={false}
       />
     </SafeAreaView>
   )
@@ -136,10 +163,16 @@ export default function DietWeightPsychoScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
-  header: { marginBottom: spacing.md, marginTop: spacing.lg },
-  heading: { fontSize: 28, fontWeight: '700', color: colors.text },
-  subheading: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.md },
+  sectionHeader: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
+  },
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.lg,

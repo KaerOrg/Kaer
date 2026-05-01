@@ -103,6 +103,7 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, bouton info PubMed, SQLite local, tests Jest |
 | `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — 8 fiches psychoéducatives, contenu en base Supabase, rendu bloc par bloc, teen mode |
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — 7 fiches psyedu (zeitgebers, IPSRT, lumière, repas, rythme social, lever/coucher, perturbations) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets, teen mode |
+| `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — 6 fiches psyedu (intro, TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons) + onglet "En crise" (accordéon), bandeau disclaimer MDR, teen mode, 8 tests Jest |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -139,6 +140,7 @@ Les questionnaires suivent un pattern uniforme à 3 fichiers :
 - [x] Module ASRS v1.1 Bilan Complet (`asrs18`) — 18 items (Parties A+B), score 0-72 + sous-scores, bouton info PubMed, SQLite local, tests Jest
 - [x] Module Alimentation et psychotropes (`diet_weight_psycho`) — 8 fiches, contenu Supabase (psyedu_topics + psyedu_blocks), rendu bloc custom, teen mode, 10 tests Jest
 - [x] Module Régularité chronobiologique (`chronobiology_tracker`) — 7 fiches psyedu (Supabase) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets Fiches/Journal, teen mode, 8 tests Jest
+- [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale

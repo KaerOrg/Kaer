@@ -32,7 +32,7 @@ const MODULE_CONFIG: Record<
 > = {
   crisis_plan:              { icon: 'lifebuoy',                  available: true  },
   therapeutic_commitment:   { icon: 'handshake-outline',         available: false },
-  distress_tolerance:       { icon: 'shield-half-full',          available: false },
+  distress_tolerance:       { icon: 'shield-half-full',          available: true  },
   medication_side_effects:  { icon: 'pill',                      available: true  },
   medication_adherence:     { icon: 'calendar-check-outline',    available: true  },
   sleep_diary:              { icon: 'weather-night',             available: true  },
@@ -269,6 +269,7 @@ export default function HomeScreen() {
       asrs18:                  'ASRS18',
       diet_weight_psycho:      'DietWeightPsycho',
       chronobiology_tracker:   'ChronoBio',
+      distress_tolerance:      'DistressTolerance',
     }
     if (['psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity', 'cognitive_distortions'].includes(moduleType)) {
       navigation.navigate('PsyEduModule', { moduleKey: moduleType })

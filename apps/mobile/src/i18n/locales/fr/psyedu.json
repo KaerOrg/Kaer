@@ -412,6 +412,125 @@
       }
     }
   },
+  "distress_tolerance": {
+    "intro": {
+      "title": "Qu'est-ce que la tolérance à la détresse ?",
+      "summary": "Traverser une crise sans l'aggraver — les principes fondamentaux de la DBT",
+      "why": {
+        "p1": "La **tolérance à la détresse** est une compétence issue de la DBT (Thérapie Dialectique Comportementale), développée par Marsha Linehan. Elle repose sur une idée centrale : toute émotion intense est temporaire — elle finira par passer, comme une vague.",
+        "p2": "En situation de crise, l'impulsion est d'**agir immédiatement** pour faire cesser la douleur — souvent au prix de conséquences durables. Ces techniques permettent de **survivre à la vague** sans l'aggraver.",
+        "p3": "Ce n'est pas une technique de résolution de problème. Elle ne règle rien. Elle permet de **traverser** un moment insupportable sans prendre de décision irréversible.",
+        "tip1": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."
+      },
+      "how": {
+        "p1": "Ces techniques sont à **connaître avant la crise**, pas à découvrir pendant. C'est pourquoi votre soignant vous les a présentées en consultation.",
+        "p2": "En situation de détresse intense, le raisonnement est difficile. Votre cerveau a besoin de **routines déjà apprises** — pas de nouvelles informations à traiter.",
+        "item1": "Reconnaître le signal : « je suis en crise »",
+        "item2": "Choisir une technique que vous connaissez déjà",
+        "item3": "L'appliquer sans viser la guérison — juste traverser le moment"
+      },
+      "sources": {
+        "s1": "Linehan MM (1993) — Cognitive-Behavioral Treatment of Borderline Personality Disorder. Guilford Press.",
+        "s2": "Linehan MM (2015) — DBT Skills Training Manual, 2nd ed. Guilford Press."
+      }
+    },
+    "tipp": {
+      "title": "TIPP — Régulation physique rapide",
+      "summary": "Agir sur le corps pour calmer rapidement l'intensité émotionnelle",
+      "why": {
+        "p1": "En situation de crise aiguë, le système nerveux sympathique est activé : rythme cardiaque élevé, tension musculaire, hypervigilance. Ces techniques agissent **directement sur la physiologie** pour interrompre ce cycle.",
+        "p2": "**T — Température** : appliquer de l'eau froide sur le visage active le réflexe de plongée (*diving reflex*), qui ralentit mécaniquement la fréquence cardiaque.",
+        "p3": "**I — Exercice intense** : 30 secondes à 2 minutes d'effort physique intense brûle l'adrénaline en excès.",
+        "p4": "**P — Respiration rythmée** : expirer plus lentement qu'on inspire active le système nerveux parasympathique.",
+        "p5": "**P — Relaxation progressive** : contracter puis relâcher les groupes musculaires réduit la tension physique résiduelle.",
+        "tip1": "Ces techniques sont documentées dans le DBT Skills Training Manual (Linehan, 2015). Elles sont destinées aux situations de détresse intense, en complément de votre suivi."
+      },
+      "how": {
+        "p1": "**T — Température** : immergez votre visage dans un saladier d'eau froide 30 secondes, ou tenez des glaçons dans les mains.",
+        "p2": "**I — Exercice intense** : courez sur place, faites des pompes ou des jumping jacks pendant 1 à 2 minutes.",
+        "p3": "**P — Respiration** : inspirez 4 secondes, expirez 6 secondes. L'expiration doit être plus longue que l'inspiration.",
+        "p4": "**P — Relaxation musculaire** : contractez un groupe musculaire (poings, épaules, jambes) 5 secondes, relâchez complètement 10 secondes.",
+        "item1": "Choisissez **une seule** de ces quatre techniques en priorité",
+        "item2": "Appliquez-la pendant au moins 1 minute avant d'évaluer l'effet",
+        "item3": "Vous pouvez combiner T + P (eau froide + respiration lente)"
+      }
+    },
+    "accepts": {
+      "title": "ACCEPTS — Distraction structurée",
+      "summary": "Se distraire intentionnellement pour traverser une vague émotionnelle",
+      "why": {
+        "p1": "La distraction est souvent perçue comme un évitement. Dans le contexte de la tolérance à la détresse, elle a un **rôle stratégique** : elle permet au cerveau émotionnel de se désamorcer, sans fuir le problème définitivement.",
+        "p2": "ACCEPTS est un acronyme : **A**ctivities, **C**ontributing, **C**omparisons, **E**motions, **P**ushing away, **T**houghts, **S**ensations.",
+        "tip1": "Cette technique est utile pour les crises modérées. Pour les crises intenses avec impulsion de comportement à risque, préférez TIPP en premier."
+      },
+      "how": {
+        "p1": "**A — Activités** : faites une activité qui occupe entièrement votre attention (puzzle, dessin, jeu vidéo, sport).",
+        "p2": "**C — Contribution** : faites quelque chose pour quelqu'un d'autre (message à un ami, aide domestique). Cela déplace le focus de soi vers l'autre.",
+        "p3": "**C — Comparaisons** : pensez à des moments que vous avez traversés et qui semblaient insurmontables. Vous les avez vécus.",
+        "p4": "**E — Émotions contraires** : exposez-vous à quelque chose qui génère une émotion différente (film drôle, musique énergique).",
+        "p5": "**P — Repousser** (*Push away*) : imaginez mettre la situation dans une boîte et la refermer. Vous y reviendrez plus tard, pas maintenant.",
+        "p6": "**T — Pensées** : engagez votre esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
+        "p7": "**S — Sensations** : activez une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
+      }
+    },
+    "self_soothing": {
+      "title": "Self-soothing — Apaiser les 5 sens",
+      "summary": "Activer délibérément le confort sensoriel pour réduire l'intensité émotionnelle",
+      "why": {
+        "p1": "Les 5 sens (vue, ouïe, odorat, goût, toucher) ont un accès direct au système nerveux autonome. Des stimuli sensoriels apaisants peuvent **réduire l'activation émotionnelle** de façon rapide et non pharmacologique.",
+        "p2": "Cette technique est particulièrement utile pour les personnes ayant du mal à se calmer par le langage interne (raisonnement, discours intérieur). Elle court-circuite le cerveau émotionnel par la **voie sensorielle**.",
+        "tip1": "Préparez avec votre soignant une liste personnalisée de 2 à 3 ressources par sens. Ce qui apaise est très personnel."
+      },
+      "how": {
+        "p1": "**Vue** : regarder une photo apaisante, un paysage, une bougie, un aquarium, le ciel.",
+        "p2": "**Ouïe** : musique douce, sons de nature (pluie, mer), silence, voix familière.",
+        "p3": "**Odorat** : huile essentielle apaisante, café, boulangerie, savon préféré.",
+        "p4": "**Goût** : thé chaud, chocolat, quelque chose de savoureux et non culpabilisant.",
+        "p5": "**Toucher** : couverture chaude, douche chaude, peluche, animal de compagnie, pâte à modeler.",
+        "item1": "Préparez votre liste personnelle de ressources sensorielles avec votre soignant",
+        "item2": "En crise, activez au moins **deux sens différents** simultanément",
+        "item3": "Accordez-vous au moins 5 minutes — l'effet n'est pas immédiat"
+      }
+    },
+    "improve": {
+      "title": "IMPROVE — Ressources intérieures",
+      "summary": "Mobiliser ses ressources psychologiques et créatives en situation de crise",
+      "why": {
+        "p1": "IMPROVE est un acronyme : **I**magery, **M**eaning, **P**rayer/spirituality, **R**elaxation, **O**ne thing at a time, **V**acation, **E**ncouragement.",
+        "p2": "Ces techniques mobilisent des **ressources internes** — sens, valeurs, créativité — plutôt que des actions externes. Elles sont particulièrement utiles quand le contexte ne peut pas être changé.",
+        "tip1": "Toutes les composantes d'IMPROVE ne s'appliquent pas à tout le monde. Identifiez avec votre soignant celles qui correspondent à vos propres ressources."
+      },
+      "how": {
+        "p1": "**I — Imagerie** : imaginez un lieu sûr et ressourçant. Visualisez-le en détail — lumière, sons, textures.",
+        "p2": "**M — Sens** (*Meaning*) : cherchez une signification, même minime, dans la situation difficile.",
+        "p3": "**P — Spiritualité** : si vous avez une pratique spirituelle ou religieuse, mobilisez-la (prière, méditation, lecture).",
+        "p4": "**R — Relaxation** : respiration lente, relaxation musculaire progressive, scan corporel.",
+        "p5": "**O — Une chose à la fois** : réduisez votre champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
+        "p6": "**V — Vacance** : accordez-vous une courte trêve mentale — pas de résolution, pas de décision pendant les prochaines minutes.",
+        "p7": "**E — Encouragement** : dites-vous quelque chose de bienveillant — ce que vous diriez à un ami dans la même situation."
+      }
+    },
+    "pros_cons": {
+      "title": "Pros & cons — Avant d'agir",
+      "summary": "Évaluer les conséquences d'une action impulsive avant de la réaliser",
+      "why": {
+        "p1": "En situation de crise, l'impulsion de **faire quelque chose pour faire cesser la douleur** est intense. Cette technique ne supprime pas l'impulsion — elle crée un **espace de délibération** entre l'impulsion et l'action.",
+        "p2": "Elle repose sur une comparaison : les conséquences de **céder à l'impulsion** versus les conséquences de **tolérer la détresse** sans agir.",
+        "p3": "Elle est plus efficace quand elle est préparée **avant la crise**, en consultation — parce qu'en pleine crise, la capacité à raisonner est réduite.",
+        "tip1": "Votre soignant peut vous aider à construire votre propre grille pros/cons personnalisée dans un moment calme."
+      },
+      "how": {
+        "p1": "**Étape 1** : identifiez l'impulsion à agir (ce que vous avez envie de faire maintenant).",
+        "p2": "**Étape 2** : listez les avantages à court terme de céder à l'impulsion.",
+        "p3": "**Étape 3** : listez les inconvénients à long terme de céder à l'impulsion.",
+        "p4": "**Étape 4** : listez les avantages à long terme de tolérer la détresse sans agir.",
+        "p5": "**Étape 5** : pesez les deux colonnes. Quelle décision correspond le mieux à vos valeurs à long terme ?",
+        "item1": "Préparez cette grille en consultation, dans un moment calme",
+        "item2": "En crise, avoir la liste déjà écrite est plus utile qu'essayer de la construire",
+        "item3": "L'objectif n'est pas de ne jamais souffrir — c'est de ne pas aggraver la situation"
+      }
+    }
+  },
   "cognitive_distortions": {
     "cog_distortions_intro": {
       "title": "Les distorsions cognitives",

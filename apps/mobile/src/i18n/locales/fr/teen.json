@@ -10,6 +10,9 @@
     "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe."
   },
   "modules": {
+    "distress_tolerance": {
+      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique."
+    },
     "crisis_plan": {
       "title": "Mon plan si ça va pas",
       "subtitle": "Ce plan est là pour t'aider quand ça devient trop dur.",

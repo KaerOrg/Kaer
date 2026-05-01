@@ -277,7 +277,7 @@ export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
   // Sécurité & Gestion de Crise
   crisis_plan: 'Plan d\'action personnalisé pour les moments difficiles (Stanley & Brown).',
   therapeutic_commitment: 'Alliance thérapeutique : engagement à utiliser les ressources avant tout passage à l\'acte.',
-  distress_tolerance: 'Cartes d\'actions physiologiques d\'urgence inspirées de la TCD pour casser une crise aiguë.',
+  distress_tolerance: 'Support mémoriel de consultation — permet au patient de retrouver les techniques de tolérance à la détresse (DBT) travaillées en séance avec son soignant.',
   // Surveillance Iatrogénique & Somatique
   medication_side_effects: 'Jauges d\'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.',
   medication_adherence: 'Auto-rapport hebdomadaire d\'observance du traitement médicamenteux.',

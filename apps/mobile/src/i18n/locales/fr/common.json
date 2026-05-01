@@ -147,7 +147,11 @@
     },
     "distress_tolerance": {
       "label": "Tolérance à la détresse",
-      "description": "Techniques d'urgence pour traverser une crise"
+      "description": "Techniques d'urgence pour traverser une crise",
+      "tab_fiches": "Fiches",
+      "tab_crisis": "En crise",
+      "crisis_hint": "Appuyez sur une technique pour afficher les étapes.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."
     },
     "medication_side_effects": {
       "label": "Effets du traitement",
@@ -268,7 +272,9 @@
       "description": "",
       "topics_count_one": "{{count}} fiche",
       "topics_count_other": "{{count}} fiches",
-      "content_not_found": "Contenu introuvable."
+      "content_not_found": "Contenu introuvable.",
+      "section_lifestyle": "Hygiène de vie",
+      "section_medication": "Médicaments & alimentation"
     },
     "chronobiology_tracker": {
       "label": "Régularité chronobiologique",

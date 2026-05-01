@@ -52,6 +52,8 @@ import ChronoBioScreen from '../screens/modules/ChronoBioScreen'
 import ChronoBioDetailScreen from '../screens/modules/ChronoBioDetailScreen'
 import ChronoBioEntryScreen from '../screens/modules/ChronoBioEntryScreen'
 import ChronoBioMonthScreen from '../screens/modules/ChronoBioMonthScreen'
+import DistressToleranceScreen from '../screens/modules/DistressToleranceScreen'
+import DistressToleranceDetailScreen from '../screens/modules/DistressToleranceDetailScreen'
 import PsyEduModuleScreen from '../screens/modules/PsyEduModuleScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
@@ -111,6 +113,8 @@ export type AppStackParamList = {
   ChronoBioDetail: { topicId: string; topicTitle: string }
   ChronoBioEntry: { date: string }
   ChronoBioMonth: undefined
+  DistressTolerance: undefined
+  DistressToleranceDetail: { topicId: string; topicTitle: string }
 }
 
 export type TabParamList = {
@@ -400,6 +404,16 @@ export default function AppStack() {
         options={({ route }) => ({
           title: route.params.topicTitle,
         })}
+      />
+      <Stack.Screen
+        name="DistressTolerance"
+        component={DistressToleranceScreen}
+        options={{ title: 'Tolérance à la détresse' }}
+      />
+      <Stack.Screen
+        name="DistressToleranceDetail"
+        component={DistressToleranceDetailScreen}
+        options={({ route }) => ({ title: route.params.topicTitle })}
       />
       <Stack.Screen
         name="ChronoBio"
