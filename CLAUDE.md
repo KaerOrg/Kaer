@@ -89,6 +89,7 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `sleep_diary` | Agenda du sommeil | MVP — à construire |
 | `beck_columns` | Colonnes de Beck (TCC) | Prévu |
 | `fear_thermometer` | Thermomètre de la peur | Prévu |
+| `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté — liste graduée SUDs 0-100, case à cocher neutre, bandeau disclaimer, sources HAS/NICE, SQLite local, teen mode, 15 tests Jest |
 | `emotion_wheel` | Roue des émotions | Prévu |
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
@@ -141,6 +142,7 @@ Les questionnaires suivent un pattern uniforme à 3 fichiers :
 - [x] Module Alimentation et psychotropes (`diet_weight_psycho`) — 8 fiches, contenu Supabase (psyedu_topics + psyedu_blocks), rendu bloc custom, teen mode, 10 tests Jest
 - [x] Module Régularité chronobiologique (`chronobiology_tracker`) — 7 fiches psyedu (Supabase) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets Fiches/Journal, teen mode, 8 tests Jest
 - [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
+- [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -207,6 +209,30 @@ Ce pattern combine fiches psychoéducatives et tracker de données locales dans 
 - **Champs optionnels** : chaque ancrage peut être nul — composant `OptionalTimeField` avec bouton clear.
 - **MDR** : aucun score, aucun calcul, aucun seuil — le journal affiche uniquement les horaires bruts saisis par le patient.
 - **Reload** : `useFocusEffect` + `listChronoEntries(14)` pour actualiser l'historique au retour depuis `ChronoBioEntryScreen`.
+
+## Pattern : Bandeau disclaimer MDR (`DisclaimerBanner`)
+
+Pour tout module affichant une technique thérapeutique, ajouter un bandeau d'avertissement en haut de l'écran liste.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/mobile/src/components/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
+| `apps/mobile/src/i18n/locales/fr/common.json` | Clé `modules.<moduleKey>.disclaimer` (vouvoiement) |
+| `apps/mobile/src/i18n/locales/fr/teen.json` | Clé `modules.<moduleKey>.disclaimer` (tutoiement) |
+
+### Usage
+
+```tsx
+<DisclaimerBanner moduleKey="exposure_hierarchy" isTeenMode={isTeenMode} />
+```
+
+### Règle
+
+- Le composant lit `modules.<moduleKey>.disclaimer` dans le namespace `common` (adulte) ou `teen` (ado).
+- **Tout nouveau module** présentant une technique clinique (TCC, DBT, etc.) doit inclure ce bandeau.
+- Texte adulte type : *"Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."*
+
+---
 
 ## Pattern : Mode Ado (teen mode)
 

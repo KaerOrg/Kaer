@@ -56,6 +56,7 @@ export async function initDatabase(): Promise<void> {
   await createASRS6Table(database)
   await createASRS18Table(database)
   await createChronoEntriesTable(database)
+  await createExposureHierarchyTables(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1648,5 +1649,174 @@ export async function saveChronoEntry(entry: ChronoEntry): Promise<void> {
 export async function deleteChronoEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM chrono_entries WHERE id = ?', [id])
+}
+
+// ─── Hiérarchie d'exposition ──────────────────────────────────────────────────
+
+export function clampSuds(score: number): number {
+  return Math.min(100, Math.max(0, Math.round(score)))
+}
+
+export interface ExposureHierarchy {
+  id: string
+  title: string | null
+  created_at: string
+}
+
+export interface ExposureItem {
+  id: string
+  hierarchy_id: string
+  description: string
+  suds_score: number
+  is_done: boolean
+  created_at: string
+}
+
+export async function createExposureHierarchyTables(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS exposure_hierarchies (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS exposure_items (
+      id TEXT PRIMARY KEY,
+      hierarchy_id TEXT NOT NULL REFERENCES exposure_hierarchies(id) ON DELETE CASCADE,
+      description TEXT NOT NULL,
+      suds_score INTEGER NOT NULL DEFAULT 0,
+      is_done INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS exposure_sessions (
+      id TEXT PRIMARY KEY,
+      item_id TEXT NOT NULL REFERENCES exposure_items(id) ON DELETE CASCADE,
+      suds_score INTEGER NOT NULL,
+      session_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+// ─── Sessions d'exposition ────────────────────────────────────────────────────
+
+export interface ExposureSession {
+  id: string
+  item_id: string
+  suds_score: number
+  session_date: string
+  created_at: string
+}
+
+export async function addExposureSession(
+  id: string,
+  itemId: string,
+  sudsScore: number,
+): Promise<void> {
+  const database = getDb()
+  const now = new Date().toISOString()
+  await database.runAsync(
+    'INSERT INTO exposure_sessions (id, item_id, suds_score, session_date, created_at) VALUES (?, ?, ?, ?, ?)',
+    [id, itemId, sudsScore, now, now]
+  )
+}
+
+export async function listSessionsForItem(itemId: string): Promise<ExposureSession[]> {
+  const database = getDb()
+  return database.getAllAsync<ExposureSession>(
+    'SELECT * FROM exposure_sessions WHERE item_id = ? ORDER BY session_date ASC',
+    [itemId]
+  )
+}
+
+export async function countSessionsForItems(itemIds: string[]): Promise<Record<string, number>> {
+  if (itemIds.length === 0) return {}
+  const database = getDb()
+  const placeholders = itemIds.map(() => '?').join(',')
+  const rows = await database.getAllAsync<{ item_id: string; cnt: number }>(
+    `SELECT item_id, COUNT(*) as cnt FROM exposure_sessions WHERE item_id IN (${placeholders}) GROUP BY item_id`,
+    itemIds
+  )
+  const result: Record<string, number> = {}
+  for (const row of rows) result[row.item_id] = row.cnt
+  return result
+}
+
+export async function deleteExposureSession(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM exposure_sessions WHERE id = ?', [id])
+}
+
+export async function listExposureHierarchies(): Promise<ExposureHierarchy[]> {
+  const database = getDb()
+  return database.getAllAsync<ExposureHierarchy>(
+    'SELECT * FROM exposure_hierarchies ORDER BY created_at DESC'
+  )
+}
+
+export async function createExposureHierarchy(id: string, title: string | null): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'INSERT INTO exposure_hierarchies (id, title, created_at) VALUES (?, ?, ?)',
+    [id, title, new Date().toISOString()]
+  )
+}
+
+export async function deleteExposureHierarchy(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM exposure_hierarchies WHERE id = ?', [id])
+}
+
+export async function listExposureItems(hierarchyId: string): Promise<ExposureItem[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string; hierarchy_id: string; description: string
+    suds_score: number; is_done: number; created_at: string
+  }>(
+    'SELECT * FROM exposure_items WHERE hierarchy_id = ? ORDER BY suds_score ASC, created_at ASC',
+    [hierarchyId]
+  )
+  return rows.map((r) => ({ ...r, is_done: r.is_done === 1 }))
+}
+
+export async function addExposureItem(
+  id: string,
+  hierarchyId: string,
+  description: string,
+  sudsScore: number
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'INSERT INTO exposure_items (id, hierarchy_id, description, suds_score, is_done, created_at) VALUES (?, ?, ?, ?, 0, ?)',
+    [id, hierarchyId, description, sudsScore, new Date().toISOString()]
+  )
+}
+
+export async function updateExposureItem(
+  id: string,
+  description: string,
+  sudsScore: number
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'UPDATE exposure_items SET description = ?, suds_score = ? WHERE id = ?',
+    [description, sudsScore, id]
+  )
+}
+
+export async function toggleExposureItemDone(id: string, isDone: boolean): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'UPDATE exposure_items SET is_done = ? WHERE id = ?',
+    [isDone ? 1 : 0, id]
+  )
+}
+
+export async function deleteExposureItem(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM exposure_items WHERE id = ?', [id])
 }
 

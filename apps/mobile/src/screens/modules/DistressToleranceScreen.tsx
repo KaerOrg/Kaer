@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import {
-  BookOpen, Zap, Wind, Heart, Star, Scale, ChevronRight, ChevronDown, Info,
+  BookOpen, Zap, Wind, Heart, Star, Scale, ChevronRight, ChevronDown,
 } from 'lucide-react-native'
 import i18next from 'i18next'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +20,7 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import { fetchTopicsByModule, fetchBlocksByTopic } from '../../services/psyeduService'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
+import { DisclaimerBanner } from '../../components/DisclaimerBanner'
 import { PsyEduBlockRenderer } from '../../components/PsyEduBlockRenderer'
 import { colors, spacing, radius } from '../../theme'
 import type { PsyEduTopic, PsyEduBlock } from 'shared'
@@ -30,21 +31,6 @@ type LucideIcon = React.ComponentType<{ size?: number; color?: string }>
 
 const LUCIDE_ICONS: Record<string, LucideIcon> = {
   BookOpen, Zap, Wind, Heart, Star, Scale,
-}
-
-// ─── Composant : bandeau disclaimer ──────────────────────────────────────────
-
-function DisclaimerBanner({ isTeenMode }: { isTeenMode: boolean }) {
-  const { t } = useTranslation()
-  const ns = isTeenMode ? 'teen' : 'common'
-  return (
-    <View style={styles.disclaimer}>
-      <Info size={14} color={colors.primary} style={styles.disclaimerIcon} />
-      <Text style={styles.disclaimerText}>
-        {t('modules.distress_tolerance.disclaimer', { ns })}
-      </Text>
-    </View>
-  )
 }
 
 // ─── Composant : ligne topic (onglet Fiches) ──────────────────────────────────
@@ -236,7 +222,7 @@ export default function DistressToleranceScreen() {
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <TeenAccent color={teenColor('distress_tolerance')} />
 
-      <DisclaimerBanner isTeenMode={isTeenMode} />
+      <DisclaimerBanner moduleKey="distress_tolerance" isTeenMode={isTeenMode} />
 
       {/* Segment control */}
       <View style={styles.tabs}>
@@ -269,20 +255,6 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', margin: spacing.xl },
 
   // Disclaimer
-  disclaimer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.xs,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.md,
-  },
-  disclaimerIcon: { marginTop: 2 },
-  disclaimerText: { flex: 1, fontSize: 12, color: colors.primary, lineHeight: 18 },
-
   // Segment control
   tabs: {
     flexDirection: 'row',

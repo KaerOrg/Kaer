@@ -48,6 +48,11 @@ import ASRS18Screen from '../screens/modules/ASRS18Screen'
 import ASRS18EntryScreen from '../screens/modules/ASRS18EntryScreen'
 import DietWeightPsychoScreen from '../screens/modules/DietWeightPsychoScreen'
 import DietWeightPsychoDetailScreen from '../screens/modules/DietWeightPsychoDetailScreen'
+import ExposureHierarchyScreen from '../screens/modules/ExposureHierarchyScreen'
+import ExposureHierarchyDetailScreen from '../screens/modules/ExposureHierarchyDetailScreen'
+import ExposureHierarchyEntryScreen from '../screens/modules/ExposureHierarchyEntryScreen'
+import ExposureSessionScreen from '../screens/modules/ExposureSessionScreen'
+import ExposureItemHistoryScreen from '../screens/modules/ExposureItemHistoryScreen'
 import ChronoBioScreen from '../screens/modules/ChronoBioScreen'
 import ChronoBioDetailScreen from '../screens/modules/ChronoBioDetailScreen'
 import ChronoBioEntryScreen from '../screens/modules/ChronoBioEntryScreen'
@@ -106,6 +111,11 @@ export type AppStackParamList = {
   ASRS6Entry: {}
   ASRS18: undefined
   ASRS18Entry: {}
+  ExposureHierarchy: undefined
+  ExposureHierarchyDetail: { hierarchyId: string; title: string | null }
+  ExposureHierarchyEntry: { hierarchyId: string; itemId?: string }
+  ExposureSession: { itemId: string; hierarchyId: string }
+  ExposureItemHistory: { itemId: string; hierarchyId: string; description: string; initialSuds: number }
   PsyEduModule: { moduleKey: string }
   DietWeightPsycho: undefined
   DietWeightPsychoDetail: { topicId: string; topicTitle: string }
@@ -379,6 +389,35 @@ export default function AppStack() {
         name="ASRS18Entry"
         component={ASRS18EntryScreen}
         options={{ title: 'Nouveau ASRS v1.1 — Bilan' }}
+      />
+      <Stack.Screen
+        name="ExposureHierarchy"
+        component={ExposureHierarchyScreen}
+        options={{ title: "Hiérarchie d'exposition" }}
+      />
+      <Stack.Screen
+        name="ExposureHierarchyDetail"
+        component={ExposureHierarchyDetailScreen}
+        options={({ route }) => ({
+          title: route.params.title ?? "Hiérarchie d'exposition",
+        })}
+      />
+      <Stack.Screen
+        name="ExposureHierarchyEntry"
+        component={ExposureHierarchyEntryScreen}
+        options={({ route }) => ({
+          title: route.params.itemId ? "Modifier la situation" : "Nouvelle situation",
+        })}
+      />
+      <Stack.Screen
+        name="ExposureSession"
+        component={ExposureSessionScreen}
+        options={{ title: "Enregistrer une séance" }}
+      />
+      <Stack.Screen
+        name="ExposureItemHistory"
+        component={ExposureItemHistoryScreen}
+        options={{ title: "Évolution SUDs" }}
       />
       <Stack.Screen
         name="PsyEduModule"
