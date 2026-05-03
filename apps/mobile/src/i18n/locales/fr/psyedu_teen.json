@@ -226,5 +226,61 @@
         "bq1": "Ces informations sont générales. Ton médecin adapte le suivi à ta situation personnelle."
       }
     }
+  },
+  "craving_journal": {
+    "what_is_craving": {
+      "why": {
+        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique — pas un manque de volonté.",
+        "p2": "Il est déclenché par le **circuit de la récompense** (dopamine). Ce circuit apprend à anticiper le plaisir : une odeur, une image, une émotion peuvent suffire à l'activer.",
+        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement — comme une vague qui monte et qui passe.",
+        "tip1": "Ressentir un craving ne signifie pas que tu vas céder. Beaucoup de personnes ressentent des cravings forts sans y donner suite.",
+        "p4": "Plus tu observes le craving sans agir dessus, plus le **circuit neuronal** associé s'affaiblit progressivement au fil du temps."
+      },
+      "how": {
+        "item1": "Nommer ce qui se passe : « Je suis en train de ressentir un craving »",
+        "item2": "Vérifier l'heure : noter mentalement quand il a commencé",
+        "item3": "Attendre 20 minutes avant toute décision — le pic est souvent passé"
+      }
+    },
+    "triggers_abc": {
+      "why": {
+        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur** — une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
+        "tip1": "L'acronyme **HALT** résume les quatre états qui renforcent les cravings : **H**ungry (faim), **A**ngry (colère), **L**onely (solitude), **T**ired (fatigue). Ils abaissent ta résistance à l'envie.",
+        "p3": "Connaître tes déclencheurs personnels te permet de les anticiper — et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
+      },
+      "how": {
+        "item1": "Après chaque craving, note la situation : où t'étais-tu, avec qui, que faisais-tu ?",
+        "item2": "Note l'émotion ressentie juste avant l'envie — même si elle te paraît sans lien",
+        "item3": "Vérifie HALT : avais-tu faim, te sentais-tu seul(e), fatigué(e) ou en colère ?",
+        "item4": "Avec le temps, des schémas répétés apparaîtront — c'est une info utile pour ton soignant",
+        "bq1": "Ces observations sont des données précieuses. Ton soignant peut t'aider à les analyser et à construire un plan de prévention personnalisé."
+      }
+    },
+    "urge_surfing": {
+      "why": {
+        "p1": "L'**urge surfing** est une technique de pleine conscience appliquée aux envies compulsives, développée par Gordon Marlatt (1985). Elle repose sur une observation : résister activement au craving l'amplifie souvent. Observer sans résister le laisse passer.",
+        "tip1": "L'urge surfing ne supprime pas les envies. Il change ta relation à elles : de la lutte vers l'observation. Avec la pratique, la vague devient moins impressionnante."
+      },
+      "how": {
+        "item1": "**Reconnaître** : « Je ressens un craving en ce moment. » Nomme-le sans te juger.",
+        "item2": "**Observer** : où ressens-tu l'envie dans ton corps ? Gorge, poitrine, ventre ? Observe sans chercher à faire partir la sensation.",
+        "item3": "**Respirer** : respire lentement. Expiration plus longue que l'inspiration. Reste présent(e).",
+        "item4": "**Attendre** : regarde l'envie monter, atteindre son pic, puis redescendre. Tu n'as rien à faire.",
+        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal — persévère."
+      }
+    },
+    "after_the_craving": {
+      "why": {
+        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving — c'est le **cycle honte-rechute**.",
+        "p2": "Marlatt et Gordon ont nommé ce phénomène l'**Abstinence Violation Effect (AVE)** : la croyance que « j'ai craqué une fois, tout est fichu » aggrave souvent la situation bien plus que le craquage lui-même.",
+        "tip1": "Un craquage est une information clinique — pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
+        "bq1": "Ton soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster ton plan — c'est exactement à ça que sert le journal."
+      },
+      "how": {
+        "item1": "Qu'est-ce qui s'est passé juste avant ? Quel était le déclencheur (HALT, situation, émotion) ?",
+        "item2": "Quelle ressource était absente ou insuffisante ce jour-là ?",
+        "item3": "Qu'est-ce qui pourrait être différent la prochaine fois ?"
+      }
+    }
   }
 }

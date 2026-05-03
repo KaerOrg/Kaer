@@ -59,6 +59,9 @@ import ChronoBioEntryScreen from '../screens/modules/ChronoBioEntryScreen'
 import ChronoBioMonthScreen from '../screens/modules/ChronoBioMonthScreen'
 import DistressToleranceScreen from '../screens/modules/DistressToleranceScreen'
 import DistressToleranceDetailScreen from '../screens/modules/DistressToleranceDetailScreen'
+import CravingJournalScreen from '../screens/modules/CravingJournalScreen'
+import CravingJournalDetailScreen from '../screens/modules/CravingJournalDetailScreen'
+import CravingJournalEntryScreen from '../screens/modules/CravingJournalEntryScreen'
 import PsyEduModuleScreen from '../screens/modules/PsyEduModuleScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
@@ -125,6 +128,9 @@ export type AppStackParamList = {
   ChronoBioMonth: undefined
   DistressTolerance: undefined
   DistressToleranceDetail: { topicId: string; topicTitle: string }
+  CravingJournal: undefined
+  CravingJournalDetail: { topicId: string; topicKey: string; topicTitle: string }
+  CravingJournalEntry: { entryId?: string }
 }
 
 export type TabParamList = {
@@ -473,6 +479,23 @@ export default function AppStack() {
         name="ChronoBioMonth"
         component={ChronoBioMonthScreen}
         options={{ title: 'Vue mensuelle' }}
+      />
+      <Stack.Screen
+        name="CravingJournal"
+        component={CravingJournalScreen}
+        options={{ title: 'Journal de craving' }}
+      />
+      <Stack.Screen
+        name="CravingJournalDetail"
+        component={CravingJournalDetailScreen}
+        options={({ route }) => ({ title: route.params.topicTitle })}
+      />
+      <Stack.Screen
+        name="CravingJournalEntry"
+        component={CravingJournalEntryScreen}
+        options={({ route }) => ({
+          title: route.params?.entryId ? 'Modifier la saisie' : 'Nouvelle saisie',
+        })}
       />
     </Stack.Navigator>
   )

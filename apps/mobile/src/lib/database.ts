@@ -57,6 +57,7 @@ export async function initDatabase(): Promise<void> {
   await createASRS18Table(database)
   await createChronoEntriesTable(database)
   await createExposureHierarchyTables(database)
+  await createCravingEntriesTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1818,5 +1819,81 @@ export async function toggleExposureItemDone(id: string, isDone: boolean): Promi
 export async function deleteExposureItem(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM exposure_items WHERE id = ?', [id])
+}
+
+// ─── Journal de craving ───────────────────────────────────────────────────────
+//
+// Auto-monitoring des envies compulsives.
+// Référence : Marlatt & Gordon (1985) — Relapse Prevention ;
+//             Beck, Wright, Newman & Liese (1993) — Cognitive Therapy of Substance Abuse.
+//
+// intensity (0–10) : valeur brute déclarée par le patient, sans label interprétatif.
+// Conformité MDR 2017/745 — aucun seuil, aucune alerte, aucune interprétation.
+
+export interface CravingEntry {
+  id: string
+  created_at: string             // ISO 8601 — plusieurs saisies par jour possibles
+  intensity: number              // 0–10, brut
+  trigger_context: string | null // situation déclenchante (texte libre)
+  emotion: string | null         // émotion associée (texte libre)
+  automatic_thought: string | null // pensée automatique (texte libre)
+  coping_used: string | null     // stratégie utilisée (texte libre)
+  notes: string | null
+}
+
+export async function createCravingEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS craving_entries (
+      id               TEXT PRIMARY KEY,
+      created_at       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      intensity        INTEGER NOT NULL DEFAULT 5,
+      trigger_context  TEXT,
+      emotion          TEXT,
+      automatic_thought TEXT,
+      coping_used      TEXT,
+      notes            TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_craving_entries_created_at ON craving_entries(created_at);
+  `)
+}
+
+export async function listCravingEntries(limit = 30): Promise<CravingEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<CravingEntry>(
+    'SELECT * FROM craving_entries ORDER BY created_at DESC LIMIT ?',
+    [limit]
+  )
+}
+
+export async function getCravingEntry(id: string): Promise<CravingEntry | null> {
+  const database = getDb()
+  return database.getFirstAsync<CravingEntry>(
+    'SELECT * FROM craving_entries WHERE id = ?',
+    [id]
+  )
+}
+
+export async function saveCravingEntry(entry: CravingEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO craving_entries
+       (id, created_at, intensity, trigger_context, emotion, automatic_thought, coping_used, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      entry.created_at,
+      entry.intensity,
+      entry.trigger_context ?? null,
+      entry.emotion ?? null,
+      entry.automatic_thought ?? null,
+      entry.coping_used ?? null,
+      entry.notes ?? null,
+    ]
+  )
+}
+
+export async function deleteCravingEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM craving_entries WHERE id = ?', [id])
 }
 

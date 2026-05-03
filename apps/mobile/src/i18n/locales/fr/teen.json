@@ -124,6 +124,15 @@
       "new_btn": "Remplir le questionnaire",
       "empty_title": "Rien pour l'instant",
       "empty_text": "Appuie sur le bouton pour commencer."
+    },
+    "craving_journal": {
+      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "empty_text": "Appuie sur le bouton ci-dessus pour enregistrer ta première envie.",
+      "trigger_placeholder": "Où t'étais ? Que se passait-il ?",
+      "emotion_placeholder": "Ex : ennui, stress, tristesse, solitude…",
+      "thought_placeholder": "Ex : Juste une fois ça changera rien…",
+      "coping_placeholder": "Ex : Marche, appel à un pote, respiration…",
+      "intensity_hint": "De 0 (absente) à 10 (très intense). Valeur brute."
     }
   }
 }

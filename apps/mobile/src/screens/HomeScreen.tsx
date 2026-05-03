@@ -52,7 +52,7 @@ const MODULE_CONFIG: Record<
   exposure_hierarchy:       { icon: 'stairs-up',                 available: true  },
   breathing_techniques:     { icon: 'lungs',                     available: true  },
   cognitive_saturation:     { icon: 'chat-processing-outline',   available: true  },
-  craving_journal:          { icon: 'lightning-bolt-outline',    available: false },
+  craving_journal:          { icon: 'lightning-bolt-outline',    available: true  },
   decisional_balance:       { icon: 'scale-balance',             available: true  },
   phq9:                     { icon: 'clipboard-text-outline',    available: true  },
   gad7:                     { icon: 'clipboard-text-outline',    available: true  },
@@ -271,6 +271,7 @@ export default function HomeScreen() {
       diet_weight_psycho:      'DietWeightPsycho',
       chronobiology_tracker:   'ChronoBio',
       distress_tolerance:      'DistressTolerance',
+      craving_journal:         'CravingJournal',
     }
     if (['psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity', 'cognitive_distortions'].includes(moduleType)) {
       navigation.navigate('PsyEduModule', { moduleKey: moduleType })

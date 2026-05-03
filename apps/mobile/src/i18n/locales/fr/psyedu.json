@@ -531,6 +531,84 @@
       }
     }
   },
+  "craving_journal": {
+    "what_is_craving": {
+      "title": "Qu'est-ce que le craving ?",
+      "summary": "Neurobiologie, durée limitée et normalisation de l'envie compulsive",
+      "why": {
+        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique — pas un manque de volonté.",
+        "p2": "Il est déclenché par le **circuit de la récompense** (dopamine). Ce circuit apprend à anticiper le plaisir : une odeur, une image, une émotion peuvent suffire à l'activer.",
+        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement — comme une vague qui monte et qui passe.",
+        "tip1": "Ressentir un craving ne signifie pas que vous allez céder. Beaucoup de personnes ressentent des cravings forts sans y donner suite.",
+        "p4": "Plus vous observez le craving sans agir dessus, plus le **circuit neuronal** associé s'affaiblit progressivement au fil du temps."
+      },
+      "how": {
+        "intro": "Ces trois réflexes peuvent vous aider dans les premières minutes.",
+        "item1": "Nommer ce qui se passe : « Je suis en train de ressentir un craving »",
+        "item2": "Vérifier l'heure : noter mentalement quand il a commencé",
+        "item3": "Attendre 20 minutes avant toute décision — le pic est souvent passé"
+      },
+      "src1": "HAS (2015) — Mésusage de l'alcool : dépistage, diagnostic et traitement",
+      "src2": "OMS — Troubles liés à l'usage de substances"
+    },
+    "triggers_abc": {
+      "title": "Reconnaître ses déclencheurs",
+      "summary": "Le modèle A-B-C et l'acronyme HALT pour identifier ce qui précède l'envie",
+      "why": {
+        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur** — une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
+        "p2": "Le modèle **A-B-C** (Beck, 1993) distingue : **A**ntécédent (la situation), **B**elief (la pensée automatique), **C**onséquence (l'envie, l'émotion, le comportement).",
+        "tip1": "L'acronyme **HALT** résume les quatre états qui renforcent les cravings : **H**ungry (faim), **A**ngry (colère), **L**onely (solitude), **T**ired (fatigue). Ils abaissent la résistance à l'envie.",
+        "p3": "Connaître ses déclencheurs personnels permet de les anticiper — et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
+      },
+      "how": {
+        "intro": "Le journal de craving est un outil pour identifier vos schémas personnels sur la durée.",
+        "item1": "Après chaque craving, notez la situation : où étiez-vous, avec qui, que faisiez-vous ?",
+        "item2": "Notez l'émotion ressentie juste avant l'envie — même si elle paraît sans lien",
+        "item3": "Vérifiez HALT : aviez-vous faim, vous sentiez-vous seul(e), fatigué(e) ou en colère ?",
+        "item4": "Avec le temps, des schémas répétés apparaîtront — c'est une information utile pour votre soignant",
+        "bq1": "Ces observations sont des données cliniques précieuses. Votre soignant peut vous aider à les analyser et à construire un plan de prévention personnalisé."
+      },
+      "src1": "Beck AT, Wright FD, Newman CF, Liese BS (1993) — Cognitive Therapy of Substance Abuse. Guilford Press."
+    },
+    "urge_surfing": {
+      "title": "Surfer sur l'envie",
+      "summary": "Observer le craving comme une vague — sans agir, sans résister",
+      "why": {
+        "p1": "L'**urge surfing** est une technique de pleine conscience appliquée aux envies compulsives, développée par Gordon Marlatt (1985). Elle repose sur une observation : résister activement au craving l'amplifie souvent. Observer sans résister le laisse passer.",
+        "p2": "L'image de la **vague** est centrale : une vague monte, atteint un pic, puis redescend. Le craving suit le même schéma. L'objectif n'est pas de détruire la vague — c'est de la traverser debout.",
+        "tip1": "L'urge surfing ne supprime pas les envies. Il change votre relation à elles : de la lutte vers l'observation. Avec la pratique, la vague devient moins impressionnante.",
+        "how": {}
+      },
+      "how": {
+        "intro": "Voici comment pratiquer l'urge surfing en 4 étapes.",
+        "item1": "**Reconnaître** : « Je ressens un craving en ce moment. » Nommez-le sans le juger.",
+        "item2": "**Observer** : où ressentez-vous l'envie dans votre corps ? Gorge, poitrine, ventre ? Observez sans chercher à faire partir la sensation.",
+        "item3": "**Respirer** : respirez lentement. Expiration plus longue que l'inspiration. Restez présent(e).",
+        "item4": "**Attendre** : regardez l'envie monter, atteindre son pic, puis redescendre. Vous n'avez rien à faire.",
+        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal — persévérez."
+      },
+      "src1": "Marlatt GA & Gordon JR (1985) — Relapse Prevention. Guilford Press.",
+      "src2": "Bowen S, Chawla N & Marlatt GA (2011) — Mindfulness-Based Relapse Prevention. Guilford Press."
+    },
+    "after_the_craving": {
+      "title": "Après le craving, sans se juger",
+      "summary": "Comprendre l'Abstinence Violation Effect et transformer un craquage en information",
+      "why": {
+        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving — c'est le **cycle honte-rechute**.",
+        "p2": "Marlatt et Gordon ont nommé ce phénomène l'**Abstinence Violation Effect (AVE)** : la croyance que « j'ai craqué une fois, tout est fichu » aggrave souvent la situation bien plus que le craquage lui-même.",
+        "tip1": "Un craquage est une information clinique — pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
+        "bq1": "Votre soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster votre plan — c'est exactement à ça que sert le journal."
+      },
+      "how": {
+        "intro": "Après un craquage, ces trois questions permettent d'apprendre plutôt que de se juger.",
+        "item1": "Qu'est-ce qui s'est passé juste avant ? Quel était le déclencheur (HALT, situation, émotion) ?",
+        "item2": "Quelle ressource était absente ou insuffisante ce jour-là ?",
+        "item3": "Qu'est-ce qui pourrait être différent la prochaine fois ?"
+      },
+      "src1": "Marlatt GA & Gordon JR (1985) — Relapse Prevention. Guilford Press.",
+      "src2": "HAS (2015) — Mésusage de l'alcool : dépistage, diagnostic et traitement"
+    }
+  },
   "cognitive_distortions": {
     "cog_distortions_intro": {
       "title": "Les distorsions cognitives",

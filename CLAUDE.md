@@ -105,6 +105,7 @@ Praticien saisit l'email → token UUID généré (expire 48h) → stocké en BD
 | `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — 8 fiches psychoéducatives, contenu en base Supabase, rendu bloc par bloc, teen mode |
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — 7 fiches psyedu (zeitgebers, IPSRT, lumière, repas, rythme social, lever/coucher, perturbations) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets, teen mode |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — 6 fiches psyedu (intro, TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons) + onglet "En crise" (accordéon), bandeau disclaimer MDR, teen mode, 8 tests Jest |
+| `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — 4 fiches psyedu (what_is_craving, triggers_abc, urge_surfing, after_the_craving) + journal d'auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, bandeau disclaimer MDR, teen mode, 10 tests Jest |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -143,6 +144,7 @@ Les questionnaires suivent un pattern uniforme à 3 fichiers :
 - [x] Module Régularité chronobiologique (`chronobiology_tracker`) — 7 fiches psyedu (Supabase) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets Fiches/Journal, teen mode, 8 tests Jest
 - [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
 - [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
+- [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale
