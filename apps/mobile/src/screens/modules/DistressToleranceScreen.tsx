@@ -161,7 +161,7 @@ export default function DistressToleranceScreen() {
 
   const handleTopicPress = useCallback((topic: PsyEduTopic) => {
     const topicTitle = i18next.t(`distress_tolerance.${topic.topic_key}.title`, { ns: 'psyedu' })
-    navigation.navigate('DistressToleranceDetail', { topicId: topic.id, topicTitle })
+    navigation.navigate('DistressToleranceDetail', { topicId: topic.id, topicKey: topic.topic_key, topicTitle })
   }, [navigation])
 
   const handleToggle = useCallback((topicId: string) => {

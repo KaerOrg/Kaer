@@ -103,7 +103,7 @@ export default function DietWeightPsychoScreen() {
   const handlePress = useCallback(
     (topic: PsyEduTopic) => {
       const topicTitle = i18next.t(`diet_weight_psycho.${topic.topic_key}.title`, { ns: 'psyedu' })
-      navigation.navigate('DietWeightPsychoDetail', { topicId: topic.id, topicTitle })
+      navigation.navigate('DietWeightPsychoDetail', { topicId: topic.id, topicKey: topic.topic_key, topicTitle })
     },
     [navigation],
   )

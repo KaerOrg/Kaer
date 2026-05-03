@@ -121,13 +121,13 @@ export type AppStackParamList = {
   ExposureItemHistory: { itemId: string; hierarchyId: string; description: string; initialSuds: number }
   PsyEduModule: { moduleKey: string }
   DietWeightPsycho: undefined
-  DietWeightPsychoDetail: { topicId: string; topicTitle: string }
+  DietWeightPsychoDetail: { topicId: string; topicKey: string; topicTitle: string }
   ChronoBio: undefined
-  ChronoBioDetail: { topicId: string; topicTitle: string }
+  ChronoBioDetail: { topicId: string; topicKey: string; topicTitle: string }
   ChronoBioEntry: { date: string }
   ChronoBioMonth: undefined
   DistressTolerance: undefined
-  DistressToleranceDetail: { topicId: string; topicTitle: string }
+  DistressToleranceDetail: { topicId: string; topicKey: string; topicTitle: string }
   CravingJournal: undefined
   CravingJournalDetail: { topicId: string; topicKey: string; topicTitle: string }
   CravingJournalEntry: { entryId?: string }

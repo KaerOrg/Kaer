@@ -194,7 +194,7 @@ export default function ChronoBioScreen() {
 
   const handleTopicPress = useCallback((topic: PsyEduTopic) => {
     const topicTitle = i18next.t(`chronobiology_tracker.${topic.topic_key}.title`, { ns: 'psyedu' })
-    navigation.navigate('ChronoBioDetail', { topicId: topic.id, topicTitle })
+    navigation.navigate('ChronoBioDetail', { topicId: topic.id, topicKey: topic.topic_key, topicTitle })
   }, [navigation])
 
   const navigateToEntry = useCallback((date: string) => {

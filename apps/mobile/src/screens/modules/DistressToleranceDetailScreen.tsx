@@ -13,38 +13,19 @@ import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { fetchBlocksByTopic } from '../../services/psyeduService'
 import { PsyEduBlockRenderer } from '../../components/PsyEduBlockRenderer'
-import { TeenAccent } from '../../components/TeenAccent'
+import { PsyEduDetailHeader } from '../../components/PsyEduDetailHeader'
 import { useTeen } from '../../hooks/useTeen'
+import { groupAndSortBlocks, SectionGroup } from '../../utils/psyeduUtils'
+import { TOPIC_VISUAL } from './distressToleranceFicheData'
 import { colors, spacing } from '../../theme'
-import type { PsyEduBlock, PsyEduSectionKey } from 'shared'
 
 type RouteProps = RouteProp<AppStackParamList, 'DistressToleranceDetail'>
 
-const SECTION_ORDER: Record<PsyEduSectionKey, number> = { why: 0, how: 1, sources: 2 }
-
-interface SectionGroup {
-  key: PsyEduSectionKey
-  blocks: PsyEduBlock[]
-}
-
-function groupAndSort(blocks: readonly PsyEduBlock[]): SectionGroup[] {
-  const map = new Map<PsyEduSectionKey, PsyEduBlock[]>()
-  for (const block of blocks) {
-    const key = block.section_key as PsyEduSectionKey
-    if (!map.has(key)) map.set(key, [])
-    map.get(key)!.push(block)
-  }
-  for (const arr of map.values()) {
-    arr.sort((a, b) => a.sort_order - b.sort_order)
-  }
-  return [...map.entries()]
-    .sort(([a], [b]) => (SECTION_ORDER[a] ?? 99) - (SECTION_ORDER[b] ?? 99))
-    .map(([key, blks]) => ({ key, blocks: blks }))
-}
+const SECTION_LABELS: Record<string, string> = { why: 'Pourquoi', how: 'Comment', sources: 'Sources' }
 
 export default function DistressToleranceDetailScreen() {
   const route = useRoute<RouteProps>()
-  const { topicId } = route.params
+  const { topicId, topicKey } = route.params
   const { t } = useTranslation()
   const { teenColor } = useTeen()
 
@@ -57,7 +38,7 @@ export default function DistressToleranceDetailScreen() {
     fetchBlocksByTopic(topicId)
       .then((blocks) => {
         if (!active) return
-        setSectionGroups(groupAndSort(blocks))
+        setSectionGroups(groupAndSortBlocks(blocks))
         setLoading(false)
       })
       .catch(() => {
@@ -68,11 +49,25 @@ export default function DistressToleranceDetailScreen() {
     return () => { active = false }
   }, [topicId, t])
 
+  const visual = TOPIC_VISUAL[topicKey]
+  const accentColor = visual?.color ?? teenColor('distress_tolerance') ?? colors.primary
+  const title   = i18next.t(`distress_tolerance.${topicKey}.title`,   { ns: 'psyedu' })
+  const tagline = i18next.t(`distress_tolerance.${topicKey}.summary`, { ns: 'psyedu' })
+
   if (loading) {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
+        {visual && (
+          <PsyEduDetailHeader
+            title={title}
+            tagline={tagline}
+            Icon={visual.Icon}
+            accentColor={accentColor}
+            keyInsight={visual.keyInsight}
+          />
+        )}
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} />
+          <ActivityIndicator color={accentColor} />
         </View>
       </SafeAreaView>
     )
@@ -90,19 +85,34 @@ export default function DistressToleranceDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <TeenAccent color={teenColor('distress_tolerance')} />
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {sectionGroups.map((group) => (
-          <View key={group.key} style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              {i18next.t(`section.${group.key}`, { ns: 'psyedu' })}
-            </Text>
-            <PsyEduBlockRenderer blocks={group.blocks} />
-          </View>
-        ))}
+      <ScrollView showsVerticalScrollIndicator={false}>
+
+        {visual && (
+          <PsyEduDetailHeader
+            title={title}
+            tagline={tagline}
+            Icon={visual.Icon}
+            accentColor={accentColor}
+            keyInsight={visual.keyInsight}
+          />
+        )}
+
+        <View style={styles.content}>
+          {sectionGroups.map((group, idx) => (
+            <View key={group.key} style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionIndex, { color: accentColor }]}>
+                  {idx + 1}/{sectionGroups.length}
+                </Text>
+                <Text style={[styles.sectionTitle, { color: accentColor }]}>
+                  {i18next.t(`section.${group.key}`, { ns: 'psyedu' })}
+                </Text>
+              </View>
+              <PsyEduBlockRenderer blocks={group.blocks} accentColor={accentColor} />
+            </View>
+          ))}
+        </View>
+
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
@@ -111,15 +121,25 @@ export default function DistressToleranceDetailScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', marginTop: spacing.xl },
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center' },
-  scrollContent: { padding: spacing.lg },
+  content: { paddingHorizontal: spacing.lg },
   section: { marginBottom: spacing.lg },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.text,
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  bottomSpacer: { height: 40 },
+  sectionIndex: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    opacity: 0.7,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  bottomSpacer: { height: 48 },
 })

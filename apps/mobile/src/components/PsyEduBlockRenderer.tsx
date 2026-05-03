@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import i18next from 'i18next'
+import { Lightbulb, ExternalLink } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
 import { InlineText } from './InlineText'
 import { colors, spacing, radius } from '../theme'
@@ -9,6 +10,7 @@ import type { PsyEduBlock } from 'shared'
 
 interface Props {
   blocks: readonly PsyEduBlock[]
+  accentColor?: string
 }
 
 function resolveText(code: string, isTeenMode: boolean): string {
@@ -18,9 +20,10 @@ function resolveText(code: string, isTeenMode: boolean): string {
   return i18next.t(code, { ns: 'psyedu' })
 }
 
-export function PsyEduBlockRenderer({ blocks }: Props) {
+export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
   const isTeenMode = useAuthStore((s) => s.teenMode)
   const { t } = useTranslation()
+  const accent = accentColor ?? colors.primary
 
   const openLink = useCallback((href: string) => {
     Linking.openURL(href).catch(() => undefined)
@@ -47,7 +50,7 @@ export function PsyEduBlockRenderer({ blocks }: Props) {
               <View key={block.id} style={styles.list}>
                 {block.items_codes.map((itemCode: string, i: number) => (
                   <View key={i} style={styles.listItem}>
-                    <Text style={styles.bullet}>{'•'}</Text>
+                    <View style={[styles.bulletDot, { backgroundColor: accent }]} />
                     <InlineText code={itemCode} style={styles.listText} />
                   </View>
                 ))}
@@ -56,14 +59,15 @@ export function PsyEduBlockRenderer({ blocks }: Props) {
 
           case 'tip':
             return block.text_code ? (
-              <View key={block.id} style={styles.tip}>
-                <InlineText code={block.text_code} style={styles.tipText} />
+              <View key={block.id} style={[styles.tip, { backgroundColor: accent + '18' }]}>
+                <Lightbulb size={16} color={accent} style={styles.tipIcon} />
+                <InlineText code={block.text_code} style={[styles.tipText, { color: accent }]} />
               </View>
             ) : null
 
           case 'blockquote':
             return block.text_code ? (
-              <View key={block.id} style={styles.blockquote}>
+              <View key={block.id} style={[styles.blockquote, { borderLeftColor: accent }]}>
                 <InlineText code={block.text_code} style={styles.blockquoteText} />
               </View>
             ) : null
@@ -72,13 +76,20 @@ export function PsyEduBlockRenderer({ blocks }: Props) {
             return block.text_code ? (
               <Pressable
                 key={block.id}
-                style={({ pressed }) => [styles.sourceLink, pressed && styles.sourceLinkPressed]}
+                style={({ pressed }) => [
+                  styles.sourceCard,
+                  { borderLeftColor: accent },
+                  pressed && styles.sourceCardPressed,
+                ]}
                 onPress={block.href ? () => openLink(block.href!) : undefined}
                 accessibilityRole="link"
               >
-                <Text style={[styles.sourceLinkText, !block.href && styles.sourceLinkNoUrl]}>
+                <Text style={styles.sourceText}>
                   {resolveText(block.text_code, isTeenMode)}
                 </Text>
+                {block.href ? (
+                  <ExternalLink size={14} color={accent} />
+                ) : null}
               </Pressable>
             ) : null
 
@@ -110,52 +121,66 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  bullet: {
-    color: colors.primary,
-    fontSize: 16,
-    lineHeight: 26,
-    width: 12,
+  bulletDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    marginTop: 9,
+    flexShrink: 0,
   },
   listText: {
     flex: 1,
   },
   tip: {
-    backgroundColor: colors.primaryLight,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  tipIcon: {
+    marginTop: 2,
+    flexShrink: 0,
   },
   tipText: {
-    color: colors.primary,
+    flex: 1,
     fontSize: 15,
     lineHeight: 22,
     fontWeight: '500',
   },
   blockquote: {
     borderLeftWidth: 3,
-    borderLeftColor: colors.border,
     paddingLeft: spacing.md,
     marginBottom: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   blockquoteText: {
     color: colors.textMuted,
     fontStyle: 'italic',
   },
-  sourceLink: {
-    paddingVertical: spacing.xs,
+  sourceCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    padding: spacing.md,
     marginBottom: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderLeftWidth: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
-  sourceLinkPressed: {
-    opacity: 0.6,
+  sourceCardPressed: {
+    opacity: 0.65,
   },
-  sourceLinkText: {
-    color: colors.primary,
-    fontSize: 14,
-    lineHeight: 20,
-    textDecorationLine: 'underline',
-  },
-  sourceLinkNoUrl: {
-    color: colors.textMuted,
-    textDecorationLine: 'none',
+  sourceText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 13,
+    lineHeight: 19,
   },
 })
