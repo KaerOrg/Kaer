@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LogOut, UserPen, Globe } from 'lucide-react'
-import { SUPPORTED, LANG_LABELS, LANG_FLAGS, setLanguage, type SupportedLang } from '../../../i18n'
+import { SUPPORTED, LANG_LABELS, LANG_FLAGS, type SupportedLang } from '../../../i18n'
+import { useAuthStore } from '../../../store/authStore'
 import './ProfileDropdown.css'
 import type { ProfileDropdownProps } from './ProfileDropdown.types'
 
@@ -9,6 +10,7 @@ export function ProfileDropdown({ initials, name, email, professionalTitle, onEd
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const updateLanguagePreference = useAuthStore(s => s.updateLanguagePreference)
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -43,7 +45,7 @@ export function ProfileDropdown({ initials, name, email, professionalTitle, onEd
             <select
               className="profile-dropdown__lang-select"
               value={currentLang}
-              onChange={e => setLanguage(e.target.value as SupportedLang)}
+              onChange={e => void updateLanguagePreference(e.target.value as SupportedLang)}
             >
               {(SUPPORTED as readonly SupportedLang[]).map(lang => (
                 <option key={lang} value={lang}>

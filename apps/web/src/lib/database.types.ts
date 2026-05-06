@@ -9,6 +9,7 @@ export interface Database {
           email: string
           name: string
           professional_title: string | null
+          language_preference: string
           created_at: string
         }
         Insert: {
@@ -16,10 +17,12 @@ export interface Database {
           email: string
           name: string
           professional_title?: string | null
+          language_preference?: string
         }
         Update: {
           name?: string
           professional_title?: string | null
+          language_preference?: string
         }
         Relationships: []
       }
@@ -117,6 +120,61 @@ export interface Database {
         Update: {
           config?: Record<string, unknown>
         }
+        Relationships: []
+      }
+      cssrs_screen_assessments: {
+        Row: {
+          id: string
+          patient_id: string
+          practitioner_id: string
+          ideation_answers: Array<{ value: number; description: string }>
+          intensite_ideation: {
+            frequence: number | null
+            duree: number | null
+            maitrise: number | null
+            dissuasifs: number | null
+            causes: number | null
+          } | null
+          behavior_answers: Array<{ value: number; description: string }>
+          nssi: number | null
+          nb_tentatives_averees: number | null
+          nb_tentatives_interrompues: number | null
+          nb_tentatives_avortees: number | null
+          comportement_observe: number | null
+          suicide_reussi: number | null
+          date_tentative_plus_letale: string | null
+          letalite_observee: number | null
+          letalite_potentielle: number | null
+          ideation_level: number
+          behavior_count: number
+          assessed_at: string
+        }
+        Insert: {
+          patient_id: string
+          practitioner_id: string
+          ideation_answers: Array<{ value: number; description: string }>
+          intensite_ideation?: {
+            frequence: number | null
+            duree: number | null
+            maitrise: number | null
+            dissuasifs: number | null
+            causes: number | null
+          } | null
+          behavior_answers: Array<{ value: number; description: string }>
+          nssi?: number | null
+          nb_tentatives_averees?: number | null
+          nb_tentatives_interrompues?: number | null
+          nb_tentatives_avortees?: number | null
+          comportement_observe?: number | null
+          suicide_reussi?: number | null
+          date_tentative_plus_letale?: string | null
+          letalite_observee?: number | null
+          letalite_potentielle?: number | null
+          ideation_level: number
+          behavior_count: number
+          assessed_at?: string
+        }
+        Update: Record<string, never>
         Relationships: []
       }
       module_categories: {
@@ -237,6 +295,7 @@ export interface Practitioner {
   email: string
   name: string
   professional_title: string | null
+  language_preference: string
 }
 
 export interface PatientSummary {
@@ -264,6 +323,7 @@ export interface PractitionerModuleSettings {
   enabled_modules: ModuleType[]
   updated_at: string
 }
+
 
 export interface PsychoeducationCardEntry {
   card_id: string

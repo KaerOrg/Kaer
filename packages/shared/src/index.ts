@@ -36,6 +36,14 @@ export type ModuleType =
   // Addictologie & Impulsivité
   | 'craving_journal'
   | 'decisional_balance'
+  // Échelles & Questionnaires cliniques
+  | 'phq9'
+  | 'gad7'
+  | 'epds'
+  | 'rcads'
+  | 'bsl23'
+  | 'cape42'
+  | 'audit'
 
 export interface Module {
   id: string

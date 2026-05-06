@@ -24,6 +24,7 @@ import {
 } from '../../lib/database'
 import Button from '../../components/Button'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateFull } from '../../lib/dateUtils'
 import { useTranslation } from 'react-i18next'
 
 type Route = RouteProp<AppStackParamList, 'SleepDiaryEntry'>
@@ -41,16 +42,6 @@ function fromHHMM(timeStr: string): Date {
   return d
 }
 
-// Formate la date pour l'affichage : "Lundi 7 avril 2025"
-function formatFullDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-}
 
 // Composant de sélection d'heure avec affichage du picker natif
 function TimeField({
@@ -406,7 +397,7 @@ export default function SleepDiaryEntryScreen() {
         {/* En-tête avec la date */}
         <View style={styles.dateHeader}>
           <Text style={styles.dateLabel}>{t('modules.sleep_diary.date_label')}</Text>
-          <Text style={styles.dateValue}>{formatFullDate(targetDate)}</Text>
+          <Text style={styles.dateValue}>{formatDateFull(targetDate)}</Text>
         </View>
 
         {/* Section horaires */}

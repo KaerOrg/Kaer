@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -21,6 +21,22 @@ import { useTeen } from '../hooks/useTeen'
 import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 
+// Modules avec un écran dédié (interaction custom non couverte par le moteur générique).
+// Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.
+// Tout module absent de cette map ET autre preview_kind → ModuleContent (moteur générique).
+const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
+  sleep_diary:              'SleepDiary',
+  psychoeducation:          'Psychoeducation',
+  decisional_balance:       'DecisionalBalance',
+  beck_columns:             'BeckColumns',
+  medication_adherence:     'MedicationAdherence',
+  fear_thermometer:         'FearThermometer',
+  behavioral_activation:    'BehavioralActivation',
+  breathing_techniques:     'BreathingTechniques',
+  emotion_wheel:            'EmotionWheel',
+}
+
+
 interface UnlockedModule {
   id: string
   module_type: string
@@ -33,11 +49,138 @@ interface UnlockedModule {
   } | null
 }
 
+interface ModuleSectionsProps {
+  modules: UnlockedModule[]
+  isTeenMode: boolean
+  teenColor: (moduleType: string) => string | undefined
+  handleModulePress: (mod: UnlockedModule) => void
+  t: (key: string) => string
+}
+
+function ModuleCard({
+  mod,
+  isTeenMode,
+  accentColor,
+  onPress,
+  t,
+}: {
+  mod: UnlockedModule
+  isTeenMode: boolean
+  accentColor: string | undefined
+  onPress: () => void
+  t: (key: string) => string
+}) {
+  // Un module est disponible s'il a un écran custom OU si la base ne le marque pas coming_soon
+  const available = CUSTOM_ROUTES[mod.module_type] != null
+    || (mod.module != null && mod.module.preview_kind !== 'coming_soon')
+  const icon = (mod.module?.mobile_icon ?? 'help-circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
+  return (
+    <Pressable
+      key={mod.id}
+      onPress={available ? onPress : undefined}
+      disabled={!available}
+    >
+      <Card
+        state={!available ? 'disabled' : undefined}
+        accentColor={isTeenMode ? accentColor : undefined}
+      >
+        <View style={cardStyles.row}>
+          <View style={[
+            cardStyles.icon,
+            isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
+          ]}>
+            <MaterialCommunityIcons
+              name={icon}
+              size={30}
+              color={available ? (accentColor ?? colors.primary) : colors.textMuted}
+            />
+          </View>
+          <View style={cardStyles.content}>
+            <Text style={cardStyles.title}>{t(`modules.${mod.module_type}.label`)}</Text>
+            {Boolean(t(`modules.${mod.module_type}.description`)) && (
+              <Text style={cardStyles.desc}>{t(`modules.${mod.module_type}.description`)}</Text>
+            )}
+            {!available && (
+              <Text style={cardStyles.comingSoon}>{t('home.coming_soon')}</Text>
+            )}
+          </View>
+          {available && (
+            <Text style={[cardStyles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
+          )}
+        </View>
+      </Card>
+    </Pressable>
+  )
+}
+
+const cardStyles = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  icon: { width: 42, alignItems: 'center', justifyContent: 'center' },
+  content: { flex: 1 },
+  title: { fontSize: 17, fontWeight: '600', color: colors.text },
+  desc: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
+  comingSoon: { fontSize: 12, color: colors.primary, fontWeight: '500', marginTop: 4 },
+  chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
+})
+
+function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress, t }: ModuleSectionsProps) {
+  const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire')
+  const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire')
+
+  return (
+    <View style={{ gap: spacing.md }}>
+      {tools.length > 0 && (
+        <View style={{ gap: spacing.sm }}>
+          {scales.length > 0 && (
+            <Text style={sectionStyles.header}>{t('home.section_tools')}</Text>
+          )}
+          {tools.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isTeenMode={isTeenMode}
+              accentColor={teenColor(mod.module_type)}
+              onPress={() => handleModulePress(mod)}
+              t={t}
+            />
+          ))}
+        </View>
+      )}
+      {scales.length > 0 && (
+        <View style={{ gap: spacing.sm }}>
+          <Text style={sectionStyles.header}>{t('home.section_scales')}</Text>
+          {scales.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isTeenMode={isTeenMode}
+              accentColor={teenColor(mod.module_type)}
+              onPress={() => handleModulePress(mod)}
+              t={t}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  )
+}
+
+const sectionStyles = StyleSheet.create({
+  header: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: spacing.xs,
+  },
+})
+
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const patient = useAuthStore((s) => s.patient)
   const { t } = useTranslation()
-  const { isTeenMode, tg } = useTeen()
+  const { isTeenMode, tg, teenColor } = useTeen()
   const [modules, setModules] = useState<UnlockedModule[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -64,31 +207,21 @@ export default function HomeScreen() {
     setRefreshing(false)
   }
 
-  const handleModulePress = (moduleType: string) => {
-    const routes: Partial<Record<string, keyof AppStackParamList>> = {
-      sleep_diary:             'SleepDiary',
-      crisis_plan:             'CrisisPlan',
-      psychoeducation:         'Psychoeducation',
-      decisional_balance:      'DecisionalBalance',
-      beck_columns:            'BeckColumns',
-      mood_tracker:            'MoodTracker',
-      medication_adherence:    'MedicationAdherence',
-      medication_side_effects: 'MedicationSideEffects',
-      fear_thermometer:        'FearThermometer',
-      behavioral_activation:   'BehavioralActivation',
-      breathing_techniques:    'BreathingTechniques',
-      rim:                     'Rim',
-      grounding:               'Grounding',
-      cognitive_saturation:    'CognitiveSaturation',
-      emotion_wheel:           'EmotionWheel',
+  const handleModulePress = useCallback((mod: UnlockedModule) => {
+    // 1. Écrans custom dédiés (interaction non couverte par le moteur générique)
+    const customRoute = CUSTOM_ROUTES[mod.module_type]
+    if (customRoute) {
+      navigation.navigate(customRoute as never)
+      return
     }
-    const route = routes[moduleType]
-    if (route) {
-      navigation.navigate(route as never)
-    } else {
-      navigation.navigate('ModuleContent', { moduleType })
+    // 2. Questionnaire sans écran custom → moteur générique ScaleHistory
+    if (mod.module?.preview_kind === 'questionnaire') {
+      navigation.navigate('ScaleHistory', { scale_id: mod.module_type })
+      return
     }
-  }
+    // 3. Tous les autres → moteur générique ModuleContent (DB-driven)
+    navigation.navigate('ModuleContent', { moduleType: mod.module_type })
+  }, [navigation])
 
   if (loading) {
     return (
@@ -122,47 +255,13 @@ export default function HomeScreen() {
             description={isTeenMode ? t('home.empty_description', { ns: 'teen' }) : t('home.empty_description')}
           />
         ) : (
-          <View style={styles.list}>
-            {modules.map((mod) => {
-              const available = mod.module?.preview_kind !== 'coming_soon'
-              const accentColor = isTeenMode ? (mod.module?.color ?? undefined) : undefined
-              const iconName = (mod.module?.mobile_icon ?? 'help-circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
-              return (
-                <Pressable
-                  key={mod.id}
-                  onPress={() => handleModulePress(mod.module_type)}
-                >
-                  <Card
-                    state={!available ? 'disabled' : undefined}
-                    accentColor={accentColor}
-                  >
-                    <View style={styles.cardRow}>
-                      <View style={[
-                        styles.cardIcon,
-                        isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
-                      ]}>
-                        <MaterialCommunityIcons
-                          name={iconName}
-                          size={30}
-                          color={available ? (accentColor ?? colors.primary) : colors.textMuted}
-                        />
-                      </View>
-                      <View style={styles.cardContent}>
-                        <Text style={styles.cardTitle}>{t(`modules.${mod.module_type}.label`)}</Text>
-                        <Text style={styles.cardDesc}>{t(`modules.${mod.module_type}.description`)}</Text>
-                        {!available && (
-                          <Text style={styles.comingSoon}>{t('home.coming_soon')}</Text>
-                        )}
-                      </View>
-                      {available && (
-                        <Text style={[styles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
-                      )}
-                    </View>
-                  </Card>
-                </Pressable>
-              )
-            })}
-          </View>
+          <ModuleSections
+            modules={modules}
+            isTeenMode={isTeenMode}
+            teenColor={teenColor}
+            handleModulePress={handleModulePress}
+            t={t}
+          />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -175,12 +274,4 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
   subheading: { fontSize: 14, color: colors.textMuted, marginTop: -spacing.xs },
-  list: { gap: spacing.sm },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  cardIcon: { width: 42, alignItems: 'center', justifyContent: 'center' },
-  cardContent: { flex: 1 },
-  cardTitle: { fontSize: 17, fontWeight: '600', color: colors.text },
-  cardDesc: { fontSize: 14, color: colors.textMuted, marginTop: 2 },
-  comingSoon: { fontSize: 12, color: colors.primary, fontWeight: '500', marginTop: 4 },
-  chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
 })

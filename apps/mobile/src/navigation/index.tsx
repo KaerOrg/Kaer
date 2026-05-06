@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
+import { logger } from '@psytool/shared'
 import { useAuthStore } from '../store/authStore'
 import { initDatabase } from '../lib/database'
 import { setupAndroidChannel } from '../lib/notifications'
@@ -24,11 +25,19 @@ export default function Navigation() {
   const { patient, loading, loadSession } = useAuthStore()
 
   useEffect(() => {
-    // Initialise la base de données locale et les notifications au démarrage
     const init = async () => {
-      await initDatabase()
-      await setupAndroidChannel()
+      logger.log('[Boot] start')
+      try {
+        logger.log('[Boot] initDatabase...')
+        await initDatabase()
+        logger.log('[Boot] initDatabase OK')
+        await setupAndroidChannel()
+      } catch (e) {
+        logger.error('[Boot] initDatabase failed', e)
+      }
+      logger.log('[Boot] loadSession...')
       await loadSession()
+      logger.log('[Boot] loadSession OK')
     }
     init()
   }, [])

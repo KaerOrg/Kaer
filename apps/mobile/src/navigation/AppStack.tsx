@@ -7,28 +7,23 @@ import ProfileScreen from '../screens/ProfileScreen'
 import SleepDiaryScreen from '../screens/modules/SleepDiaryScreen'
 import SleepDiaryEntryScreen from '../screens/modules/SleepDiaryEntryScreen'
 import SleepDiaryMonthScreen from '../screens/modules/SleepDiaryMonthScreen'
-import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
 import BeckColumnsScreen from '../screens/modules/BeckColumnsScreen'
 import BeckEntryScreen from '../screens/modules/BeckEntryScreen'
-import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import MedicationAdherenceScreen from '../screens/modules/MedicationAdherenceScreen'
-import MedicationSideEffectsScreen from '../screens/modules/MedicationSideEffectsScreen'
 import FearThermometerScreen from '../screens/modules/FearThermometerScreen'
 import FearEntryScreen from '../screens/modules/FearEntryScreen'
 import BehavioralActivationScreen from '../screens/modules/BehavioralActivationScreen'
 import BehavioralActivationEntryScreen from '../screens/modules/BehavioralActivationEntryScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
-import RimScreen from '../screens/modules/RimScreen'
-import GroundingScreen from '../screens/modules/GroundingScreen'
-import CognitiveSaturationScreen from '../screens/modules/CognitiveSaturationScreen'
-import CognitiveSaturationExerciseScreen from '../screens/modules/CognitiveSaturationExerciseScreen'
 import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
 import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
 import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
+import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
+import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
@@ -42,28 +37,23 @@ export type AppStackParamList = {
   SleepDiary: undefined
   SleepDiaryEntry: { date?: string }
   SleepDiaryMonth: undefined
-  CrisisPlan: undefined
   Psychoeducation: undefined
   CardDetail: { cardId: string; isRead: boolean }
   DecisionalBalance: undefined
   BeckColumns: undefined
   BeckEntry: { recordId?: string }
-  MoodTracker: undefined
   MedicationAdherence: undefined
-  MedicationSideEffects: undefined
   FearThermometer: undefined
   FearEntry: { entryId?: string }
   BehavioralActivation: undefined
   BehavioralActivationEntry: { recordId?: string }
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
-  Rim: undefined
-  Grounding: undefined
-  CognitiveSaturation: undefined
-  CognitiveSaturationExercise: undefined
   EmotionWheel: undefined
   EmotionEntry: undefined
   EmotionMonth: undefined
+  ScaleHistory: { scale_id: string }
+  ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
 }
 
@@ -128,11 +118,6 @@ export default function AppStack() {
         options={{ title: 'Vue mensuelle' }}
       />
       <Stack.Screen
-        name="CrisisPlan"
-        component={CrisisPlanScreen}
-        options={{ title: 'Plan de crise' }}
-      />
-      <Stack.Screen
         name="Psychoeducation"
         component={PsychoeducationScreen}
         options={{ title: 'Psychoéducation' }}
@@ -164,19 +149,9 @@ export default function AppStack() {
         })}
       />
       <Stack.Screen
-        name="MoodTracker"
-        component={MoodTrackerScreen}
-        options={{ title: 'Thermomètre de l\'humeur' }}
-      />
-      <Stack.Screen
         name="MedicationAdherence"
         component={MedicationAdherenceScreen}
         options={{ title: 'Observance du traitement' }}
-      />
-      <Stack.Screen
-        name="MedicationSideEffects"
-        component={MedicationSideEffectsScreen}
-        options={{ title: 'Effets du traitement' }}
       />
       <Stack.Screen
         name="FearThermometer"
@@ -215,26 +190,6 @@ export default function AppStack() {
         })}
       />
       <Stack.Screen
-        name="Rim"
-        component={RimScreen}
-        options={{ title: 'RIM — Imagerie mentale' }}
-      />
-      <Stack.Screen
-        name="Grounding"
-        component={GroundingScreen}
-        options={{ title: 'Ancrage 5-4-3-2-1' }}
-      />
-      <Stack.Screen
-        name="CognitiveSaturation"
-        component={CognitiveSaturationScreen}
-        options={{ title: 'Saturation cognitive' }}
-      />
-      <Stack.Screen
-        name="CognitiveSaturationExercise"
-        component={CognitiveSaturationExerciseScreen}
-        options={{ title: 'Exercice de saturation' }}
-      />
-      <Stack.Screen
         name="EmotionWheel"
         component={EmotionWheelScreen}
         options={{ title: 'Roue des émotions' }}
@@ -248,6 +203,16 @@ export default function AppStack() {
         name="EmotionMonth"
         component={EmotionMonthScreen}
         options={{ title: 'Bilan mensuel' }}
+      />
+      <Stack.Screen
+        name="ScaleHistory"
+        component={ScaleHistoryScreen}
+        options={({ route }) => ({ title: route.params.scale_id.toUpperCase().replace('_', '-') })}
+      />
+      <Stack.Screen
+        name="ScaleEntry"
+        component={ScaleEntryScreen}
+        options={{ title: 'Nouveau questionnaire' }}
       />
       <Stack.Screen
         name="ModuleContent"

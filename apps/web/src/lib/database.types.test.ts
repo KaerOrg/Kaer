@@ -24,12 +24,19 @@ const ALL_MODULE_IDS = [
   'cognitive_saturation',
   'craving_journal',
   'decisional_balance',
+  // Clinical scales (generic ModuleRenderer pattern)
+  'phq9',
+  'gad7',
+  'bsl23',
+  'snap_iv',
+  'asrs6',
+  'asrs18',
 ]
 
 const CATEGORY_IDS = ['safety', 'iatrogenic', 'lifestyle', 'emotion', 'cognitive', 'anxiety', 'addiction']
 
 describe('i18n FR locale — modules', () => {
-  it('contient un label pour chacun des 22 modules', () => {
+  it('contient un label pour chacun des 28 modules', () => {
     for (const id of ALL_MODULE_IDS) {
       const entry = (frLocale.module as Record<string, { label?: string }>)[id]
       expect(entry, `module.${id} manquant dans la locale FR`).toBeDefined()
@@ -37,14 +44,14 @@ describe('i18n FR locale — modules', () => {
     }
   })
 
-  it('contient une description pour chacun des 22 modules', () => {
+  it('contient une description pour chacun des 28 modules', () => {
     for (const id of ALL_MODULE_IDS) {
       const entry = (frLocale.module as Record<string, { description?: string }>)[id]
       expect(entry?.description, `module.${id}.description manquant`).toBeTruthy()
     }
   })
 
-  it('couvre exactement les 22 modules', () => {
+  it('couvre exactement les 28 modules', () => {
     expect(Object.keys(frLocale.module)).toHaveLength(ALL_MODULE_IDS.length)
   })
 

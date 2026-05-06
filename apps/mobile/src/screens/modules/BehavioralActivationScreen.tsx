@@ -20,6 +20,7 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateFull } from '../../lib/dateUtils'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
@@ -43,14 +44,6 @@ function groupByDate(records: ActivityRecord[]): { date: string; items: Activity
     .map(([date, items]) => ({ date, items }))
 }
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-}
 
 // ─── Carte d'une activité ─────────────────────────────────────────────────────
 
@@ -221,7 +214,7 @@ function MonthCalendarView({ records, selectedDay, onDayPress }: MonthCalendarPr
               ]}
               onPress={() => onDayPress(dateStr)}
               accessibilityRole="button"
-              accessibilityLabel={`${formatDate(dateStr)}${acts ? `, ${acts.done + acts.planned} activité(s)` : ''}`}
+              accessibilityLabel={`${formatDateFull(dateStr)}${acts ? `, ${acts.done + acts.planned} activité(s)` : ''}`}
             >
               <Text style={[
                 calStyles.dayNum,
@@ -488,10 +481,10 @@ export default function BehavioralActivationScreen() {
               groups.map(({ date, items }) => (
                 <View key={date} style={styles.group}>
                   {viewMode === 'list' && (
-                    <Text style={styles.groupDate}>{formatDate(date)}</Text>
+                    <Text style={styles.groupDate}>{formatDateFull(date)}</Text>
                   )}
                   {viewMode === 'month' && selectedDay && (
-                    <Text style={styles.groupDate}>{formatDate(date)}</Text>
+                    <Text style={styles.groupDate}>{formatDateFull(date)}</Text>
                   )}
                   {items.map((r) => (
                     <ActivityCard

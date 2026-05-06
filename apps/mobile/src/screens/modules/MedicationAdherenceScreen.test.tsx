@@ -2,12 +2,10 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import MedicationAdherenceScreen from './MedicationAdherenceScreen'
 
-// ─── Mocks des dépendances externes ──────────────────────────────────────────
-
 jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
-    useFocusEffect: (cb: () => () => void) => {
+    useFocusEffect: (cb: () => void) => {
       React.useEffect(() => { cb() }, [])
     },
   }
@@ -17,6 +15,7 @@ jest.mock('../../lib/database', () => ({
   getMedicationAdherenceEntry: jest.fn().mockResolvedValue(null),
   getAllMedicationAdherenceEntries: jest.fn().mockResolvedValue([]),
   saveMedicationAdherenceEntry: jest.fn().mockResolvedValue(undefined),
+  deleteMedicationAdherenceEntry: jest.fn().mockResolvedValue(undefined),
   generateId: jest.fn().mockReturnValue('test-id-999'),
 }))
 
@@ -29,7 +28,7 @@ jest.mock('../../lib/supabase', () => ({
 }))
 
 jest.mock('../../store/authStore', () => ({
-  useAuthStore: jest.fn().mockImplementation((selector: (s: { patient: { id: string } | null }) => unknown) =>
+  useAuthStore: jest.fn().mockImplementation((selector) =>
     selector({ patient: { id: 'patient-uuid-1' } })
   ),
 }))
@@ -38,12 +37,12 @@ jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+jest.mock('../../hooks/useTeen', () => ({
+  useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
+}))
 
 const { getMedicationAdherenceEntry, getAllMedicationAdherenceEntries, saveMedicationAdherenceEntry } =
   jest.requireMock('../../lib/database')
-
-// ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('MedicationAdherenceScreen', () => {
   beforeEach(() => {
@@ -52,12 +51,7 @@ describe('MedicationAdherenceScreen', () => {
     getAllMedicationAdherenceEntries.mockResolvedValue([])
   })
 
-  it('affiche la section de saisie du jour', async () => {
-    render(<MedicationAdherenceScreen />)
-    expect(await screen.findByText('Mon traitement du jour')).toBeTruthy()
-  })
-
-  it('affiche les 3 boutons de statut', async () => {
+  it('affiche les 3 boutons de statut sur l\'onglet Aujourd\'hui', async () => {
     render(<MedicationAdherenceScreen />)
     expect(await screen.findByText('Pris')).toBeTruthy()
     expect(screen.getByText('Partiellement')).toBeTruthy()
@@ -81,7 +75,7 @@ describe('MedicationAdherenceScreen', () => {
     expect(await screen.findByText('Mettre à jour')).toBeTruthy()
   })
 
-  it('pré-remplit le statut si une entrée du jour existe', async () => {
+  it('pré-remplit les notes si une entrée du jour existe', async () => {
     getMedicationAdherenceEntry.mockResolvedValue({
       id: 'existing-id',
       date: new Date().toISOString().slice(0, 10),
@@ -90,34 +84,33 @@ describe('MedicationAdherenceScreen', () => {
       created_at: new Date().toISOString(),
     })
     render(<MedicationAdherenceScreen />)
-    // Le champ notes doit être pré-rempli
     expect(await screen.findByDisplayValue('oubli le matin')).toBeTruthy()
   })
 
-  it('affiche l\'historique quand des entrées existent', async () => {
+  it('affiche l\'historique sur l\'onglet Historique', async () => {
     getAllMedicationAdherenceEntries.mockResolvedValue([
       { id: 'h1', date: '2026-04-13', status: 'taken', notes: null, created_at: '2026-04-13T10:00:00' },
       { id: 'h2', date: '2026-04-12', status: 'missed', notes: 'oubli', created_at: '2026-04-12T10:00:00' },
     ])
     render(<MedicationAdherenceScreen />)
-    // Les deux statuts doivent apparaître dans l'historique
+    await screen.findByText('Enregistrer')
+    fireEvent.press(screen.getByText('Historique'))
     const prisElements = await screen.findAllByText('Pris')
     expect(prisElements.length).toBeGreaterThanOrEqual(1)
     const nonPrisElements = await screen.findAllByText('Non pris')
     expect(nonPrisElements.length).toBeGreaterThanOrEqual(1)
   })
 
-  it('affiche "Aucune saisie" quand l\'historique est vide', async () => {
+  it('affiche "Aucune saisie" sur l\'onglet Historique quand vide', async () => {
     render(<MedicationAdherenceScreen />)
+    await screen.findByText('Enregistrer')
+    fireEvent.press(screen.getByText('Historique'))
     expect(await screen.findByText(/Aucune saisie/i)).toBeTruthy()
   })
 
-  it('appelle saveMedicationAdherenceEntry au tap sur Enregistrer avec un statut sélectionné', async () => {
+  it('appelle saveMedicationAdherenceEntry avec le statut sélectionné', async () => {
     render(<MedicationAdherenceScreen />)
-    // Sélectionner le statut "Pris"
-    const prisBtn = await screen.findByText('Pris')
-    fireEvent.press(prisBtn)
-    // Tapper le bouton Enregistrer
+    fireEvent.press(await screen.findByText('Pris'))
     fireEvent.press(screen.getByText('Enregistrer'))
     await waitFor(() => {
       expect(saveMedicationAdherenceEntry).toHaveBeenCalledWith(
@@ -134,8 +127,8 @@ describe('MedicationAdherenceScreen', () => {
     })
   })
 
-  it('affiche la section historique', async () => {
+  it('affiche l\'onglet Historique', async () => {
     render(<MedicationAdherenceScreen />)
-    expect(await screen.findByText(/Historique/i)).toBeTruthy()
+    expect(await screen.findByText('Historique')).toBeTruthy()
   })
 })

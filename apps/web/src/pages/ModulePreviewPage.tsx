@@ -34,8 +34,8 @@ export function ModulePreviewPage() {
         </button>
 
         <div className="preview-page__meta">
-          <h1 className="preview-page__title">{t(`module.${moduleType}.label`)}</h1>
-          <p className="preview-page__desc">{t(`module.${moduleType}.description`)}</p>
+          <h1 className="preview-page__title">{t(`modules.${moduleType}.label`)}</h1>
+          <p className="preview-page__desc">{t(`modules.${moduleType}.description`)}</p>
         </div>
 
         {previewKind === null && (

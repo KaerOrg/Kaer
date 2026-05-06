@@ -16,6 +16,7 @@ import { getAllEmotionEntries, deleteEmotionEntry, type EmotionEntry } from '../
 import { EMOTION_WHEEL } from '../../constants/emotionWheel'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateTime } from '../../lib/dateUtils'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
@@ -24,16 +25,6 @@ type Nav = NativeStackNavigationProp<AppStackParamList>
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDateTime(isoStr: string): string {
-  const d = new Date(isoStr)
-  return d.toLocaleDateString('fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
 
 // Lookup couleur par clé primaire — module-level pour éviter les re-créations
 const PRIMARY_COLOR_MAP = new Map(EMOTION_WHEEL.map((e) => [e.key, e.color]))

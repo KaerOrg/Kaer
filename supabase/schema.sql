@@ -99,6 +99,20 @@ begin
   end if;
 end $$;
 
+-- Migration idempotente : ajoute language_preference sur practitioners
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'practitioners'
+      and column_name  = 'language_preference'
+  ) then
+    alter table public.practitioners
+      add column language_preference text not null default 'fr';
+  end if;
+end $$;
+
 -- Migration idempotente : ajoute les infos patient sur invitations
 do $$
 begin
@@ -320,6 +334,76 @@ create policy "modules_patient" on public.patient_modules
 drop policy if exists "modules_patient_update" on public.patient_modules;
 create policy "modules_patient_update" on public.patient_modules
   for update using (auth.uid() = patient_id and revoked_at is null);
+
+
+-- 6. Évaluations C-SSRS (Columbia Suicide Severity Rating Scale — « Depuis la dernière visite »)
+--    Outil d'hétéro-évaluation : rempli par le praticien pendant la consultation.
+--    Données cliniques praticien — JAMAIS accessibles au patient.
+--    ⚠️ Requiert un hébergement HDS pour usage commercial (données de santé sensibles).
+--
+--    Structure du formulaire :
+--      ideation_answers  — 5 items binaires (Oui/Non) + champ texte libre « Si oui, décrivez »
+--      intensite_ideation — 5 dimensions Likert (Fréquence, Durée, Maîtrise, Dissuasifs, Causes)
+--                           NULL si Q1 = Non ET Q2 = Non
+--      behavior_answers  — 4 items binaires + champ texte libre
+--      nssi              — comportement auto-agressif non suicidaire (0/1)
+--      nb_tentatives_*   — compteurs de tentatives
+--      comportement_observe — comportement suicidaire observé par le praticien (0/1)
+--      suicide_reussi    — (0/1)
+--      date_tentative_plus_letale — date ISO
+--      letalite_observee — 0–5 (lésions médicales observées)
+--      letalite_potentielle — 0–2 (si létalité observée = 0 uniquement)
+--      ideation_level    — niveau le plus élevé endorsé (0–5), calculé
+--      behavior_count    — comportements endorsés (0–4), calculé
+create table if not exists public.cssrs_screen_assessments (
+  id                            uuid        primary key default gen_random_uuid(),
+  patient_id                    uuid        not null references public.patients(id) on delete cascade,
+  practitioner_id               uuid        not null references public.practitioners(id) on delete cascade,
+
+  -- Idéation suicidaire (5 items)
+  -- Format : [{"value": 0|1, "description": "..."}]
+  ideation_answers              jsonb       not null default '[]',
+
+  -- Intensité de l'idéation (null si Q1 = Non ET Q2 = Non)
+  -- Format : {"frequence": 1-5, "duree": 1-5, "maitrise": 0-5, "dissuasifs": 0-5, "causes": 0-5}
+  intensite_ideation            jsonb,
+
+  -- Comportements suicidaires (4 items)
+  -- Format : [{"value": 0|1, "description": "..."}]
+  behavior_answers              jsonb       not null default '[]',
+
+  -- Section complémentaire
+  nssi                          smallint,   -- 0 = Non, 1 = Oui
+  nb_tentatives_averees         smallint,
+  nb_tentatives_interrompues    smallint,
+  nb_tentatives_avortees        smallint,
+  comportement_observe          smallint,   -- 0 = Non, 1 = Oui
+  suicide_reussi                smallint,   -- 0 = Non, 1 = Oui
+  date_tentative_plus_letale    date,
+  letalite_observee             smallint,   -- 0–5
+  letalite_potentielle          smallint,   -- 0–2 (uniquement si létalité observée = 0)
+
+  -- Scores calculés (pour affichage rapide dans l'historique)
+  ideation_level                smallint    not null default 0,
+  behavior_count                smallint    not null default 0,
+
+  assessed_at                   timestamptz not null default now()
+);
+
+create index if not exists idx_cssrs_patient
+  on public.cssrs_screen_assessments(patient_id);
+
+create index if not exists idx_cssrs_practitioner
+  on public.cssrs_screen_assessments(practitioner_id);
+
+alter table public.cssrs_screen_assessments enable row level security;
+
+-- Praticien : accès total à ses propres évaluations
+drop policy if exists "cssrs_practitioner" on public.cssrs_screen_assessments;
+create policy "cssrs_practitioner" on public.cssrs_screen_assessments
+  for all using (auth.uid() = practitioner_id);
+
+-- Le patient n'a AUCUN accès (données cliniques praticien uniquement)
 
 
 -- ============================================================
@@ -756,4 +840,228 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('bt.field_4', 'widget_type', 'info'),
   ('bt.field_5', 'widget_type', 'info'),
   ('bt.field_6', 'widget_type', 'text')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : Questionnaires cliniques génériques
+-- PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS-6, ASRS-18
+-- preview_kind = 'questionnaire' → ScaleEntryScreen / ScaleHistoryScreen
+-- ============================================================
+
+-- Catégorie pour les questionnaires d'évaluation
+INSERT INTO public.module_categories (id, sort_order)
+VALUES ('assessments', 8)
+ON CONFLICT (id) DO NOTHING;
+
+-- Modules
+INSERT INTO public.modules (id, category_id, preview_kind, sort_order, is_invite_excluded, icon, mobile_icon, color)
+VALUES
+  ('phq9',    'assessments', 'questionnaire', 23, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),
+  ('gad7',    'assessments', 'questionnaire', 24, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),
+  ('bsl23',   'assessments', 'questionnaire', 25, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),
+  ('snap_iv', 'assessments', 'questionnaire', 26, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),
+  ('asrs6',   'assessments', 'questionnaire', 27, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),
+  ('asrs18',  'assessments', 'questionnaire', 28, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1')
+ON CONFLICT (id) DO UPDATE SET preview_kind = EXCLUDED.preview_kind;
+
+-- ── PHQ-9 ─────────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('phq9.instr1', 'phq9', 'scale_instruction', 'modules.phq9.instructions_1', 0),
+  ('phq9.instr2', 'phq9', 'scale_instruction', 'modules.phq9.instructions_2', 1),
+  ('phq9.opt0',   'phq9', 'scale_option',       'modules.phq9.opt_0',          10),
+  ('phq9.opt1',   'phq9', 'scale_option',       'modules.phq9.opt_1',          11),
+  ('phq9.opt2',   'phq9', 'scale_option',       'modules.phq9.opt_2',          12),
+  ('phq9.opt3',   'phq9', 'scale_option',       'modules.phq9.opt_3',          13),
+  ('phq9.q1',     'phq9', 'scale_question',     'modules.phq9.q1',             100),
+  ('phq9.q2',     'phq9', 'scale_question',     'modules.phq9.q2',             101),
+  ('phq9.q3',     'phq9', 'scale_question',     'modules.phq9.q3',             102),
+  ('phq9.q4',     'phq9', 'scale_question',     'modules.phq9.q4',             103),
+  ('phq9.q5',     'phq9', 'scale_question',     'modules.phq9.q5',             104),
+  ('phq9.q6',     'phq9', 'scale_question',     'modules.phq9.q6',             105),
+  ('phq9.q7',     'phq9', 'scale_question',     'modules.phq9.q7',             106),
+  ('phq9.q8',     'phq9', 'scale_question',     'modules.phq9.q8',             107),
+  ('phq9.q9',     'phq9', 'scale_question',     'modules.phq9.q9',             108),
+  ('phq9.footer', 'phq9', 'footer_note',         'modules.phq9.footer',         999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('phq9.opt0', 'value', '0'), ('phq9.opt1', 'value', '1'),
+  ('phq9.opt2', 'value', '2'), ('phq9.opt3', 'value', '3')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+-- ── GAD-7 ─────────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('gad7.instr1', 'gad7', 'scale_instruction', 'modules.gad7.instructions_1', 0),
+  ('gad7.instr2', 'gad7', 'scale_instruction', 'modules.gad7.instructions_2', 1),
+  ('gad7.opt0',   'gad7', 'scale_option',       'modules.gad7.opt_0',          10),
+  ('gad7.opt1',   'gad7', 'scale_option',       'modules.gad7.opt_1',          11),
+  ('gad7.opt2',   'gad7', 'scale_option',       'modules.gad7.opt_2',          12),
+  ('gad7.opt3',   'gad7', 'scale_option',       'modules.gad7.opt_3',          13),
+  ('gad7.q1',     'gad7', 'scale_question',     'modules.gad7.q1',             100),
+  ('gad7.q2',     'gad7', 'scale_question',     'modules.gad7.q2',             101),
+  ('gad7.q3',     'gad7', 'scale_question',     'modules.gad7.q3',             102),
+  ('gad7.q4',     'gad7', 'scale_question',     'modules.gad7.q4',             103),
+  ('gad7.q5',     'gad7', 'scale_question',     'modules.gad7.q5',             104),
+  ('gad7.q6',     'gad7', 'scale_question',     'modules.gad7.q6',             105),
+  ('gad7.q7',     'gad7', 'scale_question',     'modules.gad7.q7',             106),
+  ('gad7.footer', 'gad7', 'footer_note',         'modules.gad7.footer',         999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('gad7.opt0', 'value', '0'), ('gad7.opt1', 'value', '1'),
+  ('gad7.opt2', 'value', '2'), ('gad7.opt3', 'value', '3')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+-- ── BSL-23 ────────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('bsl23.instr1', 'bsl23', 'scale_instruction', 'modules.bsl23.instructions_1', 0),
+  ('bsl23.instr2', 'bsl23', 'scale_instruction', 'modules.bsl23.instructions_2', 1),
+  ('bsl23.opt0',   'bsl23', 'scale_option',       'modules.bsl23.opt_0',          10),
+  ('bsl23.opt1',   'bsl23', 'scale_option',       'modules.bsl23.opt_1',          11),
+  ('bsl23.opt2',   'bsl23', 'scale_option',       'modules.bsl23.opt_2',          12),
+  ('bsl23.opt3',   'bsl23', 'scale_option',       'modules.bsl23.opt_3',          13),
+  ('bsl23.opt4',   'bsl23', 'scale_option',       'modules.bsl23.opt_4',          14),
+  ('bsl23.leg0',   'bsl23', 'scale_legend_item',  'modules.bsl23.legend_0',       20),
+  ('bsl23.leg1',   'bsl23', 'scale_legend_item',  'modules.bsl23.legend_1',       21),
+  ('bsl23.leg2',   'bsl23', 'scale_legend_item',  'modules.bsl23.legend_2',       22),
+  ('bsl23.leg3',   'bsl23', 'scale_legend_item',  'modules.bsl23.legend_3',       23),
+  ('bsl23.leg4',   'bsl23', 'scale_legend_item',  'modules.bsl23.legend_4',       24),
+  ('bsl23.q1',     'bsl23', 'scale_question',     'modules.bsl23.q1',             100),
+  ('bsl23.q2',     'bsl23', 'scale_question',     'modules.bsl23.q2',             101),
+  ('bsl23.q3',     'bsl23', 'scale_question',     'modules.bsl23.q3',             102),
+  ('bsl23.q4',     'bsl23', 'scale_question',     'modules.bsl23.q4',             103),
+  ('bsl23.q5',     'bsl23', 'scale_question',     'modules.bsl23.q5',             104),
+  ('bsl23.q6',     'bsl23', 'scale_question',     'modules.bsl23.q6',             105),
+  ('bsl23.q7',     'bsl23', 'scale_question',     'modules.bsl23.q7',             106),
+  ('bsl23.q8',     'bsl23', 'scale_question',     'modules.bsl23.q8',             107),
+  ('bsl23.q9',     'bsl23', 'scale_question',     'modules.bsl23.q9',             108),
+  ('bsl23.q10',    'bsl23', 'scale_question',     'modules.bsl23.q10',            109),
+  ('bsl23.q11',    'bsl23', 'scale_question',     'modules.bsl23.q11',            110),
+  ('bsl23.q12',    'bsl23', 'scale_question',     'modules.bsl23.q12',            111),
+  ('bsl23.q13',    'bsl23', 'scale_question',     'modules.bsl23.q13',            112),
+  ('bsl23.q14',    'bsl23', 'scale_question',     'modules.bsl23.q14',            113),
+  ('bsl23.q15',    'bsl23', 'scale_question',     'modules.bsl23.q15',            114),
+  ('bsl23.q16',    'bsl23', 'scale_question',     'modules.bsl23.q16',            115),
+  ('bsl23.q17',    'bsl23', 'scale_question',     'modules.bsl23.q17',            116),
+  ('bsl23.q18',    'bsl23', 'scale_question',     'modules.bsl23.q18',            117),
+  ('bsl23.q19',    'bsl23', 'scale_question',     'modules.bsl23.q19',            118),
+  ('bsl23.q20',    'bsl23', 'scale_question',     'modules.bsl23.q20',            119),
+  ('bsl23.q21',    'bsl23', 'scale_question',     'modules.bsl23.q21',            120),
+  ('bsl23.q22',    'bsl23', 'scale_question',     'modules.bsl23.q22',            121),
+  ('bsl23.q23',    'bsl23', 'scale_question',     'modules.bsl23.q23',            122),
+  ('bsl23.footer', 'bsl23', 'footer_note',         'modules.bsl23.footer',         999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('bsl23.opt0', 'value', '0'), ('bsl23.opt1', 'value', '1'), ('bsl23.opt2', 'value', '2'),
+  ('bsl23.opt3', 'value', '3'), ('bsl23.opt4', 'value', '4'),
+  ('bsl23.leg0', 'value', '0'), ('bsl23.leg1', 'value', '1'), ('bsl23.leg2', 'value', '2'),
+  ('bsl23.leg3', 'value', '3'), ('bsl23.leg4', 'value', '4')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+-- ── SNAP-IV ───────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('snap_iv.instr1',  'snap_iv', 'scale_instruction', 'modules.snap_iv.instructions_1',        0),
+  ('snap_iv.instr2',  'snap_iv', 'scale_instruction', 'modules.snap_iv.instructions_2',        1),
+  ('snap_iv.opt0',    'snap_iv', 'scale_option',       'modules.snap_iv.opt_0',                 10),
+  ('snap_iv.opt1',    'snap_iv', 'scale_option',       'modules.snap_iv.opt_1',                 11),
+  ('snap_iv.opt2',    'snap_iv', 'scale_option',       'modules.snap_iv.opt_2',                 12),
+  ('snap_iv.opt3',    'snap_iv', 'scale_option',       'modules.snap_iv.opt_3',                 13),
+  ('snap_iv.warn',    'snap_iv', 'scale_warning',      'modules.snap_iv.warning',               30),
+  ('snap_iv.sec_i',   'snap_iv', 'scale_section',      'modules.snap_iv.section_inattention',   100),
+  ('snap_iv.q1',      'snap_iv', 'scale_question',     'modules.snap_iv.q1',                    101),
+  ('snap_iv.q2',      'snap_iv', 'scale_question',     'modules.snap_iv.q2',                    102),
+  ('snap_iv.q3',      'snap_iv', 'scale_question',     'modules.snap_iv.q3',                    103),
+  ('snap_iv.q4',      'snap_iv', 'scale_question',     'modules.snap_iv.q4',                    104),
+  ('snap_iv.q5',      'snap_iv', 'scale_question',     'modules.snap_iv.q5',                    105),
+  ('snap_iv.q6',      'snap_iv', 'scale_question',     'modules.snap_iv.q6',                    106),
+  ('snap_iv.q7',      'snap_iv', 'scale_question',     'modules.snap_iv.q7',                    107),
+  ('snap_iv.q8',      'snap_iv', 'scale_question',     'modules.snap_iv.q8',                    108),
+  ('snap_iv.q9',      'snap_iv', 'scale_question',     'modules.snap_iv.q9',                    109),
+  ('snap_iv.sec_hi',  'snap_iv', 'scale_section',      'modules.snap_iv.section_hyperactivite', 200),
+  ('snap_iv.q10',     'snap_iv', 'scale_question',     'modules.snap_iv.q10',                   201),
+  ('snap_iv.q11',     'snap_iv', 'scale_question',     'modules.snap_iv.q11',                   202),
+  ('snap_iv.q12',     'snap_iv', 'scale_question',     'modules.snap_iv.q12',                   203),
+  ('snap_iv.q13',     'snap_iv', 'scale_question',     'modules.snap_iv.q13',                   204),
+  ('snap_iv.q14',     'snap_iv', 'scale_question',     'modules.snap_iv.q14',                   205),
+  ('snap_iv.q15',     'snap_iv', 'scale_question',     'modules.snap_iv.q15',                   206),
+  ('snap_iv.q16',     'snap_iv', 'scale_question',     'modules.snap_iv.q16',                   207),
+  ('snap_iv.q17',     'snap_iv', 'scale_question',     'modules.snap_iv.q17',                   208),
+  ('snap_iv.q18',     'snap_iv', 'scale_question',     'modules.snap_iv.q18',                   209),
+  ('snap_iv.sec_tod', 'snap_iv', 'scale_section',      'modules.snap_iv.section_tod',           300),
+  ('snap_iv.q19',     'snap_iv', 'scale_question',     'modules.snap_iv.q19',                   301),
+  ('snap_iv.q20',     'snap_iv', 'scale_question',     'modules.snap_iv.q20',                   302),
+  ('snap_iv.q21',     'snap_iv', 'scale_question',     'modules.snap_iv.q21',                   303),
+  ('snap_iv.q22',     'snap_iv', 'scale_question',     'modules.snap_iv.q22',                   304),
+  ('snap_iv.q23',     'snap_iv', 'scale_question',     'modules.snap_iv.q23',                   305),
+  ('snap_iv.q24',     'snap_iv', 'scale_question',     'modules.snap_iv.q24',                   306),
+  ('snap_iv.q25',     'snap_iv', 'scale_question',     'modules.snap_iv.q25',                   307),
+  ('snap_iv.q26',     'snap_iv', 'scale_question',     'modules.snap_iv.q26',                   308),
+  ('snap_iv.footer',  'snap_iv', 'footer_note',         'modules.snap_iv.footer',                999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('snap_iv.opt0', 'value', '0'), ('snap_iv.opt1', 'value', '1'),
+  ('snap_iv.opt2', 'value', '2'), ('snap_iv.opt3', 'value', '3')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+-- ── ASRS-6 ────────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('asrs6.instr1', 'asrs6', 'scale_instruction', 'modules.asrs6.instructions_1', 0),
+  ('asrs6.instr2', 'asrs6', 'scale_instruction', 'modules.asrs6.instructions_2', 1),
+  ('asrs6.opt0',   'asrs6', 'scale_option',       'modules.asrs6.opt_0',          10),
+  ('asrs6.opt1',   'asrs6', 'scale_option',       'modules.asrs6.opt_1',          11),
+  ('asrs6.opt2',   'asrs6', 'scale_option',       'modules.asrs6.opt_2',          12),
+  ('asrs6.opt3',   'asrs6', 'scale_option',       'modules.asrs6.opt_3',          13),
+  ('asrs6.opt4',   'asrs6', 'scale_option',       'modules.asrs6.opt_4',          14),
+  ('asrs6.q1',     'asrs6', 'scale_question',     'modules.asrs6.q1',             100),
+  ('asrs6.q2',     'asrs6', 'scale_question',     'modules.asrs6.q2',             101),
+  ('asrs6.q3',     'asrs6', 'scale_question',     'modules.asrs6.q3',             102),
+  ('asrs6.q4',     'asrs6', 'scale_question',     'modules.asrs6.q4',             103),
+  ('asrs6.q5',     'asrs6', 'scale_question',     'modules.asrs6.q5',             104),
+  ('asrs6.q6',     'asrs6', 'scale_question',     'modules.asrs6.q6',             105),
+  ('asrs6.footer', 'asrs6', 'footer_note',         'modules.asrs6.footer',         999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('asrs6.opt0', 'value', '0'), ('asrs6.opt1', 'value', '1'), ('asrs6.opt2', 'value', '2'),
+  ('asrs6.opt3', 'value', '3'), ('asrs6.opt4', 'value', '4')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+-- ── ASRS-18 ───────────────────────────────────────────────────────────────────
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('asrs18.instr1', 'asrs18', 'scale_instruction', 'modules.asrs18.instructions_1', 0),
+  ('asrs18.instr2', 'asrs18', 'scale_instruction', 'modules.asrs18.instructions_2', 1),
+  ('asrs18.opt0',   'asrs18', 'scale_option',       'modules.asrs18.opt_0',          10),
+  ('asrs18.opt1',   'asrs18', 'scale_option',       'modules.asrs18.opt_1',          11),
+  ('asrs18.opt2',   'asrs18', 'scale_option',       'modules.asrs18.opt_2',          12),
+  ('asrs18.opt3',   'asrs18', 'scale_option',       'modules.asrs18.opt_3',          13),
+  ('asrs18.opt4',   'asrs18', 'scale_option',       'modules.asrs18.opt_4',          14),
+  ('asrs18.sec_a',  'asrs18', 'scale_section',      'modules.asrs18.section_part_a', 100),
+  ('asrs18.q1',     'asrs18', 'scale_question',     'modules.asrs18.q1',             101),
+  ('asrs18.q2',     'asrs18', 'scale_question',     'modules.asrs18.q2',             102),
+  ('asrs18.q3',     'asrs18', 'scale_question',     'modules.asrs18.q3',             103),
+  ('asrs18.q4',     'asrs18', 'scale_question',     'modules.asrs18.q4',             104),
+  ('asrs18.q5',     'asrs18', 'scale_question',     'modules.asrs18.q5',             105),
+  ('asrs18.q6',     'asrs18', 'scale_question',     'modules.asrs18.q6',             106),
+  ('asrs18.sec_b',  'asrs18', 'scale_section',      'modules.asrs18.section_part_b', 200),
+  ('asrs18.q7',     'asrs18', 'scale_question',     'modules.asrs18.q7',             201),
+  ('asrs18.q8',     'asrs18', 'scale_question',     'modules.asrs18.q8',             202),
+  ('asrs18.q9',     'asrs18', 'scale_question',     'modules.asrs18.q9',             203),
+  ('asrs18.q10',    'asrs18', 'scale_question',     'modules.asrs18.q10',            204),
+  ('asrs18.q11',    'asrs18', 'scale_question',     'modules.asrs18.q11',            205),
+  ('asrs18.q12',    'asrs18', 'scale_question',     'modules.asrs18.q12',            206),
+  ('asrs18.q13',    'asrs18', 'scale_question',     'modules.asrs18.q13',            207),
+  ('asrs18.q14',    'asrs18', 'scale_question',     'modules.asrs18.q14',            208),
+  ('asrs18.q15',    'asrs18', 'scale_question',     'modules.asrs18.q15',            209),
+  ('asrs18.q16',    'asrs18', 'scale_question',     'modules.asrs18.q16',            210),
+  ('asrs18.q17',    'asrs18', 'scale_question',     'modules.asrs18.q17',            211),
+  ('asrs18.q18',    'asrs18', 'scale_question',     'modules.asrs18.q18',            212),
+  ('asrs18.footer', 'asrs18', 'footer_note',         'modules.asrs18.footer',         999)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('asrs18.opt0', 'value', '0'), ('asrs18.opt1', 'value', '1'), ('asrs18.opt2', 'value', '2'),
+  ('asrs18.opt3', 'value', '3'), ('asrs18.opt4', 'value', '4')
 ON CONFLICT (field_id, prop_key) DO NOTHING;

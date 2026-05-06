@@ -26,6 +26,7 @@ import {
 } from '../../lib/database'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateShortYear } from '../../lib/dateUtils'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
@@ -34,14 +35,6 @@ type Nav = NativeStackNavigationProp<AppStackParamList>
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
 
 // ─── Barre SUDs visuelle ──────────────────────────────────────────────────────
 // Affiche le chiffre brut + une barre proportionnelle sans couleur interprétative
@@ -107,7 +100,7 @@ function EntryCard({ entry, onEdit, onDelete }: EntryCardProps) {
       <View style={cardStyles.header}>
         <View style={cardStyles.headerLeft}>
           <Text style={cardStyles.situation} numberOfLines={1}>{entry.situation_label}</Text>
-          <Text style={cardStyles.date}>{formatDate(entry.date)}</Text>
+          <Text style={cardStyles.date}>{formatDateShortYear(entry.date)}</Text>
         </View>
         <View style={cardStyles.actions}>
           <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('common.modify')}>

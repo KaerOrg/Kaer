@@ -49,10 +49,52 @@ Valeurs de `preview_kind` et leur layout :
 | `preview_kind` | Layout React | Modules exemples |
 |---|---|---|
 | `steps` | Liste ordonnée verticale de sections | `crisis_plan`, `beck_columns` |
-| `fields` | Grille de champs avec widget | `sleep_diary`, `mood_tracker`, `medication_adherence` |
+| `fields` | Grille de champs avec widget | `sleep_diary`, `medication_adherence` |
 | `grid2x2` | Matrice 2×2 | `decisional_balance` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
+| `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18`, `mood_tracker` |
+| `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
+| `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
+| `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
+
+#### `questionnaire` — circuit spécifique mobile
+
+Pour les modules `questionnaire`, le rendu interactif côté patient suit un circuit différent :
+
+```
+Supabase module_content_fields
+  ↓
+fetchModuleFields(scale_id)  →  ContentField[]
+  ↓
+ScaleEntryScreen  (apps/mobile/src/screens/modules/ScaleEntryScreen.tsx)
+  ├── FieldRenderer preview_kind='questionnaire'
+  │     ↓
+  │   QuestionnaireLayout
+  │     ├── scale_instruction     → bloc intro
+  │     ├── scale_legend_item     → légende numérique (BSL-23) — prop value
+  │     ├── scale_warning         → bandeau jaune hétéro-évaluation (SNAP-IV)
+  │     ├── scale_section         → en-tête de section (SNAP-IV, ASRS-18)
+  │     ├── scale_question        → question + LikertWidget (Likert discret)
+  │     ├── scale_slider_question → question + pips numériques (1–10 ou autre range)
+  │     ├── scale_number_input    → champ numérique libre (clavier)
+  │     ├── scale_text_input      → champ texte libre (notes)
+  │     └── footer_note           → note MDR bas de page
+  │
+  └── saveScaleEntry(entry: ScaleEntry)  →  SQLite scale_entries
+
+ScaleHistoryScreen  (apps/mobile/src/screens/modules/ScaleHistoryScreen.tsx)
+  ├── getAllScaleEntries(scale_id)  →  ScaleEntry[]
+  └── Affiche score total + chips sous-échelles (SNAP-IV, ASRS-18)
+```
+
+Le **scoring** est centralisé dans `apps/mobile/src/lib/scaleScoring.ts` :
+```ts
+SCALE_SCORING[scale_id].computeScore(answers)          // total
+SCALE_SCORING[scale_id].computeSubscaleScores(answers) // sous-échelles (optionnel)
+```
+
+Les **données** (entrées patient) sont stockées dans la table SQLite générique `scale_entries` — une seule table pour toutes les échelles, discriminée par `scale_id`.
 
 ### `module_content_fields`
 
@@ -98,6 +140,33 @@ create table public.module_content_fields (
 | `module_label` | `NullField` | Silencieux — filtré avant rendu |
 | `module_description` | `NullField` | Silencieux — filtré avant rendu |
 | `coming_soon` | `NullField` | Silencieux |
+| `scale_instruction` | `Text` inline | Bloc intro dans layout `questionnaire` |
+| `scale_option` | `LikertWidget` (option) | Choix de réponse Likert — prop `value` obligatoire |
+| `scale_legend_item` | Légende numérique | BSL-23 — valeur + libellé affiché sous instructions — prop `value` obligatoire |
+| `scale_warning` | Bandeau jaune | SNAP-IV — avertissement hétéro-évaluation |
+| `scale_section` | En-tête de section | SNAP-IV (Inattention / HI / TOD), ASRS-18 (Partie A / B) |
+| `scale_question` | Question + `LikertWidget` | Chaque item du questionnaire — indexé dans l'ordre `sort_order` |
+| `scale_slider_question` | Question + pips numériques | Sélecteur pip 1–N — props `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` — ex. `mood_tracker` |
+| `scale_number_input` | Champ numérique libre | Saisie numérique clavier — prop `subscale_key` |
+| `scale_text_input` | Champ texte libre | Notes libres — prop `placeholder_code`, `subscale_key` |
+| `exercise_title` | Titre de l'exercice | Layout `guided_exercise` — écran intro |
+| `exercise_intro` | Paragraphe intro | Layout `guided_exercise` — plusieurs lignes possibles |
+| `exercise_start_btn` | Label bouton démarrer | Layout `guided_exercise` — texte du bouton Démarrer |
+| `exercise_next_btn` | Label bouton suivant | Layout `guided_exercise` — texte du bouton Suivant |
+| `exercise_finish_btn` | Label bouton terminer | Layout `guided_exercise` |
+| `exercise_stop_btn` | Label bouton annuler | Layout `guided_exercise` |
+| `exercise_done_text` | Texte écran fin | Layout `guided_exercise` |
+| `exercise_safety_title` | Titre section urgence | Layouts `guided_exercise`, `patient_scenario` |
+| `exercise_safety` | Entrée urgence cliquable | Layouts `guided_exercise`, `patient_scenario` — props `phone`, `icon` |
+| `rim_disclaimer` | Disclaimer RIM | Layout `patient_scenario` |
+| `rim_step` | Étape protocole RIM | Layout `patient_scenario` — prop `step_number` |
+| `ambient_sound` | Bouton son d'ambiance | Layout `patient_scenario` — props `key`, `icon`, `available` |
+
+**Props `questionnaire` :**
+
+| `prop_key` | Utilisé par | Description |
+|---|---|---|
+| `value` | `scale_option`, `scale_legend_item` | Valeur numérique entière (stockée en texte) |
 
 **Inline children — `card_inline`**
 
@@ -127,10 +196,20 @@ create table public.field_props (
 | `prop_key` | Valeur exemple | Utilisé par |
 |---|---|---|
 | `widget_type` | `"slider:0:120:min"` | `FieldRow` → `FieldWidget` |
-| `icon` | `"moon"` | `FieldRow` — icône Lucide/Ionicons |
+| `icon` | `"moon"` | `FieldRow`, `scale_slider_question`, `exercise_safety`, `ambient_sound` |
 | `detail_code` | `"sleep.field_1.detail"` | `FieldRow` — texte descriptif sous le label |
-| `color` | `"#4F46E5"` | `StepsLayout` (couleur badge), `Grid2x2Layout` (bordure) |
-| `step_number` | `"1"` | `StepsLayout` — numéro affiché dans le badge |
+| `color` | `"#4F46E5"` | `StepsLayout` (badge), `Grid2x2Layout` (bordure), `scale_slider_question` (accent) |
+| `step_number` | `"1"` | `StepsLayout`, `rim_step` — numéro affiché dans le badge |
+| `value` | `"0"` | `scale_option`, `scale_legend_item` — valeur numérique entière |
+| `min` | `"1"` | `scale_slider_question` — valeur minimale des pips |
+| `max` | `"10"` | `scale_slider_question` — valeur maximale des pips |
+| `low_hint_code` | `"modules.mood_tracker.low"` | `scale_slider_question` — clé i18n libellé bas |
+| `high_hint_code` | `"modules.mood_tracker.high"` | `scale_slider_question` — clé i18n libellé haut |
+| `subscale_key` | `"mood"` | `scale_slider_question`, `scale_number_input`, `scale_text_input` — clé dans `subscale_scores` JSON |
+| `placeholder_code` | `"modules.mood.notes_placeholder"` | `scale_text_input`, `scale_number_input` |
+| `phone` | `"3114"` | `exercise_safety` — numéro composé au tap |
+| `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
+| `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 
 **Format `widget_type` :**
 
@@ -228,10 +307,14 @@ interface FieldRendererProps {
 ```
 'coming_soon' ou fields vides → null (rien rendu)
 
-'steps'    → StepsLayout    (groups par section_id, champ step_title requis)
-'cards'    → CardsLayout    (groups par section_id, accordéon card_title/card_summary)
-'fields'   → FieldsLayout   (filtre field_type === 'field_row', FieldRow par champ)
-'grid2x2'  → Grid2x2Layout  (groups par section_id, quadrant_title/quadrant_subtitle)
+'steps'           → StepsLayout         (groups par section_id, champ step_title requis)
+'cards'           → CardsLayout         (groups par section_id, accordéon card_title/card_summary)
+'fields'          → FieldsLayout        (filtre field_type === 'field_row', FieldRow par champ)
+'grid2x2'         → Grid2x2Layout       (groups par section_id, quadrant_title/quadrant_subtitle)
+'questionnaire'   → QuestionnaireLayout (mobile uniquement — ScaleEntryScreen pilote les réponses)
+'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
+'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
+'editable_steps'  → EditableStepsLayout (mobile uniquement — étapes éditables, Crisis Plan)
 ```
 
 **Filtrage initial commun aux 4 layouts :**

@@ -15,23 +15,31 @@ function field(field_type: string, text_code?: string, extra: Partial<ContentFie
 
 describe('FieldText', () => {
   const VARIANTS: [string, string][] = [
-    ['card_heading_2',      'h2 text'],
-    ['card_heading_3',      'h3 text'],
-    ['card_heading_4',      'h4 text'],
-    ['card_paragraph',      'paragraph text'],
-    ['card_paragraph_bold', 'bold text'],
-    ['card_italic_note',    'italic text'],
-    ['footer_note',         'footer text'],
-    ['step_title',          'step title'],
-    ['quadrant_title',      'quadrant title'],
-    ['quadrant_subtitle',   'quadrant subtitle'],
-    ['card_title',          'card title'],
-    ['card_summary',        'card summary'],
+    ['card_heading_2',   'h2 text'],
+    ['card_heading_3',   'h3 text'],
+    ['card_heading_4',   'h4 text'],
+    ['card_paragraph',   'paragraph text'],
+    ['footer_note',      'footer text'],
+    ['step_title',       'step title'],
+    ['quadrant_title',   'quadrant title'],
+    ['quadrant_subtitle','quadrant subtitle'],
+    ['card_title',       'card title'],
+    ['card_summary',     'card summary'],
   ]
 
   it.each(VARIANTS)('%s affiche son texte', (type, code) => {
     render(<FieldText field={field(type, code)} t={t} />)
     expect(screen.getByText(code)).toBeTruthy()
+  })
+
+  it('card_paragraph avec bold=true affiche son texte', () => {
+    render(<FieldText field={field('card_paragraph', 'bold text', { props: { bold: 'true' } })} t={t} />)
+    expect(screen.getByText('bold text')).toBeTruthy()
+  })
+
+  it('card_paragraph avec italic=true affiche son texte', () => {
+    render(<FieldText field={field('card_paragraph', 'italic text', { props: { italic: 'true' } })} t={t} />)
+    expect(screen.getByText('italic text')).toBeTruthy()
   })
 
   it('card_callout affiche son texte', () => {

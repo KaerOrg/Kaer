@@ -1,9 +1,15 @@
+jest.mock('../../hooks/useTeen', () => ({
+  useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
+}))
+
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
+import { Linking } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import type { ContentField } from '../../lib/moduleService'
 
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
+jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
 function f(overrides: Partial<ContentField>): ContentField {
   return {
@@ -196,5 +202,117 @@ describe('FieldRenderer — layout grid2x2', () => {
       />,
     )
     expect(screen.getByText('q.subtitle')).toBeTruthy()
+  })
+})
+
+// ─── Layout : patient_scenario ───────────────────────────────────────────────
+
+// Utilise des text_codes fictifs (non présents dans les locales) pour que t() retourne la clé brute
+const rimDisclaimer = f({ id: 'rim.disclaimer', field_type: 'rim_disclaimer', text_code: 'test.rim.disclaimer', sort_order: 10 })
+const rimStep1      = f({ id: 'rim.step_1', field_type: 'rim_step', text_code: 'test.rim.step_1', sort_order: 20, props: { step_number: '1' } })
+const rimStep2      = f({ id: 'rim.step_2', field_type: 'rim_step', text_code: 'test.rim.step_2', sort_order: 30, props: { step_number: '2' } })
+const rimSoundRain  = f({ id: 'rim.sound_rain', field_type: 'ambient_sound', text_code: 'test.rim.sound_rain', sort_order: 70, props: { icon: 'weather-rainy', key: 'pluie', available: 'false' } })
+const safetyTitle   = f({ id: 'rim.safety_title', field_type: 'exercise_safety_title', text_code: 'test.rim.safety_title', sort_order: 120 })
+const safety3114    = f({ id: 'rim.safety_3114', field_type: 'exercise_safety', text_code: 'test.rim.safety_3114', sort_order: 130, props: { phone: '3114', icon: 'phone' } })
+const safety15      = f({ id: 'rim.safety_15',  field_type: 'exercise_safety', text_code: 'test.rim.safety_15',  sort_order: 140, props: { phone: '15',   icon: 'ambulance' } })
+
+const RIM_FIELDS = [rimDisclaimer, rimStep1, rimStep2, rimSoundRain, safetyTitle, safety3114, safety15]
+const FULL_CONFIG = { alternative_scenario: 'Je marche dans un pré verdoyant.', original_scenario: 'Le couloir sombre.' }
+
+describe('FieldRenderer — layout patient_scenario', () => {
+  // ── État vide ──────────────────────────────────────────────────────────────
+
+  it('affiche l\'état vide si patientConfig est null', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={null} />)
+    expect(screen.getByText('Scénario non configuré')).toBeTruthy()
+    expect(screen.getByText(/n'a pas encore renseigné/)).toBeTruthy()
+  })
+
+  it('affiche l\'état vide si alternative_scenario est absent', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={{}} />)
+    expect(screen.getByText('Scénario non configuré')).toBeTruthy()
+  })
+
+  // ── Contenu principal ──────────────────────────────────────────────────────
+
+  it('affiche le scénario alternatif', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByTestId('alternative-scenario-card')).toBeTruthy()
+    expect(screen.getByText('Je marche dans un pré verdoyant.')).toBeTruthy()
+  })
+
+  it('affiche le disclaimer', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByTestId('rim-disclaimer')).toBeTruthy()
+    expect(screen.getByText('test.rim.disclaimer')).toBeTruthy()
+  })
+
+  it('affiche les étapes du protocole avec leur numéro', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByTestId('protocol-steps')).toBeTruthy()
+    expect(screen.getByText('test.rim.step_1')).toBeTruthy()
+    expect(screen.getByText('test.rim.step_2')).toBeTruthy()
+    expect(screen.getByText('1')).toBeTruthy()
+    expect(screen.getByText('2')).toBeTruthy()
+  })
+
+  // ── Scénario initial ───────────────────────────────────────────────────────
+
+  it('n\'affiche pas le scénario initial si absent de la config', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={{ alternative_scenario: FULL_CONFIG.alternative_scenario }} />)
+    expect(screen.queryByText('Scénario initial (référence)')).toBeNull()
+  })
+
+  it('affiche le bouton scénario initial si présent', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByText('Scénario initial (référence)')).toBeTruthy()
+    expect(screen.queryByTestId('original-scenario-card')).toBeNull()
+  })
+
+  it('développe le scénario initial au tap', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    fireEvent.press(screen.getByText('Scénario initial (référence)'))
+    expect(screen.getByTestId('original-scenario-card')).toBeTruthy()
+    expect(screen.getByText('Le couloir sombre.')).toBeTruthy()
+  })
+
+  it('referme le scénario initial au deuxième tap', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    fireEvent.press(screen.getByText('Scénario initial (référence)'))
+    fireEvent.press(screen.getByText('Scénario initial (référence)'))
+    expect(screen.queryByTestId('original-scenario-card')).toBeNull()
+  })
+
+  // ── Sons d'ambiance ────────────────────────────────────────────────────────
+
+  it('affiche les sons d\'ambiance avec "coming soon"', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByText('test.rim.sound_rain')).toBeTruthy()
+    expect(screen.getByText('Bientôt')).toBeTruthy()
+  })
+
+  // ── Section urgence ────────────────────────────────────────────────────────
+
+  it('affiche la section urgence avec 3114 et 15', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.getByText('test.rim.safety_3114')).toBeTruthy()
+    expect(screen.getByText('test.rim.safety_15')).toBeTruthy()
+  })
+
+  it('appelle Linking.openURL au tap sur le 3114', () => {
+    const spy = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    fireEvent.press(screen.getByText('test.rim.safety_3114'))
+    expect(spy).toHaveBeenCalledWith('tel:3114')
+    spy.mockRestore()
+  })
+
+  // ── Conformité MDR ─────────────────────────────────────────────────────────
+
+  it('n\'affiche aucun score ou label interprétatif (conformité MDR)', () => {
+    render(<FieldRenderer preview_kind="patient_scenario" fields={RIM_FIELDS} patientConfig={FULL_CONFIG} />)
+    expect(screen.queryByText(/score/i)).toBeNull()
+    expect(screen.queryByText(/sévère/i)).toBeNull()
+    expect(screen.queryByText(/résultat/i)).toBeNull()
   })
 })

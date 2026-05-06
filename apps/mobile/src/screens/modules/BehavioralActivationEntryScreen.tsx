@@ -50,73 +50,11 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { PipPicker } from '../../components/PipPicker'
 import { useTranslation } from 'react-i18next'
 
 type RouteType = RouteProp<AppStackParamList, 'BehavioralActivationEntry'>
 
-// ─── Curseur 0–10 par pas de 1 ───────────────────────────────────────────────
-// Valeur brute saisie par le patient — aucune interprétation algorithmique
-// (conformité MDR 2017/745).
-
-interface ScalePickerProps {
-  label: string
-  sublabel: string
-  value: number
-  color: string
-  onChange: (v: number) => void
-}
-
-function ScalePicker({ label, sublabel, value, color, onChange }: ScalePickerProps) {
-  return (
-    <View style={pickerStyles.container}>
-      <View style={pickerStyles.header}>
-        <View>
-          <Text style={pickerStyles.label}>{label}</Text>
-          <Text style={pickerStyles.sublabel}>{sublabel}</Text>
-        </View>
-        <Text style={[pickerStyles.value, { color }]}>{value}</Text>
-      </View>
-      <View style={pickerStyles.track}>
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-          <TouchableOpacity
-            key={n}
-            style={[pickerStyles.pip, n <= value && { backgroundColor: color }]}
-            onPress={() => onChange(n)}
-            activeOpacity={0.7}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: value === n }}
-            accessibilityLabel={`${label} : ${n}`}
-          />
-        ))}
-      </View>
-      <View style={pickerStyles.ends}>
-        <Text style={pickerStyles.endLabel}>0</Text>
-        <Text style={pickerStyles.endLabel}>10</Text>
-      </View>
-    </View>
-  )
-}
-
-const pickerStyles = StyleSheet.create({
-  container: { gap: spacing.sm },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  label: { fontSize: 14, fontWeight: '600', color: colors.text },
-  sublabel: { fontSize: 12, color: colors.textMuted },
-  value: { fontSize: 32, fontWeight: '800' },
-  track: {
-    flexDirection: 'row',
-    gap: 4,
-    alignItems: 'center',
-  },
-  pip: {
-    flex: 1,
-    height: 12,
-    borderRadius: radius.full,
-    backgroundColor: colors.border,
-  },
-  ends: { flexDirection: 'row', justifyContent: 'space-between' },
-  endLabel: { fontSize: 11, color: colors.textMuted },
-})
 
 // ─── Sélecteur de date ────────────────────────────────────────────────────────
 
@@ -332,20 +270,26 @@ export default function BehavioralActivationEntryScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t('modules.behavioral_activation.section_evaluation')}</Text>
             <View style={styles.card}>
-              <ScalePicker
+              <PipPicker
                 label={t('modules.behavioral_activation.pleasure_label')}
                 sublabel={t('modules.behavioral_activation.pleasure_sublabel')}
                 value={pleasure}
+                steps={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
                 color="#059669"
-                onChange={setPleasure}
+                variant="track"
+                showEndLabels
+                onPress={setPleasure}
               />
               <View style={styles.divider} />
-              <ScalePicker
+              <PipPicker
                 label={t('modules.behavioral_activation.mastery_label')}
                 sublabel={t('modules.behavioral_activation.mastery_sublabel')}
                 value={mastery}
+                steps={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
                 color="#4F46E5"
-                onChange={setMastery}
+                variant="track"
+                showEndLabels
+                onPress={setMastery}
               />
             </View>
           </View>

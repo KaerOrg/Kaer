@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
 import i18next, { initialLanguage } from '../i18n'
+import { logger } from '@psytool/shared'
 
 interface Patient {
   id: string
@@ -30,17 +31,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   language: initialLanguage,
   loading: true,
 
-  // Appelé au démarrage de l'app pour restaurer la session existante
   loadSession: async () => {
-    // Timeout de sécurité : si la session ne charge pas en 6s, on affiche le login
+    logger.log('[loadSession] start')
     const timeout = setTimeout(() => {
+      logger.warn('[loadSession] timeout fired — forcing loading=false')
       set((state) => (state.loading ? { patient: null, loading: false } : state))
     }, 6000)
 
     try {
+      logger.log('[loadSession] getSession...')
       const {
         data: { session },
       } = await supabase.auth.getSession()
+      logger.log('[loadSession] getSession result', session ? 'session found' : 'no session')
 
       if (session?.user) {
         const { data: profile } = await supabase

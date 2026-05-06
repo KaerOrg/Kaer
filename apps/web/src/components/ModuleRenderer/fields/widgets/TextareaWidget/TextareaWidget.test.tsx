@@ -3,13 +3,10 @@ import { describe, it, expect } from 'vitest'
 import { TextareaWidget } from './TextareaWidget'
 
 describe('TextareaWidget', () => {
-  it('rend un div.fw-textarea', () => {
+  it('rend un textarea.fw-textarea interactif', () => {
     const { container } = render(<TextareaWidget />)
-    expect(container.querySelector('.fw-textarea')).toBeTruthy()
-  })
-
-  it('ne rend pas de textarea interactif', () => {
-    const { container } = render(<TextareaWidget />)
-    expect(container.querySelector('textarea')).toBeNull()
+    const el = container.querySelector('textarea.fw-textarea')
+    expect(el).toBeTruthy()
+    expect((el as HTMLTextAreaElement).disabled).toBe(false)
   })
 })

@@ -2,11 +2,11 @@ import { StyleSheet } from 'react-native'
 import { colors, radius } from '../../theme'
 
 const VARIANT_COLORS = {
-  neutral: { bg: colors.background,    text: colors.textMuted   },
+  neutral: { bg: colors.neutral,       text: colors.textMuted   },
   info:    { bg: colors.primaryLight,  text: colors.primary     },
-  success: { bg: '#D1FAE5',            text: colors.success     },
-  warning: { bg: '#FEF3C7',            text: '#92400E'          },
-  danger:  { bg: '#FEE2E2',            text: colors.danger      },
+  success: { bg: colors.successLight,  text: colors.success     },
+  warning: { bg: colors.warningLight,  text: '#92400E'          },
+  danger:  { bg: colors.dangerLight,   text: colors.danger      },
 } as const
 
 export { VARIANT_COLORS }

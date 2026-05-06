@@ -16,10 +16,12 @@ Tokens partagés entre web et mobile, définis dans `packages/shared/src/theme.t
 | `colors.textMuted` | `#6B7280` | Texte secondaire, placeholders |
 | `colors.border` | `#E5E7EB` | Bordures, séparateurs |
 | `colors.success` | `#10B981` | États positifs |
-| `colors.successLight` | `#F0FDF4` | Fond état positif |
+| `colors.successLight` | `#ECFDF5` | Fond état positif |
 | `colors.warning` | `#F59E0B` | États d'avertissement, étoiles |
+| `colors.warningLight` | `#FFFBEB` | Fond état d'avertissement |
 | `colors.danger` | `#EF4444` | États d'erreur |
-| `colors.dangerLight` | `#FEF2F2` | Fond état erreur |
+| `colors.dangerLight` | `#FEE2E2` | Fond état erreur |
+| `colors.neutral` | `#F3F4F6` | Fond neutre (chips, tags) |
 | `colors.stars` | `#F59E0B` | Étoiles (StarsWidget) |
 | `colors.white` | `#FFFFFF` | Texte sur fond coloré |
 

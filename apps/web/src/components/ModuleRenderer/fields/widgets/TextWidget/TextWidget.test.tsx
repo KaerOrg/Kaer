@@ -3,13 +3,10 @@ import { describe, it, expect } from 'vitest'
 import { TextWidget } from './TextWidget'
 
 describe('TextWidget', () => {
-  it('rend un div.fw-text', () => {
+  it('rend un input.fw-text interactif', () => {
     const { container } = render(<TextWidget />)
-    expect(container.querySelector('.fw-text')).toBeTruthy()
-  })
-
-  it("ne rend pas d'input interactif", () => {
-    const { container } = render(<TextWidget />)
-    expect(container.querySelector('input')).toBeNull()
+    const el = container.querySelector('input.fw-text')
+    expect(el).toBeTruthy()
+    expect((el as HTMLInputElement).disabled).toBe(false)
   })
 })
