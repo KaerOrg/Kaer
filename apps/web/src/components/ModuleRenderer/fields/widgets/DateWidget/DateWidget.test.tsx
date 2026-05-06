@@ -8,10 +8,10 @@ describe('DateWidget', () => {
     expect(container.querySelector('input[type="date"]')).toBeTruthy()
   })
 
-  it('est désactivé', () => {
+  it('est interactif (non désactivé)', () => {
     const { container } = render(<DateWidget />)
     const input = container.querySelector('input') as HTMLInputElement
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it('porte la classe fw-date', () => {

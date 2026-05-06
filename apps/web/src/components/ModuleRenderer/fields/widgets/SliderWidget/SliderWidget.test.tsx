@@ -8,10 +8,10 @@ describe('SliderWidget', () => {
     expect(container.querySelector('input[type="range"]')).toBeTruthy()
   })
 
-  it('est désactivé', () => {
+  it('est interactif (non désactivé)', () => {
     const { container } = render(<SliderWidget spec="slider:0:10" />)
     const input = container.querySelector('input') as HTMLInputElement
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it('applique min et max depuis le spec', () => {

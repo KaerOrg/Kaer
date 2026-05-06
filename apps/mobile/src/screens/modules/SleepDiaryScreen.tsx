@@ -21,18 +21,10 @@ import {
   SleepEntry,
 } from '../../lib/database'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateShort } from '../../lib/dateUtils'
 import { Card } from '../../components/Card'
 import { StatusBadge } from '../../components/StatusBadge'
 
-// Formate YYYY-MM-DD en "Lun. 7 avr."
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
-}
 
 // Retourne la date d'hier au format YYYY-MM-DD
 function yesterday(): string {
@@ -111,7 +103,7 @@ export default function SleepDiaryScreen() {
               <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
               <View style={styles.ctaTexts}>
                 <Text style={styles.ctaTitle}>{t('modules.sleep_diary.cta_title')}</Text>
-                <Text style={styles.ctaSubtitle}>{formatDate(yesterday())}</Text>
+                <Text style={styles.ctaSubtitle}>{formatDateShort(yesterday())}</Text>
               </View>
               <Text style={styles.chevron}>›</Text>
             </View>
@@ -150,7 +142,7 @@ export default function SleepDiaryScreen() {
 
               <View style={styles.dayInfo}>
                 <Text style={[styles.dayDate, filled && styles.dayDateFilled]}>
-                  {formatDate(date)}
+                  {formatDateShort(date)}
                 </Text>
 
                 {filled && entry.bedtime && entry.wake_time ? (

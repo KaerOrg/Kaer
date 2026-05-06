@@ -32,14 +32,14 @@ describe('FieldText — paragraphes', () => {
     expect(container.querySelector('p')).toBeTruthy()
   })
 
-  it('card_paragraph_bold rend <p><strong>', () => {
-    const { container } = render(<FieldText field={field('card_paragraph_bold')} t={t} />)
+  it('card_paragraph avec bold=true rend <p><strong>', () => {
+    const { container } = render(<FieldText field={field('card_paragraph', { props: { bold: 'true' } })} t={t} />)
     expect(container.querySelector('p > strong')).toBeTruthy()
     expect(container.querySelector('p > strong')?.textContent).toBe('some.key')
   })
 
-  it('card_italic_note rend <p><em>', () => {
-    const { container } = render(<FieldText field={field('card_italic_note')} t={t} />)
+  it('card_paragraph avec italic=true rend <p><em>', () => {
+    const { container } = render(<FieldText field={field('card_paragraph', { props: { italic: 'true' } })} t={t} />)
     expect(container.querySelector('p > em')).toBeTruthy()
   })
 

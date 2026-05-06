@@ -13,14 +13,10 @@ describe('StarsWidget', () => {
     expect(container.querySelectorAll('.fw-stars svg').length).toBe(3)
   })
 
-  it('la moitié supérieure est allumée (5 → 3 allumées)', () => {
+  it('toutes les étoiles sont éteintes par défaut', () => {
     const { container } = render(<StarsWidget spec="stars:5" />)
-    expect(container.querySelectorAll('.fw-star--on').length).toBe(3)
-  })
-
-  it('la moitié inférieure est éteinte (5 → 2 éteintes)', () => {
-    const { container } = render(<StarsWidget spec="stars:5" />)
-    expect(container.querySelectorAll('.fw-star--off').length).toBe(2)
+    expect(container.querySelectorAll('.fw-star--on').length).toBe(0)
+    expect(container.querySelectorAll('.fw-star--off').length).toBe(5)
   })
 
   it('porte la classe fw-stars', () => {

@@ -1,3 +1,3 @@
 export function TextWidget() {
-  return <div className="fw-text" />
+  return <input type="text" className="fw-text" />
 }

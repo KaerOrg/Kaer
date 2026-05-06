@@ -150,6 +150,762 @@
     "enable_all": "Enable all",
     "disable_all": "Disable all",
     "enabled_count_one": "{{count}} module enabled",
-    "enabled_count_other": "{{count}} modules enabled"
+    "enabled_count_other": "{{count}} modules enabled",
+    "phq9": {
+      "label": "PHQ-9",
+      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27.",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first PHQ-9.",
+      "instructions_1": "Over the last 2 weeks,",
+      "instructions_2": "how often have you been bothered by any of the following problems?",
+      "opt_0": "Not at all",
+      "opt_1": "Several days",
+      "opt_2": "More than half the days",
+      "opt_3": "Nearly every day",
+      "q1": "Little interest or pleasure in doing things",
+      "q2": "Feeling down, depressed, or hopeless",
+      "q3": "Trouble falling or staying asleep, or sleeping too much",
+      "q4": "Feeling tired or having little energy",
+      "q5": "Poor appetite or overeating",
+      "q6": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
+      "q7": "Trouble concentrating on things, such as reading the newspaper or watching television",
+      "q8": "Moving or speaking so slowly that other people could have noticed. Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual",
+      "q9": "Thoughts that you would be better off dead or of hurting yourself in some way",
+      "score_label": "Total score",
+      "score_max": "/ 27",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total} answers",
+      "submit": "Submit questionnaire"
+    },
+    "gad7": {
+      "label": "GAD-7",
+      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0–21.",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first GAD-7.",
+      "instructions_1": "Over the last 2 weeks,",
+      "instructions_2": "how often have you been bothered by the following problems?",
+      "opt_0": "Not at all",
+      "opt_1": "Several days",
+      "opt_2": "More than half the days",
+      "opt_3": "Nearly every day",
+      "q1": "Feeling nervous, anxious, or on edge",
+      "q2": "Not being able to stop or control worrying",
+      "q3": "Worrying too much about different things",
+      "q4": "Trouble relaxing",
+      "q5": "Being so restless that it's hard to sit still",
+      "q6": "Becoming easily annoyed or irritable",
+      "q7": "Feeling afraid as if something awful might happen",
+      "score_label": "Total score",
+      "score_max": "/ 21",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total} answers",
+      "submit": "Submit questionnaire"
+    },
+    "bsl23": {
+      "label": "BSL-23",
+      "description": "23-item borderline symptom scale. Average score 0–4.",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first BSL-23.",
+      "instructions_1": "Over the past week,",
+      "instructions_2": "how much have you suffered from the following problems?",
+      "legend_0": "Not at all",
+      "legend_1": "A little",
+      "legend_2": "Somewhat",
+      "legend_3": "A lot",
+      "legend_4": "Extremely",
+      "opt_0": "0",
+      "opt_1": "1",
+      "opt_2": "2",
+      "opt_3": "3",
+      "opt_4": "4",
+      "q1": "Feeling inner numbness",
+      "q2": "Feeling worthless",
+      "q3": "Feeling uncomfortable in my own skin",
+      "q4": "Wanting to hurt myself",
+      "q5": "Feeling like I'm outside my own body",
+      "q6": "Feeling like a bad person",
+      "q7": "Feeling empty inside",
+      "q8": "Being unable to express my feelings",
+      "q9": "Thinking about hurting or injuring myself",
+      "q10": "Feeling as though I don't exist",
+      "q11": "Having difficulty concentrating",
+      "q12": "Feeling so bad that I want to hurt myself",
+      "q13": "Feeling so tense that I feel like I'm going to explode",
+      "q14": "Feeling agitated and unable to calm down",
+      "q15": "Feeling emotionally unstable",
+      "q16": "Being afraid of being abandoned",
+      "q17": "Feeling misunderstood and alone",
+      "q18": "Finding it hard to believe that others respect me",
+      "q19": "Suddenly feeling empty and desperate",
+      "q20": "Feeling angry and irritable for no apparent reason",
+      "q21": "Feeling that others see me negatively",
+      "q22": "Feeling depressed",
+      "q23": "Being afraid of the future",
+      "score_label": "Mean score",
+      "score_max": "/ 4",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total}",
+      "submit": "Submit questionnaire"
+    },
+    "snap_iv": {
+      "label": "SNAP-IV",
+      "description": "ADHD screening for children/adolescents — 26 items, 3 subscales.",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first SNAP-IV.",
+      "instructions_1": "Hetero-evaluation — to be filled in by a parent or teacher.",
+      "instructions_2": "For each of the following behaviours, indicate how often you observe it in the child.",
+      "warning": "This questionnaire must be completed by a parent, guardian or teacher — not by the child.",
+      "opt_0": "Not at all",
+      "opt_1": "Just a little",
+      "opt_2": "Quite a bit",
+      "opt_3": "Very much",
+      "section_inattention": "Inattention",
+      "section_hyperactivite": "Hyperactivity · Impulsivity",
+      "section_tod": "Oppositional · Defiant",
+      "q1": "Fails to give close attention to details or makes careless mistakes in schoolwork, work, or other activities.",
+      "q2": "Has difficulty sustaining attention in tasks or play activities.",
+      "q3": "Does not seem to listen when spoken to directly.",
+      "q4": "Does not follow through on instructions and fails to finish schoolwork, chores, or duties (not due to oppositional behaviour or failure to understand).",
+      "q5": "Has difficulty organising tasks and activities.",
+      "q6": "Avoids, dislikes, or is reluctant to engage in tasks that require sustained mental effort.",
+      "q7": "Loses things necessary for tasks or activities (pencils, books, tools, assignments).",
+      "q8": "Is easily distracted by extraneous stimuli.",
+      "q9": "Is forgetful in daily activities.",
+      "q10": "Fidgets with hands or feet or squirms in seat.",
+      "q11": "Leaves seat in classroom or in other situations in which remaining seated is expected.",
+      "q12": "Runs about or climbs excessively in situations in which it is inappropriate.",
+      "q13": "Has difficulty playing or engaging in leisure activities quietly.",
+      "q14": "Is 'on the go' or often acts as if 'driven by a motor'.",
+      "q15": "Talks excessively.",
+      "q16": "Blurts out answers before questions have been completed.",
+      "q17": "Has difficulty awaiting turn.",
+      "q18": "Interrupts or intrudes on others (butts into conversations or games).",
+      "q19": "Loses temper.",
+      "q20": "Argues with adults.",
+      "q21": "Actively defies or refuses to comply with adults' requests or rules.",
+      "q22": "Deliberately annoys people.",
+      "q23": "Blames others for his or her mistakes or misbehaviour.",
+      "q24": "Is touchy or easily annoyed by others.",
+      "q25": "Is angry and resentful.",
+      "q26": "Is spiteful and vindictive.",
+      "score_label": "Total score",
+      "score_max": "/ 78",
+      "chip_i": "I",
+      "chip_hi": "H/I",
+      "chip_tod": "ODD",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total} answers",
+      "submit": "Submit questionnaire"
+    },
+    "asrs6": {
+      "label": "ASRS v1.1 — Screener",
+      "description": "Adult ADHD rapid screening — 6-item Part A (Kessler et al., 2005).",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first ASRS-6.",
+      "instructions_1": "Over the past 6 months,",
+      "instructions_2": "for each of the following questions, select the option that best describes how you have felt and conducted yourself.",
+      "opt_0": "Never",
+      "opt_1": "Rarely",
+      "opt_2": "Sometimes",
+      "opt_3": "Often",
+      "opt_4": "Very often",
+      "q1": "How often do you have difficulty wrapping up the final details of a project, once the challenging parts have been done?",
+      "q2": "How often do you have difficulty getting things in order when you have to do a task that requires organisation?",
+      "q3": "How often do you have problems remembering appointments or obligations?",
+      "q4": "When you have a task that requires a lot of thought, how often do you avoid or delay getting started?",
+      "q5": "How often do you fidget or squirm with your hands or feet when you have to sit down for a long time?",
+      "q6": "How often do you feel overly active and compelled to do things, like you were driven by a motor?",
+      "score_label": "Total score",
+      "score_max": "/ 24",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total} answers",
+      "submit": "Submit questionnaire"
+    },
+    "asrs18": {
+      "label": "ASRS v1.1 — Full Assessment",
+      "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005).",
+      "new_btn": "New questionnaire",
+      "empty_title": "No questionnaire filled in yet",
+      "empty_text": "Use the button above to complete your first ASRS-18.",
+      "instructions_1": "Over the past 6 months,",
+      "instructions_2": "for each of the following questions, select the option that best describes how you have felt and conducted yourself.",
+      "opt_0": "Never",
+      "opt_1": "Rarely",
+      "opt_2": "Sometimes",
+      "opt_3": "Often",
+      "opt_4": "Very often",
+      "section_part_a": "Part A",
+      "section_part_b": "Part B",
+      "q1": "How often do you have difficulty wrapping up the final details of a project, once the challenging parts have been done?",
+      "q2": "How often do you have difficulty getting things in order when you have to do a task that requires organisation?",
+      "q3": "How often do you have problems remembering appointments or obligations?",
+      "q4": "When you have a task that requires a lot of thought, how often do you avoid or delay getting started?",
+      "q5": "How often do you fidget or squirm with your hands or feet when you have to sit down for a long time?",
+      "q6": "How often do you feel overly active and compelled to do things, like you were driven by a motor?",
+      "q7": "How often do you make careless mistakes when you have to work on a boring or difficult project?",
+      "q8": "How often do you have difficulty keeping your attention when you are doing boring or repetitive work?",
+      "q9": "How often do you have difficulty concentrating on what people say to you, even when they are speaking to you directly?",
+      "q10": "How often do you misplace or have difficulty finding things at home or at work?",
+      "q11": "How often are you distracted by activity or noise around you?",
+      "q12": "How often do you leave your seat in meetings or other situations in which you are expected to remain seated?",
+      "q13": "How often do you feel restless or fidgety?",
+      "q14": "How often do you have difficulty unwinding and relaxing when you have time to yourself?",
+      "q15": "How often do you find yourself talking too much when you are in social situations?",
+      "q16": "When you're in a conversation, how often do you find yourself finishing the sentences of the people you are talking to, before they can finish them themselves?",
+      "q17": "How often do you have difficulty waiting your turn in situations when turn-taking is required?",
+      "q18": "How often do you interrupt others when they are busy?",
+      "score_label": "Total score",
+      "score_max": "/ 72",
+      "chip_a": "Part A",
+      "chip_b": "Part B",
+      "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
+      "progress": "{answered} / {total} answers",
+      "submit": "Submit questionnaire"
+    },
+    "crisis_plan": {
+      "label": "Crisis Plan",
+      "description": "Personalized action plan for difficult moments (Stanley & Brown).",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to create your crisis plan."
+    },
+    "therapeutic_commitment": {
+      "label": "Therapeutic Commitment",
+      "description": "Therapeutic alliance: commitment to using resources before any crisis act.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to fill in your therapeutic commitment."
+    },
+    "distress_tolerance": {
+      "label": "Distress Tolerance Toolkit",
+      "description": "DBT-inspired emergency physiological action cards for breaking acute crises.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to access the toolkit."
+    },
+    "medication_side_effects": {
+      "label": "Psychotropic Tolerance Thermometer",
+      "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
+      "new_btn": "New report",
+      "empty_title": "No report yet",
+      "empty_text": "Use the button above to complete your first report."
+    },
+    "medication_adherence": {
+      "label": "Medication Adherence Module",
+      "description": "Weekly self-report on medication adherence.",
+      "new_btn": "New report",
+      "empty_title": "No report yet",
+      "empty_text": "Use the button above to complete your first report."
+    },
+    "psychoeducation": {
+      "label": "Psychoeducation",
+      "description": "Therapeutic knowledge cards: sleep, grounding, distortions, drug interactions.",
+      "new_btn": "Browse cards",
+      "empty_title": "No card yet",
+      "empty_text": "Use the button above to browse the psychoeducation cards."
+    },
+    "sleep_diary": {
+      "label": "Sleep Diary",
+      "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first night."
+    },
+    "diet_weight_psycho": {
+      "label": "Diet & Weight Psychoeducation",
+      "description": "Understanding and managing cravings and weight gain on antipsychotics.",
+      "new_btn": "Browse cards",
+      "empty_title": "No card yet",
+      "empty_text": "Use the button above to browse the cards."
+    },
+    "chronobiology_tracker": {
+      "label": "Chronobiology Regularity Tracker",
+      "description": "Track zeitgebers: wake time, bedtime, first meal — essential for bipolar disorders.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first entry."
+    },
+    "mood_tracker": {
+      "label": "Mood & Energy Thermometer",
+      "description": "Daily tracking of mood and energy level on a visual scale.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first entry."
+    },
+    "emotion_wheel": {
+      "label": "Emotion Wheel",
+      "description": "Explore and precisely name emotions to address alexithymia.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first entry."
+    },
+    "behavioral_activation": {
+      "label": "Behavioral Activation Journal",
+      "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
+      "new_btn": "New activity",
+      "empty_title": "No activity yet",
+      "empty_text": "Use the button above to log your first activity."
+    },
+    "beck_columns": {
+      "label": "Beck Columns",
+      "description": "Thought journal: Situation, Emotion, Automatic Thought, Alternative Thought.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first thought record."
+    },
+    "cognitive_distortions": {
+      "label": "Cognitive Distortions Detector",
+      "description": "Educational cards on thinking traps (all-or-nothing, overgeneralization, mind-reading…)",
+      "new_btn": "Browse cards",
+      "empty_title": "No card yet",
+      "empty_text": "Use the button above to browse the cards."
+    },
+    "grounding": {
+      "label": "Grounding Techniques",
+      "description": "5-4-3-2-1 exercise to return to the present during dissociation or severe rumination.",
+      "new_btn": "New session",
+      "empty_title": "No session yet",
+      "empty_text": "Use the button above to start your first grounding session."
+    },
+    "rim": {
+      "label": "RIM – Mental Imagery Reprocessing",
+      "description": "Mental imagery reprocessing technique.",
+      "new_btn": "New session",
+      "empty_title": "No session yet",
+      "empty_text": "Use the button above to start your first session."
+    },
+    "fear_thermometer": {
+      "label": "Fear Thermometer",
+      "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first entry."
+    },
+    "exposure_hierarchy": {
+      "label": "Exposure Hierarchy",
+      "description": "Graduated exposure step builder for phobias and OCD.",
+      "new_btn": "New hierarchy",
+      "empty_title": "No hierarchy yet",
+      "empty_text": "Use the button above to build your first exposure hierarchy."
+    },
+    "breathing_techniques": {
+      "label": "Breathing Techniques",
+      "description": "Visual guide to box breathing and cardiac coherence with local counter.",
+      "new_btn": "New session",
+      "empty_title": "No session yet",
+      "empty_text": "Use the button above to start your first session."
+    },
+    "cognitive_saturation": {
+      "label": "Cognitive Saturation",
+      "description": "Rapid repetition exercise to interrupt ruminations.",
+      "new_btn": "New session",
+      "empty_title": "No session yet",
+      "empty_text": "Use the button above to start your first session."
+    },
+    "craving_journal": {
+      "label": "Craving Journal",
+      "description": "Log the urge intensity (0-10), the trigger, and the avoidance strategy used.",
+      "new_btn": "New entry",
+      "empty_title": "No entry yet",
+      "empty_text": "Use the button above to log your first entry."
+    },
+    "decisional_balance": {
+      "label": "Decisional Balance",
+      "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
+      "new_btn": "New balance",
+      "empty_title": "No balance yet",
+      "empty_text": "Use the button above to fill in your first decisional balance."
+    }
+  },
+  "category": {
+    "safety": {
+      "label": "Safety & Crisis Management",
+      "subtitle": ""
+    },
+    "iatrogenic": {
+      "label": "Iatrogenic & Somatic Monitoring",
+      "subtitle": ""
+    },
+    "lifestyle": {
+      "label": "Lifestyle & Biological Rhythms",
+      "subtitle": ""
+    },
+    "emotion": {
+      "label": "Emotional Regulation & Mood",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Cognitive Restructuring",
+      "subtitle": ""
+    },
+    "anxiety": {
+      "label": "Anxiety, Phobias & OCD",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictology & Impulsivity",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Clinical Assessments",
+      "subtitle": ""
+    }
+  },
+  "module": {
+    "crisis_plan": {
+      "label": "Crisis Plan",
+      "description": "Personalized action plan for difficult moments (Stanley & Brown).",
+      "step_1": {
+        "title": "Warning Signs",
+        "hint": "How do I feel when a crisis is approaching?"
+      },
+      "step_2": {
+        "title": "Internal Coping Strategies",
+        "hint": "What can I do on my own to calm down?"
+      },
+      "step_3": {
+        "title": "Distracting People or Places",
+        "hint": "Who can I see or where can I go to distract myself?"
+      },
+      "step_4": {
+        "title": "People to Contact",
+        "hint": "Who can listen and help me if I feel at risk?"
+      },
+      "step_5": {
+        "title": "Professionals and Emergency Services",
+        "hint": "Which professionals or services can I contact?"
+      },
+      "step_6": {
+        "title": "Securing My Environment",
+        "hint": "How can I make my surroundings safer?"
+      },
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
+    },
+    "therapeutic_commitment": {
+      "label": "Therapeutic Commitment",
+      "description": "Therapeutic alliance: commitment to using resources before any crisis act."
+    },
+    "distress_tolerance": {
+      "label": "Distress Tolerance Toolkit",
+      "description": "DBT-inspired emergency physiological action cards for breaking acute crises."
+    },
+    "medication_side_effects": {
+      "label": "Psychotropic Tolerance Thermometer",
+      "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
+      "field_1": {
+        "label": "Sedation",
+        "detail": "Drowsiness, slowness, concentration difficulties — scale 0–3"
+      },
+      "field_2": {
+        "label": "Akathisia",
+        "detail": "Inner agitation, inability to stay still — scale 0–3"
+      },
+      "field_3": {
+        "label": "Tremors",
+        "detail": "Hands, limbs — lithium, valproate, antipsychotics — scale 0–3"
+      },
+      "field_4": {
+        "label": "Dry Mouth",
+        "detail": "Anticholinergics, tricyclics — scale 0–3"
+      },
+      "field_5": {
+        "label": "Sleep Disturbances",
+        "detail": "Insomnia or hypersomnia — SSRIs, SNRIs, mood stabilizers — scale 0–3"
+      },
+      "field_6": {
+        "label": "Nausea / Digestive Issues",
+        "detail": "Lithium, valproate, SSRIs — scale 0–3"
+      },
+      "field_7": {
+        "label": "Free Notes",
+        "detail": "Context, remark, time of day"
+      },
+      "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
+    },
+    "medication_adherence": {
+      "label": "Medication Adherence Module",
+      "description": "Weekly self-report on medication adherence.",
+      "field_1": {
+        "label": "Taken",
+        "detail": "Medication taken in full"
+      },
+      "field_2": {
+        "label": "Partially",
+        "detail": "Medication partially taken (missed dose, difficulty)"
+      },
+      "field_3": {
+        "label": "Not Taken",
+        "detail": "Medication not taken this day"
+      },
+      "field_4": {
+        "label": "Free Notes",
+        "detail": "Optional text field (missed dose, remark…)"
+      },
+      "field_5": {
+        "label": "History",
+        "detail": "Raw list of the last 30 days (date, status, note)"
+      },
+      "footer": "Data stored locally on the patient's phone. The patient self-reports their status each day — no algorithmic interpretation (MDR 2017/745 compliance). Last 30 days of history available in the app."
+    },
+    "psychoeducation": {
+      "label": "Psychoeducation",
+      "description": "Therapeutic knowledge cards: sleep, grounding, distortions, drug interactions."
+    },
+    "sleep_diary": {
+      "label": "Sleep Diary",
+      "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
+      "field_1": {
+        "label": "Bedtime",
+        "detail": "Time picker"
+      },
+      "field_2": {
+        "label": "Wake Time",
+        "detail": "Time picker"
+      },
+      "field_3": {
+        "label": "Time to Fall Asleep",
+        "detail": "Slider in minutes (0–120)"
+      },
+      "field_4": {
+        "label": "Number of Night Wakings",
+        "detail": "Slider (0–10)"
+      },
+      "field_5": {
+        "label": "Total Wake Time",
+        "detail": "Slider in minutes (0–120)"
+      },
+      "field_6": {
+        "label": "Sleep Quality",
+        "detail": "1 to 5 star scale"
+      },
+      "field_7": {
+        "label": "Nightmares",
+        "detail": "Yes / No"
+      },
+      "field_8": {
+        "label": "Free Notes",
+        "detail": "Optional text field"
+      },
+      "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%."
+    },
+    "diet_weight_psycho": {
+      "label": "Diet & Weight Psychoeducation",
+      "description": "Understanding and managing cravings and weight gain on antipsychotics."
+    },
+    "chronobiology_tracker": {
+      "label": "Chronobiology Regularity Tracker",
+      "description": "Track zeitgebers: wake time, bedtime, first meal — essential for bipolar disorders."
+    },
+    "mood_tracker": {
+      "label": "Mood & Energy Thermometer",
+      "description": "Daily tracking of mood and energy level on a visual scale.",
+      "field_1": {
+        "label": "Mood",
+        "detail": "Scale 1–10"
+      },
+      "field_2": {
+        "label": "Energy",
+        "detail": "Scale 1–10"
+      },
+      "field_3": {
+        "label": "Anxiety",
+        "detail": "Scale 1–10"
+      },
+      "field_4": {
+        "label": "Pleasure",
+        "detail": "Scale 1–10 — anhedonia dimension (SHAPS 1995)"
+      },
+      "field_5": {
+        "label": "Free Notes",
+        "detail": "Optional text field"
+      },
+      "footer": "Single daily entry. History available with mini-charts per dimension (last 30 days). Data stored locally on the device."
+    },
+    "emotion_wheel": {
+      "label": "Emotion Wheel",
+      "description": "Explore and precisely name emotions to address alexithymia."
+    },
+    "behavioral_activation": {
+      "label": "Behavioral Activation Journal",
+      "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
+      "field_1": {
+        "label": "Date",
+        "detail": "Activity date (past or upcoming)"
+      },
+      "field_2": {
+        "label": "Activity Name",
+        "detail": "Free text — e.g. 20-min walk, Call a friend"
+      },
+      "field_3": {
+        "label": "Completed / Planned",
+        "detail": "The patient checks when the activity is done"
+      },
+      "field_4": {
+        "label": "Pleasure (0–10)",
+        "detail": "Satisfaction from the activity — raw value, no interpretation"
+      },
+      "field_5": {
+        "label": "Mastery (0–10)",
+        "detail": "Sense of accomplishment — raw value, no interpretation"
+      },
+      "field_6": {
+        "label": "Free Notes",
+        "detail": "Context, feelings, remark"
+      },
+      "footer": "The patient plans and rates activities on two dimensions (P and M). Data stored locally. No global score — raw P and M values are reviewed by the clinician during sessions to guide motivational interviewing."
+    },
+    "beck_columns": {
+      "label": "Beck Columns",
+      "description": "Thought journal: Situation, Emotion, Automatic Thought, Alternative Thought.",
+      "step_1": {
+        "title": "Situation",
+        "hint": "Where was I? What was happening? Who was present?"
+      },
+      "step_2": {
+        "title": "Emotion(s)",
+        "hint": "What emotion did I feel? How intense was it (0–100)?"
+      },
+      "step_3": {
+        "title": "Automatic Thought",
+        "hint": "What thought came to mind? How much did I believe it (0–100)?"
+      },
+      "step_4": {
+        "title": "Rational Response",
+        "hint": "Another way to see the situation? What facts contradict this thought?"
+      },
+      "step_5": {
+        "title": "Outcome",
+        "hint": "What emotion now? Intensity (0–100)? Belief in the alternative thought (0–100)?"
+      },
+      "footer": "Each record is stored locally on the patient's device. History is accessible at any time."
+    },
+    "cognitive_distortions": {
+      "label": "Cognitive Distortions Detector",
+      "description": "Educational cards on thinking traps (all-or-nothing, overgeneralization, mind-reading…)"
+    },
+    "grounding": {
+      "label": "Grounding Techniques",
+      "description": "5-4-3-2-1 exercise to return to the present during dissociation or severe rumination."
+    },
+    "rim": {
+      "label": "RIM – Mental Imagery Reprocessing",
+      "description": "Mental imagery reprocessing technique."
+    },
+    "fear_thermometer": {
+      "label": "Fear Thermometer",
+      "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
+      "field_1": {
+        "label": "Triggering Situation",
+        "detail": "Selection from personal catalog or free text"
+      },
+      "field_2": {
+        "label": "SUDs Before (0–100)",
+        "detail": "Subjective distress level before the strategy — raw number, no interpretation"
+      },
+      "field_3": {
+        "label": "Strategies Used",
+        "detail": "Multi-select: Slow Breathing, 5-4-3-2-1 Grounding, Exposure, etc. + free text"
+      },
+      "field_4": {
+        "label": "SUDs After (0–100)",
+        "detail": "Distress level after the strategy — optional (can be filled in later)"
+      },
+      "field_5": {
+        "label": "Free Notes",
+        "detail": "Context, observations, remark"
+      },
+      "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0–100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
+    },
+    "exposure_hierarchy": {
+      "label": "Exposure Hierarchy",
+      "description": "Graduated exposure step builder for phobias and OCD."
+    },
+    "breathing_techniques": {
+      "label": "Breathing Techniques",
+      "description": "Visual guide to box breathing and cardiac coherence with local counter.",
+      "field_1": {
+        "label": "Cardiac Coherence",
+        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inhale / 5s exhale · 5 min recommended"
+      },
+      "field_2": {
+        "label": "Diaphragmatic Breathing",
+        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inhale / 7s exhale · 5 min recommended"
+      },
+      "field_3": {
+        "label": "Box Breathing",
+        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommended"
+      },
+      "field_4": {
+        "label": "4-7-8 Technique",
+        "detail": "Expert consensus — Grade C · 4s-7s-8s · sleep onset, anxiety crisis · 3 min"
+      },
+      "field_5": {
+        "label": "Mindful Breathing",
+        "detail": "MBCT Segal et al. (2002) — Grade A depressive relapse · 4-1-6-1 · 10 min recommended"
+      },
+      "field_6": {
+        "label": "Session History",
+        "detail": "Technique used + actual duration — raw data, no interpretation"
+      },
+      "footer": "Animated guide at a fixed pace — no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
+    },
+    "cognitive_saturation": {
+      "label": "Cognitive Saturation",
+      "description": "Rapid repetition exercise to interrupt ruminations."
+    },
+    "craving_journal": {
+      "label": "Craving Journal",
+      "description": "Log the urge intensity (0-10), the trigger, and the avoidance strategy used."
+    },
+    "decisional_balance": {
+      "label": "Decisional Balance",
+      "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
+      "q1": {
+        "title": "Benefits of Change",
+        "subtitle": "Reasons to change"
+      },
+      "q2": {
+        "title": "Costs of Change",
+        "subtitle": "Costs of changing"
+      },
+      "q3": {
+        "title": "Benefits of Status Quo",
+        "subtitle": "Reasons to stay"
+      },
+      "q4": {
+        "title": "Costs of Status Quo",
+        "subtitle": "Costs of staying"
+      },
+      "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
+    },
+    "phq9": {
+      "label": "PHQ-9",
+      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27."
+    },
+    "gad7": {
+      "label": "GAD-7",
+      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0–21."
+    },
+    "bsl23": {
+      "label": "BSL-23",
+      "description": "23-item borderline symptom scale. Average score 0–4."
+    },
+    "snap_iv": {
+      "label": "SNAP-IV",
+      "description": "ADHD screening for children/adolescents — 26 items, 3 subscales."
+    },
+    "asrs6": {
+      "label": "ASRS v1.1 — Screener",
+      "description": "Adult ADHD rapid screening — 6-item Part A (Kessler et al., 2005)."
+    },
+    "asrs18": {
+      "label": "ASRS v1.1 — Full Assessment",
+      "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005)."
+    }
   }
 }

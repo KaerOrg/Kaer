@@ -21,48 +21,19 @@ import { useTeen } from '../hooks/useTeen'
 import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 
-const SCALES_TYPES = new Set([
-  'phq9', 'gad7', 'epds', 'rcads', 'bsl23', 'cape42', 'audit', 'nsi', 'snap_iv', 'asrs6', 'asrs18',
-])
-
-// icon + disponibilité par module. Labels et descriptions viennent de i18n.
-const MODULE_CONFIG: Record<
-  string,
-  { icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; available: boolean }
-> = {
-  crisis_plan:              { icon: 'lifebuoy',                  available: true  },
-  therapeutic_commitment:   { icon: 'handshake-outline',         available: false },
-  distress_tolerance:       { icon: 'shield-half-full',          available: false },
-  medication_side_effects:  { icon: 'pill',                      available: true  },
-  medication_adherence:     { icon: 'calendar-check-outline',    available: true  },
-  psychoeducation:          { icon: 'book-open-page-variant',    available: true  },
-  sleep_diary:              { icon: 'weather-night',             available: true  },
-  diet_weight_psycho:       { icon: 'food-apple-outline',        available: false },
-  chronobiology_tracker:    { icon: 'clock-outline',             available: false },
-  mood_tracker:             { icon: 'emoticon-outline',          available: true  },
-  emotion_wheel:            { icon: 'palette',                   available: true  },
-  behavioral_activation:    { icon: 'run-fast',                  available: true  },
-  beck_columns:             { icon: 'brain',                     available: true  },
-  cognitive_distortions:    { icon: 'head-cog-outline',          available: false },
-  grounding:                { icon: 'hand-heart-outline',        available: true  },
-  rim:                      { icon: 'waves',                     available: true  },
-  fear_thermometer:         { icon: 'thermometer',               available: true  },
-  exposure_hierarchy:       { icon: 'stairs-up',                 available: false },
-  breathing_techniques:     { icon: 'lungs',                     available: true  },
-  cognitive_saturation:     { icon: 'chat-processing-outline',   available: true  },
-  craving_journal:          { icon: 'lightning-bolt-outline',    available: false },
-  decisional_balance:       { icon: 'scale-balance',             available: true  },
-  phq9:                     { icon: 'clipboard-text-outline',    available: true  },
-  gad7:                     { icon: 'clipboard-text-outline',    available: true  },
-  epds:                     { icon: 'clipboard-text-outline',    available: true  },
-  rcads:                    { icon: 'clipboard-text-outline',    available: true  },
-  bsl23:                    { icon: 'clipboard-text-outline',    available: true  },
-  cape42:                   { icon: 'clipboard-text-outline',    available: false },
-  audit:                    { icon: 'clipboard-text-outline',    available: false },
-  nsi:                      { icon: 'clipboard-text-outline',    available: true  },
-  snap_iv:                  { icon: 'clipboard-text-outline',    available: true  },
-  asrs6:                    { icon: 'clipboard-text-outline',    available: true  },
-  asrs18:                   { icon: 'clipboard-text-outline',    available: true  },
+// Modules avec un écran dédié (interaction custom non couverte par le moteur générique).
+// Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.
+// Tout module absent de cette map ET autre preview_kind → ModuleContent (moteur générique).
+const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
+  sleep_diary:              'SleepDiary',
+  psychoeducation:          'Psychoeducation',
+  decisional_balance:       'DecisionalBalance',
+  beck_columns:             'BeckColumns',
+  medication_adherence:     'MedicationAdherence',
+  fear_thermometer:         'FearThermometer',
+  behavioral_activation:    'BehavioralActivation',
+  breathing_techniques:     'BreathingTechniques',
+  emotion_wheel:            'EmotionWheel',
 }
 
 
@@ -80,37 +51,37 @@ interface UnlockedModule {
 
 interface ModuleSectionsProps {
   modules: UnlockedModule[]
-  moduleConfig: typeof MODULE_CONFIG
-  scalesTypes: Set<string>
   isTeenMode: boolean
   teenColor: (moduleType: string) => string | undefined
-  handleModulePress: (moduleType: string) => void
+  handleModulePress: (mod: UnlockedModule) => void
   t: (key: string) => string
 }
 
 function ModuleCard({
   mod,
-  config,
   isTeenMode,
   accentColor,
   onPress,
   t,
 }: {
   mod: UnlockedModule
-  config: { icon: React.ComponentProps<typeof MaterialCommunityIcons>['name']; available: boolean }
   isTeenMode: boolean
   accentColor: string | undefined
   onPress: () => void
   t: (key: string) => string
 }) {
+  // Un module est disponible s'il a un écran custom OU si la base ne le marque pas coming_soon
+  const available = CUSTOM_ROUTES[mod.module_type] != null
+    || (mod.module != null && mod.module.preview_kind !== 'coming_soon')
+  const icon = (mod.module?.mobile_icon ?? 'help-circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
   return (
     <Pressable
       key={mod.id}
-      onPress={config.available ? onPress : undefined}
-      disabled={!config.available}
+      onPress={available ? onPress : undefined}
+      disabled={!available}
     >
       <Card
-        state={!config.available ? 'disabled' : undefined}
+        state={!available ? 'disabled' : undefined}
         accentColor={isTeenMode ? accentColor : undefined}
       >
         <View style={cardStyles.row}>
@@ -119,9 +90,9 @@ function ModuleCard({
             isTeenMode && accentColor && { backgroundColor: accentColor + '1A', borderRadius: radius.md },
           ]}>
             <MaterialCommunityIcons
-              name={config.icon}
+              name={icon}
               size={30}
-              color={config.available ? (accentColor ?? colors.primary) : colors.textMuted}
+              color={available ? (accentColor ?? colors.primary) : colors.textMuted}
             />
           </View>
           <View style={cardStyles.content}>
@@ -129,11 +100,11 @@ function ModuleCard({
             {Boolean(t(`modules.${mod.module_type}.description`)) && (
               <Text style={cardStyles.desc}>{t(`modules.${mod.module_type}.description`)}</Text>
             )}
-            {!config.available && (
+            {!available && (
               <Text style={cardStyles.comingSoon}>{t('home.coming_soon')}</Text>
             )}
           </View>
-          {config.available && (
+          {available && (
             <Text style={[cardStyles.chevron, isTeenMode && accentColor && { color: accentColor }]}>›</Text>
           )}
         </View>
@@ -152,9 +123,9 @@ const cardStyles = StyleSheet.create({
   chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
 })
 
-function ModuleSections({ modules, moduleConfig, scalesTypes, isTeenMode, teenColor, handleModulePress, t }: ModuleSectionsProps) {
-  const tools = modules.filter(m => !scalesTypes.has(m.module_type))
-  const scales = modules.filter(m => scalesTypes.has(m.module_type))
+function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress, t }: ModuleSectionsProps) {
+  const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire')
+  const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire')
 
   return (
     <View style={{ gap: spacing.md }}>
@@ -163,41 +134,31 @@ function ModuleSections({ modules, moduleConfig, scalesTypes, isTeenMode, teenCo
           {scales.length > 0 && (
             <Text style={sectionStyles.header}>{t('home.section_tools')}</Text>
           )}
-          {tools.map(mod => {
-            const config = moduleConfig[mod.module_type]
-            if (!config) return null
-            return (
-              <ModuleCard
-                key={mod.id}
-                mod={mod}
-                config={config}
-                isTeenMode={isTeenMode}
-                accentColor={teenColor(mod.module_type)}
-                onPress={() => handleModulePress(mod.module_type)}
-                t={t}
-              />
-            )
-          })}
+          {tools.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isTeenMode={isTeenMode}
+              accentColor={teenColor(mod.module_type)}
+              onPress={() => handleModulePress(mod)}
+              t={t}
+            />
+          ))}
         </View>
       )}
       {scales.length > 0 && (
         <View style={{ gap: spacing.sm }}>
           <Text style={sectionStyles.header}>{t('home.section_scales')}</Text>
-          {scales.map(mod => {
-            const config = moduleConfig[mod.module_type]
-            if (!config) return null
-            return (
-              <ModuleCard
-                key={mod.id}
-                mod={mod}
-                config={config}
-                isTeenMode={isTeenMode}
-                accentColor={teenColor(mod.module_type)}
-                onPress={() => handleModulePress(mod.module_type)}
-                t={t}
-              />
-            )
-          })}
+          {scales.map(mod => (
+            <ModuleCard
+              key={mod.id}
+              mod={mod}
+              isTeenMode={isTeenMode}
+              accentColor={teenColor(mod.module_type)}
+              onPress={() => handleModulePress(mod)}
+              t={t}
+            />
+          ))}
         </View>
       )}
     </View>
@@ -246,40 +207,21 @@ export default function HomeScreen() {
     setRefreshing(false)
   }
 
-  const handleModulePress = (moduleType: string) => {
-    const routes: Partial<Record<string, keyof AppStackParamList>> = {
-      sleep_diary:             'SleepDiary',
-      crisis_plan:             'CrisisPlan',
-      psychoeducation:         'Psychoeducation',
-      decisional_balance:      'DecisionalBalance',
-      beck_columns:            'BeckColumns',
-      mood_tracker:            'MoodTracker',
-      medication_adherence:    'MedicationAdherence',
-      medication_side_effects: 'MedicationSideEffects',
-      fear_thermometer:        'FearThermometer',
-      behavioral_activation:   'BehavioralActivation',
-      breathing_techniques:    'BreathingTechniques',
-      rim:                     'Rim',
-      grounding:               'Grounding',
-      cognitive_saturation:    'CognitiveSaturation',
-      emotion_wheel:           'EmotionWheel',
-      phq9:                    'PHQ9',
-      bsl23:                   'BSL23',
-      gad7:                    'GAD7',
-      rcads:                   'RCADS25',
-      epds:                    'EPDS',
-      nsi:                     'NSI',
-      snap_iv:                 'SNAPIV',
-      asrs6:                   'ASRS6',
-      asrs18:                  'ASRS18',
+  const handleModulePress = useCallback((mod: UnlockedModule) => {
+    // 1. Écrans custom dédiés (interaction non couverte par le moteur générique)
+    const customRoute = CUSTOM_ROUTES[mod.module_type]
+    if (customRoute) {
+      navigation.navigate(customRoute as never)
+      return
     }
-    const route = routes[moduleType]
-    if (route) {
-      navigation.navigate(route as never)
-    } else {
-      navigation.navigate('ModuleContent', { moduleType })
+    // 2. Questionnaire sans écran custom → moteur générique ScaleHistory
+    if (mod.module?.preview_kind === 'questionnaire') {
+      navigation.navigate('ScaleHistory', { scale_id: mod.module_type })
+      return
     }
-  }
+    // 3. Tous les autres → moteur générique ModuleContent (DB-driven)
+    navigation.navigate('ModuleContent', { moduleType: mod.module_type })
+  }, [navigation])
 
   if (loading) {
     return (
@@ -315,8 +257,6 @@ export default function HomeScreen() {
         ) : (
           <ModuleSections
             modules={modules}
-            moduleConfig={MODULE_CONFIG}
-            scalesTypes={SCALES_TYPES}
             isTeenMode={isTeenMode}
             teenColor={teenColor}
             handleModulePress={handleModulePress}

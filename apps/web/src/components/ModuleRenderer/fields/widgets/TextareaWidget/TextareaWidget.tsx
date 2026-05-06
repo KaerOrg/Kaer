@@ -1,3 +1,3 @@
 export function TextareaWidget() {
-  return <div className="fw-textarea" />
+  return <textarea className="fw-textarea" />
 }

@@ -92,3 +92,68 @@ Les objets, tableaux et fonctions déclarés dans le render sont re-créés à c
 ## Schéma
 
 - Tout changement de schéma (table, colonne, trigger, RLS, index PostGIS) → répercuté dans `supabase/schema.sql` (source de vérité)
+
+## Internationalisation — zéro texte hardcodé
+
+**Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.**
+
+### Principe général
+
+- **Code (web + mobile)** : tout libellé, label, message d'erreur, consigne, placeholder ou texte d'interface passe par `t('clé')` (i18next). Zéro string littérale dans le JSX ou les fonctions UI.
+- **Base de données** : la colonne `text_code` de `module_content_fields` contient une **clé i18n**, jamais le texte lui-même. Le rendu appelle `t(field.text_code)`.
+- **Violations** : toute string littérale dans le JSX (hors valeurs purement techniques : ids, URLs, formats de date) est un bug bloquant — corriger avant de merger.
+
+### Langues
+
+| Fichier | Obligatoire | Fallback |
+|---|---|---|
+| `locales/fr/common.json` | Oui | — |
+| `locales/en/common.json` | Oui | — |
+| `locales/{de,es,it,pt}/common.json` | Best-effort | `en` via i18next |
+| `locales/fr/teen.json` | Oui (clés module) | `fr/common` |
+| `locales/en/teen.json` | Oui (clés module) | `en/common` |
+
+### Convention de nommage des clés
+
+- Clés de module : `modules.<module_id>.<élément>` — ex. `modules.phq9.instructions`, `modules.phq9.q1`, `modules.phq9.opt_0`
+- Clés communes : `common.<élément>` — ex. `common.save`, `common.cancel`
+- Clés d'interface par section : `<section>.<élément>` — ex. `auth.login_title`, `home.title`
+
+### Mode ado (teen) — règle d'or
+
+Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+
+- i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** pour toute clé de module.
+- `de`, `es`, `it`, `pt` n'ont pas de `teen.json` — aucune traduction teen requise pour ces langues.
+- **Le web n'a pas de mode ado** — `teen.json` est mobile uniquement.
+
+### Fonctions de traduction — quand utiliser quoi
+
+| Fonction | Quand l'utiliser | Exemple |
+|---|---|---|
+| `t('clé')` | Textes hors module (auth, navigation, common) | `t('common.save')` |
+| `tt(moduleId, textKey)` | Textes de module dans les écrans custom (résout `modules.{moduleId}.{textKey}` en mode teen si actif) | `tt('phq9', 'instructions')` |
+| `tg(textKey)` | Textes globaux avec override teen (résout `global.{textKey}`) | `tg('greeting')` |
+| `useTranslation(isTeenMode ? ['teen', 'common'] : 'common')` | Dans `FieldRenderer` et tout composant générique qui reçoit une `text_code` depuis la base | Voir règle ci-dessous |
+
+### FieldRenderer — intégration teen obligatoire
+
+`FieldRenderer` et tous les composants du `ModuleRenderer` qui appellent `t(field.text_code)` **doivent** utiliser le namespace teen quand le mode est actif :
+
+```ts
+// Obligatoire dans FieldRenderer et ses layouts
+const { isTeenMode } = useTeen()
+const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+// t(field.text_code) résout automatiquement teen → common
+```
+
+Ne pas appeler `tt()` dans `FieldRenderer` — `text_code` est déjà la clé complète (`modules.phq9.q1`), pas un fragment.
+
+### Nouveaux modules — checklist i18n
+
+Avant toute PR introduisant un nouveau module :
+
+- [ ] Toutes les clés `modules.<id>.*` ajoutées dans `fr/common.json` et `en/common.json`
+- [ ] Toutes les clés `modules.<id>.*` ajoutées dans `fr/teen.json` et `en/teen.json` (tutoiement, registre ado)
+- [ ] Clés optionnelles ajoutées dans `de/es/it/pt common.json` (best-effort)
+- [ ] `text_code` en base référencent des clés existantes dans les locales

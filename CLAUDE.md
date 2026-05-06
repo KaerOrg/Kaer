@@ -90,24 +90,39 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `rim` | RIM — Imagerie mentale | Prévu |
 | `cognitive_saturation` | Saturation cognitive | Prévu |
 | `decisional_balance` | Balance décisionnelle | Implémenté — grille 2×2 + jauge de motivation, SQLite local, signal Supabase |
-| `phq9` | PHQ-9 — Dépression | Implémenté — 9 items, score 0-27, SQLite local, tests RNTL |
-| `gad7` | GAD-7 — Anxiété généralisée | Implémenté — 7 items, score 0-21, SQLite local, tests RNTL |
-| `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, SQLite local, tests RNTL |
+| `phq9` | PHQ-9 — Dépression | Implémenté — 9 items, score 0-27, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `gad7` | GAD-7 — Anxiété généralisée | Implémenté — 7 items, score 0-21, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, légende 0-4, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | Implémenté — 25 items Ebesutani (2012), 6 sous-échelles (TAG/TP/TS/PS/TOC/TD), SQLite local, 20 tests Jest |
-| `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest |
-| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, auto-évaluation, bouton info PubMed, SQLite local, tests Jest |
-| `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, bouton info PubMed, SQLite local, tests Jest |
+| `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, pattern générique ModuleRenderer, SQLite `scale_entries` |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
-Les questionnaires suivent un pattern uniforme à 3 fichiers :
-- `apps/mobile/src/data/<scale>.ts` — items, options, calcul des scores (exporté et testé unitairement)
-- `apps/mobile/src/screens/modules/<Scale>Screen.tsx` — historique, suppression, mini-cartes de résultats
-- `apps/mobile/src/screens/modules/<Scale>EntryScreen.tsx` — saisie avec `QuestionRow` + validation
+Les échelles cliniques standard suivent le **pattern générique ModuleRenderer** — deux écrans partagés + données en base :
 
-**Échelles multi-dimensionnelles (RCADS-25, SNAP-IV)** : contrairement aux échelles à score unique, elles stockent un objet JSON de sous-scores en plus du `total_score`. L'écran liste affiche les sous-scores sous forme de chips. Toute nouvelle échelle multi-dimensionnelle doit suivre ce pattern.
+| Fichier | Rôle |
+|---|---|
+| `apps/mobile/src/screens/modules/ScaleHistoryScreen.tsx` | Historique + suppression + chips sous-scores (paramètre `scale_id`) |
+| `apps/mobile/src/screens/modules/ScaleEntryScreen.tsx` | Saisie interactive via `FieldRenderer preview_kind='questionnaire'` |
+| `apps/mobile/src/lib/scaleScoring.ts` | Config scoring par échelle (`SCALE_SCORING` map) |
+| `apps/mobile/src/lib/database.ts` | Table SQLite générique `scale_entries` |
+| `supabase/schema.sql` | `module_content_fields` + `field_props` par échelle |
 
-**SNAP-IV spécificité** : hétéro-évaluation obligatoire (parent/enseignant, pas l'enfant). L'écran de saisie affiche un bandeau d'avertissement jaune et groupe les 26 items en 3 sections visuelles avec `SectionHeader`.
+**Ajouter une nouvelle échelle générique :**
+1. Ajouter la config dans `SCALE_SCORING` (scaleScoring.ts)
+2. Ajouter les clés i18n dans fr/en common.json + fr/en teen.json
+3. Ajouter le module dans `modules` Supabase avec `preview_kind = 'questionnaire'`
+4. Insérer les `module_content_fields` (instructions, options, questions, footer) + `field_props`
+5. Ajouter l'entrée dans `GENERIC_SCALE_TYPES` (HomeScreen.tsx) si pas déjà présent
+6. Ajouter l'icône dans `MODULE_CONFIG` (HomeScreen.tsx)
+
+**Échelles multi-dimensionnelles** (sous-scores) : implémenter `computeSubscaleScores` dans `SCALE_SCORING` et ajouter la map `CHIP_KEY_TO_SUBSCALE` dans `ScaleHistoryScreen.tsx`.
+
+**Hétéro-évaluation** (ex. SNAP-IV) : ajouter un champ `scale_warning` dans `module_content_fields`.
+
+**Exceptions** : les échelles avec logique conditionnelle (C-SSRS) restent sur écrans custom dédiés.
 
 ## État d'avancement
 

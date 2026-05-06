@@ -5,7 +5,7 @@ import type { FieldProps } from '../types'
 import { InlineText } from '../InlineText'
 
 interface FieldConfig {
-  variant: 'h2' | 'h3' | 'h4' | 'paragraph' | 'bold' | 'italic' | 'callout' | 'footer' |
+  variant: 'h2' | 'h3' | 'h4' | 'paragraph' | 'callout' | 'footer' |
            'step_title' | 'step_hint' | 'quadrant_title' | 'quadrant_subtitle' |
            'card_title' | 'card_summary'
   propColor?: boolean
@@ -17,8 +17,6 @@ const CONFIG: Record<string, FieldConfig> = {
   card_heading_3:      { variant: 'h3' },
   card_heading_4:      { variant: 'h4' },
   card_paragraph:      { variant: 'paragraph' },
-  card_paragraph_bold: { variant: 'bold' },
-  card_italic_note:    { variant: 'italic' },
   card_callout:        { variant: 'callout' },
   footer_note:         { variant: 'footer' },
   step_title:          { variant: 'step_title' },
@@ -80,10 +78,9 @@ export function FieldText({ field, t }: FieldProps) {
   if (cfg.variant === 'h2') return <Text style={styles.h2}>{body}</Text>
   if (cfg.variant === 'h3') return <Text style={styles.h3}>{body}</Text>
   if (cfg.variant === 'h4') return <Text style={styles.h4}>{body}</Text>
-  if (cfg.variant === 'bold') return <Text style={styles.bold}>{body}</Text>
-  if (cfg.variant === 'italic') return <Text style={styles.italic}>{body}</Text>
-
-  return <Text style={styles.paragraph}>{body}</Text>
+  const isBold = field.props['bold'] === 'true'
+  const isItalic = field.props['italic'] === 'true'
+  return <Text style={isBold ? styles.bold : isItalic ? styles.italic : styles.paragraph}>{body}</Text>
 }
 
 const styles = StyleSheet.create({

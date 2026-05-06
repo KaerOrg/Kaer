@@ -8,10 +8,10 @@ describe('CheckboxWidget', () => {
     expect(container.querySelector('input[type="checkbox"]')).toBeTruthy()
   })
 
-  it('est désactivé', () => {
+  it('est interactif (non désactivé)', () => {
     const { container } = render(<CheckboxWidget />)
     const input = container.querySelector('input') as HTMLInputElement
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it("n'est pas coché par défaut", () => {
@@ -20,7 +20,7 @@ describe('CheckboxWidget', () => {
     expect(input.checked).toBe(false)
   })
 
-  it('affiche le libellé "Non accompli"', () => {
+  it('affiche le libellé "Non accompli" par défaut', () => {
     const { container } = render(<CheckboxWidget />)
     expect(container.querySelector('.fw-checkbox__label')?.textContent).toBe('Non accompli')
   })

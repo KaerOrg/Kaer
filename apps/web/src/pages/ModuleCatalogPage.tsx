@@ -183,10 +183,10 @@ export function ModuleCatalogPage() {
                           <div className="catalog-card__top">
                             <span className="catalog-card__name-row">
                               {IconComponent && <IconComponent size={16} className="catalog-card__icon" />}
-                              <span className="catalog-card__name">{t(`module.${mod.id}.label`)}</span>
+                              <span className="catalog-card__name">{t(`modules.${mod.id}.label`)}</span>
                             </span>
                           </div>
-                          <p className="catalog-card__desc">{t(`module.${mod.id}.description`)}</p>
+                          <p className="catalog-card__desc">{t(`modules.${mod.id}.description`)}</p>
                         </div>
                         <div className="catalog-card__footer">
                           {isComingSoon ? (

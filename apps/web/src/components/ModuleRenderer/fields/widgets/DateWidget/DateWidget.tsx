@@ -1,3 +1,3 @@
 export function DateWidget() {
-  return <input type="date" disabled readOnly className="fw-date" />
+  return <input type="date" className="fw-date" />
 }

@@ -32,6 +32,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { PipPicker } from '../../components/PipPicker'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Route = RouteProp<AppStackParamList, 'FearEntry'>
@@ -69,30 +70,15 @@ function SudsPicker({ label, hint, value, accentColor = colors.primary, nullable
         </View>
       </View>
 
-      <View style={pickerStyles.pips}>
-        {steps.map((s) => (
-          <Pressable
-            key={s}
-            style={[
-              pickerStyles.pip,
-              value === s && { backgroundColor: accentColor, borderColor: accentColor },
-            ]}
-            onPress={() => onChange(s)}
-            accessibilityRole="button"
-            accessibilityLabel={`${label} ${s}`}
-            accessibilityState={{ selected: value === s }}
-          >
-            <Text
-              style={[
-                pickerStyles.pipText,
-                value === s && { color: colors.white, fontWeight: '700' },
-              ]}
-            >
-              {s}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      <PipPicker
+        value={value}
+        steps={steps}
+        color={accentColor}
+        label={label}
+        variant="numbered"
+        showHeader={false}
+        onPress={onChange}
+      />
 
       {nullable && (
         <Pressable
@@ -120,23 +106,7 @@ const pickerStyles = StyleSheet.create({
   value: { fontSize: 22, fontWeight: '800' },
   valueNull: { fontSize: 22, fontWeight: '800', color: colors.textMuted },
   valueMax: { fontSize: 12, color: colors.textMuted },
-  pips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  pip: {
-    width: 48,
-    height: 36,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pipText: { fontSize: 13, color: colors.textMuted },
-  skipBtn: { alignSelf: 'flex-start', paddingVertical: 4 },
+skipBtn: { alignSelf: 'flex-start', paddingVertical: 4 },
   skipText: { fontSize: 12, color: colors.textMuted, textDecorationLine: 'underline' },
 })
 

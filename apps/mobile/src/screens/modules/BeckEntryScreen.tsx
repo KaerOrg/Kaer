@@ -25,72 +25,10 @@ import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
+import { PipPicker } from '../../components/PipPicker'
 
 type RouteType = RouteProp<AppStackParamList, 'BeckEntry'>
 
-// ─── Curseur d'intensité 0–100 ────────────────────────────────────────────────
-// Affiche le chiffre brut saisi par le patient — aucune interprétation algorithmique
-// (conformité MDR 2017/745 : le code affiche, jamais il ne conclut).
-
-interface IntensitySliderProps {
-  label: string
-  value: number
-  accentColor: string
-  onChange: (v: number) => void
-}
-
-function IntensitySlider({ label, value, accentColor, onChange }: IntensitySliderProps) {
-  const steps = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
-  return (
-    <View style={sliderStyles.container}>
-      <View style={sliderStyles.header}>
-        <Text style={sliderStyles.label}>{label}</Text>
-        <Text style={[sliderStyles.value, { color: accentColor }]}>{value}</Text>
-      </View>
-      <View style={sliderStyles.track}>
-        {steps.map((step) => (
-          <Pressable
-            key={step}
-            style={[
-              sliderStyles.pip,
-              value >= step && { backgroundColor: accentColor },
-            ]}
-            onPress={() => onChange(step)}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: value === step }}
-            accessibilityLabel={`${step}`}
-          />
-        ))}
-      </View>
-      <View style={sliderStyles.endpoints}>
-        <Text style={sliderStyles.endpoint}>0</Text>
-        <Text style={sliderStyles.endpoint}>100</Text>
-      </View>
-    </View>
-  )
-}
-
-const sliderStyles = StyleSheet.create({
-  container: { gap: 4 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  label: { fontSize: 13, color: colors.textMuted },
-  value: { fontSize: 20, fontWeight: '700', minWidth: 36, textAlign: 'right' },
-  track: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 4,
-  },
-  pip: {
-    flex: 1,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.border,
-  },
-  endpoints: { flexDirection: 'row', justifyContent: 'space-between' },
-  endpoint: { fontSize: 11, color: colors.textMuted },
-})
 
 // ─── Section d'une colonne ────────────────────────────────────────────────────
 
@@ -310,12 +248,15 @@ export default function BeckEntryScreen() {
             multiline={false}
             minHeight={0}
           />
-          <IntensitySlider
-            label={t('modules.beck_columns.entry_col_2_intensity')}
-            value={record.emotion_intensity}
-            accentColor="#8B5CF6"
-            onChange={(v) => set('emotion_intensity', v)}
-          />
+          <PipPicker
+                label={t('modules.beck_columns.entry_col_2_intensity')}
+                value={record.emotion_intensity}
+                color="#8B5CF6"
+                steps={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+                variant="track"
+                showEndLabels
+                onPress={(v) => set('emotion_intensity', v)}
+              />
         </ColumnSection>
 
         {/* Colonne 3 — Pensée automatique */}
@@ -330,12 +271,15 @@ export default function BeckEntryScreen() {
             value={record.automatic_thought}
             onChange={(v) => set('automatic_thought', v)}
           />
-          <IntensitySlider
-            label={t('modules.beck_columns.entry_col_3_belief')}
-            value={record.thought_belief}
-            accentColor="#EF4444"
-            onChange={(v) => set('thought_belief', v)}
-          />
+          <PipPicker
+                label={t('modules.beck_columns.entry_col_3_belief')}
+                value={record.thought_belief}
+                color="#EF4444"
+                steps={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+                variant="track"
+                showEndLabels
+                onPress={(v) => set('thought_belief', v)}
+              />
         </ColumnSection>
 
         {/* Colonne 4 — Réponse rationnelle */}
@@ -367,18 +311,24 @@ export default function BeckEntryScreen() {
             multiline={false}
             minHeight={0}
           />
-          <IntensitySlider
-            label={t('modules.beck_columns.entry_col_5_intensity')}
-            value={record.outcome_intensity}
-            accentColor="#D97706"
-            onChange={(v) => set('outcome_intensity', v)}
-          />
-          <IntensitySlider
-            label={t('modules.beck_columns.entry_col_5_belief')}
-            value={record.outcome_belief}
-            accentColor="#D97706"
-            onChange={(v) => set('outcome_belief', v)}
-          />
+          <PipPicker
+                label={t('modules.beck_columns.entry_col_5_intensity')}
+                value={record.outcome_intensity}
+                color="#D97706"
+                steps={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+                variant="track"
+                showEndLabels
+                onPress={(v) => set('outcome_intensity', v)}
+              />
+          <PipPicker
+                label={t('modules.beck_columns.entry_col_5_belief')}
+                value={record.outcome_belief}
+                color="#D97706"
+                steps={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+                variant="track"
+                showEndLabels
+                onPress={(v) => set('outcome_belief', v)}
+              />
         </ColumnSection>
 
       </ScrollView>

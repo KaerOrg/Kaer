@@ -12,7 +12,6 @@
     "test:web": "cd apps/web && npx vitest run"
   },
   "dependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "react-dom": "^19.2.5"
+    "@testing-library/dom": "^10.4.1"
   }
 }

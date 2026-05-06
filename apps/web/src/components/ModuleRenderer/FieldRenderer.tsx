@@ -22,11 +22,9 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_heading_2:      FieldText,
   card_heading_3:      FieldText,
   card_heading_4:      FieldText,
-  card_italic_note:    FieldText,
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
-  card_paragraph_bold: FieldText,
 }
 
 // ─── Lookup registry avec avertissement sur type inconnu ─────────────────────
@@ -42,7 +40,7 @@ function renderField(f: ContentField, t: (key: string) => string): ReactNode {
 
 // ─── Groupement des list items consécutifs en ul/ol ──────────────────────────
 
-function renderCardBodyFields(fields: ContentField[], t: (key: string) => string): ReactNode {
+function renderCardBody(fields: ContentField[], t: (key: string) => string): ReactNode {
   const result: ReactNode[] = []
   let listBuffer: ContentField[] = []
   let listType: 'ul' | 'ol' | null = null
@@ -184,13 +182,64 @@ function CardsLayout({ sections, expandedCard, onToggle, t }: {
             </button>
             {isOpen && bodyFields.length > 0 && (
               <div className="preview-card__body">
-                {renderCardBodyFields(bodyFields, t)}
+                {renderCardBody(bodyFields, t)}
               </div>
             )}
           </div>
         )
       })}
     </div>
+  )
+}
+
+// ─── Questionnaire layout (PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS…) ─────────────
+
+function QuestionnaireLayout({ fields, footer, t }: {
+  fields: ContentField[]
+  footer: ContentField | undefined
+  t: (key: string) => string
+}) {
+  const warning = fields.find(f => f.field_type === 'scale_warning')
+  const instructions = fields.filter(f => f.field_type === 'scale_instruction')
+  const options = fields
+    .filter(f => f.field_type === 'scale_option' || f.field_type === 'scale_legend_item')
+    .sort((a, b) => a.sort_order - b.sort_order)
+  const questions = fields
+    .filter(f => f.field_type === 'scale_question')
+    .sort((a, b) => a.sort_order - b.sort_order)
+
+  return (
+    <>
+      {warning && (
+        <p className="preview-questionnaire__warning">{t(warning.text_code ?? '')}</p>
+      )}
+      {instructions.map(f => (
+        <p key={f.id} className="preview-questionnaire__instruction">{t(f.text_code ?? '')}</p>
+      ))}
+      {options.length > 0 && (
+        <div className="preview-questionnaire__options">
+          {options.map(f => (
+            <span key={f.id} className="preview-questionnaire__option">
+              <span className="preview-questionnaire__option-val">{f.props['value']}</span>
+              <span className="preview-questionnaire__option-label">{t(f.text_code ?? '')}</span>
+            </span>
+          ))}
+        </div>
+      )}
+      <ol className="preview-questionnaire__questions">
+        {questions.map(f => (
+          <li key={f.id} className="preview-questionnaire__question">
+            {t(f.text_code ?? '')}
+          </li>
+        ))}
+      </ol>
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
+        </div>
+      )}
+    </>
   )
 }
 
@@ -245,6 +294,10 @@ export function FieldRenderer({ preview_kind, fields, expandedCard, onToggleCard
       sections.get(f.section_id)!.push(f)
     }
     return <Grid2x2Layout sections={sections} footer={footer} t={t} />
+  }
+
+  if (preview_kind === 'questionnaire') {
+    return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
   }
 
   return null

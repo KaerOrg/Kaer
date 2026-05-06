@@ -8,10 +8,10 @@ describe('TimeWidget', () => {
     expect(container.querySelector('input[type="time"]')).toBeTruthy()
   })
 
-  it('est désactivé (non interactif)', () => {
+  it('est interactif (non désactivé)', () => {
     const { container } = render(<TimeWidget />)
     const input = container.querySelector('input') as HTMLInputElement
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it('a une valeur par défaut visible', () => {

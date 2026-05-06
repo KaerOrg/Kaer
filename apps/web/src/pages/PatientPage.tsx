@@ -25,6 +25,22 @@ import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
 
+type PageData = {
+  modules: PatientModule[]
+  categories: ModuleCategory[]
+  enabledModules: Set<ModuleType> | null
+  psychoCards: PsychoCardInfo[]
+  comingSoonIds: Set<string>
+}
+
+const PAGE_DATA_INITIAL: PageData = {
+  modules: [],
+  categories: [],
+  enabledModules: null,
+  psychoCards: [],
+  comingSoonIds: new Set(),
+}
+
 
 // ─── Helpers psychoéducation ─────────────────────────────────────────────────
 
@@ -43,16 +59,13 @@ export function PatientPage() {
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
-  const [categories, setCategories] = useState<ModuleCategory[]>([])
-  const [modules, setModules] = useState<PatientModule[]>([])
+  const [pageData, setPageData] = useState<PageData>(PAGE_DATA_INITIAL)
+  const { modules, categories, enabledModules, psychoCards, comingSoonIds } = pageData
   const [loading, setLoading] = useState(true)
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
   const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
   const [teenMode, setTeenMode] = useState(false)
   const [togglingTeen, setTogglingTeen] = useState(false)
-  const [enabledModules, setEnabledModules] = useState<Set<ModuleType> | null>(null)
-  const [psychoCards, setPsychoCards] = useState<PsychoCardInfo[]>([])
-  const [comingSoonIds, setComingSoonIds] = useState<Set<string>>(new Set())
 
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
 
@@ -102,11 +115,13 @@ export function PatientPage() {
       fetchComingSoonModuleIds(),
     ])
 
-    setModules(mods ?? [])
-    setCategories(cats)
-    setEnabledModules(settings ? new Set(settings.enabled_modules as ModuleType[]) : null)
-    setPsychoCards(cards)
-    setComingSoonIds(comingSoon)
+    setPageData({
+      modules: mods ?? [],
+      categories: cats,
+      enabledModules: settings ? new Set(settings.enabled_modules as ModuleType[]) : null,
+      psychoCards: cards,
+      comingSoonIds: comingSoon,
+    })
     setLoading(false)
   }, [id, practitioner, navigate])
 
@@ -312,7 +327,7 @@ export function PatientPage() {
         <div key={moduleType} className="module-card-wrapper-block">
           <Card
             state="disabled"
-            header={{ title: t(`module.${moduleType}.label`), subtitle: t(`module.${moduleType}.description`) }}
+            header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
             actions={<StatusBadge variant="neutral" label={t('patient.realtime_soon')} />}
           />
         </div>
@@ -330,7 +345,7 @@ export function PatientPage() {
         <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
           <Card
             state={unlocked ? 'active' : undefined}
-            header={{ title: t('module.psychoeducation.label'), subtitle: t('module.psychoeducation.description') }}
+            header={{ title: t('modules.psychoeducation.label'), subtitle: t('modules.psychoeducation.description') }}
             actions={
               <>
                 <button
@@ -458,7 +473,7 @@ export function PatientPage() {
         <div key="rim" className="module-card-wrapper module-card-wrapper-block">
           <Card
             state={unlocked ? 'active' : undefined}
-            header={{ title: t('module.rim.label'), subtitle: t('module.rim.description') }}
+            header={{ title: t('modules.rim.label'), subtitle: t('modules.rim.description') }}
             actions={
               <>
                 {unlocked && mod ? (
@@ -553,7 +568,7 @@ export function PatientPage() {
       <div key={moduleType} className="module-card-wrapper-block">
         <Card
           state={unlocked ? 'active' : undefined}
-          header={{ title: t(`module.${moduleType}.label`), subtitle: t(`module.${moduleType}.description`) }}
+          header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
           actions={
             <>
               <button
@@ -716,22 +731,22 @@ export function PatientPage() {
               ) : (
                 <div className="radar__grid">
                   {isUnlocked('crisis_plan') && (
-                    <StatusBadge variant="info" label={t('module.crisis_plan.label')} value={t('patient.active_badge')} />
+                    <StatusBadge variant="info" label={t('modules.crisis_plan.label')} value={t('patient.active_badge')} />
                   )}
                   {psychoModule && (
                     <StatusBadge
                       variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
-                      label={t('module.psychoeducation.label')}
+                      label={t('modules.psychoeducation.label')}
                       value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards}`}
                     />
                   )}
                   {isUnlocked('sleep_diary') && (
-                    <StatusBadge variant="info" label={t('module.sleep_diary.label')} value={t('patient.active_badge')} />
+                    <StatusBadge variant="info" label={t('modules.sleep_diary.label')} value={t('patient.active_badge')} />
                   )}
                   {modules
                     .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
                     .map(m => (
-                      <StatusBadge key={m.id} variant="info" label={t(`module.${m.module_type}.label`)} value={t('patient.active_badge')} />
+                      <StatusBadge key={m.id} variant="info" label={t(`modules.${m.module_type}.label`)} value={t('patient.active_badge')} />
                     ))}
                   <StatusBadge variant="neutral" label={t('patient.realtime_label')} value={t('patient.realtime_soon')} />
                 </div>

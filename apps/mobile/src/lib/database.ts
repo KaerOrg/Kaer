@@ -49,20 +49,33 @@ export async function initDatabase(): Promise<void> {
   await createPHQ9Table(database)
   await createBSL23Table(database)
   await createGAD7Table(database)
-  await createRCADS25Table(database)
-  await createEPDSTable(database)
-  await createNSITable(database)
+  await createNSITable(database) // kept for migration source
   await createSNAPIVTable(database)
   await createASRS6Table(database)
   await createASRS18Table(database)
+  await createScaleEntriesTable(database)
+  await createPlanItemsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
     `ALTER TABLE sleep_diary_entries ADD COLUMN awakenings_duration_minutes INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
+    // Copie des entrées des tables dédiées vers scale_entries
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'phq9',answers,score,NULL,created_at FROM phq9_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'bsl23',answers,mean_score,NULL,created_at FROM bsl23_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'gad7',answers,score,NULL,created_at FROM gad7_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'snap_iv',answers,total_score,subscale_scores,created_at FROM snapiv_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'asrs6',answers,total_score,NULL,created_at FROM asrs6_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'asrs18',answers,total_score,sub_scores,created_at FROM asrs18_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'rcads',answers,total_score,subscale_scores,created_at FROM rcads25_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'medication_side_effects',json_array(sedation,akathisia,tremors,dry_mouth,sleep_disturbance,nausea),(sedation+akathisia+tremors+dry_mouth+sleep_disturbance+nausea),json_object('sedation',sedation,'akathisia',akathisia,'tremors',tremors,'dry_mouth',dry_mouth,'sleep',sleep_disturbance,'nausea',nausea),created_at FROM side_effects_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'nsi',answers,score,json_object('pct_recurrent',COALESCE(recurrent_pct,0),'theme_1',COALESCE(json_extract(themes,'$[0]'),''),'theme_2',COALESCE(json_extract(themes,'$[1]'),''),'theme_3',COALESCE(json_extract(themes,'$[2]'),'')),created_at FROM nsi_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'epds',answers,score,NULL,created_at FROM epds_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'mood_tracker',json_array(mood,energy,anxiety,pleasure),ROUND(CAST(mood+energy+anxiety+pleasure AS REAL)/4),json_object('mood',mood,'energy',energy,'anxiety',anxiety,'pleasure',pleasure),created_at FROM mood_entries`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,created_at) SELECT id,'crisis_plan',CASE step_number WHEN 1 THEN 'step_1' WHEN 2 THEN 'step_2' WHEN 3 THEN 'step_3' WHEN 4 THEN 'step_4' WHEN 5 THEN 'step_5' WHEN 6 THEN 'step_6' ELSE 'step_1' END,content,position,COALESCE(created_at,CURRENT_TIMESTAMP) FROM crisis_plan_items`,
   ]
   for (const sql of migrations) {
-    try { await database.execAsync(sql) } catch { /* colonne déjà présente */ }
+    try { await database.execAsync(sql) } catch { /* colonne déjà présente ou table absente */ }
   }
 }
 
@@ -454,30 +467,9 @@ export async function deleteThoughtRecord(id: string): Promise<void> {
   await database.runAsync('DELETE FROM beck_thought_records WHERE id = ?', [id])
 }
 
-// ─── Types Thermomètre de l'Humeur ───────────────────────────────────────────
-//
-// Dimensions retenues (CANMAT 2018 / Basco & Rush 2005 / NIMH Life Chart) :
-//   - mood       : humeur globale (1–10) — universel tous diagnostics
-//   - energy     : énergie/vitalité (1–10) — distingue les polarités, prédit les rechutes
-//   - anxiety    : anxiété (1–10) — comorbidité présente chez ~60 % des patients
-//
-// Les valeurs sont des chiffres bruts saisis par le patient.
-// Aucune interprétation algorithmique — conformité MDR 2017/745.
+// ─── mood_entries — table source conservée pour migration unique vers scale_entries ──
 
-export interface MoodEntry {
-  id: string
-  date: string          // YYYY-MM-DD — une saisie par jour
-  mood: number          // 1–10, brut
-  energy: number        // 1–10, brut
-  anxiety: number       // 1–10, brut
-  pleasure: number      // 1–10, brut — dimension anhédonique (SHAPS 1995)
-  notes: string | null  // texte libre optionnel
-  created_at: string
-}
-
-// ─── SQLite Thermomètre de l'Humeur ──────────────────────────────────────────
-
-export async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS mood_entries (
       id TEXT PRIMARY KEY,
@@ -490,48 +482,6 @@ export async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): P
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
-}
-
-/** Récupère toutes les entrées, de la plus récente à la plus ancienne */
-export async function getAllMoodEntries(): Promise<MoodEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<MoodEntry>(
-    'SELECT * FROM mood_entries ORDER BY date DESC'
-  )
-}
-
-/** Récupère les N dernières entrées (pour le graphique) */
-export async function getRecentMoodEntries(limit = 30): Promise<MoodEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<MoodEntry>(
-    'SELECT * FROM mood_entries ORDER BY date DESC LIMIT ?',
-    [limit]
-  )
-}
-
-/** Récupère l'entrée du jour (YYYY-MM-DD), ou null si absente */
-export async function getMoodEntryForDate(date: string): Promise<MoodEntry | null> {
-  const database = getDb()
-  return database.getFirstAsync<MoodEntry>(
-    'SELECT * FROM mood_entries WHERE date = ?',
-    [date]
-  )
-}
-
-/** Sauvegarde (insert ou replace) une entrée */
-export async function saveMoodEntry(entry: Omit<MoodEntry, 'created_at'>): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO mood_entries (id, date, mood, energy, anxiety, pleasure, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [entry.id, entry.date, entry.mood, entry.energy, entry.anxiety, entry.pleasure, entry.notes]
-  )
-}
-
-/** Supprime une entrée */
-export async function deleteMoodEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM mood_entries WHERE id = ?', [id])
 }
 
 // ─── Types Observance Médicamenteuse ─────────────────────────────────────────
@@ -1124,9 +1074,9 @@ export async function deleteCognitiveSaturationSession(id: string): Promise<void
   )
 }
 
-// ─── PHQ-9 ────────────────────────────────────────────────────────────────────
+// ─── PHQ-9 / BSL-23 / GAD-7 legacy tables (migration source only) ─────────────
 
-export async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS phq9_entries (
       id TEXT PRIMARY KEY,
@@ -1137,37 +1087,7 @@ export async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<
   `)
 }
 
-export interface PHQ9Entry {
-  id: string
-  answers: number[]   // 9 valeurs 0-3
-  score: number       // somme des réponses (0-27)
-  created_at: string
-}
-
-export async function getAllPHQ9Entries(): Promise<PHQ9Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM phq9_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function savePHQ9Entry(entry: PHQ9Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO phq9_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deletePHQ9Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM phq9_entries WHERE id = ?', [id])
-}
-
-// ─── BSL-23 ───────────────────────────────────────────────────────────────────
-
-export async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS bsl23_entries (
       id TEXT PRIMARY KEY,
@@ -1178,37 +1098,7 @@ export async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise
   `)
 }
 
-export interface BSL23Entry {
-  id: string
-  answers: number[]   // 23 valeurs 0-4
-  mean_score: number  // moyenne des 23 items (0.00 – 4.00)
-  created_at: string
-}
-
-export async function getAllBSL23Entries(): Promise<BSL23Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; mean_score: number; created_at: string }>(
-    'SELECT * FROM bsl23_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveBSL23Entry(entry: BSL23Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO bsl23_entries (id, answers, mean_score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.mean_score, entry.created_at]
-  )
-}
-
-export async function deleteBSL23Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM bsl23_entries WHERE id = ?', [id])
-}
-
-// ─── GAD-7 ────────────────────────────────────────────────────────────────────
-
-export async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS gad7_entries (
       id TEXT PRIMARY KEY,
@@ -1219,138 +1109,9 @@ export async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<
   `)
 }
 
-export interface GAD7Entry {
-  id: string
-  answers: number[]   // 7 valeurs 0-3
-  score: number       // somme des réponses (0-21)
-  created_at: string
-}
+// ─── NSI — table source conservée pour migration unique vers scale_entries ────
 
-export async function getAllGAD7Entries(): Promise<GAD7Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM gad7_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveGAD7Entry(entry: GAD7Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO gad7_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deleteGAD7Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM gad7_entries WHERE id = ?', [id])
-}
-
-// ─── RCADS-25 ──────────────────────────────────────────────────────────────────
-
-export async function createRCADS25Table(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS rcads25_entries (
-      id TEXT PRIMARY KEY,
-      answers TEXT NOT NULL,
-      subscale_scores TEXT NOT NULL,
-      total_score INTEGER NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-}
-
-export interface RCADS25SubScaleScores {
-  tag: number
-  tp:  number
-  ts:  number
-  ps:  number
-  toc: number
-  td:  number
-}
-
-export interface RCADS25Entry {
-  id: string
-  answers: number[]                  // 25 valeurs 0-3
-  subscale_scores: RCADS25SubScaleScores
-  total_score: number                // somme 0-75
-  created_at: string
-}
-
-export async function getAllRCADS25Entries(): Promise<RCADS25Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    subscale_scores: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM rcads25_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    subscale_scores: JSON.parse(r.subscale_scores) as RCADS25SubScaleScores,
-  }))
-}
-
-export async function saveRCADS25Entry(entry: RCADS25Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO rcads25_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteRCADS25Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM rcads25_entries WHERE id = ?', [id])
-}
-
-// ─── EPDS ─────────────────────────────────────────────────────────────────────
-
-export async function createEPDSTable(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS epds_entries (
-      id TEXT PRIMARY KEY,
-      answers TEXT NOT NULL,
-      score INTEGER NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-}
-
-export interface EPDSEntry {
-  id: string
-  answers: number[]   // 10 valeurs 0-3
-  score: number       // somme des réponses (0-30)
-  created_at: string
-}
-
-export async function getAllEPDSEntries(): Promise<EPDSEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM epds_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveEPDSEntry(entry: EPDSEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO epds_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deleteEPDSEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM epds_entries WHERE id = ?', [id])
-}
-
-// ─── NSI ──────────────────────────────────────────────────────────────────────
-
-export async function createNSITable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createNSITable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS nsi_entries (
       id TEXT PRIMARY KEY,
@@ -1363,56 +1124,9 @@ export async function createNSITable(database: SQLite.SQLiteDatabase): Promise<v
   `)
 }
 
-export interface NSIEntry {
-  id: string
-  answers: number[]        // 9 valeurs 0-5 (items 1-9)
-  score: number            // somme des réponses (0-45)
-  recurrent_pct: number | null  // item 10 : % cauchemars récurrents (0-100)
-  themes: string[]         // item 11 : thèmes récurrents (0-3 entrées)
-  created_at: string
-}
+// ─── SNAP-IV / ASRS-6 / ASRS-18 legacy tables (migration source only) ─────────
 
-export async function getAllNSIEntries(): Promise<NSIEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    score: number
-    recurrent_pct: number | null
-    themes: string
-    created_at: string
-  }>('SELECT * FROM nsi_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    themes: JSON.parse(r.themes) as string[],
-  }))
-}
-
-export async function saveNSIEntry(entry: NSIEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO nsi_entries (id, answers, score, recurrent_pct, themes, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      entry.id,
-      JSON.stringify(entry.answers),
-      entry.score,
-      entry.recurrent_pct ?? null,
-      JSON.stringify(entry.themes),
-      entry.created_at,
-    ]
-  )
-}
-
-export async function deleteNSIEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM nsi_entries WHERE id = ?', [id])
-}
-
-// ─── SNAP-IV ──────────────────────────────────────────────────────────────────
-
-export async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS snapiv_entries (
       id TEXT PRIMARY KEY,
@@ -1424,52 +1138,7 @@ export async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promis
   `)
 }
 
-export interface SNAPIVSubScaleScores {
-  inattention:   number
-  hyperactivite: number
-  tod:           number
-}
-
-export interface SNAPIVEntry {
-  id: string
-  answers: number[]             // 26 valeurs 0-3
-  subscale_scores: SNAPIVSubScaleScores
-  total_score: number           // somme 0-78
-  created_at: string
-}
-
-export async function getAllSNAPIVEntries(): Promise<SNAPIVEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    subscale_scores: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM snapiv_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    subscale_scores: JSON.parse(r.subscale_scores) as SNAPIVSubScaleScores,
-  }))
-}
-
-export async function saveSNAPIVEntry(entry: SNAPIVEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO snapiv_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteSNAPIVEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM snapiv_entries WHERE id = ?', [id])
-}
-
-// ─── ASRS v1.1 — Dépistage Rapide (6 items) ──────────────────────────────────
-
-export async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS asrs6_entries (
       id TEXT PRIMARY KEY,
@@ -1480,43 +1149,7 @@ export async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise
   `)
 }
 
-export interface ASRS6Entry {
-  id: string
-  answers: number[]   // 6 valeurs 0-4
-  total_score: number // somme 0-24
-  created_at: string
-}
-
-export async function getAllASRS6Entries(): Promise<ASRS6Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM asrs6_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-  }))
-}
-
-export async function saveASRS6Entry(entry: ASRS6Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO asrs6_entries (id, answers, total_score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteASRS6Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM asrs6_entries WHERE id = ?', [id])
-}
-
-// ─── ASRS v1.1 — Bilan Complet (18 items) ────────────────────────────────────
-
-export async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS asrs18_entries (
       id TEXT PRIMARY KEY,
@@ -1528,45 +1161,111 @@ export async function createASRS18Table(database: SQLite.SQLiteDatabase): Promis
   `)
 }
 
-export interface ASRS18SubScores {
-  part_a: number
-  part_b: number
-}
+// ─── plan_items — table générique pour les plans éditables (crisis_plan…) ────
 
-export interface ASRS18Entry {
+export interface PlanItem {
   id: string
-  answers: number[]        // 18 valeurs 0-4
-  sub_scores: ASRS18SubScores
-  total_score: number      // somme 0-72
+  module_id: string
+  section_id: string
+  text: string
+  sort_order: number
   created_at: string
 }
 
-export async function getAllASRS18Entries(): Promise<ASRS18Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    sub_scores: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM asrs18_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    sub_scores: JSON.parse(r.sub_scores) as ASRS18SubScores,
-  }))
+async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS plan_items (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      section_id TEXT NOT NULL,
+      text       TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_plan_items_module ON plan_items(module_id, section_id);
+  `)
 }
 
-export async function saveASRS18Entry(entry: ASRS18Entry): Promise<void> {
+export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanItem[]> {
   const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO asrs18_entries (id, answers, sub_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.sub_scores), entry.total_score, entry.created_at]
+  return database.getAllAsync<PlanItem>(
+    'SELECT * FROM plan_items WHERE module_id = ? ORDER BY section_id ASC, sort_order ASC, created_at ASC',
+    [moduleId]
   )
 }
 
-export async function deleteASRS18Entry(id: string): Promise<void> {
+export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
   const database = getDb()
-  await database.runAsync('DELETE FROM asrs18_entries WHERE id = ?', [id])
+  await database.runAsync(
+    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order) VALUES (?, ?, ?, ?, ?)`,
+    [item.id, item.module_id, item.section_id, item.text, item.sort_order]
+  )
+}
+
+export async function deletePlanItem(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM plan_items WHERE id = ?', [id])
+}
+
+// ─── scale_entries — table générique pour tous les questionnaires cliniques ───
+
+export async function createScaleEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS scale_entries (
+      id TEXT PRIMARY KEY,
+      scale_id TEXT NOT NULL,
+      answers TEXT NOT NULL,
+      total_score REAL NOT NULL,
+      subscale_scores TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_scale_entries_scale_id ON scale_entries(scale_id);
+  `)
+}
+
+export interface ScaleEntry {
+  id: string
+  scale_id: string
+  answers: number[]
+  total_score: number
+  subscale_scores: Record<string, number | string> | null
+  created_at: string
+}
+
+export async function getAllScaleEntries(scaleId: string): Promise<ScaleEntry[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<{
+    id: string
+    scale_id: string
+    answers: string
+    total_score: number
+    subscale_scores: string | null
+    created_at: string
+  }>('SELECT * FROM scale_entries WHERE scale_id = ? ORDER BY created_at DESC', [scaleId])
+  return rows.map(r => ({
+    ...r,
+    answers: JSON.parse(r.answers) as number[],
+    subscale_scores: r.subscale_scores ? JSON.parse(r.subscale_scores) as Record<string, number | string> : null,
+  }))
+}
+
+export async function saveScaleEntry(entry: ScaleEntry): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO scale_entries (id, scale_id, answers, total_score, subscale_scores, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      entry.scale_id,
+      JSON.stringify(entry.answers),
+      entry.total_score,
+      entry.subscale_scores ? JSON.stringify(entry.subscale_scores) : null,
+      entry.created_at,
+    ]
+  )
+}
+
+export async function deleteScaleEntry(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM scale_entries WHERE id = ?', [id])
 }
 

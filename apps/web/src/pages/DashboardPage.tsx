@@ -345,8 +345,8 @@ export function DashboardPage() {
                               onChange={() => toggleInviteModule(mod.id)}
                             />
                             <div className="invite-module-option__content">
-                              <span className="invite-module-option__name">{t(`module.${mod.id}.label`)}</span>
-                              <span className="invite-module-option__desc">{t(`module.${mod.id}.description`)}</span>
+                              <span className="invite-module-option__name">{t(`modules.${mod.id}.label`)}</span>
+                              <span className="invite-module-option__desc">{t(`modules.${mod.id}.description`)}</span>
                             </div>
                           </label>
                         ))}

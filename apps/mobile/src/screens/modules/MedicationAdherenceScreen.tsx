@@ -1,13 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   TextInput,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
@@ -16,6 +18,7 @@ import {
   getMedicationAdherenceEntry,
   getAllMedicationAdherenceEntries,
   saveMedicationAdherenceEntry,
+  deleteMedicationAdherenceEntry,
   generateId,
   type MedicationAdherenceEntry,
   type AdherenceStatus,
@@ -23,13 +26,16 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
+import { formatDateFull, formatDateNumeric } from '../../lib/dateUtils'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/TeenAccent'
+import { Card } from '../../components/Card'
+import { EmptyState } from '../../components/EmptyState'
+import { StatusBadge } from '../../components/StatusBadge'
 
-// ─── Métadonnées des statuts de prise ────────────────────────────────────────
-// Affichage neutre : le statut est un fait déclaré par le patient, sans jugement.
-// Conformité MDR 2017/745 : aucune couleur d'alerte, aucune interprétation.
+// ─── Métadonnées des statuts ──────────────────────────────────────────────────
+// Conformité MDR 2017/745 : affichage neutre, aucune interprétation clinique.
 
 type StatusMeta = {
   readonly value: AdherenceStatus
@@ -63,31 +69,10 @@ const STATUS_META: ReadonlyArray<StatusMeta> = [
   },
 ] as const
 
-// Formate la date pour l'affichage : "Lundi 14 avril 2026"
-function formatFullDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-}
-
-// Formate la date en court : "14/04/2026"
-function formatShortDate(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
-}
-
-// Retourne la date du jour au format YYYY-MM-DD
-function today(): string {
+function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
+
 
 // ─── Bouton de statut ─────────────────────────────────────────────────────────
 
@@ -100,13 +85,12 @@ interface StatusButtonProps {
 function StatusButton({ meta, selected, onPress }: StatusButtonProps) {
   const { t } = useTranslation()
   return (
-    <TouchableOpacity
+    <Pressable
       style={[
         statusStyles.btn,
         selected && { backgroundColor: meta.bgColor, borderColor: meta.color },
       ]}
       onPress={onPress}
-      activeOpacity={0.75}
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
       accessibilityLabel={t(meta.labelKey)}
@@ -119,7 +103,7 @@ function StatusButton({ meta, selected, onPress }: StatusButtonProps) {
       <Text style={[statusStyles.label, selected && { color: meta.color }]}>
         {t(meta.labelKey)}
       </Text>
-    </TouchableOpacity>
+    </Pressable>
   )
 }
 
@@ -135,61 +119,62 @@ const statusStyles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
   },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textMuted,
-  },
+  label: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
 })
 
-// ─── Ligne d'historique ───────────────────────────────────────────────────────
+// ─── Carte d'historique ───────────────────────────────────────────────────────
 
-interface HistoryRowProps {
+interface HistoryCardProps {
   entry: MedicationAdherenceEntry
+  onDelete: () => void
 }
 
-function HistoryRow({ entry }: HistoryRowProps) {
+function HistoryCard({ entry, onDelete }: HistoryCardProps) {
   const { t } = useTranslation()
   const meta = STATUS_META.find((m) => m.value === entry.status) ?? STATUS_META[2]
   return (
-    <View style={historyStyles.row}>
-      <View style={historyStyles.dateCol}>
-        <Text style={historyStyles.date}>{formatShortDate(entry.date)}</Text>
+    <View style={histStyles.card}>
+      <View style={histStyles.main}>
+        <Text style={histStyles.date}>{formatDateNumeric(entry.date)}</Text>
+        <View style={[histStyles.badge, { backgroundColor: meta.bgColor }]}>
+          <MaterialCommunityIcons name={meta.icon} size={13} color={meta.color} />
+          <Text style={[histStyles.badgeText, { color: meta.color }]}>{t(meta.labelKey)}</Text>
+        </View>
+        {entry.notes ? (
+          <Text style={histStyles.notes} numberOfLines={1}>{entry.notes}</Text>
+        ) : null}
       </View>
-      <View style={[historyStyles.statusBadge, { backgroundColor: meta.bgColor }]}>
-        <MaterialCommunityIcons name={meta.icon} size={14} color={meta.color} />
-        <Text style={[historyStyles.statusText, { color: meta.color }]}>{t(meta.labelKey)}</Text>
-      </View>
-      {entry.notes ? (
-        <Text style={historyStyles.notes} numberOfLines={1}>
-          {entry.notes}
-        </Text>
-      ) : null}
+      <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')}>
+        <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
+      </Pressable>
     </View>
   )
 }
 
-const historyStyles = StyleSheet.create({
-  row: {
+const histStyles = StyleSheet.create({
+  card: {
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.xs + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
-  dateCol: { width: 80 },
-  date: { fontSize: 13, color: colors.textMuted },
-  statusBadge: {
+  main: { flex: 1, gap: 4 },
+  date: { fontSize: 13, fontWeight: '600', color: colors.text },
+  badge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    alignSelf: 'flex-start',
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: radius.full,
   },
-  statusText: { fontSize: 12, fontWeight: '600' },
-  notes: { flex: 1, fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
+  badgeText: { fontSize: 12, fontWeight: '600' },
+  notes: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
 })
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
@@ -198,22 +183,18 @@ export default function MedicationAdherenceScreen() {
   const { t } = useTranslation()
   const { tt, teenColor } = useTeen()
   const patient = useAuthStore((s) => s.patient)
-  const todayDate = today()
+  const todayDate = useMemo(() => todayISO(), [])
 
-  // État du formulaire du jour
+  const [tab, setTab] = useState<'today' | 'history'>('today')
   const [selectedStatus, setSelectedStatus] = useState<AdherenceStatus | null>(null)
   const [notes, setNotes] = useState('')
   const [existingId, setExistingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-
-  // Historique
   const [history, setHistory] = useState<MedicationAdherenceEntry[]>([])
-  const [loadingHistory, setLoadingHistory] = useState(true)
-
-  // ── Chargement de l'entrée du jour + historique ───────────────────────────
+  const [loading, setLoading] = useState(true)
 
   const loadData = useCallback(async () => {
-    setLoadingHistory(true)
+    setLoading(true)
     const [todayEntry, entries] = await Promise.all([
       getMedicationAdherenceEntry(todayDate),
       getAllMedicationAdherenceEntries(30),
@@ -228,20 +209,19 @@ export default function MedicationAdherenceScreen() {
       setNotes('')
     }
     setHistory(entries)
-    setLoadingHistory(false)
+    setLoading(false)
   }, [todayDate])
 
   useFocusEffect(
-    useCallback(() => {
-      loadData()
-    }, [loadData])
+    useCallback(() => { loadData() }, [loadData])
   )
 
-  // ── Sauvegarde ────────────────────────────────────────────────────────────
-
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!selectedStatus) {
-      Alert.alert(t('modules.medication_adherence.status_missing'), t('modules.medication_adherence.status_missing_msg'))
+      Alert.alert(
+        t('modules.medication_adherence.status_missing'),
+        t('modules.medication_adherence.status_missing_msg'),
+      )
       return
     }
     setSaving(true)
@@ -253,8 +233,6 @@ export default function MedicationAdherenceScreen() {
         notes: notes.trim() || null,
       }
       await saveMedicationAdherenceEntry(entry)
-
-      // Signal d'observance anonymisé vers Supabase (aucune donnée clinique)
       if (patient?.id) {
         await supabase.from('patient_engagement_logs').insert({
           patient_id: patient.id,
@@ -262,36 +240,104 @@ export default function MedicationAdherenceScreen() {
           metadata: {},
         })
       }
-
       setExistingId(entry.id)
       await loadData()
-      Alert.alert(t('common.saved'), t('common.saved'))
+      Alert.alert(t('common.saved'), t('modules.medication_adherence.saved_message'))
     } catch {
       Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
+  }, [selectedStatus, existingId, notes, todayDate, patient, t, loadData])
+
+  const handleDelete = useCallback((entry: MedicationAdherenceEntry) => {
+    Alert.alert(
+      t('modules.medication_adherence.delete_entry_title'),
+      t('common.irreversible'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteMedicationAdherenceEntry(entry.id)
+            setHistory(prev => prev.filter(e => e.id !== entry.id))
+            if (entry.date === todayDate) {
+              setExistingId(null)
+              setSelectedStatus(null)
+              setNotes('')
+            }
+          },
+        },
+      ]
+    )
+  }, [t, todayDate])
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    )
   }
 
-  // ── Rendu ─────────────────────────────────────────────────────────────────
-
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+    >
       <TeenAccent color={teenColor('medication_adherence')} />
-      <ScrollView
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* En-tête */}
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateLabel}>{t('modules.medication_adherence.today_label')}</Text>
-          <Text style={styles.dateValue}>{formatFullDate(todayDate)}</Text>
-        </View>
 
-        {/* Saisie du jour */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('modules.medication_adherence.section_today')}</Text>
-          <View style={styles.card}>
+      {/* Onglets */}
+      <View style={styles.tabs}>
+        <Pressable
+          style={[styles.tab, tab === 'today' && styles.tabActive]}
+          onPress={() => setTab('today')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'today' }}
+        >
+          <Text style={[styles.tabText, tab === 'today' && styles.tabTextActive]}>
+            {t('modules.medication_adherence.tab_today')}
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tab, tab === 'history' && styles.tabActive]}
+          onPress={() => setTab('history')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'history' }}
+        >
+          <Text style={[styles.tabText, tab === 'history' && styles.tabTextActive]}>
+            {t('modules.medication_adherence.tab_history')}
+          </Text>
+          {history.length > 0 && (
+            <StatusBadge variant="info" label="" value={history.length} />
+          )}
+        </Pressable>
+      </View>
+
+      {tab === 'today' ? (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Date du jour */}
+          <View style={styles.dateHeader}>
+            <Text style={styles.dateLabel}>{t('modules.medication_adherence.today_label')}</Text>
+            <Text style={styles.dateValue}>{formatDateFull(todayDate)}</Text>
+          </View>
+
+          {/* Indicateur saisie déjà effectuée */}
+          {existingId ? (
+            <StatusBadge
+              variant="success"
+              label={t('modules.medication_adherence.already_saved')}
+            />
+          ) : null}
+
+          {/* Saisie du statut */}
+          <Card>
             <Text style={styles.question}>
               {tt('medication_adherence', 'intro') || t('modules.medication_adherence.intro')}
             </Text>
@@ -305,13 +351,11 @@ export default function MedicationAdherenceScreen() {
                 />
               ))}
             </View>
-          </View>
-        </View>
+          </Card>
 
-        {/* Notes */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('common.notes_optional')}</Text>
-          <View style={styles.card}>
+          {/* Notes */}
+          <View style={styles.notesSection}>
+            <Text style={styles.notesLabel}>{t('common.notes_optional')}</Text>
             <TextInput
               style={styles.notesInput}
               value={notes}
@@ -323,52 +367,82 @@ export default function MedicationAdherenceScreen() {
               textAlignVertical="top"
             />
           </View>
-        </View>
-
-        {/* Bouton enregistrer */}
-        <TouchableOpacity
-          style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={existingId ? t('common.update') : t('modules.medication_adherence.save')}
-        >
-          {saving ? (
-            <ActivityIndicator color={colors.white} size="small" />
+        </ScrollView>
+      ) : (
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+          {history.length === 0 ? (
+            <EmptyState
+              icon="💊"
+              title=""
+              description={t('modules.medication_adherence.empty_history')}
+            />
           ) : (
-            <>
-              <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-              <Text style={styles.saveBtnText}>
-                {existingId ? t('common.update') : t('modules.medication_adherence.save')}
-              </Text>
-            </>
+            <View style={styles.list}>
+              {history.map((entry) => (
+                <HistoryCard
+                  key={entry.id}
+                  entry={entry}
+                  onDelete={() => handleDelete(entry)}
+                />
+              ))}
+            </View>
           )}
-        </TouchableOpacity>
+        </ScrollView>
+      )}
 
-        {/* Historique */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('modules.medication_adherence.history_30')}</Text>
-          <View style={styles.card}>
-            {loadingHistory ? (
-              <ActivityIndicator color={colors.primary} />
-            ) : history.length === 0 ? (
-              <Text style={styles.emptyHistory}>{t('modules.medication_adherence.empty_history')}</Text>
+      {/* Footer bouton sauvegarder — uniquement sur l'onglet Aujourd'hui */}
+      {tab === 'today' && (
+        <SafeAreaView edges={['bottom']} style={styles.footer}>
+          <Pressable
+            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={existingId ? t('common.update') : t('modules.medication_adherence.save')}
+            testID="save-button"
+          >
+            {saving ? (
+              <ActivityIndicator color={colors.white} size="small" />
             ) : (
-              history.map((entry) => (
-                <HistoryRow key={entry.id} entry={entry} />
-              ))
+              <>
+                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
+                <Text style={styles.saveBtnText}>
+                  {existingId ? t('common.update') : t('modules.medication_adherence.save')}
+                </Text>
+              </>
             )}
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          </Pressable>
+        </SafeAreaView>
+      )}
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  flex: { flex: 1, backgroundColor: colors.background },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  scroll: { flex: 1 },
+  content: { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.lg },
+
+  tabs: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm + 2,
+    gap: spacing.xs,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: { borderBottomColor: colors.primary },
+  tabText: { fontSize: 14, fontWeight: '500', color: colors.textMuted },
+  tabTextActive: { color: colors.primary, fontWeight: '700' },
 
   dateHeader: {
     backgroundColor: colors.primaryLight,
@@ -385,36 +459,36 @@ const styles = StyleSheet.create({
   },
   dateValue: { fontSize: 18, fontWeight: '700', color: colors.text },
 
-  section: { gap: spacing.sm },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-
   question: { fontSize: 15, fontWeight: '500', color: colors.text },
   statusRow: { flexDirection: 'row', gap: spacing.sm },
 
+  notesSection: { gap: spacing.xs },
+  notesLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   notesInput: {
-    fontSize: 15,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    fontSize: 14,
     color: colors.text,
-    minHeight: 72,
-    lineHeight: 22,
+    minHeight: 80,
   },
 
+  list: { gap: spacing.sm },
+
+  footer: {
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    padding: spacing.md,
+  },
   saveBtn: {
     backgroundColor: colors.primary,
     borderRadius: radius.md,
@@ -422,16 +496,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.sm + 4,
+    paddingVertical: spacing.sm + 2,
   },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: colors.white, fontSize: 16, fontWeight: '700' },
-
-  emptyHistory: {
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: 'center',
-    paddingVertical: spacing.md,
-    fontStyle: 'italic',
-  },
 })

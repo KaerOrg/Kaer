@@ -30,6 +30,24 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 ---
 
+## Quand créer un composant vs utiliser les tokens directement
+
+Un composant se justifie quand il encapsule du **comportement** (états, interactions, animations) ou une **structure réutilisable** (layout, accessibilité, logique conditionnelle).
+
+Un style simple répété → **style inline avec tokens**, pas un composant :
+
+```ts
+// ✅ Correct — deux tokens, pas de composant
+<Text style={{ fontSize: 12, fontWeight: '700', color: colors.textMuted }}>Activité</Text>
+
+// ❌ Sur-abstraction
+<SectionLabel>Activité</SectionLabel>
+```
+
+Règle : si le composant n'a que `children: string` + `style?: ViewStyle` et ne contient aucune logique, c'est un style, pas un composant.
+
+---
+
 ## StyleSheet — règles
 
 - Tout style dans `StyleSheet.create({})` — jamais de style inline `style={{}}` ad hoc
@@ -40,6 +58,23 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 ---
 
 ## Composants primitifs
+
+### Convention de fichiers
+
+Chaque composant partagé vit dans son propre dossier `ComponentName/` :
+
+```
+ComponentName/
+  ComponentName.tsx       # composant React (React.memo)
+  ComponentName.types.ts  # interface Props exportée
+  ComponentName.styles.ts # StyleSheet.create() isolé
+  ComponentName.test.tsx  # tests RNTL
+  index.ts                # re-export (export { X } from './X'; export type ...)
+```
+
+Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours dans un dossier.
+
+---
 
 ### Button (`src/components/Button/`)
 
@@ -52,6 +87,12 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 Taille de base : `paddingVertical: 12`, `paddingHorizontal: 24`, `borderRadius: 10`, `minHeight: 50`
 
+### Divider (`src/components/Divider/`)
+
+Séparateur horizontal — `height: 1, backgroundColor: colors.border`.
+
+Prop `inset?: number` pour retrait horizontal optionnel (ex. dans une liste de réglages avec bords).
+
 ### Card (`src/components/Card/`)
 
 | Variante | Fond | Bordure | Ombre |
@@ -62,6 +103,19 @@ Taille de base : `paddingVertical: 12`, `paddingHorizontal: 24`, `borderRadius: 
 | `active` | `colors.primaryLight` | `colors.primary` (1px) | — |
 
 Base : `borderRadius: 10`, `padding: 16`, `gap: 8`
+
+---
+
+### PipPicker (`src/components/PipPicker/`)
+
+Sélecteur de valeur numérique à pips. Deux variantes visuelles :
+
+| Variante | Rendu | Usage |
+|---|---|---|
+| `numbered` (défaut) | boutons carrés bordés avec le chiffre, seul le sélectionné est mis en évidence | `mood_tracker` (1–10), `fear_thermometer` (0–100 par 10) |
+| `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns` (0–100 par 10) |
+
+Props clés : `value: number | null`, `steps: number[]`, `color: string`, `showHeader?: boolean` (défaut `true` — `false` si le parent gère son propre header), `showEndLabels?: boolean`.
 
 ---
 

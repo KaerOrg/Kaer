@@ -3,11 +3,11 @@ import { describe, it, expect } from 'vitest'
 import { FieldWidget } from '../FieldWidget'
 
 describe('FieldWidget', () => {
-  it('time → input[type=time] disabled', () => {
+  it('time → input[type=time] interactif', () => {
     const { container } = render(<FieldWidget widgetType="time" />)
     const input = container.querySelector('input[type="time"]') as HTMLInputElement
     expect(input).toBeTruthy()
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it('slider:0:120:min → input[type=range] min=0 max=120 + valeur en min', () => {
@@ -50,11 +50,11 @@ describe('FieldWidget', () => {
     expect(container.querySelector('.fw-radio--miss')).toBeTruthy()
   })
 
-  it('date → input[type=date] disabled', () => {
+  it('date → input[type=date] interactif', () => {
     const { container } = render(<FieldWidget widgetType="date" />)
     const input = container.querySelector('input[type="date"]') as HTMLInputElement
     expect(input).toBeTruthy()
-    expect(input.disabled).toBe(true)
+    expect(input.disabled).toBe(false)
   })
 
   it('text → div.fw-text', () => {
@@ -62,10 +62,10 @@ describe('FieldWidget', () => {
     expect(container.querySelector('.fw-text')).toBeTruthy()
   })
 
-  it('checkbox → checkbox disabled', () => {
+  it('checkbox → checkbox interactif', () => {
     const { container } = render(<FieldWidget widgetType="checkbox" />)
     const input = container.querySelector('input[type="checkbox"]') as HTMLInputElement
-    expect(input?.disabled).toBe(true)
+    expect(input?.disabled).toBe(false)
   })
 
   it('textarea → div.fw-textarea', () => {
