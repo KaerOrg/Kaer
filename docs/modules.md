@@ -2,25 +2,46 @@
 
 ## Liste des modules
 
-| Clé | Nom | Statut |
-|-----|-----|--------|
-| `sleep_diary` | Agenda du sommeil | **Implémenté** — SQLite local, vue 14 nuits, bilan mensuel |
-| `beck_columns` | Colonnes de Beck (TCC) | **Implémenté** — SQLite local, 7 colonnes, tests |
-| `fear_thermometer` | Thermomètre de la peur | **Implémenté** — SUDs 0–100, situations, SQLite, tests |
-| `emotion_wheel` | Roue des émotions | **Implémenté** — taxonomie Plutchik, 3 niveaux, SQLite, 22 tests — [doc](modules/emotion_wheel.md) |
-| `crisis_plan` | Plan de crise | **Implémenté** — protocole Stanley & Brown (2012), 6 étapes, SQLite |
-| `rim` | RIM — Imagerie mentale | **Implémenté** — IRT Krakow & Zadra (2006), scénario praticien, tests — [doc](modules/rim.md) |
-| `cognitive_saturation` | Saturation cognitive | **Implémenté** — défusion ACT, timer 90s, tap counter, SQLite, 22 tests — [doc](modules/cognitive_saturation.md) |
-| `grounding` | Ancrage 5-4-3-2-1 | **Implémenté** — DBT Linehan (1993), 5 sens guidés, 17 tests — [doc](modules/grounding.md) |
-| `decisional_balance` | Balance décisionnelle | **Implémenté** — grille 2×2, jauge motivation, SQLite, signal Supabase |
-| `mood_tracker` | Thermomètre de l'humeur | **Implémenté** — humeur/énergie/anxiété/plaisir (1–10), SQLite, graphique |
-| `medication_adherence` | Observance du traitement | **Implémenté** — SQLite, tests — [doc](modules/medication_adherence.md) |
-| `medication_side_effects` | Effets du traitement | **Implémenté** — SQLite, tests — [doc](modules/medication_side_effects.md) |
-| `behavioral_activation` | Activation comportementale | **Implémenté** — SQLite, tests — [doc](modules/behavioral_activation.md) |
-| `breathing_techniques` | Techniques de respiration | **Implémenté** — 6 techniques, timer guidé, tests — [doc](modules/breathing_techniques.md) |
-| `psychoeducation` | Psychoéducation | **Implémenté** — cartes thématiques, lecture, tests |
-| `exposure_hierarchy` | Hiérarchie d'exposition | À construire |
-| `craving_journal` | Journal des envies | À construire |
+> Convention : un fichier de doc par module dans [`modules/`](modules/), nommé d'après la clé `ModuleType` (snake_case).
+
+### Modules thérapeutiques (interactifs)
+
+| Clé | Nom | Statut | Doc |
+|-----|-----|--------|-----|
+| `sleep_diary` | Agenda du sommeil | **Implémenté** — SQLite local, vue 14 nuits, bilan mensuel | — |
+| `beck_columns` | Colonnes de Beck (TCC) | **Implémenté** — SQLite local, 7 colonnes, tests | [doc](modules/beck_columns.md) |
+| `fear_thermometer` | Thermomètre de la peur | **Implémenté** — SUDs 0–100, situations, SQLite, tests | [doc](modules/fear_thermometer.md) |
+| `emotion_wheel` | Roue des émotions | **Implémenté** — taxonomie Plutchik, 3 niveaux, SQLite, 22 tests | [doc](modules/emotion_wheel.md) |
+| `crisis_plan` | Plan de crise | **Implémenté** — protocole Stanley & Brown (2012), 6 étapes, SQLite | — |
+| `rim` | RIM — Imagerie mentale | **Implémenté** — IRT Krakow & Zadra (2006), scénario praticien, tests | [doc](modules/rim.md) |
+| `cognitive_saturation` | Saturation cognitive | **Implémenté** — défusion ACT, timer 90s, tap counter, SQLite, 22 tests | [doc](modules/cognitive_saturation.md) |
+| `grounding` | Ancrage 5-4-3-2-1 | **Implémenté** — DBT Linehan (1993), 5 sens guidés, 17 tests | [doc](modules/grounding.md) |
+| `decisional_balance` | Balance décisionnelle | **Implémenté** — grille 2×2, jauge motivation, SQLite, signal Supabase | — |
+| `mood_tracker` | Thermomètre de l'humeur | **Implémenté** — humeur/énergie/anxiété/plaisir (1–10), SQLite, graphique | [doc](modules/mood_tracker.md) |
+| `medication_adherence` | Observance du traitement | **Implémenté** — SQLite, tests | [doc](modules/medication_adherence.md) |
+| `medication_side_effects` | Effets du traitement | **Implémenté** — SQLite, tests | [doc](modules/medication_side_effects.md) |
+| `behavioral_activation` | Activation comportementale | **Implémenté** — SQLite, tests | [doc](modules/behavioral_activation.md) |
+| `breathing_techniques` | Techniques de respiration | **Implémenté** — 6 techniques, timer guidé, tests | [doc](modules/breathing_techniques.md) |
+| `psychoeducation` | Psychoéducation | **Implémenté** — cartes thématiques, lecture, tests | [doc](modules/psychoeducation.md) |
+| `exposure_hierarchy` | Hiérarchie d'exposition | À construire | — |
+| `craving_journal` | Journal des envies | À construire | — |
+
+### Échelles cliniques (questionnaires)
+
+Pattern générique `ModuleRenderer` — voir [`module-engine.md`](module-engine.md).
+
+| Clé | Nom | Statut | Doc |
+|-----|-----|--------|-----|
+| `phq9` | PHQ-9 — Dépression | **Implémenté** — 9 items, score 0-27 | — |
+| `gad7` | GAD-7 — Anxiété généralisée | **Implémenté** — 7 items, score 0-21 | — |
+| `bsl23` | BSL-23 — Symptômes borderline | **Implémenté** — 23 items, score moyen 0-4 | — |
+| `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | **Implémenté** — 25 items, 6 sous-échelles | — |
+| `epds` | EPDS — Dépression post-natale | **Implémenté** | [doc](modules/epds.md) |
+| `nsi` | NSI — Inventaire neuropsychologique | **Implémenté** | [doc](modules/nsi.md) |
+| `cssrs` | C-SSRS — Dépistage suicidaire | **Implémenté** — écran custom (logique conditionnelle) | [doc](modules/cssrs_screen.md) |
+| `snap_iv` | SNAP-IV — TDAH enfant/ado (hétéro-éval) | **Implémenté** — 26 items, 3 sous-échelles | [doc](modules/snap_iv.md) |
+| `asrs6` | ASRS v1.1 Dépistage Rapide — TDAH adulte | **Implémenté** — 6 items Kessler (2005) | [doc](modules/asrs6.md) |
+| `asrs18` | ASRS v1.1 Bilan Complet — TDAH adulte | **Implémenté** — 18 items (Parties A+B) | [doc](modules/asrs18.md) |
 
 ## Module Agenda du sommeil (`sleep_diary`)
 

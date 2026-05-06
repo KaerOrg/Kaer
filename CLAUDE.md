@@ -222,12 +222,22 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
 
 ## Documentation technique
 
+Index complet : [`docs/README.md`](docs/README.md). Conventions :
+
+- **Transversal au monorepo** → `docs/` (architecture, base de données, flux d'invitation, module engine, modules thérapeutiques)
+- **Spécifique à une app** → `apps/<app>/docs/` (design system de l'app, composants UI propres)
+- **Documentation par module** → `docs/modules/<module_id>.md` (un fichier par module thérapeutique implémenté)
+
+Points d'entrée fréquents :
+
 | Document | Contenu |
 |---|---|
-| `docs/design-system.md` | Tokens partagés (couleurs, spacing, radius, fontSize) — source de vérité cross-platform |
+| `docs/README.md` | Index général de la documentation |
+| `docs/modules.md` | Liste et statut de tous les modules thérapeutiques |
+| `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
+| `docs/architecture.md` / `docs/database.md` | Vue d'ensemble technique et schéma BDD |
 | `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |
-| `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
 | `apps/web/docs/components/module-renderer.md` | Détails web : table `FieldText CONFIG`, extensions field_type/preview_kind |
 
 ## MCP disponible
