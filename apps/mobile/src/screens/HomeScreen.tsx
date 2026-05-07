@@ -27,8 +27,6 @@ import { EmptyState } from '../components/EmptyState'
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
   decisional_balance:       'DecisionalBalance',
-  fear_thermometer:         'FearThermometer',
-  behavioral_activation:    'BehavioralActivation',
   breathing_techniques:     'BreathingTechniques',
 }
 

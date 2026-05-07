@@ -1489,3 +1489,176 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('sj.cfg', 'quality_good_threshold',      '4'),
   ('sj.cfg', 'quality_avg_threshold',       '3')
 ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : behavioral_activation → activity_log
+-- preview_kind = 'activity_log' → ActivityLogLayout (FieldRenderer)
+-- 3 modes internes : list | entry | month
+-- Persistance SQLite : activity_records (table dédiée existante)
+-- Conformité MDR 2017/745 : valeurs brutes uniquement (Plaisir / Maîtrise),
+-- aucun seuil, aucune interprétation. Les couleurs des points calendrier
+-- sont une convention d'affichage des statuts done/planned saisis.
+-- ============================================================
+
+-- Nettoyer les anciens widget_type props (preview_kind 'fields' obsolète)
+DELETE FROM public.field_props
+WHERE field_id IN ('ba.field_1','ba.field_2','ba.field_3','ba.field_4','ba.field_5','ba.field_6');
+DELETE FROM public.module_content_fields WHERE module_id = 'behavioral_activation';
+
+UPDATE public.modules SET preview_kind = 'activity_log' WHERE id = 'behavioral_activation';
+
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order)
+VALUES
+  ('al.cfg',                'behavioral_activation', 'activity_log_config',                  NULL,                                                  0),
+  ('al.tab_list',           'behavioral_activation', 'activity_log_tab_list_label',          'modules.behavioral_activation.tab_list',              1),
+  ('al.tab_month',          'behavioral_activation', 'activity_log_tab_month_label',         'modules.behavioral_activation.tab_month',             2),
+  ('al.add_btn',            'behavioral_activation', 'activity_log_add_btn',                 'modules.behavioral_activation.add_btn',               3),
+  ('al.empty_title',        'behavioral_activation', 'activity_log_empty_title',             'modules.behavioral_activation.empty_title',           4),
+  ('al.empty_text',         'behavioral_activation', 'activity_log_empty_text',              'modules.behavioral_activation.empty_text',            5),
+  ('al.section_activity',   'behavioral_activation', 'activity_log_section_activity_title',  'modules.behavioral_activation.section_activity',      10),
+  ('al.section_evaluation', 'behavioral_activation', 'activity_log_section_evaluation_title','modules.behavioral_activation.section_evaluation',    11),
+  ('al.section_notes',      'behavioral_activation', 'activity_log_section_notes_title',     'modules.behavioral_activation.section_notes',         12),
+  ('al.activity_placeholder','behavioral_activation','activity_log_activity_placeholder',    'modules.behavioral_activation.activity_placeholder',  13),
+  ('al.pleasure_label',     'behavioral_activation', 'activity_log_pleasure_label',          'modules.behavioral_activation.pleasure_label',        14),
+  ('al.pleasure_sublabel',  'behavioral_activation', 'activity_log_pleasure_sublabel',       'modules.behavioral_activation.pleasure_sublabel',     15),
+  ('al.mastery_label',      'behavioral_activation', 'activity_log_mastery_label',           'modules.behavioral_activation.mastery_label',         16),
+  ('al.mastery_sublabel',   'behavioral_activation', 'activity_log_mastery_sublabel',        'modules.behavioral_activation.mastery_sublabel',      17),
+  ('al.done_label',         'behavioral_activation', 'activity_log_done_label',              'modules.behavioral_activation.done_label',            18),
+  ('al.mark_done',          'behavioral_activation', 'activity_log_mark_done_label',         'modules.behavioral_activation.mark_done',             19),
+  ('al.mark_undone',        'behavioral_activation', 'activity_log_mark_undone_label',       'modules.behavioral_activation.mark_undone',           20),
+  ('al.notes_placeholder',  'behavioral_activation', 'activity_log_notes_placeholder',       'common.notes_placeholder',                            21),
+  ('al.date_label',         'behavioral_activation', 'activity_log_date_label',              'modules.behavioral_activation.date_label',            22),
+  ('al.date_confirm',       'behavioral_activation', 'activity_log_date_confirm_label',      'modules.behavioral_activation.date_confirm',          23),
+  ('al.save_label',         'behavioral_activation', 'activity_log_save_label',              'modules.behavioral_activation.save',                  30),
+  ('al.update_label',       'behavioral_activation', 'activity_log_update_label',            'common.update',                                       31),
+  ('al.delete_label',       'behavioral_activation', 'activity_log_delete_label',            'common.delete',                                       32),
+  ('al.delete_title',       'behavioral_activation', 'activity_log_delete_title',            'modules.behavioral_activation.delete_activity_title', 33),
+  ('al.name_missing_title', 'behavioral_activation', 'activity_log_name_missing_title',      'modules.behavioral_activation.name_missing',          34),
+  ('al.name_missing_msg',   'behavioral_activation', 'activity_log_name_missing_msg',        'modules.behavioral_activation.name_missing_msg',      35),
+  ('al.legend_done',        'behavioral_activation', 'activity_log_legend_done_label',       'modules.behavioral_activation.legend_done',           40),
+  ('al.legend_planned',     'behavioral_activation', 'activity_log_legend_planned_label',    'modules.behavioral_activation.legend_planned',        41),
+  ('al.month_hint_tap',     'behavioral_activation', 'activity_log_month_hint_tap',          'modules.behavioral_activation.month_hint_tap',        42),
+  ('al.month_hint_empty',   'behavioral_activation', 'activity_log_month_hint_empty',        'modules.behavioral_activation.month_hint_empty',      43),
+  ('al.back_label',         'behavioral_activation', 'activity_log_back_label',              'modules.behavioral_activation.back_btn',              44),
+  -- Suggestions (chips). 20 propositions copiées de l'ancien écran custom.
+  ('al.sug_walk',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_walk',       100),
+  ('al.sug_groceries',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_groceries',  101),
+  ('al.sug_gym',            'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_gym',        102),
+  ('al.sug_bike',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_bike',       103),
+  ('al.sug_yoga',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_yoga',       104),
+  ('al.sug_meditation',     'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_meditation', 105),
+  ('al.sug_reading',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_reading',    106),
+  ('al.sug_cooking',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_cooking',    107),
+  ('al.sug_call_friend',    'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_call_friend',108),
+  ('al.sug_cafe',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_cafe',       109),
+  ('al.sug_gardening',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_gardening',  110),
+  ('al.sug_music',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_music',      111),
+  ('al.sug_movie',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_movie',      112),
+  ('al.sug_bath',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_bath',       113),
+  ('al.sug_cleaning',       'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_cleaning',   114),
+  ('al.sug_drawing',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_drawing',    115),
+  ('al.sug_board_game',     'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_board_game', 116),
+  ('al.sug_journal',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_journal',    117),
+  ('al.sug_swimming',       'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_swimming',   118),
+  ('al.sug_running',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_running',    119)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('al.cfg', 'engagement_event_type', 'SAVE_BEHAVIORAL_ACTIVATION'),
+  ('al.cfg', 'pleasure_min',          '0'),
+  ('al.cfg', 'pleasure_max',          '10'),
+  ('al.cfg', 'pleasure_step',         '1'),
+  ('al.cfg', 'mastery_min',           '0'),
+  ('al.cfg', 'mastery_max',           '10'),
+  ('al.cfg', 'mastery_step',          '1'),
+  ('al.cfg', 'pleasure_color',        '#059669'),
+  ('al.cfg', 'mastery_color',         '#4F46E5'),
+  ('al.cfg', 'dot_done_color',        '#10B981'),
+  ('al.cfg', 'dot_planned_color',     '#3B82F6'),
+  ('al.cfg', 'locale',                'fr-FR')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : fear_thermometer → exposure_tracker
+-- preview_kind = 'exposure_tracker' → ExposureTrackerLayout (FieldRenderer)
+-- 3 modes internes : list (avec tabs Saisies / Situations) | entry
+-- Persistance SQLite : fear_entries + fear_situations (tables existantes)
+-- Conformité MDR 2017/745 : SUDs 0–100 affichés bruts, sans label
+-- interprétatif. Les couleurs avant (rouge) / après (vert) = convention
+-- d'affichage de l'ordre temporel saisi.
+-- ============================================================
+
+-- Nettoyer les anciens widget_type props (preview_kind 'fields' obsolète)
+DELETE FROM public.field_props
+WHERE field_id IN ('ft.field_1','ft.field_2','ft.field_3','ft.field_4','ft.field_5');
+DELETE FROM public.module_content_fields WHERE module_id = 'fear_thermometer';
+
+UPDATE public.modules SET preview_kind = 'exposure_tracker' WHERE id = 'fear_thermometer';
+
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order)
+VALUES
+  ('et.cfg',                   'fear_thermometer', 'exposure_tracker_config',                   NULL,                                                  0),
+  -- Tabs et liste principale
+  ('et.tab_entries',           'fear_thermometer', 'exposure_tracker_tab_entries_label',        'modules.fear_thermometer.tab_entries',                1),
+  ('et.tab_situations',        'fear_thermometer', 'exposure_tracker_tab_situations_label',     'modules.fear_thermometer.tab_situations',             2),
+  ('et.add_btn',               'fear_thermometer', 'exposure_tracker_add_btn',                  'modules.fear_thermometer.new_entry',                  3),
+  ('et.empty_title',           'fear_thermometer', 'exposure_tracker_empty_title',              'modules.fear_thermometer.empty_title',                4),
+  ('et.empty_text',            'fear_thermometer', 'exposure_tracker_empty_text',               'modules.fear_thermometer.empty_text',                 5),
+  -- Sections du formulaire entry
+  ('et.section_trigger',       'fear_thermometer', 'exposure_tracker_section_trigger_title',    'modules.fear_thermometer.section_trigger',            10),
+  ('et.section_before',        'fear_thermometer', 'exposure_tracker_section_before_title',     'modules.fear_thermometer.section_before',             11),
+  ('et.section_strategies',    'fear_thermometer', 'exposure_tracker_section_strategies_title', 'modules.fear_thermometer.section_strategies',         12),
+  ('et.section_after',         'fear_thermometer', 'exposure_tracker_section_after_title',      'modules.fear_thermometer.section_after',              13),
+  ('et.section_notes',         'fear_thermometer', 'exposure_tracker_section_notes_title',      'modules.fear_thermometer.section_notes',              14),
+  -- Situation picker
+  ('et.sit_mode_catalogue',    'fear_thermometer', 'exposure_tracker_situation_mode_catalogue', 'modules.fear_thermometer.situation_mode_catalogue',   20),
+  ('et.sit_mode_free',         'fear_thermometer', 'exposure_tracker_situation_mode_free',      'modules.fear_thermometer.situation_mode_free',        21),
+  ('et.sit_free_ph',           'fear_thermometer', 'exposure_tracker_situation_free_placeholder','modules.fear_thermometer.situation_free_placeholder',22),
+  ('et.sit_cat_empty',         'fear_thermometer', 'exposure_tracker_situation_catalogue_empty','modules.fear_thermometer.situation_catalogue_empty',  23),
+  -- SUDs labels et hints
+  ('et.suds_before_label',     'fear_thermometer', 'exposure_tracker_suds_before_label',        'modules.fear_thermometer.suds_before',                30),
+  ('et.suds_before_hint',      'fear_thermometer', 'exposure_tracker_suds_before_hint',         'modules.fear_thermometer.suds_hint_before',           31),
+  ('et.suds_after_label',      'fear_thermometer', 'exposure_tracker_suds_after_label',         'modules.fear_thermometer.suds_after',                 32),
+  ('et.suds_after_hint',       'fear_thermometer', 'exposure_tracker_suds_after_hint',          'modules.fear_thermometer.suds_hint_after',            33),
+  ('et.suds_skip_null',        'fear_thermometer', 'exposure_tracker_suds_skip_null',           'modules.fear_thermometer.suds_skip_null',             34),
+  ('et.suds_skip_later',       'fear_thermometer', 'exposure_tracker_suds_skip_later',          'modules.fear_thermometer.suds_skip_later',            35),
+  -- Stratégies
+  ('et.strategies_hint',       'fear_thermometer', 'exposure_tracker_strategies_hint',          'modules.fear_thermometer.strategies_hint',            40),
+  ('et.strategy_custom_ph',    'fear_thermometer', 'exposure_tracker_strategy_custom_placeholder','modules.fear_thermometer.strategy_custom_placeholder',41),
+  -- Notes / boutons
+  ('et.notes_placeholder',     'fear_thermometer', 'exposure_tracker_notes_placeholder',        'modules.fear_thermometer.notes_placeholder',          50),
+  ('et.save_label',            'fear_thermometer', 'exposure_tracker_save_label',               'modules.fear_thermometer.save',                       60),
+  ('et.update_label',          'fear_thermometer', 'exposure_tracker_update_label',             'common.update',                                       61),
+  ('et.delete_label',          'fear_thermometer', 'exposure_tracker_delete_label',             'common.delete',                                       62),
+  ('et.back_label',            'fear_thermometer', 'exposure_tracker_back_label',               'common.back',                                         63),
+  -- Validation
+  ('et.sit_missing_title',     'fear_thermometer', 'exposure_tracker_situation_missing_title',  'modules.fear_thermometer.situation_missing',          70),
+  ('et.sit_missing_msg',       'fear_thermometer', 'exposure_tracker_situation_missing_msg',    'modules.fear_thermometer.situation_missing_msg',      71),
+  -- Suppression
+  ('et.delete_entry_title',    'fear_thermometer', 'exposure_tracker_delete_entry_title',       'modules.fear_thermometer.delete_entry_title',         72),
+  ('et.sit_delete_title',      'fear_thermometer', 'exposure_tracker_situation_delete_title',   'modules.fear_thermometer.delete_situation_title',     73),
+  -- Panneau gestion des situations
+  ('et.panel_title',           'fear_thermometer', 'exposure_tracker_situations_panel_title',   'modules.fear_thermometer.situations_title',           80),
+  ('et.panel_hint',            'fear_thermometer', 'exposure_tracker_situations_panel_hint',    'modules.fear_thermometer.situations_hint',            81),
+  ('et.sit_placeholder',       'fear_thermometer', 'exposure_tracker_situation_placeholder',    'modules.fear_thermometer.situation_placeholder',      82),
+  ('et.sit_empty',             'fear_thermometer', 'exposure_tracker_situation_empty',          'modules.fear_thermometer.situation_empty',            83),
+  -- Stratégies catalogue (champs sortés par sort_order, ID = key stockée en JSON)
+  ('et.strategy_breathing',    'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_breathing',         100),
+  ('et.strategy_grounding',    'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_grounding',         101),
+  ('et.strategy_movement',     'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_movement',          102),
+  ('et.strategy_exposure',     'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_exposure',          103),
+  ('et.strategy_distraction',  'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_distraction',       104),
+  ('et.strategy_contact',      'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_contact',           105)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('et.cfg', 'engagement_event_type', 'SAVE_FEAR_ENTRY'),
+  ('et.cfg', 'suds_min',              '0'),
+  ('et.cfg', 'suds_max',              '100'),
+  ('et.cfg', 'suds_step',             '10'),
+  ('et.cfg', 'suds_default_before',   '50'),
+  ('et.cfg', 'suds_before_color',     '#EF4444'),
+  ('et.cfg', 'suds_after_color',      '#059669')
+ON CONFLICT (field_id, prop_key) DO NOTHING;

@@ -25,6 +25,8 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'column_form',
   'tree_selector',
   'sleep_journal',
+  'activity_log',
+  'exposure_tracker',
   'patient_scenario',
 ])
 

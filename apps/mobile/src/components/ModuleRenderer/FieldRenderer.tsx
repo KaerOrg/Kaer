@@ -20,6 +20,8 @@ import {
   FieldRow,
   FieldText,
 } from './fields'
+import { ActivityLogLayout } from './layouts/ActivityLog'
+import { ExposureTrackerLayout } from './layouts/ExposureTracker'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
@@ -3489,6 +3491,14 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'sleep_journal') {
     return <SleepJournalLayout fields={visibleFields} />
+  }
+
+  if (preview_kind === 'activity_log') {
+    return <ActivityLogLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'exposure_tracker') {
+    return <ExposureTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {

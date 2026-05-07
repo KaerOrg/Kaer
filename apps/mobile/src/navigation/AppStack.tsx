@@ -7,10 +7,6 @@ import ProfileScreen from '../screens/ProfileScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
-import FearThermometerScreen from '../screens/modules/FearThermometerScreen'
-import FearEntryScreen from '../screens/modules/FearEntryScreen'
-import BehavioralActivationScreen from '../screens/modules/BehavioralActivationScreen'
-import BehavioralActivationEntryScreen from '../screens/modules/BehavioralActivationEntryScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
@@ -28,10 +24,6 @@ export type AppStackParamList = {
   Psychoeducation: undefined
   CardDetail: { cardId: string; isRead: boolean }
   DecisionalBalance: undefined
-  FearThermometer: undefined
-  FearEntry: { entryId?: string }
-  BehavioralActivation: undefined
-  BehavioralActivationEntry: { recordId?: string }
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
   ScaleHistory: { scale_id: string }
@@ -102,30 +94,6 @@ export default function AppStack() {
         name="DecisionalBalance"
         component={DecisionalBalanceScreen}
         options={{ title: 'Balance décisionnelle' }}
-      />
-      <Stack.Screen
-        name="FearThermometer"
-        component={FearThermometerScreen}
-        options={{ title: 'Thermomètre de la peur' }}
-      />
-      <Stack.Screen
-        name="FearEntry"
-        component={FearEntryScreen}
-        options={({ route }) => ({
-          title: route.params?.entryId ? 'Modifier la saisie' : 'Nouvelle saisie SUDs',
-        })}
-      />
-      <Stack.Screen
-        name="BehavioralActivation"
-        component={BehavioralActivationScreen}
-        options={{ title: 'Activation comportementale' }}
-      />
-      <Stack.Screen
-        name="BehavioralActivationEntry"
-        component={BehavioralActivationEntryScreen}
-        options={({ route }) => ({
-          title: route.params?.recordId ? 'Modifier l\'activité' : 'Nouvelle activité',
-        })}
       />
       <Stack.Screen
         name="BreathingTechniques"

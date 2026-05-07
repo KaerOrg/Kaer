@@ -84,7 +84,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 |---|---|---|
 | `sleep_diary` | Agenda du sommeil | MVP — à construire |
 | `beck_columns` | Colonnes de Beck (TCC) | Prévu |
-| `fear_thermometer` | Thermomètre de la peur | Prévu |
+| `fear_thermometer` | Thermomètre de la peur | Implémenté — moteur générique (`preview_kind = 'exposure_tracker'`), tabs Saisies/Situations, SUDS avant/après, stratégies DB-driven |
 | `emotion_wheel` | Roue des émotions | Prévu |
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
