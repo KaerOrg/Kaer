@@ -1,10 +1,12 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { colors } from '../../../../theme'
+import { useModuleT } from '../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 import { InlineText } from '../InlineText'
 
-export function FieldListItem({ field, t }: FieldProps) {
+export function FieldListItem({ field }: FieldProps) {
+  const t = useModuleT()
   const text = field.text_code ? t(field.text_code) : ''
   const isNumbered = field.field_type === 'card_numbered_item'
   const num = field.props['item_number'] ?? '•'
@@ -15,7 +17,7 @@ export function FieldListItem({ field, t }: FieldProps) {
       <Text style={styles.bullet}>{bullet}</Text>
       <Text style={styles.text}>
         {field.children.length > 0
-          ? <>{field.children.map(c => <InlineText key={c.id} field={c} t={t} />)}</>
+          ? <>{field.children.map(c => <InlineText key={c.id} field={c} />)}</>
           : text}
       </Text>
     </View>

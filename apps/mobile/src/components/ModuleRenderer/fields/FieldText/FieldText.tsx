@@ -1,6 +1,7 @@
 import React from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import { colors } from '../../../../theme'
+import { useModuleT } from '../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 import { InlineText } from '../InlineText'
 
@@ -27,7 +28,8 @@ const CONFIG: Record<string, FieldConfig> = {
   card_summary:        { variant: 'card_summary' },
 }
 
-export function FieldText({ field, t }: FieldProps) {
+export function FieldText({ field }: FieldProps) {
+  const t = useModuleT()
   const cfg = CONFIG[field.field_type]
   if (!cfg) return null
 
@@ -36,7 +38,7 @@ export function FieldText({ field, t }: FieldProps) {
   const color = cfg.propColor ? (field.props['color'] ?? '#6366F1') : undefined
 
   const body = field.children.length > 0
-    ? <>{field.children.map(c => <InlineText key={c.id} field={c} t={t} />)}</>
+    ? <>{field.children.map(c => <InlineText key={c.id} field={c} />)}</>
     : <Text>{text}</Text>
 
   if (cfg.variant === 'callout') {

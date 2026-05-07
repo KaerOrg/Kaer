@@ -3,7 +3,9 @@ import { render, screen } from '@testing-library/react-native'
 import { InlineText } from './InlineText'
 import type { ContentField } from '../../../../services/moduleService'
 
-const t = (key: string) => key
+jest.mock('../../../../hooks/useModuleT', () => ({
+  useModuleT: () => (key: string) => key,
+}))
 
 function field(field_type: string, text_code: string | null, props: Record<string, string> = {}): ContentField {
   return {
@@ -14,17 +16,17 @@ function field(field_type: string, text_code: string | null, props: Record<strin
 
 describe('InlineText', () => {
   it('affiche le texte par défaut', () => {
-    render(<InlineText field={field('card_inline', 'inline.text')} t={t} />)
+    render(<InlineText field={field('card_inline', 'inline.text')} />)
     expect(screen.getByText('inline.text')).toBeTruthy()
   })
 
   it('affiche le texte en gras avec props.bold=true', () => {
-    render(<InlineText field={field('card_inline', 'bold.text', { bold: 'true' })} t={t} />)
+    render(<InlineText field={field('card_inline', 'bold.text', { bold: 'true' })} />)
     expect(screen.getByText('bold.text')).toBeTruthy()
   })
 
   it("n'affiche rien quand text_code est null", () => {
-    render(<InlineText field={field('card_inline', null)} t={t} />)
+    render(<InlineText field={field('card_inline', null)} />)
     expect(screen.queryByText(/.+/)).toBeNull()
   })
 })

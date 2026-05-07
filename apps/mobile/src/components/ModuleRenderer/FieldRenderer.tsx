@@ -2,15 +2,14 @@ import React, { useState, useCallback, useEffect, useMemo, useRef, ComponentType
 import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { useTranslation } from 'react-i18next'
 import { logger } from '@psytool/shared'
 import { colors, spacing, radius } from '../../theme'
 import type { ContentField } from '../../services/moduleService'
-import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry } from '../../lib/database'
+import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry, getAllTreeSelections, saveTreeSelection, deleteTreeSelection, type TreeSelection, type TreeSelectionPathNode } from '../../lib/database'
 import { formatDateTime, formatDateFull, formatDateNumeric } from '../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
-import { useTeen } from '../../hooks/useTeen'
+import { useModuleT } from '../../hooks/useModuleT'
 import { LikertWidget, type LikertOption } from './fields/widgets/LikertWidget'
 import { PipPicker } from '../PipPicker'
 import {
@@ -37,21 +36,18 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_paragraph:      FieldText,
 }
 
-function renderField(f: ContentField, t: (key: string) => string): React.ReactNode {
+function renderField(f: ContentField): React.ReactNode {
   const Component = FIELD_REGISTRY[f.field_type]
   if (!Component) {
     logger.warn(`[ModuleRenderer] field_type non géré : "${f.field_type}"`)
     return null
   }
-  return <Component key={f.id} field={f} t={t} />
+  return <Component key={f.id} field={f} />
 }
 
 // ─── List rendering ───────────────────────────────────────────────────────────
 
-function renderCardBodyFields(
-  fields: ContentField[],
-  t: (key: string) => string,
-): React.ReactNode {
+function renderCardBodyFields(fields: ContentField[]): React.ReactNode {
   const result: React.ReactNode[] = []
   let listBuffer: ContentField[] = []
   let listType: 'ul' | 'ol' | null = null
@@ -60,7 +56,7 @@ function renderCardBodyFields(
     if (listBuffer.length === 0) return
     result.push(
       <View key={`list-${listBuffer[0].id}`} style={styles.listBlock}>
-        {listBuffer.map(f => renderField(f, t))}
+        {listBuffer.map(f => renderField(f))}
       </View>
     )
     listBuffer = []
@@ -78,7 +74,7 @@ function renderCardBodyFields(
       listBuffer.push(f)
     } else {
       flushList()
-      result.push(renderField(f, t))
+      result.push(renderField(f))
     }
   }
   flushList()
@@ -87,10 +83,9 @@ function renderCardBodyFields(
 
 // ─── Layouts — preview (read-only) ───────────────────────────────────────────
 
-function StepsLayout({ sections, footer, t }: {
+function StepsLayout({ sections, footer }: {
   sections: Map<string, ContentField[]>
   footer: ContentField | undefined
-  t: (key: string) => string
 }) {
   return (
     <View style={styles.stepsContainer}>
@@ -106,41 +101,39 @@ function StepsLayout({ sections, footer, t }: {
               <Text style={styles.stepNum}>{num}</Text>
             </View>
             <View style={styles.stepContent}>
-              <FieldText field={titleField} t={t} />
-              {hintField && <FieldText field={hintField} t={t} />}
+              <FieldText field={titleField} />
+              {hintField && <FieldText field={hintField} />}
             </View>
           </View>
         )
       })}
-      {footer && <FieldText field={footer} t={t} />}
+      {footer && <FieldText field={footer} />}
     </View>
   )
 }
 
-function FieldsLayout({ fields, footer, t }: {
+function FieldsLayout({ fields, footer }: {
   fields: ContentField[]
   footer: ContentField | undefined
-  t: (key: string) => string
 }) {
   return (
     <View>
       <View style={styles.fieldsBlock}>
-        {fields.map(f => <FieldRow key={f.id} field={f} t={t} />)}
+        {fields.map(f => <FieldRow key={f.id} field={f} />)}
       </View>
       {footer && (
         <View style={styles.infoBox}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
-          <FieldText field={footer} t={t} />
+          <FieldText field={footer} />
         </View>
       )}
     </View>
   )
 }
 
-function Grid2x2Layout({ sections, footer, t }: {
+function Grid2x2Layout({ sections, footer }: {
   sections: Map<string, ContentField[]>
   footer: ContentField | undefined
-  t: (key: string) => string
 }) {
   const entries = [...sections.entries()]
   return (
@@ -152,21 +145,21 @@ function Grid2x2Layout({ sections, footer, t }: {
           const color = titleField?.props['color'] ?? '#6366F1'
           return (
             <View key={sectionId} style={[styles.quadrant, { borderTopColor: color, borderTopWidth: 3 }]}>
-              {titleField && <FieldText field={titleField} t={t} />}
-              {subtitleField && <FieldText field={subtitleField} t={t} />}
+              {titleField && <FieldText field={titleField} />}
+              {subtitleField && <FieldText field={subtitleField} />}
             </View>
           )
         })}
       </View>
-      {footer && <FieldText field={footer} t={t} />}
+      {footer && <FieldText field={footer} />}
     </View>
   )
 }
 
-function CardsLayout({ sections, t }: {
+function CardsLayout({ sections }: {
   sections: Map<string, ContentField[]>
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
   const handleToggle = useCallback((id: string) => {
@@ -194,10 +187,10 @@ function CardsLayout({ sections, t }: {
             >
               <View style={styles.cardMeta}>
                 {titleField
-                  ? <FieldText field={titleField} t={t} />
+                  ? <FieldText field={titleField} />
                   : <Text style={styles.cardFallbackTitle}>{sectionId}</Text>
                 }
-                {summaryField && <FieldText field={summaryField} t={t} />}
+                {summaryField && <FieldText field={summaryField} />}
               </View>
               <Ionicons
                 name={isOpen ? 'chevron-up' : 'chevron-down'}
@@ -207,7 +200,7 @@ function CardsLayout({ sections, t }: {
             </Pressable>
             {isOpen && bodyFields.length > 0 && (
               <View style={styles.cardBody}>
-                {renderCardBodyFields(bodyFields, t)}
+                {renderCardBodyFields(bodyFields)}
               </View>
             )}
           </View>
@@ -219,15 +212,15 @@ function CardsLayout({ sections, t }: {
 
 // ─── Layout — questionnaire interactif (patient) ──────────────────────────────
 
-function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTextInput, accentColor, t }: {
+function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTextInput, accentColor }: {
   fields: ContentField[]
   answers: (number | null)[]
   onAnswer: (index: number, value: number) => void
   textInputValues?: Record<string, string>
   onTextInput?: (fieldId: string, value: string) => void
   accentColor?: string
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const instructions = fields
     .filter(f => f.field_type === 'scale_instruction')
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -442,7 +435,8 @@ function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTex
 
 // ─── Layout — exercice guidé interactif ──────────────────────────────────────
 
-function ExerciseSafetySection({ fields, t }: { fields: ContentField[]; t: (key: string) => string }) {
+function ExerciseSafetySection({ fields }: { fields: ContentField[] }) {
+  const t = useModuleT()
   const titleField = fields.find(f => f.field_type === 'exercise_safety_title')
   const phoneFields = [...fields]
     .filter(f => f.field_type === 'exercise_safety')
@@ -472,13 +466,13 @@ function ExerciseSafetySection({ fields, t }: { fields: ContentField[]; t: (key:
   )
 }
 
-function GuidedExerciseLayout({ sections, uiFields, footer, t, accentColor }: {
+function GuidedExerciseLayout({ sections, uiFields, footer, accentColor }: {
   sections: Map<string, ContentField[]>
   uiFields: ContentField[]
   footer: ContentField | undefined
-  t: (key: string) => string
   accentColor?: string
 }) {
+  const t = useModuleT()
   const [mode, setMode] = useState<'intro' | 'guided' | 'done'>('intro')
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -577,7 +571,7 @@ function GuidedExerciseLayout({ sections, uiFields, footer, t, accentColor }: {
           <Text style={gStyles.startBtnText}>{startLabel}</Text>
         </Pressable>
 
-        <ExerciseSafetySection fields={uiFields} t={t} />
+        <ExerciseSafetySection fields={uiFields} />
       </ScrollView>
     )
   }
@@ -651,18 +645,18 @@ function GuidedExerciseLayout({ sections, uiFields, footer, t, accentColor }: {
         </Text>
       </Pressable>
 
-      <ExerciseSafetySection fields={uiFields} t={t} />
+      <ExerciseSafetySection fields={uiFields} />
     </ScrollView>
   )
 }
 
 // ─── Layout — patient_scenario (per-patient config) ─────────────────────────
 
-function PatientScenarioLayout({ fields, patientConfig, t }: {
+function PatientScenarioLayout({ fields, patientConfig }: {
   fields: ContentField[]
   patientConfig: Record<string, unknown> | null
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const [showOriginal, setShowOriginal] = useState(false)
   const [activeSound, setActiveSound] = useState<string | null>(null)
 
@@ -796,19 +790,19 @@ function PatientScenarioLayout({ fields, patientConfig, t }: {
         </View>
       )}
 
-      <ExerciseSafetySection fields={fields} t={t} />
+      <ExerciseSafetySection fields={fields} />
     </ScrollView>
   )
 }
 
 // ─── Layout — plan éditable (crisis_plan…) ────────────────────────────────────
 
-function EditableStepsLayout({ sections, uiFields, moduleId, t }: {
+function EditableStepsLayout({ sections, uiFields, moduleId }: {
   sections: Map<string, ContentField[]>
   uiFields: ContentField[]
   moduleId: string
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
@@ -1064,10 +1058,10 @@ function formatDuration(seconds: number): string {
   return s > 0 ? `${m}min ${s}s` : `${m}min`
 }
 
-function TimedTapExerciseLayout({ fields, t }: {
+function TimedTapExerciseLayout({ fields }: {
   fields: ContentField[]
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   // ── Config (stable — fields ne changent pas pendant la durée de vie du composant)
   const configField = fields.find(f => f.field_type === 'timed_tap_config')
   const durationSeconds = parseInt((configField?.props['duration_seconds'] as string | undefined) ?? '90', 10)
@@ -1356,11 +1350,11 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-function DailyCheckinLayout({ fields, moduleId, t }: {
+function DailyCheckinLayout({ fields, moduleId }: {
   fields: ContentField[]
   moduleId: string
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
 
   // ── Résolution des champs DB-driven
@@ -1663,11 +1657,11 @@ interface ColumnSpec {
   children: ContentField[]
 }
 
-function ColumnFormLayout({ fields, moduleId, t }: {
+function ColumnFormLayout({ fields, moduleId }: {
   fields: ContentField[]
   moduleId: string
-  t: (key: string) => string
 }) {
+  const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
 
   // ── Résolution des champs DB-driven
@@ -2012,6 +2006,556 @@ function ColumnFormLayout({ fields, moduleId, t }: {
   )
 }
 
+// ─── Layout — sélecteur d'arbre (emotion_wheel…) ────────────────────────────
+//
+// Pattern « sélection hiérarchique guidée » : un arbre de noeuds modélisé
+// via parent_field_id, navigation niveau par niveau, intensité brute
+// optionnelle (1–N), notes libres optionnelles. Persistance dans la table
+// SQLite générique tree_selections.
+// Conformité MDR 2017/745 : aucun seuil interprétatif, juste affichage des
+// déclarations brutes du patient.
+
+interface TreeNode {
+  id: string
+  text_code: string | null
+  color?: string
+  icon?: string
+  children: TreeNode[]
+}
+
+const DEFAULT_INTENSITY_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
+
+function buildTreeNodes(fields: ContentField[]): TreeNode[] {
+  const convert = (f: ContentField): TreeNode => ({
+    id: f.id,
+    text_code: f.text_code,
+    color: f.props['color'],
+    icon: f.props['icon'],
+    children: (f.children ?? [])
+      .filter(c => c.field_type === 'tree_node')
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(convert),
+  })
+  return fields
+    .filter(f => f.field_type === 'tree_node' && f.parent_field_id == null)
+    .slice()
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map(convert)
+}
+
+function resolvePathLabel(node: TreeSelectionPathNode, t: (key: string) => string): string {
+  if (node.text_code) return t(node.text_code)
+  if (node.label) return node.label
+  return node.id
+}
+
+function intensityValuesFor(min: number, max: number): number[] {
+  if (min === 1 && max === 10) return [...DEFAULT_INTENSITY_VALUES]
+  const result: number[] = []
+  for (let v = min; v <= max; v += 1) result.push(v)
+  return result
+}
+
+function TreeSelectorLayout({ fields, moduleId }: {
+  fields: ContentField[]
+  moduleId: string
+}) {
+  const t = useModuleT()
+  // ── Résolution des champs DB-driven
+  const ft = (type: string): string => {
+    const f = fields.find(field => field.field_type === type)
+    return f?.text_code ? t(f.text_code) : ''
+  }
+
+  const configField = fields.find(f => f.field_type === 'tree_selector_config')
+  const enableIntensity = (configField?.props['enable_intensity'] ?? '0') === '1'
+  const enableNotes = (configField?.props['enable_notes'] ?? '0') === '1'
+  const intensityMin = parseInt(configField?.props['intensity_min'] ?? '1', 10)
+  const intensityMax = parseInt(configField?.props['intensity_max'] ?? '10', 10)
+  const intensityValues = useMemo(
+    () => intensityValuesFor(intensityMin, intensityMax),
+    [intensityMin, intensityMax]
+  )
+
+  const nodes = useMemo(() => buildTreeNodes(fields), [fields])
+
+  // ── State
+  const [mode, setMode] = useState<'history' | 'selection' | 'intensity' | 'notes'>('history')
+  const [path, setPath] = useState<TreeNode[]>([])
+  const [intensity, setIntensity] = useState<number>(Math.round((intensityMin + intensityMax) / 2))
+  const [notes, setNotes] = useState('')
+  const [entries, setEntries] = useState<TreeSelection[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  const loadEntries = useCallback(async () => {
+    const data = await getAllTreeSelections(moduleId)
+    setEntries(data)
+    setLoading(false)
+  }, [moduleId])
+
+  useEffect(() => { void loadEntries() }, [loadEntries])
+
+  // ── Couleur courante : couleur du noeud le plus profond ayant une couleur
+  const accentColor = useMemo(() => {
+    for (let i = path.length - 1; i >= 0; i -= 1) {
+      if (path[i].color) return path[i].color!
+    }
+    return colors.primary
+  }, [path])
+
+  // ── Noeuds visibles à l'étape courante : enfants du dernier sélectionné, ou racine
+  const currentNodes = useMemo(() => {
+    if (path.length === 0) return nodes
+    return path[path.length - 1].children
+  }, [nodes, path])
+
+  // ── Titres d'étape par niveau (le titre du niveau 2 est le label parent)
+  const level = path.length + 1 // 1 quand path vide
+  const stepTitle = useMemo(() => {
+    if (level === 2 && path.length >= 1) {
+      return path[0].text_code ? t(path[0].text_code) : ''
+    }
+    return ft(`tree_selector_step_${level}_title`)
+  }, [level, path, ft, t])
+  const stepHint = ft(`tree_selector_step_${level}_hint`)
+
+  // ── Navigation
+  const handleStartNew = useCallback(() => {
+    setPath([])
+    setIntensity(Math.round((intensityMin + intensityMax) / 2))
+    setNotes('')
+    setMode('selection')
+  }, [intensityMin, intensityMax])
+
+  const handleSelectNode = useCallback((node: TreeNode) => {
+    const newPath = [...path, node]
+    if (node.children.length > 0) {
+      setPath(newPath)
+      return
+    }
+    // Feuille atteinte
+    setPath(newPath)
+    if (enableIntensity) {
+      setMode('intensity')
+    } else if (enableNotes) {
+      setMode('notes')
+    } else {
+      // Auto-save quand pas d'étapes supplémentaires
+      void persistEntry(newPath, null, '')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, enableIntensity, enableNotes])
+
+  const handleBack = useCallback(() => {
+    if (mode === 'notes' && enableIntensity) { setMode('intensity'); return }
+    if (mode === 'notes' || mode === 'intensity') { setMode('selection'); return }
+    if (path.length > 0) {
+      setPath(prev => prev.slice(0, -1))
+      return
+    }
+    setMode('history')
+  }, [mode, path, enableIntensity])
+
+  const handleCancel = useCallback(() => {
+    setPath([])
+    setMode('history')
+  }, [])
+
+  const persistEntry = useCallback(async (
+    finalPath: TreeNode[],
+    finalIntensity: number | null,
+    finalNotes: string,
+  ) => {
+    if (finalPath.length === 0) return
+    setSaving(true)
+    try {
+      const leaf = finalPath[finalPath.length - 1]
+      await saveTreeSelection({
+        id: generateId(),
+        module_id: moduleId,
+        selected_id: leaf.id,
+        selected_label: leaf.text_code,
+        path: finalPath.map(n => ({
+          id: n.id,
+          text_code: n.text_code ?? undefined,
+          color: n.color,
+          icon: n.icon,
+        })),
+        intensity: finalIntensity,
+        notes: finalNotes.trim() || null,
+      })
+      await loadEntries()
+      setPath([])
+      setIntensity(Math.round((intensityMin + intensityMax) / 2))
+      setNotes('')
+      setMode('history')
+    } finally {
+      setSaving(false)
+    }
+  }, [moduleId, loadEntries, intensityMin, intensityMax])
+
+  const handleConfirmIntensity = useCallback(() => {
+    if (enableNotes) {
+      setMode('notes')
+      return
+    }
+    void persistEntry(path, intensity, '')
+  }, [enableNotes, persistEntry, path, intensity])
+
+  const handleSaveFinal = useCallback(() => {
+    void persistEntry(path, enableIntensity ? intensity : null, notes)
+  }, [persistEntry, path, enableIntensity, intensity, notes])
+
+  const handleDelete = useCallback((entry: TreeSelection) => {
+    Alert.alert(
+      ft('tree_selector_delete_title') || t('common.delete'),
+      t('common.irreversible'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteTreeSelection(entry.id)
+            setEntries(prev => prev.filter(e => e.id !== entry.id))
+          },
+        },
+      ]
+    )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t])
+
+  if (loading) {
+    return <View style={tsStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
+  }
+
+  // ── Mode historique ────────────────────────────────────────────────────────
+  if (mode === 'history') {
+    const introText = ft('tree_selector_intro')
+    const newBtnLabel = ft('tree_selector_new_btn') || t('common.add')
+    const historyLabel = ft('tree_selector_history_label')
+    const emptyTitle = ft('tree_selector_empty_title')
+    const emptyText = ft('tree_selector_empty_text')
+
+    return (
+      <View style={tsStyles.container}>
+        <Pressable
+          style={tsStyles.startBtn}
+          onPress={handleStartNew}
+          accessibilityRole="button"
+          accessibilityLabel={newBtnLabel}
+          testID="start-new-button"
+        >
+          <MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.white} />
+          <Text style={tsStyles.startBtnText}>{newBtnLabel}</Text>
+        </Pressable>
+
+        <ScrollView contentContainerStyle={tsStyles.historyContent}>
+          {introText ? (
+            <View style={tsStyles.introCard} testID="intro-card">
+              <MaterialCommunityIcons name="palette" size={22} color={colors.primary} />
+              <Text style={tsStyles.introText}>{introText}</Text>
+            </View>
+          ) : null}
+
+          {entries.length === 0 ? (
+            <View style={tsStyles.empty} testID="list-empty">
+              <MaterialCommunityIcons name="palette-outline" size={52} color={colors.border} />
+              {emptyTitle ? <Text style={tsStyles.emptyTitle}>{emptyTitle}</Text> : null}
+              {emptyText ? <Text style={tsStyles.emptyText}>{emptyText}</Text> : null}
+            </View>
+          ) : (
+            <View style={tsStyles.section}>
+              {historyLabel ? (
+                <Text style={tsStyles.sectionLabel}>{historyLabel} ({entries.length})</Text>
+              ) : null}
+              {entries.map(entry => {
+                const rootNode = entry.path[0]
+                const cardColor = rootNode?.color ?? colors.primary
+                const cardIcon = (rootNode?.icon ?? 'palette-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
+                const labels = entry.path.map(n => resolvePathLabel(n, t)).filter(Boolean)
+                return (
+                  <View
+                    key={entry.id}
+                    style={[tsStyles.entryCard, { borderLeftColor: cardColor }]}
+                    testID={`entry-card-${entry.id}`}
+                  >
+                    <View style={tsStyles.entryHeader}>
+                      <View style={[tsStyles.entryIcon, { backgroundColor: cardColor + '1A' }]}>
+                        <MaterialCommunityIcons name={cardIcon} size={20} color={cardColor} />
+                      </View>
+                      <View style={tsStyles.entryLabels}>
+                        {labels[0] ? (
+                          <Text style={[tsStyles.entryPrimary, { color: cardColor }]}>{labels[0]}</Text>
+                        ) : null}
+                        {labels.length > 1 ? (
+                          <Text style={tsStyles.entrySecondary}>
+                            {labels.slice(1).join(' · ')}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <View style={tsStyles.entryRight}>
+                        {entry.intensity != null ? (
+                          <View style={[tsStyles.intensityBadge, { backgroundColor: cardColor + '1A' }]}>
+                            <Text style={[tsStyles.intensityText, { color: cardColor }]}>
+                              {entry.intensity}/{intensityMax}
+                            </Text>
+                          </View>
+                        ) : null}
+                        <Pressable
+                          onPress={() => handleDelete(entry)}
+                          accessibilityRole="button"
+                          accessibilityLabel={t('common.delete')}
+                          hitSlop={8}
+                          testID={`delete-${entry.id}`}
+                        >
+                          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
+                        </Pressable>
+                      </View>
+                    </View>
+                    {entry.notes ? (
+                      <Text style={tsStyles.entryNotes} numberOfLines={2}>{entry.notes}</Text>
+                    ) : null}
+                    <Text style={tsStyles.entryDate}>{formatDateTime(entry.created_at)}</Text>
+                  </View>
+                )
+              })}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    )
+  }
+
+  // ── Mode sélection (navigation dans l'arbre) ───────────────────────────────
+  if (mode === 'selection') {
+    const breadcrumb = path.map(n => (n.text_code ? t(n.text_code) : '')).filter(Boolean).join(' › ')
+    return (
+      <View style={tsStyles.container}>
+        <View style={tsStyles.header}>
+          <Pressable
+            onPress={handleBack}
+            style={tsStyles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}
+            testID="back-button"
+          >
+            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+          </Pressable>
+          <View style={tsStyles.progressContainer}>
+            <View style={tsStyles.progressTrack}>
+              <View style={[tsStyles.progressFill, {
+                width: `${(level / Math.max(level, 3)) * 100}%`,
+                backgroundColor: accentColor,
+              }]} />
+            </View>
+            {breadcrumb ? (
+              <Text style={tsStyles.progressLabel} numberOfLines={1}>{breadcrumb}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <ScrollView contentContainerStyle={tsStyles.selectionContent}>
+          {stepTitle ? <Text style={tsStyles.stepTitle}>{stepTitle}</Text> : null}
+          {stepHint ? <Text style={tsStyles.stepHint}>{stepHint}</Text> : null}
+
+          {level === 1 ? (
+            <View style={tsStyles.gridContainer} testID="level-1-grid">
+              {currentNodes.map(node => {
+                const nodeColor = node.color ?? colors.primary
+                const nodeIcon = (node.icon ?? 'circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
+                const label = node.text_code ? t(node.text_code) : ''
+                return (
+                  <Pressable
+                    key={node.id}
+                    style={[tsStyles.primaryCard, { borderColor: nodeColor }]}
+                    onPress={() => handleSelectNode(node)}
+                    accessibilityRole="button"
+                    accessibilityLabel={label}
+                    testID={`node-${node.id}`}
+                  >
+                    <View style={[tsStyles.primaryIconCircle, { backgroundColor: nodeColor + '1A' }]}>
+                      <MaterialCommunityIcons name={nodeIcon} size={28} color={nodeColor} />
+                    </View>
+                    <Text style={[tsStyles.primaryLabel, { color: nodeColor }]}>{label}</Text>
+                  </Pressable>
+                )
+              })}
+            </View>
+          ) : (
+            <View style={tsStyles.listContainer} testID={`level-${level}-list`}>
+              {currentNodes.map(node => {
+                const nodeColor = node.color ?? accentColor
+                const label = node.text_code ? t(node.text_code) : ''
+                return (
+                  <Pressable
+                    key={node.id}
+                    style={[tsStyles.optionCard, { borderLeftColor: nodeColor }]}
+                    onPress={() => handleSelectNode(node)}
+                    accessibilityRole="button"
+                    accessibilityLabel={label}
+                    testID={`node-${node.id}`}
+                  >
+                    <Text style={[tsStyles.optionLabel, { color: nodeColor }]}>{label}</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
+                  </Pressable>
+                )
+              })}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    )
+  }
+
+  // ── Mode intensité ─────────────────────────────────────────────────────────
+  if (mode === 'intensity') {
+    const intensityTitle = ft('tree_selector_intensity_title')
+    const intensityHint = ft('tree_selector_intensity_hint')
+    const continueLabel = ft('tree_selector_continue_btn') || t('common.continue')
+    return (
+      <View style={tsStyles.container}>
+        <View style={tsStyles.header}>
+          <Pressable
+            onPress={handleBack}
+            style={tsStyles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}
+            testID="back-button"
+          >
+            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={tsStyles.selectionContent}>
+          {intensityTitle ? <Text style={tsStyles.stepTitle}>{intensityTitle}</Text> : null}
+          {intensityHint ? <Text style={tsStyles.stepHint}>{intensityHint}</Text> : null}
+
+          <View style={tsStyles.intensityCard} testID="intensity-card">
+            <View style={[tsStyles.intensityDisplay, { backgroundColor: accentColor + '1A' }]}>
+              <Text style={[tsStyles.intensityValue, { color: accentColor }]} testID="intensity-value">
+                {intensity}
+              </Text>
+              <Text style={tsStyles.intensityMax}>/{intensityMax}</Text>
+            </View>
+            <View style={tsStyles.intensityBtns}>
+              {intensityValues.map(v => {
+                const isActive = intensity === v
+                return (
+                  <Pressable
+                    key={v}
+                    style={[
+                      tsStyles.intensityBtn,
+                      isActive && { backgroundColor: accentColor, borderColor: accentColor },
+                    ]}
+                    onPress={() => setIntensity(v)}
+                    accessibilityRole="button"
+                    accessibilityLabel={String(v)}
+                    testID={`intensity-btn-${v}`}
+                  >
+                    <Text style={[
+                      tsStyles.intensityBtnText,
+                      isActive && tsStyles.intensityBtnTextActive,
+                    ]}>{v}</Text>
+                  </Pressable>
+                )
+              })}
+            </View>
+          </View>
+
+          <Pressable
+            style={[tsStyles.continueBtn, { backgroundColor: accentColor }]}
+            onPress={handleConfirmIntensity}
+            accessibilityRole="button"
+            accessibilityLabel={continueLabel}
+            testID="continue-intensity"
+          >
+            <Text style={tsStyles.continueBtnText}>{continueLabel}</Text>
+            <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
+          </Pressable>
+        </ScrollView>
+      </View>
+    )
+  }
+
+  // ── Mode notes ─────────────────────────────────────────────────────────────
+  const notesTitle = ft('tree_selector_notes_title')
+  const notesHint = ft('tree_selector_notes_hint')
+  const notesPlaceholder = ft('tree_selector_notes_placeholder')
+  const saveLabel = ft('tree_selector_save_btn') || t('common.save')
+  const summary = path.map(n => (n.text_code ? t(n.text_code) : '')).filter(Boolean).join(' — ')
+
+  return (
+    <KeyboardAvoidingView
+      style={tsStyles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+    >
+      <View style={tsStyles.header}>
+        <Pressable
+          onPress={handleBack}
+          style={tsStyles.backBtn}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.back')}
+          testID="back-button"
+        >
+          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+        </Pressable>
+      </View>
+      <ScrollView contentContainerStyle={tsStyles.selectionContent} keyboardShouldPersistTaps="handled">
+        {notesTitle ? <Text style={tsStyles.stepTitle}>{notesTitle}</Text> : null}
+        {notesHint ? <Text style={tsStyles.stepHint}>{notesHint}</Text> : null}
+
+        {summary ? (
+          <View style={[tsStyles.summaryCard, { borderLeftColor: accentColor }]} testID="summary-card">
+            <Text style={[tsStyles.summaryPrimary, { color: accentColor }]}>{summary}</Text>
+            {enableIntensity ? (
+              <Text style={tsStyles.summaryMeta}>{intensity}/{intensityMax}</Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        <TextInput
+          style={tsStyles.notesInput}
+          placeholder={notesPlaceholder}
+          placeholderTextColor={colors.textMuted}
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          numberOfLines={4}
+          textAlignVertical="top"
+          accessibilityLabel={notesPlaceholder}
+          testID="notes-input"
+        />
+
+        <View style={tsStyles.actionsRow}>
+          <Pressable
+            style={tsStyles.cancelBtn}
+            onPress={handleCancel}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.cancel')}
+            testID="cancel-entry"
+          >
+            <Text style={tsStyles.cancelBtnText}>{t('common.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            style={[tsStyles.saveBtn, { backgroundColor: accentColor }, saving && tsStyles.btnDisabled]}
+            onPress={handleSaveFinal}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={saveLabel}
+            testID="save-entry"
+          >
+            <Text style={tsStyles.saveBtnText}>{saving ? '…' : saveLabel}</Text>
+            {!saving && <MaterialCommunityIcons name="check" size={20} color={colors.white} />}
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
+}
+
 // ─── Questionnaire props ──────────────────────────────────────────────────────
 
 export interface QuestionnaireInteraction {
@@ -2038,9 +2582,6 @@ export interface FieldRendererProps {
 }
 
 export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
-  const { isTeenMode } = useTeen()
-  const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
-
   if (preview_kind === 'coming_soon' || fields.length === 0) return null
 
   const visibleFields = fields.filter(
@@ -2059,7 +2600,6 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
         textInputValues={questionnaire.textInputValues}
         onTextInput={questionnaire.onTextInput}
         accentColor={questionnaire.accentColor}
-        t={t}
       />
     )
   }
@@ -2077,7 +2617,6 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
         sections={sections}
         uiFields={uiFields}
         footer={footer}
-        t={t}
         accentColor={accentColor}
       />
     )
@@ -2091,14 +2630,14 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
       sections.get(f.section_id)!.push(f)
     }
     if (preview_kind === 'steps') {
-      return <StepsLayout sections={sections} footer={footer} t={t} />
+      return <StepsLayout sections={sections} footer={footer} />
     }
-    return <CardsLayout sections={sections} t={t} />
+    return <CardsLayout sections={sections} />
   }
 
   if (preview_kind === 'fields') {
     const fieldRows = contentFields.filter(f => f.field_type === 'field_row')
-    return <FieldsLayout fields={fieldRows} footer={footer} t={t} />
+    return <FieldsLayout fields={fieldRows} footer={footer} />
   }
 
   if (preview_kind === 'patient_scenario') {
@@ -2106,7 +2645,6 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
       <PatientScenarioLayout
         fields={visibleFields}
         patientConfig={patientConfig ?? null}
-        t={t}
       />
     )
   }
@@ -2118,19 +2656,23 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
       if (!sections.has(f.section_id)) sections.set(f.section_id, [])
       sections.get(f.section_id)!.push(f)
     }
-    return <Grid2x2Layout sections={sections} footer={footer} t={t} />
+    return <Grid2x2Layout sections={sections} footer={footer} />
   }
 
   if (preview_kind === 'timed_tap_exercise') {
-    return <TimedTapExerciseLayout fields={visibleFields} t={t} />
+    return <TimedTapExerciseLayout fields={visibleFields} />
   }
 
   if (preview_kind === 'daily_checkin') {
-    return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} t={t} />
+    return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'column_form') {
-    return <ColumnFormLayout fields={visibleFields} moduleId={moduleId ?? ''} t={t} />
+    return <ColumnFormLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'tree_selector') {
+    return <TreeSelectorLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {
@@ -2146,7 +2688,6 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
         sections={sections}
         uiFields={uiFields}
         moduleId={moduleId ?? ''}
-        t={t}
       />
     )
   }
@@ -2687,4 +3228,145 @@ const cfStyles = StyleSheet.create({
   },
   newBtnText:        { color: colors.white, fontSize: 16, fontWeight: '700' },
   btnDisabled:       { opacity: 0.6 },
+})
+
+const tsStyles = StyleSheet.create({
+  container:        { flex: 1, backgroundColor: colors.background },
+  center:           { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  // ── Bouton démarrer (mode historique)
+  startBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.lg,
+    paddingVertical: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.lg,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  startBtnText:     { fontSize: 16, fontWeight: '700', color: colors.white },
+  // ── Historique
+  historyContent:   { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  introCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  introText:        { flex: 1, fontSize: 14, color: colors.textMuted, lineHeight: 20 },
+  section:          { gap: spacing.sm },
+  sectionLabel: {
+    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  empty:            { alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xl },
+  emptyTitle:       { fontSize: 18, fontWeight: '600', color: colors.text },
+  emptyText:        { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  // ── Carte d'entrée
+  entryCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    borderLeftWidth: 4, gap: spacing.xs,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  entryHeader:      { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  entryIcon: {
+    width: 36, height: 36, borderRadius: radius.full,
+    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+  },
+  entryLabels:      { flex: 1, gap: 2 },
+  entryPrimary:     { fontSize: 15, fontWeight: '700' },
+  entrySecondary:   { fontSize: 13, color: colors.textMuted },
+  entryRight:       { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  intensityBadge: {
+    paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full,
+  },
+  intensityText:    { fontSize: 12, fontWeight: '700' },
+  entryNotes: {
+    fontSize: 13, color: colors.textMuted, fontStyle: 'italic',
+    lineHeight: 18, marginTop: spacing.xs,
+  },
+  entryDate:        { fontSize: 11, color: colors.border, marginTop: 2 },
+  // ── En-tête mode sélection
+  header: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.sm,
+  },
+  backBtn:          { padding: spacing.xs },
+  progressContainer:{ flex: 1, gap: spacing.xs },
+  progressTrack: {
+    height: 4, backgroundColor: colors.border,
+    borderRadius: radius.full, overflow: 'hidden',
+  },
+  progressFill:     { height: '100%', borderRadius: radius.full },
+  progressLabel:    { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
+  // ── Sélection
+  selectionContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  stepTitle:        { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
+  stepHint:         { fontSize: 14, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.md },
+  gridContainer:    { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  primaryCard: {
+    width: '47%', backgroundColor: colors.card, borderRadius: radius.lg,
+    padding: spacing.md, alignItems: 'center', gap: spacing.sm, borderWidth: 1.5,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  primaryIconCircle: {
+    width: 56, height: 56, borderRadius: radius.full,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  primaryLabel:     { fontSize: 15, fontWeight: '700', textAlign: 'center' },
+  listContainer:    { gap: spacing.sm },
+  optionCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderLeftWidth: 4,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  optionLabel:      { fontSize: 16, fontWeight: '600' },
+  // ── Intensité
+  intensityCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
+    alignItems: 'center', gap: spacing.lg,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    marginBottom: spacing.md,
+  },
+  intensityDisplay: {
+    flexDirection: 'row', alignItems: 'baseline', gap: 4,
+    paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderRadius: radius.lg,
+  },
+  intensityValue:   { fontSize: 48, fontWeight: '800' },
+  intensityMax:     { fontSize: 20, color: colors.textMuted, fontWeight: '600' },
+  intensityBtns: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center',
+  },
+  intensityBtn: {
+    width: 44, height: 44, borderRadius: radius.full, borderWidth: 1.5,
+    borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.card,
+  },
+  intensityBtnText: { fontSize: 15, fontWeight: '600', color: colors.text },
+  intensityBtnTextActive: { color: colors.white },
+  continueBtn: {
+    borderRadius: radius.lg, paddingVertical: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  continueBtnText:  { fontSize: 16, fontWeight: '700', color: colors.white },
+  // ── Notes
+  summaryCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    borderLeftWidth: 4, gap: spacing.xs, marginBottom: spacing.md,
+  },
+  summaryPrimary:   { fontSize: 15, fontWeight: '700' },
+  summaryMeta:      { fontSize: 13, color: colors.textMuted },
+  notesInput: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    fontSize: 15, color: colors.text, minHeight: 100,
+    borderWidth: 1, borderColor: colors.border, marginBottom: spacing.md,
+  },
+  actionsRow:       { flexDirection: 'row', gap: spacing.sm },
+  cancelBtn: {
+    paddingHorizontal: spacing.lg, paddingVertical: spacing.md,
+    borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
+  },
+  cancelBtnText:    { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+  saveBtn: {
+    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  saveBtnText:      { fontSize: 16, fontWeight: '700', color: colors.white },
+  btnDisabled:      { opacity: 0.6 },
 })
