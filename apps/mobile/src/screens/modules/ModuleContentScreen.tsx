@@ -64,7 +64,7 @@ export default function ModuleContentScreen({ route }: Props) {
   }
 
   // Layouts that manage their own scroll + fixed bottom bar — render without outer ScrollView
-  if (result?.preview_kind === 'guided_exercise' || result?.preview_kind === 'editable_steps' || result?.preview_kind === 'timed_tap_exercise' || result?.preview_kind === 'daily_checkin' || result?.preview_kind === 'column_form') {
+  if (result?.preview_kind === 'guided_exercise' || result?.preview_kind === 'editable_steps' || result?.preview_kind === 'timed_tap_exercise' || result?.preview_kind === 'daily_checkin' || result?.preview_kind === 'column_form' || result?.preview_kind === 'tree_selector') {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <FieldRenderer

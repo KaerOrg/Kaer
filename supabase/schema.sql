@@ -1224,3 +1224,186 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('beck.col5.belief', 'step',  '10'),
   ('beck.col5.belief', 'color', '#D97706')
 ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MODULE : emotion_wheel — Roue des émotions (Plutchik 1980)
+-- preview_kind = 'tree_selector' → TreeSelectorLayout (FieldRenderer)
+-- Modélisation : arbre 3 niveaux via parent_field_id
+--   Niveau 1 — emotion primaire (8 noeuds, color + icon)
+--   Niveau 2 — émotion secondaire (24 noeuds, parent = primaire)
+--   Niveau 3 — émotion spécifique (72 noeuds, parent = secondaire)
+-- ============================================================
+
+UPDATE public.modules SET preview_kind = 'tree_selector' WHERE id = 'emotion_wheel';
+
+-- Champs UI (config + libellés sans section)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('ew.cfg',                   'emotion_wheel', 'tree_selector_config',              NULL,                                                  0),
+  ('ew.intro',                 'emotion_wheel', 'tree_selector_intro',               'modules.emotion_wheel.intro',                         1),
+  ('ew.step1.title',           'emotion_wheel', 'tree_selector_step_1_title',        'modules.emotion_wheel.step_primary_title',            2),
+  ('ew.step1.hint',            'emotion_wheel', 'tree_selector_step_1_hint',         'modules.emotion_wheel.step_primary_hint',             3),
+  ('ew.step2.hint',            'emotion_wheel', 'tree_selector_step_2_hint',         'modules.emotion_wheel.step_secondary_hint',           4),
+  ('ew.step3.title',           'emotion_wheel', 'tree_selector_step_3_title',        'modules.emotion_wheel.step_specific_title',           5),
+  ('ew.step3.hint',            'emotion_wheel', 'tree_selector_step_3_hint',         'modules.emotion_wheel.step_specific_hint',            6),
+  ('ew.intensity.title',       'emotion_wheel', 'tree_selector_intensity_title',     'modules.emotion_wheel.step_intensity_title',          7),
+  ('ew.intensity.hint',        'emotion_wheel', 'tree_selector_intensity_hint',      'modules.emotion_wheel.step_intensity_hint',           8),
+  ('ew.notes.title',           'emotion_wheel', 'tree_selector_notes_title',         'modules.emotion_wheel.step_notes_title',              9),
+  ('ew.notes.hint',            'emotion_wheel', 'tree_selector_notes_hint',          'modules.emotion_wheel.step_notes_hint',              10),
+  ('ew.notes.placeholder',     'emotion_wheel', 'tree_selector_notes_placeholder',   'modules.emotion_wheel.notes_free_placeholder',       11),
+  ('ew.continue_btn',          'emotion_wheel', 'tree_selector_continue_btn',        'modules.emotion_wheel.continue',                     12),
+  ('ew.save_btn',              'emotion_wheel', 'tree_selector_save_btn',            'modules.emotion_wheel.save',                         13),
+  ('ew.new_btn',               'emotion_wheel', 'tree_selector_new_btn',             'modules.emotion_wheel.identify_btn',                 14),
+  ('ew.history_label',         'emotion_wheel', 'tree_selector_history_label',       'modules.emotion_wheel.history_label',                15),
+  ('ew.empty_title',           'emotion_wheel', 'tree_selector_empty_title',         'modules.emotion_wheel.empty_title',                  16),
+  ('ew.empty_text',            'emotion_wheel', 'tree_selector_empty_text',          'modules.emotion_wheel.empty_text',                   17),
+  ('ew.delete_title',          'emotion_wheel', 'tree_selector_delete_title',        'modules.emotion_wheel.delete_entry_title',           18)
+ON CONFLICT (id) DO NOTHING;
+
+-- Niveau 1 — émotions primaires (8)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('ew.joy',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy',          100),
+  ('ew.trust',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust',        110),
+  ('ew.fear',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear',         120),
+  ('ew.surprise',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise',     130),
+  ('ew.sadness',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness',      140),
+  ('ew.disgust',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust',      150),
+  ('ew.anger',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger',        160),
+  ('ew.anticipation', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation', 170)
+ON CONFLICT (id) DO NOTHING;
+
+-- Niveau 2 — émotions secondaires (24)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, parent_field_id, sort_order) VALUES
+  ('ew.joy.serenity',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__serenity',          'ew.joy',          1),
+  ('ew.joy.joy_2',             'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__joy_2',             'ew.joy',          2),
+  ('ew.joy.ecstasy',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__ecstasy',           'ew.joy',          3),
+  ('ew.trust.acceptance',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__acceptance',      'ew.trust',        1),
+  ('ew.trust.trust_2',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__trust_2',         'ew.trust',        2),
+  ('ew.trust.admiration',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__admiration',      'ew.trust',        3),
+  ('ew.fear.apprehension',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__apprehension',     'ew.fear',         1),
+  ('ew.fear.fear_2',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__fear_2',           'ew.fear',         2),
+  ('ew.fear.terror',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__terror',           'ew.fear',         3),
+  ('ew.surprise.distraction',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__distraction',  'ew.surprise',     1),
+  ('ew.surprise.surprise_2',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__surprise_2',   'ew.surprise',     2),
+  ('ew.surprise.amazement',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__amazement',    'ew.surprise',     3),
+  ('ew.sadness.pensiveness',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__pensiveness',   'ew.sadness',      1),
+  ('ew.sadness.sadness_2',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__sadness_2',     'ew.sadness',      2),
+  ('ew.sadness.grief',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__grief',         'ew.sadness',      3),
+  ('ew.disgust.boredom',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__boredom',       'ew.disgust',      1),
+  ('ew.disgust.disgust_2',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__disgust_2',     'ew.disgust',      2),
+  ('ew.disgust.loathing',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__loathing',      'ew.disgust',      3),
+  ('ew.anger.annoyance',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__annoyance',       'ew.anger',        1),
+  ('ew.anger.anger_2',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__anger_2',         'ew.anger',        2),
+  ('ew.anger.rage',            'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__rage',            'ew.anger',        3),
+  ('ew.anticipation.interest',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__interest',         'ew.anticipation', 1),
+  ('ew.anticipation.anticipation_2',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__anticipation_2',   'ew.anticipation', 2),
+  ('ew.anticipation.vigilance',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__vigilance',        'ew.anticipation', 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Niveau 3 — émotions spécifiques (72)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, parent_field_id, sort_order) VALUES
+  ('ew.joy.serenity.calm',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__serenity__calm',         'ew.joy.serenity',     1),
+  ('ew.joy.serenity.peaceful',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__serenity__peaceful',     'ew.joy.serenity',     2),
+  ('ew.joy.serenity.content',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__serenity__content',      'ew.joy.serenity',     3),
+  ('ew.joy.joy_2.happy',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__joy_2__happy',           'ew.joy.joy_2',        1),
+  ('ew.joy.joy_2.cheerful',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__joy_2__cheerful',        'ew.joy.joy_2',        2),
+  ('ew.joy.joy_2.amused',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__joy_2__amused',          'ew.joy.joy_2',        3),
+  ('ew.joy.ecstasy.elated',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__ecstasy__elated',        'ew.joy.ecstasy',      1),
+  ('ew.joy.ecstasy.euphoric',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__ecstasy__euphoric',      'ew.joy.ecstasy',      2),
+  ('ew.joy.ecstasy.overjoyed',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__ecstasy__overjoyed',     'ew.joy.ecstasy',      3),
+  ('ew.trust.acceptance.open',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__acceptance__open',          'ew.trust.acceptance', 1),
+  ('ew.trust.acceptance.tolerant',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__acceptance__tolerant',      'ew.trust.acceptance', 2),
+  ('ew.trust.acceptance.receptive',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__acceptance__receptive',     'ew.trust.acceptance', 3),
+  ('ew.trust.trust_2.secure',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__trust_2__secure',           'ew.trust.trust_2',    1),
+  ('ew.trust.trust_2.confident',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__trust_2__confident',        'ew.trust.trust_2',    2),
+  ('ew.trust.trust_2.assured',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__trust_2__assured',          'ew.trust.trust_2',    3),
+  ('ew.trust.admiration.admiring',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__admiration__admiring',      'ew.trust.admiration', 1),
+  ('ew.trust.admiration.grateful',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__admiration__grateful',      'ew.trust.admiration', 2),
+  ('ew.trust.admiration.reverent',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.trust__admiration__reverent',      'ew.trust.admiration', 3),
+  ('ew.fear.apprehension.uneasy',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__apprehension__uneasy',       'ew.fear.apprehension', 1),
+  ('ew.fear.apprehension.worried',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__apprehension__worried',      'ew.fear.apprehension', 2),
+  ('ew.fear.apprehension.nervous',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__apprehension__nervous',      'ew.fear.apprehension', 3),
+  ('ew.fear.fear_2.scared',             'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__fear_2__scared',             'ew.fear.fear_2',       1),
+  ('ew.fear.fear_2.anxious',            'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__fear_2__anxious',            'ew.fear.fear_2',       2),
+  ('ew.fear.fear_2.threatened',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__fear_2__threatened',         'ew.fear.fear_2',       3),
+  ('ew.fear.terror.panicked',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__terror__panicked',           'ew.fear.terror',       1),
+  ('ew.fear.terror.horrified',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__terror__horrified',          'ew.fear.terror',       2),
+  ('ew.fear.terror.overwhelmed',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__terror__overwhelmed',        'ew.fear.terror',       3),
+  ('ew.surprise.distraction.confused',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__distraction__confused',  'ew.surprise.distraction', 1),
+  ('ew.surprise.distraction.uncertain', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__distraction__uncertain', 'ew.surprise.distraction', 2),
+  ('ew.surprise.distraction.perplexed', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__distraction__perplexed', 'ew.surprise.distraction', 3),
+  ('ew.surprise.surprise_2.surprised',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__surprise_2__surprised',  'ew.surprise.surprise_2',  1),
+  ('ew.surprise.surprise_2.startled',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__surprise_2__startled',   'ew.surprise.surprise_2',  2),
+  ('ew.surprise.surprise_2.astonished', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__surprise_2__astonished', 'ew.surprise.surprise_2',  3),
+  ('ew.surprise.amazement.amazed',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__amazement__amazed',      'ew.surprise.amazement',   1),
+  ('ew.surprise.amazement.awed',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__amazement__awed',        'ew.surprise.amazement',   2),
+  ('ew.surprise.amazement.dumbfounded', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.surprise__amazement__dumbfounded', 'ew.surprise.amazement',   3),
+  ('ew.sadness.pensiveness.pensive',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__pensiveness__pensive',    'ew.sadness.pensiveness', 1),
+  ('ew.sadness.pensiveness.nostalgic',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__pensiveness__nostalgic',  'ew.sadness.pensiveness', 2),
+  ('ew.sadness.pensiveness.wistful',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__pensiveness__wistful',    'ew.sadness.pensiveness', 3),
+  ('ew.sadness.sadness_2.sad',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__sadness_2__sad',          'ew.sadness.sadness_2',   1),
+  ('ew.sadness.sadness_2.sorrowful',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__sadness_2__sorrowful',    'ew.sadness.sadness_2',   2),
+  ('ew.sadness.sadness_2.dejected',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__sadness_2__dejected',     'ew.sadness.sadness_2',   3),
+  ('ew.sadness.grief.hopeless',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__grief__hopeless',         'ew.sadness.grief',       1),
+  ('ew.sadness.grief.despairing',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__grief__despairing',       'ew.sadness.grief',       2),
+  ('ew.sadness.grief.anguished',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__grief__anguished',        'ew.sadness.grief',       3),
+  ('ew.disgust.boredom.bored',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__boredom__bored',          'ew.disgust.boredom',     1),
+  ('ew.disgust.boredom.indifferent',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__boredom__indifferent',    'ew.disgust.boredom',     2),
+  ('ew.disgust.boredom.apathetic',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__boredom__apathetic',      'ew.disgust.boredom',     3),
+  ('ew.disgust.disgust_2.disgusted',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__disgust_2__disgusted',    'ew.disgust.disgust_2',   1),
+  ('ew.disgust.disgust_2.revolted',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__disgust_2__revolted',     'ew.disgust.disgust_2',   2),
+  ('ew.disgust.disgust_2.repulsed',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__disgust_2__repulsed',     'ew.disgust.disgust_2',   3),
+  ('ew.disgust.loathing.loathing',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__loathing__loathing',      'ew.disgust.loathing',    1),
+  ('ew.disgust.loathing.contemptuous',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__loathing__contemptuous',  'ew.disgust.loathing',    2),
+  ('ew.disgust.loathing.hateful',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__loathing__hateful',       'ew.disgust.loathing',    3),
+  ('ew.anger.annoyance.annoyed',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__annoyance__annoyed',        'ew.anger.annoyance',     1),
+  ('ew.anger.annoyance.irritated',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__annoyance__irritated',      'ew.anger.annoyance',     2),
+  ('ew.anger.annoyance.impatient',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__annoyance__impatient',      'ew.anger.annoyance',     3),
+  ('ew.anger.anger_2.angry',            'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__anger_2__angry',            'ew.anger.anger_2',       1),
+  ('ew.anger.anger_2.frustrated',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__anger_2__frustrated',       'ew.anger.anger_2',       2),
+  ('ew.anger.anger_2.resentful',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__anger_2__resentful',        'ew.anger.anger_2',       3),
+  ('ew.anger.rage.furious',             'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__rage__furious',             'ew.anger.rage',          1),
+  ('ew.anger.rage.outraged',            'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__rage__outraged',            'ew.anger.rage',          2),
+  ('ew.anger.rage.enraged',             'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__rage__enraged',             'ew.anger.rage',          3),
+  ('ew.anticipation.interest.curious',                'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__interest__curious',                 'ew.anticipation.interest',         1),
+  ('ew.anticipation.interest.interested',             'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__interest__interested',              'ew.anticipation.interest',         2),
+  ('ew.anticipation.interest.attentive',              'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__interest__attentive',               'ew.anticipation.interest',         3),
+  ('ew.anticipation.anticipation_2.expectant',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__anticipation_2__expectant',         'ew.anticipation.anticipation_2',   1),
+  ('ew.anticipation.anticipation_2.hopeful',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__anticipation_2__hopeful',           'ew.anticipation.anticipation_2',   2),
+  ('ew.anticipation.anticipation_2.eager',            'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__anticipation_2__eager',             'ew.anticipation.anticipation_2',   3),
+  ('ew.anticipation.vigilance.alert',                 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__vigilance__alert',                  'ew.anticipation.vigilance',        1),
+  ('ew.anticipation.vigilance.cautious',              'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__vigilance__cautious',               'ew.anticipation.vigilance',        2),
+  ('ew.anticipation.vigilance.watchful',              'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anticipation__vigilance__watchful',               'ew.anticipation.vigilance',        3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Props : config + couleur/icône des 8 émotions primaires
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('ew.cfg', 'enable_intensity', '1'),
+  ('ew.cfg', 'intensity_min',    '1'),
+  ('ew.cfg', 'intensity_max',    '10'),
+  ('ew.cfg', 'enable_notes',     '1'),
+  -- Joie — orange chaud
+  ('ew.joy',          'color', '#F59E0B'),
+  ('ew.joy',          'icon',  'emoticon-happy-outline'),
+  -- Confiance — vert
+  ('ew.trust',        'color', '#10B981'),
+  ('ew.trust',        'icon',  'shield-heart-outline'),
+  -- Peur — vert clair (Plutchik)
+  ('ew.fear',         'color', '#6EE7B7'),
+  ('ew.fear',         'icon',  'alert-circle-outline'),
+  -- Surprise — cyan
+  ('ew.surprise',     'color', '#06B6D4'),
+  ('ew.surprise',     'icon',  'emoticon-excited-outline'),
+  -- Tristesse — bleu
+  ('ew.sadness',      'color', '#3B82F6'),
+  ('ew.sadness',      'icon',  'emoticon-sad-outline'),
+  -- Dégoût — violet
+  ('ew.disgust',      'color', '#8B5CF6'),
+  ('ew.disgust',      'icon',  'emoticon-sick-outline'),
+  -- Colère — rouge
+  ('ew.anger',        'color', '#EF4444'),
+  ('ew.anger',        'icon',  'emoticon-angry-outline'),
+  -- Anticipation — orange vif
+  ('ew.anticipation', 'color', '#F97316'),
+  ('ew.anticipation', 'icon',  'clock-fast')
+ON CONFLICT (field_id, prop_key) DO NOTHING;

@@ -57,6 +57,7 @@ export async function initDatabase(): Promise<void> {
   await createPlanItemsTable(database)
   await createDailyEntriesTable(database)
   await createFormEntriesTable(database)
+  await createTreeSelectionsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -79,6 +80,8 @@ export async function initDatabase(): Promise<void> {
     `INSERT OR IGNORE INTO daily_entries (id,module_id,date,status,notes,created_at) SELECT id,'medication_adherence',date,status,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM medication_adherence_entries`,
     // beck_thought_records → form_entries
     `INSERT OR IGNORE INTO form_entries (id,module_id,values,created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
+    // emotion_entries → tree_selections (labels conservés directement dans path_json)
+    `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
   ]
   for (const sql of migrations) {
     try { await database.execAsync(sql) } catch { /* colonne déjà présente ou table absente */ }
@@ -1273,4 +1276,115 @@ export async function saveFormEntry(entry: Omit<FormEntry, 'created_at'>): Promi
 export async function deleteFormEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM form_entries WHERE id = ?', [id])
+}
+
+// ─── tree_selections — table générique pour les sélecteurs d'arbre ──────────
+// Pattern : N enregistrements par module, chacun stockant le chemin de
+// sélection (path_json) plus une intensité brute et des notes optionnelles.
+// Utilisée par le layout tree_selector (emotion_wheel et autres modules
+// futurs partageant la sémantique « sélection hiérarchique guidée »).
+//
+// path_json est un tableau ordonné de noeuds — chaque entrée a un `id` et
+// soit un `text_code` (clé i18n résolue à l'affichage), soit un `label`
+// brut (cas des entrées migrées depuis emotion_entries). Les props
+// d'affichage (color, icon) sont également capturées pour rendre l'historique
+// indépendant du fait que les noeuds Supabase soient encore présents.
+
+export interface TreeSelectionPathNode {
+  id: string
+  text_code?: string
+  label?: string
+  color?: string
+  icon?: string
+}
+
+export interface TreeSelection {
+  id: string
+  module_id: string
+  selected_id: string
+  selected_label: string | null
+  path: TreeSelectionPathNode[]
+  intensity: number | null
+  notes: string | null
+  created_at: string
+}
+
+export async function createTreeSelectionsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS tree_selections (
+      id              TEXT PRIMARY KEY,
+      module_id       TEXT NOT NULL,
+      selected_id     TEXT NOT NULL,
+      selected_label  TEXT,
+      path_json       TEXT NOT NULL,
+      intensity       INTEGER,
+      notes           TEXT,
+      created_at      TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_tree_selections_module ON tree_selections(module_id, created_at DESC);
+  `)
+}
+
+interface TreeSelectionRow {
+  id: string
+  module_id: string
+  selected_id: string
+  selected_label: string | null
+  path_json: string
+  intensity: number | null
+  notes: string | null
+  created_at: string
+}
+
+function parsePath(json: string): TreeSelectionPathNode[] {
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed as TreeSelectionPathNode[]
+  } catch {
+    return []
+  }
+}
+
+export async function getAllTreeSelections(moduleId: string, limit = 100): Promise<TreeSelection[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<TreeSelectionRow>(
+    'SELECT * FROM tree_selections WHERE module_id = ? ORDER BY created_at DESC LIMIT ?',
+    [moduleId, limit]
+  )
+  return rows.map(r => ({
+    id: r.id,
+    module_id: r.module_id,
+    selected_id: r.selected_id,
+    selected_label: r.selected_label,
+    path: parsePath(r.path_json),
+    intensity: r.intensity,
+    notes: r.notes,
+    created_at: r.created_at,
+  }))
+}
+
+export async function saveTreeSelection(
+  entry: Omit<TreeSelection, 'created_at'>
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO tree_selections
+       (id, module_id, selected_id, selected_label, path_json, intensity, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      entry.id,
+      entry.module_id,
+      entry.selected_id,
+      entry.selected_label,
+      JSON.stringify(entry.path),
+      entry.intensity,
+      entry.notes,
+    ]
+  )
+}
+
+export async function deleteTreeSelection(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM tree_selections WHERE id = ?', [id])
 }

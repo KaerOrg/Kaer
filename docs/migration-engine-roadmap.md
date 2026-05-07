@@ -31,13 +31,17 @@ Deux entrées possibles :
             └── autres         → SafeAreaView + ScrollView → FieldRenderer
                     ↓
           FieldRenderer.tsx  (dispatch preview_kind → layout)
-            ├── guided_exercise   → GuidedExerciseLayout  (intro / guidé / terminé)
-            ├── patient_scenario  → PatientScenarioLayout (per-patient depuis patient_modules.config)
-            ├── editable_steps    → EditableStepsLayout  (plan de crise avec plan_items SQLite)
-            ├── steps             → StepsLayout
-            ├── cards             → CardsLayout
-            ├── fields            → FieldsLayout
-            └── grid2x2           → Grid2x2Layout
+            ├── guided_exercise    → GuidedExerciseLayout  (intro / guidé / terminé)
+            ├── patient_scenario   → PatientScenarioLayout (per-patient depuis patient_modules.config)
+            ├── editable_steps     → EditableStepsLayout  (plan de crise avec plan_items SQLite)
+            ├── timed_tap_exercise → TimedTapExerciseLayout (cognitive_saturation : timer + taps + 4 modes)
+            ├── daily_checkin      → DailyCheckinLayout    (medication_adherence : 1 saisie/jour + onglets)
+            ├── column_form        → ColumnFormLayout      (beck_columns : sections + champs enfants + form_entries)
+            ├── tree_selector      → TreeSelectorLayout    (emotion_wheel : arbre N niveaux + tree_selections)
+            ├── steps              → StepsLayout
+            ├── cards              → CardsLayout
+            ├── fields             → FieldsLayout
+            └── grid2x2            → Grid2x2Layout
 ```
 
 ### Fichiers clés à modifier lors d'une migration
@@ -116,7 +120,7 @@ const CUSTOM_ROUTES = {
 | `cognitive_saturation` | CognitiveSaturationScreen + ExerciseScreen | Timer + compteur de taps + historique | Nouveau layout `timed_tap_exercise` (4 modes internes) | ✅ Migré |
 | `medication_adherence` | MedicationAdherenceScreen | Saisie 1 item/jour + notes | Nouveau layout `daily_checkin` (onglets + UPSERT date UNIQUE + `logEvent`) | ✅ Migré |
 | `beck_columns` | BeckColumnsScreen + BeckEntryScreen | 5 colonnes hétérogènes TCC | Nouveau layout `column_form` (sections = colonnes, champs enfants via `parent_field_id`, table `form_entries`) | ✅ Migré |
-| `emotion_wheel` | EmotionWheelScreen + Entry + Month | Roue 3 niveaux hiérarchiques | Nouveau layout `tree_selector` (niveaux modélisés via `parent_field_id`) | ⏳ Planifié (M) |
+| `emotion_wheel` | EmotionWheelScreen + Entry + Month | Roue 3 niveaux hiérarchiques | Nouveau layout `tree_selector` (niveaux modélisés via `parent_field_id`, table SQLite générique `tree_selections`) | ✅ Migré |
 | `sleep_diary` | SleepDiaryScreen + Entry + Month | Journal + time pickers + calendrier | Nouveau layout `sleep_journal` (3 modes internes + time pickers natifs + grille mois) | ⏳ Planifié (L) |
 | `behavioral_activation` | BehavioralActivationScreen + Entry | CRUD activités + calendrier mensuel | Nouveau layout `activity_log` (calendrier + CRUD + 2 dimensions) | ⏳ Planifié (L) |
 | `fear_thermometer` | FearThermometerScreen + FearEntryScreen | SUDS avant/après + catalogue situations + stratégies | Nouveau layout `exposure_tracker` (3 sous-tables SQLite dédiées) | ⏳ Planifié (XL) |
@@ -529,7 +533,7 @@ Modules déjà migrés (barrés) — restants classés par effort croissant :
 6. ~~`cognitive_saturation`~~ ✅
 7. ~~`medication_adherence`~~ ✅ (layout `daily_checkin`, table SQLite générique `daily_entries`)
 8. ~~`beck_columns`~~ ✅ (layout `column_form`, table SQLite générique `form_entries`)
-9. **`emotion_wheel`** — layout `tree_selector`, arbre via `parent_field_id` en cascade, effort M
+9. ~~`emotion_wheel`~~ ✅ (layout `tree_selector`, arbre 3 niveaux via `parent_field_id`, table SQLite générique `tree_selections`)
 10. **`sleep_diary`** — layout `sleep_journal`, time pickers + grille mois, effort L
 11. **`behavioral_activation`** — layout `activity_log`, calendrier + CRUD, effort L
 12. **`fear_thermometer`** — layout `exposure_tracker`, 3 sous-tables SQLite, effort XL
@@ -581,26 +585,35 @@ CREATE TABLE IF NOT EXISTS form_entries (
 
 ---
 
-### 9. `emotion_wheel` — Sélecteur hiérarchique (M)
+### 9 (complété). `emotion_wheel` — Sélecteur hiérarchique d'émotions
 
 **Fonctionnel**
-Sélection d'une émotion en 3 niveaux : primaire (8) → secondaire (~3–5 par primaire) → spécifique (~3–5 par secondaire).
-Historique des sélections avec date.
+Sélection d'une émotion en 3 niveaux (Plutchik 1980) : primaire (8) → secondaire (3 par primaire = 24) → spécifique (3 par secondaire = 72). Intensité brute 1–10 et notes libres optionnelles. Historique chronologique avec suppression. Conformité MDR : aucune interprétation, valeurs brutes uniquement.
 
-**`preview_kind: 'tree_selector'`**
+**Solution : `preview_kind: 'tree_selector'` + `TreeSelectorLayout`**
 
-*Layout `TreeSelectorLayout`*
+Layout auto-suffisant à 4 modes internes : `history → selection → intensity → notes`. Aucune navigation externe. Le mode `selection` itère N niveaux selon la profondeur de l'arbre — sélectionner un noeud avec enfants descend d'un niveau, sélectionner une feuille passe à l'étape `intensity` (ou `notes` ou save direct selon la config). La couleur courante est héritée du noeud le plus profond ayant un `color` (en général la primaire).
 
-- Modélisation Supabase : l'arbre entier via `parent_field_id`.
-  - Niveau 1 : `emotion_primary` sans `parent_field_id` (enfants du module)
-  - Niveau 2 : `emotion_secondary` avec `parent_field_id = emotion_primary.id`
-  - Niveau 3 : `emotion_specific` avec `parent_field_id = emotion_secondary.id`
-  - Props : `color`, `icon` sur chaque nœud pour le rendu visuel
-- State : `path: ContentField[]` — breadcrumb de la sélection en cours.
-- Rendu : grille de chips pour le niveau courant. Sélectionner un nœud qui a des enfants → descend d'un niveau. Sélectionner une feuille → confirme le choix.
-- Persistance : table SQLite `tree_selections (id, module_id, selected_id, selected_text_code, path_json, created_at)`.
-- `TreeSelectorLayout` reçoit `fields` et construit l'arbre en mémoire via une Map `parent_id → children[]`.
+*`field_types` configurables depuis Supabase :*
+- `tree_selector_config` — props : `enable_intensity` ('1'|'0'), `intensity_min` (défaut '1'), `intensity_max` (défaut '10'), `enable_notes` ('1'|'0')
+- `tree_node` (multiple, hiérarchique via `parent_field_id`) — props : `color`, `icon` (MaterialCommunityIcons name) ; généralement portés par les noeuds racine
+- UI labels (sans section) : `tree_selector_intro`, `tree_selector_step_1_title`, `tree_selector_step_1_hint`, `tree_selector_step_2_hint`, `tree_selector_step_3_title`, `tree_selector_step_3_hint`, `tree_selector_intensity_title`, `tree_selector_intensity_hint`, `tree_selector_notes_title`, `tree_selector_notes_hint`, `tree_selector_notes_placeholder`, `tree_selector_continue_btn`, `tree_selector_save_btn`, `tree_selector_new_btn`, `tree_selector_history_label`, `tree_selector_empty_title`, `tree_selector_empty_text`, `tree_selector_delete_title`
 
-*`field_types` :*
-- `emotion_primary`, `emotion_secondary`, `emotion_specific` — tous avec prop `color` et optionnellement `icon`
-- `tree_selector_config` — props : `confirm_btn_code`, `history_label_code`
+*SQLite — nouvelle table générique `tree_selections` :*
+```sql
+CREATE TABLE IF NOT EXISTS tree_selections (
+  id              TEXT PRIMARY KEY,
+  module_id       TEXT NOT NULL,
+  selected_id     TEXT NOT NULL,
+  selected_label  TEXT,
+  path_json       TEXT NOT NULL,  -- JSON [{ id, text_code?, label?, color?, icon? }, …]
+  intensity       INTEGER,
+  notes           TEXT,
+  created_at      TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
+Migration depuis `emotion_entries` au boot (les labels copiés directement dans `path_json` puisque les anciennes lignes stockaient les libellés et non des clés i18n). `createEmotionEntriesTable` conservée comme source.
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode notes).
+
+*Tests :* `FieldRenderer.tree_selector.test.tsx` — 11 tests (chargement, état vide, liste, descente dans l'arbre, intensité, transition vers notes, save complet, annulation, suppression).

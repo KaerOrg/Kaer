@@ -31,7 +31,6 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   fear_thermometer:         'FearThermometer',
   behavioral_activation:    'BehavioralActivation',
   breathing_techniques:     'BreathingTechniques',
-  emotion_wheel:            'EmotionWheel',
 }
 
 

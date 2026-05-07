@@ -16,9 +16,6 @@ import BehavioralActivationScreen from '../screens/modules/BehavioralActivationS
 import BehavioralActivationEntryScreen from '../screens/modules/BehavioralActivationEntryScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
-import EmotionWheelScreen from '../screens/modules/EmotionWheelScreen'
-import EmotionEntryScreen from '../screens/modules/EmotionEntryScreen'
-import EmotionMonthScreen from '../screens/modules/EmotionMonthScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
@@ -43,9 +40,6 @@ export type AppStackParamList = {
   BehavioralActivationEntry: { recordId?: string }
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
-  EmotionWheel: undefined
-  EmotionEntry: undefined
-  EmotionMonth: undefined
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
@@ -165,21 +159,6 @@ export default function AppStack() {
         options={({ route }) => ({
           title: getTechniqueTitle(route.params.techniqueKey),
         })}
-      />
-      <Stack.Screen
-        name="EmotionWheel"
-        component={EmotionWheelScreen}
-        options={{ title: 'Roue des émotions' }}
-      />
-      <Stack.Screen
-        name="EmotionEntry"
-        component={EmotionEntryScreen}
-        options={{ title: 'Identifier une émotion' }}
-      />
-      <Stack.Screen
-        name="EmotionMonth"
-        component={EmotionMonthScreen}
-        options={{ title: 'Bilan mensuel' }}
       />
       <Stack.Screen
         name="ScaleHistory"

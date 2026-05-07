@@ -12,6 +12,14 @@ describe('TEEN_DEFAULT_COLOR', () => {
   })
 })
 
+function collectStringValues(node: unknown): string[] {
+  if (typeof node === 'string') return [node]
+  if (node && typeof node === 'object') {
+    return Object.values(node as Record<string, unknown>).flatMap(collectStringValues)
+  }
+  return []
+}
+
 describe('fr/teen.json — locale ado française', () => {
   it('contient les surcharges de titres pour les modules principaux', () => {
     expect(frTeen.modules.crisis_plan.title).toBeTruthy()
@@ -20,9 +28,7 @@ describe('fr/teen.json — locale ado française', () => {
   })
 
   it('les textes ado utilisent le tutoiement ou un langage simplifié', () => {
-    const allTeenTexts = Object.values(frTeen.modules).flatMap((mod) =>
-      Object.values(mod as Record<string, string>)
-    )
+    const allTeenTexts = collectStringValues(frTeen.modules)
     const hasTutoiement = allTeenTexts.some(
       (t) => t.toLowerCase().includes(' tu ') || t.toLowerCase().includes(' ton ') ||
              t.toLowerCase().includes(' tes ') || t.toLowerCase().startsWith('tu ') ||
@@ -47,9 +53,7 @@ describe('en/teen.json — locale ado anglaise', () => {
   })
 
   it('les textes ado anglais sont distincts', () => {
-    const allValues = Object.values(enTeen.modules ?? {}).flatMap((mod) =>
-      Object.values(mod as Record<string, string>)
-    )
+    const allValues = collectStringValues(enTeen.modules ?? {})
     for (const val of allValues) {
       expect(typeof val).toBe('string')
       expect(val.length).toBeGreaterThan(0)
