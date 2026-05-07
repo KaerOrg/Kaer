@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker'
-import { pickAvatarImage, uploadAvatar, saveAvatarUrl } from './avatar'
+import { pickAvatarImage, uploadAvatar, saveAvatarUrl } from './avatarService'
 
 // ─── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -9,7 +9,7 @@ const mockUpload = jest.fn()
 const mockGetPublicUrl = jest.fn()
 const mockEq = jest.fn()
 
-jest.mock('./supabase', () => ({
+jest.mock('../lib/supabase', () => ({
   supabase: {
     storage: {
       from: () => ({

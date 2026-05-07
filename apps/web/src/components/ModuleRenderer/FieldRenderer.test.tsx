@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
 import { FieldRenderer } from './FieldRenderer'
-import type { ContentField } from '../../lib/moduleService'
+import type { ContentField } from '../../services/moduleService'
 
 function field(field_type: string, overrides: Partial<ContentField> = {}): ContentField {
   return {

@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Check, Users } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -14,19 +13,16 @@ import { StepBreadcrumb } from '../components/StepBreadcrumb/StepBreadcrumb'
 import { Toggle } from '../components/Toggle/Toggle'
 import { SelectField } from '../components/SelectField/SelectField'
 import type { PatientSummary, ModuleType } from '../lib/database.types'
-import { fetchInviteCategories, type ModuleCategory } from '../lib/moduleCategories'
+import { fetchInviteCategories, type ModuleCategory } from '../services/moduleCatalogService'
+import { fetchPatientsWithModules } from '../services/patientService'
+import {
+  fetchPendingInvitations,
+  sendInvitation,
+  type PendingInvitation,
+} from '../services/invitationService'
 import './DashboardPage.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-interface PendingInvitation {
-  id: string
-  patient_email: string
-  patient_first_name: string | null
-  patient_last_name: string | null
-  expires_at: string
-  created_at: string
-}
 
 export function DashboardPage() {
   const { practitioner } = useAuthStore()
@@ -62,56 +58,13 @@ export function DashboardPage() {
 
   const loadPatients = useCallback(async () => {
     if (!practitioner) return
-
-    interface RelationRow {
-      patient_id: string
-      patient_alias: string | null
-      patient_first_name: string | null
-      patient_last_name: string | null
-      patient_birth_date: string | null
-      patient_sex: string | null
-      patients: { id: string; email: string } | { id: string; email: string }[] | null
-    }
-    const { data: relations } = await supabase
-      .from('practitioner_patients')
-      .select('patient_id, patient_alias, patient_first_name, patient_last_name, patient_birth_date, patient_sex, patients(id, email)')
-      .eq('practitioner_id', practitioner.id) as { data: RelationRow[] | null }
-
-    if (!relations) { setLoadingPatients(false); return }
-
-    const patientIds = relations.map(r => r.patient_id)
-    const { data: modules } = patientIds.length > 0
-      ? await supabase.from('patient_modules').select('*').in('patient_id', patientIds)
-      : { data: [] as import('../lib/database.types').PatientModule[] }
-
-    const list: PatientSummary[] = relations.map(rel => {
-      const patient = Array.isArray(rel.patients) ? rel.patients[0] : rel.patients
-      return {
-        id: rel.patient_id,
-        email: (patient as { email: string } | null)?.email ?? '',
-        patient_alias: rel.patient_alias ?? null,
-        patient_first_name: rel.patient_first_name ?? null,
-        patient_last_name: rel.patient_last_name ?? null,
-        patient_birth_date: rel.patient_birth_date ?? null,
-        patient_sex: rel.patient_sex ?? null,
-        modules: (modules ?? []).filter(m => m.patient_id === rel.patient_id),
-      }
-    }).filter(p => p.id)
-
-    setPatients(list)
+    setPatients(await fetchPatientsWithModules(practitioner.id))
     setLoadingPatients(false)
   }, [practitioner])
 
   const loadPendingInvitations = useCallback(async () => {
     if (!practitioner) return
-    const { data } = await supabase
-      .from('invitations')
-      .select('id, patient_email, patient_first_name, patient_last_name, expires_at, created_at')
-      .eq('practitioner_id', practitioner.id)
-      .is('accepted_at', null)
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-    setPendingInvitations(data ?? [])
+    setPendingInvitations(await fetchPendingInvitations(practitioner.id))
   }, [practitioner])
 
   useEffect(() => {
@@ -161,43 +114,28 @@ export function DashboardPage() {
     setInviteStep(2)
   }, [inviteEmail, inviteBirthDateError, handleEmailBlur])
 
-  const sendInvitation = useCallback(async () => {
+  const submitInvitation = useCallback(async () => {
     if (!practitioner) return
     if (inviteEmailError || inviteBirthDateError) return
     setInviteLoading(true)
     setInviteError('')
 
-    const { data, error } = await supabase.functions.invoke('send-invitation', {
-      body: {
-        practitioner_id: practitioner.id,
-        patient_email: inviteEmail.toLowerCase().trim(),
-        first_name: inviteFirstName.trim() || null,
-        last_name: inviteLastName.trim() || null,
-        birth_date: inviteBirthDate || null,
-        sex: inviteSex || null,
-        teen_mode: inviteTeenMode,
-        modules: [...inviteModules],
-      },
+    const result = await sendInvitation({
+      practitionerId: practitioner.id,
+      email: inviteEmail,
+      firstName: inviteFirstName,
+      lastName: inviteLastName,
+      birthDate: inviteBirthDate || null,
+      sex: inviteSex || null,
+      teenMode: inviteTeenMode,
+      modules: [...inviteModules],
     })
 
-    if (error) {
-      let errorMessage = t('dashboard.invite_error_generic')
-      try {
-        interface FnError { context?: { json?: () => Promise<{ error?: string }> } }
-        const body = await (error as FnError).context?.json?.()
-        if (body?.error) {
-          const knownCodes = ['patient_already_registered', 'invitation_already_pending'] as const
-          const isKnown = (knownCodes as readonly string[]).includes(body.error)
-          errorMessage = isKnown ? t(`dashboard.${body.error}`) : body.error
-        }
-      } catch { /* use default */ }
-      setInviteError(errorMessage)
-      setInviteLoading(false)
-      return
-    }
-
-    if (!data?.success) {
-      setInviteError(data?.error ?? t('dashboard.invite_error_generic'))
+    if (!result.ok) {
+      const message = result.errorCode
+        ? t(`dashboard.${result.errorCode}`)
+        : result.errorMessage ?? t('dashboard.invite_error_generic')
+      setInviteError(message)
       setInviteLoading(false)
       return
     }
@@ -361,7 +299,7 @@ export function DashboardPage() {
                   <Button type="button" variant="secondary" onClick={() => setInviteStep(1)}>
                     ← {t('common.back')}
                   </Button>
-                  <Button loading={inviteLoading} onClick={sendInvitation}>
+                  <Button loading={inviteLoading} onClick={submitInvitation}>
                     {t('dashboard.send_invitation')}
                   </Button>
                 </div>

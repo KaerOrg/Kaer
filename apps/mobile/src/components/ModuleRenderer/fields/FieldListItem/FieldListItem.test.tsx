@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react-native'
 import { FieldListItem } from './FieldListItem'
-import type { ContentField } from '../../../../lib/moduleService'
+import type { ContentField } from '../../../../services/moduleService'
 
 const t = (key: string) => key
 

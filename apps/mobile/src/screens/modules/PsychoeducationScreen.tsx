@@ -13,9 +13,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { useAuthStore } from '../../store/authStore'
-import { supabase } from '../../lib/supabase'
+import { fetchUnlockedCards } from '../../services/psychoeducationService'
 import { PSYCHOEDUCATION_CARDS } from '../../constants/psychoeducationCards'
-import type { UnlockedCard } from '../../lib/psychoeducation'
+import type { UnlockedCard } from '../../services/psychoeducationService'
 import { colors, spacing, radius } from '../../theme'
 import { useTranslation } from 'react-i18next'
 
@@ -65,21 +65,12 @@ export default function PsychoeducationScreen() {
   const fetchCards = async () => {
     if (!patient) return
     setError(null)
-
-    const { data, error: fetchError } = await supabase
-      .from('patient_modules')
-      .select('config')
-      .eq('patient_id', patient.id)
-      .eq('module_type', 'psychoeducation')
-      .is('revoked_at', null)
-      .single<{ config: { unlocked_cards?: UnlockedCard[] } }>()
-
-    if (fetchError) {
+    const result = await fetchUnlockedCards(patient.id)
+    if (!result.ok) {
       setError(t('modules.psychoeducation.load_error'))
       return
     }
-
-    setUnlockedCards(data?.config?.unlocked_cards ?? [])
+    setUnlockedCards(result.cards)
   }
 
   // Recharge à chaque retour sur cet écran (ex : après avoir lu une carte)

@@ -6,7 +6,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ScaleEntryScreen from './ScaleEntryScreen'
 import * as database from '../../lib/database'
-import * as moduleService from '../../lib/moduleService'
+import * as moduleService from '../../services/moduleService'
 
 jest.setTimeout(15000)
 
@@ -61,7 +61,7 @@ jest.mock('../../components/ModuleRenderer/FieldRenderer', () => {
   }
 })
 
-jest.mock('../../lib/moduleService', () => ({
+jest.mock('../../services/moduleService', () => ({
   fetchModuleFields: jest.fn(),
 }))
 

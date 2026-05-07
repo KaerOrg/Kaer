@@ -2,11 +2,14 @@ jest.mock('../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
+jest.mock('../../services/engagementService', () => ({ logEvent: jest.fn() }))
+jest.mock('../../store/authStore', () => ({ useAuthStore: () => null }))
+
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { Linking } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
-import type { ContentField } from '../../lib/moduleService'
+import type { ContentField } from '../../services/moduleService'
 
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')

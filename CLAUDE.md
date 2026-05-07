@@ -186,6 +186,7 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
 ## Règles de développement
 
 - Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
+- **Pas de SQL ni d'appel Supabase dans un composant** — toute opération de données passe par une fonction d'un service `apps/<app>/src/services/<domaine>Service.ts`. Seules exceptions : les clients d'infrastructure dans `src/lib/` (`supabase.ts`, `database.ts` SQLite). Détails et procédure : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) section *Accès aux données* + [`docs/services.md`](docs/services.md).
 - **Nouveau module = web + mobile simultanément, dans cet ordre :**
   1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
@@ -235,6 +236,7 @@ Points d'entrée fréquents :
 | `docs/README.md` | Index général de la documentation |
 | `docs/modules.md` | Liste et statut de tous les modules thérapeutiques |
 | `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
+| `docs/services.md` | Couche services web et mobile (responsabilités, conventions, patterns) |
 | `docs/architecture.md` / `docs/database.md` | Vue d'ensemble technique et schéma BDD |
 | `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |

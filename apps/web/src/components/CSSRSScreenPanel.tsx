@@ -3,7 +3,12 @@ import {
   ShieldAlert, Plus, Trash2, ChevronDown, ChevronUp,
   BookOpen, Info, ExternalLink,
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
+import {
+  fetchCSSRSAssessments,
+  saveCSSRSAssessment,
+  deleteCSSRSAssessment,
+  type CSSRSAssessment,
+} from '../services/cssrsService'
 import {
   CSSRS_SECTIONS,
   CSSRS_IDEATION_COUNT,
@@ -49,30 +54,7 @@ interface FormState {
   letalitePotentielle: number | null
 }
 
-interface Assessment {
-  id: string
-  ideation_answers: Array<{ value: number; description: string }>
-  intensite_ideation: {
-    frequence: number | null
-    duree: number | null
-    maitrise: number | null
-    dissuasifs: number | null
-    causes: number | null
-  } | null
-  behavior_answers: Array<{ value: number; description: string }>
-  nssi: number | null
-  nb_tentatives_averees: number | null
-  nb_tentatives_interrompues: number | null
-  nb_tentatives_avortees: number | null
-  comportement_observe: number | null
-  suicide_reussi: number | null
-  date_tentative_plus_letale: string | null
-  letalite_observee: number | null
-  letalite_potentielle: number | null
-  ideation_level: number
-  behavior_count: number
-  assessed_at: string
-}
+type Assessment = CSSRSAssessment
 
 interface Props {
   patientId: string
@@ -442,13 +424,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('cssrs_screen_assessments')
-      .select('*')
-      .eq('patient_id', patientId)
-      .eq('practitioner_id', practitionerId)
-      .order('assessed_at', { ascending: false })
-    setAssessments((data ?? []) as Assessment[])
+    setAssessments(await fetchCSSRSAssessments(patientId, practitionerId))
     setLoading(false)
   }, [patientId, practitionerId])
 
@@ -601,9 +577,9 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
     const flatIdeation = ideationAnswers.map(a => a.value)
     const flatBehavior = formState.behavior.map(b => b.value ?? 0)
 
-    const { error } = await supabase.from('cssrs_screen_assessments').insert({
-      patient_id: patientId,
-      practitioner_id: practitionerId,
+    const result = await saveCSSRSAssessment({
+      patientId,
+      practitionerId,
       ideation_answers: ideationAnswers,
       intensite_ideation: showsIntensite ? formState.intensite : null,
       behavior_answers: formState.behavior.map(b => ({
@@ -624,8 +600,8 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
       behavior_count: computeBehaviorCount([...flatIdeation, ...flatBehavior]),
     })
 
-    if (error) {
-      setSaveError(`Erreur lors de l'enregistrement : ${error.message}`)
+    if (!result.ok) {
+      setSaveError(`Erreur lors de l'enregistrement : ${result.message ?? 'inconnue'}`)
       setSaving(false)
       return
     }
@@ -641,7 +617,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Supprimer cette évaluation ? Cette action est irréversible.')) return
     setDeletingId(id)
-    await supabase.from('cssrs_screen_assessments').delete().eq('id', id)
+    await deleteCSSRSAssessment(id)
     setAssessments(prev => prev.filter(a => a.id !== id))
     setDeletingId(null)
   }

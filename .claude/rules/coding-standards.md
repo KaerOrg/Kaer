@@ -16,6 +16,60 @@
 - Composant utilisé dans ≥2 écrans → `src/components/`
 - Fonctions de service : pures, paramètres typés, sans side effects
 
+## Accès aux données — toujours passer par un service fonctionnel
+
+> **Règle absolue pour toute nouvelle PR.** Aucun appel à Supabase, à SQLite (`db.*`), à Supabase Storage ou à une edge function ne doit apparaître dans une page, un écran ou un composant. Toute opération de données passe par une fonction nommée d'un fichier `apps/<app>/src/services/<domaine>Service.ts`.
+
+### Concrètement, dans un composant ou un écran
+
+- **Interdit** : `import { supabase } from '../lib/supabase'` ou `import { db } from '../lib/database'` directement, suivi d'un `supabase.from(...)`, `supabase.auth.*`, `supabase.functions.invoke(...)`, `supabase.storage.*`, `db.execAsync(...)`, etc.
+- **Obligatoire** : `import { fetchPatientHeader, setTeenMode } from '../services/patientService'` puis appel direct à la fonction. Le composant ne sait pas s'il y a une requête SQL derrière.
+
+### Pourquoi cette règle
+
+- **Réutilisation** — la même requête sert souvent à plusieurs écrans (ex. liste patients dashboard + dispensaire). Elle s'écrit *une seule fois*.
+- **Testabilité** — un service se mocke avec `jest.mock('.../xxxService')` ; le client Supabase n'apparaît jamais dans les tests d'écrans.
+- **Conformité MDR 2017/745** — le service centralise la conversion `userInput → row insert`, ce qui garantit qu'aucune logique d'interprétation clinique ne se glisse dans l'UI.
+- **Lisibilité** — un écran de 600 lignes parle métier (`unlockModule`, `logEvent`), pas plomberie (`supabase.from('patient_modules').insert(...)`).
+
+### Exceptions strictement limitées
+
+Une seule exception : les fichiers d'**infrastructure / client** dans `src/lib/` peuvent utiliser le client Supabase ou SQLite directement, parce qu'ils l'instancient ou l'enrobent une fois pour tout le projet :
+
+- `src/lib/supabase.ts` — création du client Supabase
+- `src/lib/database.ts` (mobile) — wrapper SQLite générique (CRUD locaux par table)
+
+Tout le reste — y compris les stores Zustand — passe par un service. Les stores délèguent aux services et n'exposent qu'un état réactif (cf. `apps/web/src/store/authStore.ts` et `apps/mobile/src/store/authStore.ts`).
+
+### Procédure pour un nouveau dev
+
+1. Avant d'écrire `supabase.from(...)` dans un composant : ouvrir `apps/<app>/src/services/` et chercher si une fonction existe déjà (`fetchX`, `saveX`, `unlockX`).
+2. Si elle existe → l'appeler.
+3. Si elle n'existe pas → créer ou étendre le service du domaine concerné, exporter une fonction typée, l'appeler depuis le composant.
+4. Couvrir le service par un test unitaire (cf. les tests existants à côté de chaque service).
+5. Référence complète : [`docs/services.md`](../../docs/services.md).
+
+### Anti-pattern à refuser en revue
+
+```tsx
+// ❌ NON — appel direct dans un composant
+function MyScreen() {
+  const save = async () => {
+    await supabase.from('patient_modules').insert({ ... })
+  }
+}
+
+// ✅ OUI — service fonctionnel nommé
+import { unlockModule } from '../services/moduleAssignmentService'
+
+function MyScreen() {
+  const save = async () => {
+    const result = await unlockModule(patientId, practitionerId, type)
+    if (!result.ok) setError(result.message)
+  }
+}
+```
+
 ## Suppressions interdites
 
 Ne jamais utiliser :

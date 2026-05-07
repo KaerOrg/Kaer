@@ -21,7 +21,7 @@ import {
   type BalanceArgument,
   type BalanceQuadrant,
 } from '../../lib/database'
-import { supabase } from '../../lib/supabase'
+import { logEvent } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing, radius } from '../../theme'
 import { useTranslation } from 'react-i18next'
@@ -439,13 +439,8 @@ export default function DecisionalBalanceScreen() {
     try {
       await saveDecisionalBalance(balance)
 
-      // Signal d'observance anonymisé vers Supabase (aucune donnée clinique)
       if (patient?.id) {
-        await supabase.from('patient_engagement_logs').insert({
-          patient_id: patient.id,
-          event_type: 'UPDATE_DECISIONAL_BALANCE',
-          metadata: {},
-        })
+        await logEvent(patient.id, 'UPDATE_DECISIONAL_BALANCE')
       }
 
       Alert.alert(t('common.saved'), t('modules.decisional_balance.saved_message'))

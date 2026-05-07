@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect, memo, useCallback } from 'react'
 import { Check, X, Loader, Info } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
-import { supabase } from '../lib/supabase'
+import { fetchPatientOptions, type PatientOption } from '../services/patientService'
+import { proposeScale } from '../services/moduleAssignmentService'
 import { useAuthStore } from '../store/authStore'
 import {
   CLINICAL_SCALES,
@@ -15,11 +16,6 @@ import {
 import './DispensairePage.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface PatientOption {
-  id: string
-  label: string
-}
 
 interface ProposalModal {
   scale: ClinicalScale
@@ -131,20 +127,7 @@ export function DispensairePage() {
       error: null,
     })
 
-    const { data: relations } = await supabase
-      .from('practitioner_patients')
-      .select('patient_id, patient_alias, patients(email)')
-      .eq('practitioner_id', practitioner.id)
-
-    type RelRow = { patient_id: string; patient_alias: string | null; patients: { email: string } | { email: string }[] | null }
-    const patients: PatientOption[] = ((relations ?? []) as unknown as RelRow[]).map(rel => {
-      const p = Array.isArray(rel.patients) ? rel.patients[0] : rel.patients
-      const email = (p as { email: string } | null)?.email ?? ''
-      return {
-        id: rel.patient_id,
-        label: rel.patient_alias ?? email,
-      }
-    })
+    const patients = await fetchPatientOptions(practitioner.id)
 
     setModal(prev =>
       prev ? { ...prev, patients, loadingPatients: false } : null
@@ -170,17 +153,10 @@ export function DispensairePage() {
 
     setModal(prev => prev ? { ...prev, sending: patient.id, error: null } : null)
 
-    const { error } = await (supabase.from('patient_modules') as unknown as {
-      insert: (v: Record<string, unknown>) => Promise<{ error: { code: string; message: string } | null }>
-    }).insert({
-      patient_id: patient.id,
-      practitioner_id: practitioner.id,
-      module_type: modal.scale.id,
-      config: {},
-    })
+    const result = await proposeScale(patient.id, practitioner.id, modal.scale.id)
 
-    if (error) {
-      const msg = error.code === '23505'
+    if (!result.ok) {
+      const msg = result.code === '23505'
         ? `${patient.label} a déjà ce questionnaire.`
         : 'Erreur lors de l\'envoi. Réessayez.'
       setModal(prev => prev ? { ...prev, sending: null, error: msg } : null)

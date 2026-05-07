@@ -46,7 +46,7 @@ import {
   generateId,
   type ActivityRecord,
 } from '../../lib/database'
-import { supabase } from '../../lib/supabase'
+import { logEvent } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
@@ -176,11 +176,7 @@ export default function BehavioralActivationEntryScreen() {
       await saveActivityRecord(record)
 
       if (patient?.id) {
-        await supabase.from('patient_engagement_logs').insert({
-          patient_id: patient.id,
-          event_type: 'SAVE_BEHAVIORAL_ACTIVATION',
-          metadata: {},
-        })
+        await logEvent(patient.id, 'SAVE_BEHAVIORAL_ACTIVATION')
       }
 
       navigation.goBack()

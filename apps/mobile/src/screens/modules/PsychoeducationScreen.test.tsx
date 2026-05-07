@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import PsychoeducationScreen from './PsychoeducationScreen'
 import CardDetailScreen from './CardDetailScreen'
-import * as psychoeducationLib from '../../lib/psychoeducation'
+import * as psychoeducationLib from '../../services/psychoeducationService'
 
 // ─── Mocks des dépendances externes ──────────────────────────────────────────
 
@@ -51,8 +51,8 @@ jest.mock('../../lib/supabase', () => ({
 }))
 
 // Mock de markCardAsRead pour les tests de CardDetailScreen
-jest.mock('../../lib/psychoeducation', () => ({
-  ...jest.requireActual('../../lib/psychoeducation'),
+jest.mock('../../services/psychoeducationService', () => ({
+  ...jest.requireActual('../../services/psychoeducationService'),
   markCardAsRead: jest.fn(),
 }))
 

@@ -7,7 +7,7 @@ import {
   scheduleSleepDiaryReminder,
   cancelSleepDiaryReminder,
   getSleepDiaryReminderTime,
-} from './notifications'
+} from './notificationService'
 
 describe('requestNotificationPermission (stub)', () => {
   it('retourne false (stub — expo-notifications indisponible dans Expo Go SDK 53+)', async () => {

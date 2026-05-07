@@ -24,8 +24,8 @@ import {
   scheduleSleepDiaryReminder,
   cancelSleepDiaryReminder,
   getSleepDiaryReminderTime,
-} from '../lib/notifications'
-import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../lib/avatar'
+} from '../services/notificationService'
+import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../services/avatarService'
 
 const AVATAR_SIZE = 84
 

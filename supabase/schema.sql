@@ -1065,3 +1065,162 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('asrs18.opt0', 'value', '0'), ('asrs18.opt1', 'value', '1'), ('asrs18.opt2', 'value', '2'),
   ('asrs18.opt3', 'value', '3'), ('asrs18.opt4', 'value', '4')
 ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : medication_adherence → daily_checkin
+-- preview_kind = 'daily_checkin' → DailyCheckinLayout (FieldRenderer)
+-- 1 saisie / jour, UPSERT sur (module_id, date) en local SQLite (daily_entries),
+-- signal logEvent('SAVE_MEDICATION_ADHERENCE') côté Supabase.
+-- ============================================================
+
+UPDATE public.modules SET preview_kind = 'daily_checkin' WHERE id = 'medication_adherence';
+
+-- Champs UI (sans section)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('madh.cfg',                'medication_adherence', 'daily_checkin_config',         NULL,                                              0),
+  ('madh.tab_today',          'medication_adherence', 'daily_tab_today_label',         'modules.medication_adherence.tab_today',          5),
+  ('madh.tab_history',        'medication_adherence', 'daily_tab_history_label',       'modules.medication_adherence.tab_history',        6),
+  ('madh.today_label',        'medication_adherence', 'daily_today_label',             'modules.medication_adherence.today_label',        10),
+  ('madh.already_saved',      'medication_adherence', 'daily_already_saved_label',     'modules.medication_adherence.already_saved',      11),
+  ('madh.question',           'medication_adherence', 'daily_question',                'modules.medication_adherence.intro',               20),
+  ('madh.opt_taken',          'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_taken',       30),
+  ('madh.opt_partial',        'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_partial',     31),
+  ('madh.opt_missed',         'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_missed',      32),
+  ('madh.notes_label',        'medication_adherence', 'daily_notes_label',             'common.notes_optional',                            40),
+  ('madh.notes_placeholder',  'medication_adherence', 'daily_notes_placeholder',       'modules.medication_adherence.notes_placeholder',  41),
+  ('madh.save_label',         'medication_adherence', 'daily_save_label',              'modules.medication_adherence.save',                50),
+  ('madh.update_label',       'medication_adherence', 'daily_update_label',            'common.update',                                    51),
+  ('madh.history_empty',      'medication_adherence', 'daily_history_empty_text',      'modules.medication_adherence.empty_history',      60),
+  ('madh.missing_title',      'medication_adherence', 'daily_status_missing_title',    'modules.medication_adherence.status_missing',     70),
+  ('madh.missing_msg',        'medication_adherence', 'daily_status_missing_msg',      'modules.medication_adherence.status_missing_msg', 71),
+  ('madh.delete_title',       'medication_adherence', 'daily_delete_title',            'modules.medication_adherence.delete_entry_title', 72),
+  ('madh.saved_message',      'medication_adherence', 'daily_saved_message',           'modules.medication_adherence.saved_message',      73)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('madh.cfg',          'engagement_event_type', 'SAVE_MEDICATION_ADHERENCE'),
+  -- Status options : value, icon (MaterialCommunityIcons), color (icône + bordure sélectionnée), bg_color (fond sélectionné)
+  ('madh.opt_taken',    'value',    'taken'),
+  ('madh.opt_taken',    'icon',     'check-circle-outline'),
+  ('madh.opt_taken',    'color',    '#10B981'),
+  ('madh.opt_taken',    'bg_color', '#ECFDF5'),
+  ('madh.opt_partial',  'value',    'partial'),
+  ('madh.opt_partial',  'icon',     'circle-half-full'),
+  ('madh.opt_partial',  'color',    '#F59E0B'),
+  ('madh.opt_partial',  'bg_color', '#FFFBEB'),
+  ('madh.opt_missed',   'value',    'missed'),
+  ('madh.opt_missed',   'icon',     'circle-outline'),
+  ('madh.opt_missed',   'color',    '#6B7280'),
+  ('madh.opt_missed',   'bg_color', '#F3F4F6')
+ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : beck_columns → column_form
+-- preview_kind = 'column_form' → ColumnFormLayout (FieldRenderer)
+-- N enregistrements / module dans `form_entries` (JSON values).
+-- 5 colonnes TCC (sections) avec champs texte + sliders 0–100 hétérogènes.
+-- Signal logEvent('SAVE_BECK_THOUGHT_RECORD') côté Supabase.
+-- ============================================================
+
+UPDATE public.modules SET preview_kind = 'column_form' WHERE id = 'beck_columns';
+
+-- Champs UI (sans section)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('beck.cfg',              'beck_columns', 'column_form_config',           NULL,                                            0),
+  ('beck.new_btn',          'beck_columns', 'column_form_new_btn_label',     'modules.beck_columns.new_thought',              1),
+  ('beck.save_label',       'beck_columns', 'column_form_save_label',        'modules.beck_columns.save',                     2),
+  ('beck.empty_title',      'beck_columns', 'column_form_empty_title',       'modules.beck_columns.empty_title',              3),
+  ('beck.empty_text',       'beck_columns', 'column_form_empty_text',        'modules.beck_columns.intro',                    4),
+  ('beck.delete_title',     'beck_columns', 'column_form_delete_title',      'modules.beck_columns.delete_record_title',      5),
+  ('beck.validation_title', 'beck_columns', 'column_form_validation_title',  'modules.beck_columns.empty_alert_title',        6),
+  ('beck.validation_msg',   'beck_columns', 'column_form_validation_msg',    'modules.beck_columns.empty_alert_msg',          7)
+ON CONFLICT (id) DO NOTHING;
+
+-- Colonnes (column_header) — sections triées 10/20/30/40/50
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) VALUES
+  ('beck.col1.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_1_title', 'beck.col_situation', 10),
+  ('beck.col2.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_2_title', 'beck.col_emotion',   20),
+  ('beck.col3.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_3_title', 'beck.col_thought',   30),
+  ('beck.col4.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_4_title', 'beck.col_rational',  40),
+  ('beck.col5.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_5_title', 'beck.col_outcome',   50)
+ON CONFLICT (id) DO NOTHING;
+
+-- Champs enfants des colonnes (parent_field_id = id du column_header)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, section_id, parent_field_id, sort_order) VALUES
+  -- Colonne 1 — Situation : 1 champ texte multilignes
+  ('beck.col1.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_1_placeholder', 'beck.col_situation', 'beck.col1.h', 11),
+  -- Colonne 2 — Émotion : 1 texte mono-ligne + 1 slider intensité
+  ('beck.col2.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_2_placeholder', 'beck.col_emotion',   'beck.col2.h', 21),
+  ('beck.col2.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_2_intensity',   'beck.col_emotion',   'beck.col2.h', 22),
+  -- Colonne 3 — Pensée auto : 1 texte multilignes + 1 slider belief
+  ('beck.col3.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_3_placeholder', 'beck.col_thought',   'beck.col3.h', 31),
+  ('beck.col3.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_3_belief',      'beck.col_thought',   'beck.col3.h', 32),
+  -- Colonne 4 — Réponse rationnelle : 1 texte multilignes haut
+  ('beck.col4.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_4_placeholder', 'beck.col_rational',  'beck.col4.h', 41),
+  -- Colonne 5 — Résultat : 1 texte mono-ligne + 2 sliders (intensité, belief)
+  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 51),
+  ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 52),
+  ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
+ON CONFLICT (id) DO NOTHING;
+
+-- Props : config + headers + champs enfants
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
+  ('beck.cfg', 'required_keys_any',     'situation,automatic_thought'),
+
+  -- Headers : color (accent), step_number, hint_code
+  ('beck.col1.h', 'color',       '#0EA5E9'),
+  ('beck.col1.h', 'step_number', '1'),
+  ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),
+  ('beck.col2.h', 'color',       '#8B5CF6'),
+  ('beck.col2.h', 'step_number', '2'),
+  ('beck.col2.h', 'hint_code',   'modules.beck_columns.entry_col_2_hint'),
+  ('beck.col3.h', 'color',       '#EF4444'),
+  ('beck.col3.h', 'step_number', '3'),
+  ('beck.col3.h', 'hint_code',   'modules.beck_columns.entry_col_3_hint'),
+  ('beck.col4.h', 'color',       '#059669'),
+  ('beck.col4.h', 'step_number', '4'),
+  ('beck.col4.h', 'hint_code',   'modules.beck_columns.entry_col_4_hint'),
+  ('beck.col5.h', 'color',       '#D97706'),
+  ('beck.col5.h', 'step_number', '5'),
+  ('beck.col5.h', 'hint_code',   'modules.beck_columns.entry_col_5_hint'),
+
+  -- Texte : key (clé logique JSON), multiline, min_height
+  ('beck.col1.text', 'key',        'situation'),
+  ('beck.col1.text', 'multiline',  '1'),
+  ('beck.col1.text', 'min_height', '72'),
+  ('beck.col2.text', 'key',        'emotion'),
+  ('beck.col2.text', 'multiline',  '0'),
+  ('beck.col3.text', 'key',        'automatic_thought'),
+  ('beck.col3.text', 'multiline',  '1'),
+  ('beck.col3.text', 'min_height', '72'),
+  ('beck.col4.text', 'key',        'rational_response'),
+  ('beck.col4.text', 'multiline',  '1'),
+  ('beck.col4.text', 'min_height', '88'),
+  ('beck.col5.text', 'key',        'outcome_emotion'),
+  ('beck.col5.text', 'multiline',  '0'),
+
+  -- Sliders : key, min, max, step, color
+  ('beck.col2.slider', 'key',   'emotion_intensity'),
+  ('beck.col2.slider', 'min',   '0'),
+  ('beck.col2.slider', 'max',   '100'),
+  ('beck.col2.slider', 'step',  '10'),
+  ('beck.col2.slider', 'color', '#8B5CF6'),
+  ('beck.col3.slider', 'key',   'thought_belief'),
+  ('beck.col3.slider', 'min',   '0'),
+  ('beck.col3.slider', 'max',   '100'),
+  ('beck.col3.slider', 'step',  '10'),
+  ('beck.col3.slider', 'color', '#EF4444'),
+  ('beck.col5.intens', 'key',   'outcome_intensity'),
+  ('beck.col5.intens', 'min',   '0'),
+  ('beck.col5.intens', 'max',   '100'),
+  ('beck.col5.intens', 'step',  '10'),
+  ('beck.col5.intens', 'color', '#D97706'),
+  ('beck.col5.belief', 'key',   'outcome_belief'),
+  ('beck.col5.belief', 'min',   '0'),
+  ('beck.col5.belief', 'max',   '100'),
+  ('beck.col5.belief', 'step',  '10'),
+  ('beck.col5.belief', 'color', '#D97706')
+ON CONFLICT (field_id, prop_key) DO NOTHING;

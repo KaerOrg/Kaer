@@ -5,11 +5,14 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { logger } from '@psytool/shared'
 import { colors, spacing, radius } from '../../theme'
-import type { ContentField } from '../../lib/moduleService'
-import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession } from '../../lib/database'
-import { formatDateTime } from '../../lib/dateUtils'
+import type { ContentField } from '../../services/moduleService'
+import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry } from '../../lib/database'
+import { formatDateTime, formatDateFull, formatDateNumeric } from '../../lib/dateUtils'
+import { logEvent, type EngagementEventType } from '../../services/engagementService'
+import { useAuthStore } from '../../store/authStore'
 import { useTeen } from '../../hooks/useTeen'
 import { LikertWidget, type LikertOption } from './fields/widgets/LikertWidget'
+import { PipPicker } from '../PipPicker'
 import {
   type FieldProps,
   CardDefinition,
@@ -1341,6 +1344,674 @@ function TimedTapExerciseLayout({ fields, t }: {
   )
 }
 
+// ─── Layout — saisie quotidienne (medication_adherence…) ────────────────────
+//
+// Pattern « 1 statut par jour, persistance UPSERT par (module_id, date) ».
+// 2 onglets internes : today | history. Aucune navigation externe.
+// Le statut sélectionné, les notes, et la liste 30j sont gérés en interne.
+// Conformité MDR 2017/745 : aucun seuil interprétatif, juste affichage des
+// déclarations brutes du patient + pastilles de couleur fournies par la base.
+
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function DailyCheckinLayout({ fields, moduleId, t }: {
+  fields: ContentField[]
+  moduleId: string
+  t: (key: string) => string
+}) {
+  const patient = useAuthStore(s => s.patient)
+
+  // ── Résolution des champs DB-driven
+  const ft = (type: string): string => {
+    const f = fields.find(field => field.field_type === type)
+    return f?.text_code ? t(f.text_code) : ''
+  }
+  const configField = fields.find(f => f.field_type === 'daily_checkin_config')
+  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
+
+  const statusOptions = useMemo(
+    () => fields
+      .filter(f => f.field_type === 'daily_status_option')
+      .sort((a, b) => a.sort_order - b.sort_order),
+    [fields]
+  )
+
+  // ── State
+  const todayDate = useMemo(() => todayISO(), [])
+  const [tab, setTab] = useState<'today' | 'history'>('today')
+  const [selectedValue, setSelectedValue] = useState<string | null>(null)
+  const [notes, setNotes] = useState('')
+  const [existingId, setExistingId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [entries, setEntries] = useState<DailyEntry[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadData = useCallback(async () => {
+    const [todayEntry, history] = await Promise.all([
+      getDailyEntry(moduleId, todayDate),
+      getAllDailyEntries(moduleId, 30),
+    ])
+    if (todayEntry) {
+      setExistingId(todayEntry.id)
+      setSelectedValue(todayEntry.status)
+      setNotes(todayEntry.notes ?? '')
+    } else {
+      setExistingId(null)
+      setSelectedValue(null)
+      setNotes('')
+    }
+    setEntries(history)
+    setLoading(false)
+  }, [moduleId, todayDate])
+
+  useEffect(() => { void loadData() }, [loadData])
+
+  const handleSave = useCallback(async () => {
+    if (!selectedValue) {
+      Alert.alert(
+        ft('daily_status_missing_title') || t('common.error'),
+        ft('daily_status_missing_msg'),
+      )
+      return
+    }
+    setSaving(true)
+    try {
+      const entry: Omit<DailyEntry, 'created_at'> = {
+        id: existingId ?? generateId(),
+        module_id: moduleId,
+        date: todayDate,
+        status: selectedValue,
+        notes: notes.trim() || null,
+      }
+      await saveDailyEntry(entry)
+      if (patient?.id && engagementEventType) {
+        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
+      }
+      setExistingId(entry.id)
+      await loadData()
+      const savedMsg = ft('daily_saved_message')
+      if (savedMsg) Alert.alert(t('common.saved'), savedMsg)
+    } catch {
+      Alert.alert(t('common.error'), t('common.save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, ft, t])
+
+  const handleDelete = useCallback((entry: DailyEntry) => {
+    Alert.alert(
+      ft('daily_delete_title') || t('common.delete'),
+      t('common.irreversible'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteDailyEntry(entry.id)
+            setEntries(prev => prev.filter(e => e.id !== entry.id))
+            if (entry.date === todayDate) {
+              setExistingId(null)
+              setSelectedValue(null)
+              setNotes('')
+            }
+          },
+        },
+      ]
+    )
+  }, [ft, t, todayDate])
+
+  if (loading) {
+    return <View style={dcStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
+  }
+
+  const saveLabel = existingId
+    ? (ft('daily_update_label') || t('common.update'))
+    : (ft('daily_save_label') || t('common.save'))
+  const tabTodayLabel = ft('daily_tab_today_label')
+  const tabHistoryLabel = ft('daily_tab_history_label')
+
+  return (
+    <KeyboardAvoidingView
+      style={dcStyles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+    >
+      {/* Onglets */}
+      <View style={dcStyles.tabs}>
+        <Pressable
+          style={[dcStyles.tab, tab === 'today' && dcStyles.tabActive]}
+          onPress={() => setTab('today')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'today' }}
+          testID="tab-today"
+        >
+          <Text style={[dcStyles.tabText, tab === 'today' && dcStyles.tabTextActive]}>{tabTodayLabel}</Text>
+        </Pressable>
+        <Pressable
+          style={[dcStyles.tab, tab === 'history' && dcStyles.tabActive]}
+          onPress={() => setTab('history')}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: tab === 'history' }}
+          testID="tab-history"
+        >
+          <Text style={[dcStyles.tabText, tab === 'history' && dcStyles.tabTextActive]}>{tabHistoryLabel}</Text>
+          {entries.length > 0 && (
+            <View style={dcStyles.tabBadge}><Text style={dcStyles.tabBadgeText}>{entries.length}</Text></View>
+          )}
+        </Pressable>
+      </View>
+
+      {tab === 'today' ? (
+        <ScrollView
+          style={dcStyles.scroll}
+          contentContainerStyle={dcStyles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Date du jour */}
+          <View style={dcStyles.dateHeader}>
+            <Text style={dcStyles.dateLabel}>{ft('daily_today_label')}</Text>
+            <Text style={dcStyles.dateValue}>{formatDateFull(todayDate)}</Text>
+          </View>
+
+          {/* Indicateur saisie déjà effectuée */}
+          {existingId && ft('daily_already_saved_label') ? (
+            <View style={dcStyles.savedBadge} testID="already-saved-badge">
+              <MaterialCommunityIcons name="check-circle-outline" size={16} color={colors.success} />
+              <Text style={dcStyles.savedBadgeText}>{ft('daily_already_saved_label')}</Text>
+            </View>
+          ) : null}
+
+          {/* Question + boutons de statut */}
+          <View style={dcStyles.questionCard}>
+            <Text style={dcStyles.questionText}>{ft('daily_question')}</Text>
+            <View style={dcStyles.statusRow}>
+              {statusOptions.map(opt => {
+                const value = opt.props['value'] ?? ''
+                const iconName = (opt.props['icon'] ?? 'circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
+                const color = opt.props['color'] ?? colors.textMuted
+                const bgColor = opt.props['bg_color'] ?? colors.background
+                const selected = selectedValue === value
+                const label = opt.text_code ? t(opt.text_code) : value
+                return (
+                  <Pressable
+                    key={opt.id}
+                    style={[
+                      dcStyles.statusBtn,
+                      selected && { backgroundColor: bgColor, borderColor: color },
+                    ]}
+                    onPress={() => setSelectedValue(value)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    accessibilityLabel={label}
+                    testID={`status-${value}`}
+                  >
+                    <MaterialCommunityIcons name={iconName} size={22} color={selected ? color : colors.border} />
+                    <Text style={[dcStyles.statusLabel, selected && { color }]}>{label}</Text>
+                  </Pressable>
+                )
+              })}
+            </View>
+          </View>
+
+          {/* Notes */}
+          <View style={dcStyles.notesSection}>
+            <Text style={dcStyles.notesLabel}>{ft('daily_notes_label') || t('common.notes_optional')}</Text>
+            <TextInput
+              style={dcStyles.notesInput}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder={ft('daily_notes_placeholder')}
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+              testID="notes-input"
+            />
+          </View>
+        </ScrollView>
+      ) : (
+        <ScrollView style={dcStyles.scroll} contentContainerStyle={dcStyles.content}>
+          {entries.length === 0 ? (
+            <View style={dcStyles.empty} testID="history-empty">
+              <Text style={dcStyles.emptyText}>{ft('daily_history_empty_text')}</Text>
+            </View>
+          ) : (
+            <View style={dcStyles.list}>
+              {entries.map(entry => {
+                const meta = statusOptions.find(o => (o.props['value'] ?? '') === (entry.status ?? ''))
+                const iconName = (meta?.props['icon'] ?? 'circle-outline') as React.ComponentProps<typeof MaterialCommunityIcons>['name']
+                const color = meta?.props['color'] ?? colors.textMuted
+                const bgColor = meta?.props['bg_color'] ?? colors.background
+                const label = meta?.text_code ? t(meta.text_code) : (entry.status ?? '')
+                return (
+                  <View key={entry.id} style={dcStyles.histCard} testID={`history-${entry.id}`}>
+                    <View style={dcStyles.histMain}>
+                      <Text style={dcStyles.histDate}>{formatDateNumeric(entry.date)}</Text>
+                      <View style={[dcStyles.histBadge, { backgroundColor: bgColor }]}>
+                        <MaterialCommunityIcons name={iconName} size={13} color={color} />
+                        <Text style={[dcStyles.histBadgeText, { color }]}>{label}</Text>
+                      </View>
+                      {entry.notes ? (
+                        <Text style={dcStyles.histNotes} numberOfLines={1}>{entry.notes}</Text>
+                      ) : null}
+                    </View>
+                    <Pressable
+                      onPress={() => handleDelete(entry)}
+                      hitSlop={8}
+                      accessibilityLabel={t('common.delete')}
+                      testID={`delete-${entry.id}`}
+                    >
+                      <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                )
+              })}
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* Footer bouton sauvegarder — uniquement sur l'onglet Aujourd'hui */}
+      {tab === 'today' && (
+        <View style={dcStyles.footer}>
+          <Pressable
+            style={[dcStyles.saveBtn, saving && dcStyles.saveBtnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={saveLabel}
+            testID="save-button"
+          >
+            {saving ? (
+              <ActivityIndicator color={colors.white} size="small" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
+                <Text style={dcStyles.saveBtnText}>{saveLabel}</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      )}
+    </KeyboardAvoidingView>
+  )
+}
+
+// ─── Layout — formulaire à colonnes hétérogènes (beck_columns…) ─────────────
+//
+// Pattern « plusieurs enregistrements par module, chacun = un formulaire à
+// champs hétérogènes ». Chaque section_id = une colonne. Chaque colonne
+// contient un `column_header` et des champs enfants (`parent_field_id`)
+// définissant le widget : `column_text_field` ou `column_slider_field`.
+// Persistance JSON dans `form_entries`. 2 modes internes : list | entry.
+// Conformité MDR 2017/745 : aucune interprétation, simple journal libre.
+
+const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+
+function buildPipSteps(min: number, max: number, step: number): number[] {
+  const steps: number[] = []
+  for (let v = min; v <= max; v += step) steps.push(v)
+  return steps
+}
+
+interface ColumnSpec {
+  sectionId: string
+  header: ContentField
+  children: ContentField[]
+}
+
+function ColumnFormLayout({ fields, moduleId, t }: {
+  fields: ContentField[]
+  moduleId: string
+  t: (key: string) => string
+}) {
+  const patient = useAuthStore(s => s.patient)
+
+  // ── Résolution des champs DB-driven
+  const ft = (type: string): string => {
+    const f = fields.find(field => field.field_type === type)
+    return f?.text_code ? t(f.text_code) : ''
+  }
+  const configField = fields.find(f => f.field_type === 'column_form_config')
+  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
+  const requiredKeysProp = configField?.props['required_keys_any'] ?? ''
+  const requiredKeysAny = useMemo(
+    () => requiredKeysProp.split(',').map(k => k.trim()).filter(Boolean),
+    [requiredKeysProp]
+  )
+
+  // ── Construction des colonnes (sections triées par sort_order de leur column_header)
+  const columns = useMemo<ColumnSpec[]>(() => {
+    const headers = fields
+      .filter(f => f.field_type === 'column_header' && f.section_id != null)
+      .sort((a, b) => a.sort_order - b.sort_order)
+    return headers.map(h => ({
+      sectionId: h.section_id!,
+      header: h,
+      children: (h.children ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
+    }))
+  }, [fields])
+
+  // ── State
+  const [mode, setMode] = useState<'list' | 'entry'>('list')
+  const [entries, setEntries] = useState<FormEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [values, setValues] = useState<Record<string, string | number>>({})
+  const [saving, setSaving] = useState(false)
+
+  const loadEntries = useCallback(async () => {
+    const data = await getAllFormEntries(moduleId)
+    setEntries(data)
+    setLoading(false)
+  }, [moduleId])
+
+  useEffect(() => { void loadEntries() }, [loadEntries])
+
+  const initialValuesForNew = useCallback((): Record<string, string | number> => {
+    const init: Record<string, string | number> = {}
+    for (const col of columns) {
+      for (const child of col.children) {
+        const key = child.props['key']
+        if (!key) continue
+        if (child.field_type === 'column_slider_field') {
+          const min = parseInt(child.props['min'] ?? '0', 10)
+          const max = parseInt(child.props['max'] ?? '100', 10)
+          init[key] = Math.round((min + max) / 2)
+        } else {
+          init[key] = ''
+        }
+      }
+    }
+    return init
+  }, [columns])
+
+  const handleNew = useCallback(() => {
+    setEditingId(null)
+    setValues(initialValuesForNew())
+    setMode('entry')
+  }, [initialValuesForNew])
+
+  const handleEdit = useCallback((entry: FormEntry) => {
+    const merged = { ...initialValuesForNew(), ...entry.values }
+    setEditingId(entry.id)
+    setValues(merged)
+    setMode('entry')
+  }, [initialValuesForNew])
+
+  const handleCancelEntry = useCallback(() => {
+    setMode('list')
+    setEditingId(null)
+    setValues({})
+  }, [])
+
+  const handleDelete = useCallback((entry: FormEntry) => {
+    Alert.alert(
+      ft('column_form_delete_title') || t('common.delete'),
+      t('common.irreversible'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteFormEntry(entry.id)
+            setEntries(prev => prev.filter(e => e.id !== entry.id))
+          },
+        },
+      ]
+    )
+  }, [ft, t])
+
+  const handleSave = useCallback(async () => {
+    if (requiredKeysAny.length > 0) {
+      const ok = requiredKeysAny.some(k => {
+        const v = values[k]
+        return typeof v === 'string' ? v.trim().length > 0 : v != null
+      })
+      if (!ok) {
+        Alert.alert(
+          ft('column_form_validation_title') || t('common.error'),
+          ft('column_form_validation_msg'),
+        )
+        return
+      }
+    }
+    setSaving(true)
+    try {
+      const id = editingId ?? generateId()
+      await saveFormEntry({ id, module_id: moduleId, values })
+      if (patient?.id && engagementEventType && !editingId) {
+        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
+      }
+      await loadEntries()
+      setMode('list')
+      setEditingId(null)
+      setValues({})
+    } catch {
+      Alert.alert(t('common.error'), t('common.save_error'))
+    } finally {
+      setSaving(false)
+    }
+  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, ft, t])
+
+  if (loading) {
+    return <View style={cfStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
+  }
+
+  // ── Mode entry
+  if (mode === 'entry') {
+    return (
+      <KeyboardAvoidingView
+        style={cfStyles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={88}
+      >
+        <ScrollView
+          style={cfStyles.scroll}
+          contentContainerStyle={cfStyles.entryContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {columns.map((col, idx) => {
+            const accent = col.header.props['color'] ?? colors.primary
+            const stepNumber = col.header.props['step_number'] ?? String(idx + 1)
+            const hintCode = col.header.props['hint_code']
+            const titleText = col.header.text_code ? t(col.header.text_code) : ''
+            const hintText = hintCode ? t(hintCode) : ''
+            return (
+              <View
+                key={col.sectionId}
+                style={[cfStyles.section, { borderLeftColor: accent }]}
+                testID={`column-${col.sectionId}`}
+              >
+                <View style={cfStyles.sectionHeader}>
+                  <View style={[cfStyles.sectionBadge, { backgroundColor: accent }]}>
+                    <Text style={cfStyles.sectionBadgeText}>{stepNumber}</Text>
+                  </View>
+                  <View style={cfStyles.sectionHeaderText}>
+                    {titleText ? <Text style={[cfStyles.sectionTitle, { color: accent }]}>{titleText}</Text> : null}
+                    {hintText ? <Text style={cfStyles.sectionHint}>{hintText}</Text> : null}
+                  </View>
+                </View>
+                <View style={cfStyles.sectionBody}>
+                  {col.children.map(child => {
+                    const key = child.props['key']
+                    if (!key) return null
+                    const labelOrPlaceholder = child.text_code ? t(child.text_code) : ''
+                    if (child.field_type === 'column_text_field') {
+                      const multiline = (child.props['multiline'] ?? '1') !== '0'
+                      const minHeight = parseInt(child.props['min_height'] ?? (multiline ? '72' : '0'), 10)
+                      const value = String(values[key] ?? '')
+                      return (
+                        <TextInput
+                          key={child.id}
+                          style={[cfStyles.textInput, multiline && minHeight > 0 && { minHeight }]}
+                          placeholder={labelOrPlaceholder}
+                          placeholderTextColor={colors.textMuted}
+                          value={value}
+                          onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
+                          multiline={multiline}
+                          textAlignVertical={multiline ? 'top' : 'center'}
+                          testID={`field-${key}`}
+                        />
+                      )
+                    }
+                    if (child.field_type === 'column_slider_field') {
+                      const min = parseInt(child.props['min'] ?? '0', 10)
+                      const max = parseInt(child.props['max'] ?? '100', 10)
+                      const step = parseInt(child.props['step'] ?? '10', 10)
+                      const sliderColor = child.props['color'] ?? accent
+                      const steps = (min === 0 && max === 100 && step === 10)
+                        ? PIP_STEPS_0_100
+                        : buildPipSteps(min, max, step)
+                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : Math.round((min + max) / 2)
+                      return (
+                        <View key={child.id} testID={`slider-${key}`}>
+                          <PipPicker
+                            label={labelOrPlaceholder}
+                            value={numValue}
+                            color={sliderColor}
+                            steps={steps}
+                            variant="track"
+                            showEndLabels
+                            onPress={(v) => setValues(prev => ({ ...prev, [key]: v }))}
+                          />
+                        </View>
+                      )
+                    }
+                    return null
+                  })}
+                </View>
+              </View>
+            )
+          })}
+        </ScrollView>
+        <View style={cfStyles.footer}>
+          <Pressable
+            style={cfStyles.cancelBtn}
+            onPress={handleCancelEntry}
+            accessibilityRole="button"
+            testID="cancel-entry"
+          >
+            <Text style={cfStyles.cancelBtnText}>{t('common.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            style={[cfStyles.saveBtn, saving && cfStyles.btnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+            accessibilityRole="button"
+            accessibilityLabel={ft('column_form_save_label') || t('common.save')}
+            testID="save-entry"
+          >
+            {saving ? (
+              <ActivityIndicator color={colors.white} size="small" />
+            ) : (
+              <>
+                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
+                <Text style={cfStyles.saveBtnText}>{ft('column_form_save_label') || t('common.save')}</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    )
+  }
+
+  // ── Mode list
+  return (
+    <View style={cfStyles.container}>
+      <ScrollView
+        style={cfStyles.scroll}
+        contentContainerStyle={cfStyles.listContent}
+      >
+        {entries.length === 0 ? (
+          <View style={cfStyles.empty} testID="list-empty">
+            <MaterialCommunityIcons name="thought-bubble-outline" size={52} color={colors.border} />
+            {ft('column_form_empty_title') ? (
+              <Text style={cfStyles.emptyTitle}>{ft('column_form_empty_title')}</Text>
+            ) : null}
+            {ft('column_form_empty_text') ? (
+              <Text style={cfStyles.emptyText}>{ft('column_form_empty_text')}</Text>
+            ) : null}
+          </View>
+        ) : (
+          <View style={cfStyles.list}>
+            {entries.map(entry => {
+              const dateLabel = formatDateFull(entry.created_at)
+              return (
+                <View key={entry.id} style={cfStyles.recordCard} testID={`record-${entry.id}`}>
+                  <View style={cfStyles.recordHeader}>
+                    <Text style={cfStyles.recordDate}>{dateLabel}</Text>
+                    <View style={cfStyles.recordActions}>
+                      <Pressable
+                        onPress={() => handleEdit(entry)}
+                        hitSlop={8}
+                        accessibilityLabel={t('common.modify')}
+                        testID={`edit-${entry.id}`}
+                      >
+                        <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
+                      </Pressable>
+                      <Pressable
+                        onPress={() => handleDelete(entry)}
+                        hitSlop={8}
+                        accessibilityLabel={t('common.delete')}
+                        testID={`delete-${entry.id}`}
+                      >
+                        <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
+                      </Pressable>
+                    </View>
+                  </View>
+                  {columns.map(col => {
+                    const textChildren = col.children.filter(c => c.field_type === 'column_text_field')
+                    const sliderChildren = col.children.filter(c => c.field_type === 'column_slider_field')
+                    const accent = col.header.props['color'] ?? colors.primary
+                    return textChildren.map(child => {
+                      const key = child.props['key']
+                      if (!key) return null
+                      const value = entry.values[key]
+                      if (typeof value !== 'string' || !value) return null
+                      // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
+                      const slider = sliderChildren[0]
+                      const sliderKey = slider?.props['key']
+                      const sliderVal = sliderKey ? entry.values[sliderKey] : null
+                      return (
+                        <View key={child.id} style={cfStyles.recordRow}>
+                          <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
+                          <Text style={cfStyles.recordText} numberOfLines={2}>
+                            {value}
+                            {typeof sliderVal === 'number' ? (
+                              <Text style={cfStyles.recordIntensity}> ({sliderVal}%)</Text>
+                            ) : null}
+                          </Text>
+                        </View>
+                      )
+                    })
+                  })}
+                </View>
+              )
+            })}
+          </View>
+        )}
+      </ScrollView>
+      <View style={cfStyles.footer}>
+        <Pressable
+          style={cfStyles.newBtn}
+          onPress={handleNew}
+          accessibilityRole="button"
+          accessibilityLabel={ft('column_form_new_btn_label') || t('common.add')}
+          testID="new-entry"
+        >
+          <MaterialCommunityIcons name="plus" size={22} color={colors.white} />
+          <Text style={cfStyles.newBtnText}>{ft('column_form_new_btn_label') || t('common.add')}</Text>
+        </Pressable>
+      </View>
+    </View>
+  )
+}
+
 // ─── Questionnaire props ──────────────────────────────────────────────────────
 
 export interface QuestionnaireInteraction {
@@ -1452,6 +2123,14 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'timed_tap_exercise') {
     return <TimedTapExerciseLayout fields={visibleFields} t={t} />
+  }
+
+  if (preview_kind === 'daily_checkin') {
+    return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} t={t} />
+  }
+
+  if (preview_kind === 'column_form') {
+    return <ColumnFormLayout fields={visibleFields} moduleId={moduleId ?? ''} t={t} />
   }
 
   if (preview_kind === 'editable_steps') {
@@ -1827,4 +2506,185 @@ const ttStyles = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.primary, backgroundColor: colors.primaryLight,
   },
   restartBtnText:   { fontSize: 15, fontWeight: '600', color: colors.primary },
+})
+
+const dcStyles = StyleSheet.create({
+  container:        { flex: 1, backgroundColor: colors.background },
+  center:           { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  scroll:           { flex: 1 },
+  content:          { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.lg },
+  // ── Onglets
+  tabs: {
+    flexDirection: 'row', backgroundColor: colors.card,
+    borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  tab: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: spacing.sm + 2, gap: spacing.xs,
+    borderBottomWidth: 2, borderBottomColor: 'transparent',
+  },
+  tabActive:        { borderBottomColor: colors.primary },
+  tabText:          { fontSize: 14, fontWeight: '500', color: colors.textMuted },
+  tabTextActive:    { color: colors.primary, fontWeight: '700' },
+  tabBadge: {
+    backgroundColor: colors.primary, borderRadius: radius.full,
+    minWidth: 20, height: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6,
+  },
+  tabBadgeText:     { color: colors.white, fontSize: 11, fontWeight: '700' },
+  // ── Date du jour
+  dateHeader: {
+    backgroundColor: colors.primaryLight, borderRadius: radius.lg,
+    padding: spacing.md, gap: 2,
+  },
+  dateLabel: {
+    fontSize: 13, fontWeight: '600', color: colors.primary,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+  dateValue:        { fontSize: 18, fontWeight: '700', color: colors.text },
+  // ── Badge "déjà saisi"
+  savedBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
+    backgroundColor: colors.successLight, borderRadius: radius.md,
+    paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, alignSelf: 'flex-start',
+  },
+  savedBadgeText:   { fontSize: 13, color: colors.success, fontWeight: '600' },
+  // ── Question + boutons de statut
+  questionCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg,
+    padding: spacing.md, gap: spacing.sm,
+    borderWidth: 1, borderColor: colors.border,
+  },
+  questionText:     { fontSize: 15, fontWeight: '500', color: colors.text },
+  statusRow:        { flexDirection: 'row', gap: spacing.sm },
+  statusBtn: {
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs,
+    paddingVertical: spacing.md, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.card,
+  },
+  statusLabel:      { fontSize: 13, fontWeight: '600', color: colors.textMuted },
+  // ── Notes
+  notesSection:     { gap: spacing.xs },
+  notesLabel: {
+    fontSize: 13, fontWeight: '600', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+  notesInput: {
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
+    borderRadius: radius.md, padding: spacing.md,
+    fontSize: 14, color: colors.text, minHeight: 80,
+  },
+  // ── Liste historique
+  list:             { gap: spacing.sm },
+  empty:            { alignItems: 'center', paddingVertical: spacing.xl, gap: spacing.sm },
+  emptyText:        { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+  histCard: {
+    backgroundColor: colors.card, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.sm,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+  },
+  histMain:         { flex: 1, gap: 4 },
+  histDate:         { fontSize: 13, fontWeight: '600', color: colors.text },
+  histBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full,
+  },
+  histBadgeText:    { fontSize: 12, fontWeight: '600' },
+  histNotes:        { fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
+  // ── Footer
+  footer: {
+    backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
+    padding: spacing.md,
+  },
+  saveBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.sm, paddingVertical: spacing.sm + 2,
+  },
+  saveBtnDisabled:  { opacity: 0.6 },
+  saveBtnText:      { color: colors.white, fontSize: 16, fontWeight: '700' },
+})
+
+const cfStyles = StyleSheet.create({
+  container:         { flex: 1, backgroundColor: colors.background },
+  center:            { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  scroll:            { flex: 1 },
+  // ── Liste
+  listContent:       { padding: spacing.md, paddingBottom: spacing.lg },
+  list:              { gap: spacing.sm },
+  empty: {
+    alignItems: 'center', paddingVertical: spacing.xl * 2, gap: spacing.md,
+  },
+  emptyTitle:        { fontSize: 20, fontWeight: '600', color: colors.text },
+  emptyText: {
+    fontSize: 15, color: colors.textMuted, textAlign: 'center',
+    lineHeight: 22, paddingHorizontal: spacing.lg,
+  },
+  recordCard: {
+    backgroundColor: colors.card, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+    gap: spacing.xs,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
+  },
+  recordHeader: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', marginBottom: spacing.xs,
+  },
+  recordDate:        { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+  recordActions:     { flexDirection: 'row', gap: spacing.sm },
+  recordRow:         { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
+  recordDot:         { width: 8, height: 8, borderRadius: 4, marginTop: 5 },
+  recordText:        { flex: 1, fontSize: 14, color: colors.text, lineHeight: 20 },
+  recordIntensity:   { color: colors.textMuted, fontSize: 13 },
+  // ── Entrée
+  entryContent:      { padding: spacing.md, gap: spacing.md, paddingBottom: spacing.lg },
+  section: {
+    backgroundColor: colors.card, borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm,
+    padding: spacing.md, paddingBottom: spacing.sm,
+  },
+  sectionBadge: {
+    width: 26, height: 26, borderRadius: 13,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  sectionBadgeText:  { fontSize: 13, fontWeight: '700', color: colors.white },
+  sectionHeaderText: { flex: 1 },
+  sectionTitle:      { fontSize: 15, fontWeight: '700' },
+  sectionHint:       { fontSize: 12, color: colors.textMuted, marginTop: 2, lineHeight: 17 },
+  sectionBody: {
+    paddingHorizontal: spacing.md, paddingBottom: spacing.md, gap: spacing.sm,
+  },
+  textInput: {
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm,
+    padding: spacing.sm, fontSize: 14, color: colors.text,
+    backgroundColor: colors.background,
+  },
+  // ── Footer
+  footer: {
+    backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
+    padding: spacing.md, flexDirection: 'row', gap: spacing.sm,
+  },
+  saveBtn: {
+    flex: 1, backgroundColor: colors.primary, borderRadius: radius.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.sm, paddingVertical: spacing.sm + 2,
+  },
+  saveBtnText:       { color: colors.white, fontSize: 16, fontWeight: '700' },
+  cancelBtn: {
+    paddingHorizontal: spacing.lg, paddingVertical: spacing.sm + 2,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
+  },
+  cancelBtnText:     { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
+  newBtn: {
+    flex: 1, backgroundColor: colors.primary, borderRadius: radius.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.sm, paddingVertical: spacing.sm + 2,
+  },
+  newBtnText:        { color: colors.white, fontSize: 16, fontWeight: '700' },
+  btnDisabled:       { opacity: 0.6 },
 })

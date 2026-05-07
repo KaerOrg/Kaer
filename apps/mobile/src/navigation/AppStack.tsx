@@ -10,9 +10,6 @@ import SleepDiaryMonthScreen from '../screens/modules/SleepDiaryMonthScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
-import BeckColumnsScreen from '../screens/modules/BeckColumnsScreen'
-import BeckEntryScreen from '../screens/modules/BeckEntryScreen'
-import MedicationAdherenceScreen from '../screens/modules/MedicationAdherenceScreen'
 import FearThermometerScreen from '../screens/modules/FearThermometerScreen'
 import FearEntryScreen from '../screens/modules/FearEntryScreen'
 import BehavioralActivationScreen from '../screens/modules/BehavioralActivationScreen'
@@ -40,9 +37,6 @@ export type AppStackParamList = {
   Psychoeducation: undefined
   CardDetail: { cardId: string; isRead: boolean }
   DecisionalBalance: undefined
-  BeckColumns: undefined
-  BeckEntry: { recordId?: string }
-  MedicationAdherence: undefined
   FearThermometer: undefined
   FearEntry: { entryId?: string }
   BehavioralActivation: undefined
@@ -135,23 +129,6 @@ export default function AppStack() {
         name="DecisionalBalance"
         component={DecisionalBalanceScreen}
         options={{ title: 'Balance décisionnelle' }}
-      />
-      <Stack.Screen
-        name="BeckColumns"
-        component={BeckColumnsScreen}
-        options={{ title: 'Colonnes de Beck' }}
-      />
-      <Stack.Screen
-        name="BeckEntry"
-        component={BeckEntryScreen}
-        options={({ route }) => ({
-          title: route.params?.recordId ? 'Modifier l\'enregistrement' : 'Nouvel enregistrement',
-        })}
-      />
-      <Stack.Screen
-        name="MedicationAdherence"
-        component={MedicationAdherenceScreen}
-        options={{ title: 'Observance du traitement' }}
       />
       <Stack.Screen
         name="FearThermometer"

@@ -1,4 +1,4 @@
-import type { ContentField } from '../../../lib/moduleService'
+import type { ContentField } from '../../../services/moduleService'
 
 export interface FieldProps {
   field: ContentField

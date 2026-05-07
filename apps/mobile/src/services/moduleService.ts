@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '../lib/supabase'
 
 export interface ContentField {
   id: string
@@ -17,10 +17,18 @@ export interface ModuleFieldsResult {
   fields: ContentField[]
 }
 
-export interface PsychoCardInfo {
-  id: string
-  titleKey: string
-  summaryKey: string
+export async function fetchPatientModuleConfig(
+  patientId: string,
+  moduleType: string
+): Promise<Record<string, unknown> | null> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('patient_id', patientId)
+    .eq('module_type', moduleType)
+    .is('revoked_at', null)
+    .maybeSingle()
+  return (data?.config as Record<string, unknown>) ?? null
 }
 
 export async function fetchModuleFields(moduleId: string): Promise<ModuleFieldsResult> {
@@ -81,19 +89,4 @@ export async function fetchModuleFields(moduleId: string): Promise<ModuleFieldsR
   }
 
   return { preview_kind, fields: topLevel }
-}
-
-export async function fetchPsychoCards(): Promise<PsychoCardInfo[]> {
-  const { data } = await supabase
-    .from('module_content_fields')
-    .select('id, section_id, text_code')
-    .eq('module_id', 'psychoeducation')
-    .eq('field_type', 'card_title')
-    .order('sort_order')
-
-  return (data ?? []).map(f => ({
-    id: f.section_id ?? f.id,
-    titleKey: f.text_code ?? '',
-    summaryKey: (f.text_code ?? '').replace(/\.title$/, '.summary'),
-  }))
 }

@@ -27,7 +27,7 @@ import {
   type FearSituation,
   type CopingStrategy,
 } from '../../lib/database'
-import { supabase } from '../../lib/supabase'
+import { logEvent } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../../navigation/AppStack'
@@ -382,7 +382,7 @@ export default function FearEntryScreen() {
   const entryId = route.params?.entryId
   const isEdit = !!entryId
 
-  const userId = useAuthStore()
+  const userId = useAuthStore((s) => s.patient?.id)
 
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
@@ -451,16 +451,7 @@ export default function FearEntryScreen() {
 
       await saveFearEntry(entry)
 
-      // Signal d'observance anonymisé — aucune donnée clinique
-      try {
-        await supabase.from('patient_engagement_logs').insert({
-          patient_id: userId,
-          event_type: 'SAVE_FEAR_ENTRY',
-          metadata: { module: 'fear_thermometer' },
-        })
-      } catch {
-        // Signal non critique, erreur ignorée
-      }
+      if (userId) await logEvent(userId, 'SAVE_FEAR_ENTRY', { module: 'fear_thermometer' })
 
       Alert.alert(
         isEdit ? t('modules.fear_thermometer.saved_updated') : t('common.saved'),

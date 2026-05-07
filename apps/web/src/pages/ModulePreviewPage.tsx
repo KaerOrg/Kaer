@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
-import { supabase } from '../lib/supabase'
+import { fetchModulePreviewKind } from '../services/moduleService'
 import './ModulePreviewPage.css'
 
 export function ModulePreviewPage() {
@@ -15,12 +15,7 @@ export function ModulePreviewPage() {
 
   useEffect(() => {
     if (!moduleType) return
-    supabase
-      .from('modules')
-      .select('preview_kind')
-      .eq('id', moduleType)
-      .single()
-      .then(({ data }) => setPreviewKind(data?.preview_kind ?? 'coming_soon'))
+    fetchModulePreviewKind(moduleType).then(setPreviewKind)
   }, [moduleType])
 
   if (!moduleType) return null

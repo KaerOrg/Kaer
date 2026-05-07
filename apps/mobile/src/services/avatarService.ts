@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker'
-import { supabase } from './supabase'
+import { supabase } from '../lib/supabase'
 
 export type AvatarSource = 'library' | 'camera'
 
@@ -33,7 +33,6 @@ export async function pickAvatarImage(source: AvatarSource): Promise<string | nu
 
 /** Upload l'image vers Supabase Storage et retourne l'URL publique. */
 export async function uploadAvatar(userId: string, localUri: string): Promise<string> {
-  // Lit le fichier en ArrayBuffer via fetch (compatible Expo)
   const response = await fetch(localUri)
   const arrayBuffer = await response.arrayBuffer()
 
@@ -49,7 +48,7 @@ export async function uploadAvatar(userId: string, localUri: string): Promise<st
   if (error) throw new Error(error.message)
 
   const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-  // Ajoute un cache-buster pour forcer le rechargement de l'image après mise à jour
+  // Cache-buster pour forcer le rechargement après mise à jour.
   return `${data.publicUrl}?t=${Date.now()}`
 }
 

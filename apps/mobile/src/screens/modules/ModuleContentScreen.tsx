@@ -5,10 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { useFocusEffect } from '@react-navigation/native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AppStackParamList } from '../../navigation/AppStack'
-import { fetchModuleFields, type ModuleFieldsResult } from '../../lib/moduleService'
+import {
+  fetchModuleFields,
+  fetchPatientModuleConfig,
+  type ModuleFieldsResult,
+} from '../../services/moduleService'
 import { FieldRenderer } from '../../components/ModuleRenderer'
 import { useTeen } from '../../hooks/useTeen'
-import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing } from '../../theme'
 
@@ -33,14 +36,7 @@ export default function ModuleContentScreen({ route }: Props) {
 
   const loadPatientConfig = useCallback(async () => {
     if (!patient) return
-    const { data } = await supabase
-      .from('patient_modules')
-      .select('config')
-      .eq('patient_id', patient.id)
-      .eq('module_type', moduleType)
-      .is('revoked_at', null)
-      .maybeSingle()
-    setPatientConfig((data?.config as Record<string, unknown>) ?? null)
+    setPatientConfig(await fetchPatientModuleConfig(patient.id, moduleType))
   }, [patient, moduleType])
 
   useEffect(() => {
@@ -68,7 +64,7 @@ export default function ModuleContentScreen({ route }: Props) {
   }
 
   // Layouts that manage their own scroll + fixed bottom bar — render without outer ScrollView
-  if (result?.preview_kind === 'guided_exercise' || result?.preview_kind === 'editable_steps' || result?.preview_kind === 'timed_tap_exercise') {
+  if (result?.preview_kind === 'guided_exercise' || result?.preview_kind === 'editable_steps' || result?.preview_kind === 'timed_tap_exercise' || result?.preview_kind === 'daily_checkin' || result?.preview_kind === 'column_form') {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <FieldRenderer

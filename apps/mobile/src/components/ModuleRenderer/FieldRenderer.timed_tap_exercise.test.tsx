@@ -2,6 +2,9 @@ jest.mock('../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
+jest.mock('../../services/engagementService', () => ({ logEvent: jest.fn() }))
+jest.mock('../../store/authStore', () => ({ useAuthStore: () => null }))
+
 jest.mock('../../lib/database', () => ({
   getAllPlanItemsForModule: jest.fn().mockResolvedValue([]),
   savePlanItem: jest.fn().mockResolvedValue(undefined),
@@ -23,7 +26,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../lib/database'
-import type { ContentField } from '../../lib/moduleService'
+import type { ContentField } from '../../services/moduleService'
 
 jest.setTimeout(15000)
 

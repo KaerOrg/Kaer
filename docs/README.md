@@ -18,6 +18,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`setup.md`](setup.md) | Installation, configuration et lancement |
 | [`invitation-flow.md`](invitation-flow.md) | Flux complet d'invitation patient (web ↔ email ↔ mobile) |
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
+| [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
 | [`avatar.md`](avatar.md) | Système d'avatars patients/praticiens |
 | [`mobile-app.md`](mobile-app.md) | Vue d'ensemble app mobile patient |

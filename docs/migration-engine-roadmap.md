@@ -114,8 +114,8 @@ const CUSTOM_ROUTES = {
 | `crisis_plan` | CrisisPlanScreen | Document éditable 6 étapes | Nouveau layout `editable_steps` | ✅ Migré |
 | `rim` | RimScreen | Scénario per-patient Supabase | `preview_kind: 'patient_scenario'` + `patientConfig` | ✅ Migré |
 | `cognitive_saturation` | CognitiveSaturationScreen + ExerciseScreen | Timer + compteur de taps + historique | Nouveau layout `timed_tap_exercise` (4 modes internes) | ✅ Migré |
-| `medication_adherence` | MedicationAdherenceScreen | Saisie 1 item/jour + notes | Nouveau layout `daily_checkin` (onglets + UPSERT date UNIQUE + `logEngagement`) | ⏳ Planifié (S) |
-| `beck_columns` | BeckColumnsScreen + BeckEntryScreen | 5 colonnes hétérogènes TCC | Nouveau layout `column_form` (sections = colonnes, champs enfants via `parent_field_id`) | ⏳ Planifié (M) |
+| `medication_adherence` | MedicationAdherenceScreen | Saisie 1 item/jour + notes | Nouveau layout `daily_checkin` (onglets + UPSERT date UNIQUE + `logEvent`) | ✅ Migré |
+| `beck_columns` | BeckColumnsScreen + BeckEntryScreen | 5 colonnes hétérogènes TCC | Nouveau layout `column_form` (sections = colonnes, champs enfants via `parent_field_id`, table `form_entries`) | ✅ Migré |
 | `emotion_wheel` | EmotionWheelScreen + Entry + Month | Roue 3 niveaux hiérarchiques | Nouveau layout `tree_selector` (niveaux modélisés via `parent_field_id`) | ⏳ Planifié (M) |
 | `sleep_diary` | SleepDiaryScreen + Entry + Month | Journal + time pickers + calendrier | Nouveau layout `sleep_journal` (3 modes internes + time pickers natifs + grille mois) | ⏳ Planifié (L) |
 | `behavioral_activation` | BehavioralActivationScreen + Entry | CRUD activités + calendrier mensuel | Nouveau layout `activity_log` (calendrier + CRUD + 2 dimensions) | ⏳ Planifié (L) |
@@ -295,9 +295,9 @@ medication_side_effects: {
 
 ---
 
-### 4. `medication_adherence` — ⚠️ Approche obsolète
+### 4. `medication_adherence` → voir **section 7 (complété)** ci-dessous
 
-> Voir **section 7** dans "Migrations planifiées". L'approche questionnaire générique (`ScaleEntryScreen`) a été abandonnée au profit d'un layout dédié `daily_checkin` qui gère la contrainte date UNIQUE, les onglets Aujourd'hui/Historique et le signal `logEngagement`.
+L'approche questionnaire générique (`ScaleEntryScreen`) a été abandonnée au profit d'un layout dédié `daily_checkin` qui gère la contrainte `UNIQUE(module_id, date)`, les onglets Aujourd'hui/Historique et le signal `logEvent`.
 
 ---
 
@@ -382,7 +382,82 @@ crisis.sec_safety:  step_title 'modules.crisis_plan.step_safety_title'
 
 ---
 
-### 7 (complété). `cognitive_saturation` — Timer + tapotements + historique
+### 7 (complété). `medication_adherence` — Saisie quotidienne + historique
+
+**Fonctionnel**
+1 saisie par jour : statut (Pris / Partiellement / Non pris) + notes libres optionnelles.
+Historique 30j avec badges couleur. Signal `logEvent('SAVE_MEDICATION_ADHERENCE')` côté Supabase.
+
+**Solution : `preview_kind: 'daily_checkin'` + `DailyCheckinLayout`**
+
+Layout auto-suffisant à 2 onglets internes : `today | history`. KeyboardAvoidingView + scroll interne + footer fixe.
+
+*`field_types` configurables depuis Supabase :*
+- `daily_checkin_config` — props : `engagement_event_type` (string `EngagementEventType`)
+- `daily_status_option` (multiple, sortés par `sort_order`) — props : `value`, `icon` (MaterialCommunityIcons), `color`, `bg_color`
+- `daily_question`, `daily_today_label`, `daily_already_saved_label`
+- `daily_tab_today_label`, `daily_tab_history_label`
+- `daily_notes_label`, `daily_notes_placeholder`
+- `daily_save_label`, `daily_update_label`
+- `daily_history_empty_text`
+- `daily_status_missing_title`, `daily_status_missing_msg`
+- `daily_delete_title`, `daily_saved_message`
+
+*SQLite — nouvelle table générique `daily_entries` :*
+```sql
+CREATE TABLE IF NOT EXISTS daily_entries (
+  id         TEXT PRIMARY KEY,
+  module_id  TEXT NOT NULL,
+  date       TEXT NOT NULL,
+  status     TEXT,
+  notes      TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(module_id, date)
+);
+```
+Pattern UPSERT via `ON CONFLICT(module_id, date) DO UPDATE`. Migration depuis `medication_adherence_entries` au boot (`createMedicationAdherenceTable` conservée comme source).
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre `KeyboardAvoidingView` + scroll + footer fixe).
+
+*Tests :* `FieldRenderer.daily_checkin.test.tsx` — 10 tests (chargement, onglets, validation manquante, save + logEvent, pré-remplissage, historique, suppression).
+
+---
+
+### 8 (complété). `beck_columns` — Formulaire à colonnes hétérogènes
+
+**Fonctionnel**
+5 colonnes TCC (Beck, Rush, Shaw & Emery 1979) : Situation / Émotion+intensité / Pensée automatique+belief / Réponse rationnelle / Résultat (intensité+belief).
+Liste d'enregistrements + édition + suppression + nouveau formulaire. Signal `logEvent('SAVE_BECK_THOUGHT_RECORD')` côté Supabase à la création (jamais à l'édition).
+
+**Solution : `preview_kind: 'column_form'` + `ColumnFormLayout`**
+
+Layout auto-suffisant à 2 modes internes : `list | entry`. Mode liste = cartes avec aperçu des champs texte annotés par leur slider de la colonne (ex. « je suis nul (80%) »). Mode entry = sections empilées avec accent coloré, badge step_number, hint, et widgets enfants. KeyboardAvoidingView en mode entry, footer fixe (Annuler / Enregistrer).
+
+*`field_types` configurables depuis Supabase :*
+- `column_form_config` — props : `engagement_event_type`, `required_keys_any` (CSV de clés logiques dont au moins une doit être non vide pour valider)
+- `column_header` (1 par section) — text_code (titre) ; props : `color` (accent), `step_number`, `hint_code` (clé i18n du sous-titre)
+- `column_text_field` (enfant via `parent_field_id`) — text_code (placeholder) ; props : `key` (clé logique JSON), `multiline` ('1'/'0'), `min_height`
+- `column_slider_field` (enfant via `parent_field_id`) — text_code (label) ; props : `key`, `min`, `max`, `step`, `color`
+- UI labels (sans section) : `column_form_save_label`, `column_form_new_btn_label`, `column_form_empty_title`, `column_form_empty_text`, `column_form_delete_title`, `column_form_validation_title`, `column_form_validation_msg`
+
+*SQLite — nouvelle table générique `form_entries` :*
+```sql
+CREATE TABLE IF NOT EXISTS form_entries (
+  id         TEXT PRIMARY KEY,
+  module_id  TEXT NOT NULL,
+  values     TEXT NOT NULL,  -- JSON Record<key, string|number>
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+```
+Migration depuis `beck_thought_records` au boot via `json_object(...)` SQLite. `createBeckColumnsTable` conservée comme source.
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre `KeyboardAvoidingView` + scroll + footer fixe).
+
+*Tests :* `FieldRenderer.column_form.test.tsx` — 10 tests (chargement, état vide, liste, passage en entry, rendu enfants, validation manquante, save + logEvent, édition sans logEvent, annulation, suppression).
+
+---
+
+### 9 (complété). `cognitive_saturation` — Timer + tapotements + historique
 
 **Solution : `preview_kind: 'timed_tap_exercise'` + `TimedTapExerciseLayout`**
 
@@ -429,8 +504,6 @@ Un layout qui *interprète* les données (affiche une conclusion, déclenche une
 
 | Module | `preview_kind` | Nouveaux mécanismes requis | Effort |
 |---|---|---|---|
-| `medication_adherence` | `daily_checkin` | Onglets Aujourd'hui/Historique, UPSERT date UNIQUE SQLite, appel `logEngagement` Supabase | S |
-| `beck_columns` | `column_form` | Colonnes lues depuis sections Supabase, champs enfants (`parent_field_id`) définissent le type de chaque cellule | M |
 | `emotion_wheel` | `tree_selector` | Navigation multi-niveaux, arbre d'émotions modélisé via `parent_field_id` en cascade, state `currentPath[]` | M |
 | `sleep_diary` | `sleep_journal` | 3 modes internes (liste / saisie / mois), time pickers natifs (`@react-native-community/datetimepicker`), grille calendrier | L |
 | `behavioral_activation` | `activity_log` | Calendrier mensuel (points colorés), CRUD avec 2 dimensions (plaisir/maîtrise), toggle réalisé/planifié | L |
@@ -454,8 +527,8 @@ Modules déjà migrés (barrés) — restants classés par effort croissant :
 4. ~~`mood_tracker`~~ ✅
 5. ~~`crisis_plan`~~ ✅
 6. ~~`cognitive_saturation`~~ ✅
-7. **`medication_adherence`** — layout `daily_checkin`, aucun nouveau mécanisme SQLite, effort S
-8. **`beck_columns`** — layout `column_form`, exploite `parent_field_id` pour hétérogénéité des colonnes, effort M
+7. ~~`medication_adherence`~~ ✅ (layout `daily_checkin`, table SQLite générique `daily_entries`)
+8. ~~`beck_columns`~~ ✅ (layout `column_form`, table SQLite générique `form_entries`)
 9. **`emotion_wheel`** — layout `tree_selector`, arbre via `parent_field_id` en cascade, effort M
 10. **`sleep_diary`** — layout `sleep_journal`, time pickers + grille mois, effort L
 11. **`behavioral_activation`** — layout `activity_log`, calendrier + CRUD, effort L
@@ -477,39 +550,6 @@ Pour chaque migration :
 ---
 
 ## Migrations planifiées — Détail technique
-
----
-
-### 7. `medication_adherence` — Saisie quotidienne + historique (S)
-
-**Fonctionnel**
-1 saisie par jour : statut (Pris / Partiellement / Manqué) + notes libres optionnelles.
-Historique 30j avec badges couleur. Enregistrement observance dans Supabase (`logEngagement`).
-
-**`preview_kind: 'daily_checkin'`**
-
-*Layout `DailyCheckinLayout` — 2 onglets internes : `today` | `history`*
-
-- Onglet Aujourd'hui : 1 question à 3 options (statut) + `scale_text_input` pour les notes. Si une saisie existe déjà pour aujourd'hui → affiche les valeurs courantes (mode édition).
-- Onglet Historique : liste 30j avec badge coloré par statut.
-- SQLite : UPSERT sur `(scale_id, date)` — une ligne par jour. Requiert une colonne `date TEXT` dans `scale_entries` ou une table dédiée `daily_entries`.
-- Après save : appeler `logEngagement('medication_adherence')` vers Supabase.
-
-*`field_types` :*
-- `daily_checkin_config` — props : `tab_today_code`, `tab_history_code`, `status_colors` (JSON)
-- Réutilise `scale_option` (3 options statut) + `scale_text_input` (notes)
-
-*`scaleScoring.ts` :*
-```ts
-medication_adherence: {
-  formula: 'sum', items_count: 1, score_decimals: 0,
-  computeScore: (answers) => answers[0] ?? 0,
-}
-```
-
-*Migration SQLite :*
-Créer table `daily_entries (id, module_id, date TEXT, answers TEXT, notes TEXT, created_at)` avec contrainte `UNIQUE(module_id, date)`.
-Migrer depuis l'ancienne table `medication_adherence_entries` si elle existe.
 
 ---
 

@@ -2,8 +2,6 @@ import { useEffect, useState, useCallback, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BookOpen, Eye, EyeOff } from 'lucide-react'
-import { supabase } from '../lib/supabase'
-import type { Database } from '../lib/database.types'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -18,9 +16,25 @@ import {
 } from '../lib/database.types'
 import { CLINICAL_SCALES } from '../data/scales'
 import { CSSRSScreenPanel } from '../components/CSSRSScreenPanel'
-import { fetchPsychoCards, type PsychoCardInfo } from '../lib/moduleService'
+import { fetchPsychoCards, type PsychoCardInfo } from '../services/moduleService'
 import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
-import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory, type ModuleItem } from '../lib/moduleCategories'
+import {
+  fetchModuleCategories,
+  fetchComingSoonModuleIds,
+  type ModuleCategory,
+  type ModuleItem,
+} from '../services/moduleCatalogService'
+import { fetchPatientHeader, setTeenMode as updateTeenMode } from '../services/patientService'
+import {
+  fetchPatientModules,
+  unlockModule as unlockStandardModule,
+  revokeModule as revokeModuleService,
+  unlockPsychoeducation,
+  updatePsychoeducationCards,
+  unlockRim,
+  updateRim,
+} from '../services/moduleAssignmentService'
+import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
@@ -88,37 +102,25 @@ export function PatientPage() {
     if (!id || !practitioner) return
     setLoading(true)
 
-    interface RelationRow { patient_alias: string | null; teen_mode: boolean; patients: { email: string } | { email: string }[] | null }
-    const { data: relation } = await supabase
-      .from('practitioner_patients')
-      .select('patient_alias, teen_mode, patients(email)')
-      .eq('practitioner_id', practitioner.id)
-      .eq('patient_id', id)
-      .single() as { data: RelationRow | null }
+    const header = await fetchPatientHeader(practitioner.id, id)
+    if (!header) { navigate('/'); return }
 
-    if (!relation) { navigate('/'); return }
+    setPatientEmail(header.email)
+    setPatientAlias(header.alias)
+    setTeenMode(header.teenMode)
 
-    const patient = Array.isArray(relation.patients) ? relation.patients[0] : relation.patients
-    setPatientEmail((patient as { email: string } | null)?.email ?? '')
-    setPatientAlias(relation.patient_alias)
-    setTeenMode(relation.teen_mode ?? false)
-
-    const [{ data: mods }, { data: settings }, cats, cards, comingSoon] = await Promise.all([
-      supabase.from('patient_modules').select('*').eq('patient_id', id),
-      supabase
-        .from('practitioner_module_settings')
-        .select('enabled_modules')
-        .eq('practitioner_id', practitioner.id)
-        .maybeSingle(),
+    const [mods, enabled, cats, cards, comingSoon] = await Promise.all([
+      fetchPatientModules(id),
+      fetchEnabledModules(practitioner.id),
       fetchModuleCategories(),
       fetchPsychoCards(),
       fetchComingSoonModuleIds(),
     ])
 
     setPageData({
-      modules: mods ?? [],
+      modules: mods,
       categories: cats,
-      enabledModules: settings ? new Set(settings.enabled_modules as ModuleType[]) : null,
+      enabledModules: enabled,
       psychoCards: cards,
       comingSoonIds: comingSoon,
     })
@@ -134,22 +136,19 @@ export function PatientPage() {
   const unlockModule = async (moduleType: ModuleType) => {
     if (!id || !practitioner) return
     setUnlockingModule(moduleType)
-    const insertRow: Database['public']['Tables']['patient_modules']['Insert'] = {
-      patient_id: id, practitioner_id: practitioner.id, module_type: moduleType,
-    }
-    const { error } = await supabase.from('patient_modules').insert(insertRow)
-    if (!error) await loadPatient()
+    const result = await unlockStandardModule(id, practitioner.id, moduleType)
+    if (result.ok) await loadPatient()
     setUnlockingModule(null)
   }
 
   const revokeModule = async (moduleId: string) => {
-    await supabase.from('patient_modules').delete().eq('id', moduleId)
+    await revokeModuleService(moduleId)
     await loadPatient()
   }
 
   const revokeScale = async (moduleId: string) => {
     setRevokingModuleId(moduleId)
-    await supabase.from('patient_modules').delete().eq('id', moduleId)
+    await revokeModuleService(moduleId)
     await loadPatient()
     setRevokingModuleId(null)
   }
@@ -168,12 +167,8 @@ export function PatientPage() {
     if (!id || !practitioner) return
     setTogglingTeen(true)
     const next = !teenMode
-    const { error } = await supabase
-      .from('practitioner_patients')
-      .update({ teen_mode: next } as never)
-      .eq('practitioner_id', practitioner.id)
-      .eq('patient_id', id)
-    if (!error) setTeenMode(next)
+    const { ok } = await updateTeenMode(practitioner.id, id, next)
+    if (ok) setTeenMode(next)
     setTogglingTeen(false)
   }
 
@@ -208,39 +203,21 @@ export function PatientPage() {
 
     setSavingPsycho(true)
     setPsychoError(null)
-    const now = new Date().toISOString()
 
     if (psychoPickerMode === 'unlock') {
-      const cards: PsychoeducationCardEntry[] = [...selectedCardIds].map(card_id => ({
-        card_id,
-        is_read: false,
-        unlocked_at: now,
-      }))
-      const psychoInsert: Database['public']['Tables']['patient_modules']['Insert'] = {
-        patient_id: id, practitioner_id: practitioner.id, module_type: 'psychoeducation',
-        config: { unlocked_cards: cards } as Record<string, unknown>,
-      }
-      const { error } = await supabase.from('patient_modules').insert(psychoInsert)
-      if (error) {
+      const { ok } = await unlockPsychoeducation(id, practitioner.id, selectedCardIds)
+      if (!ok) {
         setPsychoError(t('patient.psycho_error_unlock'))
         setSavingPsycho(false)
         return
       }
     } else if (psychoPickerMode === 'edit' && psychoModule) {
-      const existingById: Record<string, PsychoeducationCardEntry> = Object.fromEntries(
-        getPsychoCards(psychoModule).map(c => [c.card_id, c])
+      const { ok } = await updatePsychoeducationCards(
+        psychoModule.id,
+        getPsychoCards(psychoModule),
+        selectedCardIds
       )
-      const cards: PsychoeducationCardEntry[] = [...selectedCardIds].map(card_id =>
-        existingById[card_id] ?? { card_id, is_read: false, unlocked_at: now }
-      )
-      const psychoUpdate: Database['public']['Tables']['patient_modules']['Update'] = {
-        config: { unlocked_cards: cards } as Record<string, unknown>,
-      }
-      const { error } = await supabase
-        .from('patient_modules')
-        .update(psychoUpdate)
-        .eq('id', psychoModule.id)
-      if (error) {
+      if (!ok) {
         setPsychoError(t('patient.psycho_error_update'))
         setSavingPsycho(false)
         return
@@ -287,24 +264,14 @@ export function PatientPage() {
     }
     setSavingRim(true)
     setRimError(null)
-    const alt = rimAlternative.trim()
-    const orig = rimOriginal.trim()
-    const rimCfg: Record<string, unknown> = { alternative_scenario: alt }
-    if (orig) rimCfg['original_scenario'] = orig
+    const scenario = { alternative: rimAlternative.trim(), original: rimOriginal.trim() }
 
     if (rimEditorMode === 'unlock') {
-      const rimInsert: Database['public']['Tables']['patient_modules']['Insert'] = {
-        patient_id: id, practitioner_id: practitioner.id, module_type: 'rim', config: rimCfg,
-      }
-      const { error } = await supabase.from('patient_modules').insert(rimInsert)
-      if (error) { setRimError(t('patient.rim_error_unlock')); setSavingRim(false); return }
+      const { ok } = await unlockRim(id, practitioner.id, scenario)
+      if (!ok) { setRimError(t('patient.rim_error_unlock')); setSavingRim(false); return }
     } else if (rimEditorMode === 'edit' && rimModule) {
-      const rimUpdate: Database['public']['Tables']['patient_modules']['Update'] = { config: rimCfg }
-      const { error } = await supabase
-        .from('patient_modules')
-        .update(rimUpdate)
-        .eq('id', rimModule.id)
-      if (error) { setRimError(t('patient.rim_error_update')); setSavingRim(false); return }
+      const { ok } = await updateRim(rimModule.id, scenario)
+      if (!ok) { setRimError(t('patient.rim_error_update')); setSavingRim(false); return }
     }
     setSavingRim(false)
     setRimEditorMode('off')

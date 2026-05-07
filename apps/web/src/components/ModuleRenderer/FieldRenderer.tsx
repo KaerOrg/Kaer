@@ -2,7 +2,7 @@ import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info } from 'lucide-react'
 import { logger } from '@psytool/shared'
-import type { ContentField } from '../../lib/moduleService'
+import type { ContentField } from '../../services/moduleService'
 import {
   type FieldProps,
   CardDefinition,

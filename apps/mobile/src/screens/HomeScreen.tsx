@@ -15,7 +15,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
-import { supabase } from '../lib/supabase'
+import { fetchUnlockedModules, type UnlockedModule } from '../services/homeService'
 import { colors, spacing, radius } from '../theme'
 import { useTeen } from '../hooks/useTeen'
 import { Card } from '../components/Card'
@@ -28,26 +28,12 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   sleep_diary:              'SleepDiary',
   psychoeducation:          'Psychoeducation',
   decisional_balance:       'DecisionalBalance',
-  beck_columns:             'BeckColumns',
-  medication_adherence:     'MedicationAdherence',
   fear_thermometer:         'FearThermometer',
   behavioral_activation:    'BehavioralActivation',
   breathing_techniques:     'BreathingTechniques',
   emotion_wheel:            'EmotionWheel',
 }
 
-
-interface UnlockedModule {
-  id: string
-  module_type: string
-  config: Record<string, unknown>
-  unlocked_at: string
-  module: {
-    mobile_icon: string
-    color: string
-    preview_kind: string
-  } | null
-}
 
 interface ModuleSectionsProps {
   modules: UnlockedModule[]
@@ -187,12 +173,7 @@ export default function HomeScreen() {
 
   const fetchModules = async () => {
     if (!patient) return
-    const { data } = await supabase
-      .from('patient_modules')
-      .select('*, module:modules(mobile_icon, color, preview_kind)')
-      .eq('patient_id', patient.id)
-      .order('unlocked_at', { ascending: true })
-    setModules((data ?? []) as UnlockedModule[])
+    setModules(await fetchUnlockedModules(patient.id))
   }
 
   useFocusEffect(

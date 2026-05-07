@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '../lib/supabase'
 
 // Type local miroir de PsychoeducationCardEntry (shared)
 export interface UnlockedCard {
@@ -14,23 +14,34 @@ interface PsychoModuleRow {
   }
 }
 
+export type FetchUnlockedCardsResult =
+  | { ok: true; cards: UnlockedCard[] }
+  | { ok: false }
+
+/** Lit la liste des cartes débloquées (et leur statut lu/non-lu) pour un patient. */
+export async function fetchUnlockedCards(patientId: string): Promise<FetchUnlockedCardsResult> {
+  const { data, error } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('patient_id', patientId)
+    .eq('module_type', 'psychoeducation')
+    .is('revoked_at', null)
+    .single<{ config: { unlocked_cards?: UnlockedCard[] } }>()
+
+  if (error) return { ok: false }
+  return { ok: true, cards: data?.config?.unlocked_cards ?? [] }
+}
+
 /**
  * Marque une carte de psychoéducation comme lue dans Supabase.
- *
- * Stratégie :
- *   1. Lire la ligne patient_modules pour module_type = 'psychoeducation'
- *   2. Mettre à jour is_read = true pour la carte ciblée dans le tableau JSONB
- *   3. Réécrire le config complet (Supabase JS ne supporte pas la mise à jour
- *      partielle d'un tableau JSONB sans fonction RPC)
- *
- * Prérequis RLS : la politique "modules_patient_update" doit être active
- * (voir supabase/schema.sql).
+ * Stratégie : lire la ligne, muter le tableau JSONB unlocked_cards, réécrire
+ * le config complet (Supabase JS ne supporte pas la mise à jour partielle
+ * d'un tableau JSONB sans fonction RPC).
  */
 export async function markCardAsRead(
   patientId: string,
   cardId: string
 ): Promise<void> {
-  // 1. Récupérer la ligne actuelle
   const { data, error } = await supabase
     .from('patient_modules')
     .select('id, config')
@@ -45,12 +56,10 @@ export async function markCardAsRead(
 
   const currentCards: UnlockedCard[] = data.config?.unlocked_cards ?? []
 
-  // 2. Mettre à jour uniquement la carte ciblée
   const updatedCards = currentCards.map((card) =>
     card.card_id === cardId ? { ...card, is_read: true } : card
   )
 
-  // 3. Réécrire le config
   const { error: updateError } = await supabase
     .from('patient_modules')
     .update({

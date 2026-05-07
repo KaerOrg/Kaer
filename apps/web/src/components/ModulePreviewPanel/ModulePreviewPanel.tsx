@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { fetchModuleFields, type ModuleFieldsResult } from '../../lib/moduleService'
+import { fetchModuleFields, type ModuleFieldsResult } from '../../services/moduleService'
 import { FieldRenderer } from '../ModuleRenderer'
 import './ModulePreviewPanel.css'
 

@@ -7,12 +7,12 @@ import {
   Moon, Apple, Clock, Smile, Target, Activity, Brain, Search,
   Leaf, Waves, Thermometer, TrendingUp, Wind, RefreshCw, BookMarked, Scale,
 } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
 import type { ModuleType } from '../lib/database.types'
-import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../lib/moduleCategories'
+import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../services/moduleCatalogService'
+import { fetchEnabledModules, saveEnabledModules } from '../services/practitionerSettingsService'
 import { Toggle } from '../components/Toggle/Toggle'
 import './ModuleCatalogPage.css'
 
@@ -57,18 +57,14 @@ export function ModuleCatalogPage() {
 
   const loadSettings = useCallback(async () => {
     if (!practitioner) return
-    const [cats, { data }, comingSoon] = await Promise.all([
+    const [cats, savedEnabled, comingSoon] = await Promise.all([
       fetchModuleCategories(),
-      supabase
-        .from('practitioner_module_settings')
-        .select('enabled_modules')
-        .eq('practitioner_id', practitioner.id)
-        .maybeSingle(),
+      fetchEnabledModules(practitioner.id),
       fetchComingSoonModuleIds(),
     ])
     setCategories(cats)
     const allModuleIds = cats.flatMap(c => c.modules).map(m => m.id)
-    setEnabled(data ? new Set(data.enabled_modules as ModuleType[]) : new Set(allModuleIds))
+    setEnabled(savedEnabled ?? new Set(allModuleIds))
     setComingSoonIds(comingSoon)
     setLoading(false)
   }, [practitioner])
@@ -102,14 +98,9 @@ export function ModuleCatalogPage() {
     setSaveError(null)
     setSaveSuccess(false)
 
-    const { error } = await supabase
-      .from('practitioner_module_settings')
-      .upsert(
-        { practitioner_id: practitioner.id, enabled_modules: [...enabled], updated_at: new Date().toISOString() },
-        { onConflict: 'practitioner_id' },
-      )
+    const { ok } = await saveEnabledModules(practitioner.id, enabled)
 
-    if (error) {
+    if (!ok) {
       setSaveError(t('modules.save_error'))
     } else {
       setSaveSuccess(true)
