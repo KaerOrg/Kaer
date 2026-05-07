@@ -27,6 +27,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'sleep_journal',
   'activity_log',
   'exposure_tracker',
+  'decision_grid',
   'patient_scenario',
 ])
 

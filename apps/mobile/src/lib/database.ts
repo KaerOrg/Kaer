@@ -58,11 +58,13 @@ export async function initDatabase(): Promise<void> {
   await createDailyEntriesTable(database)
   await createFormEntriesTable(database)
   await createTreeSelectionsTable(database)
+  await createModuleSettingsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
     `ALTER TABLE sleep_diary_entries ADD COLUMN awakenings_duration_minutes INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
+    `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
     // Copie des entrées des tables dédiées vers scale_entries
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'phq9',answers,score,NULL,created_at FROM phq9_entries`,
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'bsl23',answers,mean_score,NULL,created_at FROM bsl23_entries`,
@@ -82,6 +84,12 @@ export async function initDatabase(): Promise<void> {
     `INSERT OR IGNORE INTO form_entries (id,module_id,values,created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
     // emotion_entries → tree_selections (labels conservés directement dans path_json)
     `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
+    // decisional_balance → plan_items (4 quadrants × N args avec weight) + module_settings (target_behavior)
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_change) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_change) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_status_quo) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_status_quo) AS arg`,
+    `INSERT OR IGNORE INTO module_settings (module_id,key,value,updated_at) SELECT 'decisional_balance','target_behavior',target_behavior,COALESCE(updated_at,CURRENT_TIMESTAMP) FROM decisional_balance WHERE target_behavior <> ''`,
   ]
   for (const sql of migrations) {
     try { await database.execAsync(sql) } catch { /* colonne déjà présente ou table absente */ }
@@ -248,64 +256,12 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36)
 }
 
-// ─── Types Balance Décisionnelle ─────────────────────────────────────────────
+// ─── Table legacy decisional_balance ─────────────────────────────────────────
+// Conservée comme source de migration : les anciennes installations ont leurs
+// arguments stockés en JSON dans cette table monoligne. La migration au boot
+// (cf. plus haut) les déplie vers plan_items + module_settings via json_each.
+// Le module utilise désormais le moteur générique (preview_kind decision_grid).
 
-/** Un argument dans un quadrant de la balance, avec son poids d'importance (1-5) */
-export interface BalanceArgument {
-  id: string
-  text: string
-  weight: number // 1 à 5
-}
-
-/** Les 4 quadrants de la balance décisionnelle */
-export type BalanceQuadrant = 'pros_change' | 'cons_change' | 'pros_status_quo' | 'cons_status_quo'
-
-/** Enregistrement complet d'une balance décisionnelle */
-export interface DecisionalBalance {
-  id: string
-  target_behavior: string
-  pros_change: BalanceArgument[]
-  cons_change: BalanceArgument[]
-  pros_status_quo: BalanceArgument[]
-  cons_status_quo: BalanceArgument[]
-  updated_at: string
-}
-
-/** Scores calculés à partir des poids des arguments */
-export interface BalanceScores {
-  /** Somme des poids de pros_change + pros_status_quo du changement */
-  changeScore: number
-  /** Somme des poids de pros_status_quo + cons_change du statu quo */
-  statusQuoScore: number
-  /** changeScore / (changeScore + statusQuoScore) × 100, ou 50 si tout est vide */
-  motivationPercent: number
-}
-
-// ─── Calcul des scores (pur, testable) ───────────────────────────────────────
-
-/** Somme des poids d'une liste d'arguments */
-function sumWeights(args: BalanceArgument[]): number {
-  return args.reduce((acc, a) => acc + a.weight, 0)
-}
-
-/**
- * Calcule les scores de la balance décisionnelle.
- *
- * Score Changement  = Σ poids(pros_change)
- * Score Statu Quo   = Σ poids(pros_status_quo)
- * La jauge compare ces deux scores pour indiquer la motivation au changement.
- */
-export function computeBalanceScores(balance: Pick<DecisionalBalance, 'pros_change' | 'cons_change' | 'pros_status_quo' | 'cons_status_quo'>): BalanceScores {
-  const changeScore = sumWeights(balance.pros_change)
-  const statusQuoScore = sumWeights(balance.pros_status_quo)
-  const total = changeScore + statusQuoScore
-  const motivationPercent = total === 0 ? 50 : Math.round((changeScore / total) * 100)
-  return { changeScore, statusQuoScore, motivationPercent }
-}
-
-// ─── Fonctions SQLite Balance Décisionnelle ───────────────────────────────────
-
-/** Crée la table si elle n'existe pas encore (appelée dans initDatabase) */
 async function createDecisionalBalanceTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS decisional_balance (
@@ -318,63 +274,6 @@ async function createDecisionalBalanceTable(database: SQLite.SQLiteDatabase): Pr
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
-}
-
-function parseBalance(row: {
-  id: string
-  target_behavior: string
-  pros_change: string
-  cons_change: string
-  pros_status_quo: string
-  cons_status_quo: string
-  updated_at: string
-}): DecisionalBalance {
-  return {
-    id: row.id,
-    target_behavior: row.target_behavior,
-    pros_change: JSON.parse(row.pros_change) as BalanceArgument[],
-    cons_change: JSON.parse(row.cons_change) as BalanceArgument[],
-    pros_status_quo: JSON.parse(row.pros_status_quo) as BalanceArgument[],
-    cons_status_quo: JSON.parse(row.cons_status_quo) as BalanceArgument[],
-    updated_at: row.updated_at,
-  }
-}
-
-/**
- * Récupère la balance décisionnelle du patient (une seule par patient).
- * Retourne null si aucune n'existe encore.
- */
-export async function getDecisionalBalance(): Promise<DecisionalBalance | null> {
-  const database = getDb()
-  const row = await database.getFirstAsync<{
-    id: string
-    target_behavior: string
-    pros_change: string
-    cons_change: string
-    pros_status_quo: string
-    cons_status_quo: string
-    updated_at: string
-  }>('SELECT * FROM decisional_balance LIMIT 1')
-  return row ? parseBalance(row) : null
-}
-
-/** Sauvegarde (insert ou replace) la balance décisionnelle */
-export async function saveDecisionalBalance(balance: DecisionalBalance): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO decisional_balance
-      (id, target_behavior, pros_change, cons_change, pros_status_quo, cons_status_quo, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      balance.id,
-      balance.target_behavior,
-      JSON.stringify(balance.pros_change),
-      JSON.stringify(balance.cons_change),
-      JSON.stringify(balance.pros_status_quo),
-      JSON.stringify(balance.cons_status_quo),
-      new Date().toISOString(),
-    ]
-  )
 }
 
 // ─── SQLite Colonnes de Beck ──────────────────────────────────────────────────
@@ -1048,6 +947,8 @@ export interface PlanItem {
   section_id: string
   text: string
   sort_order: number
+  /** Poids optionnel (1..N selon le layout). null pour les modules qui n'utilisent pas de pondération (ex. crisis_plan). */
+  weight: number | null
   created_at: string
 }
 
@@ -1059,6 +960,7 @@ async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<vo
       section_id TEXT NOT NULL,
       text       TEXT NOT NULL,
       sort_order INTEGER NOT NULL DEFAULT 0,
+      weight     INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_plan_items_module ON plan_items(module_id, section_id);
@@ -1076,14 +978,49 @@ export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanIt
 export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order) VALUES (?, ?, ?, ?, ?)`,
-    [item.id, item.module_id, item.section_id, item.text, item.sort_order]
+    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight) VALUES (?, ?, ?, ?, ?, ?)`,
+    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null]
   )
 }
 
 export async function deletePlanItem(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM plan_items WHERE id = ?', [id])
+}
+
+// ─── module_settings — table générique pour les single-doc fields ────────────
+// Stocke des paires clé/valeur scopées par module_id (ex. target_behavior d'une
+// balance décisionnelle, etc.). Une seule valeur par (module_id, key).
+
+async function createModuleSettingsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS module_settings (
+      module_id  TEXT NOT NULL,
+      key        TEXT NOT NULL,
+      value      TEXT NOT NULL,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (module_id, key)
+    );
+  `)
+}
+
+export async function getModuleSetting(moduleId: string, key: string): Promise<string | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<{ value: string }>(
+    'SELECT value FROM module_settings WHERE module_id = ? AND key = ?',
+    [moduleId, key]
+  )
+  return row?.value ?? null
+}
+
+export async function setModuleSetting(moduleId: string, key: string, value: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO module_settings (module_id, key, value, updated_at)
+     VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+     ON CONFLICT(module_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
+    [moduleId, key, value]
+  )
 }
 
 // ─── scale_entries — table générique pour tous les questionnaires cliniques ───

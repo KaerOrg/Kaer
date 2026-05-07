@@ -22,6 +22,8 @@ import {
 } from './fields'
 import { ActivityLogLayout } from './layouts/ActivityLog'
 import { ExposureTrackerLayout } from './layouts/ExposureTracker'
+import { DecisionGridLayout } from './layouts/DecisionGrid'
+import { EditableItemsList } from './layouts/shared'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
@@ -809,10 +811,6 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
-  const [addingToSection, setAddingToSection] = useState<string | null>(null)
-  const [newItemText, setNewItemText] = useState('')
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editText, setEditText] = useState('')
 
   useEffect(() => {
     getAllPlanItemsForModule(moduleId).then(data => {
@@ -834,63 +832,31 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   const toggleSection = useCallback((sectionId: string) => {
     setExpandedSections(prev => {
       const next = new Set(prev)
-      if (next.has(sectionId)) {
-        next.delete(sectionId)
-        setAddingToSection(curr => (curr === sectionId ? null : curr))
-      } else {
-        next.add(sectionId)
-      }
+      if (next.has(sectionId)) next.delete(sectionId)
+      else next.add(sectionId)
       return next
     })
   }, [])
 
-  const handleStartAdd = useCallback((sectionId: string) => {
-    setAddingToSection(sectionId)
-    setNewItemText('')
-    setEditingId(null)
-  }, [])
-
-  const handleCancelAdd = useCallback(() => {
-    setAddingToSection(null)
-    setNewItemText('')
-  }, [])
-
-  const handleSaveNew = useCallback(async (sectionId: string) => {
-    const trimmed = newItemText.trim()
-    if (!trimmed) return
+  const handleAdd = useCallback(async (sectionId: string, text: string) => {
     const existingItems = itemsBySection.get(sectionId) ?? []
-    const newItem = {
+    const newItem: PlanItem = {
       id: generateId(),
       module_id: moduleId,
       section_id: sectionId,
-      text: trimmed,
+      text,
       sort_order: existingItems.length,
+      weight: null,
+      created_at: new Date().toISOString(),
     }
     await savePlanItem(newItem)
-    setItems(prev => [...prev, { ...newItem, created_at: new Date().toISOString() }])
-    setAddingToSection(null)
-    setNewItemText('')
-  }, [newItemText, itemsBySection, moduleId])
+    setItems(prev => [...prev, newItem])
+  }, [itemsBySection, moduleId])
 
-  const handleStartEdit = useCallback((item: PlanItem) => {
-    setEditingId(item.id)
-    setEditText(item.text)
-    setAddingToSection(null)
+  const handleEdit = useCallback(async (item: PlanItem, text: string) => {
+    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text, sort_order: item.sort_order, weight: item.weight })
+    setItems(prev => prev.map(i => (i.id === item.id ? { ...i, text } : i)))
   }, [])
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingId(null)
-    setEditText('')
-  }, [])
-
-  const handleSaveEdit = useCallback(async (item: PlanItem) => {
-    const trimmed = editText.trim()
-    if (!trimmed) return
-    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text: trimmed, sort_order: item.sort_order })
-    setItems(prev => prev.map(i => (i.id === item.id ? { ...i, text: trimmed } : i)))
-    setEditingId(null)
-    setEditText('')
-  }, [editText])
 
   const handleDelete = useCallback((item: PlanItem) => {
     Alert.alert(t('modules.crisis_plan.delete_item_title'), `"${item.text}"`, [
@@ -959,61 +925,17 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
                   {hintField != null && (
                     <Text style={esStyles.stepHint}>{t(hintField.text_code ?? '')}</Text>
                   )}
-
-                  {sectionItems.map(item => (
-                    <View key={item.id} style={esStyles.itemRow}>
-                      {editingId === item.id ? (
-                        <View style={esStyles.editContainer}>
-                          <TextInput style={esStyles.textInput} value={editText} onChangeText={setEditText} autoFocus multiline testID={`edit-input-${item.id}`} />
-                          <View style={esStyles.actionRow}>
-                            <Pressable style={[esStyles.actionBtn, esStyles.validateBtn]} onPress={() => handleSaveEdit(item)} testID={`validate-edit-${item.id}`}>
-                              <Text style={esStyles.validateBtnText}>{t('common.validate')}</Text>
-                            </Pressable>
-                            <Pressable style={[esStyles.actionBtn, esStyles.cancelBtn]} onPress={handleCancelEdit}>
-                              <Text style={esStyles.cancelBtnText}>{t('common.cancel')}</Text>
-                            </Pressable>
-                          </View>
-                        </View>
-                      ) : (
-                        <>
-                          <MaterialCommunityIcons name="circle-small" size={20} color={iconColor} />
-                          <Pressable style={esStyles.itemTextArea} onPress={() => handleStartEdit(item)}>
-                            <Text style={esStyles.itemContent}>{item.text}</Text>
-                          </Pressable>
-                          <Pressable onPress={() => handleDelete(item)} hitSlop={8} testID={`delete-item-${item.id}`} accessibilityLabel={`${t('common.delete')} : ${item.text}`}>
-                            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-                          </Pressable>
-                        </>
-                      )}
-                    </View>
-                  ))}
-
-                  {addingToSection === sectionId ? (
-                    <View style={esStyles.addForm}>
-                      <TextInput
-                        style={esStyles.textInput}
-                        placeholder={t('modules.crisis_plan.item_placeholder')}
-                        value={newItemText}
-                        onChangeText={setNewItemText}
-                        autoFocus
-                        multiline
-                        testID="new-item-input"
-                      />
-                      <View style={esStyles.actionRow}>
-                        <Pressable style={[esStyles.actionBtn, esStyles.validateBtn]} onPress={() => handleSaveNew(sectionId)} testID="validate-new-item">
-                          <Text style={esStyles.validateBtnText}>{t('common.validate')}</Text>
-                        </Pressable>
-                        <Pressable style={[esStyles.actionBtn, esStyles.cancelBtn]} onPress={handleCancelAdd} testID="cancel-new-item">
-                          <Text style={esStyles.cancelBtnText}>{t('common.cancel')}</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  ) : (
-                    <Pressable style={esStyles.addBtn} onPress={() => handleStartAdd(sectionId)} testID={`add-to-step-${stepNumber}`}>
-                      <MaterialCommunityIcons name="plus" size={18} color={iconColor} />
-                      <Text style={[esStyles.addBtnText, { color: iconColor }]}>{t('modules.crisis_plan.add_item')}</Text>
-                    </Pressable>
-                  )}
+                  <EditableItemsList
+                    items={sectionItems}
+                    accentColor={iconColor}
+                    weightConfig={null}
+                    addLabel={t('modules.crisis_plan.add_item')}
+                    placeholder={t('modules.crisis_plan.item_placeholder')}
+                    onAdd={(text) => handleAdd(sectionId, text)}
+                    onEdit={(item, text) => handleEdit(item, text)}
+                    onDelete={handleDelete}
+                    testIdPrefix={`step-${stepNumber}`}
+                  />
                 </View>
               )}
             </View>
@@ -3499,6 +3421,10 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'exposure_tracker') {
     return <ExposureTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'decision_grid') {
+    return <DecisionGridLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {

@@ -39,6 +39,9 @@ Deux entrées possibles :
             ├── column_form        → ColumnFormLayout      (beck_columns : sections + champs enfants + form_entries)
             ├── tree_selector      → TreeSelectorLayout    (emotion_wheel : arbre N niveaux + tree_selections)
             ├── sleep_journal      → SleepJournalLayout    (sleep_diary : 3 modes internes list/entry/month, time pickers natifs, grille calendrier, table sleep_diary_entries)
+            ├── activity_log       → ActivityLogLayout     (behavioral_activation : 3 modes internes list/entry/month, suggestions chips, 2 sliders P/M, calendrier dots done/planned, table activity_records)
+            ├── exposure_tracker   → ExposureTrackerLayout (fear_thermometer : tabs Saisies/Situations, mode entry avec SUDs avant/après, catalogue + texte libre, stratégies DB-driven, tables fear_entries + fear_situations)
+            ├── decision_grid      → DecisionGridLayout    (decisional_balance : grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, tables plan_items.weight + module_settings, sous-composant EditableItemsList partagé avec editable_steps)
             ├── steps              → StepsLayout
             ├── cards              → CardsLayout
             ├── fields             → FieldsLayout
@@ -92,7 +95,6 @@ Tout module absent de cette map ET autre `preview_kind` → `ModuleContent` (mot
 ```ts
 const CUSTOM_ROUTES = {
   psychoeducation, decisional_balance,
-  fear_thermometer, behavioral_activation,
   breathing_techniques,
 }
 ```
@@ -123,9 +125,9 @@ const CUSTOM_ROUTES = {
 | `beck_columns` | BeckColumnsScreen + BeckEntryScreen | 5 colonnes hétérogènes TCC | Nouveau layout `column_form` (sections = colonnes, champs enfants via `parent_field_id`, table `form_entries`) | ✅ Migré |
 | `emotion_wheel` | EmotionWheelScreen + Entry + Month | Roue 3 niveaux hiérarchiques | Nouveau layout `tree_selector` (niveaux modélisés via `parent_field_id`, table SQLite générique `tree_selections`) | ✅ Migré |
 | `sleep_diary` | SleepDiaryScreen + Entry + Month | Journal + time pickers + calendrier | Nouveau layout `sleep_journal` (3 modes internes + time pickers natifs + grille mois, table SQLite dédiée `sleep_diary_entries`) | ✅ Migré |
-| `behavioral_activation` | BehavioralActivationScreen + Entry | CRUD activités + calendrier mensuel | Nouveau layout `activity_log` (calendrier + CRUD + 2 dimensions) | ⏳ Planifié (L) |
-| `fear_thermometer` | FearThermometerScreen + FearEntryScreen | SUDS avant/après + catalogue situations + stratégies | Nouveau layout `exposure_tracker` (3 sous-tables SQLite dédiées) | ⏳ Planifié (XL) |
-| `decisional_balance` | DecisionalBalanceScreen | Grille 2×2 + poids étoiles + jauge | Jauge dynamique interprétative — contrainte MDR, pas technique | ❌ MDR |
+| `behavioral_activation` | BehavioralActivationScreen + Entry | CRUD activités + calendrier mensuel | Nouveau layout `activity_log` (3 modes list/entry/month, calendrier dots done/planned, suggestions chips, 2 sliders P/M, table SQLite dédiée `activity_records`) | ✅ Migré |
+| `fear_thermometer` | FearThermometerScreen + FearEntryScreen | SUDS avant/après + catalogue situations + stratégies | Nouveau layout `exposure_tracker` (tabs Saisies/Situations, mode entry SUDs avant/après, stratégies DB-driven, tables `fear_entries` + `fear_situations`) | ✅ Migré |
+| `decisional_balance` | DecisionalBalanceScreen | Grille 2×2 + items pondérés (1–5 étoiles) + jauge motivation | Nouveau layout `decision_grid` (4 quadrants 2×2 via `column_header.gauge_role`, items via `plan_items.weight`, target_behavior via `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`) | ✅ Migré |
 
 ---
 
@@ -499,7 +501,7 @@ Le moteur est extensible à volonté via deux mécanismes :
 
 **Seule contrainte réelle : MDR 2017/745.**  
 Un layout qui *interprète* les données (affiche une conclusion, déclenche une action selon le score) requalifie l'app en Dispositif Médical. Un layout qui *affiche* et *collecte* sans conclure reste conforme.  
-→ `decisional_balance` reste custom car sa jauge de motivation est interprétative par nature.
+→ Aucun module ne tombe dans cette catégorie : tous les calculs affichés (totaux, moyennes, ratios, jauges) sont des synthèses arithmétiques des saisies du patient, sans seuil clinique ni label interprétatif.
 
 ---
 
@@ -507,16 +509,11 @@ Un layout qui *interprète* les données (affiche une conclusion, déclenche une
 
 ### Planifiés (effort estimé S/M/L/XL)
 
-| Module | `preview_kind` | Nouveaux mécanismes requis | Effort |
-|---|---|---|---|
-| `behavioral_activation` | `activity_log` | Calendrier mensuel (points colorés), CRUD avec 2 dimensions (plaisir/maîtrise), toggle réalisé/planifié | L |
-| `fear_thermometer` | `exposure_tracker` | 3 sous-tables SQLite dédiées (situations, mesures SUDS, stratégies), sliders 0–100, checkboxes avec ajout libre | XL |
+_Plus aucun module restant à migrer — tous les modules thérapeutiques fonctionnels ont été migrés vers le moteur générique. Seul `decisional_balance` reste custom pour des raisons de conformité MDR (jauge interprétative)._
 
 ### Conservé custom — contrainte non-technique
 
-| Module | Raison |
-|---|---|
-| `decisional_balance` | La jauge de motivation calculée dynamiquement depuis les poids (étoiles 1–5) est interprétative — elle synthétise les données en une conclusion visuelle. Migrer vers le moteur déplacerait cette logique dans un layout générique, rendant la traçabilité MDR plus difficile à défendre. Restera custom tant que la conformité MDR n'est pas formellement établie. |
+_Aucun module restant custom pour des raisons MDR. La jauge de `decisional_balance` initialement marquée comme « interprétative » s'est révélée être en réalité une simple synthèse arithmétique des poids saisis par le patient (`Σ(pros_change.weight) / [Σ(pros_change.weight) + Σ(pros_status_quo.weight)]`), de même nature que les scores totaux affichés par PHQ-9, GAD-7 ou mood_tracker — déjà migrés. Aucun seuil clinique, aucune comparaison à une norme : la barre affiche un ratio brut, pas un diagnostic. La migration a remplacé la justification fragile « ❌ MDR » par une migration propre vers le moteur générique._
 
 ---
 
@@ -534,8 +531,9 @@ Modules déjà migrés (barrés) — restants classés par effort croissant :
 8. ~~`beck_columns`~~ ✅ (layout `column_form`, table SQLite générique `form_entries`)
 9. ~~`emotion_wheel`~~ ✅ (layout `tree_selector`, arbre 3 niveaux via `parent_field_id`, table SQLite générique `tree_selections`)
 10. ~~`sleep_diary`~~ ✅ (layout `sleep_journal`, 3 modes internes list/entry/month, time pickers natifs, grille calendrier, table SQLite dédiée `sleep_diary_entries`)
-11. **`behavioral_activation`** — layout `activity_log`, calendrier + CRUD, effort L
-12. **`fear_thermometer`** — layout `exposure_tracker`, 3 sous-tables SQLite, effort XL
+11. ~~`behavioral_activation`~~ ✅ (layout `activity_log`, 3 modes internes list/entry/month, suggestions chips, 2 sliders P/M, calendrier dots done/planned, table SQLite dédiée `activity_records`)
+12. ~~`fear_thermometer`~~ ✅ (layout `exposure_tracker`, tabs Saisies/Situations + mode entry SUDs avant/après, catalogue de situations + texte libre, stratégies DB-driven, tables SQLite existantes `fear_entries` + `fear_situations`)
+13. ~~`decisional_balance`~~ ✅ (layout `decision_grid`, grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`)
 
 Pour chaque migration :
 1. Lire le(s) fichier(s) écran actuel(s) pour extraire TOUTES les clés i18n et la structure SQLite
@@ -641,3 +639,111 @@ Layout auto-suffisant à 3 modes internes : `list → entry → month`. Aucune n
 *`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode entry).
 
 *Tests :* `FieldRenderer.sleep_journal.test.tsx` — 12 tests (chargement, liste 14 jours, ouverture entry, pré-remplissage entrée existante, calcul SE live, validation qualité manquante, save nouveau, save avec cauchemars, compteur awakenings, mode month, navigation month, suppression).
+
+---
+
+### 11 (complété). `behavioral_activation` — Journal d'activités plaisir/maîtrise + calendrier mensuel
+
+**Fonctionnel**
+Planification ou enregistrement d'activités, chacune notée selon deux dimensions brutes Plaisir (0–10) et Maîtrise (0–10), avec un statut « réalisée / planifiée », une date libre (passée ou future) et des notes optionnelles. Liste groupée par date avec toggle done en place. Vue mensuelle avec calendrier coloré (points verts = réalisée, bleus = planifiée), légende et filtre par jour sélectionné. Conformité MDR 2017/745 : aucune interprétation, aucun seuil, aucun score agrégé — les couleurs des points = convention d'affichage des statuts saisis.
+
+**Solution : `preview_kind: 'activity_log'` + `ActivityLogLayout`**
+
+Layout auto-suffisant à 3 modes internes : `list → entry → month`. Aucune navigation externe. Mode `entry` utilise `KeyboardAvoidingView` + `DateTimePicker` natif (`@react-native-community/datetimepicker`) + suggestions horizontales (chips configurables depuis Supabase). Mode `month` réutilise une grille calendrier avec points colorés `done/planned`. Signal `logEvent('SAVE_BEHAVIORAL_ACTIVATION')` côté Supabase à la création seulement (jamais à l'édition).
+
+*`field_types` configurables depuis Supabase :*
+- `activity_log_config` — props : `engagement_event_type`, `pleasure_min` (0), `pleasure_max` (10), `pleasure_step` (1), `mastery_min` (0), `mastery_max` (10), `mastery_step` (1), `pleasure_color` (#059669), `mastery_color` (#4F46E5), `dot_done_color` (#10B981), `dot_planned_color` (#3B82F6), `locale` (fr-FR)
+- `activity_log_suggestion` (multiple, sortés par `sort_order`) — text_code = clé i18n du label de la suggestion (ex. `modules.behavioral_activation.suggestion_walk`)
+- UI labels (sans section) : `activity_log_tab_list_label`, `activity_log_tab_month_label`, `activity_log_add_btn`, `activity_log_empty_title`, `activity_log_empty_text`, `activity_log_section_activity_title`, `activity_log_section_evaluation_title`, `activity_log_section_notes_title`, `activity_log_activity_placeholder`, `activity_log_pleasure_label`, `activity_log_pleasure_sublabel`, `activity_log_mastery_label`, `activity_log_mastery_sublabel`, `activity_log_done_label`, `activity_log_mark_done_label`, `activity_log_mark_undone_label`, `activity_log_notes_placeholder`, `activity_log_date_label`, `activity_log_date_confirm_label`, `activity_log_save_label`, `activity_log_update_label`, `activity_log_delete_label`, `activity_log_delete_title`, `activity_log_name_missing_title`, `activity_log_name_missing_msg`, `activity_log_legend_done_label`, `activity_log_legend_planned_label`, `activity_log_month_hint_tap`, `activity_log_month_hint_empty`, `activity_log_back_label`
+
+*SQLite :* réutilise `activity_records` existant — aucune migration nécessaire. La structure couvrait déjà toutes les valeurs (`date`, `label`, `pleasure`, `mastery`, `done`, `notes`).
+
+*Supabase (schema.sql) :*
+- `UPDATE modules SET preview_kind = 'activity_log' WHERE id = 'behavioral_activation'`
+- Suppression des anciens `widget_type` props `ba.field_1`–`ba.field_6` (preview_kind 'fields' obsolète) avant insertion des nouveaux `al.*` champs.
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode entry).
+
+*Tests :* `FieldRenderer.activity_log.test.tsx` — 12 tests (chargement état vide, liste groupée, passage en entry, validation nom manquant, save + logEvent, toggle done depuis entry, pré-remplissage édition, édition sans logEvent, toggle done depuis liste, mode month + navigation, suppression depuis entry, suppression depuis liste).
+
+---
+
+### 12 (complété). `fear_thermometer` — Mesure SUDS avant/après + catalogue de situations + stratégies de coping
+
+**Fonctionnel**
+Mesure de la détresse subjective (SUDS, Subjective Units of Distress Scale, Wolpe 1969) sur une échelle brute 0–100 avant et après une situation anxiogène. Chaque saisie est rattachée à une situation déclenchante (choisie dans un catalogue personnel ou en texte libre), enrichie d'une liste de stratégies de coping (Respiration / Ancrage / Mouvement / Exposition / Distraction / Contact, plus texte libre) et de notes optionnelles. Le SUDS après est nullable — le patient peut différer la saisie. Liste des entries, panneau de gestion du catalogue de situations. Conformité MDR 2017/745 : SUDS bruts uniquement, aucun seuil, aucune interprétation. Les couleurs avant (rouge) / après (vert) = convention d'affichage de l'ordre temporel saisi.
+
+**Solution : `preview_kind: 'exposure_tracker'` + `ExposureTrackerLayout`**
+
+Layout auto-suffisant à 3 modes internes : `list → entry`, plus deux tabs au sein du mode `list` (`Saisies` / `Situations`). Aucune navigation externe. Mode `entry` utilise `KeyboardAvoidingView` + 2 `PipPicker` pour SUDS avant/après (variant `numbered`, 0–100 step 10). Le tab `Situations` héberge un panneau de gestion du catalogue (input + liste avec delete). Signal `logEvent('SAVE_FEAR_ENTRY')` côté Supabase à la création seulement (jamais à l'édition).
+
+*`field_types` configurables depuis Supabase :*
+- `exposure_tracker_config` — props : `engagement_event_type`, `suds_min` (0), `suds_max` (100), `suds_step` (10), `suds_default_before` (50), `suds_before_color` (#EF4444), `suds_after_color` (#059669)
+- `exposure_tracker_strategy` (multiple, sortés par `sort_order`) — text_code = clé i18n du label, le `field.id` sert de clé stockée dans le JSON `strategies` côté SQLite (ex. `et.strategy_breathing`)
+- UI labels (sans section) : `exposure_tracker_tab_entries_label`, `exposure_tracker_tab_situations_label`, `exposure_tracker_add_btn`, `exposure_tracker_empty_title`, `exposure_tracker_empty_text`, `exposure_tracker_section_trigger_title`, `exposure_tracker_section_before_title`, `exposure_tracker_section_strategies_title`, `exposure_tracker_section_after_title`, `exposure_tracker_section_notes_title`, `exposure_tracker_situation_mode_catalogue`, `exposure_tracker_situation_mode_free`, `exposure_tracker_situation_free_placeholder`, `exposure_tracker_situation_catalogue_empty`, `exposure_tracker_suds_before_label`, `exposure_tracker_suds_before_hint`, `exposure_tracker_suds_after_label`, `exposure_tracker_suds_after_hint`, `exposure_tracker_suds_skip_null`, `exposure_tracker_suds_skip_later`, `exposure_tracker_strategies_hint`, `exposure_tracker_strategy_custom_placeholder`, `exposure_tracker_notes_placeholder`, `exposure_tracker_save_label`, `exposure_tracker_update_label`, `exposure_tracker_delete_label`, `exposure_tracker_back_label`, `exposure_tracker_situation_missing_title`, `exposure_tracker_situation_missing_msg`, `exposure_tracker_delete_entry_title`, `exposure_tracker_situation_delete_title`, `exposure_tracker_situations_panel_title`, `exposure_tracker_situations_panel_hint`, `exposure_tracker_situation_placeholder`, `exposure_tracker_situation_empty`
+
+*SQLite :* réutilise `fear_entries` et `fear_situations` existants — aucune migration nécessaire. La structure couvrait déjà toutes les valeurs. Le champ `strategies` (JSON) bascule en douceur de `selected: CopingStrategy[]` (legacy : labels FR codés en dur) vers `selected: string[]` (nouvelles entries : field IDs `et.strategy_*`). Le rendu fait `strategyLabelByKey.get(key) ?? key` — les anciennes entries continuent d'afficher leurs labels bruts ; les nouvelles entries voient leurs chips i18n-isées.
+
+*Supabase (schema.sql) :*
+- `UPDATE modules SET preview_kind = 'exposure_tracker' WHERE id = 'fear_thermometer'`
+- Suppression des anciens `widget_type` props `ft.field_1`–`ft.field_5` (preview_kind 'fields' obsolète) avant insertion des nouveaux `et.*` champs.
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode entry).
+
+*Nettoyage :* suppression de `FearThermometerScreen.tsx`, `FearEntryScreen.tsx`, `FearThermometerScreen.test.tsx` ; retrait des entrées `fear_thermometer` de `CUSTOM_ROUTES` (HomeScreen) ; retrait des routes `FearThermometer` et `FearEntry` d'`AppStack`.
+
+*Tests :* `FieldRenderer.exposure_tracker.test.tsx` — 13 tests (chargement état vide, liste, passage en entry, validation situation manquante, save texte libre + logEvent, save situation catalogue, toggle stratégie persistée dans JSON, pré-remplissage édition, édition sans logEvent, suppression depuis liste, suppression depuis entry, ajout situation depuis panneau, suppression situation depuis panneau).
+
+---
+
+### 13 (complété). `decisional_balance` — Grille 2×2 + items pondérés + jauge motivation
+
+**Fonctionnel**
+Balance décisionnelle (Janis & Mann 1977 — Motivational Interviewing). 4 quadrants en grille 2×2 : Avantages du changement / Inconvénients du changement / Avantages à rester comme je suis / Inconvénients à rester comme je suis. Chaque quadrant contient un nombre variable d'arguments saisis par le patient, chacun pondéré sur une échelle de 1 à 5 étoiles. Un champ texte « comportement ciblé » en tête. Une jauge horizontale en pied calcule un ratio brut entre les sommes pondérées des « pros_change » (côté changement) et des « pros_status_quo » (côté statu quo). Conformité MDR 2017/745 : ratio arithmétique pur, sans seuil clinique, sans label interprétatif — de même nature que le score total d'un PHQ-9 ou la moyenne d'un mood_tracker.
+
+**Solution : `preview_kind: 'decision_grid'` + `DecisionGridLayout`**
+
+Layout auto-suffisant rendu en grille 2×2 + jauge en pied + champ texte top-level + bouton Sauvegarder fixe. Réutilise le sous-composant `EditableItemsList` (partagé avec `editable_steps` via `layouts/shared/`) pour gérer la liste d'items de chaque quadrant. Le `WeightPicker` (1..N étoiles) est aussi extrait pour réemploi futur.
+
+*Sous-composant partagé `EditableItemsList<TItem extends EditableItem>` (`layouts/shared/`) :*
+- Props : `items`, `accentColor`, `weightConfig: { min, max, defaultValue, label } | null`, `addLabel`, `placeholder`, `onAdd(text, weight)`, `onEdit(item, text, weight)`, `onDelete(item)`, `testIdPrefix`
+- Quand `weightConfig` est null, comportement identique à l'ancien EditableStepsLayout (texte seul). Quand défini, un `WeightPicker` apparaît dans les formulaires d'ajout/édition + sous chaque item rendu (tap direct = save inline).
+- Utilisé par `EditableStepsLayout` (sans poids) et `DecisionGridLayout` (avec poids 1–5 étoiles).
+
+*`field_types` configurables depuis Supabase :*
+- `decision_grid_config` — props : `engagement_event_type`, `target_behavior_key` (clé du module_settings, défaut 'target_behavior'), `weight_min` (1), `weight_max` (5), `weight_default` (3), `gauge_fill_color` (#EC4899)
+- `column_header` (réutilisé) — un par quadrant, sortés par `sort_order`. Props étendus : `color` (accent), `bg_color` (background du header, nouveau), `icon` (MaterialCommunityIcons, nouveau), `gauge_role` ('change' | 'status_quo' | absent → ignoré dans la jauge, nouveau), `subtitle_code` (clé i18n du sous-titre, nouveau)
+- UI labels (sans section) : `decision_grid_target_label`, `decision_grid_target_placeholder`, `decision_grid_save_label`, `decision_grid_saved_message`, `decision_grid_gauge_title`, `decision_grid_gauge_change_label`, `decision_grid_gauge_status_label`, `decision_grid_add_label`, `decision_grid_arg_placeholder`, `decision_grid_weight_label`
+
+*SQLite — extension de `plan_items` + nouvelle table `module_settings` :*
+```sql
+ALTER TABLE plan_items ADD COLUMN weight INTEGER;  -- nullable, ignoré pour crisis_plan
+
+CREATE TABLE IF NOT EXISTS module_settings (
+  module_id  TEXT NOT NULL,
+  key        TEXT NOT NULL,
+  value      TEXT NOT NULL,
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (module_id, key)
+);
+```
+Migration depuis `decisional_balance` au boot : décompresse les 4 JSON arrays via `json_each` en lignes `plan_items` (une par argument, avec `weight`), copie `target_behavior` dans `module_settings`. La table legacy `decisional_balance` est conservée comme source de migration mais n'est plus écrite.
+
+*Calcul de la jauge (pur, dans `DecisionGridLayout`) :*
+```
+changeScore     = Σ items.weight pour chaque quadrant avec gauge_role='change'
+statusQuoScore  = Σ items.weight pour chaque quadrant avec gauge_role='status_quo'
+motivation%     = total === 0 ? 50 : round(changeScore / total × 100)
+```
+Pour `decisional_balance`, seuls `pros_change` (gauge_role=change) et `pros_status_quo` (gauge_role=status_quo) contribuent. Les `cons_*` n'ont pas de `gauge_role` et sont ignorés dans la jauge — comportement identique à l'écran custom précédent.
+
+*Supabase (schema.sql) :*
+- `UPDATE modules SET preview_kind = 'decision_grid' WHERE id = 'decisional_balance'` (était `'grid2x2'`)
+- Suppression des champs `db.*` éventuels avant insertion (idempotent)
+- 4 `column_header` (un par quadrant) avec leurs props (color, bg_color, icon, subtitle_code, gauge_role pour 2 d'entre eux)
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode entry).
+
+*Nettoyage :* suppression de `DecisionalBalanceScreen.tsx` et `DecisionalBalance.test.ts` ; retrait de l'entrée `decisional_balance` de `CUSTOM_ROUTES` (HomeScreen) ; retrait de la route `DecisionalBalance` d'`AppStack`. Suppression des fonctions/types legacy `getDecisionalBalance`, `saveDecisionalBalance`, `BalanceArgument`, `BalanceQuadrant`, `DecisionalBalance`, `BalanceScores`, `computeBalanceScores` de `database.ts` (la table reste comme source de migration).
+
+*Tests :* `FieldRenderer.decision_grid.test.tsx` — 10 tests (chargement items + target_behavior, rendu des 4 quadrants, rendu de la jauge, pré-remplissage target depuis module_settings, ajout d'argument avec poids défaut, validation texte vide, ajustement poids inline via tap étoile, save bouton + logEvent, suppression avec confirmation, agrégation jauge ignore les quadrants sans gauge_role). `FieldRenderer.editable_steps.test.tsx` mis à jour pour les nouveaux testIDs préfixés (`step-{n}-add`, `step-{n}-new-input`, etc.) consécutifs au refacto via `EditableItemsList`.

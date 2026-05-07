@@ -76,10 +76,10 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
     fireEvent.press(screen.getByTestId('step-header-1'))
-    await waitFor(() => expect(screen.getByTestId('add-to-step-1')).toBeTruthy())
+    await waitFor(() => expect(screen.getByTestId('step-1-add')).toBeTruthy())
 
     fireEvent.press(screen.getByTestId('step-header-1'))
-    await waitFor(() => expect(screen.queryByTestId('add-to-step-1')).toBeNull())
+    await waitFor(() => expect(screen.queryByTestId('step-1-add')).toBeNull())
   })
 
   it("affiche le formulaire d'ajout et appelle savePlanItem avec le bon contenu", async () => {
@@ -87,11 +87,11 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
     fireEvent.press(screen.getByTestId('step-header-1'))
-    await waitFor(() => expect(screen.getByTestId('add-to-step-1')).toBeTruthy())
-    fireEvent.press(screen.getByTestId('add-to-step-1'))
+    await waitFor(() => expect(screen.getByTestId('step-1-add')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('step-1-add'))
 
-    fireEvent.changeText(screen.getByTestId('new-item-input'), 'Respirer profondément')
-    fireEvent.press(screen.getByTestId('validate-new-item'))
+    fireEvent.changeText(screen.getByTestId('step-1-new-input'), 'Respirer profondément')
+    fireEvent.press(screen.getByTestId('step-1-validate-new'))
 
     await waitFor(() => {
       expect(database.savePlanItem).toHaveBeenCalledWith(
@@ -105,9 +105,9 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
     fireEvent.press(screen.getByTestId('step-header-1'))
-    await waitFor(() => expect(screen.getByTestId('add-to-step-1')).toBeTruthy())
-    fireEvent.press(screen.getByTestId('add-to-step-1'))
-    fireEvent.press(screen.getByTestId('validate-new-item'))
+    await waitFor(() => expect(screen.getByTestId('step-1-add')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('step-1-add'))
+    fireEvent.press(screen.getByTestId('step-1-validate-new'))
 
     expect(database.savePlanItem).not.toHaveBeenCalled()
   })
@@ -117,12 +117,12 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
     fireEvent.press(screen.getByTestId('step-header-1'))
-    await waitFor(() => expect(screen.getByTestId('add-to-step-1')).toBeTruthy())
-    fireEvent.press(screen.getByTestId('add-to-step-1'))
+    await waitFor(() => expect(screen.getByTestId('step-1-add')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('step-1-add'))
 
-    expect(screen.getByTestId('new-item-input')).toBeTruthy()
-    fireEvent.press(screen.getByTestId('cancel-new-item'))
-    expect(screen.queryByTestId('new-item-input')).toBeNull()
+    expect(screen.getByTestId('step-1-new-input')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('step-1-cancel-new'))
+    expect(screen.queryByTestId('step-1-new-input')).toBeNull()
   })
 
   it('affiche les boutons d\'urgence et appelle Linking.openURL sur le 15', async () => {
@@ -165,9 +165,9 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     await waitFor(() => expect(screen.getByText('Mon signe')).toBeTruthy())
 
     fireEvent.press(screen.getByText('Mon signe'))
-    const editInput = screen.getByTestId('edit-input-existing-1')
+    const editInput = screen.getByTestId('step-1-edit-input-existing-1')
     fireEvent.changeText(editInput, 'Mon signe modifié')
-    fireEvent.press(screen.getByTestId('validate-edit-existing-1'))
+    fireEvent.press(screen.getByTestId('step-1-validate-edit-existing-1'))
 
     await waitFor(() => {
       expect(database.savePlanItem).toHaveBeenCalledWith(

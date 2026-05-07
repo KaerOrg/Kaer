@@ -6,7 +6,6 @@ import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
-import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
@@ -23,7 +22,6 @@ export type AppStackParamList = {
   Tabs: undefined
   Psychoeducation: undefined
   CardDetail: { cardId: string; isRead: boolean }
-  DecisionalBalance: undefined
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
   ScaleHistory: { scale_id: string }
@@ -89,11 +87,6 @@ export default function AppStack() {
             ? (require('../constants/psychoeducationCards').PSYCHOEDUCATION_CARDS[route.params.cardId]?.title ?? 'Carte')
             : 'Carte',
         })}
-      />
-      <Stack.Screen
-        name="DecisionalBalance"
-        component={DecisionalBalanceScreen}
-        options={{ title: 'Balance décisionnelle' }}
       />
       <Stack.Screen
         name="BreathingTechniques"

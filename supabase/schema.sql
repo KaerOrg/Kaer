@@ -1662,3 +1662,87 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('et.cfg', 'suds_before_color',     '#EF4444'),
   ('et.cfg', 'suds_after_color',      '#059669')
 ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : decisional_balance → decision_grid
+-- preview_kind = 'decision_grid' → DecisionGridLayout (FieldRenderer)
+-- Grille 2×2 + items pondérés (1–5 étoiles) + jauge motivation
+-- Persistance : plan_items (un argument = une ligne) + module_settings
+-- (target_behavior). Items partagent le sous-composant EditableItemsList
+-- avec editable_steps.
+-- Conformité MDR 2017/745 : la jauge affiche un ratio brut des poids saisis
+-- par le patient, sans seuil ni interprétation clinique. Les couleurs des
+-- quadrants = convention d'affichage des catégories saisies.
+-- ============================================================
+
+-- Nettoyer toute insertion antérieure éventuelle
+DELETE FROM public.field_props WHERE field_id IN (
+  'db.cfg','db.q1.h','db.q2.h','db.q3.h','db.q4.h',
+  'db.target_label','db.target_placeholder','db.save_label','db.saved_message',
+  'db.gauge_title','db.gauge_change_label','db.gauge_status_label',
+  'db.add_label','db.arg_placeholder','db.weight_label','db.delete_title'
+);
+DELETE FROM public.module_content_fields WHERE module_id = 'decisional_balance';
+
+UPDATE public.modules SET preview_kind = 'decision_grid' WHERE id = 'decisional_balance';
+
+-- Champs UI (config + libellés sans section)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order) VALUES
+  ('db.cfg',                 'decisional_balance', 'decision_grid_config',              NULL,                                                  0),
+  ('db.target_label',        'decisional_balance', 'decision_grid_target_label',        'modules.decisional_balance.behavior_label',           1),
+  ('db.target_placeholder',  'decisional_balance', 'decision_grid_target_placeholder',  'modules.decisional_balance.behavior_placeholder',     2),
+  ('db.save_label',          'decisional_balance', 'decision_grid_save_label',          'modules.decisional_balance.save',                     3),
+  ('db.saved_message',       'decisional_balance', 'decision_grid_saved_message',       'modules.decisional_balance.saved_message',            4),
+  ('db.gauge_title',         'decisional_balance', 'decision_grid_gauge_title',         'modules.decisional_balance.gauge_title',              5),
+  ('db.gauge_change_label',  'decisional_balance', 'decision_grid_gauge_change_label',  'modules.decisional_balance.gauge_label_change',       6),
+  ('db.gauge_status_label',  'decisional_balance', 'decision_grid_gauge_status_label',  'modules.decisional_balance.gauge_label_status',       7),
+  ('db.add_label',           'decisional_balance', 'decision_grid_add_label',           'modules.decisional_balance.add_trigger',              8),
+  ('db.arg_placeholder',     'decisional_balance', 'decision_grid_arg_placeholder',     'modules.decisional_balance.arg_placeholder',          9),
+  ('db.weight_label',        'decisional_balance', 'decision_grid_weight_label',        'modules.decisional_balance.weight_label',             10)
+ON CONFLICT (id) DO NOTHING;
+
+-- Quadrants (column_header — un par section, sortés 10/20/30/40)
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) VALUES
+  ('db.q1.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_pros_change_title',  'pros_change',     10),
+  ('db.q2.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_cons_change_title',  'cons_change',     20),
+  ('db.q3.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_pros_status_title',  'pros_status_quo', 30),
+  ('db.q4.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_cons_status_title',  'cons_status_quo', 40)
+ON CONFLICT (id) DO NOTHING;
+
+-- Props : config + headers
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  -- Layout config
+  ('db.cfg', 'engagement_event_type', 'UPDATE_DECISIONAL_BALANCE'),
+  ('db.cfg', 'target_behavior_key',   'target_behavior'),
+  ('db.cfg', 'weight_min',            '1'),
+  ('db.cfg', 'weight_max',            '5'),
+  ('db.cfg', 'weight_default',        '3'),
+  ('db.cfg', 'gauge_fill_color',      '#EC4899'),
+
+  -- Quadrant 1 — Avantages du changement (gauge_role = change)
+  ('db.q1.h', 'color',         '#059669'),
+  ('db.q1.h', 'bg_color',      '#ECFDF5'),
+  ('db.q1.h', 'icon',          'thumb-up-outline'),
+  ('db.q1.h', 'subtitle_code', 'modules.decisional_balance.quadrant_pros_change_subtitle'),
+  ('db.q1.h', 'gauge_role',    'change'),
+
+  -- Quadrant 2 — Inconvénients du changement (pas de gauge_role)
+  ('db.q2.h', 'color',         '#EA580C'),
+  ('db.q2.h', 'bg_color',      '#FFF7ED'),
+  ('db.q2.h', 'icon',          'thumb-down-outline'),
+  ('db.q2.h', 'subtitle_code', 'modules.decisional_balance.quadrant_cons_change_subtitle'),
+
+  -- Quadrant 3 — Avantages à rester comme je suis (gauge_role = status_quo)
+  ('db.q3.h', 'color',         '#2563EB'),
+  ('db.q3.h', 'bg_color',      '#EFF6FF'),
+  ('db.q3.h', 'icon',          'shield-check-outline'),
+  ('db.q3.h', 'subtitle_code', 'modules.decisional_balance.quadrant_pros_status_subtitle'),
+  ('db.q3.h', 'gauge_role',    'status_quo'),
+
+  -- Quadrant 4 — Inconvénients à rester comme je suis (pas de gauge_role)
+  ('db.q4.h', 'color',         '#9333EA'),
+  ('db.q4.h', 'bg_color',      '#FDF4FF'),
+  ('db.q4.h', 'icon',          'alert-outline'),
+  ('db.q4.h', 'subtitle_code', 'modules.decisional_balance.quadrant_cons_status_subtitle')
+ON CONFLICT (field_id, prop_key) DO NOTHING;

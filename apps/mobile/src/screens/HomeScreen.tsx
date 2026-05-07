@@ -26,7 +26,6 @@ import { EmptyState } from '../components/EmptyState'
 // Tout module absent de cette map ET autre preview_kind → ModuleContent (moteur générique).
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
-  decisional_balance:       'DecisionalBalance',
   breathing_techniques:     'BreathingTechniques',
 }
 

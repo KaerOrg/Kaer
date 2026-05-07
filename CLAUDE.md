@@ -89,7 +89,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
 | `cognitive_saturation` | Saturation cognitive | Prévu |
-| `decisional_balance` | Balance décisionnelle | Implémenté — grille 2×2 + jauge de motivation, SQLite local, signal Supabase |
+| `decisional_balance` | Balance décisionnelle | Implémenté — moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé |
 | `phq9` | PHQ-9 — Dépression | Implémenté — 9 items, score 0-27, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `gad7` | GAD-7 — Anxiété généralisée | Implémenté — 7 items, score 0-21, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, légende 0-4, pattern générique ModuleRenderer, SQLite `scale_entries` |
@@ -137,7 +137,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [ ] App mobile patient (navigation, auth, modules)
 - [ ] Module Agenda du sommeil
 - [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL
-- [x] Module Balance décisionnelle (`decisional_balance`) — grille 2×2 + jauge de motivation, SQLite local, signal d'observance Supabase, 10 tests Jest
+- [x] Module Balance décisionnelle (`decisional_balance`) — migré vers moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`, signal d'observance Supabase, 10 tests Jest
 - [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
 - [x] Module PHQ-9 (`phq9`) — 9 items, SQLite local, tests RNTL
 - [x] Module GAD-7 (`gad7`) — 7 items, SQLite local, tests RNTL
