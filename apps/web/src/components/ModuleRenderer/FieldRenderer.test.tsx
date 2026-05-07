@@ -42,11 +42,31 @@ describe('FieldRenderer — cas limites', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('preview_kind inconnu rend null', () => {
+  it('preview_kind inconnu retombe sur le fallback générique', () => {
     const { container } = render(
-      <FieldRenderer preview_kind="unknown" fields={[field('step_title')]} expandedCard={null} onToggleCard={noop} />
+      <FieldRenderer
+        preview_kind={'unknown' as never}
+        fields={[field('step_title', { text_code: 'foo.bar' })]}
+        expandedCard={null}
+        onToggleCard={noop}
+      />
     )
-    expect(container.firstChild).toBeNull()
+    expect(container.querySelector('ul.preview-fallback')).toBeTruthy()
+    expect(container.querySelectorAll('li.preview-fallback__item')).toHaveLength(1)
+  })
+
+  it('preview_kind inconnu sans text_code affiche une erreur visible', () => {
+    const { container } = render(
+      <FieldRenderer
+        preview_kind={'unknown' as never}
+        fields={[field('mystery_type', { text_code: null })]}
+        expandedCard={null}
+        onToggleCard={noop}
+      />
+    )
+    const err = container.querySelector('.field-error')
+    expect(err).toBeTruthy()
+    expect(err?.textContent).toContain('mystery_type')
   })
 
   it('module_label et module_description sont filtrés', () => {
@@ -118,6 +138,85 @@ describe('FieldRenderer — layout grid2x2', () => {
     )
     expect(container.querySelector('div.preview-grid2x2')).toBeTruthy()
     expect(container.querySelectorAll('div.preview-quadrant')).toHaveLength(1)
+  })
+})
+
+describe('FieldRenderer — layout daily_checkin', () => {
+  it('rend les onglets, la question, les options de statut et les notes', () => {
+    const fields = [
+      field('daily_checkin_config', { props: { engagement_event_type: 'SAVE_FOO' } }),
+      field('daily_tab_today_label', { text_code: 'm.tab_today' }),
+      field('daily_tab_history_label', { text_code: 'm.tab_history' }),
+      field('daily_today_label', { text_code: 'm.today' }),
+      field('daily_question', { text_code: 'm.question' }),
+      field('daily_status_option', {
+        sort_order: 30,
+        text_code: 'm.opt_taken',
+        props: { value: 'taken', color: '#10B981', bg_color: '#ECFDF5' },
+      }),
+      field('daily_status_option', {
+        sort_order: 31,
+        text_code: 'm.opt_partial',
+        props: { value: 'partial', color: '#F59E0B', bg_color: '#FFFBEB' },
+      }),
+      field('daily_status_option', {
+        sort_order: 32,
+        text_code: 'm.opt_missed',
+        props: { value: 'missed', color: '#6B7280', bg_color: '#F3F4F6' },
+      }),
+      field('daily_notes_label', { text_code: 'm.notes' }),
+      field('daily_notes_placeholder', { text_code: 'm.placeholder' }),
+      field('daily_save_label', { text_code: 'm.save' }),
+      field('daily_history_empty_text', { text_code: 'm.empty' }),
+    ]
+    const { container } = render(
+      <FieldRenderer preview_kind="daily_checkin" fields={fields} expandedCard={null} onToggleCard={noop} />
+    )
+    expect(container.querySelector('.preview-daily')).toBeTruthy()
+    const tabs = container.querySelectorAll('.preview-daily__tab')
+    expect(tabs).toHaveLength(2)
+    expect(tabs[0].classList.contains('preview-daily__tab--active')).toBe(true)
+    expect(tabs[0].textContent).toBe('m.tab_today')
+    expect(tabs[1].textContent).toBe('m.tab_history')
+    expect(container.querySelector('.preview-daily__question')?.textContent).toBe('m.question')
+    expect(container.querySelectorAll('.preview-daily__status')).toHaveLength(3)
+    expect(container.querySelector('.preview-daily__notes-label')?.textContent).toBe('m.notes')
+    expect(container.querySelector('.preview-daily__save-btn')?.textContent).toBe('m.save')
+    expect(container.querySelector('.preview-daily__history-empty')?.textContent).toBe('m.empty')
+  })
+
+  it('trie les options par sort_order et applique color/bg_color', () => {
+    const fields = [
+      field('daily_status_option', {
+        sort_order: 32,
+        text_code: 'm.c',
+        props: { value: 'c', color: '#111111', bg_color: '#222222' },
+      }),
+      field('daily_status_option', {
+        sort_order: 30,
+        text_code: 'm.a',
+        props: { value: 'a', color: '#aaaaaa', bg_color: '#bbbbbb' },
+      }),
+    ]
+    const { container } = render(
+      <FieldRenderer preview_kind="daily_checkin" fields={fields} expandedCard={null} onToggleCard={noop} />
+    )
+    const pills = container.querySelectorAll<HTMLSpanElement>('.preview-daily__status')
+    expect(pills[0].textContent).toBe('m.a')
+    expect(pills[1].textContent).toBe('m.c')
+    expect(pills[0].style.borderColor).toBeTruthy()
+  })
+
+  it('rend le footer_note dans un bloc info', () => {
+    const fields = [
+      field('daily_question', { text_code: 'm.q' }),
+      field('footer_note', { text_code: 'm.foot' }),
+    ]
+    const { container } = render(
+      <FieldRenderer preview_kind="daily_checkin" fields={fields} expandedCard={null} onToggleCard={noop} />
+    )
+    expect(container.querySelector('.preview-panel__info')).toBeTruthy()
+    expect(container.querySelector('.preview-panel__footer')?.textContent).toBe('m.foot')
   })
 })
 

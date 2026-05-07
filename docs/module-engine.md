@@ -12,8 +12,9 @@ supabase/schema.sql
   ├── module_content_fields  (1 ligne par champ de contenu)
   └── field_props        (props React attachées à chaque champ)
           ↓
-apps/web/src/lib/moduleService.ts  (fetchModuleFields)
-apps/mobile/src/lib/moduleService.ts  (même API)
+packages/shared/src/services/moduleFields.ts  (fetchModuleFields, partagé)
+  → apps/web/src/services/moduleService.ts   (wrapper, injecte le client web)
+  → apps/mobile/src/services/moduleService.ts (wrapper, injecte le client mobile)
           ↓
 ContentField[]  (arbre typé, props hydratées)
           ↓
@@ -230,11 +231,14 @@ create table public.field_props (
 
 ## 2. Service — `fetchModuleFields`
 
-Fichiers :
-- `apps/web/src/lib/moduleService.ts`
-- `apps/mobile/src/lib/moduleService.ts`
+Fichier source unique :
+- `packages/shared/src/services/moduleFields.ts` — fonction `fetchModuleFields(client, moduleId)` partagée web + mobile.
 
-Les deux fichiers sont **identiques** — même interface `ContentField`, même algorithme en 3 passes. Ils ne sont pas mutualisés dans `packages/shared/` car chacun importe son propre client Supabase (`./supabase`). À terme, extraire vers `packages/shared/` si un client partagé est introduit.
+Wrappers locaux (une ligne, injectent leur propre client Supabase) :
+- `apps/web/src/services/moduleService.ts`
+- `apps/mobile/src/services/moduleService.ts`
+
+Le service partagé prend le `SupabaseClient` en paramètre — `packages/shared/` n'a aucun couplage avec un client concret. Tests dans `packages/shared/src/services/moduleFields.test.ts` (`npm run test:shared`).
 
 ```ts
 export interface ContentField {

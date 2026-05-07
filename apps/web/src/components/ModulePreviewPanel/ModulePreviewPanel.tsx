@@ -34,6 +34,22 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
   const accentColor = color ?? DEFAULT_ACCENT
 
+  // « Bientôt disponible » réservé aux modules réellement vides : `preview_kind`
+  // explicite ou aucun field de contenu (le seul field présent étant un
+  // placeholder `coming_soon`). Si la base contient du vrai contenu, on le rend
+  // via FieldRenderer (layout dédié ou fallback générique) — un éventuel field
+  // `coming_soon` résiduel n'écrase pas le rendu.
+  const meaningfulFieldsCount = result
+    ? result.fields.filter(
+        f =>
+          f.field_type !== 'coming_soon' &&
+          f.field_type !== 'module_label' &&
+          f.field_type !== 'module_description',
+      ).length
+    : 0
+  const showComingSoon =
+    !!result && (result.preview_kind === 'coming_soon' || meaningfulFieldsCount === 0)
+
   return (
     <div className="preview-panel" style={{ borderTopColor: accentColor }}>
       <div className="preview-panel__header" style={{ color: accentColor }}>
@@ -45,17 +61,19 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
         <div className="preview-panel__coming-soon">{t('common.loading')}</div>
       )}
 
-      {!loading && result && result.preview_kind === 'coming_soon' && (
+      {!loading && showComingSoon && (
         <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
       )}
 
-      {!loading && result && result.preview_kind !== 'coming_soon' && (
-        <FieldRenderer
-          preview_kind={result.preview_kind}
-          fields={result.fields}
-          expandedCard={expandedCard}
-          onToggleCard={handleToggleCard}
-        />
+      {!loading && result && !showComingSoon && (
+        <div className="preview-panel__inner">
+          <FieldRenderer
+            preview_kind={result.preview_kind}
+            fields={result.fields}
+            expandedCard={expandedCard}
+            onToggleCard={handleToggleCard}
+          />
+        </div>
       )}
     </div>
   )

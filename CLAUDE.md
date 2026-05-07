@@ -50,9 +50,15 @@ npm run mobile
 
 ## Schéma de base de données
 
-> **Règle :** `supabase/schema.sql` est la source de vérité du modèle de données.
-> À chaque modification du schéma (nouvelle table, colonne, policy, trigger, index),
-> mettre à jour ce fichier ET la section ci-dessous pour qu'ils restent synchronisés.
+> **Règle :** `supabase/schema.sql` (DDL) + `supabase/seed.sql` (données de référence)
+> sont la source de vérité du modèle de données. Les deux fichiers sont idempotents
+> et peuvent être ré-exécutés à tout stade (BDD vierge, partielle, ou à jour).
+>
+> - **`schema.sql`** — tables, colonnes, index, RLS, policies, triggers, fonctions, bucket de stockage.
+> - **`seed.sql`** — modules, catégories, `module_content_fields`, `field_props`, layouts (sleep_journal, activity_log, exposure_tracker, decision_grid, daily_checkin, column_form, tree_selector). À exécuter APRÈS `schema.sql`.
+>
+> À chaque modification (nouvelle table, colonne, policy, trigger, index, module, layout) :
+> mettre à jour le fichier concerné ET la section ci-dessous.
 
 5 tables principales :
 

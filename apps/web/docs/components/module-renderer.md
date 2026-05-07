@@ -41,6 +41,26 @@ Ce fichier documente uniquement les détails spécifiques à l'implémentation w
 2. Exporter dans `fields/index.ts`
 3. Enregistrer dans `FIELD_REGISTRY` de `FieldRenderer.tsx`
 
+## Layout `daily_checkin`
+
+Aperçu passif du module mobile « 1 statut par jour » (ex. `medication_adherence`).
+Le layout consomme les `field_type` suivants (résolus par `field_type`, pas par
+`section_id`) :
+
+| `field_type` | Rôle |
+|---|---|
+| `daily_checkin_config` | Marqueur (props `engagement_event_type`) |
+| `daily_tab_today_label` / `daily_tab_history_label` | Onglets simulés |
+| `daily_today_label` | Bandeau date du jour |
+| `daily_question` | Question posée au patient |
+| `daily_status_option` (×N) | Pastilles de statut, triées par `sort_order`, couleurs depuis `props.color` / `props.bg_color` |
+| `daily_notes_label` / `daily_notes_placeholder` | Bloc notes inactif |
+| `daily_save_label` | Libellé du bouton sauvegarder |
+| `daily_history_empty_text` | État vide de l'onglet historique |
+
+Aucun rendu interactif : tabs, boutons et zone de notes sont des `<span>` /
+`<div>` stylés, en lecture seule.
+
 ## Ajouter un `preview_kind`
 
 1. Créer le layout (fonction dans `FieldRenderer.tsx`)

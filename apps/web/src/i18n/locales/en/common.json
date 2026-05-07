@@ -372,7 +372,20 @@
       "description": "Personalized action plan for difficult moments (Stanley & Brown).",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
-      "empty_text": "Use the button above to create your crisis plan."
+      "empty_text": "Use the button above to create your crisis plan.",
+      "step_1_title": "Warning Signs",
+      "step_1_hint": "How do I feel when a crisis is approaching?",
+      "step_2_title": "Internal Coping Strategies",
+      "step_2_hint": "What can I do on my own to calm down?",
+      "step_3_title": "Distracting People or Places",
+      "step_3_hint": "Who can I see or where can I go to distract myself?",
+      "step_4_title": "People to Contact",
+      "step_4_hint": "Who can listen and help me if I feel at risk?",
+      "step_5_title": "Professionals and Emergency Services",
+      "step_5_hint": "Which professionals or services can I contact?",
+      "step_6_title": "Securing My Environment",
+      "step_6_hint": "How can I make my surroundings safer?",
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
     },
     "therapeutic_commitment": {
       "label": "Therapeutic Commitment",
@@ -560,30 +573,18 @@
     "crisis_plan": {
       "label": "Crisis Plan",
       "description": "Personalized action plan for difficult moments (Stanley & Brown).",
-      "step_1": {
-        "title": "Warning Signs",
-        "hint": "How do I feel when a crisis is approaching?"
-      },
-      "step_2": {
-        "title": "Internal Coping Strategies",
-        "hint": "What can I do on my own to calm down?"
-      },
-      "step_3": {
-        "title": "Distracting People or Places",
-        "hint": "Who can I see or where can I go to distract myself?"
-      },
-      "step_4": {
-        "title": "People to Contact",
-        "hint": "Who can listen and help me if I feel at risk?"
-      },
-      "step_5": {
-        "title": "Professionals and Emergency Services",
-        "hint": "Which professionals or services can I contact?"
-      },
-      "step_6": {
-        "title": "Securing My Environment",
-        "hint": "How can I make my surroundings safer?"
-      },
+      "step_1_title": "Warning Signs",
+      "step_1_hint": "How do I feel when a crisis is approaching?",
+      "step_2_title": "Internal Coping Strategies",
+      "step_2_hint": "What can I do on my own to calm down?",
+      "step_3_title": "Distracting People or Places",
+      "step_3_hint": "Who can I see or where can I go to distract myself?",
+      "step_4_title": "People to Contact",
+      "step_4_hint": "Who can listen and help me if I feel at risk?",
+      "step_5_title": "Professionals and Emergency Services",
+      "step_5_hint": "Which professionals or services can I contact?",
+      "step_6_title": "Securing My Environment",
+      "step_6_hint": "How can I make my surroundings safer?",
       "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
     },
     "therapeutic_commitment": {
@@ -597,34 +598,6 @@
     "medication_side_effects": {
       "label": "Psychotropic Tolerance Thermometer",
       "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
-      "field_1": {
-        "label": "Sedation",
-        "detail": "Drowsiness, slowness, concentration difficulties — scale 0–3"
-      },
-      "field_2": {
-        "label": "Akathisia",
-        "detail": "Inner agitation, inability to stay still — scale 0–3"
-      },
-      "field_3": {
-        "label": "Tremors",
-        "detail": "Hands, limbs — lithium, valproate, antipsychotics — scale 0–3"
-      },
-      "field_4": {
-        "label": "Dry Mouth",
-        "detail": "Anticholinergics, tricyclics — scale 0–3"
-      },
-      "field_5": {
-        "label": "Sleep Disturbances",
-        "detail": "Insomnia or hypersomnia — SSRIs, SNRIs, mood stabilizers — scale 0–3"
-      },
-      "field_6": {
-        "label": "Nausea / Digestive Issues",
-        "detail": "Lithium, valproate, SSRIs — scale 0–3"
-      },
-      "field_7": {
-        "label": "Free Notes",
-        "detail": "Context, remark, time of day"
-      },
       "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
     },
     "medication_adherence": {
@@ -659,38 +632,6 @@
     "sleep_diary": {
       "label": "Sleep Diary",
       "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
-      "field_1": {
-        "label": "Bedtime",
-        "detail": "Time picker"
-      },
-      "field_2": {
-        "label": "Wake Time",
-        "detail": "Time picker"
-      },
-      "field_3": {
-        "label": "Time to Fall Asleep",
-        "detail": "Slider in minutes (0–120)"
-      },
-      "field_4": {
-        "label": "Number of Night Wakings",
-        "detail": "Slider (0–10)"
-      },
-      "field_5": {
-        "label": "Total Wake Time",
-        "detail": "Slider in minutes (0–120)"
-      },
-      "field_6": {
-        "label": "Sleep Quality",
-        "detail": "1 to 5 star scale"
-      },
-      "field_7": {
-        "label": "Nightmares",
-        "detail": "Yes / No"
-      },
-      "field_8": {
-        "label": "Free Notes",
-        "detail": "Optional text field"
-      },
       "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%."
     },
     "diet_weight_psycho": {
@@ -704,26 +645,6 @@
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",
       "description": "Daily tracking of mood and energy level on a visual scale.",
-      "field_1": {
-        "label": "Mood",
-        "detail": "Scale 1–10"
-      },
-      "field_2": {
-        "label": "Energy",
-        "detail": "Scale 1–10"
-      },
-      "field_3": {
-        "label": "Anxiety",
-        "detail": "Scale 1–10"
-      },
-      "field_4": {
-        "label": "Pleasure",
-        "detail": "Scale 1–10 — anhedonia dimension (SHAPS 1995)"
-      },
-      "field_5": {
-        "label": "Free Notes",
-        "detail": "Optional text field"
-      },
       "footer": "Single daily entry. History available with mini-charts per dimension (last 30 days). Data stored locally on the device."
     },
     "emotion_wheel": {
@@ -733,30 +654,6 @@
     "behavioral_activation": {
       "label": "Behavioral Activation Journal",
       "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
-      "field_1": {
-        "label": "Date",
-        "detail": "Activity date (past or upcoming)"
-      },
-      "field_2": {
-        "label": "Activity Name",
-        "detail": "Free text — e.g. 20-min walk, Call a friend"
-      },
-      "field_3": {
-        "label": "Completed / Planned",
-        "detail": "The patient checks when the activity is done"
-      },
-      "field_4": {
-        "label": "Pleasure (0–10)",
-        "detail": "Satisfaction from the activity — raw value, no interpretation"
-      },
-      "field_5": {
-        "label": "Mastery (0–10)",
-        "detail": "Sense of accomplishment — raw value, no interpretation"
-      },
-      "field_6": {
-        "label": "Free Notes",
-        "detail": "Context, feelings, remark"
-      },
       "footer": "The patient plans and rates activities on two dimensions (P and M). Data stored locally. No global score — raw P and M values are reviewed by the clinician during sessions to guide motivational interviewing."
     },
     "beck_columns": {
@@ -799,26 +696,6 @@
     "fear_thermometer": {
       "label": "Fear Thermometer",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
-      "field_1": {
-        "label": "Triggering Situation",
-        "detail": "Selection from personal catalog or free text"
-      },
-      "field_2": {
-        "label": "SUDs Before (0–100)",
-        "detail": "Subjective distress level before the strategy — raw number, no interpretation"
-      },
-      "field_3": {
-        "label": "Strategies Used",
-        "detail": "Multi-select: Slow Breathing, 5-4-3-2-1 Grounding, Exposure, etc. + free text"
-      },
-      "field_4": {
-        "label": "SUDs After (0–100)",
-        "detail": "Distress level after the strategy — optional (can be filled in later)"
-      },
-      "field_5": {
-        "label": "Free Notes",
-        "detail": "Context, observations, remark"
-      },
       "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0–100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
     },
     "exposure_hierarchy": {
@@ -865,22 +742,6 @@
     "decisional_balance": {
       "label": "Decisional Balance",
       "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
-      "q1": {
-        "title": "Benefits of Change",
-        "subtitle": "Reasons to change"
-      },
-      "q2": {
-        "title": "Costs of Change",
-        "subtitle": "Costs of changing"
-      },
-      "q3": {
-        "title": "Benefits of Status Quo",
-        "subtitle": "Reasons to stay"
-      },
-      "q4": {
-        "title": "Costs of Status Quo",
-        "subtitle": "Costs of staying"
-      },
       "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
     },
     "phq9": {

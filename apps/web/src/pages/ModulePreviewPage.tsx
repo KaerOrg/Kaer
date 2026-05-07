@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
-import { fetchModulePreviewKind } from '../services/moduleService'
+import { fetchModulePreviewKind, type PreviewKind } from '../services/moduleService'
 import './ModulePreviewPage.css'
 
 export function ModulePreviewPage() {
   const { t } = useTranslation()
   const { moduleType } = useParams<{ moduleType: string }>()
   const navigate = useNavigate()
-  const [previewKind, setPreviewKind] = useState<string | null>(null)
+  const [previewKind, setPreviewKind] = useState<PreviewKind | null>(null)
 
   useEffect(() => {
     if (!moduleType) return

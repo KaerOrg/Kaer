@@ -107,9 +107,11 @@ describe('FieldText — card labels', () => {
 })
 
 describe('FieldText — cas limites', () => {
-  it('field_type inconnu rend null', () => {
+  it('field_type inconnu rend une erreur visible', () => {
     const { container } = render(<FieldText field={field('unknown_type')} t={t} />)
-    expect(container.firstChild).toBeNull()
+    const err = container.querySelector('.field-error')
+    expect(err).toBeTruthy()
+    expect(err?.textContent).toContain('unknown_type')
   })
 
   it('text_code null rend une chaîne vide', () => {

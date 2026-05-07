@@ -20,6 +20,21 @@ PsyTool sépare strictement la logique métier de l'affichage. **Les pages, écr
 - Les clients infra (`supabase.ts`, `database.ts` SQLite) restent dans `src/lib/` — ils ne sont pas des services métier.
 - Les utilitaires purs sans I/O (`dateUtils.ts`, `scaleScoring.ts`) restent aussi dans `src/lib/`.
 
+## Partagé — `packages/shared/src/services/`
+
+Quand une fonction de service est **strictement identique** entre web et mobile (mêmes tables, même logique, pas de SQLite ni de stockage natif), elle vit dans le package partagé et reçoit le client Supabase en paramètre. Les services par app gardent un wrapper trivial qui injecte leur client local — l'UI continue d'importer depuis son `services/moduleService.ts` habituel.
+
+| Fichier | Domaine | Test |
+|---|---|---|
+| [`moduleFields.ts`](../packages/shared/src/services/moduleFields.ts) | `fetchModuleFields(client, moduleId)` — lecture du moteur générique (modules + module_content_fields + field_props avec hiérarchie parent/enfant) | [`moduleFields.test.ts`](../packages/shared/src/services/moduleFields.test.ts) — `npm run test:shared` |
+
+**Règle pour ajouter un service partagé :**
+1. La fonction doit prendre `client: SupabaseClient` comme premier argument — pas d'import direct.
+2. Elle vit dans `packages/shared/src/services/<domaine>.ts` et est ré-exportée depuis `packages/shared/src/index.ts`.
+3. Le test unitaire vit aux côtés du service (`<domaine>.test.ts` exécuté par Vitest).
+4. Web et mobile exposent un wrapper d'une ligne : `return fetchX(supabase, ...args)` — pour que les composants n'aient jamais à connaître le client.
+5. Si la logique diverge un jour (besoin SQLite mobile, cache web spécifique…), rapatrier dans l'app concernée et garder l'autre côté sur le partagé.
+
 ## Web — `apps/web/src/services/`
 
 | Fichier | Domaine |
@@ -30,7 +45,7 @@ PsyTool sépare strictement la logique métier de l'affichage. **Les pages, écr
 | [`invitationService.ts`](../apps/web/src/services/invitationService.ts) | Liste des invitations en attente, validation de token, envoi via edge function, signup patient |
 | [`practitionerSettingsService.ts`](../apps/web/src/services/practitionerSettingsService.ts) | `practitioner_module_settings` (modules activés par praticien) |
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
-| [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | Lecture du moteur générique : `module_content_fields`, `field_props`, `preview_kind` |
+| [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | `fetchPsychoCards`, `fetchModulePreviewKind` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
 | [`moduleCatalogService.ts`](../apps/web/src/services/moduleCatalogService.ts) | Catégories + modules pour l'armoire thérapeutique et le formulaire d'invitation |
 
 Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrapper Zustand : il délègue toutes les opérations Supabase à `authService.ts` et n'expose qu'un état réactif.
@@ -42,7 +57,7 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`authService.ts`](../apps/mobile/src/services/authService.ts) | Session patient, login, inscription via token (multi-étapes), teen context, logout |
 | [`engagementService.ts`](../apps/mobile/src/services/engagementService.ts) | `logEvent(patientId, eventType, metadata?)` — signal d'observance anonymisé |
 | [`homeService.ts`](../apps/mobile/src/services/homeService.ts) | Liste des modules débloqués pour l'écran d'accueil |
-| [`moduleService.ts`](../apps/mobile/src/services/moduleService.ts) | Lecture du moteur générique + `fetchPatientModuleConfig` |
+| [`moduleService.ts`](../apps/mobile/src/services/moduleService.ts) | `fetchPatientModuleConfig` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
 | [`notificationService.ts`](../apps/mobile/src/services/notificationService.ts) | Permissions et planification des rappels (stubs Expo Go SDK 53+) |
 | [`avatarService.ts`](../apps/mobile/src/services/avatarService.ts) | Picker image, upload Supabase Storage, mise à jour `patients.avatar_url` |
 | [`psychoeducationService.ts`](../apps/mobile/src/services/psychoeducationService.ts) | `markCardAsRead` — réécriture du JSONB `unlocked_cards` |

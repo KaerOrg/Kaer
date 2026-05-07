@@ -6,10 +6,10 @@ jest.mock('../lib/supabase', () => ({
   },
 }))
 
-import {
-  fetchModuleFields,
-  fetchPatientModuleConfig,
-} from './moduleService'
+import { fetchPatientModuleConfig } from './moduleService'
+
+// Note : fetchModuleFields est testé dans @psytool/shared (packages/shared/src/services/moduleFields.test.ts)
+// car la logique est partagée entre web et mobile via le service injecté.
 
 interface ChainOpts {
   data?: unknown
@@ -29,63 +29,6 @@ function makeChain({ data = null, error = null }: ChainOpts = {}) {
   })
   return chain
 }
-
-describe('moduleService.fetchModuleFields', () => {
-  beforeEach(() => jest.clearAllMocks())
-
-  it("retourne preview_kind = 'coming_soon' et fields = [] quand aucun field n'existe", async () => {
-    const moduleChain = makeChain({ data: { preview_kind: 'questionnaire' } })
-    const fieldsChain = makeChain({ data: [] })
-    mockFrom
-      .mockReturnValueOnce(moduleChain)
-      .mockReturnValueOnce(fieldsChain)
-
-    const result = await fetchModuleFields('phq9')
-
-    expect(result).toEqual({ preview_kind: 'questionnaire', fields: [] })
-  })
-
-  it('hiérarchise correctement les champs parent → enfants et attache leurs props', async () => {
-    const moduleChain = makeChain({ data: { preview_kind: 'fields' } })
-    const fieldsChain = makeChain({
-      data: [
-        { id: 'parent', module_id: 'm', section_id: null, parent_field_id: null, field_type: 'card_title', text_code: 't.parent', sort_order: 0 },
-        { id: 'child',  module_id: 'm', section_id: null, parent_field_id: 'parent', field_type: 'card_paragraph', text_code: 't.child', sort_order: 1 },
-      ],
-    })
-    const propsChain = makeChain({
-      data: [
-        { field_id: 'parent', prop_key: 'color', prop_value: '#fff' },
-        { field_id: 'parent', prop_key: 'size',  prop_value: 'lg' },
-      ],
-    })
-    mockFrom
-      .mockReturnValueOnce(moduleChain)
-      .mockReturnValueOnce(fieldsChain)
-      .mockReturnValueOnce(propsChain)
-
-    const result = await fetchModuleFields('m')
-
-    expect(result.preview_kind).toBe('fields')
-    expect(result.fields).toHaveLength(1)
-    expect(result.fields[0].id).toBe('parent')
-    expect(result.fields[0].props).toEqual({ color: '#fff', size: 'lg' })
-    expect(result.fields[0].children).toHaveLength(1)
-    expect(result.fields[0].children[0].id).toBe('child')
-  })
-
-  it("retombe sur 'coming_soon' si la table modules ne renvoie rien", async () => {
-    const moduleChain = makeChain({ data: null })
-    const fieldsChain = makeChain({ data: [] })
-    mockFrom
-      .mockReturnValueOnce(moduleChain)
-      .mockReturnValueOnce(fieldsChain)
-
-    const result = await fetchModuleFields('inconnu')
-
-    expect(result.preview_kind).toBe('coming_soon')
-  })
-})
 
 describe('moduleService.fetchPatientModuleConfig', () => {
   beforeEach(() => jest.clearAllMocks())

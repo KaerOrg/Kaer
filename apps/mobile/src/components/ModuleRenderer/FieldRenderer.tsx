@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { logger } from '@psytool/shared'
 import { colors, spacing, radius } from '../../theme'
-import type { ContentField } from '../../services/moduleService'
+import type { ContentField, PreviewKind } from '../../services/moduleService'
 import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry, getAllTreeSelections, saveTreeSelection, deleteTreeSelection, type TreeSelection, type TreeSelectionPathNode, getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth, saveSleepEntry, deleteSleepEntry, computeSleepDuration, computeSleepEfficiency, type SleepEntry } from '../../lib/database'
 import { formatDateTime, formatDateFull, formatDateNumeric, formatDateShort } from '../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../services/engagementService'
@@ -3305,7 +3305,7 @@ export interface QuestionnaireInteraction {
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 export interface FieldRendererProps {
-  preview_kind: string
+  preview_kind: PreviewKind
   fields: ContentField[]
   /** Provided only for questionnaire layout in patient-side interactive mode. */
   questionnaire?: QuestionnaireInteraction

@@ -4,6 +4,8 @@ export { logger } from './logger'
 
 export { colors, spacing, radius, fontSize } from './theme'
 
+export { fetchModuleFields } from './services/moduleFields'
+
 export type UserRole = 'practitioner' | 'patient'
 
 export type ModuleType =
@@ -83,4 +85,43 @@ export interface PatientModule {
   moduleType: ModuleType
   unlockedAt: string
   config: ModuleConfig
+}
+
+// Module rendering — partagé entre web (preview praticien) et mobile (rendu patient).
+// La colonne `modules.preview_kind` en base pilote le moteur de rendu.
+export type PreviewKind =
+  | 'coming_soon'
+  | 'steps'
+  | 'editable_steps'
+  | 'cards'
+  | 'fields'
+  | 'grid2x2'
+  | 'questionnaire'
+  | 'guided_exercise'
+  | 'patient_scenario'
+  | 'timed_tap_exercise'
+  | 'daily_checkin'
+  | 'column_form'
+  | 'tree_selector'
+  | 'sleep_journal'
+  | 'activity_log'
+  | 'exposure_tracker'
+  | 'decision_grid'
+
+// Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
+export interface ContentField {
+  id: string
+  module_id: string
+  section_id: string | null
+  parent_field_id: string | null
+  field_type: string
+  text_code: string | null
+  sort_order: number
+  props: Record<string, string>
+  children: ContentField[]
+}
+
+export interface ModuleFieldsResult {
+  preview_kind: PreviewKind
+  fields: ContentField[]
 }

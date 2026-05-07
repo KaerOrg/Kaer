@@ -39,7 +39,7 @@ describe('FieldRenderer — null cases', () => {
 
   it('retourne null pour un preview_kind inconnu', () => {
     const { toJSON } = render(
-      <FieldRenderer preview_kind="inconnu" fields={[f({ text_code: 'test.text' })]} />,
+      <FieldRenderer preview_kind={'inconnu' as never} fields={[f({ text_code: 'test.text' })]} />,
     )
     expect(toJSON()).toBeNull()
   })

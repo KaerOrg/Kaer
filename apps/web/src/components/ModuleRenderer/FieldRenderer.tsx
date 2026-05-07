@@ -1,252 +1,25 @@
-import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Info } from 'lucide-react'
-import { logger } from '@psytool/shared'
-import type { ContentField } from '../../services/moduleService'
+import type { ContentField, PreviewKind } from '../../services/moduleService'
 import {
-  type FieldProps,
-  CardDefinition,
-  FieldListItem,
-  FieldRow,
-  FieldText,
-} from './fields'
-
-// ─── Registry: field_type → composant ────────────────────────────────────────
-
-function CardDivider() { return <hr /> }
-
-const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
-  card_callout:        FieldText,
-  card_definition:     CardDefinition,
-  card_divider:        CardDivider,
-  card_heading_2:      FieldText,
-  card_heading_3:      FieldText,
-  card_heading_4:      FieldText,
-  card_list_item:      FieldListItem,
-  card_numbered_item:  FieldListItem,
-  card_paragraph:      FieldText,
-}
-
-// ─── Lookup registry avec avertissement sur type inconnu ─────────────────────
-
-function renderField(f: ContentField, t: (key: string) => string): ReactNode {
-  const Component = FIELD_REGISTRY[f.field_type]
-  if (!Component) {
-    logger.warn(`[ModuleRenderer] field_type non géré : "${f.field_type}"`)
-    return null
-  }
-  return <Component key={f.id} field={f} t={t} />
-}
-
-// ─── Groupement des list items consécutifs en ul/ol ──────────────────────────
-
-function renderCardBody(fields: ContentField[], t: (key: string) => string): ReactNode {
-  const result: ReactNode[] = []
-  let listBuffer: ContentField[] = []
-  let listType: 'ul' | 'ol' | null = null
-
-  const flushList = () => {
-    if (listBuffer.length === 0) return
-    const Tag = listType ?? 'ul'
-    result.push(
-      <Tag key={`list-${listBuffer[0].id}`} className="fr-list">
-        {listBuffer.map(f => renderField(f, t))}
-      </Tag>
-    )
-    listBuffer = []
-    listType = null
-  }
-
-  for (const f of fields) {
-    if (f.field_type === 'card_list_item') {
-      if (listType === 'ol') flushList()
-      listType = 'ul'
-      listBuffer.push(f)
-    } else if (f.field_type === 'card_numbered_item') {
-      if (listType === 'ul') flushList()
-      listType = 'ol'
-      listBuffer.push(f)
-    } else {
-      flushList()
-      result.push(renderField(f, t))
-    }
-  }
-  flushList()
-  return result
-}
-
-// ─── Layouts ──────────────────────────────────────────────────────────────────
-
-function StepsLayout({ sections, footer, t }: {
-  sections: Map<string, ContentField[]>
-  footer: ContentField | undefined
-  t: (key: string) => string
-}) {
-  return (
-    <>
-      <ol className="preview-steps">
-        {[...sections.entries()].map(([sectionId, fields]) => {
-          const titleField = fields.find(f => f.field_type === 'step_title')
-          const hintField = fields.find(f => f.field_type === 'step_hint')
-          if (!titleField) return null
-          const color = titleField.props['color'] ?? '#6366F1'
-          const num = titleField.props['step_number'] ?? ''
-          return (
-            <li key={sectionId} className="preview-step">
-              <span className="preview-step__num" style={{ backgroundColor: color }}>{num}</span>
-              <div>
-                <FieldText field={titleField} t={t} />
-                {hintField && <FieldText field={hintField} t={t} />}
-              </div>
-            </li>
-          )
-        })}
-      </ol>
-      {footer && <FieldText field={footer} t={t} />}
-    </>
-  )
-}
-
-function FieldsLayout({ fields, footer, t }: {
-  fields: ContentField[]
-  footer: ContentField | undefined
-  t: (key: string) => string
-}) {
-  return (
-    <>
-      <ul className="preview-fields">
-        {fields.map(f => <FieldRow key={f.id} field={f} t={t} />)}
-      </ul>
-      {footer && (
-        <div className="preview-panel__info">
-          <Info size={13} className="preview-panel__info-icon" />
-          <FieldText field={footer} t={t} />
-        </div>
-      )}
-    </>
-  )
-}
-
-function Grid2x2Layout({ sections, footer, t }: {
-  sections: Map<string, ContentField[]>
-  footer: ContentField | undefined
-  t: (key: string) => string
-}) {
-  return (
-    <>
-      <div className="preview-grid2x2">
-        {[...sections.entries()].map(([sectionId, fields]) => {
-          const titleField = fields.find(f => f.field_type === 'quadrant_title')
-          const subtitleField = fields.find(f => f.field_type === 'quadrant_subtitle')
-          const color = titleField?.props['color'] ?? '#6366F1'
-          return (
-            <div key={sectionId} className="preview-quadrant" style={{ borderTopColor: color }}>
-              {titleField && <FieldText field={titleField} t={t} />}
-              {subtitleField && <FieldText field={subtitleField} t={t} />}
-            </div>
-          )
-        })}
-      </div>
-      {footer && <FieldText field={footer} t={t} />}
-    </>
-  )
-}
-
-function CardsLayout({ sections, expandedCard, onToggle, t }: {
-  sections: Map<string, ContentField[]>
-  expandedCard: string | null
-  onToggle: (id: string) => void
-  t: (key: string) => string
-}) {
-  return (
-    <div className="preview-cards">
-      {[...sections.entries()].map(([sectionId, fields]) => {
-        const titleField = fields.find(f => f.field_type === 'card_title')
-        const summaryField = fields.find(f => f.field_type === 'card_summary')
-        const bodyFields = fields.filter(
-          f => f.field_type !== 'card_title' && f.field_type !== 'card_summary'
-        )
-        const isOpen = expandedCard === sectionId
-
-        return (
-          <div key={sectionId} className="preview-card">
-            <button className="preview-card__header" onClick={() => onToggle(sectionId)}>
-              <div className="preview-card__meta">
-                {titleField
-                  ? <FieldText field={titleField} t={t} />
-                  : <span className="preview-card__title">{sectionId}</span>
-                }
-                {summaryField && <FieldText field={summaryField} t={t} />}
-              </div>
-              <span className="preview-card__toggle">{isOpen ? '▲' : '▼'}</span>
-            </button>
-            {isOpen && bodyFields.length > 0 && (
-              <div className="preview-card__body">
-                {renderCardBody(bodyFields, t)}
-              </div>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-// ─── Questionnaire layout (PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS…) ─────────────
-
-function QuestionnaireLayout({ fields, footer, t }: {
-  fields: ContentField[]
-  footer: ContentField | undefined
-  t: (key: string) => string
-}) {
-  const warning = fields.find(f => f.field_type === 'scale_warning')
-  const instructions = fields.filter(f => f.field_type === 'scale_instruction')
-  const options = fields
-    .filter(f => f.field_type === 'scale_option' || f.field_type === 'scale_legend_item')
-    .sort((a, b) => a.sort_order - b.sort_order)
-  const questions = fields
-    .filter(f => f.field_type === 'scale_question')
-    .sort((a, b) => a.sort_order - b.sort_order)
-
-  return (
-    <>
-      {warning && (
-        <p className="preview-questionnaire__warning">{t(warning.text_code ?? '')}</p>
-      )}
-      {instructions.map(f => (
-        <p key={f.id} className="preview-questionnaire__instruction">{t(f.text_code ?? '')}</p>
-      ))}
-      {options.length > 0 && (
-        <div className="preview-questionnaire__options">
-          {options.map(f => (
-            <span key={f.id} className="preview-questionnaire__option">
-              <span className="preview-questionnaire__option-val">{f.props['value']}</span>
-              <span className="preview-questionnaire__option-label">{t(f.text_code ?? '')}</span>
-            </span>
-          ))}
-        </div>
-      )}
-      <ol className="preview-questionnaire__questions">
-        {questions.map(f => (
-          <li key={f.id} className="preview-questionnaire__question">
-            {t(f.text_code ?? '')}
-          </li>
-        ))}
-      </ol>
-      {footer && (
-        <div className="preview-panel__info">
-          <Info size={13} className="preview-panel__info-icon" />
-          <FieldText field={footer} t={t} />
-        </div>
-      )}
-    </>
-  )
-}
-
-// ─── Main FieldRenderer ───────────────────────────────────────────────────────
+  ActivityLogLayout,
+  CardsLayout,
+  ColumnFormLayout,
+  DailyCheckinLayout,
+  DecisionGridLayout,
+  ExposureTrackerLayout,
+  FallbackLayout,
+  FieldsLayout,
+  Grid2x2Layout,
+  GuidedExerciseLayout,
+  PatientScenarioLayout,
+  QuestionnaireLayout,
+  SleepJournalLayout,
+  StepsLayout,
+  TreeSelectorLayout,
+} from './layouts'
 
 export interface FieldRendererProps {
-  preview_kind: string
+  preview_kind: PreviewKind
   fields: ContentField[]
   expandedCard: string | null
   onToggleCard: (id: string) => void
@@ -263,14 +36,14 @@ export function FieldRenderer({ preview_kind, fields, expandedCard, onToggleCard
   const footer = visibleFields.find(f => f.field_type === 'footer_note')
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
-  if (preview_kind === 'steps' || preview_kind === 'cards') {
+  if (preview_kind === 'steps' || preview_kind === 'editable_steps' || preview_kind === 'cards') {
     const sections = new Map<string, ContentField[]>()
     for (const f of contentFields) {
       if (!f.section_id) continue
       if (!sections.has(f.section_id)) sections.set(f.section_id, [])
       sections.get(f.section_id)!.push(f)
     }
-    if (preview_kind === 'steps') return <StepsLayout sections={sections} footer={footer} t={t} />
+    if (preview_kind === 'steps' || preview_kind === 'editable_steps') return <StepsLayout sections={sections} footer={footer} t={t} />
     return (
       <CardsLayout
         sections={sections}
@@ -300,5 +73,42 @@ export function FieldRenderer({ preview_kind, fields, expandedCard, onToggleCard
     return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
   }
 
-  return null
+  if (preview_kind === 'daily_checkin') {
+    return <DailyCheckinLayout fields={contentFields} footer={footer} t={t} />
+  }
+
+  if (preview_kind === 'sleep_journal') {
+    return <SleepJournalLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'activity_log') {
+    return <ActivityLogLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'decision_grid') {
+    return <DecisionGridLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'exposure_tracker') {
+    return <ExposureTrackerLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'tree_selector') {
+    return <TreeSelectorLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'column_form') {
+    return <ColumnFormLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'guided_exercise') {
+    return <GuidedExerciseLayout fields={contentFields} t={t} />
+  }
+
+  if (preview_kind === 'patient_scenario') {
+    return <PatientScenarioLayout fields={contentFields} t={t} />
+  }
+
+  // Fallback générique pour les preview_kinds restants (timed_tap_exercise…)
+  return <FallbackLayout fields={contentFields} footer={footer} t={t} />
 }

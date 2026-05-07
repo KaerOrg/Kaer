@@ -8,6 +8,60 @@ import deCommon from './locales/de/common.json'
 import itCommon from './locales/it/common.json'
 import ptCommon from './locales/pt/common.json'
 
+// Les `text_code` en base (`modules.<id>.<clé>`) suivent la convention mobile
+// (clés à plat). On importe les sections `modules` du mobile pour que le preview
+// praticien résolve ces clés sans dupliquer les traductions.
+import mobileFrCommon from '../../../mobile/src/i18n/locales/fr/common.json'
+import mobileEnCommon from '../../../mobile/src/i18n/locales/en/common.json'
+import mobileEsCommon from '../../../mobile/src/i18n/locales/es/common.json'
+import mobileDeCommon from '../../../mobile/src/i18n/locales/de/common.json'
+import mobileItCommon from '../../../mobile/src/i18n/locales/it/common.json'
+import mobilePtCommon from '../../../mobile/src/i18n/locales/pt/common.json'
+
+// Pour chaque module, on fusionne les clés mobile (DB-aligned) avec celles du web,
+// en laissant le web gagner sur les clés en doublon (label, description). Les clés
+// présentes uniquement côté mobile (`step_1_title`, `scale_info`, `effect_*`…)
+// sont ainsi disponibles côté web sans dupliquer la traduction.
+//
+// La section `modules` mélange des entrées par module (objets) et des libellés
+// transverses (`nav_link`, `title`, `subtitle`…, des strings). On ne fusionne que
+// les entrées dont la valeur est un objet — sinon le spread d'un string casse le
+// libellé en map { '0': 'M', '1': 'o', … }.
+type ModulesEntry = Record<string, unknown> | string
+type ModulesSection = Record<string, ModulesEntry>
+
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v)
+
+const mergeModules = <T extends { modules?: ModulesSection }>(
+  web: T,
+  mobile: { modules?: ModulesSection },
+): T => {
+  const webModules = web.modules ?? {}
+  const mobModules = mobile.modules ?? {}
+  const keys = new Set([...Object.keys(webModules), ...Object.keys(mobModules)])
+  const merged: ModulesSection = {}
+  for (const k of keys) {
+    const w = webModules[k]
+    const m = mobModules[k]
+    if (isPlainObject(w) && isPlainObject(m)) {
+      merged[k] = { ...m, ...w }
+    } else if (w !== undefined) {
+      merged[k] = w
+    } else if (m !== undefined) {
+      merged[k] = m
+    }
+  }
+  return { ...web, modules: merged }
+}
+
+const fr = mergeModules(frCommon, mobileFrCommon)
+const en = mergeModules(enCommon, mobileEnCommon)
+const es = mergeModules(esCommon, mobileEsCommon)
+const de = mergeModules(deCommon, mobileDeCommon)
+const it = mergeModules(itCommon, mobileItCommon)
+const pt = mergeModules(ptCommon, mobilePtCommon)
+
 const SUPPORTED = ['fr', 'en', 'es', 'de', 'it', 'pt'] as const
 export type SupportedLang = (typeof SUPPORTED)[number]
 
@@ -50,12 +104,12 @@ i18next
     ns: ['common'],
     defaultNS: 'common',
     resources: {
-      fr: { common: frCommon },
-      en: { common: enCommon },
-      es: { common: esCommon },
-      de: { common: deCommon },
-      it: { common: itCommon },
-      pt: { common: ptCommon },
+      fr: { common: fr },
+      en: { common: en },
+      es: { common: es },
+      de: { common: de },
+      it: { common: it },
+      pt: { common: pt },
     },
     interpolation: { escapeValue: false },
   })

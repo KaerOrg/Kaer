@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react'
 import type { FieldProps } from '../types'
+import { FieldError } from '../FieldError/FieldError'
 import { InlineText } from '../InlineText'
 
 type Tag = 'h2' | 'h3' | 'h4' | 'p' | 'div' | 'span'
@@ -30,7 +31,7 @@ const CONFIG: Record<string, FieldConfig> = {
 
 export function FieldText({ field, t }: FieldProps) {
   const cfg = CONFIG[field.field_type]
-  if (!cfg) return null
+  if (!cfg) return <FieldError fieldId={field.id} fieldType={field.field_type} reason="unknown_type" />
 
   const { tag: Tag, wrap: baseWrap, className, propColor, inlineStyle, quoted } = cfg
   const wrap = baseWrap ?? (

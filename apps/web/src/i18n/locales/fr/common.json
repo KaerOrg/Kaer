@@ -140,30 +140,18 @@
     "crisis_plan": {
       "label": "Plan de crise",
       "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
-      "step_1": {
-        "title": "Signes avant-coureurs",
-        "hint": "Comment est-ce que je me sens quand une crise approche ?"
-      },
-      "step_2": {
-        "title": "Stratégies d'apaisement internes",
-        "hint": "Que puis-je faire seul(e) pour me calmer ?"
-      },
-      "step_3": {
-        "title": "Personnes ou lieux de distraction",
-        "hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?"
-      },
-      "step_4": {
-        "title": "Proches à contacter",
-        "hint": "Qui peut m'écouter et m'aider si je me sens en danger ?"
-      },
-      "step_5": {
-        "title": "Professionnels et urgences",
-        "hint": "Quels professionnels ou services puis-je contacter ?"
-      },
-      "step_6": {
-        "title": "Sécuriser mon environnement",
-        "hint": "Comment rendre mon entourage plus sûr ?"
-      },
+      "step_1_title": "Signes avant-coureurs",
+      "step_1_hint": "Comment est-ce que je me sens quand une crise approche ?",
+      "step_2_title": "Stratégies d'apaisement internes",
+      "step_2_hint": "Que puis-je faire seul(e) pour me calmer ?",
+      "step_3_title": "Personnes ou lieux de distraction",
+      "step_3_hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?",
+      "step_4_title": "Proches à contacter",
+      "step_4_hint": "Qui peut m'écouter et m'aider si je me sens en danger ?",
+      "step_5_title": "Professionnels et urgences",
+      "step_5_hint": "Quels professionnels ou services puis-je contacter ?",
+      "step_6_title": "Sécuriser mon environnement",
+      "step_6_hint": "Comment rendre mon entourage plus sûr ?",
       "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide"
     },
     "therapeutic_commitment": {
@@ -177,59 +165,11 @@
     "medication_side_effects": {
       "label": "Thermomètre de tolérance aux psychotropes",
       "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
-      "field_1": {
-        "label": "Sédation",
-        "detail": "Somnolence, lenteur, difficultés de concentration — échelle 0–3"
-      },
-      "field_2": {
-        "label": "Akathisie",
-        "detail": "Agitation intérieure, impossibilité de rester immobile — échelle 0–3"
-      },
-      "field_3": {
-        "label": "Tremblements",
-        "detail": "Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3"
-      },
-      "field_4": {
-        "label": "Sécheresse buccale",
-        "detail": "Anticholinergiques, tricycliques — échelle 0–3"
-      },
-      "field_5": {
-        "label": "Troubles du sommeil",
-        "detail": "Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3"
-      },
-      "field_6": {
-        "label": "Nausées / troubles digestifs",
-        "detail": "Lithium, valproate, ISRS — échelle 0–3"
-      },
-      "field_7": {
-        "label": "Notes libres",
-        "detail": "Contexte, remarque, moment de la journée"
-      },
       "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
     },
     "medication_adherence": {
       "label": "Module Observance",
       "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
-      "field_1": {
-        "label": "Pris",
-        "detail": "Traitement pris dans son intégralité"
-      },
-      "field_2": {
-        "label": "Partiellement",
-        "detail": "Traitement pris en partie (oubli, difficulté)"
-      },
-      "field_3": {
-        "label": "Non pris",
-        "detail": "Traitement non pris ce jour"
-      },
-      "field_4": {
-        "label": "Notes libres",
-        "detail": "Champ texte optionnel (oubli, remarque…)"
-      },
-      "field_5": {
-        "label": "Historique",
-        "detail": "Liste brute des 30 derniers jours (date, statut, note)"
-      },
       "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
     },
     "psychoeducation": {
@@ -239,38 +179,6 @@
     "sleep_diary": {
       "label": "Agenda du sommeil",
       "description": "Suivi quotidien du sommeil : heure de coucher, lever, efficacité.",
-      "field_1": {
-        "label": "Heure de coucher",
-        "detail": "Sélecteur horaire"
-      },
-      "field_2": {
-        "label": "Heure de lever",
-        "detail": "Sélecteur horaire"
-      },
-      "field_3": {
-        "label": "Temps pour s'endormir",
-        "detail": "Curseur en minutes (0–120)"
-      },
-      "field_4": {
-        "label": "Nombre de réveils nocturnes",
-        "detail": "Curseur (0–10)"
-      },
-      "field_5": {
-        "label": "Durée totale des réveils",
-        "detail": "Curseur en minutes (0–120)"
-      },
-      "field_6": {
-        "label": "Qualité du sommeil",
-        "detail": "Échelle 1 à 5 étoiles"
-      },
-      "field_7": {
-        "label": "Cauchemars",
-        "detail": "Oui / Non"
-      },
-      "field_8": {
-        "label": "Notes libres",
-        "detail": "Champ texte optionnel"
-      },
       "footer": "Formule TCC-I (Morin, 1993) — SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70–84 % · < 70 %."
     },
     "diet_weight_psycho": {
@@ -284,26 +192,6 @@
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
       "description": "Suivi quotidien de l'humeur et du niveau d'énergie sur une échelle visuelle.",
-      "field_1": {
-        "label": "Humeur",
-        "detail": "Échelle 1–10"
-      },
-      "field_2": {
-        "label": "Énergie",
-        "detail": "Échelle 1–10"
-      },
-      "field_3": {
-        "label": "Anxiété",
-        "detail": "Échelle 1–10"
-      },
-      "field_4": {
-        "label": "Plaisir",
-        "detail": "Échelle 1–10 — dimension anhédonique (SHAPS 1995)"
-      },
-      "field_5": {
-        "label": "Notes libres",
-        "detail": "Champ texte optionnel"
-      },
       "footer": "Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l'appareil."
     },
     "emotion_wheel": {
@@ -313,55 +201,11 @@
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
-      "field_1": {
-        "label": "Date",
-        "detail": "Date de l'activité (passée ou à venir)"
-      },
-      "field_2": {
-        "label": "Nom de l'activité",
-        "detail": "Texte libre — ex : Marche 20 min, Appel à un ami"
-      },
-      "field_3": {
-        "label": "Réalisée / Planifiée",
-        "detail": "Le patient coche quand l'activité est accomplie"
-      },
-      "field_4": {
-        "label": "Plaisir (0–10)",
-        "detail": "Satisfaction retirée de l'activité — brut, sans interprétation"
-      },
-      "field_5": {
-        "label": "Maîtrise (0–10)",
-        "detail": "Sentiment d'accomplissement — brut, sans interprétation"
-      },
-      "field_6": {
-        "label": "Notes libres",
-        "detail": "Contexte, ressenti, remarque"
-      },
       "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
       "description": "Journal des pensées : Situation, Émotion, Pensée automatique, Pensée alternative.",
-      "step_1": {
-        "title": "Situation",
-        "hint": "Où étais-je ? Que se passait-il ? Qui était présent ?"
-      },
-      "step_2": {
-        "title": "Émotion(s)",
-        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0–100) ?"
-      },
-      "step_3": {
-        "title": "Pensée automatique",
-        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0–100) ?"
-      },
-      "step_4": {
-        "title": "Réponse rationnelle",
-        "hint": "Quelle autre façon de voir la situation ? Quels faits contredisent cette pensée ?"
-      },
-      "step_5": {
-        "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0–100) ? Conviction en la pensée alternative (0–100) ?"
-      },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
     "cognitive_distortions": {
@@ -379,26 +223,6 @@
     "fear_thermometer": {
       "label": "Thermomètre de la peur",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
-      "field_1": {
-        "label": "Situation déclenchante",
-        "detail": "Sélection dans le catalogue personnel ou texte libre"
-      },
-      "field_2": {
-        "label": "SUDs avant (0–100)",
-        "detail": "Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation"
-      },
-      "field_3": {
-        "label": "Stratégies utilisées",
-        "detail": "Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre"
-      },
-      "field_4": {
-        "label": "SUDs après (0–100)",
-        "detail": "Niveau de détresse après la stratégie — optionnel (remplissage différé possible)"
-      },
-      "field_5": {
-        "label": "Notes libres",
-        "detail": "Contexte, observations, remarque"
-      },
       "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
     },
     "exposure_hierarchy": {
@@ -408,30 +232,6 @@
     "breathing_techniques": {
       "label": "Techniques de respiration",
       "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
-      "field_1": {
-        "label": "Cohérence cardiaque",
-        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
-      },
-      "field_2": {
-        "label": "Respiration diaphragmatique",
-        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
-      },
-      "field_3": {
-        "label": "Respiration carrée",
-        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées"
-      },
-      "field_4": {
-        "label": "Technique 4-7-8",
-        "detail": "Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
-      },
-      "field_5": {
-        "label": "Pleine conscience respiratoire",
-        "detail": "MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
-      },
-      "field_6": {
-        "label": "Historique des sessions",
-        "detail": "Technique utilisée + durée effective — données brutes, sans interprétation"
-      },
       "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
@@ -445,22 +245,6 @@
     "decisional_balance": {
       "label": "Balance décisionnelle",
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
-      "q1": {
-        "title": "Avantages du changement",
-        "subtitle": "Raisons de changer"
-      },
-      "q2": {
-        "title": "Inconvénients du changement",
-        "subtitle": "Coûts du changement"
-      },
-      "q3": {
-        "title": "Avantages du statu quo",
-        "subtitle": "Raisons de rester"
-      },
-      "q4": {
-        "title": "Inconvénients du statu quo",
-        "subtitle": "Coûts de rester"
-      },
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
     "phq9": {
@@ -892,30 +676,18 @@
     "crisis_plan": {
       "label": "Plan de crise",
       "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
-      "step_1": {
-        "title": "Signes avant-coureurs",
-        "hint": "Comment est-ce que je me sens quand une crise approche ?"
-      },
-      "step_2": {
-        "title": "Stratégies d'apaisement internes",
-        "hint": "Que puis-je faire seul(e) pour me calmer ?"
-      },
-      "step_3": {
-        "title": "Personnes ou lieux de distraction",
-        "hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?"
-      },
-      "step_4": {
-        "title": "Proches à contacter",
-        "hint": "Qui peut m'écouter et m'aider si je me sens en danger ?"
-      },
-      "step_5": {
-        "title": "Professionnels et urgences",
-        "hint": "Quels professionnels ou services puis-je contacter ?"
-      },
-      "step_6": {
-        "title": "Sécuriser mon environnement",
-        "hint": "Comment rendre mon entourage plus sûr ?"
-      },
+      "step_1_title": "Signes avant-coureurs",
+      "step_1_hint": "Comment est-ce que je me sens quand une crise approche ?",
+      "step_2_title": "Stratégies d'apaisement internes",
+      "step_2_hint": "Que puis-je faire seul(e) pour me calmer ?",
+      "step_3_title": "Personnes ou lieux de distraction",
+      "step_3_hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?",
+      "step_4_title": "Proches à contacter",
+      "step_4_hint": "Qui peut m'écouter et m'aider si je me sens en danger ?",
+      "step_5_title": "Professionnels et urgences",
+      "step_5_hint": "Quels professionnels ou services puis-je contacter ?",
+      "step_6_title": "Sécuriser mon environnement",
+      "step_6_hint": "Comment rendre mon entourage plus sûr ?",
       "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide"
     },
     "therapeutic_commitment": {
@@ -929,34 +701,6 @@
     "medication_side_effects": {
       "label": "Thermomètre de tolérance aux psychotropes",
       "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
-      "field_1": {
-        "label": "Sédation",
-        "detail": "Somnolence, lenteur, difficultés de concentration — échelle 0–3"
-      },
-      "field_2": {
-        "label": "Akathisie",
-        "detail": "Agitation intérieure, impossibilité de rester immobile — échelle 0–3"
-      },
-      "field_3": {
-        "label": "Tremblements",
-        "detail": "Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3"
-      },
-      "field_4": {
-        "label": "Sécheresse buccale",
-        "detail": "Anticholinergiques, tricycliques — échelle 0–3"
-      },
-      "field_5": {
-        "label": "Troubles du sommeil",
-        "detail": "Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3"
-      },
-      "field_6": {
-        "label": "Nausées / troubles digestifs",
-        "detail": "Lithium, valproate, ISRS — échelle 0–3"
-      },
-      "field_7": {
-        "label": "Notes libres",
-        "detail": "Contexte, remarque, moment de la journée"
-      },
       "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
     },
     "medication_adherence": {
@@ -991,38 +735,6 @@
     "sleep_diary": {
       "label": "Agenda du sommeil",
       "description": "Suivi quotidien du sommeil : heure de coucher, lever, efficacité.",
-      "field_1": {
-        "label": "Heure de coucher",
-        "detail": "Sélecteur horaire"
-      },
-      "field_2": {
-        "label": "Heure de lever",
-        "detail": "Sélecteur horaire"
-      },
-      "field_3": {
-        "label": "Temps pour s'endormir",
-        "detail": "Curseur en minutes (0–120)"
-      },
-      "field_4": {
-        "label": "Nombre de réveils nocturnes",
-        "detail": "Curseur (0–10)"
-      },
-      "field_5": {
-        "label": "Durée totale des réveils",
-        "detail": "Curseur en minutes (0–120)"
-      },
-      "field_6": {
-        "label": "Qualité du sommeil",
-        "detail": "Échelle 1 à 5 étoiles"
-      },
-      "field_7": {
-        "label": "Cauchemars",
-        "detail": "Oui / Non"
-      },
-      "field_8": {
-        "label": "Notes libres",
-        "detail": "Champ texte optionnel"
-      },
       "footer": "Formule TCC-I (Morin, 1993) — SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70–84 % · < 70 %."
     },
     "diet_weight_psycho": {
@@ -1036,26 +748,6 @@
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
       "description": "Suivi quotidien de l'humeur et du niveau d'énergie sur une échelle visuelle.",
-      "field_1": {
-        "label": "Humeur",
-        "detail": "Échelle 1–10"
-      },
-      "field_2": {
-        "label": "Énergie",
-        "detail": "Échelle 1–10"
-      },
-      "field_3": {
-        "label": "Anxiété",
-        "detail": "Échelle 1–10"
-      },
-      "field_4": {
-        "label": "Plaisir",
-        "detail": "Échelle 1–10 — dimension anhédonique (SHAPS 1995)"
-      },
-      "field_5": {
-        "label": "Notes libres",
-        "detail": "Champ texte optionnel"
-      },
       "footer": "Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l'appareil."
     },
     "emotion_wheel": {
@@ -1065,30 +757,6 @@
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
-      "field_1": {
-        "label": "Date",
-        "detail": "Date de l'activité (passée ou à venir)"
-      },
-      "field_2": {
-        "label": "Nom de l'activité",
-        "detail": "Texte libre — ex : Marche 20 min, Appel à un ami"
-      },
-      "field_3": {
-        "label": "Réalisée / Planifiée",
-        "detail": "Le patient coche quand l'activité est accomplie"
-      },
-      "field_4": {
-        "label": "Plaisir (0–10)",
-        "detail": "Satisfaction retirée de l'activité — brut, sans interprétation"
-      },
-      "field_5": {
-        "label": "Maîtrise (0–10)",
-        "detail": "Sentiment d'accomplissement — brut, sans interprétation"
-      },
-      "field_6": {
-        "label": "Notes libres",
-        "detail": "Contexte, ressenti, remarque"
-      },
       "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
     },
     "beck_columns": {
@@ -1131,26 +799,6 @@
     "fear_thermometer": {
       "label": "Thermomètre de la peur",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
-      "field_1": {
-        "label": "Situation déclenchante",
-        "detail": "Sélection dans le catalogue personnel ou texte libre"
-      },
-      "field_2": {
-        "label": "SUDs avant (0–100)",
-        "detail": "Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation"
-      },
-      "field_3": {
-        "label": "Stratégies utilisées",
-        "detail": "Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre"
-      },
-      "field_4": {
-        "label": "SUDs après (0–100)",
-        "detail": "Niveau de détresse après la stratégie — optionnel (remplissage différé possible)"
-      },
-      "field_5": {
-        "label": "Notes libres",
-        "detail": "Contexte, observations, remarque"
-      },
       "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
     },
     "exposure_hierarchy": {
@@ -1197,22 +845,6 @@
     "decisional_balance": {
       "label": "Balance décisionnelle",
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
-      "q1": {
-        "title": "Avantages du changement",
-        "subtitle": "Raisons de changer"
-      },
-      "q2": {
-        "title": "Inconvénients du changement",
-        "subtitle": "Coûts du changement"
-      },
-      "q3": {
-        "title": "Avantages du statu quo",
-        "subtitle": "Raisons de rester"
-      },
-      "q4": {
-        "title": "Inconvénients du statu quo",
-        "subtitle": "Coûts de rester"
-      },
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
     "phq9": {
