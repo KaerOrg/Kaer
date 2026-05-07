@@ -38,6 +38,7 @@ Deux entrées possibles :
             ├── daily_checkin      → DailyCheckinLayout    (medication_adherence : 1 saisie/jour + onglets)
             ├── column_form        → ColumnFormLayout      (beck_columns : sections + champs enfants + form_entries)
             ├── tree_selector      → TreeSelectorLayout    (emotion_wheel : arbre N niveaux + tree_selections)
+            ├── sleep_journal      → SleepJournalLayout    (sleep_diary : 3 modes internes list/entry/month, time pickers natifs, grille calendrier, table sleep_diary_entries)
             ├── steps              → StepsLayout
             ├── cards              → CardsLayout
             ├── fields             → FieldsLayout
@@ -90,9 +91,9 @@ Tout module absent de cette map ET autre `preview_kind` → `ModuleContent` (mot
 
 ```ts
 const CUSTOM_ROUTES = {
-  sleep_diary, psychoeducation, decisional_balance, beck_columns,
-  medication_adherence, fear_thermometer, behavioral_activation,
-  breathing_techniques, cognitive_saturation, emotion_wheel,
+  psychoeducation, decisional_balance,
+  fear_thermometer, behavioral_activation,
+  breathing_techniques,
 }
 ```
 
@@ -121,7 +122,7 @@ const CUSTOM_ROUTES = {
 | `medication_adherence` | MedicationAdherenceScreen | Saisie 1 item/jour + notes | Nouveau layout `daily_checkin` (onglets + UPSERT date UNIQUE + `logEvent`) | ✅ Migré |
 | `beck_columns` | BeckColumnsScreen + BeckEntryScreen | 5 colonnes hétérogènes TCC | Nouveau layout `column_form` (sections = colonnes, champs enfants via `parent_field_id`, table `form_entries`) | ✅ Migré |
 | `emotion_wheel` | EmotionWheelScreen + Entry + Month | Roue 3 niveaux hiérarchiques | Nouveau layout `tree_selector` (niveaux modélisés via `parent_field_id`, table SQLite générique `tree_selections`) | ✅ Migré |
-| `sleep_diary` | SleepDiaryScreen + Entry + Month | Journal + time pickers + calendrier | Nouveau layout `sleep_journal` (3 modes internes + time pickers natifs + grille mois) | ⏳ Planifié (L) |
+| `sleep_diary` | SleepDiaryScreen + Entry + Month | Journal + time pickers + calendrier | Nouveau layout `sleep_journal` (3 modes internes + time pickers natifs + grille mois, table SQLite dédiée `sleep_diary_entries`) | ✅ Migré |
 | `behavioral_activation` | BehavioralActivationScreen + Entry | CRUD activités + calendrier mensuel | Nouveau layout `activity_log` (calendrier + CRUD + 2 dimensions) | ⏳ Planifié (L) |
 | `fear_thermometer` | FearThermometerScreen + FearEntryScreen | SUDS avant/après + catalogue situations + stratégies | Nouveau layout `exposure_tracker` (3 sous-tables SQLite dédiées) | ⏳ Planifié (XL) |
 | `decisional_balance` | DecisionalBalanceScreen | Grille 2×2 + poids étoiles + jauge | Jauge dynamique interprétative — contrainte MDR, pas technique | ❌ MDR |
@@ -508,8 +509,6 @@ Un layout qui *interprète* les données (affiche une conclusion, déclenche une
 
 | Module | `preview_kind` | Nouveaux mécanismes requis | Effort |
 |---|---|---|---|
-| `emotion_wheel` | `tree_selector` | Navigation multi-niveaux, arbre d'émotions modélisé via `parent_field_id` en cascade, state `currentPath[]` | M |
-| `sleep_diary` | `sleep_journal` | 3 modes internes (liste / saisie / mois), time pickers natifs (`@react-native-community/datetimepicker`), grille calendrier | L |
 | `behavioral_activation` | `activity_log` | Calendrier mensuel (points colorés), CRUD avec 2 dimensions (plaisir/maîtrise), toggle réalisé/planifié | L |
 | `fear_thermometer` | `exposure_tracker` | 3 sous-tables SQLite dédiées (situations, mesures SUDS, stratégies), sliders 0–100, checkboxes avec ajout libre | XL |
 
@@ -534,7 +533,7 @@ Modules déjà migrés (barrés) — restants classés par effort croissant :
 7. ~~`medication_adherence`~~ ✅ (layout `daily_checkin`, table SQLite générique `daily_entries`)
 8. ~~`beck_columns`~~ ✅ (layout `column_form`, table SQLite générique `form_entries`)
 9. ~~`emotion_wheel`~~ ✅ (layout `tree_selector`, arbre 3 niveaux via `parent_field_id`, table SQLite générique `tree_selections`)
-10. **`sleep_diary`** — layout `sleep_journal`, time pickers + grille mois, effort L
+10. ~~`sleep_diary`~~ ✅ (layout `sleep_journal`, 3 modes internes list/entry/month, time pickers natifs, grille calendrier, table SQLite dédiée `sleep_diary_entries`)
 11. **`behavioral_activation`** — layout `activity_log`, calendrier + CRUD, effort L
 12. **`fear_thermometer`** — layout `exposure_tracker`, 3 sous-tables SQLite, effort XL
 
@@ -617,3 +616,28 @@ Migration depuis `emotion_entries` au boot (les labels copiés directement dans 
 *`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode notes).
 
 *Tests :* `FieldRenderer.tree_selector.test.tsx` — 11 tests (chargement, état vide, liste, descente dans l'arbre, intensité, transition vers notes, save complet, annulation, suppression).
+
+---
+
+### 10 (complété). `sleep_diary` — Journal de sommeil + time pickers + calendrier mensuel
+
+**Fonctionnel**
+Saisie quotidienne d'une nuit : heure de coucher / lever, temps d'endormissement, nombre & durée des réveils, cauchemars, qualité (étoiles 1-5), notes libres. Calcul live de l'efficacité du sommeil (TST/TPL). Liste des 14 dernières nuits avec aperçu durée + étoiles. Vue mensuelle avec calendrier coloré par qualité, badges cauchemar, et 4 statistiques agrégées (durée moyenne, réveils moyens, nuits saisies, cauchemars). Conformité MDR : aucun seuil interprétatif, valeurs brutes uniquement, palette couleurs = convention d'affichage des étoiles saisies.
+
+**Solution : `preview_kind: 'sleep_journal'` + `SleepJournalLayout`**
+
+Layout auto-suffisant à 3 modes internes : `list → entry → month`. Aucune navigation externe. Mode `entry` utilise `KeyboardAvoidingView` + `DateTimePicker` natif (`@react-native-community/datetimepicker`). Mode `month` réutilise la grille calendrier de l'écran custom.
+
+*`field_types` configurables depuis Supabase :*
+- `sleep_journal_config` — props : `history_days` (défaut 14), `awakenings_max` (20), `onset_max_minutes` (180), `awak_duration_max_minutes` (300), `efficiency_good` (85), `efficiency_warning` (70), `quality_max` (5), `quality_good_threshold` (4), `quality_avg_threshold` (3)
+- UI labels (sans section) : `sleep_journal_cta_title`, `sleep_journal_monthly_button_label`, `sleep_journal_list_header`, `sleep_journal_incomplete_label`, `sleep_journal_empty_day_label`, `sleep_journal_section_schedule_title`, `sleep_journal_section_awakenings_title`, `sleep_journal_section_nightmares_title`, `sleep_journal_section_quality_title`, `sleep_journal_section_notes_title`, `sleep_journal_bedtime_label`, `sleep_journal_wake_time_label`, `sleep_journal_onset_label`, `sleep_journal_awakenings_label`, `sleep_journal_awakenings_duration_label`, `sleep_journal_nightmares_label`, `sleep_journal_quality_label`, `sleep_journal_quality_label_1`…`_5`, `sleep_journal_quality_missing_title`, `sleep_journal_quality_missing_msg`, `sleep_journal_efficiency_label`, `sleep_journal_date_label`, `sleep_journal_save_label`, `sleep_journal_update_label`, `sleep_journal_delete_label`, `sleep_journal_delete_title`, `sleep_journal_notes_placeholder`, `sleep_journal_minutes_unit`, `sleep_journal_tap_to_modify_hint`, `sleep_journal_confirm_label`, `sleep_journal_back_label`, `sleep_journal_month_summary_title`, `sleep_journal_legend_title`, `sleep_journal_legend_good_label`, `sleep_journal_legend_average_label`, `sleep_journal_legend_bad_label`, `sleep_journal_legend_empty_label`, `sleep_journal_legend_nightmare_label`, `sleep_journal_stat_avg_duration_label`, `sleep_journal_stat_avg_awakenings_label`, `sleep_journal_stat_nights_filled_label`, `sleep_journal_stat_nightmares_label`
+
+*SQLite :* réutilise `sleep_diary_entries` existant (UNIQUE par date) — aucune migration nécessaire. La structure de la table couvrait déjà toutes les valeurs (`bedtime`, `wake_time`, `sleep_onset_minutes`, `awakenings`, `awakenings_duration_minutes`, `nightmares`, `quality`, `notes`).
+
+*Supabase (schema.sql) :*
+- `UPDATE modules SET preview_kind = 'sleep_journal' WHERE id = 'sleep_diary'`
+- Suppression des anciens widget_type props `sleep.field_1`–`sleep.field_8` (preview_kind 'fields' obsolète) avant insertion des nouveaux `sj.*` champs.
+
+*`ModuleContentScreen.tsx` :* ajouté à la branche `flex:1` (le layout gère son propre scroll + `KeyboardAvoidingView` en mode entry).
+
+*Tests :* `FieldRenderer.sleep_journal.test.tsx` — 12 tests (chargement, liste 14 jours, ouverture entry, pré-remplissage entrée existante, calcul SE live, validation qualité manquante, save nouveau, save avec cauchemars, compteur awakenings, mode month, navigation month, suppression).

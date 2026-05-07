@@ -1407,3 +1407,85 @@ INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
   ('ew.anticipation', 'color', '#F97316'),
   ('ew.anticipation', 'icon',  'clock-fast')
 ON CONFLICT (field_id, prop_key) DO NOTHING;
+
+
+-- ============================================================
+-- MIGRATION : sleep_diary → sleep_journal
+-- preview_kind = 'sleep_journal' → SleepJournalLayout (FieldRenderer)
+-- 3 modes internes : list | entry | month
+-- Persistance SQLite : sleep_diary_entries (UNIQUE par date)
+-- Conformité MDR 2017/745 : valeurs brutes uniquement, aucun seuil
+-- interprétatif. La couleur des cellules calendrier est une convention
+-- d'affichage des étoiles saisies, pas une interprétation clinique.
+-- ============================================================
+
+-- Nettoyer les anciens widget_type props (preview_kind 'fields' obsolète)
+DELETE FROM public.field_props
+WHERE field_id IN ('sleep.field_1','sleep.field_2','sleep.field_3','sleep.field_4',
+                   'sleep.field_5','sleep.field_6','sleep.field_7','sleep.field_8');
+DELETE FROM public.module_content_fields WHERE module_id = 'sleep_diary';
+
+UPDATE public.modules SET preview_kind = 'sleep_journal' WHERE id = 'sleep_diary';
+
+INSERT INTO public.module_content_fields (id, module_id, field_type, text_code, sort_order)
+VALUES
+  ('sj.cfg',                   'sleep_diary', 'sleep_journal_config',                   NULL,                                       0),
+  ('sj.cta_title',             'sleep_diary', 'sleep_journal_cta_title',                'modules.sleep_diary.cta_title',            1),
+  ('sj.monthly_button',        'sleep_diary', 'sleep_journal_monthly_button_label',     'modules.sleep_diary.monthly_button',       2),
+  ('sj.list_header',           'sleep_diary', 'sleep_journal_list_header',              'modules.sleep_diary.list_header',          3),
+  ('sj.incomplete',            'sleep_diary', 'sleep_journal_incomplete_label',         'modules.sleep_diary.incomplete',           4),
+  ('sj.empty_day',             'sleep_diary', 'sleep_journal_empty_day_label',          'modules.sleep_diary.empty_day',            5),
+  ('sj.section_schedule',      'sleep_diary', 'sleep_journal_section_schedule_title',   'modules.sleep_diary.section_schedule',     6),
+  ('sj.section_awakenings',    'sleep_diary', 'sleep_journal_section_awakenings_title', 'modules.sleep_diary.section_awakenings',   7),
+  ('sj.section_nightmares',    'sleep_diary', 'sleep_journal_section_nightmares_title', 'modules.sleep_diary.section_nightmares',   8),
+  ('sj.section_quality',       'sleep_diary', 'sleep_journal_section_quality_title',    'modules.sleep_diary.section_quality',      9),
+  ('sj.section_notes',         'sleep_diary', 'sleep_journal_section_notes_title',      'modules.sleep_diary.notes_label',         10),
+  ('sj.bedtime_label',         'sleep_diary', 'sleep_journal_bedtime_label',            'modules.sleep_diary.bedtime_label',       11),
+  ('sj.wake_time_label',       'sleep_diary', 'sleep_journal_wake_time_label',          'modules.sleep_diary.wake_time_label',     12),
+  ('sj.onset_label',           'sleep_diary', 'sleep_journal_onset_label',              'modules.sleep_diary.onset_label',         13),
+  ('sj.awakenings_label',      'sleep_diary', 'sleep_journal_awakenings_label',         'modules.sleep_diary.awakenings_label',    14),
+  ('sj.awakenings_dur_label',  'sleep_diary', 'sleep_journal_awakenings_duration_label','modules.sleep_diary.awakenings_duration_label', 15),
+  ('sj.nightmares_label',      'sleep_diary', 'sleep_journal_nightmares_label',         'modules.sleep_diary.nightmares_label',    16),
+  ('sj.quality_label',         'sleep_diary', 'sleep_journal_quality_label',            'modules.sleep_diary.quality_label',       17),
+  ('sj.quality_missing_title', 'sleep_diary', 'sleep_journal_quality_missing_title',    'modules.sleep_diary.quality_missing',     18),
+  ('sj.quality_missing_msg',   'sleep_diary', 'sleep_journal_quality_missing_msg',      'modules.sleep_diary.quality_missing_msg', 19),
+  ('sj.efficiency_label',      'sleep_diary', 'sleep_journal_efficiency_label',         'modules.sleep_diary.sleep_efficiency',    20),
+  ('sj.date_label',            'sleep_diary', 'sleep_journal_date_label',               'modules.sleep_diary.date_label',          21),
+  ('sj.save_label',            'sleep_diary', 'sleep_journal_save_label',               'modules.sleep_diary.save_night',          22),
+  ('sj.update_label',          'sleep_diary', 'sleep_journal_update_label',             'modules.sleep_diary.update_entry',        23),
+  ('sj.delete_label',          'sleep_diary', 'sleep_journal_delete_label',             'modules.sleep_diary.delete_entry',        24),
+  ('sj.delete_title',          'sleep_diary', 'sleep_journal_delete_title',             'modules.sleep_diary.delete_entry',        25),
+  ('sj.notes_placeholder',     'sleep_diary', 'sleep_journal_notes_placeholder',        'modules.sleep_diary.notes_placeholder',   26),
+  ('sj.month_summary',         'sleep_diary', 'sleep_journal_month_summary_title',      'modules.sleep_diary.month_summary',       27),
+  ('sj.legend_title',          'sleep_diary', 'sleep_journal_legend_title',             'modules.sleep_diary.legend',              28),
+  ('sj.legend_good',           'sleep_diary', 'sleep_journal_legend_good_label',        'modules.sleep_diary.legend_good',         29),
+  ('sj.legend_average',        'sleep_diary', 'sleep_journal_legend_average_label',     'modules.sleep_diary.legend_average',      30),
+  ('sj.legend_bad',            'sleep_diary', 'sleep_journal_legend_bad_label',         'modules.sleep_diary.legend_bad',          31),
+  ('sj.legend_empty',          'sleep_diary', 'sleep_journal_legend_empty_label',       'modules.sleep_diary.legend_empty',        32),
+  ('sj.legend_nightmare',      'sleep_diary', 'sleep_journal_legend_nightmare_label',   'modules.sleep_diary.legend_nightmare',    33),
+  ('sj.stat_avg_duration',     'sleep_diary', 'sleep_journal_stat_avg_duration_label',  'modules.sleep_diary.stat_avg_duration',   34),
+  ('sj.stat_avg_awakenings',   'sleep_diary', 'sleep_journal_stat_avg_awakenings_label','modules.sleep_diary.stat_avg_awakenings', 35),
+  ('sj.stat_nights_filled',    'sleep_diary', 'sleep_journal_stat_nights_filled_label', 'modules.sleep_diary.stat_nights_filled',  36),
+  ('sj.stat_nightmares',       'sleep_diary', 'sleep_journal_stat_nightmares_label',    'modules.sleep_diary.stat_nightmares',     37),
+  ('sj.minutes_unit',          'sleep_diary', 'sleep_journal_minutes_unit',             'modules.sleep_diary.minutes_unit',        38),
+  ('sj.tap_to_modify',         'sleep_diary', 'sleep_journal_tap_to_modify_hint',       'modules.sleep_diary.tap_to_modify',       39),
+  ('sj.confirm_label',         'sleep_diary', 'sleep_journal_confirm_label',            'modules.sleep_diary.confirm_label',       40),
+  ('sj.back_label',            'sleep_diary', 'sleep_journal_back_label',               'modules.sleep_diary.back_btn',            41),
+  ('sj.quality_label_1',       'sleep_diary', 'sleep_journal_quality_label_1',          'modules.sleep_diary.quality_very_bad',    42),
+  ('sj.quality_label_2',       'sleep_diary', 'sleep_journal_quality_label_2',          'modules.sleep_diary.quality_bad',         43),
+  ('sj.quality_label_3',       'sleep_diary', 'sleep_journal_quality_label_3',          'modules.sleep_diary.quality_average',     44),
+  ('sj.quality_label_4',       'sleep_diary', 'sleep_journal_quality_label_4',          'modules.sleep_diary.quality_good',        45),
+  ('sj.quality_label_5',       'sleep_diary', 'sleep_journal_quality_label_5',          'modules.sleep_diary.quality_excellent',   46)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.field_props (field_id, prop_key, prop_value) VALUES
+  ('sj.cfg', 'history_days',                '14'),
+  ('sj.cfg', 'awakenings_max',              '20'),
+  ('sj.cfg', 'onset_max_minutes',           '180'),
+  ('sj.cfg', 'awak_duration_max_minutes',   '300'),
+  ('sj.cfg', 'efficiency_good',             '85'),
+  ('sj.cfg', 'efficiency_warning',          '70'),
+  ('sj.cfg', 'quality_max',                 '5'),
+  ('sj.cfg', 'quality_good_threshold',      '4'),
+  ('sj.cfg', 'quality_avg_threshold',       '3')
+ON CONFLICT (field_id, prop_key) DO NOTHING;

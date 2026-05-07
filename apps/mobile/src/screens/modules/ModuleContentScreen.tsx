@@ -17,6 +17,17 @@ import { colors, spacing } from '../../theme'
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ModuleContent'>
 
+const SELF_MANAGED_LAYOUTS = new Set([
+  'guided_exercise',
+  'editable_steps',
+  'timed_tap_exercise',
+  'daily_checkin',
+  'column_form',
+  'tree_selector',
+  'sleep_journal',
+  'patient_scenario',
+])
+
 export default function ModuleContentScreen({ route }: Props) {
   const { moduleType } = route.params
   const { t } = useTranslation()
@@ -63,8 +74,8 @@ export default function ModuleContentScreen({ route }: Props) {
     )
   }
 
-  // Layouts that manage their own scroll + fixed bottom bar — render without outer ScrollView
-  if (result?.preview_kind === 'guided_exercise' || result?.preview_kind === 'editable_steps' || result?.preview_kind === 'timed_tap_exercise' || result?.preview_kind === 'daily_checkin' || result?.preview_kind === 'column_form' || result?.preview_kind === 'tree_selector') {
+  // Layouts qui gèrent leur propre scroll / structure — rendu sans ScrollView externe
+  if (result != null && SELF_MANAGED_LAYOUTS.has(result.preview_kind)) {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <FieldRenderer
@@ -72,19 +83,6 @@ export default function ModuleContentScreen({ route }: Props) {
           fields={result.fields}
           accentColor={accentColor}
           moduleId={moduleType}
-        />
-      </SafeAreaView>
-    )
-  }
-
-  // patient_scenario layout manages its own structure — render without outer ScrollView
-  if (isPatientScenario && result != null) {
-    return (
-      <SafeAreaView style={styles.safe} edges={['bottom']}>
-        <FieldRenderer
-          preview_kind={result.preview_kind}
-          fields={result.fields}
-          accentColor={accentColor}
           patientConfig={patientConfig ?? null}
         />
       </SafeAreaView>

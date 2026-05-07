@@ -4,9 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
 import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
-import SleepDiaryScreen from '../screens/modules/SleepDiaryScreen'
-import SleepDiaryEntryScreen from '../screens/modules/SleepDiaryEntryScreen'
-import SleepDiaryMonthScreen from '../screens/modules/SleepDiaryMonthScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import DecisionalBalanceScreen from '../screens/modules/DecisionalBalanceScreen'
@@ -28,9 +25,6 @@ function getTechniqueTitle(key: string): string {
 
 export type AppStackParamList = {
   Tabs: undefined
-  SleepDiary: undefined
-  SleepDiaryEntry: { date?: string }
-  SleepDiaryMonth: undefined
   Psychoeducation: undefined
   CardDetail: { cardId: string; isRead: boolean }
   DecisionalBalance: undefined
@@ -90,21 +84,6 @@ export default function AppStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
-      <Stack.Screen
-        name="SleepDiary"
-        component={SleepDiaryScreen}
-        options={{ title: 'Agenda du sommeil' }}
-      />
-      <Stack.Screen
-        name="SleepDiaryEntry"
-        component={SleepDiaryEntryScreen}
-        options={{ title: 'Saisir ma nuit' }}
-      />
-      <Stack.Screen
-        name="SleepDiaryMonth"
-        component={SleepDiaryMonthScreen}
-        options={{ title: 'Vue mensuelle' }}
-      />
       <Stack.Screen
         name="Psychoeducation"
         component={PsychoeducationScreen}

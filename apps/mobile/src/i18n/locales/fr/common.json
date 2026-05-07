@@ -7,6 +7,9 @@
     "add": "Ajouter",
     "update": "Mettre à jour",
     "error": "Erreur",
+    "warning": "Attention",
+    "ok": "OK",
+    "calendar": "Calendrier",
     "loading": "Chargement…",
     "irreversible": "Cette action est irréversible.",
     "saved_title": "Enregistré",
@@ -279,7 +282,13 @@
       "quality_bad": "Mauvaise",
       "quality_average": "Moyenne",
       "quality_good": "Bonne",
-      "quality_excellent": "Excellente"
+      "quality_excellent": "Excellente",
+      "intro": "Notez votre sommeil chaque matin pour suivre vos rythmes au fil du temps.",
+      "list_btn": "Saisir une nuit",
+      "month_btn": "Vue mensuelle",
+      "back_btn": "Retour",
+      "notes_label": "Notes (optionnel)",
+      "notes_placeholder": "Contexte, rêves, remarques…"
     },
     "diet_weight_psycho": {
       "label": "Alimentation & poids",

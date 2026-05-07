@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef, ComponentType } from 'react'
-import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { logger } from '@psytool/shared'
 import { colors, spacing, radius } from '../../theme'
 import type { ContentField } from '../../services/moduleService'
-import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry, getAllTreeSelections, saveTreeSelection, deleteTreeSelection, type TreeSelection, type TreeSelectionPathNode } from '../../lib/database'
-import { formatDateTime, formatDateFull, formatDateNumeric } from '../../lib/dateUtils'
+import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry, getAllTreeSelections, saveTreeSelection, deleteTreeSelection, type TreeSelection, type TreeSelectionPathNode, getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth, saveSleepEntry, deleteSleepEntry, computeSleepDuration, computeSleepEfficiency, type SleepEntry } from '../../lib/database'
+import { formatDateTime, formatDateFull, formatDateNumeric, formatDateShort } from '../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
 import { useModuleT } from '../../hooks/useModuleT'
@@ -2556,6 +2557,817 @@ function TreeSelectorLayout({ fields, moduleId }: {
   )
 }
 
+// ─── Layout — journal de sommeil (sleep_diary) ──────────────────────────────
+//
+// Pattern « journal quotidien horodaté » : 3 modes internes (list/entry/month),
+// time pickers natifs, calcul d'efficacité du sommeil affiché en valeur brute,
+// grille calendrier mensuelle. Persistance dans la table SQLite dédiée
+// sleep_diary_entries (UNIQUE par date).
+// Conformité MDR 2017/745 : aucun seuil interprétatif, juste affichage des
+// valeurs brutes saisies par le patient. La couleur de la qualité est une
+// convention d'affichage (4-5 étoiles = vert), pas une interprétation clinique.
+
+const WEEKDAYS_SHORT = ['L', 'M', 'M', 'J', 'V', 'S', 'D'] as const
+
+function toHHMM(date: Date): string {
+  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+}
+
+function fromHHMM(timeStr: string): Date {
+  const [h, m] = timeStr.split(':').map(Number)
+  const d = new Date()
+  d.setHours(h, m, 0, 0)
+  return d
+}
+
+function yesterdayDateStr(): string {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+function lastNDays(n: number): string[] {
+  const days: string[] = []
+  for (let i = 1; i <= n; i += 1) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    days.push(d.toISOString().slice(0, 10))
+  }
+  return days
+}
+
+function toYearMonth(year: number, month: number): string {
+  return `${year}-${String(month).padStart(2, '0')}`
+}
+
+function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate()
+}
+
+function firstWeekday(year: number, month: number): number {
+  const day = new Date(year, month - 1, 1).getDay()
+  return (day + 6) % 7
+}
+
+function sleepMinutes(entry: SleepEntry): number | null {
+  if (!entry.bedtime || !entry.wake_time) return null
+  const [bH, bM] = entry.bedtime.split(':').map(Number)
+  const [wH, wM] = entry.wake_time.split(':').map(Number)
+  let total = wH * 60 + wM - (bH * 60 + bM) - (entry.sleep_onset_minutes ?? 0)
+  if (total < 0) total += 24 * 60
+  return total
+}
+
+function formatMinutes(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return `${h}h${String(m).padStart(2, '0')}`
+}
+
+function qualityColorOf(quality: number | null, qualityWarning: number, qualityGood: number): string {
+  if (quality === null) return colors.border
+  if (quality >= qualityGood) return colors.success
+  if (quality >= qualityWarning) return '#F59E0B'
+  return colors.danger
+}
+
+function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
+  const t = useModuleT()
+
+  const ft = useCallback((type: string): string => {
+    const f = fields.find(field => field.field_type === type)
+    return f?.text_code ? t(f.text_code) : ''
+  }, [fields, t])
+
+  const configField = fields.find(f => f.field_type === 'sleep_journal_config')
+  const historyDays = parseInt(configField?.props['history_days'] ?? '14', 10)
+  const awakeningsMax = parseInt(configField?.props['awakenings_max'] ?? '20', 10)
+  const onsetMaxMinutes = parseInt(configField?.props['onset_max_minutes'] ?? '180', 10)
+  const awakDurationMaxMinutes = parseInt(configField?.props['awak_duration_max_minutes'] ?? '300', 10)
+  const efficiencyGood = parseInt(configField?.props['efficiency_good'] ?? '85', 10)
+  const efficiencyWarning = parseInt(configField?.props['efficiency_warning'] ?? '70', 10)
+  const qualityMax = parseInt(configField?.props['quality_max'] ?? '5', 10)
+  const qualityGoodThreshold = parseInt(configField?.props['quality_good_threshold'] ?? '4', 10)
+  const qualityAvgThreshold = parseInt(configField?.props['quality_avg_threshold'] ?? '3', 10)
+
+  const now = useMemo(() => new Date(), [])
+
+  // ── State
+  const [mode, setMode] = useState<'list' | 'entry' | 'month'>('list')
+  const [entries, setEntries] = useState<SleepEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  // Mode entry
+  const [targetDate, setTargetDate] = useState<string>(yesterdayDateStr())
+  const [existingId, setExistingId] = useState<string | null>(null)
+  const [bedtime, setBedtime] = useState<Date>(() => { const d = new Date(); d.setHours(23, 0, 0, 0); return d })
+  const [wakeTime, setWakeTime] = useState<Date>(() => { const d = new Date(); d.setHours(7, 0, 0, 0); return d })
+  const [onsetMinutes, setOnsetMinutes] = useState(0)
+  const [awakenings, setAwakenings] = useState(0)
+  const [awakeningsDuration, setAwakeningsDuration] = useState(0)
+  const [nightmares, setNightmares] = useState(false)
+  const [quality, setQuality] = useState<number | null>(null)
+  const [notes, setNotes] = useState('')
+  const [showBedtimePicker, setShowBedtimePicker] = useState(false)
+  const [showWakePicker, setShowWakePicker] = useState(false)
+
+  // Mode month
+  const [monthYear, setMonthYear] = useState(now.getFullYear())
+  const [monthNum, setMonthNum] = useState(now.getMonth() + 1)
+  const [monthEntries, setMonthEntries] = useState<SleepEntry[]>([])
+
+  // ── Loaders
+  const loadEntries = useCallback(async () => {
+    const data = await getAllSleepEntries()
+    setEntries(data)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { void loadEntries() }, [loadEntries])
+
+  const loadMonth = useCallback(async (year: number, monthVal: number) => {
+    const data = await getSleepEntriesForMonth(toYearMonth(year, monthVal))
+    setMonthEntries(data)
+  }, [])
+
+  // ── Navigation
+  const handleOpenEntry = useCallback(async (date: string) => {
+    setTargetDate(date)
+    const entry = await getSleepEntry(date)
+    if (entry) {
+      setExistingId(entry.id)
+      if (entry.bedtime) setBedtime(fromHHMM(entry.bedtime))
+      else { const d = new Date(); d.setHours(23, 0, 0, 0); setBedtime(d) }
+      if (entry.wake_time) setWakeTime(fromHHMM(entry.wake_time))
+      else { const d = new Date(); d.setHours(7, 0, 0, 0); setWakeTime(d) }
+      setOnsetMinutes(entry.sleep_onset_minutes ?? 0)
+      setAwakenings(entry.awakenings ?? 0)
+      setAwakeningsDuration(entry.awakenings_duration_minutes ?? 0)
+      setNightmares(entry.nightmares === 1)
+      setQuality(entry.quality)
+      setNotes(entry.notes ?? '')
+    } else {
+      setExistingId(null)
+      const b = new Date(); b.setHours(23, 0, 0, 0); setBedtime(b)
+      const w = new Date(); w.setHours(7, 0, 0, 0); setWakeTime(w)
+      setOnsetMinutes(0)
+      setAwakenings(0)
+      setAwakeningsDuration(0)
+      setNightmares(false)
+      setQuality(null)
+      setNotes('')
+    }
+    setMode('entry')
+  }, [])
+
+  const handleOpenMonth = useCallback(() => {
+    void loadMonth(monthYear, monthNum)
+    setMode('month')
+  }, [loadMonth, monthYear, monthNum])
+
+  const handleBackToList = useCallback(() => {
+    void loadEntries()
+    setMode('list')
+  }, [loadEntries])
+
+  // ── Save / delete
+  const handleSave = useCallback(async () => {
+    if (quality === null) {
+      Alert.alert(
+        ft('sleep_journal_quality_missing_title') || t('common.warning'),
+        ft('sleep_journal_quality_missing_msg') || '',
+      )
+      return
+    }
+    setSaving(true)
+    try {
+      await saveSleepEntry({
+        id: existingId ?? generateId(),
+        date: targetDate,
+        bedtime: toHHMM(bedtime),
+        wake_time: toHHMM(wakeTime),
+        sleep_onset_minutes: onsetMinutes,
+        awakenings,
+        awakenings_duration_minutes: awakeningsDuration,
+        nightmares: nightmares ? 1 : 0,
+        quality,
+        notes: notes.trim() || null,
+      })
+      await loadEntries()
+      setMode('list')
+    } catch {
+      Alert.alert(t('common.error'), t('common.save_error'))
+    } finally {
+      setSaving(false)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quality, existingId, targetDate, bedtime, wakeTime, onsetMinutes, awakenings, awakeningsDuration, nightmares, notes, loadEntries, t])
+
+  const handleDelete = useCallback(() => {
+    if (!existingId) return
+    Alert.alert(
+      ft('sleep_journal_delete_title') || t('common.delete'),
+      t('common.irreversible'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await deleteSleepEntry(existingId)
+            await loadEntries()
+            setMode('list')
+          },
+        },
+      ]
+    )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingId, loadEntries, t])
+
+  // ── Month nav
+  const goPrevMonth = useCallback(() => {
+    let y = monthYear, m = monthNum
+    if (m === 1) { y -= 1; m = 12 } else { m -= 1 }
+    setMonthYear(y)
+    setMonthNum(m)
+    void loadMonth(y, m)
+  }, [monthYear, monthNum, loadMonth])
+
+  const goNextMonth = useCallback(() => {
+    const nowYear = now.getFullYear()
+    const nowMonth = now.getMonth() + 1
+    if (monthYear > nowYear || (monthYear === nowYear && monthNum >= nowMonth)) return
+    let y = monthYear, m = monthNum
+    if (m === 12) { y += 1; m = 1 } else { m += 1 }
+    setMonthYear(y)
+    setMonthNum(m)
+    void loadMonth(y, m)
+  }, [monthYear, monthNum, loadMonth, now])
+
+  // ── Sleep efficiency (computed live in entry mode)
+  const liveSE = useMemo(
+    () => computeSleepEfficiency(toHHMM(bedtime), toHHMM(wakeTime), onsetMinutes, awakeningsDuration),
+    [bedtime, wakeTime, onsetMinutes, awakeningsDuration]
+  )
+  const seColor = liveSE === null ? colors.danger
+    : liveSE >= efficiencyGood ? colors.success
+    : liveSE >= efficiencyWarning ? '#F59E0B'
+    : colors.danger
+
+  if (loading) {
+    return <View style={sjStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
+  }
+
+  // ── MODE LIST ───────────────────────────────────────────────────────────
+  if (mode === 'list') {
+    const entryByDate: Record<string, SleepEntry> = {}
+    for (const e of entries) entryByDate[e.date] = e
+    const days = lastNDays(historyDays)
+    const ctaTitle = ft('sleep_journal_cta_title')
+    const monthlyLabel = ft('sleep_journal_monthly_button_label') || ft('sleep_journal_month_btn') || t('common.calendar')
+    const listHeader = ft('sleep_journal_list_header')
+    const incompleteLabel = ft('sleep_journal_incomplete_label')
+    const emptyDayLabel = ft('sleep_journal_empty_day_label')
+
+    return (
+      <ScrollView style={sjStyles.container} contentContainerStyle={sjStyles.listContent} testID="sleep-journal-list">
+        <View style={sjStyles.ctaContainer}>
+          <Pressable
+            style={sjStyles.ctaCard}
+            onPress={() => handleOpenEntry(yesterdayDateStr())}
+            accessibilityRole="button"
+            testID="cta-yesterday"
+          >
+            <View style={sjStyles.ctaRow}>
+              <MaterialCommunityIcons name="weather-night" size={32} color={colors.white} />
+              <View style={sjStyles.ctaTexts}>
+                {ctaTitle ? <Text style={sjStyles.ctaTitle}>{ctaTitle}</Text> : null}
+                <Text style={sjStyles.ctaSubtitle}>{formatDateShort(yesterdayDateStr())}</Text>
+              </View>
+              <Text style={sjStyles.chevronWhite}>›</Text>
+            </View>
+          </Pressable>
+
+          <Pressable
+            style={sjStyles.monthCard}
+            onPress={handleOpenMonth}
+            accessibilityRole="button"
+            testID="cta-month"
+          >
+            <View style={sjStyles.ctaRow}>
+              <MaterialCommunityIcons name="calendar-month-outline" size={20} color={colors.primary} />
+              <Text style={sjStyles.monthBtnText}>{monthlyLabel}</Text>
+              <Text style={sjStyles.chevron}>›</Text>
+            </View>
+          </Pressable>
+        </View>
+
+        {listHeader ? <Text style={sjStyles.listHeader}>{listHeader}</Text> : null}
+
+        {days.map(date => {
+          const entry = entryByDate[date]
+          const filled = entry != null
+          return (
+            <Pressable
+              key={date}
+              style={[sjStyles.dayRow, filled && sjStyles.dayRowFilled]}
+              onPress={() => handleOpenEntry(date)}
+              accessibilityRole="button"
+              testID={`day-${date}`}
+            >
+              <View style={[sjStyles.dot, filled ? sjStyles.dotFilled : sjStyles.dotEmpty]} />
+              <View style={sjStyles.dayInfo}>
+                <Text style={[sjStyles.dayDate, filled && sjStyles.dayDateFilled]}>{formatDateShort(date)}</Text>
+                {filled && entry.bedtime && entry.wake_time ? (
+                  <View style={sjStyles.entryDetails}>
+                    <Text style={sjStyles.entryMeta}>
+                      {entry.bedtime} → {entry.wake_time}
+                      {'  '}
+                      <Text style={sjStyles.entryMetaStrong}>
+                        ({computeSleepDuration(entry.bedtime, entry.wake_time, entry.sleep_onset_minutes)})
+                      </Text>
+                    </Text>
+                    {entry.quality !== null ? (
+                      <View style={sjStyles.starsRow}>
+                        {Array.from({ length: qualityMax }, (_, i) => (
+                          <MaterialCommunityIcons
+                            key={i}
+                            name={i < (entry.quality ?? 0) ? 'star' : 'star-outline'}
+                            size={14}
+                            color={i < (entry.quality ?? 0) ? colors.stars : colors.border}
+                          />
+                        ))}
+                      </View>
+                    ) : null}
+                  </View>
+                ) : filled ? (
+                  <Text style={sjStyles.entryMeta}>{incompleteLabel}</Text>
+                ) : (
+                  <Text style={sjStyles.emptyDay}>{emptyDayLabel}</Text>
+                )}
+              </View>
+              <Text style={sjStyles.chevron}>›</Text>
+            </Pressable>
+          )
+        })}
+      </ScrollView>
+    )
+  }
+
+  // ── MODE MONTH ──────────────────────────────────────────────────────────
+  if (mode === 'month') {
+    const monthEntryByDate: Record<string, SleepEntry> = {}
+    for (const e of monthEntries) monthEntryByDate[e.date] = e
+    const totalDays = daysInMonth(monthYear, monthNum)
+    const offset = firstWeekday(monthYear, monthNum)
+    const cells: (number | null)[] = [
+      ...Array(offset).fill(null),
+      ...Array.from({ length: totalDays }, (_, i) => i + 1),
+    ]
+    while (cells.length % 7 !== 0) cells.push(null)
+
+    const isCurrentMonth = monthYear === now.getFullYear() && monthNum === now.getMonth() + 1
+
+    const filledEntries = monthEntries.filter(e => e.quality !== null)
+    const sleepDurations = monthEntries.map(sleepMinutes).filter((m): m is number => m !== null)
+    const avgSleep = sleepDurations.length > 0
+      ? Math.round(sleepDurations.reduce((a, b) => a + b, 0) / sleepDurations.length)
+      : null
+    const awakEntries = monthEntries.filter(e => e.awakenings != null)
+    const avgAwakenings = awakEntries.length > 0
+      ? Math.round((awakEntries.reduce((a, e) => a + (e.awakenings ?? 0), 0) / awakEntries.length) * 10) / 10
+      : null
+    const nightmaresCount = monthEntries.filter(e => e.nightmares === 1).length
+
+    const monthLabel = new Date(monthYear, monthNum - 1, 1)
+      .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    const monthSummaryTitle = ft('sleep_journal_month_summary_title')
+    const legendTitle = ft('sleep_journal_legend_title')
+
+    return (
+      <View style={sjStyles.container} testID="sleep-journal-month">
+        <View style={sjStyles.monthNav}>
+          <Pressable
+            onPress={handleBackToList}
+            style={sjStyles.backBtn}
+            accessibilityRole="button"
+            accessibilityLabel={ft('sleep_journal_back_label') || t('common.back')}
+            testID="month-back-button"
+          >
+            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+          </Pressable>
+          <Pressable onPress={goPrevMonth} style={sjStyles.navBtn} accessibilityRole="button" testID="month-prev">
+            <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
+          </Pressable>
+          <Text style={sjStyles.monthTitle}>{monthLabel}</Text>
+          <Pressable
+            onPress={goNextMonth}
+            style={[sjStyles.navBtn, isCurrentMonth && sjStyles.navBtnDisabled]}
+            accessibilityRole="button"
+            testID="month-next"
+            disabled={isCurrentMonth}
+          >
+            <MaterialCommunityIcons name="chevron-right" size={26} color={isCurrentMonth ? colors.border : colors.primary} />
+          </Pressable>
+        </View>
+
+        <ScrollView contentContainerStyle={sjStyles.monthContent}>
+          <View style={sjStyles.calendarCard}>
+            <View style={sjStyles.calendarHeader}>
+              {WEEKDAYS_SHORT.map((d, i) => (
+                <Text key={i} style={sjStyles.weekday}>{d}</Text>
+              ))}
+            </View>
+            {Array.from({ length: cells.length / 7 }, (_, rowIdx) => (
+              <View key={rowIdx} style={sjStyles.calendarRow}>
+                {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
+                  if (!day) return <View key={colIdx} style={sjStyles.calendarCell} />
+                  const dateStr = `${toYearMonth(monthYear, monthNum)}-${String(day).padStart(2, '0')}`
+                  const entry = monthEntryByDate[dateStr]
+                  const isFuture = isCurrentMonth && day > now.getDate()
+                  const isToday = isCurrentMonth && day === now.getDate()
+                  const bg = entry
+                    ? qualityColorOf(entry.quality, qualityAvgThreshold, qualityGoodThreshold)
+                    : isFuture ? 'transparent' : colors.border
+                  const hasNightmare = entry?.nightmares === 1
+                  return (
+                    <View key={colIdx} style={sjStyles.calendarCell}>
+                      <View style={[sjStyles.dayDot, { backgroundColor: bg }, isToday && sjStyles.dayDotToday]}>
+                        <Text style={[sjStyles.dayNum, entry ? sjStyles.dayNumFilled : isFuture ? sjStyles.dayNumFuture : null]}>
+                          {day}
+                        </Text>
+                        {hasNightmare ? (
+                          <View style={sjStyles.nightmareBadge}>
+                            <MaterialCommunityIcons name="ghost" size={8} color={colors.white} />
+                          </View>
+                        ) : null}
+                      </View>
+                    </View>
+                  )
+                })}
+              </View>
+            ))}
+          </View>
+
+          {monthSummaryTitle ? <Text style={sjStyles.sectionTitle}>{monthSummaryTitle}</Text> : null}
+          <View style={sjStyles.statsGrid}>
+            <View style={sjStyles.statCard}>
+              <Text style={sjStyles.statValue}>{avgSleep !== null ? formatMinutes(avgSleep) : '–'}</Text>
+              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_avg_duration_label')}</Text>
+            </View>
+            <View style={sjStyles.statCard}>
+              <Text style={sjStyles.statValue}>{avgAwakenings !== null ? String(avgAwakenings) : '–'}</Text>
+              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_avg_awakenings_label')}</Text>
+            </View>
+            <View style={sjStyles.statCard}>
+              <Text style={sjStyles.statValue}>{`${filledEntries.length}/${totalDays}`}</Text>
+              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_nights_filled_label')}</Text>
+            </View>
+            <View style={sjStyles.statCard}>
+              <Text style={sjStyles.statValue}>{String(nightmaresCount)}</Text>
+              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_nightmares_label')}</Text>
+            </View>
+          </View>
+
+          {legendTitle ? <Text style={sjStyles.sectionTitle}>{legendTitle}</Text> : null}
+          <View style={sjStyles.legendCard}>
+            <View style={sjStyles.legendRow}>
+              <View style={[sjStyles.legendDot, { backgroundColor: colors.success }]} />
+              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_good_label')}</Text>
+            </View>
+            <View style={sjStyles.legendRow}>
+              <View style={[sjStyles.legendDot, { backgroundColor: '#F59E0B' }]} />
+              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_average_label')}</Text>
+            </View>
+            <View style={sjStyles.legendRow}>
+              <View style={[sjStyles.legendDot, { backgroundColor: colors.danger }]} />
+              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_bad_label')}</Text>
+            </View>
+            <View style={sjStyles.legendRow}>
+              <View style={[sjStyles.legendDot, { backgroundColor: colors.border }]} />
+              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_empty_label')}</Text>
+            </View>
+            <View style={sjStyles.legendRow}>
+              <MaterialCommunityIcons name="ghost" size={13} color={colors.textMuted} />
+              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_nightmare_label')}</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    )
+  }
+
+  // ── MODE ENTRY ──────────────────────────────────────────────────────────
+  const onsetConv = (() => {
+    if (onsetMinutes === 0) return null
+    const h = Math.floor(onsetMinutes / 60)
+    const m = onsetMinutes % 60
+    if (h > 0 && m > 0) return `= ${h}h${String(m).padStart(2, '0')}`
+    if (h > 0) return `= ${h}h00`
+    return null
+  })()
+  const awakDurConv = (() => {
+    if (awakeningsDuration === 0) return null
+    const h = Math.floor(awakeningsDuration / 60)
+    const m = awakeningsDuration % 60
+    if (h > 0 && m > 0) return `= ${h}h${String(m).padStart(2, '0')}`
+    if (h > 0) return `= ${h}h00`
+    return null
+  })()
+  const qualityLabels = [
+    ft('sleep_journal_quality_label_1') || ft('sleep_journal_quality_very_bad'),
+    ft('sleep_journal_quality_label_2') || ft('sleep_journal_quality_bad'),
+    ft('sleep_journal_quality_label_3') || ft('sleep_journal_quality_average'),
+    ft('sleep_journal_quality_label_4') || ft('sleep_journal_quality_good'),
+    ft('sleep_journal_quality_label_5') || ft('sleep_journal_quality_excellent'),
+  ]
+  const saveLabel = existingId
+    ? (ft('sleep_journal_update_label') || t('common.update'))
+    : (ft('sleep_journal_save_label') || t('common.save'))
+  const tapModify = ft('sleep_journal_tap_to_modify_hint')
+  const minutesUnit = ft('sleep_journal_minutes_unit') || 'min'
+
+  return (
+    <KeyboardAvoidingView
+      style={sjStyles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+      testID="sleep-journal-entry"
+    >
+      <View style={sjStyles.entryHeaderBar}>
+        <Pressable
+          onPress={handleBackToList}
+          style={sjStyles.backBtn}
+          accessibilityRole="button"
+          accessibilityLabel={ft('sleep_journal_back_label') || t('common.back')}
+          testID="entry-back-button"
+        >
+          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+        </Pressable>
+      </View>
+      <ScrollView contentContainerStyle={sjStyles.entryContent} keyboardShouldPersistTaps="handled">
+        <View style={sjStyles.dateHeader} testID="entry-date-header">
+          <Text style={sjStyles.dateLabel}>{ft('sleep_journal_date_label')}</Text>
+          <Text style={sjStyles.dateValue}>{formatDateFull(targetDate)}</Text>
+        </View>
+
+        <View style={sjStyles.section}>
+          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_schedule_title')}</Text>
+          <View style={sjStyles.card}>
+            <View style={sjStyles.timeFieldGroup}>
+              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_bedtime_label')}</Text>
+              <TouchableOpacity
+                style={sjStyles.timeBtn}
+                onPress={() => setShowBedtimePicker(true)}
+                accessibilityRole="button"
+                testID="bedtime-btn"
+              >
+                <MaterialCommunityIcons name="clock-outline" size={20} color={colors.textMuted} />
+                <Text style={sjStyles.timeValue}>{toHHMM(bedtime)}</Text>
+                {tapModify ? <Text style={sjStyles.timeHint}>{tapModify}</Text> : null}
+              </TouchableOpacity>
+              {showBedtimePicker ? (
+                <DateTimePicker
+                  value={bedtime}
+                  mode="time"
+                  is24Hour
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(_, date) => {
+                    if (Platform.OS === 'android') setShowBedtimePicker(false)
+                    if (date) setBedtime(date)
+                  }}
+                />
+              ) : null}
+              {showBedtimePicker && Platform.OS === 'ios' ? (
+                <Pressable style={sjStyles.confirmBtn} onPress={() => setShowBedtimePicker(false)}>
+                  <Text style={sjStyles.confirmBtnText}>{ft('sleep_journal_confirm_label') || t('common.ok')}</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <View style={sjStyles.divider} />
+
+            <View style={sjStyles.timeFieldGroup}>
+              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_wake_time_label')}</Text>
+              <TouchableOpacity
+                style={sjStyles.timeBtn}
+                onPress={() => setShowWakePicker(true)}
+                accessibilityRole="button"
+                testID="wake-time-btn"
+              >
+                <MaterialCommunityIcons name="clock-outline" size={20} color={colors.textMuted} />
+                <Text style={sjStyles.timeValue}>{toHHMM(wakeTime)}</Text>
+                {tapModify ? <Text style={sjStyles.timeHint}>{tapModify}</Text> : null}
+              </TouchableOpacity>
+              {showWakePicker ? (
+                <DateTimePicker
+                  value={wakeTime}
+                  mode="time"
+                  is24Hour
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(_, date) => {
+                    if (Platform.OS === 'android') setShowWakePicker(false)
+                    if (date) setWakeTime(date)
+                  }}
+                />
+              ) : null}
+              {showWakePicker && Platform.OS === 'ios' ? (
+                <Pressable style={sjStyles.confirmBtn} onPress={() => setShowWakePicker(false)}>
+                  <Text style={sjStyles.confirmBtnText}>{ft('sleep_journal_confirm_label') || t('common.ok')}</Text>
+                </Pressable>
+              ) : null}
+            </View>
+
+            <View style={sjStyles.divider} />
+
+            <View style={sjStyles.timeFieldGroup}>
+              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_onset_label')}</Text>
+              <View style={sjStyles.minutesRow}>
+                <TextInput
+                  style={sjStyles.minutesInput}
+                  value={onsetMinutes > 0 ? String(onsetMinutes) : ''}
+                  onChangeText={(raw) => {
+                    const parsed = parseInt(raw, 10)
+                    if (!Number.isNaN(parsed) && parsed >= 0 && parsed <= onsetMaxMinutes) setOnsetMinutes(parsed)
+                    else if (raw === '') setOnsetMinutes(0)
+                  }}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  placeholderTextColor={colors.border}
+                  maxLength={3}
+                  returnKeyType="done"
+                  testID="onset-input"
+                />
+                <Text style={sjStyles.minutesUnit}>{minutesUnit}</Text>
+                {onsetConv ? <Text style={sjStyles.minutesConv}>{onsetConv}</Text> : null}
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={sjStyles.section}>
+          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_awakenings_title')}</Text>
+          <View style={sjStyles.card}>
+            <View style={sjStyles.timeFieldGroup}>
+              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_awakenings_label')}</Text>
+              <View style={sjStyles.counterRow}>
+                <Pressable
+                  style={[sjStyles.counterBtn, awakenings <= 0 && sjStyles.counterBtnDisabled]}
+                  onPress={() => awakenings > 0 && setAwakenings(awakenings - 1)}
+                  accessibilityRole="button"
+                  accessibilityLabel="-"
+                  testID="awakenings-minus"
+                >
+                  <Text style={sjStyles.counterBtnText}>−</Text>
+                </Pressable>
+                <Text style={sjStyles.counterValue} testID="awakenings-value">{awakenings}</Text>
+                <Pressable
+                  style={[sjStyles.counterBtn, awakenings >= awakeningsMax && sjStyles.counterBtnDisabled]}
+                  onPress={() => awakenings < awakeningsMax && setAwakenings(awakenings + 1)}
+                  accessibilityRole="button"
+                  accessibilityLabel="+"
+                  testID="awakenings-plus"
+                >
+                  <Text style={sjStyles.counterBtnText}>+</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={sjStyles.divider} />
+
+            <View style={sjStyles.timeFieldGroup}>
+              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_awakenings_duration_label')}</Text>
+              <View style={sjStyles.minutesRow}>
+                <TextInput
+                  style={sjStyles.minutesInput}
+                  value={awakeningsDuration > 0 ? String(awakeningsDuration) : ''}
+                  onChangeText={(raw) => {
+                    const parsed = parseInt(raw, 10)
+                    if (!Number.isNaN(parsed) && parsed >= 0 && parsed <= awakDurationMaxMinutes) setAwakeningsDuration(parsed)
+                    else if (raw === '') setAwakeningsDuration(0)
+                  }}
+                  keyboardType="numeric"
+                  placeholder="0"
+                  placeholderTextColor={colors.border}
+                  maxLength={3}
+                  returnKeyType="done"
+                  testID="awak-duration-input"
+                />
+                <Text style={sjStyles.minutesUnit}>{minutesUnit}</Text>
+                {awakDurConv ? <Text style={sjStyles.minutesConv}>{awakDurConv}</Text> : null}
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={sjStyles.section}>
+          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_nightmares_title')}</Text>
+          <Pressable
+            style={[sjStyles.card, sjStyles.toggleRow]}
+            onPress={() => setNightmares(!nightmares)}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: nightmares }}
+            testID="nightmares-toggle"
+          >
+            <View style={sjStyles.toggleLeft}>
+              <MaterialCommunityIcons
+                name="ghost"
+                size={22}
+                color={nightmares ? colors.danger : colors.textMuted}
+              />
+              <Text style={sjStyles.toggleLabel}>{ft('sleep_journal_nightmares_label')}</Text>
+            </View>
+            <View style={[sjStyles.switchTrack, nightmares && sjStyles.switchTrackOn]}>
+              <View style={[sjStyles.switchThumb, nightmares && sjStyles.switchThumbOn]} />
+            </View>
+          </Pressable>
+        </View>
+
+        <View style={sjStyles.section}>
+          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_quality_title')}</Text>
+          <View style={sjStyles.card}>
+            <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_quality_label')}</Text>
+            <View style={sjStyles.starsBig}>
+              {Array.from({ length: qualityMax }, (_, i) => {
+                const n = i + 1
+                return (
+                  <Pressable
+                    key={n}
+                    onPress={() => setQuality(n)}
+                    accessibilityRole="button"
+                    accessibilityLabel={String(n)}
+                    testID={`quality-star-${n}`}
+                  >
+                    <MaterialCommunityIcons
+                      name={n <= (quality ?? 0) ? 'star' : 'star-outline'}
+                      size={36}
+                      color={n <= (quality ?? 0) ? colors.stars : colors.border}
+                    />
+                  </Pressable>
+                )
+              })}
+            </View>
+            {quality !== null && qualityLabels[quality - 1] ? (
+              <Text style={sjStyles.qualityLabel}>{qualityLabels[quality - 1]}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={sjStyles.section}>
+          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_notes_title') || ft('sleep_journal_notes_label')}</Text>
+          <View style={sjStyles.card}>
+            <TextInput
+              style={sjStyles.notesInput}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder={ft('sleep_journal_notes_placeholder')}
+              placeholderTextColor={colors.textMuted}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              testID="notes-input"
+            />
+          </View>
+        </View>
+
+        {liveSE !== null ? (
+          <View style={[sjStyles.seCard, { borderColor: seColor }]} testID="sleep-efficiency">
+            <View style={sjStyles.seRow}>
+              <MaterialCommunityIcons name="sleep" size={20} color={seColor} />
+              <Text style={sjStyles.seTitle}>{ft('sleep_journal_efficiency_label')}</Text>
+              <Text style={[sjStyles.seScore, { color: seColor }]}>{liveSE} %</Text>
+            </View>
+          </View>
+        ) : null}
+
+        <Pressable
+          style={[sjStyles.saveBtn, saving && sjStyles.btnDisabled]}
+          onPress={handleSave}
+          disabled={saving}
+          accessibilityRole="button"
+          accessibilityLabel={saveLabel}
+          testID="save-button"
+        >
+          <Text style={sjStyles.saveBtnText}>{saving ? '…' : saveLabel}</Text>
+          {!saving ? <MaterialCommunityIcons name="check" size={20} color={colors.white} /> : null}
+        </Pressable>
+        {existingId ? (
+          <Pressable
+            style={sjStyles.deleteBtn}
+            onPress={handleDelete}
+            accessibilityRole="button"
+            accessibilityLabel={ft('sleep_journal_delete_label') || t('common.delete')}
+            testID="delete-button"
+          >
+            <Text style={sjStyles.deleteBtnText}>{ft('sleep_journal_delete_label') || t('common.delete')}</Text>
+          </Pressable>
+        ) : null}
+      </ScrollView>
+    </KeyboardAvoidingView>
+  )
+}
+
 // ─── Questionnaire props ──────────────────────────────────────────────────────
 
 export interface QuestionnaireInteraction {
@@ -2673,6 +3485,10 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'tree_selector') {
     return <TreeSelectorLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'sleep_journal') {
+    return <SleepJournalLayout fields={visibleFields} />
   }
 
   if (preview_kind === 'editable_steps') {
@@ -3369,4 +4185,211 @@ const tsStyles = StyleSheet.create({
   },
   saveBtnText:      { fontSize: 16, fontWeight: '700', color: colors.white },
   btnDisabled:      { opacity: 0.6 },
+})
+
+const sjStyles = StyleSheet.create({
+  container:         { flex: 1, backgroundColor: colors.background },
+  center:            { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
+  // ── List
+  listContent:       { padding: spacing.lg, paddingBottom: spacing.xl, gap: spacing.xs },
+  ctaContainer:      { gap: spacing.sm, marginBottom: spacing.md },
+  ctaCard: {
+    backgroundColor: colors.primary, borderRadius: radius.lg,
+    padding: spacing.md,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  monthCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg,
+    padding: spacing.md, borderWidth: 1, borderColor: colors.border,
+  },
+  ctaRow:            { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  ctaTexts:          { flex: 1 },
+  ctaTitle:          { fontSize: 17, fontWeight: '700', color: colors.white },
+  ctaSubtitle:       { fontSize: 13, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
+  monthBtnText:      { flex: 1, fontSize: 15, fontWeight: '600', color: colors.primary },
+  chevron:           { fontSize: 22, color: colors.textMuted, fontWeight: '300' },
+  chevronWhite:      { fontSize: 22, color: colors.white, fontWeight: '300' },
+  listHeader: {
+    fontSize: 13, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+    marginBottom: spacing.sm, marginTop: spacing.sm,
+  },
+  dayRow: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    paddingVertical: spacing.sm + 4, paddingHorizontal: spacing.md,
+    borderRadius: radius.md, marginBottom: spacing.xs, backgroundColor: colors.card,
+  },
+  dayRowFilled:      { borderLeftWidth: 3, borderLeftColor: colors.success },
+  dot:               { width: 10, height: 10, borderRadius: 5 },
+  dotFilled:         { backgroundColor: colors.success },
+  dotEmpty:          { backgroundColor: colors.border },
+  dayInfo:           { flex: 1 },
+  dayDate:           { fontSize: 15, fontWeight: '500', color: colors.textMuted },
+  dayDateFilled:     { color: colors.text, fontWeight: '600' },
+  entryDetails:      { marginTop: 2, gap: 1 },
+  entryMeta:         { fontSize: 13, color: colors.textMuted },
+  entryMetaStrong:   { fontWeight: '600', color: colors.primary },
+  emptyDay:          { fontSize: 13, color: colors.border, fontStyle: 'italic', marginTop: 2 },
+  starsRow:          { flexDirection: 'row', gap: 2, marginTop: 2 },
+  // ── Month
+  monthNav: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  navBtn:            { padding: spacing.xs },
+  navBtnDisabled:    { opacity: 0.3 },
+  monthTitle: {
+    flex: 1, fontSize: 17, fontWeight: '700',
+    color: colors.text, textAlign: 'center', textTransform: 'capitalize',
+  },
+  monthContent:      { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  calendarCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    gap: 4,
+  },
+  calendarHeader:    { flexDirection: 'row', justifyContent: 'space-between' },
+  calendarRow:       { flexDirection: 'row', justifyContent: 'space-between' },
+  weekday: {
+    flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '700',
+    color: colors.textMuted, textTransform: 'uppercase', paddingBottom: spacing.xs,
+  },
+  calendarCell: {
+    flex: 1, aspectRatio: 1,
+    alignItems: 'center', justifyContent: 'center', padding: 2,
+  },
+  dayDot: {
+    width: '85%', aspectRatio: 1, borderRadius: radius.full,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  dayDotToday:       { borderWidth: 2, borderColor: colors.primary },
+  dayNum:            { fontSize: 12, fontWeight: '500', color: colors.textMuted },
+  dayNumFilled:      { color: colors.white, fontWeight: '700' },
+  dayNumFuture:      { color: colors.border },
+  nightmareBadge: {
+    position: 'absolute', top: 0, right: 0, width: 12, height: 12,
+    borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8, marginTop: spacing.xs,
+  },
+  statsGrid:         { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  statCard: {
+    flex: 1, minWidth: '45%', backgroundColor: colors.card,
+    borderRadius: radius.lg, padding: spacing.md, alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  statValue:         { fontSize: 26, fontWeight: '800', color: colors.primary },
+  statLabel:         { fontSize: 13, color: colors.textMuted, marginTop: 2, textAlign: 'center' },
+  legendCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    gap: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  legendRow:         { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  legendDot:         { width: 12, height: 12, borderRadius: 6 },
+  legendLabel:       { fontSize: 13, color: colors.textMuted },
+  // ── Entry
+  entryHeaderBar: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  backBtn:           { padding: spacing.xs },
+  entryContent:      { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  dateHeader: {
+    backgroundColor: colors.primaryLight, borderRadius: radius.lg,
+    padding: spacing.md, gap: 2,
+  },
+  dateLabel: {
+    fontSize: 13, fontWeight: '600', color: colors.primary,
+    textTransform: 'uppercase', letterSpacing: 0.5,
+  },
+  dateValue:         { fontSize: 18, fontWeight: '700', color: colors.text },
+  section:           { gap: spacing.sm },
+  sectionLabel: {
+    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  card: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    gap: spacing.md,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  divider:           { height: 1, backgroundColor: colors.border },
+  timeFieldGroup:    { gap: spacing.xs },
+  fieldLabel:        { fontSize: 14, fontWeight: '600', color: colors.text },
+  timeBtn: {
+    backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border,
+    borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 4,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+  },
+  timeValue:         { fontSize: 22, fontWeight: '700', color: colors.primary },
+  timeHint:          { fontSize: 13, color: colors.textMuted, marginLeft: spacing.xs },
+  confirmBtn: {
+    backgroundColor: colors.primaryLight, borderRadius: radius.md,
+    padding: spacing.sm, alignItems: 'center', marginTop: spacing.xs,
+  },
+  confirmBtnText:    { color: colors.primary, fontWeight: '600' },
+  minutesRow:        { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  minutesInput: {
+    width: 72, fontSize: 28, fontWeight: '700', color: colors.primary,
+    backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border,
+    borderRadius: radius.md, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs,
+    textAlign: 'center',
+  },
+  minutesUnit:       { fontSize: 15, color: colors.textMuted },
+  minutesConv:       { fontSize: 15, fontWeight: '600', color: colors.primary },
+  counterRow:        { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  counterBtn: {
+    width: 44, height: 44, borderRadius: radius.md, backgroundColor: colors.background,
+    borderWidth: 1, borderColor: colors.border,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  counterBtnDisabled:{ opacity: 0.4 },
+  counterBtnText:    { fontSize: 24, fontWeight: '300', color: colors.text, lineHeight: 28 },
+  counterValue:      { fontSize: 28, fontWeight: '700', color: colors.text, minWidth: 40, textAlign: 'center' },
+  toggleRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+  },
+  toggleLeft:        { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  toggleLabel:       { fontSize: 15, fontWeight: '500', color: colors.text },
+  switchTrack: {
+    width: 48, height: 28, borderRadius: radius.full,
+    backgroundColor: colors.border, padding: 2, justifyContent: 'center',
+  },
+  switchTrackOn:     { backgroundColor: colors.danger },
+  switchThumb: {
+    width: 24, height: 24, borderRadius: radius.full,
+    backgroundColor: colors.white, alignSelf: 'flex-start',
+  },
+  switchThumbOn:     { alignSelf: 'flex-end' },
+  starsBig:          { flexDirection: 'row', gap: spacing.sm },
+  qualityLabel:      { fontSize: 14, color: colors.textMuted, fontStyle: 'italic' },
+  notesInput: {
+    fontSize: 15, color: colors.text, minHeight: 90, lineHeight: 22,
+  },
+  seCard: {
+    borderWidth: 2, borderRadius: radius.lg, padding: spacing.md,
+    backgroundColor: colors.card, gap: spacing.xs,
+  },
+  seRow:             { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  seTitle:           { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+  seScore:           { fontSize: 24, fontWeight: '800' },
+  saveBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  saveBtnText:       { fontSize: 16, fontWeight: '700', color: colors.white },
+  btnDisabled:       { opacity: 0.6 },
+  deleteBtn: {
+    borderRadius: radius.lg, paddingVertical: spacing.md,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.danger,
+  },
+  deleteBtnText:     { fontSize: 15, fontWeight: '600', color: colors.danger },
 })
