@@ -81,7 +81,7 @@ export async function initDatabase(): Promise<void> {
     // medication_adherence_entries → daily_entries
     `INSERT OR IGNORE INTO daily_entries (id,module_id,date,status,notes,created_at) SELECT id,'medication_adherence',date,status,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM medication_adherence_entries`,
     // beck_thought_records → form_entries
-    `INSERT OR IGNORE INTO form_entries (id,module_id,values,created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
+    `INSERT OR IGNORE INTO form_entries (id,module_id,"values",created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
     // emotion_entries → tree_selections (labels conservés directement dans path_json)
     `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
     // decisional_balance → plan_items (4 quadrants × N args avec weight) + module_settings (target_behavior)
@@ -1159,7 +1159,7 @@ export async function createFormEntriesTable(database: SQLite.SQLiteDatabase): P
     CREATE TABLE IF NOT EXISTS form_entries (
       id         TEXT PRIMARY KEY,
       module_id  TEXT NOT NULL,
-      values     TEXT NOT NULL,
+      "values"   TEXT NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_form_entries_module ON form_entries(module_id, created_at DESC);
@@ -1205,7 +1205,7 @@ export async function getFormEntry(id: string): Promise<FormEntry | null> {
 export async function saveFormEntry(entry: Omit<FormEntry, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO form_entries (id, module_id, values) VALUES (?, ?, ?)`,
+    `INSERT OR REPLACE INTO form_entries (id, module_id, "values") VALUES (?, ?, ?)`,
     [entry.id, entry.module_id, JSON.stringify(entry.values)]
   )
 }
