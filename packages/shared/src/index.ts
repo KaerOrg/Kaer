@@ -110,6 +110,7 @@ export type PreviewKind =
   | 'psyedu'
   | 'tabbed'
   | 'chrono_month'
+  | 'exposure_hierarchy'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

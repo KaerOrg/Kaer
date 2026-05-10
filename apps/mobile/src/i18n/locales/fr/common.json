@@ -806,7 +806,11 @@
       "anchor_100": "Anxiété intense, difficile à supporter",
       "history_no_sessions": "Aucune séance enregistrée.\nEnregistrez votre première séance pour visualiser votre progression.",
       "history_add_session": "Enregistrer une séance",
-      "history_delete_session": "Supprimer cette séance ?"
+      "history_delete_session": "Supprimer cette séance ?",
+      "items_count": "situation",
+      "items_count_plural": "situations",
+      "sessions_count": "séance",
+      "sessions_count_plural": "séances"
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",

@@ -8,6 +8,7 @@ import {
   ColumnFormLayout,
   DailyCheckinLayout,
   DecisionGridLayout,
+  ExposureHierarchyLayout,
   ExposureTrackerLayout,
   FallbackLayout,
   FieldsLayout,
@@ -24,7 +25,7 @@ import {
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
 
 export interface FieldRendererProps {
   preview_kind: PreviewKind
@@ -85,6 +86,10 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
 
   if (preview_kind === 'chrono_month') {
     return <ChronoMonthLayout />
+  }
+
+  if (preview_kind === 'exposure_hierarchy') {
+    return <ExposureHierarchyLayout />
   }
 
   if (preview_kind === 'tabbed') {

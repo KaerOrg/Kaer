@@ -447,7 +447,22 @@ export type CopingStrategy = typeof COPING_STRATEGIES[number]
  */
 export interface FearSituation {
   id: string
-  label: string       // ex : "Prendre le métro", "Parler en public"
+  label: string                 // ex : "Prendre le métro", "Parler en public"
+  hierarchy_id: string | null   // FK exposure_hierarchies.id ou null = catalogue global
+  target_suds: number | null    // SUDs initial estimé (0-100) — optionnel pour fear_thermometer
+  is_done: number               // 0/1 — coche neutre du patient (mode hiérarchie)
+  created_at: string
+}
+
+/**
+ * Hiérarchie d'exposition — groupe de situations partageant un même thème
+ * (ex. « phobie sociale », « agoraphobie »). Multi-hiérarchies activé par
+ * exposure_tracker_config.enable_hierarchies = '1'.
+ */
+export interface ExposureHierarchy {
+  id: string
+  module_id: string
+  title: string
   created_at: string
 }
 
@@ -484,16 +499,53 @@ export function deserializeStrategies(raw: string): { selected: CopingStrategy[]
   }
 }
 
-// ─── SQLite Thermomètre de la Peur ────────────────────────────────────────────
+// ─── SQLite Thermomètre de la Peur + Hiérarchies d'exposition ────────────────
+//
+// Modèle :
+//  - exposure_hierarchies : groupes de situations propres à un module
+//    (multi-hiérarchies par patient — ex. « phobie sociale » et
+//    « agoraphobie »). Optionnel : si vide, le layout retombe sur un
+//    catalogue global (compatibilité fear_thermometer).
+//  - fear_situations.hierarchy_id : nullable — null = catalogue global.
+//
+// Migration idempotente : on ajoute la colonne hierarchy_id à l'ancien
+// schéma sans casser les données existantes.
 
 export async function createFearThermometerTables(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS exposure_hierarchies (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      title      TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_exposure_hierarchies_module
+      ON exposure_hierarchies(module_id, created_at DESC);
+  `)
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS fear_situations (
       id TEXT PRIMARY KEY,
       label TEXT NOT NULL,
+      hierarchy_id TEXT,
+      target_suds INTEGER,
+      is_done INTEGER DEFAULT 0,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
+  // Idempotent migrations — ajouter colonnes si absentes (anciennes BDDs)
+  const cols = await database.getAllAsync<{ name: string }>(
+    'PRAGMA table_info(fear_situations)'
+  )
+  const colNames = new Set(cols.map(c => c.name))
+  if (!colNames.has('hierarchy_id')) {
+    await database.execAsync('ALTER TABLE fear_situations ADD COLUMN hierarchy_id TEXT')
+  }
+  if (!colNames.has('target_suds')) {
+    await database.execAsync('ALTER TABLE fear_situations ADD COLUMN target_suds INTEGER')
+  }
+  if (!colNames.has('is_done')) {
+    await database.execAsync('ALTER TABLE fear_situations ADD COLUMN is_done INTEGER DEFAULT 0')
+  }
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS fear_entries (
       id TEXT PRIMARY KEY,
@@ -512,24 +564,72 @@ export async function createFearThermometerTables(database: SQLite.SQLiteDatabas
 
 // ── Situations ────────────────────────────────────────────────────────────────
 
-export async function getAllFearSituations(): Promise<FearSituation[]> {
+export async function getAllFearSituations(hierarchyId?: string | null): Promise<FearSituation[]> {
   const database = getDb()
+  if (hierarchyId === undefined) {
+    return database.getAllAsync<FearSituation>(
+      'SELECT * FROM fear_situations ORDER BY target_suds ASC, created_at ASC'
+    )
+  }
+  if (hierarchyId === null) {
+    return database.getAllAsync<FearSituation>(
+      'SELECT * FROM fear_situations WHERE hierarchy_id IS NULL ORDER BY target_suds ASC, created_at ASC'
+    )
+  }
   return database.getAllAsync<FearSituation>(
-    'SELECT * FROM fear_situations ORDER BY created_at ASC'
+    'SELECT * FROM fear_situations WHERE hierarchy_id = ? ORDER BY target_suds ASC, created_at ASC',
+    [hierarchyId]
   )
 }
 
-export async function saveFearSituation(situation: Omit<FearSituation, 'created_at'>): Promise<void> {
+export async function saveFearSituation(
+  situation: Omit<FearSituation, 'created_at'>
+): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    'INSERT OR REPLACE INTO fear_situations (id, label) VALUES (?, ?)',
-    [situation.id, situation.label]
+    `INSERT OR REPLACE INTO fear_situations
+       (id, label, hierarchy_id, target_suds, is_done)
+     VALUES (?, ?, ?, ?, ?)`,
+    [
+      situation.id,
+      situation.label,
+      situation.hierarchy_id,
+      situation.target_suds,
+      situation.is_done,
+    ]
   )
 }
 
 export async function deleteFearSituation(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM fear_situations WHERE id = ?', [id])
+}
+
+// ── Hiérarchies d'exposition ─────────────────────────────────────────────────
+
+export async function listExposureHierarchies(moduleId: string): Promise<ExposureHierarchy[]> {
+  const database = getDb()
+  return database.getAllAsync<ExposureHierarchy>(
+    'SELECT * FROM exposure_hierarchies WHERE module_id = ? ORDER BY created_at ASC',
+    [moduleId]
+  )
+}
+
+export async function createExposureHierarchy(
+  hierarchy: Omit<ExposureHierarchy, 'created_at'>
+): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    'INSERT OR REPLACE INTO exposure_hierarchies (id, module_id, title) VALUES (?, ?, ?)',
+    [hierarchy.id, hierarchy.module_id, hierarchy.title]
+  )
+}
+
+export async function deleteExposureHierarchy(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM exposure_hierarchies WHERE id = ?', [id])
+  // Cascade : situations rattachées à cette hiérarchie sont également supprimées
+  await database.runAsync('DELETE FROM fear_situations WHERE hierarchy_id = ?', [id])
 }
 
 // ── Saisies SUDs ──────────────────────────────────────────────────────────────

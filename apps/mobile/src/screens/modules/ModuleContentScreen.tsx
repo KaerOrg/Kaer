@@ -32,6 +32,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'psyedu',
   'tabbed',
   'chrono_month',
+  'exposure_hierarchy',
 ])
 
 export default function ModuleContentScreen({ route }: Props) {

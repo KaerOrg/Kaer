@@ -27,6 +27,7 @@ import { DecisionGridLayout } from './layouts/DecisionGrid'
 import { PsyEduLayout } from './layouts/PsyEdu'
 import { resolvePsyEduIcon } from './layouts/PsyEdu/iconMap'
 import { ChronoMonthLayout } from './layouts/ChronoMonth'
+import { ExposureHierarchyLayout } from './layouts/ExposureHierarchy'
 import { EditableItemsList } from './layouts/shared'
 import { DisclaimerBanner } from '../DisclaimerBanner'
 
@@ -3592,7 +3593,7 @@ export interface FieldRendererProps {
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
 // avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
 
 // Wrapper exporté : extrait le field 'disclaimer_banner' (s'il existe) et
 // l'affiche au-dessus du layout principal. Le dispatcher est dans
@@ -3743,6 +3744,10 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
 
   if (preview_kind === 'chrono_month') {
     return <ChronoMonthLayout moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'exposure_hierarchy') {
+    return <ExposureHierarchyLayout moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {
