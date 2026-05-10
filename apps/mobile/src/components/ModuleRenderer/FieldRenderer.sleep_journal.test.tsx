@@ -50,6 +50,9 @@ jest.mock('../../store/authStore', () => ({
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ setOptions: jest.fn() }),
+}))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'

@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { logger } from '@psytool/shared'
+import { useNavigation } from '@react-navigation/native'
 import { colors, spacing, radius } from '../../theme'
 import type { ContentField, PreviewKind } from '../../services/moduleService'
 import { getAllPlanItemsForModule, savePlanItem, deletePlanItem, generateId, type PlanItem, getAllCognitiveSaturationSessions, saveCognitiveSaturationSession, deleteCognitiveSaturationSession, type CognitiveSaturationSession, getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry, type DailyEntry, getAllFormEntries, saveFormEntry, deleteFormEntry, type FormEntry, getAllTreeSelections, saveTreeSelection, deleteTreeSelection, type TreeSelection, type TreeSelectionPathNode, getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth, saveSleepEntry, deleteSleepEntry, computeSleepDuration, computeSleepEfficiency, type SleepEntry } from '../../lib/database'
@@ -2601,6 +2602,12 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   const [monthNum, setMonthNum] = useState(now.getMonth() + 1)
   const [monthEntries, setMonthEntries] = useState<SleepEntry[]>([])
 
+  // Hide the React Navigation header in entry mode — the inner header carries the title.
+  const navigation = useNavigation()
+  useEffect(() => {
+    navigation.setOptions({ headerShown: mode !== 'entry' })
+  }, [navigation, mode])
+
   // ── Loaders
   const loadEntries = useCallback(async () => {
     const data = await getAllSleepEntries()
@@ -3019,7 +3026,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
       keyboardVerticalOffset={88}
       testID="sleep-journal-entry"
     >
-      <View style={sjStyles.entryHeaderBar}>
+      <View style={sjStyles.entryHeaderBar} testID="entry-date-header">
         <Pressable
           onPress={handleBackToList}
           style={sjStyles.backBtn}
@@ -3029,13 +3036,12 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
         >
           <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
         </Pressable>
-      </View>
-      <ScrollView contentContainerStyle={sjStyles.entryContent} keyboardShouldPersistTaps="handled">
-        <View style={sjStyles.dateHeader} testID="entry-date-header">
+        <View style={sjStyles.entryHeaderTitle}>
           <Text style={sjStyles.dateLabel}>{ft('sleep_journal_date_label')}</Text>
           <Text style={sjStyles.dateValue}>{formatDateFull(targetDate)}</Text>
         </View>
-
+      </View>
+      <ScrollView contentContainerStyle={sjStyles.entryContent} keyboardShouldPersistTaps="handled">
         <View style={sjStyles.section}>
           <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_schedule_title')}</Text>
           <View style={sjStyles.card}>
@@ -4230,21 +4236,18 @@ const sjStyles = StyleSheet.create({
   legendLabel:       { fontSize: 13, color: colors.textMuted },
   // ── Entry
   entryHeaderBar: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   backBtn:           { padding: spacing.xs },
+  entryHeaderTitle:  { flex: 1, gap: 2 },
   entryContent:      { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
-  dateHeader: {
-    backgroundColor: colors.primaryLight, borderRadius: radius.lg,
-    padding: spacing.md, gap: 2,
-  },
   dateLabel: {
-    fontSize: 13, fontWeight: '600', color: colors.primary,
+    fontSize: 11, fontWeight: '600', color: colors.primary,
     textTransform: 'uppercase', letterSpacing: 0.5,
   },
-  dateValue:         { fontSize: 18, fontWeight: '700', color: colors.text },
+  dateValue:         { fontSize: 17, fontWeight: '700', color: colors.text },
   section:           { gap: spacing.sm },
   sectionLabel: {
     fontSize: 12, fontWeight: '700', color: colors.textMuted,

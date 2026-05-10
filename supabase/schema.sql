@@ -488,6 +488,23 @@ drop policy if exists "modules_read" on public.modules;
 create policy "modules_read" on public.modules
   for select to authenticated using (true);
 
+-- FK patient_modules.module_type → modules.id
+-- Ajoutée après la création de modules (modules est définie après patient_modules).
+-- Indispensable pour que PostgREST détecte la relation et que le join
+-- `module:modules(...)` fonctionne côté app mobile.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'patient_modules_module_type_fkey'
+      and conrelid = 'public.patient_modules'::regclass
+  ) then
+    alter table public.patient_modules
+      add constraint patient_modules_module_type_fkey
+      foreign key (module_type) references public.modules(id);
+  end if;
+end $$;
+
 
 -- ============================================================
 -- TABLE : module_content_fields (Champs de contenu — 1 ligne = 1 champ)
