@@ -86,10 +86,10 @@ const FicheCard = React.memo(function FicheCard({ topic, onPress }: FicheCardPro
 interface EntryRowProps {
   entry: CravingEntry
   onPress: () => void
-  t: (key: string, opts?: Record<string, unknown>) => string
 }
 
-const EntryRow = React.memo(function EntryRow({ entry, onPress, t }: EntryRowProps) {
+const EntryRow = React.memo(function EntryRow({ entry, onPress }: EntryRowProps) {
+  const { t } = useTranslation()
   return (
     <Pressable
       style={({ pressed }) => [styles.entryRow, pressed && styles.entryRowPressed]}
@@ -226,7 +226,7 @@ export default function CravingJournalScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <EntryRow entry={item} onPress={() => handleEntryPress(item)} t={t} />
+          <EntryRow entry={item} onPress={() => handleEntryPress(item)} />
         )}
       />
     )

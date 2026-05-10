@@ -23,6 +23,10 @@
     "time_picker": {
       "tap_to_set": "Définir l'heure"
     },
+    "chart_legend": {
+      "sessions": "Séances réalisées",
+      "initial_suds": "SUDs estimé au départ"
+    },
     "history": "Historique",
     "notes_optional": "Notes (facultatif)",
     "notes_placeholder": "Contexte, remarque…",
