@@ -2189,6 +2189,28 @@
 
 .cf-slider__fill { height: 100%; border-radius: 999px; }
 
+.cf-time { display: flex; flex-direction: column; gap: 4px; }
+
+.cf-time__label { font-size: 12px; color: var(--color-text-secondary); }
+
+.cf-time__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.cf-time__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
 .cf-save-btn {
   width: 100%;
   display: inline-flex;

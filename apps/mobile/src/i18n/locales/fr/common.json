@@ -20,6 +20,9 @@
     "confirm": "Confirmer",
     "close": "Fermer",
     "modify": "Modifier",
+    "time_picker": {
+      "tap_to_set": "Définir l'heure"
+    },
     "history": "Historique",
     "notes_optional": "Notes (facultatif)",
     "notes_placeholder": "Contexte, remarque…",

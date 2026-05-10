@@ -1583,6 +1583,127 @@ interface ColumnSpec {
   children: ContentField[]
 }
 
+// ─── column_time_field — TimePicker interactif optionnel ─────────────────────
+//
+// Stockage : "HH:MM" (string) dans form_entries.values[key], '' si non renseigné.
+// Props field_props : `key` (clé form_entries, requis), `optional` ('0'|'1', défaut '1').
+
+const TIME_HHMM_RE = /^(\d{1,2}):(\d{2})$/
+
+function parseHHMMToDate(value: string): Date {
+  const m = TIME_HHMM_RE.exec(value)
+  const date = new Date()
+  if (m) {
+    date.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0)
+  } else {
+    date.setHours(9, 0, 0, 0)
+  }
+  return date
+}
+
+function formatDateToHHMM(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
+interface ColumnTimeFieldProps {
+  fieldKey: string
+  label: string
+  value: string
+  optional: boolean
+  accent: string
+  onChange: (next: string) => void
+}
+
+const ColumnTimeField = React.memo(function ColumnTimeField({
+  fieldKey,
+  label,
+  value,
+  optional,
+  accent,
+  onChange,
+}: ColumnTimeFieldProps) {
+  const t = useModuleT()
+  const [showPicker, setShowPicker] = useState(false)
+  const hasValue = value.length > 0
+
+  const handleOpen = useCallback(() => {
+    setShowPicker(true)
+  }, [])
+
+  const handlePickerChange = useCallback((_: unknown, date?: Date) => {
+    if (Platform.OS === 'android') setShowPicker(false)
+    if (date) onChange(formatDateToHHMM(date))
+  }, [onChange])
+
+  const handleConfirm = useCallback(() => {
+    setShowPicker(false)
+  }, [])
+
+  const handleClear = useCallback(() => {
+    onChange('')
+  }, [onChange])
+
+  return (
+    <View style={cfStyles.timeContainer} testID={`time-${fieldKey}`}>
+      <View style={cfStyles.timeLabelRow}>
+        {label ? <Text style={cfStyles.timeLabel}>{label}</Text> : <View />}
+        {optional && hasValue ? (
+          <Pressable
+            onPress={handleClear}
+            hitSlop={8}
+            accessibilityLabel={t('common.delete')}
+            testID={`time-${fieldKey}-clear`}
+          >
+            <MaterialCommunityIcons
+              name="close-circle-outline"
+              size={18}
+              color={colors.textMuted}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+      <Pressable
+        style={[cfStyles.timeButton, !hasValue && cfStyles.timeButtonEmpty]}
+        onPress={handleOpen}
+        accessibilityRole="button"
+        testID={`time-${fieldKey}-button`}
+      >
+        <MaterialCommunityIcons
+          name="clock-outline"
+          size={20}
+          color={hasValue ? accent : colors.textMuted}
+        />
+        {hasValue ? (
+          <Text style={cfStyles.timeValue}>{value}</Text>
+        ) : (
+          <Text style={cfStyles.timePlaceholder}>{t('common.time_picker.tap_to_set')}</Text>
+        )}
+      </Pressable>
+      {showPicker ? (
+        <DateTimePicker
+          value={parseHHMMToDate(value)}
+          mode="time"
+          is24Hour
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handlePickerChange}
+        />
+      ) : null}
+      {showPicker && Platform.OS === 'ios' ? (
+        <Pressable
+          style={cfStyles.timeConfirm}
+          onPress={handleConfirm}
+          accessibilityRole="button"
+          testID={`time-${fieldKey}-confirm`}
+        >
+          <Text style={cfStyles.timeConfirmText}>{t('common.confirm')}</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  )
+})
+
 function ColumnFormLayout({ fields, moduleId }: {
   fields: ContentField[]
   moduleId: string
@@ -1802,6 +1923,21 @@ function ColumnFormLayout({ fields, moduleId }: {
                         </View>
                       )
                     }
+                    if (child.field_type === 'column_time_field') {
+                      const optional = (child.props['optional'] ?? '1') !== '0'
+                      const timeValue = typeof values[key] === 'string' ? (values[key] as string) : ''
+                      return (
+                        <ColumnTimeField
+                          key={child.id}
+                          fieldKey={key}
+                          label={labelOrPlaceholder}
+                          value={timeValue}
+                          optional={optional}
+                          accent={accent}
+                          onChange={(next) => setValues(prev => ({ ...prev, [key]: next }))}
+                        />
+                      )
+                    }
                     return null
                   })}
                 </View>
@@ -1887,28 +2023,49 @@ function ColumnFormLayout({ fields, moduleId }: {
                   {columns.map(col => {
                     const textChildren = col.children.filter(c => c.field_type === 'column_text_field')
                     const sliderChildren = col.children.filter(c => c.field_type === 'column_slider_field')
+                    const timeChildren = col.children.filter(c => c.field_type === 'column_time_field')
                     const accent = col.header.props['color'] ?? colors.primary
-                    return textChildren.map(child => {
-                      const key = child.props['key']
-                      if (!key) return null
-                      const value = entry.values[key]
-                      if (typeof value !== 'string' || !value) return null
-                      // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
-                      const slider = sliderChildren[0]
-                      const sliderKey = slider?.props['key']
-                      const sliderVal = sliderKey ? entry.values[sliderKey] : null
-                      return (
-                        <View key={child.id} style={cfStyles.recordRow}>
-                          <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
-                          <Text style={cfStyles.recordText} numberOfLines={2}>
-                            {value}
-                            {typeof sliderVal === 'number' ? (
-                              <Text style={cfStyles.recordIntensity}> ({sliderVal}%)</Text>
-                            ) : null}
-                          </Text>
-                        </View>
-                      )
-                    })
+                    return (
+                      <React.Fragment key={col.sectionId}>
+                        {textChildren.map(child => {
+                          const key = child.props['key']
+                          if (!key) return null
+                          const value = entry.values[key]
+                          if (typeof value !== 'string' || !value) return null
+                          // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
+                          const slider = sliderChildren[0]
+                          const sliderKey = slider?.props['key']
+                          const sliderVal = sliderKey ? entry.values[sliderKey] : null
+                          return (
+                            <View key={child.id} style={cfStyles.recordRow}>
+                              <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
+                              <Text style={cfStyles.recordText} numberOfLines={2}>
+                                {value}
+                                {typeof sliderVal === 'number' ? (
+                                  <Text style={cfStyles.recordIntensity}> ({sliderVal}%)</Text>
+                                ) : null}
+                              </Text>
+                            </View>
+                          )
+                        })}
+                        {timeChildren.map(child => {
+                          const key = child.props['key']
+                          if (!key) return null
+                          const value = entry.values[key]
+                          if (typeof value !== 'string' || !value) return null
+                          const labelText = child.text_code ? t(child.text_code) : ''
+                          return (
+                            <View key={child.id} style={cfStyles.recordRow} testID={`record-time-${key}`}>
+                              <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
+                              <Text style={cfStyles.recordText} numberOfLines={1}>
+                                {labelText ? <Text style={cfStyles.recordIntensity}>{labelText} </Text> : null}
+                                {value}
+                              </Text>
+                            </View>
+                          )
+                        })}
+                      </React.Fragment>
+                    )
                   })}
                 </View>
               )
@@ -3962,6 +4119,31 @@ const cfStyles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
+  // ── Champ horaire
+  timeContainer:    { gap: spacing.xs },
+  timeLabelRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    minHeight: 18,
+  },
+  timeLabel:        { fontSize: 13, fontWeight: '600', color: colors.text },
+  timeButton: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm, paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+  },
+  timeButtonEmpty:  { borderStyle: 'dashed' },
+  timeValue: {
+    fontSize: 16, fontWeight: '600', color: colors.text,
+    fontVariant: ['tabular-nums'],
+  },
+  timePlaceholder:  { fontSize: 14, color: colors.textMuted },
+  timeConfirm: {
+    alignSelf: 'flex-end', paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs, marginTop: spacing.xs,
+    borderRadius: radius.sm, backgroundColor: colors.primary,
+  },
+  timeConfirmText:  { color: colors.white, fontSize: 13, fontWeight: '600' },
   // ── Footer
   footer: {
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,

@@ -5,10 +5,14 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "add": "Add",
+    "time_picker": {
+      "tap_to_set": "Set time"
+    },
     "update": "Update",
     "error": "Error",
     "warning": "Warning",
     "ok": "OK",
+    "confirm": "Confirm",
     "calendar": "Calendar",
     "loading": "Loading…",
     "irreversible": "This action cannot be undone.",
