@@ -1,11 +1,16 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { fetchModuleFields, type ModuleFieldsResult } from '../../services/moduleService'
+import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../services/moduleService'
 import { FieldRenderer } from '../ModuleRenderer'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
+
+// Layouts dont le contenu vit dans une autre table que module_content_fields
+// (psyedu_topics/blocks, form_entries, exposure_hierarchies). Ils peuvent
+// rendre avec 0 fields — le fallback "coming soon" ne s'applique pas.
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
 
 interface Props {
   moduleType: string
@@ -38,7 +43,9 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
   // explicite ou aucun field de contenu (le seul field présent étant un
   // placeholder `coming_soon`). Si la base contient du vrai contenu, on le rend
   // via FieldRenderer (layout dédié ou fallback générique) — un éventuel field
-  // `coming_soon` résiduel n'écrase pas le rendu.
+  // `coming_soon` résiduel n'écrase pas le rendu. Les layouts fieldless
+  // (psyedu, chrono_month, exposure_hierarchy) lisent leur contenu ailleurs
+  // que module_content_fields — on n'applique pas le fallback pour eux.
   const meaningfulFieldsCount = result
     ? result.fields.filter(
         f =>
@@ -47,8 +54,11 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
           f.field_type !== 'module_description',
       ).length
     : 0
+  const isFieldless = !!result && FIELDLESS_LAYOUTS.has(result.preview_kind)
   const showComingSoon =
-    !!result && (result.preview_kind === 'coming_soon' || meaningfulFieldsCount === 0)
+    !!result &&
+    !isFieldless &&
+    (result.preview_kind === 'coming_soon' || meaningfulFieldsCount === 0)
 
   return (
     <div className="preview-panel" style={{ borderTopColor: accentColor }}>
