@@ -1,0 +1,286 @@
+{
+  "distress_tolerance": {
+    "intro": {
+      "why": {
+        "tip1": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique."
+      },
+      "how": {
+        "item1": "Reconnaître le signal : « je suis en crise »",
+        "item2": "Choisir une technique que tu connais déjà",
+        "item3": "L'appliquer sans viser la guérison — juste traverser le moment"
+      }
+    },
+    "tipp": {
+      "why": {
+        "tip1": "Ces techniques sont documentées dans le DBT Skills Training Manual (Linehan, 2015). Elles sont là pour t'aider en moment de crise, en complément de ton suivi."
+      },
+      "how": {
+        "p1": "**T — Température** : plonge ton visage dans un saladier d'eau froide 30 secondes, ou tiens des glaçons dans les mains.",
+        "p2": "**I — Exercice intense** : cours sur place, fais des pompes ou des jumping jacks pendant 1 à 2 minutes.",
+        "p3": "**P — Respiration** : inspire 4 secondes, expire 6 secondes. L'expiration doit être plus longue que l'inspiration.",
+        "p4": "**P — Relaxation musculaire** : contracte un groupe musculaire (poings, épaules, jambes) 5 secondes, relâche complètement 10 secondes.",
+        "item1": "Choisis **une seule** de ces quatre techniques en priorité",
+        "item2": "Applique-la pendant au moins 1 minute avant d'évaluer l'effet",
+        "item3": "Tu peux combiner T + P (eau froide + respiration lente)"
+      }
+    },
+    "accepts": {
+      "why": {
+        "tip1": "Cette technique est utile pour les crises modérées. Pour les crises intenses, préfère TIPP en premier."
+      },
+      "how": {
+        "p1": "**A — Activités** : fais une activité qui occupe entièrement ton attention (puzzle, dessin, jeu vidéo, sport).",
+        "p2": "**C — Contribution** : fais quelque chose pour quelqu'un d'autre (message à un ami, aide à la maison).",
+        "p3": "**C — Comparaisons** : pense à des moments difficiles que tu as traversés. Tu les as vécus.",
+        "p4": "**E — Émotions contraires** : expose-toi à quelque chose qui génère une émotion différente (film drôle, musique entraînante).",
+        "p5": "**P — Repousser** (*Push away*) : imagine mettre la situation dans une boîte et la refermer. Tu y reviendras plus tard.",
+        "p6": "**T — Pensées** : engage ton esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
+        "p7": "**S — Sensations** : active une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
+      }
+    },
+    "self_soothing": {
+      "why": {
+        "tip1": "Prépare avec ton soignant une liste personnalisée de 2 à 3 ressources par sens. Ce qui apaise est très personnel."
+      },
+      "how": {
+        "item1": "Prépare ta liste personnelle de ressources sensorielles avec ton soignant",
+        "item2": "En crise, active au moins **deux sens différents** simultanément",
+        "item3": "Accorde-toi au moins 5 minutes — l'effet n'est pas immédiat"
+      }
+    },
+    "improve": {
+      "why": {
+        "tip1": "Toutes les composantes d'IMPROVE ne s'appliquent pas à tout le monde. Identifie avec ton soignant celles qui correspondent à tes ressources."
+      },
+      "how": {
+        "p1": "**I — Imagerie** : imagine un lieu sûr et ressourçant. Visualise-le en détail — lumière, sons, textures.",
+        "p2": "**M — Sens** (*Meaning*) : cherche une signification, même minime, dans la situation difficile.",
+        "p5": "**O — Une chose à la fois** : réduis ton champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
+        "p6": "**V — Vacance** : accorde-toi une courte trêve mentale — pas de résolution, pas de décision pendant les prochaines minutes.",
+        "p7": "**E — Encouragement** : dis-toi quelque chose de bienveillant — ce que tu dirais à un ami dans la même situation."
+      }
+    },
+    "pros_cons": {
+      "why": {
+        "tip1": "Ton soignant peut t'aider à construire ta propre grille pros/cons dans un moment calme."
+      },
+      "how": {
+        "p1": "**Étape 1** : identifie l'impulsion à agir (ce que tu as envie de faire maintenant).",
+        "p2": "**Étape 2** : liste les avantages à court terme de céder à l'impulsion.",
+        "p3": "**Étape 3** : liste les inconvénients à long terme de céder à l'impulsion.",
+        "p4": "**Étape 4** : liste les avantages à long terme de tolérer la détresse sans agir.",
+        "p5": "**Étape 5** : pèse les deux colonnes. Quelle décision correspond le mieux à tes valeurs à long terme ?",
+        "item1": "Prépare cette grille en consultation, dans un moment calme",
+        "item2": "En crise, avoir la liste déjà écrite est plus utile qu'essayer de la construire",
+        "item3": "L'objectif n'est pas de ne jamais souffrir — c'est de ne pas aggraver la situation"
+      }
+    }
+  },
+  "chronobiology_tracker": {
+    "what_is_chrono": {
+      "how": {
+        "p1": "Chaque personne a un **chronotype** — une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le tien t'aide à mieux organiser tes journées en accord avec ta biologie.",
+        "p2": "Ton horloge biologique peut être **resynchronisée** progressivement. Des ancres horaires régulières — heure de lever, repas, activités — envoient des signaux stables à ton cerveau.",
+        "item3": "En parler avec ton soignant pour adapter cet outil à ta situation"
+      }
+    },
+    "why_regularity": {
+      "how": {
+        "p1": "L'objectif n'est pas la perfection mais la **cohérence**. Même deux ou trois ancrages réguliers par jour ont un effet mesurable sur la stabilité de tes rythmes.",
+        "p2": "L'heure de **lever** est l'ancre la plus efficace. Elle détermine le point de départ de toute ta cascade hormonale de la journée."
+      }
+    },
+    "light_anchor": {
+      "how": {
+        "p1": "**Objectif principal** : t'exposer à la lumière naturelle dans les 30 minutes après ton réveil, si possible."
+      }
+    },
+    "meals_timing": {
+      "how": {
+        "p1": "L'objectif est la **régularité des horaires**, pas la restriction alimentaire. Le but n'est pas de changer ce que tu manges, mais **quand** tu manges.",
+        "p2": "Le premier repas après ton réveil est un ancrage fort pour ton horloge digestive. Essaie de le prendre dans un créneau horaire stable d'un jour à l'autre."
+      }
+    },
+    "social_rhythm": {
+      "why": {
+        "tip1": "Ton soignant peut t'aider à identifier quels événements sociaux sont les plus importants pour ton équilibre et comment les préserver."
+      },
+      "how": {
+        "p1": "Identifie **2 à 3 ancrages sociaux** réguliers dans ta semaine. Il peut s'agir de n'importe quel contact prévisible : café avec un ami, repas en famille, cours de sport.",
+        "p2": "En période de changement (nouveau lycée, déménagement, rupture), essaie de **maintenir au moins un ou deux ancrages sociaux** stables pour amortir la désynchronisation."
+      }
+    },
+    "sleep_wake": {
+      "how": {
+        "p1": "**Si tu ne peux maintenir qu'une seule ancre**, privilégie l'heure de lever plutôt que l'heure de coucher.",
+        "p2": "Le week-end, essaie de te lever dans un créneau de ±1 heure par rapport à ton horaire de semaine.",
+        "p3": "Si une nuit difficile t'empêche de te lever à ton heure habituelle, une **sieste courte** (20 minutes maximum, avant 15h) est préférable à un lever tardif."
+      }
+    },
+    "disruptions": {
+      "why": {
+        "tip1": "Si tu remarques qu'un événement a significativement bouleversé tes horaires habituels, c'est une information utile à partager avec ton soignant."
+      },
+      "how": {
+        "p1": "La perturbation est inévitable. L'objectif n'est pas de l'éviter, mais de **récupérer la régularité aussi vite que possible** après.",
+        "p2": "Après une perturbation, l'ancre la plus efficace pour te resynchroniser est le **lever matinal** à heure fixe, combiné à la lumière du jour."
+      }
+    }
+  },
+  "diet_weight_psycho": {
+    "sleep_chrono": {
+      "why": {
+        "p1": "Le sommeil n'est pas passif. Pendant la nuit, ton cerveau trie, consolide et régule tes émotions.",
+        "p2": "Pendant le **sommeil paradoxal**, les expériences de la journée sont intégrées. C'est la **consolidation émotionnelle**.",
+        "p3": "Le sommeil favorise la **neuroplasticité** — la capacité de ton cerveau à former de nouvelles connexions. Une forme de réparation naturelle.",
+        "tip1": "Un sommeil régulier est reconnu comme facteur de protection dans les recommandations de soins en psychiatrie.",
+        "p4": "Ton corps suit un **rythme circadien** — une horloge interne d'environ 24 heures. Elle régule le sommeil, l'humeur, la température et l'appétit.",
+        "p5": "Le **lever à heure fixe** est le synchroniseur le plus puissant de cette horloge. C'est la recommandation HAS/INSV.",
+        "p6": "Les **écrans** bloquent la **mélatonine** (hormone du sommeil) via leur lumière bleue. Leur contenu provoque aussi un **hyperéveil cognitif** qui repousse l'endormissement.",
+        "p7": "Café, thé et nicotine bloquent l'**adénosine** — une substance naturelle qui pousse à dormir. L'effet de la caféine dure environ 5 heures."
+      },
+      "how": {
+        "intro": "Tu n'as pas besoin de tout changer d'un coup. Choisis une seule habitude cette semaine.",
+        "item1": "Te lever à la même heure chaque matin, y compris le week-end",
+        "item2": "Réserver le lit au sommeil uniquement — contrôle des stimuli (TCC-I)",
+        "item3": "Éteindre les écrans 30 à 60 minutes avant de dormir",
+        "item4": "Aérer ta chambre 10 minutes avant de dormir",
+        "item5": "Éviter le café et le thé après 14h — à ajuster avec ton soignant"
+      }
+    },
+    "nutrition_brain": {
+      "why": {
+        "p1": "Ton système digestif contient environ 500 millions de neurones. C'est pourquoi on l'appelle parfois le **deuxième cerveau**.",
+        "p2": "Le **microbiote** — les milliards de bactéries de ton intestin — communique avec ton cerveau via le nerf vague et des molécules chimiques.",
+        "p3": "Environ 95 % de la **sérotonine** de ton corps est produite dans ton intestin. La sérotonine influence l'humeur, l'anxiété et le sommeil.",
+        "p4": "Une alimentation variée et riche en fibres favorise un microbiote diversifié. Ton cerveau est sensible aux carences en fer, vitamines B et oméga-3.",
+        "p5": "L'**hydratation** est souvent sous-estimée. Certains médicaments peuvent modifier ta sensation de soif — ton soignant peut préciser tes besoins.",
+        "p6": "L'**alcool** est un dépresseur du système nerveux central. Il peut paraître sédatif à court terme, mais perturbe le sommeil et l'humeur à moyen terme.",
+        "bq1": "Les substances (cannabis, autres) interagissent avec les récepteurs de ton cerveau et peuvent perturber l'équilibre des traitements. Ton soignant est le bon interlocuteur pour en parler."
+      },
+      "how": {
+        "tip1": "Cette règle est un repère, pas une obligation. L'objectif est la variété, pas la perfection.",
+        "p2": "**Hydratation :** 1,5 à 2 litres d'eau par jour est un repère général. L'eau plate, les infusions et les tisanes sans sucre comptent.",
+        "habit1": "3 repas à heures régulières plutôt que des repas sautés",
+        "habit2": "Commencer par les légumes et les protéines avant les féculents",
+        "habit3": "Un petit-déjeuner avec des protéines aide à tenir jusqu'au déjeuner"
+      }
+    },
+    "gentle_activity": {
+      "why": {
+        "p1": "L'activité physique libère des **endorphines** — molécules naturelles qui réduisent la douleur et procurent un sentiment de bien-être.",
+        "p2": "Elle stimule la production de **BDNF** (facteur neurotrophique cérébral — une protéine qui favorise la croissance des neurones, parfois appelée engrais pour le cerveau).",
+        "p3": "Elle régule les hormones du stress (**cortisol**, adrénaline) et améliore la qualité du sommeil.",
+        "p4": "Coupler la marche à la **lumière du jour** amplifie les bénéfices. La lumière naturelle synchronise ton horloge biologique et stimule la sérotonine.",
+        "tip1": "20 minutes de marche dehors le matin = activité physique + lumière naturelle = double bénéfice.",
+        "p5": "Le **NEAT** (Non-Exercise Activity Thermogenesis) désigne toute l'énergie dépensée hors sport formel : escaliers, ménage, se lever régulièrement.",
+        "p6": "Le NEAT peut représenter une part importante de ton activité totale. Tu bouges peut-être plus que tu ne le penses.",
+        "bq1": "Certains médicaments peuvent provoquer une fatigue physique. C'est un effet connu — parles-en à ton soignant. Même un effort très doux a un effet réel."
+      },
+      "how": {
+        "tip1": "5 minutes de marche valent mieux que zéro. Chaque petit effort compte.",
+        "p1": "**Objectif starter :** 10 minutes de marche par jour, de préférence le matin à la lumière du jour.",
+        "neat1": "Descendre un arrêt de bus ou de tram plus tôt",
+        "neat2": "Prendre les escaliers à la place de l'ascenseur",
+        "neat3": "Te lever 5 minutes toutes les heures si tu es assis longtemps",
+        "neat4": "Faire une courte marche après les repas",
+        "p2": "**Activités douces :** marche, yoga doux, tai-chi, natation, vélo en plat. L'intensité modérée — pouvoir parler sans être essoufflé — est suffisante.",
+        "p3": "Associe l'activité à un moment fixe de ta journée pour créer une habitude. Après le café du matin ou avant le déjeuner sont de bons ancrages."
+      }
+    },
+    "general": {
+      "why": {
+        "p1": "Certains médicaments psychotropes peuvent modifier la façon dont ton corps régule l'appétit et le métabolisme. Ce n'est pas une fatalité — comprendre ces mécanismes t'aide à adapter tes habitudes en collaboration avec ton soignant.",
+        "p2": "Ces effets varient selon la molécule, la dose et la durée de traitement. Ils ne sont pas systématiques et peuvent évoluer avec le temps."
+      },
+      "how": {
+        "bq1": "Si tu remarques des changements importants de ton appétit ou de ton poids depuis le début ou la modification de ton traitement, signalez-le à ton soignant à la prochaine consultation."
+      }
+    },
+    "antipsychotics": {
+      "why": {
+        "bq1": "Ces informations sont indicatives. La tolérance individuelle varie. Ne modifie jamais ton traitement sans en parler à ton médecin."
+      }
+    },
+    "methylphenidate": {
+      "why": {
+        "bq_child": "Chez l'enfant et l'ado : une réduction des apports sur plusieurs mois peut ralentir la courbe de croissance. La surveillance du poids et de la taille est systématique dans le suivi pédiatrique."
+      },
+      "how": {
+        "bq1": "Si la perte de poids est notable ou si tu stagnes sur ta courbe de croissance, signale-le à ton médecin dès que possible."
+      }
+    },
+    "antidepressants": {
+      "why": {
+        "bq1": "En cas de changement notable de l'appétit ou du poids, parles-en à ton médecin. Un accompagnement diététique spécialisé peut être envisagé."
+      },
+      "how": {
+        "bq1": "Ces effets s'atténuent souvent après les premières semaines. Informe ton médecin si ils persistent ou s'ils te gênent dans ton quotidien."
+      }
+    },
+    "mood_stabilizers": {
+      "why": {
+        "bq_lithium": "Ne pas commencer un régime sans sel strict sans en parler à ton médecin. En cas de fièvre, vomissements ou diarrhée prolongée : contacte ton médecin rapidement."
+      },
+      "how": {
+        "bq1": "Ces informations sont générales. Ton médecin adapte le suivi à ta situation personnelle."
+      }
+    }
+  },
+  "craving_journal": {
+    "what_is_craving": {
+      "why": {
+        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique — pas un manque de volonté.",
+        "p2": "Il est déclenché par le **circuit de la récompense** (dopamine). Ce circuit apprend à anticiper le plaisir : une odeur, une image, une émotion peuvent suffire à l'activer.",
+        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement — comme une vague qui monte et qui passe.",
+        "tip1": "Ressentir un craving ne signifie pas que tu vas céder. Beaucoup de personnes ressentent des cravings forts sans y donner suite.",
+        "p4": "Plus tu observes le craving sans agir dessus, plus le **circuit neuronal** associé s'affaiblit progressivement au fil du temps."
+      },
+      "how": {
+        "item1": "Nommer ce qui se passe : « Je suis en train de ressentir un craving »",
+        "item2": "Vérifier l'heure : noter mentalement quand il a commencé",
+        "item3": "Attendre 20 minutes avant toute décision — le pic est souvent passé"
+      }
+    },
+    "triggers_abc": {
+      "why": {
+        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur** — une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
+        "tip1": "L'acronyme **HALT** résume les quatre états qui renforcent les cravings : **H**ungry (faim), **A**ngry (colère), **L**onely (solitude), **T**ired (fatigue). Ils abaissent ta résistance à l'envie.",
+        "p3": "Connaître tes déclencheurs personnels te permet de les anticiper — et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
+      },
+      "how": {
+        "item1": "Après chaque craving, note la situation : où t'étais-tu, avec qui, que faisais-tu ?",
+        "item2": "Note l'émotion ressentie juste avant l'envie — même si elle te paraît sans lien",
+        "item3": "Vérifie HALT : avais-tu faim, te sentais-tu seul(e), fatigué(e) ou en colère ?",
+        "item4": "Avec le temps, des schémas répétés apparaîtront — c'est une info utile pour ton soignant",
+        "bq1": "Ces observations sont des données précieuses. Ton soignant peut t'aider à les analyser et à construire un plan de prévention personnalisé."
+      }
+    },
+    "urge_surfing": {
+      "why": {
+        "p1": "L'**urge surfing** est une technique de pleine conscience appliquée aux envies compulsives, développée par Gordon Marlatt (1985). Elle repose sur une observation : résister activement au craving l'amplifie souvent. Observer sans résister le laisse passer.",
+        "tip1": "L'urge surfing ne supprime pas les envies. Il change ta relation à elles : de la lutte vers l'observation. Avec la pratique, la vague devient moins impressionnante."
+      },
+      "how": {
+        "item1": "**Reconnaître** : « Je ressens un craving en ce moment. » Nomme-le sans te juger.",
+        "item2": "**Observer** : où ressens-tu l'envie dans ton corps ? Gorge, poitrine, ventre ? Observe sans chercher à faire partir la sensation.",
+        "item3": "**Respirer** : respire lentement. Expiration plus longue que l'inspiration. Reste présent(e).",
+        "item4": "**Attendre** : regarde l'envie monter, atteindre son pic, puis redescendre. Tu n'as rien à faire.",
+        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal — persévère."
+      }
+    },
+    "after_the_craving": {
+      "why": {
+        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving — c'est le **cycle honte-rechute**.",
+        "p2": "Marlatt et Gordon ont nommé ce phénomène l'**Abstinence Violation Effect (AVE)** : la croyance que « j'ai craqué une fois, tout est fichu » aggrave souvent la situation bien plus que le craquage lui-même.",
+        "tip1": "Un craquage est une information clinique — pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
+        "bq1": "Ton soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster ton plan — c'est exactement à ça que sert le journal."
+      },
+      "how": {
+        "item1": "Qu'est-ce qui s'est passé juste avant ? Quel était le déclencheur (HALT, situation, émotion) ?",
+        "item2": "Quelle ressource était absente ou insuffisante ce jour-là ?",
+        "item3": "Qu'est-ce qui pourrait être différent la prochaine fois ?"
+      }
+    }
+  }
+}

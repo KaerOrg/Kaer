@@ -146,13 +146,6 @@
       "notes_placeholder": "Es.: dimenticanza, difficoltà, nota…",
       "empty_history": "Nessun inserimento ancora."
     },
-    "psychoeducation": {
-      "label": "Psicoeducazione",
-      "description": "Schede di conoscenza sulla tua salute mentale",
-      "title": "Psicoeducazione",
-      "intro": "Consulta le tue schede di conoscenza.",
-      "cards_progress": "{{read}}/{{total}} schede lette"
-    },
     "sleep_diary": {
       "label": "Diario del sonno",
       "description": "Registra il tuo sonno ogni mattina",

@@ -2189,6 +2189,250 @@
 
 .cf-slider__fill { height: 100%; border-radius: 999px; }
 
+.cf-time { display: flex; flex-direction: column; gap: 4px; }
+
+.cf-time__label { font-size: 12px; color: var(--color-text-secondary); }
+
+.cf-time__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+}
+
+.cf-time__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── PsyEdu (preview_kind='psyedu') ─────────────────────────────────────── */
+
+.psyedu { display: flex; flex-direction: column; gap: 12px; }
+
+.psyedu__intro {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary, #f4f4f5);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.psyedu__intro-icon { color: var(--color-primary); flex-shrink: 0; }
+
+.psyedu__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.psyedu__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.psyedu__row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.psyedu__row-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.psyedu__row-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+
+.psyedu__row-summary {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.psyedu__row-chevron { color: var(--color-text-muted); flex-shrink: 0; }
+
+/* ── Tabs (preview_kind='tabbed') ──────────────────────────────────────── */
+
+.tabs { display: flex; flex-direction: column; gap: 12px; }
+
+.tabs__bar {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+}
+
+.tabs__tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.tabs__tab:hover { background: color-mix(in srgb, var(--color-primary) 5%, transparent); }
+
+.tabs__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tabs__tab-icon { color: currentColor; flex-shrink: 0; }
+
+.tabs__tab-label { white-space: nowrap; }
+
+.tabs__content { display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Disclaimer banner (field_type='disclaimer_banner') ────────────────── */
+
+.preview-disclaimer-wrapper { display: flex; flex-direction: column; gap: 12px; }
+
+.preview-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+}
+
+.preview-disclaimer__icon { flex-shrink: 0; margin-top: 2px; }
+
+.preview-disclaimer__text { font-size: 12px; line-height: 1.5; }
+
+/* ── Chrono Month (preview_kind='chrono_month') ────────────────────────── */
+
+.chrono-month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.chrono-month__icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chrono-month__title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+
+.chrono-month__hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.5;
+}
+
+.chrono-month__grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  width: 100%;
+}
+
+.chrono-month__cell {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--color-bg-secondary, #f4f4f5);
+  border: 1px solid var(--color-border);
+}
+
+.chrono-month__cell--filled {
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-color: var(--color-primary);
+}
+
+/* ── Exposure Hierarchy (preview_kind='exposure_hierarchy') ────────────── */
+
+.exposure-hierarchy { display: flex; flex-direction: column; gap: 12px; }
+
+.exposure-hierarchy__list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.exposure-hierarchy__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.exposure-hierarchy__row-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.exposure-hierarchy__row-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.exposure-hierarchy__row-title { font-size: 14px; font-weight: 600; color: var(--color-text); }
+
+.exposure-hierarchy__row-meta { font-size: 12px; color: var(--color-text-secondary); }
+
+.exposure-hierarchy__row-trash { color: var(--color-text-muted); flex-shrink: 0; }
+
+.exposure-hierarchy__row-chevron { color: var(--color-text-muted); flex-shrink: 0; }
+
+.exposure-hierarchy__add {
+  width: 100%;
+  padding: 12px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
 .cf-save-btn {
   width: 100%;
   display: inline-flex;

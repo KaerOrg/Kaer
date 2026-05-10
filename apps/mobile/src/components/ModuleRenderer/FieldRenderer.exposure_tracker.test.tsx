@@ -155,6 +155,9 @@ const MOCK_ENTRY: database.FearEntry = {
 const MOCK_SITUATION: database.FearSituation = {
   id: 'sit-1',
   label: 'Prendre le métro',
+  hierarchy_id: null,
+  target_suds: null,
+  is_done: 0,
   created_at: '2026-05-01T10:00:00Z',
 }
 

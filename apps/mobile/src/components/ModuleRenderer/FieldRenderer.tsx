@@ -24,7 +24,12 @@ import {
 import { ActivityLogLayout } from './layouts/ActivityLog'
 import { ExposureTrackerLayout } from './layouts/ExposureTracker'
 import { DecisionGridLayout } from './layouts/DecisionGrid'
+import { PsyEduLayout } from './layouts/PsyEdu'
+import { resolvePsyEduIcon } from './layouts/PsyEdu/iconMap'
+import { ChronoMonthLayout } from './layouts/ChronoMonth'
+import { ExposureHierarchyLayout } from './layouts/ExposureHierarchy'
 import { EditableItemsList } from './layouts/shared'
+import { DisclaimerBanner } from '../DisclaimerBanner'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
@@ -1583,6 +1588,127 @@ interface ColumnSpec {
   children: ContentField[]
 }
 
+// ─── column_time_field — TimePicker interactif optionnel ─────────────────────
+//
+// Stockage : "HH:MM" (string) dans form_entries.values[key], '' si non renseigné.
+// Props field_props : `key` (clé form_entries, requis), `optional` ('0'|'1', défaut '1').
+
+const TIME_HHMM_RE = /^(\d{1,2}):(\d{2})$/
+
+function parseHHMMToDate(value: string): Date {
+  const m = TIME_HHMM_RE.exec(value)
+  const date = new Date()
+  if (m) {
+    date.setHours(parseInt(m[1], 10), parseInt(m[2], 10), 0, 0)
+  } else {
+    date.setHours(9, 0, 0, 0)
+  }
+  return date
+}
+
+function formatDateToHHMM(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
+interface ColumnTimeFieldProps {
+  fieldKey: string
+  label: string
+  value: string
+  optional: boolean
+  accent: string
+  onChange: (next: string) => void
+}
+
+const ColumnTimeField = React.memo(function ColumnTimeField({
+  fieldKey,
+  label,
+  value,
+  optional,
+  accent,
+  onChange,
+}: ColumnTimeFieldProps) {
+  const t = useModuleT()
+  const [showPicker, setShowPicker] = useState(false)
+  const hasValue = value.length > 0
+
+  const handleOpen = useCallback(() => {
+    setShowPicker(true)
+  }, [])
+
+  const handlePickerChange = useCallback((_: unknown, date?: Date) => {
+    if (Platform.OS === 'android') setShowPicker(false)
+    if (date) onChange(formatDateToHHMM(date))
+  }, [onChange])
+
+  const handleConfirm = useCallback(() => {
+    setShowPicker(false)
+  }, [])
+
+  const handleClear = useCallback(() => {
+    onChange('')
+  }, [onChange])
+
+  return (
+    <View style={cfStyles.timeContainer} testID={`time-${fieldKey}`}>
+      <View style={cfStyles.timeLabelRow}>
+        {label ? <Text style={cfStyles.timeLabel}>{label}</Text> : <View />}
+        {optional && hasValue ? (
+          <Pressable
+            onPress={handleClear}
+            hitSlop={8}
+            accessibilityLabel={t('common.delete')}
+            testID={`time-${fieldKey}-clear`}
+          >
+            <MaterialCommunityIcons
+              name="close-circle-outline"
+              size={18}
+              color={colors.textMuted}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+      <Pressable
+        style={[cfStyles.timeButton, !hasValue && cfStyles.timeButtonEmpty]}
+        onPress={handleOpen}
+        accessibilityRole="button"
+        testID={`time-${fieldKey}-button`}
+      >
+        <MaterialCommunityIcons
+          name="clock-outline"
+          size={20}
+          color={hasValue ? accent : colors.textMuted}
+        />
+        {hasValue ? (
+          <Text style={cfStyles.timeValue}>{value}</Text>
+        ) : (
+          <Text style={cfStyles.timePlaceholder}>{t('common.time_picker.tap_to_set')}</Text>
+        )}
+      </Pressable>
+      {showPicker ? (
+        <DateTimePicker
+          value={parseHHMMToDate(value)}
+          mode="time"
+          is24Hour
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handlePickerChange}
+        />
+      ) : null}
+      {showPicker && Platform.OS === 'ios' ? (
+        <Pressable
+          style={cfStyles.timeConfirm}
+          onPress={handleConfirm}
+          accessibilityRole="button"
+          testID={`time-${fieldKey}-confirm`}
+        >
+          <Text style={cfStyles.timeConfirmText}>{t('common.confirm')}</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  )
+})
+
 function ColumnFormLayout({ fields, moduleId }: {
   fields: ContentField[]
   moduleId: string
@@ -1802,6 +1928,21 @@ function ColumnFormLayout({ fields, moduleId }: {
                         </View>
                       )
                     }
+                    if (child.field_type === 'column_time_field') {
+                      const optional = (child.props['optional'] ?? '1') !== '0'
+                      const timeValue = typeof values[key] === 'string' ? (values[key] as string) : ''
+                      return (
+                        <ColumnTimeField
+                          key={child.id}
+                          fieldKey={key}
+                          label={labelOrPlaceholder}
+                          value={timeValue}
+                          optional={optional}
+                          accent={accent}
+                          onChange={(next) => setValues(prev => ({ ...prev, [key]: next }))}
+                        />
+                      )
+                    }
                     return null
                   })}
                 </View>
@@ -1887,28 +2028,49 @@ function ColumnFormLayout({ fields, moduleId }: {
                   {columns.map(col => {
                     const textChildren = col.children.filter(c => c.field_type === 'column_text_field')
                     const sliderChildren = col.children.filter(c => c.field_type === 'column_slider_field')
+                    const timeChildren = col.children.filter(c => c.field_type === 'column_time_field')
                     const accent = col.header.props['color'] ?? colors.primary
-                    return textChildren.map(child => {
-                      const key = child.props['key']
-                      if (!key) return null
-                      const value = entry.values[key]
-                      if (typeof value !== 'string' || !value) return null
-                      // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
-                      const slider = sliderChildren[0]
-                      const sliderKey = slider?.props['key']
-                      const sliderVal = sliderKey ? entry.values[sliderKey] : null
-                      return (
-                        <View key={child.id} style={cfStyles.recordRow}>
-                          <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
-                          <Text style={cfStyles.recordText} numberOfLines={2}>
-                            {value}
-                            {typeof sliderVal === 'number' ? (
-                              <Text style={cfStyles.recordIntensity}> ({sliderVal}%)</Text>
-                            ) : null}
-                          </Text>
-                        </View>
-                      )
-                    })
+                    return (
+                      <React.Fragment key={col.sectionId}>
+                        {textChildren.map(child => {
+                          const key = child.props['key']
+                          if (!key) return null
+                          const value = entry.values[key]
+                          if (typeof value !== 'string' || !value) return null
+                          // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
+                          const slider = sliderChildren[0]
+                          const sliderKey = slider?.props['key']
+                          const sliderVal = sliderKey ? entry.values[sliderKey] : null
+                          return (
+                            <View key={child.id} style={cfStyles.recordRow}>
+                              <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
+                              <Text style={cfStyles.recordText} numberOfLines={2}>
+                                {value}
+                                {typeof sliderVal === 'number' ? (
+                                  <Text style={cfStyles.recordIntensity}> ({sliderVal}%)</Text>
+                                ) : null}
+                              </Text>
+                            </View>
+                          )
+                        })}
+                        {timeChildren.map(child => {
+                          const key = child.props['key']
+                          if (!key) return null
+                          const value = entry.values[key]
+                          if (typeof value !== 'string' || !value) return null
+                          const labelText = child.text_code ? t(child.text_code) : ''
+                          return (
+                            <View key={child.id} style={cfStyles.recordRow} testID={`record-time-${key}`}>
+                              <View style={[cfStyles.recordDot, { backgroundColor: accent }]} />
+                              <Text style={cfStyles.recordText} numberOfLines={1}>
+                                {labelText ? <Text style={cfStyles.recordIntensity}>{labelText} </Text> : null}
+                                {value}
+                              </Text>
+                            </View>
+                          )
+                        })}
+                      </React.Fragment>
+                    )
                   })}
                 </View>
               )
@@ -3308,6 +3470,111 @@ export interface QuestionnaireInteraction {
   accentColor?: string
 }
 
+// ─── Layout — Onglets génériques (tabbed) ───────────────────────────────────
+//
+// Pattern « N sous-vues dans un même module ». Chaque tab field racine porte
+// `sub_preview_kind` (le layout enfant à utiliser) et `icon_name`. Ses
+// children = les fields rendus par le sous-layout. La sélection d'onglet est
+// state local. Délègue le rendu à FieldRenderer (récursif).
+
+interface TabSpec {
+  key: string
+  label: string
+  iconName: string
+  subPreviewKind: PreviewKind
+  children: ContentField[]
+}
+
+function TabsLayout({ fields, moduleId }: {
+  fields: ContentField[]
+  moduleId: string
+}) {
+  const t = useModuleT()
+
+  const tabs = useMemo<TabSpec[]>(() => {
+    return fields
+      .filter(f => f.field_type === 'tab')
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(f => ({
+        key: f.props['tab_key'] ?? f.id,
+        label: f.text_code ? t(f.text_code) : '',
+        iconName: f.props['icon_name'] ?? '',
+        subPreviewKind: (f.props['sub_preview_kind'] ?? 'coming_soon') as PreviewKind,
+        children: f.children ?? [],
+      }))
+  }, [fields, t])
+
+  const [activeKey, setActiveKey] = useState<string>(tabs[0]?.key ?? '')
+  const activeTab = useMemo(
+    () => tabs.find(tb => tb.key === activeKey) ?? tabs[0],
+    [tabs, activeKey]
+  )
+
+  if (!activeTab) {
+    return null
+  }
+
+  return (
+    <View style={tabStyles.container} testID="tabs-layout">
+      <View style={tabStyles.bar} accessibilityRole="tablist">
+        {tabs.map(tab => {
+          const isActive = tab.key === activeTab.key
+          const Icon = tab.iconName ? resolvePsyEduIcon(tab.iconName) : null
+          return (
+            <Pressable
+              key={tab.key}
+              style={[tabStyles.tab, isActive && tabStyles.tabActive]}
+              onPress={() => setActiveKey(tab.key)}
+              testID={`tab-${tab.key}`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+            >
+              {Icon ? (
+                <Icon size={16} color={isActive ? colors.primary : colors.textMuted} />
+              ) : null}
+              <Text style={[tabStyles.tabLabel, isActive && tabStyles.tabLabelActive]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          )
+        })}
+      </View>
+      <View style={tabStyles.content} testID={`tab-content-${activeTab.key}`}>
+        <FieldRenderer
+          preview_kind={activeTab.subPreviewKind}
+          fields={activeTab.children}
+          moduleId={moduleId}
+        />
+      </View>
+    </View>
+  )
+}
+
+const tabStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  bar: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm + 2,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: { borderBottomColor: colors.primary },
+  tabLabel: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
+  tabLabelActive: { color: colors.primary },
+  content: { flex: 1 },
+})
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 export interface FieldRendererProps {
@@ -3323,8 +3590,42 @@ export interface FieldRendererProps {
   moduleId?: string
 }
 
-export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
-  if (preview_kind === 'coming_soon' || fields.length === 0) return null
+// Layouts dont le contenu provient d'une autre source que module_content_fields
+// (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
+// avec 0 fields.
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
+
+// Wrapper exporté : extrait le field 'disclaimer_banner' (s'il existe) et
+// l'affiche au-dessus du layout principal. Le dispatcher est dans
+// FieldRendererCore en dessous.
+export function FieldRenderer(props: FieldRendererProps) {
+  const isTeenMode = useAuthStore(s => s.teenMode)
+  const disclaimerField = props.fields.find(f => f.field_type === 'disclaimer_banner')
+  const filteredFields = disclaimerField
+    ? props.fields.filter(f => f.field_type !== 'disclaimer_banner')
+    : props.fields
+
+  const core = <FieldRendererCore {...props} fields={filteredFields} />
+
+  if (!disclaimerField) return core
+
+  const moduleKey = disclaimerField.props['module_key'] || props.moduleId || ''
+  return (
+    <View style={disclaimerWrapperStyles.wrapper}>
+      <DisclaimerBanner moduleKey={moduleKey} isTeenMode={isTeenMode} />
+      <View style={disclaimerWrapperStyles.body}>{core}</View>
+    </View>
+  )
+}
+
+const disclaimerWrapperStyles = StyleSheet.create({
+  wrapper: { flex: 1 },
+  body: { flex: 1 },
+})
+
+function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
+  if (preview_kind === 'coming_soon') return null
+  if (fields.length === 0 && !FIELDLESS_LAYOUTS.has(preview_kind)) return null
 
   const visibleFields = fields.filter(
     f => f.field_type !== 'module_label' && f.field_type !== 'module_description'
@@ -3431,6 +3732,22 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'decision_grid') {
     return <DecisionGridLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'psyedu') {
+    return <PsyEduLayout moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'tabbed') {
+    return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'chrono_month') {
+    return <ChronoMonthLayout moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'exposure_hierarchy') {
+    return <ExposureHierarchyLayout moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {
@@ -3962,6 +4279,31 @@ const cfStyles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
+  // ── Champ horaire
+  timeContainer:    { gap: spacing.xs },
+  timeLabelRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    minHeight: 18,
+  },
+  timeLabel:        { fontSize: 13, fontWeight: '600', color: colors.text },
+  timeButton: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm, paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+  },
+  timeButtonEmpty:  { borderStyle: 'dashed' },
+  timeValue: {
+    fontSize: 16, fontWeight: '600', color: colors.text,
+    fontVariant: ['tabular-nums'],
+  },
+  timePlaceholder:  { fontSize: 14, color: colors.textMuted },
+  timeConfirm: {
+    alignSelf: 'flex-end', paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs, marginTop: spacing.xs,
+    borderRadius: radius.sm, backgroundColor: colors.primary,
+  },
+  timeConfirmText:  { color: colors.white, fontSize: 13, fontWeight: '600' },
   // ── Footer
   footer: {
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,

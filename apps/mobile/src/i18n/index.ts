@@ -4,6 +4,8 @@ import * as Localization from 'expo-localization'
 
 import frCommon from './locales/fr/common.json'
 import frTeen from './locales/fr/teen.json'
+import frPsyedu from './locales/fr/psyedu.json'
+import frPsyeduTeen from './locales/fr/psyedu_teen.json'
 import enCommon from './locales/en/common.json'
 import enTeen from './locales/en/teen.json'
 import esCommon from './locales/es/common.json'
@@ -24,11 +26,11 @@ i18next
   .init({
     lng: initialLanguage,
     fallbackLng: 'fr',
-    ns: ['common', 'teen'],
+    ns: ['common', 'teen', 'psyedu', 'psyedu_teen'],
     defaultNS: 'common',
     fallbackNS: 'common',
     resources: {
-      fr: { common: frCommon, teen: frTeen },
+      fr: { common: frCommon, teen: frTeen, psyedu: frPsyedu, psyedu_teen: frPsyeduTeen },
       en: { common: enCommon, teen: enTeen },
       es: { common: esCommon },
       de: { common: deCommon },

@@ -5,12 +5,13 @@ import './MainNav.css'
 export function MainNav() {
   const { t } = useTranslation()
   const location = useLocation()
+  const isPatientsActive = location.pathname === '/' || location.pathname.startsWith('/patient/')
 
   return (
     <nav className="main-nav">
       <Link
         to="/"
-        className={`main-nav__link ${location.pathname === '/' ? 'main-nav__link--active' : ''}`}
+        className={`main-nav__link ${isPatientsActive ? 'main-nav__link--active' : ''}`}
       >
         {t('dashboard.title')}
       </Link>

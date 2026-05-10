@@ -107,6 +107,10 @@ export type PreviewKind =
   | 'activity_log'
   | 'exposure_tracker'
   | 'decision_grid'
+  | 'psyedu'
+  | 'tabbed'
+  | 'chrono_month'
+  | 'exposure_hierarchy'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {
@@ -124,4 +128,36 @@ export interface ContentField {
 export interface ModuleFieldsResult {
   preview_kind: PreviewKind
   fields: ContentField[]
+}
+
+// ─── Psychoéducation structurée (contenu en base — psyedu_topics + psyedu_blocks) ───────────
+
+export interface PsyEduTopic {
+  readonly id: string
+  readonly module_key: string
+  readonly topic_key: string
+  readonly icon_name: string
+  readonly sort_order: number
+  readonly is_active: boolean
+}
+
+export type PsyEduBlockType =
+  | 'heading'
+  | 'paragraph'
+  | 'bullet_list'
+  | 'tip'
+  | 'blockquote'
+  | 'source_link'
+
+export type PsyEduSectionKey = 'why' | 'how' | 'sources'
+
+export interface PsyEduBlock {
+  readonly id: string
+  readonly topic_id: string
+  readonly section_key: PsyEduSectionKey
+  readonly block_type: PsyEduBlockType
+  readonly text_code: string | null
+  readonly items_codes: string[] | null
+  readonly href: string | null
+  readonly sort_order: number
 }

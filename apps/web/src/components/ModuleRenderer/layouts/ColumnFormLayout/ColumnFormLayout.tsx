@@ -1,4 +1,4 @@
-import { Pencil, Plus, Save, Trash2 } from 'lucide-react'
+import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
 import type { ContentField } from '../../../../services/moduleService'
 
 interface Props {
@@ -28,7 +28,11 @@ export function ColumnFormLayout({ fields, t }: Props) {
 
   const childrenByHeader = new Map<string, ContentField[]>()
   for (const f of fields) {
-    if (f.field_type === 'column_text_field' || f.field_type === 'column_slider_field') {
+    if (
+      f.field_type === 'column_text_field' ||
+      f.field_type === 'column_slider_field' ||
+      f.field_type === 'column_time_field'
+    ) {
       if (!f.parent_field_id) continue
       if (!childrenByHeader.has(f.parent_field_id)) childrenByHeader.set(f.parent_field_id, [])
       childrenByHeader.get(f.parent_field_id)!.push(f)
@@ -135,6 +139,19 @@ export function ColumnFormLayout({ fields, t }: Props) {
                             className="cf-slider__fill"
                             style={{ width: `${ratio * 100}%`, background: sliderColor }}
                           />
+                        </div>
+                      </div>
+                    )
+                  }
+                  if (child.field_type === 'column_time_field') {
+                    const timeLabel = child.text_code ? t(child.text_code) : ''
+                    const mockValue = child.props['preview_value'] ?? '07:30'
+                    return (
+                      <div key={child.id} className="cf-time">
+                        {timeLabel ? <span className="cf-time__label">{timeLabel}</span> : null}
+                        <div className="cf-time__chip" style={{ borderColor: color }}>
+                          <Clock size={14} style={{ color }} />
+                          <span className="cf-time__value">{mockValue}</span>
                         </div>
                       </div>
                     )

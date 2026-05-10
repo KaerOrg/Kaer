@@ -146,13 +146,6 @@
       "notes_placeholder": "Ej.: olvido, dificultad, nota…",
       "empty_history": "Sin registros por ahora."
     },
-    "psychoeducation": {
-      "label": "Psicoeducación",
-      "description": "Fichas de conocimiento sobre tu salud mental",
-      "title": "Psicoeducación",
-      "intro": "Consulta tus fichas de conocimiento.",
-      "cards_progress": "{{read}}/{{total}} tarjetas leídas"
-    },
     "sleep_diary": {
       "label": "Diario del sueño",
       "description": "Registra tu sueño cada mañana",

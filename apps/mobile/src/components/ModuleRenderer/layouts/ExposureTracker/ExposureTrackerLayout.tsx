@@ -266,7 +266,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   const handleAddSituation = useCallback(async () => {
     const trimmed = newSituationLabel.trim()
     if (!trimmed) return
-    const s = { id: generateId(), label: trimmed }
+    const s = {
+      id: generateId(),
+      label: trimmed,
+      hierarchy_id: null,
+      target_suds: null,
+      is_done: 0,
+    }
     await saveFearSituation(s)
     setSituations(prev => [...prev, { ...s, created_at: new Date().toISOString() }])
     setNewSituationLabel('')

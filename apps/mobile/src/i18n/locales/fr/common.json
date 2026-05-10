@@ -5,6 +5,7 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "add": "Ajouter",
+    "create": "Créer",
     "update": "Mettre à jour",
     "error": "Erreur",
     "warning": "Attention",
@@ -19,6 +20,27 @@
     "confirm": "Confirmer",
     "close": "Fermer",
     "modify": "Modifier",
+    "time_picker": {
+      "tap_to_set": "Définir l'heure"
+    },
+    "chart_legend": {
+      "sessions": "Séances réalisées",
+      "initial_suds": "SUDs estimé au départ"
+    },
+    "months": {
+      "january": "Janvier",
+      "february": "Février",
+      "march": "Mars",
+      "april": "Avril",
+      "may": "Mai",
+      "june": "Juin",
+      "july": "Juillet",
+      "august": "Août",
+      "september": "Septembre",
+      "october": "Octobre",
+      "november": "Novembre",
+      "december": "Décembre"
+    },
     "history": "Historique",
     "notes_optional": "Notes (facultatif)",
     "notes_placeholder": "Contexte, remarque…",
@@ -153,7 +175,43 @@
     },
     "distress_tolerance": {
       "label": "Tolérance à la détresse",
-      "description": "Techniques d'urgence pour traverser une crise"
+      "description": "Techniques d'urgence pour traverser une crise",
+      "tab_fiches": "Fiches",
+      "tab_crisis": "En crise",
+      "crisis_hint": "Appuyez sur une technique pour afficher les étapes.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "crisis": {
+        "tipp": {
+          "title": "TIPP — Apaiser le corps",
+          "summary": "4 leviers physiologiques pour faire chuter l'activation : Température, Intensité, Paced breathing, Paired muscle relaxation.",
+          "body1": "Température : passez de l'eau froide sur le visage (yeux ouverts), tenez un glaçon, ou plongez les mains 30 secondes dans de l'eau très froide. Le réflexe de plongée ralentit le rythme cardiaque.",
+          "body2": "Intensité : 1 à 3 minutes d'activité physique vigoureuse (jumping jacks, squats, course sur place). Puis Paced breathing : respiration ralentie 5s inspirez / 7s expirez. Terminez par une relaxation musculaire — contractez 5s puis relâchez chaque grand groupe musculaire."
+        },
+        "accepts": {
+          "title": "ACCEPTS — Distraire l'esprit",
+          "summary": "7 leviers pour rediriger l'attention quand la détresse est trop intense pour être traitée frontalement.",
+          "body1": "Activités (faire quelque chose qui mobilise l'attention), Contribuer (aider quelqu'un d'autre), Comparaisons (avec des moments où vous alliez moins bien, sans jugement), Émotions opposées (regarder une comédie si vous êtes triste).",
+          "body2": "Push-away (mettez la pensée dans une boîte mentale, fermez-la, posez-la sur une étagère pour plus tard), Thoughts (comptez à rebours, listez des capitales), Sensations (mâchez un chewing-gum fort, douche froide, parfum intense)."
+        },
+        "soothing": {
+          "title": "Self-soothing — Réconforter par les 5 sens",
+          "summary": "Apaiser le système nerveux en stimulant doucement chacun des 5 sens, l'un après l'autre.",
+          "body1": "Vue : regardez une photo qui vous est chère, observez la nature, allumez une bougie. Ouïe : musique calme, bruits blancs, podcast familier. Odorat : huile essentielle de lavande, café, peau d'orange.",
+          "body2": "Toucher : couverture lestée, bain chaud, animal de compagnie, peluche. Goût : tisane chaude, carré de chocolat noir, fruit savouré lentement. Choisissez 1 à 2 sens à la fois — l'objectif est la douceur, pas la stimulation."
+        },
+        "improve": {
+          "title": "IMPROVE — Améliorer le moment",
+          "summary": "7 stratégies cognitives et imaginaires pour traverser la crise sans la fuir.",
+          "body1": "Imagery (visualisez un lieu sûr, un souvenir apaisant), Meaning (donnez un sens à l'épreuve — qu'est-ce que ça vous apprend ?), Prayer (méditation, prière laïque ou religieuse, sentiment de connexion), Relaxation (respiration, scan corporel).",
+          "body2": "One thing at a time (focalisez-vous sur une seule action, ici et maintenant), Vacation (offrez-vous 10 min de pause complète sans culpabilité), Encouragement (parlez-vous comme à un proche en détresse — \"je peux traverser ça, ce n'est qu'une vague\")."
+        },
+        "proscons": {
+          "title": "Pros & Cons — Peser avant d'agir",
+          "summary": "Avant de céder à une impulsion (consommer, s'isoler, agir contre soi), faites une grille rapide à 4 cases.",
+          "body1": "Listez : Avantages d'agir maintenant (soulagement immédiat), Inconvénients d'agir (conséquences à 24h, 1 semaine, 1 mois), Avantages de tolérer la détresse, Inconvénients de tolérer.",
+          "body2": "Lisez votre grille à voix haute. La décision n'est pas \"souffrir ou ne pas souffrir\" — c'est \"souffrir maintenant\" vs \"souffrir plus tard\". Cette technique demande de l'entraînement à froid pour être disponible à chaud."
+        }
+      }
     },
     "medication_side_effects": {
       "label": "Effets du traitement",
@@ -290,13 +348,70 @@
       "notes_label": "Notes (optionnel)",
       "notes_placeholder": "Contexte, rêves, remarques…"
     },
+    "psyedu_sleep": {
+      "label": "Sommeil & récupération",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
+    "psyedu_nutrition": {
+      "label": "Alimentation & cerveau",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
+    "psyedu_activity": {
+      "label": "Activité physique douce",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
+    },
     "diet_weight_psycho": {
-      "label": "Alimentation & poids",
-      "description": "Gérer les fringales liées au traitement"
+      "label": "Psychotropes & alimentation",
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches",
+      "content_not_found": "Contenu introuvable.",
+      "section_lifestyle": "Hygiène de vie",
+      "section_medication": "Médicaments & alimentation"
     },
     "chronobiology_tracker": {
       "label": "Régularité chronobiologique",
-      "description": "Heure de lever, coucher, premier repas"
+      "description": "Heure de lever, coucher, premier repas",
+      "rhythm_band_title": "Bande de rythme",
+      "anchor_wake": "Lever",
+      "anchor_first_meal": "1er repas",
+      "anchor_main_activity": "Activité",
+      "anchor_last_meal": "Dernier repas",
+      "anchor_bedtime": "Coucher"
+    },
+    "chrono_bio": {
+      "tab_fiches": "Fiches",
+      "tab_journal": "Journal",
+      "today_label": "Aujourd'hui",
+      "add_today": "Saisir mes ancrages du jour",
+      "history_label": "Historique",
+      "empty_history": "Aucune saisie pour l'instant.",
+      "tap_to_add": "Appuyer pour saisir",
+      "no_anchor_title": "Aucun ancrage saisi",
+      "no_anchor_msg": "Renseignez au moins un horaire avant d'enregistrer.",
+      "delete_entry": "Supprimer cette saisie",
+      "date_label": "Journée du",
+      "section_anchors": "Mes ancrages du jour",
+      "wake_time": "Heure de lever",
+      "first_meal": "Premier repas",
+      "main_activity": "Activité principale",
+      "last_meal": "Dernier repas",
+      "bedtime": "Coucher",
+      "optional_hint": "Tous les ancrages sont facultatifs — saisissez ceux dont vous vous souvenez.",
+      "save_entry": "Enregistrer les ancrages",
+      "update_entry": "Mettre à jour",
+      "view_month": "Vue mensuelle",
+      "recent_days": "14 derniers jours",
+      "no_entry_day": "Aucun ancrage",
+      "legend_recorded": "Ancrage enregistré",
+      "legend_empty_day": "Aucune saisie",
+      "rhythm_band_title": "Bande de rythme"
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur",
@@ -559,7 +674,9 @@
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",
-      "description": "Identifier les pièges de la pensée automatique"
+      "description": "",
+      "topics_count_one": "{{count}} fiche",
+      "topics_count_other": "{{count}} fiches"
     },
     "grounding": {
       "label": "Techniques d'ancrage",
@@ -599,7 +716,23 @@
       "step_smell_tip": "Ex. l'air ambiant, votre peau, un tissu. Si rien, imaginez une odeur apaisante.",
       "step_taste_sense": "Goûter",
       "step_taste_instruction": "Prenez conscience d'1 goût dans votre bouche.",
-      "step_taste_tip": "Ex. le goût de votre salive, d'une boisson ou d'un aliment récent."
+      "step_taste_tip": "Ex. le goût de votre salive, d'une boisson ou d'un aliment récent.",
+      "learn_btn": "Comprendre cette technique",
+      "learn_title": "Pourquoi ça fonctionne ?",
+      "learn_what_title": "Qu'est-ce que l'ancrage 5-4-3-2-1 ?",
+      "learn_what_p1": "C'est un **frein d'urgence** pour le cerveau. Cette technique utilise vos **cinq sens** pour forcer votre système nerveux à revenir dans l'instant présent.",
+      "learn_what_p2": "Elle est particulièrement efficace en cas d'anxiété intense, de pensées envahissantes, de flashback ou de sensation de dissociation.",
+      "learn_when_title": "Quand l'utiliser ?",
+      "learn_when_1": "Lors d'une montée d'angoisse",
+      "learn_when_2": "Quand les pensées s'emballent ou deviennent envahissantes",
+      "learn_when_3": "Lors d'un flashback ou d'une dissociation",
+      "learn_when_4": "Pour se recentrer avant un moment stressant",
+      "learn_why_title": "Pourquoi ça marche ?",
+      "learn_why_p1": "En mobilisant les cinq sens simultanément, vous obligez votre cerveau à traiter des informations concrètes et immédiates. Cette surcharge sensorielle interrompt le circuit des pensées automatiques.",
+      "learn_why_p2": "Cette technique mobilise le cortex préfrontal — la zone de la pensée rationnelle — et diminue l'activité de l'amygdale, responsable de la réponse de peur.",
+      "learn_practice_title": "Comment progresser ?",
+      "learn_practice_p1": "La technique demande un peu de pratique pour devenir automatique. L'idéal est de s'entraîner **avant** les moments de crise, afin qu'elle soit disponible quand vous en avez vraiment besoin.",
+      "learn_ref": "Référence : Linehan MM (1993) — DBT Skills Training. Grade B — recommandé par la HAS et le NICE pour la gestion de l'anxiété et des états dissociatifs."
     },
     "rim": {
       "label": "RIM – Imagerie mentale",
@@ -682,7 +815,48 @@
     },
     "exposure_hierarchy": {
       "label": "Hiérarchie d'exposition",
-      "description": "Construire vos paliers d'exposition graduelle"
+      "description": "Construire vos paliers d'exposition graduelle",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "info_btn": "À propos de cette technique",
+      "info_title": "Hiérarchie d'exposition",
+      "info_body": "La hiérarchie d'exposition est une technique TCC validée. Vous listez les situations que vous évitez, vous les notez de 0 à 100 selon leur niveau de difficulté (score SUDs), puis vous les affrontez progressivement en commençant par les plus faciles.",
+      "info_sources": "Références",
+      "untitled": "Hiérarchie sans titre",
+      "empty_title": "Aucune hiérarchie",
+      "empty_text": "Créez votre première hiérarchie d'exposition avec votre soignant.",
+      "add_hierarchy": "Nouvelle hiérarchie",
+      "new_hierarchy_title": "Nouvelle hiérarchie",
+      "new_hierarchy_placeholder": "Titre (ex. : Peur des ascenseurs)",
+      "delete_confirm": "Supprimer « {{title}} » et toutes ses situations ?",
+      "items_empty_title": "Aucune situation",
+      "items_empty_text": "Ajoutez une première situation à affronter.",
+      "add_item": "Ajouter une situation",
+      "delete_item_confirm": "Supprimer cette situation ?",
+      "toggle_done": "Marquer comme réalisé",
+      "suds_legend": "Score SUDs : 0 = aucune anxiété · 100 = anxiété maximale",
+      "suds_label": "Score SUDs — Niveau de difficulté",
+      "suds_hint": "De 0 (aucune anxiété) à 100 (anxiété maximale). Ce chiffre est personnel — il n'y a pas de bonne ou mauvaise réponse.",
+      "suds_low": "0",
+      "suds_high": "100",
+      "description_label": "Situation à affronter",
+      "description_hint": "Décrivez précisément la situation que vous évitez.",
+      "description_placeholder": "Ex. : Prendre l'ascenseur seul(e) jusqu'au 5ᵉ étage",
+      "description_required": "Veuillez décrire la situation avant de valider.",
+      "session_number": "Séance n°{{n}}",
+      "session_question": "Quel est votre niveau d'anxiété face à cette situation en ce moment ?",
+      "session_question_hint": "Donnez votre ressenti immédiat, de 0 (aucune anxiété) à 100 (anxiété maximale).",
+      "session_save": "Enregistrer cette séance",
+      "last_session_suds": "Séance précédente :",
+      "anchor_0": "Aucune ou très légère anxiété",
+      "anchor_50": "Anxiété modérée, perceptible",
+      "anchor_100": "Anxiété intense, difficile à supporter",
+      "history_no_sessions": "Aucune séance enregistrée.\nEnregistrez votre première séance pour visualiser votre progression.",
+      "history_add_session": "Enregistrer une séance",
+      "history_delete_session": "Supprimer cette séance ?",
+      "items_count": "situation",
+      "items_count_plural": "situations",
+      "sessions_count": "séance",
+      "sessions_count_plural": "séances"
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
@@ -758,7 +932,31 @@
     },
     "craving_journal": {
       "label": "Journal de craving",
-      "description": "Intensité de l'envie, déclencheur, stratégie"
+      "description": "Intensité de l'envie, déclencheur, stratégie",
+      "disclaimer": "Ce module est un support à vos consultations. Il a été abordé avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "tab_fiches": "Fiches",
+      "tab_journal": "Journal",
+      "new_entry_btn": "Nouvelle saisie",
+      "empty_title": "Aucune saisie",
+      "empty_text": "Appuyez sur le bouton ci-dessus pour enregistrer votre première envie.",
+      "history_label": "Dernières saisies",
+      "delete_entry_title": "Supprimer cette saisie ?",
+      "section_intensity": "Intensité de l'envie",
+      "intensity_hint": "De 0 (absente) à 10 (très intense). Valeur brute.",
+      "section_trigger": "Situation déclenchante (facultatif)",
+      "trigger_placeholder": "Où étiez-vous ? Que se passait-il ?",
+      "section_emotion": "Émotion associée (facultatif)",
+      "emotion_placeholder": "Ex : ennui, stress, tristesse, solitude…",
+      "section_thought": "Pensée automatique (facultatif)",
+      "thought_placeholder": "Ex : Juste une fois ça ne changera rien…",
+      "section_coping": "Stratégie utilisée (facultatif)",
+      "coping_placeholder": "Ex : Marche, appel à un proche, respiration…",
+      "save_entry": "Enregistrer",
+      "saved_msg": "Votre saisie a été enregistrée.",
+      "intensity_label": "Intensité :",
+      "no_trigger": "Aucun déclencheur renseigné",
+      "missing_intensity": "Intensité manquante",
+      "missing_intensity_msg": "Indiquez l'intensité de l'envie avant d'enregistrer."
     },
     "phq9": {
       "label": "PHQ-9",
@@ -1244,7 +1442,17 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.",
+      "title": "Psychoéducation",
+      "intro": "Consultez vos fiches de savoir.",
+      "empty_title": "Aucune carte disponible",
+      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
+      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
+      "mark_as_read": "J'ai lu et compris",
+      "already_read": "Lu et compris",
+      "read_error": "Une erreur est survenue. Veuillez réessayer.",
+      "content_not_found": "Contenu introuvable.",
+      "cards_progress": "{{read}}/{{total}} cartes lues"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",

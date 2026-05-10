@@ -405,10 +405,6 @@
         "anticipation__vigilance__watchful": "Watchful"
       }
     },
-    "psychoeducation": {
-      "title": "Understanding my mental health",
-      "intro": "Read these cards to better understand what you're going through."
-    },
     "phq9": {
       "new_btn": "Fill in the questionnaire",
       "empty_title": "Nothing yet",

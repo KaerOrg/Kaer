@@ -22,7 +22,8 @@
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "i18next": "^26.0.6",
-    "react": "19.1.0",
+    "lucide-react-native": "^1.12.0",
+    "react": "^19.1.0",
     "react-i18next": "^17.0.4",
     "react-native": "0.81.5",
     "react-native-markdown-display": "^7.0.2",
@@ -32,10 +33,14 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFiles": ["<rootDir>/jest.setup.ts"],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-markdown-display)"
     ],
     "moduleNameMapper": {
+      "^react$": "<rootDir>/node_modules/react",
+      "^react/jsx-runtime$": "<rootDir>/node_modules/react/jsx-runtime",
+      "^react/jsx-dev-runtime$": "<rootDir>/node_modules/react/jsx-dev-runtime",
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts",
       "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts",
       "^expo-image-picker$": "<rootDir>/src/__mocks__/expo-image-picker.ts",

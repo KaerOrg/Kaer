@@ -91,6 +91,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `sleep_diary` | Agenda du sommeil | MVP — à construire |
 | `beck_columns` | Colonnes de Beck (TCC) | Prévu |
 | `fear_thermometer` | Thermomètre de la peur | Implémenté — moteur générique (`preview_kind = 'exposure_tracker'`), tabs Saisies/Situations, SUDS avant/après, stratégies DB-driven |
+| `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté — `preview_kind='exposure_hierarchy'`, 4 modes (hiérarchies/items/item_form/item_history), DesensitizationChart embedded, table SQLite `exposure_hierarchies` + colonnes `hierarchy_id`/`target_suds`/`is_done` ajoutées à `fear_situations` |
 | `emotion_wheel` | Roue des émotions | Prévu |
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
@@ -103,6 +104,10 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — `preview_kind='psyedu'`, 8 fiches `psyedu_topics`/`psyedu_blocks` (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
+| `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
+| `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
+| `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -152,6 +157,11 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module SNAP-IV (`snap_iv`) — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation parent/enseignant, SQLite local, tests Jest
 - [x] Module ASRS v1.1 Dépistage (`asrs6`) — 6 items, score 0-24, auto-évaluation adulte, bouton info référence PubMed, SQLite local, tests Jest
 - [x] Module ASRS v1.1 Bilan Complet (`asrs18`) — 18 items (Parties A+B), score 0-72 + sous-scores, bouton info PubMed, SQLite local, tests Jest
+- [x] Module Alimentation et psychotropes (`diet_weight_psycho`) — 8 fiches, contenu Supabase (psyedu_topics + psyedu_blocks), rendu bloc custom, teen mode, 10 tests Jest
+- [x] Module Régularité chronobiologique (`chronobiology_tracker`) — 7 fiches psyedu (Supabase) + journal des 5 ancrages quotidiens (SQLite local), 2 onglets Fiches/Journal, teen mode, 8 tests Jest
+- [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
+- [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
+- [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -197,6 +207,52 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
   1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
   3. Ne jamais livrer un module mobile sans son pendant web, ni vice-versa : un module invisible dans l'armoire praticien ne peut pas être débloqué pour le patient.
+
+## Pattern : Module mixte psyedu + journal (chronobiology_tracker)
+
+Ce pattern combine fiches psychoéducatives et tracker de données locales dans un même module, avec deux onglets.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/mobile/src/screens/modules/ChronoBioScreen.tsx` | Écran principal — segment control Fiches / Journal |
+| `apps/mobile/src/screens/modules/ChronoBioDetailScreen.tsx` | Détail d'une fiche psyedu (BlockRenderer) |
+| `apps/mobile/src/screens/modules/ChronoBioEntryScreen.tsx` | Formulaire de saisie des 5 ancrages horaires |
+| `apps/mobile/src/lib/database.ts` | Table `chrono_entries` + CRUD (`ChronoEntry`, `saveChronoEntry`, etc.) |
+| `supabase/seed/chrono_seed.sql` | Seed idempotent — 7 topics + blocs |
+| `apps/mobile/src/i18n/locales/fr/psyedu.json` | Namespace `chronobiology_tracker` |
+| `apps/mobile/src/i18n/locales/fr/psyedu_teen.json` | Surcharges tutoiement |
+
+### Règles
+
+- **Onglets** : implémentés avec un segment control maison (2 `Pressable` + `activeTab` state), pas de React Navigation Tab imbriqué.
+- **Journal** : données 100% locales (SQLite). Aucune donnée de timing envoyée à Supabase.
+- **Champs optionnels** : chaque ancrage peut être nul — composant `OptionalTimeField` avec bouton clear.
+- **MDR** : aucun score, aucun calcul, aucun seuil — le journal affiche uniquement les horaires bruts saisis par le patient.
+- **Reload** : `useFocusEffect` + `listChronoEntries(14)` pour actualiser l'historique au retour depuis `ChronoBioEntryScreen`.
+
+## Pattern : Bandeau disclaimer MDR (`DisclaimerBanner`)
+
+Pour tout module affichant une technique thérapeutique, ajouter un bandeau d'avertissement en haut de l'écran liste.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/mobile/src/components/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
+| `apps/mobile/src/i18n/locales/fr/common.json` | Clé `modules.<moduleKey>.disclaimer` (vouvoiement) |
+| `apps/mobile/src/i18n/locales/fr/teen.json` | Clé `modules.<moduleKey>.disclaimer` (tutoiement) |
+
+### Usage
+
+```tsx
+<DisclaimerBanner moduleKey="exposure_hierarchy" isTeenMode={isTeenMode} />
+```
+
+### Règle
+
+- Le composant lit `modules.<moduleKey>.disclaimer` dans le namespace `common` (adulte) ou `teen` (ado).
+- **Tout nouveau module** présentant une technique clinique (TCC, DBT, etc.) doit inclure ce bandeau.
+- Texte adulte type : *"Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."*
+
+---
 
 ## Pattern : Mode Ado (teen mode)
 
@@ -247,6 +303,32 @@ Points d'entrée fréquents :
 | `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |
 | `apps/web/docs/components/module-renderer.md` | Détails web : table `FieldText CONFIG`, extensions field_type/preview_kind |
+
+## Pattern : Fiches psychoéducatives (psyedu)
+
+Pour tout contenu psychoéducatif structuré (fiches, articles, protocoles), utiliser le pattern suivant — **ne jamais stocker de contenu en dur dans le code TypeScript**. Rendu via le `preview_kind = 'psyedu'` du ModuleRenderer (wrappe `PsyEduBlockRenderer`).
+
+### Architecture
+
+| Fichier | Rôle |
+|---|---|
+| `supabase/schema.sql` | Tables `psyedu_topics` (métadonnées) + `psyedu_blocks` (blocs de contenu) |
+| `supabase/seed/psyedu_seed.sql` | Seed idempotent avec UUIDs fixes |
+| `packages/shared/src/index.ts` | Types `PsyEduTopic`, `PsyEduBlock`, `PsyEduSectionKey`, `PsyEduBlockType` |
+| `apps/mobile/src/services/psyeduService.ts` | `fetchTopicsByModule`, `fetchBlocksByTopic`, `clearPsyEduCache` |
+| `apps/mobile/src/components/InlineText.tsx` | Rendu inline avec **bold** + fallback teen mode |
+| `apps/mobile/src/components/PsyEduBlockRenderer.tsx` | Rendu des blocs (heading, paragraph, bullet_list, tip, blockquote, source_link) |
+| `apps/mobile/src/i18n/locales/fr/psyedu.json` | Traductions adulte (vouvoiement) |
+| `apps/mobile/src/i18n/locales/fr/psyedu_teen.json` | Surcharges tutoiement (teen mode — clés partielles) |
+
+### Règles
+
+- **Textes en base** : uniquement des `text_code` (clés i18n) — jamais de texte brut.
+- **Traductions dans l'app** : namespace `psyedu` (adulte) + `psyedu_teen` (tutoiement, fallback sur `psyedu`).
+- **Icônes** : `lucide-react-native` uniquement — nom de l'icône stocké dans `icon_name` du topic.
+- **Tri des sections** : côté client (`SECTION_ORDER = { why: 0, how: 1, sources: 2 }`) — ne pas se fier à l'ordre alphabétique de la BDD.
+- **Cache mémoire** : `psyeduService` maintient un cache Map en session — appeler `clearPsyEduCache()` si besoin de forcer un rechargement.
+- **Pas de react-native-markdown-display** : utiliser `PsyEduBlockRenderer` + `InlineText`.
 
 ## MCP disponible
 

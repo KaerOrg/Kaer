@@ -35,7 +35,6 @@ interface ModuleSectionsProps {
   isTeenMode: boolean
   teenColor: (moduleType: string) => string | undefined
   handleModulePress: (mod: UnlockedModule) => void
-  t: (key: string) => string
 }
 
 function ModuleCard({
@@ -43,14 +42,13 @@ function ModuleCard({
   isTeenMode,
   accentColor,
   onPress,
-  t,
 }: {
   mod: UnlockedModule
   isTeenMode: boolean
   accentColor: string | undefined
   onPress: () => void
-  t: (key: string) => string
 }) {
+  const { t } = useTranslation()
   // Un module est disponible s'il a un écran custom OU si la base ne le marque pas coming_soon
   const available = CUSTOM_ROUTES[mod.module_type] != null
     || (mod.module != null && mod.module.preview_kind !== 'coming_soon')
@@ -104,7 +102,8 @@ const cardStyles = StyleSheet.create({
   chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
 })
 
-function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress, t }: ModuleSectionsProps) {
+function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress }: ModuleSectionsProps) {
+  const { t } = useTranslation()
   const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire')
   const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire')
 
@@ -122,7 +121,6 @@ function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress, t }
               isTeenMode={isTeenMode}
               accentColor={teenColor(mod.module_type)}
               onPress={() => handleModulePress(mod)}
-              t={t}
             />
           ))}
         </View>
@@ -137,7 +135,6 @@ function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress, t }
               isTeenMode={isTeenMode}
               accentColor={teenColor(mod.module_type)}
               onPress={() => handleModulePress(mod)}
-              t={t}
             />
           ))}
         </View>
@@ -236,7 +233,6 @@ export default function HomeScreen() {
             isTeenMode={isTeenMode}
             teenColor={teenColor}
             handleModulePress={handleModulePress}
-            t={t}
           />
         )}
       </ScrollView>
