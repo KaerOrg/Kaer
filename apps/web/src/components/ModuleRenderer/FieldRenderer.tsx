@@ -12,11 +12,16 @@ import {
   Grid2x2Layout,
   GuidedExerciseLayout,
   PatientScenarioLayout,
+  PsyEduLayout,
   QuestionnaireLayout,
   SleepJournalLayout,
   StepsLayout,
   TreeSelectorLayout,
 } from './layouts'
+
+// Layouts dont le contenu provient d'une autre source que module_content_fields
+// (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu'])
 
 export interface FieldRendererProps {
   preview_kind: PreviewKind
@@ -28,7 +33,12 @@ export interface FieldRendererProps {
 export function FieldRenderer({ preview_kind, fields, expandedCard, onToggleCard }: FieldRendererProps) {
   const { t } = useTranslation()
 
-  if (preview_kind === 'coming_soon' || fields.length === 0) return null
+  if (preview_kind === 'coming_soon') return null
+  if (fields.length === 0 && !FIELDLESS_LAYOUTS.has(preview_kind)) return null
+
+  if (preview_kind === 'psyedu') {
+    return <PsyEduLayout t={t} />
+  }
 
   const visibleFields = fields.filter(
     f => f.field_type !== 'module_label' && f.field_type !== 'module_description'

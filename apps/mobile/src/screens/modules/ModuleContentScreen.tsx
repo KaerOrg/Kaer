@@ -29,6 +29,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'exposure_tracker',
   'decision_grid',
   'patient_scenario',
+  'psyedu',
 ])
 
 export default function ModuleContentScreen({ route }: Props) {

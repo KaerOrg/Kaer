@@ -1,0 +1,1 @@
+export { PsyEduLayout } from './PsyEduLayout'

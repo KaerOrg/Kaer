@@ -6,7 +6,7 @@ import { Lightbulb, ExternalLink } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
 import { InlineText } from './InlineText'
 import { colors, spacing, radius } from '../theme'
-import type { PsyEduBlock } from 'shared'
+import type { PsyEduBlock } from '@psytool/shared'
 
 interface Props {
   blocks: readonly PsyEduBlock[]

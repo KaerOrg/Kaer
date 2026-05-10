@@ -107,6 +107,7 @@ export type PreviewKind =
   | 'activity_log'
   | 'exposure_tracker'
   | 'decision_grid'
+  | 'psyedu'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

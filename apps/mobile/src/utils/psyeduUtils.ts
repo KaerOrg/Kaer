@@ -1,4 +1,4 @@
-import type { PsyEduBlock, PsyEduSectionKey } from 'shared'
+import type { PsyEduBlock, PsyEduSectionKey } from '@psytool/shared'
 
 export interface SectionGroup {
   key: PsyEduSectionKey

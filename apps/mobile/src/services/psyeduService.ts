@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { PsyEduBlock, PsyEduTopic } from 'shared'
+import type { PsyEduBlock, PsyEduTopic } from '@psytool/shared'
 
 // In-memory cache for the session — content is static and rarely changes
 const topicsCache = new Map<string, PsyEduTopic[]>()

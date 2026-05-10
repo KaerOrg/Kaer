@@ -24,6 +24,7 @@ import {
 import { ActivityLogLayout } from './layouts/ActivityLog'
 import { ExposureTrackerLayout } from './layouts/ExposureTracker'
 import { DecisionGridLayout } from './layouts/DecisionGrid'
+import { PsyEduLayout } from './layouts/PsyEdu'
 import { EditableItemsList } from './layouts/shared'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
@@ -3480,8 +3481,14 @@ export interface FieldRendererProps {
   moduleId?: string
 }
 
+// Layouts dont le contenu provient d'une autre source que module_content_fields
+// (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
+// avec 0 fields.
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu'])
+
 export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
-  if (preview_kind === 'coming_soon' || fields.length === 0) return null
+  if (preview_kind === 'coming_soon') return null
+  if (fields.length === 0 && !FIELDLESS_LAYOUTS.has(preview_kind)) return null
 
   const visibleFields = fields.filter(
     f => f.field_type !== 'module_label' && f.field_type !== 'module_description'
@@ -3588,6 +3595,10 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'decision_grid') {
     return <DecisionGridLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'psyedu') {
+    return <PsyEduLayout moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {
