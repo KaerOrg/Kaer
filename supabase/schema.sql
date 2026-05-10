@@ -1,68 +1,82 @@
 -- ============================================================
 -- PSYTOOL — Schéma de base de données PostgreSQL / Supabase
 --
+-- Ce fichier contient UNIQUEMENT la structure (DDL) :
+--   tables, colonnes, index, contraintes, fonctions, triggers,
+--   Row Level Security, policies, bucket de stockage.
+--
+-- Pour les données de référence (modules, contenus, props, layouts) :
+--   voir `supabase/seed.sql` — à exécuter APRÈS schema.sql.
+--
 -- Instructions :
 --   1. Créer un projet Supabase (supabase.com)
 --   2. Aller dans Dashboard > SQL Editor
---   3. Coller et exécuter ce fichier en entier
+--   3. Exécuter ce fichier en entier
+--   4. Exécuter ensuite `seed.sql` en entier
 --
--- Ce script est idempotent : peut être relancé sans erreur.
+-- Ce script est idempotent : peut être relancé sans erreur,
+-- à n'importe quel stade (BDD vierge, partielle ou à jour).
 -- ============================================================
 
 
 -- ============================================================
--- TABLES
+-- TABLES — Domaine utilisateurs / patients / praticiens
 -- ============================================================
 
 -- 1. Profils des praticiens (créé automatiquement à l'inscription)
 create table if not exists public.practitioners (
-  id               uuid        primary key references auth.users(id) on delete cascade,
-  email            text        not null,
-  name             text        not null default '',
-  professional_title text,
-  created_at       timestamptz not null default now()
+  id                  uuid        primary key references auth.users(id) on delete cascade,
+  email               text        not null,
+  name                text        not null default '',
+  professional_title  text,
+  language_preference text        not null default 'fr',
+  created_at          timestamptz not null default now()
 );
 
 -- 2. Profils des patients (créé automatiquement à l'inscription)
 create table if not exists public.patients (
-  id               uuid        primary key references auth.users(id) on delete cascade,
-  email            text        not null,
-  first_name       text        not null default '',
-  last_name        text        not null default '',
-  avatar_url       text,
-  created_at       timestamptz not null default now()
+  id          uuid        primary key references auth.users(id) on delete cascade,
+  email       text        not null,
+  first_name  text        not null default '',
+  last_name   text        not null default '',
+  avatar_url  text,
+  created_at  timestamptz not null default now()
 );
 
 -- 3. Relation praticien ↔ patient
 create table if not exists public.practitioner_patients (
-  id               uuid        primary key default gen_random_uuid(),
-  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
-  patient_id       uuid        not null references public.patients(id) on delete cascade,
-  patient_alias    text,
-  teen_mode        boolean     not null default false,
-  created_at       timestamptz not null default now(),
+  id                  uuid        primary key default gen_random_uuid(),
+  practitioner_id     uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id          uuid        not null references public.patients(id) on delete cascade,
+  patient_alias       text,
+  patient_first_name  text,
+  patient_last_name   text,
+  patient_birth_date  date,
+  patient_sex         text,
+  teen_mode           boolean     not null default false,
+  created_at          timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
 
 -- 4. Invitations envoyées par le praticien
 --    Un patient ne peut pas s'inscrire sans invitation.
 create table if not exists public.invitations (
-  id               uuid        primary key default gen_random_uuid(),
-  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
-  patient_email    text        not null,
-  token            text        not null unique,
-  expires_at       timestamptz not null,
-  accepted_at      timestamptz,
-  created_at       timestamptz not null default now()
+  id                    uuid        primary key default gen_random_uuid(),
+  practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
+  patient_email         text        not null,
+  patient_first_name    text,
+  patient_last_name     text,
+  patient_birth_date    date,
+  patient_sex           text,
+  teen_mode             boolean     not null default false,
+  pre_selected_modules  text[]      not null default '{}',
+  token                 text        not null unique,
+  expires_at            timestamptz not null,
+  accepted_at           timestamptz,
+  created_at            timestamptz not null default now()
 );
 
 -- 5. Modules thérapeutiques débloqués par le praticien pour un patient
---    module_type : 'sleep_diary' | 'beck_columns' | 'fear_thermometer' |
---                  'emotion_wheel' | 'crisis_plan' | 'rim' | 'cognitive_saturation' |
---                  'psychoeducation'
---
---    Pour psychoeducation, le champ config suit le schéma :
---      { "unlocked_cards": [{ "card_id": "...", "is_read": false, "unlocked_at": "..." }] }
 create table if not exists public.patient_modules (
   id               uuid        primary key default gen_random_uuid(),
   patient_id       uuid        not null references public.patients(id) on delete cascade,
@@ -70,36 +84,77 @@ create table if not exists public.patient_modules (
   module_type      text        not null,
   config           jsonb       not null default '{}',
   unlocked_at      timestamptz not null default now(),
-  revoked_at       timestamptz,                        -- null = actif
+  revoked_at       timestamptz,
   unique(patient_id, module_type)
 );
 
 
--- Migration idempotente : ajoute teen_mode si la colonne n'existe pas encore
+-- ============================================================
+-- MIGRATIONS IDEMPOTENTES — colonnes ajoutées sur tables existantes
+-- (no-op sur BDD vierge, applique le delta sur ancienne BDD)
+-- ============================================================
+
+-- practitioner_patients.teen_mode
 do $$
 begin
   if not exists (
     select 1 from information_schema.columns
-    where table_schema = 'public'
-      and table_name   = 'practitioner_patients'
-      and column_name  = 'teen_mode'
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'teen_mode'
   ) then
-    alter table public.practitioner_patients
-      add column teen_mode boolean not null default false;
+    alter table public.practitioner_patients add column teen_mode boolean not null default false;
   end if;
 end $$;
 
--- Migration idempotente : ajoute language_preference sur practitioners
+-- practitioners.language_preference
 do $$
 begin
   if not exists (
     select 1 from information_schema.columns
-    where table_schema = 'public'
-      and table_name   = 'practitioners'
-      and column_name  = 'language_preference'
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'language_preference'
   ) then
-    alter table public.practitioners
-      add column language_preference text not null default 'fr';
+    alter table public.practitioners add column language_preference text not null default 'fr';
+  end if;
+end $$;
+
+-- invitations : démographie patient + teen_mode
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'invitations' and column_name = 'patient_first_name'
+  ) then
+    alter table public.invitations
+      add column patient_first_name text,
+      add column patient_last_name  text,
+      add column patient_birth_date date,
+      add column patient_sex        text,
+      add column teen_mode          boolean not null default false;
+  end if;
+end $$;
+
+-- practitioner_patients : démographie patient
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'patient_first_name'
+  ) then
+    alter table public.practitioner_patients
+      add column patient_first_name text,
+      add column patient_last_name  text,
+      add column patient_birth_date date,
+      add column patient_sex        text;
+  end if;
+end $$;
+
+-- invitations.pre_selected_modules
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'invitations' and column_name = 'pre_selected_modules'
+  ) then
+    alter table public.invitations add column pre_selected_modules text[] not null default '{}';
   end if;
 end $$;
 
@@ -131,17 +186,16 @@ create index if not exists idx_patient_modules_practitioner
 -- TRIGGERS — Création automatique de profil après inscription
 -- ============================================================
 
--- Fonction générique appelée après chaque nouvel utilisateur auth
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer set search_path = public
 as $$
 declare
-  v_role text;
+  v_role       text;
   v_invitation public.invitations%rowtype;
+  v_module     text;
 begin
-  -- Le rôle est transmis dans raw_user_meta_data lors de l'inscription
   v_role := new.raw_user_meta_data ->> 'role';
 
   if v_role = 'practitioner' then
@@ -164,7 +218,6 @@ begin
     )
     on conflict (id) do nothing;
 
-    -- Marquer l'invitation comme acceptée et créer la relation praticien-patient
     update public.invitations
     set accepted_at = now()
     where token = (new.raw_user_meta_data ->> 'invitation_token')
@@ -173,18 +226,33 @@ begin
     returning * into v_invitation;
 
     if v_invitation.id is not null then
-      insert into public.practitioner_patients (practitioner_id, patient_id)
-      values (v_invitation.practitioner_id, new.id)
+      insert into public.practitioner_patients (
+        practitioner_id, patient_id,
+        patient_first_name, patient_last_name, patient_birth_date, patient_sex, teen_mode
+      )
+      values (
+        v_invitation.practitioner_id, new.id,
+        v_invitation.patient_first_name, v_invitation.patient_last_name,
+        v_invitation.patient_birth_date, v_invitation.patient_sex,
+        v_invitation.teen_mode
+      )
       on conflict do nothing;
-    end if;
 
+      if cardinality(v_invitation.pre_selected_modules) > 0 then
+        foreach v_module in array v_invitation.pre_selected_modules
+        loop
+          insert into public.patient_modules (patient_id, practitioner_id, module_type, config)
+          values (new.id, v_invitation.practitioner_id, v_module, '{}')
+          on conflict (patient_id, module_type) do nothing;
+        end loop;
+      end if;
+    end if;
   end if;
 
   return new;
 end;
 $$;
 
--- Attacher le trigger à auth.users (une seule fois)
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
@@ -192,26 +260,23 @@ create trigger on_auth_user_created
 
 
 -- ============================================================
--- ROW LEVEL SECURITY
+-- ROW LEVEL SECURITY — tables principales
 -- ============================================================
 
-alter table public.practitioners       enable row level security;
-alter table public.patients            enable row level security;
+alter table public.practitioners         enable row level security;
+alter table public.patients              enable row level security;
 alter table public.practitioner_patients enable row level security;
-alter table public.invitations         enable row level security;
-alter table public.patient_modules     enable row level security;
+alter table public.invitations           enable row level security;
+alter table public.patient_modules       enable row level security;
 
--- Praticien : accès total à son propre profil
 drop policy if exists "practitioners_own" on public.practitioners;
 create policy "practitioners_own" on public.practitioners
   for all using (auth.uid() = id);
 
--- Patient : accès total à son propre profil
 drop policy if exists "patients_own" on public.patients;
 create policy "patients_own" on public.patients
   for all using (auth.uid() = id);
 
--- Praticien : lecture des profils de ses patients liés
 drop policy if exists "patients_read_by_practitioner" on public.patients;
 create policy "patients_read_by_practitioner" on public.patients
   for select using (
@@ -222,94 +287,58 @@ create policy "patients_read_by_practitioner" on public.patients
     )
   );
 
--- Praticien voit et gère les patients qui lui sont liés
 drop policy if exists "ptp_practitioner" on public.practitioner_patients;
 create policy "ptp_practitioner" on public.practitioner_patients
   for all using (auth.uid() = practitioner_id);
 
--- Patient voit sa propre relation (pour connaître son praticien)
 drop policy if exists "ptp_patient" on public.practitioner_patients;
 create policy "ptp_patient" on public.practitioner_patients
   for select using (auth.uid() = patient_id);
 
--- Praticien gère ses propres invitations
 drop policy if exists "invitations_practitioner" on public.invitations;
 create policy "invitations_practitioner" on public.invitations
   for all using (auth.uid() = practitioner_id);
 
--- Tout utilisateur peut lire une invitation par token (pour valider le lien)
 drop policy if exists "invitations_by_token" on public.invitations;
 create policy "invitations_by_token" on public.invitations
   for select using (true);
 
--- Praticien gère les modules de ses patients
 drop policy if exists "modules_practitioner" on public.patient_modules;
 create policy "modules_practitioner" on public.patient_modules
   for all using (auth.uid() = practitioner_id);
 
--- Patient lit ses propres modules actifs (non révoqués)
 drop policy if exists "modules_patient" on public.patient_modules;
 create policy "modules_patient" on public.patient_modules
   for select using (auth.uid() = patient_id and revoked_at is null);
 
--- Patient peut mettre à jour la config de ses propres modules actifs
--- (usage : marquer une carte de psychoéducation comme lue)
 drop policy if exists "modules_patient_update" on public.patient_modules;
 create policy "modules_patient_update" on public.patient_modules
   for update using (auth.uid() = patient_id and revoked_at is null);
 
 
--- 6. Évaluations C-SSRS (Columbia Suicide Severity Rating Scale — « Depuis la dernière visite »)
---    Outil d'hétéro-évaluation : rempli par le praticien pendant la consultation.
---    Données cliniques praticien — JAMAIS accessibles au patient.
---    ⚠️ Requiert un hébergement HDS pour usage commercial (données de santé sensibles).
---
---    Structure du formulaire :
---      ideation_answers  — 5 items binaires (Oui/Non) + champ texte libre « Si oui, décrivez »
---      intensite_ideation — 5 dimensions Likert (Fréquence, Durée, Maîtrise, Dissuasifs, Causes)
---                           NULL si Q1 = Non ET Q2 = Non
---      behavior_answers  — 4 items binaires + champ texte libre
---      nssi              — comportement auto-agressif non suicidaire (0/1)
---      nb_tentatives_*   — compteurs de tentatives
---      comportement_observe — comportement suicidaire observé par le praticien (0/1)
---      suicide_reussi    — (0/1)
---      date_tentative_plus_letale — date ISO
---      letalite_observee — 0–5 (lésions médicales observées)
---      letalite_potentielle — 0–2 (si létalité observée = 0 uniquement)
---      ideation_level    — niveau le plus élevé endorsé (0–5), calculé
---      behavior_count    — comportements endorsés (0–4), calculé
+-- ============================================================
+-- TABLE : cssrs_screen_assessments (C-SSRS — hétéro-évaluation praticien)
+-- ============================================================
+-- Données cliniques praticien — JAMAIS accessibles au patient.
+-- ⚠️ Requiert un hébergement HDS pour usage commercial.
 create table if not exists public.cssrs_screen_assessments (
   id                            uuid        primary key default gen_random_uuid(),
   patient_id                    uuid        not null references public.patients(id) on delete cascade,
   practitioner_id               uuid        not null references public.practitioners(id) on delete cascade,
-
-  -- Idéation suicidaire (5 items)
-  -- Format : [{"value": 0|1, "description": "..."}]
   ideation_answers              jsonb       not null default '[]',
-
-  -- Intensité de l'idéation (null si Q1 = Non ET Q2 = Non)
-  -- Format : {"frequence": 1-5, "duree": 1-5, "maitrise": 0-5, "dissuasifs": 0-5, "causes": 0-5}
   intensite_ideation            jsonb,
-
-  -- Comportements suicidaires (4 items)
-  -- Format : [{"value": 0|1, "description": "..."}]
   behavior_answers              jsonb       not null default '[]',
-
-  -- Section complémentaire
-  nssi                          smallint,   -- 0 = Non, 1 = Oui
+  nssi                          smallint,
   nb_tentatives_averees         smallint,
   nb_tentatives_interrompues    smallint,
   nb_tentatives_avortees        smallint,
-  comportement_observe          smallint,   -- 0 = Non, 1 = Oui
-  suicide_reussi                smallint,   -- 0 = Non, 1 = Oui
+  comportement_observe          smallint,
+  suicide_reussi                smallint,
   date_tentative_plus_letale    date,
-  letalite_observee             smallint,   -- 0–5
-  letalite_potentielle          smallint,   -- 0–2 (uniquement si létalité observée = 0)
-
-  -- Scores calculés (pour affichage rapide dans l'historique)
+  letalite_observee             smallint,
+  letalite_potentielle          smallint,
   ideation_level                smallint    not null default 0,
   behavior_count                smallint    not null default 0,
-
   assessed_at                   timestamptz not null default now()
 );
 
@@ -321,24 +350,19 @@ create index if not exists idx_cssrs_practitioner
 
 alter table public.cssrs_screen_assessments enable row level security;
 
--- Praticien : accès total à ses propres évaluations
 drop policy if exists "cssrs_practitioner" on public.cssrs_screen_assessments;
 create policy "cssrs_practitioner" on public.cssrs_screen_assessments
   for all using (auth.uid() = practitioner_id);
-
--- Le patient n'a AUCUN accès (données cliniques praticien uniquement)
 
 
 -- ============================================================
 -- STORAGE — Bucket avatars (photos de profil patients)
 -- ============================================================
 
--- Bucket public : les URLs sont lisibles sans authentification
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do nothing;
 
--- Chaque patient ne peut écrire que dans son propre dossier : avatars/{user_id}/
 drop policy if exists "avatars_insert_own" on storage.objects;
 create policy "avatars_insert_own" on storage.objects
   for insert to authenticated
@@ -363,7 +387,6 @@ create policy "avatars_delete_own" on storage.objects
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
--- Lecture publique (bucket public, cohérence explicite)
 drop policy if exists "avatars_select_public" on storage.objects;
 create policy "avatars_select_public" on storage.objects
   for select using (bucket_id = 'avatars');
@@ -372,11 +395,7 @@ create policy "avatars_select_public" on storage.objects
 -- ============================================================
 -- TABLE : patient_engagement_logs (Observance / Engagement)
 -- ============================================================
-
--- Suivi anonymisé de l'activité patient (aucune donnée clinique)
--- event_type : ex. 'READ_CARD', 'FILL_SLEEP_DIARY', 'UPDATE_DECISIONAL_BALANCE'
--- metadata   : données contextuelles optionnelles (ex. { "card_id": "card_sleep_01" })
-
+-- Suivi anonymisé de l'activité patient (aucune donnée clinique).
 create table if not exists public.patient_engagement_logs (
   id          uuid        default gen_random_uuid() primary key,
   patient_id  uuid        references auth.users(id) on delete cascade,
@@ -387,13 +406,11 @@ create table if not exists public.patient_engagement_logs (
 
 alter table public.patient_engagement_logs enable row level security;
 
--- Le patient peut insérer ses propres logs
 drop policy if exists "Patients can insert their own logs" on public.patient_engagement_logs;
 create policy "Patients can insert their own logs"
   on public.patient_engagement_logs for insert
   with check (auth.uid() = patient_id);
 
--- Le praticien peut voir les logs de ses patients liés
 drop policy if exists "Practitioners can view logs of their patients" on public.patient_engagement_logs;
 create policy "Practitioners can view logs of their patients"
   on public.patient_engagement_logs for select
@@ -407,10 +424,159 @@ create policy "Practitioners can view logs of their patients"
 
 
 -- ============================================================
--- TABLES : psyedu_topics + psyedu_blocks
--- Contenu psychoéducatif structuré (fiches du module diet_weight_psycho et futurs modules)
--- Aucune donnée clinique — contenu éditorial global accessible à tout utilisateur authentifié
+-- TABLE : module_categories (Organisation des modules en catégories)
 -- ============================================================
+-- Données de référence statiques : ordonnancement et groupement des module_type.
+
+create table if not exists public.module_categories (
+  id          text  primary key,
+  sort_order  int   not null
+);
+
+-- Migration idempotente : supprimer colonnes dépréciées (anciennes BDD)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='label_key') then
+    alter table public.module_categories drop column label_key;
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='subtitle_key') then
+    alter table public.module_categories drop column subtitle_key;
+  end if;
+  if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='modules') then
+    alter table public.module_categories drop column modules;
+  end if;
+end $$;
+
+alter table public.module_categories enable row level security;
+
+drop policy if exists "module_categories_read" on public.module_categories;
+create policy "module_categories_read" on public.module_categories
+  for select to authenticated using (true);
+
+
+-- ============================================================
+-- TABLE : modules (Référentiel des modules thérapeutiques)
+-- ============================================================
+-- Une ligne par module. preview_kind pilote le moteur de rendu côté client.
+-- is_invite_excluded : exclu de la pré-sélection à l'invitation.
+
+create table if not exists public.modules (
+  id                 text    primary key,
+  category_id        text    not null references public.module_categories(id),
+  preview_kind       text    not null default 'coming_soon',
+  sort_order         int     not null default 0,
+  is_invite_excluded boolean not null default false,
+  icon               text    not null default '',
+  mobile_icon        text    not null default '',
+  color              text    not null default '#6366F1'
+);
+
+-- Migration idempotente : ajouter icon/mobile_icon/color (anciennes BDD)
+do $$
+begin
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'modules' and column_name = 'icon') then
+    alter table public.modules add column icon        text not null default '';
+    alter table public.modules add column mobile_icon text not null default '';
+    alter table public.modules add column color       text not null default '#6366F1';
+  end if;
+end $$;
+
+alter table public.modules enable row level security;
+
+drop policy if exists "modules_read" on public.modules;
+create policy "modules_read" on public.modules
+  for select to authenticated using (true);
+
+-- FK patient_modules.module_type → modules.id
+-- Ajoutée après la création de modules (modules est définie après patient_modules).
+-- Indispensable pour que PostgREST détecte la relation et que le join
+-- `module:modules(...)` fonctionne côté app mobile.
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'patient_modules_module_type_fkey'
+      and conrelid = 'public.patient_modules'::regclass
+  ) then
+    alter table public.patient_modules
+      add constraint patient_modules_module_type_fkey
+      foreign key (module_type) references public.modules(id);
+  end if;
+end $$;
+
+
+-- ============================================================
+-- TABLE : module_content_fields (Champs de contenu — 1 ligne = 1 champ)
+-- ============================================================
+-- field_type → composant React (22 types).
+-- parent_field_id : pour les spans inline et les arbres (tree_node, column children).
+-- text_code : clé i18n — NULL pour card_divider et coming_soon.
+
+create table if not exists public.module_content_fields (
+  id              text primary key,
+  module_id       text not null references public.modules(id) on delete cascade,
+  section_id      text,
+  parent_field_id text references public.module_content_fields(id) on delete cascade,
+  field_type      text not null,
+  text_code       text,
+  sort_order      int  not null default 0
+);
+
+alter table public.module_content_fields enable row level security;
+
+drop policy if exists "module_content_fields_read" on public.module_content_fields;
+create policy "module_content_fields_read" on public.module_content_fields
+  for select to authenticated using (true);
+
+create index if not exists idx_mcf_module   on public.module_content_fields(module_id);
+create index if not exists idx_mcf_parent   on public.module_content_fields(parent_field_id);
+create index if not exists idx_mcf_section  on public.module_content_fields(module_id, section_id);
+
+
+-- ============================================================
+-- TABLE : field_props (Propriétés des composants React)
+-- ============================================================
+-- PK composite (field_id, prop_key) : un seul prop_value par prop par champ.
+
+create table if not exists public.field_props (
+  field_id   text not null references public.module_content_fields(id) on delete cascade,
+  prop_key   text not null,
+  prop_value text not null,
+  primary key (field_id, prop_key)
+);
+
+alter table public.field_props enable row level security;
+
+drop policy if exists "field_props_read" on public.field_props;
+create policy "field_props_read" on public.field_props
+  for select to authenticated using (true);
+
+
+-- ============================================================
+-- TABLE : practitioner_module_settings (Catalogue de modules)
+-- ============================================================
+-- Si aucune ligne pour un praticien → tous les modules disponibles.
+
+create table if not exists public.practitioner_module_settings (
+  practitioner_id  uuid        primary key references public.practitioners(id) on delete cascade,
+  enabled_modules  text[]      not null default '{}',
+  updated_at       timestamptz not null default now()
+);
+
+alter table public.practitioner_module_settings enable row level security;
+
+drop policy if exists "module_settings_own" on public.practitioner_module_settings;
+create policy "module_settings_own" on public.practitioner_module_settings
+  for all using (auth.uid() = practitioner_id);
+
+
+-- ============================================================
+-- TABLES : psyedu_topics + psyedu_blocks
+-- ============================================================
+-- Contenu psychoéducatif structuré (fiches des modules psyedu / mixtes).
+-- Aucune donnée clinique — contenu éditorial global accessible à tout utilisateur authentifié.
+-- Rendu via le layout `preview_kind = 'psyedu'` du ModuleRenderer.
 
 create table if not exists public.psyedu_topics (
   id           uuid        primary key default gen_random_uuid(),

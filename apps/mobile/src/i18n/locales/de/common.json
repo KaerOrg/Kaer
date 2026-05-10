@@ -214,7 +214,8 @@
       "description": "Aktivitäten planen, die Freude bereiten",
       "title": "Verhaltensaktivierung",
       "intro": "Planen Sie Aktivitäten, die Freude oder Zufriedenheit bringen.",
-      "save": "Speichern"
+      "save": "Speichern",
+      "add_btn": "Aktivität hinzufügen"
     },
     "beck_columns": {
       "label": "Beck-Spalten",

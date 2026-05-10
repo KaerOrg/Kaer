@@ -1,0 +1,60 @@
+.preview-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.preview-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.preview-page__back:hover {
+  color: #111827;
+}
+
+.preview-page__meta {
+  margin-bottom: 32px;
+}
+
+.preview-page__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.preview-page__desc {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.preview-page__loading {
+  text-align: center;
+  padding: 48px;
+  color: #9CA3AF;
+  font-size: 14px;
+}
+
+.preview-page__coming-soon {
+  padding: 32px;
+  border-radius: 10px;
+  border: 1.5px dashed #D1D5DB;
+  background: #F9FAFB;
+  color: #6B7280;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}

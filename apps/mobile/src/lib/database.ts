@@ -49,23 +49,50 @@ export async function initDatabase(): Promise<void> {
   await createPHQ9Table(database)
   await createBSL23Table(database)
   await createGAD7Table(database)
-  await createRCADS25Table(database)
-  await createEPDSTable(database)
-  await createNSITable(database)
+  await createNSITable(database) // kept for migration source
   await createSNAPIVTable(database)
   await createASRS6Table(database)
   await createASRS18Table(database)
-  await createChronoEntriesTable(database)
-  await createExposureHierarchyTables(database)
-  await createCravingEntriesTable(database)
+  await createScaleEntriesTable(database)
+  await createPlanItemsTable(database)
+  await createDailyEntriesTable(database)
+  await createFormEntriesTable(database)
+  await createTreeSelectionsTable(database)
+  await createModuleSettingsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
     `ALTER TABLE sleep_diary_entries ADD COLUMN awakenings_duration_minutes INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
+    `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
+    // Copie des entrées des tables dédiées vers scale_entries
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'phq9',answers,score,NULL,created_at FROM phq9_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'bsl23',answers,mean_score,NULL,created_at FROM bsl23_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'gad7',answers,score,NULL,created_at FROM gad7_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'snap_iv',answers,total_score,subscale_scores,created_at FROM snapiv_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'asrs6',answers,total_score,NULL,created_at FROM asrs6_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'asrs18',answers,total_score,sub_scores,created_at FROM asrs18_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'rcads',answers,total_score,subscale_scores,created_at FROM rcads25_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'medication_side_effects',json_array(sedation,akathisia,tremors,dry_mouth,sleep_disturbance,nausea),(sedation+akathisia+tremors+dry_mouth+sleep_disturbance+nausea),json_object('sedation',sedation,'akathisia',akathisia,'tremors',tremors,'dry_mouth',dry_mouth,'sleep',sleep_disturbance,'nausea',nausea),created_at FROM side_effects_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'nsi',answers,score,json_object('pct_recurrent',COALESCE(recurrent_pct,0),'theme_1',COALESCE(json_extract(themes,'$[0]'),''),'theme_2',COALESCE(json_extract(themes,'$[1]'),''),'theme_3',COALESCE(json_extract(themes,'$[2]'),'')),created_at FROM nsi_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'epds',answers,score,NULL,created_at FROM epds_entries`,
+    `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'mood_tracker',json_array(mood,energy,anxiety,pleasure),ROUND(CAST(mood+energy+anxiety+pleasure AS REAL)/4),json_object('mood',mood,'energy',energy,'anxiety',anxiety,'pleasure',pleasure),created_at FROM mood_entries`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,created_at) SELECT id,'crisis_plan',CASE step_number WHEN 1 THEN 'step_1' WHEN 2 THEN 'step_2' WHEN 3 THEN 'step_3' WHEN 4 THEN 'step_4' WHEN 5 THEN 'step_5' WHEN 6 THEN 'step_6' ELSE 'step_1' END,content,position,COALESCE(created_at,CURRENT_TIMESTAMP) FROM crisis_plan_items`,
+    // medication_adherence_entries → daily_entries
+    `INSERT OR IGNORE INTO daily_entries (id,module_id,date,status,notes,created_at) SELECT id,'medication_adherence',date,status,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM medication_adherence_entries`,
+    // beck_thought_records → form_entries
+    `INSERT OR IGNORE INTO form_entries (id,module_id,"values",created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
+    // emotion_entries → tree_selections (labels conservés directement dans path_json)
+    `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
+    // decisional_balance → plan_items (4 quadrants × N args avec weight) + module_settings (target_behavior)
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_change) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_change) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_status_quo) AS arg`,
+    `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_status_quo) AS arg`,
+    `INSERT OR IGNORE INTO module_settings (module_id,key,value,updated_at) SELECT 'decisional_balance','target_behavior',target_behavior,COALESCE(updated_at,CURRENT_TIMESTAMP) FROM decisional_balance WHERE target_behavior <> ''`,
   ]
   for (const sql of migrations) {
-    try { await database.execAsync(sql) } catch { /* colonne déjà présente */ }
+    try { await database.execAsync(sql) } catch { /* colonne déjà présente ou table absente */ }
   }
 }
 
@@ -229,64 +256,12 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36)
 }
 
-// ─── Types Balance Décisionnelle ─────────────────────────────────────────────
+// ─── Table legacy decisional_balance ─────────────────────────────────────────
+// Conservée comme source de migration : les anciennes installations ont leurs
+// arguments stockés en JSON dans cette table monoligne. La migration au boot
+// (cf. plus haut) les déplie vers plan_items + module_settings via json_each.
+// Le module utilise désormais le moteur générique (preview_kind decision_grid).
 
-/** Un argument dans un quadrant de la balance, avec son poids d'importance (1-5) */
-export interface BalanceArgument {
-  id: string
-  text: string
-  weight: number // 1 à 5
-}
-
-/** Les 4 quadrants de la balance décisionnelle */
-export type BalanceQuadrant = 'pros_change' | 'cons_change' | 'pros_status_quo' | 'cons_status_quo'
-
-/** Enregistrement complet d'une balance décisionnelle */
-export interface DecisionalBalance {
-  id: string
-  target_behavior: string
-  pros_change: BalanceArgument[]
-  cons_change: BalanceArgument[]
-  pros_status_quo: BalanceArgument[]
-  cons_status_quo: BalanceArgument[]
-  updated_at: string
-}
-
-/** Scores calculés à partir des poids des arguments */
-export interface BalanceScores {
-  /** Somme des poids de pros_change + pros_status_quo du changement */
-  changeScore: number
-  /** Somme des poids de pros_status_quo + cons_change du statu quo */
-  statusQuoScore: number
-  /** changeScore / (changeScore + statusQuoScore) × 100, ou 50 si tout est vide */
-  motivationPercent: number
-}
-
-// ─── Calcul des scores (pur, testable) ───────────────────────────────────────
-
-/** Somme des poids d'une liste d'arguments */
-function sumWeights(args: BalanceArgument[]): number {
-  return args.reduce((acc, a) => acc + a.weight, 0)
-}
-
-/**
- * Calcule les scores de la balance décisionnelle.
- *
- * Score Changement  = Σ poids(pros_change)
- * Score Statu Quo   = Σ poids(pros_status_quo)
- * La jauge compare ces deux scores pour indiquer la motivation au changement.
- */
-export function computeBalanceScores(balance: Pick<DecisionalBalance, 'pros_change' | 'cons_change' | 'pros_status_quo' | 'cons_status_quo'>): BalanceScores {
-  const changeScore = sumWeights(balance.pros_change)
-  const statusQuoScore = sumWeights(balance.pros_status_quo)
-  const total = changeScore + statusQuoScore
-  const motivationPercent = total === 0 ? 50 : Math.round((changeScore / total) * 100)
-  return { changeScore, statusQuoScore, motivationPercent }
-}
-
-// ─── Fonctions SQLite Balance Décisionnelle ───────────────────────────────────
-
-/** Crée la table si elle n'existe pas encore (appelée dans initDatabase) */
 async function createDecisionalBalanceTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS decisional_balance (
@@ -301,93 +276,8 @@ async function createDecisionalBalanceTable(database: SQLite.SQLiteDatabase): Pr
   `)
 }
 
-function parseBalance(row: {
-  id: string
-  target_behavior: string
-  pros_change: string
-  cons_change: string
-  pros_status_quo: string
-  cons_status_quo: string
-  updated_at: string
-}): DecisionalBalance {
-  return {
-    id: row.id,
-    target_behavior: row.target_behavior,
-    pros_change: JSON.parse(row.pros_change) as BalanceArgument[],
-    cons_change: JSON.parse(row.cons_change) as BalanceArgument[],
-    pros_status_quo: JSON.parse(row.pros_status_quo) as BalanceArgument[],
-    cons_status_quo: JSON.parse(row.cons_status_quo) as BalanceArgument[],
-    updated_at: row.updated_at,
-  }
-}
-
-/**
- * Récupère la balance décisionnelle du patient (une seule par patient).
- * Retourne null si aucune n'existe encore.
- */
-export async function getDecisionalBalance(): Promise<DecisionalBalance | null> {
-  const database = getDb()
-  const row = await database.getFirstAsync<{
-    id: string
-    target_behavior: string
-    pros_change: string
-    cons_change: string
-    pros_status_quo: string
-    cons_status_quo: string
-    updated_at: string
-  }>('SELECT * FROM decisional_balance LIMIT 1')
-  return row ? parseBalance(row) : null
-}
-
-/** Sauvegarde (insert ou replace) la balance décisionnelle */
-export async function saveDecisionalBalance(balance: DecisionalBalance): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO decisional_balance
-      (id, target_behavior, pros_change, cons_change, pros_status_quo, cons_status_quo, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      balance.id,
-      balance.target_behavior,
-      JSON.stringify(balance.pros_change),
-      JSON.stringify(balance.cons_change),
-      JSON.stringify(balance.pros_status_quo),
-      JSON.stringify(balance.cons_status_quo),
-      new Date().toISOString(),
-    ]
-  )
-}
-
-// ─── Types Colonnes de Beck ───────────────────────────────────────────────────
-
-/**
- * Enregistrement de pensée dysfonctionnelle (DTR) — 5 colonnes de Beck.
- * Référence : Beck, Rush, Shaw & Emery (1979). Cognitive Therapy of Depression.
- *
- * Les valeurs d'intensité (0–100) sont des chiffres bruts saisis par le patient,
- * sans interprétation algorithmique — conformité MDR 2017/745.
- */
-export interface ThoughtRecord {
-  id: string
-  date: string                  // ISO 8601
-  // Colonne 1 : Situation
-  situation: string
-  // Colonne 2 : Émotion
-  emotion: string
-  emotion_intensity: number     // 0–100, brut
-  // Colonne 3 : Pensée automatique
-  automatic_thought: string
-  thought_belief: number        // 0–100, conviction initiale, brut
-  // Colonne 4 : Réponse rationnelle
-  rational_response: string
-  // Colonne 5 : Résultat
-  outcome_emotion: string
-  outcome_intensity: number     // 0–100, brut
-  outcome_belief: number        // 0–100, conviction en la PA, brut
-  created_at: string
-}
-
 // ─── SQLite Colonnes de Beck ──────────────────────────────────────────────────
+// kept for migration source — données copiées vers form_entries lors du boot.
 
 export async function createBeckColumnsTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
@@ -408,79 +298,9 @@ export async function createBeckColumnsTable(database: SQLite.SQLiteDatabase): P
   `)
 }
 
-/** Récupère tous les enregistrements, du plus récent au plus ancien */
-export async function getAllThoughtRecords(): Promise<ThoughtRecord[]> {
-  const database = getDb()
-  return database.getAllAsync<ThoughtRecord>(
-    'SELECT * FROM beck_thought_records ORDER BY date DESC, created_at DESC'
-  )
-}
+// ─── mood_entries — table source conservée pour migration unique vers scale_entries ──
 
-/** Récupère un enregistrement par son identifiant */
-export async function getThoughtRecord(id: string): Promise<ThoughtRecord | null> {
-  const database = getDb()
-  return database.getFirstAsync<ThoughtRecord>(
-    'SELECT * FROM beck_thought_records WHERE id = ?',
-    [id]
-  )
-}
-
-/** Sauvegarde (insert ou replace) un enregistrement */
-export async function saveThoughtRecord(record: Omit<ThoughtRecord, 'created_at'>): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO beck_thought_records
-      (id, date, situation, emotion, emotion_intensity,
-       automatic_thought, thought_belief,
-       rational_response,
-       outcome_emotion, outcome_intensity, outcome_belief)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      record.id,
-      record.date,
-      record.situation,
-      record.emotion,
-      record.emotion_intensity,
-      record.automatic_thought,
-      record.thought_belief,
-      record.rational_response,
-      record.outcome_emotion,
-      record.outcome_intensity,
-      record.outcome_belief,
-    ]
-  )
-}
-
-/** Supprime un enregistrement */
-export async function deleteThoughtRecord(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM beck_thought_records WHERE id = ?', [id])
-}
-
-// ─── Types Thermomètre de l'Humeur ───────────────────────────────────────────
-//
-// Dimensions retenues (CANMAT 2018 / Basco & Rush 2005 / NIMH Life Chart) :
-//   - mood       : humeur globale (1–10) — universel tous diagnostics
-//   - energy     : énergie/vitalité (1–10) — distingue les polarités, prédit les rechutes
-//   - anxiety    : anxiété (1–10) — comorbidité présente chez ~60 % des patients
-//
-// Les valeurs sont des chiffres bruts saisis par le patient.
-// Aucune interprétation algorithmique — conformité MDR 2017/745.
-
-export interface MoodEntry {
-  id: string
-  date: string          // YYYY-MM-DD — une saisie par jour
-  mood: number          // 1–10, brut
-  energy: number        // 1–10, brut
-  anxiety: number       // 1–10, brut
-  pleasure: number      // 1–10, brut — dimension anhédonique (SHAPS 1995)
-  notes: string | null  // texte libre optionnel
-  created_at: string
-}
-
-// ─── SQLite Thermomètre de l'Humeur ──────────────────────────────────────────
-
-export async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS mood_entries (
       id TEXT PRIMARY KEY,
@@ -495,67 +315,8 @@ export async function createMoodTrackerTable(database: SQLite.SQLiteDatabase): P
   `)
 }
 
-/** Récupère toutes les entrées, de la plus récente à la plus ancienne */
-export async function getAllMoodEntries(): Promise<MoodEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<MoodEntry>(
-    'SELECT * FROM mood_entries ORDER BY date DESC'
-  )
-}
-
-/** Récupère les N dernières entrées (pour le graphique) */
-export async function getRecentMoodEntries(limit = 30): Promise<MoodEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<MoodEntry>(
-    'SELECT * FROM mood_entries ORDER BY date DESC LIMIT ?',
-    [limit]
-  )
-}
-
-/** Récupère l'entrée du jour (YYYY-MM-DD), ou null si absente */
-export async function getMoodEntryForDate(date: string): Promise<MoodEntry | null> {
-  const database = getDb()
-  return database.getFirstAsync<MoodEntry>(
-    'SELECT * FROM mood_entries WHERE date = ?',
-    [date]
-  )
-}
-
-/** Sauvegarde (insert ou replace) une entrée */
-export async function saveMoodEntry(entry: Omit<MoodEntry, 'created_at'>): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO mood_entries (id, date, mood, energy, anxiety, pleasure, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [entry.id, entry.date, entry.mood, entry.energy, entry.anxiety, entry.pleasure, entry.notes]
-  )
-}
-
-/** Supprime une entrée */
-export async function deleteMoodEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM mood_entries WHERE id = ?', [id])
-}
-
-// ─── Types Observance Médicamenteuse ─────────────────────────────────────────
-//
-// Le patient déclare lui-même le statut de prise de son traitement pour chaque jour.
-// Aucune interprétation algorithmique — conformité MDR 2017/745.
-// Le praticien lit ces données brutes en consultation.
-
-/** Statut de prise déclaré par le patient */
-export type AdherenceStatus = 'taken' | 'partial' | 'missed'
-
-/** Entrée quotidienne d'observance */
-export interface MedicationAdherenceEntry {
-  id: string
-  date: string                // YYYY-MM-DD — une saisie par jour
-  status: AdherenceStatus     // 'taken' | 'partial' | 'missed' — déclaratif, brut
-  notes: string | null        // texte libre optionnel
-  created_at: string
-}
-
 // ─── SQLite Observance Médicamenteuse ─────────────────────────────────────────
+// kept for migration source — données copiées vers daily_entries lors du boot.
 
 export async function createMedicationAdherenceTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
@@ -567,42 +328,6 @@ export async function createMedicationAdherenceTable(database: SQLite.SQLiteData
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
-}
-
-/** Récupère l'entrée d'un jour donné (YYYY-MM-DD), ou null si absente */
-export async function getMedicationAdherenceEntry(date: string): Promise<MedicationAdherenceEntry | null> {
-  const database = getDb()
-  return database.getFirstAsync<MedicationAdherenceEntry>(
-    'SELECT * FROM medication_adherence_entries WHERE date = ?',
-    [date]
-  )
-}
-
-/** Récupère les N dernières entrées, du plus récent au plus ancien */
-export async function getAllMedicationAdherenceEntries(limit = 30): Promise<MedicationAdherenceEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<MedicationAdherenceEntry>(
-    'SELECT * FROM medication_adherence_entries ORDER BY date DESC LIMIT ?',
-    [limit]
-  )
-}
-
-/** Sauvegarde (insert ou replace) une entrée d'observance */
-export async function saveMedicationAdherenceEntry(
-  entry: Omit<MedicationAdherenceEntry, 'created_at'>
-): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO medication_adherence_entries (id, date, status, notes)
-     VALUES (?, ?, ?, ?)`,
-    [entry.id, entry.date, entry.status, entry.notes]
-  )
-}
-
-/** Supprime une entrée d'observance */
-export async function deleteMedicationAdherenceEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM medication_adherence_entries WHERE id = ?', [id])
 }
 
 // ─── Types Effets Secondaires Médicamenteux ───────────────────────────────────
@@ -1127,9 +852,9 @@ export async function deleteCognitiveSaturationSession(id: string): Promise<void
   )
 }
 
-// ─── PHQ-9 ────────────────────────────────────────────────────────────────────
+// ─── PHQ-9 / BSL-23 / GAD-7 legacy tables (migration source only) ─────────────
 
-export async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS phq9_entries (
       id TEXT PRIMARY KEY,
@@ -1140,37 +865,7 @@ export async function createPHQ9Table(database: SQLite.SQLiteDatabase): Promise<
   `)
 }
 
-export interface PHQ9Entry {
-  id: string
-  answers: number[]   // 9 valeurs 0-3
-  score: number       // somme des réponses (0-27)
-  created_at: string
-}
-
-export async function getAllPHQ9Entries(): Promise<PHQ9Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM phq9_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function savePHQ9Entry(entry: PHQ9Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO phq9_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deletePHQ9Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM phq9_entries WHERE id = ?', [id])
-}
-
-// ─── BSL-23 ───────────────────────────────────────────────────────────────────
-
-export async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS bsl23_entries (
       id TEXT PRIMARY KEY,
@@ -1181,37 +876,7 @@ export async function createBSL23Table(database: SQLite.SQLiteDatabase): Promise
   `)
 }
 
-export interface BSL23Entry {
-  id: string
-  answers: number[]   // 23 valeurs 0-4
-  mean_score: number  // moyenne des 23 items (0.00 – 4.00)
-  created_at: string
-}
-
-export async function getAllBSL23Entries(): Promise<BSL23Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; mean_score: number; created_at: string }>(
-    'SELECT * FROM bsl23_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveBSL23Entry(entry: BSL23Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO bsl23_entries (id, answers, mean_score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.mean_score, entry.created_at]
-  )
-}
-
-export async function deleteBSL23Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM bsl23_entries WHERE id = ?', [id])
-}
-
-// ─── GAD-7 ────────────────────────────────────────────────────────────────────
-
-export async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS gad7_entries (
       id TEXT PRIMARY KEY,
@@ -1222,138 +887,9 @@ export async function createGAD7Table(database: SQLite.SQLiteDatabase): Promise<
   `)
 }
 
-export interface GAD7Entry {
-  id: string
-  answers: number[]   // 7 valeurs 0-3
-  score: number       // somme des réponses (0-21)
-  created_at: string
-}
+// ─── NSI — table source conservée pour migration unique vers scale_entries ────
 
-export async function getAllGAD7Entries(): Promise<GAD7Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM gad7_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveGAD7Entry(entry: GAD7Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO gad7_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deleteGAD7Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM gad7_entries WHERE id = ?', [id])
-}
-
-// ─── RCADS-25 ──────────────────────────────────────────────────────────────────
-
-export async function createRCADS25Table(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS rcads25_entries (
-      id TEXT PRIMARY KEY,
-      answers TEXT NOT NULL,
-      subscale_scores TEXT NOT NULL,
-      total_score INTEGER NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-}
-
-export interface RCADS25SubScaleScores {
-  tag: number
-  tp:  number
-  ts:  number
-  ps:  number
-  toc: number
-  td:  number
-}
-
-export interface RCADS25Entry {
-  id: string
-  answers: number[]                  // 25 valeurs 0-3
-  subscale_scores: RCADS25SubScaleScores
-  total_score: number                // somme 0-75
-  created_at: string
-}
-
-export async function getAllRCADS25Entries(): Promise<RCADS25Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    subscale_scores: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM rcads25_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    subscale_scores: JSON.parse(r.subscale_scores) as RCADS25SubScaleScores,
-  }))
-}
-
-export async function saveRCADS25Entry(entry: RCADS25Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO rcads25_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteRCADS25Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM rcads25_entries WHERE id = ?', [id])
-}
-
-// ─── EPDS ─────────────────────────────────────────────────────────────────────
-
-export async function createEPDSTable(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS epds_entries (
-      id TEXT PRIMARY KEY,
-      answers TEXT NOT NULL,
-      score INTEGER NOT NULL,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-}
-
-export interface EPDSEntry {
-  id: string
-  answers: number[]   // 10 valeurs 0-3
-  score: number       // somme des réponses (0-30)
-  created_at: string
-}
-
-export async function getAllEPDSEntries(): Promise<EPDSEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{ id: string; answers: string; score: number; created_at: string }>(
-    'SELECT * FROM epds_entries ORDER BY created_at DESC'
-  )
-  return rows.map(r => ({ ...r, answers: JSON.parse(r.answers) as number[] }))
-}
-
-export async function saveEPDSEntry(entry: EPDSEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO epds_entries (id, answers, score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.score, entry.created_at]
-  )
-}
-
-export async function deleteEPDSEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM epds_entries WHERE id = ?', [id])
-}
-
-// ─── NSI ──────────────────────────────────────────────────────────────────────
-
-export async function createNSITable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createNSITable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS nsi_entries (
       id TEXT PRIMARY KEY,
@@ -1366,56 +902,9 @@ export async function createNSITable(database: SQLite.SQLiteDatabase): Promise<v
   `)
 }
 
-export interface NSIEntry {
-  id: string
-  answers: number[]        // 9 valeurs 0-5 (items 1-9)
-  score: number            // somme des réponses (0-45)
-  recurrent_pct: number | null  // item 10 : % cauchemars récurrents (0-100)
-  themes: string[]         // item 11 : thèmes récurrents (0-3 entrées)
-  created_at: string
-}
+// ─── SNAP-IV / ASRS-6 / ASRS-18 legacy tables (migration source only) ─────────
 
-export async function getAllNSIEntries(): Promise<NSIEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    score: number
-    recurrent_pct: number | null
-    themes: string
-    created_at: string
-  }>('SELECT * FROM nsi_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    themes: JSON.parse(r.themes) as string[],
-  }))
-}
-
-export async function saveNSIEntry(entry: NSIEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO nsi_entries (id, answers, score, recurrent_pct, themes, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      entry.id,
-      JSON.stringify(entry.answers),
-      entry.score,
-      entry.recurrent_pct ?? null,
-      JSON.stringify(entry.themes),
-      entry.created_at,
-    ]
-  )
-}
-
-export async function deleteNSIEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM nsi_entries WHERE id = ?', [id])
-}
-
-// ─── SNAP-IV ──────────────────────────────────────────────────────────────────
-
-export async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS snapiv_entries (
       id TEXT PRIMARY KEY,
@@ -1427,52 +916,7 @@ export async function createSNAPIVTable(database: SQLite.SQLiteDatabase): Promis
   `)
 }
 
-export interface SNAPIVSubScaleScores {
-  inattention:   number
-  hyperactivite: number
-  tod:           number
-}
-
-export interface SNAPIVEntry {
-  id: string
-  answers: number[]             // 26 valeurs 0-3
-  subscale_scores: SNAPIVSubScaleScores
-  total_score: number           // somme 0-78
-  created_at: string
-}
-
-export async function getAllSNAPIVEntries(): Promise<SNAPIVEntry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    subscale_scores: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM snapiv_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-    subscale_scores: JSON.parse(r.subscale_scores) as SNAPIVSubScaleScores,
-  }))
-}
-
-export async function saveSNAPIVEntry(entry: SNAPIVEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO snapiv_entries (id, answers, subscale_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.subscale_scores), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteSNAPIVEntry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM snapiv_entries WHERE id = ?', [id])
-}
-
-// ─── ASRS v1.1 — Dépistage Rapide (6 items) ──────────────────────────────────
-
-export async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS asrs6_entries (
       id TEXT PRIMARY KEY,
@@ -1483,43 +927,7 @@ export async function createASRS6Table(database: SQLite.SQLiteDatabase): Promise
   `)
 }
 
-export interface ASRS6Entry {
-  id: string
-  answers: number[]   // 6 valeurs 0-4
-  total_score: number // somme 0-24
-  created_at: string
-}
-
-export async function getAllASRS6Entries(): Promise<ASRS6Entry[]> {
-  const database = getDb()
-  const rows = await database.getAllAsync<{
-    id: string
-    answers: string
-    total_score: number
-    created_at: string
-  }>('SELECT * FROM asrs6_entries ORDER BY created_at DESC')
-  return rows.map(r => ({
-    ...r,
-    answers: JSON.parse(r.answers) as number[],
-  }))
-}
-
-export async function saveASRS6Entry(entry: ASRS6Entry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO asrs6_entries (id, answers, total_score, created_at) VALUES (?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteASRS6Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM asrs6_entries WHERE id = ?', [id])
-}
-
-// ─── ASRS v1.1 — Bilan Complet (18 items) ────────────────────────────────────
-
-export async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void> {
+async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS asrs18_entries (
       id TEXT PRIMARY KEY,
@@ -1531,369 +939,389 @@ export async function createASRS18Table(database: SQLite.SQLiteDatabase): Promis
   `)
 }
 
-export interface ASRS18SubScores {
-  part_a: number
-  part_b: number
-}
+// ─── plan_items — table générique pour les plans éditables (crisis_plan…) ────
 
-export interface ASRS18Entry {
+export interface PlanItem {
   id: string
-  answers: number[]        // 18 valeurs 0-4
-  sub_scores: ASRS18SubScores
-  total_score: number      // somme 0-72
+  module_id: string
+  section_id: string
+  text: string
+  sort_order: number
+  /** Poids optionnel (1..N selon le layout). null pour les modules qui n'utilisent pas de pondération (ex. crisis_plan). */
+  weight: number | null
   created_at: string
 }
 
-export async function getAllASRS18Entries(): Promise<ASRS18Entry[]> {
+async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS plan_items (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      section_id TEXT NOT NULL,
+      text       TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      weight     INTEGER,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_plan_items_module ON plan_items(module_id, section_id);
+  `)
+}
+
+export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanItem[]> {
+  const database = getDb()
+  return database.getAllAsync<PlanItem>(
+    'SELECT * FROM plan_items WHERE module_id = ? ORDER BY section_id ASC, sort_order ASC, created_at ASC',
+    [moduleId]
+  )
+}
+
+export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight) VALUES (?, ?, ?, ?, ?, ?)`,
+    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null]
+  )
+}
+
+export async function deletePlanItem(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM plan_items WHERE id = ?', [id])
+}
+
+// ─── module_settings — table générique pour les single-doc fields ────────────
+// Stocke des paires clé/valeur scopées par module_id (ex. target_behavior d'une
+// balance décisionnelle, etc.). Une seule valeur par (module_id, key).
+
+async function createModuleSettingsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS module_settings (
+      module_id  TEXT NOT NULL,
+      key        TEXT NOT NULL,
+      value      TEXT NOT NULL,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (module_id, key)
+    );
+  `)
+}
+
+export async function getModuleSetting(moduleId: string, key: string): Promise<string | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<{ value: string }>(
+    'SELECT value FROM module_settings WHERE module_id = ? AND key = ?',
+    [moduleId, key]
+  )
+  return row?.value ?? null
+}
+
+export async function setModuleSetting(moduleId: string, key: string, value: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO module_settings (module_id, key, value, updated_at)
+     VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+     ON CONFLICT(module_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
+    [moduleId, key, value]
+  )
+}
+
+// ─── scale_entries — table générique pour tous les questionnaires cliniques ───
+
+export async function createScaleEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS scale_entries (
+      id TEXT PRIMARY KEY,
+      scale_id TEXT NOT NULL,
+      answers TEXT NOT NULL,
+      total_score REAL NOT NULL,
+      subscale_scores TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_scale_entries_scale_id ON scale_entries(scale_id);
+  `)
+}
+
+export interface ScaleEntry {
+  id: string
+  scale_id: string
+  answers: number[]
+  total_score: number
+  subscale_scores: Record<string, number | string> | null
+  created_at: string
+}
+
+export async function getAllScaleEntries(scaleId: string): Promise<ScaleEntry[]> {
   const database = getDb()
   const rows = await database.getAllAsync<{
     id: string
+    scale_id: string
     answers: string
-    sub_scores: string
     total_score: number
+    subscale_scores: string | null
     created_at: string
-  }>('SELECT * FROM asrs18_entries ORDER BY created_at DESC')
+  }>('SELECT * FROM scale_entries WHERE scale_id = ? ORDER BY created_at DESC', [scaleId])
   return rows.map(r => ({
     ...r,
     answers: JSON.parse(r.answers) as number[],
-    sub_scores: JSON.parse(r.sub_scores) as ASRS18SubScores,
+    subscale_scores: r.subscale_scores ? JSON.parse(r.subscale_scores) as Record<string, number | string> : null,
   }))
 }
 
-export async function saveASRS18Entry(entry: ASRS18Entry): Promise<void> {
+export async function saveScaleEntry(entry: ScaleEntry): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO asrs18_entries (id, answers, sub_scores, total_score, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [entry.id, JSON.stringify(entry.answers), JSON.stringify(entry.sub_scores), entry.total_score, entry.created_at]
-  )
-}
-
-export async function deleteASRS18Entry(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM asrs18_entries WHERE id = ?', [id])
-}
-
-
-// ─── ChronoBio — Journal des ancrages quotidiens ─────────────────────────────
-
-export async function createChronoEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS chrono_entries (
-      id            TEXT PRIMARY KEY,
-      date          TEXT NOT NULL UNIQUE,
-      wake_time     TEXT,
-      first_meal    TEXT,
-      main_activity TEXT,
-      last_meal     TEXT,
-      bedtime       TEXT,
-      created_at    TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-    CREATE INDEX IF NOT EXISTS idx_chrono_entries_date ON chrono_entries(date);
-  `)
-}
-
-export interface ChronoEntry {
-  id: string
-  date: string               // 'YYYY-MM-DD'
-  wake_time: string | null   // 'HH:MM' ou null
-  first_meal: string | null
-  main_activity: string | null
-  last_meal: string | null
-  bedtime: string | null
-  created_at: string
-}
-
-export async function getChronoEntryByDate(date: string): Promise<ChronoEntry | null> {
-  const database = getDb()
-  const row = await database.getFirstAsync<ChronoEntry>(
-    'SELECT * FROM chrono_entries WHERE date = ?',
-    [date]
-  )
-  return row ?? null
-}
-
-export async function listChronoEntries(limit = 30): Promise<ChronoEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<ChronoEntry>(
-    'SELECT * FROM chrono_entries ORDER BY date DESC LIMIT ?',
-    [limit]
-  )
-}
-
-export async function getChronoEntriesForMonth(yearMonth: string): Promise<ChronoEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<ChronoEntry>(
-    'SELECT * FROM chrono_entries WHERE date LIKE ? ORDER BY date ASC',
-    [`${yearMonth}-%`]
-  )
-}
-
-export async function saveChronoEntry(entry: ChronoEntry): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO chrono_entries
-       (id, date, wake_time, first_meal, main_activity, last_meal, bedtime, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO scale_entries (id, scale_id, answers, total_score, subscale_scores, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
-      entry.date,
-      entry.wake_time ?? null,
-      entry.first_meal ?? null,
-      entry.main_activity ?? null,
-      entry.last_meal ?? null,
-      entry.bedtime ?? null,
+      entry.scale_id,
+      JSON.stringify(entry.answers),
+      entry.total_score,
+      entry.subscale_scores ? JSON.stringify(entry.subscale_scores) : null,
       entry.created_at,
     ]
   )
 }
 
-export async function deleteChronoEntry(id: string): Promise<void> {
+export async function deleteScaleEntry(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync('DELETE FROM chrono_entries WHERE id = ?', [id])
+  await database.runAsync('DELETE FROM scale_entries WHERE id = ?', [id])
 }
 
-// ─── Hiérarchie d'exposition ──────────────────────────────────────────────────
+// ─── daily_entries — table générique pour les saisies quotidiennes ───────────
+// Pattern : 1 entrée par (module_id, date) — UPSERT sur la contrainte UNIQUE.
+// Utilisée par les layouts daily_checkin (medication_adherence et autres modules
+// futurs partageant la sémantique « 1 statut par jour »).
 
-export function clampSuds(score: number): number {
-  return Math.min(100, Math.max(0, Math.round(score)))
-}
-
-export interface ExposureHierarchy {
-  id: string
-  title: string | null
-  created_at: string
-}
-
-export interface ExposureItem {
-  id: string
-  hierarchy_id: string
-  description: string
-  suds_score: number
-  is_done: boolean
-  created_at: string
-}
-
-export async function createExposureHierarchyTables(database: SQLite.SQLiteDatabase): Promise<void> {
+export async function createDailyEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS exposure_hierarchies (
-      id TEXT PRIMARY KEY,
-      title TEXT,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS daily_entries (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      date       TEXT NOT NULL,
+      status     TEXT,
+      notes      TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(module_id, date)
     );
-  `)
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS exposure_items (
-      id TEXT PRIMARY KEY,
-      hierarchy_id TEXT NOT NULL REFERENCES exposure_hierarchies(id) ON DELETE CASCADE,
-      description TEXT NOT NULL,
-      suds_score INTEGER NOT NULL DEFAULT 0,
-      is_done INTEGER NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS exposure_sessions (
-      id TEXT PRIMARY KEY,
-      item_id TEXT NOT NULL REFERENCES exposure_items(id) ON DELETE CASCADE,
-      suds_score INTEGER NOT NULL,
-      session_date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
+    CREATE INDEX IF NOT EXISTS idx_daily_entries_module_date
+      ON daily_entries(module_id, date);
   `)
 }
 
-// ─── Sessions d'exposition ────────────────────────────────────────────────────
-
-export interface ExposureSession {
+export interface DailyEntry {
   id: string
-  item_id: string
-  suds_score: number
-  session_date: string
+  module_id: string
+  date: string
+  status: string | null
+  notes: string | null
   created_at: string
 }
 
-export async function addExposureSession(
-  id: string,
-  itemId: string,
-  sudsScore: number,
-): Promise<void> {
+export async function getDailyEntry(moduleId: string, date: string): Promise<DailyEntry | null> {
   const database = getDb()
-  const now = new Date().toISOString()
-  await database.runAsync(
-    'INSERT INTO exposure_sessions (id, item_id, suds_score, session_date, created_at) VALUES (?, ?, ?, ?, ?)',
-    [id, itemId, sudsScore, now, now]
+  return database.getFirstAsync<DailyEntry>(
+    'SELECT * FROM daily_entries WHERE module_id = ? AND date = ?',
+    [moduleId, date]
   )
 }
 
-export async function listSessionsForItem(itemId: string): Promise<ExposureSession[]> {
+export async function getAllDailyEntries(moduleId: string, limit = 30): Promise<DailyEntry[]> {
   const database = getDb()
-  return database.getAllAsync<ExposureSession>(
-    'SELECT * FROM exposure_sessions WHERE item_id = ? ORDER BY session_date ASC',
-    [itemId]
+  return database.getAllAsync<DailyEntry>(
+    'SELECT * FROM daily_entries WHERE module_id = ? ORDER BY date DESC LIMIT ?',
+    [moduleId, limit]
   )
 }
 
-export async function countSessionsForItems(itemIds: string[]): Promise<Record<string, number>> {
-  if (itemIds.length === 0) return {}
-  const database = getDb()
-  const placeholders = itemIds.map(() => '?').join(',')
-  const rows = await database.getAllAsync<{ item_id: string; cnt: number }>(
-    `SELECT item_id, COUNT(*) as cnt FROM exposure_sessions WHERE item_id IN (${placeholders}) GROUP BY item_id`,
-    itemIds
-  )
-  const result: Record<string, number> = {}
-  for (const row of rows) result[row.item_id] = row.cnt
-  return result
-}
-
-export async function deleteExposureSession(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM exposure_sessions WHERE id = ?', [id])
-}
-
-export async function listExposureHierarchies(): Promise<ExposureHierarchy[]> {
-  const database = getDb()
-  return database.getAllAsync<ExposureHierarchy>(
-    'SELECT * FROM exposure_hierarchies ORDER BY created_at DESC'
-  )
-}
-
-export async function createExposureHierarchy(id: string, title: string | null): Promise<void> {
+export async function saveDailyEntry(entry: Omit<DailyEntry, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    'INSERT INTO exposure_hierarchies (id, title, created_at) VALUES (?, ?, ?)',
-    [id, title, new Date().toISOString()]
+    `INSERT INTO daily_entries (id, module_id, date, status, notes)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(module_id, date) DO UPDATE SET
+       status = excluded.status,
+       notes  = excluded.notes`,
+    [entry.id, entry.module_id, entry.date, entry.status, entry.notes]
   )
 }
 
-export async function deleteExposureHierarchy(id: string): Promise<void> {
+export async function deleteDailyEntry(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync('DELETE FROM exposure_hierarchies WHERE id = ?', [id])
+  await database.runAsync('DELETE FROM daily_entries WHERE id = ?', [id])
 }
 
-export async function listExposureItems(hierarchyId: string): Promise<ExposureItem[]> {
+// ─── form_entries — table générique pour les formulaires multi-champs ────────
+// Pattern : N enregistrements par module, chacun stockant un JSON de valeurs
+// indexées par clé logique. Utilisée par le layout column_form (beck_columns
+// et autres modules futurs partageant la sémantique « formulaire libre à
+// champs hétérogènes »).
+
+export async function createFormEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS form_entries (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      "values"   TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_form_entries_module ON form_entries(module_id, created_at DESC);
+  `)
+}
+
+export interface FormEntry {
+  id: string
+  module_id: string
+  values: Record<string, string | number>
+  created_at: string
+}
+
+export async function getAllFormEntries(moduleId: string): Promise<FormEntry[]> {
   const database = getDb()
   const rows = await database.getAllAsync<{
-    id: string; hierarchy_id: string; description: string
-    suds_score: number; is_done: number; created_at: string
+    id: string
+    module_id: string
+    values: string
+    created_at: string
   }>(
-    'SELECT * FROM exposure_items WHERE hierarchy_id = ? ORDER BY suds_score ASC, created_at ASC',
-    [hierarchyId]
+    'SELECT * FROM form_entries WHERE module_id = ? ORDER BY created_at DESC',
+    [moduleId]
   )
-  return rows.map((r) => ({ ...r, is_done: r.is_done === 1 }))
+  return rows.map(r => ({
+    ...r,
+    values: JSON.parse(r.values) as Record<string, string | number>,
+  }))
 }
 
-export async function addExposureItem(
-  id: string,
-  hierarchyId: string,
-  description: string,
-  sudsScore: number
-): Promise<void> {
+export async function getFormEntry(id: string): Promise<FormEntry | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<{
+    id: string
+    module_id: string
+    values: string
+    created_at: string
+  }>('SELECT * FROM form_entries WHERE id = ?', [id])
+  if (!row) return null
+  return { ...row, values: JSON.parse(row.values) as Record<string, string | number> }
+}
+
+export async function saveFormEntry(entry: Omit<FormEntry, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    'INSERT INTO exposure_items (id, hierarchy_id, description, suds_score, is_done, created_at) VALUES (?, ?, ?, ?, 0, ?)',
-    [id, hierarchyId, description, sudsScore, new Date().toISOString()]
+    `INSERT OR REPLACE INTO form_entries (id, module_id, "values") VALUES (?, ?, ?)`,
+    [entry.id, entry.module_id, JSON.stringify(entry.values)]
   )
 }
 
-export async function updateExposureItem(
-  id: string,
-  description: string,
-  sudsScore: number
-): Promise<void> {
+export async function deleteFormEntry(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync(
-    'UPDATE exposure_items SET description = ?, suds_score = ? WHERE id = ?',
-    [description, sudsScore, id]
-  )
+  await database.runAsync('DELETE FROM form_entries WHERE id = ?', [id])
 }
 
-export async function toggleExposureItemDone(id: string, isDone: boolean): Promise<void> {
-  const database = getDb()
-  await database.runAsync(
-    'UPDATE exposure_items SET is_done = ? WHERE id = ?',
-    [isDone ? 1 : 0, id]
-  )
-}
-
-export async function deleteExposureItem(id: string): Promise<void> {
-  const database = getDb()
-  await database.runAsync('DELETE FROM exposure_items WHERE id = ?', [id])
-}
-
-// ─── Journal de craving ───────────────────────────────────────────────────────
+// ─── tree_selections — table générique pour les sélecteurs d'arbre ──────────
+// Pattern : N enregistrements par module, chacun stockant le chemin de
+// sélection (path_json) plus une intensité brute et des notes optionnelles.
+// Utilisée par le layout tree_selector (emotion_wheel et autres modules
+// futurs partageant la sémantique « sélection hiérarchique guidée »).
 //
-// Auto-monitoring des envies compulsives.
-// Référence : Marlatt & Gordon (1985) — Relapse Prevention ;
-//             Beck, Wright, Newman & Liese (1993) — Cognitive Therapy of Substance Abuse.
-//
-// intensity (0–10) : valeur brute déclarée par le patient, sans label interprétatif.
-// Conformité MDR 2017/745 — aucun seuil, aucune alerte, aucune interprétation.
+// path_json est un tableau ordonné de noeuds — chaque entrée a un `id` et
+// soit un `text_code` (clé i18n résolue à l'affichage), soit un `label`
+// brut (cas des entrées migrées depuis emotion_entries). Les props
+// d'affichage (color, icon) sont également capturées pour rendre l'historique
+// indépendant du fait que les noeuds Supabase soient encore présents.
 
-export interface CravingEntry {
+export interface TreeSelectionPathNode {
   id: string
-  created_at: string             // ISO 8601 — plusieurs saisies par jour possibles
-  intensity: number              // 0–10, brut
-  trigger_context: string | null // situation déclenchante (texte libre)
-  emotion: string | null         // émotion associée (texte libre)
-  automatic_thought: string | null // pensée automatique (texte libre)
-  coping_used: string | null     // stratégie utilisée (texte libre)
-  notes: string | null
+  text_code?: string
+  label?: string
+  color?: string
+  icon?: string
 }
 
-export async function createCravingEntriesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+export interface TreeSelection {
+  id: string
+  module_id: string
+  selected_id: string
+  selected_label: string | null
+  path: TreeSelectionPathNode[]
+  intensity: number | null
+  notes: string | null
+  created_at: string
+}
+
+export async function createTreeSelectionsTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS craving_entries (
-      id               TEXT PRIMARY KEY,
-      created_at       TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      intensity        INTEGER NOT NULL DEFAULT 5,
-      trigger_context  TEXT,
-      emotion          TEXT,
-      automatic_thought TEXT,
-      coping_used      TEXT,
-      notes            TEXT
+    CREATE TABLE IF NOT EXISTS tree_selections (
+      id              TEXT PRIMARY KEY,
+      module_id       TEXT NOT NULL,
+      selected_id     TEXT NOT NULL,
+      selected_label  TEXT,
+      path_json       TEXT NOT NULL,
+      intensity       INTEGER,
+      notes           TEXT,
+      created_at      TEXT DEFAULT CURRENT_TIMESTAMP
     );
-    CREATE INDEX IF NOT EXISTS idx_craving_entries_created_at ON craving_entries(created_at);
+    CREATE INDEX IF NOT EXISTS idx_tree_selections_module ON tree_selections(module_id, created_at DESC);
   `)
 }
 
-export async function listCravingEntries(limit = 30): Promise<CravingEntry[]> {
-  const database = getDb()
-  return database.getAllAsync<CravingEntry>(
-    'SELECT * FROM craving_entries ORDER BY created_at DESC LIMIT ?',
-    [limit]
-  )
+interface TreeSelectionRow {
+  id: string
+  module_id: string
+  selected_id: string
+  selected_label: string | null
+  path_json: string
+  intensity: number | null
+  notes: string | null
+  created_at: string
 }
 
-export async function getCravingEntry(id: string): Promise<CravingEntry | null> {
-  const database = getDb()
-  return database.getFirstAsync<CravingEntry>(
-    'SELECT * FROM craving_entries WHERE id = ?',
-    [id]
-  )
+function parsePath(json: string): TreeSelectionPathNode[] {
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed as TreeSelectionPathNode[]
+  } catch {
+    return []
+  }
 }
 
-export async function saveCravingEntry(entry: CravingEntry): Promise<void> {
+export async function getAllTreeSelections(moduleId: string, limit = 100): Promise<TreeSelection[]> {
+  const database = getDb()
+  const rows = await database.getAllAsync<TreeSelectionRow>(
+    'SELECT * FROM tree_selections WHERE module_id = ? ORDER BY created_at DESC LIMIT ?',
+    [moduleId, limit]
+  )
+  return rows.map(r => ({
+    id: r.id,
+    module_id: r.module_id,
+    selected_id: r.selected_id,
+    selected_label: r.selected_label,
+    path: parsePath(r.path_json),
+    intensity: r.intensity,
+    notes: r.notes,
+    created_at: r.created_at,
+  }))
+}
+
+export async function saveTreeSelection(
+  entry: Omit<TreeSelection, 'created_at'>
+): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO craving_entries
-       (id, created_at, intensity, trigger_context, emotion, automatic_thought, coping_used, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT OR REPLACE INTO tree_selections
+       (id, module_id, selected_id, selected_label, path_json, intensity, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
-      entry.created_at,
+      entry.module_id,
+      entry.selected_id,
+      entry.selected_label,
+      JSON.stringify(entry.path),
       entry.intensity,
-      entry.trigger_context ?? null,
-      entry.emotion ?? null,
-      entry.automatic_thought ?? null,
-      entry.coping_used ?? null,
-      entry.notes ?? null,
+      entry.notes,
     ]
   )
 }
 
-export async function deleteCravingEntry(id: string): Promise<void> {
+export async function deleteTreeSelection(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync('DELETE FROM craving_entries WHERE id = ?', [id])
+  await database.runAsync('DELETE FROM tree_selections WHERE id = ?', [id])
 }
-

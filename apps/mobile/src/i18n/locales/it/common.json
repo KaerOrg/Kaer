@@ -214,7 +214,8 @@
       "description": "Pianifica attività che portano piacere",
       "title": "Attivazione comportamentale",
       "intro": "Pianifica attività che portano piacere o soddisfazione.",
-      "save": "Salva"
+      "save": "Salva",
+      "add_btn": "Aggiungere un'attività"
     },
     "beck_columns": {
       "label": "Colonne di Beck",

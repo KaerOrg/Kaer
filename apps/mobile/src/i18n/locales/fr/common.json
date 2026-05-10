@@ -8,6 +8,9 @@
     "create": "Créer",
     "update": "Mettre à jour",
     "error": "Erreur",
+    "warning": "Attention",
+    "ok": "OK",
+    "calendar": "Calendrier",
     "loading": "Chargement…",
     "irreversible": "Cette action est irréversible.",
     "saved_title": "Enregistré",
@@ -37,7 +40,10 @@
     "continue": "Continuer",
     "edit": "Modifier",
     "prev_month": "Mois précédent",
-    "next_month": "Mois suivant"
+    "next_month": "Mois suivant",
+    "exercise_step_of": "Étape {{current}} sur {{total}}",
+    "exercise_steps_overview": "Les étapes",
+    "optional_info_label": "Informations complémentaires (facultatif)"
   },
   "global": {
     "greeting": "Bienvenue",
@@ -182,7 +188,21 @@
       "scale_moderate": "Modéré",
       "scale_severe": "Sévère",
       "notes_placeholder": "Contexte, remarque, moment de la journée…",
-      "empty_history": "Aucune saisie pour l'instant."
+      "empty_history": "Aucune saisie pour l'instant.",
+      "chip_sedation": "Séda.",
+      "chip_akathisia": "Akath.",
+      "chip_tremors": "Trem.",
+      "chip_dry_mouth": "Bouche",
+      "chip_sleep": "Sommeil",
+      "chip_nausea": "Nausée",
+      "footer": "Inspiré UKU Side Effect Rating Scale (Lingjaerde et al., 1987)",
+      "score_label": "Score total",
+      "score_max": "/ 18",
+      "new_btn": "Nouveau questionnaire",
+      "empty_title": "Aucun questionnaire rempli",
+      "empty_text": "Utilisez le bouton ci-dessus pour évaluer les effets de votre traitement.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "medication_adherence": {
       "label": "Observance du traitement",
@@ -199,7 +219,12 @@
       "status_partial": "Partiellement",
       "status_missed": "Non pris",
       "notes_placeholder": "Ex : oubli, difficulté, remarque…",
-      "empty_history": "Aucune saisie pour l'instant."
+      "empty_history": "Aucune saisie pour l'instant.",
+      "tab_today": "Aujourd'hui",
+      "tab_history": "Historique",
+      "already_saved": "Traitement déjà saisi aujourd'hui",
+      "saved_message": "Saisie enregistrée.",
+      "delete_entry_title": "Supprimer cette saisie ?"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -248,7 +273,13 @@
       "quality_bad": "Mauvaise",
       "quality_average": "Moyenne",
       "quality_good": "Bonne",
-      "quality_excellent": "Excellente"
+      "quality_excellent": "Excellente",
+      "intro": "Notez votre sommeil chaque matin pour suivre vos rythmes au fil du temps.",
+      "list_btn": "Saisir une nuit",
+      "month_btn": "Vue mensuelle",
+      "back_btn": "Retour",
+      "notes_label": "Notes (optionnel)",
+      "notes_placeholder": "Contexte, rêves, remarques…"
     },
     "psyedu_sleep": {
       "label": "Sommeil & récupération",
@@ -334,45 +365,149 @@
       "dim_anxiety_low": "Aucune",
       "dim_anxiety_high": "Très intense",
       "dim_pleasure_low": "Rien ne m'a touché",
-      "dim_pleasure_high": "Pleinement ressenti"
+      "dim_pleasure_high": "Pleinement ressenti",
+      "instructions": "Évaluez chaque dimension pour le moment présent.",
+      "score_label": "Moy.",
+      "score_max": "/ 10",
+      "new_btn": "Nouvelle saisie",
+      "empty_title": "Aucune saisie",
+      "empty_text": "Enregistrez votre première saisie pour consulter l'historique.",
+      "footer": "Chiffres bruts saisis par le patient. À interpréter en consultation.",
+      "progress": "{{answered}} / {{total}} dimensions renseignées",
+      "submit": "Enregistrer",
+      "chip_mood": "Humeur",
+      "chip_energy": "Énergie",
+      "chip_anxiety": "Anxiété",
+      "chip_pleasure": "Plaisir"
     },
     "emotion_wheel": {
       "label": "Roue des émotions",
       "description": "Explorer et nommer vos émotions",
       "title": "Roue des émotions",
-      "intro": "Explorez et nommez vos émotions.",
-      "stat_entries": "Entrées",
-      "stat_days": "Jours concernés",
-      "stat_intensity": "Intensité moy.",
-      "month_view_title": "Bilan mensuel",
-      "view_monthly": "Voir le bilan mensuel",
+      "intro": "Nommez vos émotions avec précision pour mieux les reconnaître et les communiquer à votre praticien.",
       "identify_btn": "Identifier une émotion",
+      "save": "Enregistrer",
+      "continue": "Continuer",
+      "history_label": "Historique",
       "empty_title": "Aucune entrée",
       "empty_text": "Appuyez sur le bouton ci-dessus pour identifier votre première émotion.",
-      "intro_text": "Nommez vos émotions avec précision pour mieux les reconnaître et les communiquer à votre praticien.",
       "delete_entry_title": "Supprimer cette entrée ?",
       "step_primary_title": "Qu'est-ce que vous ressentez ?",
       "step_primary_hint": "Choisissez l'émotion qui vous semble la plus proche.",
-      "step_secondary_hint": "Choisissez l'intensité qui correspond le mieux.",
+      "step_secondary_hint": "Choisissez la nuance qui correspond le mieux.",
       "step_specific_title": "Quel mot vous correspond le mieux ?",
       "step_specific_hint": "Précisez votre ressenti avec un terme plus exact.",
       "step_intensity_title": "Quelle est l'intensité de ce ressenti ?",
       "step_intensity_hint": "De 1 (très faible) à 10 (très fort). Valeur brute.",
       "step_notes_title": "Une note à ajouter ? (optionnel)",
       "step_notes_hint": "Contexte, situation, pensée associée… Ce champ est libre.",
-      "intensity_label": "Intensité :",
       "notes_free_placeholder": "Note libre (facultatif)",
-      "continue": "Continuer",
-      "step_label_primary": "Émotion principale",
-      "step_label_secondary": "Nuance",
-      "step_label_specific": "Précision",
-      "step_label_intensity": "Intensité",
-      "step_label_notes": "Note",
-      "calendar_legend": "Chaque point = une émotion notée ce jour-là. La couleur indique l'émotion principale.",
-      "month_summary": "Résumé du mois",
-      "empty_month": "Aucune entrée ce mois-ci",
-      "freq_by_emotion": "Fréquence par émotion",
-      "detail_by_day": "Détail par jour"
+      "node": {
+        "joy": "Joie",
+        "joy__serenity": "Sérénité",
+        "joy__serenity__calm": "Calme",
+        "joy__serenity__peaceful": "Paisible",
+        "joy__serenity__content": "Content(e)",
+        "joy__joy_2": "Joie",
+        "joy__joy_2__happy": "Heureux/se",
+        "joy__joy_2__cheerful": "Enjoué(e)",
+        "joy__joy_2__amused": "Amusé(e)",
+        "joy__ecstasy": "Extase",
+        "joy__ecstasy__elated": "Exalté(e)",
+        "joy__ecstasy__euphoric": "Euphorique",
+        "joy__ecstasy__overjoyed": "Aux anges",
+        "trust": "Confiance",
+        "trust__acceptance": "Acceptation",
+        "trust__acceptance__open": "Ouvert(e)",
+        "trust__acceptance__tolerant": "Tolérant(e)",
+        "trust__acceptance__receptive": "Réceptif/ve",
+        "trust__trust_2": "Confiance",
+        "trust__trust_2__secure": "En sécurité",
+        "trust__trust_2__confident": "Confiant(e)",
+        "trust__trust_2__assured": "Rassuré(e)",
+        "trust__admiration": "Admiration",
+        "trust__admiration__admiring": "Admiratif/ve",
+        "trust__admiration__grateful": "Reconnaissant(e)",
+        "trust__admiration__reverent": "En respect",
+        "fear": "Peur",
+        "fear__apprehension": "Appréhension",
+        "fear__apprehension__uneasy": "Mal à l'aise",
+        "fear__apprehension__worried": "Inquiet/ète",
+        "fear__apprehension__nervous": "Nerveux/se",
+        "fear__fear_2": "Peur",
+        "fear__fear_2__scared": "Effrayé(e)",
+        "fear__fear_2__anxious": "Anxieux/se",
+        "fear__fear_2__threatened": "Menacé(e)",
+        "fear__terror": "Terreur",
+        "fear__terror__panicked": "En panique",
+        "fear__terror__horrified": "Horrifié(e)",
+        "fear__terror__overwhelmed": "Submergé(e)",
+        "surprise": "Surprise",
+        "surprise__distraction": "Distraction",
+        "surprise__distraction__confused": "Confus(e)",
+        "surprise__distraction__uncertain": "Incertain(e)",
+        "surprise__distraction__perplexed": "Perplexe",
+        "surprise__surprise_2": "Surprise",
+        "surprise__surprise_2__surprised": "Surpris(e)",
+        "surprise__surprise_2__startled": "Saisi(e)",
+        "surprise__surprise_2__astonished": "Étonné(e)",
+        "surprise__amazement": "Stupéfaction",
+        "surprise__amazement__amazed": "Stupéfait(e)",
+        "surprise__amazement__awed": "Émerveillé(e)",
+        "surprise__amazement__dumbfounded": "Abasourdi(e)",
+        "sadness": "Tristesse",
+        "sadness__pensiveness": "Mélancolie",
+        "sadness__pensiveness__pensive": "Pensif/ve",
+        "sadness__pensiveness__nostalgic": "Nostalgique",
+        "sadness__pensiveness__wistful": "Mélancolique",
+        "sadness__sadness_2": "Tristesse",
+        "sadness__sadness_2__sad": "Triste",
+        "sadness__sadness_2__sorrowful": "Chagriné(e)",
+        "sadness__sadness_2__dejected": "Abattu(e)",
+        "sadness__grief": "Désespoir",
+        "sadness__grief__hopeless": "Sans espoir",
+        "sadness__grief__despairing": "Désespéré(e)",
+        "sadness__grief__anguished": "Angoissé(e)",
+        "disgust": "Dégoût",
+        "disgust__boredom": "Ennui",
+        "disgust__boredom__bored": "Ennuyé(e)",
+        "disgust__boredom__indifferent": "Indifférent(e)",
+        "disgust__boredom__apathetic": "Apathique",
+        "disgust__disgust_2": "Dégoût",
+        "disgust__disgust_2__disgusted": "Dégoûté(e)",
+        "disgust__disgust_2__revolted": "Révulsé(e)",
+        "disgust__disgust_2__repulsed": "Repoussé(e)",
+        "disgust__loathing": "Aversion",
+        "disgust__loathing__loathing": "Horreur",
+        "disgust__loathing__contemptuous": "Mépris",
+        "disgust__loathing__hateful": "Haine",
+        "anger": "Colère",
+        "anger__annoyance": "Agacement",
+        "anger__annoyance__annoyed": "Agacé(e)",
+        "anger__annoyance__irritated": "Irrité(e)",
+        "anger__annoyance__impatient": "Impatient(e)",
+        "anger__anger_2": "Colère",
+        "anger__anger_2__angry": "En colère",
+        "anger__anger_2__frustrated": "Frustré(e)",
+        "anger__anger_2__resentful": "Rancunier/ère",
+        "anger__rage": "Rage",
+        "anger__rage__furious": "Furieux/se",
+        "anger__rage__outraged": "Outré(e)",
+        "anger__rage__enraged": "Hors de soi",
+        "anticipation": "Anticipation",
+        "anticipation__interest": "Intérêt",
+        "anticipation__interest__curious": "Curieux/se",
+        "anticipation__interest__interested": "Intéressé(e)",
+        "anticipation__interest__attentive": "Attentif/ve",
+        "anticipation__anticipation_2": "Anticipation",
+        "anticipation__anticipation_2__expectant": "Dans l'attente",
+        "anticipation__anticipation_2__hopeful": "Plein(e) d'espoir",
+        "anticipation__anticipation_2__eager": "Impatient(e) positivement",
+        "anticipation__vigilance": "Vigilance",
+        "anticipation__vigilance__alert": "En alerte",
+        "anticipation__vigilance__cautious": "Prudent(e)",
+        "anticipation__vigilance__watchful": "Aux aguets"
+      }
     },
     "behavioral_activation": {
       "label": "Activation comportementale",
@@ -383,6 +518,8 @@
       "tab_list": "Liste",
       "tab_month": "Mois",
       "empty_title": "Aucune activité",
+      "empty_text": "Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).",
+      "add_btn": "Ajouter une activité",
       "empty_description": "Ajoutez des activités à planifier ou réalisées.\nÉvaluez chaque activité en Plaisir (P) et Maîtrise (M).",
       "month_hint_tap": "Touchez un jour du calendrier pour voir ses activités",
       "month_hint_empty": "Aucune activité ce jour-là",
@@ -392,6 +529,7 @@
       "mark_undone": "Marquer comme non réalisée",
       "section_activity": "Activité",
       "section_evaluation": "Évaluation",
+      "section_notes": "Notes",
       "pleasure_label": "Plaisir (P)",
       "pleasure_sublabel": "Satisfaction retirée de l'activité",
       "mastery_label": "Accomplissement (A)",
@@ -401,8 +539,29 @@
       "name_missing_msg": "Donnez un nom à cette activité.",
       "date_label": "Date",
       "date_confirm": "Confirmer",
+      "back_btn": "Retour",
       "legend_done": "Réalisée",
-      "legend_planned": "Planifiée"
+      "legend_planned": "Planifiée",
+      "suggestion_walk": "Marche / promenade",
+      "suggestion_groceries": "Faire ses courses",
+      "suggestion_gym": "Sport / salle de sport",
+      "suggestion_bike": "Vélo",
+      "suggestion_yoga": "Yoga",
+      "suggestion_meditation": "Méditation",
+      "suggestion_reading": "Lecture",
+      "suggestion_cooking": "Cuisine",
+      "suggestion_call_friend": "Appel à un proche",
+      "suggestion_cafe": "Sortie au café",
+      "suggestion_gardening": "Jardinage",
+      "suggestion_music": "Musique",
+      "suggestion_movie": "Film / série",
+      "suggestion_bath": "Bain relaxant",
+      "suggestion_cleaning": "Rangement / ménage",
+      "suggestion_drawing": "Dessin / peinture",
+      "suggestion_board_game": "Jeu de société",
+      "suggestion_journal": "Écriture / journal",
+      "suggestion_swimming": "Natation",
+      "suggestion_running": "Courir"
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -573,7 +732,13 @@
       "strategy_custom_placeholder": "Autre stratégie (texte libre)…",
       "suds_skip_null": "Non renseigné (appuyer pour confirmer)",
       "suds_skip_later": "Passer / à renseigner plus tard",
-      "notes_placeholder": "Observations, contexte supplémentaire…"
+      "notes_placeholder": "Observations, contexte supplémentaire…",
+      "strategy_breathing": "Respiration lente",
+      "strategy_grounding": "Ancrage 5-4-3-2-1",
+      "strategy_movement": "Marche / mouvement",
+      "strategy_exposure": "Rester dans la situation (exposition)",
+      "strategy_distraction": "Distraction cognitive",
+      "strategy_contact": "Contact avec un proche"
     },
     "exposure_hierarchy": {
       "label": "Hiérarchie d'exposition",
@@ -721,63 +886,361 @@
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9.",
+      "instructions_1": "Au cours des 2 dernières semaines,",
+      "instructions_2": "à quelle fréquence avez-vous été gêné(e) par les problèmes suivants ?",
+      "opt_0": "Jamais",
+      "opt_1": "Plusieurs jours",
+      "opt_2": "Plus de la moitié des jours",
+      "opt_3": "Presque tous les jours",
+      "q1": "Peu d'intérêt ou de plaisir à faire les choses",
+      "q2": "Vous sentir triste, déprimé(e) ou sans espoir",
+      "q3": "Difficultés à vous endormir ou à rester endormi(e), ou au contraire dormir trop",
+      "q4": "Se sentir fatigué(e) ou manquer d'énergie",
+      "q5": "Manque d'appétit ou au contraire manger trop",
+      "q6": "Vous sentir négatif(ve) par rapport à vous-même — avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
+      "q7": "Avoir du mal à vous concentrer — lire ou regarder la télévision par exemple",
+      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer — ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
+      "q9": "Avoir des pensées comme quoi vous seriez mieux mort(e) ou que vous souhaiteriez vous faire du mal d'une façon ou d'une autre",
+      "score_label": "Score total",
+      "score_max": "/ 27",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "bsl23": {
       "label": "BSL-23",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier BSL-23."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier BSL-23.",
+      "instructions_1": "Au cours de la semaine passée,",
+      "instructions_2": "dans quelle mesure avez-vous souffert des problèmes suivants ?",
+      "legend_0": "Pas du tout",
+      "legend_1": "Un peu",
+      "legend_2": "Assez",
+      "legend_3": "Beaucoup",
+      "legend_4": "Extrêmement",
+      "opt_0": "0",
+      "opt_1": "1",
+      "opt_2": "2",
+      "opt_3": "3",
+      "opt_4": "4",
+      "q1": "Me sentir dans un état d'engourdissement intérieur",
+      "q2": "Me sentir inutile",
+      "q3": "Me sentir mal à l'aise dans ma propre peau",
+      "q4": "Avoir envie de me faire du mal",
+      "q5": "Avoir l'impression d'être à l'extérieur de mon propre corps",
+      "q6": "Me sentir comme une mauvaise personne",
+      "q7": "Me sentir vide intérieurement",
+      "q8": "Être incapable d'exprimer mes émotions",
+      "q9": "Penser à me blesser ou à me faire du mal",
+      "q10": "Avoir l'impression de ne pas exister",
+      "q11": "Avoir du mal à me concentrer",
+      "q12": "Me sentir si mal que j'ai envie de me faire du mal",
+      "q13": "Me sentir si tendu(e) que j'ai l'impression que je vais exploser",
+      "q14": "Me sentir agité(e) et incapable de me calmer",
+      "q15": "Me sentir émotionnellement instable",
+      "q16": "Avoir peur d'être abandonné(e)",
+      "q17": "Me sentir incompris(e) et seul(e)",
+      "q18": "Avoir du mal à croire que les autres me respectent",
+      "q19": "Me sentir soudainement vide et désespéré(e)",
+      "q20": "Me sentir en colère et irritable sans raison apparente",
+      "q21": "Avoir l'impression que les autres me voient négativement",
+      "q22": "Me sentir déprimé(e)",
+      "q23": "Avoir peur de l'avenir",
+      "score_label": "Score moyen",
+      "score_max": "/ 4",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}}",
+      "submit": "Valider le questionnaire"
     },
     "gad7": {
       "label": "GAD-7",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier GAD-7."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier GAD-7.",
+      "instructions_1": "Au cours des 2 dernières semaines,",
+      "instructions_2": "à quelle fréquence avez-vous été gêné(e) par les problèmes suivants ?",
+      "opt_0": "Jamais",
+      "opt_1": "Plusieurs jours",
+      "opt_2": "Plus de la moitié du temps",
+      "opt_3": "Presque tous les jours",
+      "q1": "Vous êtes-vous senti(e) nerveux(se), anxieux(se) ou à cran ?",
+      "q2": "Avez-vous été incapable d'arrêter de vous en faire ou de contrôler vos inquiétudes ?",
+      "q3": "Vous êtes-vous trop inquiété(e) pour différentes choses ?",
+      "q4": "Avez-vous eu du mal à vous détendre ?",
+      "q5": "Avez-vous été tellement agité(e) qu'il était difficile de tenir en place ?",
+      "q6": "Vous êtes-vous senti(e) facilement agacé(e) ou irritable ?",
+      "q7": "Avez-vous eu peur que quelque chose de terrible n'arrive ?",
+      "score_label": "Score total",
+      "score_max": "/ 21",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "rcads": {
       "label": "RCADS-25",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier RCADS-25."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier RCADS-25.",
+      "instructions": "Pour chacune des affirmations suivantes, indique à quelle fréquence cela se passe pour toi.",
+      "opt_0": "Jamais",
+      "opt_1": "Parfois",
+      "opt_2": "Souvent",
+      "opt_3": "Toujours",
+      "footer": "Ce questionnaire est un outil de suivi. Seul votre praticien peut en interpréter les résultats.",
+      "q1": "Je m'inquiète quand je crois avoir mal fait quelque chose.",
+      "q2": "Je pense que quelque chose de terrible va m'arriver.",
+      "q3": "Je me tracasse à l'idée de ne pas être aussi bon(ne) que les autres enfants.",
+      "q4": "Je me fais du souci pour plein de choses.",
+      "q5": "J'ai peur d'aller à l'école.",
+      "q6": "Soudainement, j'ai du mal à respirer et mon cœur bat très vite, sans raison.",
+      "q7": "Je tremble ou j'ai des frissons.",
+      "q8": "Je me sens étourdi(e) ou comme si j'allais m'évanouir.",
+      "q9": "Soudainement, je me sens vraiment effrayé(e) sans aucune raison.",
+      "q10": "Je ne veux pas rester seul(e) à la maison.",
+      "q11": "J'ai peur si je dois dormir ailleurs que chez moi.",
+      "q12": "Je m'inquiète quand quelqu'un de ma famille est en retard.",
+      "q13": "Je ne veux pas aller à l'école parce que mes parents vont me manquer.",
+      "q14": "Je pense que quelque chose de terrible va arriver à quelqu'un de ma famille.",
+      "q15": "Je suis nerveux(se) quand je dois parler devant la classe.",
+      "q16": "J'ai peur de faire quelque chose de stupide ou d'embarrassant devant les autres.",
+      "q17": "Je m'inquiète de ce que les autres pensent de moi.",
+      "q18": "J'ai peur d'être devant les gens.",
+      "q19": "Des images ou des pensées déplaisantes s'imposent à moi et je n'arrive pas à les chasser de mon esprit.",
+      "q20": "Je dois faire certaines choses encore et encore (me laver les mains, remettre les objets en ordre…) pour éviter qu'il arrive quelque chose de mauvais.",
+      "q21": "Je ne ressens pas beaucoup de plaisir à faire quoi que ce soit.",
+      "q22": "Je suis triste ou vide.",
+      "q23": "Je me sens fatigué(e) ou sans énergie.",
+      "q24": "Je me sens sans valeur.",
+      "q25": "Je n'ai plus envie de faire les choses que j'aimais avant.",
+      "score_label": "Score total",
+      "score_max": "/ 75",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire",
+      "chip_tag": "TAG",
+      "chip_tp": "Panique",
+      "chip_ts": "Séparation",
+      "chip_ps": "Social",
+      "chip_toc": "TOC",
+      "chip_td": "Dépression"
     },
     "epds": {
       "label": "EPDS",
-      "description": "",
+      "description": "Dépression post-partum",
+      "instructions": "Vous venez d'avoir un bébé. Nous aimerions savoir comment vous vous sentez. Veuillez souligner la réponse qui vous semble le mieux décrire comment vous vous êtes sentie durant la semaine passée (c'est-à-dire sur les 7 jours qui viennent de s'écouler).",
+      "q1": "j'ai pu rire et prendre les choses du bon côté",
+      "q1_opt0": "Aussi souvent que d'habitude",
+      "q1_opt1": "Pas tout à fait autant",
+      "q1_opt2": "Vraiment beaucoup moins souvent ces jours-ci",
+      "q1_opt3": "Absolument pas",
+      "q2": "je me suis sentie confiante et joyeuse, en pensant à l'avenir",
+      "q2_opt0": "Autant que d'habitude",
+      "q2_opt1": "Plutôt moins que d'habitude",
+      "q2_opt2": "Vraiment moins que d'habitude",
+      "q2_opt3": "Pratiquement pas",
+      "q3": "je me suis reprochée, sans raisons, d'être responsable quand les choses allaient mal",
+      "q3_opt0": "Oui, la plupart du temps",
+      "q3_opt1": "Oui, parfois",
+      "q3_opt2": "Pas très souvent",
+      "q3_opt3": "Non, jamais",
+      "q4": "je me suis sentie inquiète ou soucieuse sans motifs",
+      "q4_opt0": "Non, pas du tout",
+      "q4_opt1": "Presque jamais",
+      "q4_opt2": "Oui, parfois",
+      "q4_opt3": "Oui, très souvent",
+      "q5": "je me suis sentie effrayée ou paniquée sans vraiment de raisons",
+      "q5_opt0": "Oui, vraiment souvent",
+      "q5_opt1": "Oui, parfois",
+      "q5_opt2": "Non, pas très souvent",
+      "q5_opt3": "Non, pas du tout",
+      "q6": "j'ai eu tendance à me sentir dépassée par les évènements",
+      "q6_opt0": "Oui, la plupart du temps, je me suis sentie incapable de faire face aux situations",
+      "q6_opt1": "Oui, parfois, je ne me suis pas sentie aussi capable de faire face que d'habitude",
+      "q6_opt2": "Non, j'ai pu faire face à la plupart des situations",
+      "q6_opt3": "Non, je me suis sentie aussi efficace que d'habitude",
+      "q7": "je me suis sentie si malheureuse que j'ai eu des problèmes de sommeil",
+      "q7_opt0": "Oui, la plupart du temps",
+      "q7_opt1": "Oui, parfois",
+      "q7_opt2": "Pas très souvent",
+      "q7_opt3": "Non, pas du tout",
+      "q8": "je me suis sentie triste ou peu heureuse",
+      "q8_opt0": "Oui, la plupart du temps",
+      "q8_opt1": "Oui, très souvent",
+      "q8_opt2": "Pas très souvent",
+      "q8_opt3": "Non, pas du tout",
+      "q9": "je me suis sentie si malheureuse que j'en ai pleuré",
+      "q9_opt0": "Oui, la plupart du temps",
+      "q9_opt1": "Oui, très souvent",
+      "q9_opt2": "Seulement de temps en temps",
+      "q9_opt3": "Non, jamais",
+      "q10": "il m'est arrivé de penser à me faire du mal",
+      "q10_opt0": "Oui, très souvent",
+      "q10_opt1": "Parfois",
+      "q10_opt2": "Presque jamais",
+      "q10_opt3": "Jamais",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "score_label": "Score total",
+      "score_max": "/ 30",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier EPDS."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier EPDS.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "nsi": {
       "label": "NSI",
-      "description": "",
+      "description": "Évaluation de la sévérité des cauchemars (dernier mois)",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier NSI."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier NSI.",
+      "instructions": "Pour chacune des questions, indiquez le chiffre correspondant à votre situation au cours du dernier mois (0 = le moins / 5 = le plus) :",
+      "opt_0": "0",
+      "opt_1": "1",
+      "opt_2": "2",
+      "opt_3": "3",
+      "opt_4": "4",
+      "opt_5": "5",
+      "q1": "La fréquence à laquelle vos mauvais rêves vous réveillent",
+      "q2": "L'intensité émotionnelle de vos cauchemars",
+      "q3": "La fréquence à laquelle vos cauchemars impliquent des menaces vitales sur la sécurité ou l'intégrité physique",
+      "q4": "La façon dont vos cauchemars perturbent votre fonctionnement global en journée",
+      "q5": "La façon dont vos cauchemars perturbent votre humeur en journée",
+      "q6": "La façon dont vos cauchemars perturbent votre concentration et mémoire en journée",
+      "q7": "La façon dont vos cauchemars impactent votre capacité d'éveil (somnolence) en journée",
+      "q8": "La façon dont vos cauchemars perturbent votre endormissement",
+      "q9": "La façon dont vos cauchemars perturbent la continuité de votre sommeil",
+      "pct_question": "10. Quel pourcentage de vos cauchemars sont des cauchemars récurrents ?",
+      "themes_question": "11. Quel(s) est(sont) le(s) thème(s) récurrent(s) de vos cauchemars ?",
+      "theme_placeholder_1": "Thème 1…",
+      "theme_placeholder_2": "Thème 2…",
+      "theme_placeholder_3": "Thème 3…",
+      "score_label": "Score total",
+      "score_max": "/ 45",
+      "chip_pct_recurrent": "Récurrents",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "snap_iv": {
       "label": "SNAP-IV",
       "description": "Dépistage du TDAH (enfant/ado)",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier SNAP-IV."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier SNAP-IV.",
+      "instructions_1": "Hétéro-évaluation — à remplir par un parent ou un enseignant.",
+      "instructions_2": "Pour chacun des comportements suivants, indiquez à quelle fréquence vous l'observez chez l'enfant.",
+      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant — pas par l'enfant lui-même.",
+      "opt_0": "Pas du tout",
+      "opt_1": "Un peu",
+      "opt_2": "Assez souvent",
+      "opt_3": "Beaucoup",
+      "section_inattention": "Inattention",
+      "section_hyperactivite": "Hyperactivité · Impulsivité",
+      "section_tod": "Opposition · Défiance",
+      "q1": "Ne prête pas attention aux détails ou fait des erreurs d'étourderie dans ses devoirs, au travail ou lors d'autres activités.",
+      "q2": "A du mal à soutenir son attention sur des tâches ou des activités de jeu.",
+      "q3": "Semble ne pas écouter quand on lui parle directement.",
+      "q4": "Ne suit pas les consignes jusqu'au bout et n'arrive pas à terminer ses devoirs ou ses tâches (sans que ce soit de l'opposition ou un problème de compréhension).",
+      "q5": "A du mal à organiser ses tâches et ses activités.",
+      "q6": "Évite, a de l'aversion ou fait à contrecœur les tâches qui demandent un effort mental soutenu.",
+      "q7": "Perd les objets nécessaires à ses tâches ou activités (trousse, livres, matériel scolaire).",
+      "q8": "Se laisse facilement distraire par des stimuli extérieurs.",
+      "q9": "Est oublieux ou oublieuse dans les activités de la vie quotidienne.",
+      "q10": "Agite les mains ou les pieds, ou se tortille sur son siège.",
+      "q11": "Quitte sa place dans des situations où il ou elle devrait rester assis(e).",
+      "q12": "Court ou grimpe dans des situations où cela est inapproprié.",
+      "q13": "A du mal à jouer ou à s'occuper tranquillement à des activités de détente.",
+      "q14": "Est « sur la brèche » ou agit comme s'il ou elle était « monté(e) sur ressorts ».",
+      "q15": "Parle excessivement.",
+      "q16": "Laisse échapper la réponse à une question qui n'est pas encore entièrement posée.",
+      "q17": "A du mal à attendre son tour.",
+      "q18": "Interrompt les autres ou s'impose (fait irruption dans les conversations ou dans les jeux des autres).",
+      "q19": "S'emporte.",
+      "q20": "Se dispute avec des adultes.",
+      "q21": "S'oppose activement ou refuse d'obéir aux règles et aux demandes des adultes.",
+      "q22": "Embête délibérément les autres.",
+      "q23": "Fait porter à autrui la responsabilité de ses erreurs ou de ses mauvais comportements.",
+      "q24": "Est susceptible ou facilement agacé(e) par les autres.",
+      "q25": "Est souvent en colère et plein(e) de ressentiment.",
+      "q26": "Se montre rancunier(ière) ou vindicatif(ve).",
+      "score_label": "Score total",
+      "score_max": "/ 78",
+      "chip_i": "I",
+      "chip_hi": "H/I",
+      "chip_tod": "TOD",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "asrs6": {
       "label": "ASRS v1.1 — Dépistage",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1.",
+      "instructions_1": "Ces 6 derniers mois,",
+      "instructions_2": "pour chacune des questions suivantes, indiquez la fréquence qui vous correspond le mieux.",
+      "opt_0": "Jamais",
+      "opt_1": "Rarement",
+      "opt_2": "Parfois",
+      "opt_3": "Souvent",
+      "opt_4": "Très souvent",
+      "q1": "À quelle fréquence vous arrive-t-il de ne pas réussir à terminer les derniers détails d'un projet, une fois que les parties les plus difficiles ont été faites ?",
+      "q2": "À quelle fréquence vous arrive-t-il d'avoir du mal à organiser votre travail lorsque vous avez une tâche qui requiert de l'organisation ?",
+      "q3": "À quelle fréquence avez-vous des difficultés à vous rappeler de vos rendez-vous ou de vos obligations ?",
+      "q4": "Lorsque vous devez faire une tâche qui nécessite beaucoup de réflexion, à quelle fréquence évitez-vous ou différez-vous le début de cette tâche ?",
+      "q5": "À quelle fréquence vous arrive-t-il de gigoter ou de bouger les mains ou les pieds lorsque vous devez rester assis longtemps ?",
+      "q6": "À quelle fréquence vous arrive-t-il d'être trop actif(ve) ou de faire des choses comme si vous étiez « monté(e) sur ressorts » ?",
+      "score_label": "Score total",
+      "score_max": "/ 24",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "asrs18": {
       "label": "ASRS v1.1 — Bilan Complet",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
-      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1 Bilan Complet."
+      "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1 Bilan Complet.",
+      "instructions_1": "Ces 6 derniers mois,",
+      "instructions_2": "pour chacune des questions suivantes, indiquez la fréquence qui vous correspond le mieux.",
+      "opt_0": "Jamais",
+      "opt_1": "Rarement",
+      "opt_2": "Parfois",
+      "opt_3": "Souvent",
+      "opt_4": "Très souvent",
+      "section_part_a": "Partie A",
+      "section_part_b": "Partie B",
+      "q1": "À quelle fréquence vous arrive-t-il de ne pas réussir à terminer les derniers détails d'un projet, une fois que les parties les plus difficiles ont été faites ?",
+      "q2": "À quelle fréquence vous arrive-t-il d'avoir du mal à organiser votre travail lorsque vous avez une tâche qui requiert de l'organisation ?",
+      "q3": "À quelle fréquence avez-vous des difficultés à vous rappeler de vos rendez-vous ou de vos obligations ?",
+      "q4": "Lorsque vous devez faire une tâche qui nécessite beaucoup de réflexion, à quelle fréquence évitez-vous ou différez-vous le début de cette tâche ?",
+      "q5": "À quelle fréquence vous arrive-t-il de gigoter ou de bouger les mains ou les pieds lorsque vous devez rester assis longtemps ?",
+      "q6": "À quelle fréquence vous arrive-t-il d'être trop actif(ve) ou de faire des choses comme si vous étiez « monté(e) sur ressorts » ?",
+      "q7": "À quelle fréquence vous arrive-t-il de faire des erreurs par étourderie lorsque vous avez à travailler sur un projet ennuyeux ou difficile ?",
+      "q8": "À quelle fréquence vous arrive-t-il d'avoir du mal à rester attentif(ve) lorsque vous effectuez un travail fastidieux ou répétitif ?",
+      "q9": "À quelle fréquence vous arrive-t-il d'avoir du mal à vous concentrer sur ce que l'on vous dit, même quand on s'adresse directement à vous ?",
+      "q10": "À quelle fréquence vous arrive-t-il d'égarer ou de ne pas trouver des objets à votre domicile ou à votre lieu de travail ?",
+      "q11": "À quelle fréquence vous distrayez-vous en raison de ce qui se passe autour de vous ?",
+      "q12": "À quelle fréquence vous arrive-t-il de quitter votre siège lors de réunions ou dans d'autres situations où vous devriez rester assis(e) ?",
+      "q13": "À quelle fréquence vous sentez-vous agité(e) ou remuant(e) ?",
+      "q14": "À quelle fréquence vous arrive-t-il d'avoir des difficultés à vous défouler et à vous relaxer quand vous avez du temps libre ?",
+      "q15": "À quelle fréquence vous arrive-t-il de parler trop lorsque vous êtes avec d'autres personnes ?",
+      "q16": "À quelle fréquence, lorsque vous participez à une conversation, vous arrive-t-il de finir les phrases de vos interlocuteurs avant qu'ils aient pu le faire eux-mêmes ?",
+      "q17": "À quelle fréquence vous arrive-t-il d'avoir du mal à attendre votre tour dans les situations où chacun doit attendre son tour ?",
+      "q18": "À quelle fréquence vous arrive-t-il d'interrompre les autres lorsqu'ils sont occupés ?",
+      "score_label": "Score total",
+      "score_max": "/ 72",
+      "chip_a": "Partie A",
+      "chip_b": "Partie B",
+      "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
+      "progress": "{{answered}} / {{total}} réponses",
+      "submit": "Valider le questionnaire"
     },
     "decisional_balance": {
       "label": "Balance décisionnelle",
@@ -802,6 +1265,538 @@
       "add_trigger": "Ajouter",
       "saved_message": "Votre balance a été sauvegardée.",
       "save": "Sauvegarder"
+    }
+  },
+  "module": {
+    "crisis_plan": {
+      "label": "Plan de crise",
+      "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
+      "step_1": {
+        "title": "Signes avant-coureurs",
+        "hint": "Comment est-ce que je me sens quand une crise approche ?"
+      },
+      "step_2": {
+        "title": "Stratégies d'apaisement internes",
+        "hint": "Que puis-je faire seul(e) pour me calmer ?"
+      },
+      "step_3": {
+        "title": "Personnes ou lieux de distraction",
+        "hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?"
+      },
+      "step_4": {
+        "title": "Proches à contacter",
+        "hint": "Qui peut m'écouter et m'aider si je me sens en danger ?"
+      },
+      "step_5": {
+        "title": "Professionnels et urgences",
+        "hint": "Quels professionnels ou services puis-je contacter ?"
+      },
+      "step_6": {
+        "title": "Sécuriser mon environnement",
+        "hint": "Comment rendre mon entourage plus sûr ?"
+      },
+      "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide"
+    },
+    "therapeutic_commitment": {
+      "label": "Contrat d'engagement thérapeutique",
+      "description": "Alliance thérapeutique : engagement à utiliser les ressources avant tout passage à l'acte."
+    },
+    "distress_tolerance": {
+      "label": "Boîte à outils de tolérance à la détresse",
+      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
+    },
+    "medication_side_effects": {
+      "label": "Thermomètre de tolérance aux psychotropes",
+      "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
+      "field_1": {
+        "label": "Sédation",
+        "detail": "Somnolence, lenteur, difficultés de concentration — échelle 0–3"
+      },
+      "field_2": {
+        "label": "Akathisie",
+        "detail": "Agitation intérieure, impossibilité de rester immobile — échelle 0–3"
+      },
+      "field_3": {
+        "label": "Tremblements",
+        "detail": "Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3"
+      },
+      "field_4": {
+        "label": "Sécheresse buccale",
+        "detail": "Anticholinergiques, tricycliques — échelle 0–3"
+      },
+      "field_5": {
+        "label": "Troubles du sommeil",
+        "detail": "Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3"
+      },
+      "field_6": {
+        "label": "Nausées / troubles digestifs",
+        "detail": "Lithium, valproate, ISRS — échelle 0–3"
+      },
+      "field_7": {
+        "label": "Notes libres",
+        "detail": "Contexte, remarque, moment de la journée"
+      },
+      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
+    },
+    "medication_adherence": {
+      "label": "Module Observance",
+      "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
+      "field_1": {
+        "label": "Pris",
+        "detail": "Traitement pris dans son intégralité"
+      },
+      "field_2": {
+        "label": "Partiellement",
+        "detail": "Traitement pris en partie (oubli, difficulté)"
+      },
+      "field_3": {
+        "label": "Non pris",
+        "detail": "Traitement non pris ce jour"
+      },
+      "field_4": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel (oubli, remarque…)"
+      },
+      "field_5": {
+        "label": "Historique",
+        "detail": "Liste brute des 30 derniers jours (date, statut, note)"
+      },
+      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+    },
+    "psychoeducation": {
+      "label": "Psychoéducation",
+      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+    },
+    "sleep_diary": {
+      "label": "Agenda du sommeil",
+      "description": "Suivi quotidien du sommeil : heure de coucher, lever, efficacité.",
+      "field_1": {
+        "label": "Heure de coucher",
+        "detail": "Sélecteur horaire"
+      },
+      "field_2": {
+        "label": "Heure de lever",
+        "detail": "Sélecteur horaire"
+      },
+      "field_3": {
+        "label": "Temps pour s'endormir",
+        "detail": "Curseur en minutes (0–120)"
+      },
+      "field_4": {
+        "label": "Nombre de réveils nocturnes",
+        "detail": "Curseur (0–10)"
+      },
+      "field_5": {
+        "label": "Durée totale des réveils",
+        "detail": "Curseur en minutes (0–120)"
+      },
+      "field_6": {
+        "label": "Qualité du sommeil",
+        "detail": "Échelle 1 à 5 étoiles"
+      },
+      "field_7": {
+        "label": "Cauchemars",
+        "detail": "Oui / Non"
+      },
+      "field_8": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel"
+      },
+      "footer": "Formule TCC-I (Morin, 1993) — SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70–84 % · < 70 %."
+    },
+    "diet_weight_psycho": {
+      "label": "Psychoéducation diététique & poids",
+      "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
+    },
+    "chronobiology_tracker": {
+      "label": "Traqueur de régularité chronobiologique",
+      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires."
+    },
+    "mood_tracker": {
+      "label": "Thermomètre de l'humeur & énergie",
+      "description": "Suivi quotidien de l'humeur et du niveau d'énergie sur une échelle visuelle.",
+      "field_1": {
+        "label": "Humeur",
+        "detail": "Échelle 1–10"
+      },
+      "field_2": {
+        "label": "Énergie",
+        "detail": "Échelle 1–10"
+      },
+      "field_3": {
+        "label": "Anxiété",
+        "detail": "Échelle 1–10"
+      },
+      "field_4": {
+        "label": "Plaisir",
+        "detail": "Échelle 1–10 — dimension anhédonique (SHAPS 1995)"
+      },
+      "field_5": {
+        "label": "Notes libres",
+        "detail": "Champ texte optionnel"
+      },
+      "footer": "Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l'appareil."
+    },
+    "emotion_wheel": {
+      "label": "Roue des émotions",
+      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie."
+    },
+    "behavioral_activation": {
+      "label": "Journal d'activation comportementale",
+      "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
+      "field_1": {
+        "label": "Date",
+        "detail": "Date de l'activité (passée ou à venir)"
+      },
+      "field_2": {
+        "label": "Nom de l'activité",
+        "detail": "Texte libre — ex : Marche 20 min, Appel à un ami"
+      },
+      "field_3": {
+        "label": "Réalisée / Planifiée",
+        "detail": "Le patient coche quand l'activité est accomplie"
+      },
+      "field_4": {
+        "label": "Plaisir (0–10)",
+        "detail": "Satisfaction retirée de l'activité — brut, sans interprétation"
+      },
+      "field_5": {
+        "label": "Maîtrise (0–10)",
+        "detail": "Sentiment d'accomplissement — brut, sans interprétation"
+      },
+      "field_6": {
+        "label": "Notes libres",
+        "detail": "Contexte, ressenti, remarque"
+      },
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+    },
+    "beck_columns": {
+      "label": "Colonnes de Beck",
+      "description": "Journal des pensées : Situation, Émotion, Pensée automatique, Pensée alternative.",
+      "step_1": {
+        "title": "Situation",
+        "hint": "Où étais-je ? Que se passait-il ? Qui était présent ?"
+      },
+      "step_2": {
+        "title": "Émotion(s)",
+        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0–100) ?"
+      },
+      "step_3": {
+        "title": "Pensée automatique",
+        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0–100) ?"
+      },
+      "step_4": {
+        "title": "Réponse rationnelle",
+        "hint": "Quelle autre façon de voir la situation ? Quels faits contredisent cette pensée ?"
+      },
+      "step_5": {
+        "title": "Résultat",
+        "hint": "Quelle émotion maintenant ? Intensité (0–100) ? Conviction en la pensée alternative (0–100) ?"
+      },
+      "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
+    },
+    "cognitive_distortions": {
+      "label": "Détecteur de distorsions cognitives",
+      "description": "Cartes éducatives sur les pièges de la pensée (tout-ou-rien, surgénéralisation, lecture de pensée…)"
+    },
+    "grounding": {
+      "label": "Techniques d'ancrage",
+      "description": "Exercice 5-4-3-2-1 pour revenir au présent en cas de dissociation ou de rumination sévère."
+    },
+    "rim": {
+      "label": "RIM – Imagerie mentale",
+      "description": "Technique de retraitement par l'imagerie mentale."
+    },
+    "fear_thermometer": {
+      "label": "Thermomètre de la peur",
+      "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
+      "field_1": {
+        "label": "Situation déclenchante",
+        "detail": "Sélection dans le catalogue personnel ou texte libre"
+      },
+      "field_2": {
+        "label": "SUDs avant (0–100)",
+        "detail": "Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation"
+      },
+      "field_3": {
+        "label": "Stratégies utilisées",
+        "detail": "Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre"
+      },
+      "field_4": {
+        "label": "SUDs après (0–100)",
+        "detail": "Niveau de détresse après la stratégie — optionnel (remplissage différé possible)"
+      },
+      "field_5": {
+        "label": "Notes libres",
+        "detail": "Contexte, observations, remarque"
+      },
+      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
+    },
+    "exposure_hierarchy": {
+      "label": "Hiérarchie d'exposition",
+      "description": "Constructeur de paliers d'exposition graduelle pour phobies et TOC."
+    },
+    "breathing_techniques": {
+      "label": "Techniques de respiration",
+      "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
+      "field_1": {
+        "label": "Cohérence cardiaque",
+        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
+      },
+      "field_2": {
+        "label": "Respiration diaphragmatique",
+        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
+      },
+      "field_3": {
+        "label": "Respiration carrée",
+        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées"
+      },
+      "field_4": {
+        "label": "Technique 4-7-8",
+        "detail": "Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
+      },
+      "field_5": {
+        "label": "Pleine conscience respiratoire",
+        "detail": "MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
+      },
+      "field_6": {
+        "label": "Historique des sessions",
+        "detail": "Technique utilisée + durée effective — données brutes, sans interprétation"
+      },
+      "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+    },
+    "cognitive_saturation": {
+      "label": "Saturation cognitive",
+      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+    },
+    "craving_journal": {
+      "label": "Journal de craving",
+      "description": "Noter l'intensité de l'envie (0-10), le déclencheur et la stratégie d'évitement utilisée."
+    },
+    "decisional_balance": {
+      "label": "Balance décisionnelle",
+      "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
+      "q1": {
+        "title": "Avantages du changement",
+        "subtitle": "Raisons de changer"
+      },
+      "q2": {
+        "title": "Inconvénients du changement",
+        "subtitle": "Coûts du changement"
+      },
+      "q3": {
+        "title": "Avantages du statu quo",
+        "subtitle": "Raisons de rester"
+      },
+      "q4": {
+        "title": "Inconvénients du statu quo",
+        "subtitle": "Coûts de rester"
+      },
+      "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
+    }
+  },
+  "category": {
+    "safety": {
+      "label": "Sécurité & Gestion de Crise",
+      "subtitle": "Le bouclier vital"
+    },
+    "iatrogenic": {
+      "label": "Surveillance Iatrogénique & Somatique",
+      "subtitle": "Cœur de métier IPA"
+    },
+    "lifestyle": {
+      "label": "Hygiène de Vie & Rythmes Biologiques",
+      "subtitle": "Le socle métabolique"
+    },
+    "emotion": {
+      "label": "Régulation Émotionnelle & Humeur",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Restructuration Cognitive",
+      "subtitle": "Le moteur de la TCC"
+    },
+    "anxiety": {
+      "label": "Anxiété, Phobies & TOC",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictologie & Impulsivité",
+      "subtitle": "Le module souvent oublié"
+    }
+  },
+  "card": {
+    "sleep_01": {
+      "title": "Règles d'hygiène du sommeil",
+      "summary": "10 conseils pour améliorer la qualité de votre sommeil",
+      "intro": "Un sommeil de qualité repose sur des habitudes régulières. Voici les principes fondamentaux à appliquer progressivement.",
+      "h_horaires": "1. Horaires réguliers",
+      "p_horaires": "Couchez-vous et levez-vous à la même heure tous les jours, même le week-end. La régularité est le pilier le plus important.",
+      "h_lumiere": "2. Lumière et obscurité",
+      "li_l1_seg1": "Le matin, ",
+      "li_l1_seg2": "exposez-vous à la lumière naturelle",
+      "li_l1_seg3": " dans les 30 minutes après le réveil.",
+      "li_l2_seg1": "Le soir, ",
+      "li_l2_seg2": "réduisez les lumières",
+      "li_l2_seg3": " 1 à 2 heures avant de dormir.",
+      "li_lumiere_3": "Évitez les écrans (téléphone, tablette, ordinateur) dans les 30 minutes précédant le coucher.",
+      "h_temp": "3. Température",
+      "p_temp_seg1": "La température idéale pour dormir est entre ",
+      "p_temp_seg2": "16 °C et 18 °C",
+      "p_temp_seg3": ". Un corps frais favorise l'endormissement.",
+      "h_alim": "4. Alimentation et stimulants",
+      "li_a1_seg1": "Évitez la ",
+      "li_a1_seg2": "caféine",
+      "li_a1_seg3": " après 14h (café, thé, sodas).",
+      "li_a2_seg1": "Évitez l'",
+      "li_a2_seg2": "alcool",
+      "li_a2_seg3": " : il perturbe les cycles du sommeil profond.",
+      "li_alim_3": "Ne mangez pas de repas copieux dans les 2 heures précédant le coucher.",
+      "h_sport": "5. Activité physique",
+      "p_sport_seg1": "L'activité physique régulière améliore le sommeil — mais évitez le sport intense dans les ",
+      "p_sport_seg2": "3 heures avant le coucher",
+      "p_sport_seg3": ".",
+      "h_lit": "6. Le lit = sommeil",
+      "p_lit": "Utilisez votre lit uniquement pour dormir. Évitez d'y travailler ou de regarder des écrans.",
+      "h_rituel": "7. Rituel du coucher",
+      "p_rituel": "Créez un rituel apaisant : lecture, respiration lente, étirements doux... Ce signal conditionne votre cerveau à s'endormir.",
+      "h_insomnie": "8. Si vous ne dormez pas",
+      "p_ins_seg1": "Si vous n'êtes pas endormi(e) après 20 minutes, ",
+      "p_ins_seg2": "levez-vous",
+      "p_ins_seg3": ". Faites une activité calme dans une pièce peu éclairée, puis revenez au lit quand la somnolence revient.",
+      "h_sieste": "9. Sieste",
+      "p_sie_seg1": "Si vous faites la sieste, limitez-la à ",
+      "p_sie_seg2": "20 minutes",
+      "p_sie_seg3": " avant 14h. Une sieste longue ou tardive perturbe le sommeil nocturne.",
+      "h_agenda": "10. Agenda du sommeil",
+      "p_agenda": "Utiliser l'agenda du sommeil de l'application vous permet de repérer vos rythmes et d'ajuster vos habitudes progressivement.",
+      "note": "Ces règles ne remplacent pas l'avis de votre praticien. Parlez-lui de vos difficultés de sommeil."
+    },
+    "grounding_01": {
+      "title": "Technique d'ancrage 5-4-3-2-1",
+      "summary": "Revenir au moment présent en cas d'anxiété ou de dissociation",
+      "h_main": "Technique d'ancrage 5-4-3-2-1",
+      "intro_1_s1": "C'est un ",
+      "intro_1_s2": "frein d'urgence",
+      "intro_1_s3": " pour le cerveau. Cette technique utilise vos cinq sens pour forcer votre système nerveux à revenir dans l'instant présent. Elle est particulièrement utile en cas d'anxiété intense, de flashback ou de dissociation.",
+      "h_quand": "Quand l'utiliser ?",
+      "li_q1": "Lors d'une montée d'angoisse",
+      "li_q2": "Quand vos pensées s'emballent",
+      "li_q3": "Lors d'un flashback ou d'une dissociation",
+      "li_q4": "Pour vous recentrer avant un moment stressant",
+      "h_comment": "Comment pratiquer",
+      "p_inspir": "Prenez une profonde inspiration. Puis parcourez chaque sens :",
+      "h_1": "5 choses que vous voyez",
+      "p_1": "Regardez autour de vous et nommez mentalement (ou à voix haute) 5 éléments.",
+      "h_2": "4 choses que vous touchez",
+      "p_2": "Portez attention aux textures et sensations physiques.",
+      "h_3": "3 choses que vous entendez",
+      "p_3": "Fermez les yeux et identifiez 3 sons.",
+      "h_4": "2 choses que vous sentez",
+      "p_4": "Identifiez deux odeurs, même subtiles.",
+      "h_5": "1 chose que vous goûtez",
+      "p_5": "Notez le goût présent dans votre bouche.",
+      "p_retenir_1": "Prenez à nouveau une grande inspiration. Si l'angoisse est toujours là, recommencez le cycle avec d'autres objets.",
+      "h_retenir": "À retenir",
+      "li_r1": "Prenez votre temps à chaque étape.",
+      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse — l'important est de ",
+      "li_r2_s2": "focaliser votre attention",
+      "li_r2_s3": ".",
+      "li_r3": "Cette technique demande un peu de pratique. Entraînez-vous avant les moments de crise.",
+      "note": "Partagez votre expérience avec cette technique à votre praticien lors de votre prochain rendez-vous."
+    },
+    "cbt_01": {
+      "title": "Identifier les distorsions cognitives",
+      "summary": "Reconnaître les pièges de la pensée automatique",
+      "h_main": "Identifier les distorsions cognitives",
+      "intro": "Les distorsions cognitives sont des façons automatiques et déformées d'interpréter la réalité. Les reconnaître est la première étape pour les modifier.",
+      "h_10": "Les 10 distorsions les plus courantes",
+      "d1": {
+        "heading": "1. La pensée tout-ou-rien",
+        "body": "Vous voyez les choses de façon extrême, sans nuance.",
+        "example": "\"Si je ne réussis pas parfaitement, je suis un(e) raté(e).\""
+      },
+      "d2": {
+        "heading": "2. La surgénéralisation",
+        "body": "Un événement négatif devient une règle universelle.",
+        "example": "\"J'ai échoué une fois → j'échoue toujours.\""
+      },
+      "d3": {
+        "heading": "3. Le filtre mental",
+        "body": "Vous ne voyez que les aspects négatifs d'une situation."
+      },
+      "d4": {
+        "heading": "4. La disqualification du positif",
+        "body": "Les expériences positives \"ne comptent pas\"."
+      },
+      "d5": {
+        "heading": "5. La lecture de pensée",
+        "body": "Vous supposez savoir ce que les autres pensent."
+      },
+      "d6": {
+        "heading": "6. La prédiction négative",
+        "body": "Vous anticipez que les choses vont mal se passer."
+      },
+      "d7": {
+        "heading": "7. La catastrophisation",
+        "body": "Vous exagérez l'importance d'un problème."
+      },
+      "d8": {
+        "heading": "8. Le raisonnement émotionnel",
+        "body": "\"Je me sens incompétent(e) → donc je suis incompétent(e).\""
+      },
+      "d9": {
+        "heading": "9. Les \"il faut / je dois\"",
+        "body": "Des règles rigides et exigeantes envers vous-même ou les autres."
+      },
+      "d10": {
+        "heading": "10. L'étiquetage",
+        "body": "\"J'ai fait une erreur → je suis nul(le).\""
+      },
+      "h_comment": "Comment les utiliser ?",
+      "li_c1": "Quelle pensée automatique est apparue ?",
+      "li_c2": "Cette pensée correspond-elle à une distorsion ?",
+      "li_c3": "Quelle serait une façon plus réaliste de voir la situation ?",
+      "note": "Votre praticien peut vous accompagner dans ce travail, notamment avec les Colonnes de Beck."
+    },
+    "appetite_01": {
+      "title": "Traitements et Appétit : Reprendre le contrôle",
+      "summary": "Comprendre et gérer la faim liée aux traitements",
+      "h_main": "Traitements et Appétit : Reprendre le contrôle",
+      "intro_s1": "Certains traitements (comme les antipsychotiques ou les thymorégulateurs) peuvent modifier votre métabolisme et bloquer le signal de satiété envoyé à votre cerveau. ",
+      "intro_s2": "Vous n'êtes pas coupable d'avoir faim, c'est un effet biologique du traitement.",
+      "intro_s3": "Voici des stratégies comportementales pour limiter la prise de poids sans faire de régime restrictif :",
+      "def_1": {
+        "term": "La règle des 20 minutes",
+        "body": "Le cerveau met 20 minutes à comprendre que l'estomac est plein. Mangez lentement, posez votre fourchette entre chaque bouchée."
+      },
+      "def_2": {
+        "term": "Volume et Fibres",
+        "body": "Augmentez le volume de votre repas avec des légumes verts ou des aliments riches en fibres."
+      },
+      "def_3": {
+        "term": "Le piège de la soif",
+        "body": "Les traitements assèchent la bouche. On confond souvent cette soif avec une envie de sucre. Buvez un grand verre d'eau avant chaque grignotage et attendez 10 minutes."
+      },
+      "def_4": {
+        "term": "Mouvement doux",
+        "body": "Une marche de 15 minutes après le repas aide à réguler le pic de glycémie."
+      },
+      "callout": "Ne modifiez ou n'arrêtez jamais votre traitement sans en parler à votre praticien."
+    },
+    "lithium_01": {
+      "title": "Lithium : Hydratation et règles de sécurité",
+      "summary": "Les 3 règles essentielles pour rester en sécurité sous Lithium",
+      "h_main": "Traitement par Lithium : Les règles de sécurité",
+      "h_3regles": "Les 3 règles d'or de l'hydratation",
+      "li_r1": "Buvez régulièrement : Visez 1,5 à 2 litres d'eau par jour.",
+      "li_r2": "Ne changez pas vos habitudes de sel : Un régime sans sel soudain fait monter dangereusement le taux de lithium.",
+      "li_r3": "Compensez les pertes : En cas de forte chaleur, de sport intense, ou de diarrhée/vomissements, buvez davantage d'eau riche en minéraux.",
+      "h_eviter": "Ce qu'il faut absolument éviter",
+      "li_e1": "Les anti-inflammatoires (Ibuprofène, Advil, Nurofen). Ils sont toxiques avec le Lithium. Préférez le Paracétamol.",
+      "li_e2": "Les régimes \"détox\" ou diurétiques.",
+      "note": "Signes d'alerte (Surdosage) : Tremblements importants, soif extrême, nausées sévères ou confusion → contactez immédiatement votre médecin ou le 15.",
+      "callout": "Ne modifiez jamais votre dose ou votre traitement sans en parler à votre praticien."
     }
   }
 }

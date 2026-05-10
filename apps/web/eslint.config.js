@@ -19,5 +19,11 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // react-hooks/set-state-in-effect is part of the React Compiler ruleset (v7+).
+      // This project does not use the React Compiler; the rule produces false positives
+      // on standard async data-fetching effects (fetch → await → setState).
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

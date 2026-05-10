@@ -11,7 +11,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { getTechnique, getCycleDuration, type BreathingPhase } from '../../constants/breathingTechniques'
 import { saveBreathingSession, generateId } from '../../lib/database'
-import { supabase } from '../../lib/supabase'
+import { logEvent } from '../../services/engagementService'
 import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
@@ -161,11 +161,7 @@ export default function BreathingExerciseScreen() {
           duration_seconds: totalSeconds,
         })
         if (patient?.id) {
-          await supabase.from('patient_engagement_logs').insert({
-            patient_id: patient.id,
-            event_type: 'SAVE_BREATHING_SESSION',
-            metadata: {},
-          })
+          await logEvent(patient.id, 'SAVE_BREATHING_SESSION')
         }
       } catch {
         // Échec silencieux — la session n'est pas critique

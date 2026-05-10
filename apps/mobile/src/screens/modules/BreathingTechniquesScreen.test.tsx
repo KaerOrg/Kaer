@@ -61,7 +61,7 @@ describe('BreathingTechniquesScreen', () => {
 
   it('navigue vers BreathingExercise au tap sur la cohérence cardiaque', async () => {
     render(<BreathingTechniquesScreen />)
-    fireEvent.press(await screen.findByLabelText('Commencer Cohérence cardiaque'))
+    fireEvent.press(await screen.findByLabelText('Cohérence cardiaque'))
     expect(mockNavigate).toHaveBeenCalledWith('BreathingExercise', {
       techniqueKey: 'coherence_cardiaque',
     })
@@ -69,7 +69,7 @@ describe('BreathingTechniquesScreen', () => {
 
   it('navigue vers BreathingExercise au tap sur la respiration carrée', async () => {
     render(<BreathingTechniquesScreen />)
-    fireEvent.press(await screen.findByLabelText('Commencer Respiration carrée'))
+    fireEvent.press(await screen.findByLabelText('Respiration carrée'))
     expect(mockNavigate).toHaveBeenCalledWith('BreathingExercise', {
       techniqueKey: 'carree',
     })

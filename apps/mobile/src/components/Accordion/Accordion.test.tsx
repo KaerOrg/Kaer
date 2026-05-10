@@ -14,7 +14,7 @@ describe('Accordion', () => {
     expect(screen.queryByText('corps')).toBeNull()
   })
 
-  it('s'ouvre au clic', () => {
+  it("s'ouvre au clic", () => {
     render(<Accordion title="S"><Text>corps</Text></Accordion>)
     fireEvent.press(screen.getByText('S'))
     expect(screen.getByText('corps')).toBeTruthy()
@@ -27,7 +27,7 @@ describe('Accordion', () => {
     expect(screen.queryByText('corps')).toBeNull()
   })
 
-  it('s'ouvre par défaut si defaultOpen=true', () => {
+  it("s'ouvre par défaut si defaultOpen=true", () => {
     render(<Accordion title="S" defaultOpen><Text>corps</Text></Accordion>)
     expect(screen.getByText('corps')).toBeTruthy()
   })

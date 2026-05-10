@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { PatientPage } from './pages/PatientPage'
 import { PatientRegisterPage } from './pages/PatientRegisterPage'
 import { DispensairePage } from './pages/DispensairePage'
+import { ModuleCatalogPage } from './pages/ModuleCatalogPage'
+import { ModulePreviewPage } from './pages/ModulePreviewPage'
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -14,7 +16,7 @@ function App() {
 
   useEffect(() => {
     loadSession()
-  }, [])
+  }, [loadSession])
 
   if (loading) {
     return (
@@ -40,6 +42,8 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/patient/:id" element={<PatientPage />} />
             <Route path="/dispensaire" element={<DispensairePage />} />
+            <Route path="/modules" element={<ModuleCatalogPage />} />
+            <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (

@@ -1,22 +1,26 @@
 const { getDefaultConfig } = require('expo/metro-config')
 const path = require('path')
 
-const projectRoot = __dirname
+const config = getDefaultConfig(__dirname)
 
-const config = getDefaultConfig(projectRoot)
+// In this monorepo, packages hoisted to the root node_modules (zustand,
+// @react-navigation/*…) resolve to react@19.2.5, while react-native's renderer
+// needs exactly react@19.1.0. Two React copies in the same Metro bundle break
+// hook calls. resolveRequest intercepts before normal resolution so every
+// require('react') lands on the single 19.1.0 copy in apps/mobile/node_modules.
+const reactDir = path.resolve(__dirname, 'node_modules/react')
 
-// Monorepo deduplication: apps/mobile has react@19.1.0 while root
-// node_modules has react@19.2.5 (pulled in by react-dom).
-// The react-native renderer bundled in react-native is compiled for 19.1.0
-// and requires an EXACT version match.
-// resolveRequest intercepts every import and forces all 'react' to 19.1.0.
+const REACT_ALIASES = {
+  'react': path.join(reactDir, 'index.js'),
+  'react/jsx-runtime': path.join(reactDir, 'jsx-runtime.js'),
+  'react/jsx-dev-runtime': path.join(reactDir, 'jsx-dev-runtime.js'),
+}
+
+const _resolve = config.resolver.resolveRequest
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName === 'react' || moduleName.startsWith('react/')) {
-    const resolved = require.resolve(moduleName, {
-      paths: [projectRoot],
-    })
-    return { filePath: resolved, type: 'sourceFile' }
-  }
+  const alias = REACT_ALIASES[moduleName]
+  if (alias) return { filePath: alias, type: 'sourceFile' }
+  if (_resolve) return _resolve(context, moduleName, platform)
   return context.resolveRequest(context, moduleName, platform)
 }
 

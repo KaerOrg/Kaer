@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Check, Users } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -10,15 +9,20 @@ import { InputField } from '../components/InputField'
 import { Card } from '../components/Card'
 import { EmptyState } from '../components/EmptyState'
 import { StatusBadge } from '../components/StatusBadge'
-import type { PatientSummary } from '../lib/database.types'
+import { StepBreadcrumb } from '../components/StepBreadcrumb/StepBreadcrumb'
+import { Toggle } from '../components/Toggle/Toggle'
+import { SelectField } from '../components/SelectField/SelectField'
+import type { PatientSummary, ModuleType } from '../lib/database.types'
+import { fetchInviteCategories, type ModuleCategory } from '../services/moduleCatalogService'
+import { fetchPatientsWithModules } from '../services/patientService'
+import {
+  fetchPendingInvitations,
+  sendInvitation,
+  type PendingInvitation,
+} from '../services/invitationService'
 import './DashboardPage.css'
 
-interface PendingInvitation {
-  id: string
-  patient_email: string
-  expires_at: string
-  created_at: string
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function DashboardPage() {
   const { practitioner } = useAuthStore()
@@ -28,101 +32,127 @@ export function DashboardPage() {
   const [loadingPatients, setLoadingPatients] = useState(true)
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([])
   const [showInviteForm, setShowInviteForm] = useState(false)
+
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteAlias, setInviteAlias] = useState('')
+  const [inviteEmailError, setInviteEmailError] = useState('')
+  const [inviteFirstName, setInviteFirstName] = useState('')
+  const [inviteLastName, setInviteLastName] = useState('')
+  const [inviteBirthDate, setInviteBirthDate] = useState('')
+  const [inviteBirthDateError, setInviteBirthDateError] = useState('')
+  const [inviteSex, setInviteSex] = useState('')
+  const [inviteTeenMode, setInviteTeenMode] = useState(false)
+  const [inviteStep, setInviteStep] = useState<1 | 2>(1)
+  const [inviteModules, setInviteModules] = useState<Set<ModuleType>>(new Set())
+  const [inviteCategories, setInviteCategories] = useState<ModuleCategory[]>([])
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [inviteError, setInviteError] = useState('')
 
+  const { minBirthDate, maxBirthDate } = useMemo(() => {
+    const today = new Date()
+    const max = today.toISOString().split('T')[0]
+    const min = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate())
+      .toISOString().split('T')[0]
+    return { minBirthDate: min, maxBirthDate: max }
+  }, [])
+
+  const loadPatients = useCallback(async () => {
+    if (!practitioner) return
+    setPatients(await fetchPatientsWithModules(practitioner.id))
+    setLoadingPatients(false)
+  }, [practitioner])
+
+  const loadPendingInvitations = useCallback(async () => {
+    if (!practitioner) return
+    setPendingInvitations(await fetchPendingInvitations(practitioner.id))
+  }, [practitioner])
+
   useEffect(() => {
     loadPatients()
     loadPendingInvitations()
+    fetchInviteCategories().then(cats => setInviteCategories(cats))
+  }, [loadPatients, loadPendingInvitations])
+
+  const handleEmailBlur = useCallback((value: string) => {
+    setInviteEmailError(value && !EMAIL_RE.test(value.trim()) ? t('dashboard.invite_email_error') : '')
+  }, [t])
+
+  const handleBirthDateBlur = useCallback((value: string) => {
+    if (!value) { setInviteBirthDateError(''); return }
+    if (value < minBirthDate) setInviteBirthDateError(t('dashboard.invite_birth_date_error_old'))
+    else if (value > maxBirthDate) setInviteBirthDateError(t('dashboard.invite_birth_date_error_future'))
+    else setInviteBirthDateError('')
+  }, [t, minBirthDate, maxBirthDate])
+
+  const resetForm = useCallback(() => {
+    setInviteEmail('')
+    setInviteEmailError('')
+    setInviteFirstName('')
+    setInviteLastName('')
+    setInviteBirthDate('')
+    setInviteBirthDateError('')
+    setInviteSex('')
+    setInviteTeenMode(false)
+    setInviteStep(1)
+    setInviteModules(new Set())
   }, [])
 
-  const loadPatients = async () => {
-    if (!practitioner) return
-    setLoadingPatients(true)
+  const toggleInviteModule = useCallback((moduleType: ModuleType) => {
+    setInviteModules(prev => {
+      const next = new Set(prev)
+      if (next.has(moduleType)) next.delete(moduleType)
+      else next.add(moduleType)
+      return next
+    })
+  }, [])
 
-    interface RelationRow { patient_id: string; patient_alias: string | null; patients: { id: string; email: string } | { id: string; email: string }[] | null }
-    const { data: relations } = await supabase
-      .from('practitioner_patients')
-      .select('patient_id, patient_alias, patients(id, email)')
-      .eq('practitioner_id', practitioner.id) as { data: RelationRow[] | null }
-
-    if (!relations) { setLoadingPatients(false); return }
-
-    const patientIds = relations.map(r => r.patient_id)
-    const { data: modules } = patientIds.length > 0
-      ? await supabase.from('patient_modules').select('*').in('patient_id', patientIds)
-      : { data: [] as import('../lib/database.types').PatientModule[] }
-
-    const list: PatientSummary[] = relations.map(rel => {
-      const patient = Array.isArray(rel.patients) ? rel.patients[0] : rel.patients
-      return {
-        id: rel.patient_id,
-        email: (patient as { email: string } | null)?.email ?? '',
-        patient_alias: rel.patient_alias ?? null,
-        modules: (modules ?? []).filter(m => m.patient_id === rel.patient_id),
-      }
-    }).filter(p => p.id)
-
-    setPatients(list)
-    setLoadingPatients(false)
-  }
-
-  const loadPendingInvitations = async () => {
-    if (!practitioner) return
-    const { data } = await supabase
-      .from('invitations')
-      .select('id, patient_email, expires_at, created_at')
-      .eq('practitioner_id', practitioner.id)
-      .is('accepted_at', null)
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-    setPendingInvitations(data ?? [])
-  }
-
-  const sendInvitation = async (e: React.FormEvent) => {
+  const goToStep2 = useCallback((e: React.FormEvent) => {
     e.preventDefault()
+    handleEmailBlur(inviteEmail)
+    if (!inviteEmail.trim() || !EMAIL_RE.test(inviteEmail.trim())) return
+    if (inviteBirthDateError) return
+    setInviteStep(2)
+  }, [inviteEmail, inviteBirthDateError, handleEmailBlur])
+
+  const submitInvitation = useCallback(async () => {
     if (!practitioner) return
+    if (inviteEmailError || inviteBirthDateError) return
     setInviteLoading(true)
     setInviteError('')
 
-    const { data, error } = await supabase.functions.invoke('send-invitation', {
-      body: {
-        practitioner_id: practitioner.id,
-        patient_email: inviteEmail.toLowerCase().trim(),
-        alias: inviteAlias.trim() || null,
-      },
+    const result = await sendInvitation({
+      practitionerId: practitioner.id,
+      email: inviteEmail,
+      firstName: inviteFirstName,
+      lastName: inviteLastName,
+      birthDate: inviteBirthDate || null,
+      sex: inviteSex || null,
+      teenMode: inviteTeenMode,
+      modules: [...inviteModules],
     })
 
-    if (error) {
-      let errorMessage = t('dashboard.invite_error_generic')
-      try {
-        const body = await (error as any).context?.json?.()
-        if (body?.error) errorMessage = body.error
-      } catch { /* use default */ }
-      setInviteError(errorMessage)
-      setInviteLoading(false)
-      return
-    }
-
-    if (!data?.success) {
-      setInviteError(data?.error ?? t('dashboard.invite_error_generic'))
+    if (!result.ok) {
+      const message = result.errorCode
+        ? t(`dashboard.${result.errorCode}`)
+        : result.errorMessage ?? t('dashboard.invite_error_generic')
+      setInviteError(message)
       setInviteLoading(false)
       return
     }
 
     setInviteSuccess(true)
     setInviteLoading(false)
-    setInviteEmail('')
-    setInviteAlias('')
+    resetForm()
     loadPendingInvitations()
     setTimeout(() => {
       setInviteSuccess(false)
       setShowInviteForm(false)
     }, 3000)
-  }
+  }, [
+    practitioner, inviteEmail, inviteEmailError, inviteFirstName, inviteLastName,
+    inviteBirthDate, inviteBirthDateError, inviteSex, inviteTeenMode, inviteModules,
+    t, resetForm, loadPendingInvitations,
+  ])
 
   const patientSubtitle = patients.length === 1
     ? t('dashboard.subtitle_one', { count: patients.length })
@@ -149,39 +179,132 @@ export function DashboardPage() {
               subtitle: t('dashboard.invite_card_subtitle'),
             }}
           >
-            <form onSubmit={sendInvitation} className="invite-form">
-              <InputField
-                label={t('dashboard.invite_email_label')}
-                type="email"
-                value={inviteEmail}
-                onChange={e => setInviteEmail(e.target.value)}
-                placeholder={t('dashboard.invite_email_placeholder')}
-                required
-              />
-              <InputField
-                label={t('dashboard.invite_alias_label')}
-                type="text"
-                value={inviteAlias}
-                onChange={e => setInviteAlias(e.target.value)}
-                placeholder={t('dashboard.invite_alias_placeholder')}
-              />
-              {inviteError && (
-                <div className="invite-form__error">{inviteError}</div>
-              )}
-              {inviteSuccess && (
-                <div className="invite-form__success">
-                  <Check size={14} /> {t('dashboard.invite_success', { email: inviteEmail || '…' })}
-                </div>
-              )}
-              <div className="invite-form__actions">
-                <Button type="button" variant="secondary" onClick={() => setShowInviteForm(false)}>
-                  {t('common.cancel')}
-                </Button>
-                <Button type="submit" loading={inviteLoading}>
-                  {t('dashboard.send_invitation')}
-                </Button>
+            {/* Status messages — shown regardless of step */}
+            {inviteError && (
+              <div className="invite-form__error">{inviteError}</div>
+            )}
+            {inviteSuccess && (
+              <div className="invite-form__success">
+                <Check size={14} /> {t('dashboard.invite_success', { email: inviteEmail || '…' })}
               </div>
-            </form>
+            )}
+
+            <StepBreadcrumb
+              steps={[t('dashboard.invite_step_info'), t('dashboard.invite_step_modules')]}
+              currentStep={inviteStep}
+            />
+
+            {/* Step 1 — Patient info */}
+            {inviteStep === 1 && (
+              <form onSubmit={goToStep2} className="invite-form">
+                <InputField
+                  label={t('dashboard.invite_email_label')}
+                  type="email"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  onBlur={e => handleEmailBlur(e.target.value)}
+                  placeholder={t('dashboard.invite_email_placeholder')}
+                  error={inviteEmailError}
+                  required
+                />
+                <div className="invite-form__row">
+                  <InputField
+                    label={t('dashboard.invite_first_name_label')}
+                    type="text"
+                    value={inviteFirstName}
+                    onChange={e => setInviteFirstName(e.target.value)}
+                    placeholder={t('dashboard.invite_first_name_placeholder')}
+                  />
+                  <InputField
+                    label={t('dashboard.invite_last_name_label')}
+                    type="text"
+                    value={inviteLastName}
+                    onChange={e => setInviteLastName(e.target.value)}
+                    placeholder={t('dashboard.invite_last_name_placeholder')}
+                  />
+                </div>
+                <div className="invite-form__row">
+                  <InputField
+                    label={t('dashboard.invite_birth_date_label')}
+                    type="date"
+                    value={inviteBirthDate}
+                    onChange={e => setInviteBirthDate(e.target.value)}
+                    onBlur={e => handleBirthDateBlur(e.target.value)}
+                    min={minBirthDate}
+                    max={maxBirthDate}
+                    error={inviteBirthDateError}
+                  />
+                  <SelectField
+                    label={t('dashboard.invite_sex_label')}
+                    id="invite-sex"
+                    value={inviteSex}
+                    onChange={e => setInviteSex(e.target.value)}
+                  >
+                    <option value="">{t('dashboard.invite_sex_placeholder')}</option>
+                    <option value="M">{t('dashboard.invite_sex_m')}</option>
+                    <option value="F">{t('dashboard.invite_sex_f')}</option>
+                    <option value="O">{t('dashboard.invite_sex_o')}</option>
+                  </SelectField>
+                </div>
+                <Toggle
+                  checked={inviteTeenMode}
+                  onChange={setInviteTeenMode}
+                  label={t('patient.teen_mode_label')}
+                />
+                <div className="invite-form__actions">
+                  <Button type="button" variant="secondary" onClick={() => { setShowInviteForm(false); resetForm() }}>
+                    {t('common.cancel')}
+                  </Button>
+                  <Button type="submit">
+                    {t('dashboard.invite_next_button')}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Step 2 — Module pre-selection */}
+            {inviteStep === 2 && (
+              <div className="invite-module-picker-container">
+                <p className="invite-module-intro">{t('dashboard.invite_module_intro')}</p>
+
+                <div className="invite-module-picker">
+                  {inviteCategories.map(cat => (
+                    <div key={cat.id} className="invite-module-category">
+                      <div className="invite-module-category__title">{t(cat.labelKey)}</div>
+                      <div className="invite-module-category__grid">
+                        {cat.modules.map(mod => (
+                          <label
+                            key={mod.id}
+                            className={`invite-module-option${inviteModules.has(mod.id) ? ' invite-module-option--selected' : ''}`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={inviteModules.has(mod.id)}
+                              onChange={() => toggleInviteModule(mod.id)}
+                            />
+                            <div className="invite-module-option__content">
+                              <span className="invite-module-option__name">{t(`modules.${mod.id}.label`)}</span>
+                              <span className="invite-module-option__desc">{t(`modules.${mod.id}.description`)}</span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="invite-module-config-note">{t('dashboard.invite_module_config_note')}</p>
+
+                <div className="invite-form__actions">
+                  <Button type="button" variant="secondary" onClick={() => setInviteStep(1)}>
+                    ← {t('common.back')}
+                  </Button>
+                  <Button loading={inviteLoading} onClick={submitInvitation}>
+                    {t('dashboard.send_invitation')}
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         )}
 
@@ -191,17 +314,25 @@ export function DashboardPage() {
               {t('dashboard.pending_title', { count: pendingInvitations.length })}
             </h2>
             <div className="pending-invitations__list">
-              {pendingInvitations.map(inv => (
-                <div key={inv.id} className="pending-invitation-row">
-                  <span className="pending-invitation-row__email">{inv.patient_email}</span>
-                  <span className="pending-invitation-row__expires">
-                    {t('dashboard.pending_expires', {
-                      date: new Date(inv.expires_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),
-                    })}
-                  </span>
-                  <StatusBadge variant="warning" label={t('dashboard.pending_badge')} />
-                </div>
-              ))}
+              {pendingInvitations.map(inv => {
+                const displayName = [inv.patient_first_name, inv.patient_last_name].filter(Boolean).join(' ')
+                return (
+                  <div key={inv.id} className="pending-invitation-row">
+                    <div className="pending-invitation-row__info">
+                      {displayName ? (
+                        <span className="pending-invitation-row__name">{displayName}</span>
+                      ) : null}
+                      <span className="pending-invitation-row__email">{inv.patient_email}</span>
+                    </div>
+                    <span className="pending-invitation-row__expires">
+                      {t('dashboard.pending_expires', {
+                        date: new Date(inv.expires_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }),
+                      })}
+                    </span>
+                    <StatusBadge variant="warning" label={t('dashboard.pending_badge')} />
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
@@ -216,32 +347,33 @@ export function DashboardPage() {
           />
         ) : (
           <div className="patient-grid">
-            {patients.map(patient => (
-              <button
-                key={patient.id}
-                className="patient-grid__item"
-                onClick={() => navigate(`/patient/${patient.id}`)}
-              >
-                <Card variant="default" className="patient-card">
-                  <div className="patient-card__avatar">
-                    {(patient.patient_alias || patient.email || '?')[0]?.toUpperCase() ?? '?'}
-                  </div>
-                  <div className="patient-card__info">
-                    <div className="patient-card__name">
-                      {patient.patient_alias ?? patient.email}
+            {patients.map(patient => {
+              const fullName = [patient.patient_first_name, patient.patient_last_name].filter(Boolean).join(' ')
+              const displayName = fullName || patient.patient_alias || patient.email
+              const avatarChar = displayName[0]?.toUpperCase() ?? '?'
+              return (
+                <button
+                  key={patient.id}
+                  className="patient-grid__item"
+                  onClick={() => navigate(`/patient/${patient.id}`)}
+                >
+                  <Card variant="default" className="patient-card">
+                    <div className="patient-card__avatar">{avatarChar}</div>
+                    <div className="patient-card__info">
+                      <div className="patient-card__name">{displayName}</div>
+                      <div className="patient-card__email">{patient.email}</div>
                     </div>
-                    <div className="patient-card__email">{patient.email}</div>
-                  </div>
-                  <div className="patient-card__modules">
-                    <span className="patient-card__module-count">
-                      {patient.modules.length === 1
-                        ? t('dashboard.module_count_one', { count: patient.modules.length })
-                        : t('dashboard.module_count_other', { count: patient.modules.length })}
-                    </span>
-                  </div>
-                </Card>
-              </button>
-            ))}
+                    <div className="patient-card__modules">
+                      <span className="patient-card__module-count">
+                        {patient.modules.length === 1
+                          ? t('dashboard.module_count_one', { count: patient.modules.length })
+                          : t('dashboard.module_count_other', { count: patient.modules.length })}
+                      </span>
+                    </div>
+                  </Card>
+                </button>
+              )
+            })}
           </div>
         )}
       </div>

@@ -45,7 +45,9 @@
       "^expo-image-picker$": "<rootDir>/src/__mocks__/expo-image-picker.ts",
       "^react-native-markdown-display$": "<rootDir>/src/__mocks__/react-native-markdown-display.tsx",
       "^react-i18next$": "<rootDir>/src/__mocks__/react-i18next.ts",
-      "^expo-localization$": "<rootDir>/src/__mocks__/expo-localization.ts"
+      "^expo-localization$": "<rootDir>/src/__mocks__/expo-localization.ts",
+      "^react$": "<rootDir>/node_modules/react",
+      "^react/(.*)$": "<rootDir>/node_modules/react/$1"
     }
   },
   "devDependencies": {

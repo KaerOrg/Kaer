@@ -1,0 +1,1 @@
+export { ActivityLogLayout } from './ActivityLogLayout'

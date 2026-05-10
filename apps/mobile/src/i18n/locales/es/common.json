@@ -214,7 +214,8 @@
       "description": "Planifica actividades que te den placer",
       "title": "Activación conductual",
       "intro": "Planifica actividades que te den placer o satisfacción.",
-      "save": "Guardar"
+      "save": "Guardar",
+      "add_btn": "Añadir una actividad"
     },
     "beck_columns": {
       "label": "Columnas de Beck",

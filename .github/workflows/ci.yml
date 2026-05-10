@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-web:
+    name: Web — Tests & TypeScript & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: TypeScript
+        run: cd apps/web && npx tsc -b --noEmit
+      - name: Lint
+        run: cd apps/web && npx eslint .
+      - name: Tests
+        run: cd apps/web && npx vitest run
+
+  test-mobile:
+    name: Mobile — Tests & TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: TypeScript
+        run: cd apps/mobile && npx tsc --noEmit
+      - name: Tests
+        run: cd apps/mobile && npx jest --passWithNoTests

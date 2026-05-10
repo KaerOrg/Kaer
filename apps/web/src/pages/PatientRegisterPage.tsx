@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BrainCircuit, CheckCircle, TriangleAlert } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 import { Button } from '../components/Button'
 import { InputField } from '../components/InputField'
+import {
+  signUpPatientFromInvitation,
+  validateInvitationToken,
+} from '../services/invitationService'
 import './LoginPage.css'
 import './PatientRegisterPage.css'
 
@@ -20,27 +23,20 @@ export function PatientRegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    if (!token) { setStep('invalid'); return }
-    checkToken()
-  }, [token])
-
-  const checkToken = async () => {
-    interface InvitationRow { patient_email: string; expires_at: string; accepted_at: string | null }
-    const { data } = await supabase
-      .from('invitations')
-      .select('patient_email, expires_at, accepted_at')
-      .eq('token', token)
-      .single() as { data: InvitationRow | null; error: unknown }
-
-    if (!data || data.accepted_at || new Date(data.expires_at) < new Date()) {
+  const checkToken = useCallback(async () => {
+    const result = await validateInvitationToken(token)
+    if (!result.valid) {
       setStep('invalid')
       return
     }
-
-    setPrefillEmail(data.patient_email)
+    setPrefillEmail(result.email)
     setStep('form')
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (!token) { setStep('invalid'); return }
+    checkToken()
+  }, [token, checkToken])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,16 +47,9 @@ export function PatientRegisterPage() {
     setLoading(true)
     setError('')
 
-    const { error: signUpError } = await supabase.auth.signUp({
-      email: prefillEmail,
-      password,
-      options: {
-        data: { role: 'patient', invitation_token: token },
-      },
-    })
-
-    if (signUpError) {
-      setError(signUpError.message)
+    const result = await signUpPatientFromInvitation(prefillEmail, password, token)
+    if (!result.ok) {
+      setError(result.message ?? 'Erreur lors de la création du compte.')
       setLoading(false)
       return
     }
