@@ -109,6 +109,7 @@ export type PreviewKind =
   | 'decision_grid'
   | 'psyedu'
   | 'tabbed'
+  | 'chrono_month'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

@@ -31,6 +31,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'patient_scenario',
   'psyedu',
   'tabbed',
+  'chrono_month',
 ])
 
 export default function ModuleContentScreen({ route }: Props) {

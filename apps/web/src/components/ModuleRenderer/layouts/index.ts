@@ -1,5 +1,6 @@
 export { ActivityLogLayout } from './ActivityLogLayout'
 export { CardsLayout } from './CardsLayout'
+export { ChronoMonthLayout } from './ChronoMonthLayout'
 export { ColumnFormLayout } from './ColumnFormLayout'
 export { DailyCheckinLayout } from './DailyCheckinLayout'
 export { DecisionGridLayout } from './DecisionGridLayout'

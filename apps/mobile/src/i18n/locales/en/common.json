@@ -12,6 +12,20 @@
       "sessions": "Sessions logged",
       "initial_suds": "Initial SUDs"
     },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
     "update": "Update",
     "error": "Error",
     "warning": "Warning",

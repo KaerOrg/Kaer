@@ -27,6 +27,20 @@
       "sessions": "Séances réalisées",
       "initial_suds": "SUDs estimé au départ"
     },
+    "months": {
+      "january": "Janvier",
+      "february": "Février",
+      "march": "Mars",
+      "april": "Avril",
+      "may": "Mai",
+      "june": "Juin",
+      "july": "Juillet",
+      "august": "Août",
+      "september": "Septembre",
+      "october": "Octobre",
+      "november": "Novembre",
+      "december": "Décembre"
+    },
     "history": "Historique",
     "notes_optional": "Notes (facultatif)",
     "notes_placeholder": "Contexte, remarque…",
@@ -317,7 +331,13 @@
     },
     "chronobiology_tracker": {
       "label": "Régularité chronobiologique",
-      "description": "Heure de lever, coucher, premier repas"
+      "description": "Heure de lever, coucher, premier repas",
+      "rhythm_band_title": "Bande de rythme",
+      "anchor_wake": "Lever",
+      "anchor_first_meal": "1er repas",
+      "anchor_main_activity": "Activité",
+      "anchor_last_meal": "Dernier repas",
+      "anchor_bedtime": "Coucher"
     },
     "chrono_bio": {
       "tab_fiches": "Fiches",

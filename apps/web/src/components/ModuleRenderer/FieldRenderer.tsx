@@ -4,6 +4,7 @@ import type { ContentField, PreviewKind } from '../../services/moduleService'
 import {
   ActivityLogLayout,
   CardsLayout,
+  ChronoMonthLayout,
   ColumnFormLayout,
   DailyCheckinLayout,
   DecisionGridLayout,
@@ -23,7 +24,7 @@ import {
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
 
 export interface FieldRendererProps {
   preview_kind: PreviewKind
@@ -80,6 +81,10 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
 
   if (preview_kind === 'psyedu') {
     return <PsyEduLayout />
+  }
+
+  if (preview_kind === 'chrono_month') {
+    return <ChronoMonthLayout />
   }
 
   if (preview_kind === 'tabbed') {
