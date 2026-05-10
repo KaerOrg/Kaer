@@ -30,6 +30,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'decision_grid',
   'patient_scenario',
   'psyedu',
+  'tabbed',
 ])
 
 export default function ModuleContentScreen({ route }: Props) {

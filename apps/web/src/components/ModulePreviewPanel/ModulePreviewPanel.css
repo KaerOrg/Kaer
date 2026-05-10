@@ -2269,6 +2269,47 @@
 
 .psyedu__row-chevron { color: var(--color-text-muted); flex-shrink: 0; }
 
+/* ── Tabs (preview_kind='tabbed') ──────────────────────────────────────── */
+
+.tabs { display: flex; flex-direction: column; gap: 12px; }
+
+.tabs__bar {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+}
+
+.tabs__tab {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.tabs__tab:hover { background: color-mix(in srgb, var(--color-primary) 5%, transparent); }
+
+.tabs__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tabs__tab-icon { color: currentColor; flex-shrink: 0; }
+
+.tabs__tab-label { white-space: nowrap; }
+
+.tabs__content { display: flex; flex-direction: column; gap: 12px; }
+
 .cf-save-btn {
   width: 100%;
   display: inline-flex;

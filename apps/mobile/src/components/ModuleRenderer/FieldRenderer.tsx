@@ -25,6 +25,7 @@ import { ActivityLogLayout } from './layouts/ActivityLog'
 import { ExposureTrackerLayout } from './layouts/ExposureTracker'
 import { DecisionGridLayout } from './layouts/DecisionGrid'
 import { PsyEduLayout } from './layouts/PsyEdu'
+import { resolvePsyEduIcon } from './layouts/PsyEdu/iconMap'
 import { EditableItemsList } from './layouts/shared'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
@@ -3466,6 +3467,111 @@ export interface QuestionnaireInteraction {
   accentColor?: string
 }
 
+// ─── Layout — Onglets génériques (tabbed) ───────────────────────────────────
+//
+// Pattern « N sous-vues dans un même module ». Chaque tab field racine porte
+// `sub_preview_kind` (le layout enfant à utiliser) et `icon_name`. Ses
+// children = les fields rendus par le sous-layout. La sélection d'onglet est
+// state local. Délègue le rendu à FieldRenderer (récursif).
+
+interface TabSpec {
+  key: string
+  label: string
+  iconName: string
+  subPreviewKind: PreviewKind
+  children: ContentField[]
+}
+
+function TabsLayout({ fields, moduleId }: {
+  fields: ContentField[]
+  moduleId: string
+}) {
+  const t = useModuleT()
+
+  const tabs = useMemo<TabSpec[]>(() => {
+    return fields
+      .filter(f => f.field_type === 'tab')
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(f => ({
+        key: f.props['tab_key'] ?? f.id,
+        label: f.text_code ? t(f.text_code) : '',
+        iconName: f.props['icon_name'] ?? '',
+        subPreviewKind: (f.props['sub_preview_kind'] ?? 'coming_soon') as PreviewKind,
+        children: f.children ?? [],
+      }))
+  }, [fields, t])
+
+  const [activeKey, setActiveKey] = useState<string>(tabs[0]?.key ?? '')
+  const activeTab = useMemo(
+    () => tabs.find(tb => tb.key === activeKey) ?? tabs[0],
+    [tabs, activeKey]
+  )
+
+  if (!activeTab) {
+    return null
+  }
+
+  return (
+    <View style={tabStyles.container} testID="tabs-layout">
+      <View style={tabStyles.bar} accessibilityRole="tablist">
+        {tabs.map(tab => {
+          const isActive = tab.key === activeTab.key
+          const Icon = tab.iconName ? resolvePsyEduIcon(tab.iconName) : null
+          return (
+            <Pressable
+              key={tab.key}
+              style={[tabStyles.tab, isActive && tabStyles.tabActive]}
+              onPress={() => setActiveKey(tab.key)}
+              testID={`tab-${tab.key}`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isActive }}
+            >
+              {Icon ? (
+                <Icon size={16} color={isActive ? colors.primary : colors.textMuted} />
+              ) : null}
+              <Text style={[tabStyles.tabLabel, isActive && tabStyles.tabLabelActive]}>
+                {tab.label}
+              </Text>
+            </Pressable>
+          )
+        })}
+      </View>
+      <View style={tabStyles.content} testID={`tab-content-${activeTab.key}`}>
+        <FieldRenderer
+          preview_kind={activeTab.subPreviewKind}
+          fields={activeTab.children}
+          moduleId={moduleId}
+        />
+      </View>
+    </View>
+  )
+}
+
+const tabStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  bar: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm + 2,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: { borderBottomColor: colors.primary },
+  tabLabel: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
+  tabLabelActive: { color: colors.primary },
+  content: { flex: 1 },
+})
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 export interface FieldRendererProps {
@@ -3599,6 +3705,10 @@ export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor
 
   if (preview_kind === 'psyedu') {
     return <PsyEduLayout moduleId={moduleId ?? ''} />
+  }
+
+  if (preview_kind === 'tabbed') {
+    return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'editable_steps') {

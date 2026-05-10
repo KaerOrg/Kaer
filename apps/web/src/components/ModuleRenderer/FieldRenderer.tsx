@@ -16,6 +16,7 @@ import {
   QuestionnaireLayout,
   SleepJournalLayout,
   StepsLayout,
+  TabsLayout,
   TreeSelectorLayout,
 } from './layouts'
 
@@ -38,6 +39,23 @@ export function FieldRenderer({ preview_kind, fields, expandedCard, onToggleCard
 
   if (preview_kind === 'psyedu') {
     return <PsyEduLayout t={t} />
+  }
+
+  if (preview_kind === 'tabbed') {
+    return (
+      <TabsLayout
+        fields={visibleFields}
+        t={t}
+        renderInner={(subKind, subFields) => (
+          <FieldRenderer
+            preview_kind={subKind}
+            fields={subFields}
+            expandedCard={expandedCard}
+            onToggleCard={onToggleCard}
+          />
+        )}
+      />
+    )
   }
 
   const visibleFields = fields.filter(
