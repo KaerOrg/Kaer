@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
 import type { ContentField, PreviewKind } from '../../../../services/moduleService'
@@ -6,7 +6,7 @@ import type { ContentField, PreviewKind } from '../../../../services/moduleServi
 interface Props {
   fields: ContentField[]
   /** Render the active tab's children with the appropriate sub-layout. */
-  renderInner: (preview_kind: PreviewKind, fields: ContentField[]) => JSX.Element | null
+  renderInner: (preview_kind: PreviewKind, fields: ContentField[]) => ReactElement | null
 }
 
 interface TabSpec {
