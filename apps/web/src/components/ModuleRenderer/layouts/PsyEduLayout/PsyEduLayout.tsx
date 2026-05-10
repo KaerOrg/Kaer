@@ -1,9 +1,5 @@
 import { BookOpen, ChevronRight } from 'lucide-react'
 
-interface Props {
-  t: (key: string) => string
-}
-
 // Aperçu praticien du layout psyedu : liste de fiches psychoéducatives
 // (psyedu_topics) avec titre + résumé. Les vraies données viennent des
 // tables `psyedu_topics` / `psyedu_blocks` côté patient mobile — ici on
@@ -15,7 +11,7 @@ const MOCK_TOPICS: ReadonlyArray<{ id: string; title: string; summary: string }>
   { id: 't4', title: 'Pour aller plus loin', summary: 'Sources et lectures recommandées' },
 ]
 
-export function PsyEduLayout({ t: _t }: Props) {
+export function PsyEduLayout() {
   return (
     <div className="psyedu">
       <div className="psyedu__intro">

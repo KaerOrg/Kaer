@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
 import type { ContentField, PreviewKind } from '../../../../services/moduleService'
 
 interface Props {
   fields: ContentField[]
-  t: (key: string) => string
   /** Render the active tab's children with the appropriate sub-layout. */
   renderInner: (preview_kind: PreviewKind, fields: ContentField[]) => JSX.Element | null
 }
@@ -20,7 +20,8 @@ interface TabSpec {
 // Aperçu praticien d'un module à onglets — délègue le rendu de chaque
 // onglet à un sous-layout via `renderInner` (injecté par FieldRenderer pour
 // éviter une dépendance circulaire).
-export function TabsLayout({ fields, t, renderInner }: Props) {
+export function TabsLayout({ fields, renderInner }: Props) {
+  const { t } = useTranslation()
   const tabs = useMemo<TabSpec[]>(() => {
     return fields
       .filter(f => f.field_type === 'tab')

@@ -2310,6 +2310,24 @@
 
 .tabs__content { display: flex; flex-direction: column; gap: 12px; }
 
+/* ── Disclaimer banner (field_type='disclaimer_banner') ────────────────── */
+
+.preview-disclaimer-wrapper { display: flex; flex-direction: column; gap: 12px; }
+
+.preview-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+}
+
+.preview-disclaimer__icon { flex-shrink: 0; margin-top: 2px; }
+
+.preview-disclaimer__text { font-size: 12px; line-height: 1.5; }
+
 .cf-save-btn {
   width: 100%;
   display: inline-flex;

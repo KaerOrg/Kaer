@@ -27,6 +27,7 @@ import { DecisionGridLayout } from './layouts/DecisionGrid'
 import { PsyEduLayout } from './layouts/PsyEdu'
 import { resolvePsyEduIcon } from './layouts/PsyEdu/iconMap'
 import { EditableItemsList } from './layouts/shared'
+import { DisclaimerBanner } from '../DisclaimerBanner'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
@@ -3592,7 +3593,35 @@ export interface FieldRendererProps {
 // avec 0 fields.
 const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu'])
 
-export function FieldRenderer({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
+// Wrapper exporté : extrait le field 'disclaimer_banner' (s'il existe) et
+// l'affiche au-dessus du layout principal. Le dispatcher est dans
+// FieldRendererCore en dessous.
+export function FieldRenderer(props: FieldRendererProps) {
+  const isTeenMode = useAuthStore(s => s.teenMode)
+  const disclaimerField = props.fields.find(f => f.field_type === 'disclaimer_banner')
+  const filteredFields = disclaimerField
+    ? props.fields.filter(f => f.field_type !== 'disclaimer_banner')
+    : props.fields
+
+  const core = <FieldRendererCore {...props} fields={filteredFields} />
+
+  if (!disclaimerField) return core
+
+  const moduleKey = disclaimerField.props['module_key'] || props.moduleId || ''
+  return (
+    <View style={disclaimerWrapperStyles.wrapper}>
+      <DisclaimerBanner moduleKey={moduleKey} isTeenMode={isTeenMode} />
+      <View style={disclaimerWrapperStyles.body}>{core}</View>
+    </View>
+  )
+}
+
+const disclaimerWrapperStyles = StyleSheet.create({
+  wrapper: { flex: 1 },
+  body: { flex: 1 },
+})
+
+function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
   if (preview_kind === 'coming_soon') return null
   if (fields.length === 0 && !FIELDLESS_LAYOUTS.has(preview_kind)) return null
 
