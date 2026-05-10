@@ -78,6 +78,12 @@ describe('MainNav — état actif', () => {
     expect(screen.getByText('Modules')).not.toHaveClass('main-nav__link--active')
   })
 
+  it('chemin "/modules/preview/:moduleType" : Modules reste actif (sous-page)', () => {
+    renderNav('/modules/preview/phq9')
+    expect(screen.getByText('Modules')).toHaveClass('main-nav__link--active')
+    expect(screen.getByText('Mes patients')).not.toHaveClass('main-nav__link--active')
+  })
+
   it('chemin inconnu : aucun lien n\'est actif', () => {
     renderNav('/dispensaire')
     expect(screen.getByText('Mes patients')).not.toHaveClass('main-nav__link--active')
