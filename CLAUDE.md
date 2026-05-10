@@ -91,7 +91,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `sleep_diary` | Agenda du sommeil | MVP — à construire |
 | `beck_columns` | Colonnes de Beck (TCC) | Prévu |
 | `fear_thermometer` | Thermomètre de la peur | Implémenté — moteur générique (`preview_kind = 'exposure_tracker'`), tabs Saisies/Situations, SUDS avant/après, stratégies DB-driven |
-| `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté côté branche (écrans custom + SQLite) — **migration ModuleRenderer planifiée** : extension `exposure_tracker` pour multi-hiérarchies + `field_type='exposure_history_chart'` |
+| `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté — `preview_kind='exposure_hierarchy'`, 4 modes (hiérarchies/items/item_form/item_history), DesensitizationChart embedded, table SQLite `exposure_hierarchies` + colonnes `hierarchy_id`/`target_suds`/`is_done` ajoutées à `fear_situations` |
 | `emotion_wheel` | Roue des émotions | Prévu |
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
 | `rim` | RIM — Imagerie mentale | Prévu |
@@ -104,10 +104,10 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, pattern générique ModuleRenderer, SQLite `scale_entries` |
-| `diet_weight_psycho` | Alimentation et psychotropes | Implémenté côté branche (8 fiches psyedu_topics/blocks) — **migration ModuleRenderer planifiée** : `preview_kind='psyedu'` |
-| `chronobiology_tracker` | Régularité chronobiologique | Implémenté côté branche (7 fiches + journal 5 ancrages SQLite + vue mensuelle) — **migration ModuleRenderer planifiée** : `preview_kind='tabbed'` (psyedu + column_form + chrono_month_calendar) |
-| `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté côté branche (6 fiches DBT + onglet "En crise" accordéon) — **migration ModuleRenderer planifiée** : `preview_kind='tabbed'` (psyedu + cards) |
-| `craving_journal` | Journal de craving (TCC addictologie) | Implémenté côté branche (4 fiches + journal auto-monitoring SQLite) — **migration ModuleRenderer planifiée** : `preview_kind='tabbed'` (psyedu + column_form) |
+| `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — `preview_kind='psyedu'`, 8 fiches `psyedu_topics`/`psyedu_blocks` (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
+| `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
+| `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
+| `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
