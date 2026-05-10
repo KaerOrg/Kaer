@@ -1,71 +1,105 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
+import { fetchTopicsByModule, type PsyEduTopic } from '../../../../services/psyeduService'
+import { PsyEduBlocks } from './PsyEduBlocks'
 
-// Aperçu praticien du layout psyedu : liste de fiches psychoéducatives
-// (psyedu_topics) avec titre + résumé. Les vraies données viennent des
-// tables `psyedu_topics` / `psyedu_blocks` côté patient mobile — ici on
-// affiche un mock générique pour visualiser la structure.
-const MOCK_TOPICS: ReadonlyArray<{
-  id: string
-  title: string
-  summary: string
-  body: string
-}> = [
-  {
-    id: 't1',
-    title: 'Comprendre le mécanisme',
-    summary: 'Définition, déclencheurs, modèle TCC',
-    body: 'Court paragraphe d\'introduction. Côté patient, les blocs sont rendus depuis psyedu_blocks (heading, paragraph, bullet_list, tip, blockquote, source_link).',
-  },
-  {
-    id: 't2',
-    title: 'Reconnaître mes signaux',
-    summary: 'Cadre ABC : Antécédent → Comportement → Conséquence',
-    body: 'Le contenu de cette fiche est défini dans psyedu_blocks (sections why / how / sources, triées côté client).',
-  },
-  {
-    id: 't3',
-    title: 'Une technique éprouvée',
-    summary: 'Exercice guidé étape par étape',
-    body: 'Liste à puces et encart « tip » disponibles via psyedu_blocks. Le rendu mobile utilise PsyEduBlockRenderer.',
-  },
-  {
-    id: 't4',
-    title: 'Pour aller plus loin',
-    summary: 'Sources et lectures recommandées',
-    body: 'Les sources cliquables (HAS, NICE, articles) sont des blocs source_link avec un href.',
-  },
-]
+interface Props {
+  moduleId: string
+}
 
-export function PsyEduLayout() {
+const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }
+
+// Aperçu praticien du layout psyedu : liste des fiches réelles fetchées
+// depuis psyedu_topics (filtrées par module_key=moduleId). Au tap sur une
+// fiche, charge les psyedu_blocks et les rend via PsyEduBlocks (équivalent
+// web du PsyEduBlockRenderer mobile).
+export function PsyEduLayout({ moduleId }: Props) {
+  const { t } = useTranslation()
+  const [topics, setTopics] = useState<readonly PsyEduTopic[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    if (!moduleId) {
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    setLoading(true)
+    setError(false)
+    fetchTopicsByModule(moduleId)
+      .then(list => {
+        if (!cancelled) setTopics(list)
+      })
+      .catch(() => {
+        if (!cancelled) setError(true)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [moduleId])
+
+  const handleToggle = useCallback((id: string) => {
+    setOpenId(prev => (prev === id ? null : id))
+  }, [])
+
+  if (loading) {
+    return <div className="psyedu psyedu--loading">{t('common.loading')}</div>
+  }
+
+  if (error) {
+    return <div className="psyedu psyedu--error">{t('common.error')}</div>
+  }
+
+  if (topics.length === 0) {
+    return (
+      <div className="psyedu psyedu--empty">
+        <BookOpen size={32} className="psyedu__empty-icon" />
+        <span className="psyedu__empty-text">
+          Aucune fiche psychoéducative seedée pour ce module.
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="psyedu">
       <div className="psyedu__intro">
         <BookOpen size={14} className="psyedu__intro-icon" />
         <span className="psyedu__intro-text">
-          Fiches psychoéducatives — appuyez sur une fiche pour prévisualiser
+          {topics.length} fiches psychoéducatives — appuyez pour prévisualiser
         </span>
       </div>
 
       <ul className="psyedu__list">
-        {MOCK_TOPICS.map(topic => {
+        {topics.map(topic => {
           const isOpen = openId === topic.id
+          const titleKey = `${topic.module_key}.${topic.topic_key}.title`
+          const summaryKey = `${topic.module_key}.${topic.topic_key}.summary`
+          const title = t(titleKey, { ns: 'psyedu', defaultValue: topic.topic_key })
+          const summary = t(summaryKey, { ns: 'psyedu', defaultValue: '' })
+
           return (
             <li key={topic.id} className="psyedu__item">
               <button
                 type="button"
                 className={`psyedu__row${isOpen ? ' psyedu__row--open' : ''}`}
-                onClick={() => setOpenId(isOpen ? null : topic.id)}
+                onClick={() => handleToggle(topic.id)}
                 aria-expanded={isOpen}
               >
                 <div className="psyedu__row-icon">
                   <BookOpen size={18} />
                 </div>
                 <div className="psyedu__row-text">
-                  <span className="psyedu__row-title">{topic.title}</span>
-                  <span className="psyedu__row-summary">{topic.summary}</span>
+                  <span className="psyedu__row-title">{title}</span>
+                  {summary ? (
+                    <span className="psyedu__row-summary">{summary}</span>
+                  ) : null}
                 </div>
                 {isOpen ? (
                   <ChevronDown size={16} className="psyedu__row-chevron" />
@@ -74,7 +108,7 @@ export function PsyEduLayout() {
                 )}
               </button>
               {isOpen ? (
-                <div className="psyedu__body">{topic.body}</div>
+                <PsyEduBlocks topicId={topic.id} sectionOrder={SECTION_ORDER} />
               ) : null}
             </li>
           )

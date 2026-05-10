@@ -81,7 +81,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
   if (preview_kind === 'psyedu') {
-    return <PsyEduLayout />
+    return <PsyEduLayout moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'chrono_month') {

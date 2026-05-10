@@ -18,6 +18,11 @@ import mobileDeCommon from '../../../mobile/src/i18n/locales/de/common.json'
 import mobileItCommon from '../../../mobile/src/i18n/locales/it/common.json'
 import mobilePtCommon from '../../../mobile/src/i18n/locales/pt/common.json'
 
+// Namespace `psyedu` — fiches psychoéducatives (titres, summaries, blocs).
+// Source unique côté mobile, partagée par le preview praticien web pour
+// rendre le contenu réel de psyedu_topics + psyedu_blocks.
+import mobileFrPsyedu from '../../../mobile/src/i18n/locales/fr/psyedu.json'
+
 // Pour chaque module, on fusionne les clés mobile (DB-aligned) avec celles du web,
 // en laissant le web gagner sur les clés en doublon (label, description). Les clés
 // présentes uniquement côté mobile (`step_1_title`, `scale_info`, `effect_*`…)
@@ -101,15 +106,15 @@ i18next
   .init({
     lng: detected,
     fallbackLng: 'fr',
-    ns: ['common'],
+    ns: ['common', 'psyedu'],
     defaultNS: 'common',
     resources: {
-      fr: { common: fr },
-      en: { common: en },
-      es: { common: es },
-      de: { common: de },
-      it: { common: it },
-      pt: { common: pt },
+      fr: { common: fr, psyedu: mobileFrPsyedu },
+      en: { common: en, psyedu: mobileFrPsyedu },
+      es: { common: es, psyedu: mobileFrPsyedu },
+      de: { common: de, psyedu: mobileFrPsyedu },
+      it: { common: it, psyedu: mobileFrPsyedu },
+      pt: { common: pt, psyedu: mobileFrPsyedu },
     },
     interpolation: { escapeValue: false },
   })

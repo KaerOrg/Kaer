@@ -2257,15 +2257,114 @@
 }
 
 .psyedu__body {
-  padding: 10px 14px 14px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
+  padding: 12px 14px 14px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-top: none;
   border-bottom-left-radius: var(--radius-md);
   border-bottom-right-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.psyedu__body--loading,
+.psyedu__body--error,
+.psyedu__body--empty {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.psyedu--loading,
+.psyedu--error,
+.psyedu--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.psyedu--empty { flex-direction: column; }
+.psyedu__empty-icon { color: var(--color-border); }
+.psyedu__empty-text { text-align: center; }
+
+.psyedu-block { margin: 0; line-height: 1.5; }
+
+.psyedu-block__section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-primary);
+  margin: 8px 0 4px;
+}
+
+.psyedu-block--heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 6px 0 2px;
+}
+
+.psyedu-block--paragraph {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.psyedu-block--list {
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psyedu-block__list-item { padding-left: 2px; }
+
+.psyedu-block--tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+}
+
+.psyedu-block__tip-icon { flex-shrink: 0; margin-top: 2px; }
+
+.psyedu-block--quote {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  border-left: 3px solid var(--color-primary);
+  padding: 4px 12px;
+  margin: 4px 0;
+}
+
+.psyedu-block--source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  background: var(--color-bg-secondary, #f4f4f5);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.psyedu-block--source:hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-bg-secondary, #f4f4f5));
 }
 
 .psyedu__row-icon {

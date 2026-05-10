@@ -80,6 +80,7 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
           <FieldRenderer
             preview_kind={result.preview_kind}
             fields={result.fields}
+            moduleId={moduleType}
             expandedCard={expandedCard}
             onToggleCard={handleToggleCard}
           />
