@@ -377,6 +377,7 @@ export function ExposureHierarchyLayout({ moduleId }: Props) {
             {t('modules.exposure_hierarchy.suds_label')}
           </Text>
           <PipPicker
+            label={t('modules.exposure_hierarchy.suds_label')}
             value={itemSuds}
             onPress={setItemSuds}
             steps={SUDS_STEPS_0_100}

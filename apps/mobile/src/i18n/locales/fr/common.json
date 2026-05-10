@@ -179,7 +179,39 @@
       "tab_fiches": "Fiches",
       "tab_crisis": "En crise",
       "crisis_hint": "Appuyez sur une technique pour afficher les étapes.",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "crisis": {
+        "tipp": {
+          "title": "TIPP — Apaiser le corps",
+          "summary": "4 leviers physiologiques pour faire chuter l'activation : Température, Intensité, Paced breathing, Paired muscle relaxation.",
+          "body1": "Température : passez de l'eau froide sur le visage (yeux ouverts), tenez un glaçon, ou plongez les mains 30 secondes dans de l'eau très froide. Le réflexe de plongée ralentit le rythme cardiaque.",
+          "body2": "Intensité : 1 à 3 minutes d'activité physique vigoureuse (jumping jacks, squats, course sur place). Puis Paced breathing : respiration ralentie 5s inspirez / 7s expirez. Terminez par une relaxation musculaire — contractez 5s puis relâchez chaque grand groupe musculaire."
+        },
+        "accepts": {
+          "title": "ACCEPTS — Distraire l'esprit",
+          "summary": "7 leviers pour rediriger l'attention quand la détresse est trop intense pour être traitée frontalement.",
+          "body1": "Activités (faire quelque chose qui mobilise l'attention), Contribuer (aider quelqu'un d'autre), Comparaisons (avec des moments où vous alliez moins bien, sans jugement), Émotions opposées (regarder une comédie si vous êtes triste).",
+          "body2": "Push-away (mettez la pensée dans une boîte mentale, fermez-la, posez-la sur une étagère pour plus tard), Thoughts (comptez à rebours, listez des capitales), Sensations (mâchez un chewing-gum fort, douche froide, parfum intense)."
+        },
+        "soothing": {
+          "title": "Self-soothing — Réconforter par les 5 sens",
+          "summary": "Apaiser le système nerveux en stimulant doucement chacun des 5 sens, l'un après l'autre.",
+          "body1": "Vue : regardez une photo qui vous est chère, observez la nature, allumez une bougie. Ouïe : musique calme, bruits blancs, podcast familier. Odorat : huile essentielle de lavande, café, peau d'orange.",
+          "body2": "Toucher : couverture lestée, bain chaud, animal de compagnie, peluche. Goût : tisane chaude, carré de chocolat noir, fruit savouré lentement. Choisissez 1 à 2 sens à la fois — l'objectif est la douceur, pas la stimulation."
+        },
+        "improve": {
+          "title": "IMPROVE — Améliorer le moment",
+          "summary": "7 stratégies cognitives et imaginaires pour traverser la crise sans la fuir.",
+          "body1": "Imagery (visualisez un lieu sûr, un souvenir apaisant), Meaning (donnez un sens à l'épreuve — qu'est-ce que ça vous apprend ?), Prayer (méditation, prière laïque ou religieuse, sentiment de connexion), Relaxation (respiration, scan corporel).",
+          "body2": "One thing at a time (focalisez-vous sur une seule action, ici et maintenant), Vacation (offrez-vous 10 min de pause complète sans culpabilité), Encouragement (parlez-vous comme à un proche en détresse — \"je peux traverser ça, ce n'est qu'une vague\")."
+        },
+        "proscons": {
+          "title": "Pros & Cons — Peser avant d'agir",
+          "summary": "Avant de céder à une impulsion (consommer, s'isoler, agir contre soi), faites une grille rapide à 4 cases.",
+          "body1": "Listez : Avantages d'agir maintenant (soulagement immédiat), Inconvénients d'agir (conséquences à 24h, 1 semaine, 1 mois), Avantages de tolérer la détresse, Inconvénients de tolérer.",
+          "body2": "Lisez votre grille à voix haute. La décision n'est pas \"souffrir ou ne pas souffrir\" — c'est \"souffrir maintenant\" vs \"souffrir plus tard\". Cette technique demande de l'entraînement à froid pour être disponible à chaud."
+        }
+      }
     },
     "medication_side_effects": {
       "label": "Effets du traitement",
@@ -246,6 +278,20 @@
       "already_saved": "Traitement déjà saisi aujourd'hui",
       "saved_message": "Saisie enregistrée.",
       "delete_entry_title": "Supprimer cette saisie ?"
+    },
+    "psychoeducation": {
+      "label": "Psychoéducation",
+      "description": "Cartes de savoir sur votre santé mentale",
+      "title": "Psychoéducation",
+      "intro": "Consultez vos fiches de savoir.",
+      "empty_title": "Aucune carte disponible",
+      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
+      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
+      "mark_as_read": "J'ai lu et compris",
+      "already_read": "Lu et compris",
+      "read_error": "Une erreur est survenue. Veuillez réessayer.",
+      "content_not_found": "Contenu introuvable.",
+      "cards_progress": "{{read}}/{{total}} cartes lues"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -1396,7 +1442,17 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.",
+      "title": "Psychoéducation",
+      "intro": "Consultez vos fiches de savoir.",
+      "empty_title": "Aucune carte disponible",
+      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
+      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
+      "mark_as_read": "J'ai lu et compris",
+      "already_read": "Lu et compris",
+      "read_error": "Une erreur est survenue. Veuillez réessayer.",
+      "content_not_found": "Contenu introuvable.",
+      "cards_progress": "{{read}}/{{total}} cartes lues"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",

@@ -72,8 +72,14 @@ describe('MainNav — état actif', () => {
     expect(screen.getByText('Mes patients')).not.toHaveClass('main-nav__link--active')
   })
 
-  it('chemin inconnu : aucun lien n\'est actif', () => {
+  it('chemin "/patient/:id" : Mes patients reste actif (sous-page)', () => {
     renderNav('/patient/123')
+    expect(screen.getByText('Mes patients')).toHaveClass('main-nav__link--active')
+    expect(screen.getByText('Modules')).not.toHaveClass('main-nav__link--active')
+  })
+
+  it('chemin inconnu : aucun lien n\'est actif', () => {
+    renderNav('/dispensaire')
     expect(screen.getByText('Mes patients')).not.toHaveClass('main-nav__link--active')
     expect(screen.getByText('Modules')).not.toHaveClass('main-nav__link--active')
   })
