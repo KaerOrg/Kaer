@@ -73,6 +73,19 @@
   color: var(--color-text-muted);
 }
 
+/* ── Search bar ──────────────────────────────────────────────────────────── */
+
+.catalog-page__search {
+  max-width: 420px;
+}
+
+.catalog-page__empty {
+  text-align: center;
+  padding: calc(var(--spacing-xl) * 2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
 /* ── Sections par catégorie ──────────────────────────────────────────────── */
 
 .catalog-sections {

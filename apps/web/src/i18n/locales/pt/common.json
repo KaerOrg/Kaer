@@ -79,6 +79,9 @@
     "loading_patients": "A carregar pacientes…",
     "empty_title": "Nenhum paciente ainda",
     "empty_description": "Comece por convidar o seu primeiro paciente.",
+    "search_placeholder": "Procurar um paciente (nome, email)…",
+    "empty_search_title": "Nenhum paciente corresponde",
+    "empty_search_description": "Nenhum paciente corresponde à sua pesquisa. Verifique a ortografia ou limpe o campo para ver todos.",
     "module_count_one": "{{count}} módulo",
     "module_count_other": "{{count}} módulos"
   },
@@ -150,6 +153,8 @@
     "enable_all": "Ativar todos",
     "disable_all": "Desativar todos",
     "enabled_count_one": "{{count}} módulo ativado",
-    "enabled_count_other": "{{count}} módulos ativados"
+    "enabled_count_other": "{{count}} módulos ativados",
+    "search_placeholder": "Procurar um módulo (nome, descrição)…",
+    "empty_search": "Nenhum módulo corresponde à sua pesquisa."
   }
 }

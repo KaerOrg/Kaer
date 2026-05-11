@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -14,6 +14,8 @@ import type { ModuleType } from '../lib/database.types'
 import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '../services/practitionerSettingsService'
 import { Toggle } from '../components/Toggle/Toggle'
+import { SearchInput } from '../components/SearchInput'
+import { matchesAllTokens, tokenizeSearch } from '../lib/search'
 import './ModuleCatalogPage.css'
 
 // Bridge architectural : mappe les noms d'icônes stockés en BDD vers les composants Lucide.
@@ -54,6 +56,21 @@ export function ModuleCatalogPage() {
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredCategories = useMemo(() => {
+    const tokens = tokenizeSearch(searchQuery)
+    if (tokens.length === 0) return categories
+    return categories
+      .map(cat => ({
+        ...cat,
+        modules: cat.modules.filter(mod => {
+          const haystack = `${t(`modules.${mod.id}.label`)} ${t(`modules.${mod.id}.description`)}`
+          return matchesAllTokens(haystack, tokens)
+        }),
+      }))
+      .filter(cat => cat.modules.length > 0)
+  }, [categories, searchQuery, t])
 
   const loadSettings = useCallback(async () => {
     if (!practitioner) return
@@ -147,11 +164,23 @@ export function ModuleCatalogPage() {
           </div>
         )}
 
+        {!loading && (
+          <div className="catalog-page__search">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t('modules.search_placeholder')}
+            />
+          </div>
+        )}
+
         {loading ? (
           <div className="catalog-page__loading">{t('common.loading')}</div>
+        ) : filteredCategories.length === 0 ? (
+          <div className="catalog-page__empty">{t('modules.empty_search')}</div>
         ) : (
           <div className="catalog-sections">
-            {categories.map(category => (
+            {filteredCategories.map(category => (
               <section key={category.id} className="catalog-section">
                 <div className="catalog-section__header">
                   <h2 className="catalog-section__title">{t(category.labelKey)}</h2>

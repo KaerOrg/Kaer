@@ -12,6 +12,8 @@ import { StatusBadge } from '../components/StatusBadge'
 import { StepBreadcrumb } from '../components/StepBreadcrumb/StepBreadcrumb'
 import { Toggle } from '../components/Toggle/Toggle'
 import { SelectField } from '../components/SelectField/SelectField'
+import { SearchInput } from '../components/SearchInput'
+import { matchesAllTokens, tokenizeSearch } from '../lib/search'
 import type { PatientSummary, ModuleType } from '../lib/database.types'
 import { fetchInviteCategories, type ModuleCategory } from '../services/moduleCatalogService'
 import { fetchPatientsWithModules } from '../services/patientService'
@@ -32,6 +34,7 @@ export function DashboardPage() {
   const [loadingPatients, setLoadingPatients] = useState(true)
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([])
   const [showInviteForm, setShowInviteForm] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteEmailError, setInviteEmailError] = useState('')
@@ -157,6 +160,20 @@ export function DashboardPage() {
   const patientSubtitle = patients.length === 1
     ? t('dashboard.subtitle_one', { count: patients.length })
     : t('dashboard.subtitle_other', { count: patients.length })
+
+  const filteredPatients = useMemo(() => {
+    const tokens = tokenizeSearch(searchQuery)
+    if (tokens.length === 0) return patients
+    return patients.filter(p => {
+      const haystack = [
+        p.patient_first_name,
+        p.patient_last_name,
+        p.patient_alias,
+        p.email,
+      ].filter(Boolean).join(' ')
+      return matchesAllTokens(haystack, tokens)
+    })
+  }, [patients, searchQuery])
 
   return (
     <Layout>
@@ -346,35 +363,52 @@ export function DashboardPage() {
             description={t('dashboard.empty_description')}
           />
         ) : (
-          <div className="patient-grid">
-            {patients.map(patient => {
-              const fullName = [patient.patient_first_name, patient.patient_last_name].filter(Boolean).join(' ')
-              const displayName = fullName || patient.patient_alias || patient.email
-              const avatarChar = displayName[0]?.toUpperCase() ?? '?'
-              return (
-                <button
-                  key={patient.id}
-                  className="patient-grid__item"
-                  onClick={() => navigate(`/patient/${patient.id}`)}
-                >
-                  <Card variant="default" className="patient-card">
-                    <div className="patient-card__avatar">{avatarChar}</div>
-                    <div className="patient-card__info">
-                      <div className="patient-card__name">{displayName}</div>
-                      <div className="patient-card__email">{patient.email}</div>
-                    </div>
-                    <div className="patient-card__modules">
-                      <span className="patient-card__module-count">
-                        {patient.modules.length === 1
-                          ? t('dashboard.module_count_one', { count: patient.modules.length })
-                          : t('dashboard.module_count_other', { count: patient.modules.length })}
-                      </span>
-                    </div>
-                  </Card>
-                </button>
-              )
-            })}
-          </div>
+          <>
+            <div className="dashboard__search">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={t('dashboard.search_placeholder')}
+              />
+            </div>
+            {filteredPatients.length === 0 ? (
+              <EmptyState
+                icon={<Users size={48} />}
+                title={t('dashboard.empty_search_title')}
+                description={t('dashboard.empty_search_description')}
+              />
+            ) : (
+              <div className="patient-grid">
+                {filteredPatients.map(patient => {
+                  const fullName = [patient.patient_first_name, patient.patient_last_name].filter(Boolean).join(' ')
+                  const displayName = fullName || patient.patient_alias || patient.email
+                  const avatarChar = displayName[0]?.toUpperCase() ?? '?'
+                  return (
+                    <button
+                      key={patient.id}
+                      className="patient-grid__item"
+                      onClick={() => navigate(`/patient/${patient.id}`)}
+                    >
+                      <Card variant="default" className="patient-card">
+                        <div className="patient-card__avatar">{avatarChar}</div>
+                        <div className="patient-card__info">
+                          <div className="patient-card__name">{displayName}</div>
+                          <div className="patient-card__email">{patient.email}</div>
+                        </div>
+                        <div className="patient-card__modules">
+                          <span className="patient-card__module-count">
+                            {patient.modules.length === 1
+                              ? t('dashboard.module_count_one', { count: patient.modules.length })
+                              : t('dashboard.module_count_other', { count: patient.modules.length })}
+                          </span>
+                        </div>
+                      </Card>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
     </Layout>

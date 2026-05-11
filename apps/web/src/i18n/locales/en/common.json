@@ -79,6 +79,9 @@
     "loading_patients": "Loading patients…",
     "empty_title": "No patients yet",
     "empty_description": "Start by inviting your first patient.",
+    "search_placeholder": "Search a patient (name, email)…",
+    "empty_search_title": "No matching patient",
+    "empty_search_description": "No patient matches your search. Check the spelling or clear the field to see all.",
     "module_count_one": "{{count}} module",
     "module_count_other": "{{count}} modules"
   },
@@ -151,6 +154,8 @@
     "disable_all": "Disable all",
     "enabled_count_one": "{{count}} module enabled",
     "enabled_count_other": "{{count}} modules enabled",
+    "search_placeholder": "Search a module (name, description)…",
+    "empty_search": "No module matches your search.",
     "phq9": {
       "label": "PHQ-9",
       "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27.",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Lightbulb } from 'lucide-react'
 import { fetchBlocksByTopic, type PsyEduBlock } from '../../../../services/psyeduService'
@@ -22,8 +22,8 @@ function sortBlocks(
 
 // Rend la version inline (italique pour *X*, gras pour **X**) d'un texte
 // résolu depuis i18next. Aligné sur le InlineText mobile.
-function renderInline(text: string): JSX.Element[] {
-  const parts: JSX.Element[] = []
+function renderInline(text: string): ReactElement[] {
+  const parts: ReactElement[] = []
   const regex = /(\*\*[^*]+\*\*|\*[^*]+\*)/g
   let lastIndex = 0
   let match: RegExpExecArray | null
@@ -105,7 +105,7 @@ export function PsyEduBlocks({ topicId, sectionOrder }: Props) {
             })
           : null
 
-        let content: JSX.Element | null = null
+        let content: ReactElement | null = null
         switch (block.block_type) {
           case 'heading':
             content = block.text_code ? (

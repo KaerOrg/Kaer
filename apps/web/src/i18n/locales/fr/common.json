@@ -79,6 +79,9 @@
     "loading_patients": "Chargement des patients…",
     "empty_title": "Aucun patient pour l'instant",
     "empty_description": "Commencez par inviter votre premier patient.",
+    "search_placeholder": "Rechercher un patient (nom, email)…",
+    "empty_search_title": "Aucun patient ne correspond",
+    "empty_search_description": "Aucun patient ne correspond à votre recherche. Vérifiez l'orthographe ou videz le champ pour tout voir.",
     "module_count_one": "{{count}} module",
     "module_count_other": "{{count}} modules"
   },
@@ -137,6 +140,8 @@
     "disable_all": "Tout désactiver",
     "enabled_count_one": "{{count}} module activé",
     "enabled_count_other": "{{count}} modules activés",
+    "search_placeholder": "Rechercher un module (nom, description)…",
+    "empty_search": "Aucun module ne correspond à votre recherche.",
     "crisis_plan": {
       "label": "Plan de crise",
       "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
