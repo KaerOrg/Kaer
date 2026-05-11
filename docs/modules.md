@@ -70,6 +70,8 @@ Le patient peut activer un rappel quotidien (heure configurable dans ProfileScre
 
 ## Comment ajouter un nouveau module
 
+> **Procédure canonique** — passer par le skill **`module-builder`** (`.claude/skills/module-builder/SKILL.md`). Il cadre le travail data-first (modèle DB → seed → `FieldRenderer` → tests → doc) et garantit la parité aperçu praticien web ≡ écran patient mobile. La séquence simplifiée ci-dessous reste valable pour les modules **legacy à écran dédié** (cas marginal : animation Reanimated, machine d'état multi-écrans interactive). Pour tout module nouveau, voir d'abord [`module-engine.md`](module-engine.md).
+
 ### 1. Déclarer le type
 
 Dans `packages/shared/src/index.ts`, ajouter la clé dans `ModuleType`:
