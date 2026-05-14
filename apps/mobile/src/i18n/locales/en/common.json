@@ -1063,5 +1063,19 @@
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Submit questionnaire"
     }
+  },
+  "notifications": {
+    "panel_title": "Reminders",
+    "my_time_label": "My time:",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused_label": "Paused",
+    "day_lun": "M",
+    "day_mar": "T",
+    "day_mer": "W",
+    "day_jeu": "T",
+    "day_ven": "F",
+    "day_sam": "S",
+    "day_dim": "S"
   }
 }

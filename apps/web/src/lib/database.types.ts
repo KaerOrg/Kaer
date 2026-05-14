@@ -281,6 +281,96 @@ export interface Database {
         }
         Relationships: []
       }
+      patient_push_tokens: {
+        Row: {
+          id: string
+          patient_id: string
+          expo_push_token: string
+          platform: 'ios' | 'android'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_id: string
+          expo_push_token: string
+          platform: 'ios' | 'android'
+        }
+        Update: {
+          expo_push_token?: string
+          platform?: 'ios' | 'android'
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_routines: {
+        Row: {
+          id: string
+          patient_module_id: string
+          practitioner_id: string
+          patient_id: string
+          days_of_week: number[]
+          time_of_day: string
+          patient_time_override: string | null
+          practitioner_note: string | null
+          is_active: boolean
+          patient_paused: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_module_id: string
+          practitioner_id: string
+          patient_id: string
+          days_of_week: number[]
+          time_of_day: string
+          patient_time_override?: string | null
+          practitioner_note?: string | null
+          is_active?: boolean
+          patient_paused?: boolean
+        }
+        Update: {
+          days_of_week?: number[]
+          time_of_day?: string
+          patient_time_override?: string | null
+          practitioner_note?: string | null
+          is_active?: boolean
+          patient_paused?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          id: string
+          routine_id: string | null
+          patient_id: string | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          routine_id?: string | null
+          patient_id?: string | null
+          status?: string
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      patient_engagement_logs: {
+        Row: {
+          id: string
+          patient_id: string
+          event_type: string
+          metadata: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          patient_id: string
+          event_type: string
+          metadata?: Record<string, unknown>
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -339,4 +429,43 @@ export interface PsychoeducationCardEntry {
   card_id: string
   is_read: boolean
   unlocked_at: string
+}
+
+export interface NotificationRoutine {
+  id: string
+  patient_module_id: string
+  practitioner_id: string
+  patient_id: string
+  days_of_week: number[]
+  time_of_day: string
+  patient_time_override: string | null
+  practitioner_note: string | null
+  is_active: boolean
+  patient_paused: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationRoutineInsert {
+  patient_module_id: string
+  practitioner_id: string
+  patient_id: string
+  days_of_week: number[]
+  time_of_day: string
+  practitioner_note?: string | null
+}
+
+export interface NotificationRoutineUpdate {
+  days_of_week?: number[]
+  time_of_day?: string
+  practitioner_note?: string | null
+  is_active?: boolean
+}
+
+export interface ActivityFeedEvent {
+  id: string
+  patient_id: string
+  event_type: string
+  metadata: Record<string, unknown>
+  created_at: string
 }

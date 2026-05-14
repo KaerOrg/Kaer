@@ -1895,5 +1895,19 @@
       "note": "Signes d'alerte (Surdosage) : Tremblements importants, soif extrême, nausées sévères ou confusion → contactez immédiatement votre médecin ou le 15.",
       "callout": "Ne modifiez jamais votre dose ou votre traitement sans en parler à votre praticien."
     }
+  },
+  "notifications": {
+    "panel_title": "Rappels",
+    "my_time_label": "Mon heure :",
+    "pause": "Suspendre",
+    "resume": "Reprendre",
+    "paused_label": "Suspendu",
+    "day_lun": "L",
+    "day_mar": "M",
+    "day_mer": "Me",
+    "day_jeu": "J",
+    "day_ven": "V",
+    "day_sam": "S",
+    "day_dim": "D"
   }
 }

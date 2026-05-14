@@ -4,7 +4,9 @@
     "cancel": "Cancel",
     "save": "Save",
     "back": "Back",
-    "error_generic": "An error occurred."
+    "error_generic": "An error occurred.",
+    "close": "Close",
+    "delete": "Delete"
   },
   "nav": {
     "profile_menu": "Profile menu",
@@ -781,5 +783,32 @@
       "label": "ASRS v1.1 — Full Assessment",
       "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005)."
     }
+  },
+  "notifications": {
+    "modal_title": "Notifications",
+    "days_label": "Reminder days",
+    "time_label": "Time",
+    "note_label": "Note for patient",
+    "note_placeholder": "E.g.: Remember to do it before the session…",
+    "save_routine": "Save",
+    "add_routine": "Add reminder",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "patient_paused": "Paused by patient",
+    "configure_button": "Configure reminders",
+    "activity_feed_label": "Patient activity",
+    "activity_feed_title": "Recent activity",
+    "feed_empty": "No recent activity.",
+    "feed_paused_event": "Paused reminders for module {{module}}",
+    "feed_minutes": "{{n}} min ago",
+    "feed_hours": "{{n}} h ago",
+    "feed_days": "{{n}} d ago",
+    "day_lun": "M",
+    "day_mar": "T",
+    "day_mer": "W",
+    "day_jeu": "T",
+    "day_ven": "F",
+    "day_sam": "S",
+    "day_dim": "S"
   }
 }

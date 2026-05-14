@@ -2,6 +2,7 @@ import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { ProfileDropdown } from './ProfileDropdown'
 import { MainNav } from '../MainNav/MainNav'
+import { ActivityFeedPanel } from '../ActivityFeedPanel/ActivityFeedPanel'
 import { getInitials } from './Layout.utils'
 import './Layout.css'
 import type { LayoutProps } from './Layout.types'
@@ -23,12 +24,15 @@ export function Layout({ children }: LayoutProps) {
             </div>
             <MainNav />
           </div>
-          <ProfileDropdown
-            initials={initials}
-            avatarUrl={practitioner?.avatar_url ?? undefined}
-            name={practitioner?.name ?? ''}
-            onLogout={logout}
-          />
+          <div className="layout__right">
+            {practitioner ? <ActivityFeedPanel practitionerId={practitioner.id} /> : null}
+            <ProfileDropdown
+              initials={initials}
+              avatarUrl={practitioner?.avatar_url ?? undefined}
+              name={practitioner?.name ?? ''}
+              onLogout={logout}
+            />
+          </div>
         </div>
       </header>
 

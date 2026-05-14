@@ -4,6 +4,7 @@ export interface CardHeader {
   title: string
   subtitle?: string
   icon?: ReactNode
+  right?: ReactNode
 }
 
 export interface CardProps {

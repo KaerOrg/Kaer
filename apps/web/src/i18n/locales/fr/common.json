@@ -4,7 +4,9 @@
     "cancel": "Annuler",
     "save": "Enregistrer",
     "back": "Retour",
-    "error_generic": "Une erreur est survenue."
+    "error_generic": "Une erreur est survenue.",
+    "close": "Fermer",
+    "delete": "Supprimer"
   },
   "nav": {
     "profile_menu": "Menu profil",
@@ -884,5 +886,32 @@
       "label": "ASRS v1.1 — Bilan Complet",
       "description": "Bilan complet TDAH adulte — 18 items Parties A+B (Kessler et al., 2005)."
     }
+  },
+  "notifications": {
+    "modal_title": "Notifications",
+    "days_label": "Jours de rappel",
+    "time_label": "Heure",
+    "note_label": "Note pour le patient",
+    "note_placeholder": "Ex. : Pensez à le faire avant la séance…",
+    "save_routine": "Enregistrer",
+    "add_routine": "Ajouter un rappel",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "patient_paused": "Mis en pause par le patient",
+    "configure_button": "Configurer les rappels",
+    "activity_feed_label": "Activité patients",
+    "activity_feed_title": "Activité récente",
+    "feed_empty": "Aucune activité récente.",
+    "feed_paused_event": "A mis en pause les rappels du module {{module}}",
+    "feed_minutes": "Il y a {{n}} min",
+    "feed_hours": "Il y a {{n}} h",
+    "feed_days": "Il y a {{n}} j",
+    "day_lun": "L",
+    "day_mar": "M",
+    "day_mer": "Me",
+    "day_jeu": "J",
+    "day_ven": "V",
+    "day_sam": "S",
+    "day_dim": "D"
   }
 }

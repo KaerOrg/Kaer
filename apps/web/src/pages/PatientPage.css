@@ -177,9 +177,9 @@
   gap: 12px;
 }
 
-/* Psycho picker spans full grid width inside accordion body */
+/* Psycho picker and expanded wrappers span full grid width */
 .category-list .accordion__body .psycho-card-picker,
-.category-list .accordion__body .module-card-wrapper-block {
+.category-list .accordion__body .module-card-wrapper-block--wide {
   grid-column: 1 / -1;
 }
 
@@ -189,14 +189,88 @@
   display: contents;
 }
 
+/* ── Toggle activation module ────────────────────────────────────────────── */
+
+.module-toggle {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.module-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.module-toggle__track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #D1D5DB;
+  transition: background 0.2s;
+}
+
+.module-toggle__track--on {
+  background: #5EEAD4;
+}
+
+.module-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s;
+}
+
+.module-toggle__track--on .module-toggle__thumb {
+  transform: translateX(16px);
+}
+
+/* ── ─────────────────────────────────────────────────────────────────────── */
+
+.module-card--unlocked {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
+}
+
 .module-card__date {
   font-size: 11px;
   color: var(--color-text-secondary);
   margin-top: 6px;
 }
 
+.module-card__date--actions {
+  margin-top: 0;
+  margin-right: auto;
+}
+
 .module-card__revoke {
   color: var(--color-danger) !important;
+}
+
+.module-card__notif-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.module-card__notif-btn:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light, #eef2ff);
+  border-color: var(--color-primary);
 }
 
 .psycho-observance-summary {
@@ -303,12 +377,20 @@
   gap: 0;
 }
 
+/* Cartes normales (non-wide) : remplissent toute la hauteur de la cellule de grille */
+.module-card-wrapper-block:not(.module-card-wrapper-block--wide) {
+  height: 100%;
+}
+
+.module-card-wrapper-block:not(.module-card-wrapper-block--wide) > .card {
+  height: 100%;
+}
+
 /* Assure que les wrappers psycho (qui utilisent display:contents) restent
    compatibles avec la grille quand on leur ajoute la classe block */
 .module-card-wrapper.module-card-wrapper-block {
   display: flex;
   flex-direction: column;
-  grid-column: 1 / -1;
 }
 
 /* ── Bouton Aperçu ────────────────────────────────────────────────────────── */

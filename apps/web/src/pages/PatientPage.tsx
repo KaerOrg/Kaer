@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BookOpen, Eye, EyeOff } from 'lucide-react'
+import { BookOpen, Eye, EyeOff, Bell } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -35,6 +35,7 @@ import {
   updateRim,
 } from '../services/moduleAssignmentService'
 import { fetchEnabledModules } from '../services/practitionerSettingsService'
+import { NotificationRoutineModal } from '../components/NotificationRoutineModal/NotificationRoutineModal'
 import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
@@ -73,6 +74,8 @@ export function PatientPage() {
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
+  const [patientFirstName, setPatientFirstName] = useState<string | null>(null)
+  const [patientLastName, setPatientLastName] = useState<string | null>(null)
   const [pageData, setPageData] = useState<PageData>(PAGE_DATA_INITIAL)
   const { modules, categories, enabledModules, psychoCards, comingSoonIds } = pageData
   const [loading, setLoading] = useState(true)
@@ -98,6 +101,14 @@ export function PatientPage() {
   const [savingRim, setSavingRim] = useState(false)
   const [rimError, setRimError] = useState<string | null>(null)
 
+  const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string } | null>(null)
+
+  const reloadModules = useCallback(async () => {
+    if (!id) return
+    const mods = await fetchPatientModules(id)
+    setPageData(prev => ({ ...prev, modules: mods }))
+  }, [id])
+
   const loadPatient = useCallback(async () => {
     if (!id || !practitioner) return
     setLoading(true)
@@ -107,6 +118,8 @@ export function PatientPage() {
 
     setPatientEmail(header.email)
     setPatientAlias(header.alias)
+    setPatientFirstName(header.firstName)
+    setPatientLastName(header.lastName)
     setTeenMode(header.teenMode)
 
     const [mods, enabled, cats, cards, comingSoon] = await Promise.all([
@@ -137,19 +150,19 @@ export function PatientPage() {
     if (!id || !practitioner) return
     setUnlockingModule(moduleType)
     const result = await unlockStandardModule(id, practitioner.id, moduleType)
-    if (result.ok) await loadPatient()
+    if (result.ok) await reloadModules()
     setUnlockingModule(null)
   }
 
   const revokeModule = async (moduleId: string) => {
     await revokeModuleService(moduleId)
-    await loadPatient()
+    await reloadModules()
   }
 
   const revokeScale = async (moduleId: string) => {
     setRevokingModuleId(moduleId)
     await revokeModuleService(moduleId)
-    await loadPatient()
+    await reloadModules()
     setRevokingModuleId(null)
   }
 
@@ -226,7 +239,7 @@ export function PatientPage() {
 
     setSavingPsycho(false)
     setPsychoPickerMode('off')
-    await loadPatient()
+    await reloadModules()
   }
 
   const cancelPsychoPicker = () => {
@@ -275,7 +288,7 @@ export function PatientPage() {
     }
     setSavingRim(false)
     setRimEditorMode('off')
-    await loadPatient()
+    await reloadModules()
   }
 
   // ── Radar ────────────────────────────────────────────────────────────────
@@ -287,20 +300,21 @@ export function PatientPage() {
 
   // ── Rendu d'une carte module ─────────────────────────────────────────────
 
+  const moduleToggle = (on: boolean, loading: boolean, onToggle: () => void) => (
+    <button
+      className="module-toggle"
+      onClick={onToggle}
+      disabled={loading}
+      aria-label={on ? t('patient.revoke_button') : t('patient.unlock_button')}
+    >
+      <span className={`module-toggle__track ${on ? 'module-toggle__track--on' : ''}`}>
+        <span className="module-toggle__thumb" />
+      </span>
+    </button>
+  )
+
   const renderModuleCard = (modItem: ModuleItem) => {
     const moduleType = modItem.id as ModuleType
-    if (comingSoonIds.has(moduleType)) {
-      return (
-        <div key={moduleType} className="module-card-wrapper-block">
-          <Card
-            state="disabled"
-            header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
-            actions={<StatusBadge variant="neutral" label={t('patient.realtime_soon')} />}
-          />
-        </div>
-      )
-    }
-
     const mod = modules.find(m => m.module_type === moduleType)
     const unlocked = !!mod
 
@@ -308,11 +322,20 @@ export function PatientPage() {
       const cards = mod ? getPsychoCards(mod) : []
       const readCount = cards.filter(c => c.is_read).length
 
+      const handlePsychoToggle = () => {
+        if (unlocked && mod) { cancelPsychoPicker(); revokeModule(mod.id) }
+        else if (psychoPickerMode === 'unlock') cancelPsychoPicker()
+        else openPsychoPicker('unlock')
+      }
+
       return (
-        <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
+        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psychoPickerMode !== 'off' || previewModule === 'psychoeducation' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
-            state={unlocked ? 'active' : undefined}
-            header={{ title: t('modules.psychoeducation.label'), subtitle: t('modules.psychoeducation.description') }}
+            header={{
+              title: t('modules.psychoeducation.label'),
+              subtitle: t('modules.psychoeducation.description'),
+              right: moduleToggle(unlocked, false, handlePsychoToggle),
+            }}
             actions={
               <>
                 <button
@@ -323,31 +346,9 @@ export function PatientPage() {
                   {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
                 </button>
-                {unlocked && mod ? (
-                  <>
-                    <StatusBadge variant="success" label={t('patient.active_badge')} />
-                    {psychoPickerMode !== 'edit' && (
-                      <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
-                        {t('patient.psycho_edit_cards')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="module-card__revoke"
-                      onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
-                    >
-                      {t('patient.revoke_button')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
-                    }
-                  >
-                    {psychoPickerMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
+                {unlocked && mod && psychoPickerMode !== 'edit' && (
+                  <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
+                    {t('patient.psycho_edit_cards')}
                   </Button>
                 )}
               </>
@@ -436,42 +437,26 @@ export function PatientPage() {
 
     if (moduleType === 'rim') {
       const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
+
+      const handleRimToggle = () => {
+        if (unlocked && mod) { cancelRimEditor(); revokeModule(mod.id) }
+        else if (rimEditorMode === 'unlock') cancelRimEditor()
+        else openRimEditor('unlock')
+      }
+
       return (
-        <div key="rim" className="module-card-wrapper module-card-wrapper-block">
+        <div key="rim" className={`module-card-wrapper module-card-wrapper-block ${rimEditorMode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
-            state={unlocked ? 'active' : undefined}
-            header={{ title: t('modules.rim.label'), subtitle: t('modules.rim.description') }}
-            actions={
-              <>
-                {unlocked && mod ? (
-                  <>
-                    <StatusBadge variant="success" label={t('patient.active_badge')} />
-                    {rimEditorMode !== 'edit' && (
-                      <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
-                        {t('patient.rim_edit_scenario')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="module-card__revoke"
-                      onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
-                    >
-                      {t('patient.revoke_button')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
-                    }
-                  >
-                    {rimEditorMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
-                  </Button>
-                )}
-              </>
-            }
+            header={{
+              title: t('modules.rim.label'),
+              subtitle: t('modules.rim.description'),
+              right: moduleToggle(unlocked, false, handleRimToggle),
+            }}
+            actions={unlocked && mod && rimEditorMode !== 'edit' ? (
+              <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
+                {t('patient.rim_edit_scenario')}
+              </Button>
+            ) : undefined}
           >
             {unlocked && mod && (
               <div className="module-card__date">
@@ -532,12 +517,34 @@ export function PatientPage() {
     }
 
     return (
-      <div key={moduleType} className="module-card-wrapper-block">
+      <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
         <Card
-          state={unlocked ? 'active' : undefined}
-          header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
+          className={unlocked ? 'module-card--unlocked' : ''}
+          header={{
+            title: t(`modules.${moduleType}.label`),
+            subtitle: t(`modules.${moduleType}.description`),
+            right: moduleToggle(unlocked, unlockingModule === moduleType, () => {
+              if (unlocked && mod) revokeModule(mod.id)
+              else unlockModule(moduleType)
+            }),
+          }}
           actions={
             <>
+              {unlocked && mod && (
+                <span className="module-card__date module-card__date--actions">
+                  {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                </span>
+              )}
+              {unlocked && mod && (
+                <button
+                  type="button"
+                  className="module-card__notif-btn"
+                  title={t('notifications.configure_button')}
+                  onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`) })}
+                >
+                  <Bell size={14} />
+                </button>
+              )}
               <button
                 className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
                 onClick={() => togglePreview(moduleType)}
@@ -546,36 +553,9 @@ export function PatientPage() {
                 {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
               </button>
-              {unlocked && mod ? (
-                <>
-                  <StatusBadge variant="success" label={t('patient.active_badge')} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="module-card__revoke"
-                    onClick={() => revokeModule(mod.id)}
-                  >
-                    {t('patient.revoke_button')}
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  loading={unlockingModule === moduleType}
-                  onClick={() => unlockModule(moduleType)}
-                >
-                  {t('patient.unlock_button')}
-                </Button>
-              )}
             </>
           }
-        >
-          {unlocked && mod && (
-            <div className="module-card__date">
-              {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-            </div>
-          )}
-        </Card>
+        />
 
         {previewModule === moduleType && (
           <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
@@ -646,7 +626,8 @@ export function PatientPage() {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const displayName = patientAlias ?? patientEmail
+  const fullName = [patientFirstName, patientLastName].filter(Boolean).join(' ')
+  const displayName = patientAlias ?? (fullName || patientEmail)
 
   return (
     <Layout>
@@ -726,9 +707,10 @@ export function PatientPage() {
 
               <div className="category-list">
                 {categories.map(category => {
-                  const visibleModules = enabledModules === null
+                  const visibleModules = (enabledModules === null
                     ? category.modules
                     : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
+                  ).filter(m => !comingSoonIds.has(m.id))
                   if (visibleModules.length === 0) return null
                   const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
                   return (
@@ -757,6 +739,16 @@ export function PatientPage() {
           </>
         )}
       </div>
+
+      {notifModal && practitioner && id && (
+        <NotificationRoutineModal
+          patientModuleId={notifModal.patientModuleId}
+          practitionerId={practitioner.id}
+          patientId={id}
+          moduleLabel={notifModal.moduleLabel}
+          onClose={() => setNotifModal(null)}
+        />
+      )}
     </Layout>
   )
 }

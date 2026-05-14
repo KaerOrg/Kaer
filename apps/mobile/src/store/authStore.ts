@@ -11,6 +11,7 @@ import {
   type PatientProfile,
 } from '../services/authService'
 import { updatePatientProfile, type PatientProfileUpdate } from '../services/patientProfileService'
+import { registerPushToken } from '../services/notificationService'
 
 interface AuthState {
   patient: PatientProfile | null
@@ -75,6 +76,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!patient) return
     const { teenMode, moduleColors } = await fetchTeenContext(patient.id)
     set({ teenMode, moduleColors })
+    // Enregistrement du token push en arrière-plan — non bloquant
+    void registerPushToken(patient.id)
   },
 
   login: async (email, password) => {

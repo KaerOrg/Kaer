@@ -11,6 +11,7 @@ export function Card({ header, actions, children, variant = 'default', state, cl
             <h3 className="card__title">{header.title}</h3>
             {header.subtitle ? <p className="card__subtitle">{header.subtitle}</p> : null}
           </div>
+          {header.right ? <div className="card__header-right">{header.right}</div> : null}
         </div>
       ) : null}
       {children ? <div className="card__body">{children}</div> : null}

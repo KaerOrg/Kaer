@@ -55,6 +55,12 @@
   gap: 24px;
 }
 
+.layout__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .layout__main {
   flex: 1;
   max-width: 1200px;

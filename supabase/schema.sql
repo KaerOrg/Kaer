@@ -679,3 +679,165 @@ create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
       where t.id = topic_id and t.is_active = true
     )
   );
+
+
+-- ============================================================
+-- TABLE : patient_push_tokens (Tokens Expo Push par device patient)
+-- ============================================================
+-- Un patient peut avoir plusieurs tokens (plusieurs devices).
+-- L'Edge Function send-notifications utilise le service_role pour lire.
+
+create table if not exists public.patient_push_tokens (
+  id               uuid        primary key default gen_random_uuid(),
+  patient_id       uuid        not null references public.patients(id) on delete cascade,
+  expo_push_token  text        not null,
+  platform         text        not null check (platform in ('ios', 'android')),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (expo_push_token)
+);
+
+create index if not exists idx_push_tokens_patient
+  on public.patient_push_tokens(patient_id);
+
+alter table public.patient_push_tokens enable row level security;
+
+-- Le patient ne voit et ne modifie que ses propres tokens
+drop policy if exists "push_tokens_patient_select" on public.patient_push_tokens;
+create policy "push_tokens_patient_select"
+  on public.patient_push_tokens for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_insert" on public.patient_push_tokens;
+create policy "push_tokens_patient_insert"
+  on public.patient_push_tokens for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_update" on public.patient_push_tokens;
+create policy "push_tokens_patient_update"
+  on public.patient_push_tokens for update
+  using (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_delete" on public.patient_push_tokens;
+create policy "push_tokens_patient_delete"
+  on public.patient_push_tokens for delete
+  using (auth.uid() = patient_id);
+
+
+-- ============================================================
+-- TABLE : notification_routines (Calendriers de rappel par module patient)
+-- ============================================================
+-- Créées par le praticien, ajustables par le patient (heure + pause).
+-- days_of_week : tableau ISO (1=lundi … 7=dimanche).
+-- time_of_day : heure fixée par le praticien ("HH:MM").
+-- patient_time_override : décalage optionnel du patient ("HH:MM").
+-- practitioner_note : texte libre affiché dans le corps de la notification.
+
+create table if not exists public.notification_routines (
+  id                    uuid        primary key default gen_random_uuid(),
+  patient_module_id     uuid        not null references public.patient_modules(id) on delete cascade,
+  practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id            uuid        not null references public.patients(id) on delete cascade,
+  days_of_week          smallint[]  not null,
+  time_of_day           text        not null,
+  patient_time_override text,
+  practitioner_note     text,
+  is_active             boolean     not null default true,
+  patient_paused        boolean     not null default false,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+
+create index if not exists idx_notification_routines_patient
+  on public.notification_routines(patient_id);
+
+create index if not exists idx_notification_routines_practitioner
+  on public.notification_routines(practitioner_id);
+
+create index if not exists idx_notification_routines_module
+  on public.notification_routines(patient_module_id);
+
+alter table public.notification_routines enable row level security;
+
+-- Praticien : CRUD complet sur ses propres routines
+drop policy if exists "notif_routines_practitioner_select" on public.notification_routines;
+create policy "notif_routines_practitioner_select"
+  on public.notification_routines for select
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_insert" on public.notification_routines;
+create policy "notif_routines_practitioner_insert"
+  on public.notification_routines for insert
+  with check (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_update" on public.notification_routines;
+create policy "notif_routines_practitioner_update"
+  on public.notification_routines for update
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_delete" on public.notification_routines;
+create policy "notif_routines_practitioner_delete"
+  on public.notification_routines for delete
+  using (auth.uid() = practitioner_id);
+
+-- Patient : lecture + mise à jour de ses seules colonnes (patient_paused, patient_time_override)
+drop policy if exists "notif_routines_patient_select" on public.notification_routines;
+create policy "notif_routines_patient_select"
+  on public.notification_routines for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "notif_routines_patient_update" on public.notification_routines;
+create policy "notif_routines_patient_update"
+  on public.notification_routines for update
+  using (auth.uid() = patient_id)
+  with check (
+    auth.uid() = patient_id
+    -- Seules les colonnes patient sont modifiables côté patient :
+    -- is_active, days_of_week, time_of_day, practitioner_id ne sont pas vérifiées ici
+    -- car RLS s'applique à la ligne entière — l'application n'envoie que ces deux colonnes.
+  );
+
+
+-- ============================================================
+-- TABLE : notification_logs (Historique des envois — audit)
+-- ============================================================
+-- Remplie uniquement par l'Edge Function (service_role).
+-- Aucun accès client direct.
+
+create table if not exists public.notification_logs (
+  id          uuid        primary key default gen_random_uuid(),
+  routine_id  uuid        references public.notification_routines(id) on delete set null,
+  patient_id  uuid        references public.patients(id) on delete cascade,
+  sent_at     timestamptz not null default now(),
+  status      text        not null default 'sent'
+);
+
+create index if not exists idx_notification_logs_routine
+  on public.notification_logs(routine_id);
+
+create index if not exists idx_notification_logs_patient
+  on public.notification_logs(patient_id, sent_at desc);
+
+alter table public.notification_logs enable row level security;
+-- Aucune policy client — lecture/écriture réservée au service_role (Edge Function).
+
+
+-- ============================================================
+-- pg_cron : déclenchement de l'Edge Function send-notifications
+-- ============================================================
+-- Prérequis : activer l'extension pg_cron dans Supabase Dashboard
+--   > Database > Extensions > pg_cron (enable)
+-- Remplacer <PROJECT_REF> par la référence du projet Supabase.
+-- À exécuter une seule fois manuellement dans le SQL Editor.
+--
+-- select cron.schedule(
+--   'send-notifications-cron',
+--   '* * * * *',
+--   $$
+--     select net.http_post(
+--       url := 'https://<PROJECT_REF>.supabase.co/functions/v1/send-notifications',
+--       headers := '{"Content-Type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}'::jsonb,
+--       body := '{}'::jsonb
+--     ) as request_id;
+--   $$
+-- );
