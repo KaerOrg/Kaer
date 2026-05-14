@@ -533,6 +533,10 @@
       "new_btn": "New balance",
       "empty_title": "No balance yet",
       "empty_text": "Use the button above to fill in your first decisional balance."
+    },
+    "motivational_balance": {
+      "label": "Motivational Balance",
+      "description": "Motivational Interviewing (Miller & Rollnick): Prochaska stages, importance/confidence rulers 0-10, values balance."
     }
   },
   "category": {
@@ -563,6 +567,10 @@
     "addiction": {
       "label": "Addictology & Impulsivity",
       "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivational Interviewing",
+      "subtitle": "Exploring ambivalence to change"
     },
     "assessments": {
       "label": "Clinical Assessments",
@@ -743,6 +751,10 @@
       "label": "Decisional Balance",
       "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
       "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
+    },
+    "motivational_balance": {
+      "label": "Motivational Balance",
+      "description": "Motivational Interviewing (Miller & Rollnick): Prochaska stages, importance/confidence rulers 0-10, values balance."
     },
     "phq9": {
       "label": "PHQ-9",

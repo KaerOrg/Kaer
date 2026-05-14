@@ -108,6 +108,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
 | `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
+| `motivational_balance` | Balance motivationnelle (Entretien Motivationnel) | Implémenté — écran custom, 4 onglets : Fiches (`psyedu`, 4 topics), Stade (roue Prochaska 6 stades), Thermomètres (importance + confiance 0-10 + question de suivi + phrase d'engagement), Balance (12 valeurs + 2 colonnes Pour/Contre + poids 1-3) ; bouton "i" sources (Miller & Rollnick, Prochaska, SDT, HAS, NICE) ; SQLite local 3 tables (`em_rulers`, `em_balance_items`, `em_values`) ; teen mode ; bandeau MDR ; catégorie Supabase `motivation` |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -162,6 +163,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
 - [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
 - [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
+- [x] Module Balance motivationnelle (`motivational_balance`) — 4 onglets (Fiches psyedu, Stade Prochaska, Thermomètres importance/confiance 0-10 + question de suivi, Balance valeurs + 2 colonnes), bouton "i" sources scientifiques, SQLite local (3 tables), teen mode, bandeau MDR, 10 tests Jest
 - [ ] Notifications push
 
 ## Vision commerciale

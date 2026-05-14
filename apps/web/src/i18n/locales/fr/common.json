@@ -247,6 +247,10 @@
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
+    "motivational_balance": {
+      "label": "Balance motivationnelle",
+      "description": "Entretien Motivationnel (Miller & Rollnick) : stades Prochaska, thermomètres importance/confiance 0-10, balance valeurs."
+    },
     "phq9": {
       "label": "PHQ-9",
       "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0–27.",
@@ -492,6 +496,10 @@
     "addiction": {
       "label": "Addictologie & Impulsivité",
       "subtitle": "Le module souvent oublié"
+    },
+    "motivation": {
+      "label": "Entretien Motivationnel",
+      "subtitle": "Explorer l'ambivalence au changement"
     },
     "assessments": {
       "label": "Évaluations Cliniques",
@@ -846,6 +854,10 @@
       "label": "Balance décisionnelle",
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
+    },
+    "motivational_balance": {
+      "label": "Balance motivationnelle",
+      "description": "Entretien Motivationnel (Miller & Rollnick) : stades Prochaska, thermomètres importance/confiance 0-10, balance valeurs."
     },
     "phq9": {
       "label": "PHQ-9",
