@@ -1,19 +1,13 @@
-import { useState, useCallback } from 'react'
 import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { ProfileDropdown } from './ProfileDropdown'
-import { ProfileModal } from './ProfileModal'
 import { MainNav } from '../MainNav/MainNav'
 import { getInitials } from './Layout.utils'
 import './Layout.css'
 import type { LayoutProps } from './Layout.types'
 
 export function Layout({ children }: LayoutProps) {
-  const { practitioner, logout, updateProfile } = useAuthStore()
-  const [modalOpen, setModalOpen] = useState(false)
-
-  const openModal = useCallback(() => setModalOpen(true), [])
-  const closeModal = useCallback(() => setModalOpen(false), [])
+  const { practitioner, logout } = useAuthStore()
 
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
 
@@ -34,22 +28,12 @@ export function Layout({ children }: LayoutProps) {
             name={practitioner?.name ?? ''}
             email={practitioner?.email ?? ''}
             professionalTitle={practitioner?.professional_title ?? undefined}
-            onEditProfile={openModal}
             onLogout={logout}
           />
         </div>
       </header>
 
       <main className="layout__main">{children}</main>
-
-      {modalOpen ? (
-        <ProfileModal
-          initialName={practitioner?.name ?? ''}
-          initialTitle={practitioner?.professional_title ?? ''}
-          onSave={updateProfile}
-          onClose={closeModal}
-        />
-      ) : null}
     </div>
   )
 }

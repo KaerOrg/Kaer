@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Profilmenü",
+    "profile": "Profil",
     "edit_profile": "Profil bearbeiten",
     "logout": "Abmelden",
     "language": "Sprache"
@@ -35,9 +36,13 @@
     "error_credentials": "Falsche E-Mail oder falsches Passwort."
   },
   "profile_modal": {
-    "title": "Profil bearbeiten",
+    "title": "Mein Profil",
+    "edit_section": "Meine Informationen bearbeiten",
+    "email_label": "E-Mail-Adresse",
     "full_name_label": "Vollständiger Name",
     "title_label": "Berufsbezeichnung",
+    "phone_label": "Telefon",
+    "address_label": "Adresse",
     "error_update": "Fehler beim Aktualisieren des Profils.",
     "success": "✓ Profil aktualisiert"
   },

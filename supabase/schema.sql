@@ -116,6 +116,28 @@ begin
   end if;
 end $$;
 
+-- practitioners.address
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'address'
+  ) then
+    alter table public.practitioners add column address text;
+  end if;
+end $$;
+
+-- practitioners.phone
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'phone'
+  ) then
+    alter table public.practitioners add column phone text;
+  end if;
+end $$;
+
 -- invitations : démographie patient + teen_mode
 do $$
 begin

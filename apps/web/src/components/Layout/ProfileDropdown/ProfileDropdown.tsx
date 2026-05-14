@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LogOut, UserPen, Globe } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { LogOut, User, Globe } from 'lucide-react'
 import { SUPPORTED, LANG_LABELS, LANG_FLAGS, type SupportedLang } from '../../../i18n'
 import { useAuthStore } from '../../../store/authStore'
 import './ProfileDropdown.css'
 import type { ProfileDropdownProps } from './ProfileDropdown.types'
 
-export function ProfileDropdown({ initials, name, email, professionalTitle, onEditProfile, onLogout }: ProfileDropdownProps) {
+export function ProfileDropdown({ initials, name, email, professionalTitle, onLogout }: ProfileDropdownProps) {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const updateLanguagePreference = useAuthStore(s => s.updateLanguagePreference)
@@ -56,9 +58,9 @@ export function ProfileDropdown({ initials, name, email, professionalTitle, onEd
           </div>
 
           <div className="profile-dropdown__divider" />
-          <button className="profile-dropdown__item" onClick={() => { setOpen(false); onEditProfile() }}>
-            <UserPen size={15} />
-            {t('nav.edit_profile')}
+          <button className="profile-dropdown__item" onClick={() => { setOpen(false); navigate('/profil') }}>
+            <User size={15} />
+            {t('nav.profile')}
           </button>
           <button className="profile-dropdown__item profile-dropdown__item--danger" onClick={onLogout}>
             <LogOut size={15} />

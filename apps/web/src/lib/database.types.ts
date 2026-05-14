@@ -296,6 +296,8 @@ export interface Practitioner {
   name: string
   professional_title: string | null
   language_preference: string
+  address: string | null
+  phone: string | null
 }
 
 export interface PatientSummary {

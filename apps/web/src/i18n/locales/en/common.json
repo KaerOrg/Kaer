@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Profile menu",
+    "profile": "Profile",
     "edit_profile": "Edit profile",
     "logout": "Sign out",
     "language": "Language"
@@ -35,9 +36,13 @@
     "error_credentials": "Incorrect email or password."
   },
   "profile_modal": {
-    "title": "Edit profile",
+    "title": "My profile",
+    "edit_section": "Edit my information",
+    "email_label": "Email address",
     "full_name_label": "Full name",
     "title_label": "Professional title",
+    "phone_label": "Phone",
+    "address_label": "Address",
     "error_update": "Error updating profile.",
     "success": "✓ Profile updated"
   },

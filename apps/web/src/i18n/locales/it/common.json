@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Menu profilo",
+    "profile": "Profilo",
     "edit_profile": "Modifica profilo",
     "logout": "Disconnetti",
     "language": "Lingua"
@@ -35,9 +36,13 @@
     "error_credentials": "Email o password errati."
   },
   "profile_modal": {
-    "title": "Modifica profilo",
+    "title": "Il mio profilo",
+    "edit_section": "Modifica le mie informazioni",
+    "email_label": "Indirizzo email",
     "full_name_label": "Nome completo",
     "title_label": "Titolo professionale",
+    "phone_label": "Telefono",
+    "address_label": "Indirizzo",
     "error_update": "Errore durante l'aggiornamento del profilo.",
     "success": "✓ Profilo aggiornato"
   },

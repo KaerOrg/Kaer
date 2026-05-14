@@ -156,3 +156,4 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 ```
 
 Ces valeurs sont disponibles dans le tableau de bord Supabase → Settings → API.
+    

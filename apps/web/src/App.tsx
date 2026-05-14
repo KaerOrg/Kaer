@@ -9,6 +9,7 @@ import { PatientRegisterPage } from './pages/PatientRegisterPage'
 import { DispensairePage } from './pages/DispensairePage'
 import { ModuleCatalogPage } from './pages/ModuleCatalogPage'
 import { ModulePreviewPage } from './pages/ModulePreviewPage'
+import { ProfilePage } from './pages/ProfilePage'
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -44,6 +45,7 @@ function App() {
             <Route path="/dispensaire" element={<DispensairePage />} />
             <Route path="/modules" element={<ModuleCatalogPage />} />
             <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
+            <Route path="/profil" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (

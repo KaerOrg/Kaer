@@ -3,6 +3,5 @@ export interface ProfileDropdownProps {
   name: string
   email: string
   professionalTitle?: string
-  onEditProfile: () => void
   onLogout: () => void
 }
