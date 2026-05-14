@@ -25,9 +25,8 @@ export function Layout({ children }: LayoutProps) {
           </div>
           <ProfileDropdown
             initials={initials}
+            avatarUrl={practitioner?.avatar_url ?? undefined}
             name={practitioner?.name ?? ''}
-            email={practitioner?.email ?? ''}
-            professionalTitle={practitioner?.professional_title ?? undefined}
             onLogout={logout}
           />
         </div>

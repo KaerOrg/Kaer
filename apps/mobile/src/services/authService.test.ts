@@ -54,7 +54,7 @@ describe('authService.getCurrentSessionPatient', () => {
 
     const result = await getCurrentSessionPatient()
 
-    expect(result).toEqual({ id: 'pat-1', email: 'p@t.fr', avatar_url: 'https://x/y.jpg' })
+    expect(result).toEqual({ id: 'pat-1', email: 'p@t.fr', first_name: '', last_name: '', phone: null, avatar_url: 'https://x/y.jpg' })
   })
 })
 

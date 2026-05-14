@@ -20,6 +20,34 @@
 
 
 -- ============================================================
+-- TABLE : professional_titles (Référentiel des professions praticiens)
+-- ============================================================
+-- Données de référence publiques — accessibles sans authentification.
+create table if not exists public.professional_titles (
+  code        text    primary key,
+  label_fr    text    not null,
+  label_en    text    not null,
+  sort_order  integer not null default 0
+);
+
+alter table public.professional_titles enable row level security;
+
+drop policy if exists "professional_titles_select_all" on public.professional_titles;
+create policy "professional_titles_select_all"
+  on public.professional_titles for select using (true);
+
+insert into public.professional_titles (code, label_fr, label_en, sort_order) values
+  ('ide',                'Infirmier diplômé d''État (IDE)',         'Registered Nurse (RN)',      1),
+  ('ipa',                'Infirmier en pratique avancée (IPA)',     'Advanced Practice Nurse',    2),
+  ('psychiatrist',       'Psychiatre',                              'Psychiatrist',               3),
+  ('child_psychiatrist', 'Pédopsychiatre',                          'Child Psychiatrist',         4),
+  ('addictologist',      'Addictologue',                            'Addictologist',              5),
+  ('gp',                 'Médecin généraliste',                     'General Practitioner',       6),
+  ('psychologist',       'Psychologue',                             'Psychologist',               7)
+on conflict (code) do nothing;
+
+
+-- ============================================================
 -- TABLES — Domaine utilisateurs / patients / praticiens
 -- ============================================================
 

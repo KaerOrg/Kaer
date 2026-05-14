@@ -1,14 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Button } from '../components/Button'
 import { InputField } from '../components/InputField'
+import { SelectField } from '../components/SelectField/SelectField'
+import { fetchProfessionalTitles } from '../services/authService'
+import type { ProfessionalTitle } from '../lib/database.types'
 import './LoginPage.css'
 
 export function LoginPage() {
   const { login, register, loading, error, clearError } = useAuthStore()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [registered, setRegistered] = useState(false)
 
@@ -16,6 +19,11 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [title, setTitle] = useState('')
+  const [professionalTitles, setProfessionalTitles] = useState<ProfessionalTitle[]>([])
+
+  useEffect(() => {
+    void fetchProfessionalTitles().then(setProfessionalTitles)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,13 +86,18 @@ export function LoginPage() {
                 placeholder={t('auth.full_name_placeholder')}
                 required
               />
-              <InputField
+              <SelectField
                 label={t('auth.professional_title_label')}
-                type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder={t('auth.professional_title_placeholder')}
-              />
+              >
+                <option value="">{t('auth.professional_title_placeholder')}</option>
+                {professionalTitles.map(pt => (
+                  <option key={pt.code} value={pt.code}>
+                    {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
+                  </option>
+                ))}
+              </SelectField>
             </>
           )}
 

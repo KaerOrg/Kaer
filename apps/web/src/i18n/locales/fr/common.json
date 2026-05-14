@@ -19,7 +19,7 @@
     "full_name_label": "Votre nom complet",
     "full_name_placeholder": "Dr. Marie Dupont",
     "professional_title_label": "Titre professionnel",
-    "professional_title_placeholder": "Infirmier en pratique avancée",
+    "professional_title_placeholder": "— Sélectionner une profession —",
     "email_label": "Adresse email",
     "email_placeholder": "vous@exemple.fr",
     "password_label": "Mot de passe",
@@ -41,10 +41,13 @@
     "email_label": "Adresse email",
     "full_name_label": "Nom complet",
     "title_label": "Titre professionnel",
+    "title_placeholder": "— Sélectionner une profession —",
     "phone_label": "Téléphone",
     "address_label": "Adresse",
     "error_update": "Erreur lors de la mise à jour.",
-    "success": "✓ Profil mis à jour"
+    "success": "✓ Profil mis à jour",
+    "avatar_change_label": "Modifier la photo de profil",
+    "avatar_error": "Erreur lors de la mise à jour de la photo."
   },
   "dashboard": {
     "title": "Mes patients",

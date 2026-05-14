@@ -3,6 +3,9 @@ import { supabase } from '../lib/supabase'
 export interface PatientProfile {
   id: string
   email: string
+  first_name: string
+  last_name: string
+  phone: string | null
   avatar_url: string | null
 }
 
@@ -19,13 +22,16 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
 
   const { data: profile } = await supabase
     .from('patients')
-    .select('avatar_url')
+    .select('first_name, last_name, phone, avatar_url')
     .eq('id', session.user.id)
     .single()
 
   return {
     id: session.user.id,
     email: session.user.email!,
+    first_name: profile?.first_name ?? '',
+    last_name: profile?.last_name ?? '',
+    phone: profile?.phone ?? null,
     avatar_url: profile?.avatar_url ?? null,
   }
 }
@@ -41,6 +47,9 @@ export function onAuthChange(
     void cb({
       id: session.user.id,
       email: session.user.email!,
+      first_name: '',
+      last_name: '',
+      phone: null,
       avatar_url: null,
     })
   })

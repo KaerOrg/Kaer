@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { setLanguage, type SupportedLang } from '../i18n'
-import type { Practitioner } from '../lib/database.types'
+import type { Practitioner, ProfessionalTitle } from '../lib/database.types'
 
 async function applyLanguagePreference(practitioner: Practitioner | null): Promise<void> {
   if (practitioner?.language_preference) {
@@ -112,4 +112,12 @@ export async function updatePractitionerProfile(
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
+}
+
+export async function fetchProfessionalTitles(): Promise<ProfessionalTitle[]> {
+  const { data } = await supabase
+    .from('professional_titles')
+    .select('code, label_fr, label_en, sort_order')
+    .order('sort_order')
+  return (data ?? []) as ProfessionalTitle[]
 }

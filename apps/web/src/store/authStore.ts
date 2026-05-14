@@ -18,6 +18,7 @@ interface AuthState {
   register: (email: string, password: string, name: string, title: string) => Promise<void>
   updateProfile: (name: string, title: string, address: string, phone: string) => Promise<string | null>
   updateLanguagePreference: (lang: SupportedLang) => Promise<void>
+  updateAvatar: (avatarUrl: string) => void
   logout: () => Promise<void>
   loadSession: () => Promise<void>
   clearError: () => void
@@ -66,6 +67,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) return error
     if (practitioner) set({ practitioner })
     return null
+  },
+
+  updateAvatar: (avatarUrl) => {
+    set((state) => ({
+      practitioner: state.practitioner ? { ...state.practitioner, avatar_url: avatarUrl } : null,
+    }))
   },
 
   logout: async () => {

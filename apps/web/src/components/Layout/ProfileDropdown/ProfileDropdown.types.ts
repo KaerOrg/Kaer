@@ -1,7 +1,6 @@
 export interface ProfileDropdownProps {
   initials: string
+  avatarUrl?: string
   name: string
-  email: string
-  professionalTitle?: string
   onLogout: () => void
 }

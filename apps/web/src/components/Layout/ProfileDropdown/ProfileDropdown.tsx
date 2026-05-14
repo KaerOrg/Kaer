@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, User, Globe } from 'lucide-react'
+import { LogOut, Globe } from 'lucide-react'
 import { SUPPORTED, LANG_LABELS, LANG_FLAGS, type SupportedLang } from '../../../i18n'
 import { useAuthStore } from '../../../store/authStore'
 import './ProfileDropdown.css'
 import type { ProfileDropdownProps } from './ProfileDropdown.types'
 
-export function ProfileDropdown({ initials, name, email, professionalTitle, onLogout }: ProfileDropdownProps) {
+export function ProfileDropdown({ initials, avatarUrl, name, onLogout }: ProfileDropdownProps) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -27,16 +27,21 @@ export function ProfileDropdown({ initials, name, email, professionalTitle, onLo
   return (
     <div className="profile-dropdown" ref={ref}>
       <button className="profile-dropdown__avatar" onClick={() => setOpen(o => !o)} aria-label={t('nav.profile_menu')}>
-        {initials}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="" className="profile-dropdown__avatar-photo" />
+        ) : (
+          initials
+        )}
       </button>
 
       {open ? (
         <div className="profile-dropdown__menu">
-          <div className="profile-dropdown__info">
-            <div className="profile-dropdown__name">{name || '—'}</div>
-            <div className="profile-dropdown__email">{email}</div>
-            {professionalTitle ? <div className="profile-dropdown__title">{professionalTitle}</div> : null}
-          </div>
+          <button
+            className="profile-dropdown__name-btn"
+            onClick={() => { setOpen(false); navigate('/profil') }}
+          >
+            {name || '—'}
+          </button>
           <div className="profile-dropdown__divider" />
 
           <div className="profile-dropdown__lang">
@@ -58,10 +63,6 @@ export function ProfileDropdown({ initials, name, email, professionalTitle, onLo
           </div>
 
           <div className="profile-dropdown__divider" />
-          <button className="profile-dropdown__item" onClick={() => { setOpen(false); navigate('/profil') }}>
-            <User size={15} />
-            {t('nav.profile')}
-          </button>
           <button className="profile-dropdown__item profile-dropdown__item--danger" onClick={onLogout}>
             <LogOut size={15} />
             {t('nav.logout')}

@@ -1,25 +1,41 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Briefcase, UserCircle2, MapPin, Phone } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
 import { InputField } from '../components/InputField'
+import { SelectField } from '../components/SelectField/SelectField'
 import { getInitials } from '../components/Layout/Layout.utils'
+import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../services/avatarService'
+import { fetchProfessionalTitles } from '../services/authService'
+import type { ProfessionalTitle } from '../lib/database.types'
 import './ProfilePage.css'
 
 export function ProfilePage() {
-  const { t } = useTranslation()
-  const { practitioner, updateProfile } = useAuthStore()
+  const { t, i18n } = useTranslation()
+  const { practitioner, updateProfile, updateAvatar } = useAuthStore()
 
   const [name, setName] = useState(practitioner?.name ?? '')
   const [title, setTitle] = useState(practitioner?.professional_title ?? '')
+  const [professionalTitles, setProfessionalTitles] = useState<ProfessionalTitle[]>([])
+
+  useEffect(() => {
+    void fetchProfessionalTitles().then(setProfessionalTitles)
+  }, [])
+
+  const titleLangKey = i18n.language.startsWith('fr') ? 'label_fr' : 'label_en'
+  const titleMatch = professionalTitles.find(pt => pt.code === practitioner?.professional_title)
+  const titleLabel = titleMatch ? titleMatch[titleLangKey] : practitioner?.professional_title
   const [address, setAddress] = useState(practitioner?.address ?? '')
   const [phone, setPhone] = useState(practitioner?.phone ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
 
   const handleSave = async (e: React.FormEvent) => {
@@ -33,13 +49,58 @@ export function ProfilePage() {
     setTimeout(() => setSuccess(false), 2500)
   }
 
+  const handleAvatarClick = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !practitioner) return
+    setAvatarUploading(true)
+    setAvatarError('')
+    try {
+      const url = await uploadPractitionerAvatar(practitioner.id, file)
+      await savePractitionerAvatarUrl(practitioner.id, url)
+      updateAvatar(url)
+    } catch {
+      setAvatarError(t('profile_modal.avatar_error'))
+    } finally {
+      setAvatarUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }, [practitioner, updateAvatar, t])
+
   return (
     <Layout>
       <h1 className="profile-page__title">{t('profile_modal.title')}</h1>
 
       <div className="profile-page__grid">
         <div className="profile-page__card">
-          <div className="profile-page__avatar">{initials}</div>
+          <div
+            className="profile-page__avatar-wrapper"
+            onClick={handleAvatarClick}
+            role="button"
+            aria-label={t('profile_modal.avatar_change_label')}
+            tabIndex={0}
+            onKeyDown={e => e.key === 'Enter' && handleAvatarClick()}
+          >
+            {practitioner?.avatar_url ? (
+              <img src={practitioner.avatar_url} alt="" className="profile-page__avatar-photo" />
+            ) : (
+              <div className="profile-page__avatar">{initials}</div>
+            )}
+            <div className="profile-page__avatar-badge">✎</div>
+            {avatarUploading ? <div className="profile-page__avatar-overlay" /> : null}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          {avatarError ? <div className="profile-page__avatar-error">{avatarError}</div> : null}
+
           <div className="profile-page__info-rows">
             <div className="profile-page__info-row">
               <UserCircle2 size={16} className="profile-page__info-icon" />
@@ -49,10 +110,10 @@ export function ProfilePage() {
               <Mail size={16} className="profile-page__info-icon" />
               <span className="profile-page__info-value">{practitioner?.email}</span>
             </div>
-            {practitioner?.professional_title ? (
+            {titleLabel ? (
               <div className="profile-page__info-row">
                 <Briefcase size={16} className="profile-page__info-icon" />
-                <span className="profile-page__info-value">{practitioner.professional_title}</span>
+                <span className="profile-page__info-value">{titleLabel}</span>
               </div>
             ) : null}
             {practitioner?.phone ? (
@@ -82,13 +143,18 @@ export function ProfilePage() {
                 placeholder="Dr. Marie Dupont"
                 required
               />
-              <InputField
+              <SelectField
                 label={t('profile_modal.title_label')}
-                type="text"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                placeholder="Infirmier en pratique avancée"
-              />
+              >
+                <option value="">{t('profile_modal.title_placeholder')}</option>
+                {professionalTitles.map(pt => (
+                  <option key={pt.code} value={pt.code}>
+                    {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
+                  </option>
+                ))}
+              </SelectField>
             </div>
             <div className="profile-page__form-row">
               <InputField

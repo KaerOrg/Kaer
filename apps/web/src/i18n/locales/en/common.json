@@ -19,7 +19,7 @@
     "full_name_label": "Your full name",
     "full_name_placeholder": "Dr. Marie Dupont",
     "professional_title_label": "Professional title",
-    "professional_title_placeholder": "Advanced practice nurse",
+    "professional_title_placeholder": "— Select a profession —",
     "email_label": "Email address",
     "email_placeholder": "you@example.com",
     "password_label": "Password",
@@ -41,10 +41,13 @@
     "email_label": "Email address",
     "full_name_label": "Full name",
     "title_label": "Professional title",
+    "title_placeholder": "— Select a profession —",
     "phone_label": "Phone",
     "address_label": "Address",
     "error_update": "Error updating profile.",
-    "success": "✓ Profile updated"
+    "success": "✓ Profile updated",
+    "avatar_change_label": "Change profile photo",
+    "avatar_error": "Error updating profile photo."
   },
   "dashboard": {
     "title": "My patients",

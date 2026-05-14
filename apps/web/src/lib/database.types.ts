@@ -290,6 +290,13 @@ export interface Database {
 }
 
 // Types pratiques pour l'app
+export interface ProfessionalTitle {
+  code: string
+  label_fr: string
+  label_en: string
+  sort_order: number
+}
+
 export interface Practitioner {
   id: string
   email: string
@@ -298,6 +305,7 @@ export interface Practitioner {
   language_preference: string
   address: string | null
   phone: string | null
+  avatar_url: string | null
 }
 
 export interface PatientSummary {
