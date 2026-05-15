@@ -67,7 +67,7 @@ export function ProfilePage() {
       setAvatarUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
-  }, [practitioner, updateAvatar, t])
+  }, [practitioner, updateAvatar, t, toast])
 
   return (
     <Layout>

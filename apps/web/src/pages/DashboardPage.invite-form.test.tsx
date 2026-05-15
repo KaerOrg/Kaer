@@ -26,7 +26,7 @@ vi.mock('../store/authStore', () => ({
 
 import { supabase } from '../lib/supabase'
 import { DashboardPage } from './DashboardPage'
-import { ToastProvider } from '../contexts/ToastContext'
+import { ToastProvider } from '../contexts/ToastProvider'
 import { ToastContainer } from '../components/ui/Toast/ToastContainer'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

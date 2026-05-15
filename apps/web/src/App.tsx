@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
-import { ToastProvider } from './contexts/ToastContext'
+import { ToastProvider } from './contexts/ToastProvider'
 import { ToastContainer } from './components/ui/Toast'
 
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
