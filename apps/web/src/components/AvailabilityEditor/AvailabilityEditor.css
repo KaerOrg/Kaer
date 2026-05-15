@@ -102,6 +102,37 @@
   padding: 12px 0;
 }
 
+/* ── Day pills ── */
+.availability-editor__day-pills {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.availability-editor__day-pill {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.availability-editor__day-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.availability-editor__day-pill--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
 /* ── Add rule form ── */
 .availability-editor__add-form {
   display: flex;

@@ -11,6 +11,7 @@ export interface AvailabilityRule {
   start_time: string
   end_time: string
   slot_duration_minutes: number
+  buffer_minutes: number
   created_at: string
 }
 
@@ -80,34 +81,40 @@ export function computeAvailableSlots(
   const exception = exceptions.find(e => e.exception_date === date)
   if (exception?.is_closed) return []
 
-  const rule = rules.find(r => r.day_of_week === dayOfWeek)
-  if (!rule) return []
+  const dayRules = rules.filter(r => r.day_of_week === dayOfWeek)
+  if (dayRules.length === 0) return []
 
-  const startTime = exception?.start_time ?? rule.start_time
-  const endTime = exception?.end_time ?? rule.end_time
-  const duration = rule.slot_duration_minutes
+  // Une exception avec des horaires explicites remplace l'ensemble des règles du jour
+  // par une seule fenêtre (durée/buffer de la première règle).
+  const windows: Array<{ start: string; end: string; duration: number; buffer: number }> =
+    exception?.start_time != null && exception.end_time != null
+      ? [{ start: exception.start_time, end: exception.end_time, duration: dayRules[0].slot_duration_minutes, buffer: dayRules[0].buffer_minutes ?? 0 }]
+      : dayRules.map(r => ({ start: r.start_time, end: r.end_time, duration: r.slot_duration_minutes, buffer: r.buffer_minutes ?? 0 }))
 
   const slots: ComputedSlot[] = []
-  let current = timeToMinutes(startTime)
-  const end = timeToMinutes(endTime)
 
-  while (current + duration <= end) {
-    const slotStart = `${date}T${minutesToTimeString(current)}:00`
-    const slotEnd = `${date}T${minutesToTimeString(current + duration)}:00`
-    const sStart = new Date(slotStart).getTime()
-    const sEnd = new Date(slotEnd).getTime()
+  for (const { start, end, duration, buffer } of windows) {
+    let current = timeToMinutes(start)
+    const endMin = timeToMinutes(end)
 
-    const isBooked = bookedSlots.some(a => {
-      if (a.status === 'cancelled_by_patient' || a.status === 'cancelled_by_practitioner')
-        return false
-      return new Date(a.starts_at).getTime() < sEnd && new Date(a.ends_at).getTime() > sStart
-    })
+    while (current + duration <= endMin) {
+      const slotStart = `${date}T${minutesToTimeString(current)}:00`
+      const slotEnd = `${date}T${minutesToTimeString(current + duration)}:00`
+      const sStart = new Date(slotStart).getTime()
+      const sEnd = new Date(slotEnd).getTime()
 
-    slots.push({ starts_at: slotStart, ends_at: slotEnd, is_available: !isBooked })
-    current += duration
+      const isBooked = bookedSlots.some(a => {
+        if (a.status === 'cancelled_by_patient' || a.status === 'cancelled_by_practitioner')
+          return false
+        return new Date(a.starts_at).getTime() < sEnd && new Date(a.ends_at).getTime() > sStart
+      })
+
+      slots.push({ starts_at: slotStart, ends_at: slotEnd, is_available: !isBooked })
+      current += duration + buffer
+    }
   }
 
-  return slots
+  return slots.sort((a, b) => a.starts_at.localeCompare(b.starts_at))
 }
 
 // ─── Rendez-vous patient ──────────────────────────────────────────────────────
@@ -182,6 +189,8 @@ export async function bookAppointment(params: {
 
   const { error } = await supabase.from('appointments').insert({
     ...params,
+    starts_at: new Date(params.starts_at).toISOString(),
+    ends_at: new Date(params.ends_at).toISOString(),
     status: autoConfirm ? 'confirmed' : 'pending',
   })
   return { ok: !error, error: error?.message }

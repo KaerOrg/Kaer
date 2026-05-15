@@ -35,13 +35,22 @@ export function jsDayToSchema(jsDay: number): DayOfWeek {
 // ─── Calcul des créneaux ──────────────────────────────────────────────────────
 
 /**
+ * Retourne true si les plages horaires [aStart, aEnd[ et [bStart, bEnd[ se chevauchent.
+ * Les heures sont des chaînes "HH:MM" ou "HH:MM:SS" — seuls les 5 premiers caractères sont comparés.
+ */
+export function timesOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
+  return aStart.slice(0, 5) < bEnd.slice(0, 5) && aEnd.slice(0, 5) > bStart.slice(0, 5)
+}
+
+/**
  * Calcule les créneaux disponibles pour une date donnée.
  * Fonction pure — pas d'appel réseau.
+ * Supporte plusieurs règles non-chevauchantes pour le même jour (ex. matin + après-midi).
  *
- * @param rules       Règles de disponibilité du praticien
- * @param exceptions  Exceptions ponctuelles
+ * @param rules        Règles de disponibilité du praticien
+ * @param exceptions   Exceptions ponctuelles
  * @param appointments Rendez-vous existants pour cette date (tous statuts)
- * @param date        "YYYY-MM-DD"
+ * @param date         "YYYY-MM-DD"
  */
 export function computeAvailableSlots(
   rules: AvailabilityRule[],
@@ -55,44 +64,50 @@ export function computeAvailableSlots(
   const exception = exceptions.find(e => e.exception_date === date)
   if (exception?.is_closed) return []
 
-  const rule = rules.find(r => r.day_of_week === dayOfWeek)
-  if (!rule) return []
+  const dayRules = rules.filter(r => r.day_of_week === dayOfWeek)
+  if (dayRules.length === 0) return []
 
-  const startTime = exception?.start_time ?? rule.start_time
-  const endTime = exception?.end_time ?? rule.end_time
-  const duration = rule.slot_duration_minutes
+  // Une exception avec des horaires explicites remplace l'ensemble des règles du jour
+  // par une seule fenêtre (durée/buffer de la première règle).
+  const windows: Array<{ start: string; end: string; duration: number; buffer: number }> =
+    exception?.start_time != null && exception.end_time != null
+      ? [{ start: exception.start_time, end: exception.end_time, duration: dayRules[0].slot_duration_minutes, buffer: dayRules[0].buffer_minutes ?? 0 }]
+      : dayRules.map(r => ({ start: r.start_time, end: r.end_time, duration: r.slot_duration_minutes, buffer: r.buffer_minutes ?? 0 }))
 
   const slots: ComputedSlot[] = []
-  let current = timeToMinutes(startTime)
-  const end = timeToMinutes(endTime)
 
-  while (current + duration <= end) {
-    const slotStart = `${date}T${minutesToTimeString(current)}:00`
-    const slotEnd = `${date}T${minutesToTimeString(current + duration)}:00`
-    const sStart = new Date(slotStart).getTime()
-    const sEnd = new Date(slotEnd).getTime()
+  for (const { start, end, duration, buffer } of windows) {
+    let current = timeToMinutes(start)
+    const endMin = timeToMinutes(end)
 
-    const overlapping = appointments.find(a => {
-      if (
-        a.status === 'cancelled_by_patient' ||
-        a.status === 'cancelled_by_practitioner'
-      ) return false
-      const aStart = new Date(a.starts_at).getTime()
-      const aEnd = new Date(a.ends_at).getTime()
-      return aStart < sEnd && aEnd > sStart
-    })
+    while (current + duration <= endMin) {
+      const slotStart = `${date}T${minutesToTimeString(current)}:00`
+      const slotEnd = `${date}T${minutesToTimeString(current + duration)}:00`
+      const sStart = new Date(slotStart).getTime()
+      const sEnd = new Date(slotEnd).getTime()
 
-    slots.push({
-      starts_at: slotStart,
-      ends_at: slotEnd,
-      is_available: !overlapping,
-      appointment: overlapping ?? null,
-    })
+      const overlapping = appointments.find(a => {
+        if (
+          a.status === 'cancelled_by_patient' ||
+          a.status === 'cancelled_by_practitioner'
+        ) return false
+        const aStart = new Date(a.starts_at).getTime()
+        const aEnd = new Date(a.ends_at).getTime()
+        return aStart < sEnd && aEnd > sStart
+      })
 
-    current += duration
+      slots.push({
+        starts_at: slotStart,
+        ends_at: slotEnd,
+        is_available: !overlapping,
+        appointment: overlapping ?? null,
+      })
+
+      current += duration + buffer
+    }
   }
 
-  return slots
+  return slots.sort((a, b) => a.starts_at.localeCompare(b.starts_at))
 }
 
 // ─── Règles de disponibilité ──────────────────────────────────────────────────
@@ -172,6 +187,13 @@ export async function deleteException(
 
 // ─── Rendez-vous ──────────────────────────────────────────────────────────────
 
+type PatientRelEntry = {
+  patient_alias: string | null
+  patient_first_name: string | null
+  patient_last_name: string | null
+  patients: { email: string; first_name: string | null; last_name: string | null } | { email: string; first_name: string | null; last_name: string | null }[] | null
+}
+
 type AppointmentRow = {
   id: string
   practitioner_id: string
@@ -182,17 +204,13 @@ type AppointmentRow = {
   notes: string | null
   created_at: string
   updated_at: string
-  patient_rel: {
-    patient_alias: string | null
-    patient_first_name: string | null
-    patient_last_name: string | null
-    patients: { email: string; first_name: string | null; last_name: string | null } | null
-  }[] | null
+  // PostgREST retourne un objet (many-to-one via FK composite) ou un tableau selon la version
+  patient_rel: PatientRelEntry | PatientRelEntry[] | null
 }
 
 function rowToAppointmentWithPatient(row: AppointmentRow): AppointmentWithPatient {
-  const rel = row.patient_rel?.[0]
-  const profile = rel?.patients
+  const rel = Array.isArray(row.patient_rel) ? row.patient_rel[0] : row.patient_rel
+  const profile = Array.isArray(rel?.patients) ? rel?.patients[0] : rel?.patients
   const firstName = rel?.patient_first_name ?? profile?.first_name ?? ''
   const lastName = rel?.patient_last_name ?? profile?.last_name ?? ''
   const alias = rel?.patient_alias
@@ -212,6 +230,25 @@ function rowToAppointmentWithPatient(row: AppointmentRow): AppointmentWithPatien
     patient_display_name,
     patient_email: profile?.email ?? '',
   }
+}
+
+export async function fetchAppointmentsForPatient(
+  practitionerId: string,
+  patientId: string,
+): Promise<AppointmentWithPatient[]> {
+  const { data } = await supabase
+    .from('appointments')
+    .select(`
+      *,
+      patient_rel:practitioner_patients!inner(
+        patient_alias, patient_first_name, patient_last_name,
+        patients(email, first_name, last_name)
+      )
+    `)
+    .eq('practitioner_id', practitionerId)
+    .eq('patient_id', patientId)
+    .order('starts_at', { ascending: false })
+  return ((data ?? []) as AppointmentRow[]).map(rowToAppointmentWithPatient)
 }
 
 export async function fetchAppointmentsForWeek(
@@ -242,12 +279,16 @@ export async function createAppointment(params: {
   starts_at: string
   ends_at: string
   notes?: string
-  auto_confirm: boolean
 }): Promise<{ ok: boolean; data?: Appointment; error?: string }> {
-  const { auto_confirm, ...rest } = params
+  const { starts_at, ends_at, ...rest } = params
   const { data, error } = await supabase
     .from('appointments')
-    .insert({ ...rest, status: auto_confirm ? 'confirmed' : 'pending' })
+    .insert({
+      ...rest,
+      starts_at: new Date(starts_at).toISOString(),
+      ends_at: new Date(ends_at).toISOString(),
+      status: 'pending',
+    })
     .select()
     .single()
   if (error) return { ok: false, error: error.message }
@@ -261,6 +302,17 @@ export async function updateAppointmentStatus(
   const { error } = await supabase
     .from('appointments')
     .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+  return { ok: !error }
+}
+
+export async function updateAppointmentNotes(
+  id: string,
+  notes: string,
+): Promise<{ ok: boolean }> {
+  const { error } = await supabase
+    .from('appointments')
+    .update({ notes: notes || null, updated_at: new Date().toISOString() })
     .eq('id', id)
   return { ok: !error }
 }

@@ -1,7 +1,7 @@
 .agenda-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-lg, 32px) var(--spacing-md, 16px);
+  padding: 0;
 }
 
 .agenda-page__header {
@@ -62,6 +62,12 @@
 
 .agenda-page__nav-btn:hover {
   background: var(--color-border);
+}
+
+/* Patient filter */
+.agenda-page__patient-filter {
+  margin-left: auto;
+  width: 200px;
 }
 
 /* Main layout: grid + sidebar */

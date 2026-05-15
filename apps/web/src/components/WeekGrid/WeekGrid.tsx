@@ -34,7 +34,10 @@ function durationPx(startsAt: string, endsAt: string): number {
 }
 
 function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = (d.getMonth() + 1).toString().padStart(2, '0')
+  const day = d.getDate().toString().padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function addDays(d: Date, n: number): Date {
@@ -46,6 +49,14 @@ function addDays(d: Date, n: number): Date {
 function formatTime(iso: string): string {
   const d = new Date(iso)
   return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`
+}
+
+function formatSlotTime(iso: string): string {
+  const d = new Date(iso)
+  const minutes = d.getMinutes()
+  return minutes === 0
+    ? `${d.getHours()}h`
+    : `${d.getHours()}h${d.getMinutes().toString().padStart(2, '0')}`
 }
 
 function AppointmentBlock({
@@ -159,24 +170,34 @@ export function WeekGrid({
                     const heightPx = durationPx(s.starts_at, s.ends_at)
                     const rule = rules.find(r => r.day_of_week === jsDayToSchema(day.getDay()))
                     const slotDuration = rule?.slot_duration_minutes ?? 50
+                    const showLabel = heightPx >= 28
                     return (
                       <div
                         key={s.starts_at}
                         className="week-grid__slot"
-                        style={{ top: topPx, height: Math.max(heightPx - 2, 8) }}
+                        style={{ top: topPx, height: Math.max(heightPx - 2, 16) }}
                         onClick={() => onSlotClick(s.starts_at, s.ends_at, slotDuration)}
                         role="button"
                         tabIndex={0}
+                        title={`${formatSlotTime(s.starts_at)} – ${formatSlotTime(s.ends_at)}`}
                         onKeyDown={e => {
                           if (e.key === 'Enter' || e.key === ' ')
                             onSlotClick(s.starts_at, s.ends_at, slotDuration)
                         }}
-                      />
+                      >
+                        {showLabel && (
+                          <span className="week-grid__slot-label">
+                            {formatSlotTime(s.starts_at)}
+                          </span>
+                        )}
+                      </div>
                     )
                   })}
 
                 {/* Appointments */}
-                {dayAppointments.map(appt => {
+                {dayAppointments
+                  .filter(a => a.status !== 'cancelled_by_patient' && a.status !== 'cancelled_by_practitioner')
+                  .map(appt => {
                   const topPx = isoToPx(appt.starts_at)
                   const heightPx = durationPx(appt.starts_at, appt.ends_at)
                   return (

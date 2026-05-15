@@ -33,7 +33,7 @@ beforeEach(() => { jest.clearAllMocks() })
 
 const baseRule: AvailabilityRule = {
   id: 'r1', practitioner_id: 'p1', day_of_week: 0,
-  start_time: '09:00', end_time: '11:00', slot_duration_minutes: 50, created_at: '',
+  start_time: '09:00', end_time: '11:00', slot_duration_minutes: 50, buffer_minutes: 0, created_at: '',
 }
 
 describe('computeAvailableSlots', () => {
@@ -73,6 +73,29 @@ describe('computeAvailableSlots', () => {
     }
     const slots = computeAvailableSlots([baseRule], [], [booked], '2024-01-08')
     expect(slots[0].is_available).toBe(true)
+  })
+
+  it('deux règles matin + après-midi : créneaux triés chronologiquement', () => {
+    const morning: AvailabilityRule = { ...baseRule, id: 'r1', start_time: '09:00', end_time: '11:00' }
+    const afternoon: AvailabilityRule = { ...baseRule, id: 'r2', start_time: '14:00', end_time: '16:00' }
+    const slots = computeAvailableSlots([morning, afternoon], [], [], '2024-01-08')
+    // 2h/50min = 2 slots le matin, 2h/50min = 2 slots l'après-midi → 4
+    expect(slots).toHaveLength(4)
+    expect(slots[0].starts_at).toBe('2024-01-08T09:00:00')
+    expect(slots[2].starts_at).toBe('2024-01-08T14:00:00')
+    expect(slots[3].starts_at).toBe('2024-01-08T14:50:00')
+  })
+
+  it('exception avec horaires explicites remplace toutes les règles du jour', () => {
+    const morning: AvailabilityRule = { ...baseRule, id: 'r1', start_time: '09:00', end_time: '11:00' }
+    const afternoon: AvailabilityRule = { ...baseRule, id: 'r2', start_time: '14:00', end_time: '18:00' }
+    const exc: AvailabilityException = {
+      id: 'e1', practitioner_id: 'p1', exception_date: '2024-01-08',
+      is_closed: false, start_time: '10:00', end_time: '11:00', created_at: '',
+    }
+    const slots = computeAvailableSlots([morning, afternoon], [exc], [], '2024-01-08')
+    expect(slots).toHaveLength(1)
+    expect(slots[0].starts_at).toBe('2024-01-08T10:00:00')
   })
 })
 

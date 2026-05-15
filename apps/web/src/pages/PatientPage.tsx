@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo, type ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BookOpen, Eye, EyeOff, Bell, Search, LayoutDashboard, Package2, FileText, CalendarDays, Clock } from 'lucide-react'
@@ -46,6 +46,16 @@ import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import { NotificationRoutineModal } from '../components/NotificationRoutineModal/NotificationRoutineModal'
 import { Tabs } from '../components/Tabs'
 import { extractUniqueTags, extractTopTags } from '../services/noteService'
+import { AppointmentModal } from '../components/AppointmentModal'
+import {
+  fetchAppointmentsForPatient,
+  createAppointment,
+  updateAppointmentStatus,
+  updateAppointmentNotes,
+  fetchAutoConfirmSetting,
+} from '../services/appointmentService'
+import type { PatientOption } from '../services/patientService'
+import type { AppointmentWithPatient, AppointmentStatus } from '../lib/calendar.types'
 
 import './PatientPage.css'
 
@@ -137,6 +147,12 @@ export function PatientPage() {
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
   const [generalNoteError, setGeneralNoteError] = useState<string | null>(null)
 
+  // ── Rendez-vous ──────────────────────────────────────────────────────────
+  const [rdvAppointments, setRdvAppointments] = useState<AppointmentWithPatient[]>([])
+  const [rdvLoaded, setRdvLoaded] = useState(false)
+  const [rdvModal, setRdvModal] = useState<{ type: 'create' | 'view'; appointment?: AppointmentWithPatient } | null>(null)
+  const [rdvAutoConfirm, setRdvAutoConfirm] = useState(true)
+
   const reloadModules = useCallback(async () => {
     if (!id) return
     const mods = await fetchPatientModules(id)
@@ -181,6 +197,66 @@ export function PatientPage() {
   useEffect(() => {
     loadPatient()
   }, [loadPatient])
+
+  useEffect(() => {
+    if (activeTab !== 'rdv' || rdvLoaded || !practitioner || !id) return
+    Promise.all([
+      fetchAppointmentsForPatient(practitioner.id, id),
+      fetchAutoConfirmSetting(practitioner.id),
+    ]).then(([appts, autoC]) => {
+      setRdvAppointments(appts)
+      setRdvAutoConfirm(autoC)
+      setRdvLoaded(true)
+    })
+  }, [activeTab, rdvLoaded, practitioner, id])
+
+  const handleRdvCreate = useCallback(
+    async (patientId: string, startsAt: string, endsAt: string, notes: string) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await createAppointment({
+        practitioner_id: practitioner.id,
+        patient_id: patientId,
+        starts_at: startsAt,
+        ends_at: endsAt,
+        notes: notes || undefined,
+        auto_confirm: rdvAutoConfirm,
+      })
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+        setRdvModal(null)
+      }
+      return result
+    },
+    [practitioner, id, rdvAutoConfirm],
+  )
+
+  const handleRdvUpdateStatus = useCallback(
+    async (apptId: string, status: AppointmentStatus) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await updateAppointmentStatus(apptId, status)
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+        setRdvModal(null)
+      }
+      return result
+    },
+    [practitioner, id],
+  )
+
+  const handleRdvUpdateNotes = useCallback(
+    async (apptId: string, notes: string) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await updateAppointmentNotes(apptId, notes)
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+      }
+      return result
+    },
+    [practitioner, id],
+  )
 
   // ── Module standard ──────────────────────────────────────────────────────
 
@@ -765,6 +841,23 @@ export function PatientPage() {
   const fullName = [patientFirstName, patientLastName].filter(Boolean).join(' ')
   const displayName = patientAlias ?? (fullName || patientEmail)
 
+  const rdvPatientOptions = useMemo<PatientOption[]>(
+    () => (id ? [{ id, label: displayName }] : []),
+    [id, displayName],
+  )
+
+  const rdvNow = new Date().toISOString()
+  const rdvUpcoming = rdvAppointments.filter(
+    a => a.starts_at > rdvNow &&
+      a.status !== 'cancelled_by_patient' &&
+      a.status !== 'cancelled_by_practitioner',
+  )
+  const rdvPast = rdvAppointments.filter(
+    a => a.starts_at <= rdvNow ||
+      a.status === 'cancelled_by_patient' ||
+      a.status === 'cancelled_by_practitioner',
+  )
+
   const allTags = extractUniqueTags(notes)
   const topTags = extractTopTags(notes, 7)
   const visibleTags = tagSearch
@@ -799,27 +892,29 @@ export function PatientPage() {
           {t('patient.back')}
         </button>
 
-        <div className="patient-page__header">
-          <div className="patient-page__avatar">
-            {displayName[0]?.toUpperCase()}
+        {activeTab === 'overview' && (
+          <div className="patient-page__header">
+            <div className="patient-page__avatar">
+              {displayName[0]?.toUpperCase()}
+            </div>
+            <div className="patient-page__header-info">
+              <h1 className="patient-page__name">{displayName}</h1>
+              <p className="patient-page__email">{patientEmail}</p>
+            </div>
+            <button
+              className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
+              onClick={toggleTeenMode}
+              disabled={togglingTeen}
+              title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
+            >
+              <span className="teen-mode-toggle__icon">🎨</span>
+              <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
+              <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
+                {teenMode ? 'ON' : 'OFF'}
+              </span>
+            </button>
           </div>
-          <div className="patient-page__header-info">
-            <h1 className="patient-page__name">{displayName}</h1>
-            <p className="patient-page__email">{patientEmail}</p>
-          </div>
-          <button
-            className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
-            onClick={toggleTeenMode}
-            disabled={togglingTeen}
-            title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
-          >
-            <span className="teen-mode-toggle__icon">🎨</span>
-            <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
-            <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
-              {teenMode ? 'ON' : 'OFF'}
-            </span>
-          </button>
-        </div>
+        )}
 
         {loading ? (
           <div className="patient-page__loading">{t('common.loading')}</div>
@@ -1194,13 +1289,92 @@ export function PatientPage() {
             )}
 
             {activeTab === 'rdv' && (
-              <div className="patient-rdv-placeholder">
-                <p>{t('patient.rdv_coming_soon')}</p>
+              <div className="patient-rdv">
+                <div className="patient-rdv__header">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setRdvModal({ type: 'create' })}
+                  >
+                    {t('patient.rdv_new')}
+                  </Button>
+                </div>
+
+                <section className="patient-rdv__section">
+                  <h3 className="patient-rdv__section-title">{t('patient.rdv_upcoming')}</h3>
+                  {rdvUpcoming.length === 0 ? (
+                    <p className="patient-rdv__empty">{t('patient.rdv_empty_upcoming')}</p>
+                  ) : (
+                    <ul className="patient-rdv__list">
+                      {rdvUpcoming.map(appt => (
+                        <li
+                          key={appt.id}
+                          className="patient-rdv__item"
+                          onClick={() => setRdvModal({ type: 'view', appointment: appt })}
+                        >
+                          <span className="patient-rdv__item-date">
+                            {new Date(appt.starts_at).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <StatusBadge
+                            variant={appt.status === 'confirmed' ? 'success' : 'warning'}
+                            label={t(`agenda.appointment.status_${appt.status.replace('cancelled_by_patient', 'cancelled').replace('cancelled_by_practitioner', 'cancelled')}`)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+                <section className="patient-rdv__section">
+                  <h3 className="patient-rdv__section-title">{t('patient.rdv_past')}</h3>
+                  {rdvPast.length === 0 ? (
+                    <p className="patient-rdv__empty">{t('patient.rdv_empty_past')}</p>
+                  ) : (
+                    <ul className="patient-rdv__list">
+                      {rdvPast.map(appt => (
+                        <li
+                          key={appt.id}
+                          className="patient-rdv__item"
+                          onClick={() => setRdvModal({ type: 'view', appointment: appt })}
+                        >
+                          <span className="patient-rdv__item-date">
+                            {new Date(appt.starts_at).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <StatusBadge
+                            variant={
+                              appt.status === 'completed' ? 'neutral' :
+                              appt.status === 'confirmed' ? 'success' :
+                              appt.status === 'pending' ? 'warning' : 'danger'
+                            }
+                            label={t(`agenda.appointment.status_${appt.status.replace('cancelled_by_patient', 'cancelled').replace('cancelled_by_practitioner', 'cancelled')}`)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
               </div>
             )}
           </>
         )}
       </div>
+
+      {rdvModal && practitioner && id && (
+        <AppointmentModal
+          mode={rdvModal.type}
+          startsAt={null}
+          endsAt={null}
+          appointment={rdvModal.appointment ?? null}
+          patients={rdvPatientOptions}
+          autoConfirm={rdvAutoConfirm}
+          defaultPatientId={id}
+          practitionerName={practitioner?.name ?? undefined}
+          onClose={() => setRdvModal(null)}
+          onCreate={handleRdvCreate}
+          onUpdateStatus={handleRdvUpdateStatus}
+          onUpdateNotes={handleRdvUpdateNotes}
+        />
+      )}
 
       {notifModal && practitioner && id && (
         <NotificationRoutineModal

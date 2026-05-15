@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Settings2 } from 'lucide-react'
+import { Settings2, CalendarPlus } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button/Button'
 import { WeekGrid } from '../components/WeekGrid'
 import { AvailabilityEditor } from '../components/AvailabilityEditor'
 import { AppointmentModal } from '../components/AppointmentModal'
+import { SearchInput } from '../components/SearchInput'
 import { useAuthStore } from '../store/authStore'
 import {
   fetchAvailabilityRules,
@@ -15,6 +17,7 @@ import {
   fetchAppointmentsForWeek,
   createAppointment,
   updateAppointmentStatus,
+  updateAppointmentNotes,
   fetchAutoConfirmSetting,
   saveAutoConfirmSetting,
 } from '../services/appointmentService'
@@ -44,7 +47,10 @@ function addDays(d: Date, n: number): Date {
 }
 
 function toDateString(d: Date): string {
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = (d.getMonth() + 1).toString().padStart(2, '0')
+  const day = d.getDate().toString().padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function formatWeekLabel(monday: Date, t: (key: string) => string): string {
@@ -58,11 +64,12 @@ function formatWeekLabel(monday: Date, t: (key: string) => string): string {
 
 type ModalState =
   | { type: 'none' }
-  | { type: 'create'; startsAt: string; endsAt: string; slotDuration: number }
+  | { type: 'create'; startsAt: string | null; endsAt: string | null; slotDuration: number }
   | { type: 'view'; appointment: AppointmentWithPatient }
 
 export function AgendaPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { practitioner } = useAuthStore()
 
   const [weekStart, setWeekStart] = useState<Date>(() => getMondayOfWeek(new Date()))
@@ -76,8 +83,17 @@ export function AgendaPage() {
   const [loading, setLoading] = useState(true)
 
   const [modal, setModal] = useState<ModalState>({ type: 'none' })
+  const [filterQuery, setFilterQuery] = useState<string>('')
 
   const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart])
+
+  const filteredAppointments = useMemo(() => {
+    const q = filterQuery.trim().toLowerCase()
+    if (!q) return appointments
+    return appointments.filter(a =>
+      a.patient_display_name.toLowerCase().includes(q),
+    )
+  }, [appointments, filterQuery])
 
   const loadWeek = useCallback(async (pId: string, monday: Date) => {
     const from = toDateString(monday)
@@ -154,7 +170,6 @@ export function AgendaPage() {
         starts_at: startsAt,
         ends_at: endsAt,
         notes: notes || undefined,
-        auto_confirm: autoConfirm,
       })
       if (result.ok) {
         await loadWeek(practitioner.id, weekStart)
@@ -162,7 +177,7 @@ export function AgendaPage() {
       }
       return result
     },
-    [practitioner, autoConfirm, weekStart, loadWeek],
+    [practitioner, weekStart, loadWeek],
   )
 
   const handleUpdateStatus = useCallback(
@@ -171,6 +186,17 @@ export function AgendaPage() {
       if (result.ok && practitioner) {
         await loadWeek(practitioner.id, weekStart)
         setModal({ type: 'none' })
+      }
+      return result
+    },
+    [practitioner, weekStart, loadWeek],
+  )
+
+  const handleUpdateNotes = useCallback(
+    async (id: string, notes: string) => {
+      const result = await updateAppointmentNotes(id, notes)
+      if (result.ok && practitioner) {
+        await loadWeek(practitioner.id, weekStart)
       }
       return result
     },
@@ -190,6 +216,14 @@ export function AgendaPage() {
             <p>{t('agenda.subtitle')}</p>
           </div>
           <div className="agenda-page__header-right">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setModal({ type: 'create', startsAt: null, endsAt: null, slotDuration: 50 })}
+            >
+              <CalendarPlus size={15} style={{ marginRight: 6 }} />
+              {t('agenda.appointment.new')}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -215,6 +249,14 @@ export function AgendaPage() {
           <Button variant="ghost" size="sm" onClick={goToToday}>
             {t('agenda.today')}
           </Button>
+
+          <div className="agenda-page__patient-filter">
+            <SearchInput
+              value={filterQuery}
+              onChange={setFilterQuery}
+              placeholder={t('agenda.filter_patient_label')}
+            />
+          </div>
         </div>
 
         {loading ? (
@@ -226,7 +268,7 @@ export function AgendaPage() {
                 weekStart={weekStart}
                 rules={rules}
                 exceptions={exceptions}
-                appointments={appointments}
+                appointments={filteredAppointments}
                 onSlotClick={handleSlotClick}
                 onAppointmentClick={handleAppointmentClick}
               />
@@ -253,10 +295,12 @@ export function AgendaPage() {
           endsAt={modalEndsAt}
           appointment={modalAppointment}
           patients={patients}
-          autoConfirm={autoConfirm}
+          practitionerName={practitioner?.name ?? undefined}
           onClose={() => setModal({ type: 'none' })}
           onCreate={handleCreate}
           onUpdateStatus={handleUpdateStatus}
+          onUpdateNotes={handleUpdateNotes}
+          onNavigateToPatient={patientId => navigate(`/patient/${patientId}`)}
         />
       )}
     </Layout>

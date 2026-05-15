@@ -7,6 +7,7 @@ export interface AvailabilityRule {
   start_time: string        // "HH:MM"
   end_time: string          // "HH:MM"
   slot_duration_minutes: number
+  buffer_minutes: number    // temps de battement entre deux RDV
   created_at: string
 }
 

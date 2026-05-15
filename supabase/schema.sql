@@ -952,6 +952,7 @@ end $$;
 -- Plages hebdomadaires récurrentes du praticien.
 -- day_of_week : 0=Lundi … 6=Dimanche.
 -- slot_duration_minutes : durée d'un rendez-vous pour cette plage.
+-- buffer_minutes : temps de battement entre deux RDV consécutifs (ex. 10 min pour se préparer).
 create table if not exists public.availability_rules (
   id                    uuid        primary key default gen_random_uuid(),
   practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
@@ -959,9 +960,14 @@ create table if not exists public.availability_rules (
   start_time            time        not null,
   end_time              time        not null,
   slot_duration_minutes smallint    not null default 50 check (slot_duration_minutes between 5 and 480),
+  buffer_minutes        smallint    not null default 0 check (buffer_minutes between 0 and 120),
   created_at            timestamptz not null default now(),
   constraint chk_availability_times check (end_time > start_time)
 );
+
+alter table public.availability_rules
+  add column if not exists buffer_minutes smallint not null default 0
+    check (buffer_minutes between 0 and 120);
 
 create index if not exists idx_availability_rules_practitioner
   on public.availability_rules(practitioner_id);
@@ -1041,6 +1047,21 @@ create table if not exists public.appointments (
   updated_at       timestamptz not null default now(),
   constraint chk_appointment_times check (ends_at > starts_at)
 );
+
+-- FK composite : permet à PostgREST de joindre appointments → practitioner_patients
+-- et garantit qu'un RDV ne peut exister que pour un patient lié au praticien.
+do $$ begin
+  if not exists (
+    select 1 from information_schema.table_constraints
+    where constraint_name = 'fk_appt_practitioner_patient'
+      and table_name = 'appointments'
+  ) then
+    alter table public.appointments
+      add constraint fk_appt_practitioner_patient
+      foreign key (practitioner_id, patient_id)
+      references public.practitioner_patients (practitioner_id, patient_id);
+  end if;
+end $$;
 
 create index if not exists idx_appointments_practitioner_time
   on public.appointments(practitioner_id, starts_at);

@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react'
-import { Check, X, Loader, Info } from 'lucide-react'
+import { Check, Loader, Info } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
+import { Modal } from '../components/Modal'
 import { fetchPatientOptions, type PatientOption } from '../services/patientService'
 import { proposeScale } from '../services/moduleAssignmentService'
 import { useAuthStore } from '../store/authStore'
@@ -250,69 +251,60 @@ export function DispensairePage() {
 
       {/* ── Modale patient picker ───────────────────────────────────────────── */}
       {modal && (
-        <div className="dp-modal-overlay" onClick={closeModal}>
-          <div className="dp-modal" onClick={e => e.stopPropagation()}>
-            <div className="dp-modal__header">
-              <div>
-                <div className="dp-modal__scale-name">{modal.scale.name}</div>
-                <div className="dp-modal__title">Choisir un patient</div>
-              </div>
-              <button className="dp-modal__close" onClick={closeModal} aria-label="Fermer">
-                <X size={18} />
-              </button>
+        <Modal
+          title={modal.scale.name}
+          subtitle="Choisir un patient"
+          onClose={closeModal}
+          maxWidth={420}
+          noPadding
+          footer={
+            <Button variant="secondary" size="sm" onClick={closeModal}>
+              Fermer
+            </Button>
+          }
+        >
+          {modal.loadingPatients ? (
+            <div className="dp-modal__loading">
+              <Loader size={20} className="dp-modal__spinner" />
+              Chargement des patients…
             </div>
-
-            <div className="dp-modal__body">
-              {modal.loadingPatients ? (
-                <div className="dp-modal__loading">
-                  <Loader size={20} className="dp-modal__spinner" />
-                  Chargement des patients…
-                </div>
-              ) : modal.patients.length === 0 ? (
-                <div className="dp-modal__empty">
-                  Aucun patient dans votre liste pour le moment.
-                </div>
-              ) : (
-                <ul className="dp-modal__list">
-                  {modal.patients.map(patient => {
-                    const isSent = modal.sent.has(patient.id)
-                    const isSending = modal.sending === patient.id
-
-                    return (
-                      <li key={patient.id} className="dp-modal__item">
-                        <span className="dp-modal__patient-label">{patient.label}</span>
-                        {isSent ? (
-                          <span className="dp-modal__sent-badge">
-                            <Check size={13} />
-                            Envoyé
-                          </span>
-                        ) : (
-                          <Button
-                            size="sm"
-                            loading={isSending}
-                            onClick={() => sendToPatient(patient)}
-                          >
-                            Envoyer
-                          </Button>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-              )}
-
-              {modal.error && (
-                <div className="dp-modal__error">{modal.error}</div>
-              )}
+          ) : modal.patients.length === 0 ? (
+            <div className="dp-modal__empty">
+              Aucun patient dans votre liste pour le moment.
             </div>
+          ) : (
+            <ul className="dp-modal__list">
+              {modal.patients.map(patient => {
+                const isSent = modal.sent.has(patient.id)
+                const isSending = modal.sending === patient.id
 
-            <div className="dp-modal__footer">
-              <Button variant="secondary" size="sm" onClick={closeModal}>
-                Fermer
-              </Button>
-            </div>
-          </div>
-        </div>
+                return (
+                  <li key={patient.id} className="dp-modal__item">
+                    <span className="dp-modal__patient-label">{patient.label}</span>
+                    {isSent ? (
+                      <span className="dp-modal__sent-badge">
+                        <Check size={13} />
+                        Envoyé
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        loading={isSending}
+                        onClick={() => sendToPatient(patient)}
+                      >
+                        Envoyer
+                      </Button>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          {modal.error && (
+            <div className="dp-modal__error">{modal.error}</div>
+          )}
+        </Modal>
       )}
     </Layout>
   )

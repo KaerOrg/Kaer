@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import { Toggle } from '../Toggle/Toggle'
 import { Button } from '../Button/Button'
+import { timesOverlap } from '../../services/appointmentService'
 import type { AvailabilityRule, DayOfWeek } from '../../lib/calendar.types'
 import './AvailabilityEditor.css'
 
@@ -28,18 +29,29 @@ export function AvailabilityEditor({
   const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
 
-  const dayRef = useRef<HTMLSelectElement>(null)
   const startRef = useRef<HTMLInputElement>(null)
   const endRef = useRef<HTMLInputElement>(null)
   const durationRef = useRef<HTMLInputElement>(null)
+  const bufferRef = useRef<HTMLInputElement>(null)
+
+  function toggleDay(day: DayOfWeek) {
+    setSelectedDays(prev =>
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    )
+  }
 
   async function handleAddRule() {
-    const day = Number(dayRef.current?.value ?? 0) as DayOfWeek
     const start = startRef.current?.value ?? ''
     const end = endRef.current?.value ?? ''
     const duration = Number(durationRef.current?.value ?? 50)
+    const buffer = Number(bufferRef.current?.value ?? 0)
 
+    if (selectedDays.length === 0) {
+      setFormError('Sélectionnez au moins un jour.')
+      return
+    }
     if (!start || !end) {
       setFormError('Renseignez les heures de début et de fin.')
       return
@@ -52,18 +64,38 @@ export function AvailabilityEditor({
       setFormError('La durée doit être entre 5 et 480 minutes.')
       return
     }
+    if (buffer < 0 || buffer > 120) {
+      setFormError('Le temps entre RDV doit être entre 0 et 120 minutes.')
+      return
+    }
+
+    const conflictingDays = selectedDays.filter(day =>
+      rules.some(r => r.day_of_week === day && timesOverlap(start, end, r.start_time, r.end_time))
+    )
+    if (conflictingDays.length > 0) {
+      const dayNames = conflictingDays.map(d => t(`agenda.days.${d}`)).join(', ')
+      setFormError(`Ces horaires chevauchent une plage existante pour : ${dayNames}.`)
+      return
+    }
 
     setFormError(null)
     setSaving(true)
-    await onAddRule({
-      practitioner_id: practitionerId,
-      day_of_week: day,
-      start_time: start,
-      end_time: end,
-      slot_duration_minutes: duration,
-    })
-    if (startRef.current) startRef.current.value = ''
-    if (endRef.current) endRef.current.value = ''
+    await Promise.all(
+      selectedDays.map(day =>
+        onAddRule({
+          practitioner_id: practitionerId,
+          day_of_week: day,
+          start_time: start,
+          end_time: end,
+          slot_duration_minutes: duration,
+          buffer_minutes: buffer,
+        })
+      )
+    )
+    setSelectedDays([])
+    if (startRef.current) startRef.current.value = '09:00'
+    if (endRef.current) endRef.current.value = '19:00'
+    if (bufferRef.current) bufferRef.current.value = '0'
     setSaving(false)
   }
 
@@ -107,6 +139,11 @@ export function AvailabilityEditor({
               </span>
               <span className="availability-editor__rule-duration">
                 {rule.slot_duration_minutes} {t('agenda.editor.minutes')}
+                {rule.buffer_minutes > 0 && (
+                  <span className="availability-editor__rule-buffer">
+                    {' '}+{rule.buffer_minutes}
+                  </span>
+                )}
               </span>
               <button
                 className="availability-editor__rule-delete"
@@ -121,20 +158,24 @@ export function AvailabilityEditor({
 
         {/* Add form */}
         <div className="availability-editor__add-form">
-          <div className="availability-editor__form-row">
-            <label>{t('agenda.days_short.0')[0]}</label>
-            <select ref={dayRef} defaultValue={0}>
-              {DAY_OPTIONS.map(d => (
-                <option key={d} value={d}>{t(`agenda.days.${d}`)}</option>
-              ))}
-            </select>
+          <div className="availability-editor__day-pills">
+            {DAY_OPTIONS.map(d => (
+              <button
+                key={d}
+                type="button"
+                className={`availability-editor__day-pill${selectedDays.includes(d) ? ' availability-editor__day-pill--active' : ''}`}
+                onClick={() => toggleDay(d)}
+              >
+                {t(`agenda.days_short.${d}`)}
+              </button>
+            ))}
           </div>
 
           <div className="availability-editor__form-row">
             <label>{t('agenda.editor.from')}</label>
-            <input ref={startRef} type="time" step={300} />
+            <input ref={startRef} type="time" step={300} defaultValue="09:00" />
             <label>{t('agenda.editor.to')}</label>
-            <input ref={endRef} type="time" step={300} />
+            <input ref={endRef} type="time" step={300} defaultValue="19:00" />
           </div>
 
           <div className="availability-editor__form-row">
@@ -145,6 +186,19 @@ export function AvailabilityEditor({
               defaultValue={50}
               min={5}
               max={480}
+              step={5}
+            />
+            <label>{t('agenda.editor.minutes')}</label>
+          </div>
+
+          <div className="availability-editor__form-row">
+            <label>{t('agenda.editor.buffer_minutes')}</label>
+            <input
+              ref={bufferRef}
+              type="number"
+              defaultValue={0}
+              min={0}
+              max={120}
               step={5}
             />
             <label>{t('agenda.editor.minutes')}</label>

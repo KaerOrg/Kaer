@@ -1,143 +1,298 @@
-.appointment-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+/* ── Date card ──────────────────────────────────────────────── */
+.appt-date-card {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: var(--spacing-md, 16px);
+  gap: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
 }
 
-.appointment-modal {
-  background: var(--color-card);
-  border-radius: var(--radius-lg, 16px);
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+.appt-date-card__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
-.appointment-modal__header {
+.appt-date-card__text {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.appointment-modal__title {
-  font-size: 16px;
+.appt-date-card__day {
+  font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
-  margin: 0;
+  text-transform: capitalize;
 }
 
-.appointment-modal__close {
-  background: none;
-  border: none;
-  cursor: pointer;
+.appt-date-card__slot {
+  font-size: 13px;
   color: var(--color-text-muted);
-  padding: 4px;
-  border-radius: var(--radius-sm, 6px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Section ────────────────────────────────────────────────── */
+.appt-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.appt-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
   display: flex;
   align-items: center;
-  transition: background 0.15s;
-}
-
-.appointment-modal__close:hover {
-  background: var(--color-border);
-}
-
-.appointment-modal__body {
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.appointment-modal__field {
-  display: flex;
-  flex-direction: column;
   gap: 4px;
 }
 
-.appointment-modal__label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
-.appointment-modal__time-info {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.appointment-modal__select {
-  padding: 8px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 6px);
-  font-size: 14px;
-  font-family: inherit;
-  background: var(--color-card);
-  color: var(--color-text);
-}
-
-.appointment-modal__textarea {
-  padding: 8px 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 6px);
-  font-size: 14px;
-  font-family: inherit;
-  background: var(--color-card);
-  color: var(--color-text);
-  resize: vertical;
-  min-height: 72px;
-}
-
-.appointment-modal__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 99px;
-}
-
-.appointment-modal__status--pending {
-  background: var(--color-warning-light, #fffbeb);
-  color: var(--color-warning, #f59e0b);
-}
-
-.appointment-modal__status--confirmed {
-  background: var(--color-primary-light, #eff6ff);
+/* ── Avatar ─────────────────────────────────────────────────── */
+.appt-avatar {
+  border-radius: 50%;
+  background: var(--color-primary-light);
   color: var(--color-primary);
-}
-
-.appointment-modal__status--cancelled_by_patient,
-.appointment-modal__status--cancelled_by_practitioner {
-  background: var(--color-neutral, #f3f4f6);
-  color: var(--color-text-muted);
-}
-
-.appointment-modal__status--completed {
-  background: var(--color-success-light, #ecfdf5);
-  color: var(--color-success, #10b981);
-}
-
-.appointment-modal__footer {
-  padding: 16px 24px 20px;
-  border-top: 1px solid var(--color-border);
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* ── Participants inline ────────────────────────────────────── */
+.appt-participants-row {
+  display: flex;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-.appointment-modal__error {
+.appt-participant {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.appt-participant--practitioner {
+  opacity: 0.65;
+}
+
+.appt-participant--link {
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.appt-participant--link:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.appt-participant--link:hover .appt-participant__link-icon {
+  color: var(--color-primary);
+}
+
+.appt-participant__link-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.appt-participant__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.appt-participant__name {
   font-size: 13px;
-  color: var(--color-danger, #ef4444);
-  padding: 0 24px 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appt-participant__role {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 1px;
+}
+
+/* ── Notes textarea (view mode) ─────────────────────────────── */
+.appt-textarea--view {
+  resize: none;
+  background: var(--color-bg);
+  border-style: dashed;
+}
+
+.appt-textarea--view:not(:focus) {
+  border-color: var(--color-border);
+}
+
+/* ── Create form ────────────────────────────────────────────── */
+.appt-datetime-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.appt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.appt-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.appt-input {
+  padding: 9px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  touch-action: manipulation;
+}
+
+.appt-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.appt-textarea {
+  padding: 9px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  resize: vertical;
+  min-height: 72px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  touch-action: manipulation;
+}
+
+.appt-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* ── Autocomplete ────────────────────────────────────────────── */
+.appt-autocomplete {
+  position: relative;
+}
+
+.appt-autocomplete__input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.appt-autocomplete__dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  z-index: 50;
+}
+
+.appt-autocomplete__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.appt-autocomplete__option:hover,
+.appt-autocomplete__option--focused {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.appt-autocomplete__option--selected {
+  font-weight: 600;
+}
+
+.appt-autocomplete__empty {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* ── Footer layout (danger gauche / actions droite) ─────────── */
+.appt-footer-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.appt-footer-left {
+  display: flex;
+  gap: 8px;
+}
+
+.appt-footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Misc ───────────────────────────────────────────────────── */
+.appt-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.appt-error {
+  font-size: 13px;
+  color: var(--color-danger);
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appt-input,
+  .appt-textarea {
+    transition: none;
+  }
 }

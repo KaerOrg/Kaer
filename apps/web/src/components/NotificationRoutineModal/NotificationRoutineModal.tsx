@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { X, Bell, BellOff, Loader } from 'lucide-react'
+import { Bell, BellOff, Loader, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Modal } from '../Modal'
 import { Button } from '../Button'
 import { LUCIDE_ICONS } from '../../lib/lucideIcons'
 import {
@@ -23,7 +24,6 @@ interface Props {
 
 const DAY_KEYS = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'] as const
 const DAY_ISO = [1, 2, 3, 4, 5, 6, 7] as const
-
 const DEFAULT_TIME = '09:00'
 
 export function NotificationRoutineModal({
@@ -35,18 +35,16 @@ export function NotificationRoutineModal({
   onClose,
 }: Props) {
   const { t } = useTranslation()
-
   const ModuleIcon = LUCIDE_ICONS[moduleIconName]
 
   const [routines, setRoutines] = useState<NotificationRoutine[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-
-  // Form state pour création d'une nouvelle routine
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 3, 5])
+  const [showForm, setShowForm] = useState(false)
+
   const timeRef = useRef<HTMLInputElement>(null)
   const noteRef = useRef<HTMLTextAreaElement>(null)
-  const [showForm, setShowForm] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -102,100 +100,91 @@ export function NotificationRoutineModal({
   const dayLabels = useMemo(() => DAY_KEYS, [])
 
   return (
-    <div className="nr-modal-overlay" onClick={onClose}>
-      <div className="nr-modal" onClick={e => e.stopPropagation()}>
-        <div className="nr-modal__header">
-          <div className="nr-modal__title-block">
-            <Bell size={18} className="nr-modal__icon" />
-            <span className="nr-modal__title">{t('notifications.modal_title')}</span>
-          </div>
-          <button className="nr-modal__close" onClick={onClose} aria-label={t('common.close')}>
-            <X size={18} />
-          </button>
-        </div>
+    <Modal
+      title={t('notifications.modal_title')}
+      icon={<Bell size={18} />}
+      onClose={onClose}
+    >
+      <p className="nr-module-label">
+        {ModuleIcon && <ModuleIcon size={14} className="nr-module-icon" />}
+        {moduleLabel}
+      </p>
 
-        <div className="nr-modal__body">
-          <p className="nr-modal__module-label">
-            {ModuleIcon && <ModuleIcon size={14} className="nr-modal__module-icon" />}
-            {moduleLabel}
-          </p>
-          {loading ? (
-            <div className="nr-modal__loading"><Loader size={20} className="nr-modal__spinner" /></div>
-          ) : (
-            <>
-              {routines.map(routine => (
-                <RoutineRow
-                  key={routine.id}
-                  routine={routine}
-                  onToggle={() => void handleToggleActive(routine)}
-                  onDelete={() => void handleDelete(routine.id)}
-                  t={t}
-                />
-              ))}
+      {loading ? (
+        <div className="nr-loading"><Loader size={20} className="nr-spinner" /></div>
+      ) : (
+        <>
+          {routines.map(routine => (
+            <RoutineRow
+              key={routine.id}
+              routine={routine}
+              onToggle={() => void handleToggleActive(routine)}
+              onDelete={() => void handleDelete(routine.id)}
+              t={t}
+            />
+          ))}
 
-              {showForm ? (
-                <div className="nr-form">
-                  <div className="nr-form__label">{t('notifications.days_label')}</div>
-                  <div className="nr-form__days">
-                    {dayLabels.map((key, i) => (
-                      <button
-                        key={key}
-                        type="button"
-                        className={`nr-form__day ${selectedDays.includes(DAY_ISO[i]) ? 'nr-form__day--on' : ''}`}
-                        onClick={() => toggleDay(DAY_ISO[i])}
-                      >
-                        {t(`notifications.day_${key}`)}
-                      </button>
-                    ))}
-                  </div>
+          {showForm ? (
+            <div className="nr-form">
+              <div className="nr-form__label">{t('notifications.days_label')}</div>
+              <div className="nr-form__days">
+                {dayLabels.map((key, i) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`nr-form__day ${selectedDays.includes(DAY_ISO[i]) ? 'nr-form__day--on' : ''}`}
+                    onClick={() => toggleDay(DAY_ISO[i])}
+                  >
+                    {t(`notifications.day_${key}`)}
+                  </button>
+                ))}
+              </div>
 
-                  <div className="nr-form__label">{t('notifications.time_label')}</div>
-                  <input
-                    type="time"
-                    className="nr-form__time"
-                    ref={timeRef}
-                    defaultValue={DEFAULT_TIME}
-                  />
+              <div className="nr-form__label">{t('notifications.time_label')}</div>
+              <input
+                type="time"
+                className="nr-form__time"
+                ref={timeRef}
+                defaultValue={DEFAULT_TIME}
+              />
 
-                  <div className="nr-form__label">{t('notifications.note_label')}</div>
-                  <textarea
-                    className="nr-form__note"
-                    ref={noteRef}
-                    placeholder={t('notifications.note_placeholder')}
-                    rows={2}
-                  />
+              <div className="nr-form__label">{t('notifications.note_label')}</div>
+              <textarea
+                className="nr-form__note"
+                ref={noteRef}
+                placeholder={t('notifications.note_placeholder')}
+                rows={2}
+              />
 
-                  <div className="nr-form__actions">
-                    {routines.length > 0 && (
-                      <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
-                        {t('common.cancel')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      loading={saving}
-                      disabled={selectedDays.length === 0}
-                      onClick={() => void handleCreate()}
-                    >
-                      {t('notifications.save_routine')}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="nr-modal__add-btn"
-                  onClick={() => setShowForm(true)}
+              <div className="nr-form__actions">
+                {routines.length > 0 && (
+                  <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
+                    {t('common.cancel')}
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  loading={saving}
+                  disabled={selectedDays.length === 0}
+                  onClick={() => void handleCreate()}
                 >
-                  + {t('notifications.add_routine')}
-                </button>
-              )}
-            </>
+                  {t('notifications.save_routine')}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="nr-add-btn"
+              onClick={() => setShowForm(true)}
+            >
+              + {t('notifications.add_routine')}
+            </button>
           )}
-        </div>
-      </div>
-    </div>
+        </>
+      )}
+    </Modal>
   )
 }
 

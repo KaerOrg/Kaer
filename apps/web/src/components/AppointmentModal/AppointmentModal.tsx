@@ -1,7 +1,10 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { Calendar, FileText, ExternalLink } from 'lucide-react'
+import { Modal } from '../Modal'
 import { Button } from '../Button/Button'
+import { StatusBadge } from '../StatusBadge'
+import type { StatusBadgeVariant } from '../StatusBadge/StatusBadge.types'
 import type { AppointmentWithPatient, AppointmentStatus } from '../../lib/calendar.types'
 import type { PatientOption } from '../../services/patientService'
 import './AppointmentModal.css'
@@ -14,27 +17,69 @@ interface AppointmentModalProps {
   endsAt: string | null
   appointment: AppointmentWithPatient | null
   patients: PatientOption[]
-  autoConfirm: boolean
+  defaultPatientId?: string
+  practitionerName?: string
   onClose: () => void
   onCreate: (patientId: string, startsAt: string, endsAt: string, notes: string) => Promise<{ ok: boolean; error?: string }>
   onUpdateStatus: (id: string, status: AppointmentStatus) => Promise<{ ok: boolean }>
+  onUpdateNotes?: (id: string, notes: string) => Promise<{ ok: boolean }>
+  onNavigateToPatient?: (patientId: string) => void
 }
 
-function formatDateTime(iso: string): string {
+function nextFullHour(): string {
+  const d = new Date()
+  d.setMinutes(0, 0, 0)
+  d.setHours(d.getHours() + 1)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`
+}
+
+function addMinutes(isoLocal: string, minutes: number): string {
+  const d = new Date(isoLocal)
+  d.setMinutes(d.getMinutes() + minutes)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+function formatDateLabel(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long',
-    hour: '2-digit', minute: '2-digit',
-  })
+  return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-function formatTimeRange(startsAt: string, endsAt: string): string {
+function formatTimeSlot(startsAt: string, endsAt: string): string {
   const d1 = new Date(startsAt)
   const d2 = new Date(endsAt)
-  const dateStr = d1.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-  const t1 = `${d1.getHours().toString().padStart(2, '0')}:${d1.getMinutes().toString().padStart(2, '0')}`
-  const t2 = `${d2.getHours().toString().padStart(2, '0')}:${d2.getMinutes().toString().padStart(2, '0')}`
-  return `${dateStr} · ${t1} – ${t2}`
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  const t1 = `${pad(d1.getHours())}:${pad(d1.getMinutes())}`
+  const t2 = `${pad(d2.getHours())}:${pad(d2.getMinutes())}`
+  const diffMin = Math.round((d2.getTime() - d1.getTime()) / 60000)
+  return `${t1} – ${t2} · ${diffMin} min`
+}
+
+const STATUS_VARIANT: Record<AppointmentStatus, StatusBadgeVariant> = {
+  pending: 'warning',
+  confirmed: 'success',
+  cancelled_by_patient: 'neutral',
+  cancelled_by_practitioner: 'neutral',
+  completed: 'info',
+}
+
+function statusI18nKey(status: AppointmentStatus): string {
+  if (status === 'cancelled_by_patient' || status === 'cancelled_by_practitioner') return 'cancelled'
+  return status
+}
+
+function Avatar({ name, size = 38 }: { name: string; size?: number }) {
+  const initial = name.trim()[0]?.toUpperCase() ?? '?'
+  return (
+    <div
+      className="appt-avatar"
+      style={{ width: size, height: size, fontSize: size * 0.42 }}
+      aria-hidden="true"
+    >
+      {initial}
+    </div>
+  )
 }
 
 export function AppointmentModal({
@@ -43,31 +88,93 @@ export function AppointmentModal({
   endsAt,
   appointment,
   patients,
-  autoConfirm,
+  defaultPatientId,
+  practitionerName,
   onClose,
   onCreate,
   onUpdateStatus,
+  onUpdateNotes,
+  onNavigateToPatient,
 }: AppointmentModalProps) {
   const { t } = useTranslation()
   const [saving, setSaving] = useState(false)
+  const [savingNotes, setSavingNotes] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const patientRef = useRef<HTMLSelectElement>(null)
-  const notesRef = useRef<HTMLTextAreaElement>(null)
+  // Note éditable en mode view
+  const [noteText, setNoteText] = useState(appointment?.notes ?? '')
+  const notesDirty = noteText !== (appointment?.notes ?? '')
 
-  async function handleCreate() {
-    const patientId = patientRef.current?.value
-    if (!patientId) {
-      setError(t('agenda.appointment.error_no_patient'))
+  // Autocomplete patient (mode create)
+  const [query, setQuery] = useState<string>(() => {
+    if (defaultPatientId) return patients.find(p => p.id === defaultPatientId)?.label ?? ''
+    return ''
+  })
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(defaultPatientId ?? '')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState(-1)
+  const autocompleteRef = useRef<HTMLDivElement>(null)
+  const notesRef = useRef<HTMLTextAreaElement>(null)
+  const startInputRef = useRef<HTMLInputElement>(null)
+  const endInputRef = useRef<HTMLInputElement>(null)
+
+  const filteredPatients = query.length === 0
+    ? patients
+    : patients.filter(p => p.label.toLowerCase().includes(query.toLowerCase()))
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (autocompleteRef.current && !autocompleteRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const defaultStart = startsAt ?? nextFullHour()
+  const defaultEnd = endsAt ?? addMinutes(defaultStart, 50)
+
+  function handleSelectPatient(p: PatientOption) {
+    setSelectedPatientId(p.id)
+    setQuery(p.label)
+    setDropdownOpen(false)
+    setFocusedIndex(-1)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!dropdownOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') setDropdownOpen(true)
       return
     }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setFocusedIndex(i => Math.min(i + 1, filteredPatients.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setFocusedIndex(i => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (focusedIndex >= 0 && filteredPatients[focusedIndex]) {
+        handleSelectPatient(filteredPatients[focusedIndex])
+      }
+    } else if (e.key === 'Escape') {
+      setDropdownOpen(false)
+    }
+  }
+
+  async function handleCreate() {
+    const patientId = selectedPatientId
+    if (!patientId) { setError(t('agenda.appointment.error_no_patient')); return }
+    const start = startsAt ?? startInputRef.current?.value
+    const end = endsAt ?? endInputRef.current?.value
+    if (!start || !end) { setError(t('agenda.appointment.error_no_date')); return }
+    if (start >= end) { setError(t('agenda.appointment.error_date_order')); return }
     setSaving(true)
     setError(null)
-    const result = await onCreate(patientId, startsAt!, endsAt!, notesRef.current?.value ?? '')
+    const result = await onCreate(patientId, start, end, notesRef.current?.value ?? '')
     setSaving(false)
-    if (!result.ok) {
-      setError(t('agenda.appointment.error_create'))
-    }
+    if (!result.ok) setError(t('agenda.appointment.error_create'))
   }
 
   async function handleStatus(status: AppointmentStatus) {
@@ -77,151 +184,229 @@ export function AppointmentModal({
     setSaving(false)
   }
 
+  const handleSaveNotes = useCallback(async () => {
+    if (!appointment || !onUpdateNotes) return
+    setSavingNotes(true)
+    await onUpdateNotes(appointment.id, noteText)
+    setSavingNotes(false)
+  }, [appointment, onUpdateNotes, noteText])
+
   const statusKey = appointment?.status ?? 'pending'
   const isActive = statusKey === 'pending' || statusKey === 'confirmed'
 
-  return (
-    <div className="appointment-modal-overlay" onClick={onClose}>
-      <div className="appointment-modal" onClick={e => e.stopPropagation()}>
-        <div className="appointment-modal__header">
-          <h2 className="appointment-modal__title">
-            {mode === 'create' ? t('agenda.appointment.title_new') : t('agenda.appointment.title_view')}
-          </h2>
-          <button className="appointment-modal__close" onClick={onClose}>
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="appointment-modal__body">
-          {/* Time info */}
-          {(startsAt && endsAt) && (
-            <div className="appointment-modal__field">
-              <div className="appointment-modal__time-info">
-                {formatTimeRange(startsAt, endsAt)}
-              </div>
-            </div>
-          )}
-          {appointment && !startsAt && (
-            <div className="appointment-modal__field">
-              <div className="appointment-modal__time-info">
-                {formatTimeRange(appointment.starts_at, appointment.ends_at)}
-              </div>
-            </div>
-          )}
-
-          {/* View mode — patient name + status */}
-          {mode === 'view' && appointment && (
-            <>
-              <div className="appointment-modal__field">
-                <span className="appointment-modal__label">{t('agenda.appointment.patient_label')}</span>
-                <span style={{ fontSize: 15, fontWeight: 600 }}>{appointment.patient_display_name}</span>
-              </div>
-              <div className="appointment-modal__field">
-                <span
-                  className={`appointment-modal__status appointment-modal__status--${statusKey}`}
-                >
-                  {t(`agenda.appointment.status_${statusKey.replace('cancelled_by_patient', 'cancelled').replace('cancelled_by_practitioner', 'cancelled')}`)}
-                </span>
-              </div>
-              {appointment.notes && (
-                <div className="appointment-modal__field">
-                  <span className="appointment-modal__label">{t('agenda.appointment.notes_label')}</span>
-                  <span style={{ fontSize: 14 }}>{appointment.notes}</span>
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Create mode — patient selector + notes */}
-          {mode === 'create' && (
-            <>
-              <div className="appointment-modal__field">
-                <label className="appointment-modal__label" htmlFor="appt-patient">
-                  {t('agenda.appointment.patient_label')}
-                </label>
-                <select
-                  id="appt-patient"
-                  ref={patientRef}
-                  className="appointment-modal__select"
-                  defaultValue=""
-                >
-                  <option value="" disabled>{t('agenda.appointment.patient_placeholder')}</option>
-                  {patients.map(p => (
-                    <option key={p.id} value={p.id}>{p.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="appointment-modal__field">
-                <label className="appointment-modal__label" htmlFor="appt-notes">
-                  {t('agenda.appointment.notes_label')}
-                </label>
-                <textarea
-                  id="appt-notes"
-                  ref={notesRef}
-                  className="appointment-modal__textarea"
-                  placeholder={t('agenda.appointment.notes_placeholder')}
-                />
-              </div>
-              {!autoConfirm && (
-                <p style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
-                  {t('agenda.editor.auto_confirm_hint')} — désactivé, le RDV sera en attente de confirmation.
-                </p>
-              )}
-            </>
-          )}
-        </div>
-
-        {error && <p className="appointment-modal__error">{error}</p>}
-
-        <div className="appointment-modal__footer">
-          {mode === 'create' ? (
-            <>
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                {t('common.cancel')}
-              </Button>
-              <Button variant="primary" size="sm" loading={saving} onClick={handleCreate}>
-                {t('agenda.appointment.create_btn')}
-              </Button>
-            </>
-          ) : (
-            <>
-              {isActive && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  loading={saving}
-                  onClick={() => handleStatus('cancelled_by_practitioner')}
-                >
-                  {t('agenda.appointment.cancel_btn')}
-                </Button>
-              )}
-              {statusKey === 'pending' && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  loading={saving}
-                  onClick={() => handleStatus('confirmed')}
-                >
-                  {t('agenda.appointment.confirm_btn')}
-                </Button>
-              )}
-              {statusKey === 'confirmed' && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  loading={saving}
-                  onClick={() => handleStatus('completed')}
-                >
-                  {t('agenda.appointment.complete_btn')}
-                </Button>
-              )}
-              <Button variant="ghost" size="sm" onClick={onClose}>
-                {t('common.close')}
-              </Button>
-            </>
-          )}
-        </div>
+  const footer = mode === 'create' ? (
+    <>
+      <Button variant="ghost" size="sm" onClick={onClose}>
+        {t('common.cancel')}
+      </Button>
+      <Button variant="primary" size="sm" loading={saving} onClick={() => void handleCreate()}>
+        {t('agenda.appointment.create_btn')}
+      </Button>
+    </>
+  ) : (
+    <div className="appt-footer-layout">
+      <div className="appt-footer-left">
+        {isActive && (
+          <Button variant="danger" size="sm" loading={saving} onClick={() => void handleStatus('cancelled_by_practitioner')}>
+            {t('agenda.appointment.cancel_btn')}
+          </Button>
+        )}
+      </div>
+      <div className="appt-footer-right">
+        {notesDirty && onUpdateNotes && (
+          <Button variant="secondary" size="sm" loading={savingNotes} onClick={() => void handleSaveNotes()}>
+            {t('common.save')}
+          </Button>
+        )}
+        {statusKey === 'pending' && (
+          <Button variant="primary" size="sm" loading={saving} onClick={() => void handleStatus('confirmed')}>
+            {t('agenda.appointment.confirm_btn')}
+          </Button>
+        )}
       </div>
     </div>
+  )
+
+  return (
+    <Modal
+      title={mode === 'create' ? t('agenda.appointment.title_new') : t('agenda.appointment.title_view')}
+      onClose={onClose}
+      footer={footer}
+    >
+      {/* ── Mode visualisation ─────────────────────────────────── */}
+      {mode === 'view' && appointment && (
+        <>
+          {/* Date card */}
+          <div className="appt-date-card">
+            <Calendar size={18} className="appt-date-card__icon" aria-hidden="true" />
+            <div className="appt-date-card__text">
+              <div className="appt-date-card__day">{formatDateLabel(appointment.starts_at)}</div>
+              <div className="appt-date-card__slot">{formatTimeSlot(appointment.starts_at, appointment.ends_at)}</div>
+            </div>
+          </div>
+
+          {/* Participants */}
+          <div className="appt-section">
+            <p className="appt-section-label">{t('agenda.appointment.participants_label')}</p>
+            <div className="appt-participants-row">
+              {onNavigateToPatient ? (
+                <button
+                  type="button"
+                  className="appt-participant appt-participant--link"
+                  onClick={() => { onNavigateToPatient(appointment.patient_id); onClose() }}
+                  title={t('agenda.appointment.view_patient_file')}
+                >
+                  <Avatar name={appointment.patient_display_name} size={34} />
+                  <div className="appt-participant__info">
+                    <div className="appt-participant__name">{appointment.patient_display_name}</div>
+                    <div className="appt-participant__role">{t('agenda.appointment.role_patient')}</div>
+                  </div>
+                  <StatusBadge
+                    variant={STATUS_VARIANT[statusKey]}
+                    label={t(`agenda.appointment.status_${statusI18nKey(statusKey)}`)}
+                  />
+                  <ExternalLink size={14} className="appt-participant__link-icon" aria-hidden="true" />
+                </button>
+              ) : (
+                <div className="appt-participant">
+                  <Avatar name={appointment.patient_display_name} size={34} />
+                  <div className="appt-participant__info">
+                    <div className="appt-participant__name">{appointment.patient_display_name}</div>
+                    <div className="appt-participant__role">{t('agenda.appointment.role_patient')}</div>
+                  </div>
+                  <StatusBadge
+                    variant={STATUS_VARIANT[statusKey]}
+                    label={t(`agenda.appointment.status_${statusI18nKey(statusKey)}`)}
+                  />
+                </div>
+              )}
+              {practitionerName && (
+                <div className="appt-participant appt-participant--practitioner">
+                  <Avatar name={practitionerName} size={34} />
+                  <div className="appt-participant__info">
+                    <div className="appt-participant__name">{practitionerName}</div>
+                    <div className="appt-participant__role">{t('agenda.appointment.role_practitioner')}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Notes éditables */}
+          <div className="appt-section">
+            <label className="appt-section-label" htmlFor="appt-view-notes">
+              <FileText size={11} aria-hidden="true" style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
+              {t('agenda.appointment.notes_label')}
+            </label>
+            <textarea
+              id="appt-view-notes"
+              className="appt-textarea appt-textarea--view"
+              value={noteText}
+              onChange={e => setNoteText(e.target.value)}
+              placeholder={t('agenda.appointment.notes_placeholder')}
+              rows={3}
+            />
+          </div>
+        </>
+      )}
+
+      {/* ── Mode création ──────────────────────────────────────── */}
+      {mode === 'create' && (
+        <>
+          {startsAt && endsAt && (
+            <div className="appt-date-card">
+              <Calendar size={18} className="appt-date-card__icon" aria-hidden="true" />
+              <div className="appt-date-card__text">
+                <div className="appt-date-card__day">{formatDateLabel(startsAt)}</div>
+                <div className="appt-date-card__slot">{formatTimeSlot(startsAt, endsAt)}</div>
+              </div>
+            </div>
+          )}
+
+          {!startsAt && (
+            <div className="appt-datetime-row">
+              <div className="appt-field">
+                <label className="appt-label" htmlFor="appt-start">{t('agenda.appointment.date_start')}</label>
+                <input
+                  id="appt-start"
+                  ref={startInputRef}
+                  type="datetime-local"
+                  className="appt-input"
+                  defaultValue={defaultStart}
+                  autoComplete="off"
+                />
+              </div>
+              <div className="appt-field">
+                <label className="appt-label" htmlFor="appt-end">{t('agenda.appointment.date_end')}</label>
+                <input
+                  id="appt-end"
+                  ref={endInputRef}
+                  type="datetime-local"
+                  className="appt-input"
+                  defaultValue={defaultEnd}
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="appt-field">
+            <label className="appt-label" htmlFor="appt-patient">{t('agenda.appointment.patient_label')}</label>
+            <div className="appt-autocomplete" ref={autocompleteRef}>
+              <input
+                id="appt-patient"
+                type="text"
+                className="appt-input appt-autocomplete__input"
+                placeholder={t('agenda.appointment.patient_placeholder')}
+                value={query}
+                autoComplete="off"
+                onChange={e => {
+                  setQuery(e.target.value)
+                  setSelectedPatientId('')
+                  setDropdownOpen(true)
+                  setFocusedIndex(-1)
+                }}
+                onFocus={() => setDropdownOpen(true)}
+                onKeyDown={handleKeyDown}
+              />
+              {dropdownOpen && filteredPatients.length > 0 && (
+                <ul className="appt-autocomplete__dropdown" role="listbox">
+                  {filteredPatients.map((p, i) => (
+                    <li
+                      key={p.id}
+                      role="option"
+                      aria-selected={p.id === selectedPatientId}
+                      className={`appt-autocomplete__option${i === focusedIndex ? ' appt-autocomplete__option--focused' : ''}${p.id === selectedPatientId ? ' appt-autocomplete__option--selected' : ''}`}
+                      onMouseDown={() => handleSelectPatient(p)}
+                      onMouseEnter={() => setFocusedIndex(i)}
+                    >
+                      <Avatar name={p.label} size={26} />
+                      <span>{p.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {dropdownOpen && query.length > 0 && filteredPatients.length === 0 && (
+                <div className="appt-autocomplete__empty">{t('agenda.appointment.no_patients_found')}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="appt-field">
+            <label className="appt-label" htmlFor="appt-notes">{t('agenda.appointment.notes_label')}</label>
+            <textarea
+              id="appt-notes"
+              ref={notesRef}
+              className="appt-textarea"
+              placeholder={t('agenda.appointment.notes_placeholder')}
+            />
+          </div>
+
+          <p className="appt-hint">{t('agenda.appointment.practitioner_creates_hint')}</p>
+        </>
+      )}
+
+      {error && <p className="appt-error" role="alert">{error}</p>}
+    </Modal>
   )
 }
