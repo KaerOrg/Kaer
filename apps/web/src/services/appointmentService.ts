@@ -279,15 +279,16 @@ export async function createAppointment(params: {
   starts_at: string
   ends_at: string
   notes?: string
+  auto_confirm?: boolean
 }): Promise<{ ok: boolean; data?: Appointment; error?: string }> {
-  const { starts_at, ends_at, ...rest } = params
+  const { starts_at, ends_at, auto_confirm, ...rest } = params
   const { data, error } = await supabase
     .from('appointments')
     .insert({
       ...rest,
       starts_at: new Date(starts_at).toISOString(),
       ends_at: new Date(ends_at).toISOString(),
-      status: 'pending',
+      status: auto_confirm ? 'confirmed' : 'pending',
     })
     .select()
     .single()

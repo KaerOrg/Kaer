@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { computeAvailableSlots, jsDayToSchema, timeToMinutes } from '../../../services/appointmentService'
+import { computeAvailableSlots, jsDayToSchema } from '../../../services/appointmentService'
 import type { AppointmentWithPatient } from '../../../lib/calendar.types'
 import type { WeekGridProps } from './WeekGrid.types'
 import './WeekGrid.css'
@@ -17,10 +17,6 @@ const HOURS = Array.from(
 
 function minutesToPx(minutes: number): number {
   return (minutes / 60) * HOUR_HEIGHT_PX
-}
-
-function timeToPx(time: string): number {
-  return minutesToPx(timeToMinutes(time) - GRID_START_HOUR * 60)
 }
 
 function isoToPx(iso: string): number {

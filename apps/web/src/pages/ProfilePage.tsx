@@ -57,7 +57,6 @@ export function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !practitioner) return
     setAvatarUploading(true)
-    setAvatarError('')
     try {
       const url = await uploadPractitionerAvatar(practitioner.id, file)
       await savePractitionerAvatarUrl(practitioner.id, url)

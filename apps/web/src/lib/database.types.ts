@@ -10,6 +10,10 @@ export interface Database {
           name: string
           professional_title: string | null
           language_preference: string
+          address: string | null
+          phone: string | null
+          avatar_url: string | null
+          auto_confirm_appointments: boolean
           created_at: string
         }
         Insert: {
@@ -18,11 +22,19 @@ export interface Database {
           name: string
           professional_title?: string | null
           language_preference?: string
+          address?: string | null
+          phone?: string | null
+          avatar_url?: string | null
+          auto_confirm_appointments?: boolean
         }
         Update: {
           name?: string
           professional_title?: string | null
           language_preference?: string
+          address?: string | null
+          phone?: string | null
+          avatar_url?: string | null
+          auto_confirm_appointments?: boolean
         }
         Relationships: []
       }
@@ -372,6 +384,107 @@ export interface Database {
           metadata?: Record<string, unknown>
         }
         Update: Record<string, never>
+        Relationships: []
+      }
+      availability_rules: {
+        Row: {
+          id: string
+          practitioner_id: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          slot_duration_minutes: number
+          buffer_minutes: number
+          created_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          slot_duration_minutes?: number
+          buffer_minutes?: number
+        }
+        Update: {
+          day_of_week?: number
+          start_time?: string
+          end_time?: string
+          slot_duration_minutes?: number
+          buffer_minutes?: number
+        }
+        Relationships: []
+      }
+      availability_exceptions: {
+        Row: {
+          id: string
+          practitioner_id: string
+          exception_date: string
+          is_closed: boolean
+          start_time: string | null
+          end_time: string | null
+          created_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          exception_date: string
+          is_closed?: boolean
+          start_time?: string | null
+          end_time?: string | null
+        }
+        Update: {
+          is_closed?: boolean
+          start_time?: string | null
+          end_time?: string | null
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          id: string
+          practitioner_id: string
+          patient_id: string
+          starts_at: string
+          ends_at: string
+          status: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          patient_id: string
+          starts_at: string
+          ends_at: string
+          status?: string
+          notes?: string | null
+        }
+        Update: {
+          status?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      practitioner_patient_notes: {
+        Row: {
+          id: string
+          practitioner_id: string
+          patient_id: string
+          content: string
+          tags: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          patient_id: string
+          content: string
+          tags?: string[]
+        }
+        Update: {
+          content?: string
+          tags?: string[]
+        }
         Relationships: []
       }
     }

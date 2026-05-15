@@ -85,8 +85,6 @@ export function AgendaPage() {
   const [modal, setModal] = useState<ModalState>({ type: 'none' })
   const [filterQuery, setFilterQuery] = useState<string>('')
 
-  const weekEnd = useMemo(() => addDays(weekStart, 6), [weekStart])
-
   const filteredAppointments = useMemo(() => {
     const q = filterQuery.trim().toLowerCase()
     if (!q) return appointments

@@ -1363,7 +1363,6 @@ export function PatientPage() {
           endsAt={null}
           appointment={rdvModal.appointment ?? null}
           patients={rdvPatientOptions}
-          autoConfirm={rdvAutoConfirm}
           defaultPatientId={id}
           practitionerName={practitioner?.name ?? undefined}
           onClose={() => setRdvModal(null)}
