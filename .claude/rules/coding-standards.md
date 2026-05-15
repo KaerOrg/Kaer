@@ -7,18 +7,37 @@
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
 - **Documentation inline ciblée** : uniquement pour la logique non-évidente (invariants, workarounds, race conditions). Le reste se documente dans CLAUDE.md et les fichiers `.md` de feature.
 
+## Architecture des composants — `ui/` vs `features/`
+
+> **Règle absolue pour tout nouveau composant.**
+
+`src/components/` est divisé en deux sous-dossiers selon la nature du composant :
+
+| Dossier | Rôle | Exemples |
+|---|---|---|
+| `components/ui/` | Primitives du design system — sans logique métier, sans appel service | `Button`, `Card`, `Toggle`, `Modal`, `StatusBadge`, `InputField` |
+| `components/features/` | Composants métier — connaissent les domaines (agenda, module, patient, notification) | `Layout`, `WeekGrid`, `ModuleRenderer`, `AppointmentModal`, `TeenAccent` |
+
+**Règle de dépendance : `features → ui` uniquement.** Un composant `ui/` ne doit jamais importer depuis `features/`. Un composant `features/` peut importer librement depuis `ui/`.
+
+**Ajouter un composant :**
+- Primitif générique, réutilisable hors de tout contexte métier → `components/ui/NomComposant/`
+- Lié à un domaine spécifique (patients, modules, agenda…) → `components/features/NomComposant/`
+
+---
+
 ## Checklist obligatoire avant tout nouveau CSS ou composant UI
 
 > **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, ou d'implémenter un nouveau composant dans une page.**
 
 **Étape 1 — Chercher dans le design system web :**
 ```
-apps/web/src/components/   ← composants partagés (Card, Button, Toggle, StatusBadge, Accordion…)
+apps/web/src/components/ui/   ← primitives (Card, Button, Toggle, StatusBadge, Accordion…)
 apps/web/docs/design-system.md  ← référence CSS custom properties, classes utilitaires
 ```
 **Étape 2 — Chercher dans le design system mobile :**
 ```
-apps/mobile/src/components/
+apps/mobile/src/components/ui/
 apps/mobile/docs/design-system.md
 ```
 **Étape 3 — Un composant existant a le même but fonctionnel mais ne couvre pas exactement le besoin ?**

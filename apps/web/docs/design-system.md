@@ -98,43 +98,77 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 ---
 
+## Architecture des composants — `ui/` vs `features/`
+
+`src/components/` est divisé en deux sous-dossiers :
+
+| Dossier | Rôle |
+|---|---|
+| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, SearchInput, SelectField, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
+
+**Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
+
+---
+
 ## Structure des fichiers
 
 ```
 apps/web/src/
 ├── theme.ts                              # injectTheme() + tokens JS
 ├── components/
-│   ├── ModulePreviewPanel/
-│   │   └── ModulePreviewPanel.css        # toutes les classes fw-* et preview-*
-│   └── ModuleRenderer/
-│       ├── FieldRenderer.tsx             # dispatch preview_kind → layout
-│       └── fields/
-│           ├── index.ts                  # barrel
-│           ├── types.ts                  # FieldProps interface
-│           ├── renderInlineChildren.tsx  # spans inline (bold/italic/text)
-│           ├── FieldRow/                 # field_row → header + FieldWidget
-│           ├── FieldWidget/              # dispatch widget_type → widget
-│           ├── FieldText/                # variantes typographiques
-│           ├── FieldListItem/            # li bullet / numéroté
-│           ├── CardDefinition/           # terme + définition
-│           ├── CardDivider/              # séparateur <hr>
-│           ├── CardInline/               # span inline
-│           ├── NullField/                # placeholder silencieux
-│           └── widgets/
-│               ├── index.ts
-│               ├── TimeWidget/
-│               ├── SliderWidget/
-│               ├── StarsWidget/
-│               ├── BooleanWidget/
-│               ├── RadioWidget/
-│               ├── DateWidget/
-│               ├── TextWidget/
-│               ├── CheckboxWidget/
-│               ├── TextareaWidget/
-│               └── InfoWidget/
+│   ├── ui/                               # primitives design system
+│   │   ├── Button/, Card/, Modal/ …
+│   │   └── Toggle/, Tabs/, Toast/ …
+│   └── features/                         # composants métier
+│       ├── Layout/
+│       ├── MainNav/
+│       ├── ModulePreviewPanel/
+│       │   └── ModulePreviewPanel.css    # classes fw-* et preview-*
+│       └── ModuleRenderer/
+│           ├── FieldRenderer.tsx         # dispatch preview_kind → layout
+│           └── fields/
+│               ├── index.ts              # barrel
+│               ├── types.ts              # FieldProps interface
+│               ├── FieldRow/             # field_row → header + FieldWidget
+│               ├── FieldWidget/          # dispatch widget_type → widget
+│               ├── FieldText/            # variantes typographiques
+│               ├── FieldListItem/        # li bullet / numéroté
+│               ├── CardDefinition/       # terme + définition
+│               ├── CardDivider/          # séparateur <hr>
+│               └── widgets/
+│                   ├── index.ts
+│                   ├── TimeWidget/
+│                   ├── SliderWidget/
+│                   ├── StarsWidget/
+│                   ├── BooleanWidget/
+│                   ├── RadioWidget/
+│                   ├── DateWidget/
+│                   ├── TextWidget/
+│                   ├── CheckboxWidget/
+│                   ├── TextareaWidget/
+│                   └── InfoWidget/
 ```
 
 Chaque dossier contient : `ComponentName.tsx` + `ComponentName.test.tsx` + `index.ts`.
+
+---
+
+## Feedback utilisateur — Toasts
+
+Tout feedback d'opération réseau passe par le système de toast. Voir la doc complète : [`docs/components/toast.md`](components/toast.md).
+
+```tsx
+import { useToast } from '../contexts/ToastContext'
+
+const toast = useToast()
+toast.success('Enregistré')   // auto-dismiss 4 s
+toast.error('Erreur réseau')  // persistant
+toast.warning('Attention')
+toast.info('Info')
+```
+
+**Règle :** `useToast` pour les résultats d'opération réseau. État local inline uniquement pour la validation de champ (email invalide, champ vide).
 
 ---
 

@@ -923,7 +923,10 @@
       "role_practitioner": "Practitioner",
       "view_patient_file": "View patient file",
       "pending_hint": "the appointment will be pending confirmation.",
-      "practitioner_creates_hint": "The patient will receive a notification and must confirm this appointment."
+      "practitioner_creates_hint": "The patient will receive a notification and must confirm this appointment.",
+      "notes_saved": "Notes saved",
+      "error_save_notes": "Error saving notes.",
+      "error_update_status": "Error updating status."
     },
     "filter_patient_label": "Search a patient…"
   }

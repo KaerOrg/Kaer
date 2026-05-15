@@ -18,8 +18,8 @@ import { useAuthStore } from '../store/authStore'
 import { fetchUnlockedModules, type UnlockedModule } from '../services/homeService'
 import { colors, spacing, radius } from '../theme'
 import { useTeen } from '../hooks/useTeen'
-import { Card } from '../components/Card'
-import { EmptyState } from '../components/EmptyState'
+import { Card } from '../components/ui/Card'
+import { EmptyState } from '../components/ui/EmptyState'
 
 // Modules avec un écran dédié (interaction custom non couverte par le moteur générique).
 // Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.

@@ -121,6 +121,8 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 | `apps/mobile/src/lib/database.ts` | Table SQLite générique `scale_entries` |
 | `supabase/schema.sql` | `module_content_fields` + `field_props` par échelle |
 
+> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer.tsx`
+
 **Ajouter une nouvelle échelle générique :**
 1. Ajouter la config dans `SCALE_SCORING` (scaleScoring.ts)
 2. Ajouter les clés i18n dans fr/en common.json + fr/en teen.json
@@ -203,6 +205,7 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
 ## Règles de développement
 
 - Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
+- **Feedback utilisateur web — toujours utiliser `useToast()`** pour les résultats d'opérations réseau (save, update, delete, erreur serveur). Ne jamais créer d'état `error`/`success` local pour une opération réseau. Réserver les états locaux inline à la validation de champ (email invalide, champ requis). Hook : `import { useToast } from '../contexts/ToastContext'` — doc complète : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Pas de SQL ni d'appel Supabase dans un composant** — toute opération de données passe par une fonction d'un service `apps/<app>/src/services/<domaine>Service.ts`. Seules exceptions : les clients d'infrastructure dans `src/lib/` (`supabase.ts`, `database.ts` SQLite). Détails et procédure : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) section *Accès aux données* + [`docs/services.md`](docs/services.md).
 - **Nouveau module = passer par le skill [`module-builder`](.claude/skills/module-builder/SKILL.md).** Il enforce la règle data-first (`modules` + `module_content_fields` + `field_props` → `FieldRenderer` web et mobile) : zéro page hardcodée, parité aperçu praticien web ≡ écran patient mobile garantie par construction, composants génériques réutilisés avant d'être créés, tests et documentation obligatoires. Lecture préalable indispensable : [`docs/module-engine.md`](docs/module-engine.md).
 - **Pour les modules legacy à écran mobile dédié** (animation Reanimated, machine d'état multi-écrans interactive), garder l'ordre web-puis-mobile :
@@ -224,6 +227,8 @@ Ce pattern combine fiches psychoéducatives et tracker de données locales dans 
 | `apps/mobile/src/i18n/locales/fr/psyedu.json` | Namespace `chronobiology_tracker` |
 | `apps/mobile/src/i18n/locales/fr/psyedu_teen.json` | Surcharges tutoiement |
 
+> Composant métier `PsyEduBlockRenderer` : `apps/mobile/src/components/features/PsyEduBlockRenderer.tsx`
+
 ### Règles
 
 - **Onglets** : implémentés avec un segment control maison (2 `Pressable` + `activeTab` state), pas de React Navigation Tab imbriqué.
@@ -238,7 +243,7 @@ Pour tout module affichant une technique thérapeutique, ajouter un bandeau d'av
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/src/components/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
+| `apps/mobile/src/components/features/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
 | `apps/mobile/src/i18n/locales/fr/common.json` | Clé `modules.<moduleKey>.disclaimer` (vouvoiement) |
 | `apps/mobile/src/i18n/locales/fr/teen.json` | Clé `modules.<moduleKey>.disclaimer` (tutoiement) |
 
@@ -268,7 +273,7 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
 | `apps/mobile/src/store/authStore.ts` | Champ `teenMode: boolean` + `fetchTeenMode()` appelé au login |
 | `apps/mobile/src/theme/teen.ts` | Palette vive par module, textes bilingues adulte/ado |
 | `apps/mobile/src/hooks/useTeen.ts` | Hook `useTeen()` → `{ isTeenMode, tt, tg, teenColor }` |
-| `apps/mobile/src/components/TeenAccent.tsx` | Bande colorée en haut d'un écran (4px, invisible si mode adulte) |
+| `apps/mobile/src/components/features/TeenAccent.tsx` | Bande colorée en haut d'un écran (4px, invisible si mode adulte) |
 | `apps/web/src/pages/PatientPage.tsx` | Bouton toggle "Mode ado" dans le header patient |
 
 ### Règles
@@ -283,6 +288,7 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
     useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
   }))
   ```
+- **Import de `TeenAccent`** depuis un écran : `from '../../components/features/TeenAccent'`
 - **Conformité MDR** : le mode ado modifie uniquement le lexique et la palette — aucune logique conditionnelle sur les données cliniques.
 
 ## Pattern : Système de rendez-vous (calendar_booking)
@@ -293,9 +299,9 @@ Prise de RDV entre praticien et patient, sans librairie de calendrier externe.
 |---|---|
 | `apps/web/src/lib/calendar.types.ts` | Types partagés côté web (AvailabilityRule, Appointment, ComputedSlot…) |
 | `apps/web/src/services/appointmentService.ts` | Service web : CRUD Supabase + `computeAvailableSlots` (pure function) |
-| `apps/web/src/components/WeekGrid/` | Grille semaine pixel — `HOUR_HEIGHT_PX=64`, positionnement absolu par calcul minutes |
-| `apps/web/src/components/AvailabilityEditor/` | Sidebar : règles récurrentes + exceptions + toggle `auto_confirm` |
-| `apps/web/src/components/AppointmentModal/` | Modal création (mode `create`) / visualisation (mode `view`) |
+| `apps/web/src/components/features/WeekGrid/` | Grille semaine pixel — `HOUR_HEIGHT_PX=64`, positionnement absolu par calcul minutes |
+| `apps/web/src/components/features/AvailabilityEditor/` | Sidebar : règles récurrentes + exceptions + toggle `auto_confirm` |
+| `apps/web/src/components/features/AppointmentModal/` | Modal création (mode `create`) / visualisation (mode `view`) |
 | `apps/web/src/pages/AgendaPage.tsx` | Page principale praticien — charge tout via `Promise.all` |
 | `apps/mobile/src/services/appointmentService.ts` | Service mobile — même `computeAvailableSlots`, + `fetchPatientPractitioner` |
 | `apps/mobile/src/screens/AppointmentsScreen.tsx` | Liste RDV patient (à venir / passés), annulation avec Alert |

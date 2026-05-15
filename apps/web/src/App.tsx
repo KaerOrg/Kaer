@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
+import { ToastProvider } from './contexts/ToastContext'
+import { ToastContainer } from './components/ui/Toast'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { PatientPage } from './pages/PatientPage'
@@ -36,6 +38,8 @@ function App() {
   }
 
   return (
+    <ToastProvider>
+      <ToastContainer />
     <BrowserRouter>
       <Routes>
         <Route path="/register" element={<PatientRegisterPage />} />
@@ -58,6 +62,7 @@ function App() {
         )}
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   )
 }
 

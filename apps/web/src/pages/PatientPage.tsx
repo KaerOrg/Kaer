@@ -4,21 +4,22 @@ import { useTranslation } from 'react-i18next'
 import { BookOpen, Eye, EyeOff, Bell, Search, LayoutDashboard, Package2, FileText, CalendarDays, Clock } from 'lucide-react'
 import { LUCIDE_ICONS } from '../lib/lucideIcons'
 import { useAuthStore } from '../store/authStore'
-import { Layout } from '../components/Layout'
-import { Button } from '../components/Button'
-import { Card } from '../components/Card'
-import { Toggle } from '../components/Toggle/Toggle'
-import { Accordion } from '../components/Accordion'
-import { StatusBadge } from '../components/StatusBadge'
+import { useToast } from '../contexts/ToastContext'
+import { Layout } from '../components/features/Layout'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Toggle } from '../components/ui/Toggle/Toggle'
+import { Accordion } from '../components/ui/Accordion'
+import { StatusBadge } from '../components/ui/StatusBadge'
 import {
   type ModuleType,
   type PatientModule,
   type PsychoeducationCardEntry,
 } from '../lib/database.types'
 import { CLINICAL_SCALES } from '../data/scales'
-import { CSSRSScreenPanel } from '../components/CSSRSScreenPanel'
+import { CSSRSScreenPanel } from '../components/features/CSSRSScreenPanel'
 import { fetchPsychoCards, type PsychoCardInfo } from '../services/moduleService'
-import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
+import { ModulePreviewPanel } from '../components/features/ModulePreviewPanel'
 import {
   fetchModuleCategories,
   fetchComingSoonModuleIds,
@@ -43,10 +44,10 @@ import {
   updateRim,
 } from '../services/moduleAssignmentService'
 import { fetchEnabledModules } from '../services/practitionerSettingsService'
-import { NotificationRoutineModal } from '../components/NotificationRoutineModal/NotificationRoutineModal'
-import { Tabs } from '../components/Tabs'
+import { NotificationRoutineModal } from '../components/features/NotificationRoutineModal/NotificationRoutineModal'
+import { Tabs } from '../components/ui/Tabs'
 import { extractUniqueTags, extractTopTags } from '../services/noteService'
-import { AppointmentModal } from '../components/AppointmentModal'
+import { AppointmentModal } from '../components/features/AppointmentModal'
 import {
   fetchAppointmentsForPatient,
   createAppointment,
@@ -92,6 +93,7 @@ export function PatientPage() {
   const navigate = useNavigate()
   const { practitioner } = useAuthStore()
   const { t, i18n } = useTranslation()
+  const toast = useToast()
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
@@ -145,7 +147,6 @@ export function PatientPage() {
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
-  const [generalNoteError, setGeneralNoteError] = useState<string | null>(null)
 
   // ── Rendez-vous ──────────────────────────────────────────────────────────
   const [rdvAppointments, setRdvAppointments] = useState<AppointmentWithPatient[]>([])
@@ -334,7 +335,7 @@ export function PatientPage() {
     if (psychoPickerMode === 'unlock') {
       const { ok } = await unlockPsychoeducation(id, practitioner.id, selectedCardIds)
       if (!ok) {
-        setPsychoError(t('patient.psycho_error_unlock'))
+        toast.error(t('patient.psycho_error_unlock'))
         setSavingPsycho(false)
         return
       }
@@ -345,7 +346,7 @@ export function PatientPage() {
         selectedCardIds
       )
       if (!ok) {
-        setPsychoError(t('patient.psycho_error_update'))
+        toast.error(t('patient.psycho_error_update'))
         setSavingPsycho(false)
         return
       }
@@ -395,10 +396,10 @@ export function PatientPage() {
 
     if (rimEditorMode === 'unlock') {
       const { ok } = await unlockRim(id, practitioner.id, scenario)
-      if (!ok) { setRimError(t('patient.rim_error_unlock')); setSavingRim(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_unlock')); setSavingRim(false); return }
     } else if (rimEditorMode === 'edit' && rimModule) {
       const { ok } = await updateRim(rimModule.id, scenario)
-      if (!ok) { setRimError(t('patient.rim_error_update')); setSavingRim(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_update')); setSavingRim(false); return }
     }
     setSavingRim(false)
     setRimEditorMode('off')
@@ -438,24 +439,23 @@ export function PatientPage() {
     setSavingNote(true)
     setNoteError(null)
     const result = await saveNote(practitioner.id, id, content, newNoteTags)
+    setSavingNote(false)
     if (result.ok && result.note) {
       setNotes(prev => [result.note!, ...prev])
       if (newNoteRef.current) newNoteRef.current.value = ''
       setNewNoteTags([])
       setNewTagInput('')
     } else {
-      setNoteError(t('notes.error_save'))
+      toast.error(t('notes.error_save'))
     }
-    setSavingNote(false)
   }
 
   const handleSaveGeneralNote = async () => {
     if (!id || !practitioner) return
     setGeneralNoteSaving(true)
-    setGeneralNoteError(null)
     const { ok } = await saveGeneralNote(practitioner.id, id, generalNote)
-    if (!ok) setGeneralNoteError(t('notes.error_save'))
     setGeneralNoteSaving(false)
+    if (!ok) toast.error(t('notes.error_save'))
   }
 
   const handleStartEditNote = (note: PractitionerNote) => {
@@ -480,6 +480,7 @@ export function PatientPage() {
     setUpdatingNote(true)
     setNoteError(null)
     const result = await updateNote(editingNoteId, editingContent, editingTags)
+    setUpdatingNote(false)
     if (result.ok) {
       setNotes(prev => prev.map(n =>
         n.id === editingNoteId
@@ -490,9 +491,8 @@ export function PatientPage() {
       setEditingContent('')
       setEditingTags([])
     } else {
-      setNoteError(t('notes.error_update'))
+      toast.error(t('notes.error_update'))
     }
-    setUpdatingNote(false)
   }
 
   const handleDeleteNote = async (noteId: string) => {
@@ -968,9 +968,6 @@ export function PatientPage() {
                     value={generalNote}
                     onChange={e => setGeneralNote(e.target.value)}
                   />
-                  {generalNoteError && (
-                    <p className="patient-notes__error">{generalNoteError}</p>
-                  )}
                   <div className="patient-overview__note-form-actions">
                     <Button size="sm" loading={generalNoteSaving} onClick={handleSaveGeneralNote}>
                       {t('common.save')}

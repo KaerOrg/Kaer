@@ -22,7 +22,7 @@ import {
 } from '../services/appointmentService'
 import { colors, spacing, radius, fontSize } from '../theme'
 import type { AppStackParamList } from '../navigation/AppStack'
-import { EmptyState } from '../components/EmptyState'
+import { EmptyState } from '../components/ui/EmptyState'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
