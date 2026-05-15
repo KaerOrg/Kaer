@@ -149,15 +149,43 @@
   border-color: var(--color-primary);
 }
 
-.patient-notes__textarea--recording {
-  border-color: var(--color-primary);
-  outline: none;
-  animation: note-recording-pulse 1.4s ease-in-out infinite;
+/* ── Bordure lumineuse rotative pendant l'enregistrement ─────────────────── */
+
+@property --stt-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-@keyframes note-recording-pulse {
-  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent); }
-  50%       { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 40%, transparent); }
+.patient-notes__textarea-frame {
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+.patient-notes__textarea-frame--recording {
+  padding: 2px;
+  border-radius: var(--radius-md);
+  background: conic-gradient(
+    from var(--stt-angle),
+    transparent 0%,
+    color-mix(in srgb, var(--color-primary) 40%, transparent) 8%,
+    var(--color-primary) 18%,
+    color-mix(in srgb, var(--color-primary) 30%, transparent) 28%,
+    transparent 38%,
+    transparent 100%
+  );
+  animation: stt-border-rotate 2s linear infinite;
+}
+
+@keyframes stt-border-rotate {
+  to { --stt-angle: 360deg; }
+}
+
+.patient-notes__textarea-frame--recording .patient-notes__textarea {
+  border-color: transparent;
+  border-radius: calc(var(--radius-md) - 2px);
+  width: 100%;
+  display: block;
 }
 
 .patient-notes__error {

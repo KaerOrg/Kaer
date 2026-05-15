@@ -1025,12 +1025,14 @@ export function PatientPage() {
               <section className="patient-notes">
                 {/* ── Formulaire nouvelle note ─────────────────────────── */}
                 <div className="patient-notes__form">
-                  <textarea
-                    ref={newNoteRef}
-                    className={`patient-notes__textarea ${isRecording ? 'patient-notes__textarea--recording' : ''}`}
-                    placeholder={t('notes.placeholder')}
-                    rows={3}
-                  />
+                  <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
+                    <textarea
+                      ref={newNoteRef}
+                      className="patient-notes__textarea"
+                      placeholder={t('notes.placeholder')}
+                      rows={3}
+                    />
+                  </div>
 
                   <div className="patient-notes__tag-row">
                     {newNoteTags.map(tag => (
