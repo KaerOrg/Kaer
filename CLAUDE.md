@@ -143,7 +143,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Package shared (types TypeScript)
 - [x] Schéma SQL écrit (`supabase/schema.sql`)
 - [x] MCP Supabase configuré (`~/.claude/settings.json`)
-- [ ] Schéma SQL appliqué sur Supabase
+- [x] Schéma SQL appliqué sur Supabase
 - [ ] Clés Supabase dans les fichiers `.env`
 - [ ] App mobile patient (navigation, auth, modules)
 - [ ] Module Agenda du sommeil
@@ -162,6 +162,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
 - [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
 - [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
+- [x] Système de prise de rendez-vous (`calendar_booking`) — praticien : grille semaine pixel, éditeur plages récurrentes + exceptions, toggle auto-confirm, modal RDV ; patient mobile : calendrier mois custom, réservation + annulation ; 3 tables Supabase (availability_rules, availability_exceptions, appointments) + RLS ; 28 tests vitest + 11 tests jest ; spec [`docs/spec/calendar.md`](docs/spec/calendar.md)
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -283,6 +284,30 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
   }))
   ```
 - **Conformité MDR** : le mode ado modifie uniquement le lexique et la palette — aucune logique conditionnelle sur les données cliniques.
+
+## Pattern : Système de rendez-vous (calendar_booking)
+
+Prise de RDV entre praticien et patient, sans librairie de calendrier externe.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/web/src/lib/calendar.types.ts` | Types partagés côté web (AvailabilityRule, Appointment, ComputedSlot…) |
+| `apps/web/src/services/appointmentService.ts` | Service web : CRUD Supabase + `computeAvailableSlots` (pure function) |
+| `apps/web/src/components/WeekGrid/` | Grille semaine pixel — `HOUR_HEIGHT_PX=64`, positionnement absolu par calcul minutes |
+| `apps/web/src/components/AvailabilityEditor/` | Sidebar : règles récurrentes + exceptions + toggle `auto_confirm` |
+| `apps/web/src/components/AppointmentModal/` | Modal création (mode `create`) / visualisation (mode `view`) |
+| `apps/web/src/pages/AgendaPage.tsx` | Page principale praticien — charge tout via `Promise.all` |
+| `apps/mobile/src/services/appointmentService.ts` | Service mobile — même `computeAvailableSlots`, + `fetchPatientPractitioner` |
+| `apps/mobile/src/screens/AppointmentsScreen.tsx` | Liste RDV patient (à venir / passés), annulation avec Alert |
+| `apps/mobile/src/screens/BookAppointmentScreen.tsx` | Calendrier mois maison + sélection créneau + `bookAppointment` |
+
+### Règles architecturales
+
+- **`computeAvailableSlots`** est une pure function (zéro réseau) — elle tourne côté client pour afficher les créneaux disponibles dans la grille web et le calendrier mois mobile.
+- **Convention `day_of_week`** : `0=Lundi … 6=Dimanche` en base. JS `Date.getDay()` renvoie `0=Dimanche` → toujours passer par `jsDayToSchema()` pour la conversion.
+- **La grille semaine s'affiche toujours**, même sans règles configurées — les colonnes sont vides, le praticien navigue librement et ouvre l'éditeur via "Configurer".
+- **`auto_confirm_appointments`** sur `practitioners` : `true` → RDV créé en `confirmed` ; `false` → `pending` (le praticien confirme manuellement).
+- Spec complète : [`docs/spec/calendar.md`](docs/spec/calendar.md).
 
 ## Documentation technique
 
