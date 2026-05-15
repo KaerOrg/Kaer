@@ -138,7 +138,21 @@
     "rim_error_unlock": "Erreur lors du déverrouillage. Réessayez.",
     "rim_error_update": "Erreur lors de la mise à jour. Réessayez.",
     "rim_btn_unlock": "Débloquer avec ce scénario",
-    "rim_btn_save": "Enregistrer le scénario"
+    "rim_btn_save": "Enregistrer le scénario",
+    "tab_overview": "Vue d'ensemble",
+    "tab_modules": "Modules",
+    "tab_notes": "Notes",
+    "tab_rdv": "Rendez-vous",
+    "overview_active_modules": "Modules actifs",
+    "overview_no_modules": "Aucun module débloqué pour ce patient.",
+    "overview_recent_notes": "Notes récentes",
+    "overview_no_notes": "Aucune note pour ce patient.",
+    "overview_see_all_notes": "Voir toutes les notes",
+    "overview_unlocked_on": "Débloqué le {{date}}",
+    "overview_enrolled_since": "Suivi depuis",
+    "overview_rdv_done": "RDV réalisés",
+    "overview_add_note": "Informations générales",
+    "rdv_coming_soon": "La gestion des rendez-vous sera disponible prochainement."
   },
   "modules": {
     "nav_link": "Modules",
@@ -913,5 +927,31 @@
     "day_ven": "V",
     "day_sam": "S",
     "day_dim": "D"
+  },
+  "notes": {
+    "section_title": "Notes",
+    "placeholder": "Ajouter une note…",
+    "save_button": "Enregistrer",
+    "edit_button": "Modifier",
+    "delete_button": "Supprimer",
+    "confirm_delete": "Supprimer cette note définitivement ?",
+    "confirm_yes": "Supprimer",
+    "error_empty": "La note ne peut pas être vide.",
+    "error_save": "Erreur lors de l'enregistrement.",
+    "error_update": "Erreur lors de la modification.",
+    "error_delete": "Erreur lors de la suppression.",
+    "empty_state": "Aucune note pour ce patient.",
+    "tag_placeholder": "Ajouter un tag…",
+    "tag_hint": "Appuyez sur Entrée pour ajouter",
+    "filter_label": "Filtrer par tag",
+    "filter_clear": "Tout afficher",
+    "empty_filtered": "Aucune note pour ce tag.",
+    "tag_search_placeholder": "Rechercher un tag…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Gérez vos rendez-vous et planifiez vos consultations.",
+    "coming_soon": "La gestion des rendez-vous arrive bientôt."
   }
 }

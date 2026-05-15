@@ -1,4 +1,4 @@
-import { BrainCircuit } from 'lucide-react'
+import { HeartPlus } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { ProfileDropdown } from './ProfileDropdown'
 import { MainNav } from '../MainNav/MainNav'
@@ -7,7 +7,7 @@ import { getInitials } from './Layout.utils'
 import './Layout.css'
 import type { LayoutProps } from './Layout.types'
 
-export function Layout({ children }: LayoutProps) {
+export function Layout({ children, sidebar }: LayoutProps) {
   const { practitioner, logout } = useAuthStore()
 
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
@@ -18,10 +18,11 @@ export function Layout({ children }: LayoutProps) {
         <div className="layout__header-inner">
           <div className="layout__left">
             <div className="layout__logo">
-              <span className="layout__logo-icon"><BrainCircuit size={22} /></span>
-              <span className="layout__logo-text">PsyTool</span>
-              <span className="layout__logo-badge">Praticien</span>
+              <span className="layout__logo-icon"><HeartPlus size={30} /></span>
+              <span className="layout__logo-text">Kær</span>
             </div>
+          </div>
+          <div className="layout__center">
             <MainNav />
           </div>
           <div className="layout__right">
@@ -36,7 +37,10 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
-      <main className="layout__main">{children}</main>
+      <div className={`layout__body${sidebar ? ' layout__body--with-sidebar' : ''}`}>
+        {sidebar && <aside className="layout__sidebar">{sidebar}</aside>}
+        <main className="layout__main">{children}</main>
+      </div>
     </div>
   )
 }

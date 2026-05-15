@@ -74,6 +74,8 @@ export interface PatientHeader {
   firstName: string | null
   lastName: string | null
   teenMode: boolean
+  enrolledAt: string
+  generalNote: string | null
 }
 
 export async function fetchPatientHeader(
@@ -85,11 +87,13 @@ export async function fetchPatientHeader(
     patient_first_name: string | null
     patient_last_name: string | null
     teen_mode: boolean
+    created_at: string
+    general_note: string | null
     patients: { email: string; first_name: string | null; last_name: string | null } | { email: string; first_name: string | null; last_name: string | null }[] | null
   }
   const { data } = await supabase
     .from('practitioner_patients')
-    .select('patient_alias, patient_first_name, patient_last_name, teen_mode, patients(email, first_name, last_name)')
+    .select('patient_alias, patient_first_name, patient_last_name, teen_mode, created_at, general_note, patients(email, first_name, last_name)')
     .eq('practitioner_id', practitionerId)
     .eq('patient_id', patientId)
     .single() as { data: RelationRow | null }
@@ -102,7 +106,22 @@ export async function fetchPatientHeader(
     firstName: data.patient_first_name ?? patient?.first_name ?? null,
     lastName: data.patient_last_name ?? patient?.last_name ?? null,
     teenMode: data.teen_mode ?? false,
+    enrolledAt: data.created_at,
+    generalNote: data.general_note ?? null,
   }
+}
+
+export async function saveGeneralNote(
+  practitionerId: string,
+  patientId: string,
+  content: string,
+): Promise<{ ok: boolean }> {
+  const { error } = await supabase
+    .from('practitioner_patients')
+    .update({ general_note: content || null } as never)
+    .eq('practitioner_id', practitionerId)
+    .eq('patient_id', patientId)
+  return { ok: !error }
 }
 
 export async function setTeenMode(

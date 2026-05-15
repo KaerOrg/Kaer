@@ -58,6 +58,9 @@ create table if not exists public.practitioners (
   name                text        not null default '',
   professional_title  text,
   language_preference text        not null default 'fr',
+  address             text,
+  phone               text,
+  avatar_url          text,
   created_at          timestamptz not null default now()
 );
 
@@ -82,6 +85,7 @@ create table if not exists public.practitioner_patients (
   patient_birth_date  date,
   patient_sex         text,
   teen_mode           boolean     not null default false,
+  general_note        text,
   created_at          timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
@@ -121,6 +125,17 @@ create table if not exists public.patient_modules (
 -- MIGRATIONS IDEMPOTENTES — colonnes ajoutées sur tables existantes
 -- (no-op sur BDD vierge, applique le delta sur ancienne BDD)
 -- ============================================================
+
+-- practitioner_patients.general_note
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'general_note'
+  ) then
+    alter table public.practitioner_patients add column general_note text;
+  end if;
+end $$;
 
 -- practitioner_patients.teen_mode
 do $$
@@ -163,6 +178,17 @@ begin
     where table_schema = 'public' and table_name = 'practitioners' and column_name = 'phone'
   ) then
     alter table public.practitioners add column phone text;
+  end if;
+end $$;
+
+-- practitioners.avatar_url
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'avatar_url'
+  ) then
+    alter table public.practitioners add column avatar_url text;
   end if;
 end $$;
 
@@ -474,16 +500,78 @@ create policy "Practitioners can view logs of their patients"
 
 
 -- ============================================================
+-- TABLE : practitioner_patient_notes (Notes privées praticien)
+-- ============================================================
+-- Notes libres liées à un patient, visibles uniquement du praticien.
+-- Aucune donnée clinique structurée — texte libre.
+create table if not exists public.practitioner_patient_notes (
+  id              uuid        primary key default gen_random_uuid(),
+  practitioner_id uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id      uuid        not null references public.patients(id)      on delete cascade,
+  content         text        not null,
+  tags            text[]      not null default '{}',
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+-- Migration idempotente : ajouter tags sur BDD existante
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patient_notes' and column_name = 'tags'
+  ) then
+    alter table public.practitioner_patient_notes add column tags text[] not null default '{}';
+  end if;
+end $$;
+
+create index if not exists idx_ppnotes_practitioner_patient
+  on public.practitioner_patient_notes(practitioner_id, patient_id);
+
+create or replace function public.set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists ppnotes_updated_at on public.practitioner_patient_notes;
+create trigger ppnotes_updated_at
+  before update on public.practitioner_patient_notes
+  for each row execute procedure public.set_updated_at();
+
+alter table public.practitioner_patient_notes enable row level security;
+
+drop policy if exists "ppnotes_select" on public.practitioner_patient_notes;
+create policy "ppnotes_select" on public.practitioner_patient_notes
+  for select using (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_insert" on public.practitioner_patient_notes;
+create policy "ppnotes_insert" on public.practitioner_patient_notes
+  for insert with check (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_update" on public.practitioner_patient_notes;
+create policy "ppnotes_update" on public.practitioner_patient_notes
+  for update using (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_delete" on public.practitioner_patient_notes;
+create policy "ppnotes_delete" on public.practitioner_patient_notes
+  for delete using (auth.uid() = practitioner_id);
+
+
+-- ============================================================
 -- TABLE : module_categories (Organisation des modules en catégories)
 -- ============================================================
 -- Données de référence statiques : ordonnancement et groupement des module_type.
 
 create table if not exists public.module_categories (
   id          text  primary key,
-  sort_order  int   not null
+  sort_order  int   not null,
+  icon        text  not null default ''
 );
 
--- Migration idempotente : supprimer colonnes dépréciées (anciennes BDD)
+-- Migration idempotente : supprimer colonnes dépréciées / ajouter nouvelles (anciennes BDD)
 do $$
 begin
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='label_key') then
@@ -494,6 +582,9 @@ begin
   end if;
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='modules') then
     alter table public.module_categories drop column modules;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='icon') then
+    alter table public.module_categories add column icon text not null default '';
   end if;
 end $$;
 

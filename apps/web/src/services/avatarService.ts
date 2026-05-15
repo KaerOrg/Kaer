@@ -3,12 +3,13 @@ import { supabase } from '../lib/supabase'
 /** Upload un fichier image vers Supabase Storage et retourne l'URL publique. */
 export async function uploadPractitionerAvatar(userId: string, file: File): Promise<string> {
   const arrayBuffer = await file.arrayBuffer()
-  const path = `${userId}/avatar.jpg`
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `${userId}/avatar.${ext}`
 
   const { error } = await supabase.storage
     .from('avatars')
     .upload(path, arrayBuffer, {
-      contentType: 'image/jpeg',
+      contentType: file.type || 'image/jpeg',
       upsert: true,
     })
 

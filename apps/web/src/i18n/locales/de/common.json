@@ -161,5 +161,31 @@
     "enabled_count_other": "{{count}} Module aktiviert",
     "search_placeholder": "Modul suchen (Name, Beschreibung)…",
     "empty_search": "Kein Modul entspricht Ihrer Suche."
+  },
+  "notes": {
+    "section_title": "Notizen",
+    "placeholder": "Notiz hinzufügen…",
+    "save_button": "Speichern",
+    "edit_button": "Bearbeiten",
+    "delete_button": "Löschen",
+    "confirm_delete": "Diese Notiz endgültig löschen?",
+    "confirm_yes": "Löschen",
+    "error_empty": "Notiz darf nicht leer sein.",
+    "error_save": "Fehler beim Speichern.",
+    "error_update": "Fehler beim Aktualisieren.",
+    "error_delete": "Fehler beim Löschen.",
+    "empty_state": "Keine Notizen für diesen Patienten.",
+    "tag_placeholder": "Tag hinzufügen…",
+    "tag_hint": "Enter drücken zum Hinzufügen",
+    "filter_label": "Nach Tag filtern",
+    "filter_clear": "Alle anzeigen",
+    "empty_filtered": "Keine Notizen für diesen Tag.",
+    "tag_search_placeholder": "Tag suchen…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Verwalten Sie Ihre Termine und planen Sie Ihre Konsultationen.",
+    "coming_soon": "Die Terminverwaltung kommt bald."
   }
 }

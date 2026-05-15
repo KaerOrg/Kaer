@@ -10,6 +10,7 @@ import { DispensairePage } from './pages/DispensairePage'
 import { ModuleCatalogPage } from './pages/ModuleCatalogPage'
 import { ModulePreviewPage } from './pages/ModulePreviewPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { AgendaPage } from './pages/AgendaPage'
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -46,6 +47,7 @@ function App() {
             <Route path="/modules" element={<ModuleCatalogPage />} />
             <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
             <Route path="/profil" element={<ProfilePage />} />
+            <Route path="/agenda" element={<AgendaPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (

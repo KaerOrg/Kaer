@@ -181,13 +181,16 @@ export interface Database {
         Row: {
           id: string
           sort_order: number
+          icon: string
         }
         Insert: {
           id: string
           sort_order: number
+          icon?: string
         }
         Update: {
           sort_order?: number
+          icon?: string
         }
         Relationships: []
       }

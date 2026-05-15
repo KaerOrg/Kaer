@@ -91,13 +91,13 @@ export function PsyEduBlocks({ topicId, sectionOrder }: Props) {
     )
   }
 
-  let lastSection: string | null = null
+  const seenSections = new Set<string>()
 
   return (
     <div className="psyedu__body">
       {blocks.map(block => {
-        const showSectionLabel = block.section_key !== lastSection
-        lastSection = block.section_key
+        const showSectionLabel = !seenSections.has(block.section_key)
+        seenSections.add(block.section_key)
         const sectionLabel = showSectionLabel
           ? t(`section.${block.section_key}`, {
               ns: 'psyedu',

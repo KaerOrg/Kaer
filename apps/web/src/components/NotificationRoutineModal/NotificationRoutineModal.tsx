@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { X, Bell, BellOff, Loader } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../Button'
+import { LUCIDE_ICONS } from '../../lib/lucideIcons'
 import {
   getRoutinesForPatientModule,
   createRoutine,
@@ -16,6 +17,7 @@ interface Props {
   practitionerId: string
   patientId: string
   moduleLabel: string
+  moduleIconName: string
   onClose: () => void
 }
 
@@ -29,9 +31,12 @@ export function NotificationRoutineModal({
   practitionerId,
   patientId,
   moduleLabel,
+  moduleIconName,
   onClose,
 }: Props) {
   const { t } = useTranslation()
+
+  const ModuleIcon = LUCIDE_ICONS[moduleIconName]
 
   const [routines, setRoutines] = useState<NotificationRoutine[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,8 +44,8 @@ export function NotificationRoutineModal({
 
   // Form state pour création d'une nouvelle routine
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 3, 5])
-  const [time, setTime] = useState(DEFAULT_TIME)
-  const [note, setNote] = useState('')
+  const timeRef = useRef<HTMLInputElement>(null)
+  const noteRef = useRef<HTMLTextAreaElement>(null)
   const [showForm, setShowForm] = useState(false)
 
   const load = useCallback(async () => {
@@ -71,18 +76,18 @@ export function NotificationRoutineModal({
         practitioner_id: practitionerId,
         patient_id: patientId,
         days_of_week: selectedDays,
-        time_of_day: time,
-        practitioner_note: note.trim() || null,
+        time_of_day: timeRef.current?.value ?? DEFAULT_TIME,
+        practitioner_note: noteRef.current?.value.trim() || null,
       })
       setSelectedDays([1, 3, 5])
-      setTime(DEFAULT_TIME)
-      setNote('')
+      if (timeRef.current) timeRef.current.value = DEFAULT_TIME
+      if (noteRef.current) noteRef.current.value = ''
       setShowForm(false)
       await load()
     } finally {
       setSaving(false)
     }
-  }, [selectedDays, time, note, patientModuleId, practitionerId, patientId, load])
+  }, [selectedDays, patientModuleId, practitionerId, patientId, load])
 
   const handleToggleActive = useCallback(async (routine: NotificationRoutine) => {
     await updateRoutine(routine.id, { is_active: !routine.is_active })
@@ -102,10 +107,7 @@ export function NotificationRoutineModal({
         <div className="nr-modal__header">
           <div className="nr-modal__title-block">
             <Bell size={18} className="nr-modal__icon" />
-            <div>
-              <div className="nr-modal__title">{t('notifications.modal_title')}</div>
-              <div className="nr-modal__subtitle">{moduleLabel}</div>
-            </div>
+            <span className="nr-modal__title">{t('notifications.modal_title')}</span>
           </div>
           <button className="nr-modal__close" onClick={onClose} aria-label={t('common.close')}>
             <X size={18} />
@@ -113,6 +115,10 @@ export function NotificationRoutineModal({
         </div>
 
         <div className="nr-modal__body">
+          <p className="nr-modal__module-label">
+            {ModuleIcon && <ModuleIcon size={14} className="nr-modal__module-icon" />}
+            {moduleLabel}
+          </p>
           {loading ? (
             <div className="nr-modal__loading"><Loader size={20} className="nr-modal__spinner" /></div>
           ) : (
@@ -147,15 +153,14 @@ export function NotificationRoutineModal({
                   <input
                     type="time"
                     className="nr-form__time"
-                    value={time}
-                    onChange={e => setTime(e.target.value)}
+                    ref={timeRef}
+                    defaultValue={DEFAULT_TIME}
                   />
 
                   <div className="nr-form__label">{t('notifications.note_label')}</div>
                   <textarea
                     className="nr-form__note"
-                    value={note}
-                    onChange={e => setNote(e.target.value)}
+                    ref={noteRef}
                     placeholder={t('notifications.note_placeholder')}
                     rows={2}
                   />

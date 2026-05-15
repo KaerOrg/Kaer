@@ -7,6 +7,7 @@ export function MainNav() {
   const location = useLocation()
   const isPatientsActive = location.pathname === '/' || location.pathname.startsWith('/patient/')
   const isModulesActive = location.pathname === '/modules' || location.pathname.startsWith('/modules/')
+  const isAgendaActive = location.pathname === '/agenda'
 
   return (
     <nav className="main-nav">
@@ -21,6 +22,12 @@ export function MainNav() {
         className={`main-nav__link ${isModulesActive ? 'main-nav__link--active' : ''}`}
       >
         {t('modules.nav_link')}
+      </Link>
+      <Link
+        to="/agenda"
+        className={`main-nav__link ${isAgendaActive ? 'main-nav__link--active' : ''}`}
+      >
+        {t('agenda.nav_link')}
       </Link>
     </nav>
   )

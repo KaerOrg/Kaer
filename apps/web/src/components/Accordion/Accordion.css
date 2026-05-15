@@ -28,9 +28,19 @@
 }
 
 .accordion__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: var(--font-size-body, 16px);
   font-weight: 600;
   color: var(--color-text);
+}
+
+.accordion__title-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .accordion__subtitle {

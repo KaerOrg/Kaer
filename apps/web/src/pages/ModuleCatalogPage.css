@@ -102,11 +102,19 @@
 }
 
 .catalog-section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: var(--font-size-body);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.2px;
   margin: 0;
+}
+
+.catalog-section__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .catalog-section__subtitle {
@@ -123,25 +131,7 @@
   gap: var(--spacing-md);
 }
 
-/* ── Carte module ────────────────────────────────────────────────────────── */
-
-.catalog-card {
-  border-radius: var(--radius-md);
-  border: 1.5px solid var(--color-border);
-  background: var(--color-surface);
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.catalog-card:hover {
-  box-shadow: var(--shadow-sm);
-}
-
-.catalog-card--enabled:hover {
-  box-shadow: var(--shadow-sm);
-}
+/* États */
 
 .catalog-card--disabled {
   opacity: 0.55;
@@ -159,14 +149,6 @@
   letter-spacing: 0.01em;
 }
 
-.catalog-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  flex: 1;
-}
-
 .catalog-card__toggle-btn {
   background: none;
   border: none;
@@ -175,54 +157,6 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-}
-
-/* Footer avec bouton aperçu */
-
-.catalog-card__footer {
-  border-top: 1px solid var(--color-border);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: rgba(0, 0, 0, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-}
-
-/* ── Top row : nom + icône ───────────────────────────────────────────────── */
-
-.catalog-card__top {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.catalog-card__name-row {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  min-width: 0;
-}
-
-.catalog-card__icon {
-  flex-shrink: 0;
-  color: var(--color-text-muted);
-}
-
-.catalog-card__name {
-  font-size: var(--font-size-caption);
-  font-weight: 600;
-  color: var(--color-text);
-  line-height: 1.3;
-}
-
-/* ── Description ─────────────────────────────────────────────────────────── */
-
-.catalog-card__desc {
-  font-size: var(--font-size-caption);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  margin: 0;
 }
 
 /* ── Panneau d'aperçu de section ─────────────────────────────────────────── */

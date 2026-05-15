@@ -14,13 +14,11 @@
 }
 
 .layout__header-inner {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 var(--spacing-lg);
   height: 60px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .layout__logo {
@@ -29,42 +27,66 @@
   gap: 10px;
 }
 
-.layout__logo-icon { display: flex; align-items: center; }
+.layout__logo-icon { display: flex; align-items: center; color: var(--color-primary)}
 
 .layout__logo-text {
-  font-size: 18px;
+  font-size: 30px;
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-primary);
   letter-spacing: -0.3px;
 }
-
-.layout__logo-badge {
-  font-size: 11px;
-  font-weight: 600;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  padding: 2px 8px;
-  border-radius: var(--radius-full, 999px);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 .layout__left {
+  width: 200px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 24px;
+}
+
+.layout__center {
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .layout__right {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 
+.layout__body {
+  flex: 1;
+  display: flex;
+}
+
+/* Sans sidebar : le main est centré avec max-width */
 .layout__main {
   flex: 1;
+  min-width: 0;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+/* ── Variante avec sidebar ───────────────────────────────────────────────── */
+
+/* Avec sidebar : le body est full-width, sidebar collée à gauche */
+.layout__body--with-sidebar {
+  align-items: stretch;
+}
+
+.layout__sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding-top: var(--spacing-xl);
+}
+
+.layout__body--with-sidebar .layout__main {
+  max-width: none;
+  margin: 0;
+  padding-left: var(--spacing-xl);
 }

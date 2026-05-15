@@ -390,17 +390,19 @@ export function DashboardPage() {
                       onClick={() => navigate(`/patient/${patient.id}`)}
                     >
                       <Card variant="default" className="patient-card">
-                        <div className="patient-card__avatar">{avatarChar}</div>
-                        <div className="patient-card__info">
-                          <div className="patient-card__name">{displayName}</div>
-                          <div className="patient-card__email">{patient.email}</div>
-                        </div>
-                        <div className="patient-card__modules">
-                          <span className="patient-card__module-count">
-                            {patient.modules.length === 1
-                              ? t('dashboard.module_count_one', { count: patient.modules.length })
-                              : t('dashboard.module_count_other', { count: patient.modules.length })}
-                          </span>
+                        <div className="patient-card__row">
+                          <div className="patient-card__avatar">{avatarChar}</div>
+                          <div className="patient-card__info">
+                            <div className="patient-card__name">{displayName}</div>
+                            <div className="patient-card__email">{patient.email}</div>
+                          </div>
+                          <div className="patient-card__modules">
+                            <span className="patient-card__module-count">
+                              {patient.modules.length === 1
+                                ? t('dashboard.module_count_one', { count: patient.modules.length })
+                                : t('dashboard.module_count_other', { count: patient.modules.length })}
+                            </span>
+                          </div>
                         </div>
                       </Card>
                     </button>

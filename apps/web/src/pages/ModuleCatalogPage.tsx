@@ -1,48 +1,19 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import {
-  Eye,
-  Shield, Handshake, Zap, Pill, ClipboardList, BookOpen,
-  Moon, Apple, Clock, Smile, Target, Activity, Brain, Search,
-  Leaf, Waves, Thermometer, TrendingUp, Wind, RefreshCw, BookMarked, Scale,
-} from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
+import { Card } from '../components/Card'
 import type { ModuleType } from '../lib/database.types'
 import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '../services/practitionerSettingsService'
 import { Toggle } from '../components/Toggle/Toggle'
 import { SearchInput } from '../components/SearchInput'
 import { matchesAllTokens, tokenizeSearch } from '../lib/search'
+import { LUCIDE_ICONS } from '../lib/lucideIcons'
 import './ModuleCatalogPage.css'
-
-// Bridge architectural : mappe les noms d'icônes stockés en BDD vers les composants Lucide.
-const LUCIDE_ICONS: Record<string, React.FC<{ size?: number; className?: string }>> = {
-  shield:        Shield,
-  handshake:     Handshake,
-  zap:           Zap,
-  pill:          Pill,
-  'clipboard-list': ClipboardList,
-  'book-open':   BookOpen,
-  moon:          Moon,
-  apple:         Apple,
-  clock:         Clock,
-  smile:         Smile,
-  target:        Target,
-  activity:      Activity,
-  brain:         Brain,
-  search:        Search,
-  leaf:          Leaf,
-  waves:         Waves,
-  thermometer:   Thermometer,
-  'trending-up': TrendingUp,
-  wind:          Wind,
-  'refresh-cw':  RefreshCw,
-  bookmark:      BookMarked,
-  scale:         Scale,
-}
 
 export function ModuleCatalogPage() {
   const { t } = useTranslation()
@@ -183,7 +154,10 @@ export function ModuleCatalogPage() {
             {filteredCategories.map(category => (
               <section key={category.id} className="catalog-section">
                 <div className="catalog-section__header">
-                  <h2 className="catalog-section__title">{t(category.labelKey)}</h2>
+                  <h2 className="catalog-section__title">
+                    {LUCIDE_ICONS[category.icon] && React.createElement(LUCIDE_ICONS[category.icon], { size: 18, className: 'catalog-section__icon' })}
+                    {t(category.labelKey)}
+                  </h2>
                   {t(category.subtitleKey) && (
                     <span className="catalog-section__subtitle">{t(category.subtitleKey)}</span>
                   )}
@@ -195,44 +169,39 @@ export function ModuleCatalogPage() {
                     const isComingSoon = comingSoonIds.has(mod.id)
                     const IconComponent = LUCIDE_ICONS[mod.icon]
                     return (
-                      <div
+                      <Card
                         key={mod.id}
-                        className={`catalog-card ${isComingSoon ? 'catalog-card--coming-soon' : (isEnabled ? 'catalog-card--enabled' : 'catalog-card--disabled')}`}
+                        className={isComingSoon ? 'catalog-card--coming-soon' : (!isEnabled ? 'catalog-card--disabled' : '')}
+                        header={{
+                          icon: IconComponent ? <IconComponent size={16} /> : undefined,
+                          title: t(`modules.${mod.id}.label`),
+                          subtitle: t(`modules.${mod.id}.description`),
+                          right: isComingSoon ? undefined : (
+                            <button
+                              className="catalog-card__toggle-btn"
+                              onClick={() => toggleModule(mod.id)}
+                              aria-pressed={isEnabled}
+                              type="button"
+                            >
+                              <Toggle checked={isEnabled} />
+                            </button>
+                          ),
+                        }}
+                        actions={!isComingSoon ? (
+                          <button
+                            className="preview-toggle-btn"
+                            onClick={() => navigate(`/modules/preview/${mod.id}`)}
+                            title={t('patient.patient_view')}
+                          >
+                            <Eye size={12} />
+                            {t('patient.preview_button')}
+                          </button>
+                        ) : undefined}
                       >
-                        <div className="catalog-card__body">
-                          <div className="catalog-card__top">
-                            <span className="catalog-card__name-row">
-                              {IconComponent && <IconComponent size={16} className="catalog-card__icon" />}
-                              <span className="catalog-card__name">{t(`modules.${mod.id}.label`)}</span>
-                            </span>
-                          </div>
-                          <p className="catalog-card__desc">{t(`modules.${mod.id}.description`)}</p>
-                        </div>
-                        <div className="catalog-card__footer">
-                          {isComingSoon ? (
-                            <span className="catalog-card__soon-badge">{t('patient.realtime_soon')}</span>
-                          ) : (
-                            <>
-                              <button
-                                className="preview-toggle-btn"
-                                onClick={() => navigate(`/modules/preview/${mod.id}`)}
-                                title={t('patient.patient_view')}
-                              >
-                                <Eye size={12} />
-                                {t('patient.preview_button')}
-                              </button>
-                              <button
-                                className="catalog-card__toggle-btn"
-                                onClick={() => toggleModule(mod.id)}
-                                aria-pressed={isEnabled}
-                                type="button"
-                              >
-                                <Toggle checked={isEnabled} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                        {isComingSoon ? (
+                          <span className="catalog-card__soon-badge">{t('patient.realtime_soon')}</span>
+                        ) : null}
+                      </Card>
                     )
                   })}
                 </div>

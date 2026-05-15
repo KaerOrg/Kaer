@@ -7,6 +7,32 @@
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
 - **Documentation inline ciblée** : uniquement pour la logique non-évidente (invariants, workarounds, race conditions). Le reste se documente dans CLAUDE.md et les fichiers `.md` de feature.
 
+## Checklist obligatoire avant tout nouveau CSS ou composant UI
+
+> **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, ou d'implémenter un nouveau composant dans une page.**
+
+**Étape 1 — Chercher dans le design system web :**
+```
+apps/web/src/components/   ← composants partagés (Card, Button, Toggle, StatusBadge, Accordion…)
+apps/web/docs/design-system.md  ← référence CSS custom properties, classes utilitaires
+```
+**Étape 2 — Chercher dans le design system mobile :**
+```
+apps/mobile/src/components/
+apps/mobile/docs/design-system.md
+```
+**Étape 3 — Un composant existant a le même but fonctionnel mais ne couvre pas exactement le besoin ?**
+→ **Le retravailler en priorité** : ajouter une prop, une variante, un slot. C'est la voie normale.
+→ Créer un nouveau composant uniquement si le rework implique un virage trop important (changement de contrat, rupture de l'API existante, logique fondamentalement différente). Ce cas doit rester marginal — justifier explicitement pourquoi l'extension n'était pas possible.
+
+**Anti-patterns bloquants — refuser d'écrire :**
+- Markup HTML qui duplique un composant existant (`Toggle`, `Card`, `Button`, `StatusBadge`…)
+- Style inline `style={{ ... }}` pour autre chose qu'un calcul dynamique ponctuel
+- Classe CSS définie dans le `.css` d'une page pour un pattern déjà présent dans un composant
+- Couleur, taille, espacement hardcodés (#FFFFFF, 14px, 8px) — utiliser les tokens CSS (`var(--color-*)`, `var(--spacing-*)`, `var(--font-size-*)`)
+
+**Rappel :** la session où `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` illustre exactement ce problème. Coût : bug de cohérence visuelle découvert à la revue, refactorisation supplémentaire.
+
 ## Architecture en couches — ne jamais mélanger
 
 - **UI** (`src/screens/`, `src/components/`) : affichage uniquement — zéro logique métier, zéro appel Supabase direct
@@ -96,6 +122,30 @@ Les objets, tableaux et fonctions déclarés dans le render sont re-créés à c
 - Objets passés en props (`style={{}}`, `action={{}}`) → `useMemo` ou variable pré-calculée
 - Config Animated (`inputRange`, `outputRange`) → constantes module-level `number[]`
 - Items de liste complexes → composant dédié + `React.memo`
+
+## Inputs non contrôlés — préférer `useRef` quand possible
+
+**Règle : un input est contrôlé (`value` + `onChange` + `useState`) seulement si sa valeur dérive d'autre chose dans l'UI (validation visible, désactivation d'un bouton, formatage en live, etc.).** Dans tous les autres cas, utiliser un input non contrôlé (`defaultValue` + `ref`) — zéro re-render à chaque frappe.
+
+Critères pour choisir :
+
+| Critère | Contrôlé (`useState`) | Non contrôlé (`useRef`) |
+|---|---|---|
+| La valeur de l'input conditionne l'UI (classe, `disabled`, autre champ) | Oui | — |
+| La valeur est lue uniquement au submit | — | Oui |
+| Reset après submit | `setState(initial)` | `ref.current.value = initial` |
+
+```tsx
+// ❌ Contrôle inutile — la valeur ne sert qu'au submit
+const [note, setNote] = useState('')
+<textarea value={note} onChange={e => setNote(e.target.value)} />
+
+// ✅ Non contrôlé — zéro re-render, reset impératif
+const noteRef = useRef<HTMLTextAreaElement>(null)
+<textarea ref={noteRef} defaultValue="" />
+// Au submit : noteRef.current?.value
+// Reset : if (noteRef.current) noteRef.current.value = ''
+```
 
 ## Design system
 

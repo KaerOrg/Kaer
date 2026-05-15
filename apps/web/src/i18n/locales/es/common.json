@@ -161,5 +161,31 @@
     "enabled_count_other": "{{count}} módulos activados",
     "search_placeholder": "Buscar un módulo (nombre, descripción)…",
     "empty_search": "Ningún módulo coincide con su búsqueda."
+  },
+  "notes": {
+    "section_title": "Notas",
+    "placeholder": "Añadir una nota…",
+    "save_button": "Guardar",
+    "edit_button": "Editar",
+    "delete_button": "Eliminar",
+    "confirm_delete": "¿Eliminar esta nota definitivamente?",
+    "confirm_yes": "Eliminar",
+    "error_empty": "La nota no puede estar vacía.",
+    "error_save": "Error al guardar.",
+    "error_update": "Error al actualizar.",
+    "error_delete": "Error al eliminar.",
+    "empty_state": "Sin notas para este paciente.",
+    "tag_placeholder": "Añadir una etiqueta…",
+    "tag_hint": "Pulsa Enter para añadir",
+    "filter_label": "Filtrar por etiqueta",
+    "filter_clear": "Mostrar todo",
+    "empty_filtered": "Sin notas para esta etiqueta.",
+    "tag_search_placeholder": "Buscar una etiqueta…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Gestione sus citas y planifique sus consultas.",
+    "coming_soon": "La gestión de citas llegará pronto."
   }
 }
