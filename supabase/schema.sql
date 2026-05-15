@@ -931,4 +931,159 @@ alter table public.notification_logs enable row level security;
 --       body := '{}'::jsonb
 --     ) as request_id;
 --   $$
+
+
+-- ============================================================
+-- AGENDA / SYSTÈME DE RENDEZ-VOUS
+-- ============================================================
+
+-- Migration idempotente : auto_confirm_appointments sur practitioners
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'auto_confirm_appointments'
+  ) then
+    alter table public.practitioners add column auto_confirm_appointments boolean not null default true;
+  end if;
+end $$;
+
+-- TABLE : availability_rules
+-- Plages hebdomadaires récurrentes du praticien.
+-- day_of_week : 0=Lundi … 6=Dimanche.
+-- slot_duration_minutes : durée d'un rendez-vous pour cette plage.
+create table if not exists public.availability_rules (
+  id                    uuid        primary key default gen_random_uuid(),
+  practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
+  day_of_week           smallint    not null check (day_of_week between 0 and 6),
+  start_time            time        not null,
+  end_time              time        not null,
+  slot_duration_minutes smallint    not null default 50 check (slot_duration_minutes between 5 and 480),
+  created_at            timestamptz not null default now(),
+  constraint chk_availability_times check (end_time > start_time)
+);
+
+create index if not exists idx_availability_rules_practitioner
+  on public.availability_rules(practitioner_id);
+
+alter table public.availability_rules enable row level security;
+
+drop policy if exists "availability_rules_practitioner_all" on public.availability_rules;
+create policy "availability_rules_practitioner_all" on public.availability_rules
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Patients liés au praticien peuvent lire ses règles (pour calculer les créneaux disponibles)
+drop policy if exists "availability_rules_patient_select" on public.availability_rules;
+create policy "availability_rules_patient_select" on public.availability_rules
+  for select using (
+    practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+
+-- TABLE : availability_exceptions
+-- Exceptions ponctuelles (congés, jours fermés, horaires différents).
+-- is_closed = true → fermé ce jour (start_time/end_time ignorés).
+-- is_closed = false + start_time/end_time → override de l'horaire ce jour.
+create table if not exists public.availability_exceptions (
+  id               uuid        primary key default gen_random_uuid(),
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  exception_date   date        not null,
+  is_closed        boolean     not null default true,
+  start_time       time,
+  end_time         time,
+  created_at       timestamptz not null default now(),
+  unique (practitioner_id, exception_date)
+);
+
+create index if not exists idx_availability_exceptions_practitioner_date
+  on public.availability_exceptions(practitioner_id, exception_date);
+
+alter table public.availability_exceptions enable row level security;
+
+drop policy if exists "availability_exceptions_practitioner_all" on public.availability_exceptions;
+create policy "availability_exceptions_practitioner_all" on public.availability_exceptions
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+drop policy if exists "availability_exceptions_patient_select" on public.availability_exceptions;
+create policy "availability_exceptions_patient_select" on public.availability_exceptions
+  for select using (
+    practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+
+-- TABLE : appointments
+-- Rendez-vous réservés entre praticien et patient.
+-- status : pending (en attente de confirmation) → confirmed / cancelled_by_* / completed
+create table if not exists public.appointments (
+  id               uuid        primary key default gen_random_uuid(),
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id       uuid        not null references public.patients(id) on delete cascade,
+  starts_at        timestamptz not null,
+  ends_at          timestamptz not null,
+  status           text        not null default 'pending'
+                               check (status in (
+                                 'pending',
+                                 'confirmed',
+                                 'cancelled_by_patient',
+                                 'cancelled_by_practitioner',
+                                 'completed'
+                               )),
+  notes            text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  constraint chk_appointment_times check (ends_at > starts_at)
+);
+
+create index if not exists idx_appointments_practitioner_time
+  on public.appointments(practitioner_id, starts_at);
+
+create index if not exists idx_appointments_patient
+  on public.appointments(patient_id, starts_at);
+
+alter table public.appointments enable row level security;
+
+-- Praticien : CRUD sur ses propres rendez-vous
+drop policy if exists "appointments_practitioner_all" on public.appointments;
+create policy "appointments_practitioner_all" on public.appointments
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Patient : lecture de ses propres rendez-vous + créneaux occupés du praticien (pour la réservation)
+drop policy if exists "appointments_patient_select" on public.appointments;
+create policy "appointments_patient_select" on public.appointments
+  for select using (
+    auth.uid() = patient_id
+    or practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+-- Patient : création d'un rendez-vous (status = pending ou confirmed selon auto_confirm)
+drop policy if exists "appointments_patient_insert" on public.appointments;
+create policy "appointments_patient_insert" on public.appointments
+  for insert with check (
+    auth.uid() = patient_id
+    and practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+-- Patient : annulation de ses propres rendez-vous
+drop policy if exists "appointments_patient_cancel" on public.appointments;
+create policy "appointments_patient_cancel" on public.appointments
+  for update using (auth.uid() = patient_id)
+  with check (
+    auth.uid() = patient_id
+    and status in ('cancelled_by_patient')
+  );
 -- );

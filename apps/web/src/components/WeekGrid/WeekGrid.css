@@ -1,0 +1,179 @@
+.week-grid {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-card);
+}
+
+/* ── Header row ── */
+.week-grid__header {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  background: var(--color-card);
+  z-index: 2;
+}
+
+.week-grid__header-empty {
+  border-right: 1px solid var(--color-border);
+}
+
+.week-grid__day-header {
+  padding: 10px 8px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  border-right: 1px solid var(--color-border);
+}
+
+.week-grid__day-header--today .week-grid__day-number {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto 0;
+  font-weight: 600;
+}
+
+.week-grid__day-label {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.week-grid__day-number {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
+/* ── Body ── */
+.week-grid__body {
+  display: grid;
+  grid-template-columns: 56px repeat(7, 1fr);
+  overflow-y: auto;
+  max-height: 640px;
+  position: relative;
+}
+
+/* ── Time axis ── */
+.week-grid__time-axis {
+  border-right: 1px solid var(--color-border);
+  position: relative;
+}
+
+.week-grid__time-label {
+  position: absolute;
+  right: 8px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  transform: translateY(-50%);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Day columns ── */
+.week-grid__day-col {
+  position: relative;
+  border-right: 1px solid var(--color-border);
+}
+
+.week-grid__hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--color-border);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ── Available slot ── */
+.week-grid__slot {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 4px;
+  background: var(--color-primary-light, #eff6ff);
+  border: 1px solid var(--color-primary);
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  z-index: 1;
+}
+
+.week-grid__slot:hover {
+  opacity: 1;
+  transform: scaleX(1.02);
+}
+
+/* ── Appointment block ── */
+.week-grid__appt {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  z-index: 2;
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+
+.week-grid__appt:hover {
+  opacity: 0.9;
+}
+
+.week-grid__appt--pending {
+  background: var(--color-warning-light, #fffbeb);
+  border-left: 3px solid var(--color-warning, #f59e0b);
+}
+
+.week-grid__appt--confirmed {
+  background: var(--color-primary-light, #eff6ff);
+  border-left: 3px solid var(--color-primary);
+}
+
+.week-grid__appt--cancelled_by_patient,
+.week-grid__appt--cancelled_by_practitioner {
+  background: var(--color-neutral, #f3f4f6);
+  border-left: 3px solid var(--color-text-muted);
+  opacity: 0.55;
+}
+
+.week-grid__appt--completed {
+  background: var(--color-success-light, #ecfdf5);
+  border-left: 3px solid var(--color-success, #10b981);
+}
+
+.week-grid__appt-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.week-grid__appt-time {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* ── Empty state ── */
+.week-grid__empty {
+  grid-column: 1 / -1;
+  padding: 48px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}

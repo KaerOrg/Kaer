@@ -1,0 +1,143 @@
+.appointment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--spacing-md, 16px);
+}
+
+.appointment-modal {
+  background: var(--color-card);
+  border-radius: var(--radius-lg, 16px);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.appointment-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.appointment-modal__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.appointment-modal__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px;
+  border-radius: var(--radius-sm, 6px);
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.appointment-modal__close:hover {
+  background: var(--color-border);
+}
+
+.appointment-modal__body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.appointment-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appointment-modal__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.appointment-modal__time-info {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.appointment-modal__select {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+.appointment-modal__textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--color-card);
+  color: var(--color-text);
+  resize: vertical;
+  min-height: 72px;
+}
+
+.appointment-modal__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.appointment-modal__status--pending {
+  background: var(--color-warning-light, #fffbeb);
+  color: var(--color-warning, #f59e0b);
+}
+
+.appointment-modal__status--confirmed {
+  background: var(--color-primary-light, #eff6ff);
+  color: var(--color-primary);
+}
+
+.appointment-modal__status--cancelled_by_patient,
+.appointment-modal__status--cancelled_by_practitioner {
+  background: var(--color-neutral, #f3f4f6);
+  color: var(--color-text-muted);
+}
+
+.appointment-modal__status--completed {
+  background: var(--color-success-light, #ecfdf5);
+  color: var(--color-success, #10b981);
+}
+
+.appointment-modal__footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.appointment-modal__error {
+  font-size: 13px;
+  color: var(--color-danger, #ef4444);
+  padding: 0 24px 12px;
+}

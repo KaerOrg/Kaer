@@ -23,6 +23,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`terminologie-praticiens.md`](terminologie-praticiens.md) | Glossaire métier (IDE, IPA, etc.) |
 | [`migration-engine-roadmap.md`](migration-engine-roadmap.md) | Roadmap moteur de migrations |
 | [`dependency-pitfalls.md`](dependency-pitfalls.md) | Pièges connus de dépendances |
+| [`spec/calendar.md`](spec/calendar.md) | Système de prise de rendez-vous (praticien web + patient mobile) |
 
 ## Documentation par module thérapeutique
 

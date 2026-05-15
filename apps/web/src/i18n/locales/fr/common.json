@@ -951,7 +951,65 @@
   "agenda": {
     "nav_link": "Agenda",
     "title": "Agenda",
-    "subtitle": "Gérez vos rendez-vous et planifiez vos consultations.",
-    "coming_soon": "La gestion des rendez-vous arrive bientôt."
+    "subtitle": "Configurez vos disponibilités et gérez vos rendez-vous.",
+    "week_of": "Semaine du {{start}} au {{end}}",
+    "today": "Aujourd'hui",
+    "prev_week": "Semaine précédente",
+    "next_week": "Semaine suivante",
+    "configure": "Disponibilités",
+    "no_rules": "Aucune plage horaire définie. Commencez par configurer vos disponibilités.",
+    "empty_week": "Aucun créneau configuré pour cette semaine.",
+    "days": {
+      "0": "Lundi",
+      "1": "Mardi",
+      "2": "Mercredi",
+      "3": "Jeudi",
+      "4": "Vendredi",
+      "5": "Samedi",
+      "6": "Dimanche"
+    },
+    "days_short": {
+      "0": "Lun",
+      "1": "Mar",
+      "2": "Mer",
+      "3": "Jeu",
+      "4": "Ven",
+      "5": "Sam",
+      "6": "Dim"
+    },
+    "editor": {
+      "title": "Mes disponibilités",
+      "add_rule": "Ajouter une plage",
+      "slot_duration": "Durée du RDV",
+      "minutes": "min",
+      "auto_confirm": "Confirmation automatique",
+      "auto_confirm_hint": "Les demandes sont acceptées sans validation manuelle",
+      "delete_rule": "Supprimer",
+      "from": "De",
+      "to": "à",
+      "save": "Enregistrer",
+      "no_rules": "Aucune plage définie.",
+      "exceptions_title": "Exceptions (congés, jours atypiques)"
+    },
+    "appointment": {
+      "new": "Nouveau rendez-vous",
+      "title_new": "Créer un rendez-vous",
+      "title_view": "Rendez-vous",
+      "patient_label": "Patient",
+      "patient_placeholder": "Sélectionner un patient",
+      "notes_label": "Notes (optionnel)",
+      "notes_placeholder": "Notes internes…",
+      "create_btn": "Créer le rendez-vous",
+      "confirm_btn": "Confirmer",
+      "cancel_btn": "Annuler le rendez-vous",
+      "complete_btn": "Marquer comme terminé",
+      "status_pending": "En attente",
+      "status_confirmed": "Confirmé",
+      "status_cancelled": "Annulé",
+      "status_completed": "Terminé",
+      "error_no_patient": "Veuillez sélectionner un patient.",
+      "error_create": "Erreur lors de la création.",
+      "error_update": "Erreur lors de la mise à jour."
+    }
   }
 }

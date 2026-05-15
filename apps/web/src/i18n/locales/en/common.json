@@ -848,7 +848,65 @@
   "agenda": {
     "nav_link": "Schedule",
     "title": "Schedule",
-    "subtitle": "Manage your appointments and plan your consultations.",
-    "coming_soon": "Appointment management is coming soon."
+    "subtitle": "Configure your availability and manage appointments.",
+    "week_of": "Week of {{start}} to {{end}}",
+    "today": "Today",
+    "prev_week": "Previous week",
+    "next_week": "Next week",
+    "configure": "Availability",
+    "no_rules": "No time slots defined. Start by configuring your availability.",
+    "empty_week": "No slots configured for this week.",
+    "days": {
+      "0": "Monday",
+      "1": "Tuesday",
+      "2": "Wednesday",
+      "3": "Thursday",
+      "4": "Friday",
+      "5": "Saturday",
+      "6": "Sunday"
+    },
+    "days_short": {
+      "0": "Mon",
+      "1": "Tue",
+      "2": "Wed",
+      "3": "Thu",
+      "4": "Fri",
+      "5": "Sat",
+      "6": "Sun"
+    },
+    "editor": {
+      "title": "My availability",
+      "add_rule": "Add a time slot",
+      "slot_duration": "Appointment duration",
+      "minutes": "min",
+      "auto_confirm": "Automatic confirmation",
+      "auto_confirm_hint": "Requests are accepted without manual validation",
+      "delete_rule": "Delete",
+      "from": "From",
+      "to": "to",
+      "save": "Save",
+      "no_rules": "No slots defined.",
+      "exceptions_title": "Exceptions (holidays, atypical days)"
+    },
+    "appointment": {
+      "new": "New appointment",
+      "title_new": "Create appointment",
+      "title_view": "Appointment",
+      "patient_label": "Patient",
+      "patient_placeholder": "Select a patient",
+      "notes_label": "Notes (optional)",
+      "notes_placeholder": "Internal notes…",
+      "create_btn": "Create appointment",
+      "confirm_btn": "Confirm",
+      "cancel_btn": "Cancel appointment",
+      "complete_btn": "Mark as completed",
+      "status_pending": "Pending",
+      "status_confirmed": "Confirmed",
+      "status_cancelled": "Cancelled",
+      "status_completed": "Completed",
+      "error_no_patient": "Please select a patient.",
+      "error_create": "Error creating appointment.",
+      "error_update": "Error updating appointment."
+    }
   }
 }
