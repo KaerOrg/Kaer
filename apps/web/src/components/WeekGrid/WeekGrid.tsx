@@ -193,7 +193,6 @@ export function WeekGrid({
             )
           })}
         </div>
-      </div>
     </div>
   )
 }
