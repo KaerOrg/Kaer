@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback, type ReactNode } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BookOpen, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { Layout } from '../components/Layout'
 import { Button } from '../components/Button'
@@ -37,7 +37,16 @@ import {
 import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import './PatientPage.css'
 
-const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
+const SCALE_DOMAIN_ORDER = [
+  { key: 'Humeur',       label: 'Humeur & Dépression' },
+  { key: 'Anxiété',      label: 'Anxiété' },
+  { key: 'Neurodev',     label: 'Neurodev / TDAH' },
+  { key: 'Personnalité', label: 'Personnalité' },
+  { key: 'Sommeil',      label: 'Sommeil' },
+  { key: 'Addictologie', label: 'Addictologie' },
+  { key: 'Psychose',     label: 'Psychose' },
+  { key: 'Trauma',       label: 'Trauma' },
+] as const
 
 type PageData = {
   modules: PatientModule[]
@@ -152,14 +161,6 @@ export function PatientPage() {
     await loadPatient()
     setRevokingModuleId(null)
   }
-
-  const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
-  const autoScales = activeScales.filter(
-    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'auto'
-  )
-  const heteroScales = activeScales.filter(
-    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'hetero'
-  )
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -584,63 +585,80 @@ export function PatientPage() {
     )
   }
 
-  const renderScalesGroup = (type: 'auto' | 'hetero', extra?: ReactNode) => {
-    const scales = type === 'auto' ? autoScales : heteroScales
-    const label = type === 'auto' ? 'Auto-questionnaires' : 'Hétéro-questionnaires'
-    const subtitle = scales.length > 0
-      ? `${scales.length} questionnaire${scales.length > 1 ? 's' : ''} actif${scales.length > 1 ? 's' : ''}`
-      : 'Aucun questionnaire actif pour ce patient'
-
+  const renderScaleRow = (modId: string) => {
+    const scale = CLINICAL_SCALES.find(s => s.id === modId)
+    const active = modules.find(m => m.module_type === modId)
     return (
-      <div className={`scales-section scales-section--${type}`}>
-        <div className="scales-section__header">
-          <div className="scales-section__left">
-            <span className="scales-section__icon">
-              <BookOpen size={18} />
+      <div key={modId} className="scale-row">
+        <div className="scale-row__info">
+          <span className="scale-row__name">{scale?.name ?? modId}</span>
+          <span className={`scale-row__badge scale-row__badge--${scale?.evaluationType ?? 'auto'}`}>
+            {scale?.evaluationType === 'hetero' ? 'Hétéro' : 'Auto'}
+          </span>
+          {active && (
+            <span className="scale-row__date">
+              depuis le {new Date(active.unlocked_at).toLocaleDateString(i18n.language)}
             </span>
-            <div>
-              <span className="scales-section__label">{label}</span>
-              <span className="scales-section__sub">{subtitle}</span>
-            </div>
-          </div>
-          <button className="scales-section__add-btn" onClick={() => navigate('/dispensaire')}>
-            + Ajouter
-          </button>
+          )}
         </div>
-
-        {scales.length > 0 && (
-          <ul className="scales-section__list">
-            {scales.map(mod => {
-              const scale = CLINICAL_SCALES.find(s => s.id === mod.module_type)
-              return (
-                <li key={mod.id} className="scales-section__item">
-                  <div className="scales-section__item-info">
-                    <span className="scales-section__item-name">{scale?.name ?? mod.module_type}</span>
-                    <span className="scales-section__item-date">
-                      depuis le {new Date(mod.unlocked_at).toLocaleDateString(i18n.language)}
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="module-card__revoke"
-                    loading={revokingModuleId === mod.id}
-                    onClick={() => revokeScale(mod.id)}
-                  >
-                    Révoquer
-                  </Button>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-
-        {extra !== undefined && (
-          <div className="scales-section__extra">
-            {extra}
-          </div>
+        {active ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="module-card__revoke"
+            loading={revokingModuleId === active.id}
+            onClick={() => revokeScale(active.id)}
+          >
+            Révoquer
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            loading={unlockingModule === modId}
+            onClick={() => unlockModule(modId as ModuleType)}
+          >
+            Activer
+          </Button>
         )}
       </div>
+    )
+  }
+
+  const renderClinicalEvaluations = () => {
+    const cat = categories.find(c => c.id === 'assessments')
+    const allMods = cat
+      ? (enabledModules === null ? cat.modules : cat.modules.filter(m => enabledModules.has(m.id as ModuleType)))
+      : []
+    const activeCount = allMods.filter(m => isUnlocked(m.id as ModuleType)).length
+
+    const byDomain = new Map<string, string[]>()
+    for (const mod of allMods) {
+      const domain = CLINICAL_SCALES.find(s => s.id === mod.id)?.category ?? 'Autre'
+      if (!byDomain.has(domain)) byDomain.set(domain, [])
+      byDomain.get(domain)!.push(mod.id)
+    }
+
+    return (
+      <Accordion
+        title={t('category.assessments.label')}
+        badge={activeCount > 0 ? activeCount : undefined}
+        defaultOpen={false}
+      >
+        <div className="scale-subgroup">
+          <span className="scale-subgroup__label">Risque suicidaire</span>
+          <CSSRSScreenPanel patientId={id!} practitionerId={practitioner!.id} />
+        </div>
+
+        {SCALE_DOMAIN_ORDER
+          .filter(d => byDomain.has(d.key))
+          .map(d => (
+            <div key={d.key} className="scale-subgroup">
+              <span className="scale-subgroup__label">{d.label}</span>
+              {byDomain.get(d.key)!.map(renderScaleRow)}
+            </div>
+          ))
+        }
+      </Accordion>
     )
   }
 
@@ -725,7 +743,7 @@ export function PatientPage() {
               <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
 
               <div className="category-list">
-                {categories.map(category => {
+                {categories.filter(c => c.id !== 'assessments').map(category => {
                   const visibleModules = enabledModules === null
                     ? category.modules
                     : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
@@ -744,13 +762,7 @@ export function PatientPage() {
                 })}
 
                 {/* ── Échelles et questionnaires ─────────────────────────── */}
-                {renderScalesGroup('auto')}
-                {renderScalesGroup('hetero', (
-                  <CSSRSScreenPanel
-                    patientId={id!}
-                    practitionerId={practitioner!.id}
-                  />
-                ))}
+                {renderClinicalEvaluations()}
               </div>
             </section>
 
