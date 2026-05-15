@@ -46,6 +46,7 @@ import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import { NotificationRoutineModal } from '../components/NotificationRoutineModal/NotificationRoutineModal'
 import { Tabs } from '../components/Tabs'
 import { extractUniqueTags, extractTopTags } from '../services/noteService'
+import { SpeechToTextButton } from '../components/SpeechToTextButton'
 
 import './PatientPage.css'
 
@@ -354,6 +355,12 @@ export function PatientPage() {
   const handleEditingTagKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') { e.preventDefault(); addEditingTag() }
   }
+
+  const handleTranscription = useCallback((text: string) => {
+    if (!newNoteRef.current) return
+    const current = newNoteRef.current.value
+    newNoteRef.current.value = current ? `${current}\n${text}` : text
+  }, [])
 
   const handleSaveNote = async () => {
     if (!id || !practitioner) return
@@ -1029,6 +1036,10 @@ export function PatientPage() {
                     <p className="patient-notes__error">{noteError}</p>
                   )}
                   <div className="patient-notes__form-actions">
+                    <SpeechToTextButton
+                      onTranscription={handleTranscription}
+                      disabled={savingNote}
+                    />
                     <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
                       {t('notes.save_button')}
                     </Button>

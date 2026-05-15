@@ -946,7 +946,15 @@
     "filter_label": "Filtrer par tag",
     "filter_clear": "Tout afficher",
     "empty_filtered": "Aucune note pour ce tag.",
-    "tag_search_placeholder": "Rechercher un tag…"
+    "tag_search_placeholder": "Rechercher un tag…",
+    "mic_start": "Dicter une note",
+    "mic_stop": "Arrêter l'enregistrement",
+    "mic_processing": "Transcription en cours…",
+    "mic_error_not_supported": "Votre navigateur ne supporte pas l'enregistrement audio.",
+    "mic_error_permission": "Accès au microphone refusé. Vérifiez les permissions de votre navigateur.",
+    "mic_error_too_large": "Enregistrement trop long. Veuillez enregistrer des segments plus courts.",
+    "mic_error_network": "Erreur réseau lors de la transcription. Vérifiez votre connexion.",
+    "mic_error_server": "Erreur lors de la transcription. Réessayez."
   },
   "agenda": {
     "nav_link": "Agenda",

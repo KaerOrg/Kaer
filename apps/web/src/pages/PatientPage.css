@@ -156,7 +156,9 @@
 
 .patient-notes__form-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
 }
 
 .patient-notes__empty {
