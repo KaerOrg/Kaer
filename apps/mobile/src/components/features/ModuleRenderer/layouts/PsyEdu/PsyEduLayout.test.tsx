@@ -1,14 +1,14 @@
-jest.mock('../../../../hooks/useTeen', () => ({
+jest.mock('../../../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../../../services/psyeduService', () => ({
+jest.mock('../../../../../services/psyeduService', () => ({
   fetchTopicsByModule: jest.fn(),
   fetchBlocksByTopic: jest.fn(),
   clearPsyEduCache: jest.fn(),
 }))
 
-jest.mock('../../../../store/authStore', () => ({
+jest.mock('../../../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { teenMode: boolean }) => unknown) =>
     selector({ teenMode: false }),
 }))

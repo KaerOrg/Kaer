@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react-native'
 import { InlineText } from './InlineText'
 import type { ContentField } from '../../../../../services/moduleService'
 
-jest.mock('../../../../hooks/useModuleT', () => ({
+jest.mock('../../../../../hooks/useModuleT', () => ({
   useModuleT: () => (key: string) => key,
 }))
 

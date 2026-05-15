@@ -1,14 +1,14 @@
-jest.mock('../../../../hooks/useTeen', () => ({
+jest.mock('../../../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../../../lib/database', () => ({
+jest.mock('../../../../../lib/database', () => ({
   getAllFormEntries: jest.fn().mockResolvedValue([]),
   saveFormEntry: jest.fn().mockResolvedValue(undefined),
   deleteFormEntry: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../../../store/authStore', () => ({
+jest.mock('../../../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { teenMode: boolean }) => unknown) =>
     selector({ teenMode: false }),
 }))

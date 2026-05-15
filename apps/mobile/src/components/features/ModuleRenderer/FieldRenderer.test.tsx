@@ -1,9 +1,9 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../services/engagementService', () => ({ logEvent: jest.fn() }))
-jest.mock('../../store/authStore', () => ({ useAuthStore: () => null }))
+jest.mock('../../../services/engagementService', () => ({ logEvent: jest.fn() }))
+jest.mock('../../../store/authStore', () => ({ useAuthStore: () => null }))
 
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'

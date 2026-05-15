@@ -1,11 +1,11 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../services/engagementService', () => ({ logEvent: jest.fn() }))
-jest.mock('../../store/authStore', () => ({ useAuthStore: () => null }))
+jest.mock('../../../services/engagementService', () => ({ logEvent: jest.fn() }))
+jest.mock('../../../store/authStore', () => ({ useAuthStore: () => null }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllPlanItemsForModule: jest.fn().mockResolvedValue([]),
   savePlanItem: jest.fn().mockResolvedValue(undefined),
   deletePlanItem: jest.fn().mockResolvedValue(undefined),
@@ -15,7 +15,7 @@ jest.mock('../../lib/database', () => ({
   deleteCognitiveSaturationSession: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../lib/dateUtils', () => ({
+jest.mock('../../../lib/dateUtils', () => ({
   formatDateTime: (str: string) => str,
 }))
 

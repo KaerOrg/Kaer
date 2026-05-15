@@ -1,8 +1,8 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllPlanItemsForModule: jest.fn().mockResolvedValue([]),
   savePlanItem: jest.fn().mockResolvedValue(undefined),
   deletePlanItem: jest.fn().mockResolvedValue(undefined),
@@ -22,23 +22,23 @@ jest.mock('../../lib/database', () => ({
   generateId: jest.fn().mockReturnValue('test-id-1'),
 }))
 
-jest.mock('../../lib/dateUtils', () => ({
+jest.mock('../../../lib/dateUtils', () => ({
   formatDateTime: (str: string) => str,
   formatDateFull: (str: string) => `full:${str}`,
   formatDateNumeric: (str: string) => `num:${str}`,
 }))
 
-jest.mock('../../services/engagementService', () => ({
+jest.mock('../../../services/engagementService', () => ({
   logEvent: jest.fn().mockResolvedValue(undefined),
 }))
 
 const teenModeRef = { current: false }
-jest.mock('../../store/authStore', () => ({
+jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string }; teenMode: boolean }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' }, teenMode: teenModeRef.current }),
 }))
 
-jest.mock('../../services/psyeduService', () => ({
+jest.mock('../../../services/psyeduService', () => ({
   fetchTopicsByModule: jest.fn().mockResolvedValue([]),
   fetchBlocksByTopic: jest.fn().mockResolvedValue([]),
   clearPsyEduCache: jest.fn(),

@@ -1,8 +1,8 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   // Other layouts — required at module load
   getAllPlanItemsForModule: jest.fn().mockResolvedValue([]),
   savePlanItem: jest.fn().mockResolvedValue(undefined),
@@ -42,7 +42,7 @@ jest.mock('../../lib/database', () => ({
   generateId: jest.fn().mockReturnValue('test-id-1'),
 }))
 
-jest.mock('../../lib/dateUtils', () => ({
+jest.mock('../../../lib/dateUtils', () => ({
   formatDateTime: (str: string) => str,
   formatDateFull: (str: string) => `full:${str}`,
   formatDateNumeric: (str: string) => `num:${str}`,
@@ -50,11 +50,11 @@ jest.mock('../../lib/dateUtils', () => ({
   formatDateShortYear: (str: string) => `sy:${str}`,
 }))
 
-jest.mock('../../services/engagementService', () => ({
+jest.mock('../../../services/engagementService', () => ({
   logEvent: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../store/authStore', () => ({
+jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
 }))

@@ -5,7 +5,7 @@ import type { ContentField } from '../../../../../services/moduleService'
 
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
-jest.mock('../../../../hooks/useModuleT', () => ({
+jest.mock('../../../../../hooks/useModuleT', () => ({
   useModuleT: () => (key: string) => key,
 }))
 
