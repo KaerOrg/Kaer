@@ -6,6 +6,9 @@ import './SpeechToTextButton.css'
 
 export interface SpeechToTextButtonProps {
   onTranscription: (text: string) => void
+  onStreamStart?: () => void
+  onTextChunk?: (delta: string) => void
+  onRecordingChange?: (recording: boolean) => void
   disabled?: boolean
 }
 
@@ -27,7 +30,13 @@ function errorKey(result: TranscriptionResult & { ok: false }): string {
   return map[result.error] ?? 'notes.mic_error_server'
 }
 
-export function SpeechToTextButton({ onTranscription, disabled = false }: SpeechToTextButtonProps) {
+export function SpeechToTextButton({
+  onTranscription,
+  onStreamStart,
+  onTextChunk,
+  onRecordingChange,
+  disabled = false,
+}: SpeechToTextButtonProps) {
   const { t } = useTranslation()
   const [state, setState] = useState<RecordingState>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -63,10 +72,11 @@ export function SpeechToTextButton({ onTranscription, disabled = false }: Speech
 
     recorder.onstop = async () => {
       stream.getTracks().forEach(t => t.stop())
+      onRecordingChange?.(false)
       const blob = new Blob(chunksRef.current, { type: mimeType })
       setState('processing')
 
-      const result = await transcribeAudio(blob)
+      const result = await transcribeAudio(blob, { onStreamStart, onTextChunk })
       if (result.ok) {
         onTranscription(result.text)
         setState('idle')
@@ -79,6 +89,7 @@ export function SpeechToTextButton({ onTranscription, disabled = false }: Speech
 
     recorder.start()
     setState('recording')
+    onRecordingChange?.(true)
   }, [t, onTranscription])
 
   const stopRecording = useCallback(() => {

@@ -149,6 +149,17 @@
   border-color: var(--color-primary);
 }
 
+.patient-notes__textarea--recording {
+  border-color: var(--color-primary);
+  outline: none;
+  animation: note-recording-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes note-recording-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent); }
+  50%       { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 40%, transparent); }
+}
+
 .patient-notes__error {
   font-size: 13px;
   color: var(--color-danger);

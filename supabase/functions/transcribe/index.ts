@@ -13,7 +13,6 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // Valider le JWT du praticien
   const authHeader = req.headers.get('Authorization')
   if (!authHeader) {
     return new Response(
@@ -62,7 +61,6 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Décoder le base64 en bytes
   const binaryStr = atob(audio_base64)
   const bytes = new Uint8Array(binaryStr.length)
   for (let i = 0; i < binaryStr.length; i++) {
@@ -76,7 +74,6 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Choisir l'extension selon le MIME type
   const ext = mime_type === 'audio/mp4' || mime_type === 'audio/m4a' ? 'm4a'
     : mime_type === 'audio/mpeg' || mime_type === 'audio/mp3' ? 'mp3'
     : mime_type === 'audio/wav' ? 'wav'
@@ -87,7 +84,7 @@ Deno.serve(async (req) => {
   const formData = new FormData()
   formData.append('file', audioFile)
   formData.append('model', 'gpt-4o-transcribe')
-  formData.append('response_format', 'json')
+  formData.append('stream', 'true')
 
   const openaiKey = Deno.env.get('OPENAI_API_KEY')
   if (!openaiKey) {
@@ -113,10 +110,13 @@ Deno.serve(async (req) => {
     )
   }
 
-  const { text } = await openaiRes.json() as { text: string }
-
-  return new Response(
-    JSON.stringify({ text }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-  )
+  // Pipe le stream SSE d'OpenAI directement vers le client
+  return new Response(openaiRes.body, {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+    },
+  })
 })

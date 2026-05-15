@@ -134,6 +134,8 @@ export function PatientPage() {
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null)
   const [tagSearch, setTagSearch] = useState('')
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
+  const streamingActiveRef = useRef(false)
+  const [isRecording, setIsRecording] = useState(false)
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
   const [generalNoteError, setGeneralNoteError] = useState<string | null>(null)
@@ -356,7 +358,26 @@ export function PatientPage() {
     if (e.key === 'Enter') { e.preventDefault(); addEditingTag() }
   }
 
+  const handleRecordingChange = useCallback((recording: boolean) => {
+    setIsRecording(recording)
+  }, [])
+
+  const handleStreamStart = useCallback(() => {
+    streamingActiveRef.current = true
+    if (!newNoteRef.current) return
+    if (newNoteRef.current.value) newNoteRef.current.value += '\n'
+  }, [])
+
+  const handleTextChunk = useCallback((delta: string) => {
+    if (!newNoteRef.current) return
+    newNoteRef.current.value += delta
+  }, [])
+
   const handleTranscription = useCallback((text: string) => {
+    if (streamingActiveRef.current) {
+      streamingActiveRef.current = false
+      return
+    }
     if (!newNoteRef.current) return
     const current = newNoteRef.current.value
     newNoteRef.current.value = current ? `${current}\n${text}` : text
@@ -1006,7 +1027,7 @@ export function PatientPage() {
                 <div className="patient-notes__form">
                   <textarea
                     ref={newNoteRef}
-                    className="patient-notes__textarea"
+                    className={`patient-notes__textarea ${isRecording ? 'patient-notes__textarea--recording' : ''}`}
                     placeholder={t('notes.placeholder')}
                     rows={3}
                   />
@@ -1038,6 +1059,9 @@ export function PatientPage() {
                   <div className="patient-notes__form-actions">
                     <SpeechToTextButton
                       onTranscription={handleTranscription}
+                      onStreamStart={handleStreamStart}
+                      onTextChunk={handleTextChunk}
+                      onRecordingChange={handleRecordingChange}
                       disabled={savingNote}
                     />
                     <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
