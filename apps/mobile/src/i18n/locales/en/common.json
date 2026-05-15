@@ -1064,6 +1064,23 @@
       "submit": "Submit questionnaire"
     }
   },
+  "agenda": {
+    "empty_title": "No appointments",
+    "empty_description": "Your upcoming appointments will appear here.",
+    "empty_week": "No available slots on this day.",
+    "section_upcoming": "Upcoming",
+    "section_past": "Past",
+    "book_success": "Your appointment has been booked.",
+    "appointment": {
+      "new": "Book an appointment",
+      "cancel_btn": "Cancel appointment",
+      "cancel_confirm": "Are you sure you want to cancel this appointment?",
+      "status_pending": "Pending confirmation",
+      "status_confirmed": "Confirmed",
+      "status_cancelled": "Cancelled",
+      "status_completed": "Completed"
+    }
+  },
   "notifications": {
     "panel_title": "Reminders",
     "my_time_label": "My time:",

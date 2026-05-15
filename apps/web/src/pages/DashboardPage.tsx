@@ -1,18 +1,19 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Check, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
-import { Layout } from '../components/Layout'
-import { Button } from '../components/Button'
-import { InputField } from '../components/InputField'
-import { Card } from '../components/Card'
-import { EmptyState } from '../components/EmptyState'
-import { StatusBadge } from '../components/StatusBadge'
-import { StepBreadcrumb } from '../components/StepBreadcrumb/StepBreadcrumb'
-import { Toggle } from '../components/Toggle/Toggle'
-import { SelectField } from '../components/SelectField/SelectField'
-import { SearchInput } from '../components/SearchInput'
+import { useToast } from '../contexts/ToastContext'
+import { Layout } from '../components/features/Layout'
+import { Button } from '../components/ui/Button'
+import { InputField } from '../components/ui/InputField'
+import { Card } from '../components/ui/Card'
+import { EmptyState } from '../components/ui/EmptyState'
+import { StatusBadge } from '../components/ui/StatusBadge'
+import { StepBreadcrumb } from '../components/ui/StepBreadcrumb/StepBreadcrumb'
+import { Toggle } from '../components/ui/Toggle/Toggle'
+import { SelectField } from '../components/ui/SelectField/SelectField'
+import { SearchInput } from '../components/ui/SearchInput'
 import { matchesAllTokens, tokenizeSearch } from '../lib/search'
 import type { PatientSummary, ModuleType } from '../lib/database.types'
 import { fetchInviteCategories, type ModuleCategory } from '../services/moduleCatalogService'
@@ -30,6 +31,7 @@ export function DashboardPage() {
   const { practitioner } = useAuthStore()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const toast = useToast()
   const [patients, setPatients] = useState<PatientSummary[]>([])
   const [loadingPatients, setLoadingPatients] = useState(true)
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([])
@@ -48,8 +50,6 @@ export function DashboardPage() {
   const [inviteModules, setInviteModules] = useState<Set<ModuleType>>(new Set())
   const [inviteCategories, setInviteCategories] = useState<ModuleCategory[]>([])
   const [inviteLoading, setInviteLoading] = useState(false)
-  const [inviteSuccess, setInviteSuccess] = useState(false)
-  const [inviteError, setInviteError] = useState('')
 
   const { minBirthDate, maxBirthDate } = useMemo(() => {
     const today = new Date()
@@ -121,7 +121,6 @@ export function DashboardPage() {
     if (!practitioner) return
     if (inviteEmailError || inviteBirthDateError) return
     setInviteLoading(true)
-    setInviteError('')
 
     const result = await sendInvitation({
       practitionerId: practitioner.id,
@@ -134,27 +133,24 @@ export function DashboardPage() {
       modules: [...inviteModules],
     })
 
+    setInviteLoading(false)
+
     if (!result.ok) {
       const message = result.errorCode
         ? t(`dashboard.${result.errorCode}`)
         : result.errorMessage ?? t('dashboard.invite_error_generic')
-      setInviteError(message)
-      setInviteLoading(false)
+      toast.error(message)
       return
     }
 
-    setInviteSuccess(true)
-    setInviteLoading(false)
+    toast.success(t('dashboard.invite_success', { email: inviteEmail }))
     resetForm()
+    setShowInviteForm(false)
     loadPendingInvitations()
-    setTimeout(() => {
-      setInviteSuccess(false)
-      setShowInviteForm(false)
-    }, 3000)
   }, [
     practitioner, inviteEmail, inviteEmailError, inviteFirstName, inviteLastName,
     inviteBirthDate, inviteBirthDateError, inviteSex, inviteTeenMode, inviteModules,
-    t, resetForm, loadPendingInvitations,
+    t, toast, resetForm, loadPendingInvitations,
   ])
 
   const patientSubtitle = patients.length === 1
@@ -196,16 +192,6 @@ export function DashboardPage() {
               subtitle: t('dashboard.invite_card_subtitle'),
             }}
           >
-            {/* Status messages — shown regardless of step */}
-            {inviteError && (
-              <div className="invite-form__error">{inviteError}</div>
-            )}
-            {inviteSuccess && (
-              <div className="invite-form__success">
-                <Check size={14} /> {t('dashboard.invite_success', { email: inviteEmail || '…' })}
-              </div>
-            )}
-
             <StepBreadcrumb
               steps={[t('dashboard.invite_step_info'), t('dashboard.invite_step_modules')]}
               currentStep={inviteStep}

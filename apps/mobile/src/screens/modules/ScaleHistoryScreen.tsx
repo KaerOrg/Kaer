@@ -19,7 +19,7 @@ import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/TeenAccent'
+import { TeenAccent } from '../../components/features/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleHistory'>

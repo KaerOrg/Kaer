@@ -54,17 +54,22 @@ export async function fetchPatientOptions(practitionerId: string): Promise<Patie
   type RelRow = {
     patient_id: string
     patient_alias: string | null
-    patients: { email: string } | { email: string }[] | null
+    patient_first_name: string | null
+    patient_last_name: string | null
+    patients: { email: string; first_name: string | null; last_name: string | null } | { email: string; first_name: string | null; last_name: string | null }[] | null
   }
   const { data } = await supabase
     .from('practitioner_patients')
-    .select('patient_id, patient_alias, patients(email)')
+    .select('patient_id, patient_alias, patient_first_name, patient_last_name, patients(email, first_name, last_name)')
     .eq('practitioner_id', practitionerId) as { data: RelRow[] | null }
 
   return ((data ?? []) as RelRow[]).map(rel => {
     const p = Array.isArray(rel.patients) ? rel.patients[0] : rel.patients
-    const email = (p as { email: string } | null)?.email ?? ''
-    return { id: rel.patient_id, label: rel.patient_alias ?? email }
+    const firstName = rel.patient_first_name ?? p?.first_name ?? ''
+    const lastName = rel.patient_last_name ?? p?.last_name ?? ''
+    const fullName = [firstName, lastName].filter(Boolean).join(' ')
+    const email = p?.email ?? ''
+    return { id: rel.patient_id, label: rel.patient_alias ?? (fullName || email) }
   })
 }
 

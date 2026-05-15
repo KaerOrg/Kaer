@@ -111,14 +111,30 @@ describe('patientService.fetchPatientHeader', () => {
   it('extrait email + alias + teenMode', async () => {
     vi.mocked(supabase.from).mockReturnValue(
       makeChain({
-        data: { patient_alias: 'A', teen_mode: true, patients: { email: 'p@t.fr' } },
+        data: {
+          patient_alias: 'A',
+          patient_first_name: 'Jean',
+          patient_last_name: 'Dupont',
+          teen_mode: true,
+          created_at: '2024-01-01T00:00:00Z',
+          general_note: null,
+          patients: { email: 'p@t.fr', first_name: null, last_name: null },
+        },
         error: null,
       }) as never
     )
 
     const result = await fetchPatientHeader('p-1', 'pat-1')
 
-    expect(result).toEqual({ email: 'p@t.fr', alias: 'A', teenMode: true })
+    expect(result).toEqual({
+      email: 'p@t.fr',
+      alias: 'A',
+      firstName: 'Jean',
+      lastName: 'Dupont',
+      teenMode: true,
+      enrolledAt: '2024-01-01T00:00:00Z',
+      generalNote: null,
+    })
   })
 
   it('retourne null si la relation n’existe pas', async () => {

@@ -185,7 +185,14 @@
   "agenda": {
     "nav_link": "Agenda",
     "title": "Agenda",
-    "subtitle": "Gestisci i tuoi appuntamenti e pianifica le tue consulenze.",
-    "coming_soon": "La gestione degli appuntamenti arriverà presto."
+    "subtitle": "Configura la tua disponibilità e gestisci gli appuntamenti.",
+    "today": "Oggi",
+    "prev_week": "Settimana precedente",
+    "next_week": "Settimana successiva",
+    "configure": "Disponibilità",
+    "no_rules": "Nessuna fascia oraria definita.",
+    "days_short": { "0": "Lun", "1": "Mar", "2": "Mer", "3": "Gio", "4": "Ven", "5": "Sab", "6": "Dom" },
+    "editor": { "title": "La mia disponibilità", "add_rule": "Aggiungi fascia", "slot_duration": "Durata appuntamento", "minutes": "min", "auto_confirm": "Conferma automatica", "delete_rule": "Elimina" },
+    "appointment": { "new": "Nuovo appuntamento", "status_pending": "In attesa", "status_confirmed": "Confermato", "status_cancelled": "Annullato", "status_completed": "Completato" }
   }
 }

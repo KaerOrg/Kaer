@@ -26,6 +26,8 @@ vi.mock('../store/authStore', () => ({
 
 import { supabase } from '../lib/supabase'
 import { DashboardPage } from './DashboardPage'
+import { ToastProvider } from '../contexts/ToastProvider'
+import { ToastContainer } from '../components/ui/Toast/ToastContainer'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -75,7 +77,12 @@ beforeEach(() => {
 
 /** Rend la page et ouvre le formulaire d'invitation (étape 1). */
 async function openForm() {
-  render(<DashboardPage />)
+  render(
+    <ToastProvider>
+      <DashboardPage />
+      <ToastContainer />
+    </ToastProvider>
+  )
   await userEvent.click(screen.getByRole('button', { name: /inviter un patient/i }))
 }
 
@@ -321,11 +328,15 @@ describe('DashboardPage — formulaire d\'invitation : soumission', () => {
     await userEvent.click(screen.getByRole('button', { name: /suivant/i }))
     await userEvent.click(screen.getByRole('button', { name: /envoyer l.invitation/i }))
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/email/i)).toHaveValue('')
-      expect(screen.getByLabelText(/prénom/i)).toHaveValue('')
-      expect(screen.getByRole('checkbox')).not.toBeChecked()
-    })
+    // après succès, le formulaire se ferme — on le rouvre pour vérifier les champs vides
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /inviter un patient/i })).toBeInTheDocument()
+    )
+    await userEvent.click(screen.getByRole('button', { name: /inviter un patient/i }))
+
+    expect(screen.getByLabelText(/email/i)).toHaveValue('')
+    expect(screen.getByLabelText(/prénom/i)).toHaveValue('')
+    expect(screen.getByRole('checkbox')).not.toBeChecked()
   })
 
   it('affiche le message d\'erreur retourné par l\'API', async () => {

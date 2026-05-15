@@ -1,41 +1,91 @@
 .agenda-page {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-lg, 32px) var(--spacing-md, 16px);
+  padding: 0;
 }
 
 .agenda-page__header {
-  margin-bottom: var(--spacing-xl, 48px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md, 16px);
+  margin-bottom: var(--spacing-lg, 32px);
+  flex-wrap: wrap;
 }
 
-.agenda-page__title {
-  font-size: var(--font-size-2xl, 24px);
+.agenda-page__header-left h1 {
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text);
-  margin: 0 0 8px;
+  margin: 0 0 4px;
 }
 
-.agenda-page__subtitle {
-  font-size: var(--font-size-sm, 14px);
+.agenda-page__header-left p {
+  font-size: 14px;
   color: var(--color-text-muted);
   margin: 0;
 }
 
-.agenda-page__placeholder {
+.agenda-page__header-right {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 80px 0;
+  gap: 8px;
+}
+
+/* Week navigation */
+.agenda-page__week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.agenda-page__week-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  min-width: 240px;
+  text-align: center;
+}
+
+.agenda-page__nav-btn {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.agenda-page__nav-btn:hover {
+  background: var(--color-border);
+}
+
+/* Patient filter */
+.agenda-page__patient-filter {
+  margin-left: auto;
+  width: 200px;
+}
+
+/* Main layout: grid + sidebar */
+.agenda-page__layout {
+  display: flex;
+  gap: var(--spacing-lg, 32px);
+  align-items: flex-start;
+}
+
+.agenda-page__grid-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Loading / error */
+.agenda-page__loading {
+  padding: 48px;
+  text-align: center;
   color: var(--color-text-muted);
-}
-
-.agenda-page__placeholder-icon {
-  opacity: 0.35;
-}
-
-.agenda-page__placeholder-text {
-  font-size: var(--font-size-base, 15px);
-  margin: 0;
+  font-size: 14px;
 }

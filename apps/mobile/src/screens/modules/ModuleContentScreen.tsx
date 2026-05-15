@@ -10,7 +10,7 @@ import {
   fetchPatientModuleConfig,
   type ModuleFieldsResult,
 } from '../../services/moduleService'
-import { FieldRenderer } from '../../components/ModuleRenderer'
+import { FieldRenderer } from '../../components/features/ModuleRenderer'
 import { useTeen } from '../../hooks/useTeen'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing } from '../../theme'
