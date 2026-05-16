@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { getProvider } from './stt/factory.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,12 +14,10 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // ── Auth ────────────────────────────────────────────────────────────────
   const authHeader = req.headers.get('Authorization')
   if (!authHeader) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return json({ error: 'Unauthorized' }, 401)
   }
 
   const supabase = createClient(
@@ -28,92 +27,54 @@ Deno.serve(async (req) => {
   )
 
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) {
-    return new Response(
-      JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
-  }
+  if (authError || !user) return json({ error: 'Unauthorized' }, 401)
 
+  // ── Body ─────────────────────────────────────────────────────────────────
   let body: { audio_base64?: string; mime_type?: string }
   try {
     body = await req.json()
   } catch {
-    return new Response(
-      JSON.stringify({ error: 'Corps JSON invalide' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return json({ error: 'Corps JSON invalide' }, 400)
   }
 
   const { audio_base64, mime_type = 'audio/webm' } = body
 
   if (!audio_base64 || typeof audio_base64 !== 'string') {
-    return new Response(
-      JSON.stringify({ error: 'audio_base64 manquant' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return json({ error: 'audio_base64 manquant' }, 400)
   }
-
   if (!mime_type.startsWith(ALLOWED_MIME_PREFIX)) {
-    return new Response(
-      JSON.stringify({ error: 'Format audio non supporté' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return json({ error: 'Format audio non supporté' }, 400)
   }
 
   const binaryStr = atob(audio_base64)
   const bytes = new Uint8Array(binaryStr.length)
-  for (let i = 0; i < binaryStr.length; i++) {
-    bytes[i] = binaryStr.charCodeAt(i)
-  }
+  for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i)
 
   if (bytes.byteLength > MAX_BYTES) {
-    return new Response(
-      JSON.stringify({ error: 'Fichier trop volumineux (max 25 Mo)' }),
-      { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return json({ error: 'Fichier trop volumineux (max 25 Mo)' }, 413)
   }
 
-  const ext = mime_type === 'audio/mp4' || mime_type === 'audio/m4a' ? 'm4a'
-    : mime_type === 'audio/mpeg' || mime_type === 'audio/mp3' ? 'mp3'
-    : mime_type === 'audio/wav' ? 'wav'
-    : 'webm'
-
-  const audioFile = new File([bytes], `recording.${ext}`, { type: mime_type })
-
-  const formData = new FormData()
-  formData.append('file', audioFile)
-  formData.append('model', 'gpt-4o-transcribe')
-  formData.append('response_format', 'json')
-
-  const openaiKey = Deno.env.get('OPENAI_API_KEY')
-  if (!openaiKey) {
-    console.error('OPENAI_API_KEY non configurée')
-    return new Response(
-      JSON.stringify({ error: 'Configuration serveur manquante' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+  // ── Transcription ────────────────────────────────────────────────────────
+  let provider
+  try {
+    provider = getProvider()
+  } catch (err) {
+    console.error('Provider config error:', err instanceof Error ? err.message : err)
+    return json({ error: 'Configuration serveur manquante' }, 500)
   }
 
-  const openaiRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${openaiKey}` },
-    body: formData,
-  })
-
-  if (!openaiRes.ok) {
-    const detail = await openaiRes.text()
-    console.error('Erreur OpenAI:', detail)
-    return new Response(
-      JSON.stringify({ error: 'Erreur de transcription' }),
-      { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+  try {
+    const text = await provider.transcribe(bytes, mime_type)
+    return json({ text }, 200)
+  } catch (err) {
+    console.error(`[${provider.name}] transcription error:`, err instanceof Error ? err.message : err)
+    return json({ error: 'Erreur de transcription' }, 502)
   }
-
-  const { text } = await openaiRes.json() as { text: string }
-
-  return new Response(
-    JSON.stringify({ text }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-  )
 })
+
+function json(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+}
