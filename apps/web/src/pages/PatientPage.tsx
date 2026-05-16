@@ -135,7 +135,6 @@ export function PatientPage() {
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null)
   const [tagSearch, setTagSearch] = useState('')
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
-  const chunkCountRef = useRef(0)
   const [isRecording, setIsRecording] = useState(false)
   const typewriterQueueRef = useRef<string[]>([])
   const isTypingRef = useRef(false)
@@ -363,7 +362,6 @@ export function PatientPage() {
 
   const handleRecordingChange = useCallback((recording: boolean) => {
     setIsRecording(recording)
-    if (recording) chunkCountRef.current = 0
   }, [])
 
   const typeNextChar = useCallback(() => {
@@ -384,11 +382,7 @@ export function PatientPage() {
 
   const handleTextChunk = useCallback((text: string) => {
     if (!newNoteRef.current) return
-    let chunk = text
-    if (chunkCountRef.current === 0 && newNoteRef.current.value.trim()) {
-      chunk = '\n' + text
-    }
-    chunkCountRef.current++
+    const chunk = newNoteRef.current.value.trim() ? '\n' + text : text
     typewriterQueueRef.current.push(chunk)
     if (!isTypingRef.current) {
       isTypingRef.current = true

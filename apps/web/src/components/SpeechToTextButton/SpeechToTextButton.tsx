@@ -11,7 +11,6 @@ export interface SpeechToTextButtonProps {
   disabled?: boolean
 }
 
-const CHUNK_MS = 8_000
 const PREFERRED_MIME_TYPES = ['audio/webm', 'audio/mp4', 'audio/ogg']
 
 function getSupportedMimeType(): string | null {
@@ -47,18 +46,10 @@ export function SpeechToTextButton({
   useEffect(() => { onTextChunkRef.current = onTextChunk }, [onTextChunk])
   useEffect(() => { onRecordingChangeRef.current = onRecordingChange }, [onRecordingChange])
 
-  const isRecordingRef = useRef(false)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const chunkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Centralise l'arrêt complet avec message d'erreur optionnel
   const abortRecording = useCallback((msgKey?: string) => {
-    isRecordingRef.current = false
-    if (chunkTimerRef.current) {
-      clearTimeout(chunkTimerRef.current)
-      chunkTimerRef.current = null
-    }
     if (recorderRef.current?.state !== 'inactive') {
       try { recorderRef.current?.stop() } catch { /* ignore */ }
     }
@@ -89,92 +80,74 @@ export function SpeechToTextButton({
       return
     }
 
-    // Détecte la déconnexion physique du micro
     stream.getTracks().forEach(track => {
-      track.onended = () => {
-        if (isRecordingRef.current) abortRecording('notes.mic_error_disconnected')
-      }
+      track.onended = () => abortRecording('notes.mic_error_disconnected')
     })
 
-    streamRef.current = stream
-    isRecordingRef.current = true
-    setState('recording')
-    onRecordingChangeRef.current?.(true)
-
-    const runChunk = () => {
-      const chunks: Blob[] = []
-
-      let recorder: MediaRecorder
-      try {
-        recorder = new MediaRecorder(stream, { mimeType })
-      } catch {
-        abortRecording('notes.mic_error_recorder')
-        return
-      }
-      recorderRef.current = recorder
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data)
-      }
-
-      recorder.onerror = () => {
-        abortRecording('notes.mic_error_recorder')
-      }
-
-      recorder.onstop = async () => {
-        try {
-          const isLast = !isRecordingRef.current
-          const blob = new Blob(chunks, { type: mimeType })
-
-          if (isLast) setState('processing')
-
-          const result = await transcribeAudio(blob)
-
-          if (!result.ok) {
-            abortRecording(errorKey(result))
-            return
-          }
-
-          if (result.text.trim()) onTextChunkRef.current?.(result.text)
-
-          if (isLast) {
-            streamRef.current?.getTracks().forEach(tr => tr.stop())
-            streamRef.current = null
-            onTranscriptionRef.current(result.text)
-            setState('idle')
-            onRecordingChangeRef.current?.(false)
-          } else {
-            runChunk()
-          }
-        } catch (err) {
-          console.error('[STT] Unexpected error in chunk processing:', err)
-          abortRecording('notes.mic_error_server')
-        }
-      }
-
-      try {
-        recorder.start()
-      } catch {
-        abortRecording('notes.mic_error_recorder')
-        return
-      }
-
-      chunkTimerRef.current = setTimeout(() => {
-        if (recorder.state !== 'inactive') {
-          try { recorder.stop() } catch { /* ignore */ }
-        }
-      }, CHUNK_MS)
+    const chunks: Blob[] = []
+    let recorder: MediaRecorder
+    try {
+      recorder = new MediaRecorder(stream, { mimeType })
+    } catch {
+      stream.getTracks().forEach(tr => tr.stop())
+      setState('error')
+      setErrorMsg(t('notes.mic_error_recorder'))
+      return
     }
 
-    runChunk()
+    recorderRef.current = recorder
+    streamRef.current = stream
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data)
+    }
+
+    recorder.onerror = () => {
+      abortRecording('notes.mic_error_recorder')
+    }
+
+    recorder.onstop = async () => {
+      try {
+        streamRef.current?.getTracks().forEach(tr => tr.stop())
+        streamRef.current = null
+        setState('processing')
+
+        const blob = new Blob(chunks, { type: mimeType })
+        const result = await transcribeAudio(blob)
+
+        if (!result.ok) {
+          setState('error')
+          setErrorMsg(t(errorKey(result)))
+          onRecordingChangeRef.current?.(false)
+          return
+        }
+
+        if (result.text.trim()) onTextChunkRef.current?.(result.text)
+        onTranscriptionRef.current(result.text)
+        setState('idle')
+        onRecordingChangeRef.current?.(false)
+      } catch (err) {
+        console.error('[STT] Unexpected error:', err)
+        setState('error')
+        setErrorMsg(t('notes.mic_error_server'))
+        onRecordingChangeRef.current?.(false)
+      }
+    }
+
+    try {
+      recorder.start()
+    } catch {
+      stream.getTracks().forEach(tr => tr.stop())
+      setState('error')
+      setErrorMsg(t('notes.mic_error_recorder'))
+      return
+    }
+
+    setState('recording')
+    onRecordingChangeRef.current?.(true)
   }, [t, abortRecording])
 
   const stopRecording = useCallback(() => {
-    isRecordingRef.current = false
-    if (chunkTimerRef.current) {
-      clearTimeout(chunkTimerRef.current)
-      chunkTimerRef.current = null
-    }
     if (recorderRef.current?.state !== 'inactive') {
       try { recorderRef.current?.stop() } catch { /* ignore */ }
     }
