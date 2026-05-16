@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
   const formData = new FormData()
   formData.append('file', audioFile)
   formData.append('model', 'gpt-4o-transcribe')
-  formData.append('stream', 'true')
+  formData.append('response_format', 'json')
 
   const openaiKey = Deno.env.get('OPENAI_API_KEY')
   if (!openaiKey) {
@@ -110,13 +110,10 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Pipe le stream SSE d'OpenAI directement vers le client
-  return new Response(openaiRes.body, {
-    status: 200,
-    headers: {
-      ...corsHeaders,
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-    },
-  })
+  const { text } = await openaiRes.json() as { text: string }
+
+  return new Response(
+    JSON.stringify({ text }),
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+  )
 })

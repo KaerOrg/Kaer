@@ -134,7 +134,7 @@ export function PatientPage() {
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null)
   const [tagSearch, setTagSearch] = useState('')
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
-  const streamingActiveRef = useRef(false)
+  const chunkCountRef = useRef(0)
   const [isRecording, setIsRecording] = useState(false)
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
@@ -360,27 +360,20 @@ export function PatientPage() {
 
   const handleRecordingChange = useCallback((recording: boolean) => {
     setIsRecording(recording)
+    if (recording) chunkCountRef.current = 0
   }, [])
 
-  const handleStreamStart = useCallback(() => {
-    streamingActiveRef.current = true
+  const handleTextChunk = useCallback((text: string) => {
     if (!newNoteRef.current) return
-    if (newNoteRef.current.value) newNoteRef.current.value += '\n'
-  }, [])
-
-  const handleTextChunk = useCallback((delta: string) => {
-    if (!newNoteRef.current) return
-    newNoteRef.current.value += delta
-  }, [])
-
-  const handleTranscription = useCallback((text: string) => {
-    if (streamingActiveRef.current) {
-      streamingActiveRef.current = false
-      return
+    if (chunkCountRef.current === 0 && newNoteRef.current.value.trim()) {
+      newNoteRef.current.value += '\n'
     }
-    if (!newNoteRef.current) return
-    const current = newNoteRef.current.value
-    newNoteRef.current.value = current ? `${current}\n${text}` : text
+    newNoteRef.current.value += text
+    chunkCountRef.current++
+  }, [])
+
+  const handleTranscription = useCallback((_text: string) => {
+    // no-op: text already inserted chunk by chunk via handleTextChunk
   }, [])
 
   const handleSaveNote = async () => {
@@ -1061,7 +1054,6 @@ export function PatientPage() {
                   <div className="patient-notes__form-actions">
                     <SpeechToTextButton
                       onTranscription={handleTranscription}
-                      onStreamStart={handleStreamStart}
                       onTextChunk={handleTextChunk}
                       onRecordingChange={handleRecordingChange}
                       disabled={savingNote}

@@ -118,7 +118,15 @@ describe('patientService.fetchPatientHeader', () => {
 
     const result = await fetchPatientHeader('p-1', 'pat-1')
 
-    expect(result).toEqual({ email: 'p@t.fr', alias: 'A', teenMode: true })
+    expect(result).toEqual({
+      email: 'p@t.fr',
+      alias: 'A',
+      teenMode: true,
+      firstName: null,
+      lastName: null,
+      enrolledAt: undefined,
+      generalNote: null,
+    })
   })
 
   it('retourne null si la relation n’existe pas', async () => {
