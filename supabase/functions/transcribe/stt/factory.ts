@@ -24,7 +24,8 @@ export function getProvider(): SttProvider {
     case 'openai': {
       const key = Deno.env.get('OPENAI_API_KEY')
       if (!key) throw new Error('OPENAI_API_KEY not configured')
-      return new OpenAiProvider(key)
+      const model = Deno.env.get('OPENAI_STT_MODEL') ?? 'gpt-4o-transcribe'
+      return new OpenAiProvider(key, model)
     }
     default:
       throw new Error(`Unknown STT_PROVIDER "${name}" — valid values: "gladia", "openai"`)

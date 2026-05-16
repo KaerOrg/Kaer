@@ -954,7 +954,9 @@
     "mic_error_permission": "Accès au microphone refusé. Vérifiez les permissions de votre navigateur.",
     "mic_error_too_large": "Enregistrement trop long. Veuillez enregistrer des segments plus courts.",
     "mic_error_network": "Erreur réseau lors de la transcription. Vérifiez votre connexion.",
-    "mic_error_server": "Erreur lors de la transcription. Réessayez."
+    "mic_error_server": "Erreur lors de la transcription. Réessayez.",
+    "mic_error_recorder": "Erreur d'enregistrement. L'enregistrement a été arrêté.",
+    "mic_error_disconnected": "Microphone déconnecté. L'enregistrement a été arrêté."
   },
   "agenda": {
     "nav_link": "Agenda",

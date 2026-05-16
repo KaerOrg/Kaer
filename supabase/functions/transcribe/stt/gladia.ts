@@ -1,4 +1,4 @@
-import type { SttProvider } from './interface.ts'
+import type { SttProvider, TranscribeOptions } from './interface.ts'
 import { mimeToExt, delay } from './utils.ts'
 
 const GLADIA_BASE = 'https://api.gladia.io'
@@ -23,9 +23,10 @@ export class GladiaProvider implements SttProvider {
     private readonly language?: string,
   ) {}
 
-  async transcribe(audio: Uint8Array, mimeType: string): Promise<string> {
+  async transcribe(audio: Uint8Array, mimeType: string, options?: TranscribeOptions): Promise<string> {
     const audioUrl = await this.upload(audio, mimeType)
-    const jobId = await this.initJob(audioUrl)
+    const lang = options?.language ?? this.language
+    const jobId = await this.initJob(audioUrl, lang)
     return this.pollUntilDone(jobId)
   }
 
@@ -45,9 +46,9 @@ export class GladiaProvider implements SttProvider {
     return audio_url
   }
 
-  private async initJob(audioUrl: string): Promise<string> {
+  private async initJob(audioUrl: string, language?: string): Promise<string> {
     const body: Record<string, unknown> = { audio_url: audioUrl }
-    if (this.language) body.language_config = { languages: [this.language] }
+    if (language) body.language_config = { languages: [language] }
 
     const res = await fetch(`${GLADIA_BASE}/v2/pre-recorded`, {
       method: 'POST',

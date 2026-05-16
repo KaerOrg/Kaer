@@ -51,6 +51,7 @@ import { SpeechToTextButton } from '../components/SpeechToTextButton'
 import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
+const TYPEWRITER_CHAR_MS = 20
 
 type PageData = {
   modules: PatientModule[]
@@ -136,6 +137,8 @@ export function PatientPage() {
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
   const chunkCountRef = useRef(0)
   const [isRecording, setIsRecording] = useState(false)
+  const typewriterQueueRef = useRef<string[]>([])
+  const isTypingRef = useRef(false)
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
   const [generalNoteError, setGeneralNoteError] = useState<string | null>(null)
@@ -363,14 +366,35 @@ export function PatientPage() {
     if (recording) chunkCountRef.current = 0
   }, [])
 
+  const typeNextChar = useCallback(() => {
+    if (!newNoteRef.current || typewriterQueueRef.current.length === 0) {
+      isTypingRef.current = false
+      return
+    }
+    const segment = typewriterQueueRef.current[0]
+    if (segment.length === 0) {
+      typewriterQueueRef.current.shift()
+      setTimeout(typeNextChar, 0)
+      return
+    }
+    newNoteRef.current.value += segment[0]
+    typewriterQueueRef.current[0] = segment.slice(1)
+    setTimeout(typeNextChar, TYPEWRITER_CHAR_MS)
+  }, [])
+
   const handleTextChunk = useCallback((text: string) => {
     if (!newNoteRef.current) return
+    let chunk = text
     if (chunkCountRef.current === 0 && newNoteRef.current.value.trim()) {
-      newNoteRef.current.value += '\n'
+      chunk = '\n' + text
     }
-    newNoteRef.current.value += text
     chunkCountRef.current++
-  }, [])
+    typewriterQueueRef.current.push(chunk)
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      typeNextChar()
+    }
+  }, [typeNextChar])
 
   const handleTranscription = useCallback((_text: string) => {
     // no-op: text already inserted chunk by chunk via handleTextChunk
@@ -1019,12 +1043,21 @@ export function PatientPage() {
                 {/* ── Formulaire nouvelle note ─────────────────────────── */}
                 <div className="patient-notes__form">
                   <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
-                    <textarea
-                      ref={newNoteRef}
-                      className="patient-notes__textarea"
-                      placeholder={t('notes.placeholder')}
-                      rows={3}
-                    />
+                    <div className="patient-notes__textarea-inner">
+                      {isRecording && (
+                        <div className="patient-notes__skeleton" aria-hidden="true">
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                        </div>
+                      )}
+                      <textarea
+                        ref={newNoteRef}
+                        className="patient-notes__textarea"
+                        placeholder={t('notes.placeholder')}
+                        rows={3}
+                      />
+                    </div>
                   </div>
 
                   <div className="patient-notes__tag-row">

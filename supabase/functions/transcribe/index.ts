@@ -30,14 +30,14 @@ Deno.serve(async (req) => {
   if (authError || !user) return json({ error: 'Unauthorized' }, 401)
 
   // ── Body ─────────────────────────────────────────────────────────────────
-  let body: { audio_base64?: string; mime_type?: string }
+  let body: { audio_base64?: string; mime_type?: string; language?: string }
   try {
     body = await req.json()
   } catch {
     return json({ error: 'Corps JSON invalide' }, 400)
   }
 
-  const { audio_base64, mime_type = 'audio/webm' } = body
+  const { audio_base64, mime_type = 'audio/webm', language } = body
 
   if (!audio_base64 || typeof audio_base64 !== 'string') {
     return json({ error: 'audio_base64 manquant' }, 400)
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const text = await provider.transcribe(bytes, mime_type)
+    const text = await provider.transcribe(bytes, mime_type, { language })
     return json({ text }, 200)
   } catch (err) {
     console.error(`[${provider.name}] transcription error:`, err instanceof Error ? err.message : err)

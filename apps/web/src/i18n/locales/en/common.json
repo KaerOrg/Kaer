@@ -851,7 +851,9 @@
     "mic_error_permission": "Microphone access denied. Check your browser permissions.",
     "mic_error_too_large": "Recording too long. Please record shorter segments.",
     "mic_error_network": "Network error during transcription. Check your connection.",
-    "mic_error_server": "Transcription error. Please try again."
+    "mic_error_server": "Transcription error. Please try again.",
+    "mic_error_recorder": "Recording error. The recording has been stopped.",
+    "mic_error_disconnected": "Microphone disconnected. The recording has been stopped."
   },
   "agenda": {
     "nav_link": "Schedule",

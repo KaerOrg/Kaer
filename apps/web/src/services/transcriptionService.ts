@@ -26,8 +26,9 @@ export async function transcribeAudio(blob: Blob): Promise<TranscriptionResult> 
   try {
     const audio_base64 = await blobToBase64(blob)
 
+    const language = navigator.language.split('-')[0]
     const { data, error } = await supabase.functions.invoke<{ text: string }>('transcribe', {
-      body: { audio_base64, mime_type: blob.type || 'audio/webm' },
+      body: { audio_base64, mime_type: blob.type || 'audio/webm', language },
     })
 
     if (error || !data?.text) return { ok: false, error: 'SERVER_ERROR' }
