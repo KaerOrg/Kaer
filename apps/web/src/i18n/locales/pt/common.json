@@ -185,7 +185,14 @@
   "agenda": {
     "nav_link": "Agenda",
     "title": "Agenda",
-    "subtitle": "Gerencie seus compromissos e planeje suas consultas.",
-    "coming_soon": "O gerenciamento de compromissos chegará em breve."
+    "subtitle": "Configure a sua disponibilidade e gira os seus compromissos.",
+    "today": "Hoje",
+    "prev_week": "Semana anterior",
+    "next_week": "Semana seguinte",
+    "configure": "Disponibilidade",
+    "no_rules": "Nenhuma faixa horária definida.",
+    "days_short": { "0": "Seg", "1": "Ter", "2": "Qua", "3": "Qui", "4": "Sex", "5": "Sáb", "6": "Dom" },
+    "editor": { "title": "A minha disponibilidade", "add_rule": "Adicionar faixa", "slot_duration": "Duração da consulta", "minutes": "min", "auto_confirm": "Confirmação automática", "delete_rule": "Eliminar" },
+    "appointment": { "new": "Nova consulta", "status_pending": "Pendente", "status_confirmed": "Confirmada", "status_cancelled": "Cancelada", "status_completed": "Concluída" }
   }
 }

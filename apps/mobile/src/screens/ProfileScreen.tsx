@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
-import Button from '../components/Button'
+import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
 import {

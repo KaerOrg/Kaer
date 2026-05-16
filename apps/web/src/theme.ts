@@ -21,6 +21,7 @@ export function injectTheme(): void {
   root.setProperty('--color-warning', colors.warning)
   root.setProperty('--color-bg', colors.background)
   root.setProperty('--color-surface', colors.card)
+  root.setProperty('--color-card', colors.card)
   root.setProperty('--color-border', colors.border)
   root.setProperty('--color-text', colors.text)
   root.setProperty('--color-text-muted', colors.textMuted)

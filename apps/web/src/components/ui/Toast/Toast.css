@@ -1,0 +1,108 @@
+/* ── Container ───────────────────────────────────────────────── */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 380px;
+  width: calc(100vw - 48px);
+}
+
+/* ── Item ────────────────────────────────────────────────────── */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  pointer-events: all;
+  animation: toast-slide-in 0.2s ease-out;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+/* ── Variantes ───────────────────────────────────────────────── */
+.toast--success {
+  border-left-color: var(--color-success);
+}
+.toast--success .toast__icon {
+  color: var(--color-success);
+}
+
+.toast--error {
+  border-left-color: var(--color-danger);
+}
+.toast--error .toast__icon {
+  color: var(--color-danger);
+}
+
+.toast--warning {
+  border-left-color: var(--color-warning, #F59E0B);
+}
+.toast--warning .toast__icon {
+  color: var(--color-warning, #F59E0B);
+}
+
+.toast--info {
+  border-left-color: var(--color-primary);
+}
+.toast--info .toast__icon {
+  color: var(--color-primary);
+}
+
+/* ── Contenu ─────────────────────────────────────────────────── */
+.toast__icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.toast__message {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.toast__close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.toast__close:hover {
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+/* ── Animation ───────────────────────────────────────────────── */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

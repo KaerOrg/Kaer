@@ -2,11 +2,12 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Briefcase, UserCircle2, MapPin, Phone } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
-import { Layout } from '../components/Layout'
-import { Button } from '../components/Button'
-import { InputField } from '../components/InputField'
-import { SelectField } from '../components/SelectField/SelectField'
-import { getInitials } from '../components/Layout/Layout.utils'
+import { useToast } from '../contexts/ToastContext'
+import { Layout } from '../components/features/Layout'
+import { Button } from '../components/ui/Button'
+import { InputField } from '../components/ui/InputField'
+import { SelectField } from '../components/ui/SelectField/SelectField'
+import { getInitials } from '../components/features/Layout/Layout.utils'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../services/avatarService'
 import { fetchProfessionalTitles } from '../services/authService'
 import type { ProfessionalTitle } from '../lib/database.types'
@@ -15,6 +16,7 @@ import './ProfilePage.css'
 export function ProfilePage() {
   const { t, i18n } = useTranslation()
   const { practitioner, updateProfile, updateAvatar } = useAuthStore()
+  const toast = useToast()
 
   const [name, setName] = useState(practitioner?.name ?? '')
   const [title, setTitle] = useState(practitioner?.professional_title ?? '')
@@ -30,10 +32,7 @@ export function ProfilePage() {
   const [address, setAddress] = useState(practitioner?.address ?? '')
   const [phone, setPhone] = useState(practitioner?.phone ?? '')
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
-  const [avatarError, setAvatarError] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
@@ -41,12 +40,13 @@ export function ProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
-    setError('')
     const err = await updateProfile(name, title, address, phone)
     setSaving(false)
-    if (err) { setError(err); return }
-    setSuccess(true)
-    setTimeout(() => setSuccess(false), 2500)
+    if (err) {
+      toast.error(err)
+    } else {
+      toast.success(t('profile_modal.success'))
+    }
   }
 
   const handleAvatarClick = useCallback(() => {
@@ -57,18 +57,17 @@ export function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !practitioner) return
     setAvatarUploading(true)
-    setAvatarError('')
     try {
       const url = await uploadPractitionerAvatar(practitioner.id, file)
       await savePractitionerAvatarUrl(practitioner.id, url)
       updateAvatar(url)
     } catch {
-      setAvatarError(t('profile_modal.avatar_error'))
+      toast.error(t('profile_modal.avatar_error'))
     } finally {
       setAvatarUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
-  }, [practitioner, updateAvatar, t])
+  }, [practitioner, updateAvatar, t, toast])
 
   return (
     <Layout>
@@ -99,7 +98,6 @@ export function ProfilePage() {
             style={{ display: 'none' }}
             onChange={handleFileChange}
           />
-          {avatarError ? <div className="profile-page__avatar-error">{avatarError}</div> : null}
 
           <div className="profile-page__info-rows">
             <div className="profile-page__info-row">
@@ -172,8 +170,6 @@ export function ProfilePage() {
                 placeholder="12 rue de la Paix, 75001 Paris"
               />
             </div>
-            {error ? <div className="profile-page__error">{error}</div> : null}
-            {success ? <div className="profile-page__success">{t('profile_modal.success')}</div> : null}
             <div className="profile-page__actions">
               <Button type="submit" loading={saving}>{t('common.save')}</Button>
             </div>

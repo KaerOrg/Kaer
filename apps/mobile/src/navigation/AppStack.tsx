@@ -4,6 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
 import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
+import AppointmentsScreen from '../screens/AppointmentsScreen'
+import BookAppointmentScreen from '../screens/BookAppointmentScreen'
 import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
 import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
@@ -27,10 +29,12 @@ export type AppStackParamList = {
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
+  BookAppointment: { practitionerId: string }
 }
 
 export type TabParamList = {
   Home: undefined
+  Appointments: undefined
   Profile: undefined
 }
 
@@ -46,19 +50,18 @@ function Tabs() {
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { borderTopColor: colors.border, backgroundColor: colors.card },
         tabBarIcon: ({ focused, color, size }) => {
-          const iconName =
-            route.name === 'Home'
-              ? focused
-                ? 'grid'
-                : 'grid-outline'
-              : focused
-              ? 'person'
-              : 'person-outline'
-          return <Ionicons name={iconName as never} size={size} color={color} />
+          if (route.name === 'Home') {
+            return <Ionicons name={focused ? 'grid' : 'grid-outline'} size={size} color={color} />
+          }
+          if (route.name === 'Appointments') {
+            return <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={size} color={color} />
+          }
+          return <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color} />
         },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Modules' }} />
+      <Tab.Screen name="Appointments" component={AppointmentsScreen} options={{ title: 'Agenda' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
     </Tab.Navigator>
   )
@@ -74,6 +77,11 @@ export default function AppStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="BookAppointment"
+        component={BookAppointmentScreen}
+        options={{ title: 'Prendre un rendez-vous' }}
+      />
       <Stack.Screen
         name="Psychoeducation"
         component={PsychoeducationScreen}

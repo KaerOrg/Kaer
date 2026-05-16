@@ -185,7 +185,14 @@
   "agenda": {
     "nav_link": "Agenda",
     "title": "Agenda",
-    "subtitle": "Verwalten Sie Ihre Termine und planen Sie Ihre Konsultationen.",
-    "coming_soon": "Die Terminverwaltung kommt bald."
+    "subtitle": "Verwalten Sie Ihre Verfügbarkeit und Termine.",
+    "today": "Heute",
+    "prev_week": "Vorherige Woche",
+    "next_week": "Nächste Woche",
+    "configure": "Verfügbarkeit",
+    "no_rules": "Keine Zeitfenster definiert.",
+    "days_short": { "0": "Mo", "1": "Di", "2": "Mi", "3": "Do", "4": "Fr", "5": "Sa", "6": "So" },
+    "editor": { "title": "Meine Verfügbarkeit", "add_rule": "Zeitfenster hinzufügen", "slot_duration": "Termindauer", "minutes": "min", "auto_confirm": "Automatische Bestätigung", "delete_rule": "Löschen" },
+    "appointment": { "new": "Neuer Termin", "status_pending": "Ausstehend", "status_confirmed": "Bestätigt", "status_cancelled": "Abgesagt", "status_completed": "Abgeschlossen" }
   }
 }

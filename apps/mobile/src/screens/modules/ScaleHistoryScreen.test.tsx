@@ -31,7 +31,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../components/TeenAccent', () => ({
+jest.mock('../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 

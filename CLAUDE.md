@@ -121,6 +121,8 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 | `apps/mobile/src/lib/database.ts` | Table SQLite générique `scale_entries` |
 | `supabase/schema.sql` | `module_content_fields` + `field_props` par échelle |
 
+> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer.tsx`
+
 **Ajouter une nouvelle échelle générique :**
 1. Ajouter la config dans `SCALE_SCORING` (scaleScoring.ts)
 2. Ajouter les clés i18n dans fr/en common.json + fr/en teen.json
@@ -143,7 +145,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Package shared (types TypeScript)
 - [x] Schéma SQL écrit (`supabase/schema.sql`)
 - [x] MCP Supabase configuré (`~/.claude/settings.json`)
-- [ ] Schéma SQL appliqué sur Supabase
+- [x] Schéma SQL appliqué sur Supabase
 - [ ] Clés Supabase dans les fichiers `.env`
 - [ ] App mobile patient (navigation, auth, modules)
 - [ ] Module Agenda du sommeil
@@ -162,6 +164,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Tolérance à la détresse (`distress_tolerance`) — 6 fiches psyedu (DBT : TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons), onglet "En crise" accordéon, bandeau disclaimer MDR, teen mode, 8 tests Jest
 - [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
 - [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
+- [x] Système de prise de rendez-vous (`calendar_booking`) — praticien : grille semaine pixel, éditeur plages récurrentes + exceptions, toggle auto-confirm, modal RDV ; patient mobile : calendrier mois custom, réservation + annulation ; 3 tables Supabase (availability_rules, availability_exceptions, appointments) + RLS ; 28 tests vitest + 11 tests jest ; spec [`docs/spec/calendar.md`](docs/spec/calendar.md)
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -202,6 +205,7 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
 ## Règles de développement
 
 - Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée.
+- **Feedback utilisateur web — toujours utiliser `useToast()`** pour les résultats d'opérations réseau (save, update, delete, erreur serveur). Ne jamais créer d'état `error`/`success` local pour une opération réseau. Réserver les états locaux inline à la validation de champ (email invalide, champ requis). Hook : `import { useToast } from '../contexts/ToastContext'` — doc complète : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Pas de SQL ni d'appel Supabase dans un composant** — toute opération de données passe par une fonction d'un service `apps/<app>/src/services/<domaine>Service.ts`. Seules exceptions : les clients d'infrastructure dans `src/lib/` (`supabase.ts`, `database.ts` SQLite). Détails et procédure : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) section *Accès aux données* + [`docs/services.md`](docs/services.md).
 - **Nouveau module = passer par le skill [`module-builder`](.claude/skills/module-builder/SKILL.md).** Il enforce la règle data-first (`modules` + `module_content_fields` + `field_props` → `FieldRenderer` web et mobile) : zéro page hardcodée, parité aperçu praticien web ≡ écran patient mobile garantie par construction, composants génériques réutilisés avant d'être créés, tests et documentation obligatoires. Lecture préalable indispensable : [`docs/module-engine.md`](docs/module-engine.md).
 - **Pour les modules legacy à écran mobile dédié** (animation Reanimated, machine d'état multi-écrans interactive), garder l'ordre web-puis-mobile :
@@ -223,6 +227,8 @@ Ce pattern combine fiches psychoéducatives et tracker de données locales dans 
 | `apps/mobile/src/i18n/locales/fr/psyedu.json` | Namespace `chronobiology_tracker` |
 | `apps/mobile/src/i18n/locales/fr/psyedu_teen.json` | Surcharges tutoiement |
 
+> Composant métier `PsyEduBlockRenderer` : `apps/mobile/src/components/features/PsyEduBlockRenderer.tsx`
+
 ### Règles
 
 - **Onglets** : implémentés avec un segment control maison (2 `Pressable` + `activeTab` state), pas de React Navigation Tab imbriqué.
@@ -237,7 +243,7 @@ Pour tout module affichant une technique thérapeutique, ajouter un bandeau d'av
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/src/components/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
+| `apps/mobile/src/components/features/DisclaimerBanner.tsx` | Composant partagé — `moduleKey` + `isTeenMode` |
 | `apps/mobile/src/i18n/locales/fr/common.json` | Clé `modules.<moduleKey>.disclaimer` (vouvoiement) |
 | `apps/mobile/src/i18n/locales/fr/teen.json` | Clé `modules.<moduleKey>.disclaimer` (tutoiement) |
 
@@ -267,7 +273,7 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
 | `apps/mobile/src/store/authStore.ts` | Champ `teenMode: boolean` + `fetchTeenMode()` appelé au login |
 | `apps/mobile/src/theme/teen.ts` | Palette vive par module, textes bilingues adulte/ado |
 | `apps/mobile/src/hooks/useTeen.ts` | Hook `useTeen()` → `{ isTeenMode, tt, tg, teenColor }` |
-| `apps/mobile/src/components/TeenAccent.tsx` | Bande colorée en haut d'un écran (4px, invisible si mode adulte) |
+| `apps/mobile/src/components/features/TeenAccent.tsx` | Bande colorée en haut d'un écran (4px, invisible si mode adulte) |
 | `apps/web/src/pages/PatientPage.tsx` | Bouton toggle "Mode ado" dans le header patient |
 
 ### Règles
@@ -282,7 +288,32 @@ Le mode ado adapte l'interface de l'app mobile pour les patients adolescents —
     useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
   }))
   ```
+- **Import de `TeenAccent`** depuis un écran : `from '../../components/features/TeenAccent'`
 - **Conformité MDR** : le mode ado modifie uniquement le lexique et la palette — aucune logique conditionnelle sur les données cliniques.
+
+## Pattern : Système de rendez-vous (calendar_booking)
+
+Prise de RDV entre praticien et patient, sans librairie de calendrier externe.
+
+| Fichier | Rôle |
+|---|---|
+| `apps/web/src/lib/calendar.types.ts` | Types partagés côté web (AvailabilityRule, Appointment, ComputedSlot…) |
+| `apps/web/src/services/appointmentService.ts` | Service web : CRUD Supabase + `computeAvailableSlots` (pure function) |
+| `apps/web/src/components/features/WeekGrid/` | Grille semaine pixel — `HOUR_HEIGHT_PX=64`, positionnement absolu par calcul minutes |
+| `apps/web/src/components/features/AvailabilityEditor/` | Sidebar : règles récurrentes + exceptions + toggle `auto_confirm` |
+| `apps/web/src/components/features/AppointmentModal/` | Modal création (mode `create`) / visualisation (mode `view`) |
+| `apps/web/src/pages/AgendaPage.tsx` | Page principale praticien — charge tout via `Promise.all` |
+| `apps/mobile/src/services/appointmentService.ts` | Service mobile — même `computeAvailableSlots`, + `fetchPatientPractitioner` |
+| `apps/mobile/src/screens/AppointmentsScreen.tsx` | Liste RDV patient (à venir / passés), annulation avec Alert |
+| `apps/mobile/src/screens/BookAppointmentScreen.tsx` | Calendrier mois maison + sélection créneau + `bookAppointment` |
+
+### Règles architecturales
+
+- **`computeAvailableSlots`** est une pure function (zéro réseau) — elle tourne côté client pour afficher les créneaux disponibles dans la grille web et le calendrier mois mobile.
+- **Convention `day_of_week`** : `0=Lundi … 6=Dimanche` en base. JS `Date.getDay()` renvoie `0=Dimanche` → toujours passer par `jsDayToSchema()` pour la conversion.
+- **La grille semaine s'affiche toujours**, même sans règles configurées — les colonnes sont vides, le praticien navigue librement et ouvre l'éditeur via "Configurer".
+- **`auto_confirm_appointments`** sur `practitioners` : `true` → RDV créé en `confirmed` ; `false` → `pending` (le praticien confirme manuellement).
+- Spec complète : [`docs/spec/calendar.md`](docs/spec/calendar.md).
 
 ## Documentation technique
 

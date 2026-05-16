@@ -185,7 +185,14 @@
   "agenda": {
     "nav_link": "Agenda",
     "title": "Agenda",
-    "subtitle": "Gestione sus citas y planifique sus consultas.",
-    "coming_soon": "La gestión de citas llegará pronto."
+    "subtitle": "Configure su disponibilidad y gestione sus citas.",
+    "today": "Hoy",
+    "prev_week": "Semana anterior",
+    "next_week": "Semana siguiente",
+    "configure": "Disponibilidad",
+    "no_rules": "Sin franjas horarias definidas.",
+    "days_short": { "0": "Lun", "1": "Mar", "2": "Mié", "3": "Jue", "4": "Vie", "5": "Sáb", "6": "Dom" },
+    "editor": { "title": "Mi disponibilidad", "add_rule": "Añadir franja", "slot_duration": "Duración de cita", "minutes": "min", "auto_confirm": "Confirmación automática", "delete_rule": "Eliminar" },
+    "appointment": { "new": "Nueva cita", "status_pending": "Pendiente", "status_confirmed": "Confirmada", "status_cancelled": "Cancelada", "status_completed": "Completada" }
   }
 }
