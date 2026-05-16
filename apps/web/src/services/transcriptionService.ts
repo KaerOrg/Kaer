@@ -58,6 +58,8 @@ export async function transcribeAudio(
     const decoder = new TextDecoder()
     let fullText = ''
     let buffer = ''
+    // Nom d'événement SSE porté par la ligne "event: …" (précède le "data: …")
+    let currentSseEvent = ''
 
     while (true) {
       const { done, value } = await reader.read()
@@ -68,15 +70,37 @@ export async function transcribeAudio(
       buffer = lines.pop() ?? ''
 
       for (const line of lines) {
+        // Ligne "event: transcript.text.delta" — format SSE standard OpenAI
+        if (line.startsWith('event: ')) {
+          currentSseEvent = line.slice(7).trim()
+          continue
+        }
+        // Ligne vide = fin d'un événement SSE
+        if (line.trim() === '') {
+          currentSseEvent = ''
+          continue
+        }
         if (!line.startsWith('data: ')) continue
         const data = line.slice(6).trim()
         if (data === '[DONE]') break
 
         try {
-          const event = JSON.parse(data) as { type?: string; delta?: string }
-          if (event.type === 'transcript.text.delta' && event.delta) {
-            fullText += event.delta
-            callbacks?.onTextChunk?.(event.delta)
+          const parsed = JSON.parse(data) as Record<string, unknown>
+          // Support format inline {"type":"transcript.text.delta","delta":"…"}
+          // ET format SSE standard event: + data:{"delta":"…"}
+          const eventType = (parsed['type'] as string | undefined) ?? currentSseEvent
+          const delta = parsed['delta'] as string | undefined
+          const doneText = parsed['text'] as string | undefined
+
+          if (delta && eventType.includes('delta')) {
+            fullText += delta
+            callbacks?.onTextChunk?.(delta)
+            // Cède le contrôle au navigateur pour repeindre entre chaque delta
+            await new Promise<void>(r => setTimeout(r, 0))
+          } else if (doneText && eventType.includes('done') && !fullText) {
+            // Fallback : l'événement "done" contient le texte complet (pas de deltas reçus)
+            fullText = doneText
+            callbacks?.onTextChunk?.(doneText)
           }
         } catch {
           // ligne SSE malformée — ignorée
