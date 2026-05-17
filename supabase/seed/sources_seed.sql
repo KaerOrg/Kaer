@@ -792,6 +792,55 @@ values
     null,
     'Recommande 4 approches TCC trauma-focalisées dont la Prolonged Exposure (Foa) — protocole qui utilise une hiérarchie d''exposition in vivo et imagée, progressivement parcourue avec le thérapeute',
     2
+  ),
+
+-- ── decisional_balance ───────────────────────────────────────────────────────
+-- Balance décisionnelle — grille pros/cons du modèle transthéorique (TTM)
+-- Sources vérifiées :
+--   PMID 10170434 — Prochaska & Velicer 1997 — modèle TTM : balance décisionnelle sur 12 comportements (vérifié PubMed, abstract lu)
+--   PMID 20524891 — Di Noia & Prochaska 2010 — méta-analyse 27 études pros/cons selon stades (vérifié PubMed, abstract lu)
+--   PMID 24001658 — Lundahl et al. 2013 — méta-analyse 48 ECR EM en soins médicaux (vérifié PubMed, abstract lu)
+
+  -- 1. Prochaska & Velicer 1997 — Am J Health Promot (article de synthèse fondateur du TTM)
+  --    PMID 10170434 — doi:10.4278/0890-1171-12.1.38 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article de synthèse théorique, non un ECR
+  (
+    'bbbbbbbb-0001-0001-0001-000000000001',
+    'decisional_balance',
+    'Prochaska & Velicer — Le modèle transthéorique du changement de comportement (Am J Health Promot, 1997)',
+    'expert_opinion',
+    'https://doi.org/10.4278/0890-1171-12.1.38',
+    null,
+    'Cadre théorique fondateur : la balance décisionnelle (pros/cons) est un prédicteur robuste du stade de changement — schéma cohérent retrouvé sur 12 comportements de santé distincts',
+    1
+  ),
+
+  -- 2. Di Noia & Prochaska 2010 — Am J Health Behav (méta-analyse, 27 études)
+  --    PMID 20524891 — doi:10.5993/ajhb.34.5.11 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'bbbbbbbb-0001-0001-0001-000000000002',
+    'decisional_balance',
+    'Di Noia & Prochaska — Balance décisionnelle et stades de changement : revue méta-analytique (Am J Health Behav, 2010)',
+    'meta_analysis',
+    'https://doi.org/10.5993/ajhb.34.5.11',
+    null,
+    'Méta-analyse de 27 études : la structure de la balance décisionnelle et sa relation aux stades de changement sont cohérentes avec la théorie — les pros augmentent davantage (+0,82) que les cons ne diminuent (−0,55) de la précontemplation à l''action',
+    2
+  ),
+
+  -- 3. Lundahl et al. 2013 — Patient Educ Couns (méta-analyse, 48 ECR, N=9 618, co-signé Rollnick)
+  --    PMID 24001658 — doi:10.1016/j.pec.2013.07.012 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'bbbbbbbb-0001-0001-0001-000000000003',
+    'decisional_balance',
+    'Lundahl et al. — Entretien motivationnel en soins médicaux : méta-analyse d''ECR (Patient Educ Couns, 2013)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.pec.2013.07.012',
+    null,
+    'Méta-analyse de 48 ECR (N=9 618) : OR=1,55 en faveur de l''EM versus comparateurs ; efficace sur une large gamme de comportements (charge virale VIH, poids, alcool, tabac, comportement sédentaire)',
+    3
   )
 
 on conflict (id) do update set
