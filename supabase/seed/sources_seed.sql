@@ -686,6 +686,73 @@ values
     null,
     'L''intensité du langage d''engagement (commitment strength) lors d''un entretien motivationnel prédit significativement l''abstinence à 12 mois — le discours-changement mobilisateur (engagement, activation) est la voie par laquelle désir, capacité et raisons influencent le comportement (n=84 usagers de drogues)',
     4
+  ),
+
+-- ── fear_thermometer ─────────────────────────────────────────────────────────
+-- Thermomètre de la peur — outil SUDS dans la thérapie d'exposition (TCC)
+-- Sources vérifiées :
+--   PMID 18410984 — Wolitzky-Taylor et al. 2008 — méta-analyse 33 ECR phobies spécifiques (vérifié PubMed, abstract lu)
+--   PMID 2871574  — Foa & Kozak 1986 — théorie du traitement émotionnel de la peur (vérifié PubMed, abstract lu)
+--   PMID 24864005 — Craske et al. 2014 — modèle d'apprentissage inhibiteur (vérifié PubMed, abstract lu)
+--   NICE CG159 (2013, revu 2024) — recommande l'exposition graduée en TCC pour les troubles anxieux
+--     URL vérifiée : https://www.nice.org.uk/guidance/cg159/chapter/Recommendations
+--     Texte exact : « graduated exposure to feared social situations, both within treatment sessions and as homework »
+
+  -- 1. Wolitzky-Taylor et al. 2008 — Clinical Psychology Review (méta-analyse, 33 ECR)
+  --    PMID 18410984 — doi:10.1016/j.cpr.2008.02.007 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    '99999999-0001-0001-0001-000000000001',
+    'fear_thermometer',
+    'Wolitzky-Taylor et al. — Traitements psychologiques des phobies spécifiques : méta-analyse (Clin Psychol Rev, 2008)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.cpr.2008.02.007',
+    null,
+    'Méta-analyse de 33 ECR : l''exposition in vivo produit des effets larges supérieurs au groupe contrôle ; l''exposition in vivo est plus efficace que l''exposition par imagerie à l''issue du traitement',
+    1
+  ),
+
+  -- 2. Foa & Kozak 1986 — Psychological Bulletin (article théorique fondateur)
+  --    PMID 2871574 — pas de DOI dans PubMed (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article théorique, non un ECR
+  (
+    '99999999-0001-0001-0001-000000000002',
+    'fear_thermometer',
+    'Foa & Kozak — Traitement émotionnel de la peur : exposition à l''information corrective (Psychol Bull, 1986)',
+    'expert_opinion',
+    'https://pubmed.ncbi.nlm.nih.gov/2871574/',
+    null,
+    'Cadre théorique fondateur de la thérapie d''exposition : habituation, traitement émotionnel et intégration d''informations incompatibles avec la peur. Base conceptuelle du thermomètre SUDS',
+    2
+  ),
+
+  -- 3. Craske et al. 2014 — Behaviour Research and Therapy (revue théorique)
+  --    PMID 24864005 — doi:10.1016/j.brat.2014.04.006 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article de synthèse, non un ECR
+  (
+    '99999999-0001-0001-0001-000000000003',
+    'fear_thermometer',
+    'Craske et al. — Maximiser la thérapie d''exposition : approche par apprentissage inhibiteur (Behav Res Ther, 2014)',
+    'systematic_review',
+    'https://doi.org/10.1016/j.brat.2014.04.006',
+    null,
+    'Modèle d''apprentissage inhibiteur : la violation d''expectative, l''extinction approfondie et le récupération variée optimisent les résultats de l''exposition — actualisation du modèle d''habituation de Foa & Kozak',
+    3
+  ),
+
+  -- 4. NICE CG159 (2013, revu 2024) — Trouble anxiété sociale
+  --    URL vérifiée : https://www.nice.org.uk/guidance/cg159/chapter/Recommendations
+  --    Texte : « graduated exposure to feared social situations, both within treatment sessions and as homework »
+  --    NICE n'utilise pas de grades A/B/C — evidence_grade : null
+  (
+    '99999999-0001-0001-0001-000000000004',
+    'fear_thermometer',
+    'NICE CG159 — Trouble d''anxiété sociale : reconnaissance, évaluation et traitement (2013, revu 2024)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/cg159/chapter/Recommendations',
+    null,
+    'Recommande la TCC avec exposition graduée aux situations redoutées, aussi bien en séance qu''en tâches entre séances ; deux modèles validés : Clark & Wells (14 séances) et Heimberg (15 séances)',
+    4
   )
 
 on conflict (id) do update set
