@@ -539,7 +539,11 @@
       "subtitle": "Le module souvent oublié"
     },
     "assessments": {
-      "label": "Évaluations Cliniques",
+      "label": "Échelles et questionnaires d'évaluation",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivation & Engagement Thérapeutique",
       "subtitle": ""
     }
   },

@@ -1234,14 +1234,169 @@
   flex-shrink: 0;
 }
 
-/* ── Blocs Échelles et questionnaires (fiche patient) ───────────────────────── */
+/* ── Échelles et questionnaires — liste unifiée ─────────────────────────────── */
 
-.scales-section {
-  margin-top: 8px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  border: 1.5px solid;
+.scales-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
+
+.scales-list__top-action {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 12px 0;
+}
+
+.scales-list__add-btn {
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary, #6366F1);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.scales-list__add-btn:hover {
+  background: #EEF2FF;
+}
+
+.scales-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.scale-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border, #E5E7EB);
+}
+
+.scale-row:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.scale-row__left {
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.scale-row__type-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.scale-row__type-badge--auto {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.scale-row__type-badge--hetero {
+  background: #DCFCE7;
+  color: #15803D;
+}
+
+.scale-row__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.scale-row__toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.scale-row__title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.scale-row__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+}
+
+.scale-row__full-title {
+  font-size: 12px;
+  color: var(--color-text-muted, #6B7280);
+}
+
+.scale-row__category-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.scale-row__age-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.scale-row__desc {
+  font-size: 12px;
+  color: var(--color-text-muted, #6B7280);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.scale-row__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.scale-row__date {
+  font-size: 12px;
+  color: var(--color-text-muted, #9CA3AF);
+}
+
+.scales-list__view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #DC2626;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.scales-list__view-btn:hover {
+  background: #FEE2E2;
+}
+
+/* ── Suppression des anciens styles scales-section ──────────────────────────── */
 
 .scales-section__header {
   display: flex;

@@ -610,7 +610,11 @@
       "subtitle": ""
     },
     "assessments": {
-      "label": "Clinical Assessments",
+      "label": "Scales and Assessment Questionnaires",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivation & Therapeutic Engagement",
       "subtitle": ""
     }
   },
