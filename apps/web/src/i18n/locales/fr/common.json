@@ -125,7 +125,18 @@
     "rim_error_unlock": "Erreur lors du déverrouillage. Réessayez.",
     "rim_error_update": "Erreur lors de la mise à jour. Réessayez.",
     "rim_btn_unlock": "Débloquer avec ce scénario",
-    "rim_btn_save": "Enregistrer le scénario"
+    "rim_btn_save": "Enregistrer le scénario",
+    "patient_view_tab": "Vue patient",
+    "sources_tab": "Sources & recommandations",
+    "sources_intro": "Sources vérifiées via PubMed et les sites officiels des organismes de santé.",
+    "sources_empty": "Aucune source disponible pour ce module.",
+    "sources_grade": "Grade {{grade}}",
+    "sources_type_rct": "Essai randomisé",
+    "sources_type_cohort_study": "Cohorte",
+    "sources_type_meta_analysis": "Méta-analyse",
+    "sources_type_systematic_review": "Revue systématique",
+    "sources_type_guideline": "Recommandation officielle",
+    "sources_type_expert_opinion": "Avis d'experts"
   },
   "modules": {
     "nav_link": "Modules",
