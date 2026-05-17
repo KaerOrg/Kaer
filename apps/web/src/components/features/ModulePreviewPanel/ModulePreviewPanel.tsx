@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
-import { Eye } from 'lucide-react'
+import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../../services/moduleService'
 import { FieldRenderer } from '../ModuleRenderer'
+import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
@@ -11,6 +12,8 @@ const DEFAULT_ACCENT = '#6366F1'
 // (psyedu_topics/blocks, form_entries, exposure_hierarchies). Ils peuvent
 // rendre avec 0 fields — le fallback "coming soon" ne s'applique pas.
 const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
+
+type PanelTab = 'preview' | 'sources'
 
 interface Props {
   moduleType: string
@@ -22,11 +25,13 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<PanelTab>('preview')
 
   useEffect(() => {
     setLoading(true)
     setResult(null)
     setExpandedCard(null)
+    setActiveTab('preview')
     fetchModuleFields(moduleType).then(r => {
       setResult(r)
       setLoading(false)
@@ -39,13 +44,6 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
   const accentColor = color ?? DEFAULT_ACCENT
 
-  // « Bientôt disponible » réservé aux modules réellement vides : `preview_kind`
-  // explicite ou aucun field de contenu (le seul field présent étant un
-  // placeholder `coming_soon`). Si la base contient du vrai contenu, on le rend
-  // via FieldRenderer (layout dédié ou fallback générique) — un éventuel field
-  // `coming_soon` résiduel n'écrase pas le rendu. Les layouts fieldless
-  // (psyedu, chrono_month, exposure_hierarchy) lisent leur contenu ailleurs
-  // que module_content_fields — on n'applique pas le fallback pour eux.
   const meaningfulFieldsCount = result
     ? result.fields.filter(
         f =>
@@ -62,28 +60,52 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
   return (
     <div className="preview-panel" style={{ borderTopColor: accentColor }}>
-      <div className="preview-panel__header" style={{ color: accentColor }}>
-        <Eye size={14} />
-        {t('patient.patient_view')}
+      <div className="preview-panel__tabs">
+        <button
+          className={`preview-panel__tab ${activeTab === 'preview' ? 'preview-panel__tab--active' : ''}`}
+          style={activeTab === 'preview' ? { color: accentColor, borderBottomColor: accentColor } : undefined}
+          onClick={() => setActiveTab('preview')}
+        >
+          <Eye size={12} />
+          {t('patient.patient_view_tab')}
+        </button>
+        <button
+          className={`preview-panel__tab ${activeTab === 'sources' ? 'preview-panel__tab--active' : ''}`}
+          style={activeTab === 'sources' ? { color: accentColor, borderBottomColor: accentColor } : undefined}
+          onClick={() => setActiveTab('sources')}
+        >
+          <BookOpen size={12} />
+          {t('patient.sources_tab')}
+        </button>
       </div>
 
-      {loading && (
-        <div className="preview-panel__coming-soon">{t('common.loading')}</div>
+      {activeTab === 'preview' && (
+        <>
+          {loading && (
+            <div className="preview-panel__coming-soon">{t('common.loading')}</div>
+          )}
+
+          {!loading && showComingSoon && (
+            <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
+          )}
+
+          {!loading && result && !showComingSoon && (
+            <div className="preview-panel__inner">
+              <FieldRenderer
+                preview_kind={result.preview_kind}
+                fields={result.fields}
+                moduleId={moduleType}
+                expandedCard={expandedCard}
+                onToggleCard={handleToggleCard}
+              />
+            </div>
+          )}
+        </>
       )}
 
-      {!loading && showComingSoon && (
-        <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
-      )}
-
-      {!loading && result && !showComingSoon && (
-        <div className="preview-panel__inner">
-          <FieldRenderer
-            preview_kind={result.preview_kind}
-            fields={result.fields}
-            moduleId={moduleType}
-            expandedCard={expandedCard}
-            onToggleCard={handleToggleCard}
-          />
+      {activeTab === 'sources' && (
+        <div className="preview-panel__inner preview-panel__inner--sources">
+          <ModuleSourcesPanel moduleId={moduleType} />
         </div>
       )}
     </div>
