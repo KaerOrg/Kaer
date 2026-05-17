@@ -753,6 +753,45 @@ values
     null,
     'Recommande la TCC avec exposition graduée aux situations redoutées, aussi bien en séance qu''en tâches entre séances ; deux modèles validés : Clark & Wells (14 séances) et Heimberg (15 séances)',
     4
+  ),
+
+-- ── exposure_hierarchy ───────────────────────────────────────────────────────
+-- Hiérarchie d'exposition — liste graduée de situations selon SUDs (TCC)
+-- Sources vérifiées :
+--   PMID 29451967 — Carpenter et al. 2018 — méta-analyse 41 ECR placebo-contrôlés (vérifié PubMed, abstract lu)
+--   NICE NG116 (2018) — Thérapie d'exposition prolongée recommandée (prolonged exposure, Foa)
+--     URL vérifiée : https://www.nice.org.uk/guidance/ng116/chapter/Recommendations
+--     Texte exact : « Offer an individual trauma-focused CBT intervention... »
+--     inclut la "prolonged exposure therapy" (protocole Foa — utilise une hiérarchie in vivo + imagerie)
+
+  -- 1. Carpenter et al. 2018 — Depression and Anxiety (méta-analyse, 41 ECR placebo-contrôlés)
+  --    PMID 29451967 — doi:10.1002/da.22728 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'aaaaaaaa-0001-0001-0001-000000000001',
+    'exposure_hierarchy',
+    'Carpenter et al. — TCC pour les troubles anxieux : méta-analyse d''ECR placebo-contrôlés (Depress Anxiety, 2018)',
+    'meta_analysis',
+    'https://doi.org/10.1002/da.22728',
+    null,
+    'Méta-analyse de 41 ECR placebo-contrôlés (N=2 843) : Hedges g=0,56 sur les symptômes cibles ; les interventions centrées sur l''exposition produisent des effets plus larges que les approches cognitives seules',
+    1
+  ),
+
+  -- 2. NICE NG116 (2018) — PTSD : évaluation et gestion
+  --    URL vérifiée : https://www.nice.org.uk/guidance/ng116/chapter/Recommendations
+  --    La Prolonged Exposure (protocole Foa) fait partie des 4 approches TCC trauma-focalisées recommandées.
+  --    Ce protocole utilise explicitement une hiérarchie d''exposition in vivo + narration imagée.
+  --    NICE n'utilise pas de grades A/B/C — evidence_grade : null
+  (
+    'aaaaaaaa-0001-0001-0001-000000000002',
+    'exposure_hierarchy',
+    'NICE NG116 — PTSD : évaluation et gestion (2018)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/ng116/chapter/Recommendations',
+    null,
+    'Recommande 4 approches TCC trauma-focalisées dont la Prolonged Exposure (Foa) — protocole qui utilise une hiérarchie d''exposition in vivo et imagée, progressivement parcourue avec le thérapeute',
+    2
   )
 
 on conflict (id) do update set
