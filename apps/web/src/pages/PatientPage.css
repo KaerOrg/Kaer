@@ -464,6 +464,19 @@
   border-radius: var(--radius-md);
 }
 
+.patient-overview__stat--link {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  text-align: center;
+  font: inherit;
+}
+
+.patient-overview__stat--link:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface, #fff));
+}
+
 .patient-overview__stat-main {
   display: flex;
   align-items: center;

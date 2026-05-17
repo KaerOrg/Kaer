@@ -129,17 +129,10 @@ describe('patientService.fetchPatientHeader', () => {
     expect(result).toEqual({
       email: 'p@t.fr',
       alias: 'A',
-<<<<<<< HEAD
-      teenMode: true,
-      firstName: null,
-      lastName: null,
-      enrolledAt: undefined,
-=======
       firstName: 'Jean',
       lastName: 'Dupont',
       teenMode: true,
       enrolledAt: '2024-01-01T00:00:00Z',
->>>>>>> origin
       generalNote: null,
     })
   })

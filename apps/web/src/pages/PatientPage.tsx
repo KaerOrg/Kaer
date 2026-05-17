@@ -441,6 +441,8 @@ export function PatientPage() {
     setIsRecording(recording)
   }, [])
 
+  const typeNextCharRef = useRef<() => void>(() => {})
+
   const typeNextChar = useCallback(() => {
     if (!newNoteRef.current || typewriterQueueRef.current.length === 0) {
       isTypingRef.current = false
@@ -449,13 +451,17 @@ export function PatientPage() {
     const segment = typewriterQueueRef.current[0]
     if (segment.length === 0) {
       typewriterQueueRef.current.shift()
-      setTimeout(typeNextChar, 0)
+      setTimeout(() => typeNextCharRef.current(), 0)
       return
     }
     newNoteRef.current.value += segment[0]
     typewriterQueueRef.current[0] = segment.slice(1)
-    setTimeout(typeNextChar, TYPEWRITER_CHAR_MS)
+    setTimeout(() => typeNextCharRef.current(), TYPEWRITER_CHAR_MS)
   }, [])
+
+  useEffect(() => {
+    typeNextCharRef.current = typeNextChar
+  }, [typeNextChar])
 
   const handleTextChunk = useCallback((text: string) => {
     if (!newNoteRef.current) return
@@ -467,7 +473,7 @@ export function PatientPage() {
     }
   }, [typeNextChar])
 
-  const handleTranscription = useCallback((_text: string) => {
+  const handleTranscription = useCallback(() => {
     // no-op: text already inserted chunk by chunk via handleTextChunk
   }, [])
 
@@ -969,13 +975,13 @@ export function PatientPage() {
                     </div>
                     <span className="patient-overview__stat-label">{t('patient.overview_active_modules')}</span>
                   </div>
-                  <div className="patient-overview__stat">
+                  <button className="patient-overview__stat patient-overview__stat--link" onClick={() => setActiveTab('notes')}>
                     <div className="patient-overview__stat-main">
                       <span className="patient-overview__stat-value">{notes.length}</span>
                       <FileText size={20} className="patient-overview__stat-icon" />
                     </div>
                     <span className="patient-overview__stat-label">{t('patient.tab_notes')}</span>
-                  </div>
+                  </button>
                   <div className="patient-overview__stat">
                     <div className="patient-overview__stat-main">
                       <span className="patient-overview__stat-value">0</span>
