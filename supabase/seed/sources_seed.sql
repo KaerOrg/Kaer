@@ -841,6 +841,132 @@ values
     null,
     'Méta-analyse de 48 ECR (N=9 618) : OR=1,55 en faveur de l''EM versus comparateurs ; efficace sur une large gamme de comportements (charge virale VIH, poids, alcool, tabac, comportement sédentaire)',
     3
+  ),
+
+-- ── phq9 ─────────────────────────────────────────────────────────────────────
+-- PHQ-9 — Questionnaire sur la santé du patient (dépression)
+-- Source vérifiée : PMID 11556941 — Kroenke, Spitzer & Williams 2001 (vérifié PubMed, abstract lu)
+
+  -- Kroenke, Spitzer & Williams 2001 — J Gen Intern Med (étude de validation, N=6 000)
+  --    PMID 11556941 — doi:10.1046/j.1525-1497.2001.016009606.x (vérifié PubMed, abstract lu)
+  --    Sensibilité 88 %, spécificité 88 % à score ≥10 pour EDC majeur
+  (
+    'cccccccc-0001-0001-0001-000000000001',
+    'phq9',
+    'Kroenke, Spitzer & Williams — The PHQ-9 : validité d''une mesure brève de sévérité dépressive (J Gen Intern Med, 2001)',
+    'cohort_study',
+    'https://doi.org/10.1046/j.1525-1497.2001.016009606.x',
+    null,
+    'Étude de validation sur 6 000 patients en soins primaires : sensibilité 88 %, spécificité 88 % à score ≥10 pour l''épisode dépressif majeur ; seuils 5/10/15/20 pour dépression légère/modérée/sévère/très sévère',
+    1
+  ),
+
+-- ── gad7 ─────────────────────────────────────────────────────────────────────
+-- GAD-7 — Trouble anxieux généralisé (7 items)
+-- Source vérifiée : PMID 16717171 — Spitzer et al. 2006 (vérifié PubMed, abstract lu)
+
+  -- Spitzer, Kroenke, Williams & Löwe 2006 — Arch Intern Med (étude de validation, N=2 740)
+  --    PMID 16717171 — doi:10.1001/archinte.166.10.1092 (vérifié PubMed, abstract lu)
+  --    Sensibilité 89 %, spécificité 82 % pour le TAG
+  (
+    'dddddddd-0001-0001-0001-000000000001',
+    'gad7',
+    'Spitzer et al. — The GAD-7 : mesure brève pour le trouble anxieux généralisé (Arch Intern Med, 2006)',
+    'cohort_study',
+    'https://doi.org/10.1001/archinte.166.10.1092',
+    null,
+    'Étude de validation sur 2 740 patients (15 cliniques US) : sensibilité 89 %, spécificité 82 % ; fiabilité, validité critérielle, factorielle et procédurale confirmées ; scores TAG et dépression indépendants',
+    1
+  ),
+
+-- ── bsl23 ─────────────────────────────────────────────────────────────────────
+-- BSL-23 — Borderline Symptom List (23 items)
+-- Source vérifiée : PMID 19023232 — Bohus et al. 2008 (vérifié PubMed, abstract lu)
+
+  -- Bohus et al. 2008 — Psychopathology (étude de validation, N=659 TPB)
+  --    PMID 19023232 — doi:10.1159/000173701 (vérifié PubMed, abstract lu)
+  --    α=0,935–0,969 ; corrélation r=0,958–0,963 avec BSL-95
+  (
+    'eeeeeeee-0001-0001-0001-000000000001',
+    'bsl23',
+    'Bohus et al. — BSL-23 : développement et propriétés psychométriques (Psychopathology, 2008)',
+    'cohort_study',
+    'https://doi.org/10.1159/000173701',
+    null,
+    'Validation de la version courte sur 659 patients TPB : α=0,935–0,969, corrélation élevée avec le BSL-95 (r=0,958–0,963) ; discrimine le TPB des diagnostics Axe I ; sensible au changement après 3 mois de TCD (d=0,47)',
+    1
+  ),
+
+-- ── rcads ─────────────────────────────────────────────────────────────────────
+-- RCADS-25 — Revised Child Anxiety and Depression Scale (25 items, Ebesutani 2012)
+-- Source vérifiée : PMID 22329531 — Ebesutani et al. 2012 (vérifié PubMed, abstract lu)
+
+  -- Ebesutani et al. 2012 — Psychological Assessment (développement RCADS-25, N=1 060+303)
+  --    PMID 22329531 — doi:10.1037/a0027283 (vérifié PubMed, abstract lu)
+  --    25 items (15 anxiété + 10 dépression) via analyse bifactorielle exploratoire
+  (
+    'ffffffff-0001-0001-0001-000000000001',
+    'rcads',
+    'Ebesutani et al. — RCADS-25 : version courte par modélisation bifactorielle (Psychol Assess, 2012)',
+    'cohort_study',
+    'https://doi.org/10.1037/a0027283',
+    null,
+    'Développement de la version 25 items par analyse bifactorielle de Schmid-Leiman (N=1 060 école + 303 clinique) : 15 items anxiété + 10 items dépression ; fiabilité α=0,80 pour la sous-échelle dépression en clinique',
+    1
+  ),
+
+-- ── snap_iv ──────────────────────────────────────────────────────────────────
+-- SNAP-IV — Swanson, Nolan and Pelham rating scale (26 items TDAH)
+-- Source vérifiée : PMID 30991820 — Hall et al. 2019 (vérifié PubMed, abstract lu)
+
+  -- Hall et al. 2019 — Assessment (étude de validation, N=250 enfants 6-17 ans)
+  --    PMID 30991820 — doi:10.1177/1073191119842255 (vérifié PubMed, abstract lu)
+  --    Structure à 2 facteurs (inattention + hyperactivité/impulsivité) ; bon outil de suivi en ECR
+  (
+    '1a1a1a1a-0001-0001-0001-000000000001',
+    'snap_iv',
+    'Hall et al. — Validité du SNAP-IV chez les enfants présentant des symptômes de TDAH (Assessment, 2019)',
+    'cohort_study',
+    'https://doi.org/10.1177/1073191119842255',
+    null,
+    'Validation sur 250 enfants (6-17 ans) : structure à 2 facteurs (inattention / hyperactivité-impulsivité) ; évaluations parentales de l''inattention et de l''hyperactivité prédicteurs significatifs du diagnostic de recherche ; bon outil de mesure de résultats en ECR',
+    1
+  ),
+
+-- ── asrs6 ─────────────────────────────────────────────────────────────────────
+-- ASRS v1.1 — Dépistage rapide TDAH adulte (6 items)
+-- Source vérifiée : PMID 15841682 — Kessler et al. 2005 (vérifié PubMed, abstract lu)
+
+  -- Kessler et al. 2005 — Psychol Med (validation ASRS-6 + ASRS-18, N=154)
+  --    PMID 15841682 — doi:10.1017/s0033291704002892 (vérifié PubMed, abstract lu)
+  --    ASRS-6 : sensibilité 68,7 %, spécificité 99,5 %, kappa 0,76
+  (
+    '1b1b1b1b-0001-0001-0001-000000000001',
+    'asrs6',
+    'Kessler et al. — L''ASRS de l''OMS : échelle de dépistage du TDAH adulte (Psychol Med, 2005)',
+    'cohort_study',
+    'https://doi.org/10.1017/s0033291704002892',
+    null,
+    'Validation de l''ASRS-6 (dépistage) et de l''ASRS-18 (complet) sur 154 sujets (NCS-R) : ASRS-6 — sensibilité 68,7 %, spécificité 99,5 %, kappa=0,76 ; surpasse l''ASRS-18 non pondéré pour le dépistage en population générale',
+    1
+  ),
+
+-- ── asrs18 ────────────────────────────────────────────────────────────────────
+-- ASRS v1.1 — Bilan complet TDAH adulte (18 items)
+-- Source vérifiée : PMID 15841682 — Kessler et al. 2005 (idem asrs6 — même article valide les deux versions)
+
+  -- Kessler et al. 2005 — Psychol Med (validation ASRS-6 + ASRS-18, N=154)
+  --    PMID 15841682 — doi:10.1017/s0033291704002892 (vérifié PubMed, abstract lu)
+  --    ASRS-18 : 18 questions DSM-IV sur les symptômes adultes, kappa=0,58
+  (
+    '1c1c1c1c-0001-0001-0001-000000000001',
+    'asrs18',
+    'Kessler et al. — L''ASRS de l''OMS : échelle de dépistage du TDAH adulte (Psychol Med, 2005)',
+    'cohort_study',
+    'https://doi.org/10.1017/s0033291704002892',
+    null,
+    'Validation de l''ASRS-18 (bilan complet) sur 154 sujets (NCS-R) : 18 questions couvrant les critères DSM-IV de TDAH adulte, sous-scores inattention et hyperactivité/impulsivité ; kappa=0,58 ; complément du dépistage ASRS-6',
+    1
   )
 
 on conflict (id) do update set
