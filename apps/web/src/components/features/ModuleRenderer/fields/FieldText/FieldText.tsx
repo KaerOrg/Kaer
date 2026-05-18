@@ -19,6 +19,8 @@ const CONFIG: Record<string, FieldConfig> = {
   card_heading_3:      { tag: 'h3' },
   card_heading_4:      { tag: 'h4' },
   card_paragraph:      { tag: 'p' },
+  card_paragraph_bold: { tag: 'p', wrap: 'strong' },
+  card_italic_note:    { tag: 'p', wrap: 'em' },
   card_callout:        { tag: 'p', inlineStyle: { fontWeight: 700, borderLeft: '3px solid #4F46E5', paddingLeft: 10, marginTop: 12 } },
   footer_note:         { tag: 'p', className: 'preview-panel__footer' },
   step_title:          { tag: 'div', className: 'preview-step__title' },

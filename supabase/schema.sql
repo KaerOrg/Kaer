@@ -1108,3 +1108,32 @@ create policy "appointments_patient_cancel" on public.appointments
     and status in ('cancelled_by_patient')
   );
 -- );
+
+-- ============================================================
+-- TABLE : module_sources (Sources et recommandations par module)
+-- ============================================================
+-- Une ligne par source bibliographique ou recommandation officielle.
+-- source_type : rct | cohort_study | meta_analysis | systematic_review | guideline | expert_opinion
+-- evidence_grade : A | B | C (selon HAS/GRADE — NULL si non applicable)
+
+create table if not exists public.module_sources (
+  id             uuid        primary key default gen_random_uuid(),
+  module_id      text        not null references public.modules(id) on delete cascade,
+  label          text        not null,
+  source_type    text        not null check (source_type in ('rct', 'cohort_study', 'meta_analysis', 'systematic_review', 'guideline', 'expert_opinion')),
+  url            text,
+  evidence_grade text        check (evidence_grade in ('A', 'B', 'C')),
+  description    text,
+  sort_order     int         not null default 0,
+  created_at     timestamptz not null default now()
+);
+
+create index if not exists idx_module_sources_module_id
+  on public.module_sources(module_id, sort_order);
+
+alter table public.module_sources enable row level security;
+
+drop policy if exists "module_sources_authenticated_select" on public.module_sources;
+create policy "module_sources_authenticated_select" on public.module_sources
+  for select to authenticated
+  using (true);

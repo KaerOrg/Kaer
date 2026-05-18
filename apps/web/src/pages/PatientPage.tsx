@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback, useRef, useMemo, type ReactNode } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BookOpen, Eye, EyeOff, Bell, Search, LayoutDashboard, Package2, FileText, CalendarDays, Clock } from 'lucide-react'
+import { ShieldAlert, ClipboardList, Eye, EyeOff, Bell, Search, LayoutDashboard, Package2, FileText, CalendarDays, Clock } from 'lucide-react'
 import { LUCIDE_ICONS } from '../lib/lucideIcons'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from '../contexts/ToastContext'
@@ -16,10 +16,11 @@ import {
   type PatientModule,
   type PsychoeducationCardEntry,
 } from '../lib/database.types'
-import { CLINICAL_SCALES } from '../data/scales'
+import { CLINICAL_SCALES, AGE_BADGE_CONFIG } from '../data/scales'
 import { CSSRSScreenPanel } from '../components/features/CSSRSScreenPanel'
 import { fetchPsychoCards, type PsychoCardInfo } from '../services/moduleService'
 import { ModulePreviewPanel } from '../components/features/ModulePreviewPanel'
+import { Modal } from '../components/ui/Modal'
 import {
   fetchModuleCategories,
   fetchComingSoonModuleIds,
@@ -154,6 +155,8 @@ export function PatientPage() {
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
 
   // ── Rendez-vous ──────────────────────────────────────────────────────────
+  const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+
   const [rdvAppointments, setRdvAppointments] = useState<AppointmentWithPatient[]>([])
   const [rdvLoaded, setRdvLoaded] = useState(false)
   const [rdvModal, setRdvModal] = useState<{ type: 'create' | 'view'; appointment?: AppointmentWithPatient } | null>(null)
@@ -287,12 +290,6 @@ export function PatientPage() {
   }
 
   const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
-  const autoScales = activeScales.filter(
-    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'auto'
-  )
-  const heteroScales = activeScales.filter(
-    m => CLINICAL_SCALES.find(s => s.id === m.module_type)?.evaluationType === 'hetero'
-  )
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -821,63 +818,95 @@ export function PatientPage() {
     )
   }
 
-  const renderScalesGroup = (type: 'auto' | 'hetero', extra?: ReactNode) => {
-    const scales = type === 'auto' ? autoScales : heteroScales
-    const label = type === 'auto' ? 'Auto-questionnaires' : 'Hétéro-questionnaires'
-    const subtitle = scales.length > 0
-      ? `${scales.length} questionnaire${scales.length > 1 ? 's' : ''} actif${scales.length > 1 ? 's' : ''}`
-      : 'Aucun questionnaire actif pour ce patient'
+  const renderScalesAccordion = () => {
+    const visibleScales = enabledModules === null
+      ? [...CLINICAL_SCALES]
+      : CLINICAL_SCALES.filter(s => enabledModules.has(s.id as ModuleType))
+    const activeCount = activeScales.length
 
     return (
-      <div className={`scales-section scales-section--${type}`}>
-        <div className="scales-section__header">
-          <div className="scales-section__left">
-            <span className="scales-section__icon">
-              <BookOpen size={18} />
-            </span>
-            <div>
-              <span className="scales-section__label">{label}</span>
-              <span className="scales-section__sub">{subtitle}</span>
-            </div>
-          </div>
-          <button className="scales-section__add-btn" onClick={() => navigate('/dispensaire')}>
-            + Ajouter
-          </button>
-        </div>
-
-        {scales.length > 0 && (
-          <ul className="scales-section__list">
-            {scales.map(mod => {
-              const scale = CLINICAL_SCALES.find(s => s.id === mod.module_type)
+      <Accordion
+        key="assessments"
+        title={t('category.assessments.label')}
+        icon={<ClipboardList size={16} />}
+        badge={activeCount > 0 ? activeCount : undefined}
+        defaultOpen={false}
+      >
+        <div className="scales-list">
+          <ul className="scales-list__items">
+            {visibleScales.map(scale => {
+              const mod = activeScales.find(m => m.module_type === scale.id)
+              const unlocked = !!mod
+              const loading = unlockingModule === (scale.id as ModuleType)
               return (
-                <li key={mod.id} className="scales-section__item">
-                  <div className="scales-section__item-info">
-                    <span className="scales-section__item-name">{scale?.name ?? mod.module_type}</span>
-                    <span className="scales-section__item-date">
-                      depuis le {new Date(mod.unlocked_at).toLocaleDateString(i18n.language)}
+                <li key={scale.id} className={`scale-row${unlocked ? ' scale-row--active' : ''}`}>
+                  <div className="scale-row__left">
+                    <span className={`scale-row__type-badge scale-row__type-badge--${scale.evaluationType}`}>
+                      {scale.evaluationType === 'auto' ? 'Auto' : 'Hétéro'}
                     </span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="module-card__revoke"
-                    loading={revokingModuleId === mod.id}
-                    onClick={() => revokeScale(mod.id)}
-                  >
-                    Révoquer
-                  </Button>
+                  <div className="scale-row__main">
+                    <div className="scale-row__title-line">
+                      <strong className="scale-row__name">{scale.name}</strong>
+                      <span className="scale-row__full-title">{scale.fullTitle}</span>
+                      <span className="scale-row__category-chip">{scale.category}</span>
+                      {scale.targetAges.map(age => (
+                        <span
+                          key={age}
+                          className="scale-row__age-chip"
+                          style={{ background: AGE_BADGE_CONFIG[age].bg, color: AGE_BADGE_CONFIG[age].text }}
+                        >
+                          {AGE_BADGE_CONFIG[age].label}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="scale-row__desc">{scale.description}</p>
+                    {unlocked && mod && (
+                      <span className="scale-row__date">
+                        {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="scale-row__toggle">
+                    {moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
+                      if (unlocked && mod) revokeScale(mod.id)
+                      else unlockModule(scale.id as ModuleType)
+                    })}
+                  </div>
                 </li>
               )
             })}
-          </ul>
-        )}
 
-        {extra !== undefined && (
-          <div className="scales-section__extra">
-            {extra}
-          </div>
-        )}
-      </div>
+            <li className="scale-row scale-row--cssrs">
+              <div className="scale-row__left">
+                <span className="scale-row__type-badge scale-row__type-badge--hetero">
+                  Hétéro
+                </span>
+              </div>
+              <div className="scale-row__main">
+                <div className="scale-row__title-line">
+                  <strong className="scale-row__name">C-SSRS — Dépistage suicidaire</strong>
+                  <span className="scale-row__full-title">Columbia Suicide Severity Rating Scale</span>
+                  <span className="scale-row__category-chip">Suicidalité</span>
+                  <span className="scale-row__age-chip" style={{ background: '#BBF7D0', color: '#15803D' }}>Adulte</span>
+                </div>
+                <p className="scale-row__desc">
+                  Évaluation structurée de l'idéation et des comportements suicidaires · Columbia University / NIMH · Version « Depuis la dernière visite ».
+                </p>
+              </div>
+              <div className="scale-row__toggle">
+                <button
+                  className="scales-list__view-btn"
+                  onClick={() => setShowCSSRSModal(true)}
+                >
+                  <ShieldAlert size={13} />
+                  Évaluations
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </Accordion>
     )
   }
 
@@ -1097,6 +1126,7 @@ export function PatientPage() {
 
                 <div className="category-list">
                   {categories.map(category => {
+                    if (category.id === 'assessments') return renderScalesAccordion()
                     const visibleModules = (enabledModules === null
                       ? category.modules
                       : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
@@ -1118,14 +1148,6 @@ export function PatientPage() {
                       </Accordion>
                     )
                   })}
-
-                  {renderScalesGroup('auto')}
-                  {renderScalesGroup('hetero', (
-                    <CSSRSScreenPanel
-                      patientId={id!}
-                      practitionerId={practitioner!.id}
-                    />
-                  ))}
                 </div>
               </section>
             )}
@@ -1443,6 +1465,22 @@ export function PatientPage() {
           moduleIconName={notifModal.moduleIconName}
           onClose={() => setNotifModal(null)}
         />
+      )}
+
+      {showCSSRSModal && practitioner && id && (
+        <Modal
+          title="C-SSRS — Dépistage suicidaire"
+          subtitle="Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
+          icon={<ShieldAlert size={20} />}
+          onClose={() => setShowCSSRSModal(false)}
+          noPadding
+          maxWidth={860}
+        >
+          <CSSRSScreenPanel
+            patientId={id}
+            practitionerId={practitioner.id}
+          />
+        </Modal>
       )}
     </Layout>
   )

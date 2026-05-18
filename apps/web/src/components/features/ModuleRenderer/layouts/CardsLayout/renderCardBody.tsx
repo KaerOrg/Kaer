@@ -20,6 +20,8 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
+  card_paragraph_bold: FieldText,
+  card_italic_note:    FieldText,
 }
 
 function renderField(f: ContentField, t: (key: string) => string): ReactNode {

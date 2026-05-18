@@ -158,6 +158,17 @@
     "rdv_past": "Past",
     "rdv_empty_upcoming": "No upcoming appointments.",
     "rdv_empty_past": "No past appointments.",
+    "patient_view_tab": "Patient view",
+    "sources_tab": "Sources & recommendations",
+    "sources_intro": "Sources verified via PubMed and official health organisation websites.",
+    "sources_empty": "No sources available for this module.",
+    "sources_grade": "Grade {{grade}}",
+    "sources_type_rct": "Randomised trial",
+    "sources_type_cohort_study": "Cohort study",
+    "sources_type_meta_analysis": "Meta-analysis",
+    "sources_type_systematic_review": "Systematic review",
+    "sources_type_guideline": "Official guideline",
+    "sources_type_expert_opinion": "Expert opinion",
     "cat_safety_label": "Safety & Crisis Management",
     "cat_safety_subtitle": "The vital shield",
     "cat_iatrogenic_label": "Iatrogenic & Somatic Monitoring",
@@ -599,7 +610,11 @@
       "subtitle": ""
     },
     "assessments": {
-      "label": "Clinical Assessments",
+      "label": "Scales and Assessment Questionnaires",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivation & Therapeutic Engagement",
       "subtitle": ""
     }
   },

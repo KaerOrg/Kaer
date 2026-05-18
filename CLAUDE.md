@@ -88,15 +88,21 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 
 | Clé | Nom | Statut |
 |---|---|---|
-| `sleep_diary` | Agenda du sommeil | MVP — à construire |
-| `beck_columns` | Colonnes de Beck (TCC) | Prévu |
+| `sleep_diary` | Agenda du sommeil | Implémenté — moteur générique (`preview_kind='sleep_journal'`), agenda TCC-I 7 jours, SQLite local |
+| `beck_columns` | Colonnes de Beck (TCC) | Implémenté — moteur générique (`preview_kind='column_form'`), 5 colonnes DTR (situation/émotion/PA/réponse/résultat), intensité 0–100, SQLite local |
 | `fear_thermometer` | Thermomètre de la peur | Implémenté — moteur générique (`preview_kind = 'exposure_tracker'`), tabs Saisies/Situations, SUDS avant/après, stratégies DB-driven |
 | `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté — `preview_kind='exposure_hierarchy'`, 4 modes (hiérarchies/items/item_form/item_history), DesensitizationChart embedded, table SQLite `exposure_hierarchies` + colonnes `hierarchy_id`/`target_suds`/`is_done` ajoutées à `fear_situations` |
-| `emotion_wheel` | Roue des émotions | Prévu |
+| `emotion_wheel` | Roue des émotions | Implémenté — moteur générique (`preview_kind='tree_selector'`), 3 niveaux Plutchik (primaire→nuance→spécifique), intensité 1–10, SQLite `emotion_entries` |
 | `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
-| `rim` | RIM — Imagerie mentale | Prévu |
-| `cognitive_saturation` | Saturation cognitive | Prévu |
+| `rim` | RIM — Retraitement par Imagerie Mentale | Implémenté — `preview_kind='patient_scenario'`, scénarios alternatifs stockés dans `patient_modules.config` (Supabase), patient en lecture seule |
+| `cognitive_saturation` | Saturation cognitive (ACT/TCC) | Implémenté — `preview_kind='guided_exercise'`, tapotement répété sur pensée cible (défusion ACT), SQLite `cognitive_saturation_sessions` |
 | `decisional_balance` | Balance décisionnelle | Implémenté — moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé |
+| `behavioral_activation` | Activation comportementale | Implémenté — `preview_kind='activity_log'`, liste activités groupées par date, scores Plaisir/Maîtrise 0–10, statut planifiée/réalisée, SQLite `activity_records` |
+| `grounding` | Ancrage 5-4-3-2-1 | Implémenté — `preview_kind='guided_exercise'`, exercice DBT sensoriel interactif (Linehan 1993), 3 modes (intro/guided/done), sans stockage de données |
+| `mood_tracker` | Thermomètre de l'humeur | Implémenté — saisie quotidienne 4 dimensions (humeur/énergie/anxiété/plaisir 1–10), sparklines 30j, SQLite `mood_entries` (UNIQUE sur `date`) |
+| `motivational_balance` | Balance motivationnelle | Implémenté — `preview_kind='tabbed'`, 2 onglets (Fiches psyedu + Balance pour/contre), SQLite local |
+| `medication_adherence` | Observance médicamenteuse | Implémenté — `preview_kind='daily_checkin'`, checklist quotidienne d'observance, SQLite local |
+| `breathing_techniques` | Techniques de respiration | Implémenté — `preview_kind='fields'`, respirations guidées (cohérence cardiaque, respiration abdominale), SQLite local |
 | `phq9` | PHQ-9 — Dépression | Implémenté — 9 items, score 0-27, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `gad7` | GAD-7 — Anxiété généralisée | Implémenté — 7 items, score 0-21, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `bsl23` | BSL-23 — Symptômes borderline | Implémenté — 23 items, score moyen 0-4, légende 0-4, pattern générique ModuleRenderer, SQLite `scale_entries` |
@@ -104,10 +110,16 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | Implémenté — 26 items, 3 sous-échelles (I/HI/TOD), hétéro-évaluation, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | Implémenté — 6 items Kessler (2005), score 0-24, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `epds` | EPDS — Dépression postnatale | Implémenté — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries` |
+| `nsi` | NSI — Sévérité des cauchemars | Implémenté — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), pattern générique ModuleRenderer, SQLite `nsi_entries` |
+| `medication_side_effects` | Effets secondaires médicamenteux | Implémenté — questionnaire générique ModuleRenderer, SQLite `scale_entries` |
+| `psychoeducation` | Psychoéducation | Implémenté — `preview_kind='cards'`, cartes de savoir thérapeutique, statut lecture par carte, IDs débloqués en Supabase |
 | `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — `preview_kind='psyedu'`, 8 fiches `psyedu_topics`/`psyedu_blocks` (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
 | `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
+| `cognitive_distortions` | Distorsions cognitives | Prévu (`preview_kind='coming_soon'`) |
+| `therapeutic_commitment` | Engagement thérapeutique | Prévu (`preview_kind='coming_soon'`) |
 
 ## Pattern : Questionnaires cliniques (échelles)
 
@@ -148,7 +160,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Schéma SQL appliqué sur Supabase
 - [ ] Clés Supabase dans les fichiers `.env`
 - [ ] App mobile patient (navigation, auth, modules)
-- [ ] Module Agenda du sommeil
+- [x] Module Agenda du sommeil (`sleep_diary`) — moteur générique (`preview_kind='sleep_journal'`), agenda TCC-I 7 jours, SQLite local
 - [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL
 - [x] Module Balance décisionnelle (`decisional_balance`) — migré vers moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`, signal d'observance Supabase, 10 tests Jest
 - [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
@@ -165,6 +177,20 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Hiérarchie d'exposition (`exposure_hierarchy`) — liste graduée SUDs 0-100, cases à cocher neutres, bandeau disclaimer, sources HAS/NICE/Wolpe/Foa, SQLite local, teen mode, 15 tests Jest
 - [x] Module Journal de craving (`craving_journal`) — 4 fiches psyedu (Supabase) + journal auto-monitoring (intensité 0-10, déclencheur, émotion, pensée automatique, stratégie), SQLite local, 2 onglets, bandeau disclaimer MDR, teen mode, 10 tests Jest
 - [x] Système de prise de rendez-vous (`calendar_booking`) — praticien : grille semaine pixel, éditeur plages récurrentes + exceptions, toggle auto-confirm, modal RDV ; patient mobile : calendrier mois custom, réservation + annulation ; 3 tables Supabase (availability_rules, availability_exceptions, appointments) + RLS ; 28 tests vitest + 11 tests jest ; spec [`docs/spec/calendar.md`](docs/spec/calendar.md)
+- [x] Module Colonnes de Beck (`beck_columns`) — 5 colonnes DTR (situation/émotion/PA/réponse/résultat), intensité 0–100, SQLite local
+- [x] Module Roue des émotions (`emotion_wheel`) — 3 niveaux Plutchik (primaire→nuance→spécifique), intensité 1–10, SQLite `emotion_entries`
+- [x] Module RIM — Retraitement par Imagerie Mentale (`rim`) — scénarios alternatifs dans `patient_modules.config` (Supabase), patient en lecture seule
+- [x] Module Saturation cognitive (`cognitive_saturation`) — défusion ACT, tapotement sur pensée cible, SQLite `cognitive_saturation_sessions`
+- [x] Module Activation comportementale (`behavioral_activation`) — activités P/M 0–10, statut planifiée/réalisée, SQLite `activity_records`
+- [x] Module Ancrage 5-4-3-2-1 (`grounding`) — exercice DBT sensoriel interactif (Linehan 1993), 3 modes, sans stockage de données
+- [x] Module Thermomètre de l'humeur (`mood_tracker`) — 4 dimensions quotidiennes (humeur/énergie/anxiété/plaisir 1–10), sparklines 30j, SQLite `mood_entries`
+- [x] Module Balance motivationnelle (`motivational_balance`) — 2 onglets psyedu + balance pour/contre, SQLite local
+- [x] Module Observance médicamenteuse (`medication_adherence`) — checklist quotidienne d'observance, SQLite local
+- [x] Module Techniques de respiration (`breathing_techniques`) — respirations guidées (cohérence cardiaque, abdominale), SQLite local
+- [x] Module EPDS — Dépression postnatale (`epds`) — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries`
+- [x] Module NSI — Sévérité des cauchemars (`nsi`) — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), SQLite `nsi_entries`
+- [x] Module Effets secondaires médicamenteux (`medication_side_effects`) — questionnaire générique ModuleRenderer, SQLite `scale_entries`
+- [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
 - [ ] Notifications push
 
 ## Vision commerciale
