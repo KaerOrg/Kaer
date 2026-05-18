@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BrainCircuit, CheckCircle, TriangleAlert } from 'lucide-react'
-import { Button } from '../components/ui/Button'
-import { InputField } from '../components/ui/InputField'
+import { Button } from '../../components/ui/Button'
+import { InputField } from '../../components/ui/InputField'
 import {
   signUpPatientFromInvitation,
   validateInvitationToken,
-} from '../services/invitationService'
-import './LoginPage.css'
+} from '../../services/invitationService'
+import '../LoginPage/LoginPage.css'
 import './PatientRegisterPage.css'
 
 type Step = 'checking' | 'invalid' | 'form' | 'success'

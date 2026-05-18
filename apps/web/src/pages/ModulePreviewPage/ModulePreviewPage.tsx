@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
-import { Layout } from '../components/features/Layout'
-import { ModulePreviewPanel } from '../components/features/ModulePreviewPanel'
-import { fetchModulePreviewKind, type PreviewKind } from '../services/moduleService'
+import { Layout } from '../../components/features/Layout'
+import { ModulePreviewPanel } from '../../components/features/ModulePreviewPanel'
+import { fetchModulePreviewKind, type PreviewKind } from '../../services/moduleService'
 import './ModulePreviewPage.css'
 
 export function ModulePreviewPage() {

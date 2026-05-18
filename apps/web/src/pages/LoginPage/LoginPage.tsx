@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrainCircuit } from 'lucide-react'
-import { useAuthStore } from '../store/authStore'
-import { Button } from '../components/ui/Button'
-import { InputField } from '../components/ui/InputField'
-import { SelectField } from '../components/ui/SelectField/SelectField'
-import { fetchProfessionalTitles } from '../services/authService'
-import type { ProfessionalTitle } from '../lib/database.types'
+import { useAuthStore } from '../../store/authStore'
+import { Button } from '../../components/ui/Button'
+import { InputField } from '../../components/ui/InputField'
+import { SelectField } from '../../components/ui/SelectField/SelectField'
+import { fetchProfessionalTitles } from '../../services/authService'
+import type { ProfessionalTitle } from '../../lib/database.types'
 import './LoginPage.css'
 
 export function LoginPage() {

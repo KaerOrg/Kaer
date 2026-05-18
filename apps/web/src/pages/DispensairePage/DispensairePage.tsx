@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react'
 import { Check, Loader, Info } from 'lucide-react'
-import { Layout } from '../components/features/Layout'
-import { Button } from '../components/ui/Button'
-import { Modal } from '../components/ui/Modal'
-import { fetchPatientOptions, type PatientOption } from '../services/patientService'
-import { proposeScale } from '../services/moduleAssignmentService'
-import { useAuthStore } from '../store/authStore'
+import { Layout } from '../../components/features/Layout'
+import { Button } from '../../components/ui/Button'
+import { Modal } from '../../components/ui/Modal'
+import { fetchPatientOptions, type PatientOption } from '../../services/patientService'
+import { proposeScale } from '../../services/moduleAssignmentService'
+import { useAuthStore } from '../../store/authStore'
 import {
   CLINICAL_SCALES,
   SCALE_CATEGORIES,
@@ -13,7 +13,7 @@ import {
   AGE_ORDER,
   type ScaleCategory,
   type ClinicalScale,
-} from '../data/scales'
+} from '../../data/scales'
 import './DispensairePage.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────

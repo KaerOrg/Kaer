@@ -19,6 +19,8 @@ export interface ClinicalScale {
   readonly validatedAgeRange: string
   readonly description: string
   readonly evaluationType: 'auto' | 'hetero'
+  readonly icon: string
+  readonly color: string
   readonly hasPreview?: boolean
   readonly reference: {
     readonly label: string
@@ -77,6 +79,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       'Questionnaire de dépistage et de mesure de la sévérité de la dépression en 9 items. Référence mondiale pour le suivi longitudinal.',
     evaluationType: 'auto',
+    icon: 'clipboard-list',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: "NICE NG222 — Dépression adulte : PHQ-9 recommandé pour le suivi régulier (2022). Également recommandé par l'APA Clinical Practice Guidelines.",
@@ -93,6 +97,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       'Évaluation rapide en 7 items du trouble anxieux généralisé. Sensible au changement thérapeutique.',
     evaluationType: 'auto',
+    icon: 'clipboard-list',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: 'NICE CG113 — Trouble anxieux généralisé et trouble panique adulte : GAD-7 recommandé en première intention.',
@@ -109,6 +115,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       'Dépistage de la dépression périnatale (ante et post-partum). Référence internationale recommandée par la HAS.',
     evaluationType: 'auto',
+    icon: 'activity',
+    color: '#EC4899',
     hasPreview: true,
     reference: {
       label: "HAS — Repérage, diagnostic et prise en charge des troubles psychiques périnatals. EPDS exigé dans l'entretien postnatal précoce obligatoire depuis juillet 2022.",
@@ -125,6 +133,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Mesure des symptômes anxieux et dépressifs chez l'enfant et l'adolescent. Versions auto-rapportée et parentale disponibles.",
     evaluationType: 'auto',
+    icon: 'clipboard-list',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: 'CORC (Child Outcomes Research Consortium) — fiche RCADS. Outil de référence des recommandations NICE pour la santé mentale pédiatrique (CG28/NG134).',
@@ -141,6 +151,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       'Mesure de la sévérité des symptômes du trouble de personnalité borderline. Outil de suivi longitudinal en TCD.',
     evaluationType: 'auto',
+    icon: 'clipboard-list',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: 'Bohus et al. — Psychopathology, 2009 (validation BSL-23, n=694)',
@@ -157,6 +169,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       'Évaluation des expériences subcliniques positives, négatives et dépressives en population générale et clinique.',
     evaluationType: 'auto',
+    icon: 'brain',
+    color: '#6366F1',
     reference: {
       label: 'Capra et al. — Front Psychiatry, 2015 (revue systématique des propriétés psychométriques du CAPE)',
       url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4681550/',
@@ -172,6 +186,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Dépistage OMS de la consommation d'alcool problématique en 10 items. Recommandé par la HAS pour le repérage précoce.",
     evaluationType: 'auto',
+    icon: 'clipboard-list',
+    color: '#6366F1',
     reference: {
       label: "OMS — Manuel officiel AUDIT, lignes directrices d'utilisation en soins primaires (2001)",
       url: 'https://www.who.int/publications/i/item/WHO-MSD-MSB-01.6a',
@@ -187,6 +203,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Évaluation multidimensionnelle de la sévérité des cauchemars en 9 items (score 0–45). Mesure la fréquence des réveils, l'intensité émotionnelle et l'impact diurne sur l'humeur, la concentration, la somnolence et le sommeil.",
     evaluationType: 'auto',
+    icon: 'moon',
+    color: '#7C3AED',
     hasPreview: true,
     reference: {
       label: "Geoffroy PA et al. — The nightmare severity index (NSI): A short new multidimensional tool for assessing nightmares. J Sleep Res, 2023. CC BY-NC.",
@@ -203,6 +221,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l'ASRS v1.1). Score total 0–72, Partie A 0–24, Partie B 0–48. Validé par l'OMS pour une évaluation approfondie en consultation.",
     evaluationType: 'auto',
+    icon: 'zap',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: "Kessler RC et al. — The World Health Organization Adult ADHD Self-Report Scale (ASRS): a short screening scale for use in the general population. Psychol Med 2005;35(2):245-256.",
@@ -219,6 +239,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0–24. Validé par l'OMS et recommandé pour le repérage rapide en consultation.",
     evaluationType: 'auto',
+    icon: 'zap',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: "Kessler RC et al. — The World Health Organization Adult ADHD Self-Report Scale (ASRS): a short screening scale for use in the general population. Psychol Med 2005;35(2):245-256.",
@@ -235,6 +257,8 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     description:
       "Grille comportementale de dépistage du TDAH en 26 items (18 critères DSM-IV TDAH + 8 critères TOD). Trois sous-scores : Inattention (I, 0–27), Hyperactivité-Impulsivité (H/I, 0–27) et Opposition-Défiance (TOD, 0–24). Hétéro-évaluation par le parent ou l'enseignant.",
     evaluationType: 'hetero',
+    icon: 'zap',
+    color: '#6366F1',
     hasPreview: true,
     reference: {
       label: "Swanson JM et al. — Clinical relevance of the primary findings of the MTA: success rates based on severity of ADHD and ODD symptoms at the end of treatment. J Am Acad Child Adolesc Psychiatry, 2001. CADDRA — Lignes directrices canadiennes pour le TDAH (2023).",
