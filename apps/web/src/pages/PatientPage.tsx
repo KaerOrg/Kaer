@@ -47,6 +47,7 @@ import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import { NotificationRoutineModal } from '../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { Tabs } from '../components/ui/Tabs'
 import { extractUniqueTags, extractTopTags } from '../services/noteService'
+import { SpeechToTextButton } from '../components/SpeechToTextButton'
 import { AppointmentModal } from '../components/features/AppointmentModal'
 import {
   fetchAppointmentsForPatient,
@@ -61,6 +62,7 @@ import type { AppointmentWithPatient, AppointmentStatus } from '../lib/calendar.
 import './PatientPage.css'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
+const TYPEWRITER_CHAR_MS = 20
 
 type PageData = {
   modules: PatientModule[]
@@ -145,6 +147,9 @@ export function PatientPage() {
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null)
   const [tagSearch, setTagSearch] = useState('')
   const newNoteRef = useRef<HTMLTextAreaElement>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const typewriterQueueRef = useRef<string[]>([])
+  const isTypingRef = useRef(false)
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
 
@@ -431,6 +436,46 @@ export function PatientPage() {
   const handleEditingTagKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') { e.preventDefault(); addEditingTag() }
   }
+
+  const handleRecordingChange = useCallback((recording: boolean) => {
+    setIsRecording(recording)
+  }, [])
+
+  const typeNextCharRef = useRef<() => void>(() => {})
+
+  const typeNextChar = useCallback(() => {
+    if (!newNoteRef.current || typewriterQueueRef.current.length === 0) {
+      isTypingRef.current = false
+      return
+    }
+    const segment = typewriterQueueRef.current[0]
+    if (segment.length === 0) {
+      typewriterQueueRef.current.shift()
+      setTimeout(() => typeNextCharRef.current(), 0)
+      return
+    }
+    newNoteRef.current.value += segment[0]
+    typewriterQueueRef.current[0] = segment.slice(1)
+    setTimeout(() => typeNextCharRef.current(), TYPEWRITER_CHAR_MS)
+  }, [])
+
+  useEffect(() => {
+    typeNextCharRef.current = typeNextChar
+  }, [typeNextChar])
+
+  const handleTextChunk = useCallback((text: string) => {
+    if (!newNoteRef.current) return
+    const chunk = newNoteRef.current.value.trim() ? '\n' + text : text
+    typewriterQueueRef.current.push(chunk)
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      typeNextChar()
+    }
+  }, [typeNextChar])
+
+  const handleTranscription = useCallback(() => {
+    // no-op: text already inserted chunk by chunk via handleTextChunk
+  }, [])
 
   const handleSaveNote = async () => {
     if (!id || !practitioner) return
@@ -930,13 +975,13 @@ export function PatientPage() {
                     </div>
                     <span className="patient-overview__stat-label">{t('patient.overview_active_modules')}</span>
                   </div>
-                  <div className="patient-overview__stat">
+                  <button className="patient-overview__stat patient-overview__stat--link" onClick={() => setActiveTab('notes')}>
                     <div className="patient-overview__stat-main">
                       <span className="patient-overview__stat-value">{notes.length}</span>
                       <FileText size={20} className="patient-overview__stat-icon" />
                     </div>
                     <span className="patient-overview__stat-label">{t('patient.tab_notes')}</span>
-                  </div>
+                  </button>
                   <div className="patient-overview__stat">
                     <div className="patient-overview__stat-main">
                       <span className="patient-overview__stat-value">0</span>
@@ -1089,12 +1134,23 @@ export function PatientPage() {
               <section className="patient-notes">
                 {/* ── Formulaire nouvelle note ─────────────────────────── */}
                 <div className="patient-notes__form">
-                  <textarea
-                    ref={newNoteRef}
-                    className="patient-notes__textarea"
-                    placeholder={t('notes.placeholder')}
-                    rows={3}
-                  />
+                  <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
+                    <div className="patient-notes__textarea-inner">
+                      {isRecording && (
+                        <div className="patient-notes__skeleton" aria-hidden="true">
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                        </div>
+                      )}
+                      <textarea
+                        ref={newNoteRef}
+                        className="patient-notes__textarea"
+                        placeholder={t('notes.placeholder')}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
 
                   <div className="patient-notes__tag-row">
                     {newNoteTags.map(tag => (
@@ -1121,6 +1177,12 @@ export function PatientPage() {
                     <p className="patient-notes__error">{noteError}</p>
                   )}
                   <div className="patient-notes__form-actions">
+                    <SpeechToTextButton
+                      onTranscription={handleTranscription}
+                      onTextChunk={handleTextChunk}
+                      onRecordingChange={handleRecordingChange}
+                      disabled={savingNote}
+                    />
                     <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
                       {t('notes.save_button')}
                     </Button>
