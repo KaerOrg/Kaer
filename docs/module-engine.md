@@ -466,4 +466,55 @@ Seulement si le module ne peut pas être rendu par `FieldRenderer` (timer, anima
     }))
     ```
 
+---
+
+## Schéma `ClinicalScale` — Échelles et questionnaires d'évaluation
+
+Fichier source : `apps/web/src/data/scales.ts`
+
+Les échelles cliniques ne passent **pas** par la table `modules` de Supabase : elles sont définies statiquement dans `CLINICAL_SCALES` et rendues dans l'accordéon **"Échelles et questionnaires d'évaluation"** de `PatientModulesTab`.
+
+### Champs
+
+| Champ | Type | Obligatoire | Rôle |
+|---|---|---|---|
+| `id` | `string` | oui | Clé `ModuleType` — doit correspondre à un type reconnu par `SCALE_SCORING` (mobile) et `scale_entries` (SQLite) |
+| `name` | `string` | oui | Nom court affiché en titre de carte |
+| `fullTitle` | `string` | oui | Titre complet affiché en sous-titre de carte |
+| `category` | `ScaleCategory` | oui | Chip nosologique affiché dans la carte (ex. `'Humeur'`, `'Anxiété'`) — jamais transmis au patient |
+| `targetAges` | `TargetAge[]` | oui | Chips de population colorés via `AGE_BADGE_CONFIG` (`'perinatal'`, `'enfant'`, `'ado'`, `'adulte'`, `'senior'`) |
+| `validatedAgeRange` | `string` | oui | Plage d'âge validée en texte libre (ex. `'≥ 18 ans'`) |
+| `description` | `string` | oui | Description clinique affichée dans la carte |
+| `evaluationType` | `'auto' \| 'hetero'` | oui | Badge **Auto** (auto-évaluation patient) ou **Hétéro** (évaluation par le praticien) |
+| `icon` | `string` | oui | Nom d'icône Lucide (ex. `'clipboard-list'`) — résolu via `LUCIDE_ICONS` |
+| `color` | `string` | oui | Couleur hexadécimale (réservé à un usage futur, non utilisé dans le rendu actuel) |
+| `hasPreview` | `boolean?` | non | Affiche le bouton **Aperçu vue patient** sur la carte. Omis = pas d'aperçu. |
+| `noToggle` | `boolean?` | non | Remplace le toggle unlock/revoke par un bouton d'action custom. Utilisé pour les échelles gérées entièrement côté praticien, sans `patient_module` en base (ex. C-SSRS). |
+| `reference` | `{ label, url }` | oui | Référence bibliographique — label affiché, url vers la publication |
+
+### Comportement selon `noToggle`
+
+```
+noToggle absent (false) → toggle standard unlock/revoke → crée/supprime un patient_module en base
+noToggle: true          → bouton custom (ex. "Voir les évaluations") → ouvre un panel dédié
+```
+
+Le composant `renderScalesAccordion` dans `PatientModulesTab` lit `scale.noToggle` et branche le rendu :
+
+```tsx
+const right = scale.noToggle
+  ? <button onClick={() => setShowCSSRSModal(true)}>...</button>
+  : moduleToggle(unlocked, loading, () => { ... })
+```
+
+### Ajouter une nouvelle échelle
+
+1. Ajouter l'entrée dans `CLINICAL_SCALES` (`apps/web/src/data/scales.ts`)
+2. Ajouter la config scoring dans `SCALE_SCORING` (`apps/mobile/src/lib/scaleScoring.ts`)
+3. Ajouter les clés i18n `modules.<id>.*` dans `fr/common.json`, `en/common.json`, `fr/teen.json`, `en/teen.json`
+4. Insérer les `module_content_fields` + `field_props` dans Supabase
+5. Ajouter l'entrée dans `GENERIC_SCALE_TYPES` et `MODULE_CONFIG` dans `HomeScreen.tsx`
+
+> Si l'échelle a une logique conditionnelle (branches, scores intermédiaires) : `noToggle: true` + écran dédié côté mobile plutôt que `ScaleEntryScreen` générique.
+
 > Règle : ne jamais livrer un module mobile sans son pendant web. Un module invisible dans l'armoire praticien ne peut pas être débloqué.

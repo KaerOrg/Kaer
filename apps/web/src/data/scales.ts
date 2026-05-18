@@ -22,6 +22,7 @@ export interface ClinicalScale {
   readonly icon: string
   readonly color: string
   readonly hasPreview?: boolean
+  readonly noToggle?: boolean
   readonly reference: {
     readonly label: string
     readonly url: string
@@ -263,6 +264,23 @@ export const CLINICAL_SCALES: readonly ClinicalScale[] = [
     reference: {
       label: "Swanson JM et al. — Clinical relevance of the primary findings of the MTA: success rates based on severity of ADHD and ODD symptoms at the end of treatment. J Am Acad Child Adolesc Psychiatry, 2001. CADDRA — Lignes directrices canadiennes pour le TDAH (2023).",
       url: 'https://www.caddra.ca',
+    },
+  },
+  {
+    id: 'cssrs',
+    name: 'C-SSRS — Dépistage suicidaire',
+    fullTitle: 'Columbia Suicide Severity Rating Scale',
+    category: 'Humeur',
+    targetAges: ['ado', 'adulte'],
+    validatedAgeRange: '≥ 12 ans',
+    description: "Évaluation structurée de l'idéation et des comportements suicidaires · Columbia University / NIMH · Version « Depuis la dernière visite ».",
+    evaluationType: 'hetero',
+    icon: 'shield-alert',
+    color: '#DC2626',
+    noToggle: true,
+    reference: {
+      label: 'Posner K et al. — The Columbia–Suicide Severity Rating Scale: Initial Validity and Internal Consistency Findings From Three Multisite Studies With Adolescents and Adults. Am J Psychiatry, 2011.',
+      url: 'https://pubmed.ncbi.nlm.nih.gov/22193671',
     },
   },
 ] as const

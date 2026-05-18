@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, ClipboardList, Eye, EyeOff, Bell } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
-import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
@@ -12,29 +11,18 @@ import { Modal } from '../../../components/ui/Modal'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
-import {
-  type ModuleType,
-  type PatientModule,
-  type PsychoeducationCardEntry,
-} from '../../../lib/database.types'
+import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { CLINICAL_SCALES, AGE_BADGE_CONFIG } from '../../../data/scales'
 import { type PsychoCardInfo } from '../../../services/moduleService'
 import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
 import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
-  unlockPsychoeducation,
-  updatePsychoeducationCards,
-  unlockRim,
-  updateRim,
 } from '../../../services/moduleAssignmentService'
+import { useRimEditor } from '../hooks/useRimEditor'
+import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 
 const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
-
-function getPsychoCards(mod: PatientModule): PsychoeducationCardEntry[] {
-  const config = mod.config as { unlocked_cards?: PsychoeducationCardEntry[] }
-  return config?.unlocked_cards ?? []
-}
 
 type Props = {
   patientId: string
@@ -63,20 +51,11 @@ export function PatientModulesTab({
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
   const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
-
-  const [psychoPickerMode, setPsychoPickerMode] = useState<'off' | 'unlock' | 'edit'>('off')
-  const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set())
-  const [savingPsycho, setSavingPsycho] = useState(false)
-  const [psychoError, setPsychoError] = useState<string | null>(null)
-
-  const [rimEditorMode, setRimEditorMode] = useState<'off' | 'unlock' | 'edit'>('off')
-  const [rimAlternative, setRimAlternative] = useState('')
-  const [rimOriginal, setRimOriginal] = useState('')
-  const [savingRim, setSavingRim] = useState(false)
-  const [rimError, setRimError] = useState<string | null>(null)
-
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+
+  const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
+  const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
 
   const togglePreview = useCallback((type: ModuleType) => {
     setPreviewModule(prev => (prev === type ? null : type))
@@ -84,8 +63,6 @@ export function PatientModulesTab({
 
   const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
-
-  // ── Module standard ──────────────────────────────────────────────────────
 
   const unlockModule = async (moduleType: ModuleType) => {
     setUnlockingModule(moduleType)
@@ -95,118 +72,10 @@ export function PatientModulesTab({
   }
 
   const revokeModule = async (moduleId: string) => {
-    await revokeModuleService(moduleId)
-    await onReloadModules()
-  }
-
-  const revokeScale = async (moduleId: string) => {
     setRevokingModuleId(moduleId)
     await revokeModuleService(moduleId)
     await onReloadModules()
     setRevokingModuleId(null)
-  }
-
-  // ── Psychoéducation : sélecteur de cartes ────────────────────────────────
-
-  const psychoModule = modules.find(m => m.module_type === 'psychoeducation')
-
-  const openPsychoPicker = (mode: 'unlock' | 'edit') => {
-    setPsychoError(null)
-    if (mode === 'edit' && psychoModule) {
-      setSelectedCardIds(new Set(getPsychoCards(psychoModule).map(c => c.card_id)))
-    } else {
-      setSelectedCardIds(new Set(psychoCards.map(c => c.id)))
-    }
-    setPsychoPickerMode(mode)
-  }
-
-  const toggleCard = (cardId: string) => {
-    setSelectedCardIds(prev => {
-      const next = new Set(prev)
-      if (next.has(cardId)) { next.delete(cardId) } else { next.add(cardId) }
-      return next
-    })
-  }
-
-  const confirmPsycho = async () => {
-    if (selectedCardIds.size === 0) {
-      setPsychoError(t('patient.psycho_pick_error'))
-      return
-    }
-    setSavingPsycho(true)
-    setPsychoError(null)
-
-    if (psychoPickerMode === 'unlock') {
-      const { ok } = await unlockPsychoeducation(patientId, practitionerId, selectedCardIds)
-      if (!ok) {
-        toast.error(t('patient.psycho_error_unlock'))
-        setSavingPsycho(false)
-        return
-      }
-    } else if (psychoPickerMode === 'edit' && psychoModule) {
-      const { ok } = await updatePsychoeducationCards(
-        psychoModule.id,
-        getPsychoCards(psychoModule),
-        selectedCardIds,
-      )
-      if (!ok) {
-        toast.error(t('patient.psycho_error_update'))
-        setSavingPsycho(false)
-        return
-      }
-    }
-
-    setSavingPsycho(false)
-    setPsychoPickerMode('off')
-    await onReloadModules()
-  }
-
-  const cancelPsychoPicker = () => {
-    setPsychoPickerMode('off')
-    setPsychoError(null)
-  }
-
-  // ── RIM : éditeur de scénarios ──────────────────────────────────────────
-
-  const rimModule = modules.find(m => m.module_type === 'rim')
-
-  const openRimEditor = (mode: 'unlock' | 'edit') => {
-    setRimError(null)
-    if (mode === 'edit' && rimModule) {
-      const cfg = rimModule.config as { alternative_scenario?: string; original_scenario?: string }
-      setRimAlternative(cfg.alternative_scenario ?? '')
-      setRimOriginal(cfg.original_scenario ?? '')
-    } else {
-      setRimAlternative('')
-      setRimOriginal('')
-    }
-    setRimEditorMode(mode)
-  }
-
-  const cancelRimEditor = () => {
-    setRimEditorMode('off')
-    setRimError(null)
-  }
-
-  const confirmRim = async () => {
-    if (!rimAlternative.trim()) {
-      setRimError(t('patient.rim_error_required'))
-      return
-    }
-    setSavingRim(true)
-    setRimError(null)
-    const scenario = { alternative: rimAlternative.trim(), original: rimOriginal.trim() }
-
-    if (rimEditorMode === 'unlock') {
-      const { ok } = await unlockRim(patientId, practitionerId, scenario)
-      if (!ok) { toast.error(t('patient.rim_error_unlock')); setSavingRim(false); return }
-    } else if (rimEditorMode === 'edit' && rimModule) {
-      const { ok } = await updateRim(rimModule.id, scenario)
-      if (!ok) { toast.error(t('patient.rim_error_update')); setSavingRim(false); return }
-    }
-    setSavingRim(false)
-    setRimEditorMode('off')
-    await onReloadModules()
   }
 
   // ── Rendu d'une carte module ─────────────────────────────────────────────
@@ -230,17 +99,17 @@ export function PatientModulesTab({
     const modIcon = ModIcon ? <ModIcon size={18} /> : undefined
 
     if (moduleType === 'psychoeducation') {
-      const cards = mod ? getPsychoCards(mod) : []
+      const cards = psycho.psychoModule ? psycho.getUnlockedCards(psycho.psychoModule) : []
       const readCount = cards.filter(c => c.is_read).length
 
       const handlePsychoToggle = () => {
-        if (unlocked && mod) { cancelPsychoPicker(); revokeModule(mod.id) }
-        else if (psychoPickerMode === 'unlock') cancelPsychoPicker()
-        else openPsychoPicker('unlock')
+        if (unlocked && mod) { psycho.cancel(); revokeModule(mod.id) }
+        else if (psycho.mode === 'unlock') psycho.cancel()
+        else psycho.open('unlock')
       }
 
       return (
-        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psychoPickerMode !== 'off' || previewModule === 'psychoeducation' ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' || previewModule === 'psychoeducation' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -259,8 +128,8 @@ export function PatientModulesTab({
                   {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
                 </button>
-                {unlocked && mod && psychoPickerMode !== 'edit' && (
-                  <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
+                {unlocked && mod && psycho.mode !== 'edit' && (
+                  <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
                     {t('patient.psycho_edit_cards')}
                   </Button>
                 )}
@@ -304,10 +173,10 @@ export function PatientModulesTab({
             <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
           )}
 
-          {(psychoPickerMode === 'unlock' || psychoPickerMode === 'edit') && (
-            <div className={`psycho-card-picker ${psychoPickerMode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
+          {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
+            <div className={`psycho-card-picker ${psycho.mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
               <p className="psycho-card-picker__label">
-                {psychoPickerMode === 'unlock'
+                {psycho.mode === 'unlock'
                   ? t('patient.psycho_pick_unlock')
                   : t('patient.psycho_pick_edit')}
               </p>
@@ -318,8 +187,8 @@ export function PatientModulesTab({
                       <input
                         type="checkbox"
                         className="psycho-card-option__checkbox"
-                        checked={selectedCardIds.has(card.id)}
-                        onChange={() => toggleCard(card.id)}
+                        checked={psycho.selectedCardIds.has(card.id)}
+                        onChange={() => psycho.toggleCard(card.id)}
                       />
                       <div>
                         <div className="psycho-card-option__title">{t(card.titleKey)}</div>
@@ -329,16 +198,16 @@ export function PatientModulesTab({
                   </li>
                 ))}
               </ul>
-              {psychoError && <p className="psycho-card-picker__error">{psychoError}</p>}
+              {psycho.error && <p className="psycho-card-picker__error">{psycho.error}</p>}
               <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={savingPsycho} onClick={confirmPsycho}>
-                  {psychoPickerMode === 'unlock'
-                    ? (selectedCardIds.size === 1
-                        ? t('patient.psycho_unlock_btn', { count: selectedCardIds.size })
-                        : t('patient.psycho_unlock_btn_plural', { count: selectedCardIds.size }))
+                <Button size="sm" loading={psycho.saving} onClick={psycho.confirm}>
+                  {psycho.mode === 'unlock'
+                    ? (psycho.selectedCardIds.size === 1
+                        ? t('patient.psycho_unlock_btn', { count: psycho.selectedCardIds.size })
+                        : t('patient.psycho_unlock_btn_plural', { count: psycho.selectedCardIds.size }))
                     : t('patient.psycho_save_btn')}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={cancelPsychoPicker}>
+                <Button size="sm" variant="ghost" onClick={psycho.cancel}>
                   {t('common.cancel')}
                 </Button>
               </div>
@@ -349,16 +218,14 @@ export function PatientModulesTab({
     }
 
     if (moduleType === 'rim') {
-      const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
-
       const handleRimToggle = () => {
-        if (unlocked && mod) { cancelRimEditor(); revokeModule(mod.id) }
-        else if (rimEditorMode === 'unlock') cancelRimEditor()
-        else openRimEditor('unlock')
+        if (unlocked && mod) { rim.cancel(); revokeModule(mod.id) }
+        else if (rim.mode === 'unlock') rim.cancel()
+        else rim.open('unlock')
       }
 
       return (
-        <div key="rim" className={`module-card-wrapper module-card-wrapper-block ${rimEditorMode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="rim" className={`module-card-wrapper module-card-wrapper-block ${rim.mode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -367,8 +234,8 @@ export function PatientModulesTab({
               subtitle: t('modules.rim.description'),
               right: moduleToggle(unlocked, false, handleRimToggle),
             }}
-            actions={unlocked && mod && rimEditorMode !== 'edit' ? (
-              <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
+            actions={unlocked && mod && rim.mode !== 'edit' ? (
+              <Button variant="ghost" size="sm" onClick={() => rim.open('edit')}>
                 {t('patient.rim_edit_scenario')}
               </Button>
             ) : undefined}
@@ -376,17 +243,17 @@ export function PatientModulesTab({
             {unlocked && mod && (
               <div className="module-card__date">
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-                {cfg?.alternative_scenario && (
+                {rim.rimModule && (rim.rimModule.config as { alternative_scenario?: string }).alternative_scenario && (
                   <span className="psycho-observance-summary"> · {t('patient.rim_scenario_configured')}</span>
                 )}
               </div>
             )}
           </Card>
 
-          {(rimEditorMode === 'unlock' || rimEditorMode === 'edit') && (
+          {(rim.mode === 'unlock' || rim.mode === 'edit') && (
             <div className="psycho-card-picker">
               <p className="psycho-card-picker__label">
-                {rimEditorMode === 'unlock'
+                {rim.mode === 'unlock'
                   ? t('patient.rim_write_unlock')
                   : t('patient.rim_write_edit')}
               </p>
@@ -398,8 +265,8 @@ export function PatientModulesTab({
                   <textarea
                     rows={5}
                     placeholder={t('patient.rim_alt_placeholder')}
-                    value={rimAlternative}
-                    onChange={e => setRimAlternative(e.target.value)}
+                    value={rim.alternative}
+                    onChange={e => rim.setAlternative(e.target.value)}
                     style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
@@ -410,18 +277,18 @@ export function PatientModulesTab({
                   <textarea
                     rows={3}
                     placeholder={t('patient.rim_orig_placeholder')}
-                    value={rimOriginal}
-                    onChange={e => setRimOriginal(e.target.value)}
+                    value={rim.original}
+                    onChange={e => rim.setOriginal(e.target.value)}
                     style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
-              {rimError && <p className="psycho-card-picker__error">{rimError}</p>}
+              {rim.error && <p className="psycho-card-picker__error">{rim.error}</p>}
               <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={savingRim} onClick={confirmRim}>
-                  {rimEditorMode === 'unlock' ? t('patient.rim_btn_unlock') : t('patient.rim_btn_save')}
+                <Button size="sm" loading={rim.saving} onClick={rim.confirm}>
+                  {rim.mode === 'unlock' ? t('patient.rim_btn_unlock') : t('patient.rim_btn_save')}
                 </Button>
-                <Button size="sm" variant="ghost" onClick={cancelRimEditor}>
+                <Button size="sm" variant="ghost" onClick={rim.cancel}>
                   {t('common.cancel')}
                 </Button>
               </div>
@@ -439,7 +306,7 @@ export function PatientModulesTab({
             icon: modIcon,
             title: t(`modules.${moduleType}.label`),
             subtitle: t(`modules.${moduleType}.description`),
-            right: moduleToggle(unlocked, unlockingModule === moduleType, () => {
+            right: moduleToggle(unlocked, unlockingModule === moduleType || revokingModuleId === (mod?.id ?? ''), () => {
               if (unlocked && mod) revokeModule(mod.id)
               else unlockModule(moduleType)
             }),
@@ -503,6 +370,22 @@ export function PatientModulesTab({
             const ScaleIcon = LUCIDE_ICONS[scale.icon]
             const scaleIcon = ScaleIcon ? <ScaleIcon size={18} /> : undefined
 
+            const right = scale.noToggle
+              ? (
+                <button
+                  type="button"
+                  className="scales-list__view-btn"
+                  onClick={() => setShowCSSRSModal(true)}
+                >
+                  <ShieldAlert size={13} />
+                  {t('patient.cssrs_evaluations')}
+                </button>
+              )
+              : moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
+                  if (unlocked && mod) revokeModule(mod.id)
+                  else unlockModule(scale.id as ModuleType)
+                })
+
             return (
               <div
                 key={scale.id}
@@ -510,15 +393,7 @@ export function PatientModulesTab({
               >
                 <Card
                   className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
-                  header={{
-                    icon: scaleIcon,
-                    title: scale.name,
-                    subtitle: scale.fullTitle,
-                    right: moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
-                      if (unlocked && mod) revokeScale(mod.id)
-                      else unlockModule(scale.id as ModuleType)
-                    }),
-                  }}
+                  header={{ icon: scaleIcon, title: scale.name, subtitle: scale.fullTitle, right }}
                   actions={
                     <>
                       {unlocked && mod && (
@@ -564,36 +439,6 @@ export function PatientModulesTab({
               </div>
             )
           })}
-
-          <div className="module-card-wrapper-block">
-            <Card
-              className="module-card-item"
-              header={{
-                icon: <ShieldAlert size={18} />,
-                title: 'C-SSRS — Dépistage suicidaire',
-                subtitle: 'Columbia Suicide Severity Rating Scale',
-                right: (
-                  <button
-                    type="button"
-                    className="scales-list__view-btn"
-                    onClick={() => setShowCSSRSModal(true)}
-                  >
-                    <ShieldAlert size={13} />
-                    {t('patient.cssrs_evaluations')}
-                  </button>
-                ),
-              }}
-            >
-              <p className="scale-card__desc">
-                Évaluation structurée de l'idéation et des comportements suicidaires · Columbia University / NIMH · Version « Depuis la dernière visite ».
-              </p>
-              <div className="scale-card__meta">
-                <span className="scale-type-badge scale-type-badge--hetero">Hétéro</span>
-                <span className="scale-category-chip">Suicidalité</span>
-                <span className="scale-age-chip" style={{ background: '#BBF7D0', color: '#15803D' }}>Adulte</span>
-              </div>
-            </Card>
-          </div>
         </div>
       </Accordion>
     )
