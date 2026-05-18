@@ -13,6 +13,8 @@ import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
+import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
+import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -30,6 +32,8 @@ export type AppStackParamList = {
   ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
   BookAppointment: { practitionerId: string }
+  CrisisPlan: undefined
+  CrisisUrgency: undefined
 }
 
 export type TabParamList = {
@@ -127,6 +131,16 @@ export default function AppStack() {
             .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
             .join(' '),
         })}
+      />
+      <Stack.Screen
+        name="CrisisPlan"
+        component={CrisisPlanScreen}
+        options={{ title: 'Plan de crise' }}
+      />
+      <Stack.Screen
+        name="CrisisUrgency"
+        component={CrisisUrgencyScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   )

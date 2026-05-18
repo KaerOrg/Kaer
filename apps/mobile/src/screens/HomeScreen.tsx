@@ -27,6 +27,7 @@ import { EmptyState } from '../components/ui/EmptyState'
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
   breathing_techniques:     'BreathingTechniques',
+  crisis_plan:              'CrisisPlan',
 }
 
 
@@ -221,6 +222,18 @@ export default function HomeScreen() {
           {isTeenMode ? t('home.subheading', { ns: 'teen' }) : t('home.subheading')}
         </Text>
 
+        {modules.some(m => m.module_type === 'crisis_plan') && (
+          <Pressable
+            style={styles.urgencyBtn}
+            onPress={() => navigation.navigate('CrisisUrgency')}
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />
+            <Text style={styles.urgencyBtnText}>{t('modules.crisis_plan.urgency_title')}</Text>
+            <MaterialCommunityIcons name="chevron-right" size={18} color="rgba(255,255,255,0.8)" />
+          </Pressable>
+        )}
+
         {modules.length === 0 ? (
           <EmptyState
             icon="📭"
@@ -246,4 +259,14 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
   subheading: { fontSize: 14, color: colors.textMuted, marginTop: -spacing.xs },
+  urgencyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DC2626',
+    borderRadius: radius.lg,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+  },
+  urgencyBtnText: { flex: 1, color: '#fff', fontWeight: '700', fontSize: 15 },
 })

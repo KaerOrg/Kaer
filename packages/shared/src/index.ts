@@ -63,6 +63,12 @@ export interface PsychoeducationCardEntry {
   unlocked_at: string // ISO 8601
 }
 
+export interface CrisisPlanCopingCard {
+  id: string
+  thought: string
+  response: string
+}
+
 export interface ModuleConfig {
   // Agenda du sommeil
   sleepDiary?: {
@@ -76,6 +82,12 @@ export interface ModuleConfig {
   // Psychoéducation — liste des cartes débloquées avec suivi de lecture
   psychoeducation?: {
     unlocked_cards: PsychoeducationCardEntry[]
+  }
+  // Plan de crise — contenu co-construit par le praticien
+  crisisPlan?: {
+    practitionerMessage?: string
+    copingCards?: CrisisPlanCopingCard[]
+    commitmentPhrase?: string
   }
 }
 

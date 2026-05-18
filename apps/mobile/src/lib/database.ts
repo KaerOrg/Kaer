@@ -59,6 +59,7 @@ export async function initDatabase(): Promise<void> {
   await createFormEntriesTable(database)
   await createTreeSelectionsTable(database)
   await createModuleSettingsTable(database)
+  await createCrisisAnchorsTable(database)
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1121,6 +1122,47 @@ export async function setModuleSetting(moduleId: string, key: string, value: str
      ON CONFLICT(module_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
     [moduleId, key, value]
   )
+}
+
+// ─── crisis_anchors — photos et phrase d'ancrage du plan de crise ────────────
+// URIs locaux (expo-file-system) + phrase libre. Max 3 photos par patient.
+
+async function createCrisisAnchorsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS crisis_anchors (
+      id         TEXT PRIMARY KEY,
+      uri        TEXT NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface CrisisAnchor {
+  id: string
+  uri: string
+  sort_order: number
+  created_at: string
+}
+
+export async function getCrisisAnchors(): Promise<CrisisAnchor[]> {
+  const database = getDb()
+  return database.getAllAsync<CrisisAnchor>(
+    'SELECT * FROM crisis_anchors ORDER BY sort_order ASC, created_at ASC'
+  )
+}
+
+export async function saveCrisisAnchor(anchor: Omit<CrisisAnchor, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO crisis_anchors (id, uri, sort_order) VALUES (?, ?, ?)`,
+    [anchor.id, anchor.uri, anchor.sort_order]
+  )
+}
+
+export async function deleteCrisisAnchor(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM crisis_anchors WHERE id = ?', [id])
 }
 
 // ─── scale_entries — table générique pour tous les questionnaires cliniques ───

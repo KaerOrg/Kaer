@@ -44,6 +44,12 @@ import {
   unlockRim,
   updateRim,
 } from '../services/moduleAssignmentService'
+import {
+  fetchCrisisPlanConfig,
+  saveCrisisPlanConfig,
+  type CrisisPlanConfig,
+  type CrisisPlanCopingCard,
+} from '../services/crisisPlanService'
 import { fetchEnabledModules } from '../services/practitionerSettingsService'
 import { NotificationRoutineModal } from '../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { Tabs } from '../components/ui/Tabs'
@@ -125,6 +131,11 @@ export function PatientPage() {
   const [rimOriginal, setRimOriginal] = useState('')
   const [savingRim, setSavingRim] = useState(false)
   const [rimError, setRimError] = useState<string | null>(null)
+
+  const [crisisEditorOpen, setCrisisEditorOpen] = useState(false)
+  const [crisisConfig, setCrisisConfig] = useState<CrisisPlanConfig>({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
+  const [crisisCardDraft, setCrisisCardDraft] = useState<{ thought: string; response: string } | null>(null)
+  const [savingCrisis, setSavingCrisis] = useState(false)
 
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
 
@@ -401,6 +412,53 @@ export function PatientPage() {
     setSavingRim(false)
     setRimEditorMode('off')
     await reloadModules()
+  }
+
+  // ── Crisis plan : éditeur de configuration ───────────────────────────────
+
+  const crisisPlanModule = modules.find(m => m.module_type === 'crisis_plan')
+
+  const openCrisisEditor = async () => {
+    if (crisisPlanModule) {
+      const cfg = await fetchCrisisPlanConfig(crisisPlanModule.id)
+      setCrisisConfig(cfg)
+    } else {
+      setCrisisConfig({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
+    }
+    setCrisisCardDraft(null)
+    setCrisisEditorOpen(true)
+  }
+
+  const closeCrisisEditor = () => {
+    setCrisisEditorOpen(false)
+    setCrisisCardDraft(null)
+  }
+
+  const saveCrisisEditor = async () => {
+    if (!crisisPlanModule) return
+    setSavingCrisis(true)
+    const { ok } = await saveCrisisPlanConfig(crisisPlanModule.id, crisisConfig)
+    setSavingCrisis(false)
+    if (!ok) { toast.error(t('patient.crisis_error_save')); return }
+    toast.success(t('common.saved'))
+    setCrisisEditorOpen(false)
+    await reloadModules()
+  }
+
+  const addCopingCard = () => {
+    if (!crisisCardDraft) { setCrisisCardDraft({ thought: '', response: '' }); return }
+    if (!crisisCardDraft.thought.trim() || !crisisCardDraft.response.trim()) return
+    const newCard: CrisisPlanCopingCard = {
+      id: `card_${Date.now()}`,
+      thought: crisisCardDraft.thought.trim(),
+      response: crisisCardDraft.response.trim(),
+    }
+    setCrisisConfig(prev => ({ ...prev, copingCards: [...prev.copingCards, newCard] }))
+    setCrisisCardDraft(null)
+  }
+
+  const removeCopingCard = (cardId: string) => {
+    setCrisisConfig(prev => ({ ...prev, copingCards: prev.copingCards.filter(c => c.id !== cardId) }))
   }
 
   // ── Notes praticien ──────────────────────────────────────────────────────
@@ -715,6 +773,158 @@ export function PatientPage() {
                   {rimEditorMode === 'unlock' ? t('patient.rim_btn_unlock') : t('patient.rim_btn_save')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={cancelRimEditor}>
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (moduleType === 'crisis_plan') {
+      const handleCrisisToggle = () => {
+        if (unlocked && mod) { closeCrisisEditor(); revokeModule(mod.id) }
+        else unlockModule(moduleType)
+      }
+      const isConfigured = crisisPlanModule && (
+        (crisisPlanModule.config as Record<string, unknown> | null)?.crisisPlan != null
+      )
+
+      return (
+        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${crisisEditorOpen && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+          <Card
+            className="module-card-item"
+            header={{
+              icon: modIcon,
+              title: t('modules.crisis_plan.label'),
+              subtitle: t('modules.crisis_plan.description'),
+              right: moduleToggle(unlocked, unlockingModule === moduleType, handleCrisisToggle),
+            }}
+            actions={unlocked && mod && !crisisEditorOpen ? (
+              <Button variant="ghost" size="sm" onClick={openCrisisEditor}>
+                {t('patient.crisis_configure')}
+              </Button>
+            ) : undefined}
+          >
+            {unlocked && mod && (
+              <div className="module-card__date">
+                {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                {isConfigured && (
+                  <span className="psycho-observance-summary"> · {t('patient.crisis_configured')}</span>
+                )}
+              </div>
+            )}
+          </Card>
+
+          {crisisEditorOpen && unlocked && mod && (
+            <div className="psycho-card-picker">
+              <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* Message de soutien */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    {t('patient.crisis_msg_label')}
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder={t('patient.crisis_msg_placeholder')}
+                    value={crisisConfig.practitionerMessage}
+                    onChange={e => setCrisisConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Phrase d'engagement */}
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    {t('patient.crisis_commitment_label')}
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder={t('patient.crisis_commitment_placeholder')}
+                    value={crisisConfig.commitmentPhrase}
+                    onChange={e => setCrisisConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Cartes de coping */}
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+                    {t('patient.crisis_cards_title')}
+                  </p>
+                  {crisisConfig.copingCards.map(card => (
+                    <div key={card.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #E5E7EB', borderLeft: '3px solid #4F46E5' }}>
+                      <div style={{ fontSize: 12, color: '#6B7280' }}>{t('patient.crisis_card_thought_label')}</div>
+                      <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
+                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
+                      <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
+                      <button
+                        type="button"
+                        onClick={() => removeCopingCard(card.id)}
+                        style={{ alignSelf: 'flex-end', fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      >
+                        {t('patient.crisis_card_delete')}
+                      </button>
+                    </div>
+                  ))}
+
+                  {crisisConfig.copingCards.length < 4 && (
+                    crisisCardDraft ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
+                        <div>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                            {t('patient.crisis_card_thought_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder={t('patient.crisis_card_thought_placeholder')}
+                            value={crisisCardDraft.thought}
+                            onChange={e => setCrisisCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
+                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                            {t('patient.crisis_card_response_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder={t('patient.crisis_card_response_placeholder')}
+                            value={crisisCardDraft.response}
+                            onChange={e => setCrisisCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
+                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            size="sm"
+                            onClick={addCopingCard}
+                            disabled={!crisisCardDraft.thought.trim() || !crisisCardDraft.response.trim()}
+                          >
+                            {t('patient.crisis_card_save')}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setCrisisCardDraft(null)}>
+                            {t('common.cancel')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={() => setCrisisCardDraft({ thought: '', response: '' })}>
+                        + {t('patient.crisis_cards_add')}
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="psycho-card-picker__actions">
+                <Button size="sm" loading={savingCrisis} onClick={saveCrisisEditor}>
+                  {t('patient.crisis_btn_save')}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={closeCrisisEditor}>
                   {t('common.cancel')}
                 </Button>
               </div>
