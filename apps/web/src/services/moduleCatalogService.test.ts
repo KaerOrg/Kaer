@@ -27,7 +27,7 @@ beforeEach(() => vi.clearAllMocks())
 describe('moduleCatalogService.fetchModuleCategories', () => {
   it('joint catégories ↔ modules par category_id et formate les clés i18n', async () => {
     vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat-a', sort_order: 1 }], error: null }) as never)
+      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat-a', sort_order: 1, icon: 'shield' }], error: null }) as never)
       .mockReturnValueOnce(makeChain({
         data: [
           { id: 'phq9', category_id: 'cat-a', sort_order: 0, icon: 'i', mobile_icon: 'mi', color: '#000' },
@@ -41,6 +41,7 @@ describe('moduleCatalogService.fetchModuleCategories', () => {
     expect(result).toHaveLength(1)
     expect(result[0]).toEqual({
       id: 'cat-a',
+      icon: 'shield',
       labelKey: 'category.cat-a.label',
       subtitleKey: 'category.cat-a.subtitle',
       modules: [{ id: 'phq9', icon: 'i', mobile_icon: 'mi', color: '#000' }],
@@ -82,7 +83,7 @@ describe('moduleCatalogService.fetchComingSoonModuleIds', () => {
 describe('moduleCatalogService.fetchInviteCategories', () => {
   it('exclut les modules is_invite_excluded et coming_soon', async () => {
     vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat', sort_order: 1 }], error: null }) as never)
+      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat', sort_order: 1, icon: 'shield' }], error: null }) as never)
       .mockReturnValueOnce(makeChain({
         data: [
           { id: 'phq9',  category_id: 'cat', sort_order: 0, icon: '', mobile_icon: '', color: '#000', is_invite_excluded: false, preview_kind: 'questionnaire' },
@@ -100,7 +101,7 @@ describe('moduleCatalogService.fetchInviteCategories', () => {
 
   it("filtre les catégories sans aucun module éligible", async () => {
     vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat-empty', sort_order: 1 }], error: null }) as never)
+      .mockReturnValueOnce(makeChain({ data: [{ id: 'cat-empty', sort_order: 1, icon: '' }], error: null }) as never)
       .mockReturnValueOnce(makeChain({
         data: [
           { id: 'a', category_id: 'cat-empty', sort_order: 0, icon: '', mobile_icon: '', color: null, is_invite_excluded: true, preview_kind: 'fields' },

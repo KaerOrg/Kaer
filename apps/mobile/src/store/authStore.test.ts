@@ -1,3 +1,7 @@
+jest.mock('../services/notificationService', () => ({
+  registerPushToken: jest.fn().mockResolvedValue(null),
+}))
+
 jest.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
@@ -40,13 +44,20 @@ describe('authStore — loadSession', () => {
       error: null,
     } as never)
 
-    // loadSession fetches avatar_url from the patients table after getting the session
-    mockFrom({ avatar_url: null })
+    // loadSession fetches patient profile from the patients table after getting the session
+    mockFrom({ first_name: 'Jean', last_name: 'Dupont', phone: null, avatar_url: null })
 
     await useAuthStore.getState().loadSession()
 
     const state = useAuthStore.getState()
-    expect(state.patient).toEqual({ id: 'pat-1', email: 'patient@example.com', avatar_url: null })
+    expect(state.patient).toEqual({
+      id: 'pat-1',
+      email: 'patient@example.com',
+      first_name: 'Jean',
+      last_name: 'Dupont',
+      phone: null,
+      avatar_url: null,
+    })
     expect(state.loading).toBe(false)
   })
 
@@ -66,9 +77,10 @@ describe('authStore — loadSession', () => {
 describe('authStore — login', () => {
   it('se connecte sans erreur', async () => {
     jest.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-      data: {},
+      data: { user: { id: 'pat-1' } },
       error: null,
     } as never)
+    mockFrom({ id: 'pat-1' })
 
     await expect(
       useAuthStore.getState().login('patient@example.com', 'pass123')

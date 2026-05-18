@@ -36,7 +36,7 @@ jest.mock('../../theme', () => ({
   typography: {},
 }))
 
-jest.mock('../../components/ModuleRenderer/FieldRenderer', () => {
+jest.mock('../../components/features/ModuleRenderer/FieldRenderer', () => {
   const React = require('react')
   const { View, TouchableOpacity, Text } = require('react-native')
   return {

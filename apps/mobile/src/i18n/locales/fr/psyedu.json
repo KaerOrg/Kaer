@@ -299,7 +299,7 @@
       },
       "sources": {
         "s1": "Frank E. et al. (2005). Two-year outcomes for IPSRT in bipolar I. Arch Gen Psychiatry. PMID: 16143731",
-        "s2": "Phillips A.J.K. et al. (2024). Sleep regularity and mental health outcomes. Psychological Medicine. PMID: 40814280",
+        "s2": "Li DR et al. (2025). Regular sleep patterns, not just duration, critical for mental health. Psychological Medicine. PMID: 40814280",
         "s3": "Roenneberg T. et al. (2012). Social jetlag and obesity. Current Biology. PMID: 22578422"
       }
     },
@@ -321,7 +321,7 @@
         "item4": "Réduire les éclairages vifs après 21h"
       },
       "sources": {
-        "s1": "Leproult R. & Van Cauter E. (2010). Role of sleep and sleep loss in hormonal release. Prog Brain Res.",
+        "s1": "Leproult R. & Van Cauter E. (2010). Role of sleep and sleep loss in hormonal release and metabolism. Endocr Dev. PMID: 19955752",
         "s2": "Rosenthal N.E. et al. (1984). Seasonal affective disorder + light therapy. Arch Gen Psychiatry. PMID: 6581756",
         "s3": "HAS — Prise en charge de l'insomnie en médecine générale (2006)."
       }
@@ -385,7 +385,7 @@
         "item3": "Compenser les nuits courtes par une sieste courte plutôt qu'un lever tardif"
       },
       "sources": {
-        "s1": "Phillips A.J.K. et al. (2024). Sleep regularity and mental health outcomes. Psychological Medicine. PMID: 40814280",
+        "s1": "Li DR et al. (2025). Regular sleep patterns, not just duration, critical for mental health. Psychological Medicine. PMID: 40814280",
         "s2": "HAS — Prise en charge de l'insomnie en médecine générale (2006). Recommandations professionnelles.",
         "s3": "Borbély A.A. (1982). A two process model of sleep regulation. Hum Neurobiol. PMID: 7185792"
       }
@@ -440,7 +440,7 @@
       "why": {
         "p1": "En situation de crise aiguë, le système nerveux sympathique est activé : rythme cardiaque élevé, tension musculaire, hypervigilance. Ces techniques agissent **directement sur la physiologie** pour interrompre ce cycle.",
         "p2": "**T — Température** : appliquer de l'eau froide sur le visage active le réflexe de plongée (*diving reflex*), qui ralentit mécaniquement la fréquence cardiaque.",
-        "p3": "**I — Exercice intense** : 30 secondes à 2 minutes d'effort physique intense brûle l'adrénaline en excès.",
+        "p3": "**I — Exercice intense** : 30 secondes à 2 minutes d'effort physique intense permet au corps de décharger l'activation sympathique et favorise le retour à l'équilibre du système nerveux autonome.",
         "p4": "**P — Respiration rythmée** : expirer plus lentement qu'on inspire active le système nerveux parasympathique.",
         "p5": "**P — Relaxation progressive** : contracter puis relâcher les groupes musculaires réduit la tension physique résiduelle.",
         "tip1": "Ces techniques sont documentées dans le DBT Skills Training Manual (Linehan, 2015). Elles sont destinées aux situations de détresse intense, en complément de votre suivi."

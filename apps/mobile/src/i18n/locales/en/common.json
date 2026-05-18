@@ -90,7 +90,8 @@
     "empty_title": "No modules available",
     "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
     "section_tools": "Therapeutic tools",
-    "section_scales": "Scales & questionnaires"
+    "section_scales": "Scales & questionnaires",
+    "today_section": "Planned for today"
   },
   "profile": {
     "title": "My profile",
@@ -102,6 +103,16 @@
     "avatar_placeholder": "Photo",
     "section_account": "My account",
     "email_label": "Email",
+    "section_identity": "Identity",
+    "first_name_label": "First name",
+    "first_name_placeholder": "Your first name",
+    "last_name_label": "Last name",
+    "last_name_placeholder": "Your last name",
+    "phone_label": "Phone",
+    "phone_placeholder": "+1 600 000 0000",
+    "save_profile_button": "Save",
+    "save_profile_success": "Profile updated.",
+    "save_profile_error": "Could not update profile. Please try again.",
     "section_reminders": "Reminders",
     "sleep_reminder_label": "Sleep diary reminder",
     "sleep_reminder_hint": "Daily notification to log your night",
@@ -1136,6 +1147,75 @@
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Submit questionnaire"
+    }
+  },
+  "agenda": {
+    "empty_title": "No appointments",
+    "empty_description": "Your upcoming appointments will appear here.",
+    "empty_week": "No available slots on this day.",
+    "section_upcoming": "Upcoming",
+    "section_past": "Past",
+    "book_success": "Your appointment has been booked.",
+    "appointment": {
+      "new": "Book an appointment",
+      "cancel_btn": "Cancel appointment",
+      "cancel_confirm": "Are you sure you want to cancel this appointment?",
+      "status_pending": "Pending confirmation",
+      "status_confirmed": "Confirmed",
+      "status_cancelled": "Cancelled",
+      "status_completed": "Completed"
+    }
+  },
+  "notifications": {
+    "panel_title": "Reminders",
+    "my_time_label": "My time:",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused_label": "Paused",
+    "day_lun": "M",
+    "day_mar": "T",
+    "day_mer": "W",
+    "day_jeu": "T",
+    "day_ven": "F",
+    "day_sam": "S",
+    "day_dim": "S"
+  },
+  "category": {
+    "safety": {
+      "label": "Safety & Crisis Management",
+      "subtitle": ""
+    },
+    "iatrogenic": {
+      "label": "Iatrogenic & Somatic Monitoring",
+      "subtitle": ""
+    },
+    "lifestyle": {
+      "label": "Lifestyle & Biological Rhythms",
+      "subtitle": ""
+    },
+    "emotion": {
+      "label": "Emotional Regulation & Mood",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Cognitive Restructuring",
+      "subtitle": ""
+    },
+    "anxiety": {
+      "label": "Anxiety, Phobias & OCD",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictology & Impulsivity",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivational Interviewing",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Clinical Assessments",
+      "subtitle": ""
     }
   }
 }

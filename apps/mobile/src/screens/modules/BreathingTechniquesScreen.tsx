@@ -17,7 +17,7 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/TeenAccent'
+import { TeenAccent } from '../../components/features/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 

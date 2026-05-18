@@ -54,7 +54,23 @@ describe('authService.getCurrentSessionPatient', () => {
 
     const result = await getCurrentSessionPatient()
 
-    expect(result).toEqual({ id: 'pat-1', email: 'p@t.fr', avatar_url: 'https://x/y.jpg' })
+    expect(result).toEqual({ id: 'pat-1', email: 'p@t.fr', first_name: '', last_name: '', phone: null, avatar_url: 'https://x/y.jpg' })
+  })
+
+  it("deconnecte et retourne null si le compte n'est pas un patient", async () => {
+    jest.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: 'pract-1', email: 'pract@t.fr' } } },
+      error: null,
+    } as never)
+    jest.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never)
+    ;(supabase.from as jest.Mock).mockReturnValue(
+      chainResolving({ data: null, error: { message: 'no rows' } })
+    )
+
+    const result = await getCurrentSessionPatient()
+
+    expect(result).toBeNull()
+    expect(supabase.auth.signOut).toHaveBeenCalled()
   })
 })
 
@@ -65,10 +81,30 @@ describe('authService.signInWithPassword', () => {
     await expect(signInWithPassword('a', 'b')).rejects.toThrow('bad creds')
   })
 
-  it('résout sans erreur en cas de succès', async () => {
-    jest.mocked(supabase.auth.signInWithPassword).mockResolvedValue({ data: {}, error: null } as never)
+  it('résout sans erreur quand le compte est un patient', async () => {
+    jest.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      data: { user: { id: 'pat-1' } },
+      error: null,
+    } as never)
+    ;(supabase.from as jest.Mock).mockReturnValue(
+      chainResolving({ data: { id: 'pat-1' }, error: null })
+    )
 
     await expect(signInWithPassword('a', 'b')).resolves.toBeUndefined()
+  })
+
+  it("deconnecte et rejette si le compte n'est pas un patient", async () => {
+    jest.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      data: { user: { id: 'pract-1' } },
+      error: null,
+    } as never)
+    jest.mocked(supabase.auth.signOut).mockResolvedValue({ error: null } as never)
+    ;(supabase.from as jest.Mock).mockReturnValue(
+      chainResolving({ data: null, error: { message: 'no rows' } })
+    )
+
+    await expect(signInWithPassword('a', 'b')).rejects.toThrow("Ce compte n'est pas un compte patient")
+    expect(supabase.auth.signOut).toHaveBeenCalled()
   })
 })
 

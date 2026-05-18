@@ -11,12 +11,14 @@ import {
   Image,
   ActivityIndicator,
   Pressable,
+  TextInput,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
-import Button from '../components/Button'
+import { useToast } from '../contexts/ToastContext'
+import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
 import {
@@ -94,7 +96,14 @@ const avatarStyles = StyleSheet.create({
 
 export default function ProfileScreen() {
   const { t } = useTranslation()
-  const { patient, logout, updateAvatar, language, setLanguage } = useAuthStore()
+  const { patient, logout, updateAvatar, updateProfile, language, setLanguage } = useAuthStore()
+  const { showToast } = useToast()
+
+  const [firstName, setFirstName] = useState(patient?.first_name ?? '')
+  const [lastName, setLastName] = useState(patient?.last_name ?? '')
+  const [phone, setPhone] = useState(patient?.phone ?? '')
+  const [savingProfile, setSavingProfile] = useState(false)
+
   const [shareData, setShareData] = useState(false)
   const [notifEnabled, setNotifEnabled] = useState(false)
   const [notifTime, setNotifTime] = useState(new Date(new Date().setHours(8, 0, 0, 0)))
@@ -149,11 +158,26 @@ export default function ProfileScreen() {
       await saveAvatarUrl(patient.id, publicUrl)
       updateAvatar(publicUrl)
     } catch {
-      Alert.alert(t('common.error'), t('profile.avatar_error'))
+      showToast(t('profile.avatar_error'), 'error')
     } finally {
       setAvatarUploading(false)
     }
   }, [patient, updateAvatar, t])
+
+  const handleSaveProfile = useCallback(async () => {
+    setSavingProfile(true)
+    const result = await updateProfile({
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone || null,
+    })
+    setSavingProfile(false)
+    if (result.ok) {
+      showToast(t('profile.save_profile_success'), 'success')
+    } else {
+      showToast(t('profile.save_profile_error'), 'error')
+    }
+  }, [firstName, lastName, phone, updateProfile, t])
 
   const handleLogout = () => {
     Alert.alert(t('profile.logout_title'), t('profile.logout_message'), [
@@ -174,6 +198,11 @@ export default function ProfileScreen() {
     ])
   }
 
+  const profileDirty =
+    firstName !== (patient?.first_name ?? '') ||
+    lastName !== (patient?.last_name ?? '') ||
+    phone !== (patient?.phone ?? '')
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -184,6 +213,57 @@ export default function ProfileScreen() {
           uploading={avatarUploading}
           onPickSource={handlePickSource}
         />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.section_identity')}</Text>
+          <View style={styles.card}>
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>{t('profile.first_name_label')}</Text>
+              <TextInput
+                style={styles.input}
+                value={firstName}
+                onChangeText={setFirstName}
+                placeholder={t('profile.first_name_placeholder')}
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="words"
+                returnKeyType="next"
+              />
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>{t('profile.last_name_label')}</Text>
+              <TextInput
+                style={styles.input}
+                value={lastName}
+                onChangeText={setLastName}
+                placeholder={t('profile.last_name_placeholder')}
+                placeholderTextColor={colors.textMuted}
+                autoCapitalize="words"
+                returnKeyType="next"
+              />
+            </View>
+            <View style={styles.separator} />
+            <View style={styles.inputRow}>
+              <Text style={styles.inputLabel}>{t('profile.phone_label')}</Text>
+              <TextInput
+                style={styles.input}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder={t('profile.phone_placeholder')}
+                placeholderTextColor={colors.textMuted}
+                keyboardType="phone-pad"
+                returnKeyType="done"
+              />
+            </View>
+          </View>
+          {profileDirty && (
+            <Button
+              label={t('profile.save_profile_button')}
+              onPress={handleSaveProfile}
+              loading={savingProfile}
+            />
+          )}
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.section_account')}</Text>
@@ -288,4 +368,7 @@ const styles = StyleSheet.create({
   timeValue: { fontSize: 18, fontWeight: '600', color: colors.primary },
   disclaimer: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
   version: { fontSize: 12, color: colors.border, textAlign: 'center', marginTop: spacing.md },
+  inputRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, minHeight: 56 },
+  inputLabel: { fontSize: 16, fontWeight: '500', color: colors.text, flex: 1 },
+  input: { flex: 2, fontSize: 15, color: colors.text, textAlign: 'right', paddingVertical: spacing.sm },
 })

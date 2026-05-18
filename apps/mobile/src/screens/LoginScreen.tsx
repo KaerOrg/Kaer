@@ -12,8 +12,8 @@ import { useTranslation } from 'react-i18next'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../navigation/AuthStack'
 import { useAuthStore } from '../store/authStore'
-import InputField from '../components/InputField'
-import Button from '../components/Button'
+import InputField from '../components/ui/InputField'
+import Button from '../components/ui/Button'
 import { colors, spacing } from '../theme'
 
 type Props = {

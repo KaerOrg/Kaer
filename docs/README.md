@@ -20,12 +20,10 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
-| [`avatar.md`](avatar.md) | Système d'avatars patients/praticiens |
-| [`mobile-app.md`](mobile-app.md) | Vue d'ensemble app mobile patient |
-| [`web-app.md`](web-app.md) | Vue d'ensemble interface web praticien |
 | [`terminologie-praticiens.md`](terminologie-praticiens.md) | Glossaire métier (IDE, IPA, etc.) |
 | [`migration-engine-roadmap.md`](migration-engine-roadmap.md) | Roadmap moteur de migrations |
 | [`dependency-pitfalls.md`](dependency-pitfalls.md) | Pièges connus de dépendances |
+| [`spec/calendar.md`](spec/calendar.md) | Système de prise de rendez-vous (praticien web + patient mobile) |
 
 ## Documentation par module thérapeutique
 
@@ -54,24 +52,27 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 
 ## Documentation par application
 
-### Web praticien — [`apps/web/docs/`](../apps/web/docs/)
+### Web praticien — [`apps/web/docs/`](../apps/web/docs/README.md)
 
 | Document | Contenu |
 |---|---|
 | [`design-system.md`](../apps/web/docs/design-system.md) | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
+| [`web-app.md`](../apps/web/docs/web-app.md) | Vue d'ensemble : structure, routing, pages, composants, store auth |
 | [`invitation-flow.md`](../apps/web/docs/invitation-flow.md) | Volet web du flux d'invitation |
-| [`components/main-nav.md`](../apps/web/docs/components/main-nav.md) | Navigation principale |
 | [`components/module-renderer.md`](../apps/web/docs/components/module-renderer.md) | Rendu générique des modules (FieldText CONFIG) |
+| [`components/main-nav.md`](../apps/web/docs/components/main-nav.md) | Navigation principale |
 | [`components/select-field.md`](../apps/web/docs/components/select-field.md) | Champ de sélection |
 | [`components/step-breadcrumb.md`](../apps/web/docs/components/step-breadcrumb.md) | Fil d'Ariane d'étapes |
 | [`components/toggle.md`](../apps/web/docs/components/toggle.md) | Composant toggle |
 
-### Mobile patient — [`apps/mobile/docs/`](../apps/mobile/docs/)
+### Mobile patient — [`apps/mobile/docs/`](../apps/mobile/docs/README.md)
 
 | Document | Contenu |
 |---|---|
 | [`design-system.md`](../apps/mobile/docs/design-system.md) | StyleSheet patterns, composants primitifs, Teen mode complet |
+| [`mobile-app.md`](../apps/mobile/docs/mobile-app.md) | Vue d'ensemble : structure, navigation, écrans, SQLite, notifications |
 | [`invitation-flow.md`](../apps/mobile/docs/invitation-flow.md) | Volet mobile du flux d'invitation |
+| [`avatar.md`](../apps/mobile/docs/avatar.md) | Photo de profil patient : pick, upload Supabase Storage, RLS |
 
 ## Ajouter un document
 

@@ -1,30 +1,40 @@
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff } from 'lucide-react'
+import { ShieldAlert, ClipboardList, Eye, EyeOff, Bell, Search, LayoutDashboard, Package2, FileText, CalendarDays, Clock } from 'lucide-react'
+import { LUCIDE_ICONS } from '../lib/lucideIcons'
 import { useAuthStore } from '../store/authStore'
-import { Layout } from '../components/Layout'
-import { Button } from '../components/Button'
-import { Card } from '../components/Card'
-import { EmptyState } from '../components/EmptyState'
-import { Accordion } from '../components/Accordion'
-import { StatusBadge } from '../components/StatusBadge'
+import { useToast } from '../contexts/ToastContext'
+import { Layout } from '../components/features/Layout'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Toggle } from '../components/ui/Toggle/Toggle'
+import { Accordion } from '../components/ui/Accordion'
+import { StatusBadge } from '../components/ui/StatusBadge'
 import {
   type ModuleType,
   type PatientModule,
   type PsychoeducationCardEntry,
 } from '../lib/database.types'
-import { CLINICAL_SCALES } from '../data/scales'
-import { CSSRSScreenPanel } from '../components/CSSRSScreenPanel'
+import { CLINICAL_SCALES, AGE_BADGE_CONFIG } from '../data/scales'
+import { CSSRSScreenPanel } from '../components/features/CSSRSScreenPanel'
 import { fetchPsychoCards, type PsychoCardInfo } from '../services/moduleService'
-import { ModulePreviewPanel } from '../components/ModulePreviewPanel'
+import { ModulePreviewPanel } from '../components/features/ModulePreviewPanel'
+import { Modal } from '../components/ui/Modal'
 import {
   fetchModuleCategories,
   fetchComingSoonModuleIds,
   type ModuleCategory,
   type ModuleItem,
 } from '../services/moduleCatalogService'
-import { fetchPatientHeader, setTeenMode as updateTeenMode } from '../services/patientService'
+import { fetchPatientHeader, setTeenMode as updateTeenMode, saveGeneralNote } from '../services/patientService'
+import {
+  fetchNotes,
+  saveNote,
+  updateNote,
+  deleteNote,
+  type PractitionerNote,
+} from '../services/noteService'
 import {
   fetchPatientModules,
   unlockModule as unlockStandardModule,
@@ -35,18 +45,25 @@ import {
   updateRim,
 } from '../services/moduleAssignmentService'
 import { fetchEnabledModules } from '../services/practitionerSettingsService'
+import { NotificationRoutineModal } from '../components/features/NotificationRoutineModal/NotificationRoutineModal'
+import { Tabs } from '../components/ui/Tabs'
+import { extractUniqueTags, extractTopTags } from '../services/noteService'
+import { SpeechToTextButton } from '../components/SpeechToTextButton'
+import { AppointmentModal } from '../components/features/AppointmentModal'
+import {
+  fetchAppointmentsForPatient,
+  createAppointment,
+  updateAppointmentStatus,
+  updateAppointmentNotes,
+  fetchAutoConfirmSetting,
+} from '../services/appointmentService'
+import type { PatientOption } from '../services/patientService'
+import type { AppointmentWithPatient, AppointmentStatus } from '../lib/calendar.types'
+
 import './PatientPage.css'
 
-const SCALE_DOMAIN_ORDER = [
-  { key: 'Humeur',       label: 'Humeur & Dépression' },
-  { key: 'Anxiété',      label: 'Anxiété' },
-  { key: 'Neurodev',     label: 'Neurodev / TDAH' },
-  { key: 'Personnalité', label: 'Personnalité' },
-  { key: 'Sommeil',      label: 'Sommeil' },
-  { key: 'Addictologie', label: 'Addictologie' },
-  { key: 'Psychose',     label: 'Psychose' },
-  { key: 'Trauma',       label: 'Trauma' },
-] as const
+const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
+const TYPEWRITER_CHAR_MS = 20
 
 type PageData = {
   modules: PatientModule[]
@@ -79,9 +96,13 @@ export function PatientPage() {
   const navigate = useNavigate()
   const { practitioner } = useAuthStore()
   const { t, i18n } = useTranslation()
+  const toast = useToast()
 
   const [patientEmail, setPatientEmail] = useState('')
   const [patientAlias, setPatientAlias] = useState<string | null>(null)
+  const [patientFirstName, setPatientFirstName] = useState<string | null>(null)
+  const [patientLastName, setPatientLastName] = useState<string | null>(null)
+  const [patientEnrolledAt, setPatientEnrolledAt] = useState<string | null>(null)
   const [pageData, setPageData] = useState<PageData>(PAGE_DATA_INITIAL)
   const { modules, categories, enabledModules, psychoCards, comingSoonIds } = pageData
   const [loading, setLoading] = useState(true)
@@ -107,6 +128,46 @@ export function PatientPage() {
   const [savingRim, setSavingRim] = useState(false)
   const [rimError, setRimError] = useState<string | null>(null)
 
+  const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv'>('overview')
+
+  // ── Notes praticien ──────────────────────────────────────────────────────
+  const [notes, setNotes] = useState<PractitionerNote[]>([])
+  const [savingNote, setSavingNote] = useState(false)
+  const [noteError, setNoteError] = useState<string | null>(null)
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState('')
+  const [editingTags, setEditingTags] = useState<string[]>([])
+  const [editingTagInput, setEditingTagInput] = useState('')
+  const [updatingNote, setUpdatingNote] = useState(false)
+  const [confirmDeleteNoteId, setConfirmDeleteNoteId] = useState<string | null>(null)
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null)
+  const [newNoteTags, setNewNoteTags] = useState<string[]>([])
+  const [newTagInput, setNewTagInput] = useState('')
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null)
+  const [tagSearch, setTagSearch] = useState('')
+  const newNoteRef = useRef<HTMLTextAreaElement>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const typewriterQueueRef = useRef<string[]>([])
+  const isTypingRef = useRef(false)
+  const [generalNote, setGeneralNote] = useState('')
+  const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
+
+  // ── Rendez-vous ──────────────────────────────────────────────────────────
+  const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+
+  const [rdvAppointments, setRdvAppointments] = useState<AppointmentWithPatient[]>([])
+  const [rdvLoaded, setRdvLoaded] = useState(false)
+  const [rdvModal, setRdvModal] = useState<{ type: 'create' | 'view'; appointment?: AppointmentWithPatient } | null>(null)
+  const [rdvAutoConfirm, setRdvAutoConfirm] = useState(true)
+
+  const reloadModules = useCallback(async () => {
+    if (!id) return
+    const mods = await fetchPatientModules(id)
+    setPageData(prev => ({ ...prev, modules: mods }))
+  }, [id])
+
   const loadPatient = useCallback(async () => {
     if (!id || !practitioner) return
     setLoading(true)
@@ -116,14 +177,19 @@ export function PatientPage() {
 
     setPatientEmail(header.email)
     setPatientAlias(header.alias)
+    setPatientFirstName(header.firstName)
+    setPatientLastName(header.lastName)
     setTeenMode(header.teenMode)
+    setPatientEnrolledAt(header.enrolledAt)
+    setGeneralNote(header.generalNote ?? '')
 
-    const [mods, enabled, cats, cards, comingSoon] = await Promise.all([
+    const [mods, enabled, cats, cards, comingSoon, fetchedNotes] = await Promise.all([
       fetchPatientModules(id),
       fetchEnabledModules(practitioner.id),
       fetchModuleCategories(),
       fetchPsychoCards(),
       fetchComingSoonModuleIds(),
+      fetchNotes(practitioner.id, id),
     ])
 
     setPageData({
@@ -133,6 +199,7 @@ export function PatientPage() {
       psychoCards: cards,
       comingSoonIds: comingSoon,
     })
+    setNotes(fetchedNotes)
     setLoading(false)
   }, [id, practitioner, navigate])
 
@@ -140,27 +207,90 @@ export function PatientPage() {
     loadPatient()
   }, [loadPatient])
 
+  useEffect(() => {
+    if (activeTab !== 'rdv' || rdvLoaded || !practitioner || !id) return
+    Promise.all([
+      fetchAppointmentsForPatient(practitioner.id, id),
+      fetchAutoConfirmSetting(practitioner.id),
+    ]).then(([appts, autoC]) => {
+      setRdvAppointments(appts)
+      setRdvAutoConfirm(autoC)
+      setRdvLoaded(true)
+    })
+  }, [activeTab, rdvLoaded, practitioner, id])
+
+  const handleRdvCreate = useCallback(
+    async (patientId: string, startsAt: string, endsAt: string, notes: string) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await createAppointment({
+        practitioner_id: practitioner.id,
+        patient_id: patientId,
+        starts_at: startsAt,
+        ends_at: endsAt,
+        notes: notes || undefined,
+        auto_confirm: rdvAutoConfirm,
+      })
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+        setRdvModal(null)
+      }
+      return result
+    },
+    [practitioner, id, rdvAutoConfirm],
+  )
+
+  const handleRdvUpdateStatus = useCallback(
+    async (apptId: string, status: AppointmentStatus) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await updateAppointmentStatus(apptId, status)
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+        setRdvModal(null)
+      }
+      return result
+    },
+    [practitioner, id],
+  )
+
+  const handleRdvUpdateNotes = useCallback(
+    async (apptId: string, notes: string) => {
+      if (!practitioner || !id) return { ok: false as const }
+      const result = await updateAppointmentNotes(apptId, notes)
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitioner.id, id)
+        setRdvAppointments(updated)
+      }
+      return result
+    },
+    [practitioner, id],
+  )
+
   // ── Module standard ──────────────────────────────────────────────────────
 
   const unlockModule = async (moduleType: ModuleType) => {
     if (!id || !practitioner) return
     setUnlockingModule(moduleType)
     const result = await unlockStandardModule(id, practitioner.id, moduleType)
-    if (result.ok) await loadPatient()
+    if (result.ok) await reloadModules()
     setUnlockingModule(null)
   }
 
   const revokeModule = async (moduleId: string) => {
     await revokeModuleService(moduleId)
-    await loadPatient()
+    await reloadModules()
   }
 
   const revokeScale = async (moduleId: string) => {
     setRevokingModuleId(moduleId)
     await revokeModuleService(moduleId)
-    await loadPatient()
+    await reloadModules()
     setRevokingModuleId(null)
   }
+
+  const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
+
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -208,7 +338,7 @@ export function PatientPage() {
     if (psychoPickerMode === 'unlock') {
       const { ok } = await unlockPsychoeducation(id, practitioner.id, selectedCardIds)
       if (!ok) {
-        setPsychoError(t('patient.psycho_error_unlock'))
+        toast.error(t('patient.psycho_error_unlock'))
         setSavingPsycho(false)
         return
       }
@@ -219,7 +349,7 @@ export function PatientPage() {
         selectedCardIds
       )
       if (!ok) {
-        setPsychoError(t('patient.psycho_error_update'))
+        toast.error(t('patient.psycho_error_update'))
         setSavingPsycho(false)
         return
       }
@@ -227,7 +357,7 @@ export function PatientPage() {
 
     setSavingPsycho(false)
     setPsychoPickerMode('off')
-    await loadPatient()
+    await reloadModules()
   }
 
   const cancelPsychoPicker = () => {
@@ -269,51 +399,195 @@ export function PatientPage() {
 
     if (rimEditorMode === 'unlock') {
       const { ok } = await unlockRim(id, practitioner.id, scenario)
-      if (!ok) { setRimError(t('patient.rim_error_unlock')); setSavingRim(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_unlock')); setSavingRim(false); return }
     } else if (rimEditorMode === 'edit' && rimModule) {
       const { ok } = await updateRim(rimModule.id, scenario)
-      if (!ok) { setRimError(t('patient.rim_error_update')); setSavingRim(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_update')); setSavingRim(false); return }
     }
     setSavingRim(false)
     setRimEditorMode('off')
-    await loadPatient()
+    await reloadModules()
   }
 
-  // ── Radar ────────────────────────────────────────────────────────────────
+  // ── Notes praticien ──────────────────────────────────────────────────────
 
-  const unreadPsychoCards = psychoModule
-    ? getPsychoCards(psychoModule).filter(c => !c.is_read).length
-    : 0
-  const totalPsychoCards = psychoModule ? getPsychoCards(psychoModule).length : 0
+  const addNewTag = () => {
+    const tag = newTagInput.trim()
+    if (tag && !newNoteTags.includes(tag)) {
+      setNewNoteTags(prev => [...prev, tag])
+    }
+    setNewTagInput('')
+  }
+
+  const handleNewTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); addNewTag() }
+  }
+
+  const addEditingTag = () => {
+    const tag = editingTagInput.trim()
+    if (tag && !editingTags.includes(tag)) {
+      setEditingTags(prev => [...prev, tag])
+    }
+    setEditingTagInput('')
+  }
+
+  const handleEditingTagKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { e.preventDefault(); addEditingTag() }
+  }
+
+  const handleRecordingChange = useCallback((recording: boolean) => {
+    setIsRecording(recording)
+  }, [])
+
+  const typeNextCharRef = useRef<() => void>(() => {})
+
+  const typeNextChar = useCallback(() => {
+    if (!newNoteRef.current || typewriterQueueRef.current.length === 0) {
+      isTypingRef.current = false
+      return
+    }
+    const segment = typewriterQueueRef.current[0]
+    if (segment.length === 0) {
+      typewriterQueueRef.current.shift()
+      setTimeout(() => typeNextCharRef.current(), 0)
+      return
+    }
+    newNoteRef.current.value += segment[0]
+    typewriterQueueRef.current[0] = segment.slice(1)
+    setTimeout(() => typeNextCharRef.current(), TYPEWRITER_CHAR_MS)
+  }, [])
+
+  useEffect(() => {
+    typeNextCharRef.current = typeNextChar
+  }, [typeNextChar])
+
+  const handleTextChunk = useCallback((text: string) => {
+    if (!newNoteRef.current) return
+    const chunk = newNoteRef.current.value.trim() ? '\n' + text : text
+    typewriterQueueRef.current.push(chunk)
+    if (!isTypingRef.current) {
+      isTypingRef.current = true
+      typeNextChar()
+    }
+  }, [typeNextChar])
+
+  const handleTranscription = useCallback(() => {
+    // no-op: text already inserted chunk by chunk via handleTextChunk
+  }, [])
+
+  const handleSaveNote = async () => {
+    if (!id || !practitioner) return
+    const content = newNoteRef.current?.value ?? ''
+    if (!content.trim()) { setNoteError(t('notes.error_empty')); return }
+    setSavingNote(true)
+    setNoteError(null)
+    const result = await saveNote(practitioner.id, id, content, newNoteTags)
+    setSavingNote(false)
+    if (result.ok && result.note) {
+      setNotes(prev => [result.note!, ...prev])
+      if (newNoteRef.current) newNoteRef.current.value = ''
+      setNewNoteTags([])
+      setNewTagInput('')
+    } else {
+      toast.error(t('notes.error_save'))
+    }
+  }
+
+  const handleSaveGeneralNote = async () => {
+    if (!id || !practitioner) return
+    setGeneralNoteSaving(true)
+    const { ok } = await saveGeneralNote(practitioner.id, id, generalNote)
+    setGeneralNoteSaving(false)
+    if (!ok) toast.error(t('notes.error_save'))
+  }
+
+  const handleStartEditNote = (note: PractitionerNote) => {
+    setEditingNoteId(note.id)
+    setEditingContent(note.content)
+    setEditingTags(note.tags)
+    setEditingTagInput('')
+    setNoteError(null)
+  }
+
+  const handleCancelEditNote = () => {
+    setEditingNoteId(null)
+    setEditingContent('')
+    setEditingTags([])
+    setEditingTagInput('')
+    setNoteError(null)
+  }
+
+  const handleUpdateNote = async () => {
+    if (!editingNoteId) return
+    if (!editingContent.trim()) { setNoteError(t('notes.error_empty')); return }
+    setUpdatingNote(true)
+    setNoteError(null)
+    const result = await updateNote(editingNoteId, editingContent, editingTags)
+    setUpdatingNote(false)
+    if (result.ok) {
+      setNotes(prev => prev.map(n =>
+        n.id === editingNoteId
+          ? { ...n, content: editingContent.trim(), tags: editingTags, updated_at: new Date().toISOString() }
+          : n
+      ))
+      setEditingNoteId(null)
+      setEditingContent('')
+      setEditingTags([])
+    } else {
+      toast.error(t('notes.error_update'))
+    }
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    setDeletingNoteId(noteId)
+    const result = await deleteNote(noteId)
+    if (result.ok) {
+      setNotes(prev => prev.filter(n => n.id !== noteId))
+    }
+    setConfirmDeleteNoteId(null)
+    setDeletingNoteId(null)
+  }
 
   // ── Rendu d'une carte module ─────────────────────────────────────────────
 
+  const moduleToggle = (on: boolean, loading: boolean, onToggle: () => void) => (
+    <button
+      className="module-toggle"
+      onClick={onToggle}
+      disabled={loading}
+      aria-label={on ? t('patient.revoke_button') : t('patient.unlock_button')}
+    >
+      <Toggle checked={on} />
+    </button>
+  )
+
   const renderModuleCard = (modItem: ModuleItem) => {
     const moduleType = modItem.id as ModuleType
-    if (comingSoonIds.has(moduleType)) {
-      return (
-        <div key={moduleType} className="module-card-wrapper-block">
-          <Card
-            state="disabled"
-            header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
-            actions={<StatusBadge variant="neutral" label={t('patient.realtime_soon')} />}
-          />
-        </div>
-      )
-    }
-
     const mod = modules.find(m => m.module_type === moduleType)
     const unlocked = !!mod
+    const ModIcon = LUCIDE_ICONS[modItem.icon]
+    const modIcon = ModIcon ? <ModIcon size={18} /> : undefined
 
     if (moduleType === 'psychoeducation') {
       const cards = mod ? getPsychoCards(mod) : []
       const readCount = cards.filter(c => c.is_read).length
 
+      const handlePsychoToggle = () => {
+        if (unlocked && mod) { cancelPsychoPicker(); revokeModule(mod.id) }
+        else if (psychoPickerMode === 'unlock') cancelPsychoPicker()
+        else openPsychoPicker('unlock')
+      }
+
       return (
-        <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
+        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psychoPickerMode !== 'off' || previewModule === 'psychoeducation' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
-            state={unlocked ? 'active' : undefined}
-            header={{ title: t('modules.psychoeducation.label'), subtitle: t('modules.psychoeducation.description') }}
+            className="module-card-item"
+            header={{
+              icon: modIcon,
+              title: t('modules.psychoeducation.label'),
+              subtitle: t('modules.psychoeducation.description'),
+              right: moduleToggle(unlocked, false, handlePsychoToggle),
+            }}
             actions={
               <>
                 <button
@@ -324,31 +598,9 @@ export function PatientPage() {
                   {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
                 </button>
-                {unlocked && mod ? (
-                  <>
-                    <StatusBadge variant="success" label={t('patient.active_badge')} />
-                    {psychoPickerMode !== 'edit' && (
-                      <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
-                        {t('patient.psycho_edit_cards')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="module-card__revoke"
-                      onClick={() => { cancelPsychoPicker(); revokeModule(mod.id) }}
-                    >
-                      {t('patient.revoke_button')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      psychoPickerMode === 'unlock' ? cancelPsychoPicker() : openPsychoPicker('unlock')
-                    }
-                  >
-                    {psychoPickerMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
+                {unlocked && mod && psychoPickerMode !== 'edit' && (
+                  <Button variant="ghost" size="sm" onClick={() => openPsychoPicker('edit')}>
+                    {t('patient.psycho_edit_cards')}
                   </Button>
                 )}
               </>
@@ -437,42 +689,28 @@ export function PatientPage() {
 
     if (moduleType === 'rim') {
       const cfg = mod?.config as { alternative_scenario?: string; original_scenario?: string } | undefined
+
+      const handleRimToggle = () => {
+        if (unlocked && mod) { cancelRimEditor(); revokeModule(mod.id) }
+        else if (rimEditorMode === 'unlock') cancelRimEditor()
+        else openRimEditor('unlock')
+      }
+
       return (
-        <div key="rim" className="module-card-wrapper module-card-wrapper-block">
+        <div key="rim" className={`module-card-wrapper module-card-wrapper-block ${rimEditorMode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
-            state={unlocked ? 'active' : undefined}
-            header={{ title: t('modules.rim.label'), subtitle: t('modules.rim.description') }}
-            actions={
-              <>
-                {unlocked && mod ? (
-                  <>
-                    <StatusBadge variant="success" label={t('patient.active_badge')} />
-                    {rimEditorMode !== 'edit' && (
-                      <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
-                        {t('patient.rim_edit_scenario')}
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="module-card__revoke"
-                      onClick={() => { cancelRimEditor(); revokeModule(mod.id) }}
-                    >
-                      {t('patient.revoke_button')}
-                    </Button>
-                  </>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      rimEditorMode === 'unlock' ? cancelRimEditor() : openRimEditor('unlock')
-                    }
-                  >
-                    {rimEditorMode === 'unlock' ? t('common.cancel') : t('patient.unlock_button')}
-                  </Button>
-                )}
-              </>
-            }
+            className="module-card-item"
+            header={{
+              icon: modIcon,
+              title: t('modules.rim.label'),
+              subtitle: t('modules.rim.description'),
+              right: moduleToggle(unlocked, false, handleRimToggle),
+            }}
+            actions={unlocked && mod && rimEditorMode !== 'edit' ? (
+              <Button variant="ghost" size="sm" onClick={() => openRimEditor('edit')}>
+                {t('patient.rim_edit_scenario')}
+              </Button>
+            ) : undefined}
           >
             {unlocked && mod && (
               <div className="module-card__date">
@@ -533,12 +771,35 @@ export function PatientPage() {
     }
 
     return (
-      <div key={moduleType} className="module-card-wrapper-block">
+      <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
         <Card
-          state={unlocked ? 'active' : undefined}
-          header={{ title: t(`modules.${moduleType}.label`), subtitle: t(`modules.${moduleType}.description`) }}
+          className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
+          header={{
+            icon: modIcon,
+            title: t(`modules.${moduleType}.label`),
+            subtitle: t(`modules.${moduleType}.description`),
+            right: moduleToggle(unlocked, unlockingModule === moduleType, () => {
+              if (unlocked && mod) revokeModule(mod.id)
+              else unlockModule(moduleType)
+            }),
+          }}
           actions={
             <>
+              {unlocked && mod && (
+                <span className="module-card__date module-card__date--actions">
+                  {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                </span>
+              )}
+              {unlocked && mod && (
+                <button
+                  type="button"
+                  className="module-card__notif-btn"
+                  title={t('notifications.configure_button')}
+                  onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
+                >
+                  <Bell size={14} />
+                </button>
+              )}
               <button
                 className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
                 onClick={() => togglePreview(moduleType)}
@@ -547,36 +808,9 @@ export function PatientPage() {
                 {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
               </button>
-              {unlocked && mod ? (
-                <>
-                  <StatusBadge variant="success" label={t('patient.active_badge')} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="module-card__revoke"
-                    onClick={() => revokeModule(mod.id)}
-                  >
-                    {t('patient.revoke_button')}
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  loading={unlockingModule === moduleType}
-                  onClick={() => unlockModule(moduleType)}
-                >
-                  {t('patient.unlock_button')}
-                </Button>
-              )}
             </>
           }
-        >
-          {unlocked && mod && (
-            <div className="module-card__date">
-              {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-            </div>
-          )}
-        </Card>
+        />
 
         {previewModule === moduleType && (
           <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
@@ -585,190 +819,670 @@ export function PatientPage() {
     )
   }
 
-  const renderScaleRow = (modId: string) => {
-    const scale = CLINICAL_SCALES.find(s => s.id === modId)
-    const active = modules.find(m => m.module_type === modId)
-    return (
-      <div key={modId} className="scale-row">
-        <div className="scale-row__info">
-          <span className="scale-row__name">{scale?.name ?? modId}</span>
-          <span className={`scale-row__badge scale-row__badge--${scale?.evaluationType ?? 'auto'}`}>
-            {scale?.evaluationType === 'hetero' ? 'Hétéro' : 'Auto'}
-          </span>
-          {active && (
-            <span className="scale-row__date">
-              depuis le {new Date(active.unlocked_at).toLocaleDateString(i18n.language)}
-            </span>
-          )}
-        </div>
-        {active ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="module-card__revoke"
-            loading={revokingModuleId === active.id}
-            onClick={() => revokeScale(active.id)}
-          >
-            Révoquer
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            loading={unlockingModule === modId}
-            onClick={() => unlockModule(modId as ModuleType)}
-          >
-            Activer
-          </Button>
-        )}
-      </div>
-    )
-  }
-
-  const renderClinicalEvaluations = () => {
-    const cat = categories.find(c => c.id === 'assessments')
-    const allMods = cat
-      ? (enabledModules === null ? cat.modules : cat.modules.filter(m => enabledModules.has(m.id as ModuleType)))
-      : []
-    const activeCount = allMods.filter(m => isUnlocked(m.id as ModuleType)).length
-
-    const byDomain = new Map<string, string[]>()
-    for (const mod of allMods) {
-      const domain = CLINICAL_SCALES.find(s => s.id === mod.id)?.category ?? 'Autre'
-      if (!byDomain.has(domain)) byDomain.set(domain, [])
-      byDomain.get(domain)!.push(mod.id)
-    }
+  const renderScalesAccordion = () => {
+    const visibleScales = enabledModules === null
+      ? [...CLINICAL_SCALES]
+      : CLINICAL_SCALES.filter(s => enabledModules.has(s.id as ModuleType))
+    const activeCount = activeScales.length
 
     return (
       <Accordion
+        key="assessments"
         title={t('category.assessments.label')}
+        icon={<ClipboardList size={16} />}
         badge={activeCount > 0 ? activeCount : undefined}
         defaultOpen={false}
       >
-        <div className="scale-subgroup">
-          <span className="scale-subgroup__label">Risque suicidaire</span>
-          <CSSRSScreenPanel patientId={id!} practitionerId={practitioner!.id} />
-        </div>
+        <div className="scales-list">
+          <ul className="scales-list__items">
+            {visibleScales.map(scale => {
+              const mod = activeScales.find(m => m.module_type === scale.id)
+              const unlocked = !!mod
+              const loading = unlockingModule === (scale.id as ModuleType)
+              return (
+                <li key={scale.id} className={`scale-row${unlocked ? ' scale-row--active' : ''}`}>
+                  <div className="scale-row__left">
+                    <span className={`scale-row__type-badge scale-row__type-badge--${scale.evaluationType}`}>
+                      {scale.evaluationType === 'auto' ? 'Auto' : 'Hétéro'}
+                    </span>
+                  </div>
+                  <div className="scale-row__main">
+                    <div className="scale-row__title-line">
+                      <strong className="scale-row__name">{scale.name}</strong>
+                      <span className="scale-row__full-title">{scale.fullTitle}</span>
+                      <span className="scale-row__category-chip">{scale.category}</span>
+                      {scale.targetAges.map(age => (
+                        <span
+                          key={age}
+                          className="scale-row__age-chip"
+                          style={{ background: AGE_BADGE_CONFIG[age].bg, color: AGE_BADGE_CONFIG[age].text }}
+                        >
+                          {AGE_BADGE_CONFIG[age].label}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="scale-row__desc">{scale.description}</p>
+                    {unlocked && mod && (
+                      <span className="scale-row__date">
+                        {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="scale-row__toggle">
+                    {moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
+                      if (unlocked && mod) revokeScale(mod.id)
+                      else unlockModule(scale.id as ModuleType)
+                    })}
+                  </div>
+                </li>
+              )
+            })}
 
-        {SCALE_DOMAIN_ORDER
-          .filter(d => byDomain.has(d.key))
-          .map(d => (
-            <div key={d.key} className="scale-subgroup">
-              <span className="scale-subgroup__label">{d.label}</span>
-              {byDomain.get(d.key)!.map(renderScaleRow)}
-            </div>
-          ))
-        }
+            <li className="scale-row scale-row--cssrs">
+              <div className="scale-row__left">
+                <span className="scale-row__type-badge scale-row__type-badge--hetero">
+                  Hétéro
+                </span>
+              </div>
+              <div className="scale-row__main">
+                <div className="scale-row__title-line">
+                  <strong className="scale-row__name">C-SSRS — Dépistage suicidaire</strong>
+                  <span className="scale-row__full-title">Columbia Suicide Severity Rating Scale</span>
+                  <span className="scale-row__category-chip">Suicidalité</span>
+                  <span className="scale-row__age-chip" style={{ background: '#BBF7D0', color: '#15803D' }}>Adulte</span>
+                </div>
+                <p className="scale-row__desc">
+                  Évaluation structurée de l'idéation et des comportements suicidaires · Columbia University / NIMH · Version « Depuis la dernière visite ».
+                </p>
+              </div>
+              <div className="scale-row__toggle">
+                <button
+                  className="scales-list__view-btn"
+                  onClick={() => setShowCSSRSModal(true)}
+                >
+                  <ShieldAlert size={13} />
+                  Évaluations
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
       </Accordion>
     )
   }
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const displayName = patientAlias ?? patientEmail
+  const fullName = [patientFirstName, patientLastName].filter(Boolean).join(' ')
+  const displayName = patientAlias ?? (fullName || patientEmail)
+
+  const rdvPatientOptions = useMemo<PatientOption[]>(
+    () => (id ? [{ id, label: displayName }] : []),
+    [id, displayName],
+  )
+
+  const rdvNow = new Date().toISOString()
+  const rdvUpcoming = rdvAppointments.filter(
+    a => a.starts_at > rdvNow &&
+      a.status !== 'cancelled_by_patient' &&
+      a.status !== 'cancelled_by_practitioner',
+  )
+  const rdvPast = rdvAppointments.filter(
+    a => a.starts_at <= rdvNow ||
+      a.status === 'cancelled_by_patient' ||
+      a.status === 'cancelled_by_practitioner',
+  )
+
+  const allTags = extractUniqueTags(notes)
+  const topTags = extractTopTags(notes, 7)
+  const visibleTags = tagSearch
+    ? allTags.filter(t => t.toLowerCase().includes(tagSearch.toLowerCase())).slice(0, 7)
+    : topTags
+  const filteredNotes = activeTagFilter
+    ? notes.filter(n => n.tags.includes(activeTagFilter))
+    : tagSearch
+      ? notes.filter(n => n.tags.some(t => t.toLowerCase().includes(tagSearch.toLowerCase())))
+      : notes
+
+  const PATIENT_TABS = [
+    { id: 'overview', label: t('patient.tab_overview'), icon: <LayoutDashboard size={16} /> },
+    { id: 'modules',  label: t('patient.tab_modules'),  icon: <Package2 size={16} />,       badge: modules.length || undefined },
+    { id: 'notes',    label: t('patient.tab_notes'),    icon: <FileText size={16} />,        badge: notes.length || undefined },
+    { id: 'rdv',      label: t('patient.tab_rdv'),      icon: <CalendarDays size={16} />,    badge: 3 },
+  ]
+
+  const sidebar = (
+    <Tabs
+      variant="vertical"
+      tabs={[...PATIENT_TABS]}
+      activeTab={activeTab}
+      onChange={id => setActiveTab(id as typeof activeTab)}
+    />
+  )
 
   return (
-    <Layout>
+    <Layout sidebar={sidebar}>
       <div className="patient-page">
         <button className="patient-page__back" onClick={() => navigate('/')}>
           {t('patient.back')}
         </button>
 
-        <div className="patient-page__header">
-          <div className="patient-page__avatar">
-            {displayName[0]?.toUpperCase()}
+        {activeTab === 'overview' && (
+          <div className="patient-page__header">
+            <div className="patient-page__avatar">
+              {displayName[0]?.toUpperCase()}
+            </div>
+            <div className="patient-page__header-info">
+              <h1 className="patient-page__name">{displayName}</h1>
+              <p className="patient-page__email">{patientEmail}</p>
+            </div>
+            <button
+              className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
+              onClick={toggleTeenMode}
+              disabled={togglingTeen}
+              title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
+            >
+              <span className="teen-mode-toggle__icon">🎨</span>
+              <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
+              <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
+                {teenMode ? 'ON' : 'OFF'}
+              </span>
+            </button>
           </div>
-          <div className="patient-page__header-info">
-            <h1 className="patient-page__name">{displayName}</h1>
-            <p className="patient-page__email">{patientEmail}</p>
-          </div>
-          <button
-            className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
-            onClick={toggleTeenMode}
-            disabled={togglingTeen}
-            title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
-          >
-            <span className="teen-mode-toggle__icon">🎨</span>
-            <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
-            <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
-              {teenMode ? 'ON' : 'OFF'}
-            </span>
-          </button>
-        </div>
+        )}
 
         {loading ? (
           <div className="patient-page__loading">{t('common.loading')}</div>
         ) : (
           <>
-            <section className="radar">
-              <h2 className="radar__title">
-                {t('patient.dashboard_title')}
-                {modules.length > 0 && (
-                  <span className="radar__count">
-                    {modules.length === 1
-                      ? t('patient.tools_active_one', { count: modules.length })
-                      : t('patient.tools_active_other', { count: modules.length })}
-                  </span>
-                )}
-              </h2>
-
-              {modules.length === 0 ? (
-                <EmptyState description={t('patient.empty_tools')} title="" />
-              ) : (
-                <div className="radar__grid">
-                  {isUnlocked('crisis_plan') && (
-                    <StatusBadge variant="info" label={t('modules.crisis_plan.label')} value={t('patient.active_badge')} />
+            {activeTab === 'overview' && (
+              <section className="patient-overview">
+                <div className="patient-overview__stats">
+                  <div className="patient-overview__stat">
+                    <div className="patient-overview__stat-main">
+                      <span className="patient-overview__stat-value">{modules.length}</span>
+                      <Package2 size={20} className="patient-overview__stat-icon" />
+                    </div>
+                    <span className="patient-overview__stat-label">{t('patient.overview_active_modules')}</span>
+                  </div>
+                  <button className="patient-overview__stat patient-overview__stat--link" onClick={() => setActiveTab('notes')}>
+                    <div className="patient-overview__stat-main">
+                      <span className="patient-overview__stat-value">{notes.length}</span>
+                      <FileText size={20} className="patient-overview__stat-icon" />
+                    </div>
+                    <span className="patient-overview__stat-label">{t('patient.tab_notes')}</span>
+                  </button>
+                  <div className="patient-overview__stat">
+                    <div className="patient-overview__stat-main">
+                      <span className="patient-overview__stat-value">0</span>
+                      <CalendarDays size={20} className="patient-overview__stat-icon" />
+                    </div>
+                    <span className="patient-overview__stat-label">{t('patient.overview_rdv_done')}</span>
+                  </div>
+                  {patientEnrolledAt && (
+                    <div className="patient-overview__stat">
+                      <div className="patient-overview__stat-main">
+                        <span className="patient-overview__stat-value patient-overview__stat-value--date">
+                          {new Date(patientEnrolledAt).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                        <Clock size={20} className="patient-overview__stat-icon" />
+                      </div>
+                      <span className="patient-overview__stat-label">{t('patient.overview_enrolled_since')}</span>
+                    </div>
                   )}
-                  {psychoModule && (
-                    <StatusBadge
-                      variant={unreadPsychoCards > 0 ? 'warning' : 'info'}
-                      label={t('modules.psychoeducation.label')}
-                      value={`${totalPsychoCards - unreadPsychoCards}/${totalPsychoCards}`}
-                    />
-                  )}
-                  {isUnlocked('sleep_diary') && (
-                    <StatusBadge variant="info" label={t('modules.sleep_diary.label')} value={t('patient.active_badge')} />
-                  )}
-                  {modules
-                    .filter(m => !['crisis_plan', 'psychoeducation', 'sleep_diary'].includes(m.module_type))
-                    .map(m => (
-                      <StatusBadge key={m.id} variant="info" label={t(`modules.${m.module_type}.label`)} value={t('patient.active_badge')} />
-                    ))}
-                  <StatusBadge variant="neutral" label={t('patient.realtime_label')} value={t('patient.realtime_soon')} />
                 </div>
-              )}
-            </section>
 
-            <section className="therapeutic-wardrobe">
-              <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
-              <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
+                <div className="patient-overview__block">
+                  <div className="patient-overview__block-header">
+                    <h3 className="patient-overview__block-title">{t('patient.overview_add_note')}</h3>
+                  </div>
+                  <textarea
+                    className="patient-notes__textarea"
+                    placeholder={t('notes.placeholder')}
+                    rows={4}
+                    value={generalNote}
+                    onChange={e => setGeneralNote(e.target.value)}
+                  />
+                  <div className="patient-overview__note-form-actions">
+                    <Button size="sm" loading={generalNoteSaving} onClick={handleSaveGeneralNote}>
+                      {t('common.save')}
+                    </Button>
+                  </div>
+                </div>
 
-              <div className="category-list">
-                {categories.filter(c => c.id !== 'assessments').map(category => {
-                  const visibleModules = enabledModules === null
-                    ? category.modules
-                    : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
-                  if (visibleModules.length === 0) return null
-                  const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
-                  return (
-                    <Accordion
-                      key={category.id}
-                      title={t(category.labelKey)}
-                      badge={activeCount > 0 ? activeCount : undefined}
-                      defaultOpen={false}
+                <div className="patient-overview__row">
+                  <div className="patient-overview__block">
+                    <div className="patient-overview__block-header">
+                      <h3 className="patient-overview__block-title">{t('patient.overview_active_modules')}</h3>
+                      <button className="patient-overview__block-link" onClick={() => setActiveTab('modules')}>
+                        + {t('patient.tab_modules')}
+                      </button>
+                    </div>
+                    {modules.length === 0 ? (
+                      <p className="patient-overview__empty">{t('patient.overview_no_modules')}</p>
+                    ) : (
+                      <ul className="patient-overview__module-list">
+                        {modules.map(mod => {
+                          const catModule = categories.flatMap(c => c.modules).find(m => m.id === mod.module_type)
+                          const ModIcon = catModule ? LUCIDE_ICONS[catModule.icon] : undefined
+                          return (
+                            <li key={mod.id} className="patient-overview__module-item">
+                              <span className="patient-overview__module-icon">
+                                {ModIcon ? <ModIcon size={14} /> : null}
+                              </span>
+                              <span className="patient-overview__module-name">
+                                {t(`modules.${mod.module_type}.label`)}
+                              </span>
+                              <span className="patient-overview__module-date">
+                                {t('patient.overview_unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                              </span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="patient-overview__block">
+                    <div className="patient-overview__block-header">
+                      <h3 className="patient-overview__block-title">{t('patient.overview_recent_notes')}</h3>
+                    {notes.length > 3 && (
+                      <button className="patient-overview__block-link" onClick={() => setActiveTab('notes')}>
+                        {t('patient.overview_see_all_notes')}
+                      </button>
+                    )}
+                  </div>
+                  {notes.length === 0 ? (
+                    <p className="patient-overview__empty">{t('patient.overview_no_notes')}</p>
+                  ) : (
+                    <ul className="patient-overview__notes-list">
+                      {notes.slice(0, 3).map(note => (
+                        <li key={note.id} className="patient-overview__note-item">
+                          <p className="patient-overview__note-content">{note.content}</p>
+                          <div className="patient-overview__note-meta">
+                            {note.tags.length > 0 && (
+                              <div className="patient-overview__note-tags">
+                                {note.tags.map(tag => (
+                                  <span key={tag} className="patient-notes__tag patient-notes__tag--readonly">{tag}</span>
+                                ))}
+                              </div>
+                            )}
+                            <span className="patient-overview__note-date">
+                              {new Date(note.created_at).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {activeTab === 'modules' && (
+              <section className="therapeutic-wardrobe">
+                <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
+                <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
+
+                <div className="category-list">
+                  {categories.map(category => {
+                    if (category.id === 'assessments') return renderScalesAccordion()
+                    const visibleModules = (enabledModules === null
+                      ? category.modules
+                      : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
+                    ).filter(m => !comingSoonIds.has(m.id))
+                    if (visibleModules.length === 0) return null
+                    const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
+                    const CatIcon = LUCIDE_ICONS[category.icon]
+                    return (
+                      <Accordion
+                        key={category.id}
+                        title={t(category.labelKey)}
+                        icon={CatIcon ? <CatIcon size={16} /> : undefined}
+                        badge={activeCount > 0 ? activeCount : undefined}
+                        defaultOpen={false}
+                      >
+                        <div className="category-modules-grid">
+                          {visibleModules.map(renderModuleCard)}
+                        </div>
+                      </Accordion>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {activeTab === 'notes' && (
+              <section className="patient-notes">
+                {/* ── Formulaire nouvelle note ─────────────────────────── */}
+                <div className="patient-notes__form">
+                  <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
+                    <div className="patient-notes__textarea-inner">
+                      {isRecording && (
+                        <div className="patient-notes__skeleton" aria-hidden="true">
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                          <div className="patient-notes__skeleton-line" />
+                        </div>
+                      )}
+                      <textarea
+                        ref={newNoteRef}
+                        className="patient-notes__textarea"
+                        placeholder={t('notes.placeholder')}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="patient-notes__tag-row">
+                    {newNoteTags.map(tag => (
+                      <span key={tag} className="patient-notes__tag">
+                        {tag}
+                        <button
+                          className="patient-notes__tag-remove"
+                          onClick={() => setNewNoteTags(prev => prev.filter(t => t !== tag))}
+                          aria-label={`Retirer ${tag}`}
+                        >×</button>
+                      </span>
+                    ))}
+                    <input
+                      className="patient-notes__tag-input"
+                      value={newTagInput}
+                      onChange={e => setNewTagInput(e.target.value)}
+                      onKeyDown={handleNewTagKeyDown}
+                      onBlur={addNewTag}
+                      placeholder={t('notes.tag_placeholder')}
+                    />
+                  </div>
+
+                  {noteError && !editingNoteId && (
+                    <p className="patient-notes__error">{noteError}</p>
+                  )}
+                  <div className="patient-notes__form-actions">
+                    <SpeechToTextButton
+                      onTranscription={handleTranscription}
+                      onTextChunk={handleTextChunk}
+                      onRecordingChange={handleRecordingChange}
+                      disabled={savingNote}
+                    />
+                    <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
+                      {t('notes.save_button')}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* ── Filtre par tag ────────────────────────────────────── */}
+                {allTags.length > 0 && (
+                  <div className="patient-notes__filter-row">
+                    <div className="patient-notes__filter-search-wrapper">
+                      <Search size={13} className="patient-notes__filter-icon" />
+                      <input
+                        className="patient-notes__filter-search"
+                        value={tagSearch}
+                        onChange={e => {
+                          const val = e.target.value
+                          if (activeTagFilter && allTags.filter(t => !val || t.toLowerCase().includes(val.toLowerCase())).indexOf(activeTagFilter) === -1) {
+                            setActiveTagFilter(null)
+                          }
+                          setTagSearch(val)
+                        }}
+                        placeholder={t('notes.tag_search_placeholder')}
+                      />
+                    </div>
+                    <button
+                      className={`patient-notes__filter-chip ${activeTagFilter === null ? 'patient-notes__filter-chip--active' : ''}`}
+                      onClick={() => setActiveTagFilter(null)}
                     >
-                      {visibleModules.map(renderModuleCard)}
-                    </Accordion>
-                  )
-                })}
+                      {t('notes.filter_clear')}
+                    </button>
+                    {visibleTags.map(tag => (
+                      <button
+                        key={tag}
+                        className={`patient-notes__filter-chip ${activeTagFilter === tag ? 'patient-notes__filter-chip--active' : ''}`}
+                        onClick={() => setActiveTagFilter(prev => prev === tag ? null : tag)}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                {/* ── Échelles et questionnaires ─────────────────────────── */}
-                {renderClinicalEvaluations()}
+                {/* ── Liste de notes ────────────────────────────────────── */}
+                {filteredNotes.length === 0 ? (
+                  <p className="patient-notes__empty">
+                    {activeTagFilter ? t('notes.empty_filtered') : t('notes.empty_state')}
+                  </p>
+                ) : (
+                  <ul className="patient-notes__list">
+                    {filteredNotes.map(note => (
+                      <li key={note.id} className="patient-notes__item">
+                        {editingNoteId === note.id ? (
+                          <div className="patient-notes__edit-form">
+                            <textarea
+                              className="patient-notes__textarea"
+                              value={editingContent}
+                              onChange={e => setEditingContent(e.target.value)}
+                              rows={3}
+                              autoFocus
+                            />
+                            <div className="patient-notes__tag-row">
+                              {editingTags.map(tag => (
+                                <span key={tag} className="patient-notes__tag">
+                                  {tag}
+                                  <button
+                                    className="patient-notes__tag-remove"
+                                    onClick={() => setEditingTags(prev => prev.filter(t => t !== tag))}
+                                    aria-label={`Retirer ${tag}`}
+                                  >×</button>
+                                </span>
+                              ))}
+                              <input
+                                className="patient-notes__tag-input"
+                                value={editingTagInput}
+                                onChange={e => setEditingTagInput(e.target.value)}
+                                onKeyDown={handleEditingTagKeyDown}
+                                onBlur={addEditingTag}
+                                placeholder={t('notes.tag_placeholder')}
+                              />
+                            </div>
+                            {noteError && editingNoteId === note.id && (
+                              <p className="patient-notes__error">{noteError}</p>
+                            )}
+                            <div className="patient-notes__item-actions">
+                              <Button size="sm" loading={updatingNote} onClick={handleUpdateNote}>
+                                {t('notes.save_button')}
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={handleCancelEditNote}>
+                                {t('common.cancel')}
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="patient-notes__item-content">{note.content}</p>
+                            {note.tags.length > 0 && (
+                              <div className="patient-notes__tag-row patient-notes__tag-row--readonly">
+                                {note.tags.map(tag => (
+                                  <span key={tag} className="patient-notes__tag patient-notes__tag--readonly">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="patient-notes__item-meta">
+                              <span className="patient-notes__item-date">
+                                {new Date(note.created_at).toLocaleDateString(i18n.language, {
+                                  day: 'numeric',
+                                  month: 'long',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                              <div className="patient-notes__item-actions">
+                                {confirmDeleteNoteId === note.id ? (
+                                  <>
+                                    <span className="patient-notes__confirm-label">
+                                      {t('notes.confirm_delete')}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      variant="danger"
+                                      loading={deletingNoteId === note.id}
+                                      onClick={() => handleDeleteNote(note.id)}
+                                    >
+                                      {t('notes.confirm_yes')}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setConfirmDeleteNoteId(null)}
+                                    >
+                                      {t('common.cancel')}
+                                    </Button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleStartEditNote(note)}
+                                    >
+                                      {t('notes.edit_button')}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="patient-notes__delete-btn"
+                                      onClick={() => setConfirmDeleteNoteId(note.id)}
+                                    >
+                                      {t('notes.delete_button')}
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
+
+            {activeTab === 'rdv' && (
+              <div className="patient-rdv">
+                <div className="patient-rdv__header">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setRdvModal({ type: 'create' })}
+                  >
+                    {t('patient.rdv_new')}
+                  </Button>
+                </div>
+
+                <section className="patient-rdv__section">
+                  <h3 className="patient-rdv__section-title">{t('patient.rdv_upcoming')}</h3>
+                  {rdvUpcoming.length === 0 ? (
+                    <p className="patient-rdv__empty">{t('patient.rdv_empty_upcoming')}</p>
+                  ) : (
+                    <ul className="patient-rdv__list">
+                      {rdvUpcoming.map(appt => (
+                        <li
+                          key={appt.id}
+                          className="patient-rdv__item"
+                          onClick={() => setRdvModal({ type: 'view', appointment: appt })}
+                        >
+                          <span className="patient-rdv__item-date">
+                            {new Date(appt.starts_at).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <StatusBadge
+                            variant={appt.status === 'confirmed' ? 'success' : 'warning'}
+                            label={t(`agenda.appointment.status_${appt.status.replace('cancelled_by_patient', 'cancelled').replace('cancelled_by_practitioner', 'cancelled')}`)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+
+                <section className="patient-rdv__section">
+                  <h3 className="patient-rdv__section-title">{t('patient.rdv_past')}</h3>
+                  {rdvPast.length === 0 ? (
+                    <p className="patient-rdv__empty">{t('patient.rdv_empty_past')}</p>
+                  ) : (
+                    <ul className="patient-rdv__list">
+                      {rdvPast.map(appt => (
+                        <li
+                          key={appt.id}
+                          className="patient-rdv__item"
+                          onClick={() => setRdvModal({ type: 'view', appointment: appt })}
+                        >
+                          <span className="patient-rdv__item-date">
+                            {new Date(appt.starts_at).toLocaleString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <StatusBadge
+                            variant={
+                              appt.status === 'completed' ? 'neutral' :
+                              appt.status === 'confirmed' ? 'success' :
+                              appt.status === 'pending' ? 'warning' : 'danger'
+                            }
+                            label={t(`agenda.appointment.status_${appt.status.replace('cancelled_by_patient', 'cancelled').replace('cancelled_by_practitioner', 'cancelled')}`)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
               </div>
-            </section>
-
+            )}
           </>
         )}
       </div>
+
+      {rdvModal && practitioner && id && (
+        <AppointmentModal
+          mode={rdvModal.type}
+          startsAt={null}
+          endsAt={null}
+          appointment={rdvModal.appointment ?? null}
+          patients={rdvPatientOptions}
+          defaultPatientId={id}
+          practitionerName={practitioner?.name ?? undefined}
+          onClose={() => setRdvModal(null)}
+          onCreate={handleRdvCreate}
+          onUpdateStatus={handleRdvUpdateStatus}
+          onUpdateNotes={handleRdvUpdateNotes}
+        />
+      )}
+
+      {notifModal && practitioner && id && (
+        <NotificationRoutineModal
+          patientModuleId={notifModal.patientModuleId}
+          practitionerId={practitioner.id}
+          patientId={id}
+          moduleLabel={notifModal.moduleLabel}
+          moduleIconName={notifModal.moduleIconName}
+          onClose={() => setNotifModal(null)}
+        />
+      )}
+
+      {showCSSRSModal && practitioner && id && (
+        <Modal
+          title="C-SSRS — Dépistage suicidaire"
+          subtitle="Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
+          icon={<ShieldAlert size={20} />}
+          onClose={() => setShowCSSRSModal(false)}
+          noPadding
+          maxWidth={860}
+        >
+          <CSSRSScreenPanel
+            patientId={id}
+            practitionerId={practitioner.id}
+          />
+        </Modal>
+      )}
     </Layout>
   )
 }

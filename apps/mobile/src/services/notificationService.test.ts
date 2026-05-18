@@ -1,18 +1,206 @@
-// NOTE : expo-notifications n'est plus supporté dans Expo Go SDK 53+.
-// Les fonctions dans notifications.ts sont des stubs temporaires.
-// Ces tests vérifient le comportement des stubs jusqu'à la création d'un development build.
-
 import {
   requestNotificationPermission,
+  registerPushToken,
+  getRoutinesForModule,
+  pauseRoutine,
+  resumeRoutine,
+  updateTimeOverride,
   scheduleSleepDiaryReminder,
   cancelSleepDiaryReminder,
   getSleepDiaryReminderTime,
 } from './notificationService'
 
-describe('requestNotificationPermission (stub)', () => {
-  it('retourne false (stub — expo-notifications indisponible dans Expo Go SDK 53+)', async () => {
+// Mocks définis dans apps/mobile/src/__mocks__/
+jest.mock('expo-notifications')
+jest.mock('../lib/supabase', () => ({
+  supabase: {
+    from: jest.fn(),
+  },
+}))
+jest.mock('react-native', () => ({
+  Platform: { OS: 'ios' },
+}))
+
+import { supabase } from '../lib/supabase'
+import * as Notifications from 'expo-notifications'
+
+function makeChain(result: { data: unknown; error?: unknown }) {
+  const chain: Record<string, unknown> = {}
+  const proxy = new Proxy(chain, {
+    get(_target, prop: string) {
+      if (prop === 'then') {
+        return (resolve: (v: unknown) => unknown) => Promise.resolve(result).then(resolve)
+      }
+      chain[prop] = jest.fn().mockReturnValue(proxy)
+      return chain[prop]
+    },
+  })
+  return proxy
+}
+
+const ROUTINE = {
+  id: 'r-1',
+  patient_module_id: 'pm-1',
+  practitioner_id: 'prac-1',
+  patient_id: 'pat-1',
+  days_of_week: [1, 3],
+  time_of_day: '09:00',
+  patient_time_override: null,
+  practitioner_note: null,
+  is_active: true,
+  patient_paused: false,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+}
+
+beforeEach(() => jest.clearAllMocks())
+
+// ── Permissions ─────────────────────────────────────────────────────────────
+
+describe('requestNotificationPermission', () => {
+  it('retourne true si déjà accordé', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    const result = await requestNotificationPermission()
+    expect(result).toBe(true)
+    expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled()
+  })
+
+  it('demande la permission si non accordée et retourne true si accordée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'undetermined' } as never)
+    jest.mocked(Notifications.requestPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    const result = await requestNotificationPermission()
+    expect(result).toBe(true)
+  })
+
+  it('retourne false si permission refusée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'undetermined' } as never)
+    jest.mocked(Notifications.requestPermissionsAsync).mockResolvedValue({ status: 'denied' } as never)
     const result = await requestNotificationPermission()
     expect(result).toBe(false)
+  })
+})
+
+// ── registerPushToken ────────────────────────────────────────────────────────
+
+describe('registerPushToken', () => {
+  it('retourne null si permission refusée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'denied' } as never)
+    jest.mocked(Notifications.requestPermissionsAsync).mockResolvedValue({ status: 'denied' } as never)
+    const result = await registerPushToken('pat-1')
+    expect(result).toBeNull()
+  })
+
+  it('retourne null si getExpoPushTokenAsync échoue (Expo Go)', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    jest.mocked(Notifications.getExpoPushTokenAsync).mockRejectedValue(new Error('not in dev build'))
+    const result = await registerPushToken('pat-1')
+    expect(result).toBeNull()
+  })
+
+  it('enregistre le token en base et le retourne', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    jest.mocked(Notifications.getExpoPushTokenAsync).mockResolvedValue({ data: 'ExponentPushToken[abc]' } as never)
+    const upsert = jest.fn().mockResolvedValue({ error: null })
+    jest.mocked(supabase.from).mockReturnValue({ upsert } as never)
+
+    const result = await registerPushToken('pat-1')
+    expect(result).toBe('ExponentPushToken[abc]')
+    expect(upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ patient_id: 'pat-1', expo_push_token: 'ExponentPushToken[abc]' }),
+      expect.any(Object)
+    )
+  })
+
+  it('retourne null si l\'upsert Supabase échoue', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    jest.mocked(Notifications.getExpoPushTokenAsync).mockResolvedValue({ data: 'ExponentPushToken[abc]' } as never)
+    const upsert = jest.fn().mockResolvedValue({ error: { message: 'RLS denied' } })
+    jest.mocked(supabase.from).mockReturnValue({ upsert } as never)
+
+    const result = await registerPushToken('pat-1')
+    expect(result).toBeNull()
+  })
+})
+
+// ── getRoutinesForModule ────────────────────────────────────────────────────
+
+describe('getRoutinesForModule', () => {
+  it('retourne les routines du module', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: [ROUTINE], error: null }) as never)
+    const result = await getRoutinesForModule('pm-1')
+    expect(result).toEqual([ROUTINE])
+  })
+
+  it('retourne [] si aucune routine', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    const result = await getRoutinesForModule('pm-1')
+    expect(result).toEqual([])
+  })
+
+  it('retourne [] en cas d\'erreur Supabase (non-bloquant)', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'network' } }) as never)
+    const result = await getRoutinesForModule('pm-1')
+    expect(result).toEqual([])
+  })
+})
+
+// ── pauseRoutine ────────────────────────────────────────────────────────────
+
+describe('pauseRoutine', () => {
+  it('retourne true et insère l\'événement d\'engagement', async () => {
+    const insert = jest.fn().mockResolvedValue({ error: null })
+    jest.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === 'notification_routines') return makeChain({ data: null, error: null }) as never
+      return { insert } as never
+    })
+    const result = await pauseRoutine('r-1', 'pat-1', 'phq9')
+    expect(result).toBe(true)
+  })
+
+  it('retourne false si la mise à jour échoue', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'RLS' } }) as never)
+    const result = await pauseRoutine('r-1', 'pat-1', 'phq9')
+    expect(result).toBe(false)
+  })
+})
+
+// ── resumeRoutine ───────────────────────────────────────────────────────────
+
+describe('resumeRoutine', () => {
+  it('retourne true si succès', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    const result = await resumeRoutine('r-1', 'pat-1')
+    expect(result).toBe(true)
+  })
+
+  it('retourne false si erreur', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'error' } }) as never)
+    const result = await resumeRoutine('r-1', 'pat-1')
+    expect(result).toBe(false)
+  })
+})
+
+// ── updateTimeOverride ──────────────────────────────────────────────────────
+
+describe('updateTimeOverride', () => {
+  it('retourne true si succès', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    const result = await updateTimeOverride('r-1', 'pat-1', '10:30')
+    expect(result).toBe(true)
+  })
+
+  it('accepte null pour réinitialiser l\'heure', async () => {
+    jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    const result = await updateTimeOverride('r-1', 'pat-1', null)
+    expect(result).toBe(true)
+  })
+})
+
+// ── Stubs legacy ────────────────────────────────────────────────────────────
+
+describe('scheduleSleepDiaryReminder (stub)', () => {
+  it('retourne une chaîne vide', async () => {
+    expect(await scheduleSleepDiaryReminder(8, 0)).toBe('')
   })
 })
 
@@ -22,20 +210,8 @@ describe('cancelSleepDiaryReminder (stub)', () => {
   })
 })
 
-describe('scheduleSleepDiaryReminder (stub)', () => {
-  it('retourne une chaîne vide (stub)', async () => {
-    const id = await scheduleSleepDiaryReminder(8, 0)
-    expect(typeof id).toBe('string')
-  })
-
-  it('accepte n\'importe quelle heure sans erreur', async () => {
-    await expect(scheduleSleepDiaryReminder(9, 30)).resolves.toBeDefined()
-  })
-})
-
 describe('getSleepDiaryReminderTime (stub)', () => {
-  it('retourne null (stub)', async () => {
-    const result = await getSleepDiaryReminderTime()
-    expect(result).toBeNull()
+  it('retourne null', async () => {
+    expect(await getSleepDiaryReminderTime()).toBeNull()
   })
 })

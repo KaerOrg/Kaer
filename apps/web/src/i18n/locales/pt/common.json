@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Menu de perfil",
+    "profile": "Perfil",
     "edit_profile": "Editar perfil",
     "logout": "Terminar sessão",
     "language": "Idioma"
@@ -35,9 +36,13 @@
     "error_credentials": "Email ou palavra-passe incorretos."
   },
   "profile_modal": {
-    "title": "Editar perfil",
+    "title": "O meu perfil",
+    "edit_section": "Editar as minhas informações",
+    "email_label": "Endereço de email",
     "full_name_label": "Nome completo",
     "title_label": "Título profissional",
+    "phone_label": "Telefone",
+    "address_label": "Endereço",
     "error_update": "Erro ao atualizar o perfil.",
     "success": "✓ Perfil atualizado"
   },
@@ -79,6 +84,9 @@
     "loading_patients": "A carregar pacientes…",
     "empty_title": "Nenhum paciente ainda",
     "empty_description": "Comece por convidar o seu primeiro paciente.",
+    "search_placeholder": "Procurar um paciente (nome, email)…",
+    "empty_search_title": "Nenhum paciente corresponde",
+    "empty_search_description": "Nenhum paciente corresponde à sua pesquisa. Verifique a ortografia ou limpe o campo para ver todos.",
     "module_count_one": "{{count}} módulo",
     "module_count_other": "{{count}} módulos"
   },
@@ -150,6 +158,41 @@
     "enable_all": "Ativar todos",
     "disable_all": "Desativar todos",
     "enabled_count_one": "{{count}} módulo ativado",
-    "enabled_count_other": "{{count}} módulos ativados"
+    "enabled_count_other": "{{count}} módulos ativados",
+    "search_placeholder": "Procurar um módulo (nome, descrição)…",
+    "empty_search": "Nenhum módulo corresponde à sua pesquisa."
+  },
+  "notes": {
+    "section_title": "Notas",
+    "placeholder": "Adicionar uma nota…",
+    "save_button": "Guardar",
+    "edit_button": "Editar",
+    "delete_button": "Eliminar",
+    "confirm_delete": "Eliminar esta nota definitivamente?",
+    "confirm_yes": "Eliminar",
+    "error_empty": "A nota não pode estar vazia.",
+    "error_save": "Erro ao guardar.",
+    "error_update": "Erro ao atualizar.",
+    "error_delete": "Erro ao eliminar.",
+    "empty_state": "Sem notas para este paciente.",
+    "tag_placeholder": "Adicionar uma tag…",
+    "tag_hint": "Prima Enter para adicionar",
+    "filter_label": "Filtrar por tag",
+    "filter_clear": "Mostrar tudo",
+    "empty_filtered": "Sem notas para esta tag.",
+    "tag_search_placeholder": "Pesquisar uma tag…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Configure a sua disponibilidade e gira os seus compromissos.",
+    "today": "Hoje",
+    "prev_week": "Semana anterior",
+    "next_week": "Semana seguinte",
+    "configure": "Disponibilidade",
+    "no_rules": "Nenhuma faixa horária definida.",
+    "days_short": { "0": "Seg", "1": "Ter", "2": "Qua", "3": "Qui", "4": "Sex", "5": "Sáb", "6": "Dom" },
+    "editor": { "title": "A minha disponibilidade", "add_rule": "Adicionar faixa", "slot_duration": "Duração da consulta", "minutes": "min", "auto_confirm": "Confirmação automática", "delete_rule": "Eliminar" },
+    "appointment": { "new": "Nova consulta", "status_pending": "Pendente", "status_confirmed": "Confirmada", "status_cancelled": "Cancelada", "status_completed": "Concluída" }
   }
 }

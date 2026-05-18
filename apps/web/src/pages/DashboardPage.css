@@ -25,6 +25,11 @@
   color: var(--color-text-muted);
 }
 
+.dashboard__search {
+  max-width: 420px;
+  margin-bottom: 16px;
+}
+
 .invite-form-card {
   margin-bottom: 32px;
 }
@@ -243,7 +248,7 @@
   transform: translateY(-1px);
 }
 
-.patient-card .card__body {
+.patient-card__row {
   display: flex;
   align-items: center;
   gap: 16px;

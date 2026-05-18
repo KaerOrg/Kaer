@@ -163,3 +163,24 @@ export interface PsyEduBlock {
   readonly href: string | null
   readonly sort_order: number
 }
+
+// ─── Sources et recommandations (module_sources) ──────────────────────────────
+
+export type ModuleSourceType =
+  | 'rct'
+  | 'cohort_study'
+  | 'meta_analysis'
+  | 'systematic_review'
+  | 'guideline'
+  | 'expert_opinion'
+
+export interface ModuleSource {
+  readonly id: string
+  readonly module_id: string
+  readonly label: string
+  readonly source_type: ModuleSourceType
+  readonly url: string | null
+  readonly evidence_grade: 'A' | 'B' | 'C' | null
+  readonly description: string | null
+  readonly sort_order: number
+}
