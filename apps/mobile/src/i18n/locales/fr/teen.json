@@ -7,7 +7,8 @@
   "home": {
     "title": "Tes modules",
     "subheading": "Activés par ton soignant",
-    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe."
+    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe.",
+    "today_section": "Prévu aujourd'hui"
   },
   "modules": {
     "crisis_plan": {

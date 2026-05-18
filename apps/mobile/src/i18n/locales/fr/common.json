@@ -109,7 +109,8 @@
     "empty_title": "Aucun module disponible",
     "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.",
     "section_tools": "Outils thérapeutiques",
-    "section_scales": "Échelles et questionnaires"
+    "section_scales": "Échelles et questionnaires",
+    "today_section": "Prévu aujourd'hui"
   },
   "profile": {
     "title": "Mon profil",
@@ -1720,6 +1721,14 @@
     "addiction": {
       "label": "Addictologie & Impulsivité",
       "subtitle": "Le module souvent oublié"
+    },
+    "motivation": {
+      "label": "Entretien Motivationnel",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Évaluations Cliniques",
+      "subtitle": ""
     }
   },
   "card": {
