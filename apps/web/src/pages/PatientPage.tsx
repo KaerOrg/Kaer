@@ -839,8 +839,9 @@ export function PatientPage() {
               const mod = activeScales.find(m => m.module_type === scale.id)
               const unlocked = !!mod
               const loading = unlockingModule === (scale.id as ModuleType)
+              const previewing = previewModule === (scale.id as ModuleType)
               return (
-                <li key={scale.id} className={`scale-row${unlocked ? ' scale-row--active' : ''}`}>
+                <li key={scale.id} className={`scale-row${unlocked ? ' scale-row--active' : ''}${previewing ? ' scale-row--expanded' : ''}`}>
                   <div className="scale-row__left">
                     <span className={`scale-row__type-badge scale-row__type-badge--${scale.evaluationType}`}>
                       {scale.evaluationType === 'auto' ? 'Auto' : 'Hétéro'}
@@ -869,11 +870,27 @@ export function PatientPage() {
                     )}
                   </div>
                   <div className="scale-row__toggle">
+                    {scale.hasPreview && (
+                      <button
+                        type="button"
+                        className={`preview-toggle-btn${previewing ? ' preview-toggle-btn--active' : ''}`}
+                        onClick={() => togglePreview(scale.id as ModuleType)}
+                        title={t('patient.patient_view')}
+                      >
+                        {previewing ? <EyeOff size={14} /> : <Eye size={14} />}
+                        {t('patient.preview_button')}
+                      </button>
+                    )}
                     {moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
                       if (unlocked && mod) revokeScale(mod.id)
                       else unlockModule(scale.id as ModuleType)
                     })}
                   </div>
+                  {previewing && (
+                    <div className="scale-row__preview">
+                      <ModulePreviewPanel moduleType={scale.id as ModuleType} />
+                    </div>
+                  )}
                 </li>
               )
             })}
