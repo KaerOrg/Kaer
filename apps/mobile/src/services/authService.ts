@@ -26,13 +26,18 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
     .eq('id', session.user.id)
     .single()
 
+  if (!profile) {
+    await supabase.auth.signOut()
+    return null
+  }
+
   return {
     id: session.user.id,
     email: session.user.email!,
-    first_name: profile?.first_name ?? '',
-    last_name: profile?.last_name ?? '',
-    phone: profile?.phone ?? null,
-    avatar_url: profile?.avatar_url ?? null,
+    first_name: profile.first_name ?? '',
+    last_name: profile.last_name ?? '',
+    phone: profile.phone ?? null,
+    avatar_url: profile.avatar_url ?? null,
   }
 }
 
@@ -73,8 +78,22 @@ export async function fetchTeenContext(patientId: string): Promise<TeenContext> 
 }
 
 export async function signInWithPassword(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error) throw new Error(error.message)
+
+  const userId = data.user?.id
+  if (!userId) throw new Error('Erreur lors de la connexion')
+
+  const { data: patient } = await supabase
+    .from('patients')
+    .select('id')
+    .eq('id', userId)
+    .single()
+
+  if (!patient) {
+    await supabase.auth.signOut()
+    throw new Error("Ce compte n'est pas un compte patient. Veuillez utiliser l'application web praticien.")
+  }
 }
 
 interface InvitationRow {

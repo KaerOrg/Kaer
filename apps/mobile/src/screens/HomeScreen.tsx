@@ -15,7 +15,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
-import { fetchUnlockedModules, type UnlockedModule } from '../services/homeService'
+import { fetchUnlockedModules, fetchTodayRoutines, type UnlockedModule, type TodayRoutine } from '../services/homeService'
+import { TodaySchedule } from '../components/features/TodaySchedule'
 import { colors, spacing, radius } from '../theme'
 import { useTeen } from '../hooks/useTeen'
 import { Card } from '../components/ui/Card'
@@ -28,6 +29,12 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
   breathing_techniques:     'BreathingTechniques',
 }
+
+// Ordre des catégories — miroir de sort_order dans module_categories en base.
+const CATEGORY_ORDER = [
+  'safety', 'iatrogenic', 'lifestyle', 'emotion',
+  'cognitive', 'anxiety', 'addiction', 'motivation', 'assessments',
+]
 
 
 interface ModuleSectionsProps {
@@ -104,17 +111,29 @@ const cardStyles = StyleSheet.create({
 
 function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress }: ModuleSectionsProps) {
   const { t } = useTranslation()
-  const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire')
-  const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire')
+
+  const grouped = new Map<string, UnlockedModule[]>()
+  for (const mod of modules) {
+    const catId = mod.module?.category_id ?? 'other'
+    if (!grouped.has(catId)) grouped.set(catId, [])
+    grouped.get(catId)!.push(mod)
+  }
+
+  const sections = [
+    ...CATEGORY_ORDER.filter(id => grouped.has(id)).map(id => ({ catId: id, items: grouped.get(id)! })),
+    ...[...grouped.entries()].filter(([id]) => !CATEGORY_ORDER.includes(id)).map(([id, items]) => ({ catId: id, items })),
+  ]
+
+  const showHeaders = sections.length > 1
 
   return (
     <View style={{ gap: spacing.md }}>
-      {tools.length > 0 && (
-        <View style={{ gap: spacing.sm }}>
-          {scales.length > 0 && (
-            <Text style={sectionStyles.header}>{t('home.section_tools')}</Text>
+      {sections.map(({ catId, items }) => (
+        <View key={catId} style={{ gap: spacing.sm }}>
+          {showHeaders && (
+            <Text style={sectionStyles.header}>{t(`category.${catId}.label`)}</Text>
           )}
-          {tools.map(mod => (
+          {items.map(mod => (
             <ModuleCard
               key={mod.id}
               mod={mod}
@@ -124,21 +143,7 @@ function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress }: M
             />
           ))}
         </View>
-      )}
-      {scales.length > 0 && (
-        <View style={{ gap: spacing.sm }}>
-          <Text style={sectionStyles.header}>{t('home.section_scales')}</Text>
-          {scales.map(mod => (
-            <ModuleCard
-              key={mod.id}
-              mod={mod}
-              isTeenMode={isTeenMode}
-              accentColor={teenColor(mod.module_type)}
-              onPress={() => handleModulePress(mod)}
-            />
-          ))}
-        </View>
-      )}
+      ))}
     </View>
   )
 }
@@ -160,12 +165,18 @@ export default function HomeScreen() {
   const { t } = useTranslation()
   const { isTeenMode, tg, teenColor } = useTeen()
   const [modules, setModules] = useState<UnlockedModule[]>([])
+  const [todayRoutines, setTodayRoutines] = useState<TodayRoutine[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
   const fetchModules = async () => {
     if (!patient) return
-    setModules(await fetchUnlockedModules(patient.id))
+    const [mods, routines] = await Promise.all([
+      fetchUnlockedModules(patient.id),
+      fetchTodayRoutines(patient.id),
+    ])
+    setModules(mods)
+    setTodayRoutines(routines)
   }
 
   useFocusEffect(
@@ -179,6 +190,19 @@ export default function HomeScreen() {
     await fetchModules()
     setRefreshing(false)
   }
+
+  const handleTodayRoutinePress = useCallback((routine: TodayRoutine) => {
+    const customRoute = CUSTOM_ROUTES[routine.module_type]
+    if (customRoute) {
+      navigation.navigate(customRoute as never)
+      return
+    }
+    if (routine.preview_kind === 'questionnaire') {
+      navigation.navigate('ScaleHistory', { scale_id: routine.module_type })
+      return
+    }
+    navigation.navigate('ModuleContent', { moduleType: routine.module_type })
+  }, [navigation])
 
   const handleModulePress = useCallback((mod: UnlockedModule) => {
     // 1. Écrans custom dédiés (interaction non couverte par le moteur générique)
@@ -220,6 +244,13 @@ export default function HomeScreen() {
         <Text style={styles.subheading}>
           {isTeenMode ? t('home.subheading', { ns: 'teen' }) : t('home.subheading')}
         </Text>
+
+        <TodaySchedule
+          routines={todayRoutines}
+          isTeenMode={isTeenMode}
+          teenColor={teenColor}
+          onPress={handleTodayRoutinePress}
+        />
 
         {modules.length === 0 ? (
           <EmptyState

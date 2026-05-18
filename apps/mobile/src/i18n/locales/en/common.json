@@ -90,7 +90,8 @@
     "empty_title": "No modules available",
     "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
     "section_tools": "Therapeutic tools",
-    "section_scales": "Scales & questionnaires"
+    "section_scales": "Scales & questionnaires",
+    "today_section": "Planned for today"
   },
   "profile": {
     "title": "My profile",
@@ -1094,5 +1095,43 @@
     "day_ven": "F",
     "day_sam": "S",
     "day_dim": "S"
+  },
+  "category": {
+    "safety": {
+      "label": "Safety & Crisis Management",
+      "subtitle": ""
+    },
+    "iatrogenic": {
+      "label": "Iatrogenic & Somatic Monitoring",
+      "subtitle": ""
+    },
+    "lifestyle": {
+      "label": "Lifestyle & Biological Rhythms",
+      "subtitle": ""
+    },
+    "emotion": {
+      "label": "Emotional Regulation & Mood",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Cognitive Restructuring",
+      "subtitle": ""
+    },
+    "anxiety": {
+      "label": "Anxiety, Phobias & OCD",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictology & Impulsivity",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivational Interviewing",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Clinical Assessments",
+      "subtitle": ""
+    }
   }
 }

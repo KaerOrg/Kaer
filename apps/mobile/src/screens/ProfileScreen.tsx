@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
+import { useToast } from '../contexts/ToastContext'
 import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
@@ -96,6 +97,7 @@ const avatarStyles = StyleSheet.create({
 export default function ProfileScreen() {
   const { t } = useTranslation()
   const { patient, logout, updateAvatar, updateProfile, language, setLanguage } = useAuthStore()
+  const { showToast } = useToast()
 
   const [firstName, setFirstName] = useState(patient?.first_name ?? '')
   const [lastName, setLastName] = useState(patient?.last_name ?? '')
@@ -156,7 +158,7 @@ export default function ProfileScreen() {
       await saveAvatarUrl(patient.id, publicUrl)
       updateAvatar(publicUrl)
     } catch {
-      Alert.alert(t('common.error'), t('profile.avatar_error'))
+      showToast(t('profile.avatar_error'), 'error')
     } finally {
       setAvatarUploading(false)
     }
@@ -171,9 +173,9 @@ export default function ProfileScreen() {
     })
     setSavingProfile(false)
     if (result.ok) {
-      Alert.alert(t('common.saved_title'), t('profile.save_profile_success'))
+      showToast(t('profile.save_profile_success'), 'success')
     } else {
-      Alert.alert(t('common.error'), t('profile.save_profile_error'))
+      showToast(t('profile.save_profile_error'), 'error')
     }
   }, [firstName, lastName, phone, updateProfile, t])
 
