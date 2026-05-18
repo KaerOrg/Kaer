@@ -3,7 +3,7 @@ import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../../services/moduleService'
 import { FieldRenderer } from '../ModuleRenderer'
-import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
+import { ModuleSourcesPanel } from '../../ModuleSources/ModuleSourcesPanel'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
