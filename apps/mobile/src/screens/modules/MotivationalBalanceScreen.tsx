@@ -20,7 +20,7 @@ import { Info, Plus, Trash2, X } from 'lucide-react-native'
 import type { PsyEduTopic } from '@psytool/shared'
 import { ChevronRight } from 'lucide-react-native'
 import { fetchTopicsByModule } from '../../services/psyeduService'
-import { resolvePsyEduIcon } from '../../components/ModuleRenderer/layouts/PsyEdu/iconMap'
+import { resolvePsyEduIcon } from '../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap'
 import {
   saveEMRuler,
   listEMRulers,
@@ -32,8 +32,8 @@ import {
   listEMValues,
 } from '../../services/motivationalBalanceService'
 import type { EMRuler, EMBalanceItem, EMValue } from '../../lib/database'
-import { DisclaimerBanner } from '../../components/DisclaimerBanner'
-import { TeenAccent } from '../../components/TeenAccent'
+import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
+import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
 import { colors, spacing, radius } from '../../theme'
 import type { AppStackParamList } from '../../navigation/AppStack'
@@ -152,7 +152,7 @@ const GuideRow = React.memo(function GuideRow({ topic, accent, onPress }: GuideR
 
 interface StageTabProps {
   accent: string
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   isTeenMode: boolean
 }
 
@@ -278,7 +278,7 @@ function StageTab({ accent, t, isTeenMode }: StageTabProps) {
 
 interface RulersTabProps {
   accent: string
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   isTeenMode: boolean
 }
 
@@ -503,7 +503,7 @@ function RulersTab({ accent, t, isTeenMode }: RulersTabProps) {
 
 interface BalanceTabProps {
   accent: string
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
   isTeenMode: boolean
 }
 
@@ -740,7 +740,7 @@ const BalanceItemRow = React.memo(function BalanceItemRow({
 interface InfoModalProps {
   visible: boolean
   onClose: () => void
-  t: (key: string) => string
+  t: (key: string, options?: Record<string, unknown>) => string
 }
 
 function InfoModal({ visible, onClose, t }: InfoModalProps) {
