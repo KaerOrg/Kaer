@@ -2497,6 +2497,11 @@
 
 .preview-disclaimer__text { font-size: 12px; line-height: 1.5; }
 
+.preview-disclaimer--danger {
+  background: color-mix(in srgb, #DC2626 10%, transparent);
+  color: #DC2626;
+}
+
 /* ── Chrono Month (preview_kind='chrono_month') ────────────────────────── */
 
 .chrono-month {

@@ -1,0 +1,44 @@
+.crisis-commitment-widget {
+  background-color: var(--color-card);
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.crisis-commitment-widget__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.crisis-commitment-widget__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.crisis-commitment-widget__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.crisis-commitment-widget__phrase {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-style: italic;
+  line-height: 1.5;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  margin: 0;
+}
+
+.crisis-commitment-widget__info {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}

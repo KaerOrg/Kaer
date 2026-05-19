@@ -4,12 +4,14 @@ import { useToast } from '../../../contexts/ToastContext'
 import {
   fetchCrisisPlanConfig,
   saveCrisisPlanConfig,
+  clearCrisisPlanConfigCache,
   type CrisisPlanConfig,
   type CrisisPlanCopingCard,
 } from '../../../services/crisisPlanService'
 import type { PatientModule } from '../../../lib/database.types'
 
 export function useCrisisPlanEditor(
+  patientId: string,
   modules: PatientModule[],
   onReloadModules: () => Promise<void>,
 ) {
@@ -22,17 +24,12 @@ export function useCrisisPlanEditor(
   const [saving, setSaving] = useState(false)
 
   const crisisPlanModule = modules.find(m => m.module_type === 'crisis_plan')
-  const isConfigured = crisisPlanModule && (
-    (crisisPlanModule.config as Record<string, unknown> | null)?.crisisPlan != null
-  )
+  // Le plan est "configuré" dès qu'il y a au moins un contenu praticien enregistré
+  const isConfigured = !!(crisisPlanModule && (config.practitionerMessage || config.copingCards.length > 0 || config.commitmentPhrase))
 
   const openEditor = async () => {
-    if (crisisPlanModule) {
-      const cfg = await fetchCrisisPlanConfig(crisisPlanModule.id)
-      setConfig(cfg)
-    } else {
-      setConfig({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
-    }
+    const cfg = await fetchCrisisPlanConfig(patientId)
+    setConfig(cfg)
     setCardDraft(null)
     setOpen(true)
   }
@@ -43,11 +40,11 @@ export function useCrisisPlanEditor(
   }
 
   const saveEditor = async () => {
-    if (!crisisPlanModule) return
     setSaving(true)
-    const { ok } = await saveCrisisPlanConfig(crisisPlanModule.id, config)
+    const { ok } = await saveCrisisPlanConfig(patientId, config)
     setSaving(false)
     if (!ok) { toast.error(t('patient.crisis_error_save')); return }
+    clearCrisisPlanConfigCache()
     toast.success(t('common.saved'))
     setOpen(false)
     await onReloadModules()

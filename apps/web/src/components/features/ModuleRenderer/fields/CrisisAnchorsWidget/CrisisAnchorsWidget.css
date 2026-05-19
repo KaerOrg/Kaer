@@ -1,0 +1,93 @@
+.crisis-anchors-widget {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.crisis-anchors-widget__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.crisis-anchors-widget__icon {
+  color: #DC2626;
+  flex-shrink: 0;
+}
+
+.crisis-anchors-widget__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.crisis-anchors-widget__subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.crisis-anchors-widget__practitioner-msg {
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-primary);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.crisis-anchors-widget__photos {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.crisis-anchors-widget__photo-slot {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface);
+}
+
+.crisis-anchors-widget__photo-icon {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.crisis-anchors-widget__info {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.crisis-anchors-widget__phrase {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--color-surface);
+}
+
+.crisis-anchors-widget__phrase-label {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.crisis-anchors-widget__phrase-empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}

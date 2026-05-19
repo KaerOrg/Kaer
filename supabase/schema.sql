@@ -500,6 +500,57 @@ create policy "Practitioners can view logs of their patients"
 
 
 -- ============================================================
+-- TABLES : crisis_plan_configs + crisis_plan_coping_cards
+-- ============================================================
+-- Config praticien pour le plan de crise (VHB-EF).
+-- Remplace le JSON dans patient_modules.config.crisisPlan.
+
+create table if not exists public.crisis_plan_configs (
+  patient_id        uuid primary key references public.patients(id) on delete cascade,
+  practitioner_message text not null default '',
+  commitment_phrase text not null default '',
+  updated_at        timestamptz not null default now()
+);
+
+create table if not exists public.crisis_plan_coping_cards (
+  id         uuid primary key default gen_random_uuid(),
+  patient_id uuid not null references public.patients(id) on delete cascade,
+  thought    text not null default '',
+  response   text not null default '',
+  sort_order integer not null default 0
+);
+
+alter table public.crisis_plan_configs enable row level security;
+alter table public.crisis_plan_coping_cards enable row level security;
+
+drop policy if exists "patient_read_own_crisis_config" on public.crisis_plan_configs;
+create policy "patient_read_own_crisis_config"
+  on public.crisis_plan_configs for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "practitioner_rw_crisis_config" on public.crisis_plan_configs;
+create policy "practitioner_rw_crisis_config"
+  on public.crisis_plan_configs for all
+  using (auth.uid() in (
+    select pp.practitioner_id from public.practitioner_patients pp
+    where pp.patient_id = crisis_plan_configs.patient_id
+  ));
+
+drop policy if exists "patient_read_own_coping_cards" on public.crisis_plan_coping_cards;
+create policy "patient_read_own_coping_cards"
+  on public.crisis_plan_coping_cards for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "practitioner_rw_coping_cards" on public.crisis_plan_coping_cards;
+create policy "practitioner_rw_coping_cards"
+  on public.crisis_plan_coping_cards for all
+  using (auth.uid() in (
+    select pp.practitioner_id from public.practitioner_patients pp
+    where pp.patient_id = crisis_plan_coping_cards.patient_id
+  ));
+
+
+-- ============================================================
 -- TABLE : practitioner_patient_notes (Notes privées praticien)
 -- ============================================================
 -- Notes libres liées à un patient, visibles uniquement du praticien.

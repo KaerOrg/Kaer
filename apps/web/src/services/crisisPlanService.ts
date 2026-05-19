@@ -14,33 +14,77 @@ export interface ServiceResult {
   message?: string
 }
 
-export async function fetchCrisisPlanConfig(moduleId: string): Promise<CrisisPlanConfig> {
-  const { data } = await supabase
-    .from('patient_modules')
-    .select('config')
-    .eq('id', moduleId)
-    .single()
+// Cache session par patientId — évite les triple-fetches des widgets de prévisualisation.
+const configCache = new Map<string, CrisisPlanConfig>()
+export function clearCrisisPlanConfigCache() { configCache.clear() }
 
-  const cfg = (data?.config as Record<string, unknown> | null)?.crisisPlan as
-    | Partial<CrisisPlanConfig>
-    | undefined
+export async function fetchCrisisPlanConfig(patientId: string): Promise<CrisisPlanConfig> {
+  if (configCache.has(patientId)) return configCache.get(patientId)!
 
-  return {
-    practitionerMessage: cfg?.practitionerMessage ?? '',
-    copingCards: cfg?.copingCards ?? [],
-    commitmentPhrase: cfg?.commitmentPhrase ?? '',
+  const [configResult, cardsResult] = await Promise.all([
+    supabase
+      .from('crisis_plan_configs')
+      .select('practitioner_message, commitment_phrase')
+      .eq('patient_id', patientId)
+      .maybeSingle(),
+    supabase
+      .from('crisis_plan_coping_cards')
+      .select('id, thought, response, sort_order')
+      .eq('patient_id', patientId)
+      .order('sort_order', { ascending: true }),
+  ])
+
+  const result: CrisisPlanConfig = {
+    practitionerMessage: configResult.data?.practitioner_message ?? '',
+    copingCards: (cardsResult.data ?? []).map(c => ({
+      id: c.id as string,
+      thought: c.thought as string,
+      response: c.response as string,
+    })),
+    commitmentPhrase: configResult.data?.commitment_phrase ?? '',
   }
+
+  configCache.set(patientId, result)
+  return result
 }
 
 export async function saveCrisisPlanConfig(
-  moduleId: string,
-  config: CrisisPlanConfig
+  patientId: string,
+  config: CrisisPlanConfig,
 ): Promise<ServiceResult> {
-  const { error } = await supabase
-    .from('patient_modules')
-    .update({ config: { crisisPlan: config } as Record<string, unknown> })
-    .eq('id', moduleId)
+  // Upsert la config principale
+  const { error: cfgErr } = await supabase
+    .from('crisis_plan_configs')
+    .upsert({
+      patient_id: patientId,
+      practitioner_message: config.practitionerMessage,
+      commitment_phrase: config.commitmentPhrase,
+      updated_at: new Date().toISOString(),
+    })
+  if (cfgErr) return { ok: false, message: cfgErr.message }
 
-  if (error) return { ok: false, message: error.message }
+  // Remplacement des cartes : suppression puis insertion
+  const { error: delErr } = await supabase
+    .from('crisis_plan_coping_cards')
+    .delete()
+    .eq('patient_id', patientId)
+  if (delErr) return { ok: false, message: delErr.message }
+
+  if (config.copingCards.length > 0) {
+    const { error: insErr } = await supabase
+      .from('crisis_plan_coping_cards')
+      .insert(
+        config.copingCards.map((c, i) => ({
+          patient_id: patientId,
+          thought: c.thought,
+          response: c.response,
+          sort_order: i,
+        })),
+      )
+    if (insErr) return { ok: false, message: insErr.message }
+  }
+
+  // Invalider le cache pour ce patient
+  configCache.delete(patientId)
   return { ok: true }
 }

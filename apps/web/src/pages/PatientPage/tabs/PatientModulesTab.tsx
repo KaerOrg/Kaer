@@ -23,6 +23,7 @@ import { ScaleMetaBadges } from '../../../components/ui/ScaleMetaBadges/ScaleMet
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
+import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 
 type Props = {
   patientId: string
@@ -60,7 +61,7 @@ export function PatientModulesTab({
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
   const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
-  const crisis = useCrisisPlanEditor(modules, onReloadModules)
+  const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
 
   const togglePreview = useCallback((type: ModuleType) => {
     setPreviewModule(prev => (prev === type ? null : type))
@@ -228,7 +229,7 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${crisis.open && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${(crisis.open || previewModule === 'crisis_plan') && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -238,9 +239,19 @@ export function PatientModulesTab({
               right: moduleToggle(unlocked, unlockingModule === moduleType, handleCrisisToggle),
             }}
             actions={unlocked && mod && !crisis.open ? (
-              <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
-                {t('patient.crisis_configure')}
-              </Button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className={`preview-toggle-btn ${previewModule === 'crisis_plan' ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview('crisis_plan')}
+                  aria-label={previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                >
+                  {previewModule === 'crisis_plan' ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                </button>
+                <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
+                  {t('patient.crisis_configure')}
+                </Button>
+              </div>
             ) : undefined}
           >
             {unlocked && mod && (
@@ -357,6 +368,13 @@ export function PatientModulesTab({
                 </Button>
               </div>
             </div>
+          )}
+
+          {previewModule === 'crisis_plan' && unlocked && (
+            <ModulePreviewPanel
+              moduleType="crisis_plan"
+              color={modItem.color}
+            />
           )}
         </div>
       )
@@ -546,7 +564,7 @@ export function PatientModulesTab({
   }
 
   return (
-    <>
+    <PatientViewProvider patientId={patientId}>
       <section className="therapeutic-wardrobe">
         <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
         <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
@@ -603,6 +621,6 @@ export function PatientModulesTab({
           />
         </Modal>
       )}
-    </>
+    </PatientViewProvider>
   )
 }

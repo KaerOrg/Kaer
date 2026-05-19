@@ -62,26 +62,34 @@ beforeEach(() => jest.clearAllMocks())
 
 describe('fetchPractitionerConfig', () => {
   it('retourne la config praticien si présente', async () => {
-    mockFrom.mockReturnValueOnce(makeChain({
-      data: { config: { crisisPlan: { practitionerMessage: 'Tu es courageux', copingCards: [], commitmentPhrase: 'Je m\'engage' } } },
-    }))
+    mockFrom
+      .mockReturnValueOnce(makeChain({ data: { practitioner_message: 'Tu es courageux', commitment_phrase: "Je m'engage" } }))
+      .mockReturnValueOnce(makeChain({ data: [] }))
     const cfg = await fetchPractitionerConfig('patient-1')
     expect(cfg.practitionerMessage).toBe('Tu es courageux')
-    expect(cfg.commitmentPhrase).toBe('Je m\'engage')
+    expect(cfg.commitmentPhrase).toBe("Je m'engage")
   })
 
-  it('retourne des valeurs vides si aucun module', async () => {
-    mockFrom.mockReturnValueOnce(makeChain({ data: null }))
+  it('retourne des valeurs vides si aucune ligne en base', async () => {
+    mockFrom
+      .mockReturnValueOnce(makeChain({ data: null }))
+      .mockReturnValueOnce(makeChain({ data: [] }))
     const cfg = await fetchPractitionerConfig('patient-1')
     expect(cfg.practitionerMessage).toBe('')
     expect(cfg.copingCards).toEqual([])
     expect(cfg.commitmentPhrase).toBe('')
   })
 
-  it('retourne des valeurs vides si crisisPlan absent du config', async () => {
-    mockFrom.mockReturnValueOnce(makeChain({ data: { config: {} } }))
+  it('mappe correctement les cartes de coping', async () => {
+    mockFrom
+      .mockReturnValueOnce(makeChain({ data: { practitioner_message: '', commitment_phrase: '' } }))
+      .mockReturnValueOnce(makeChain({ data: [
+        { id: 'card-1', thought: 'Je suis nul', response: 'Je fais de mon mieux', sort_order: 0 },
+      ] }))
     const cfg = await fetchPractitionerConfig('patient-1')
-    expect(cfg.practitionerMessage).toBe('')
+    expect(cfg.copingCards).toHaveLength(1)
+    expect(cfg.copingCards[0].thought).toBe('Je suis nul')
+    expect(cfg.copingCards[0].response).toBe('Je fais de mon mieux')
   })
 })
 
