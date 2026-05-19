@@ -103,7 +103,7 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
 
   useEffect(() => {
     let active = true
-    void Promise.all([
+    Promise.all([
       getAllPlanItemsForModule(moduleId),
       getModuleSetting(moduleId, targetBehaviorKey),
     ]).then(([loadedItems, loadedBehavior]) => {
@@ -111,7 +111,7 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
       setItems(loadedItems)
       setTargetBehavior(loadedBehavior ?? '')
       setLoading(false)
-    })
+    }).catch(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [moduleId, targetBehaviorKey])
 

@@ -75,7 +75,7 @@ export function ExposureHierarchyLayout({ moduleId }: Props) {
   }, [moduleId])
 
   useEffect(() => {
-    void reload()
+    reload().catch(() => setLoading(false))
   }, [reload])
 
   // ── Hierarchies mode ──────────────────────────────────────────────────

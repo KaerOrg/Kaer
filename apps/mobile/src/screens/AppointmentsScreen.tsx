@@ -110,7 +110,7 @@ export default function AppointmentsScreen() {
     setLoading(false)
   }, [patient])
 
-  useFocusEffect(useCallback(() => { void load() }, [load]))
+  useFocusEffect(useCallback(() => { load().catch(() => setLoading(false)) }, [load]))
 
   const handleCancel = useCallback((id: string) => {
     Alert.alert(

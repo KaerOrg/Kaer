@@ -22,6 +22,8 @@ import { fetchScaleMeta, type ScaleMetaRow } from '../../../services/scaleServic
 import { ScaleMetaBadges } from '../../../components/ui/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
+import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
+import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 
 type Props = {
   patientId: string
@@ -59,6 +61,7 @@ export function PatientModulesTab({
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
   const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
+  const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
 
   const togglePreview = useCallback((type: ModuleType) => {
     setPreviewModule(prev => (prev === type ? null : type))
@@ -214,6 +217,164 @@ export function PatientModulesTab({
                 </Button>
               </div>
             </div>
+          )}
+        </div>
+      )
+    }
+
+    if (moduleType === 'crisis_plan') {
+      const handleCrisisToggle = () => {
+        if (unlocked && mod) { crisis.closeEditor(); revokeModule(mod.id) }
+        else unlockModule(moduleType)
+      }
+
+      return (
+        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${(crisis.open || previewModule === 'crisis_plan') && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+          <Card
+            className="module-card-item"
+            header={{
+              icon: modIcon,
+              title: t('modules.crisis_plan.label'),
+              subtitle: t('modules.crisis_plan.description'),
+              right: moduleToggle(unlocked, unlockingModule === moduleType, handleCrisisToggle),
+            }}
+            actions={unlocked && mod && !crisis.open ? (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  className={`preview-toggle-btn ${previewModule === 'crisis_plan' ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview('crisis_plan')}
+                  aria-label={previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                >
+                  {previewModule === 'crisis_plan' ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                </button>
+                <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
+                  {t('patient.crisis_configure')}
+                </Button>
+              </div>
+            ) : undefined}
+          >
+            {unlocked && mod && (
+              <div className="module-card__date">
+                {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                {crisis.isConfigured && (
+                  <span className="psycho-observance-summary"> · {t('patient.crisis_configured')}</span>
+                )}
+              </div>
+            )}
+          </Card>
+
+          {crisis.open && unlocked && mod && (
+            <div className="psycho-card-picker">
+              <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    {t('patient.crisis_msg_label')}
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder={t('patient.crisis_msg_placeholder')}
+                    value={crisis.config.practitionerMessage}
+                    onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                    {t('patient.crisis_commitment_label')}
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder={t('patient.crisis_commitment_placeholder')}
+                    value={crisis.config.commitmentPhrase}
+                    onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+                    {t('patient.crisis_cards_title')}
+                  </p>
+                  {crisis.config.copingCards.map(card => (
+                    <div key={card.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #E5E7EB', borderLeft: '3px solid #4F46E5' }}>
+                      <div style={{ fontSize: 12, color: '#6B7280' }}>{t('patient.crisis_card_thought_label')}</div>
+                      <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
+                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
+                      <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
+                      <button
+                        type="button"
+                        onClick={() => crisis.removeCopingCard(card.id)}
+                        style={{ alignSelf: 'flex-end', fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      >
+                        {t('patient.crisis_card_delete')}
+                      </button>
+                    </div>
+                  ))}
+                  {crisis.config.copingCards.length < 4 && (
+                    crisis.cardDraft ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
+                        <div>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                            {t('patient.crisis_card_thought_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder={t('patient.crisis_card_thought_placeholder')}
+                            value={crisis.cardDraft.thought}
+                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
+                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                            {t('patient.crisis_card_response_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder={t('patient.crisis_card_response_placeholder')}
+                            value={crisis.cardDraft.response}
+                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
+                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                          />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <Button
+                            size="sm"
+                            onClick={crisis.addCopingCard}
+                            disabled={!crisis.cardDraft.thought.trim() || !crisis.cardDraft.response.trim()}
+                          >
+                            {t('patient.crisis_card_save')}
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => crisis.setCardDraft(null)}>
+                            {t('common.cancel')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={crisis.addCopingCard}>
+                        + {t('patient.crisis_cards_add')}
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+              <div className="psycho-card-picker__actions">
+                <Button size="sm" loading={crisis.saving} onClick={crisis.saveEditor}>
+                  {t('patient.crisis_btn_save')}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={crisis.closeEditor}>
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {previewModule === 'crisis_plan' && unlocked && (
+            <ModulePreviewPanel
+              moduleType="crisis_plan"
+              color={modItem.color}
+            />
           )}
         </div>
       )
@@ -403,7 +564,7 @@ export function PatientModulesTab({
   }
 
   return (
-    <>
+    <PatientViewProvider patientId={patientId}>
       <section className="therapeutic-wardrobe">
         <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
         <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
@@ -460,6 +621,6 @@ export function PatientModulesTab({
           />
         </Modal>
       )}
-    </>
+    </PatientViewProvider>
   )
 }

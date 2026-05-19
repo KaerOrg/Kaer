@@ -98,7 +98,7 @@ export default function BookAppointmentScreen() {
       setRules(r)
       setExceptions(exc)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
   }, [practitionerId, year, month, daysInMonth])
 
   const loadSlots = useCallback(async (date: string) => {

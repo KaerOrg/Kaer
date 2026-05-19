@@ -12,56 +12,64 @@ export function getDb(): SQLite.SQLiteDatabase {
 // Initialise toutes les tables locales au premier lancement
 export async function initDatabase(): Promise<void> {
   const database = getDb()
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS crisis_plan_items (
-      id TEXT PRIMARY KEY,
-      step_number INTEGER NOT NULL,
-      content TEXT NOT NULL,
-      position INTEGER DEFAULT 0,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS sleep_diary_entries (
-      id TEXT PRIMARY KEY,
-      date TEXT NOT NULL UNIQUE,
-      bedtime TEXT,
-      wake_time TEXT,
-      sleep_onset_minutes INTEGER DEFAULT 0,
-      awakenings INTEGER DEFAULT 0,
-      awakenings_duration_minutes INTEGER DEFAULT 0,
-      quality INTEGER,
-      nightmares INTEGER DEFAULT 0,
-      notes TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    );
-  `)
-  await createDecisionalBalanceTable(database)
-  await createBeckColumnsTable(database)
-  await createMoodTrackerTable(database)
-  await createMedicationAdherenceTable(database)
-  await createMedicationSideEffectsTable(database)
-  await createFearThermometerTables(database)
-  await createBehavioralActivationTable(database)
-  await createBreathingSessionsTable(database)
-  await createEmotionEntriesTable(database)
-  await createCognitiveSaturationTable(database)
-  await createPHQ9Table(database)
-  await createBSL23Table(database)
-  await createGAD7Table(database)
-  await createNSITable(database) // kept for migration source
-  await createSNAPIVTable(database)
-  await createASRS6Table(database)
-  await createASRS18Table(database)
-  await createScaleEntriesTable(database)
-  await createPlanItemsTable(database)
-  await createDailyEntriesTable(database)
-  await createFormEntriesTable(database)
-  await createTreeSelectionsTable(database)
-  await createModuleSettingsTable(database)
-  await createEMRulersTable(database)
-  await createEMBalanceItemsTable(database)
-  await createEMValuesTable(database)
+
+  // Chaque création de table est indépendante : un échec isolé ne bloque pas les suivantes.
+  const steps: Array<() => Promise<void>> = [
+    () => database.execAsync(`
+      CREATE TABLE IF NOT EXISTS crisis_plan_items (
+        id TEXT PRIMARY KEY,
+        step_number INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        position INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `),
+    () => database.execAsync(`
+      CREATE TABLE IF NOT EXISTS sleep_diary_entries (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL UNIQUE,
+        bedtime TEXT,
+        wake_time TEXT,
+        sleep_onset_minutes INTEGER DEFAULT 0,
+        awakenings INTEGER DEFAULT 0,
+        awakenings_duration_minutes INTEGER DEFAULT 0,
+        quality INTEGER,
+        nightmares INTEGER DEFAULT 0,
+        notes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `),
+    () => createDecisionalBalanceTable(database),
+    () => createBeckColumnsTable(database),
+    () => createMoodTrackerTable(database),
+    () => createMedicationAdherenceTable(database),
+    () => createMedicationSideEffectsTable(database),
+    () => createFearThermometerTables(database),
+    () => createBehavioralActivationTable(database),
+    () => createBreathingSessionsTable(database),
+    () => createEmotionEntriesTable(database),
+    () => createCognitiveSaturationTable(database),
+    () => createPHQ9Table(database),
+    () => createBSL23Table(database),
+    () => createGAD7Table(database),
+    () => createNSITable(database),
+    () => createSNAPIVTable(database),
+    () => createASRS6Table(database),
+    () => createASRS18Table(database),
+    () => createScaleEntriesTable(database),
+    () => createPlanItemsTable(database),
+    () => createDailyEntriesTable(database),
+    () => createFormEntriesTable(database),
+    () => createTreeSelectionsTable(database),
+    () => createModuleSettingsTable(database),
+    () => createCrisisAnchorsTable(database),
+    () => createEMRulersTable(database),
+    () => createEMBalanceItemsTable(database),
+    () => createEMValuesTable(database),
+  ]
+  for (const step of steps) {
+    try { await step() } catch { /* table déjà présente ou erreur isolée — on continue */ }
+  }
   // Migrations : ajouter les colonnes absentes des installations existantes
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
@@ -1072,6 +1080,7 @@ async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<vo
 
 export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanItem[]> {
   const database = getDb()
+  await createPlanItemsTable(database).catch(() => {})
   return database.getAllAsync<PlanItem>(
     'SELECT * FROM plan_items WHERE module_id = ? ORDER BY section_id ASC, sort_order ASC, created_at ASC',
     [moduleId]
@@ -1118,12 +1127,55 @@ export async function getModuleSetting(moduleId: string, key: string): Promise<s
 
 export async function setModuleSetting(moduleId: string, key: string, value: string): Promise<void> {
   const database = getDb()
+  await createModuleSettingsTable(database).catch(() => {})
   await database.runAsync(
     `INSERT INTO module_settings (module_id, key, value, updated_at)
      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
      ON CONFLICT(module_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
     [moduleId, key, value]
   )
+}
+
+// ─── crisis_anchors — photos et phrase d'ancrage du plan de crise ────────────
+// URIs locaux (expo-file-system) + phrase libre. Max 3 photos par patient.
+
+async function createCrisisAnchorsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS crisis_anchors (
+      id         TEXT PRIMARY KEY,
+      uri        TEXT NOT NULL,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface CrisisAnchor {
+  id: string
+  uri: string
+  sort_order: number
+  created_at: string
+}
+
+export async function getCrisisAnchors(): Promise<CrisisAnchor[]> {
+  const database = getDb()
+  return database.getAllAsync<CrisisAnchor>(
+    'SELECT * FROM crisis_anchors ORDER BY sort_order ASC, created_at ASC'
+  )
+}
+
+export async function saveCrisisAnchor(anchor: Omit<CrisisAnchor, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await createCrisisAnchorsTable(database).catch(() => {})
+  await database.runAsync(
+    `INSERT OR REPLACE INTO crisis_anchors (id, uri, sort_order) VALUES (?, ?, ?)`,
+    [anchor.id, anchor.uri, anchor.sort_order]
+  )
+}
+
+export async function deleteCrisisAnchor(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM crisis_anchors WHERE id = ?', [id])
 }
 
 // ─── scale_entries — table générique pour tous les questionnaires cliniques ───

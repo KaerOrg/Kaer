@@ -22,6 +22,11 @@ import {
   TabsLayout,
   TreeSelectorLayout,
 } from './layouts'
+import { FieldText } from './fields'
+import { ExerciseSafetyField } from './fields/ExerciseSafetyField'
+import { CrisisAnchorsWidget } from './fields/CrisisAnchorsWidget'
+import { CrisisCopingCardsWidget } from './fields/CrisisCopingCardsWidget'
+import { CrisisCommitmentWidget } from './fields/CrisisCommitmentWidget'
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
@@ -56,10 +61,14 @@ export function FieldRenderer(props: FieldRendererProps) {
   if (!disclaimerField) return core
 
   const moduleKey = disclaimerField.props['module_key'] || props.moduleId || ''
-  const text = moduleKey ? t(`modules.${moduleKey}.disclaimer`) : ''
+  // text_code prop overrides the default modules.{key}.disclaimer key
+  const textCode = (disclaimerField.props['text_code'] as string) || (moduleKey ? `modules.${moduleKey}.disclaimer` : '')
+  const text = textCode ? t(textCode) : ''
+  // tone prop: 'info' (default) | 'danger'
+  const tone = (disclaimerField.props['tone'] as string) || 'info'
   return (
     <div className="preview-disclaimer-wrapper">
-      <div className="preview-disclaimer">
+      <div className={`preview-disclaimer preview-disclaimer--${tone}`}>
         <Info size={14} className="preview-disclaimer__icon" />
         <span className="preview-disclaimer__text">{text}</span>
       </div>
@@ -109,14 +118,14 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
     )
   }
 
-  if (preview_kind === 'steps' || preview_kind === 'editable_steps' || preview_kind === 'cards') {
+  if (preview_kind === 'steps' || preview_kind === 'cards') {
     const sections = new Map<string, ContentField[]>()
     for (const f of contentFields) {
       if (!f.section_id) continue
       if (!sections.has(f.section_id)) sections.set(f.section_id, [])
       sections.get(f.section_id)!.push(f)
     }
-    if (preview_kind === 'steps' || preview_kind === 'editable_steps') return <StepsLayout sections={sections} footer={footer} t={t} />
+    if (preview_kind === 'steps') return <StepsLayout sections={sections} footer={footer} t={t} />
     return (
       <CardsLayout
         sections={sections}
@@ -124,6 +133,32 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
         onToggle={onToggleCard}
         t={t}
       />
+    )
+  }
+
+  // editable_steps : les fields hors section (footer_note, exercise_safety, widgets VHB-EF)
+  // sont rendus APRÈS les étapes, triés par sort_order, pour respecter l'ordre de l'écran mobile.
+  if (preview_kind === 'editable_steps') {
+    const sections = new Map<string, ContentField[]>()
+    const suffixFields: ContentField[] = []
+    for (const f of visibleFields) {
+      if (!f.section_id) { suffixFields.push(f); continue }
+      if (!sections.has(f.section_id)) sections.set(f.section_id, [])
+      sections.get(f.section_id)!.push(f)
+    }
+    const sorted = [...suffixFields].sort((a, b) => a.sort_order - b.sort_order)
+    return (
+      <>
+        <StepsLayout sections={sections} footer={undefined} t={t} />
+        {sorted.map(f => {
+          if (f.field_type === 'footer_note') return <FieldText key={f.id} field={f} t={t} />
+          if (f.field_type === 'exercise_safety') return <ExerciseSafetyField key={f.id} field={f} />
+          if (f.field_type === 'crisis_anchors_preview') return <CrisisAnchorsWidget key={f.id} />
+          if (f.field_type === 'crisis_coping_cards_preview') return <CrisisCopingCardsWidget key={f.id} />
+          if (f.field_type === 'crisis_commitment_preview') return <CrisisCommitmentWidget key={f.id} />
+          return null
+        })}
+      </>
     )
   }
 

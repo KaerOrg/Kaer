@@ -65,6 +65,12 @@ export interface PsychoeducationCardEntry {
   unlocked_at: string // ISO 8601
 }
 
+export interface CrisisPlanCopingCard {
+  id: string
+  thought: string
+  response: string
+}
+
 export interface ModuleConfig {
   // Agenda du sommeil
   sleepDiary?: {
@@ -78,6 +84,12 @@ export interface ModuleConfig {
   // Psychoéducation — liste des cartes débloquées avec suivi de lecture
   psychoeducation?: {
     unlocked_cards: PsychoeducationCardEntry[]
+  }
+  // Plan de crise — contenu co-construit par le praticien
+  crisisPlan?: {
+    practitionerMessage?: string
+    copingCards?: CrisisPlanCopingCard[]
+    commitmentPhrase?: string
   }
 }
 
@@ -113,6 +125,7 @@ export type PreviewKind =
   | 'tabbed'
   | 'chrono_month'
   | 'exposure_hierarchy'
+  | 'crisis_urgency'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

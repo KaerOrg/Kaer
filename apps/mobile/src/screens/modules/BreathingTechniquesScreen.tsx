@@ -95,10 +95,12 @@ export default function BreathingTechniquesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      getAllBreathingSessions(200).then((data) => {
-        setSessions(data)
-        setLoading(false)
-      })
+      getAllBreathingSessions(200)
+        .then((data) => {
+          setSessions(data)
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
     }, [])
   )
 

@@ -13,8 +13,7 @@ import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
-import DietWeightPsychoScreen from '../screens/modules/DietWeightPsychoScreen'
-import DietWeightPsychoDetailScreen from '../screens/modules/DietWeightPsychoDetailScreen'
+import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
 import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
 import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
 import { getTechnique } from '../constants/breathingTechniques'
@@ -33,11 +32,10 @@ export type AppStackParamList = {
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
-  DietWeightPsycho: undefined
-  DietWeightPsychoDetail: { topicId: string; topicKey: string }
   MotivationalBalance: undefined
   MotivationalBalanceDetail: { topicId: string; topicKey: string }
   BookAppointment: { practitionerId: string }
+  CrisisPlan: { initialUrgency?: boolean }
 }
 
 export type TabParamList = {
@@ -137,19 +135,9 @@ export default function AppStack() {
         })}
       />
       <Stack.Screen
-        name="DietWeightPsycho"
-        component={DietWeightPsychoScreen}
-        options={{ title: 'Psychotropes & alimentation' }}
-      />
-      <Stack.Screen
-        name="DietWeightPsychoDetail"
-        component={DietWeightPsychoDetailScreen}
-        options={({ route }) => ({
-          title: route.params.topicKey
-            .split('_')
-            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
-        })}
+        name="CrisisPlan"
+        component={CrisisPlanScreen}
+        options={{ title: 'Plan de crise' }}
       />
       <Stack.Screen
         name="MotivationalBalance"

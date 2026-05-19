@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { logger } from '@psytool/shared'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../navigation/AuthStack'
 import { useAuthStore } from '../store/authStore'
@@ -28,17 +29,22 @@ export default function LoginScreen({ navigation }: Props) {
   const login = useAuthStore((s) => s.login)
 
   const handleLogin = async () => {
+    logger.log('[LoginScreen] handleLogin triggered, email:', email.trim())
     if (!email.trim() || !password) {
       Alert.alert(t('auth.missing_fields_title'), t('auth.missing_fields_message'))
       return
     }
     setLoading(true)
     try {
+      logger.log('[LoginScreen] calling login...')
       await login(email.trim().toLowerCase(), password)
+      logger.log('[LoginScreen] login returned (no error)')
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : t('auth.login_error_title')
+      logger.error('[LoginScreen] login error:', message)
       Alert.alert(t('auth.login_error_title'), message)
     } finally {
+      logger.log('[LoginScreen] finally — setLoading(false)')
       setLoading(false)
     }
   }

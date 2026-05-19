@@ -57,6 +57,7 @@ Valeurs de `preview_kind` et leur layout :
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
+| `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -115,53 +116,143 @@ create table public.module_content_fields (
 
 **Conventions d'identifiants** : `{module}.{type}_{n}` — ex. `sleep.field_1`, `crisis.step_1_title`.
 
-**`field_type`** — les 22 valeurs reconnues :
+**`field_type` — inventaire complet**
 
-| `field_type` | Composant React | Contexte |
+> **Règle absolue avant tout nouveau `field_type` :** consulter cette table. Si un type existant couvre le besoin avec une nouvelle `field_prop`, l'étendre — ne pas créer un nouveau type. Tout nouveau `field_type` génère une divergence web/mobile permanente à maintenir. Justifier par écrit dans la doc du module si la création est inévitable.
+>
+> **Correspondances fréquentes à vérifier en priorité :**
+> - Bannière / alerte / disclaimer → `disclaimer_banner` (props : `color`, `icon`, `text_code`, `tone`)
+> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `bgColor`, `label_code`)
+> - Note de bas d'écran → `footer_note`
+> - Onglet → `tab` (layout `tabbed`)
+
+**Génériques (tout layout)**
+
+| `field_type` | Rendu | Props clés | Contexte |
+|---|---|---|---|
+| `module_label` | Silencieux | — | Filtré avant rendu |
+| `module_description` | Silencieux | — | Filtré avant rendu |
+| `coming_soon` | Silencieux | — | Module non implémenté |
+| `footer_note` | Note texte bas de panel | — | Filtré, affiché séparément après le contenu |
+| `disclaimer_banner` | Bandeau d'avertissement | `color`, `icon`, `module_key`, `text_code`, `tone` | Bandeau haut d'écran configurable. `text_code` override la clé i18n par défaut (`modules.<key>.disclaimer`). `tone` : `"info"` (défaut) ou `"danger"` (fond rouge). Utilisé pour MDR, précautions cliniques, urgences |
+| `tab` | Onglet du layout `tabbed` | `tab_key`, `preview_kind` | Définit un onglet et son sous-layout |
+
+**Layout `fields`**
+
+| `field_type` | Rendu | Props clés |
 |---|---|---|
-| `field_row` | `FieldRow` | Champ de saisie dans layout `fields` |
-| `step_title` | `FieldText` | Titre d'une étape dans layout `steps` |
-| `step_hint` | `FieldText` | Sous-titre d'une étape |
-| `quadrant_title` | `FieldText` | Titre d'un quadrant dans `grid2x2` |
-| `quadrant_subtitle` | `FieldText` | Sous-titre d'un quadrant |
-| `card_title` | `FieldText` | Titre d'une carte accordéon |
-| `card_summary` | `FieldText` | Résumé affiché dans le header fermé |
-| `card_heading_2` | `FieldText` | `<h2>` / texte gras grand |
-| `card_heading_3` | `FieldText` | `<h3>` |
-| `card_heading_4` | `FieldText` | `<h4>` |
-| `card_paragraph` | `FieldText` | Paragraphe courant |
-| `card_paragraph_bold` | `FieldText` | Paragraphe gras |
-| `card_italic_note` | `FieldText` | Note en italique |
-| `card_callout` | `FieldText` | Encart coloré (bordure gauche) |
-| `card_list_item` | `FieldListItem` | Puce `•` groupée en `<ul>` |
-| `card_numbered_item` | `FieldListItem` | Item numéroté groupé en `<ol>` |
-| `card_definition` | `CardDefinition` | Terme + définition |
-| `card_divider` | `CardDivider` | Séparateur horizontal |
-| `footer_note` | `FieldText` | Note de bas de panel (filtrée, affichée séparément) |
-| `module_label` | `NullField` | Silencieux — filtré avant rendu |
-| `module_description` | `NullField` | Silencieux — filtré avant rendu |
-| `coming_soon` | `NullField` | Silencieux |
-| `scale_instruction` | `Text` inline | Bloc intro dans layout `questionnaire` |
-| `scale_option` | `LikertWidget` (option) | Choix de réponse Likert — prop `value` obligatoire |
-| `scale_legend_item` | Légende numérique | BSL-23 — valeur + libellé affiché sous instructions — prop `value` obligatoire |
-| `scale_warning` | Bandeau jaune | SNAP-IV — avertissement hétéro-évaluation |
-| `scale_section` | En-tête de section | SNAP-IV (Inattention / HI / TOD), ASRS-18 (Partie A / B) |
-| `scale_question` | Question + `LikertWidget` | Chaque item du questionnaire — indexé dans l'ordre `sort_order` |
-| `scale_slider_question` | Question + pips numériques | Sélecteur pip 1–N — props `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` — ex. `mood_tracker` |
-| `scale_number_input` | Champ numérique libre | Saisie numérique clavier — prop `subscale_key` |
-| `scale_text_input` | Champ texte libre | Notes libres — prop `placeholder_code`, `subscale_key` |
-| `exercise_title` | Titre de l'exercice | Layout `guided_exercise` — écran intro |
-| `exercise_intro` | Paragraphe intro | Layout `guided_exercise` — plusieurs lignes possibles |
-| `exercise_start_btn` | Label bouton démarrer | Layout `guided_exercise` — texte du bouton Démarrer |
-| `exercise_next_btn` | Label bouton suivant | Layout `guided_exercise` — texte du bouton Suivant |
-| `exercise_finish_btn` | Label bouton terminer | Layout `guided_exercise` |
-| `exercise_stop_btn` | Label bouton annuler | Layout `guided_exercise` |
-| `exercise_done_text` | Texte écran fin | Layout `guided_exercise` |
-| `exercise_safety_title` | Titre section urgence | Layouts `guided_exercise`, `patient_scenario` |
-| `exercise_safety` | Entrée urgence cliquable | Layouts `guided_exercise`, `patient_scenario` — props `phone`, `icon` |
-| `rim_disclaimer` | Disclaimer RIM | Layout `patient_scenario` |
-| `rim_step` | Étape protocole RIM | Layout `patient_scenario` — prop `step_number` |
-| `ambient_sound` | Bouton son d'ambiance | Layout `patient_scenario` — props `key`, `icon`, `available` |
+| `field_row` | `FieldRow` — ligne de saisie | `widget_type`, `icon`, `detail_code`, etc. |
+
+**Layout `steps` / `editable_steps`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number` |
+| `step_hint` | Sous-titre / question guide | `color`, `step_number` |
+
+**Layout `editable_steps` — champs suffixes** (sans `section_id`, rendus après les étapes, triés par `sort_order`)
+
+| `field_type` | Rendu | Props clés | Contexte |
+|---|---|---|---|
+| `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
+| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Bouton coloré non-cliquable (aperçu web), actif sur mobile |
+| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | Affiche le message praticien (Supabase `crisis_plan_configs`), 3 emplacements photos, champ phrase. Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Liste les cartes praticien (Supabase `crisis_plan_coping_cards`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
+
+**Layout `grid2x2`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `quadrant_title` | Titre de quadrant | `color` |
+| `quadrant_subtitle` | Sous-titre | — |
+
+**Layout `cards`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `card_title` | Titre accordéon | — |
+| `card_summary` | Résumé header fermé | — |
+| `card_heading_2` | `<h2>` | — |
+| `card_heading_3` | `<h3>` | — |
+| `card_heading_4` | `<h4>` | — |
+| `card_paragraph` | Paragraphe | — |
+| `card_paragraph_bold` | Paragraphe gras | — |
+| `card_italic_note` | Note italique | — |
+| `card_callout` | Encart (bordure gauche colorée) | `color` |
+| `card_list_item` | Puce `•` | — |
+| `card_numbered_item` | Item numéroté | — |
+| `card_definition` | Terme + définition | — |
+| `card_divider` | Séparateur horizontal | — |
+
+**Layout `questionnaire`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `scale_instruction` | Bloc intro | — |
+| `scale_option` | Choix Likert | `value` (obligatoire) |
+| `scale_legend_item` | Légende numérique (BSL-23) | `value` (obligatoire) |
+| `scale_warning` | Bandeau jaune avertissement | — |
+| `scale_section` | En-tête de section | — |
+| `scale_question` | Question + LikertWidget | — |
+| `scale_slider_question` | Question + pips numériques | `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` |
+| `scale_number_input` | Champ numérique libre | `subscale_key` |
+| `scale_text_input` | Champ texte libre | `placeholder_code`, `subscale_key` |
+
+**Layout `guided_exercise`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `exercise_title` | Titre exercice | — |
+| `exercise_intro` | Paragraphe intro | — |
+| `exercise_start_btn` | Label bouton Démarrer | — |
+| `exercise_next_btn` | Label bouton Suivant | — |
+| `exercise_finish_btn` | Label bouton Terminer | — |
+| `exercise_stop_btn` | Label bouton Annuler | — |
+| `exercise_done_text` | Texte écran fin | — |
+| `exercise_safety_title` | Titre section urgence | — |
+| `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
+| `timed_tap_config` | Config tapotement répété | `duration`, `target_code` |
+| `timed_tap_how_body` | Corps explication tapotement | — |
+
+**Layout `patient_scenario` (RIM)**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `rim_disclaimer` | Disclaimer RIM | — |
+| `rim_step` | Étape protocole | `step_number` |
+| `ambient_sound` | Bouton son d'ambiance | `key`, `icon`, `available` |
+
+**Layout `column_form`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `column_form_config` | Config du formulaire | `columns` |
+| `column_header` | En-tête de colonne | `color` |
+| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index` |
+| `column_time_field` | Champ heure dans colonne | `column_index` |
+| `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
+
+**Layout `daily_checkin`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `daily_checkin_config` | Config checklist | — |
+| `daily_status_option` | Option de statut | `value`, `color`, `icon` |
+
+**Layout `sleep_journal`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `sleep_journal_config` | Config agenda sommeil | `fields` (liste des champs activés) |
+
+**Layout `tree_selector`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `tree_selector_config` | Config sélecteur arborescent | `max_depth` |
+| `tree_node` | Nœud de l'arbre | `depth`, `parent_id`, `icon` |
 
 **Props `questionnaire` :**
 
@@ -209,6 +300,8 @@ create table public.field_props (
 | `subscale_key` | `"mood"` | `scale_slider_question`, `scale_number_input`, `scale_text_input` — clé dans `subscale_scores` JSON |
 | `placeholder_code` | `"modules.mood.notes_placeholder"` | `scale_text_input`, `scale_number_input` |
 | `phone` | `"3114"` | `exercise_safety` — numéro composé au tap |
+| `text_code` | `"modules.crisis_plan.urgency_title"` | `disclaimer_banner` — clé i18n alternative (override la clé `modules.<module_key>.disclaimer` par défaut) |
+| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge) |
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 

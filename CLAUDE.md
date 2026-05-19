@@ -93,7 +93,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `fear_thermometer` | Thermomètre de la peur | Implémenté — moteur générique (`preview_kind = 'exposure_tracker'`), tabs Saisies/Situations, SUDS avant/après, stratégies DB-driven |
 | `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | Implémenté — `preview_kind='exposure_hierarchy'`, 4 modes (hiérarchies/items/item_form/item_history), DesensitizationChart embedded, table SQLite `exposure_hierarchies` + colonnes `hierarchy_id`/`target_suds`/`is_done` ajoutées à `fear_situations` |
 | `emotion_wheel` | Roue des émotions | Implémenté — moteur générique (`preview_kind='tree_selector'`), 3 niveaux Plutchik (primaire→nuance→spécifique), intensité 1–10, SQLite `emotion_entries` |
-| `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) |
+| `crisis_plan` | Plan de crise (Safety Plan) | Implémenté — protocole Stanley & Brown (2012) + 4 enrichissements VHB-EF : "Mes raisons de tenir" (photos FileSystem + phrase SQLite + message praticien Supabase), mode urgence 1-tap (CrisisUrgencyScreen), cartes de coping personnalisées (praticien→Supabase, patient lecture seule), engagement thérapeutique symbolique (SQLite) ; praticien configure depuis PatientPage |
 | `rim` | RIM — Retraitement par Imagerie Mentale | Implémenté — `preview_kind='patient_scenario'`, scénarios alternatifs stockés dans `patient_modules.config` (Supabase), patient en lecture seule |
 | `cognitive_saturation` | Saturation cognitive (ACT/TCC) | Implémenté — `preview_kind='guided_exercise'`, tapotement répété sur pensée cible (défusion ACT), SQLite `cognitive_saturation_sessions` |
 | `decisional_balance` | Balance décisionnelle | Implémenté — moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé |
@@ -162,7 +162,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [ ] Clés Supabase dans les fichiers `.env`
 - [ ] App mobile patient (navigation, auth, modules)
 - [x] Module Agenda du sommeil (`sleep_diary`) — moteur générique (`preview_kind='sleep_journal'`), agenda TCC-I 7 jours, SQLite local
-- [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL
+- [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL + enrichissement VHB-EF : 4 nouvelles sections (raisons de tenir, mode urgence 1-tap, cartes coping, engagement), `crisis_anchors` SQLite, `crisisPlanService` mobile+web, 17 tests Jest mobile + 4 tests Vitest web
 - [x] Module Balance décisionnelle (`decisional_balance`) — migré vers moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`, signal d'observance Supabase, 10 tests Jest
 - [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
 - [x] Module PHQ-9 (`phq9`) — 9 items, SQLite local, tests RNTL

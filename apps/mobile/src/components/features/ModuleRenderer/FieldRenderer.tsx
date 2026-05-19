@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef, ComponentType } from 'react'
+import { useTranslation } from 'react-i18next'
 import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
@@ -30,6 +31,7 @@ import { ChronoMonthLayout } from './layouts/ChronoMonth'
 import { ExposureHierarchyLayout } from './layouts/ExposureHierarchy'
 import { EditableItemsList } from './layouts/shared'
 import { DisclaimerBanner } from '../DisclaimerBanner'
+import { CrisisUrgencyContactsWidget } from './fields/CrisisUrgencyContactsWidget'
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
@@ -819,10 +821,12 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
 
   useEffect(() => {
-    getAllPlanItemsForModule(moduleId).then(data => {
-      setItems(data)
-      setLoading(false)
-    })
+    getAllPlanItemsForModule(moduleId)
+      .then(data => {
+        setItems(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [moduleId])
 
   const itemsBySection = useMemo(() => {
@@ -1018,10 +1022,12 @@ function TimedTapExerciseLayout({ fields }: {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    getAllCognitiveSaturationSessions().then(data => {
-      setSessions(data)
-      setLoadingSessions(false)
-    })
+    getAllCognitiveSaturationSessions()
+      .then(data => {
+        setSessions(data)
+        setLoadingSessions(false)
+      })
+      .catch(() => setLoadingSessions(false))
   }, [])
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
@@ -1331,7 +1337,7 @@ function DailyCheckinLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId, todayDate])
 
-  useEffect(() => { void loadData() }, [loadData])
+  useEffect(() => { loadData().catch(() => setLoading(false)) }, [loadData])
 
   const handleSave = useCallback(async () => {
     if (!selectedValue) {
@@ -1755,7 +1761,7 @@ function ColumnFormLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   const initialValuesForNew = useCallback((): Record<string, string | number> => {
     const init: Record<string, string | number> = {}
@@ -2183,7 +2189,7 @@ function TreeSelectorLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   // ── Couleur courante : couleur du noeud le plus profond ayant une couleur
   const accentColor = useMemo(() => {
@@ -2777,7 +2783,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
     setLoading(false)
   }, [])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   const loadMonth = useCallback(async (year: number, monthVal: number) => {
     const data = await getSleepEntriesForMonth(toYearMonth(year, monthVal))
@@ -3767,7 +3773,45 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
     )
   }
 
+  if (preview_kind === 'crisis_urgency') {
+    return <CrisisUrgencyLayout fields={visibleFields} />
+  }
+
   return null
+}
+
+function CrisisUrgencyLayout({ fields }: { fields: ContentField[] }) {
+  const { t } = useTranslation()
+  const callFields = fields
+    .filter(f => f.field_type === 'exercise_safety')
+    .sort((a, b) => a.sort_order - b.sort_order)
+  return (
+    <ScrollView contentContainerStyle={cuStyles.scroll}>
+      <View style={cuStyles.callSection}>
+        {callFields.map(f => {
+          const phone = f.props['phone'] ?? ''
+          const bgColor = (f.props['bgColor'] as string | undefined) ?? '#DC2626'
+          const labelCode = f.props['label_code'] as string | undefined
+          return (
+            <Pressable
+              key={f.id}
+              style={[cuStyles.callBtn, { backgroundColor: bgColor }]}
+              onPress={() => { if (phone) void Linking.openURL(`tel:${phone}`) }}
+              accessibilityRole="button"
+              accessibilityLabel={t(f.text_code ?? '')}
+            >
+              <MaterialCommunityIcons name="phone" size={24} color="#fff" />
+              <View>
+                <Text style={cuStyles.callLabel}>{t(f.text_code ?? '')}</Text>
+                {labelCode != null && <Text style={cuStyles.callSub}>{t(labelCode)}</Text>}
+              </View>
+            </Pressable>
+          )
+        })}
+      </View>
+      <CrisisUrgencyContactsWidget />
+    </ScrollView>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -4673,4 +4717,15 @@ const sjStyles = StyleSheet.create({
     backgroundColor: colors.card, borderWidth: 1, borderColor: colors.danger,
   },
   deleteBtnText:     { fontSize: 15, fontWeight: '600', color: colors.danger },
+})
+
+const cuStyles = StyleSheet.create({
+  scroll:       { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },
+  callSection:  { gap: spacing.sm, marginBottom: spacing.md },
+  callBtn: {
+    flexDirection: 'row', alignItems: 'center',
+    borderRadius: radius.lg, padding: spacing.md, gap: spacing.md,
+  },
+  callLabel:    { color: '#fff', fontSize: 16, fontWeight: '700', lineHeight: 22 },
+  callSub:      { color: 'rgba(255,255,255,0.85)', fontSize: 12, lineHeight: 16 },
 })
