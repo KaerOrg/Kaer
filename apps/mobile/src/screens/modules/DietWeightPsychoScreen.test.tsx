@@ -43,19 +43,19 @@ jest.mock('../../hooks/useTeen', () => ({
   }),
 }))
 
-jest.mock('../../components/TeenAccent', () => ({
+jest.mock('../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
-jest.mock('../../components/DisclaimerBanner', () => ({
+jest.mock('../../components/features/DisclaimerBanner', () => ({
   DisclaimerBanner: () => null,
 }))
 
-jest.mock('../../components/PsyEduBlockRenderer', () => ({
+jest.mock('../../components/features/PsyEduBlockRenderer', () => ({
   PsyEduBlockRenderer: () => null,
 }))
 
-jest.mock('../../components/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
+jest.mock('../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
   resolvePsyEduIcon: () => () => null,
 }))
 
@@ -73,7 +73,7 @@ function makeTopic(overrides: Partial<PsyEduTopic>): PsyEduTopic {
     topic_key: 'sleep_chrono',
     icon_name: 'moon',
     sort_order: 6,
-    created_at: '2024-01-01T00:00:00Z',
+    is_active: true,
     ...overrides,
   }
 }
@@ -174,8 +174,9 @@ const MOCK_BLOCKS: PsyEduBlock[] = [
     section_key: 'why',
     block_type: 'paragraph',
     text_code: 'diet_weight_psycho.sleep_chrono.why.p1',
+    items_codes: null,
+    href: null,
     sort_order: 0,
-    props: {},
   },
 ]
 

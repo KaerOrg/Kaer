@@ -109,7 +109,8 @@
     "empty_title": "Aucun module disponible",
     "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.",
     "section_tools": "Outils thérapeutiques",
-    "section_scales": "Échelles et questionnaires"
+    "section_scales": "Échelles et questionnaires",
+    "today_section": "Prévu aujourd'hui"
   },
   "profile": {
     "title": "Mon profil",
@@ -121,6 +122,16 @@
     "avatar_placeholder": "Photo",
     "section_account": "Mon compte",
     "email_label": "Email",
+    "section_identity": "Identité",
+    "first_name_label": "Prénom",
+    "first_name_placeholder": "Votre prénom",
+    "last_name_label": "Nom",
+    "last_name_placeholder": "Votre nom",
+    "phone_label": "Téléphone",
+    "phone_placeholder": "+33 6 00 00 00 00",
+    "save_profile_button": "Enregistrer",
+    "save_profile_success": "Profil mis à jour.",
+    "save_profile_error": "Impossible de mettre à jour le profil. Réessayez.",
     "section_reminders": "Rappels",
     "sleep_reminder_label": "Rappel agenda du sommeil",
     "sleep_reminder_hint": "Notification quotidienne pour noter votre nuit",
@@ -1789,6 +1800,14 @@
     "addiction": {
       "label": "Addictologie & Impulsivité",
       "subtitle": "Le module souvent oublié"
+    },
+    "motivation": {
+      "label": "Entretien Motivationnel",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Évaluations Cliniques",
+      "subtitle": ""
     }
   },
   "card": {
@@ -1964,5 +1983,36 @@
       "note": "Signes d'alerte (Surdosage) : Tremblements importants, soif extrême, nausées sévères ou confusion → contactez immédiatement votre médecin ou le 15.",
       "callout": "Ne modifiez jamais votre dose ou votre traitement sans en parler à votre praticien."
     }
+  },
+  "agenda": {
+    "empty_title": "Aucun rendez-vous",
+    "empty_description": "Vos rendez-vous à venir apparaîtront ici.",
+    "empty_week": "Aucun créneau disponible ce jour.",
+    "section_upcoming": "À venir",
+    "section_past": "Passés",
+    "book_success": "Votre rendez-vous a bien été enregistré.",
+    "appointment": {
+      "new": "Prendre un rendez-vous",
+      "cancel_btn": "Annuler le rendez-vous",
+      "cancel_confirm": "Confirmez-vous l'annulation de ce rendez-vous ?",
+      "status_pending": "En attente de confirmation",
+      "status_confirmed": "Confirmé",
+      "status_cancelled": "Annulé",
+      "status_completed": "Terminé"
+    }
+  },
+  "notifications": {
+    "panel_title": "Rappels",
+    "my_time_label": "Mon heure :",
+    "pause": "Suspendre",
+    "resume": "Reprendre",
+    "paused_label": "Suspendu",
+    "day_lun": "L",
+    "day_mar": "M",
+    "day_mer": "Me",
+    "day_jeu": "J",
+    "day_ven": "V",
+    "day_sam": "S",
+    "day_dim": "D"
   }
 }

@@ -9,6 +9,7 @@ export interface ModuleItem {
 
 export interface ModuleCategory {
   id: string
+  icon: string
   labelKey: string
   subtitleKey: string
   modules: ModuleItem[]
@@ -16,7 +17,7 @@ export interface ModuleCategory {
 
 export async function fetchModuleCategories(): Promise<ModuleCategory[]> {
   const [{ data: cats }, { data: mods }] = await Promise.all([
-    supabase.from('module_categories').select('id, sort_order').order('sort_order'),
+    supabase.from('module_categories').select('id, sort_order, icon').order('sort_order'),
     supabase.from('modules').select('id, category_id, sort_order, icon, mobile_icon, color').order('sort_order'),
   ])
 
@@ -24,6 +25,7 @@ export async function fetchModuleCategories(): Promise<ModuleCategory[]> {
 
   return cats.map(cat => ({
     id: cat.id,
+    icon: cat.icon ?? '',
     labelKey: `category.${cat.id}.label`,
     subtitleKey: `category.${cat.id}.subtitle`,
     modules: mods
@@ -42,7 +44,7 @@ export async function fetchComingSoonModuleIds(): Promise<Set<string>> {
 
 export async function fetchInviteCategories(): Promise<ModuleCategory[]> {
   const [{ data: cats }, { data: mods }] = await Promise.all([
-    supabase.from('module_categories').select('id, sort_order').order('sort_order'),
+    supabase.from('module_categories').select('id, sort_order, icon').order('sort_order'),
     supabase
       .from('modules')
       .select('id, category_id, sort_order, icon, mobile_icon, color, is_invite_excluded, preview_kind')
@@ -54,6 +56,7 @@ export async function fetchInviteCategories(): Promise<ModuleCategory[]> {
   return cats
     .map(cat => ({
       id: cat.id,
+      icon: cat.icon ?? '',
       labelKey: `category.${cat.id}.label`,
       subtitleKey: `category.${cat.id}.subtitle`,
       modules: mods

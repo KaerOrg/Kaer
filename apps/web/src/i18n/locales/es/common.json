@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Menú de perfil",
+    "profile": "Perfil",
     "edit_profile": "Editar perfil",
     "logout": "Cerrar sesión",
     "language": "Idioma"
@@ -35,9 +36,13 @@
     "error_credentials": "Correo o contraseña incorrectos."
   },
   "profile_modal": {
-    "title": "Editar perfil",
+    "title": "Mi perfil",
+    "edit_section": "Editar mi información",
+    "email_label": "Dirección de correo",
     "full_name_label": "Nombre completo",
     "title_label": "Título profesional",
+    "phone_label": "Teléfono",
+    "address_label": "Dirección",
     "error_update": "Error al actualizar el perfil.",
     "success": "✓ Perfil actualizado"
   },
@@ -79,6 +84,9 @@
     "loading_patients": "Cargando pacientes…",
     "empty_title": "Ningún paciente aún",
     "empty_description": "Comience invitando a su primer paciente.",
+    "search_placeholder": "Buscar un paciente (nombre, correo)…",
+    "empty_search_title": "Ningún paciente coincide",
+    "empty_search_description": "Ningún paciente coincide con su búsqueda. Verifique la ortografía o vacíe el campo para verlos todos.",
     "module_count_one": "{{count}} módulo",
     "module_count_other": "{{count}} módulos"
   },
@@ -150,6 +158,104 @@
     "enable_all": "Activar todos",
     "disable_all": "Desactivar todos",
     "enabled_count_one": "{{count}} módulo activado",
-    "enabled_count_other": "{{count}} módulos activados"
+    "enabled_count_other": "{{count}} módulos activados",
+    "search_placeholder": "Buscar un módulo (nombre, descripción)…",
+    "empty_search": "Ningún módulo coincide con su búsqueda."
+  },
+  "notes": {
+    "section_title": "Notas",
+    "placeholder": "Añadir una nota…",
+    "save_button": "Guardar",
+    "edit_button": "Editar",
+    "delete_button": "Eliminar",
+    "confirm_delete": "¿Eliminar esta nota definitivamente?",
+    "confirm_yes": "Eliminar",
+    "error_empty": "La nota no puede estar vacía.",
+    "error_save": "Error al guardar.",
+    "error_update": "Error al actualizar.",
+    "error_delete": "Error al eliminar.",
+    "empty_state": "Sin notas para este paciente.",
+    "tag_placeholder": "Añadir una etiqueta…",
+    "tag_hint": "Pulsa Enter para añadir",
+    "filter_label": "Filtrar por etiqueta",
+    "filter_clear": "Mostrar todo",
+    "empty_filtered": "Sin notas para esta etiqueta.",
+    "tag_search_placeholder": "Buscar una etiqueta…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Configure su disponibilidad y gestione sus citas.",
+    "today": "Hoy",
+    "prev_week": "Semana anterior",
+    "next_week": "Semana siguiente",
+    "configure": "Disponibilidad",
+    "no_rules": "Sin franjas horarias definidas.",
+    "days_short": {
+      "0": "Lun",
+      "1": "Mar",
+      "2": "Mié",
+      "3": "Jue",
+      "4": "Vie",
+      "5": "Sáb",
+      "6": "Dom"
+    },
+    "editor": {
+      "title": "Mi disponibilidad",
+      "add_rule": "Añadir franja",
+      "slot_duration": "Duración de cita",
+      "minutes": "min",
+      "auto_confirm": "Confirmación automática",
+      "delete_rule": "Eliminar"
+    },
+    "appointment": {
+      "new": "Nueva cita",
+      "status_pending": "Pendiente",
+      "status_confirmed": "Confirmada",
+      "status_cancelled": "Cancelada",
+      "status_completed": "Completada"
+    }
+  },
+  "scales": {
+    "eval_auto": "Autoinforme",
+    "eval_hetero": "Heteroinforme",
+    "validated_prefix": "Validado",
+    "age": {
+      "perinatal": "Perinatal",
+      "enfant": "Niño/a",
+      "ado": "Adolescente",
+      "adulte": "Adulto/a",
+      "senior": "Mayor"
+    },
+    "category": {
+      "humeur": "Estado de ánimo",
+      "anxiete": "Ansiedad",
+      "sommeil": "Sueño",
+      "addictologie": "Adicción",
+      "psychose": "Psicosis",
+      "personnalite": "Personalidad",
+      "neurodev": "Neurodesarrollo",
+      "trauma": "Trauma"
+    },
+    "descriptions": {}
+  },
+  "dispensaire": {
+    "title": "Biblioteca Clínica",
+    "subtitle": "Cuestionarios validados. Envíelos directamente a sus pacientes.",
+    "sidebar_title": "Temas clínicos",
+    "all_scales": "Todas las escalas",
+    "legend_ages": "Rangos de edad validados:",
+    "empty_category": "No hay escalas disponibles en esta categoría.",
+    "empty_soon": "Se añadirán nuevos cuestionarios pronto.",
+    "propose_btn": "Proponer a un paciente",
+    "reference_aria": "Referencia validada",
+    "modal_subtitle": "Elegir un paciente",
+    "close": "Cerrar",
+    "loading_patients": "Cargando pacientes…",
+    "no_patients": "Aún no hay pacientes.",
+    "sent": "Enviado",
+    "send": "Enviar",
+    "error_duplicate": "{{label}} ya tiene este cuestionario.",
+    "error_send": "Error al enviar. Inténtelo de nuevo."
   }
 }

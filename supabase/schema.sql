@@ -20,6 +20,34 @@
 
 
 -- ============================================================
+-- TABLE : professional_titles (Référentiel des professions praticiens)
+-- ============================================================
+-- Données de référence publiques — accessibles sans authentification.
+create table if not exists public.professional_titles (
+  code        text    primary key,
+  label_fr    text    not null,
+  label_en    text    not null,
+  sort_order  integer not null default 0
+);
+
+alter table public.professional_titles enable row level security;
+
+drop policy if exists "professional_titles_select_all" on public.professional_titles;
+create policy "professional_titles_select_all"
+  on public.professional_titles for select using (true);
+
+insert into public.professional_titles (code, label_fr, label_en, sort_order) values
+  ('ide',                'Infirmier diplômé d''État (IDE)',         'Registered Nurse (RN)',      1),
+  ('ipa',                'Infirmier en pratique avancée (IPA)',     'Advanced Practice Nurse',    2),
+  ('psychiatrist',       'Psychiatre',                              'Psychiatrist',               3),
+  ('child_psychiatrist', 'Pédopsychiatre',                          'Child Psychiatrist',         4),
+  ('addictologist',      'Addictologue',                            'Addictologist',              5),
+  ('gp',                 'Médecin généraliste',                     'General Practitioner',       6),
+  ('psychologist',       'Psychologue',                             'Psychologist',               7)
+on conflict (code) do nothing;
+
+
+-- ============================================================
 -- TABLES — Domaine utilisateurs / patients / praticiens
 -- ============================================================
 
@@ -30,6 +58,9 @@ create table if not exists public.practitioners (
   name                text        not null default '',
   professional_title  text,
   language_preference text        not null default 'fr',
+  address             text,
+  phone               text,
+  avatar_url          text,
   created_at          timestamptz not null default now()
 );
 
@@ -54,6 +85,7 @@ create table if not exists public.practitioner_patients (
   patient_birth_date  date,
   patient_sex         text,
   teen_mode           boolean     not null default false,
+  general_note        text,
   created_at          timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
@@ -94,6 +126,17 @@ create table if not exists public.patient_modules (
 -- (no-op sur BDD vierge, applique le delta sur ancienne BDD)
 -- ============================================================
 
+-- practitioner_patients.general_note
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'general_note'
+  ) then
+    alter table public.practitioner_patients add column general_note text;
+  end if;
+end $$;
+
 -- practitioner_patients.teen_mode
 do $$
 begin
@@ -113,6 +156,39 @@ begin
     where table_schema = 'public' and table_name = 'practitioners' and column_name = 'language_preference'
   ) then
     alter table public.practitioners add column language_preference text not null default 'fr';
+  end if;
+end $$;
+
+-- practitioners.address
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'address'
+  ) then
+    alter table public.practitioners add column address text;
+  end if;
+end $$;
+
+-- practitioners.phone
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'phone'
+  ) then
+    alter table public.practitioners add column phone text;
+  end if;
+end $$;
+
+-- practitioners.avatar_url
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'avatar_url'
+  ) then
+    alter table public.practitioners add column avatar_url text;
   end if;
 end $$;
 
@@ -424,16 +500,78 @@ create policy "Practitioners can view logs of their patients"
 
 
 -- ============================================================
+-- TABLE : practitioner_patient_notes (Notes privées praticien)
+-- ============================================================
+-- Notes libres liées à un patient, visibles uniquement du praticien.
+-- Aucune donnée clinique structurée — texte libre.
+create table if not exists public.practitioner_patient_notes (
+  id              uuid        primary key default gen_random_uuid(),
+  practitioner_id uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id      uuid        not null references public.patients(id)      on delete cascade,
+  content         text        not null,
+  tags            text[]      not null default '{}',
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+
+-- Migration idempotente : ajouter tags sur BDD existante
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patient_notes' and column_name = 'tags'
+  ) then
+    alter table public.practitioner_patient_notes add column tags text[] not null default '{}';
+  end if;
+end $$;
+
+create index if not exists idx_ppnotes_practitioner_patient
+  on public.practitioner_patient_notes(practitioner_id, patient_id);
+
+create or replace function public.set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists ppnotes_updated_at on public.practitioner_patient_notes;
+create trigger ppnotes_updated_at
+  before update on public.practitioner_patient_notes
+  for each row execute procedure public.set_updated_at();
+
+alter table public.practitioner_patient_notes enable row level security;
+
+drop policy if exists "ppnotes_select" on public.practitioner_patient_notes;
+create policy "ppnotes_select" on public.practitioner_patient_notes
+  for select using (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_insert" on public.practitioner_patient_notes;
+create policy "ppnotes_insert" on public.practitioner_patient_notes
+  for insert with check (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_update" on public.practitioner_patient_notes;
+create policy "ppnotes_update" on public.practitioner_patient_notes
+  for update using (auth.uid() = practitioner_id);
+
+drop policy if exists "ppnotes_delete" on public.practitioner_patient_notes;
+create policy "ppnotes_delete" on public.practitioner_patient_notes
+  for delete using (auth.uid() = practitioner_id);
+
+
+-- ============================================================
 -- TABLE : module_categories (Organisation des modules en catégories)
 -- ============================================================
 -- Données de référence statiques : ordonnancement et groupement des module_type.
 
 create table if not exists public.module_categories (
   id          text  primary key,
-  sort_order  int   not null
+  sort_order  int   not null,
+  icon        text  not null default ''
 );
 
--- Migration idempotente : supprimer colonnes dépréciées (anciennes BDD)
+-- Migration idempotente : supprimer colonnes dépréciées / ajouter nouvelles (anciennes BDD)
 do $$
 begin
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='label_key') then
@@ -444,6 +582,9 @@ begin
   end if;
   if exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='modules') then
     alter table public.module_categories drop column modules;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_schema='public' and table_name='module_categories' and column_name='icon') then
+    alter table public.module_categories add column icon text not null default '';
   end if;
 end $$;
 
@@ -630,6 +771,343 @@ create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
     )
   );
 
+
+-- ============================================================
+-- TABLE : patient_push_tokens (Tokens Expo Push par device patient)
+-- ============================================================
+-- Un patient peut avoir plusieurs tokens (plusieurs devices).
+-- L'Edge Function send-notifications utilise le service_role pour lire.
+
+create table if not exists public.patient_push_tokens (
+  id               uuid        primary key default gen_random_uuid(),
+  patient_id       uuid        not null references public.patients(id) on delete cascade,
+  expo_push_token  text        not null,
+  platform         text        not null check (platform in ('ios', 'android')),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (expo_push_token)
+);
+
+create index if not exists idx_push_tokens_patient
+  on public.patient_push_tokens(patient_id);
+
+alter table public.patient_push_tokens enable row level security;
+
+-- Le patient ne voit et ne modifie que ses propres tokens
+drop policy if exists "push_tokens_patient_select" on public.patient_push_tokens;
+create policy "push_tokens_patient_select"
+  on public.patient_push_tokens for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_insert" on public.patient_push_tokens;
+create policy "push_tokens_patient_insert"
+  on public.patient_push_tokens for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_update" on public.patient_push_tokens;
+create policy "push_tokens_patient_update"
+  on public.patient_push_tokens for update
+  using (auth.uid() = patient_id);
+
+drop policy if exists "push_tokens_patient_delete" on public.patient_push_tokens;
+create policy "push_tokens_patient_delete"
+  on public.patient_push_tokens for delete
+  using (auth.uid() = patient_id);
+
+
+-- ============================================================
+-- TABLE : notification_routines (Calendriers de rappel par module patient)
+-- ============================================================
+-- Créées par le praticien, ajustables par le patient (heure + pause).
+-- days_of_week : tableau ISO (1=lundi … 7=dimanche).
+-- time_of_day : heure fixée par le praticien ("HH:MM").
+-- patient_time_override : décalage optionnel du patient ("HH:MM").
+-- practitioner_note : texte libre affiché dans le corps de la notification.
+
+create table if not exists public.notification_routines (
+  id                    uuid        primary key default gen_random_uuid(),
+  patient_module_id     uuid        not null references public.patient_modules(id) on delete cascade,
+  practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id            uuid        not null references public.patients(id) on delete cascade,
+  days_of_week          smallint[]  not null,
+  time_of_day           text        not null,
+  patient_time_override text,
+  practitioner_note     text,
+  is_active             boolean     not null default true,
+  patient_paused        boolean     not null default false,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+
+create index if not exists idx_notification_routines_patient
+  on public.notification_routines(patient_id);
+
+create index if not exists idx_notification_routines_practitioner
+  on public.notification_routines(practitioner_id);
+
+create index if not exists idx_notification_routines_module
+  on public.notification_routines(patient_module_id);
+
+alter table public.notification_routines enable row level security;
+
+-- Praticien : CRUD complet sur ses propres routines
+drop policy if exists "notif_routines_practitioner_select" on public.notification_routines;
+create policy "notif_routines_practitioner_select"
+  on public.notification_routines for select
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_insert" on public.notification_routines;
+create policy "notif_routines_practitioner_insert"
+  on public.notification_routines for insert
+  with check (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_update" on public.notification_routines;
+create policy "notif_routines_practitioner_update"
+  on public.notification_routines for update
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "notif_routines_practitioner_delete" on public.notification_routines;
+create policy "notif_routines_practitioner_delete"
+  on public.notification_routines for delete
+  using (auth.uid() = practitioner_id);
+
+-- Patient : lecture + mise à jour de ses seules colonnes (patient_paused, patient_time_override)
+drop policy if exists "notif_routines_patient_select" on public.notification_routines;
+create policy "notif_routines_patient_select"
+  on public.notification_routines for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "notif_routines_patient_update" on public.notification_routines;
+create policy "notif_routines_patient_update"
+  on public.notification_routines for update
+  using (auth.uid() = patient_id)
+  with check (
+    auth.uid() = patient_id
+    -- Seules les colonnes patient sont modifiables côté patient :
+    -- is_active, days_of_week, time_of_day, practitioner_id ne sont pas vérifiées ici
+    -- car RLS s'applique à la ligne entière — l'application n'envoie que ces deux colonnes.
+  );
+
+
+-- ============================================================
+-- TABLE : notification_logs (Historique des envois — audit)
+-- ============================================================
+-- Remplie uniquement par l'Edge Function (service_role).
+-- Aucun accès client direct.
+
+create table if not exists public.notification_logs (
+  id          uuid        primary key default gen_random_uuid(),
+  routine_id  uuid        references public.notification_routines(id) on delete set null,
+  patient_id  uuid        references public.patients(id) on delete cascade,
+  sent_at     timestamptz not null default now(),
+  status      text        not null default 'sent'
+);
+
+create index if not exists idx_notification_logs_routine
+  on public.notification_logs(routine_id);
+
+create index if not exists idx_notification_logs_patient
+  on public.notification_logs(patient_id, sent_at desc);
+
+alter table public.notification_logs enable row level security;
+-- Aucune policy client — lecture/écriture réservée au service_role (Edge Function).
+
+
+-- ============================================================
+-- pg_cron : déclenchement de l'Edge Function send-notifications
+-- ============================================================
+-- Prérequis : activer l'extension pg_cron dans Supabase Dashboard
+--   > Database > Extensions > pg_cron (enable)
+-- Remplacer <PROJECT_REF> par la référence du projet Supabase.
+-- À exécuter une seule fois manuellement dans le SQL Editor.
+--
+-- select cron.schedule(
+--   'send-notifications-cron',
+--   '* * * * *',
+--   $$
+--     select net.http_post(
+--       url := 'https://<PROJECT_REF>.supabase.co/functions/v1/send-notifications',
+--       headers := '{"Content-Type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}'::jsonb,
+--       body := '{}'::jsonb
+--     ) as request_id;
+--   $$
+
+
+-- ============================================================
+-- AGENDA / SYSTÈME DE RENDEZ-VOUS
+-- ============================================================
+
+-- Migration idempotente : auto_confirm_appointments sur practitioners
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'auto_confirm_appointments'
+  ) then
+    alter table public.practitioners add column auto_confirm_appointments boolean not null default true;
+  end if;
+end $$;
+
+-- TABLE : availability_rules
+-- Plages hebdomadaires récurrentes du praticien.
+-- day_of_week : 0=Lundi … 6=Dimanche.
+-- slot_duration_minutes : durée d'un rendez-vous pour cette plage.
+-- buffer_minutes : temps de battement entre deux RDV consécutifs (ex. 10 min pour se préparer).
+create table if not exists public.availability_rules (
+  id                    uuid        primary key default gen_random_uuid(),
+  practitioner_id       uuid        not null references public.practitioners(id) on delete cascade,
+  day_of_week           smallint    not null check (day_of_week between 0 and 6),
+  start_time            time        not null,
+  end_time              time        not null,
+  slot_duration_minutes smallint    not null default 50 check (slot_duration_minutes between 5 and 480),
+  buffer_minutes        smallint    not null default 0 check (buffer_minutes between 0 and 120),
+  created_at            timestamptz not null default now(),
+  constraint chk_availability_times check (end_time > start_time)
+);
+
+alter table public.availability_rules
+  add column if not exists buffer_minutes smallint not null default 0
+    check (buffer_minutes between 0 and 120);
+
+create index if not exists idx_availability_rules_practitioner
+  on public.availability_rules(practitioner_id);
+
+alter table public.availability_rules enable row level security;
+
+drop policy if exists "availability_rules_practitioner_all" on public.availability_rules;
+create policy "availability_rules_practitioner_all" on public.availability_rules
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Patients liés au praticien peuvent lire ses règles (pour calculer les créneaux disponibles)
+drop policy if exists "availability_rules_patient_select" on public.availability_rules;
+create policy "availability_rules_patient_select" on public.availability_rules
+  for select using (
+    practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+
+-- TABLE : availability_exceptions
+-- Exceptions ponctuelles (congés, jours fermés, horaires différents).
+-- is_closed = true → fermé ce jour (start_time/end_time ignorés).
+-- is_closed = false + start_time/end_time → override de l'horaire ce jour.
+create table if not exists public.availability_exceptions (
+  id               uuid        primary key default gen_random_uuid(),
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  exception_date   date        not null,
+  is_closed        boolean     not null default true,
+  start_time       time,
+  end_time         time,
+  created_at       timestamptz not null default now(),
+  unique (practitioner_id, exception_date)
+);
+
+create index if not exists idx_availability_exceptions_practitioner_date
+  on public.availability_exceptions(practitioner_id, exception_date);
+
+alter table public.availability_exceptions enable row level security;
+
+drop policy if exists "availability_exceptions_practitioner_all" on public.availability_exceptions;
+create policy "availability_exceptions_practitioner_all" on public.availability_exceptions
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+drop policy if exists "availability_exceptions_patient_select" on public.availability_exceptions;
+create policy "availability_exceptions_patient_select" on public.availability_exceptions
+  for select using (
+    practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+
+-- TABLE : appointments
+-- Rendez-vous réservés entre praticien et patient.
+-- status : pending (en attente de confirmation) → confirmed / cancelled_by_* / completed
+create table if not exists public.appointments (
+  id               uuid        primary key default gen_random_uuid(),
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id       uuid        not null references public.patients(id) on delete cascade,
+  starts_at        timestamptz not null,
+  ends_at          timestamptz not null,
+  status           text        not null default 'pending'
+                               check (status in (
+                                 'pending',
+                                 'confirmed',
+                                 'cancelled_by_patient',
+                                 'cancelled_by_practitioner',
+                                 'completed'
+                               )),
+  notes            text,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  constraint chk_appointment_times check (ends_at > starts_at)
+);
+
+-- FK composite : permet à PostgREST de joindre appointments → practitioner_patients
+-- et garantit qu'un RDV ne peut exister que pour un patient lié au praticien.
+do $$ begin
+  if not exists (
+    select 1 from information_schema.table_constraints
+    where constraint_name = 'fk_appt_practitioner_patient'
+      and table_name = 'appointments'
+  ) then
+    alter table public.appointments
+      add constraint fk_appt_practitioner_patient
+      foreign key (practitioner_id, patient_id)
+      references public.practitioner_patients (practitioner_id, patient_id);
+  end if;
+end $$;
+
+create index if not exists idx_appointments_practitioner_time
+  on public.appointments(practitioner_id, starts_at);
+
+create index if not exists idx_appointments_patient
+  on public.appointments(patient_id, starts_at);
+
+alter table public.appointments enable row level security;
+
+-- Praticien : CRUD sur ses propres rendez-vous
+drop policy if exists "appointments_practitioner_all" on public.appointments;
+create policy "appointments_practitioner_all" on public.appointments
+  for all using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Patient : lecture de ses propres rendez-vous + créneaux occupés du praticien (pour la réservation)
+drop policy if exists "appointments_patient_select" on public.appointments;
+create policy "appointments_patient_select" on public.appointments
+  for select using (
+    auth.uid() = patient_id
+    or practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+-- Patient : création d'un rendez-vous (status = pending ou confirmed selon auto_confirm)
+drop policy if exists "appointments_patient_insert" on public.appointments;
+create policy "appointments_patient_insert" on public.appointments
+  for insert with check (
+    auth.uid() = patient_id
+    and practitioner_id in (
+      select practitioner_id from public.practitioner_patients
+      where patient_id = auth.uid()
+    )
+  );
+
+-- Patient : annulation de ses propres rendez-vous
+drop policy if exists "appointments_patient_cancel" on public.appointments;
+create policy "appointments_patient_cancel" on public.appointments
+  for update using (auth.uid() = patient_id)
+  with check (
+    auth.uid() = patient_id
+    and status in ('cancelled_by_patient')
+  );
+-- );
 
 -- ============================================================
 -- TABLE : module_sources (Sources et recommandations par module)

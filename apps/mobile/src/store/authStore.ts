@@ -10,6 +10,8 @@ import {
   signOut,
   type PatientProfile,
 } from '../services/authService'
+import { updatePatientProfile, type PatientProfileUpdate } from '../services/patientProfileService'
+import { registerPushToken } from '../services/notificationService'
 
 interface AuthState {
   patient: PatientProfile | null
@@ -24,6 +26,7 @@ interface AuthState {
   register: (token: string, password: string) => Promise<void>
   logout: () => Promise<void>
   updateAvatar: (avatarUrl: string) => void
+  updateProfile: (data: PatientProfileUpdate) => Promise<{ ok: boolean; error?: string }>
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -73,6 +76,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!patient) return
     const { teenMode, moduleColors } = await fetchTeenContext(patient.id)
     set({ teenMode, moduleColors })
+    // Enregistrement du token push en arrière-plan — non bloquant
+    void registerPushToken(patient.id)
   },
 
   login: async (email, password) => {
@@ -91,5 +96,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set((state) => ({
       patient: state.patient ? { ...state.patient, avatar_url: avatarUrl } : null,
     }))
+  },
+
+  updateProfile: async (data) => {
+    const { patient } = get()
+    if (!patient) return { ok: false, error: 'not_logged_in' }
+    const result = await updatePatientProfile(patient.id, data)
+    if (result.ok) {
+      set((state) => ({
+        patient: state.patient
+          ? { ...state.patient, first_name: data.first_name, last_name: data.last_name, phone: data.phone }
+          : null,
+      }))
+    }
+    return result
   },
 }))

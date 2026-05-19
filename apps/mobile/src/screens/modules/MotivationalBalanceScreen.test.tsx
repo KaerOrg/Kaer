@@ -17,7 +17,7 @@ jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
     useNavigation: () => ({ navigate: jest.fn(), setOptions: jest.fn() }),
-    useFocusEffect: (cb) => {
+    useFocusEffect: (cb: () => unknown) => {
       React.useEffect(() => {
         const cleanup = cb()
         return cleanup
@@ -44,12 +44,12 @@ jest.mock('../../services/motivationalBalanceService', () => ({
   listEMValues: jest.fn().mockResolvedValue([]),
 }))
 
-jest.mock('../../components/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
+jest.mock('../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
   resolvePsyEduIcon: () => () => null,
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }) => children,
+  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }))

@@ -1,0 +1,107 @@
+.profile-dropdown { position: relative; }
+
+.profile-dropdown__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.profile-dropdown__avatar:hover { opacity: 0.85; }
+
+.profile-dropdown__avatar-photo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.profile-dropdown__name-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-align: left;
+
+  transition: opacity 0.15s;
+}
+.profile-dropdown__name-btn:hover { opacity: 0.75; }
+
+.profile-dropdown__divider { height: 1px; background: var(--color-border); }
+
+.profile-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+.profile-dropdown__item:hover { background: var(--color-bg); }
+.profile-dropdown__item--danger { color: var(--color-danger); }
+
+.profile-dropdown__lang {
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-dropdown__lang-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-dropdown__lang-select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.profile-dropdown__lang-select:hover,
+.profile-dropdown__lang-select:focus { border-color: var(--color-primary); }

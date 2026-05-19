@@ -19,16 +19,16 @@
 -- SEED : module_categories
 -- ============================================================
 
-insert into public.module_categories (id, sort_order) values
-  ('safety',     1),
-  ('iatrogenic', 2),
-  ('lifestyle',  3),
-  ('emotion',    4),
-  ('cognitive',  5),
-  ('anxiety',    6),
-  ('addiction',  7),
-  ('motivation', 8)
-on conflict (id) do nothing;
+insert into public.module_categories (id, sort_order, icon) values
+  ('safety',      1, 'shield'),
+  ('iatrogenic',  2, 'pill'),
+  ('lifestyle',   3, 'leaf'),
+  ('emotion',     4, 'smile'),
+  ('cognitive',   5, 'brain'),
+  ('anxiety',     6, 'waves'),
+  ('addiction',   7, 'zap'),
+  ('motivation',  8, 'target')
+on conflict (id) do update set icon = excluded.icon;
 
 
 -- ============================================================
@@ -150,9 +150,9 @@ where icon = '';
 -- preview_kind = 'questionnaire' → ScaleEntryScreen / ScaleHistoryScreen
 -- ============================================================
 
-insert into public.module_categories (id, sort_order)
-values ('assessments', 8)
-on conflict (id) do nothing;
+insert into public.module_categories (id, sort_order, icon)
+values ('assessments', 8, 'clipboard-list')
+on conflict (id) do update set icon = excluded.icon;
 
 insert into public.modules (id, category_id, preview_kind, sort_order, is_invite_excluded, icon, mobile_icon, color) values
   ('phq9',    'assessments', 'questionnaire', 23, false, 'clipboard-list', 'clipboard-text-outline', '#6366F1'),

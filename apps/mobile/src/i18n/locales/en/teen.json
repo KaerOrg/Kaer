@@ -7,7 +7,8 @@
   "home": {
     "title": "Your modules",
     "subheading": "Activated by your care team",
-    "empty_description": "No tools unlocked yet — your care team is on it."
+    "empty_description": "No tools unlocked yet — your care team is on it.",
+    "today_section": "Planned for today"
   },
   "modules": {
     "crisis_plan": {

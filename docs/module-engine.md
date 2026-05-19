@@ -466,4 +466,84 @@ Seulement si le module ne peut pas être rendu par `FieldRenderer` (timer, anima
     }))
     ```
 
+---
+
+## Schéma `ClinicalScale` — Échelles et questionnaires d'évaluation
+
+### État actuel (transitoire)
+
+Fichier source temporaire : `apps/web/src/data/scales.ts`
+
+Les métadonnées des échelles sont actuellement définies statiquement dans `CLINICAL_SCALES` et rendues dans l'accordéon **"Échelles et questionnaires d'évaluation"** de `PatientModulesTab`. **Ce fichier est voué à disparaître** — voir section *Architecture cible* ci-dessous.
+
+### Architecture cible — `module_content_fields` avec `field_type: 'scale_meta'`
+
+Les métadonnées des échelles cliniques **appartiennent à `module_content_fields`**, pas à un fichier TypeScript statique ni à des colonnes supplémentaires sur `modules`.
+
+**Pourquoi `module_content_fields` et non pas des colonnes sur `modules` :**
+
+`module_content_fields` sert **deux usages simultanés** :
+1. **Mobile patient** — le `FieldRenderer` lit les champs pour construire les écrans de saisie (`ScaleEntryScreen`)
+2. **Web praticien** — le `ModuleRenderer` lit les mêmes champs pour générer l'aperçu dans `ModulePreviewPanel`
+
+Les métadonnées d'une échelle (description clinique, population cible, type d'évaluation) font partie de ce contenu de module — elles ont leur place naturelle dans `module_content_fields`, avec un `field_type` dédié : `'scale_meta'`.
+
+Ajouter une échelle devient alors un **INSERT en base uniquement**, sans redéploiement frontend.
+
+### Schéma `field_type: 'scale_meta'`
+
+Un champ `scale_meta` correspond à **un enregistrement dans `module_content_fields`** :
+
+| Colonne | Valeur |
+|---|---|
+| `module_id` | UUID du module (ex. `phq9`) |
+| `field_type` | `'scale_meta'` |
+| `text_code` | Clé i18n de la **description clinique** (ex. `modules.phq9.description`) |
+| `sort_order` | `0` — affiché en premier dans la carte |
+
+Les attributs structurés sont stockés dans **`field_props`** (une ligne par attribut) :
+
+| `prop_key` | `prop_value` (type text) | Rôle |
+|---|---|---|
+| `evaluation_type` | `'auto'` ou `'hetero'` | Badge Auto / Hétéro dans `ScaleMetaBadges` |
+| `target_ages` | JSON array (`'["ado","adulte"]'`) | Chips de population colorés via `AGE_BADGE_CONFIG` |
+| `validated_age_range` | `'≥ 18 ans'` | Plage d'âge validée en texte libre |
+| `no_toggle` | `'true'` ou `'false'` | Si `'true'` : remplace le toggle par un bouton d'action custom (ex. C-SSRS) |
+| `reference_label` | `'Kroenke et al., 2001'` | Label de la référence bibliographique |
+| `reference_url` | URL vers la publication | Lien vers la source |
+
+La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
+
+### Comportement `no_toggle`
+
+```
+no_toggle = 'false' (défaut) → toggle standard unlock/revoke → crée/supprime un patient_module en base
+no_toggle = 'true'           → bouton d'action custom → ouvre un panel dédié (ex. C-SSRS)
+```
+
+### Implémentation après migration
+
+1. **Nouveau service** `fetchScaleMeta(moduleId)` dans `apps/web/src/services/scaleService.ts`
+   - Lit `module_content_fields` où `field_type = 'scale_meta'` et `module_id = moduleId`
+   - Joint `field_props` pour assembler `evaluationType`, `targetAges`, `validatedAgeRange`, `noToggle`, `reference`
+   - Appelle `t(field.text_code)` pour la description
+
+2. **Suppression de `CLINICAL_SCALES`** (`apps/web/src/data/scales.ts`)
+   - `PatientModulesTab` charge les métadonnées via `fetchScaleMeta` au lieu d'importer le tableau statique
+
+3. **`ScaleMetaBadges`** ne change pas — reçoit toujours les mêmes props, la source change
+
+4. **Seed SQL** : insérer un champ `scale_meta` par échelle dans `module_content_fields` + les `field_props` correspondants
+
+### Ajouter une nouvelle échelle (après migration)
+
+1. `INSERT` dans `module_content_fields` : `field_type = 'scale_meta'`, `text_code = 'modules.<id>.description'`
+2. `INSERT` dans `field_props` : `evaluation_type`, `target_ages`, `validated_age_range`, `no_toggle`, `reference_label`, `reference_url`
+3. Ajouter les clés i18n `modules.<id>.label`, `modules.<id>.full_title`, `modules.<id>.description` dans `fr/common.json` et `en/common.json`
+4. Ajouter la config scoring dans `SCALE_SCORING` (`apps/mobile/src/lib/scaleScoring.ts`)
+5. Ajouter les clés `modules.<id>.*` (questions, options) dans `fr/teen.json` et `en/teen.json`
+6. Ajouter l'entrée dans `GENERIC_SCALE_TYPES` et `MODULE_CONFIG` dans `HomeScreen.tsx`
+
+> Si l'échelle a une logique conditionnelle (branches, scores intermédiaires) : `no_toggle: true` + écran dédié côté mobile plutôt que `ScaleEntryScreen` générique.
+
 > Règle : ne jamais livrer un module mobile sans son pendant web. Un module invisible dans l'armoire praticien ne peut pas être débloqué.

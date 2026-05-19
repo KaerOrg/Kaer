@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { setLanguage, type SupportedLang } from '../i18n'
-import type { Practitioner } from '../lib/database.types'
+import type { Practitioner, ProfessionalTitle } from '../lib/database.types'
 
 async function applyLanguagePreference(practitioner: Practitioner | null): Promise<void> {
   if (practitioner?.language_preference) {
@@ -84,7 +84,9 @@ export async function updateLanguagePreference(lang: SupportedLang): Promise<voi
 
 export async function updatePractitionerProfile(
   name: string,
-  title: string
+  title: string,
+  address: string,
+  phone: string
 ): Promise<{ practitioner: Practitioner | null; error: string | null }> {
   const {
     data: { user },
@@ -92,7 +94,12 @@ export async function updatePractitionerProfile(
   if (!user) return { practitioner: null, error: 'Non authentifié.' }
   const { error } = await supabase
     .from('practitioners')
-    .update({ name, professional_title: title || null } as never)
+    .update({
+      name,
+      professional_title: title || null,
+      address: address || null,
+      phone: phone || null,
+    } as never)
     .eq('id', user.id)
   if (error) return { practitioner: null, error: 'Erreur lors de la mise à jour.' }
   const { data } = await supabase
@@ -105,4 +112,12 @@ export async function updatePractitionerProfile(
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
+}
+
+export async function fetchProfessionalTitles(): Promise<ProfessionalTitle[]> {
+  const { data } = await supabase
+    .from('professional_titles')
+    .select('code, label_fr, label_en, sort_order')
+    .order('sort_order')
+  return (data ?? []) as ProfessionalTitle[]
 }

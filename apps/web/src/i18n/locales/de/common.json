@@ -8,6 +8,7 @@
   },
   "nav": {
     "profile_menu": "Profilmenü",
+    "profile": "Profil",
     "edit_profile": "Profil bearbeiten",
     "logout": "Abmelden",
     "language": "Sprache"
@@ -35,9 +36,13 @@
     "error_credentials": "Falsche E-Mail oder falsches Passwort."
   },
   "profile_modal": {
-    "title": "Profil bearbeiten",
+    "title": "Mein Profil",
+    "edit_section": "Meine Informationen bearbeiten",
+    "email_label": "E-Mail-Adresse",
     "full_name_label": "Vollständiger Name",
     "title_label": "Berufsbezeichnung",
+    "phone_label": "Telefon",
+    "address_label": "Adresse",
     "error_update": "Fehler beim Aktualisieren des Profils.",
     "success": "✓ Profil aktualisiert"
   },
@@ -79,6 +84,9 @@
     "loading_patients": "Patienten werden geladen…",
     "empty_title": "Noch keine Patienten",
     "empty_description": "Beginnen Sie damit, Ihren ersten Patienten einzuladen.",
+    "search_placeholder": "Patient suchen (Name, E-Mail)…",
+    "empty_search_title": "Kein passender Patient",
+    "empty_search_description": "Kein Patient entspricht Ihrer Suche. Prüfen Sie die Schreibweise oder leeren Sie das Feld, um alle anzuzeigen.",
     "module_count_one": "{{count}} Modul",
     "module_count_other": "{{count}} Module"
   },
@@ -150,6 +158,104 @@
     "enable_all": "Alle aktivieren",
     "disable_all": "Alle deaktivieren",
     "enabled_count_one": "{{count}} Modul aktiviert",
-    "enabled_count_other": "{{count}} Module aktiviert"
+    "enabled_count_other": "{{count}} Module aktiviert",
+    "search_placeholder": "Modul suchen (Name, Beschreibung)…",
+    "empty_search": "Kein Modul entspricht Ihrer Suche."
+  },
+  "notes": {
+    "section_title": "Notizen",
+    "placeholder": "Notiz hinzufügen…",
+    "save_button": "Speichern",
+    "edit_button": "Bearbeiten",
+    "delete_button": "Löschen",
+    "confirm_delete": "Diese Notiz endgültig löschen?",
+    "confirm_yes": "Löschen",
+    "error_empty": "Notiz darf nicht leer sein.",
+    "error_save": "Fehler beim Speichern.",
+    "error_update": "Fehler beim Aktualisieren.",
+    "error_delete": "Fehler beim Löschen.",
+    "empty_state": "Keine Notizen für diesen Patienten.",
+    "tag_placeholder": "Tag hinzufügen…",
+    "tag_hint": "Enter drücken zum Hinzufügen",
+    "filter_label": "Nach Tag filtern",
+    "filter_clear": "Alle anzeigen",
+    "empty_filtered": "Keine Notizen für diesen Tag.",
+    "tag_search_placeholder": "Tag suchen…"
+  },
+  "agenda": {
+    "nav_link": "Agenda",
+    "title": "Agenda",
+    "subtitle": "Verwalten Sie Ihre Verfügbarkeit und Termine.",
+    "today": "Heute",
+    "prev_week": "Vorherige Woche",
+    "next_week": "Nächste Woche",
+    "configure": "Verfügbarkeit",
+    "no_rules": "Keine Zeitfenster definiert.",
+    "days_short": {
+      "0": "Mo",
+      "1": "Di",
+      "2": "Mi",
+      "3": "Do",
+      "4": "Fr",
+      "5": "Sa",
+      "6": "So"
+    },
+    "editor": {
+      "title": "Meine Verfügbarkeit",
+      "add_rule": "Zeitfenster hinzufügen",
+      "slot_duration": "Termindauer",
+      "minutes": "min",
+      "auto_confirm": "Automatische Bestätigung",
+      "delete_rule": "Löschen"
+    },
+    "appointment": {
+      "new": "Neuer Termin",
+      "status_pending": "Ausstehend",
+      "status_confirmed": "Bestätigt",
+      "status_cancelled": "Abgesagt",
+      "status_completed": "Abgeschlossen"
+    }
+  },
+  "scales": {
+    "eval_auto": "Selbstbeurteilung",
+    "eval_hetero": "Fremdbeurteilung",
+    "validated_prefix": "Validiert",
+    "age": {
+      "perinatal": "Perinatal",
+      "enfant": "Kind",
+      "ado": "Jugendliche/r",
+      "adulte": "Erwachsene/r",
+      "senior": "Senior/in"
+    },
+    "category": {
+      "humeur": "Stimmung",
+      "anxiete": "Angst",
+      "sommeil": "Schlaf",
+      "addictologie": "Sucht",
+      "psychose": "Psychose",
+      "personnalite": "Persönlichkeit",
+      "neurodev": "Neuroentwicklung",
+      "trauma": "Trauma"
+    },
+    "descriptions": {}
+  },
+  "dispensaire": {
+    "title": "Klinische Bibliothek",
+    "subtitle": "Validierte Fragebögen. Direkt an Ihre Patienten senden.",
+    "sidebar_title": "Klinische Themen",
+    "all_scales": "Alle Skalen",
+    "legend_ages": "Validierte Altersgruppen:",
+    "empty_category": "Keine Skalen in dieser Kategorie.",
+    "empty_soon": "Neue Fragebögen folgen bald.",
+    "propose_btn": "Einem Patienten vorschlagen",
+    "reference_aria": "Validierte Referenz",
+    "modal_subtitle": "Patient auswählen",
+    "close": "Schließen",
+    "loading_patients": "Patienten laden…",
+    "no_patients": "Noch keine Patienten.",
+    "sent": "Gesendet",
+    "send": "Senden",
+    "error_duplicate": "{{label}} hat diesen Fragebogen bereits.",
+    "error_send": "Fehler beim Senden. Erneut versuchen."
   }
 }

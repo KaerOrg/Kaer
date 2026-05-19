@@ -10,6 +10,10 @@ export interface Database {
           name: string
           professional_title: string | null
           language_preference: string
+          address: string | null
+          phone: string | null
+          avatar_url: string | null
+          auto_confirm_appointments: boolean
           created_at: string
         }
         Insert: {
@@ -18,11 +22,19 @@ export interface Database {
           name: string
           professional_title?: string | null
           language_preference?: string
+          address?: string | null
+          phone?: string | null
+          avatar_url?: string | null
+          auto_confirm_appointments?: boolean
         }
         Update: {
           name?: string
           professional_title?: string | null
           language_preference?: string
+          address?: string | null
+          phone?: string | null
+          avatar_url?: string | null
+          auto_confirm_appointments?: boolean
         }
         Relationships: []
       }
@@ -181,13 +193,16 @@ export interface Database {
         Row: {
           id: string
           sort_order: number
+          icon: string
         }
         Insert: {
           id: string
           sort_order: number
+          icon?: string
         }
         Update: {
           sort_order?: number
+          icon?: string
         }
         Relationships: []
       }
@@ -281,6 +296,197 @@ export interface Database {
         }
         Relationships: []
       }
+      patient_push_tokens: {
+        Row: {
+          id: string
+          patient_id: string
+          expo_push_token: string
+          platform: 'ios' | 'android'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_id: string
+          expo_push_token: string
+          platform: 'ios' | 'android'
+        }
+        Update: {
+          expo_push_token?: string
+          platform?: 'ios' | 'android'
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_routines: {
+        Row: {
+          id: string
+          patient_module_id: string
+          practitioner_id: string
+          patient_id: string
+          days_of_week: number[]
+          time_of_day: string
+          patient_time_override: string | null
+          practitioner_note: string | null
+          is_active: boolean
+          patient_paused: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_module_id: string
+          practitioner_id: string
+          patient_id: string
+          days_of_week: number[]
+          time_of_day: string
+          patient_time_override?: string | null
+          practitioner_note?: string | null
+          is_active?: boolean
+          patient_paused?: boolean
+        }
+        Update: {
+          days_of_week?: number[]
+          time_of_day?: string
+          patient_time_override?: string | null
+          practitioner_note?: string | null
+          is_active?: boolean
+          patient_paused?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          id: string
+          routine_id: string | null
+          patient_id: string | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          routine_id?: string | null
+          patient_id?: string | null
+          status?: string
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      patient_engagement_logs: {
+        Row: {
+          id: string
+          patient_id: string
+          event_type: string
+          metadata: Record<string, unknown>
+          created_at: string
+        }
+        Insert: {
+          patient_id: string
+          event_type: string
+          metadata?: Record<string, unknown>
+        }
+        Update: Record<string, never>
+        Relationships: []
+      }
+      availability_rules: {
+        Row: {
+          id: string
+          practitioner_id: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          slot_duration_minutes: number
+          buffer_minutes: number
+          created_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          day_of_week: number
+          start_time: string
+          end_time: string
+          slot_duration_minutes?: number
+          buffer_minutes?: number
+        }
+        Update: {
+          day_of_week?: number
+          start_time?: string
+          end_time?: string
+          slot_duration_minutes?: number
+          buffer_minutes?: number
+        }
+        Relationships: []
+      }
+      availability_exceptions: {
+        Row: {
+          id: string
+          practitioner_id: string
+          exception_date: string
+          is_closed: boolean
+          start_time: string | null
+          end_time: string | null
+          created_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          exception_date: string
+          is_closed?: boolean
+          start_time?: string | null
+          end_time?: string | null
+        }
+        Update: {
+          is_closed?: boolean
+          start_time?: string | null
+          end_time?: string | null
+        }
+        Relationships: []
+      }
+      appointments: {
+        Row: {
+          id: string
+          practitioner_id: string
+          patient_id: string
+          starts_at: string
+          ends_at: string
+          status: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          patient_id: string
+          starts_at: string
+          ends_at: string
+          status?: string
+          notes?: string | null
+        }
+        Update: {
+          status?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      practitioner_patient_notes: {
+        Row: {
+          id: string
+          practitioner_id: string
+          patient_id: string
+          content: string
+          tags: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          practitioner_id: string
+          patient_id: string
+          content: string
+          tags?: string[]
+        }
+        Update: {
+          content?: string
+          tags?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -290,12 +496,22 @@ export interface Database {
 }
 
 // Types pratiques pour l'app
+export interface ProfessionalTitle {
+  code: string
+  label_fr: string
+  label_en: string
+  sort_order: number
+}
+
 export interface Practitioner {
   id: string
   email: string
   name: string
   professional_title: string | null
   language_preference: string
+  address: string | null
+  phone: string | null
+  avatar_url: string | null
 }
 
 export interface PatientSummary {
@@ -329,4 +545,43 @@ export interface PsychoeducationCardEntry {
   card_id: string
   is_read: boolean
   unlocked_at: string
+}
+
+export interface NotificationRoutine {
+  id: string
+  patient_module_id: string
+  practitioner_id: string
+  patient_id: string
+  days_of_week: number[]
+  time_of_day: string
+  patient_time_override: string | null
+  practitioner_note: string | null
+  is_active: boolean
+  patient_paused: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationRoutineInsert {
+  patient_module_id: string
+  practitioner_id: string
+  patient_id: string
+  days_of_week: number[]
+  time_of_day: string
+  practitioner_note?: string | null
+}
+
+export interface NotificationRoutineUpdate {
+  days_of_week?: number[]
+  time_of_day?: string
+  practitioner_note?: string | null
+  is_active?: boolean
+}
+
+export interface ActivityFeedEvent {
+  id: string
+  patient_id: string
+  event_type: string
+  metadata: Record<string, unknown>
+  created_at: string
 }

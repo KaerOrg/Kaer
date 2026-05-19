@@ -30,6 +30,30 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 ---
 
+## Architecture des composants — `ui/` vs `features/`
+
+`src/components/` est divisé en deux sous-dossiers :
+
+| Dossier | Rôle |
+|---|---|
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Divider, EmptyState, InputField, PipPicker, SectionDateList, StatusBadge |
+| `components/features/` | Composants métier — Chart, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent |
+
+**Règle de dépendance : `features → ui` uniquement.**
+
+Imports types selon la couche :
+```ts
+// Design system (ui/) — chemin depuis un écran
+import Button from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+
+// Métier (features/) — chemin depuis un écran
+import { TeenAccent } from '../components/features/TeenAccent'
+import { FieldRenderer } from '../components/features/ModuleRenderer'
+```
+
+---
+
 ## Quand créer un composant vs utiliser les tokens directement
 
 Un composant se justifie quand il encapsule du **comportement** (états, interactions, animations) ou une **structure réutilisable** (layout, accessibilité, logique conditionnelle).
@@ -150,7 +174,7 @@ Adapte l'interface pour les patients adolescents. Activé par le praticien, jama
 |---|---|
 | `src/theme/teen.ts` | Couleurs vives par module + textes adulte/ado |
 | `src/hooks/useTeen.ts` | Hook `useTeen()` — lit le store auth |
-| `src/components/TeenAccent.tsx` | Bande colorée 4px en haut de l'écran |
+| `src/components/features/TeenAccent.tsx` | Bande colorée 4px en haut de l'écran |
 | `src/store/authStore.ts` | Champ `teenMode: boolean` chargé au login |
 
 ### Couleurs par module (`TEEN_MODULE_COLORS`)
@@ -181,7 +205,7 @@ teenColor('module') // string | undefined — couleur vive si isTeenMode, sinon 
 
 ```tsx
 import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/TeenAccent'
+import { TeenAccent } from '../../components/features/TeenAccent'
 
 export function MonModuleScreen() {
   const { teenColor } = useTeen()

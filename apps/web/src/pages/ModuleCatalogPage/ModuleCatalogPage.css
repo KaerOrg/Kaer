@@ -1,0 +1,178 @@
+.catalog-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.catalog-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+.catalog-page__title {
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.3px;
+}
+
+.catalog-page__subtitle {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-xs);
+  max-width: 560px;
+  line-height: 1.5;
+}
+
+.catalog-page__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.catalog-page__count {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+/* ── Banners ─────────────────────────────────────────────────────────────── */
+
+.catalog-page__banner {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+.catalog-page__banner--success {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.catalog-page__banner--error {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+
+.catalog-page__loading {
+  text-align: center;
+  padding: calc(var(--spacing-xl) * 2);
+  color: var(--color-text-muted);
+}
+
+/* ── Search bar ──────────────────────────────────────────────────────────── */
+
+.catalog-page__search {
+  max-width: 420px;
+}
+
+.catalog-page__empty {
+  text-align: center;
+  padding: calc(var(--spacing-xl) * 2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+/* ── Sections par catégorie ──────────────────────────────────────────────── */
+
+.catalog-sections {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-xl) + var(--spacing-sm));
+}
+
+.catalog-section__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.catalog-section__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.catalog-section__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.catalog-section__subtitle {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* ── Grille de cartes ────────────────────────────────────────────────────── */
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(var(--catalog-card-min-width, 300px), 100%), 1fr));
+  gap: var(--spacing-md);
+}
+
+/* États */
+
+.catalog-card--disabled {
+  opacity: 0.55;
+}
+
+.catalog-card--coming-soon {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.catalog-card__soon-badge {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.catalog-card__toggle-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Panneau d'aperçu de section ─────────────────────────────────────────── */
+
+.catalog-section__preview {
+  margin-top: var(--spacing-md);
+}
+
+/* ── Footer save bar ─────────────────────────────────────────────────────── */
+
+.catalog-page__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}

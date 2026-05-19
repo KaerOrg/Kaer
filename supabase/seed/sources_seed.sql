@@ -686,6 +686,613 @@ values
     null,
     'L''intensité du langage d''engagement (commitment strength) lors d''un entretien motivationnel prédit significativement l''abstinence à 12 mois — le discours-changement mobilisateur (engagement, activation) est la voie par laquelle désir, capacité et raisons influencent le comportement (n=84 usagers de drogues)',
     4
+  ),
+
+-- ── fear_thermometer ─────────────────────────────────────────────────────────
+-- Thermomètre de la peur — outil SUDS dans la thérapie d'exposition (TCC)
+-- Sources vérifiées :
+--   PMID 18410984 — Wolitzky-Taylor et al. 2008 — méta-analyse 33 ECR phobies spécifiques (vérifié PubMed, abstract lu)
+--   PMID 2871574  — Foa & Kozak 1986 — théorie du traitement émotionnel de la peur (vérifié PubMed, abstract lu)
+--   PMID 24864005 — Craske et al. 2014 — modèle d'apprentissage inhibiteur (vérifié PubMed, abstract lu)
+--   NICE CG159 (2013, revu 2024) — recommande l'exposition graduée en TCC pour les troubles anxieux
+--     URL vérifiée : https://www.nice.org.uk/guidance/cg159/chapter/Recommendations
+--     Texte exact : « graduated exposure to feared social situations, both within treatment sessions and as homework »
+
+  -- 1. Wolitzky-Taylor et al. 2008 — Clinical Psychology Review (méta-analyse, 33 ECR)
+  --    PMID 18410984 — doi:10.1016/j.cpr.2008.02.007 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    '99999999-0001-0001-0001-000000000001',
+    'fear_thermometer',
+    'Wolitzky-Taylor et al. — Traitements psychologiques des phobies spécifiques : méta-analyse (Clin Psychol Rev, 2008)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.cpr.2008.02.007',
+    null,
+    'Méta-analyse de 33 ECR : l''exposition in vivo produit des effets larges supérieurs au groupe contrôle ; l''exposition in vivo est plus efficace que l''exposition par imagerie à l''issue du traitement',
+    1
+  ),
+
+  -- 2. Foa & Kozak 1986 — Psychological Bulletin (article théorique fondateur)
+  --    PMID 2871574 — pas de DOI dans PubMed (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article théorique, non un ECR
+  (
+    '99999999-0001-0001-0001-000000000002',
+    'fear_thermometer',
+    'Foa & Kozak — Traitement émotionnel de la peur : exposition à l''information corrective (Psychol Bull, 1986)',
+    'expert_opinion',
+    'https://pubmed.ncbi.nlm.nih.gov/2871574/',
+    null,
+    'Cadre théorique fondateur de la thérapie d''exposition : habituation, traitement émotionnel et intégration d''informations incompatibles avec la peur. Base conceptuelle du thermomètre SUDS',
+    2
+  ),
+
+  -- 3. Craske et al. 2014 — Behaviour Research and Therapy (revue théorique)
+  --    PMID 24864005 — doi:10.1016/j.brat.2014.04.006 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article de synthèse, non un ECR
+  (
+    '99999999-0001-0001-0001-000000000003',
+    'fear_thermometer',
+    'Craske et al. — Maximiser la thérapie d''exposition : approche par apprentissage inhibiteur (Behav Res Ther, 2014)',
+    'systematic_review',
+    'https://doi.org/10.1016/j.brat.2014.04.006',
+    null,
+    'Modèle d''apprentissage inhibiteur : la violation d''expectative, l''extinction approfondie et le récupération variée optimisent les résultats de l''exposition — actualisation du modèle d''habituation de Foa & Kozak',
+    3
+  ),
+
+  -- 4. NICE CG159 (2013, revu 2024) — Trouble anxiété sociale
+  --    URL vérifiée : https://www.nice.org.uk/guidance/cg159/chapter/Recommendations
+  --    Texte : « graduated exposure to feared social situations, both within treatment sessions and as homework »
+  --    NICE n'utilise pas de grades A/B/C — evidence_grade : null
+  (
+    '99999999-0001-0001-0001-000000000004',
+    'fear_thermometer',
+    'NICE CG159 — Trouble d''anxiété sociale : reconnaissance, évaluation et traitement (2013, revu 2024)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/cg159/chapter/Recommendations',
+    null,
+    'Recommande la TCC avec exposition graduée aux situations redoutées, aussi bien en séance qu''en tâches entre séances ; deux modèles validés : Clark & Wells (14 séances) et Heimberg (15 séances)',
+    4
+  ),
+
+-- ── exposure_hierarchy ───────────────────────────────────────────────────────
+-- Hiérarchie d'exposition — liste graduée de situations selon SUDs (TCC)
+-- Sources vérifiées :
+--   PMID 29451967 — Carpenter et al. 2018 — méta-analyse 41 ECR placebo-contrôlés (vérifié PubMed, abstract lu)
+--   NICE NG116 (2018) — Thérapie d'exposition prolongée recommandée (prolonged exposure, Foa)
+--     URL vérifiée : https://www.nice.org.uk/guidance/ng116/chapter/Recommendations
+--     Texte exact : « Offer an individual trauma-focused CBT intervention... »
+--     inclut la "prolonged exposure therapy" (protocole Foa — utilise une hiérarchie in vivo + imagerie)
+
+  -- 1. Carpenter et al. 2018 — Depression and Anxiety (méta-analyse, 41 ECR placebo-contrôlés)
+  --    PMID 29451967 — doi:10.1002/da.22728 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'aaaaaaaa-0001-0001-0001-000000000001',
+    'exposure_hierarchy',
+    'Carpenter et al. — TCC pour les troubles anxieux : méta-analyse d''ECR placebo-contrôlés (Depress Anxiety, 2018)',
+    'meta_analysis',
+    'https://doi.org/10.1002/da.22728',
+    null,
+    'Méta-analyse de 41 ECR placebo-contrôlés (N=2 843) : Hedges g=0,56 sur les symptômes cibles ; les interventions centrées sur l''exposition produisent des effets plus larges que les approches cognitives seules',
+    1
+  ),
+
+  -- 2. NICE NG116 (2018) — PTSD : évaluation et gestion
+  --    URL vérifiée : https://www.nice.org.uk/guidance/ng116/chapter/Recommendations
+  --    La Prolonged Exposure (protocole Foa) fait partie des 4 approches TCC trauma-focalisées recommandées.
+  --    Ce protocole utilise explicitement une hiérarchie d''exposition in vivo + narration imagée.
+  --    NICE n'utilise pas de grades A/B/C — evidence_grade : null
+  (
+    'aaaaaaaa-0001-0001-0001-000000000002',
+    'exposure_hierarchy',
+    'NICE NG116 — PTSD : évaluation et gestion (2018)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/ng116/chapter/Recommendations',
+    null,
+    'Recommande 4 approches TCC trauma-focalisées dont la Prolonged Exposure (Foa) — protocole qui utilise une hiérarchie d''exposition in vivo et imagée, progressivement parcourue avec le thérapeute',
+    2
+  ),
+
+-- ── decisional_balance ───────────────────────────────────────────────────────
+-- Balance décisionnelle — grille pros/cons du modèle transthéorique (TTM)
+-- Sources vérifiées :
+--   PMID 10170434 — Prochaska & Velicer 1997 — modèle TTM : balance décisionnelle sur 12 comportements (vérifié PubMed, abstract lu)
+--   PMID 20524891 — Di Noia & Prochaska 2010 — méta-analyse 27 études pros/cons selon stades (vérifié PubMed, abstract lu)
+--   PMID 24001658 — Lundahl et al. 2013 — méta-analyse 48 ECR EM en soins médicaux (vérifié PubMed, abstract lu)
+
+  -- 1. Prochaska & Velicer 1997 — Am J Health Promot (article de synthèse fondateur du TTM)
+  --    PMID 10170434 — doi:10.4278/0890-1171-12.1.38 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article de synthèse théorique, non un ECR
+  (
+    'bbbbbbbb-0001-0001-0001-000000000001',
+    'decisional_balance',
+    'Prochaska & Velicer — Le modèle transthéorique du changement de comportement (Am J Health Promot, 1997)',
+    'expert_opinion',
+    'https://doi.org/10.4278/0890-1171-12.1.38',
+    null,
+    'Cadre théorique fondateur : la balance décisionnelle (pros/cons) est un prédicteur robuste du stade de changement — schéma cohérent retrouvé sur 12 comportements de santé distincts',
+    1
+  ),
+
+  -- 2. Di Noia & Prochaska 2010 — Am J Health Behav (méta-analyse, 27 études)
+  --    PMID 20524891 — doi:10.5993/ajhb.34.5.11 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'bbbbbbbb-0001-0001-0001-000000000002',
+    'decisional_balance',
+    'Di Noia & Prochaska — Balance décisionnelle et stades de changement : revue méta-analytique (Am J Health Behav, 2010)',
+    'meta_analysis',
+    'https://doi.org/10.5993/ajhb.34.5.11',
+    null,
+    'Méta-analyse de 27 études : la structure de la balance décisionnelle et sa relation aux stades de changement sont cohérentes avec la théorie — les pros augmentent davantage (+0,82) que les cons ne diminuent (−0,55) de la précontemplation à l''action',
+    2
+  ),
+
+  -- 3. Lundahl et al. 2013 — Patient Educ Couns (méta-analyse, 48 ECR, N=9 618, co-signé Rollnick)
+  --    PMID 24001658 — doi:10.1016/j.pec.2013.07.012 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    'bbbbbbbb-0001-0001-0001-000000000003',
+    'decisional_balance',
+    'Lundahl et al. — Entretien motivationnel en soins médicaux : méta-analyse d''ECR (Patient Educ Couns, 2013)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.pec.2013.07.012',
+    null,
+    'Méta-analyse de 48 ECR (N=9 618) : OR=1,55 en faveur de l''EM versus comparateurs ; efficace sur une large gamme de comportements (charge virale VIH, poids, alcool, tabac, comportement sédentaire)',
+    3
+  ),
+
+-- ── phq9 ─────────────────────────────────────────────────────────────────────
+-- PHQ-9 — Questionnaire sur la santé du patient (dépression)
+-- Source vérifiée : PMID 11556941 — Kroenke, Spitzer & Williams 2001 (vérifié PubMed, abstract lu)
+
+  -- Kroenke, Spitzer & Williams 2001 — J Gen Intern Med (étude de validation, N=6 000)
+  --    PMID 11556941 — doi:10.1046/j.1525-1497.2001.016009606.x (vérifié PubMed, abstract lu)
+  --    Sensibilité 88 %, spécificité 88 % à score ≥10 pour EDC majeur
+  (
+    'cccccccc-0001-0001-0001-000000000001',
+    'phq9',
+    'Kroenke, Spitzer & Williams — The PHQ-9 : validité d''une mesure brève de sévérité dépressive (J Gen Intern Med, 2001)',
+    'cohort_study',
+    'https://doi.org/10.1046/j.1525-1497.2001.016009606.x',
+    null,
+    'Étude de validation sur 6 000 patients en soins primaires : sensibilité 88 %, spécificité 88 % à score ≥10 pour l''épisode dépressif majeur ; seuils 5/10/15/20 pour dépression légère/modérée/sévère/très sévère',
+    1
+  ),
+
+-- ── gad7 ─────────────────────────────────────────────────────────────────────
+-- GAD-7 — Trouble anxieux généralisé (7 items)
+-- Source vérifiée : PMID 16717171 — Spitzer et al. 2006 (vérifié PubMed, abstract lu)
+
+  -- Spitzer, Kroenke, Williams & Löwe 2006 — Arch Intern Med (étude de validation, N=2 740)
+  --    PMID 16717171 — doi:10.1001/archinte.166.10.1092 (vérifié PubMed, abstract lu)
+  --    Sensibilité 89 %, spécificité 82 % pour le TAG
+  (
+    'dddddddd-0001-0001-0001-000000000001',
+    'gad7',
+    'Spitzer et al. — The GAD-7 : mesure brève pour le trouble anxieux généralisé (Arch Intern Med, 2006)',
+    'cohort_study',
+    'https://doi.org/10.1001/archinte.166.10.1092',
+    null,
+    'Étude de validation sur 2 740 patients (15 cliniques US) : sensibilité 89 %, spécificité 82 % ; fiabilité, validité critérielle, factorielle et procédurale confirmées ; scores TAG et dépression indépendants',
+    1
+  ),
+
+-- ── bsl23 ─────────────────────────────────────────────────────────────────────
+-- BSL-23 — Borderline Symptom List (23 items)
+-- Source vérifiée : PMID 19023232 — Bohus et al. 2008 (vérifié PubMed, abstract lu)
+
+  -- Bohus et al. 2008 — Psychopathology (étude de validation, N=659 TPB)
+  --    PMID 19023232 — doi:10.1159/000173701 (vérifié PubMed, abstract lu)
+  --    α=0,935–0,969 ; corrélation r=0,958–0,963 avec BSL-95
+  (
+    'eeeeeeee-0001-0001-0001-000000000001',
+    'bsl23',
+    'Bohus et al. — BSL-23 : développement et propriétés psychométriques (Psychopathology, 2008)',
+    'cohort_study',
+    'https://doi.org/10.1159/000173701',
+    null,
+    'Validation de la version courte sur 659 patients TPB : α=0,935–0,969, corrélation élevée avec le BSL-95 (r=0,958–0,963) ; discrimine le TPB des diagnostics Axe I ; sensible au changement après 3 mois de TCD (d=0,47)',
+    1
+  ),
+
+-- ── rcads ─────────────────────────────────────────────────────────────────────
+-- RCADS-25 — Revised Child Anxiety and Depression Scale (25 items, Ebesutani 2012)
+-- Source vérifiée : PMID 22329531 — Ebesutani et al. 2012 (vérifié PubMed, abstract lu)
+
+  -- Ebesutani et al. 2012 — Psychological Assessment (développement RCADS-25, N=1 060+303)
+  --    PMID 22329531 — doi:10.1037/a0027283 (vérifié PubMed, abstract lu)
+  --    25 items (15 anxiété + 10 dépression) via analyse bifactorielle exploratoire
+  (
+    'ffffffff-0001-0001-0001-000000000001',
+    'rcads',
+    'Ebesutani et al. — RCADS-25 : version courte par modélisation bifactorielle (Psychol Assess, 2012)',
+    'cohort_study',
+    'https://doi.org/10.1037/a0027283',
+    null,
+    'Développement de la version 25 items par analyse bifactorielle de Schmid-Leiman (N=1 060 école + 303 clinique) : 15 items anxiété + 10 items dépression ; fiabilité α=0,80 pour la sous-échelle dépression en clinique',
+    1
+  ),
+
+-- ── snap_iv ──────────────────────────────────────────────────────────────────
+-- SNAP-IV — Swanson, Nolan and Pelham rating scale (26 items TDAH)
+-- Source vérifiée : PMID 30991820 — Hall et al. 2019 (vérifié PubMed, abstract lu)
+
+  -- Hall et al. 2019 — Assessment (étude de validation, N=250 enfants 6-17 ans)
+  --    PMID 30991820 — doi:10.1177/1073191119842255 (vérifié PubMed, abstract lu)
+  --    Structure à 2 facteurs (inattention + hyperactivité/impulsivité) ; bon outil de suivi en ECR
+  (
+    '1a1a1a1a-0001-0001-0001-000000000001',
+    'snap_iv',
+    'Hall et al. — Validité du SNAP-IV chez les enfants présentant des symptômes de TDAH (Assessment, 2019)',
+    'cohort_study',
+    'https://doi.org/10.1177/1073191119842255',
+    null,
+    'Validation sur 250 enfants (6-17 ans) : structure à 2 facteurs (inattention / hyperactivité-impulsivité) ; évaluations parentales de l''inattention et de l''hyperactivité prédicteurs significatifs du diagnostic de recherche ; bon outil de mesure de résultats en ECR',
+    1
+  ),
+
+-- ── asrs6 ─────────────────────────────────────────────────────────────────────
+-- ASRS v1.1 — Dépistage rapide TDAH adulte (6 items)
+-- Source vérifiée : PMID 15841682 — Kessler et al. 2005 (vérifié PubMed, abstract lu)
+
+  -- Kessler et al. 2005 — Psychol Med (validation ASRS-6 + ASRS-18, N=154)
+  --    PMID 15841682 — doi:10.1017/s0033291704002892 (vérifié PubMed, abstract lu)
+  --    ASRS-6 : sensibilité 68,7 %, spécificité 99,5 %, kappa 0,76
+  (
+    '1b1b1b1b-0001-0001-0001-000000000001',
+    'asrs6',
+    'Kessler et al. — L''ASRS de l''OMS : échelle de dépistage du TDAH adulte (Psychol Med, 2005)',
+    'cohort_study',
+    'https://doi.org/10.1017/s0033291704002892',
+    null,
+    'Validation de l''ASRS-6 (dépistage) et de l''ASRS-18 (complet) sur 154 sujets (NCS-R) : ASRS-6 — sensibilité 68,7 %, spécificité 99,5 %, kappa=0,76 ; surpasse l''ASRS-18 non pondéré pour le dépistage en population générale',
+    1
+  ),
+
+-- ── asrs18 ────────────────────────────────────────────────────────────────────
+-- ASRS v1.1 — Bilan complet TDAH adulte (18 items)
+-- Source vérifiée : PMID 15841682 — Kessler et al. 2005 (idem asrs6 — même article valide les deux versions)
+
+  -- Kessler et al. 2005 — Psychol Med (validation ASRS-6 + ASRS-18, N=154)
+  --    PMID 15841682 — doi:10.1017/s0033291704002892 (vérifié PubMed, abstract lu)
+  --    ASRS-18 : 18 questions DSM-IV sur les symptômes adultes, kappa=0,58
+  (
+    '1c1c1c1c-0001-0001-0001-000000000001',
+    'asrs18',
+    'Kessler et al. — L''ASRS de l''OMS : échelle de dépistage du TDAH adulte (Psychol Med, 2005)',
+    'cohort_study',
+    'https://doi.org/10.1017/s0033291704002892',
+    null,
+    'Validation de l''ASRS-18 (bilan complet) sur 154 sujets (NCS-R) : 18 questions couvrant les critères DSM-IV de TDAH adulte, sous-scores inattention et hyperactivité/impulsivité ; kappa=0,58 ; complément du dépistage ASRS-6',
+    1
+  )
+
+-- ── beck_columns ─────────────────────────────────────────────────────────────
+-- Colonnes de Beck (restructuration cognitive TCC)
+-- Sources niveau 1 (efficacité de la TCC et de la restructuration cognitive) :
+--   PMID 23459093 — Hofmann et al. 2012 — revue de 106 méta-analyses sur la TCC (vérifié PubMed, abstract lu)
+
+,
+
+  -- 1. Hofmann et al. 2012 — Cognit Ther Res (revue systématique de 106 méta-analyses TCC)
+  --    PMID 23459093 — doi:10.1007/s10608-012-9476-1 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — revue, non un ECR individuel
+  (
+    '2a2a2a2a-0001-0001-0001-000000000001',
+    'beck_columns',
+    'Hofmann et al. — Efficacité de la TCC : revue de méta-analyses (Cognit Ther Res, 2012)',
+    'systematic_review',
+    'https://doi.org/10.1007/s10608-012-9476-1',
+    null,
+    'Revue de 106 méta-analyses de la TCC : support le plus fort pour les troubles anxieux, les troubles somatoformes, la boulimie, le contrôle de la colère et le stress général — la restructuration cognitive (colonnes de Beck) est un composant central de la TCC validée dans cet ensemble',
+    1
+  )
+
+-- ── behavioral_activation ────────────────────────────────────────────────────
+-- Activation comportementale (dépression — TCC comportementale)
+-- Sources niveau 1 (efficacité de l''AC) :
+--   PMID 16881773 — Dimidjian et al. 2006 — ECR (n=241, AC ≥ TCC pour dépression sévère)
+--   PMID 17184887 — Cuijpers et al. 2007 — méta-analyse AC (16 études, n=780, g=0,87)
+
+,
+
+  -- 1. Dimidjian et al. 2006 — J Consult Clin Psychol (ECR, n=241)
+  --    PMID 16881773 — doi:10.1037/0022-006X.74.4.658 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    '2b2b2b2b-0001-0001-0001-000000000001',
+    'behavioral_activation',
+    'Dimidjian et al. — Activation comportementale vs TCC vs antidépresseurs : ECR (J Consult Clin Psychol, 2006)',
+    'rct',
+    'https://doi.org/10.1037/0022-006X.74.4.658',
+    null,
+    'ECR (n=241) : chez les patients sévèrement déprimés, l''activation comportementale est comparable aux antidépresseurs et supérieure à la TCC — la composante comportementale est identifiée comme moteur principal de l''efficacité de la TCC',
+    1
+  ),
+
+  -- 2. Cuijpers et al. 2007 — Clin Psychol Rev (méta-analyse, 16 études, n=780)
+  --    PMID 17184887 — doi:10.1016/j.cpr.2006.11.001 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    '2b2b2b2b-0001-0001-0001-000000000002',
+    'behavioral_activation',
+    'Cuijpers et al. — Traitements par activation comportementale de la dépression : méta-analyse (Clin Psychol Rev, 2007)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.cpr.2006.11.001',
+    null,
+    'Méta-analyse de 16 ECR (n=780) : taille d''effet large g=0,87 pour l''activation comportementale vs contrôle ; équivalente à la TCC à post-traitement (g=0,02) et au suivi — maintien des bénéfices à long terme confirmé',
+    2
+  )
+
+-- ── breathing_techniques ─────────────────────────────────────────────────────
+-- Techniques de respiration (respiration lente, cohérence cardiaque, biofeedback VRC)
+-- Sources niveau 1 (efficacité physiologique et clinique) :
+--   PMID 30245619 — Zaccaro et al. 2018 — revue systématique respiration lente (<10 cycles/min, 15 études)
+--   PMID 25101026 — Lehrer & Gevirtz 2014 — mécanismes du biofeedback VRC (Front Psychol)
+
+,
+
+  -- 1. Zaccaro et al. 2018 — Front Hum Neurosci (revue systématique, 15 études)
+  --    PMID 30245619 — doi:10.3389/fnhum.2018.00353 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — revue systématique, pas de méta-analyse quantitative
+  (
+    '2c2c2c2c-0001-0001-0001-000000000001',
+    'breathing_techniques',
+    'Zaccaro et al. — La respiration lente : revue systématique des corrélats psychophysiologiques (Front Hum Neurosci, 2018)',
+    'systematic_review',
+    'https://doi.org/10.3389/fnhum.2018.00353',
+    null,
+    'Revue systématique de 15 études PRISMA : la respiration lente (<10 cycles/min) augmente la VRC et l''arythmie sinusale respiratoire, accroît la puissance EEG alpha, réduit anxiété, dépression, colère et confusion — deux mécanismes proposés : entéroception et modulation olfactive-corticale',
+    1
+  ),
+
+  -- 2. Lehrer & Gevirtz 2014 — Front Psychol (revue mécanistique biofeedback VRC)
+  --    PMID 25101026 — doi:10.3389/fpsyg.2014.00756 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — article de revue mécanistique
+  (
+    '2c2c2c2c-0001-0001-0001-000000000002',
+    'breathing_techniques',
+    'Lehrer & Gevirtz — Biofeedback VRC : comment et pourquoi ça fonctionne (Front Psychol, 2014)',
+    'expert_opinion',
+    'https://doi.org/10.3389/fpsyg.2014.00756',
+    null,
+    'Revue des mécanismes du biofeedback VRC (cohérence cardiaque) : renforcement homéostatique des barorécepteurs, voie vagale afférente vers le cortex frontal — support théorique des techniques de respiration à fréquence de résonance (4,5–6,5 cycles/min adultes)',
+    2
+  )
+
+-- ── cognitive_saturation ─────────────────────────────────────────────────────
+-- Saturation cognitive (défusion cognitive — ACT)
+-- Sources niveau 1 (mécanismes de la défusion cognitive en ACT) :
+--   PMID 38615492 — Macri & Rogge 2024 — méta-analyse mécanismes ACT (77 études, n=9 123)
+
+,
+
+  -- 1. Macri & Rogge 2024 — Clin Psychol Rev (méta-analyse systématique, 77 études, n=9 123)
+  --    PMID 38615492 — doi:10.1016/j.cpr.2024.102432 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — grade non applicable à une étude individuelle
+  (
+    '2d2d2d2d-0001-0001-0001-000000000001',
+    'cognitive_saturation',
+    'Macri & Rogge — Flexibilité psychologique comme mécanisme thérapeutique de l''ACT : méta-analyse (Clin Psychol Rev, 2024)',
+    'meta_analysis',
+    'https://doi.org/10.1016/j.cpr.2024.102432',
+    null,
+    'Méta-analyse de 77 études (n=9 123) : l''ACT entraîne une augmentation significative de la défusion cognitive et une réduction de la fusion cognitive, toutes comparaisons confondues — changements liés à des réductions correspondantes de la détresse psychologique, soutenant le rôle mécanistique de la défusion',
+    1
+  )
+
+-- ── emotion_wheel ─────────────────────────────────────────────────────────────
+-- Roue des émotions (identification et labellisation des émotions)
+-- Sources niveau 1 (base neurobiologique de la labellisation affective) :
+--   PMID 17576282 — Lieberman et al. 2007 — IRMf : affect labeling réduit l''activité amygdalienne
+
+,
+
+  -- 1. Lieberman et al. 2007 — Psychological Science (étude expérimentale IRMf)
+  --    PMID 17576282 — doi:10.1111/j.1467-9280.2007.01916.x (vérifié PubMed, abstract lu)
+  --    evidence_grade : null — étude expérimentale neuroimagerie, non un ECR clinique
+  (
+    '2e2e2e2e-0001-0001-0001-000000000001',
+    'emotion_wheel',
+    'Lieberman et al. — Mettre ses émotions en mots : la labellisation affective réduit l''activité amygdalienne (Psychol Sci, 2007)',
+    'expert_opinion',
+    'https://doi.org/10.1111/j.1467-9280.2007.01916.x',
+    null,
+    'Étude IRMf : la labellisation affective (affect labeling) réduit l''activité de l''amygdale et des régions limbiques en réponse à des images émotionnelles négatives, via activation du CPF ventrolatéral droit et du CPF médian — base neurobiologique du bénéfice clinique de l''identification des émotions',
+    1
+  )
+
+-- ── epds ─────────────────────────────────────────────────────────────────────
+-- EPDS — Edinburgh Postnatal Depression Scale (10 items)
+-- Source vérifiée : PMID 3651732 — Cox, Holden & Sagovsky 1987 (vérifié PubMed, abstract lu)
+
+,
+
+  -- Cox, Holden & Sagovsky 1987 — Br J Psychiatry (développement et validation EPDS, n=84)
+  --    PMID 3651732 — doi:10.1192/bjp.150.6.782 (vérifié PubMed, abstract lu)
+  --    Sensibilité et spécificité satisfaisantes, sensible au changement dans le temps
+  (
+    '2f2f2f2f-0001-0001-0001-000000000001',
+    'epds',
+    'Cox, Holden & Sagovsky — Dépistage de la dépression postnatale : développement de l''EPDS (Br J Psychiatry, 1987)',
+    'cohort_study',
+    'https://doi.org/10.1192/bjp.150.6.782',
+    null,
+    'Développement et validation initiale de l''EPDS sur 84 mères en communauté (critères Research Diagnostic Criteria) : sensibilité et spécificité satisfaisantes pour la dépression postnatale, sensible au changement dans le temps — passation ~5 min, cotation simple',
+    1
+  )
+
+-- ── grounding ─────────────────────────────────────────────────────────────────
+-- Ancrage sensoriel 5-4-3-2-1 (technique DBT — tolérance à la détresse)
+-- Sources niveau 1 (efficacité du cadre DBT dont la technique est issue) :
+--   PMID 21114345 — Kliem et al. 2010 — méta-analyse TCD (16 études, 8 ECR, effet modéré)
+-- Référence clinique : Linehan (1993), DBT Skills Training Manual — non indexé PubMed
+
+,
+
+  -- 1. Kliem et al. 2010 — J Consult Clin Psychol (méta-analyse TCD, 16 études, 8 ECR)
+  --    PMID 21114345 — doi:10.1037/a0021015 (vérifié PubMed, abstract lu)
+  --    Effet global modéré pour la TCD — inclut les compétences de tolérance à la détresse (dont l''ancrage)
+  (
+    '3a3a3a3a-0001-0001-0001-000000000001',
+    'grounding',
+    'Kliem et al. — Thérapie comportementale dialectique pour le TPB : méta-analyse (J Consult Clin Psychol, 2010)',
+    'meta_analysis',
+    'https://doi.org/10.1037/a0021015',
+    null,
+    'Méta-analyse de 16 études (8 ECR, 8 non-randomisées) : effet global modéré pour la TCD, effet modéré pour les comportements suicidaires et auto-blessants — la TCD (dont le module tolérance à la détresse incluant les techniques d''ancrage sensoriel) est le traitement psychosocial du TPB le plus étudié',
+    1
+  )
+
+-- ── medication_adherence ──────────────────────────────────────────────────────
+-- Observance médicamenteuse (auto-monitoring de l''observance)
+-- Sources niveau 1 (recommandations sur le suivi de l''observance en psychiatrie) :
+--   NICE CG178 (2014, revu 2022) — Psychose et schizophrénie chez l''adulte
+--     URL vérifiée : https://www.nice.org.uk/guidance/cg178
+--     Recommande surveillance systématique de l''observance + programme d''autogestion incluant usage des médicaments
+--     NICE n''utilise pas de grades A/B/C — evidence_grade : null
+
+,
+
+  -- NICE CG178 (2014, revu 2022) — Psychose et schizophrénie chez l''adulte
+  (
+    '3b3b3b3b-0001-0001-0001-000000000001',
+    'medication_adherence',
+    'NICE CG178 — Psychose et schizophrénie chez l''adulte : prévention et prise en charge (2014, revu 2022)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/cg178',
+    null,
+    'Recommande la surveillance systématique de l''observance tout au long du traitement, et de proposer un programme d''autogestion manualisé couvrant l''utilisation efficace du traitement médicamenteux et l''identification des symptômes — l''auto-déclaration quotidienne est un outil d''alliance thérapeutique validé',
+    1
+  )
+
+-- ── mood_tracker ─────────────────────────────────────────────────────────────
+-- Thermomètre de l''humeur (suivi quotidien humeur/énergie/anxiété)
+-- Sources niveau 1 (valeur clinique du monitoring de l''humeur) :
+--   PMID 29536616 — Yatham et al. 2018 CANMAT/ISBD — recommandations trouble bipolaire (inclut monitoring)
+-- Référence classique non indexée PubMed :
+--   Post RM et al. (1988) — NIMH Life Chart Method — gold standard du suivi longitudinal
+
+,
+
+  -- Yatham et al. 2018 — Bipolar Disorders (CANMAT/ISBD guidelines)
+  --    PMID 29536616 — doi:10.1111/bdi.12609 (vérifié PubMed, abstract lu)
+  --    Recommande le suivi longitudinal de l''humeur comme outil central de la prise en charge bipolaire
+  (
+    '3c3c3c3c-0001-0001-0001-000000000001',
+    'mood_tracker',
+    'Yatham et al. — Recommandations CANMAT/ISBD 2018 pour la prise en charge du trouble bipolaire (Bipolar Disorders, 2018)',
+    'guideline',
+    'https://doi.org/10.1111/bdi.12609',
+    null,
+    'Directives internationales de référence pour le trouble bipolaire (CANMAT/ISBD, n>25 auteurs) : le monitoring longitudinal de l''humeur, de l''énergie et du sommeil est intégré comme outil d''évaluation et de suivi tout au long du traitement — base clinique du thermomètre de l''humeur utilisé dans ce module',
+    1
+  )
+
+-- ── nsi ──────────────────────────────────────────────────────────────────────
+-- NSI — Nightmare Severity Index (9 items scorés, score 0–45)
+-- Source vérifiée : PMID 37846776 — Geoffroy et al. 2023 (vérifié PubMed, abstract lu)
+
+,
+
+  -- Geoffroy et al. 2023 — J Sleep Res (étude pilote de validation, n=102)
+  --    PMID 37846776 — doi:10.1111/jsr.14065 (vérifié PubMed, abstract lu)
+  --    4 sous-dimensions : fréquence, impact émotionnel, impact diurne, impact nocturne
+  --    Alpha de Cronbach >0,7 — discrimine les patients avec trouble cauchemardeux DSM-5/ICSD-3
+  (
+    '3d3d3d3d-0001-0001-0001-000000000001',
+    'nsi',
+    'Geoffroy et al. — NSI : nouvel outil multidimensionnel court pour l''évaluation des cauchemars (J Sleep Res, 2023)',
+    'cohort_study',
+    'https://doi.org/10.1111/jsr.14065',
+    null,
+    'Étude pilote de validation du NSI sur 102 patients (64 % femmes, 76 % ambulatoires, 44 % TSPT comorbide) : bonne validité interne (α>0,7), acceptabilité satisfaisante, discrimine les patients présentant un trouble cauchemardeux selon les critères DSM-5/ICSD-3 — 4 sous-dimensions : fréquence, impact émotionnel, impact diurne, impact nocturne',
+    1
+  )
+
+-- ── rim ──────────────────────────────────────────────────────────────────────
+-- RIM — Réécriture par Imagerie Mentale (Imagery Rehearsal Therapy)
+-- Source vérifiée : PMID 40665297 — Zhao et al. 2025 (vérifié PubMed, abstract lu)
+
+,
+
+  -- Zhao et al. 2025 — BMC Psychiatry (revue systématique + méta-analyse ECR, PTSD + troubles du sommeil)
+  --    PMID 40665297 — doi:10.1186/s12888-025-07157-9 (vérifié PubMed, abstract lu)
+  --    L''IRT (seule ou combinée avec la TCC-I) est recommandée pour le PTSD avec troubles du sommeil
+  (
+    '3e3e3e3e-0001-0001-0001-000000000001',
+    'rim',
+    'Zhao et al. — Interventions pour le TSPT avec troubles du sommeil : revue systématique et méta-analyse (BMC Psychiatry, 2025)',
+    'meta_analysis',
+    'https://doi.org/10.1186/s12888-025-07157-9',
+    null,
+    'Revue systématique et méta-analyse des ECR conformes aux recommandations NICE pour le TSPT avec troubles du sommeil (jusqu''en 02/2023) : interventions actives réduisent TSPT (SMD=0,86), troubles du sommeil (SMD=1,06) et dépression (SMD=0,58) — l''IRT (seule ou + TCC-I) est recommandée comme traitement psychologique de première intention',
+    1
+  )
+
+-- ── sleep_diary ───────────────────────────────────────────────────────────────
+-- Agenda du sommeil (composant central de la TCC-I)
+-- Source vérifiée : PMID 26054060 — Trauer et al. 2015 (vérifié PubMed, abstract lu)
+
+,
+
+  -- Trauer et al. 2015 — Ann Intern Med (revue systématique + méta-analyse, 20 ECR, n=1 162)
+  --    PMID 26054060 — doi:10.7326/M14-2841 (vérifié PubMed, abstract lu)
+  --    La TCC-I est le traitement de 1ère ligne de l''insomnie chronique
+  --    L''agenda du sommeil est le principal outil de monitoring, d''ajustement et de restriction du sommeil
+  (
+    '3f3f3f3f-0001-0001-0001-000000000001',
+    'sleep_diary',
+    'Trauer et al. — TCC pour l''insomnie chronique : revue systématique et méta-analyse (Ann Intern Med, 2015)',
+    'meta_analysis',
+    'https://doi.org/10.7326/M14-2841',
+    null,
+    'Revue systématique de 20 ECR (n=1 162, 64 % de femmes, âge moyen 56 ans) : la TCC-I améliore significativement la latence d''endormissement (−19 min), l''éveil après endormissement (−26 min) et l''efficacité du sommeil (+9,91 %) — effets maintenus à long terme ; TCC-I recommandée comme 1ère ligne pour l''insomnie chronique, avec l''agenda du sommeil comme outil central',
+    1
+  )
+
+-- ── cognitive_distortions ────────────────────────────────────────────────────
+-- Distorsions cognitives (identification des pensées automatiques — TCC)
+-- Sources niveau 1 (mesure et validation des distorsions cognitives) :
+--   PMID 25170942 — Özdel et al. 2014 — validation Cognitive Distortions Scale (PLoS One)
+
+,
+
+  -- Özdel et al. 2014 — PLoS One (étude de validation psychométrique, n=325)
+  --    PMID 25170942 — doi:10.1371/journal.pone.0105956 (vérifié PubMed, abstract lu)
+  --    Cronbach α=0,918 (clinique) et 0,933 (non-clinique) — structure unifactorielle confirmée
+  (
+    '4a4a4a4a-0001-0001-0001-000000000001',
+    'cognitive_distortions',
+    'Özdel et al. — Validation de la Cognitive Distortions Scale : propriétés psychométriques (PLoS One, 2014)',
+    'cohort_study',
+    'https://doi.org/10.1371/journal.pone.0105956',
+    null,
+    'Validation de la CDS sur 325 sujets (cliniques et non-cliniques) : structure unifactorielle confirmée, excellente cohérence interne (α>0,90) dans les deux échantillons, stabilité à 2 semaines, corrélations significatives avec BDI, STAI et questionnaire de pensées automatiques — outil valide pour l''identification des distorsions cognitives en contexte clinique',
+    1
+  )
+
+-- ── therapeutic_commitment ──────────────────────────────────────────────────
+-- Engagement thérapeutique (l''engagement du patient prédit les résultats en TCC)
+-- Sources niveau 1 (rôle de l''engagement dans les résultats thérapeutiques) :
+--   PMID 23750465 — Glenn et al. 2013 — ECR, 439 patients anxieux en TCC (J Consult Clin Psychol)
+
+,
+
+  -- Glenn et al. 2013 — J Consult Clin Psychol (analyse secondaire ECR CALM, n=439)
+  --    PMID 23750465 — doi:10.1037/a0033403 (vérifié PubMed, abstract lu)
+  --    L''engagement en TCC (commitment) prédit les résultats à 12 et 18 mois
+  (
+    '4b4b4b4b-0001-0001-0001-000000000001',
+    'therapeutic_commitment',
+    'Glenn et al. — Qui tire le plus profit de la TCC pour les troubles anxieux ? Rôle de l''engagement (J Consult Clin Psychol, 2013)',
+    'rct',
+    'https://doi.org/10.1037/a0033403',
+    null,
+    'Analyse secondaire de l''ECR CALM (n=439 patients anxieux en TCC) : l''engagement élevé en TCC (assiduité, complétion des expositions, observance des devoirs, engagement déclaré) prédit des résultats significativement meilleurs à 12 et 18 mois sur l''anxiété, la dépression et le handicap fonctionnel — soutien empirique du monitoring de l''engagement comme levier thérapeutique',
+    1
   )
 
 on conflict (id) do update set
