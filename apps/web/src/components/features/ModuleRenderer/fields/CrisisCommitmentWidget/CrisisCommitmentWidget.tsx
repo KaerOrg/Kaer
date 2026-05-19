@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Handshake } from 'lucide-react'
-import { usePatientView } from '../../../../../contexts/PatientViewContext'
+import { usePatientView } from '../../../../../contexts/usePatientView'
 import { fetchCrisisPlanConfig } from '../../../../../services/crisisPlanService'
 import './CrisisCommitmentWidget.css'
 
