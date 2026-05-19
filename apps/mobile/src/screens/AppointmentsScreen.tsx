@@ -134,7 +134,7 @@ export default function AppointmentsScreen() {
   const past = appointments.filter(a => !isUpcoming(a))
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -154,11 +154,13 @@ export default function AppointmentsScreen() {
           )}
 
           {upcoming.length === 0 && past.length === 0 ? (
-            <EmptyState
-              icon="📅"
-              title={t('agenda.empty_title')}
-              description={t('agenda.empty_description')}
-            />
+            <View style={styles.emptyWrapper}>
+              <EmptyState
+                icon="📅"
+                title={t('agenda.empty_title')}
+                description={t('agenda.empty_description')}
+              />
+            </View>
           ) : null}
 
           {upcoming.length > 0 && (
@@ -187,7 +189,8 @@ export default function AppointmentsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scroll: { padding: spacing.md, gap: spacing.sm },
+  scroll: { flexGrow: 1, padding: spacing.md, gap: spacing.sm },
+  emptyWrapper: { flex: 1, justifyContent: 'center' },
   bookBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -224,8 +227,8 @@ const styles = StyleSheet.create({
   },
   itemContent: {
     flex: 1,
-    padding: spacing.sm,
-    gap: 4,
+    padding: spacing.md,
+    gap: 6,
   },
   itemTime: {
     fontSize: fontSize.body,

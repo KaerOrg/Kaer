@@ -7,7 +7,8 @@
   "home": {
     "title": "Your modules",
     "subheading": "Activated by your care team",
-    "empty_description": "No tools unlocked yet — your care team is on it."
+    "empty_description": "No tools unlocked yet — your care team is on it.",
+    "today_section": "Planned for today"
   },
   "modules": {
     "crisis_plan": {
@@ -690,7 +691,25 @@
     },
     "motivational_balance": {
       "label": "Motivational balance",
-      "description": "Understanding your ambivalence and what drives change"
+      "description": "Understanding your ambivalence and what drives change",
+      "disclaimer": "This module supports your consultations. It was introduced with your clinician — it doesn't replace your therapeutic follow-up.",
+      "stage_subtitle": "Pick the stage that best describes you today.",
+      "stage_1_desc": "I don't see a reason to change",
+      "stage_2_desc": "I'm thinking about it, but haven't made up my mind",
+      "stage_3_desc": "I'm planning to change soon",
+      "stage_4_desc": "I've started to change",
+      "stage_5_desc": "I'm keeping up the change",
+      "stage_6_desc": "I've gone back to the old habit — that's totally normal",
+      "rulers_importance_q": "How important is it for you to change?",
+      "rulers_importance_why_label": "Why that score and not lower?",
+      "rulers_importance_why_placeholder": "What motivates me to change…",
+      "rulers_confidence_q": "If you decided to change, how confident would you feel?",
+      "rulers_confidence_why_label": "What would make you more confident?",
+      "rulers_confidence_why_placeholder": "What I'd need to believe in it…",
+      "rulers_commitment_placeholder": "In one sentence, what I'm taking away from today…",
+      "balance_values_subtitle": "Choose up to 3 values — they'll anchor your balance.",
+      "balance_item_placeholder": "Enter an argument…",
+      "balance_commitment_placeholder": "In one sentence, what I'm taking away from today…"
     }
   }
 }

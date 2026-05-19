@@ -92,7 +92,8 @@
     "empty_title": "No modules available",
     "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
     "section_tools": "Therapeutic tools",
-    "section_scales": "Scales & questionnaires"
+    "section_scales": "Scales & questionnaires",
+    "today_section": "Planned for today"
   },
   "profile": {
     "title": "My profile",
@@ -327,7 +328,12 @@
     },
     "diet_weight_psycho": {
       "label": "Diet & weight",
-      "description": "Managing treatment-related cravings"
+      "description": "",
+      "topics_count_one": "{{count}} topic",
+      "topics_count_other": "{{count}} topics",
+      "content_not_found": "Content not found.",
+      "section_lifestyle": "Lifestyle",
+      "section_medication": "Medications & diet"
     },
     "chronobiology_tracker": {
       "label": "Chronobiological regularity",
@@ -733,7 +739,82 @@
     },
     "motivational_balance": {
       "label": "Motivational balance",
-      "description": "Psychoeducation on ambivalence and change"
+      "description": "Psychoeducation on ambivalence and change",
+      "disclaimer": "This module supports your consultations. The techniques were introduced with your clinician — it does not replace your therapeutic follow-up.",
+      "tab_guides": "Guides",
+      "tab_stage": "Stage",
+      "tab_rulers": "Rulers",
+      "tab_balance": "Balance",
+      "info_title": "Scientific sources",
+      "info_miller": "Miller & Rollnick — Motivational Interviewing (3rd ed., 2013)",
+      "info_prochaska": "Prochaska & DiClemente — Stages of Change (1983)",
+      "info_sdt": "Deci & Ryan — Self-Determination Theory (2000)",
+      "info_has": "HAS — Substance misuse (2014)",
+      "info_nice": "NICE — Behaviour change (PH49, 2014)",
+      "info_close": "Close",
+      "stage_title": "Where I am",
+      "stage_subtitle": "Select the stage that best describes you today.",
+      "stage_1": "Pre-contemplation",
+      "stage_1_desc": "I don't see a need to change",
+      "stage_2": "Contemplation",
+      "stage_2_desc": "I'm thinking about it, but haven't decided",
+      "stage_3": "Preparation",
+      "stage_3_desc": "I'm planning to change soon",
+      "stage_4": "Action",
+      "stage_4_desc": "I've started to change",
+      "stage_5": "Maintenance",
+      "stage_5_desc": "I'm maintaining the change",
+      "stage_6": "Relapse",
+      "stage_6_desc": "I've returned to the old habit — this is normal",
+      "stage_history": "Stage history",
+      "stage_no_history": "No stage recorded yet.",
+      "rulers_title": "My rulers",
+      "rulers_behavior_label": "Behaviour explored",
+      "rulers_behavior_placeholder": "E.g. Return to physical activity…",
+      "rulers_importance": "Importance",
+      "rulers_importance_q": "How important is it for you to change?",
+      "rulers_importance_why_label": "Why that score and not lower?",
+      "rulers_importance_why_placeholder": "What motivates me to change…",
+      "rulers_confidence": "Confidence",
+      "rulers_confidence_q": "If you decided to change, how confident would you feel?",
+      "rulers_confidence_why_label": "What would make you more confident?",
+      "rulers_confidence_why_placeholder": "What I would need to believe in it…",
+      "rulers_commitment_label": "My commitment statement",
+      "rulers_commitment_placeholder": "In one sentence, what I take away from this session…",
+      "rulers_save": "Save session",
+      "rulers_saved": "Session saved.",
+      "rulers_history": "Progress",
+      "rulers_no_history": "No session recorded yet.",
+      "rulers_delete_confirm": "Delete this session?",
+      "balance_title": "My balance",
+      "balance_behavior_label": "What I'm exploring",
+      "balance_behavior_placeholder": "E.g. Quit smoking…",
+      "balance_values_title": "What matters to me",
+      "balance_values_subtitle": "Choose up to 3 values — they will anchor your balance.",
+      "balance_values_save": "Confirm my values",
+      "balance_for": "For change",
+      "balance_against": "Against change",
+      "balance_add_for": "Add a reason",
+      "balance_add_against": "Add a barrier",
+      "balance_item_placeholder": "Enter an argument…",
+      "balance_weight_label": "Importance:",
+      "balance_commitment_label": "My commitment statement",
+      "balance_commitment_placeholder": "In one sentence, what I take away from today…",
+      "balance_save": "Save",
+      "balance_saved": "Balance saved.",
+      "balance_no_items": "No arguments yet. Add reasons to change or barriers.",
+      "values_family": "Family",
+      "values_health": "Health",
+      "values_freedom": "Freedom",
+      "values_work": "Work",
+      "values_relationships": "Relationships",
+      "values_spirituality": "Spirituality",
+      "values_creativity": "Creativity",
+      "values_autonomy": "Autonomy",
+      "values_pleasure": "Pleasure",
+      "values_security": "Security",
+      "values_justice": "Justice",
+      "values_growth": "Personal growth"
     },
     "phq9": {
       "label": "PHQ-9",
@@ -1127,5 +1208,43 @@
     "day_ven": "F",
     "day_sam": "S",
     "day_dim": "S"
+  },
+  "category": {
+    "safety": {
+      "label": "Safety & Crisis Management",
+      "subtitle": ""
+    },
+    "iatrogenic": {
+      "label": "Iatrogenic & Somatic Monitoring",
+      "subtitle": ""
+    },
+    "lifestyle": {
+      "label": "Lifestyle & Biological Rhythms",
+      "subtitle": ""
+    },
+    "emotion": {
+      "label": "Emotional Regulation & Mood",
+      "subtitle": ""
+    },
+    "cognitive": {
+      "label": "Cognitive Restructuring",
+      "subtitle": ""
+    },
+    "anxiety": {
+      "label": "Anxiety, Phobias & OCD",
+      "subtitle": ""
+    },
+    "addiction": {
+      "label": "Addictology & Impulsivity",
+      "subtitle": ""
+    },
+    "motivation": {
+      "label": "Motivational Interviewing",
+      "subtitle": ""
+    },
+    "assessments": {
+      "label": "Clinical Assessments",
+      "subtitle": ""
+    }
   }
 }

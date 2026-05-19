@@ -38,6 +38,8 @@ export type ModuleType =
   // Addictologie & Impulsivité
   | 'craving_journal'
   | 'decisional_balance'
+  // Entretien Motivationnel
+  | 'motivational_balance'
   // Échelles & Questionnaires cliniques
   | 'phq9'
   | 'gad7'
