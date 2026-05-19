@@ -35,7 +35,7 @@ export type AppStackParamList = {
   MotivationalBalance: undefined
   MotivationalBalanceDetail: { topicId: string; topicKey: string }
   BookAppointment: { practitionerId: string }
-  CrisisPlan: undefined
+  CrisisPlan: { initialUrgency?: boolean }
 }
 
 export type TabParamList = {

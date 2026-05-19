@@ -250,7 +250,7 @@ export default function HomeScreen() {
         {modules.some(m => m.module_type === 'crisis_plan') && (
           <Pressable
             style={styles.urgencyBtn}
-            onPress={() => navigation.navigate('CrisisUrgency')}
+            onPress={() => navigation.navigate('CrisisPlan', { initialUrgency: true })}
             accessibilityRole="button"
           >
             <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />

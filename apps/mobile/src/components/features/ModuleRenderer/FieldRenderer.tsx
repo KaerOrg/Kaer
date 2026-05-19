@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef, ComponentType } from 'react'
+import { useTranslation } from 'react-i18next'
 import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
@@ -3773,39 +3774,44 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   }
 
   if (preview_kind === 'crisis_urgency') {
-    const callFields = visibleFields
-      .filter(f => f.field_type === 'exercise_safety')
-      .sort((a, b) => a.sort_order - b.sort_order)
-    return (
-      <ScrollView contentContainerStyle={cuStyles.scroll}>
-        <View style={cuStyles.callSection}>
-          {callFields.map(f => {
-            const phone = f.props['phone'] ?? ''
-            const bgColor = (f.props['bgColor'] as string | undefined) ?? '#DC2626'
-            const labelCode = f.props['label_code'] as string | undefined
-            return (
-              <Pressable
-                key={f.id}
-                style={[cuStyles.callBtn, { backgroundColor: bgColor }]}
-                onPress={() => { if (phone) void Linking.openURL(`tel:${phone}`) }}
-                accessibilityRole="button"
-                accessibilityLabel={t(f.text_code ?? '')}
-              >
-                <MaterialCommunityIcons name="phone" size={24} color="#fff" />
-                <View>
-                  <Text style={cuStyles.callLabel}>{t(f.text_code ?? '')}</Text>
-                  {labelCode != null && <Text style={cuStyles.callSub}>{t(labelCode)}</Text>}
-                </View>
-              </Pressable>
-            )
-          })}
-        </View>
-        <CrisisUrgencyContactsWidget />
-      </ScrollView>
-    )
+    return <CrisisUrgencyLayout fields={visibleFields} />
   }
 
   return null
+}
+
+function CrisisUrgencyLayout({ fields }: { fields: ContentField[] }) {
+  const { t } = useTranslation()
+  const callFields = fields
+    .filter(f => f.field_type === 'exercise_safety')
+    .sort((a, b) => a.sort_order - b.sort_order)
+  return (
+    <ScrollView contentContainerStyle={cuStyles.scroll}>
+      <View style={cuStyles.callSection}>
+        {callFields.map(f => {
+          const phone = f.props['phone'] ?? ''
+          const bgColor = (f.props['bgColor'] as string | undefined) ?? '#DC2626'
+          const labelCode = f.props['label_code'] as string | undefined
+          return (
+            <Pressable
+              key={f.id}
+              style={[cuStyles.callBtn, { backgroundColor: bgColor }]}
+              onPress={() => { if (phone) void Linking.openURL(`tel:${phone}`) }}
+              accessibilityRole="button"
+              accessibilityLabel={t(f.text_code ?? '')}
+            >
+              <MaterialCommunityIcons name="phone" size={24} color="#fff" />
+              <View>
+                <Text style={cuStyles.callLabel}>{t(f.text_code ?? '')}</Text>
+                {labelCode != null && <Text style={cuStyles.callSub}>{t(labelCode)}</Text>}
+              </View>
+            </Pressable>
+          )
+        })}
+      </View>
+      <CrisisUrgencyContactsWidget />
+    </ScrollView>
+  )
 }
 
 const styles = StyleSheet.create({

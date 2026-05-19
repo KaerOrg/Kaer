@@ -15,6 +15,8 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { AppStackParamList } from '../../navigation/AppStack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
@@ -314,13 +316,15 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
-export default function CrisisPlanScreen() {
+type Props = NativeStackScreenProps<AppStackParamList, 'CrisisPlan'>
+
+export default function CrisisPlanScreen({ route }: Props) {
   const { t } = useTranslation()
   const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore(s => s.patient)
 
   const [loading, setLoading] = useState(true)
-  const [urgencyVisible, setUrgencyVisible] = useState(false)
+  const [urgencyVisible, setUrgencyVisible] = useState(route.params?.initialUrgency ?? false)
   const [loadError, setLoadError] = useState(false)
   const [sections, setSections] = useState<Map<string, ContentField[]>>(new Map())
   const [uiFields, setUiFields] = useState<ContentField[]>([])
