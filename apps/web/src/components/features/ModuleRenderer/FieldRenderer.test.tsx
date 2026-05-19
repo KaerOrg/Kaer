@@ -9,6 +9,16 @@ vi.mock('../../../services/psyeduService', () => ({
   fetchBlocksByTopic: vi.fn().mockResolvedValue([]),
 }))
 
+vi.mock('../../../services/crisisPlanService', () => ({
+  fetchCrisisPlanConfig: vi.fn().mockResolvedValue({
+    practitionerMessage: '',
+    copingCards: [],
+    commitmentPhrase: '',
+  }),
+  saveCrisisPlanConfig: vi.fn().mockResolvedValue({ ok: true }),
+  clearCrisisPlanConfigCache: vi.fn(),
+}))
+
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
