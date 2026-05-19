@@ -1,58 +1,61 @@
 import { useState, useMemo, useEffect, memo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Check, Loader, Info } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { Modal } from '../../components/ui/Modal'
 import { fetchPatientOptions, type PatientOption } from '../../services/patientService'
 import { proposeScale } from '../../services/moduleAssignmentService'
-import { useAuthStore } from '../../store/authStore'
 import {
-  CLINICAL_SCALES,
+  fetchScaleMeta,
+  type ScaleMetaRow,
   SCALE_CATEGORIES,
   AGE_BADGE_CONFIG,
   AGE_ORDER,
+  CATEGORY_KEY,
   type ScaleCategory,
-  type ClinicalScale,
-} from '../../data/scales'
+} from '../../services/scaleService'
+import { useAuthStore } from '../../store/authStore'
 import './DispensairePage.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProposalModal {
-  scale: ClinicalScale
+  scale: ScaleMetaRow
   patients: PatientOption[]
   loadingPatients: boolean
-  sending: string | null    // patient ID en cours d'envoi
-  sent: Set<string>         // patient IDs déjà envoyés dans cette session
+  sending: string | null
+  sent: Set<string>
   error: string | null
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function minAgeIndex(scale: ClinicalScale): number {
+function minAgeIndex(scale: ScaleMetaRow): number {
   return Math.min(...scale.targetAges.map(age => AGE_ORDER.indexOf(age)))
 }
 
-function sortByAge(scales: readonly ClinicalScale[]): ClinicalScale[] {
+function sortByAge(scales: ScaleMetaRow[]): ScaleMetaRow[] {
   return [...scales].sort((a, b) => minAgeIndex(a) - minAgeIndex(b))
 }
 
 // ─── ScaleCard ────────────────────────────────────────────────────────────────
 
 interface ScaleCardProps {
-  scale: ClinicalScale
-  onPropose: (scale: ClinicalScale) => void
+  scale: ScaleMetaRow
+  onPropose: (scale: ScaleMetaRow) => void
 }
 
 const ScaleCard = memo(function ScaleCard({ scale, onPropose }: ScaleCardProps) {
+  const { t } = useTranslation()
   const handlePropose = useCallback(() => onPropose(scale), [onPropose, scale])
 
   return (
     <div className="scale-card">
       <div className="scale-card__body">
-        <div className="scale-card__name">{scale.name}</div>
-        <div className="scale-card__full-title">{scale.fullTitle}</div>
-        <p className="scale-card__description">{scale.description}</p>
+        <div className="scale-card__name">{t(`modules.${scale.id}.label`)}</div>
+        <div className="scale-card__full-title">{t(`scales.full_title.${scale.id}`)}</div>
+        <p className="scale-card__description">{t(`scales.descriptions.${scale.id}`)}</p>
         <div className="scale-card__age-row">
           <div className="scale-card__badges">
             {scale.targetAges.map(age => {
@@ -63,25 +66,25 @@ const ScaleCard = memo(function ScaleCard({ scale, onPropose }: ScaleCardProps) 
                   className="age-badge age-badge--sm"
                   style={{ backgroundColor: cfg.bg, color: cfg.text }}
                 >
-                  {cfg.label}
+                  {t(`scales.age.${age}`)}
                 </span>
               )
             })}
           </div>
-          <span className="scale-card__age-range">Validé : {scale.validatedAgeRange}</span>
+          <span className="scale-card__age-range">{t('scales.validated_prefix')} : {scale.validatedAgeRange}</span>
         </div>
       </div>
       <div className="scale-card__footer">
         <Button size="sm" onClick={handlePropose}>
-          Proposer à un patient
+          {t('dispensaire.propose_btn')}
         </Button>
         <a
-          href={scale.reference.url}
+          href={scale.referenceUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="scale-card__ref-btn"
-          title={scale.reference.label}
-          aria-label={`Référence validée : ${scale.reference.label}`}
+          title={scale.referenceLabel}
+          aria-label={`${t('dispensaire.reference_aria')} : ${scale.referenceLabel}`}
         >
           <Info size={15} />
         </a>
@@ -93,31 +96,37 @@ const ScaleCard = memo(function ScaleCard({ scale, onPropose }: ScaleCardProps) 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function DispensairePage() {
+  const { t } = useTranslation()
   const { practitioner } = useAuthStore()
+  const [scaleMeta, setScaleMeta] = useState<ScaleMetaRow[]>([])
   const [activeCategory, setActiveCategory] = useState<ScaleCategory | null>(null)
   const [modal, setModal] = useState<ProposalModal | null>(null)
+
+  useEffect(() => {
+    fetchScaleMeta().then(setScaleMeta)
+  }, [])
 
   const categoryCounts = useMemo<Record<ScaleCategory, number>>(
     () =>
       Object.fromEntries(
         SCALE_CATEGORIES.map(cat => [
           cat,
-          CLINICAL_SCALES.filter(s => s.category === cat).length,
+          scaleMeta.filter(s => s.category === cat).length,
         ])
       ) as Record<ScaleCategory, number>,
-    []
+    [scaleMeta]
   )
 
   const filteredScales = useMemo(() => {
     const base = activeCategory
-      ? CLINICAL_SCALES.filter(s => s.category === activeCategory)
-      : CLINICAL_SCALES
+      ? scaleMeta.filter(s => s.category === activeCategory)
+      : scaleMeta
     return sortByAge(base)
-  }, [activeCategory])
+  }, [activeCategory, scaleMeta])
 
   // ── Ouvrir la modale + charger patients ──────────────────────────────────
 
-  const openModal = useCallback(async (scale: ClinicalScale) => {
+  const openModal = useCallback(async (scale: ScaleMetaRow) => {
     if (!practitioner) return
     setModal({
       scale,
@@ -158,8 +167,8 @@ export function DispensairePage() {
 
     if (!result.ok) {
       const msg = result.code === '23505'
-        ? `${patient.label} a déjà ce questionnaire.`
-        : 'Erreur lors de l\'envoi. Réessayez.'
+        ? t('dispensaire.error_duplicate', { label: patient.label })
+        : t('dispensaire.error_send')
       setModal(prev => prev ? { ...prev, sending: null, error: msg } : null)
       return
     }
@@ -180,15 +189,15 @@ export function DispensairePage() {
 
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
         <aside className="dispensaire__sidebar">
-          <p className="dispensaire__sidebar-title">Thèmes cliniques</p>
+          <p className="dispensaire__sidebar-title">{t('dispensaire.sidebar_title')}</p>
           <ul className="dispensaire__category-list">
             <li>
               <button
                 className={`dispensaire__category-btn ${activeCategory === null ? 'dispensaire__category-btn--active' : ''}`}
                 onClick={() => setActiveCategory(null)}
               >
-                <span>Toutes les échelles</span>
-                <span className="dispensaire__category-count">{CLINICAL_SCALES.length}</span>
+                <span>{t('dispensaire.all_scales')}</span>
+                <span className="dispensaire__category-count">{scaleMeta.length}</span>
               </button>
             </li>
             {SCALE_CATEGORIES.map(cat => (
@@ -197,7 +206,7 @@ export function DispensairePage() {
                   className={`dispensaire__category-btn ${activeCategory === cat ? 'dispensaire__category-btn--active' : ''}`}
                   onClick={() => setActiveCategory(cat)}
                 >
-                  <span>{cat}</span>
+                  <span>{t(`scales.category.${CATEGORY_KEY[cat]}`)}</span>
                   <span
                     className={`dispensaire__category-count ${categoryCounts[cat] === 0 ? 'dispensaire__category-count--empty' : ''}`}
                   >
@@ -212,22 +221,20 @@ export function DispensairePage() {
         {/* ── Main ─────────────────────────────────────────────────────────── */}
         <div className="dispensaire__main">
           <div className="dispensaire__header">
-            <h1 className="dispensaire__title">Dispensaire Clinique</h1>
-            <p className="dispensaire__subtitle">
-              Bibliothèque de questionnaires validés. Envoyez-les directement à vos patients.
-            </p>
+            <h1 className="dispensaire__title">{t('dispensaire.title')}</h1>
+            <p className="dispensaire__subtitle">{t('dispensaire.subtitle')}</p>
           </div>
 
           {/* Légende */}
           <div className="dispensaire__legend">
-            <span className="dispensaire__legend-label">Tranches d'âge validées :</span>
+            <span className="dispensaire__legend-label">{t('dispensaire.legend_ages')}</span>
             {Object.entries(AGE_BADGE_CONFIG).map(([age, cfg]) => (
               <span
                 key={age}
                 className="age-badge"
                 style={{ backgroundColor: cfg.bg, color: cfg.text }}
               >
-                {cfg.label}
+                {t(`scales.age.${age}`)}
               </span>
             ))}
           </div>
@@ -235,9 +242,9 @@ export function DispensairePage() {
           {/* Grille */}
           {filteredScales.length === 0 ? (
             <div className="dispensaire__empty">
-              Aucune échelle disponible dans cette catégorie pour le moment.
+              {t('dispensaire.empty_category')}
               <br />
-              De nouveaux questionnaires seront ajoutés prochainement.
+              {t('dispensaire.empty_soon')}
             </div>
           ) : (
             <div className="dispensaire__grid">
@@ -253,24 +260,24 @@ export function DispensairePage() {
       {modal && (
         <Modal
           title={modal.scale.name}
-          subtitle="Choisir un patient"
+          subtitle={t('dispensaire.modal_subtitle')}
           onClose={closeModal}
           maxWidth={420}
           noPadding
           footer={
             <Button variant="secondary" size="sm" onClick={closeModal}>
-              Fermer
+              {t('dispensaire.close')}
             </Button>
           }
         >
           {modal.loadingPatients ? (
             <div className="dp-modal__loading">
               <Loader size={20} className="dp-modal__spinner" />
-              Chargement des patients…
+              {t('dispensaire.loading_patients')}
             </div>
           ) : modal.patients.length === 0 ? (
             <div className="dp-modal__empty">
-              Aucun patient dans votre liste pour le moment.
+              {t('dispensaire.no_patients')}
             </div>
           ) : (
             <ul className="dp-modal__list">
@@ -284,7 +291,7 @@ export function DispensairePage() {
                     {isSent ? (
                       <span className="dp-modal__sent-badge">
                         <Check size={13} />
-                        Envoyé
+                        {t('dispensaire.sent')}
                       </span>
                     ) : (
                       <Button
@@ -292,7 +299,7 @@ export function DispensairePage() {
                         loading={isSending}
                         onClick={() => sendToPatient(patient)}
                       >
-                        Envoyer
+                        {t('dispensaire.send')}
                       </Button>
                     )}
                   </li>

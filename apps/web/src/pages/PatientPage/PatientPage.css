@@ -1361,54 +1361,6 @@
   background: #FEE2E2;
 }
 
-.scale-card__desc {
-  font-size: 12px;
-  color: var(--color-text-muted, #6B7280);
-  margin: 0 0 8px;
-  line-height: 1.5;
-}
-
-.scale-card__meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.scale-type-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
-.scale-type-badge--auto {
-  background: #DBEAFE;
-  color: #1D4ED8;
-}
-
-.scale-type-badge--hetero {
-  background: #DCFCE7;
-  color: #15803D;
-}
-
-.scale-category-chip {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 20px;
-  background: #F3F4F6;
-  color: #374151;
-}
-
-.scale-age-chip {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 20px;
-}
 
 /* ── Popover Sources (diet_weight_psycho) ────────────────────────────────── */
 

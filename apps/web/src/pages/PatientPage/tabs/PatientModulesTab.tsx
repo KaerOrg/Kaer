@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, ClipboardList, Eye, EyeOff, Bell } from 'lucide-react'
+import { ShieldAlert, Eye, EyeOff, Bell } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
@@ -12,17 +12,16 @@ import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
-import { CLINICAL_SCALES, AGE_BADGE_CONFIG } from '../../../data/scales'
 import { type PsychoCardInfo } from '../../../services/moduleService'
 import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
 import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
 } from '../../../services/moduleAssignmentService'
+import { fetchScaleMeta, type ScaleMetaRow } from '../../../services/scaleService'
+import { ScaleMetaBadges } from '../../../components/ui/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
-
-const SCALE_IDS = new Set(CLINICAL_SCALES.map(s => s.id))
 
 type Props = {
   patientId: string
@@ -46,13 +45,17 @@ export function PatientModulesTab({
   onReloadModules,
 }: Props) {
   const { t, i18n } = useTranslation()
-  const toast = useToast()
 
+  const [scaleMeta, setScaleMeta] = useState<ScaleMetaRow[]>([])
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
   const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+
+  useEffect(() => {
+    fetchScaleMeta().then(setScaleMeta)
+  }, [])
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
   const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
@@ -61,7 +64,6 @@ export function PatientModulesTab({
     setPreviewModule(prev => (prev === type ? null : type))
   }, [])
 
-  const activeScales = modules.filter(m => SCALE_IDS.has(m.module_type))
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
   const unlockModule = async (moduleType: ModuleType) => {
@@ -157,8 +159,8 @@ export function PatientModulesTab({
                             {meta ? t(meta.titleKey) : card.card_id}
                           </span>
                           {card.is_read
-                            ? <StatusBadge variant="success" label="Lu" />
-                            : <StatusBadge variant="neutral" label="Non lu" />
+                            ? <StatusBadge variant="success" label={t('patient.scale_read')} />
+                            : <StatusBadge variant="neutral" label={t('patient.scale_unread')} />
                           }
                         </li>
                       )
@@ -298,6 +300,59 @@ export function PatientModulesTab({
       )
     }
 
+    // Échelle clinique — ScaleMetaBadges + gestion noToggle
+    const scale = scaleMeta.find(s => s.id === moduleType)
+    if (scale) {
+      const right = scale.noToggle
+        ? (
+          <button type="button" className="scales-list__view-btn" onClick={() => setShowCSSRSModal(true)}>
+            <ShieldAlert size={13} />
+            {t('patient.cssrs_evaluations')}
+          </button>
+        )
+        : moduleToggle(unlocked, unlockingModule === moduleType || revokingModuleId === (mod?.id ?? ''), () => {
+            if (unlocked && mod) revokeModule(mod.id)
+            else unlockModule(moduleType)
+          })
+
+      return (
+        <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+          <Card
+            className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
+            header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), subtitle: t(`scales.full_title.${moduleType}`), right }}
+            actions={
+              <>
+                {unlocked && mod && (
+                  <span className="module-card__date module-card__date--actions">
+                    {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                  </span>
+                )}
+                {scale.hasPreview && (
+                  <button
+                    type="button"
+                    className={`preview-toggle-btn${previewModule === moduleType ? ' preview-toggle-btn--active' : ''}`}
+                    onClick={() => togglePreview(moduleType)}
+                    title={t('patient.patient_view')}
+                  >
+                    {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {t('patient.preview_button')}
+                  </button>
+                )}
+              </>
+            }
+          >
+            <ScaleMetaBadges
+              scaleId={moduleType}
+              evaluationType={scale.evaluationType}
+              category={scale.category}
+              targetAges={scale.targetAges}
+            />
+          </Card>
+          {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} />}
+        </div>
+      )
+    }
+
     return (
       <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
         <Card
@@ -347,103 +402,6 @@ export function PatientModulesTab({
     )
   }
 
-  const renderScalesAccordion = () => {
-    const visibleScales = enabledModules === null
-      ? [...CLINICAL_SCALES]
-      : CLINICAL_SCALES.filter(s => enabledModules.has(s.id as ModuleType))
-    const activeCount = activeScales.length
-
-    return (
-      <Accordion
-        key="assessments"
-        title={t('category.assessments.label')}
-        icon={<ClipboardList size={16} />}
-        badge={activeCount > 0 ? activeCount : undefined}
-        defaultOpen={false}
-      >
-        <div className="category-modules-grid">
-          {visibleScales.map(scale => {
-            const mod = activeScales.find(m => m.module_type === scale.id)
-            const unlocked = !!mod
-            const loading = unlockingModule === (scale.id as ModuleType)
-            const previewing = previewModule === (scale.id as ModuleType)
-            const ScaleIcon = LUCIDE_ICONS[scale.icon]
-            const scaleIcon = ScaleIcon ? <ScaleIcon size={18} /> : undefined
-
-            const right = scale.noToggle
-              ? (
-                <button
-                  type="button"
-                  className="scales-list__view-btn"
-                  onClick={() => setShowCSSRSModal(true)}
-                >
-                  <ShieldAlert size={13} />
-                  {t('patient.cssrs_evaluations')}
-                </button>
-              )
-              : moduleToggle(unlocked, loading || revokingModuleId === (mod?.id ?? ''), () => {
-                  if (unlocked && mod) revokeModule(mod.id)
-                  else unlockModule(scale.id as ModuleType)
-                })
-
-            return (
-              <div
-                key={scale.id}
-                className={`module-card-wrapper-block ${previewing ? 'module-card-wrapper-block--wide' : ''}`}
-              >
-                <Card
-                  className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
-                  header={{ icon: scaleIcon, title: scale.name, subtitle: scale.fullTitle, right }}
-                  actions={
-                    <>
-                      {unlocked && mod && (
-                        <span className="module-card__date module-card__date--actions">
-                          {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-                        </span>
-                      )}
-                      {scale.hasPreview && (
-                        <button
-                          type="button"
-                          className={`preview-toggle-btn${previewing ? ' preview-toggle-btn--active' : ''}`}
-                          onClick={() => togglePreview(scale.id as ModuleType)}
-                          title={t('patient.patient_view')}
-                        >
-                          {previewing ? <EyeOff size={14} /> : <Eye size={14} />}
-                          {t('patient.preview_button')}
-                        </button>
-                      )}
-                    </>
-                  }
-                >
-                  <p className="scale-card__desc">{scale.description}</p>
-                  <div className="scale-card__meta">
-                    <span className={`scale-type-badge scale-type-badge--${scale.evaluationType}`}>
-                      {scale.evaluationType === 'auto' ? 'Auto' : 'Hétéro'}
-                    </span>
-                    <span className="scale-category-chip">{scale.category}</span>
-                    {scale.targetAges.map(age => (
-                      <span
-                        key={age}
-                        className="scale-age-chip"
-                        style={{ background: AGE_BADGE_CONFIG[age].bg, color: AGE_BADGE_CONFIG[age].text }}
-                      >
-                        {AGE_BADGE_CONFIG[age].label}
-                      </span>
-                    ))}
-                  </div>
-                </Card>
-
-                {previewing && (
-                  <ModulePreviewPanel moduleType={scale.id as ModuleType} />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </Accordion>
-    )
-  }
-
   return (
     <>
       <section className="therapeutic-wardrobe">
@@ -452,7 +410,6 @@ export function PatientModulesTab({
 
         <div className="category-list">
           {categories.map(category => {
-            if (category.id === 'assessments') return renderScalesAccordion()
             const visibleModules = (enabledModules === null
               ? category.modules
               : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
@@ -490,8 +447,8 @@ export function PatientModulesTab({
 
       {showCSSRSModal && (
         <Modal
-          title="C-SSRS — Dépistage suicidaire"
-          subtitle="Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
+          title={t('patient.cssrs_modal_title')}
+          subtitle={t('patient.cssrs_modal_subtitle')}
           icon={<ShieldAlert size={20} />}
           onClose={() => setShowCSSRSModal(false)}
           noPadding

@@ -191,8 +191,71 @@
     "next_week": "Semana seguinte",
     "configure": "Disponibilidade",
     "no_rules": "Nenhuma faixa horária definida.",
-    "days_short": { "0": "Seg", "1": "Ter", "2": "Qua", "3": "Qui", "4": "Sex", "5": "Sáb", "6": "Dom" },
-    "editor": { "title": "A minha disponibilidade", "add_rule": "Adicionar faixa", "slot_duration": "Duração da consulta", "minutes": "min", "auto_confirm": "Confirmação automática", "delete_rule": "Eliminar" },
-    "appointment": { "new": "Nova consulta", "status_pending": "Pendente", "status_confirmed": "Confirmada", "status_cancelled": "Cancelada", "status_completed": "Concluída" }
+    "days_short": {
+      "0": "Seg",
+      "1": "Ter",
+      "2": "Qua",
+      "3": "Qui",
+      "4": "Sex",
+      "5": "Sáb",
+      "6": "Dom"
+    },
+    "editor": {
+      "title": "A minha disponibilidade",
+      "add_rule": "Adicionar faixa",
+      "slot_duration": "Duração da consulta",
+      "minutes": "min",
+      "auto_confirm": "Confirmação automática",
+      "delete_rule": "Eliminar"
+    },
+    "appointment": {
+      "new": "Nova consulta",
+      "status_pending": "Pendente",
+      "status_confirmed": "Confirmada",
+      "status_cancelled": "Cancelada",
+      "status_completed": "Concluída"
+    }
+  },
+  "scales": {
+    "eval_auto": "Autorrelato",
+    "eval_hetero": "Heteroavaliação",
+    "validated_prefix": "Validado",
+    "age": {
+      "perinatal": "Perinatal",
+      "enfant": "Criança",
+      "ado": "Adolescente",
+      "adulte": "Adulto/a",
+      "senior": "Idoso/a"
+    },
+    "category": {
+      "humeur": "Humor",
+      "anxiete": "Ansiedade",
+      "sommeil": "Sono",
+      "addictologie": "Dependência",
+      "psychose": "Psicose",
+      "personnalite": "Personalidade",
+      "neurodev": "Neurodesenvolvimento",
+      "trauma": "Trauma"
+    },
+    "descriptions": {}
+  },
+  "dispensaire": {
+    "title": "Biblioteca Clínica",
+    "subtitle": "Questionários validados. Envie diretamente para seus pacientes.",
+    "sidebar_title": "Temas clínicos",
+    "all_scales": "Todas as escalas",
+    "legend_ages": "Faixas etárias validadas:",
+    "empty_category": "Nenhuma escala disponível nesta categoria.",
+    "empty_soon": "Novos questionários serão adicionados em breve.",
+    "propose_btn": "Propor a um paciente",
+    "reference_aria": "Referência validada",
+    "modal_subtitle": "Escolher um paciente",
+    "close": "Fechar",
+    "loading_patients": "A carregar pacientes…",
+    "no_patients": "Ainda não há pacientes.",
+    "sent": "Enviado",
+    "send": "Enviar",
+    "error_duplicate": "{{label}} já tem este questionário.",
+    "error_send": "Erro ao enviar. Tente novamente."
   }
 }
