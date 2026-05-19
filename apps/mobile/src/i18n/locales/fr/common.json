@@ -385,7 +385,8 @@
       "month_btn": "Vue mensuelle",
       "back_btn": "Retour",
       "notes_label": "Notes (optionnel)",
-      "notes_placeholder": "Contexte, rêves, remarques…"
+      "notes_placeholder": "Contexte, rêves, remarques…",
+      "footer": "Agenda TCC-I — traitement de 1ère ligne pour l'insomnie chronique. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "psyedu_sleep": {
       "label": "Sommeil & récupération",

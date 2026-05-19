@@ -1,8 +1,10 @@
-import { Calendar, ChevronRight, Clock, Ghost, Moon, Star, Sparkles } from 'lucide-react'
+import { Calendar, ChevronRight, Clock, Ghost, Info, Moon, Star, Sparkles } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
+import { FieldText } from '../../fields'
 
 interface Props {
   fields: ContentField[]
+  footer: ContentField | undefined
   t: (key: string) => string
 }
 
@@ -13,7 +15,7 @@ interface Props {
 //
 // Source : apps/mobile/src/components/ModuleRenderer/FieldRenderer.tsx —
 // SleepJournalLayout (modes list + entry).
-export function SleepJournalLayout({ fields, t }: Props) {
+export function SleepJournalLayout({ fields, footer, t }: Props) {
   const ft = (type: string): string => {
     const f = fields.find(field => field.field_type === type)
     return f?.text_code ? t(f.text_code) : ''
@@ -128,6 +130,13 @@ export function SleepJournalLayout({ fields, t }: Props) {
           <ChevronRight size={14} className="sj-history__chevron" />
         </li>
       </ul>
+
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
+        </div>
+      )}
 
       {/* Entry mode : aperçu de la saisie ──────────────────────────────── */}
       <div className="sj-entry">

@@ -186,7 +186,8 @@
       "month_btn": "Vue mensuelle",
       "back_btn": "Retour",
       "notes_label": "Notes (optionnel)",
-      "notes_placeholder": "Contexte, rêves, ce que tu veux…"
+      "notes_placeholder": "Contexte, rêves, ce que tu veux…",
+      "footer": "Journal de nuit TCC-I — technique validée pour l'insomnie. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
       "title": "Mon traitement — effets ressentis",

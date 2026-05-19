@@ -151,7 +151,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   }
 
   if (preview_kind === 'sleep_journal') {
-    return <SleepJournalLayout fields={contentFields} t={t} />
+    return <SleepJournalLayout fields={contentFields} footer={footer} t={t} />
   }
 
   if (preview_kind === 'activity_log') {

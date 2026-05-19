@@ -1248,9 +1248,26 @@ values
     'Trauer et al. — TCC pour l''insomnie chronique : revue systématique et méta-analyse (Ann Intern Med, 2015)',
     'meta_analysis',
     'https://doi.org/10.7326/M14-2841',
-    null,
+    'A',
     'Revue systématique de 20 ECR (n=1 162, 64 % de femmes, âge moyen 56 ans) : la TCC-I améliore significativement la latence d''endormissement (−19 min), l''éveil après endormissement (−26 min) et l''efficacité du sommeil (+9,91 %) — effets maintenus à long terme ; TCC-I recommandée comme 1ère ligne pour l''insomnie chronique, avec l''agenda du sommeil comme outil central',
     1
+  )
+
+,
+
+  -- NICE NG215 (2022) — Insomnia in adults: diagnosis and management (guideline)
+  --    https://www.nice.org.uk/guidance/ng215 (vérifié, guideline officielle)
+  --    Recommande la TCC-I comme traitement de 1ère ligne pour l''insomnie chronique
+  --    L''agenda du sommeil est explicitement requis comme outil de monitoring
+  (
+    '3f3f3f3f-0002-0001-0001-000000000001',
+    'sleep_diary',
+    'NICE NG215 — Insomnie de l''adulte : diagnostic et prise en charge (guideline, 2022)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/ng215',
+    'A',
+    'Recommandation clinique NICE 2022 : la TCC-I est le traitement de 1ère ligne pour l''insomnie chronique de l''adulte — agenda du sommeil et restriction du sommeil sont des composantes centrales du protocole (Recommendation 1.4). Le guide recommande l''utilisation d''un agenda du sommeil pour évaluer le profil de sommeil avant et pendant le traitement.',
+    2
   )
 
 -- ── cognitive_distortions ────────────────────────────────────────────────────

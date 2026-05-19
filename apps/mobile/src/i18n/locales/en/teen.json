@@ -186,7 +186,8 @@
       "month_btn": "Monthly view",
       "back_btn": "Back",
       "notes_label": "Notes (optional)",
-      "notes_placeholder": "Context, dreams, anything you want…"
+      "notes_placeholder": "Context, dreams, anything you want…",
+      "footer": "CBT-I night journal — evidence-based technique for insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
       "title": "My treatment — side effects",

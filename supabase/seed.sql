@@ -733,7 +733,8 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('sj.quality_label_2',       'sleep_diary', 'sleep_journal_quality_label_2',          'modules.sleep_diary.quality_bad',         43),
   ('sj.quality_label_3',       'sleep_diary', 'sleep_journal_quality_label_3',          'modules.sleep_diary.quality_average',     44),
   ('sj.quality_label_4',       'sleep_diary', 'sleep_journal_quality_label_4',          'modules.sleep_diary.quality_good',        45),
-  ('sj.quality_label_5',       'sleep_diary', 'sleep_journal_quality_label_5',          'modules.sleep_diary.quality_excellent',   46)
+  ('sj.quality_label_5',       'sleep_diary', 'sleep_journal_quality_label_5',          'modules.sleep_diary.quality_excellent',   46),
+  ('sj.footer',                'sleep_diary', 'footer_note',                             'modules.sleep_diary.footer',              999)
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values

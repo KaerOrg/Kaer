@@ -487,6 +487,7 @@
     "sleep_diary": {
       "label": "Sleep Diary",
       "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
+      "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first night."

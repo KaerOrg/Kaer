@@ -2722,7 +2722,7 @@ function qualityColorOf(quality: number | null, qualityWarning: number, qualityG
   return colors.danger
 }
 
-function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
+function SleepJournalLayout({ fields, footer }: { fields: ContentField[]; footer: ContentField | undefined }) {
   const t = useModuleT()
 
   const ft = useCallback((type: string): string => {
@@ -3008,6 +3008,13 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             </Pressable>
           )
         })}
+
+        {footer != null && (
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
+          </View>
+        )}
       </ScrollView>
     )
   }
@@ -3723,7 +3730,7 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   }
 
   if (preview_kind === 'sleep_journal') {
-    return <SleepJournalLayout fields={visibleFields} />
+    return <SleepJournalLayout fields={contentFields} footer={footer} />
   }
 
   if (preview_kind === 'activity_log') {

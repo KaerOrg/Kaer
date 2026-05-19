@@ -323,7 +323,8 @@
       "month_btn": "Monthly view",
       "back_btn": "Back",
       "notes_label": "Notes (optional)",
-      "notes_placeholder": "Context, dreams, remarks…"
+      "notes_placeholder": "Context, dreams, remarks…",
+      "footer": "CBT-I sleep diary — first-line treatment for chronic insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "diet_weight_psycho": {
       "label": "Diet & weight",
