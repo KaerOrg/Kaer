@@ -115,7 +115,7 @@ export default function AppStack() {
       <Stack.Screen
         name="ScaleHistory"
         component={ScaleHistoryScreen}
-        options={({ route }) => ({ title: route.params.scale_id.toUpperCase().replace('_', '-') })}
+        options={{ title: '' }}
       />
       <Stack.Screen
         name="ScaleEntry"

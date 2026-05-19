@@ -33,6 +33,10 @@ export default function ScaleHistoryScreen() {
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(scale_id)
 
+  React.useEffect(() => {
+    navigation.setOptions({ title: t(`modules.${scale_id}.label`) })
+  }, [scale_id, t, navigation])
+
   const config = SCALE_SCORING[scale_id]
   const scoreLabel = t(`modules.${scale_id}.score_label`)
   const scoreMax = t(`modules.${scale_id}.score_max`)
