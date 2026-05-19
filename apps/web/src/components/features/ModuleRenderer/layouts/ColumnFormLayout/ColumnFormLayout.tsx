@@ -41,15 +41,6 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
     }
   }
 
-  // Mock content pour rendre l'aperçu plus parlant — basé sur Beck
-  const mockTexts: Record<string, string> = {
-    beck_col1_text: 'Réunion d\'équipe ce matin',
-    beck_col2_text: 'Anxiété, frustration',
-    beck_col3_text: 'Je vais perdre mes mots, ils vont me juger',
-    beck_col4_text: 'J\'ai préparé ma présentation, j\'ai le droit de parler',
-    beck_col5_text: 'Anxiété diminue, je me sens plus en confiance',
-  }
-
   return (
     <div className="cf">
       {/* État vide / intro ─────────────────────────────────────────────── */}
@@ -60,27 +51,39 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
         </div>
       )}
 
-      {/* Liste mock d'une entrée ───────────────────────────────────────── */}
-      <article className="cf-entry-card">
-        <header className="cf-entry-card__head">
-          <span className="cf-entry-card__date">aujourd'hui · 09:30</span>
-          <div className="cf-entry-card__actions">
-            <Pencil size={14} className="cf-entry-card__action" />
-            <Trash2 size={14} className="cf-entry-card__action" />
+      {/* Entrée mock construite dynamiquement à partir des vrais en-têtes */}
+      {headers.length > 0 && (
+        <article className="cf-entry-card">
+          <header className="cf-entry-card__head">
+            <span className="cf-entry-card__date">aujourd'hui · 09:30</span>
+            <div className="cf-entry-card__actions">
+              <Pencil size={14} className="cf-entry-card__action" />
+              <Trash2 size={14} className="cf-entry-card__action" />
+            </div>
+          </header>
+          <div className="cf-entry-card__body">
+            {headers.slice(0, 2).map(h => {
+              const color = h.props['color'] ?? '#6366F1'
+              const label = h.text_code ? t(h.text_code) : ''
+              const children = childrenByHeader.get(h.id) ?? []
+              const firstChild = children[0]
+              let mockValue = '—'
+              if (firstChild?.field_type === 'column_slider_field') {
+                const max = Number(firstChild.props['max'] ?? 100)
+                const min = Number(firstChild.props['min'] ?? 0)
+                const val = Math.round((min + max) * 0.65)
+                mockValue = max <= 10 ? `${val} / ${max}` : `${val} %`
+              }
+              return (
+                <div key={h.id} className="cf-entry-card__field">
+                  <span className="cf-entry-card__field-label" style={{ color }}>{label}</span>
+                  <span className="cf-entry-card__field-value">{mockValue}</span>
+                </div>
+              )
+            })}
           </div>
-        </header>
-        <div className="cf-entry-card__body">
-          <div className="cf-entry-card__field">
-            <span className="cf-entry-card__field-label" style={{ color: '#0EA5E9' }}>Situation</span>
-            <span className="cf-entry-card__field-value">Réunion d'équipe ce matin</span>
-          </div>
-          <div className="cf-entry-card__field">
-            <span className="cf-entry-card__field-label" style={{ color: '#EF4444' }}>Pensée</span>
-            <span className="cf-entry-card__field-value">Je vais perdre mes mots…</span>
-            <span className="cf-entry-card__field-meta">Croyance 80%</span>
-          </div>
-        </div>
-      </article>
+        </article>
+      )}
 
       {newBtn && (
         <div className="cf-new-btn">
@@ -118,15 +121,9 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
                 {children.map(child => {
                   if (child.field_type === 'column_text_field') {
                     const placeholder = child.text_code ? t(child.text_code) : ''
-                    const key = child.props['key']
-                    const mock = key ? mockTexts[`beck_${key}_text`] : undefined
                     return (
                       <div key={child.id} className="cf-text-input">
-                        {mock ? (
-                          <span className="cf-text-input__value">{mock}</span>
-                        ) : (
-                          <span className="cf-text-input__placeholder">{placeholder}</span>
-                        )}
+                        <span className="cf-text-input__placeholder">{placeholder}</span>
                       </div>
                     )
                   }
@@ -135,13 +132,14 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
                     const min = Number(child.props['min'] ?? 0)
                     const max = Number(child.props['max'] ?? 100)
                     const sliderColor = child.props['color'] ?? color
-                    const value = Math.round((min + max) * 0.7) // mock: 70%
+                    const value = Math.round((min + max) * 0.7)
                     const ratio = max > min ? (value - min) / (max - min) : 0.5
+                    const displayValue = max <= 10 ? `${value} / ${max}` : `${value} %`
                     return (
                       <div key={child.id} className="cf-slider">
                         <div className="cf-slider__head">
                           <span className="cf-slider__label">{sliderLabel}</span>
-                          <span className="cf-slider__value" style={{ color: sliderColor }}>{value}%</span>
+                          <span className="cf-slider__value" style={{ color: sliderColor }}>{displayValue}</span>
                         </div>
                         <div className="cf-slider__track">
                           <div
