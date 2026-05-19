@@ -1016,28 +1016,28 @@ values
 
   -- 1. Dimidjian et al. 2006 — J Consult Clin Psychol (ECR, n=241)
   --    PMID 16881773 — doi:10.1037/0022-006X.74.4.658 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : ECR randomisé contrôlé
   (
     '2b2b2b2b-0001-0001-0001-000000000001',
     'behavioral_activation',
     'Dimidjian et al. — Activation comportementale vs TCC vs antidépresseurs : ECR (J Consult Clin Psychol, 2006)',
     'rct',
     'https://doi.org/10.1037/0022-006X.74.4.658',
-    null,
+    'A',
     'ECR (n=241) : chez les patients sévèrement déprimés, l''activation comportementale est comparable aux antidépresseurs et supérieure à la TCC — la composante comportementale est identifiée comme moteur principal de l''efficacité de la TCC',
     1
   ),
 
   -- 2. Cuijpers et al. 2007 — Clin Psychol Rev (méta-analyse, 16 études, n=780)
   --    PMID 17184887 — doi:10.1016/j.cpr.2006.11.001 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : méta-analyse de 16 ECR
   (
     '2b2b2b2b-0001-0001-0001-000000000002',
     'behavioral_activation',
     'Cuijpers et al. — Traitements par activation comportementale de la dépression : méta-analyse (Clin Psychol Rev, 2007)',
     'meta_analysis',
     'https://doi.org/10.1016/j.cpr.2006.11.001',
-    null,
+    'A',
     'Méta-analyse de 16 ECR (n=780) : taille d''effet large g=0,87 pour l''activation comportementale vs contrôle ; équivalente à la TCC à post-traitement (g=0,02) et au suivi — maintien des bénéfices à long terme confirmé',
     2
   )

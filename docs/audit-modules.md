@@ -31,7 +31,7 @@
 | 7 | rim | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 8 | cognitive_saturation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 9 | decisional_balance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 10 | behavioral_activation | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
+| 10 | behavioral_activation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 11 | grounding | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
 | 12 | mood_tracker | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 13 | motivational_balance | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Haute |
@@ -274,21 +274,21 @@
 
 ### 10 — behavioral_activation · Activation comportementale
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Audité  
 **Type** : Moteur générique (`preview_kind='activity_log'`)  
 **Priorité** : Haute
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Lewinsohn 1974 ; Martell et al. 2010 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | ActivityLogLayout — liste activités + scores P/M en aperçu |
+| Écran mobile patient | ✅ | Journal activités, scores Plaisir/Maîtrise 0–10, statut planifiée/réalisée |
+| Cohérence web ↔ mobile | ✅ | Même structure, même champs |
+| i18n fr complet | ✅ | Parité parfaite FR/EN |
+| i18n en complet | ✅ | Parité parfaite FR/EN |
+| i18n teen fr/en complet | ✅ | Overrides présents |
+| Sources scientifiques | ✅ | Dimidjian 2006 ECR (A), Cuijpers 2007 méta-analyse 16 ECR (A) |
+| Conformité MDR | ✅ | Scores P/M bruts 0–10, liste activités — aucune interprétation |
+| Corrections apportées | ✅ | sources_seed.sql : Dimidjian 2006 et Cuijpers 2007 grades null→'A' |
 
 ---
 
