@@ -65,14 +65,21 @@ function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMod
       setAnchors(a)
       setAnchorPhrase(phrase)
       setPractitionerMessage(msg ?? '')
-    })
+    }).catch(() => { /* chargement silencieux — l'UI reste sur l'état vide */ })
     return () => { active = false }
   }, [patient]))
 
   const handleAddPhoto = useCallback(async () => {
-    const anchor = await pickAndSaveAnchorPhoto(anchors.length)
-    if (anchor) setAnchors(prev => [...prev, anchor])
-  }, [anchors.length])
+    try {
+      const anchor = await pickAndSaveAnchorPhoto(anchors.length)
+      if (anchor) setAnchors(prev => [...prev, anchor])
+    } catch {
+      Alert.alert(
+        t('common.error'),
+        t('modules.crisis_plan.photo_error'),
+      )
+    }
+  }, [anchors.length, t])
 
   const handleDeletePhoto = useCallback((anchor: CrisisAnchor) => {
     Alert.alert(
@@ -169,7 +176,7 @@ function CopingCardsSection({ t, patientId }: { t: (k: string) => string; patien
     let active = true
     fetchPractitionerConfig(patientId).then(cfg => {
       if (active) setCards(cfg.copingCards)
-    })
+    }).catch(() => {})
     return () => { active = false }
   }, [patientId]))
 
@@ -227,17 +234,21 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
       if (!active) return
       setCommitment(c)
       setCommitmentPhrase(phrase || t('modules.crisis_plan.commitment_phrase_default'))
-    })
+    }).catch(() => {})
     return () => { active = false }
   }, [patientId, t]))
 
   const handleSign = useCallback(async () => {
     if (!signingName.trim()) return
-    await saveCommitment(signingName.trim())
-    setCommitment({ name: signingName.trim(), date: new Date().toISOString() })
-    setSigning(false)
-    setSigningName('')
-  }, [signingName])
+    try {
+      await saveCommitment(signingName.trim())
+      setCommitment({ name: signingName.trim(), date: new Date().toISOString() })
+      setSigning(false)
+      setSigningName('')
+    } catch {
+      Alert.alert(t('common.error'), t('common.save_error'))
+    }
+  }, [signingName, t])
 
   const formattedDate = commitment
     ? new Date(commitment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -311,16 +322,21 @@ export default function CrisisPlanScreen() {
   const patient = useAuthStore(s => s.patient)
 
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [sections, setSections] = useState<Map<string, ContentField[]>>(new Map())
   const [uiFields, setUiFields] = useState<ContentField[]>([])
   const [items, setItems] = useState<PlanItem[]>([])
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
+  const loadSteps = useCallback(() => {
+    setLoading(true)
+    setLoadError(false)
+    let active = true
     Promise.all([
       fetchModuleFields('crisis_plan'),
-      getAllPlanItemsForModule('crisis_plan'),
+      getAllPlanItemsForModule('crisis_plan').catch((): PlanItem[] => []),
     ]).then(([result, planItems]) => {
+      if (!active) return
       const sMap = new Map<string, ContentField[]>()
       const ui: ContentField[] = []
       for (const f of result.fields) {
@@ -332,8 +348,15 @@ export default function CrisisPlanScreen() {
       setUiFields(ui)
       setItems(planItems)
       setLoading(false)
+    }).catch(() => {
+      if (!active) return
+      setLoadError(true)
+      setLoading(false)
     })
+    return () => { active = false }
   }, [])
+
+  useFocusEffect(loadSteps)
 
   const itemsBySection = useMemo(() => {
     const map = new Map<string, PlanItem[]>()
@@ -422,6 +445,15 @@ export default function CrisisPlanScreen() {
           </Pressable>
 
           {/* 6 étapes Stanley & Brown */}
+          {loadError && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorText}>{t('common.load_error')}</Text>
+              <Pressable style={styles.retryBtn} onPress={loadSteps}>
+                <Text style={styles.retryBtnText}>{t('common.retry')}</Text>
+              </Pressable>
+            </View>
+          )}
+
           {[...sections.entries()].map(([sectionId, fields], idx) => {
             const titleField = fields.find(f => f.field_type === 'step_title')
             const hintField = fields.find(f => f.field_type === 'step_hint')
@@ -572,6 +604,26 @@ const styles = StyleSheet.create({
   emergencyBtn:   { flex: 1, flexDirection: 'row', alignItems: 'center', padding: spacing.sm, borderRadius: radius.md, gap: spacing.sm },
   emergencyNumber: { color: '#fff', fontSize: 14, fontWeight: '700', lineHeight: 18 },
   emergencyLabel:  { color: 'rgba(255,255,255,0.8)', fontSize: 11, lineHeight: 14 },
+
+  // Erreur chargement étapes
+  errorBanner: {
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  errorText: { fontSize: 13, color: colors.textMuted, textAlign: 'center' },
+  retryBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  retryBtnText: { fontSize: 14, color: colors.primary, fontWeight: '600' },
 
   // Sections supplémentaires
   section: {

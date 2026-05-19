@@ -714,6 +714,10 @@
       "thought_placeholder": "Ex : Juste une fois ça changera rien…",
       "coping_placeholder": "Ex : Marche, appel à un pote, respiration…",
       "intensity_hint": "De 0 (absente) à 10 (très intense). Valeur brute."
+    },
+    "motivational_balance": {
+      "label": "Balance motivationnelle",
+      "description": "Pour comprendre ton ambivalence et ce qui te pousse à changer"
     }
   }
 }

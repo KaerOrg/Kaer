@@ -687,6 +687,10 @@
       "empty_text": "Tap the button to get started.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Send my answers"
+    },
+    "motivational_balance": {
+      "label": "Motivational balance",
+      "description": "Understanding your ambivalence and what drives change"
     }
   }
 }

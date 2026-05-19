@@ -30,8 +30,9 @@ export async function fetchPractitionerConfig(
     .from('patient_modules')
     .select('config')
     .eq('patient_id', patientId)
-    .eq('module_id', 'crisis_plan')
-    .single()
+    .eq('module_type', 'crisis_plan')
+    .is('revoked_at', null)
+    .maybeSingle()
 
   const cfg = (data?.config as Record<string, unknown> | null)?.crisisPlan as
     | Partial<CrisisPlanPractitionerConfig>
@@ -69,7 +70,7 @@ export async function pickAndSaveAnchorPhoto(
   if (!permission.granted) return null
 
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ['images'],
     allowsEditing: true,
     aspect: [1, 1],
     quality: 0.7,

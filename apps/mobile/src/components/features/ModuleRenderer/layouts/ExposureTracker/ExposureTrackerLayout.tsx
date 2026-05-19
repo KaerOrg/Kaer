@@ -136,7 +136,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
     setLoading(false)
   }, [])
 
-  useEffect(() => { void reloadAll() }, [reloadAll])
+  useEffect(() => { reloadAll().catch(() => setLoading(false)) }, [reloadAll])
 
   // ── Entry navigation ─────────────────────────────────────────────────────
   const resetEntryForm = useCallback(() => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useFocusEffect } from '@react-navigation/native'
@@ -43,14 +43,26 @@ export default function ModuleContentScreen({ route }: Props) {
   const patient = useAuthStore((s) => s.patient)
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [patientConfig, setPatientConfig] = useState<Record<string, unknown> | null | undefined>(undefined)
 
-  useEffect(() => {
-    fetchModuleFields(moduleType).then(r => {
-      setResult(r)
-      setLoading(false)
-    })
+  const loadFields = useCallback(() => {
+    setLoading(true)
+    setLoadError(false)
+    fetchModuleFields(moduleType)
+      .then(r => {
+        setResult(r)
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoadError(true)
+        setLoading(false)
+      })
   }, [moduleType])
+
+  useEffect(() => {
+    loadFields()
+  }, [loadFields])
 
   const loadPatientConfig = useCallback(async () => {
     if (!patient) return
@@ -77,6 +89,17 @@ export default function ModuleContentScreen({ route }: Props) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{t('common.load_error')}</Text>
+        <Pressable style={styles.retryBtn} onPress={loadFields}>
+          <Text style={styles.retryBtnText}>{t('common.retry')}</Text>
+        </Pressable>
       </View>
     )
   }
@@ -127,4 +150,7 @@ const styles = StyleSheet.create({
   description:     { fontSize: 14, color: colors.textMuted, lineHeight: 22, marginBottom: spacing.lg },
   comingSoon:      { alignItems: 'center', paddingVertical: spacing.xl },
   comingSoonText:  { fontSize: 15, color: colors.textMuted },
+  errorText:       { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg, textAlign: 'center', paddingHorizontal: spacing.xl },
+  retryBtn:        { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, backgroundColor: colors.primary, borderRadius: 8 },
+  retryBtnText:    { color: '#fff', fontWeight: '600' },
 })

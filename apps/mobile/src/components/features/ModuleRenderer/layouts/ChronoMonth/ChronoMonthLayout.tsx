@@ -68,10 +68,12 @@ export function ChronoMonthLayout({ moduleId }: Props) {
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1
 
   const load = useCallback(() => {
-    void getAllFormEntries(moduleId).then(rows => {
-      setEntries(formEntriesToAnchorEntries(rows))
-      setLoading(false)
-    })
+    getAllFormEntries(moduleId)
+      .then(rows => {
+        setEntries(formEntriesToAnchorEntries(rows))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [moduleId])
 
   useEffect(() => {

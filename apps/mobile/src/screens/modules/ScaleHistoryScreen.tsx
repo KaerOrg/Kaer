@@ -46,9 +46,11 @@ export default function ScaleHistoryScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true
-      getAllScaleEntries(scale_id).then(data => {
-        if (active) { setEntries(data); setLoading(false) }
-      })
+      getAllScaleEntries(scale_id)
+        .then(data => {
+          if (active) { setEntries(data); setLoading(false) }
+        })
+        .catch(() => { if (active) setLoading(false) })
       return () => { active = false }
     }, [scale_id])
   )

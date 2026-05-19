@@ -31,11 +31,13 @@ export default function CrisisUrgencyScreen() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getUrgencyItems().then(({ step4: s4, step5: s5 }) => {
-      setStep4(s4)
-      setStep5(s5)
-      setLoading(false)
-    })
+    getUrgencyItems()
+      .then(({ step4: s4, step5: s5 }) => {
+        setStep4(s4)
+        setStep5(s5)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [])
 
   return (

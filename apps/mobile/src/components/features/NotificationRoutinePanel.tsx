@@ -33,7 +33,7 @@ export function NotificationRoutinePanel({ patientModuleId, patientId, moduleTyp
     setLoading(false)
   }, [patientModuleId])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => { load().catch(() => setLoading(false)) }, [load])
 
   const handlePause = useCallback(async (routineId: string) => {
     setActionId(routineId)

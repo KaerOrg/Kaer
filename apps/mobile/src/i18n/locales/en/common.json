@@ -36,6 +36,8 @@
     "irreversible": "This action cannot be undone.",
     "saved_title": "Saved",
     "save_error": "Unable to save. Please try again.",
+    "load_error": "Unable to load this module. Check your connection and try again.",
+    "retry": "Retry",
     "saved": "Saved",
     "back": "Back",
     "continue": "Continue",
@@ -183,7 +185,9 @@
       "urgency_subtitle": "Here are your emergency contacts and resources.",
       "urgency_close_contacts": "Trusted people to call",
       "urgency_professionals": "Professionals & emergency services",
-      "urgency_no_items": "No contacts filled in your plan."
+      "urgency_no_items": "No contacts filled in your plan.",
+      "delete_photo_title": "Delete this photo?",
+      "photo_error": "Unable to add photo. Check app permissions in Settings."
     },
     "therapeutic_commitment": {
       "label": "Therapeutic commitment",
@@ -726,6 +730,10 @@
       "add_trigger": "Add",
       "saved_message": "Your balance has been saved.",
       "save": "Save"
+    },
+    "motivational_balance": {
+      "label": "Motivational balance",
+      "description": "Psychoeducation on ambivalence and change"
     },
     "phq9": {
       "label": "PHQ-9",

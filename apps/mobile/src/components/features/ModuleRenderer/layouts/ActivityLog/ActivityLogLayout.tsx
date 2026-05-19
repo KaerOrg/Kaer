@@ -120,7 +120,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     setLoading(false)
   }, [])
 
-  useEffect(() => { void loadRecords() }, [loadRecords])
+  useEffect(() => { loadRecords().catch(() => setLoading(false)) }, [loadRecords])
 
   // ── Navigation
   const handleNew = useCallback(() => {

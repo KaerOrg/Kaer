@@ -819,10 +819,12 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
 
   useEffect(() => {
-    getAllPlanItemsForModule(moduleId).then(data => {
-      setItems(data)
-      setLoading(false)
-    })
+    getAllPlanItemsForModule(moduleId)
+      .then(data => {
+        setItems(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
   }, [moduleId])
 
   const itemsBySection = useMemo(() => {
@@ -1018,10 +1020,12 @@ function TimedTapExerciseLayout({ fields }: {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    getAllCognitiveSaturationSessions().then(data => {
-      setSessions(data)
-      setLoadingSessions(false)
-    })
+    getAllCognitiveSaturationSessions()
+      .then(data => {
+        setSessions(data)
+        setLoadingSessions(false)
+      })
+      .catch(() => setLoadingSessions(false))
   }, [])
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
@@ -1331,7 +1335,7 @@ function DailyCheckinLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId, todayDate])
 
-  useEffect(() => { void loadData() }, [loadData])
+  useEffect(() => { loadData().catch(() => setLoading(false)) }, [loadData])
 
   const handleSave = useCallback(async () => {
     if (!selectedValue) {
@@ -1755,7 +1759,7 @@ function ColumnFormLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   const initialValuesForNew = useCallback((): Record<string, string | number> => {
     const init: Record<string, string | number> = {}
@@ -2183,7 +2187,7 @@ function TreeSelectorLayout({ fields, moduleId }: {
     setLoading(false)
   }, [moduleId])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   // ── Couleur courante : couleur du noeud le plus profond ayant une couleur
   const accentColor = useMemo(() => {
@@ -2777,7 +2781,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
     setLoading(false)
   }, [])
 
-  useEffect(() => { void loadEntries() }, [loadEntries])
+  useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
   const loadMonth = useCallback(async (year: number, monthVal: number) => {
     const data = await getSleepEntriesForMonth(toYearMonth(year, monthVal))
