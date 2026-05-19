@@ -1,1 +1,0 @@
-export { DispensairePage } from './DispensairePage'
