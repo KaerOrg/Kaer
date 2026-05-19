@@ -125,6 +125,7 @@ export type PreviewKind =
   | 'tabbed'
   | 'chrono_month'
   | 'exposure_hierarchy'
+  | 'crisis_urgency'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

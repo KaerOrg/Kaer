@@ -57,6 +57,7 @@ Valeurs de `preview_kind` et leur layout :
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
+| `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -155,9 +156,10 @@ create table public.module_content_fields (
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
 | `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Bouton coloré non-cliquable (aperçu web), actif sur mobile |
-| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | Affiche le message praticien (Supabase `crisis_plan_configs`), 3 emplacements photos, champ phrase. Lit `patientId` via `PatientViewContext` |
-| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Liste les cartes praticien (Supabase `crisis_plan_coping_cards`). Lit `patientId` via `PatientViewContext` |
-| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` |
+| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | Affiche le message praticien (Supabase `crisis_plan_configs`), 3 emplacements photos, champ phrase. Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Liste les cartes praticien (Supabase `crisis_plan_coping_cards`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
 
 **Layout `grid2x2`**
 

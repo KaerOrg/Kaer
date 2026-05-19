@@ -10,17 +10,18 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
+  Modal,
+  StatusBar,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useFocusEffect } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
-import { AppStackParamList } from '../../navigation/AppStack'
 import { useAuthStore } from '../../store/authStore'
+import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import {
   generateId,
   getAllPlanItemsForModule,
@@ -42,8 +43,6 @@ import {
   type CrisisAnchor,
   type CrisisCommitment,
 } from '../../services/crisisPlanService'
-
-type Nav = NativeStackNavigationProp<AppStackParamList>
 
 // ─── Sous-composant : Section "Mes raisons de tenir" ─────────────────────────
 
@@ -317,11 +316,11 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
 
 export default function CrisisPlanScreen() {
   const { t } = useTranslation()
-  const { isTeenMode, teenColor } = useTeen()
-  const navigation = useNavigation<Nav>()
+  const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore(s => s.patient)
 
   const [loading, setLoading] = useState(true)
+  const [urgencyVisible, setUrgencyVisible] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const [sections, setSections] = useState<Map<string, ContentField[]>>(new Map())
   const [uiFields, setUiFields] = useState<ContentField[]>([])
@@ -426,6 +425,7 @@ export default function CrisisPlanScreen() {
   }
 
   return (
+    <>
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <TeenAccent color={teenColor('crisis_plan')} />
       <View style={styles.flex}>
@@ -437,7 +437,7 @@ export default function CrisisPlanScreen() {
           {/* Bouton mode urgence */}
           <Pressable
             style={styles.urgencyBanner}
-            onPress={() => navigation.navigate('CrisisUrgency')}
+            onPress={() => setUrgencyVisible(true)}
           >
             <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />
             <Text style={styles.urgencyBannerText}>{t('modules.crisis_plan.urgency_title')}</Text>
@@ -558,6 +558,31 @@ export default function CrisisPlanScreen() {
         )}
       </View>
     </SafeAreaView>
+
+      {/* Modal urgence */}
+      <Modal visible={urgencyVisible} animationType="slide" statusBarTranslucent>
+        <View style={styles.urgencyRoot}>
+          <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
+          <SafeAreaView style={styles.urgencyHeader} edges={['top']}>
+            <View style={styles.urgencyHeaderInner}>
+              <View style={styles.urgencyHeaderLeft}>
+                <MaterialCommunityIcons name="alert-circle" size={28} color="#fff" />
+                <View>
+                  <Text style={styles.urgencyTitle}>{tt('crisis_plan', 'urgency_title')}</Text>
+                  <Text style={styles.urgencySubtitle}>{tt('crisis_plan', 'urgency_subtitle')}</Text>
+                </View>
+              </View>
+              <Pressable style={styles.urgencyClose} onPress={() => setUrgencyVisible(false)} accessibilityRole="button">
+                <MaterialCommunityIcons name="close" size={24} color="#fff" />
+              </Pressable>
+            </View>
+          </SafeAreaView>
+          <SafeAreaView style={styles.urgencyContent} edges={['bottom']}>
+            <FieldRenderer preview_kind="crisis_urgency" fields={uiFields} moduleId="crisis_plan" />
+          </SafeAreaView>
+        </View>
+      </Modal>
+    </>
   )
 }
 
@@ -578,6 +603,19 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   urgencyBannerText: { flex: 1, color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  // Modal urgence
+  urgencyRoot:       { flex: 1, backgroundColor: colors.background },
+  urgencyHeader:     { backgroundColor: '#DC2626' },
+  urgencyHeaderInner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: spacing.md, paddingVertical: spacing.md, gap: spacing.sm,
+  },
+  urgencyHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  urgencyTitle:      { color: '#fff', fontSize: 18, fontWeight: '700' },
+  urgencySubtitle:   { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 1 },
+  urgencyClose:      { padding: 4 },
+  urgencyContent:    { flex: 1 },
 
   // Étapes accordion
   card: {

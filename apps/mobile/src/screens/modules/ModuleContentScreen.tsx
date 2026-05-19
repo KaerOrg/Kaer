@@ -11,6 +11,8 @@ import {
   type ModuleFieldsResult,
 } from '../../services/moduleService'
 import { FieldRenderer } from '../../components/features/ModuleRenderer'
+import { TeenAccent } from '../../components/features/TeenAccent'
+import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
 import { useTeen } from '../../hooks/useTeen'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing } from '../../theme'
@@ -38,7 +40,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
 export default function ModuleContentScreen({ route }: Props) {
   const { moduleType } = route.params
   const { t } = useTranslation()
-  const { teenColor } = useTeen()
+  const { isTeenMode, teenColor } = useTeen()
   const accentColor = teenColor(moduleType)
   const patient = useAuthStore((s) => s.patient)
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
@@ -106,8 +108,11 @@ export default function ModuleContentScreen({ route }: Props) {
 
   // Layouts qui gèrent leur propre scroll / structure — rendu sans ScrollView externe
   if (result != null && SELF_MANAGED_LAYOUTS.has(result.preview_kind)) {
+    const hasDisclaimer = result.fields.some(f => f.field_type === 'disclaimer_banner')
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
+        <TeenAccent color={accentColor} />
+        {hasDisclaimer && <DisclaimerBanner moduleKey={moduleType} isTeenMode={isTeenMode} />}
         <FieldRenderer
           preview_kind={result.preview_kind}
           fields={result.fields}

@@ -1056,7 +1056,8 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.commitment', 'crisis_plan', NULL, NULL, 'crisis_commitment_preview', 'modules.crisis_plan.commitment_title', 90),
   ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'module.crisis_plan.footer', 99),
   ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 130),
-  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140)
+  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140),
+  ('crisis_plan.urgency_contacts', 'crisis_plan', NULL, NULL, 'crisis_urgency_contacts', NULL, 150)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : EPDS ─────────────────────────────────────────────
@@ -1286,6 +1287,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('cj.soon',            'craving_journal',        NULL, NULL, 'coming_soon',        NULL, 99),
   ('dwp.label',          'diet_weight_psycho',     NULL, NULL, 'module_label',       'module.diet_weight_psycho.label', 0),
   ('dwp.desc',           'diet_weight_psycho',     NULL, NULL, 'module_description', 'module.diet_weight_psycho.description', 1),
+  ('dwp.disclaimer',     'diet_weight_psycho',     NULL, NULL, 'disclaimer_banner',  NULL, 2),
   ('dwp.soon',           'diet_weight_psycho',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('dt.label',           'distress_tolerance',     NULL, NULL, 'module_label',       'module.distress_tolerance.label', 0),
   ('dt.desc',            'distress_tolerance',     NULL, NULL, 'module_description', 'module.distress_tolerance.description', 1),
