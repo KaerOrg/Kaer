@@ -32,26 +32,26 @@
 | 8 | cognitive_saturation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 9 | decisional_balance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 10 | behavioral_activation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 11 | grounding | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
-| 12 | mood_tracker | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
-| 13 | motivational_balance | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Haute |
-| 14 | medication_adherence | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
-| 15 | breathing_techniques | ✅ | ✅ | ✅ | ✅✅ | ✅ | 🔲 | Basse |
-| 16 | phq9 | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 17 | gad7 | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 18 | bsl23 | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 19 | rcads | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 20 | snap_iv | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 21 | asrs6 | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 22 | asrs18 | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 23 | epds | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 24 | nsi | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 25 | medication_side_effects | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Basse |
-| 26 | psychoeducation | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
-| 27 | diet_weight_psycho | ✅ | ✅ | ✅ (psyedu) | ⚠️ | ✅ | 🔲 | Haute |
-| 28 | chronobiology_tracker | ✅ | ✅ | ✅ (psyedu) | ⚠️ | ✅ | 🔲 | Haute |
-| 29 | distress_tolerance | ✅ | ✅ | ✅ (psyedu) | ⚠️ | ✅ | 🔲 | Haute |
-| 30 | craving_journal | ✅ | ✅ | ✅ (psyedu) | ⚠️ | ✅ | 🔲 | Haute |
+| 11 | grounding | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 12 | mood_tracker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 13 | motivational_balance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 14 | medication_adherence | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 15 | breathing_techniques | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 16 | phq9 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 17 | gad7 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 18 | bsl23 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 19 | rcads | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 20 | snap_iv | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 21 | asrs6 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 22 | asrs18 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 23 | epds | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 24 | nsi | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 25 | medication_side_effects | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 26 | psychoeducation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 27 | diet_weight_psycho | ✅ | ✅ | ✅ (psyedu) | ✅ | ✅ | ✅ | — |
+| 28 | chronobiology_tracker | ✅ | ✅ | ✅ (psyedu) | ✅ | ✅ | ✅ | — |
+| 29 | distress_tolerance | ✅ | ✅ | ✅ (psyedu) | ✅ | ✅ | ✅ | — |
+| 30 | craving_journal | ✅ | ✅ | ✅ (psyedu) | ✅ | ✅ | ✅ | — |
 
 ---
 
@@ -294,336 +294,381 @@
 
 ### 11 — grounding · Ancrage 5-4-3-2-1
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='guided_exercise'`  
-**Priorité** : Moyenne
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='guided_exercise'` (mobile : `ModuleContentScreen` → `FieldRenderer`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Linehan 1993 (DBT) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `GuidedExerciseLayout` — affiche titre + description de l'exercice |
+| Écran mobile patient | ✅ | 3 modes (intro/guided/done), sensoriel 5-4-3-2-1, sans stockage de données |
+| Cohérence web ↔ mobile | ✅ | Web = aperçu statique, mobile = parcours interactif — cohérent |
+| i18n fr complet | ✅ | Clés grounding complètes dans fr/common.json |
+| i18n en complet | ✅ | Parité FR/EN vérifiée |
+| i18n teen fr/en complet | ✅ | Overrides tutoiement présents fr + en |
+| Sources scientifiques | ✅ | Kliem et al. 2010 (PMID 21114345, méta-analyse TCD, grade null→**A**) |
+| Conformité MDR | ✅ | Aucune donnée collectée — exercice interactif uniquement, conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : Kliem 2010 grade null→'A' |
 
 ---
 
 ### 12 — mood_tracker · Thermomètre de l'humeur
 
-**Statut** : 🔲 Non audité  
-**Type** : Saisie quotidienne + sparklines  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Saisie quotidienne 4 dimensions + sparklines 30 j (SQLite `mood_entries`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Outil propriétaire — note à ajouter |
-| Conformité MDR | 🔲 | Vérifier affichage brut sans interprétation |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | Aperçu dans `MODULE_LABELS` + `MODULE_DESCRIPTIONS` ; PatientPage débloque le module |
+| Écran mobile patient | ✅ | Saisie quotidienne humeur/énergie/anxiété/plaisir 1–10, sparklines 30 j, SQLite `mood_entries` |
+| Cohérence web ↔ mobile | ✅ | Web = aperçu institutionnel, mobile = outil opérationnel — cohérent |
+| i18n fr complet | ✅ | Clés mood_tracker complètes dans fr/common.json |
+| i18n en complet | ✅ | Parité FR/EN vérifiée |
+| i18n teen fr/en complet | ✅ | Overrides tutoiement présents |
+| Sources scientifiques | ✅ | Yatham et al. 2018 CANMAT/ISBD (PMID 29536616, guideline, null — approprié) |
+| Conformité MDR | ✅ | Scores 1–10 affichés bruts, sparklines sans flèches ni seuils colorés — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : source déjà présente, grade null maintenu (guideline CANMAT) |
 
 ---
 
 ### 13 — motivational_balance · Balance motivationnelle
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='tabbed'` (psyedu + balance)  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='tabbed'` — onglet 1 fiches psyedu (Supabase) · onglet 2 balance pour/contre (SQLite)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | Minimal détecté côté i18n (contenu en psyedu Supabase) |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Miller & Rollnick 2012 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `TabbedLayout` — 2 onglets, contenus Supabase |
+| Écran mobile patient | ✅ | 2 onglets (Fiches / Balance), SQLite local, DisclaimerBanner MDR |
+| Cohérence web ↔ mobile | ✅ | Même structure tabulée, même contenu psyedu |
+| i18n fr complet | ✅ | `label`+`description` dans common.json ; contenu textuel dans psyedu Supabase (correct par pattern) |
+| i18n en complet | ✅ | Parité FR/EN vérifiée |
+| i18n teen fr/en complet | ✅ | Overrides présents dans fr/teen.json et en/teen.json |
+| Sources scientifiques | ✅ | Burke et al. 2003 méta-analyse 30 ECR (PMID 14516234, grade null→**A**) · Prochaska & DiClemente 1983 · Ryan & Deci 2000 · Amrhein 2003 |
+| Conformité MDR | ✅ | Balance pour/contre affichée brute — aucune pondération automatique, aucune recommandation algorithmique |
+| Corrections apportées | ✅ | sources_seed.sql : Burke 2003 grade null→'A' |
 
 ---
 
 ### 14 — medication_adherence · Observance médicamenteuse
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='daily_checkin'`  
-**Priorité** : Moyenne
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='daily_checkin'` (checklist quotidienne, SQLite local)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | À définir (HAS recommandations observance ?) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `DailyCheckinLayout` — checklist mock |
+| Écran mobile patient | ✅ | Checklist quotidienne de prise médicamenteuse, SQLite local |
+| Cohérence web ↔ mobile | ✅ | Structure identique, données 100 % locales |
+| i18n fr complet | ✅ | Clés medication_adherence complètes |
+| i18n en complet | ✅ | Parité FR/EN vérifiée |
+| i18n teen fr/en complet | ✅ | Overrides tutoiement présents |
+| Sources scientifiques | ✅ | NICE CG178 (2014, revu 2022) — Psychose et schizophrénie (guideline, null — approprié) |
+| Conformité MDR | ✅ | Checklist auto-déclarée sans score ni seuil — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : NICE CG178 présent, grade null maintenu (guideline) |
 
 ---
 
 ### 15 — breathing_techniques · Techniques de respiration
 
-**Statut** : 🔲 Non audité  
-**Type** : Écran dédié (`BreathingTechniquesScreen` + `BreathingExerciseScreen`)  
-**Priorité** : Basse (déjà bien sourcé)
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Écran dédié (`BreathingTechniquesScreen` + `BreathingExerciseScreen`) + `preview_kind='fields'`  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | ✅ | Lehrer & Gevirtz 2014 (Grade B), NICE CG90, HAS, MBCT Segal 2002 (Grade A) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `FieldsLayout` — liste des techniques avec description |
+| Écran mobile patient | ✅ | 5 techniques (cohérence cardiaque, abdominale, 4-7-8, MBCT, TIPP), minuteur animé |
+| Cohérence web ↔ mobile | ✅ | Même liste de techniques, même descriptions |
+| i18n fr complet | ✅ | Clés complètes fr/common.json |
+| i18n en complet | ✅ | Parité FR/EN vérifiée |
+| i18n teen fr/en complet | ✅ | Overrides tutoiement présents |
+| Sources scientifiques | ✅ | Lehrer & Gevirtz 2014 (grade B) · NICE CG90 · HAS · Segal et al. 2002 MBCT (grade A) — sourçage le plus rigoureux de l'app |
+| Conformité MDR | ✅ | Minuteur brut sans mesure physiologique ni seuil — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 16 — phq9 · PHQ-9
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique (`ScaleHistoryScreen` + `ScaleEntryScreen`)  
-**Priorité** : Basse (déjà bien sourcé)
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique (`ScaleHistoryScreen` + `ScaleEntryScreen`, `preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | ✅ | NICE NG222 (2022) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 9 items lisibles, score brut, footer source |
+| Écran mobile patient | ✅ | `ScaleEntryScreen` (saisie) + `ScaleHistoryScreen` (historique), SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même items, même scoring, même footer |
+| i18n fr complet | ✅ | 9 items + 5 options + footer + instructions |
+| i18n en complet | ✅ | Parité FR/EN |
+| i18n teen fr/en complet | ✅ | Overrides présents |
+| Sources scientifiques | ✅ | NICE NG222 (2022) + Kroenke et al. 2001 (PMID 11556941, validation) |
+| Conformité MDR | ✅ | Score total affiché brut sans label interprétatif ("dépression légère/sévère") — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 17 — gad7 · GAD-7
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique (`preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | NICE CG113 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 7 items, score brut |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même items, même scoring |
+| i18n fr/en/teen complet | ✅ | 7 items + 4 options + footer complets |
+| Sources scientifiques | ✅ | Spitzer et al. 2006 (PMID 16717171) + NICE CG113 (TAG) |
+| Conformité MDR | ✅ | Score brut sans seuil coloré — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 18 — bsl23 · BSL-23
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique (`preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | Bohus et al. 2009 (Psychopathology, n=694) |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 23 items, score moyen 0–4 |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même items, même scoring |
+| i18n fr/en/teen complet | ✅ | 23 items + légende 0–4 + footer complets |
+| Sources scientifiques | ✅ | Bohus et al. 2009 (Psychopathology, n=694 — validation de l'échelle) |
+| Conformité MDR | ✅ | Score moyen brut sans label TPB — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 19 — rcads · RCADS-25
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique pédiatrique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique pédiatrique avec 6 sous-scores (`preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | CORC, NICE CG28/NG134 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 25 items, 6 sous-scores |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` (chips sous-scores) + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même items, même 6 sous-échelles (TAG/TP/TS/PS/TOC/TD) |
+| i18n fr/en/teen complet | ✅ | 25 items + 4 options + 6 sous-scores + footer |
+| Sources scientifiques | ✅ | Ebesutani et al. 2012 (PMID 22127718) · CORC · NICE CG28/NG134 |
+| Conformité MDR | ✅ | Scores bruts par sous-échelle sans interprétation algorithmique — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 20 — snap_iv · SNAP-IV
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique hétéro-évaluation  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique hétéro-évaluation (`preview_kind='questionnaire'`, `scale_warning`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | Swanson et al. 2001 (MTA), CADDRA 2023 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 26 items, 3 sous-scores I/HI/TOD |
+| Écran mobile patient | ✅ | Bandeau avertissement hétéro-évaluation (`scale_warning`) + `ScaleHistoryScreen` + `ScaleEntryScreen` |
+| Cohérence web ↔ mobile | ✅ | Même items, même 3 sous-scores |
+| i18n fr/en/teen complet | ✅ | 26 items + options + avertissement hétéro-évaluation + footer |
+| Sources scientifiques | ✅ | Swanson et al. 2001 MTA (PMID 11575707) · CADDRA 2023 (guideline) |
+| Conformité MDR | ✅ | Scores I/HI/TOD bruts sans seuil TDAH — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 21 — asrs6 · ASRS v1.1 Dépistage
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique auto-évaluation adulte (`preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | Kessler RC et al. 2005 (Psychol Med), PubMed 15841682 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 6 items Partie A |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` (bouton info PubMed) + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même 6 items, même scoring 0–24 |
+| i18n fr/en/teen complet | ✅ | 6 items + 4 options + footer + bouton info |
+| Sources scientifiques | ✅ | Kessler et al. 2005 (PMID 15841682, Psychol Med — validation) |
+| Conformité MDR | ✅ | Score 0–24 brut sans label TDAH — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 22 — asrs18 · ASRS v1.1 Bilan complet
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique auto-évaluation adulte (`preview_kind='questionnaire'`, 2 sous-scores)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | Kessler RC et al. 2005 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 18 items Parties A+B |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` (chips A/B) + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même 18 items, même 2 sous-scores |
+| i18n fr/en/teen complet | ✅ | 18 items + 4 options + footer Parties A+B |
+| Sources scientifiques | ✅ | Kessler et al. 2005 (PMID 15841682) |
+| Conformité MDR | ✅ | Scores A/B bruts sans diagnostic — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 23 — epds · EPDS
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique (`preview_kind='questionnaire'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | HAS — dépression périnatale (obligatoire depuis juillet 2022) |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 10 items, score 0–30 |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même 10 items, même scoring |
+| i18n fr/en/teen complet | ✅ | 10 items + options à options inversées (items 3,5,6,7,8,9,10) + footer |
+| Sources scientifiques | ✅ | Cox et al. 1987 (PMID 3651732) + HAS — dépression périnatale (obligatoire depuis juillet 2022) |
+| Conformité MDR | ✅ | Score 0–30 brut sans seuil 10/13 coloré — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 24 — nsi · NSI
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Échelle générique avec table dédiée (`preview_kind='questionnaire'`, SQLite `nsi_entries`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | Geoffroy PA et al. J Sleep Res 2023 |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — 9 items scorés + 2 contextuels |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` + `ScaleEntryScreen`, SQLite `nsi_entries` (table dédiée) |
+| Cohérence web ↔ mobile | ✅ | Même 11 items (9 scorés + % récurrents + thèmes libres) |
+| i18n fr/en/teen complet | ✅ | 9 items scorés + 2 contextuels + options + footer |
+| Sources scientifiques | ✅ | Geoffroy PA et al. 2023 (PMID 37846776, J Sleep Res — validation pilote n=102) |
+| Conformité MDR | ✅ | Score 0–45 brut + thème libre — aucune interprétation algorithmique |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
-### 25 — medication_side_effects · Effets secondaires
+### 25 — medication_side_effects · Effets secondaires médicamenteux
 
-**Statut** : 🔲 Non audité  
-**Type** : Échelle générique  
-**Priorité** : Basse
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Questionnaire générique (`preview_kind='questionnaire'`, SQLite `scale_entries`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Sources scientifiques | ✅ | UKU Side Effect Rating Scale (Lingjaerde et al. 1987) |
-| Autres critères | 🔲 | |
+| Aperçu web praticien | ✅ | `QuestionnaireLayout` — items effets indésirables |
+| Écran mobile patient | ✅ | `ScaleHistoryScreen` + `ScaleEntryScreen`, SQLite `scale_entries` |
+| Cohérence web ↔ mobile | ✅ | Même items |
+| i18n fr/en/teen complet | ✅ | Items + options + footer |
+| Sources scientifiques | ✅ | UKU Side Effect Rating Scale (Lingjaerde et al. 1987 — échelle de référence internationale) |
+| Conformité MDR | ✅ | Questionnaire d'auto-signalement brut sans diagnostic d'effet indésirable — conforme MDR |
+| Corrections apportées | — | Aucune correction nécessaire |
 
 ---
 
 ### 26 — psychoeducation · Psychoéducation
 
-**Statut** : 🔲 Non audité  
-**Type** : Écran dédié (`PsychoeducationScreen` + `CardDetailScreen`)  
-**Priorité** : Moyenne
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : Écran dédié (`PsychoeducationScreen` + `CardDetailScreen`, `preview_kind='cards'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Contenu cartes à vérifier (Colom & Vieta 2006 ?) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `CardsLayout` — liste des cartes de savoir |
+| Écran mobile patient | ✅ | `PsychoeducationScreen` (liste cartes) + `CardDetailScreen`, statut lecture par carte, IDs débloqués Supabase |
+| Cohérence web ↔ mobile | ✅ | Même liste de cartes, même contenu |
+| i18n fr complet | ✅ | Clés label/description ; contenu cartes dans namespace `psychoeducation` |
+| i18n en complet | ✅ | Parité FR/EN |
+| i18n teen fr/en complet | ✅ | Overrides tutoiement présents |
+| Sources scientifiques | ✅ | Xia 2011 Cochrane (grade null→**A**) · Colom 2003 Arch Gen Psychiatry (grade null→**A**) · Bighelli 2021 Lancet Psychiatry (grade null→**A**) · Miklowitz 2021 JAMA Psychiatry (grade null→**A**) · NICE CG185 (guideline, null) |
+| Conformité MDR | ✅ | Cartes informatives, lecture seule, aucune décision clinique automatique — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : 4 sources grade null→'A' (Xia, Colom, Bighelli, Miklowitz) |
 
 ---
 
 ### 27 — diet_weight_psycho · Alimentation et psychotropes
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='psyedu'` — 8 fiches en Supabase  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='psyedu'` — 8 fiches Supabase (`psyedu_topics`/`psyedu_blocks`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| Contenu psyedu Supabase | 🔲 | Vérifier les 8 fiches (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | À vérifier dans seed psyedu |
-| Conformité MDR | 🔲 | Bandeau disclaimer présent ? |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `PsyEduLayout` — liste des 8 fiches |
+| Écran mobile patient | ✅ | `ModuleContentScreen` → `FieldRenderer` `psyedu` → `PsyEduBlockRenderer` |
+| Cohérence web ↔ mobile | ✅ | Même 8 fiches (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
+| Contenu psyedu Supabase | ✅ | Contenu vérifié dans `supabase/seed/psyedu_seed.sql` — 8 topics + blocs |
+| i18n teen fr/en complet | ✅ | Namespace `diet_weight_psycho` dans psyedu.json + psyedu_teen.json |
+| Sources scientifiques | ✅ | De Hert 2011 · Carucci 2020 méta-analyse (grade null→**A**) · Gitlin 2016 · Cryan 2019 · Cotman 2002 · Fava 2000 |
+| Conformité MDR | ✅ | Fiches informatives sans recommandations thérapeutiques individualisées — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : Carucci 2020 grade null→'A' |
 
 ---
 
 ### 28 — chronobiology_tracker · Régularité chronobiologique
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='tabbed'` — 7 fiches psyedu + journal SQLite  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='tabbed'` — 7 fiches psyedu + journal SQLite (`chrono_entries`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| Contenu psyedu Supabase | 🔲 | Vérifier les 7 fiches |
-| Journal SQLite (5 ancrages) | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | À vérifier dans seed psyedu (Frank E 2005 — Social Rhythm Therapy ?) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `TabbedLayout` — 2 onglets (Fiches / Journal) |
+| Écran mobile patient | ✅ | `ChronoBioScreen` (segment control) + `ChronoBioDetailScreen` + `ChronoBioEntryScreen`, SQLite `chrono_entries` |
+| Cohérence web ↔ mobile | ✅ | 7 fiches psyedu + journal 5 ancrages horaires |
+| Contenu psyedu Supabase | ✅ | `supabase/seed/chrono_seed.sql` — 7 topics + blocs vérifiés. Corrections psyedu.json appliquées : "Phillips 2024" → "Li DR 2025" ; "Prog Brain Res" → "Endocr Dev" |
+| Journal SQLite (5 ancrages) | ✅ | Ancrages lever/coucher/repas/exercice/social — optionnels, pas de scoring |
+| i18n teen fr/en complet | ✅ | Namespace `chronobiology_tracker` dans psyedu.json + psyedu_teen.json |
+| Sources scientifiques | ✅ | Frank 2005 IPSRT (grade null→**A**) · Li DR 2025 cohorte UK Biobank (grade null→**B**) · Roenneberg 2012 (grade null→**B**) · Rosenthal 1984 (grade null→**A**) · 7 autres sources mécanistiques (null — expert opinions) |
+| Conformité MDR | ✅ | Journal horaires bruts sans analyse ni recommandation — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : 4 grades corrigés (Frank A, Li B, Roenneberg B, Rosenthal A) |
 
 ---
 
 ### 29 — distress_tolerance · Tolérance à la détresse
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='tabbed'` — 6 fiches psyedu DBT + accordéon  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='tabbed'` — 6 fiches psyedu DBT + accordéon "En crise"  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| Contenu psyedu Supabase | 🔲 | Vérifier TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Linehan MM 1993 (DBT Skills Manual) — à vérifier si présent en seed |
-| Conformité MDR | 🔲 | Bandeau disclaimer MDR présent ? |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `TabbedLayout` — 2 onglets (Fiches DBT / En crise) |
+| Écran mobile patient | ✅ | `ModuleContentScreen` → `FieldRenderer` tabbed, 6 fiches TIPP/ACCEPTS/self-soothing/IMPROVE/pros&cons/mindfulness, accordéon "En crise", `DisclaimerBanner` MDR |
+| Cohérence web ↔ mobile | ✅ | Même 6 techniques, même structure onglets, bandeau disclaimer présent mobile |
+| Contenu psyedu Supabase | ✅ | `supabase/seed/distress_tolerance_seed.sql` — topics + blocs vérifiés |
+| i18n teen fr/en complet | ✅ | Namespace `distress_tolerance` dans psyedu.json + psyedu_teen.json |
+| Sources scientifiques | ✅ | Linehan 2006 ECR (grade null→**A**) · Linehan 2015 ECR (grade null→**A**) · Stoffers-Winterling 2022 méta-analyse (grade null→**A**) · Sakakibara 1996 ECR (grade null→**A**) · Gordon 2017 méta-analyse (grade null→**A**) · Lundell 2021 cohorte n=26 (grade null maintenu — trop petit pour 'B') |
+| Conformité MDR | ✅ | Bandeau disclaimer MDR présent, fiches informatives, aucun score — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : 5 grades null→'A' (Linehan 2006, Linehan 2015, Stoffers-Winterling, Sakakibara, Gordon) |
 
 ---
 
 ### 30 — craving_journal · Journal de craving
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='tabbed'` — 4 fiches psyedu + journal SQLite  
-**Priorité** : Haute
+**Statut** : ✅ Audité — 2026-05-19  
+**Type** : `preview_kind='tabbed'` — 4 fiches psyedu + journal auto-monitoring SQLite  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| Contenu psyedu Supabase | 🔲 | Vérifier les 4 fiches |
-| Journal auto-monitoring | 🔲 | intensity slider, déclencheur, émotion, pensée, coping |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | TCC addictologie — Marlatt & Gordon 1985 ? à vérifier |
-| Conformité MDR | 🔲 | Bandeau disclaimer MDR présent ? |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `TabbedLayout` — 2 onglets (Fiches / Journal) |
+| Écran mobile patient | ✅ | `ModuleContentScreen` → `FieldRenderer` tabbed, 4 fiches psyedu, journal (intensité 0–10, déclencheur, émotion, pensée, stratégie coping), `DisclaimerBanner` MDR |
+| Cohérence web ↔ mobile | ✅ | 4 fiches + journal auto-monitoring identiques |
+| Contenu psyedu Supabase | ✅ | `supabase/seed/craving_seed.sql` — 4 topics + blocs vérifiés (neurobiologie craving, modèle A-B-C, urge surfing, HALT) |
+| Journal auto-monitoring | ✅ | Intensité slider 0–10 brut + 4 champs texte libres — aucun scoring |
+| i18n teen fr/en complet | ✅ | Namespace `craving_journal` dans psyedu.json + psyedu_teen.json |
+| Sources scientifiques | ✅ | Magill & Ray 2009 méta-analyse 53 ECR (grade null→**A**) · Bowen 2014 MBRP ECR (grade null→**A**) · Koob & Volkow 2016 (expert_opinion, null) |
+| Conformité MDR | ✅ | Bandeau disclaimer MDR présent, intensité brute sans interprétation, journal ouvert — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : Magill 2009 et Bowen 2014 grades null→'A' |
 
 ---
 

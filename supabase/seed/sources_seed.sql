@@ -90,7 +90,7 @@ values
     'Linehan et al. — DBT vs thérapie par experts : essai randomisé 2 ans (Archives of General Psychiatry, 2006)',
     'rct',
     'https://doi.org/10.1001/archpsyc.63.7.757',
-    null,
+    'A',
     'DBT associée à 2× moins de tentatives de suicide, moins d''hospitalisations et de passages aux urgences vs thérapie par experts (n=101, suivi 2 ans)',
     1
   ),
@@ -103,7 +103,7 @@ values
     'Linehan et al. — Analyse de la composante skills training DBT (JAMA Psychiatry, 2015)',
     'rct',
     'https://doi.org/10.1001/jamapsychiatry.2014.3039',
-    null,
+    'A',
     'Les interventions incluant l''entraînement aux compétences DBT (dont tolérance à la détresse) sont plus efficaces que la DBT sans skills training sur les comportements auto-agressifs et la dépression (n=99)',
     2
   ),
@@ -116,7 +116,7 @@ values
     'Stoffers-Winterling et al. — Méta-analyse des psychothérapies pour le TPB (Br J Psychiatry, 2022)',
     'meta_analysis',
     'https://doi.org/10.1192/bjp.2021.204',
-    null,
+    'A',
     'DBT : effets significatifs sur l''automutilation (SMD -0,54) et le fonctionnement psychosocial (SMD -0,51) ; preuves de qualité modérée pour le skills training DBT (31 ECR, n=1 870)',
     3
   ),
@@ -145,7 +145,7 @@ values
     'Sakakibara & Hayano — Respiration lente et réponse parasympathique au stress (Psychosomatic Medicine, 1996)',
     'rct',
     'https://doi.org/10.1097/00006842-199601000-00006',
-    null,
+    'A',
     'La respiration ralentie (8 cycles/min) préserve significativement le tonus parasympathique cardiaque lors d''une exposition à une menace vs respiration normale ou rapide — base physiologique de la technique P (respiration) de TIPP (ECR, n=30)',
     5
   ),
@@ -159,7 +159,7 @@ values
     'Gordon, McDowell & Herring — Exercice physique et réduction de l''anxiété (Sports Medicine, 2017)',
     'meta_analysis',
     'https://doi.org/10.1007/s40279-017-0769-0',
-    null,
+    'A',
     'L''exercice physique réduit significativement les symptômes d''anxiété (Δ=0,31 ; IC 95% 0,17-0,44) ; effets plus importants chez les sujets sains (Δ=0,50) — base empirique de la technique I (exercice intense) de TIPP (méta-analyse, 16 ECR, n=922)',
     6
   ),
@@ -240,7 +240,7 @@ values
     'Xia et al. — Psychoeducation for schizophrenia : revue Cochrane (Cochrane Database Syst Rev, 2011)',
     'meta_analysis',
     'https://doi.org/10.1002/14651858.CD002831.pub2',
-    null,
+    'A',
     '48 % de réduction de la non-observance (RR 0,52), 30 % de réduction des rechutes (RR 0,70), moins de réadmissions hospitalières ; amélioration du fonctionnement social et de la satisfaction vis-à-vis des soins (44 ECR, n=5 142)',
     1
   ),
@@ -253,7 +253,7 @@ values
     'Colom et al. — Psychoéducation de groupe pour le trouble bipolaire : essai randomisé (Arch Gen Psychiatry, 2003)',
     'rct',
     'https://doi.org/10.1001/archpsyc.60.4.402',
-    null,
+    'A',
     'La psychoéducation de groupe réduit significativement le nombre de rechutes (toutes polarités), allonge le temps avant récidive et diminue les hospitalisations vs groupe contrôle non structuré (n=120, bipolaire I & II en rémission)',
     2
   ),
@@ -266,7 +266,7 @@ values
     'Bighelli et al. — Interventions psychosociales pour la prévention des rechutes dans la schizophrénie (Lancet Psychiatry, 2021)',
     'meta_analysis',
     'https://doi.org/10.1016/S2215-0366(21)00243-1',
-    null,
+    'A',
     'Psychoéducation familiale (OR 0,56) et individuelle/de groupe (OR 0,63) réduisent les rechutes vs traitement habituel — preuves de qualité modérée à faible (méta-analyse en réseau, 72 ECR, n=10 364)',
     3
   ),
@@ -279,7 +279,7 @@ values
     'Miklowitz et al. — Psychothérapies adjuvantes pour le trouble bipolaire (JAMA Psychiatry, 2021)',
     'meta_analysis',
     'https://doi.org/10.1001/jamapsychiatry.2020.2993',
-    null,
+    'A',
     'La psychoéducation en format familial ou de groupe réduit significativement les récidives vs format individuel (OR 0,12) ; effets positifs sur les symptômes dépressifs avec la TCC (SMD -0,32) (39 ECR, n=3 863, trouble bipolaire)',
     4
   ),
@@ -350,7 +350,7 @@ values
     'Carucci et al. — Méthylphénidate et croissance chez l''enfant et l''adolescent : méta-analyse (Neurosci Biobehav Rev, 2020)',
     'meta_analysis',
     'https://doi.org/10.1016/j.neubiorev.2020.09.031',
-    null,
+    'A',
     'Méta-analyse : retard statural modéré en traitement prolongé par méthylphénidate ; récupération partielle possible après arrêt ou vacances thérapeutiques — surveillance de la courbe de croissance recommandée',
     3
   ),
@@ -421,7 +421,7 @@ values
     'Frank et al. — IPSRT pour le trouble bipolaire I : résultats à 2 ans (Arch Gen Psychiatry, 2005)',
     'rct',
     'https://doi.org/10.1001/archpsyc.62.9.996',
-    null,
+    'A',
     'L''IPSRT en phase aiguë allonge significativement le temps avant rechute affective (p=0,01) — la régularisation des rythmes sociaux pendant le traitement est associée à moins de rechutes en phase de maintenance (ECR, n=175, bipolaire I)',
     1
   ),
@@ -435,7 +435,7 @@ values
     'Li DR et al. — Régularité du sommeil et risque de dépression et d''anxiété (Psychological Medicine, 2025)',
     'cohort_study',
     'https://doi.org/10.1017/S0033291725101281',
-    null,
+    'B',
     'Régularité du sommeil associée à 38 % moins de risque de dépression (HR 0,62) et 33 % moins d''anxiété (HR 0,67), indépendamment de la durée de sommeil — régularité identifiée comme cible prioritaire (n=79 666, UK Biobank)',
     2
   ),
@@ -475,7 +475,7 @@ values
     'Roenneberg et al. — Social jetlag et obésité (Current Biology, 2012)',
     'cohort_study',
     'https://doi.org/10.1016/j.cub.2012.03.038',
-    null,
+    'B',
     'Grande étude épidémiologique : le social jetlag (décalage entre horloge biologique et horloge sociale) est associé à un IMC plus élevé — « vivre contre l''horloge » contribue à l''épidémie d''obésité ; plaide pour une meilleure adéquation entre rythmes biologiques et contraintes sociales (n > 65 000)',
     5
   ),
@@ -489,7 +489,7 @@ values
     'Rosenthal et al. — Trouble affectif saisonnier et premières données sur la luminothérapie (Arch Gen Psychiatry, 1984)',
     'rct',
     'https://doi.org/10.1001/archpsyc.1984.01790120076010',
-    null,
+    'A',
     'Description originale du SAD (29 patients bipolaires II/I en dépression saisonnière : hypersomnie, hyperphagie, gloutonnerie glucidique) et premières données suggérant un effet antidépresseur de l''extension de la photopériode par lumière artificielle intense (n=11)',
     6
   ),
@@ -584,7 +584,7 @@ values
     'Magill & Ray — TCC pour les troubles liés à l''alcool et aux drogues : méta-analyse de 53 ECR (J Stud Alcohol Drugs, 2009)',
     'meta_analysis',
     'https://doi.org/10.15288/jsad.2009.70.516',
-    null,
+    'A',
     'La TCC produit un effet significatif sur les troubles liés aux substances (g=0,154, p<0,005) — effets les plus marqués pour le cannabis (g=0,513) et comparée à l''absence de traitement (g=0,796) ; effet maintenu à 6 mois (53 ECR, adultes alcool et drogues illicites)',
     1
   ),
@@ -598,7 +598,7 @@ values
     'Bowen et al. — Efficacité relative du MBRP, de la prévention des rechutes standard et du TAU (JAMA Psychiatry, 2014)',
     'rct',
     'https://doi.org/10.1001/jamapsychiatry.2013.4546',
-    null,
+    'A',
     'À 12 mois, le MBRP réduit significativement les jours de consommation de drogues et la consommation excessive d''alcool vs RP et TAU — les pratiques de pleine conscience (dont l''urge surfing) soutiendraient les résultats à long terme en améliorant la tolérance aux cravings (ECR, n=286)',
     2
   ),
@@ -641,7 +641,7 @@ values
     'Burke et al. — Efficacité de l''entretien motivationnel : méta-analyse d''essais contrôlés (J Consult Clin Psychol, 2003)',
     'meta_analysis',
     'https://doi.org/10.1037/0022-006X.71.5.843',
-    null,
+    'A',
     'Les adaptations de l''EM équivalentes aux autres traitements actifs ; effets modérés vs placebo/absence de traitement (d=0,25–0,57) pour l''alcool, les drogues et les comportements liés à l''alimentation/exercice — 51 % de taux d''amélioration, 56 % de réduction de la consommation d''alcool (méta-analyse, 30 ECR)',
     1
   ),
@@ -1174,7 +1174,7 @@ values
     'Kliem et al. — Thérapie comportementale dialectique pour le TPB : méta-analyse (J Consult Clin Psychol, 2010)',
     'meta_analysis',
     'https://doi.org/10.1037/a0021015',
-    null,
+    'A',
     'Méta-analyse de 16 études (8 ECR, 8 non-randomisées) : effet global modéré pour la TCD, effet modéré pour les comportements suicidaires et auto-blessants — la TCD (dont le module tolérance à la détresse incluant les techniques d''ancrage sensoriel) est le traitement psychosocial du TPB le plus étudié',
     1
   )
