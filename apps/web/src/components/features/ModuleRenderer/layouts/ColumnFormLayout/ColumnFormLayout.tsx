@@ -1,8 +1,10 @@
-import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
+import { Clock, Info, Pencil, Plus, Save, Trash2 } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
+import { FieldText } from '../../fields'
 
 interface Props {
   fields: ContentField[]
+  footer: ContentField | undefined
   t: (key: string) => string
 }
 
@@ -10,7 +12,7 @@ interface Props {
 // 'column_form') — entête avec liste mock d'une entrée passée, puis aperçu
 // du formulaire d'entrée colonne-par-colonne (texte + slider). Source
 // mobile : ColumnFormLayout (FieldRenderer.tsx).
-export function ColumnFormLayout({ fields, t }: Props) {
+export function ColumnFormLayout({ fields, footer, t }: Props) {
   const ft = (type: string): string => {
     const f = fields.find(field => field.field_type === type)
     return f?.text_code ? t(f.text_code) : ''
@@ -84,6 +86,13 @@ export function ColumnFormLayout({ fields, t }: Props) {
         <div className="cf-new-btn">
           <Plus size={16} />
           <span>{newBtn}</span>
+        </div>
+      )}
+
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
         </div>
       )}
 

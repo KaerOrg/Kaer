@@ -985,9 +985,25 @@ values
     'Hofmann et al. — Efficacité de la TCC : revue de méta-analyses (Cognit Ther Res, 2012)',
     'systematic_review',
     'https://doi.org/10.1007/s10608-012-9476-1',
-    null,
+    'A',
     'Revue de 106 méta-analyses de la TCC : support le plus fort pour les troubles anxieux, les troubles somatoformes, la boulimie, le contrôle de la colère et le stress général — la restructuration cognitive (colonnes de Beck) est un composant central de la TCC validée dans cet ensemble',
     1
+  )
+
+,
+
+  -- 2. NICE NG222 — Dépression de l'adulte : traitement et management (guideline, 2022)
+  --    https://www.nice.org.uk/guidance/ng222
+  --    evidence_grade : 'A' — recommandation NICE Grade A (TCC recommandée en 1ère ligne)
+  (
+    '2a2a2a2a-0002-0001-0001-000000000001',
+    'beck_columns',
+    'NICE NG222 — Dépression de l''adulte : traitement et management (guideline, 2022)',
+    'guideline',
+    'https://www.nice.org.uk/guidance/ng222',
+    'A',
+    'Recommandation clinique NICE 2022 : la TCC, dont la restructuration cognitive (colonnes de Beck), est recommandée en première ligne pour la dépression légère à modérée chez l''adulte',
+    2
   )
 
 -- ── behavioral_activation ────────────────────────────────────────────────────

@@ -171,7 +171,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   }
 
   if (preview_kind === 'column_form') {
-    return <ColumnFormLayout fields={contentFields} t={t} />
+    return <ColumnFormLayout fields={contentFields} footer={footer} t={t} />
   }
 
   if (preview_kind === 'guided_exercise') {

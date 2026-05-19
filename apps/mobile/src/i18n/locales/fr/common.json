@@ -710,7 +710,8 @@
       "entry_col_5_intensity": "Intensité de l'émotion maintenant",
       "entry_col_5_belief": "À quel point croyez-vous à cette nouvelle pensée ?",
       "empty_alert_title": "Enregistrement vide",
-      "empty_alert_msg": "Renseignez au moins la situation ou la pensée automatique."
+      "empty_alert_msg": "Renseignez au moins la situation ou la pensée automatique.",
+      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",

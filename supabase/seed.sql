@@ -448,6 +448,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
 on conflict (id) do nothing;
 
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('beck.footer', 'beck_columns', 'footer_note', 'modules.beck_columns.footer', 999)
+on conflict (id) do nothing;
+
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
   ('beck.cfg', 'required_keys_any',     'situation,automatic_thought'),

@@ -3,6 +3,10 @@
 > Branche : `consolidation-app-web-mobile` — Démarré le 2026-05-19  
 > Objectif : vérifier fonctionnement web + mobile, cohérence du contenu, et sourcing scientifique pour chaque module.
 
+## Backlog post-audit
+
+- **sleep_diary — graphiques de tendance** : courbes brutes par item (durée, latence, réveils, qualité, efficacité) sur 1 mois et 12 mois. Conforme MDR si affichage neutre sans seuils colorés. À implémenter dans `feat/sleep-diary-trends` après la fin de l'audit. Nécessite `victory-native` ou `react-native-svg`.
+
 ---
 
 ## Légende
@@ -18,8 +22,8 @@
 
 | # | Module | Web | Mobile | i18n fr/en/teen | Sources | MDR | Revue | Priorité |
 |---|---|---|---|---|---|---|---|---|
-| 1 | sleep_diary | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
-| 2 | beck_columns | ✅ | ✅ | ✅ | ⚠️ | ✅ | 🔲 | Haute |
+| 1 | sleep_diary | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| 2 | beck_columns | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 3 | fear_thermometer | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ⚠️ | ✅ | 🔲 | Haute |
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
@@ -90,41 +94,41 @@
 
 ### 01 — sleep_diary · Agenda du sommeil
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Validé — 2026-05-19  
 **Type** : Moteur générique (`preview_kind='sleep_journal'`)  
-**Priorité** : Haute
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Morin 2002, NICE NG215 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `SleepJournalLayout` — list + entry mode |
+| Écran mobile patient | ✅ | Agenda TCC-I 7 jours, SQLite local |
+| Cohérence web ↔ mobile | ✅ | Sections identiques (horaires, réveils, cauchemars, qualité, notes, efficacité) |
+| i18n fr complet | ✅ | 33 clés + footer ajouté |
+| i18n en complet | ✅ | 33 clés + footer ajouté |
+| i18n teen fr/en complet | ✅ | Footer ajouté fr + en |
+| Sources scientifiques | ✅ | Trauer et al. 2015 (PMID 26054060, grade A) · NICE NG215 (2022, grade A) |
+| Conformité MDR | ✅ | Affichage brut uniquement — aucun seuil, aucune interprétation |
+| Corrections apportées | ✅ | Ajout `footer_note` seed.sql · `SleepJournalLayout` web/mobile rendu footer · NICE NG215 + Trauer grade A dans sources_seed.sql · clés i18n footer fr/en/teen |
 
 ---
 
 ### 02 — beck_columns · Colonnes de Beck
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Validé — 2026-05-19  
 **Type** : Moteur générique (`preview_kind='column_form'`)  
-**Priorité** : Haute
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Beck AT 1979 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `ColumnFormLayout` — liste mock + formulaire colonne-par-colonne |
+| Écran mobile patient | ✅ | 5 colonnes DTR (situation/émotion/PA/réponse/résultat), sliders 0–100 |
+| Cohérence web ↔ mobile | ✅ | Même structure 5 colonnes, hints identiques |
+| i18n fr complet | ✅ | 22 clés existantes + footer ajouté |
+| i18n en complet | ✅ | 18 clés manquantes ajoutées + footer |
+| i18n teen fr/en complet | ✅ | entry_col hints/placeholders/intensities/beliefs + footer ajoutés fr + en |
+| Sources scientifiques | ✅ | Hofmann et al. 2012 (PMID 23459093, grade A corrigé) · NICE NG222 (2022, grade A) ajouté |
+| Conformité MDR | ✅ | Journal brut — aucun scoring, aucun seuil, aucune interprétation |
+| Corrections apportées | ✅ | i18n en/teen fr/en complétés · footer_note seed.sql ajouté · `ColumnFormLayout` web/mobile rendu footer · Hofmann grade null→A · NICE NG222 sources_seed.sql |
 
 ---
 

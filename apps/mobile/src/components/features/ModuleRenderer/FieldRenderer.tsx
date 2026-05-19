@@ -1713,8 +1713,9 @@ const ColumnTimeField = React.memo(function ColumnTimeField({
   )
 })
 
-function ColumnFormLayout({ fields, moduleId }: {
+function ColumnFormLayout({ fields, footer, moduleId }: {
   fields: ContentField[]
+  footer?: ContentField
   moduleId: string
 }) {
   const t = useModuleT()
@@ -2079,6 +2080,12 @@ function ColumnFormLayout({ fields, moduleId }: {
                 </View>
               )
             })}
+          </View>
+        )}
+        {footer != null && (
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
           </View>
         )}
       </ScrollView>
@@ -3722,7 +3729,7 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   }
 
   if (preview_kind === 'column_form') {
-    return <ColumnFormLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+    return <ColumnFormLayout fields={contentFields} footer={footer} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'tree_selector') {
