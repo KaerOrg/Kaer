@@ -3745,7 +3745,7 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   }
 
   if (preview_kind === 'exposure_tracker') {
-    return <ExposureTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+    return <ExposureTrackerLayout fields={contentFields} footer={footer} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'decision_grid') {

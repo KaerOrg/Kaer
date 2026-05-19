@@ -145,7 +145,8 @@
       "strategy_movement": "Bouger / marcher",
       "strategy_exposure": "Rester dans la situation",
       "strategy_distraction": "Penser à autre chose",
-      "strategy_contact": "Parler à quelqu'un"
+      "strategy_contact": "Parler à quelqu'un",
+      "footer": "L'échelle SUDS mesure ton niveau de stress — utilisée en thérapie d'exposition. Wolitzky-Taylor et al. 2008 · Craske et al. 2014."
     },
     "decisional_balance": {
       "title": "Le pour et le contre",

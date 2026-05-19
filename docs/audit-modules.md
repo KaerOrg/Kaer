@@ -24,7 +24,7 @@
 |---|---|---|---|---|---|---|---|---|
 | 1 | sleep_diary | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 2 | beck_columns | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 3 | fear_thermometer | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
+| 3 | fear_thermometer | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ⚠️ | ✅ | 🔲 | Haute |
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Critique |
@@ -134,21 +134,21 @@
 
 ### 03 — fear_thermometer · Thermomètre de la peur
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Validé — 2026-05-19  
 **Type** : Moteur générique (`preview_kind='exposure_tracker'`)  
-**Priorité** : Haute
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Wolpe 1969 (SUDS) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `ExposureTrackerLayout` — tabs Saisies/Situations + formulaire SUDS |
+| Écran mobile patient | ✅ | 3 modes list/entry/situations, catalogue de situations, stratégies |
+| Cohérence web ↔ mobile | ✅ | Mêmes sections, même structure SUDS avant/après |
+| i18n fr complet | ✅ | Footer ajouté |
+| i18n en complet | ✅ | Footer ajouté |
+| i18n teen fr/en complet | ✅ | Footer ajouté fr + en |
+| Sources scientifiques | ✅ | Wolitzky-Taylor 2008 (grade A) · Foa & Kozak 1986 · Craske 2014 · NICE CG159 — 4 sources solides |
+| Conformité MDR | ✅ | SUDs 0–100 affichés bruts, couleurs = convention temporelle pas score clinique |
+| Corrections apportées | ✅ | Footer note fr/en/teen · footer_note seed.sql · ExposureTrackerLayout web/mobile rendu footer · Wolitzky-Taylor grade null→A |
 
 ---
 

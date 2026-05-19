@@ -707,7 +707,7 @@ values
     'Wolitzky-Taylor et al. — Traitements psychologiques des phobies spécifiques : méta-analyse (Clin Psychol Rev, 2008)',
     'meta_analysis',
     'https://doi.org/10.1016/j.cpr.2008.02.007',
-    null,
+    'A',
     'Méta-analyse de 33 ECR : l''exposition in vivo produit des effets larges supérieurs au groupe contrôle ; l''exposition in vivo est plus efficace que l''exposition par imagerie à l''issue du traitement',
     1
   ),

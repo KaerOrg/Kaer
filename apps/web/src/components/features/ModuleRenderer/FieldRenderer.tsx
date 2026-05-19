@@ -163,7 +163,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   }
 
   if (preview_kind === 'exposure_tracker') {
-    return <ExposureTrackerLayout fields={contentFields} t={t} />
+    return <ExposureTrackerLayout fields={contentFields} footer={footer} t={t} />
   }
 
   if (preview_kind === 'tree_selector') {

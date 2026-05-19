@@ -145,7 +145,8 @@
       "strategy_movement": "Move / walk",
       "strategy_exposure": "Stay in the situation",
       "strategy_distraction": "Think about something else",
-      "strategy_contact": "Talk to someone"
+      "strategy_contact": "Talk to someone",
+      "footer": "The SUDS scale measures your stress level — used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014."
     },
     "decisional_balance": {
       "title": "The pros and cons",

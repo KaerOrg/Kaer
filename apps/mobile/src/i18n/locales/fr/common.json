@@ -852,7 +852,8 @@
       "strategy_movement": "Marche / mouvement",
       "strategy_exposure": "Rester dans la situation (exposition)",
       "strategy_distraction": "Distraction cognitive",
-      "strategy_contact": "Contact avec un proche"
+      "strategy_contact": "Contact avec un proche",
+      "footer": "Échelle SUDS (Subjective Units of Distress Scale) — mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
     },
     "exposure_hierarchy": {
       "label": "Hiérarchie d'exposition",

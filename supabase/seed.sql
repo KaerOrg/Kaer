@@ -893,6 +893,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('et.strategy_contact',      'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_contact',           105)
 on conflict (id) do nothing;
 
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('et.footer', 'fear_thermometer', 'footer_note', 'modules.fear_thermometer.footer', 999)
+on conflict (id) do nothing;
+
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'engagement_event_type', 'SAVE_FEAR_ENTRY'),
   ('et.cfg', 'suds_min',              '0'),

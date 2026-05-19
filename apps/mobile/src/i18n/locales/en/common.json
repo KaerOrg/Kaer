@@ -684,7 +684,8 @@
       "strategy_movement": "Walking / movement",
       "strategy_exposure": "Stay in the situation (exposure)",
       "strategy_distraction": "Cognitive distraction",
-      "strategy_contact": "Reach out to someone"
+      "strategy_contact": "Reach out to someone",
+      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
     },
     "exposure_hierarchy": {
       "label": "Exposure hierarchy",
