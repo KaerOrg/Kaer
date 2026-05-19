@@ -179,7 +179,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   }
 
   if (preview_kind === 'patient_scenario') {
-    return <PatientScenarioLayout fields={contentFields} t={t} />
+    return <PatientScenarioLayout fields={contentFields} footer={footer} t={t} />
   }
 
   // Fallback générique pour les preview_kinds restants (timed_tap_exercise…)

@@ -679,6 +679,7 @@ function PatientScenarioLayout({ fields, patientConfig }: {
     : null
 
   const disclaimerField = fields.find(f => f.field_type === 'rim_disclaimer')
+  const footerNoteField = fields.find(f => f.field_type === 'footer_note')
   const stepFields = [...fields]
     .filter(f => f.field_type === 'rim_step')
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -802,6 +803,13 @@ function PatientScenarioLayout({ fields, patientConfig }: {
       )}
 
       <ExerciseSafetySection fields={fields} />
+
+      {footerNoteField != null && (
+        <View style={psStyles.infoBox}>
+          <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+          <Text style={psStyles.footerText}>{t(footerNoteField.text_code ?? '')}</Text>
+        </View>
+      )}
     </ScrollView>
   )
 }
@@ -4006,6 +4014,8 @@ const psStyles = StyleSheet.create({
   soundLabelActive:    { color: colors.white },
   soundLabelMuted:     { color: colors.textMuted },
   soundComingSoon:     { fontSize: 9, color: colors.textMuted, fontStyle: 'italic' },
+  infoBox:             { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: spacing.xs, marginHorizontal: spacing.md, marginBottom: 4, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  footerText:          { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
 })
 
 const esStyles = StyleSheet.create({

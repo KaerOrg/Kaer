@@ -636,7 +636,8 @@
       "sound_stream": "Stream",
       "safety_title": "In case of distress",
       "safety_3114": "3114 — National suicide prevention line",
-      "safety_15": "15 — Emergency services"
+      "safety_15": "15 — Emergency services",
+      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
     },
     "fear_thermometer": {
       "label": "Fear thermometer",

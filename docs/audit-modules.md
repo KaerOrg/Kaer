@@ -28,7 +28,7 @@
 | 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 7 | rim | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
+| 7 | rim | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 8 | cognitive_saturation | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Moyenne |
 | 9 | decisional_balance | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 10 | behavioral_activation | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
@@ -214,21 +214,21 @@
 
 ### 07 — rim · RIM Retraitement par Imagerie Mentale
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Audité  
 **Type** : `preview_kind='patient_scenario'`  
 **Priorité** : Haute
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | Configuration praticien vérifiée ? |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Hackmann et al. 2011 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | PatientScenarioLayout + éditeur scénario sur PatientPage |
+| Écran mobile patient | ✅ | Scénario alternatif/original, 5 étapes, sons, sécurité 3114/15 |
+| Cohérence web ↔ mobile | ✅ | Protocole identique, scénario configuré praticien → patient read-only |
+| i18n fr complet | ✅ | Toutes clés + footer ajouté |
+| i18n en complet | ✅ | Toutes clés + footer ajouté |
+| i18n teen fr/en complet | ✅ | Sections complètes avec tutoiement adapté |
+| Sources scientifiques | ✅ | Krakow 2001 JAMA (A), Schmid 2021 Psychother Psychosom (A), Zhao 2025 méta-analyse (A) |
+| Conformité MDR | ✅ | Scénario lu par le patient, aucun score, aucune interprétation algorithmique |
+| Corrections apportées | ✅ | 3 sources ajoutées, footer_note + footer i18n fr/en/web, PatientScenarioLayout web + mobile supportent footer |
 
 ---
 

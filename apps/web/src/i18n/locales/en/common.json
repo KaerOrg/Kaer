@@ -551,6 +551,7 @@
     "rim": {
       "label": "RIM – Mental Imagery Reprocessing",
       "description": "Mental imagery reprocessing technique.",
+      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient.",
       "new_btn": "New session",
       "empty_title": "No session yet",
       "empty_text": "Use the button above to start your first session."
@@ -758,7 +759,8 @@
     },
     "rim": {
       "label": "RIM – Mental Imagery Reprocessing",
-      "description": "Mental imagery reprocessing technique."
+      "description": "Mental imagery reprocessing technique.",
+      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
     },
     "fear_thermometer": {
       "label": "Fear Thermometer",

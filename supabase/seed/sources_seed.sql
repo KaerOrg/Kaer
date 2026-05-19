@@ -1247,22 +1247,50 @@ values
 
 -- ── rim ──────────────────────────────────────────────────────────────────────
 -- RIM — Réécriture par Imagerie Mentale (Imagery Rehearsal Therapy)
--- Source vérifiée : PMID 40665297 — Zhao et al. 2025 (vérifié PubMed, abstract lu)
+-- Sources vérifiées : PMID 11476655 (Krakow 2001), PMID 33477151 (Schmid 2021), PMID 40665297 (Zhao 2025)
 
 ,
 
-  -- Zhao et al. 2025 — BMC Psychiatry (revue systématique + méta-analyse ECR, PTSD + troubles du sommeil)
+  -- 1. Krakow et al. 2001 — JAMA (ECR, n=168, survivantes d'agression sexuelle avec TSPT)
+  --    PMID 11476655 — doi:10.1001/jama.286.5.537 (vérifié PubMed, abstract lu)
+  --    evidence_grade 'A' : ECR publié dans JAMA, d Cohen 1.24 sur fréquence des cauchemars
+  (
+    '3e3e3e3e-0001-0001-0001-000000000002',
+    'rim',
+    'Krakow et al. — Imagery Rehearsal Therapy pour les cauchemars chroniques et le TSPT (JAMA, 2001)',
+    'rct',
+    'https://doi.org/10.1001/jama.286.5.537',
+    'A',
+    'ECR (n=168) : réduction des cauchemars d=1.24, qualité du sommeil d=0.67, symptômes TSPT d=1.00 — résultats maintenus à 6 mois sans contact supplémentaire',
+    1
+  ),
+
+  -- 2. Schmid et al. 2021 — Psychotherapy and Psychosomatics (ECR, n=96, trouble des cauchemars)
+  --    PMID 33477151 — doi:10.1159/000512757 (vérifié PubMed, abstract lu)
+  --    evidence_grade 'A' : ECR — imagerie rescripting vs exposition vs imagerie positive
+  (
+    '3e3e3e3e-0001-0001-0001-000000000003',
+    'rim',
+    'Schmid et al. — Imagery Rescripting vs Exposition Imaginaire vs Imagerie Positive (Psychother Psychosom, 2021)',
+    'rct',
+    'https://doi.org/10.1159/000512757',
+    'A',
+    'ECR (n=96) : imagerie rescripting d=-1.04 sur la détresse liée aux cauchemars — efficacité comparable à l''exposition, supérieure au contrôle actif',
+    2
+  ),
+
+  -- 3. Zhao et al. 2025 — BMC Psychiatry (revue systématique + méta-analyse ECR, PTSD + troubles du sommeil)
   --    PMID 40665297 — doi:10.1186/s12888-025-07157-9 (vérifié PubMed, abstract lu)
-  --    L''IRT (seule ou combinée avec la TCC-I) est recommandée pour le PTSD avec troubles du sommeil
+  --    evidence_grade 'A' : méta-analyse d''ECR
   (
     '3e3e3e3e-0001-0001-0001-000000000001',
     'rim',
     'Zhao et al. — Interventions pour le TSPT avec troubles du sommeil : revue systématique et méta-analyse (BMC Psychiatry, 2025)',
     'meta_analysis',
     'https://doi.org/10.1186/s12888-025-07157-9',
-    null,
-    'Revue systématique et méta-analyse des ECR conformes aux recommandations NICE pour le TSPT avec troubles du sommeil (jusqu''en 02/2023) : interventions actives réduisent TSPT (SMD=0,86), troubles du sommeil (SMD=1,06) et dépression (SMD=0,58) — l''IRT (seule ou + TCC-I) est recommandée comme traitement psychologique de première intention',
-    1
+    'A',
+    'Revue systématique et méta-analyse des ECR conformes aux recommandations NICE pour le TSPT avec troubles du sommeil : interventions actives réduisent TSPT (SMD=0,86), troubles du sommeil (SMD=1,06) et dépression (SMD=0,58) — l''IRT (seule ou + TCC-I) recommandée comme traitement psychologique de première intention',
+    3
   )
 
 -- ── sleep_diary ───────────────────────────────────────────────────────────────

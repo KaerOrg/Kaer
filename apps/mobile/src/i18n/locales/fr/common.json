@@ -804,7 +804,8 @@
       "sound_stream": "Ruisseau",
       "safety_title": "En cas de détresse",
       "safety_3114": "3114 — Numéro national prévention suicide",
-      "safety_15": "15 — SAMU"
+      "safety_15": "15 — SAMU",
+      "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
       "label": "Thermomètre de la peur",

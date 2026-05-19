@@ -1230,7 +1230,8 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('rim.sound_stream', 'rim', NULL, NULL, 'ambient_sound', 'modules.rim.sound_stream', 110),
   ('rim.safety_title', 'rim', NULL, NULL, 'exercise_safety_title', 'modules.rim.safety_title', 120),
   ('rim.safety_3114', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_3114', 130),
-  ('rim.safety_15', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_15', 140)
+  ('rim.safety_15', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_15', 140),
+  ('rim.footer', 'rim', NULL, NULL, 'footer_note', 'modules.rim.footer', 999)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : mood_tracker (questionnaire avec sliders) ────────

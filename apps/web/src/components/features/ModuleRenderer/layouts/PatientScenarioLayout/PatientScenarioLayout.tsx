@@ -1,8 +1,10 @@
 import { AlertTriangle, FileText, Info, Music, Shield } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
+import { FieldText } from '../../fields'
 
 interface Props {
   fields: ContentField[]
+  footer?: ContentField
   t: (key: string) => string
 }
 
@@ -10,7 +12,7 @@ interface Props {
 // 'patient_scenario') — disclaimer orange, scénario, étapes du protocole,
 // sons d'ambiance, section sécurité. Read-only (lecture seule).
 // Source mobile : PatientScenarioLayout (FieldRenderer.tsx).
-export function PatientScenarioLayout({ fields, t }: Props) {
+export function PatientScenarioLayout({ fields, footer, t }: Props) {
   const ft = (type: string): string => {
     const f = fields.find(field => field.field_type === type)
     return f?.text_code ? t(f.text_code) : ''
@@ -95,6 +97,13 @@ export function PatientScenarioLayout({ fields, t }: Props) {
             ))}
           </ul>
         </section>
+      )}
+
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
+        </div>
       )}
     </div>
   )
