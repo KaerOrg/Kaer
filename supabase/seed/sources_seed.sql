@@ -1087,14 +1087,14 @@ values
 
   -- 1. Macri & Rogge 2024 — Clin Psychol Rev (méta-analyse systématique, 77 études, n=9 123)
   --    PMID 38615492 — doi:10.1016/j.cpr.2024.102432 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : méta-analyse systématique d''ECR
   (
     '2d2d2d2d-0001-0001-0001-000000000001',
     'cognitive_saturation',
     'Macri & Rogge — Flexibilité psychologique comme mécanisme thérapeutique de l''ACT : méta-analyse (Clin Psychol Rev, 2024)',
     'meta_analysis',
     'https://doi.org/10.1016/j.cpr.2024.102432',
-    null,
+    'A',
     'Méta-analyse de 77 études (n=9 123) : l''ACT entraîne une augmentation significative de la défusion cognitive et une réduction de la fusion cognitive, toutes comparaisons confondues — changements liés à des réductions correspondantes de la détresse psychologique, soutenant le rôle mécanistique de la défusion',
     1
   )

@@ -29,7 +29,7 @@
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 7 | rim | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 8 | cognitive_saturation | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Moyenne |
+| 8 | cognitive_saturation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 9 | decisional_balance | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 10 | behavioral_activation | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 11 | grounding | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
@@ -234,21 +234,21 @@
 
 ### 08 — cognitive_saturation · Saturation cognitive
 
-**Statut** : 🔲 Non audité  
-**Type** : `preview_kind='guided_exercise'`  
+**Statut** : ✅ Audité  
+**Type** : `preview_kind='guided_exercise'` (mobile : écran custom dédié)  
 **Priorité** : Moyenne
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | Contenu minimal détecté |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Hayes SC et al. 1999 (ACT/défusion) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | GuidedExerciseLayout basique (module non interactif en preview) |
+| Écran mobile patient | ✅ | Écran custom tapotement (CognitiveSaturationScreen), 3 phases |
+| Cohérence web ↔ mobile | ✅ | Web = aperçu statique, mobile = expérience interactive — cohérent |
+| i18n fr complet | ✅ | 25 clés complètes |
+| i18n en complet | ✅ | 21 clés manquantes ajoutées (start_btn, intro_text, instructions…) |
+| i18n teen fr/en complet | ✅ | Overrides title + intro en tutoiement (suffisant, fallback sur common) |
+| Sources scientifiques | ✅ | Macri & Rogge 2024 méta-analyse ACT (grade null→A) |
+| Conformité MDR | ✅ | Comptage de tapotements brut, durée affichée — aucune interprétation |
+| Corrections apportées | ✅ | EN common.json : 21 clés ajoutées ; sources_seed.sql : grade 'A' |
 
 ---
 
