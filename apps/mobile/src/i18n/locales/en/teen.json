@@ -715,6 +715,17 @@
     "motivational_balance": {
       "label": "Motivational balance",
       "description": "Understanding your ambivalence and what drives change"
+    },
+    "exposure_hierarchy": {
+      "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
+      "info_btn": "What is this technique?",
+      "info_body": "The exposure hierarchy is a validated CBT technique. You list situations you avoid, rate them 0 to 100 by difficulty (SUDs score), then face them gradually starting with the easiest.",
+      "empty_text": "Create your first exposure hierarchy with your clinician.",
+      "suds_hint": "From 0 (no stress) to 100 (max stress). This number is personal — no right or wrong answer.",
+      "description_label": "Situation to face",
+      "description_hint": "Describe precisely the situation you avoid.",
+      "description_placeholder": "E.g. Taking the lift alone to the 5th floor",
+      "session_question_teen": "What is your anxiety level towards this situation right now?"
     }
   }
 }

@@ -25,7 +25,7 @@
 | 1 | sleep_diary | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 2 | beck_columns | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 3 | fear_thermometer | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ⚠️ | ✅ | 🔲 | Haute |
+| 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Critique |
 | 7 | rim | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
@@ -154,21 +154,21 @@
 
 ### 04 — exposure_hierarchy · Hiérarchie d'exposition
 
-**Statut** : 🔲 Non audité  
-**Type** : Moteur générique (`preview_kind='exposure_hierarchy'`)  
-**Priorité** : Haute
+**Statut** : ✅ Validé — 2026-05-19  
+**Type** : Layout FIELDLESS (`preview_kind='exposure_hierarchy'`)  
+**Priorité** : —
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Partiel : à compléter Foa & Kozak 1986, HAS |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `ExposureHierarchyLayout` — FIELDLESS, aperçu hiérarchie statique |
+| Écran mobile patient | ✅ | 4 modes (hiérarchies/items/item_form/item_history), SUDs 0–100, DisclaimerBanner |
+| Cohérence web ↔ mobile | ✅ | Layout FIELDLESS — contenu identique, DisclaimerBanner présent mobile |
+| i18n fr complet | ✅ | ~43 clés complètes |
+| i18n en complet | ✅ | ~43 clés ajoutées (seulement label+description existaient) |
+| i18n teen fr/en complet | ✅ | Teen FR : 9 clés adaptées tutoiement · Teen EN : section ajoutée |
+| Sources scientifiques | ✅ | Carpenter et al. 2018 (PMID 29451967, grade A corrigé) · NICE NG116 (2018) |
+| Conformité MDR | ✅ | Cases à cocher neutres, SUDs bruts, aucun seuil de "guérison" |
+| Corrections apportées | ✅ | EN common.json : ~40 clés ajoutées · Teen EN : section ajoutée · Carpenter grade null→A |
 
 ---
 

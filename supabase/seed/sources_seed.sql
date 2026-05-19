@@ -773,7 +773,7 @@ values
     'Carpenter et al. — TCC pour les troubles anxieux : méta-analyse d''ECR placebo-contrôlés (Depress Anxiety, 2018)',
     'meta_analysis',
     'https://doi.org/10.1002/da.22728',
-    null,
+    'A',
     'Méta-analyse de 41 ECR placebo-contrôlés (N=2 843) : Hedges g=0,56 sur les symptômes cibles ; les interventions centrées sur l''exposition produisent des effets plus larges que les approches cognitives seules',
     1
   ),
