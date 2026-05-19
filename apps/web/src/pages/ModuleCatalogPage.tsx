@@ -158,9 +158,6 @@ export function ModuleCatalogPage() {
                     {LUCIDE_ICONS[category.icon] && React.createElement(LUCIDE_ICONS[category.icon], { size: 18, className: 'catalog-section__icon' })}
                     {t(category.labelKey)}
                   </h2>
-                  {t(category.subtitleKey) && (
-                    <span className="catalog-section__subtitle">{t(category.subtitleKey)}</span>
-                  )}
                 </div>
 
                 <div className="catalog-grid">
