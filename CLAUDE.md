@@ -118,6 +118,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
 | `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
+| `motivational_balance` | Balance motivationnelle (Entretien Motivationnel) | Implémenté — écran custom, 4 onglets : Fiches (`psyedu`, 4 topics), Stade (roue Prochaska 6 stades), Thermomètres (importance + confiance 0-10 + question de suivi + phrase d'engagement), Balance (12 valeurs + 2 colonnes Pour/Contre + poids 1-3) ; bouton "i" sources (Miller & Rollnick, Prochaska, SDT, HAS, NICE) ; SQLite local 3 tables (`em_rulers`, `em_balance_items`, `em_values`) ; teen mode ; bandeau MDR ; catégorie Supabase `motivation` |
 | `cognitive_distortions` | Distorsions cognitives | Prévu (`preview_kind='coming_soon'`) |
 | `therapeutic_commitment` | Engagement thérapeutique | Prévu (`preview_kind='coming_soon'`) |
 
@@ -184,7 +185,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Activation comportementale (`behavioral_activation`) — activités P/M 0–10, statut planifiée/réalisée, SQLite `activity_records`
 - [x] Module Ancrage 5-4-3-2-1 (`grounding`) — exercice DBT sensoriel interactif (Linehan 1993), 3 modes, sans stockage de données
 - [x] Module Thermomètre de l'humeur (`mood_tracker`) — 4 dimensions quotidiennes (humeur/énergie/anxiété/plaisir 1–10), sparklines 30j, SQLite `mood_entries`
-- [x] Module Balance motivationnelle (`motivational_balance`) — 2 onglets psyedu + balance pour/contre, SQLite local
+- [x] Module Balance motivationnelle (`motivational_balance`) — 4 onglets (Fiches psyedu, Stade Prochaska, Thermomètres importance/confiance 0-10 + question de suivi, Balance valeurs + 2 colonnes), bouton "i" sources scientifiques, SQLite local (3 tables), teen mode, bandeau MDR, 10 tests Jest
 - [x] Module Observance médicamenteuse (`medication_adherence`) — checklist quotidienne d'observance, SQLite local
 - [x] Module Techniques de respiration (`breathing_techniques`) — respirations guidées (cohérence cardiaque, abdominale), SQLite local
 - [x] Module EPDS — Dépression postnatale (`epds`) — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries`

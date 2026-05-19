@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
-vi.mock('../lib/supabase', () => ({
+vi.mock('../../lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
     functions: { invoke: vi.fn() },
@@ -18,16 +18,16 @@ vi.mock('react-router-dom', () => ({
   Link: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-vi.mock('../store/authStore', () => ({
+vi.mock('../../store/authStore', () => ({
   useAuthStore: () => ({
     practitioner: { id: 'p-1', email: 'dr@test.fr', name: 'Dr Dupont', professional_title: 'IPA' },
   }),
 }))
 
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import { DashboardPage } from './DashboardPage'
-import { ToastProvider } from '../contexts/ToastProvider'
-import { ToastContainer } from '../components/ui/Toast/ToastContainer'
+import { ToastProvider } from '../../contexts/ToastProvider'
+import { ToastContainer } from '../../components/ui/Toast/ToastContainer'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -1,0 +1,1 @@
+export { ModuleCatalogPage } from './ModuleCatalogPage'

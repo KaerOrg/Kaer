@@ -57,7 +57,8 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('breathing_techniques',    'anxiety',     'fields',      19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
-  ('decisional_balance',      'addiction',   'grid2x2',     22, false)
+  ('decisional_balance',      'addiction',   'grid2x2',     22, false),
+  ('motivational_balance',    'motivation',  'tabbed',      23, false)
 on conflict (id) do nothing;
 
 -- Icônes / couleurs : appliqué uniquement sur les rangs où icon est vide
@@ -86,6 +87,7 @@ update public.modules set
     when 'cognitive_saturation'    then 'refresh-cw'
     when 'craving_journal'         then 'bookmark'
     when 'decisional_balance'      then 'scale'
+    when 'motivational_balance'    then 'trending-up'
     else ''
   end,
   mobile_icon = case id
@@ -111,6 +113,7 @@ update public.modules set
     when 'cognitive_saturation'    then 'chat-processing-outline'
     when 'craving_journal'         then 'lightning-bolt-outline'
     when 'decisional_balance'      then 'scale-balance'
+    when 'motivational_balance'    then 'trending-up'
     else ''
   end,
   color = case id
@@ -136,6 +139,7 @@ update public.modules set
     when 'cognitive_saturation'    then '#F59E0B'
     when 'craving_journal'         then '#EC4899'
     when 'decisional_balance'      then '#EC4899'
+    when 'motivational_balance'    then '#0EA5E9'
     else '#6366F1'
   end
 where icon = '';
@@ -1285,7 +1289,9 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('eh.soon',            'exposure_hierarchy',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('tc.label',           'therapeutic_commitment', NULL, NULL, 'module_label',       'module.therapeutic_commitment.label', 0),
   ('tc.desc',            'therapeutic_commitment', NULL, NULL, 'module_description', 'module.therapeutic_commitment.description', 1),
-  ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99)
+  ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99),
+  ('mb.label',           'motivational_balance',   NULL, NULL, 'module_label',       'module.motivational_balance.label', 0),
+  ('mb.desc',            'motivational_balance',   NULL, NULL, 'module_description', 'module.motivational_balance.description', 1)
 on conflict (id) do nothing;
 
 

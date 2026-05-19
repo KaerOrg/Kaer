@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Settings2, CalendarPlus } from 'lucide-react'
-import { Layout } from '../components/features/Layout'
-import { Button } from '../components/ui/Button/Button'
-import { WeekGrid } from '../components/features/WeekGrid'
-import { AvailabilityEditor } from '../components/features/AvailabilityEditor'
-import { AppointmentModal } from '../components/features/AppointmentModal'
-import { SearchInput } from '../components/ui/SearchInput'
-import { useAuthStore } from '../store/authStore'
+import { Layout } from '../../components/features/Layout'
+import { Button } from '../../components/ui/Button/Button'
+import { WeekGrid } from '../../components/features/WeekGrid'
+import { AvailabilityEditor } from '../../components/features/AvailabilityEditor'
+import { AppointmentModal } from '../../components/features/AppointmentModal'
+import { SearchInput } from '../../components/ui/SearchInput'
+import { useAuthStore } from '../../store/authStore'
 import {
   fetchAvailabilityRules,
   saveAvailabilityRule,
@@ -20,15 +20,15 @@ import {
   updateAppointmentNotes,
   fetchAutoConfirmSetting,
   saveAutoConfirmSetting,
-} from '../services/appointmentService'
-import { fetchPatientOptions } from '../services/patientService'
+} from '../../services/appointmentService'
+import { fetchPatientOptions } from '../../services/patientService'
 import type {
   AvailabilityRule,
   AvailabilityException,
   AppointmentWithPatient,
   AppointmentStatus,
-} from '../lib/calendar.types'
-import type { PatientOption } from '../services/patientService'
+} from '../../lib/calendar.types'
+import type { PatientOption } from '../../services/patientService'
 import './AgendaPage.css'
 
 function getMondayOfWeek(d: Date): Date {

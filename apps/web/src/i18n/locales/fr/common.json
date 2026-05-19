@@ -95,6 +95,56 @@
     "module_count_one": "{{count}} module",
     "module_count_other": "{{count}} modules"
   },
+  "scales": {
+    "eval_auto": "Auto",
+    "eval_hetero": "Hétéro",
+    "validated_prefix": "Validé",
+    "age": {
+      "perinatal": "Périnatal",
+      "enfant": "Enfant",
+      "ado": "Ado",
+      "adulte": "Adulte",
+      "senior": "Senior"
+    },
+    "category": {
+      "humeur": "Humeur",
+      "anxiete": "Anxiété",
+      "sommeil": "Sommeil",
+      "addictologie": "Addictologie",
+      "psychose": "Psychose",
+      "personnalite": "Personnalité",
+      "neurodev": "Neurodev",
+      "trauma": "Trauma"
+    },
+    "full_title": {
+      "phq9":    "Patient Health Questionnaire",
+      "gad7":    "Generalized Anxiety Disorder 7",
+      "epds":    "Edinburgh Postnatal Depression Scale",
+      "rcads":   "Revised Children's Anxiety and Depression Scale",
+      "bsl23":   "Borderline Symptom List 23",
+      "cape42":  "Community Assessment of Psychic Experiences",
+      "audit":   "Alcohol Use Disorders Identification Test",
+      "nsi":     "Nightmare Severity Index",
+      "asrs18":  "Adult ADHD Self-Report Scale v1.1 — Bilan Complet (18 items)",
+      "asrs6":   "Adult ADHD Self-Report Scale v1.1 — Dépistage (6 items)",
+      "snap_iv": "Swanson, Nolan and Pelham Rating Scale – version IV",
+      "cssrs":   "Columbia Suicide Severity Rating Scale"
+    },
+    "descriptions": {
+      "phq9": "Questionnaire de dépistage et de mesure de la sévérité de la dépression en 9 items. Référence mondiale pour le suivi longitudinal.",
+      "gad7": "Évaluation rapide en 7 items du trouble anxieux généralisé. Sensible au changement thérapeutique.",
+      "epds": "Dépistage de la dépression périnatale (ante et post-partum). Référence internationale recommandée par la HAS.",
+      "rcads": "Mesure des symptômes anxieux et dépressifs chez l'enfant et l'adolescent. Versions auto-rapportée et parentale disponibles.",
+      "bsl23": "Mesure de la sévérité des symptômes du trouble de personnalité borderline. Outil de suivi longitudinal en TCD.",
+      "cape42": "Évaluation des expériences subcliniques positives, négatives et dépressives en population générale et clinique.",
+      "audit": "Dépistage OMS de la consommation d'alcool problématique en 10 items. Recommandé par la HAS pour le repérage précoce.",
+      "nsi": "Évaluation multidimensionnelle de la sévérité des cauchemars en 9 items (score 0–45). Mesure la fréquence des réveils, l'intensité émotionnelle et l'impact diurne.",
+      "asrs18": "Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l'ASRS v1.1). Score total 0–72, Partie A 0–24, Partie B 0–48.",
+      "asrs6": "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0–24. Recommandé par l'OMS pour le repérage rapide.",
+      "snap_iv": "Grille comportementale de dépistage du TDAH en 26 items (18 critères DSM-IV + 8 critères TOD). Hétéro-évaluation par le parent ou l'enseignant.",
+      "cssrs": "Évaluation structurée de l'idéation et des comportements suicidaires. Columbia University / NIMH — version « Depuis la dernière visite »."
+    }
+  },
   "patient": {
     "back": "← Retour à mes patients",
     "teen_mode_label": "Mode ado",
@@ -139,6 +189,7 @@
     "rim_error_update": "Erreur lors de la mise à jour. Réessayez.",
     "rim_btn_unlock": "Débloquer avec ce scénario",
     "rim_btn_save": "Enregistrer le scénario",
+    "cssrs_evaluations": "Évaluations",
     "tab_overview": "Vue d'ensemble",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -168,7 +219,11 @@
     "sources_type_meta_analysis": "Méta-analyse",
     "sources_type_systematic_review": "Revue systématique",
     "sources_type_guideline": "Recommandation officielle",
-    "sources_type_expert_opinion": "Avis d'experts"
+    "sources_type_expert_opinion": "Avis d'experts",
+    "scale_read": "Lu",
+    "scale_unread": "Non lu",
+    "cssrs_modal_title": "C-SSRS — Dépistage suicidaire",
+    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
   },
   "modules": {
     "nav_link": "Modules",
@@ -291,6 +346,10 @@
       "label": "Balance décisionnelle",
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
+    },
+    "motivational_balance": {
+      "label": "Balance motivationnelle",
+      "description": "Entretien Motivationnel (Miller & Rollnick) : stades Prochaska, thermomètres importance/confiance 0-10, balance valeurs."
     },
     "phq9": {
       "label": "PHQ-9",
@@ -538,12 +597,12 @@
       "label": "Addictologie & Impulsivité",
       "subtitle": "Le module souvent oublié"
     },
+    "motivation": {
+      "label": "Entretien Motivationnel",
+      "subtitle": "Explorer l'ambivalence au changement"
+    },
     "assessments": {
       "label": "Échelles et questionnaires d'évaluation",
-      "subtitle": ""
-    },
-    "motivation": {
-      "label": "Motivation & Engagement Thérapeutique",
       "subtitle": ""
     }
   },
@@ -896,6 +955,10 @@
       "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
+    "motivational_balance": {
+      "label": "Balance motivationnelle",
+      "description": "Entretien Motivationnel (Miller & Rollnick) : stades Prochaska, thermomètres importance/confiance 0-10, balance valeurs."
+    },
     "phq9": {
       "label": "PHQ-9",
       "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0–27."
@@ -1057,5 +1120,24 @@
       "error_update_status": "Erreur lors de la mise à jour du statut."
     },
     "filter_patient_label": "Rechercher un patient…"
+  },
+  "dispensaire": {
+    "title": "Dispensaire Clinique",
+    "subtitle": "Bibliothèque de questionnaires validés. Envoyez-les directement à vos patients.",
+    "sidebar_title": "Thèmes cliniques",
+    "all_scales": "Toutes les échelles",
+    "legend_ages": "Tranches d'âge validées :",
+    "empty_category": "Aucune échelle disponible dans cette catégorie pour le moment.",
+    "empty_soon": "De nouveaux questionnaires seront ajoutés prochainement.",
+    "propose_btn": "Proposer à un patient",
+    "reference_aria": "Référence validée",
+    "modal_subtitle": "Choisir un patient",
+    "close": "Fermer",
+    "loading_patients": "Chargement des patients…",
+    "no_patients": "Aucun patient dans votre liste pour le moment.",
+    "sent": "Envoyé",
+    "send": "Envoyer",
+    "error_duplicate": "{{label}} a déjà ce questionnaire.",
+    "error_send": "Erreur lors de l'envoi. Réessayez."
   }
 }

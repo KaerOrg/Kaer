@@ -28,6 +28,8 @@ import { EmptyState } from '../components/ui/EmptyState'
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
   breathing_techniques:     'BreathingTechniques',
+  diet_weight_psycho:       'DietWeightPsycho',
+  motivational_balance:     'MotivationalBalance',
 }
 
 // Ordre des catégories — miroir de sort_order dans module_categories en base.
