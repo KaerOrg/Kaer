@@ -817,28 +817,28 @@ values
 
   -- 2. Di Noia & Prochaska 2010 — Am J Health Behav (méta-analyse, 27 études)
   --    PMID 20524891 — doi:10.5993/ajhb.34.5.11 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : méta-analyse systématique
   (
     'bbbbbbbb-0001-0001-0001-000000000002',
     'decisional_balance',
     'Di Noia & Prochaska — Balance décisionnelle et stades de changement : revue méta-analytique (Am J Health Behav, 2010)',
     'meta_analysis',
     'https://doi.org/10.5993/ajhb.34.5.11',
-    null,
+    'A',
     'Méta-analyse de 27 études : la structure de la balance décisionnelle et sa relation aux stades de changement sont cohérentes avec la théorie — les pros augmentent davantage (+0,82) que les cons ne diminuent (−0,55) de la précontemplation à l''action',
     2
   ),
 
   -- 3. Lundahl et al. 2013 — Patient Educ Couns (méta-analyse, 48 ECR, N=9 618, co-signé Rollnick)
   --    PMID 24001658 — doi:10.1016/j.pec.2013.07.012 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : méta-analyse de 48 ECR
   (
     'bbbbbbbb-0001-0001-0001-000000000003',
     'decisional_balance',
     'Lundahl et al. — Entretien motivationnel en soins médicaux : méta-analyse d''ECR (Patient Educ Couns, 2013)',
     'meta_analysis',
     'https://doi.org/10.1016/j.pec.2013.07.012',
-    null,
+    'A',
     'Méta-analyse de 48 ECR (N=9 618) : OR=1,55 en faveur de l''EM versus comparateurs ; efficace sur une large gamme de comportements (charge virale VIH, poids, alcool, tabac, comportement sédentaire)',
     3
   ),

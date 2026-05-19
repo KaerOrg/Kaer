@@ -30,7 +30,7 @@
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 7 | rim | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 8 | cognitive_saturation | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 9 | decisional_balance | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
+| 9 | decisional_balance | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 10 | behavioral_activation | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 11 | grounding | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
 | 12 | mood_tracker | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
@@ -254,21 +254,21 @@
 
 ### 09 — decisional_balance · Balance décisionnelle
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Audité  
 **Type** : Moteur générique (`preview_kind='decision_grid'`)  
 **Priorité** : Haute
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Miller & Rollnick 2012 (Entretien Motivationnel) |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | DecisionGridLayout : 4 quadrants pros/cons + jauge motivation |
+| Écran mobile patient | ✅ | Grille 2×2 + items pondérés 1–5 étoiles + jauge |
+| Cohérence web ↔ mobile | ✅ | Même contenu, même structure quadrant |
+| i18n fr complet | ✅ | 17 clés complètes |
+| i18n en complet | ✅ | Parité parfaite FR/EN |
+| i18n teen fr/en complet | ✅ | Overrides présents |
+| Sources scientifiques | ✅ | Prochaska 1997 (théorie), Di Noia 2010 méta-analyse (A), Lundahl 2013 méta-analyse 48 ECR (A) |
+| Conformité MDR | ✅ | Affichage brut pros/cons + jauge passive — aucune interprétation algorithmique |
+| Corrections apportées | ✅ | sources_seed.sql : Di Noia 2010 et Lundahl 2013 grades null→'A' |
 
 ---
 
