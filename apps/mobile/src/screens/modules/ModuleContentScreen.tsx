@@ -35,10 +35,14 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'exposure_hierarchy',
 ])
 
-export default function ModuleContentScreen({ route }: Props) {
+export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params
   const { t } = useTranslation()
   const { teenColor } = useTeen()
+
+  useEffect(() => {
+    navigation.setOptions({ title: t(`modules.${moduleType}.label`) })
+  }, [moduleType, t, navigation])
   const accentColor = teenColor(moduleType)
   const patient = useAuthStore((s) => s.patient)
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)

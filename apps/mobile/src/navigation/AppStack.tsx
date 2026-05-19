@@ -125,12 +125,7 @@ export default function AppStack() {
       <Stack.Screen
         name="ModuleContent"
         component={ModuleContentScreen}
-        options={({ route }) => ({
-          title: route.params.moduleType
-            .split('_')
-            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
-        })}
+        options={{ title: '' }}
       />
       <Stack.Screen
         name="CrisisPlan"
