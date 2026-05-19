@@ -515,6 +515,7 @@
       "step_notes_title": "Une note à ajouter ? (optionnel)",
       "step_notes_hint": "Contexte, situation, pensée associée… Ce champ est libre.",
       "notes_free_placeholder": "Note libre (facultatif)",
+      "footer": "Roue des émotions — labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "node": {
         "joy": "Joie",
         "joy__serenity": "Sérénité",

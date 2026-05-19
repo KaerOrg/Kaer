@@ -1115,9 +1115,26 @@ values
     'Lieberman et al. — Mettre ses émotions en mots : la labellisation affective réduit l''activité amygdalienne (Psychol Sci, 2007)',
     'expert_opinion',
     'https://doi.org/10.1111/j.1467-9280.2007.01916.x',
-    null,
+    'B',
     'Étude IRMf : la labellisation affective (affect labeling) réduit l''activité de l''amygdale et des régions limbiques en réponse à des images émotionnelles négatives, via activation du CPF ventrolatéral droit et du CPF médian — base neurobiologique du bénéfice clinique de l''identification des émotions',
     1
+  )
+
+,
+
+  -- 2. Kircanski, Lieberman & Craske 2012 — Psychological Science (ECR clinique)
+  --    PMID 22902568 — doi:10.1177/0956797612443830 (vérifié PubMed, abstract lu)
+  --    « Feelings into words: contributions of language to exposure therapy »
+  --    evidence_grade : 'B' — ECR clinique (bras entre groupes, n modéré)
+  (
+    '2e2e2e2e-0002-0001-0001-000000000001',
+    'emotion_wheel',
+    'Kircanski, Lieberman & Craske — Mettre ses ressentis en mots réduit la réponse de peur lors d''une exposition (Psychol Sci, 2012)',
+    'rct',
+    'https://doi.org/10.1177/0956797612443830',
+    'B',
+    'ECR clinique (design inter-groupes) : lors d''une exposition à une araignée, le groupe labellisation affective présente une réponse de conductance cutanée significativement inférieure aux autres groupes à J+7 (distraction, recadrage, exposition seule) — l''utilisation de mots d''anxiété/peur pendant l''exposition est associée à de meilleures réductions de la peur',
+    2
   )
 
 -- ── epds ─────────────────────────────────────────────────────────────────────

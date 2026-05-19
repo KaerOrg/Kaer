@@ -167,7 +167,7 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
   }
 
   if (preview_kind === 'tree_selector') {
-    return <TreeSelectorLayout fields={contentFields} t={t} />
+    return <TreeSelectorLayout fields={contentFields} footer={footer} t={t} />
   }
 
   if (preview_kind === 'column_form') {

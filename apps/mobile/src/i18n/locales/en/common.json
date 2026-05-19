@@ -396,6 +396,7 @@
       "step_notes_title": "Anything to add? (optional)",
       "step_notes_hint": "Context, situation, related thought… Free text.",
       "notes_free_placeholder": "Free note (optional)",
+      "footer": "Emotion wheel — affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "node": {
         "joy": "Joy",
         "joy__serenity": "Serenity",

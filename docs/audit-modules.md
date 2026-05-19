@@ -26,7 +26,7 @@
 | 2 | beck_columns | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 3 | fear_thermometer | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 5 | emotion_wheel | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Moyenne |
+| 5 | emotion_wheel | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Critique |
 | 7 | rim | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 8 | cognitive_saturation | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Moyenne |
@@ -172,7 +172,7 @@
 
 ---
 
-### 05 — emotion_wheel · Roue des émotions
+### 05 — emotion_wheel · Roue des émotions (Plutchik)
 
 **Statut** : 🔲 Non audité  
 **Type** : Moteur générique (`preview_kind='tree_selector'`)  
@@ -180,15 +180,15 @@
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | 🔲 | Manquantes : Plutchik R 1980 |
-| Conformité MDR | 🔲 | |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `TreeSelectorLayout` — grille 8 émotions Plutchik + historique mock |
+| Écran mobile patient | ✅ | 3 niveaux (primaire→nuance→spécifique), intensité 1–10, notes libres |
+| Cohérence web ↔ mobile | ✅ | Même arbre 3 niveaux, même flux de saisie |
+| i18n fr complet | ✅ | Footer ajouté |
+| i18n en complet | ✅ | Footer ajouté |
+| i18n teen fr/en complet | ✅ | Footer ajouté fr + en |
+| Sources scientifiques | ✅ | Lieberman et al. 2007 (PMID 17576282, grade B) · Kircanski, Lieberman & Craske 2012 (PMID 22902568, grade B) — ajouté via PubMed |
+| Conformité MDR | ✅ | Intensité 1–10 brute, pas de seuil interprétatif |
+| Corrections apportées | ✅ | Footer fr/en/teen · footer_note seed.sql · TreeSelectorLayout web/mobile rendu footer · Lieberman grade null→B · Kircanski 2012 ajouté |
 
 ---
 

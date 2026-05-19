@@ -2156,8 +2156,9 @@ function intensityValuesFor(min: number, max: number): number[] {
   return result
 }
 
-function TreeSelectorLayout({ fields, moduleId }: {
+function TreeSelectorLayout({ fields, footer, moduleId }: {
   fields: ContentField[]
+  footer?: ContentField
   moduleId: string
 }) {
   const t = useModuleT()
@@ -2421,6 +2422,12 @@ function TreeSelectorLayout({ fields, moduleId }: {
                   </View>
                 )
               })}
+            </View>
+          )}
+          {footer != null && (
+            <View style={styles.infoBox}>
+              <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+              <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
             </View>
           )}
         </ScrollView>
@@ -3733,7 +3740,7 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   }
 
   if (preview_kind === 'tree_selector') {
-    return <TreeSelectorLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+    return <TreeSelectorLayout fields={contentFields} footer={footer} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'sleep_journal') {

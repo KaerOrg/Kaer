@@ -536,6 +536,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.delete_title',          'emotion_wheel', 'tree_selector_delete_title',        'modules.emotion_wheel.delete_entry_title',           18)
 on conflict (id) do nothing;
 
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('ew.footer', 'emotion_wheel', 'footer_note', 'modules.emotion_wheel.footer', 999)
+on conflict (id) do nothing;
+
 -- Niveau 1 — émotions primaires (8)
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('ew.joy',          'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy',          100),

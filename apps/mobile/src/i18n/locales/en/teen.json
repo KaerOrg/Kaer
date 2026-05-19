@@ -346,6 +346,7 @@
       "step_notes_title": "Anything to add? (optional)",
       "step_notes_hint": "Context, situation, related thought… Free text.",
       "notes_free_placeholder": "Free note (optional)",
+      "footer": "Emotion wheel — putting words to your feelings actually helps. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
       "node": {
         "joy": "Joy",
         "joy__serenity": "Serenity",

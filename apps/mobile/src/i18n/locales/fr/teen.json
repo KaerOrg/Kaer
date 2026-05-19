@@ -346,6 +346,7 @@
       "step_notes_title": "Une note à ajouter ? (facultatif)",
       "step_notes_hint": "Contexte, situation, pensée associée… Texte libre.",
       "notes_free_placeholder": "Note libre (facultatif)",
+      "footer": "Roue des émotions — mettre des mots sur tes ressentis aide vraiment. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
       "node": {
         "joy": "Joie",
         "joy__serenity": "Sérénité",
