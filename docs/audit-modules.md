@@ -27,7 +27,7 @@
 | 3 | fear_thermometer | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 4 | exposure_hierarchy | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 5 | emotion_wheel | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
-| 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | 🔲 | Critique |
+| 6 | crisis_plan | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | — |
 | 7 | rim | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
 | 8 | cognitive_saturation | ✅ | ✅ | ⚠️ | ❌ | ✅ | 🔲 | Moyenne |
 | 9 | decisional_balance | ✅ | ✅ | ✅ | ❌ | ✅ | 🔲 | Haute |
@@ -194,21 +194,21 @@
 
 ### 06 — crisis_plan · Plan de crise
 
-**Statut** : 🔲 Non audité  
+**Statut** : ✅ Audité  
 **Type** : Écran dédié (`CrisisPlanScreen` + `CrisisUrgencyScreen`)  
 **Priorité** : Critique
 
 | Critère | Statut | Notes |
 |---|---|---|
-| Aperçu web praticien | 🔲 | |
-| Écran mobile patient | 🔲 | |
-| Cohérence web ↔ mobile | 🔲 | |
-| i18n fr complet | 🔲 | |
-| i18n en complet | 🔲 | |
-| i18n teen fr/en complet | 🔲 | |
-| Sources scientifiques | ✅ | Stanley & Brown (2012) présent |
-| Conformité MDR | 🔲 | Vérifier numéros urgence (3114, 15) |
-| Corrections apportées | — | |
+| Aperçu web praticien | ✅ | `preview_kind='steps'` — StepsLayout, configuration praticien sur PatientPage |
+| Écran mobile patient | ✅ | 6 étapes Stanley & Brown + 4 sections VHB-EF (raisons, urgence, coping, engagement) |
+| Cohérence web ↔ mobile | ✅ | Web affiche les étapes SPI en lecture ; mobile collecte et configure |
+| i18n fr complet | ✅ | Toutes les clés présentes incluant anchors, coping_cards, commitment, urgency |
+| i18n en complet | ✅ | Parité complète avec le FR |
+| i18n teen fr/en complet | ✅ | Clés teen présentes dans fr/teen.json et en/teen.json |
+| Sources scientifiques | ✅ | Stanley & Brown 2018 (grade B), Weinstock 2025 RCT (grade A), NICE NG225, HAS 2021 |
+| Conformité MDR | ✅ | 3114/15 : numéros fixes programmés, non conditionnels aux données — conforme MDR |
+| Corrections apportées | ✅ | sources_seed.sql : grades corrigés (Stanley B cohort → 'B', Weinstock RCT → 'A') |
 
 ---
 

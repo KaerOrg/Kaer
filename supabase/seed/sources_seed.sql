@@ -27,21 +27,21 @@ values
     'Stanley & Brown — Safety Planning Intervention + suivi téléphonique (JAMA Psychiatry, 2018)',
     'cohort_study',
     'https://doi.org/10.1001/jamapsychiatry.2018.1776',
-    null,
+    'B',
     '45 % de comportements suicidaires en moins ; doublement de l''engagement au traitement (n=1 640, 9 services d''urgences VA)',
     1
   ),
 
   -- 2. Weinstock et al. 2025 — JAMA Network Open (ECR, n=655)
   --    PMID 41212557 — doi:10.1001/jamanetworkopen.2025.43156 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — grade non applicable à une étude individuelle
+  --    evidence_grade 'A' : ECR randomisé contrôlé
   (
     '11111111-0001-0001-0001-000000000002',
     'crisis_plan',
     'Weinstock et al. — SPI vs soins standard : essai randomisé contrôlé (JAMA Network Open, 2025)',
     'rct',
     'https://doi.org/10.1001/jamanetworkopen.2025.43156',
-    null,
+    'A',
     '42 % de réduction des événements suicidaires, 55 % moins de tentatives de suicide (ECR, n=655)',
     2
   ),
