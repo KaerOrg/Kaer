@@ -3,8 +3,11 @@
 // Les fonctions sont implémentées mais registerPushToken retourne null dans Expo Go.
 
 import * as Notifications from 'expo-notifications'
+import Constants, { ExecutionEnvironment } from 'expo-constants'
 import { Platform } from 'react-native'
 import { supabase } from '../lib/supabase'
+
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient
 
 export type NotificationPlatform = 'ios' | 'android'
 
@@ -34,6 +37,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
 
 export async function setupAndroidChannel(): Promise<void> {
   if (Platform.OS !== 'android') return
+  if (isExpoGo) return
   await Notifications.setNotificationChannelAsync('psytool-reminders', {
     name: 'Rappels thérapeutiques',
     importance: Notifications.AndroidImportance.HIGH,
@@ -45,6 +49,7 @@ export async function setupAndroidChannel(): Promise<void> {
  * Retourne null si la permission est refusée ou si l'app tourne dans Expo Go.
  */
 export async function registerPushToken(patientId: string): Promise<string | null> {
+  if (isExpoGo) return null
   const granted = await requestNotificationPermission()
   if (!granted) return null
 

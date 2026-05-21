@@ -476,16 +476,21 @@ function GuidedExerciseLayout({ sections, uiFields, footer, accentColor }: {
   }, [currentStep, total])
   const handleRestart = useCallback(() => { setCurrentStep(0); setMode('intro') }, [])
 
-  // UI text fields (all module-specific, driven from DB text_codes)
-  const titleField = uiFields.find(f => f.field_type === 'exercise_title')
+  const configField = uiFields.find(f => f.field_type === 'exercise_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
+
+  const titleLabel = lbl('title')
   const introTextFields = [...uiFields]
     .filter(f => f.field_type === 'exercise_intro')
     .sort((a, b) => a.sort_order - b.sort_order)
-  const startLabel  = t(uiFields.find(f => f.field_type === 'exercise_start_btn')?.text_code ?? 'common.start_exercise')
-  const nextLabel   = t(uiFields.find(f => f.field_type === 'exercise_next_btn')?.text_code ?? 'common.continue')
-  const finishLabel = t(uiFields.find(f => f.field_type === 'exercise_finish_btn')?.text_code ?? 'common.stop')
-  const stopLabel   = t(uiFields.find(f => f.field_type === 'exercise_stop_btn')?.text_code ?? 'common.cancel')
-  const doneTextField = uiFields.find(f => f.field_type === 'exercise_done_text')
+  const startLabel  = lbl('start_btn') || t('common.start_exercise')
+  const nextLabel   = lbl('next_btn') || t('common.continue')
+  const finishLabel = lbl('finish_btn') || t('common.stop')
+  const stopLabel   = lbl('stop_btn') || t('common.cancel')
+  const doneText    = lbl('done_text')
 
   // Current step fields
   const [, currentFields = []] = steps[currentStep] ?? []
@@ -512,8 +517,8 @@ function GuidedExerciseLayout({ sections, uiFields, footer, accentColor }: {
       <ScrollView contentContainerStyle={gStyles.container}>
         <View style={gStyles.introCard}>
           <MaterialCommunityIcons name="hand-heart-outline" size={40} color={accentColor ?? colors.primary} />
-          {titleField != null && (
-            <Text style={gStyles.introTitle}>{t(titleField.text_code ?? '')}</Text>
+          {titleLabel !== '' && (
+            <Text style={gStyles.introTitle}>{titleLabel}</Text>
           )}
           {introTextFields.map(f => (
             <Text key={f.id} style={gStyles.introText}>{t(f.text_code ?? '')}</Text>
@@ -616,8 +621,8 @@ function GuidedExerciseLayout({ sections, uiFields, footer, accentColor }: {
       <View style={gStyles.doneCard}>
         <MaterialCommunityIcons name="check-circle-outline" size={56} color={colors.success} />
         <Text style={gStyles.doneTitle}>{t('common.done_title')}</Text>
-        {doneTextField != null && (
-          <Text style={gStyles.doneText}>{t(doneTextField.text_code ?? '')}</Text>
+        {doneText !== '' && (
+          <Text style={gStyles.doneText}>{doneText}</Text>
         )}
       </View>
 

@@ -10,9 +10,15 @@
     "mobile": "cd apps/mobile && npx expo start",
     "test:mobile": "cd apps/mobile && npx jest --no-coverage",
     "test:web": "cd apps/web && npx vitest run",
-    "test:shared": "cd packages/shared && npx vitest run"
+    "test:shared": "cd packages/shared && npx vitest run",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
-    "@testing-library/dom": "^10.4.1"
-  }
+    "@testing-library/dom": "^10.4.1",
+    "expo": "~54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  },
+  "version": "1.0.0"
 }

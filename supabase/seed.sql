@@ -1119,14 +1119,9 @@ on conflict (id) do nothing;
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('gr.label', 'grounding', NULL, NULL, 'module_label', 'module.grounding.label', 0),
   ('gr.desc', 'grounding', NULL, NULL, 'module_description', 'module.grounding.description', 1),
-  ('gr.title', 'grounding', NULL, NULL, 'exercise_title', 'modules.grounding.technique_title', 2),
+  ('gr.cfg', 'grounding', NULL, NULL, 'exercise_config', NULL, 2),
   ('gr.intro1', 'grounding', NULL, NULL, 'exercise_intro', 'modules.grounding.intro_text_1', 3),
   ('gr.intro2', 'grounding', NULL, NULL, 'exercise_intro', 'modules.grounding.intro_text_2', 4),
-  ('gr.start_btn', 'grounding', NULL, NULL, 'exercise_start_btn', 'modules.grounding.start_btn', 5),
-  ('gr.next_btn', 'grounding', NULL, NULL, 'exercise_next_btn', 'modules.grounding.next_step', 6),
-  ('gr.finish_btn', 'grounding', NULL, NULL, 'exercise_finish_btn', 'modules.grounding.finish', 7),
-  ('gr.stop_btn', 'grounding', NULL, NULL, 'exercise_stop_btn', 'modules.grounding.stop_btn', 8),
-  ('gr.done_text', 'grounding', NULL, NULL, 'exercise_done_text', 'modules.grounding.done_text', 9),
   ('gr.safety_title', 'grounding', NULL, NULL, 'exercise_safety_title', 'modules.grounding.safety_title', 10),
   ('gr.safety_3114', 'grounding', NULL, NULL, 'exercise_safety', 'modules.grounding.safety_3114', 11),
   ('gr.safety_15', 'grounding', NULL, NULL, 'exercise_safety', 'modules.grounding.safety_15', 12),
@@ -1543,8 +1538,14 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('epds.q10.opt0', 'value', '3'), ('epds.q10.opt1', 'value', '2'), ('epds.q10.opt2', 'value', '1'), ('epds.q10.opt3', 'value', '0')
 on conflict (field_id, prop_key) do nothing;
 
--- grounding : couleurs/icônes par sens
+-- grounding : config labels + couleurs/icônes par sens
 insert into public.field_props (field_id, prop_key, prop_value) values
+  ('gr.cfg', 'title',      'modules.grounding.technique_title'),
+  ('gr.cfg', 'start_btn',  'modules.grounding.start_btn'),
+  ('gr.cfg', 'next_btn',   'modules.grounding.next_step'),
+  ('gr.cfg', 'finish_btn', 'modules.grounding.finish'),
+  ('gr.cfg', 'stop_btn',   'modules.grounding.stop_btn'),
+  ('gr.cfg', 'done_text',  'modules.grounding.done_text'),
   ('gr.hear.title', 'color', '#059669'),
   ('gr.hear.title', 'icon', 'ear-hearing'),
   ('gr.hear.title', 'step_number', '3'),
