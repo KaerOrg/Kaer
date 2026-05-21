@@ -22,7 +22,6 @@ type Props = NativeStackScreenProps<AppStackParamList, 'ModuleContent'>
 const SELF_MANAGED_LAYOUTS = new Set([
   'guided_exercise',
   'editable_steps',
-  'timed_tap_exercise',
   'daily_checkin',
   'column_form',
   'tree_selector',

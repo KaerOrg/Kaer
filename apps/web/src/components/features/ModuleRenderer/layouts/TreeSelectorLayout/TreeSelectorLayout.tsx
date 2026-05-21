@@ -11,18 +11,19 @@ interface Props {
 // (8 émotions Plutchik colorées), section historique avec carte mock.
 // Source mobile : TreeSelectorLayout (FieldRenderer.tsx).
 export function TreeSelectorLayout({ fields, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'tree_selector_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const intro = ft('tree_selector_intro')
-  const newBtn = ft('tree_selector_new_btn')
-  const step1Title = ft('tree_selector_step_1_title')
-  const step1Hint = ft('tree_selector_step_1_hint')
-  const historyLabel = ft('tree_selector_history_label')
-  const emptyTitle = ft('tree_selector_empty_title')
-  const emptyText = ft('tree_selector_empty_text')
+  const intro = lbl('intro')
+  const newBtn = lbl('new_btn')
+  const step1Title = lbl('step_1_title')
+  const step1Hint = lbl('step_1_hint')
+  const historyLabel = lbl('history_label')
+  const emptyTitle = lbl('empty_title')
+  const emptyText = lbl('empty_text')
 
   const rootNodes = fields
     .filter(f => f.field_type === 'tree_node' && !f.parent_field_id)

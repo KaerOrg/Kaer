@@ -12,7 +12,6 @@ import {
   ExposureTrackerLayout,
   FallbackLayout,
   FieldsLayout,
-  Grid2x2Layout,
   GuidedExerciseLayout,
   PatientScenarioLayout,
   PsyEduLayout,
@@ -167,16 +166,6 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
     return <FieldsLayout fields={fieldRows} footer={footer} t={t} />
   }
 
-  if (preview_kind === 'grid2x2') {
-    const sections = new Map<string, ContentField[]>()
-    for (const f of contentFields) {
-      if (!f.section_id) continue
-      if (!sections.has(f.section_id)) sections.set(f.section_id, [])
-      sections.get(f.section_id)!.push(f)
-    }
-    return <Grid2x2Layout sections={sections} footer={footer} t={t} />
-  }
-
   if (preview_kind === 'questionnaire') {
     return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
   }
@@ -217,6 +206,5 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
     return <PatientScenarioLayout fields={contentFields} t={t} />
   }
 
-  // Fallback générique pour les preview_kinds restants (timed_tap_exercise…)
   return <FallbackLayout fields={contentFields} footer={footer} t={t} />
 }

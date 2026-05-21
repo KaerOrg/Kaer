@@ -142,28 +142,22 @@ describe('FieldRenderer — layout fields', () => {
   })
 })
 
-describe('FieldRenderer — layout grid2x2', () => {
-  it('rend un <div class="preview-grid2x2">', () => {
-    const fields = [
-      field('quadrant_title', { section_id: 'q1', props: { color: '#22C55E' } }),
-      field('quadrant_subtitle', { section_id: 'q1' }),
-    ]
-    const { container } = render(
-      <FieldRenderer preview_kind="grid2x2" fields={fields} expandedCard={null} onToggleCard={noop} />
-    )
-    expect(container.querySelector('div.preview-grid2x2')).toBeTruthy()
-    expect(container.querySelectorAll('div.preview-quadrant')).toHaveLength(1)
-  })
-})
-
 describe('FieldRenderer — layout daily_checkin', () => {
   it('rend les onglets, la question, les options de statut et les notes', () => {
     const fields = [
-      field('daily_checkin_config', { props: { engagement_event_type: 'SAVE_FOO' } }),
-      field('daily_tab_today_label', { text_code: 'm.tab_today' }),
-      field('daily_tab_history_label', { text_code: 'm.tab_history' }),
-      field('daily_today_label', { text_code: 'm.today' }),
-      field('daily_question', { text_code: 'm.question' }),
+      field('daily_checkin_config', {
+        props: {
+          engagement_event_type: 'SAVE_FOO',
+          tab_today_label:    'm.tab_today',
+          tab_history_label:  'm.tab_history',
+          today_label:        'm.today',
+          question:           'm.question',
+          notes_label:        'm.notes',
+          notes_placeholder:  'm.placeholder',
+          save_label:         'm.save',
+          history_empty_text: 'm.empty',
+        },
+      }),
       field('daily_status_option', {
         sort_order: 30,
         text_code: 'm.opt_taken',
@@ -179,10 +173,6 @@ describe('FieldRenderer — layout daily_checkin', () => {
         text_code: 'm.opt_missed',
         props: { value: 'missed', color: '#6B7280', bg_color: '#F3F4F6' },
       }),
-      field('daily_notes_label', { text_code: 'm.notes' }),
-      field('daily_notes_placeholder', { text_code: 'm.placeholder' }),
-      field('daily_save_label', { text_code: 'm.save' }),
-      field('daily_history_empty_text', { text_code: 'm.empty' }),
     ]
     const { container } = render(
       <FieldRenderer preview_kind="daily_checkin" fields={fields} expandedCard={null} onToggleCard={noop} />
@@ -224,7 +214,7 @@ describe('FieldRenderer — layout daily_checkin', () => {
 
   it('rend le footer_note dans un bloc info', () => {
     const fields = [
-      field('daily_question', { text_code: 'm.q' }),
+      field('daily_checkin_config', { props: { question: 'm.q' } }),
       field('footer_note', { text_code: 'm.foot' }),
     ]
     const { container } = render(

@@ -41,9 +41,7 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_callout:        FieldText,
   card_definition:     CardDefinition,
   card_divider:        CardDivider,
-  card_heading_2:      FieldText,
-  card_heading_3:      FieldText,
-  card_heading_4:      FieldText,
+  card_heading:        FieldText,
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
@@ -144,30 +142,6 @@ function FieldsLayout({ fields, footer }: {
   )
 }
 
-function Grid2x2Layout({ sections, footer }: {
-  sections: Map<string, ContentField[]>
-  footer: ContentField | undefined
-}) {
-  const entries = [...sections.entries()]
-  return (
-    <View>
-      <View style={styles.grid}>
-        {entries.map(([sectionId, fields]) => {
-          const titleField = fields.find(f => f.field_type === 'quadrant_title')
-          const subtitleField = fields.find(f => f.field_type === 'quadrant_subtitle')
-          const color = titleField?.props['color'] ?? '#6366F1'
-          return (
-            <View key={sectionId} style={[styles.quadrant, { borderTopColor: color, borderTopWidth: 3 }]}>
-              {titleField && <FieldText field={titleField} />}
-              {subtitleField && <FieldText field={subtitleField} />}
-            </View>
-          )
-        })}
-      </View>
-      {footer && <FieldText field={footer} />}
-    </View>
-  )
-}
 
 function CardsLayout({ sections }: {
   sections: Map<string, ContentField[]>
@@ -984,297 +958,6 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   )
 }
 
-// ─── Layout — exercice à tapotements chronométrés ────────────────────────────
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return s > 0 ? `${m}min ${s}s` : `${m}min`
-}
-
-function TimedTapExerciseLayout({ fields }: {
-  fields: ContentField[]
-}) {
-  const t = useModuleT()
-  // ── Config (stable — fields ne changent pas pendant la durée de vie du composant)
-  const configField = fields.find(f => f.field_type === 'timed_tap_config')
-  const durationSeconds = parseInt((configField?.props['duration_seconds'] as string | undefined) ?? '90', 10)
-  const maxWordLength = parseInt((configField?.props['max_word_length'] as string | undefined) ?? '40', 10)
-  const vibrationMs = parseInt((configField?.props['vibration_ms'] as string | undefined) ?? '30', 10)
-
-  // ── Résolution de texte depuis les champs
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }
-  const deleteLabel = ft('timed_tap_delete_label')
-
-  // ── State
-  const [mode, setMode] = useState<'history' | 'input' | 'exercise' | 'done'>('history')
-  const [sessions, setSessions] = useState<CognitiveSaturationSession[]>([])
-  const [loadingSessions, setLoadingSessions] = useState(true)
-  const [word, setWord] = useState('')
-  const [repetitions, setRepetitions] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(durationSeconds)
-  const [saving, setSaving] = useState(false)
-  const elapsedRef = useRef(0)
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  useEffect(() => {
-    getAllCognitiveSaturationSessions()
-      .then(data => {
-        setSessions(data)
-        setLoadingSessions(false)
-      })
-      .catch(() => setLoadingSessions(false))
-  }, [])
-
-  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current) }, [])
-
-  const startTimer = useCallback(() => {
-    elapsedRef.current = 0
-    timerRef.current = setInterval(() => {
-      elapsedRef.current += 1
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!)
-          setMode('done')
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-  }, [])
-
-  const handleStartExercise = useCallback(() => { setWord(''); setMode('input') }, [])
-
-  const handleStart = useCallback(() => {
-    if (!word.trim()) return
-    setRepetitions(0)
-    setTimeLeft(durationSeconds)
-    setMode('exercise')
-    startTimer()
-  }, [word, durationSeconds, startTimer])
-
-  const handleTap = useCallback(() => {
-    Vibration.vibrate(vibrationMs)
-    setRepetitions(prev => prev + 1)
-  }, [vibrationMs])
-
-  const handleStopEarly = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    setMode('done')
-  }, [])
-
-  const handleSave = useCallback(async () => {
-    setSaving(true)
-    try {
-      const session = { id: generateId(), word: word.trim(), repetitions, duration_seconds: elapsedRef.current }
-      await saveCognitiveSaturationSession(session)
-      setSessions(prev => [{ ...session, created_at: new Date().toISOString() }, ...prev])
-    } finally {
-      setSaving(false)
-      setMode('history')
-    }
-  }, [word, repetitions])
-
-  const handleRestart = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    setWord('')
-    setRepetitions(0)
-    setTimeLeft(durationSeconds)
-    elapsedRef.current = 0
-    setMode('input')
-  }, [durationSeconds])
-
-  const handleDelete = useCallback((id: string) => {
-    Alert.alert(deleteLabel || t('common.delete'), t('common.irreversible'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'), style: 'destructive',
-        onPress: async () => {
-          await deleteCognitiveSaturationSession(id)
-          setSessions(prev => prev.filter(s => s.id !== id))
-        },
-      },
-    ])
-  }, [deleteLabel, t])
-
-  // ── Mode historique
-  if (mode === 'history') {
-    const historyLabelTemplate = ft('timed_tap_history_label')
-    const historyLabel = historyLabelTemplate.replace('{{count}}', String(sessions.length))
-
-    if (loadingSessions) {
-      return <View style={ttStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
-    }
-
-    return (
-      <View style={ttStyles.safe}>
-        <Pressable style={ttStyles.startBtn} onPress={handleStartExercise} accessibilityRole="button" testID="start-exercise-button">
-          <MaterialCommunityIcons name="repeat" size={20} color={colors.white} />
-          <Text style={ttStyles.startBtnText}>{ft('timed_tap_start_btn')}</Text>
-        </Pressable>
-
-        <ScrollView contentContainerStyle={ttStyles.container}>
-          <View style={ttStyles.introCard} testID="intro-card">
-            <MaterialCommunityIcons name="chat-processing-outline" size={24} color={colors.primary} />
-            <Text style={ttStyles.introText}>{ft('timed_tap_intro_text')}</Text>
-          </View>
-
-          {sessions.length === 0 ? (
-            <View style={ttStyles.empty} testID="empty-state">
-              <MaterialCommunityIcons name="chat-processing-outline" size={52} color={colors.border} />
-              <Text style={ttStyles.emptyTitle}>{ft('timed_tap_empty_title')}</Text>
-              <Text style={ttStyles.emptyText}>{ft('timed_tap_empty_text')}</Text>
-            </View>
-          ) : (
-            <View style={ttStyles.section}>
-              {historyLabel ? <Text style={ttStyles.sectionLabel}>{historyLabel}</Text> : null}
-              {sessions.map(session => (
-                <View key={session.id} style={ttStyles.sessionCard} testID={`session-card-${session.id}`}>
-                  <View style={ttStyles.sessionHeader}>
-                    <View style={ttStyles.wordBadge}>
-                      <Text style={ttStyles.wordText} numberOfLines={1}>{session.word}</Text>
-                    </View>
-                    <Pressable onPress={() => handleDelete(session.id)} accessibilityRole="button" accessibilityLabel={deleteLabel} hitSlop={8}>
-                      <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-                    </Pressable>
-                  </View>
-                  <View style={ttStyles.sessionStats}>
-                    <View style={ttStyles.statItem}>
-                      <MaterialCommunityIcons name="gesture-tap" size={14} color={colors.textMuted} />
-                      <Text style={ttStyles.statText}>{session.repetitions} {ft('timed_tap_rep_label')}</Text>
-                    </View>
-                    <View style={ttStyles.statItem}>
-                      <MaterialCommunityIcons name="clock-outline" size={14} color={colors.textMuted} />
-                      <Text style={ttStyles.statText}>{formatDuration(session.duration_seconds)}</Text>
-                    </View>
-                  </View>
-                  <Text style={ttStyles.sessionDate}>{formatDateTime(session.created_at)}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </ScrollView>
-      </View>
-    )
-  }
-
-  // ── Mode saisie du mot
-  if (mode === 'input') {
-    const howBodyCode = fields.find(f => f.field_type === 'timed_tap_how_body')?.text_code
-    const howBodyText = howBodyCode
-      ? t(howBodyCode).replace('{{seconds}}', String(durationSeconds))
-      : ''
-
-    return (
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={ttStyles.container}>
-          <View style={ttStyles.inputCard} testID="input-card">
-            <MaterialCommunityIcons name="chat-processing-outline" size={32} color={colors.primary} />
-            <Text style={ttStyles.inputTitle}>{ft('timed_tap_input_title')}</Text>
-            <Text style={ttStyles.inputHint}>{ft('timed_tap_input_hint')}</Text>
-            <TextInput
-              style={ttStyles.wordInput}
-              placeholder={ft('timed_tap_input_placeholder')}
-              placeholderTextColor={colors.textMuted}
-              value={word}
-              onChangeText={v => setWord(v.slice(0, maxWordLength))}
-              maxLength={maxWordLength}
-              returnKeyType="done"
-              autoFocus
-              testID="word-input"
-            />
-            <Text style={ttStyles.charCount} testID="char-count">{word.length}/{maxWordLength}</Text>
-          </View>
-
-          {(ft('timed_tap_how_title') || howBodyText) ? (
-            <View style={ttStyles.instructionCard}>
-              {ft('timed_tap_how_title') ? <Text style={ttStyles.instructionTitle}>{ft('timed_tap_how_title')}</Text> : null}
-              {howBodyText ? <Text style={ttStyles.instructionText}>{howBodyText}</Text> : null}
-            </View>
-          ) : null}
-
-          <Pressable
-            style={[ttStyles.startBtn, !word.trim() && ttStyles.startBtnDisabled]}
-            onPress={handleStart}
-            disabled={!word.trim()}
-            accessibilityRole="button"
-            testID="confirm-start-button"
-          >
-            <MaterialCommunityIcons name="play-circle-outline" size={22} color={colors.white} />
-            <Text style={ttStyles.startBtnText}>{ft('timed_tap_start_btn')}</Text>
-          </Pressable>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    )
-  }
-
-  // ── Mode exercice
-  if (mode === 'exercise') {
-    const progress = timeLeft / durationSeconds
-    return (
-      <View style={ttStyles.exerciseContainer} testID="exercise-mode">
-        <View style={ttStyles.progressBar} testID="progress-bar">
-          <View style={[ttStyles.progressFill, { width: `${progress * 100}%` }]} />
-        </View>
-        <Text style={ttStyles.timeLabel} testID="time-label">{timeLeft}s</Text>
-        <Text style={ttStyles.repCounter} testID="rep-counter">{repetitions}</Text>
-        <Text style={ttStyles.repLabel}>{ft('timed_tap_rep_label')}</Text>
-        <Pressable style={ttStyles.wordTapArea} onPress={handleTap} accessibilityRole="button" testID="word-tap-button">
-          <Text style={ttStyles.wordDisplay} adjustsFontSizeToFit numberOfLines={2}>{word}</Text>
-          <Text style={ttStyles.tapHint}>{ft('timed_tap_tap_hint')}</Text>
-        </Pressable>
-        <Pressable style={ttStyles.stopBtn} onPress={handleStopEarly} accessibilityRole="button" testID="stop-button">
-          <Text style={ttStyles.stopBtnText}>{t('common.stop')}</Text>
-        </Pressable>
-      </View>
-    )
-  }
-
-  // ── Mode terminé
-  const effectiveDuration = durationSeconds - timeLeft
-  return (
-    <ScrollView contentContainerStyle={ttStyles.container}>
-      <View style={ttStyles.doneCard} testID="done-card">
-        <MaterialCommunityIcons name="check-circle-outline" size={56} color={colors.success} />
-        <Text style={ttStyles.doneTitle}>{ft('timed_tap_done_title')}</Text>
-        <Text style={ttStyles.doneText}>{ft('timed_tap_done_text')}</Text>
-      </View>
-
-      <View style={ttStyles.summaryCard} testID="summary-card">
-        <View style={ttStyles.summaryRow}>
-          <MaterialCommunityIcons name="chat-processing-outline" size={18} color={colors.primary} />
-          <Text style={ttStyles.summaryWord}>{word}</Text>
-        </View>
-        <View style={ttStyles.summaryStats}>
-          <View style={ttStyles.summaryStatItem}>
-            <Text style={ttStyles.summaryStatValue} testID="done-repetitions">{repetitions}</Text>
-            <Text style={ttStyles.summaryStatLabel}>{ft('timed_tap_rep_stat_label')}</Text>
-          </View>
-          <View style={ttStyles.summaryDivider} />
-          <View style={ttStyles.summaryStatItem}>
-            <Text style={ttStyles.summaryStatValue} testID="done-duration">{effectiveDuration}s</Text>
-            <Text style={ttStyles.summaryStatLabel}>{ft('timed_tap_duration_stat_label')}</Text>
-          </View>
-        </View>
-      </View>
-
-      <Pressable style={[ttStyles.saveBtn, saving && ttStyles.btnDisabled]} onPress={handleSave} disabled={saving} accessibilityRole="button" testID="save-button">
-        <Text style={ttStyles.saveBtnText}>{saving ? '…' : t('common.save')}</Text>
-        {!saving && <MaterialCommunityIcons name="check" size={20} color={colors.white} />}
-      </Pressable>
-
-      <Pressable style={ttStyles.restartBtn} onPress={handleRestart} accessibilityRole="button" testID="restart-button">
-        <MaterialCommunityIcons name="refresh" size={20} color={colors.primary} />
-        <Text style={ttStyles.restartBtnText}>{t('common.restart')}</Text>
-      </Pressable>
-    </ScrollView>
-  )
-}
-
 // ─── Layout — saisie quotidienne (medication_adherence…) ────────────────────
 //
 // Pattern « 1 statut par jour, persistance UPSERT par (module_id, date) ».
@@ -1295,11 +978,11 @@ function DailyCheckinLayout({ fields, moduleId }: {
   const patient = useAuthStore(s => s.patient)
 
   // ── Résolution des champs DB-driven
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }
   const configField = fields.find(f => f.field_type === 'daily_checkin_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
 
   const statusOptions = useMemo(
@@ -1342,8 +1025,8 @@ function DailyCheckinLayout({ fields, moduleId }: {
   const handleSave = useCallback(async () => {
     if (!selectedValue) {
       Alert.alert(
-        ft('daily_status_missing_title') || t('common.error'),
-        ft('daily_status_missing_msg'),
+        lbl('status_missing_title') || t('common.error'),
+        lbl('status_missing_msg'),
       )
       return
     }
@@ -1362,18 +1045,18 @@ function DailyCheckinLayout({ fields, moduleId }: {
       }
       setExistingId(entry.id)
       await loadData()
-      const savedMsg = ft('daily_saved_message')
+      const savedMsg = lbl('saved_message')
       if (savedMsg) Alert.alert(t('common.saved'), savedMsg)
     } catch {
       Alert.alert(t('common.error'), t('common.save_error'))
     } finally {
       setSaving(false)
     }
-  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, ft, t])
+  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, lbl, t])
 
   const handleDelete = useCallback((entry: DailyEntry) => {
     Alert.alert(
-      ft('daily_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -1392,17 +1075,17 @@ function DailyCheckinLayout({ fields, moduleId }: {
         },
       ]
     )
-  }, [ft, t, todayDate])
+  }, [lbl, t, todayDate])
 
   if (loading) {
     return <View style={dcStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
   const saveLabel = existingId
-    ? (ft('daily_update_label') || t('common.update'))
-    : (ft('daily_save_label') || t('common.save'))
-  const tabTodayLabel = ft('daily_tab_today_label')
-  const tabHistoryLabel = ft('daily_tab_history_label')
+    ? (lbl('update_label') || t('common.update'))
+    : (lbl('save_label') || t('common.save'))
+  const tabTodayLabel = lbl('tab_today_label')
+  const tabHistoryLabel = lbl('tab_history_label')
 
   return (
     <KeyboardAvoidingView
@@ -1443,21 +1126,21 @@ function DailyCheckinLayout({ fields, moduleId }: {
         >
           {/* Date du jour */}
           <View style={dcStyles.dateHeader}>
-            <Text style={dcStyles.dateLabel}>{ft('daily_today_label')}</Text>
+            <Text style={dcStyles.dateLabel}>{lbl('today_label')}</Text>
             <Text style={dcStyles.dateValue}>{formatDateFull(todayDate)}</Text>
           </View>
 
           {/* Indicateur saisie déjà effectuée */}
-          {existingId && ft('daily_already_saved_label') ? (
+          {existingId && lbl('already_saved_label') ? (
             <View style={dcStyles.savedBadge} testID="already-saved-badge">
               <MaterialCommunityIcons name="check-circle-outline" size={16} color={colors.success} />
-              <Text style={dcStyles.savedBadgeText}>{ft('daily_already_saved_label')}</Text>
+              <Text style={dcStyles.savedBadgeText}>{lbl('already_saved_label')}</Text>
             </View>
           ) : null}
 
           {/* Question + boutons de statut */}
           <View style={dcStyles.questionCard}>
-            <Text style={dcStyles.questionText}>{ft('daily_question')}</Text>
+            <Text style={dcStyles.questionText}>{lbl('question')}</Text>
             <View style={dcStyles.statusRow}>
               {statusOptions.map(opt => {
                 const value = opt.props['value'] ?? ''
@@ -1489,12 +1172,12 @@ function DailyCheckinLayout({ fields, moduleId }: {
 
           {/* Notes */}
           <View style={dcStyles.notesSection}>
-            <Text style={dcStyles.notesLabel}>{ft('daily_notes_label') || t('common.notes_optional')}</Text>
+            <Text style={dcStyles.notesLabel}>{lbl('notes_label') || t('common.notes_optional')}</Text>
             <TextInput
               style={dcStyles.notesInput}
               value={notes}
               onChangeText={setNotes}
-              placeholder={ft('daily_notes_placeholder')}
+              placeholder={lbl('notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={3}
@@ -1507,7 +1190,7 @@ function DailyCheckinLayout({ fields, moduleId }: {
         <ScrollView style={dcStyles.scroll} contentContainerStyle={dcStyles.content}>
           {entries.length === 0 ? (
             <View style={dcStyles.empty} testID="history-empty">
-              <Text style={dcStyles.emptyText}>{ft('daily_history_empty_text')}</Text>
+              <Text style={dcStyles.emptyText}>{lbl('history_empty_text')}</Text>
             </View>
           ) : (
             <View style={dcStyles.list}>
@@ -1723,11 +1406,11 @@ function ColumnFormLayout({ fields, moduleId }: {
   const patient = useAuthStore(s => s.patient)
 
   // ── Résolution des champs DB-driven
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }
   const configField = fields.find(f => f.field_type === 'column_form_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const requiredKeysProp = configField?.props['required_keys_any'] ?? ''
   const requiredKeysAny = useMemo(
@@ -1802,7 +1485,7 @@ function ColumnFormLayout({ fields, moduleId }: {
 
   const handleDelete = useCallback((entry: FormEntry) => {
     Alert.alert(
-      ft('column_form_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -1816,7 +1499,7 @@ function ColumnFormLayout({ fields, moduleId }: {
         },
       ]
     )
-  }, [ft, t])
+  }, [lbl, t])
 
   const handleSave = useCallback(async () => {
     if (requiredKeysAny.length > 0) {
@@ -1826,8 +1509,8 @@ function ColumnFormLayout({ fields, moduleId }: {
       })
       if (!ok) {
         Alert.alert(
-          ft('column_form_validation_title') || t('common.error'),
-          ft('column_form_validation_msg'),
+          lbl('validation_title') || t('common.error'),
+          lbl('validation_msg'),
         )
         return
       }
@@ -1848,7 +1531,7 @@ function ColumnFormLayout({ fields, moduleId }: {
     } finally {
       setSaving(false)
     }
-  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, ft, t])
+  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, lbl, t])
 
   if (loading) {
     return <View style={cfStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -1970,7 +1653,7 @@ function ColumnFormLayout({ fields, moduleId }: {
             onPress={handleSave}
             disabled={saving}
             accessibilityRole="button"
-            accessibilityLabel={ft('column_form_save_label') || t('common.save')}
+            accessibilityLabel={lbl('save_label') || t('common.save')}
             testID="save-entry"
           >
             {saving ? (
@@ -1978,7 +1661,7 @@ function ColumnFormLayout({ fields, moduleId }: {
             ) : (
               <>
                 <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={cfStyles.saveBtnText}>{ft('column_form_save_label') || t('common.save')}</Text>
+                <Text style={cfStyles.saveBtnText}>{lbl('save_label') || t('common.save')}</Text>
               </>
             )}
           </Pressable>
@@ -1997,11 +1680,11 @@ function ColumnFormLayout({ fields, moduleId }: {
         {entries.length === 0 ? (
           <View style={cfStyles.empty} testID="list-empty">
             <MaterialCommunityIcons name="thought-bubble-outline" size={52} color={colors.border} />
-            {ft('column_form_empty_title') ? (
-              <Text style={cfStyles.emptyTitle}>{ft('column_form_empty_title')}</Text>
+            {lbl('empty_title') ? (
+              <Text style={cfStyles.emptyTitle}>{lbl('empty_title')}</Text>
             ) : null}
-            {ft('column_form_empty_text') ? (
-              <Text style={cfStyles.emptyText}>{ft('column_form_empty_text')}</Text>
+            {lbl('empty_text') ? (
+              <Text style={cfStyles.emptyText}>{lbl('empty_text')}</Text>
             ) : null}
           </View>
         ) : (
@@ -2089,11 +1772,11 @@ function ColumnFormLayout({ fields, moduleId }: {
           style={cfStyles.newBtn}
           onPress={handleNew}
           accessibilityRole="button"
-          accessibilityLabel={ft('column_form_new_btn_label') || t('common.add')}
+          accessibilityLabel={lbl('new_btn_label') || t('common.add')}
           testID="new-entry"
         >
           <MaterialCommunityIcons name="plus" size={22} color={colors.white} />
-          <Text style={cfStyles.newBtnText}>{ft('column_form_new_btn_label') || t('common.add')}</Text>
+          <Text style={cfStyles.newBtnText}>{lbl('new_btn_label') || t('common.add')}</Text>
         </Pressable>
       </View>
     </View>
@@ -2157,12 +1840,11 @@ function TreeSelectorLayout({ fields, moduleId }: {
 }) {
   const t = useModuleT()
   // ── Résolution des champs DB-driven
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }
-
   const configField = fields.find(f => f.field_type === 'tree_selector_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
   const enableIntensity = (configField?.props['enable_intensity'] ?? '0') === '1'
   const enableNotes = (configField?.props['enable_notes'] ?? '0') === '1'
   const intensityMin = parseInt(configField?.props['intensity_min'] ?? '1', 10)
@@ -2211,9 +1893,9 @@ function TreeSelectorLayout({ fields, moduleId }: {
     if (level === 2 && path.length >= 1) {
       return path[0].text_code ? t(path[0].text_code) : ''
     }
-    return ft(`tree_selector_step_${level}_title`)
-  }, [level, path, ft, t])
-  const stepHint = ft(`tree_selector_step_${level}_hint`)
+    return lbl(`step_${level}_title`)
+  }, [level, path, lbl, t])
+  const stepHint = lbl(`step_${level}_hint`)
 
   // ── Navigation
   const handleStartNew = useCallback(() => {
@@ -2304,7 +1986,7 @@ function TreeSelectorLayout({ fields, moduleId }: {
 
   const handleDelete = useCallback((entry: TreeSelection) => {
     Alert.alert(
-      ft('tree_selector_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -2327,11 +2009,11 @@ function TreeSelectorLayout({ fields, moduleId }: {
 
   // ── Mode historique ────────────────────────────────────────────────────────
   if (mode === 'history') {
-    const introText = ft('tree_selector_intro')
-    const newBtnLabel = ft('tree_selector_new_btn') || t('common.add')
-    const historyLabel = ft('tree_selector_history_label')
-    const emptyTitle = ft('tree_selector_empty_title')
-    const emptyText = ft('tree_selector_empty_text')
+    const introText = lbl('intro')
+    const newBtnLabel = lbl('new_btn') || t('common.add')
+    const historyLabel = lbl('history_label')
+    const emptyTitle = lbl('empty_title')
+    const emptyText = lbl('empty_text')
 
     return (
       <View style={tsStyles.container}>
@@ -2506,9 +2188,9 @@ function TreeSelectorLayout({ fields, moduleId }: {
 
   // ── Mode intensité ─────────────────────────────────────────────────────────
   if (mode === 'intensity') {
-    const intensityTitle = ft('tree_selector_intensity_title')
-    const intensityHint = ft('tree_selector_intensity_hint')
-    const continueLabel = ft('tree_selector_continue_btn') || t('common.continue')
+    const intensityTitle = lbl('intensity_title')
+    const intensityHint = lbl('intensity_hint')
+    const continueLabel = lbl('continue_btn') || t('common.continue')
     return (
       <View style={tsStyles.container}>
         <View style={tsStyles.header}>
@@ -2574,10 +2256,10 @@ function TreeSelectorLayout({ fields, moduleId }: {
   }
 
   // ── Mode notes ─────────────────────────────────────────────────────────────
-  const notesTitle = ft('tree_selector_notes_title')
-  const notesHint = ft('tree_selector_notes_hint')
-  const notesPlaceholder = ft('tree_selector_notes_placeholder')
-  const saveLabel = ft('tree_selector_save_btn') || t('common.save')
+  const notesTitle = lbl('notes_title')
+  const notesHint = lbl('notes_hint')
+  const notesPlaceholder = lbl('notes_placeholder')
+  const saveLabel = lbl('save_btn') || t('common.save')
   const summary = path.map(n => (n.text_code ? t(n.text_code) : '')).filter(Boolean).join(' — ')
 
   return (
@@ -2727,12 +2409,11 @@ function qualityColorOf(quality: number | null, qualityWarning: number, qualityG
 function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   const t = useModuleT()
 
-  const ft = useCallback((type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }, [fields, t])
-
   const configField = fields.find(f => f.field_type === 'sleep_journal_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
   const historyDays = parseInt(configField?.props['history_days'] ?? '14', 10)
   const awakeningsMax = parseInt(configField?.props['awakenings_max'] ?? '20', 10)
   const onsetMaxMinutes = parseInt(configField?.props['onset_max_minutes'] ?? '180', 10)
@@ -2834,8 +2515,8 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   const handleSave = useCallback(async () => {
     if (quality === null) {
       Alert.alert(
-        ft('sleep_journal_quality_missing_title') || t('common.warning'),
-        ft('sleep_journal_quality_missing_msg') || '',
+        lbl('quality_missing_title') || t('common.warning'),
+        lbl('quality_missing_msg') || '',
       )
       return
     }
@@ -2866,7 +2547,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   const handleDelete = useCallback(() => {
     if (!existingId) return
     Alert.alert(
-      ft('sleep_journal_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -2923,11 +2604,11 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
     const entryByDate: Record<string, SleepEntry> = {}
     for (const e of entries) entryByDate[e.date] = e
     const days = lastNDays(historyDays)
-    const ctaTitle = ft('sleep_journal_cta_title')
-    const monthlyLabel = ft('sleep_journal_monthly_button_label') || ft('sleep_journal_month_btn') || t('common.calendar')
-    const listHeader = ft('sleep_journal_list_header')
-    const incompleteLabel = ft('sleep_journal_incomplete_label')
-    const emptyDayLabel = ft('sleep_journal_empty_day_label')
+    const ctaTitle = lbl('cta_title')
+    const monthlyLabel = lbl('monthly_button_label') || t('common.calendar')
+    const listHeader = lbl('list_header')
+    const incompleteLabel = lbl('incomplete_label')
+    const emptyDayLabel = lbl('empty_day_label')
 
     return (
       <ScrollView style={sjStyles.container} contentContainerStyle={sjStyles.listContent} testID="sleep-journal-list">
@@ -3041,8 +2722,8 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
 
     const monthLabel = new Date(monthYear, monthNum - 1, 1)
       .toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-    const monthSummaryTitle = ft('sleep_journal_month_summary_title')
-    const legendTitle = ft('sleep_journal_legend_title')
+    const monthSummaryTitle = lbl('month_summary_title')
+    const legendTitle = lbl('legend_title')
 
     return (
       <View style={sjStyles.container} testID="sleep-journal-month">
@@ -3051,7 +2732,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             onPress={handleBackToList}
             style={sjStyles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel={ft('sleep_journal_back_label') || t('common.back')}
+            accessibilityLabel={lbl('back_label') || t('common.back')}
             testID="month-back-button"
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
@@ -3113,19 +2794,19 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
           <View style={sjStyles.statsGrid}>
             <View style={sjStyles.statCard}>
               <Text style={sjStyles.statValue}>{avgSleep !== null ? formatMinutes(avgSleep) : '–'}</Text>
-              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_avg_duration_label')}</Text>
+              <Text style={sjStyles.statLabel}>{lbl('stat_avg_duration_label')}</Text>
             </View>
             <View style={sjStyles.statCard}>
               <Text style={sjStyles.statValue}>{avgAwakenings !== null ? String(avgAwakenings) : '–'}</Text>
-              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_avg_awakenings_label')}</Text>
+              <Text style={sjStyles.statLabel}>{lbl('stat_avg_awakenings_label')}</Text>
             </View>
             <View style={sjStyles.statCard}>
               <Text style={sjStyles.statValue}>{`${filledEntries.length}/${totalDays}`}</Text>
-              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_nights_filled_label')}</Text>
+              <Text style={sjStyles.statLabel}>{lbl('stat_nights_filled_label')}</Text>
             </View>
             <View style={sjStyles.statCard}>
               <Text style={sjStyles.statValue}>{String(nightmaresCount)}</Text>
-              <Text style={sjStyles.statLabel}>{ft('sleep_journal_stat_nightmares_label')}</Text>
+              <Text style={sjStyles.statLabel}>{lbl('stat_nightmares_label')}</Text>
             </View>
           </View>
 
@@ -3133,23 +2814,23 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
           <View style={sjStyles.legendCard}>
             <View style={sjStyles.legendRow}>
               <View style={[sjStyles.legendDot, { backgroundColor: colors.success }]} />
-              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_good_label')}</Text>
+              <Text style={sjStyles.legendLabel}>{lbl('legend_good_label')}</Text>
             </View>
             <View style={sjStyles.legendRow}>
               <View style={[sjStyles.legendDot, { backgroundColor: '#F59E0B' }]} />
-              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_average_label')}</Text>
+              <Text style={sjStyles.legendLabel}>{lbl('legend_average_label')}</Text>
             </View>
             <View style={sjStyles.legendRow}>
               <View style={[sjStyles.legendDot, { backgroundColor: colors.danger }]} />
-              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_bad_label')}</Text>
+              <Text style={sjStyles.legendLabel}>{lbl('legend_bad_label')}</Text>
             </View>
             <View style={sjStyles.legendRow}>
               <View style={[sjStyles.legendDot, { backgroundColor: colors.border }]} />
-              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_empty_label')}</Text>
+              <Text style={sjStyles.legendLabel}>{lbl('legend_empty_label')}</Text>
             </View>
             <View style={sjStyles.legendRow}>
               <MaterialCommunityIcons name="ghost" size={13} color={colors.textMuted} />
-              <Text style={sjStyles.legendLabel}>{ft('sleep_journal_legend_nightmare_label')}</Text>
+              <Text style={sjStyles.legendLabel}>{lbl('legend_nightmare_label')}</Text>
             </View>
           </View>
         </ScrollView>
@@ -3175,17 +2856,17 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
     return null
   })()
   const qualityLabels = [
-    ft('sleep_journal_quality_label_1') || ft('sleep_journal_quality_very_bad'),
-    ft('sleep_journal_quality_label_2') || ft('sleep_journal_quality_bad'),
-    ft('sleep_journal_quality_label_3') || ft('sleep_journal_quality_average'),
-    ft('sleep_journal_quality_label_4') || ft('sleep_journal_quality_good'),
-    ft('sleep_journal_quality_label_5') || ft('sleep_journal_quality_excellent'),
+    lbl('quality_label_1'),
+    lbl('quality_label_2'),
+    lbl('quality_label_3'),
+    lbl('quality_label_4'),
+    lbl('quality_label_5'),
   ]
   const saveLabel = existingId
-    ? (ft('sleep_journal_update_label') || t('common.update'))
-    : (ft('sleep_journal_save_label') || t('common.save'))
-  const tapModify = ft('sleep_journal_tap_to_modify_hint')
-  const minutesUnit = ft('sleep_journal_minutes_unit') || 'min'
+    ? (lbl('update_label') || t('common.update'))
+    : (lbl('save_label') || t('common.save'))
+  const tapModify = lbl('tap_to_modify_hint')
+  const minutesUnit = lbl('minutes_unit') || 'min'
 
   return (
     <KeyboardAvoidingView
@@ -3199,22 +2880,22 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
           onPress={handleBackToList}
           style={sjStyles.backBtn}
           accessibilityRole="button"
-          accessibilityLabel={ft('sleep_journal_back_label') || t('common.back')}
+          accessibilityLabel={lbl('back_label') || t('common.back')}
           testID="entry-back-button"
         >
           <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
         </Pressable>
         <View style={sjStyles.entryHeaderTitle}>
-          <Text style={sjStyles.dateLabel}>{ft('sleep_journal_date_label')}</Text>
+          <Text style={sjStyles.dateLabel}>{lbl('date_label')}</Text>
           <Text style={sjStyles.dateValue}>{formatDateFull(targetDate)}</Text>
         </View>
       </View>
       <ScrollView contentContainerStyle={sjStyles.entryContent} keyboardShouldPersistTaps="handled">
         <View style={sjStyles.section}>
-          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_schedule_title')}</Text>
+          <Text style={sjStyles.sectionLabel}>{lbl('section_schedule_title')}</Text>
           <View style={sjStyles.card}>
             <View style={sjStyles.timeFieldGroup}>
-              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_bedtime_label')}</Text>
+              <Text style={sjStyles.fieldLabel}>{lbl('bedtime_label')}</Text>
               <TouchableOpacity
                 style={sjStyles.timeBtn}
                 onPress={() => setShowBedtimePicker(true)}
@@ -3239,7 +2920,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
               ) : null}
               {showBedtimePicker && Platform.OS === 'ios' ? (
                 <Pressable style={sjStyles.confirmBtn} onPress={() => setShowBedtimePicker(false)}>
-                  <Text style={sjStyles.confirmBtnText}>{ft('sleep_journal_confirm_label') || t('common.ok')}</Text>
+                  <Text style={sjStyles.confirmBtnText}>{lbl('confirm_label') || t('common.ok')}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -3247,7 +2928,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             <View style={sjStyles.divider} />
 
             <View style={sjStyles.timeFieldGroup}>
-              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_wake_time_label')}</Text>
+              <Text style={sjStyles.fieldLabel}>{lbl('wake_time_label')}</Text>
               <TouchableOpacity
                 style={sjStyles.timeBtn}
                 onPress={() => setShowWakePicker(true)}
@@ -3272,7 +2953,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
               ) : null}
               {showWakePicker && Platform.OS === 'ios' ? (
                 <Pressable style={sjStyles.confirmBtn} onPress={() => setShowWakePicker(false)}>
-                  <Text style={sjStyles.confirmBtnText}>{ft('sleep_journal_confirm_label') || t('common.ok')}</Text>
+                  <Text style={sjStyles.confirmBtnText}>{lbl('confirm_label') || t('common.ok')}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -3280,7 +2961,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             <View style={sjStyles.divider} />
 
             <View style={sjStyles.timeFieldGroup}>
-              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_onset_label')}</Text>
+              <Text style={sjStyles.fieldLabel}>{lbl('onset_label')}</Text>
               <View style={sjStyles.minutesRow}>
                 <TextInput
                   style={sjStyles.minutesInput}
@@ -3305,10 +2986,10 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
         </View>
 
         <View style={sjStyles.section}>
-          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_awakenings_title')}</Text>
+          <Text style={sjStyles.sectionLabel}>{lbl('section_awakenings_title')}</Text>
           <View style={sjStyles.card}>
             <View style={sjStyles.timeFieldGroup}>
-              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_awakenings_label')}</Text>
+              <Text style={sjStyles.fieldLabel}>{lbl('awakenings_label')}</Text>
               <View style={sjStyles.counterRow}>
                 <Pressable
                   style={[sjStyles.counterBtn, awakenings <= 0 && sjStyles.counterBtnDisabled]}
@@ -3335,7 +3016,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             <View style={sjStyles.divider} />
 
             <View style={sjStyles.timeFieldGroup}>
-              <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_awakenings_duration_label')}</Text>
+              <Text style={sjStyles.fieldLabel}>{lbl('awakenings_duration_label')}</Text>
               <View style={sjStyles.minutesRow}>
                 <TextInput
                   style={sjStyles.minutesInput}
@@ -3360,7 +3041,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
         </View>
 
         <View style={sjStyles.section}>
-          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_nightmares_title')}</Text>
+          <Text style={sjStyles.sectionLabel}>{lbl('section_nightmares_title')}</Text>
           <Pressable
             style={[sjStyles.card, sjStyles.toggleRow]}
             onPress={() => setNightmares(!nightmares)}
@@ -3374,7 +3055,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
                 size={22}
                 color={nightmares ? colors.danger : colors.textMuted}
               />
-              <Text style={sjStyles.toggleLabel}>{ft('sleep_journal_nightmares_label')}</Text>
+              <Text style={sjStyles.toggleLabel}>{lbl('nightmares_label')}</Text>
             </View>
             <View style={[sjStyles.switchTrack, nightmares && sjStyles.switchTrackOn]}>
               <View style={[sjStyles.switchThumb, nightmares && sjStyles.switchThumbOn]} />
@@ -3383,9 +3064,9 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
         </View>
 
         <View style={sjStyles.section}>
-          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_quality_title')}</Text>
+          <Text style={sjStyles.sectionLabel}>{lbl('section_quality_title')}</Text>
           <View style={sjStyles.card}>
-            <Text style={sjStyles.fieldLabel}>{ft('sleep_journal_quality_label')}</Text>
+            <Text style={sjStyles.fieldLabel}>{lbl('quality_label')}</Text>
             <View style={sjStyles.starsBig}>
               {Array.from({ length: qualityMax }, (_, i) => {
                 const n = i + 1
@@ -3413,13 +3094,13 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
         </View>
 
         <View style={sjStyles.section}>
-          <Text style={sjStyles.sectionLabel}>{ft('sleep_journal_section_notes_title') || ft('sleep_journal_notes_label')}</Text>
+          <Text style={sjStyles.sectionLabel}>{lbl('section_notes_title')}</Text>
           <View style={sjStyles.card}>
             <TextInput
               style={sjStyles.notesInput}
               value={notes}
               onChangeText={setNotes}
-              placeholder={ft('sleep_journal_notes_placeholder')}
+              placeholder={lbl('notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={4}
@@ -3433,7 +3114,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
           <View style={[sjStyles.seCard, { borderColor: seColor }]} testID="sleep-efficiency">
             <View style={sjStyles.seRow}>
               <MaterialCommunityIcons name="sleep" size={20} color={seColor} />
-              <Text style={sjStyles.seTitle}>{ft('sleep_journal_efficiency_label')}</Text>
+              <Text style={sjStyles.seTitle}>{lbl('efficiency_label')}</Text>
               <Text style={[sjStyles.seScore, { color: seColor }]}>{liveSE} %</Text>
             </View>
           </View>
@@ -3455,10 +3136,10 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
             style={sjStyles.deleteBtn}
             onPress={handleDelete}
             accessibilityRole="button"
-            accessibilityLabel={ft('sleep_journal_delete_label') || t('common.delete')}
+            accessibilityLabel={lbl('delete_label') || t('common.delete')}
             testID="delete-button"
           >
-            <Text style={sjStyles.deleteBtnText}>{ft('sleep_journal_delete_label') || t('common.delete')}</Text>
+            <Text style={sjStyles.deleteBtnText}>{lbl('delete_label') || t('common.delete')}</Text>
           </Pressable>
         ) : null}
       </ScrollView>
@@ -3698,20 +3379,6 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
     )
   }
 
-  if (preview_kind === 'grid2x2') {
-    const sections = new Map<string, ContentField[]>()
-    for (const f of contentFields) {
-      if (!f.section_id) continue
-      if (!sections.has(f.section_id)) sections.set(f.section_id, [])
-      sections.get(f.section_id)!.push(f)
-    }
-    return <Grid2x2Layout sections={sections} footer={footer} />
-  }
-
-  if (preview_kind === 'timed_tap_exercise') {
-    return <TimedTapExerciseLayout fields={visibleFields} />
-  }
-
   if (preview_kind === 'daily_checkin') {
     return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   }
@@ -3824,8 +3491,6 @@ const styles = StyleSheet.create({
   listBlock:      { gap: 2 },
   fieldsBlock:    { gap: 0 },
   infoBox:        { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: 12, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
-  grid:           { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  quadrant:       { width: '47%', backgroundColor: '#FAFAFA', borderRadius: 8, padding: 12 },
   cardsBlock:     { gap: 8 },
   card:           { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10, overflow: 'hidden' },
   cardHeader:     { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 8 },

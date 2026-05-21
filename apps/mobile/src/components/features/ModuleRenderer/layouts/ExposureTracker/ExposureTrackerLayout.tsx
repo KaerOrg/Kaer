@@ -71,12 +71,11 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   const patient = useAuthStore(s => s.patient)
 
   // ── Field resolution helpers ─────────────────────────────────────────────
-  const ft = useCallback((type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }, [fields, t])
-
   const configField = useMemo(() => fields.find(f => f.field_type === 'exposure_tracker_config'), [fields])
+  const lbl = useCallback((key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }, [configField, t])
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const sudsMin = parseInt(configField?.props['suds_min'] ?? '0', 10)
   const sudsMax = parseInt(configField?.props['suds_max'] ?? '100', 10)
@@ -185,8 +184,8 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
     if (!resolvedLabel) {
       Alert.alert(
-        ft('exposure_tracker_situation_missing_title') || t('common.error'),
-        ft('exposure_tracker_situation_missing_msg'),
+        lbl('situation_missing_title') || t('common.error'),
+        lbl('situation_missing_msg'),
       )
       return
     }
@@ -222,13 +221,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   }, [
     situationId, situations, situationFreeText, sudsBefore, selectedStrategies,
     customStrategy, sudsAfter, notes, editingId, patient, engagementEventType,
-    reloadAll, ft, t,
+    reloadAll, lbl, t,
   ])
 
   const handleDeleteFromEntry = useCallback(() => {
     if (!editingId) return
     Alert.alert(
-      ft('exposure_tracker_delete_entry_title') || t('common.delete'),
+      lbl('delete_entry_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -243,11 +242,11 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
         },
       ]
     )
-  }, [editingId, reloadAll, ft, t])
+  }, [editingId, reloadAll, lbl, t])
 
   const handleDeleteFromList = useCallback((entry: FearEntry) => {
     Alert.alert(
-      ft('exposure_tracker_delete_entry_title') || t('common.delete'),
+      lbl('delete_entry_title') || t('common.delete'),
       `"${entry.situation_label}"`,
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -260,7 +259,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
         },
       ]
     )
-  }, [reloadAll, ft, t])
+  }, [reloadAll, lbl, t])
 
   // ── Situations panel ─────────────────────────────────────────────────────
   const handleAddSituation = useCallback(async () => {
@@ -280,7 +279,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
   const handleDeleteSituation = useCallback((sit: FearSituation) => {
     Alert.alert(
-      ft('exposure_tracker_situation_delete_title') || t('common.delete'),
+      lbl('situation_delete_title') || t('common.delete'),
       `"${sit.label}"`,
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -293,7 +292,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
         },
       ]
     )
-  }, [ft, t])
+  }, [lbl, t])
 
   // ── Strategy chip resolution for cards ───────────────────────────────────
   const resolveStrategyLabels = useCallback((entry: FearEntry): string[] => {
@@ -314,8 +313,8 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   // ── MODE ENTRY ───────────────────────────────────────────────────────────
   if (mode === 'entry') {
     const saveLabel = editingId
-      ? (ft('exposure_tracker_update_label') || t('common.update'))
-      : (ft('exposure_tracker_save_label') || t('common.save'))
+      ? (lbl('update_label') || t('common.update'))
+      : (lbl('save_label') || t('common.save'))
 
     return (
       <KeyboardAvoidingView
@@ -329,7 +328,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
             onPress={handleBackToList}
             style={etStyles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel={ft('exposure_tracker_back_label') || t('common.back')}
+            accessibilityLabel={lbl('back_label') || t('common.back')}
             testID="entry-back-button"
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
@@ -341,7 +340,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
         >
           {/* Situation */}
           <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{ft('exposure_tracker_section_trigger_title')}</Text>
+            <Text style={etStyles.sectionLabel}>{lbl('section_trigger_title')}</Text>
             <View style={etStyles.card}>
               <View style={etStyles.toggle}>
                 {situations.length > 0 ? (
@@ -351,7 +350,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                     testID="toggle-catalogue"
                   >
                     <Text style={[etStyles.toggleText, situationPickerMode === 'catalogue' && etStyles.toggleTextActive]}>
-                      {ft('exposure_tracker_situation_mode_catalogue')}
+                      {lbl('situation_mode_catalogue')}
                     </Text>
                   </Pressable>
                 ) : null}
@@ -361,13 +360,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                   testID="toggle-free"
                 >
                   <Text style={[etStyles.toggleText, situationPickerMode === 'free' && etStyles.toggleTextActive]}>
-                    {ft('exposure_tracker_situation_mode_free')}
+                    {lbl('situation_mode_free')}
                   </Text>
                 </Pressable>
               </View>
               {situationPickerMode === 'catalogue' ? (
                 situations.length === 0 ? (
-                  <Text style={etStyles.catalogueEmpty}>{ft('exposure_tracker_situation_catalogue_empty')}</Text>
+                  <Text style={etStyles.catalogueEmpty}>{lbl('situation_catalogue_empty')}</Text>
                 ) : (
                   <View style={etStyles.catalogueList}>
                     {situations.map(s => {
@@ -400,7 +399,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
               ) : (
                 <TextInput
                   style={etStyles.freeInput}
-                  placeholder={ft('exposure_tracker_situation_free_placeholder')}
+                  placeholder={lbl('situation_free_placeholder')}
                   placeholderTextColor={colors.textMuted}
                   value={situationFreeText}
                   onChangeText={(v) => { setSituationFreeText(v); setSituationId(null) }}
@@ -414,13 +413,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
           {/* SUDs avant */}
           <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{ft('exposure_tracker_section_before_title')}</Text>
+            <Text style={etStyles.sectionLabel}>{lbl('section_before_title')}</Text>
             <View style={etStyles.card}>
               <View style={etStyles.sudsHeader}>
                 <View style={etStyles.sudsHeaderLeft}>
-                  <Text style={etStyles.sudsHeaderLabel}>{ft('exposure_tracker_suds_before_label')}</Text>
-                  {ft('exposure_tracker_suds_before_hint') ? (
-                    <Text style={etStyles.sudsHeaderHint}>{ft('exposure_tracker_suds_before_hint')}</Text>
+                  <Text style={etStyles.sudsHeaderLabel}>{lbl('suds_before_label')}</Text>
+                  {lbl('suds_before_hint') ? (
+                    <Text style={etStyles.sudsHeaderHint}>{lbl('suds_before_hint')}</Text>
                   ) : null}
                 </View>
                 <View style={etStyles.sudsValueBox}>
@@ -432,7 +431,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                 value={sudsBefore}
                 steps={sudsSteps}
                 color={beforeColor}
-                label={ft('exposure_tracker_suds_before_label')}
+                label={lbl('suds_before_label')}
                 variant="numbered"
                 showHeader={false}
                 onPress={(v) => setSudsBefore(v)}
@@ -442,10 +441,10 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
           {/* Stratégies */}
           <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{ft('exposure_tracker_section_strategies_title')}</Text>
+            <Text style={etStyles.sectionLabel}>{lbl('section_strategies_title')}</Text>
             <View style={etStyles.card}>
-              {ft('exposure_tracker_strategies_hint') ? (
-                <Text style={etStyles.stratHint}>{ft('exposure_tracker_strategies_hint')}</Text>
+              {lbl('strategies_hint') ? (
+                <Text style={etStyles.stratHint}>{lbl('strategies_hint')}</Text>
               ) : null}
               <View style={etStyles.chips}>
                 {strategyFields.map(s => {
@@ -476,7 +475,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
               </View>
               <TextInput
                 style={etStyles.customStratInput}
-                placeholder={ft('exposure_tracker_strategy_custom_placeholder')}
+                placeholder={lbl('strategy_custom_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 value={customStrategy}
                 onChangeText={setCustomStrategy}
@@ -487,13 +486,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
           {/* SUDs après — optionnel */}
           <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{ft('exposure_tracker_section_after_title')}</Text>
+            <Text style={etStyles.sectionLabel}>{lbl('section_after_title')}</Text>
             <View style={etStyles.card}>
               <View style={etStyles.sudsHeader}>
                 <View style={etStyles.sudsHeaderLeft}>
-                  <Text style={etStyles.sudsHeaderLabel}>{ft('exposure_tracker_suds_after_label')}</Text>
-                  {ft('exposure_tracker_suds_after_hint') ? (
-                    <Text style={etStyles.sudsHeaderHint}>{ft('exposure_tracker_suds_after_hint')}</Text>
+                  <Text style={etStyles.sudsHeaderLabel}>{lbl('suds_after_label')}</Text>
+                  {lbl('suds_after_hint') ? (
+                    <Text style={etStyles.sudsHeaderHint}>{lbl('suds_after_hint')}</Text>
                   ) : null}
                 </View>
                 <View style={etStyles.sudsValueBox}>
@@ -509,7 +508,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                 value={sudsAfter}
                 steps={sudsSteps}
                 color={afterColor}
-                label={ft('exposure_tracker_suds_after_label')}
+                label={lbl('suds_after_label')}
                 variant="numbered"
                 showHeader={false}
                 onPress={(v) => setSudsAfter(v)}
@@ -518,13 +517,13 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                 style={etStyles.skipBtn}
                 onPress={() => setSudsAfter(null)}
                 accessibilityRole="button"
-                accessibilityLabel={ft('exposure_tracker_suds_skip_later')}
+                accessibilityLabel={lbl('suds_skip_later')}
                 testID="suds-after-skip"
               >
                 <Text style={[etStyles.skipText, sudsAfter === null && { color: afterColor, fontWeight: '700' }]}>
                   {sudsAfter === null
-                    ? ft('exposure_tracker_suds_skip_null')
-                    : ft('exposure_tracker_suds_skip_later')}
+                    ? lbl('suds_skip_null')
+                    : lbl('suds_skip_later')}
                 </Text>
               </Pressable>
             </View>
@@ -532,11 +531,11 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
 
           {/* Notes */}
           <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{ft('exposure_tracker_section_notes_title') || t('common.notes_optional')}</Text>
+            <Text style={etStyles.sectionLabel}>{lbl('section_notes_title') || t('common.notes_optional')}</Text>
             <View style={etStyles.card}>
               <TextInput
                 style={etStyles.notesInput}
-                placeholder={ft('exposure_tracker_notes_placeholder') || t('common.notes_placeholder')}
+                placeholder={lbl('notes_placeholder') || t('common.notes_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 value={notes}
                 onChangeText={setNotes}
@@ -570,10 +569,10 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
               style={etStyles.deleteBtn}
               onPress={handleDeleteFromEntry}
               accessibilityRole="button"
-              accessibilityLabel={ft('exposure_tracker_delete_label') || t('common.delete')}
+              accessibilityLabel={lbl('delete_label') || t('common.delete')}
               testID="delete-button"
             >
-              <Text style={etStyles.deleteBtnText}>{ft('exposure_tracker_delete_label') || t('common.delete')}</Text>
+              <Text style={etStyles.deleteBtnText}>{lbl('delete_label') || t('common.delete')}</Text>
             </Pressable>
           ) : null}
         </ScrollView>
@@ -598,7 +597,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
             color={tab === 'entries' ? colors.primary : colors.textMuted}
           />
           <Text style={[etStyles.tabText, tab === 'entries' && etStyles.tabTextActive]}>
-            {ft('exposure_tracker_tab_entries_label')}
+            {lbl('tab_entries_label')}
           </Text>
         </Pressable>
         <Pressable
@@ -614,7 +613,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
             color={tab === 'situations' ? colors.primary : colors.textMuted}
           />
           <Text style={[etStyles.tabText, tab === 'situations' && etStyles.tabTextActive]}>
-            {ft('exposure_tracker_tab_situations_label')}
+            {lbl('tab_situations_label')}
           </Text>
         </Pressable>
       </View>
@@ -625,11 +624,11 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
             {entries.length === 0 ? (
               <View style={etStyles.empty} testID="list-empty">
                 <MaterialCommunityIcons name="thermometer" size={52} color={colors.border} />
-                {ft('exposure_tracker_empty_title') ? (
-                  <Text style={etStyles.emptyTitle}>{ft('exposure_tracker_empty_title')}</Text>
+                {lbl('empty_title') ? (
+                  <Text style={etStyles.emptyTitle}>{lbl('empty_title')}</Text>
                 ) : null}
-                {ft('exposure_tracker_empty_text') ? (
-                  <Text style={etStyles.emptyText}>{ft('exposure_tracker_empty_text')}</Text>
+                {lbl('empty_text') ? (
+                  <Text style={etStyles.emptyText}>{lbl('empty_text')}</Text>
                 ) : null}
               </View>
             ) : (
@@ -640,8 +639,8 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                   strategyLabels={resolveStrategyLabels(e)}
                   beforeColor={beforeColor}
                   afterColor={afterColor}
-                  beforeLabel={ft('exposure_tracker_entry_suds_before_label') || ft('exposure_tracker_suds_before_label')}
-                  afterLabel={ft('exposure_tracker_entry_suds_after_label') || ft('exposure_tracker_suds_after_label')}
+                  beforeLabel={lbl('suds_before_label')}
+                  afterLabel={lbl('suds_after_label')}
                   onEdit={() => handleEdit(e.id)}
                   onDelete={() => handleDeleteFromList(e)}
                 />
@@ -652,24 +651,24 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
             style={etStyles.fab}
             onPress={handleNew}
             accessibilityRole="button"
-            accessibilityLabel={ft('exposure_tracker_add_btn') || t('common.add')}
+            accessibilityLabel={lbl('add_btn') || t('common.add')}
             testID="fab-add-button"
           >
             <MaterialCommunityIcons name="thermometer-plus" size={22} color={colors.white} />
-            <Text style={etStyles.fabText}>{ft('exposure_tracker_add_btn') || t('common.add')}</Text>
+            <Text style={etStyles.fabText}>{lbl('add_btn') || t('common.add')}</Text>
           </Pressable>
         </>
       ) : (
         <ScrollView contentContainerStyle={etStyles.panelContent}>
           <View style={etStyles.panelCard}>
-            <Text style={etStyles.panelTitle}>{ft('exposure_tracker_situations_panel_title')}</Text>
-            {ft('exposure_tracker_situations_panel_hint') ? (
-              <Text style={etStyles.panelHint}>{ft('exposure_tracker_situations_panel_hint')}</Text>
+            <Text style={etStyles.panelTitle}>{lbl('situations_panel_title')}</Text>
+            {lbl('situations_panel_hint') ? (
+              <Text style={etStyles.panelHint}>{lbl('situations_panel_hint')}</Text>
             ) : null}
             <View style={etStyles.panelAddRow}>
               <TextInput
                 style={etStyles.panelInput}
-                placeholder={ft('exposure_tracker_situation_placeholder')}
+                placeholder={lbl('situation_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 value={newSituationLabel}
                 onChangeText={setNewSituationLabel}
@@ -688,7 +687,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
               </Pressable>
             </View>
             {situations.length === 0 ? (
-              <Text style={etStyles.panelEmpty}>{ft('exposure_tracker_situation_empty')}</Text>
+              <Text style={etStyles.panelEmpty}>{lbl('situation_empty')}</Text>
             ) : (
               <View style={etStyles.panelList}>
                 {situations.map(s => (

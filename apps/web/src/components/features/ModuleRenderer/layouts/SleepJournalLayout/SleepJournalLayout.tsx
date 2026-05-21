@@ -14,35 +14,36 @@ interface Props {
 // Source : apps/mobile/src/components/ModuleRenderer/FieldRenderer.tsx —
 // SleepJournalLayout (modes list + entry).
 export function SleepJournalLayout({ fields, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'sleep_journal_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const ctaTitle = ft('sleep_journal_cta_title')
-  const monthlyLabel = ft('sleep_journal_monthly_button_label')
-  const listHeader = ft('sleep_journal_list_header')
-  const incompleteLabel = ft('sleep_journal_incomplete_label')
-  const emptyDayLabel = ft('sleep_journal_empty_day_label')
+  const ctaTitle = lbl('cta_title')
+  const monthlyLabel = lbl('monthly_button_label')
+  const listHeader = lbl('list_header')
+  const incompleteLabel = lbl('incomplete_label')
+  const emptyDayLabel = lbl('empty_day_label')
 
-  const dateLabel = ft('sleep_journal_date_label')
-  const sectionSchedule = ft('sleep_journal_section_schedule_title')
-  const sectionAwakenings = ft('sleep_journal_section_awakenings_title')
-  const sectionNightmares = ft('sleep_journal_section_nightmares_title')
-  const sectionQuality = ft('sleep_journal_section_quality_title')
-  const sectionNotes = ft('sleep_journal_section_notes_title')
+  const dateLabel = lbl('date_label')
+  const sectionSchedule = lbl('section_schedule_title')
+  const sectionAwakenings = lbl('section_awakenings_title')
+  const sectionNightmares = lbl('section_nightmares_title')
+  const sectionQuality = lbl('section_quality_title')
+  const sectionNotes = lbl('section_notes_title')
 
-  const bedtimeLabel = ft('sleep_journal_bedtime_label')
-  const wakeTimeLabel = ft('sleep_journal_wake_time_label')
-  const onsetLabel = ft('sleep_journal_onset_label')
-  const awakeningsLabel = ft('sleep_journal_awakenings_label')
-  const awakDurationLabel = ft('sleep_journal_awakenings_duration_label')
-  const nightmaresLabel = ft('sleep_journal_nightmares_label')
-  const qualityLabel = ft('sleep_journal_quality_label')
-  const notesPlaceholder = ft('sleep_journal_notes_placeholder')
-  const minutesUnit = ft('sleep_journal_minutes_unit') || 'min'
-  const efficiencyLabel = ft('sleep_journal_efficiency_label')
-  const saveLabel = ft('sleep_journal_save_label')
+  const bedtimeLabel = lbl('bedtime_label')
+  const wakeTimeLabel = lbl('wake_time_label')
+  const onsetLabel = lbl('onset_label')
+  const awakeningsLabel = lbl('awakenings_label')
+  const awakDurationLabel = lbl('awakenings_duration_label')
+  const nightmaresLabel = lbl('nightmares_label')
+  const qualityLabel = lbl('quality_label')
+  const notesPlaceholder = lbl('notes_placeholder')
+  const minutesUnit = lbl('minutes_unit') || 'min'
+  const efficiencyLabel = lbl('efficiency_label')
+  const saveLabel = lbl('save_label')
 
   const todayShort = mockDayLabel(0)
 

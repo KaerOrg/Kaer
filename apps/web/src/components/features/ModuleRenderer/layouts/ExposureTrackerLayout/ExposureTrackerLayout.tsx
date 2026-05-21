@@ -11,27 +11,28 @@ interface Props {
 // (situation, barres SUDs avant/après, stratégies, notes), puis aperçu du
 // formulaire d'entrée. Source mobile : ExposureTrackerLayout.tsx.
 export function ExposureTrackerLayout({ fields, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'exposure_tracker_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const tabEntries = ft('exposure_tracker_tab_entries_label')
-  const tabSituations = ft('exposure_tracker_tab_situations_label')
-  const addBtn = ft('exposure_tracker_add_btn')
-  const sectionTrigger = ft('exposure_tracker_section_trigger_title')
-  const sectionBefore = ft('exposure_tracker_section_before_title')
-  const sectionStrategies = ft('exposure_tracker_section_strategies_title')
-  const sectionAfter = ft('exposure_tracker_section_after_title')
-  const sectionNotes = ft('exposure_tracker_section_notes_title')
-  const modeCatalogue = ft('exposure_tracker_situation_mode_catalogue')
-  const modeFree = ft('exposure_tracker_situation_mode_free')
-  const sudsBefore = ft('exposure_tracker_suds_before_label')
-  const sudsAfter = ft('exposure_tracker_suds_after_label')
-  const strategiesHint = ft('exposure_tracker_strategies_hint')
-  const customPlaceholder = ft('exposure_tracker_strategy_custom_placeholder')
-  const notesPlaceholder = ft('exposure_tracker_notes_placeholder')
-  const saveLabel = ft('exposure_tracker_save_label')
+  const tabEntries = lbl('tab_entries_label')
+  const tabSituations = lbl('tab_situations_label')
+  const addBtn = lbl('add_btn')
+  const sectionTrigger = lbl('section_trigger_title')
+  const sectionBefore = lbl('section_before_title')
+  const sectionStrategies = lbl('section_strategies_title')
+  const sectionAfter = lbl('section_after_title')
+  const sectionNotes = lbl('section_notes_title')
+  const modeCatalogue = lbl('situation_mode_catalogue')
+  const modeFree = lbl('situation_mode_free')
+  const sudsBefore = lbl('suds_before_label')
+  const sudsAfter = lbl('suds_after_label')
+  const strategiesHint = lbl('strategies_hint')
+  const customPlaceholder = lbl('strategy_custom_placeholder')
+  const notesPlaceholder = lbl('notes_placeholder')
+  const saveLabel = lbl('save_label')
 
   const strategies = fields
     .filter(f => f.field_type === 'exposure_tracker_strategy')

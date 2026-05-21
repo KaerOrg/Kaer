@@ -57,14 +57,14 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
 
-  // ── Résolution des champs DB-driven
-  const ft = useCallback((type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }, [fields, t])
-
   const configField = fields.find(f => f.field_type === 'activity_log_config')
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
+
+  // ── Labels UI — lus depuis les props de activity_log_config
+  const lbl = useCallback((key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }, [configField, t])
   const pleasureMin = parseInt(configField?.props['pleasure_min'] ?? '0', 10)
   const pleasureMax = parseInt(configField?.props['pleasure_max'] ?? '10', 10)
   const pleasureStep = parseInt(configField?.props['pleasure_step'] ?? '1', 10)
@@ -156,8 +156,8 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   const handleSave = useCallback(async () => {
     if (!label.trim()) {
       Alert.alert(
-        ft('activity_log_name_missing_title') || t('common.error'),
-        ft('activity_log_name_missing_msg'),
+        lbl('name_missing_title') || t('common.error'),
+        lbl('name_missing_msg'),
       )
       return
     }
@@ -185,12 +185,12 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     } finally {
       setSaving(false)
     }
-  }, [label, editingId, entryDate, pleasure, mastery, done, notes, patient, engagementEventType, loadRecords, ft, t])
+  }, [label, editingId, entryDate, pleasure, mastery, done, notes, patient, engagementEventType, loadRecords, lbl, t])
 
   const handleDelete = useCallback(() => {
     if (!editingId) return
     Alert.alert(
-      ft('activity_log_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       t('common.irreversible'),
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -206,11 +206,11 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         },
       ]
     )
-  }, [editingId, loadRecords, ft, t])
+  }, [editingId, loadRecords, lbl, t])
 
   const handleDeleteFromList = useCallback((record: ActivityRecord) => {
     Alert.alert(
-      ft('activity_log_delete_title') || t('common.delete'),
+      lbl('delete_title') || t('common.delete'),
       `"${record.label}"`,
       [
         { text: t('common.cancel'), style: 'cancel' },
@@ -224,7 +224,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         },
       ]
     )
-  }, [loadRecords, ft, t])
+  }, [loadRecords, lbl, t])
 
   const handleToggleDone = useCallback(async (record: ActivityRecord) => {
     await saveActivityRecord({
@@ -255,8 +255,8 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   // ── MODE ENTRY ──────────────────────────────────────────────────────────
   if (mode === 'entry') {
     const saveLabel = editingId
-      ? (ft('activity_log_update_label') || t('common.update'))
-      : (ft('activity_log_save_label') || t('common.save'))
+      ? (lbl('update_label') || t('common.update'))
+      : (lbl('save_label') || t('common.save'))
     const dateValueText = entryDate.toLocaleDateString(localeProp, {
       weekday: 'long', day: 'numeric', month: 'long',
     })
@@ -273,7 +273,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
             onPress={handleBackToList}
             style={alStyles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel={ft('activity_log_back_label') || t('common.back')}
+            accessibilityLabel={lbl('back_label') || t('common.back')}
             testID="entry-back-button"
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
@@ -285,7 +285,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         >
           {/* Date */}
           <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{ft('activity_log_date_label')}</Text>
+            <Text style={alStyles.sectionLabel}>{lbl('date_label')}</Text>
             <View style={alStyles.card}>
               <TouchableOpacity
                 style={alStyles.dateBtn}
@@ -310,7 +310,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
               ) : null}
               {showDatePicker && Platform.OS === 'ios' ? (
                 <Pressable style={alStyles.confirmBtn} onPress={() => setShowDatePicker(false)}>
-                  <Text style={alStyles.confirmBtnText}>{ft('activity_log_date_confirm_label') || t('common.ok')}</Text>
+                  <Text style={alStyles.confirmBtnText}>{lbl('date_confirm_label') || t('common.ok')}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -318,13 +318,13 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
 
           {/* Activité */}
           <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{ft('activity_log_section_activity_title')}</Text>
+            <Text style={alStyles.sectionLabel}>{lbl('section_activity_title')}</Text>
             <View style={alStyles.card}>
               <TextInput
                 style={alStyles.labelInput}
                 value={label}
                 onChangeText={setLabel}
-                placeholder={ft('activity_log_activity_placeholder')}
+                placeholder={lbl('activity_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 returnKeyType="done"
                 testID="label-input"
@@ -374,17 +374,17 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
               color={done ? colors.success : colors.textMuted}
             />
             <Text style={[alStyles.doneLabel, done && { color: colors.success }]}>
-              {done ? ft('activity_log_done_label') : ft('activity_log_mark_done_label')}
+              {done ? lbl('done_label') : lbl('mark_done_label')}
             </Text>
           </Pressable>
 
           {/* Évaluation */}
           <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{ft('activity_log_section_evaluation_title')}</Text>
+            <Text style={alStyles.sectionLabel}>{lbl('section_evaluation_title')}</Text>
             <View style={alStyles.card}>
               <PipPicker
-                label={ft('activity_log_pleasure_label')}
-                sublabel={ft('activity_log_pleasure_sublabel')}
+                label={lbl('pleasure_label')}
+                sublabel={lbl('pleasure_sublabel')}
                 value={pleasure}
                 steps={pleasureSteps}
                 color={pleasureColor}
@@ -394,8 +394,8 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
               />
               <View style={alStyles.cardDivider} />
               <PipPicker
-                label={ft('activity_log_mastery_label')}
-                sublabel={ft('activity_log_mastery_sublabel')}
+                label={lbl('mastery_label')}
+                sublabel={lbl('mastery_sublabel')}
                 value={mastery}
                 steps={masterySteps}
                 color={masteryColor}
@@ -408,13 +408,13 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
 
           {/* Notes */}
           <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{ft('activity_log_section_notes_title') || t('common.notes_optional')}</Text>
+            <Text style={alStyles.sectionLabel}>{lbl('section_notes_title') || t('common.notes_optional')}</Text>
             <View style={alStyles.card}>
               <TextInput
                 style={alStyles.notesInput}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder={ft('activity_log_notes_placeholder') || t('common.notes_placeholder')}
+                placeholder={lbl('notes_placeholder') || t('common.notes_placeholder')}
                 placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={3}
@@ -446,10 +446,10 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
               style={alStyles.deleteBtn}
               onPress={handleDelete}
               accessibilityRole="button"
-              accessibilityLabel={ft('activity_log_delete_label') || t('common.delete')}
+              accessibilityLabel={lbl('delete_label') || t('common.delete')}
               testID="delete-button"
             >
-              <Text style={alStyles.deleteBtnText}>{ft('activity_log_delete_label') || t('common.delete')}</Text>
+              <Text style={alStyles.deleteBtnText}>{lbl('delete_label') || t('common.delete')}</Text>
             </Pressable>
           ) : null}
         </ScrollView>
@@ -498,7 +498,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
             onPress={handleBackToList}
             style={alStyles.backBtn}
             accessibilityRole="button"
-            accessibilityLabel={ft('activity_log_back_label') || t('common.back')}
+            accessibilityLabel={lbl('back_label') || t('common.back')}
             testID="month-back-button"
           >
             <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
@@ -564,11 +564,11 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
             <View style={alStyles.legendRow}>
               <View style={alStyles.legendItem}>
                 <View style={[alStyles.legendDot, { backgroundColor: dotDoneColor }]} />
-                <Text style={alStyles.legendText}>{ft('activity_log_legend_done_label')}</Text>
+                <Text style={alStyles.legendText}>{lbl('legend_done_label')}</Text>
               </View>
               <View style={alStyles.legendItem}>
                 <View style={[alStyles.legendDot, { backgroundColor: dotPlannedColor }]} />
-                <Text style={alStyles.legendText}>{ft('activity_log_legend_planned_label')}</Text>
+                <Text style={alStyles.legendText}>{lbl('legend_planned_label')}</Text>
               </View>
               {(monthDone > 0 || monthPlanned > 0) ? (
                 <Text style={alStyles.legendStat} testID="month-stats">
@@ -581,12 +581,12 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
           {selectedDay == null ? (
             <View style={alStyles.monthHint}>
               <MaterialCommunityIcons name="gesture-tap" size={24} color={colors.textMuted} />
-              <Text style={alStyles.monthHintText}>{ft('activity_log_month_hint_tap')}</Text>
+              <Text style={alStyles.monthHintText}>{lbl('month_hint_tap')}</Text>
             </View>
           ) : dayRecords.length === 0 ? (
             <View style={alStyles.monthHint}>
               <MaterialCommunityIcons name="calendar-blank-outline" size={24} color={colors.textMuted} />
-              <Text style={alStyles.monthHintText}>{ft('activity_log_month_hint_empty')}</Text>
+              <Text style={alStyles.monthHintText}>{lbl('month_hint_empty')}</Text>
             </View>
           ) : (
             <View style={alStyles.dayList}>
@@ -598,7 +598,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
                   onToggleDone={() => handleToggleDone(r)}
                   onEdit={() => handleEdit(r.id)}
                   onDelete={() => handleDeleteFromList(r)}
-                  ft={ft}
+                  lbl={lbl}
                 />
               ))}
             </View>
@@ -629,7 +629,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
           testID="tab-list"
         >
           <MaterialCommunityIcons name="format-list-bulleted" size={16} color={colors.primary} />
-          <Text style={[alStyles.tabText, alStyles.tabTextActive]}>{ft('activity_log_tab_list_label')}</Text>
+          <Text style={[alStyles.tabText, alStyles.tabTextActive]}>{lbl('tab_list_label')}</Text>
         </Pressable>
         <Pressable
           style={alStyles.tab}
@@ -639,7 +639,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
           testID="tab-month"
         >
           <MaterialCommunityIcons name="calendar-month-outline" size={16} color={colors.textMuted} />
-          <Text style={alStyles.tabText}>{ft('activity_log_tab_month_label')}</Text>
+          <Text style={alStyles.tabText}>{lbl('tab_month_label')}</Text>
         </Pressable>
       </View>
 
@@ -647,11 +647,11 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         {records.length === 0 ? (
           <View style={alStyles.empty} testID="list-empty">
             <MaterialCommunityIcons name="run-fast" size={52} color={colors.border} />
-            {ft('activity_log_empty_title') ? (
-              <Text style={alStyles.emptyTitle}>{ft('activity_log_empty_title')}</Text>
+            {lbl('empty_title') ? (
+              <Text style={alStyles.emptyTitle}>{lbl('empty_title')}</Text>
             ) : null}
-            {ft('activity_log_empty_text') ? (
-              <Text style={alStyles.emptyText}>{ft('activity_log_empty_text')}</Text>
+            {lbl('empty_text') ? (
+              <Text style={alStyles.emptyText}>{lbl('empty_text')}</Text>
             ) : null}
           </View>
         ) : (
@@ -665,7 +665,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
                   onToggleDone={() => handleToggleDone(r)}
                   onEdit={() => handleEdit(r.id)}
                   onDelete={() => handleDeleteFromList(r)}
-                  ft={ft}
+                  lbl={lbl}
                 />
               ))}
             </View>
@@ -677,7 +677,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         style={alStyles.fab}
         onPress={handleNew}
         accessibilityRole="button"
-        accessibilityLabel={ft('activity_log_add_btn') || t('common.add')}
+        accessibilityLabel={lbl('add_btn') || t('common.add')}
         testID="fab-add-button"
       >
         <MaterialCommunityIcons name="plus" size={28} color={colors.white} />

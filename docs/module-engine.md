@@ -51,7 +51,6 @@ Valeurs de `preview_kind` et leur layout :
 |---|---|---|
 | `steps` | Liste ordonnée verticale de sections | `crisis_plan`, `beck_columns` |
 | `fields` | Grille de champs avec widget | `sleep_diary`, `medication_adherence` |
-| `grid2x2` | Matrice 2×2 | `decisional_balance` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
 | `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18`, `mood_tracker` |
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
@@ -161,25 +160,15 @@ create table public.module_content_fields (
 | `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` (web) |
 | `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
 
-**Layout `grid2x2`**
-
-| `field_type` | Rendu | Props clés |
-|---|---|---|
-| `quadrant_title` | Titre de quadrant | `color` |
-| `quadrant_subtitle` | Sous-titre | — |
-
 **Layout `cards`**
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
 | `card_title` | Titre accordéon | — |
 | `card_summary` | Résumé header fermé | — |
-| `card_heading_2` | `<h2>` | — |
-| `card_heading_3` | `<h3>` | — |
-| `card_heading_4` | `<h4>` | — |
-| `card_paragraph` | Paragraphe | — |
-| `card_paragraph_bold` | Paragraphe gras | — |
-| `card_italic_note` | Note italique | — |
+| `card_heading` | `<h2>`/`<h3>`/`<h4>` | `level` (`'2'`/`'3'`/`'4'`, défaut `'2'`) |
+| `card_inline` | Segment inline dans un `<p>` | `bold='true'` (défaut: plain) |
+| `card_paragraph` | Paragraphe | `bold='true'` / `italic='true'` |
 | `card_callout` | Encart (bordure gauche colorée) | `color` |
 | `card_list_item` | Puce `•` | — |
 | `card_numbered_item` | Item numéroté | — |
@@ -213,9 +202,6 @@ create table public.module_content_fields (
 | `exercise_done_text` | Texte écran fin | — |
 | `exercise_safety_title` | Titre section urgence | — |
 | `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
-| `timed_tap_config` | Config tapotement répété | `duration`, `target_code` |
-| `timed_tap_how_body` | Corps explication tapotement | — |
-
 **Layout `patient_scenario` (RIM)**
 
 | `field_type` | Rendu | Props clés |
@@ -407,7 +393,6 @@ interface FieldRendererProps {
 'steps'           → StepsLayout         (groups par section_id, champ step_title requis)
 'cards'           → CardsLayout         (groups par section_id, accordéon card_title/card_summary)
 'fields'          → FieldsLayout        (filtre field_type === 'field_row', FieldRow par champ)
-'grid2x2'         → Grid2x2Layout       (groups par section_id, quadrant_title/quadrant_subtitle)
 'questionnaire'   → QuestionnaireLayout (mobile uniquement — ScaleEntryScreen pilote les réponses)
 'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
@@ -465,20 +450,16 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_callout:        FieldText,
   card_definition:     CardDefinition,
   card_divider:        CardDivider,
-  card_heading_2:      FieldText,
-  card_heading_3:      FieldText,
-  card_heading_4:      FieldText,
-  card_italic_note:    FieldText,
+  card_heading:        FieldText,
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
-  card_paragraph_bold: FieldText,
   coming_soon:         NullField,
   module_description:  NullField,
   module_label:        NullField,
 }
-// card_inline_bold et card_inline_text ne sont PAS dans ce registre —
-// rendus via renderInlineChildren() sur les champs enfants.
+// card_inline n'est PAS dans ce registre —
+// rendu via renderInlineChildren() sur les champs enfants.
 ```
 
 ---

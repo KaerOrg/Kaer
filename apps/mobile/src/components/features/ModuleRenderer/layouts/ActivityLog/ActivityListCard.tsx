@@ -11,15 +11,15 @@ export interface ActivityListCardProps {
   onToggleDone: () => void
   onEdit: () => void
   onDelete: () => void
-  ft: (type: string) => string
+  lbl: (key: string) => string
 }
 
-export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, ft }: ActivityListCardProps) {
+export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }: ActivityListCardProps) {
   const t = useModuleT()
   const isDone = record.done === 1
   const toggleAriaLabel = isDone
-    ? (ft('activity_log_mark_undone_label') || t('common.undo'))
-    : (ft('activity_log_mark_done_label') || t('common.done'))
+    ? (lbl('mark_undone_label') || t('common.undo'))
+    : (lbl('mark_done_label') || t('common.done'))
   return (
     <View style={[alStyles.recordCard, isDone && alStyles.recordCardDone]} testID={`record-${record.id}`}>
       <Pressable
