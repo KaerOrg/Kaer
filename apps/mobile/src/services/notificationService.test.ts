@@ -1,6 +1,9 @@
 import {
   requestNotificationPermission,
   registerPushToken,
+  registerPushTokenIfGranted,
+  shouldShowNotificationOnboarding,
+  markNotificationOnboardingSeen,
   getRoutinesForModule,
   pauseRoutine,
   resumeRoutine,
@@ -9,6 +12,7 @@ import {
   cancelSleepDiaryReminder,
   getSleepDiaryReminderTime,
 } from './notificationService'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // Mocks définis dans apps/mobile/src/__mocks__/
 jest.mock('expo-notifications')
@@ -119,6 +123,64 @@ describe('registerPushToken', () => {
 
     const result = await registerPushToken('pat-1')
     expect(result).toBeNull()
+  })
+})
+
+// ── registerPushTokenIfGranted ──────────────────────────────────────────────
+
+describe('registerPushTokenIfGranted', () => {
+  it('retourne null sans rien enregistrer si la permission n\'est pas accordée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'undetermined' } as never)
+    const result = await registerPushTokenIfGranted('pat-1')
+    expect(result).toBeNull()
+    expect(Notifications.getExpoPushTokenAsync).not.toHaveBeenCalled()
+  })
+
+  it('enregistre le token si la permission est déjà accordée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    jest.mocked(Notifications.getExpoPushTokenAsync).mockResolvedValue({ data: 'ExponentPushToken[xyz]' } as never)
+    const upsert = jest.fn().mockResolvedValue({ error: null })
+    jest.mocked(supabase.from).mockReturnValue({ upsert } as never)
+
+    const result = await registerPushTokenIfGranted('pat-1')
+    expect(result).toBe('ExponentPushToken[xyz]')
+  })
+})
+
+// ── Onboarding notifications ─────────────────────────────────────────────────
+
+describe('shouldShowNotificationOnboarding', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear()
+  })
+
+  it('retourne true si permission indéterminée et écran jamais présenté', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'undetermined' } as never)
+    expect(await shouldShowNotificationOnboarding()).toBe(true)
+  })
+
+  it('retourne false si l\'écran a déjà été présenté', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'undetermined' } as never)
+    await markNotificationOnboardingSeen()
+    expect(await shouldShowNotificationOnboarding()).toBe(false)
+  })
+
+  it('retourne false si la permission est déjà accordée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'granted' } as never)
+    expect(await shouldShowNotificationOnboarding()).toBe(false)
+  })
+
+  it('retourne false si la permission a été refusée', async () => {
+    jest.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ status: 'denied' } as never)
+    expect(await shouldShowNotificationOnboarding()).toBe(false)
+  })
+})
+
+describe('markNotificationOnboardingSeen', () => {
+  it('persiste le drapeau dans AsyncStorage', async () => {
+    await AsyncStorage.clear()
+    await markNotificationOnboardingSeen()
+    expect(await AsyncStorage.getItem('notif_onboarding_shown')).toBe('1')
   })
 })
 

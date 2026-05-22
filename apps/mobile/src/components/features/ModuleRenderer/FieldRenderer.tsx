@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef, ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, Alert, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
+import { View, Text, Pressable, StyleSheet, ScrollView, Linking, TextInput, ActivityIndicator, Vibration, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -13,6 +13,8 @@ import { formatDateTime, formatDateFull, formatDateNumeric, formatDateShort } fr
 import { logEvent, type EngagementEventType } from '../../../services/engagementService'
 import { useAuthStore } from '../../../store/authStore'
 import { useModuleT } from '../../../hooks/useModuleT'
+import { useToast } from '../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 import { LikertWidget, type LikertOption } from './fields/widgets/LikertWidget'
 import { PipPicker } from '../../ui/PipPicker'
 import {
@@ -795,6 +797,7 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   moduleId: string
 }) {
   const t = useModuleT()
+  const { showConfirm } = useConfirmDialog()
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
@@ -848,17 +851,17 @@ function EditableStepsLayout({ sections, uiFields, moduleId }: {
   }, [])
 
   const handleDelete = useCallback((item: PlanItem) => {
-    Alert.alert(t('modules.crisis_plan.delete_item_title'), `"${item.text}"`, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'), style: 'destructive',
-        onPress: async () => {
-          await deletePlanItem(item.id)
-          setItems(prev => prev.filter(i => i.id !== item.id))
-        },
+    showConfirm({
+      title: t('modules.crisis_plan.delete_item_title'),
+      message: `"${item.text}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deletePlanItem(item.id)
+        setItems(prev => prev.filter(i => i.id !== item.id))
       },
-    ])
-  }, [t])
+    })
+  }, [t, showConfirm])
 
   const emergencyFields = uiFields
     .filter(f => f.field_type === 'exercise_safety')
@@ -981,6 +984,8 @@ function DailyCheckinLayout({ fields, moduleId }: {
 }) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   // ── Résolution des champs DB-driven
   const configField = fields.find(f => f.field_type === 'daily_checkin_config')
@@ -1029,10 +1034,7 @@ function DailyCheckinLayout({ fields, moduleId }: {
 
   const handleSave = useCallback(async () => {
     if (!selectedValue) {
-      Alert.alert(
-        lbl('status_missing_title') || t('common.error'),
-        lbl('status_missing_msg'),
-      )
+      showToast(lbl('status_missing_msg') || t('common.error'), 'info')
       return
     }
     setSaving(true)
@@ -1051,36 +1053,31 @@ function DailyCheckinLayout({ fields, moduleId }: {
       setExistingId(entry.id)
       await loadData()
       const savedMsg = lbl('saved_message')
-      if (savedMsg) Alert.alert(t('common.saved'), savedMsg)
+      if (savedMsg) showToast(savedMsg, 'success')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, lbl, t])
+  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, lbl, t, showToast])
 
   const handleDelete = useCallback((entry: DailyEntry) => {
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteDailyEntry(entry.id)
-            setEntries(prev => prev.filter(e => e.id !== entry.id))
-            if (entry.date === todayDate) {
-              setExistingId(null)
-              setSelectedValue(null)
-              setNotes('')
-            }
-          },
-        },
-      ]
-    )
-  }, [lbl, t, todayDate])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteDailyEntry(entry.id)
+        setEntries(prev => prev.filter(e => e.id !== entry.id))
+        if (entry.date === todayDate) {
+          setExistingId(null)
+          setSelectedValue(null)
+          setNotes('')
+        }
+      },
+    })
+  }, [lbl, t, todayDate, showConfirm])
 
   if (loading) {
     return <View style={dcStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -1409,6 +1406,8 @@ function ColumnFormLayout({ fields, moduleId }: {
 }) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   // ── Résolution des champs DB-driven
   const configField = fields.find(f => f.field_type === 'column_form_config')
@@ -1489,22 +1488,17 @@ function ColumnFormLayout({ fields, moduleId }: {
   }, [])
 
   const handleDelete = useCallback((entry: FormEntry) => {
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteFormEntry(entry.id)
-            setEntries(prev => prev.filter(e => e.id !== entry.id))
-          },
-        },
-      ]
-    )
-  }, [lbl, t])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFormEntry(entry.id)
+        setEntries(prev => prev.filter(e => e.id !== entry.id))
+      },
+    })
+  }, [lbl, t, showConfirm])
 
   const handleSave = useCallback(async () => {
     if (requiredKeysAny.length > 0) {
@@ -1513,10 +1507,7 @@ function ColumnFormLayout({ fields, moduleId }: {
         return typeof v === 'string' ? v.trim().length > 0 : v != null
       })
       if (!ok) {
-        Alert.alert(
-          lbl('validation_title') || t('common.error'),
-          lbl('validation_msg'),
-        )
+        showToast(lbl('validation_msg') || t('common.error'), 'info')
         return
       }
     }
@@ -1532,11 +1523,11 @@ function ColumnFormLayout({ fields, moduleId }: {
       setEditingId(null)
       setValues({})
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, lbl, t])
+  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, lbl, t, showToast])
 
   if (loading) {
     return <View style={cfStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -1844,6 +1835,7 @@ function TreeSelectorLayout({ fields, moduleId }: {
   moduleId: string
 }) {
   const t = useModuleT()
+  const { showConfirm } = useConfirmDialog()
   // ── Résolution des champs DB-driven
   const configField = fields.find(f => f.field_type === 'tree_selector_config')
   const lbl = (key: string): string => {
@@ -1990,23 +1982,18 @@ function TreeSelectorLayout({ fields, moduleId }: {
   }, [persistEntry, path, enableIntensity, intensity, notes])
 
   const handleDelete = useCallback((entry: TreeSelection) => {
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteTreeSelection(entry.id)
-            setEntries(prev => prev.filter(e => e.id !== entry.id))
-          },
-        },
-      ]
-    )
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteTreeSelection(entry.id)
+        setEntries(prev => prev.filter(e => e.id !== entry.id))
+      },
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t])
+  }, [t, showConfirm])
 
   if (loading) {
     return <View style={tsStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -2413,6 +2400,8 @@ function qualityColorOf(quality: number | null, qualityWarning: number, qualityG
 
 function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   const t = useModuleT()
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   const configField = fields.find(f => f.field_type === 'sleep_journal_config')
   const lbl = (key: string): string => {
@@ -2519,10 +2508,7 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
   // ── Save / delete
   const handleSave = useCallback(async () => {
     if (quality === null) {
-      Alert.alert(
-        lbl('quality_missing_title') || t('common.warning'),
-        lbl('quality_missing_msg') || '',
-      )
+      showToast(lbl('quality_missing_msg') || t('common.warning'), 'info')
       return
     }
     setSaving(true)
@@ -2542,33 +2528,28 @@ function SleepJournalLayout({ fields }: { fields: ContentField[] }) {
       await loadEntries()
       setMode('list')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality, existingId, targetDate, bedtime, wakeTime, onsetMinutes, awakenings, awakeningsDuration, nightmares, notes, loadEntries, t])
+  }, [quality, existingId, targetDate, bedtime, wakeTime, onsetMinutes, awakenings, awakeningsDuration, nightmares, notes, loadEntries, t, showToast])
 
   const handleDelete = useCallback(() => {
     if (!existingId) return
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteSleepEntry(existingId)
-            await loadEntries()
-            setMode('list')
-          },
-        },
-      ]
-    )
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteSleepEntry(existingId)
+        await loadEntries()
+        setMode('list')
+      },
+    })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingId, loadEntries, t])
+  }, [existingId, loadEntries, t, showConfirm])
 
   // ── Month nav
   const goPrevMonth = useCallback(() => {

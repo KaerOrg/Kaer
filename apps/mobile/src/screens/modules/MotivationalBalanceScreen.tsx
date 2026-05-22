@@ -8,7 +8,6 @@ import {
   Modal,
   ActivityIndicator,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native'
@@ -35,6 +34,7 @@ import type { EMRuler, EMBalanceItem, EMValue } from '../../lib/database'
 import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 import { colors, spacing, radius } from '../../theme'
 import type { AppStackParamList } from '../../navigation/AppStack'
 import 'react-native-get-random-values'
@@ -161,6 +161,7 @@ function StageTab({ accent, t, isTeenMode }: StageTabProps) {
   const [history, setHistory] = useState<EMRuler[]>([])
   const [saving, setSaving] = useState(false)
   const ns = isTeenMode ? 'teen' : 'common'
+  const { showConfirm } = useConfirmDialog()
 
   useFocusEffect(
     useCallback(() => {
@@ -244,23 +245,15 @@ function StageTab({ accent, t, isTeenMode }: StageTabProps) {
               </Text>
               <Text style={s.historyDate}>{r.created_at.slice(0, 10)}</Text>
               <Pressable
-                onPress={() => {
-                  Alert.alert(
-                    t(`modules.${MODULE_KEY}.rulers_delete_confirm`),
-                    undefined,
-                    [
-                      { text: t('common.cancel'), style: 'cancel' },
-                      {
-                        text: t('common.delete'),
-                        style: 'destructive',
-                        onPress: async () => {
-                          await deleteEMRuler(r.id)
-                          setHistory(prev => prev.filter(x => x.id !== r.id))
-                        },
-                      },
-                    ]
-                  )
-                }}
+                onPress={() => showConfirm({
+                  title: t(`modules.${MODULE_KEY}.rulers_delete_confirm`),
+                  confirmLabel: t('common.delete'),
+                  destructive: true,
+                  onConfirm: async () => {
+                    await deleteEMRuler(r.id)
+                    setHistory(prev => prev.filter(x => x.id !== r.id))
+                  },
+                })}
                 hitSlop={8}
                 testID={`stage-delete-${r.id}`}
               >
@@ -290,6 +283,7 @@ function RulersTab({ accent, t, isTeenMode }: RulersTabProps) {
   const [confidenceWhy, setConfidenceWhy] = useState('')
   const [commitment, setCommitment] = useState('')
   const [history, setHistory] = useState<EMRuler[]>([])
+  const { showConfirm } = useConfirmDialog()
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const ns = isTeenMode ? 'teen' : 'common'
@@ -450,22 +444,15 @@ function RulersTab({ accent, t, isTeenMode }: RulersTabProps) {
                 <View style={s.historyCardHeader}>
                   <Text style={s.historyDate}>{r.created_at.slice(0, 10)}</Text>
                   <Pressable
-                    onPress={() => {
-                      Alert.alert(
-                        t(`modules.${MODULE_KEY}.rulers_delete_confirm`),
-                        undefined,
-                        [
-                          { text: t('common.cancel'), style: 'cancel' },
-                          {
-                            text: t('common.delete'), style: 'destructive',
-                            onPress: async () => {
-                              await deleteEMRuler(r.id)
-                              setHistory(prev => prev.filter(x => x.id !== r.id))
-                            },
-                          },
-                        ]
-                      )
-                    }}
+                    onPress={() => showConfirm({
+                      title: t(`modules.${MODULE_KEY}.rulers_delete_confirm`),
+                      confirmLabel: t('common.delete'),
+                      destructive: true,
+                      onConfirm: async () => {
+                        await deleteEMRuler(r.id)
+                        setHistory(prev => prev.filter(x => x.id !== r.id))
+                      },
+                    })}
                     hitSlop={8}
                     testID={`ruler-delete-${r.id}`}
                   >

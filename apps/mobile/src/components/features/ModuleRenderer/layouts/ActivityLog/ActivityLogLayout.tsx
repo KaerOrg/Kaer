@@ -13,7 +13,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  View, Text, Pressable, ScrollView, TextInput, Alert, ActivityIndicator,
+  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform, TouchableOpacity,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -27,6 +27,8 @@ import { formatDateFull } from '../../../../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useToast } from '../../../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { PipPicker } from '../../../../ui/PipPicker'
 import type { ContentField } from '../../../../../services/moduleService'
 import { ActivityListCard } from './ActivityListCard'
@@ -56,6 +58,8 @@ export interface ActivityLogLayoutProps {
 export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLayoutProps) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   const configField = fields.find(f => f.field_type === 'activity_log_config')
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
@@ -155,10 +159,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   // ── Save / delete / toggle
   const handleSave = useCallback(async () => {
     if (!label.trim()) {
-      Alert.alert(
-        lbl('name_missing_title') || t('common.error'),
-        lbl('name_missing_msg'),
-      )
+      showToast(lbl('name_missing_msg') || t('common.error'), 'info')
       return
     }
     setSaving(true)
@@ -181,50 +182,40 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
       setMode('list')
       setEditingId(null)
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [label, editingId, entryDate, pleasure, mastery, done, notes, patient, engagementEventType, loadRecords, lbl, t])
+  }, [label, editingId, entryDate, pleasure, mastery, done, notes, patient, engagementEventType, loadRecords, lbl, t, showToast])
 
   const handleDelete = useCallback(() => {
     if (!editingId) return
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteActivityRecord(editingId)
-            await loadRecords()
-            setMode('list')
-            setEditingId(null)
-          },
-        },
-      ]
-    )
-  }, [editingId, loadRecords, lbl, t])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteActivityRecord(editingId)
+        await loadRecords()
+        setMode('list')
+        setEditingId(null)
+      },
+    })
+  }, [editingId, loadRecords, lbl, t, showConfirm])
 
   const handleDeleteFromList = useCallback((record: ActivityRecord) => {
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      `"${record.label}"`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteActivityRecord(record.id)
-            await loadRecords()
-          },
-        },
-      ]
-    )
-  }, [loadRecords, lbl, t])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: `"${record.label}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteActivityRecord(record.id)
+        await loadRecords()
+      },
+    })
+  }, [loadRecords, lbl, t, showConfirm])
 
   const handleToggleDone = useCallback(async (record: ActivityRecord) => {
     await saveActivityRecord({

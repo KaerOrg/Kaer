@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { logger } from '@psytool/shared'
@@ -26,12 +25,14 @@ export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const login = useAuthStore((s) => s.login)
 
   const handleLogin = async () => {
     logger.log('[LoginScreen] handleLogin triggered, email:', email.trim())
+    setError(null)
     if (!email.trim() || !password) {
-      Alert.alert(t('auth.missing_fields_title'), t('auth.missing_fields_message'))
+      setError(t('auth.missing_fields_message'))
       return
     }
     setLoading(true)
@@ -42,7 +43,7 @@ export default function LoginScreen({ navigation }: Props) {
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : t('auth.login_error_title')
       logger.error('[LoginScreen] login error:', message)
-      Alert.alert(t('auth.login_error_title'), message)
+      setError(message)
     } finally {
       logger.log('[LoginScreen] finally — setLoading(false)')
       setLoading(false)
@@ -84,6 +85,7 @@ export default function LoginScreen({ navigation }: Props) {
             placeholder={t('auth.password_placeholder')}
           />
 
+          {!!error && <Text style={styles.error}>{error}</Text>}
           <Button label={t('auth.login_button')} onPress={handleLogin} loading={loading} />
 
           <View style={styles.divider}>
@@ -116,4 +118,5 @@ const styles = StyleSheet.create({
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
   dividerText: { color: colors.textMuted, fontSize: 14 },
   hint: { fontSize: 13, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+  error: { fontSize: 13, color: colors.danger, lineHeight: 18, textAlign: 'center' },
 })

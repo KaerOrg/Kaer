@@ -3,7 +3,7 @@ import { Animated, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, spacing, radius } from '../../../theme'
 
-export type ToastVariant = 'success' | 'error'
+export type ToastVariant = 'success' | 'error' | 'info'
 
 interface Props {
   message: string
@@ -14,6 +14,7 @@ interface Props {
 const BG: Record<ToastVariant, string> = {
   success: colors.success,
   error: colors.danger,
+  info: colors.warning,
 }
 
 export default function Toast({ message, variant, visible }: Props) {

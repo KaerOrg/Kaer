@@ -1207,7 +1207,21 @@
     "day_jeu": "T",
     "day_ven": "F",
     "day_sam": "S",
-    "day_dim": "S"
+    "day_dim": "S",
+    "onboarding": {
+      "title": "Stay supported between your sessions",
+      "intro": "With your consent, PsyTool can send reminders to your phone.",
+      "benefit_exercises_title": "Your exercises at the right time",
+      "benefit_exercises_text": "A discreet reminder at the times set with your care provider, so you don't forget your therapeutic exercises.",
+      "benefit_appointments_title": "Your appointments",
+      "benefit_appointments_text": "A notification before your upcoming sessions with your practitioner.",
+      "benefit_control_title": "You stay in control",
+      "benefit_control_text": "You can adjust reminder times or pause them at any moment, from each module.",
+      "privacy_note": "The content of your exercises is never included in a notification. Reminders are scheduled in advance, never triggered by what you enter.",
+      "enable_button": "Enable reminders",
+      "skip_button": "Later",
+      "skip_hint": "You can enable them later in your phone settings."
+    }
   },
   "category": {
     "safety": {

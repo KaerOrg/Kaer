@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -19,6 +18,7 @@ import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRen
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
+import { useToast } from '../../contexts/ToastContext'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleEntry'>
@@ -34,6 +34,7 @@ export default function ScaleEntryScreen() {
   const { scale_id } = params
   const { isTeenMode, teenColor } = useTeen()
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { showToast } = useToast()
   const accentColor = teenColor(scale_id)
 
   const config = SCALE_SCORING[scale_id]
@@ -85,10 +86,7 @@ export default function ScaleEntryScreen() {
   const handleSubmit = useCallback(async () => {
     if (!allAnswered) {
       const remaining = totalItems - answeredCount
-      Alert.alert(
-        t('common.error'),
-        `${remaining} question${remaining > 1 ? 's' : ''} sans réponse.`
-      )
+      showToast(`${remaining} question${remaining > 1 ? 's' : ''} sans réponse.`, 'info')
       return
     }
     if (config == null) return

@@ -46,6 +46,7 @@
       "^react$": "<rootDir>/node_modules/react",
       "^react/jsx-runtime$": "<rootDir>/node_modules/react/jsx-runtime",
       "^react/jsx-dev-runtime$": "<rootDir>/node_modules/react/jsx-dev-runtime",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts",
       "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts",
       "^expo-image-picker$": "<rootDir>/src/__mocks__/expo-image-picker.ts",

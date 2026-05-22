@@ -10,3 +10,4 @@ Documentation spécifique à `apps/mobile` (React Native + Expo). Pour la doc tr
 | [`mobile-app.md`](mobile-app.md) | Vue d'ensemble : structure, navigation, écrans, SQLite, notifications |
 | [`invitation-flow.md`](invitation-flow.md) | Volet mobile du flux d'invitation (deep link, RegisterScreen) |
 | [`avatar.md`](avatar.md) | Photo de profil patient : pick, upload Supabase Storage, RLS |
+| [`notification-permission.md`](notification-permission.md) | Écran d'onboarding : explication + demande de permission push |

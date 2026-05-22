@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, KeyboardAvoidingView, Platform } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors } from '../../../../../theme'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
+import { useToast } from '../../../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import {
   generateId,
@@ -52,6 +54,8 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
   const t = useModuleT()
   const { i18n } = useTranslation()
   const patient = useAuthStore((s) => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   // ── Configuration ──────────────────────────────────────────────────────────
   const configField = useMemo(() => fields.find((f) => f.field_type === 'decision_grid_config'), [fields])
@@ -163,22 +167,17 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
   }, [])
 
   const handleDelete = useCallback((item: PlanItem) => {
-    Alert.alert(
-      lbl('delete_title') || t('common.delete'),
-      `"${item.text}"`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deletePlanItem(item.id)
-            setItems((prev) => prev.filter((i) => i.id !== item.id))
-          },
-        },
-      ],
-    )
-  }, [lbl, t])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: `"${item.text}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deletePlanItem(item.id)
+        setItems((prev) => prev.filter((i) => i.id !== item.id))
+      },
+    })
+  }, [lbl, t, showConfirm])
 
   // ── Save (target behavior + engagement signal) ────────────────────────────
   const handleSave = useCallback(async () => {
@@ -189,13 +188,13 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
         await logEvent(patient.id, engagementEventType as EngagementEventType, {})
       }
       const savedMessage = lbl('saved_message')
-      Alert.alert(t('common.saved'), savedMessage || '')
+      showToast(savedMessage || t('common.saved'), 'success')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [moduleId, targetBehaviorKey, targetBehavior, patient, engagementEventType, lbl, t])
+  }, [moduleId, targetBehaviorKey, targetBehavior, patient, engagementEventType, lbl, t, showToast])
 
   if (loading) {
     return <View style={dgStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>

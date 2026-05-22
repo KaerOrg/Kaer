@@ -2067,6 +2067,20 @@
     "day_jeu": "J",
     "day_ven": "V",
     "day_sam": "S",
-    "day_dim": "D"
+    "day_dim": "D",
+    "onboarding": {
+      "title": "Restez accompagné entre vos consultations",
+      "intro": "Avec votre accord, PsyTool peut vous envoyer des rappels sur votre téléphone.",
+      "benefit_exercises_title": "Vos exercices au bon moment",
+      "benefit_exercises_text": "Un rappel discret aux horaires fixés avec votre soignant, pour ne pas oublier vos exercices thérapeutiques.",
+      "benefit_appointments_title": "Vos rendez-vous",
+      "benefit_appointments_text": "Une notification avant vos prochaines séances avec votre praticien.",
+      "benefit_control_title": "Vous gardez la main",
+      "benefit_control_text": "Vous pouvez ajuster l'heure des rappels ou les suspendre à tout moment, depuis chaque module.",
+      "privacy_note": "Le contenu de vos exercices n'est jamais envoyé dans une notification. Les rappels sont programmés à l'avance, jamais déclenchés par ce que vous saisissez.",
+      "enable_button": "Activer les rappels",
+      "skip_button": "Plus tard",
+      "skip_hint": "Vous pourrez les activer plus tard dans les réglages de votre téléphone."
+    }
   }
 }

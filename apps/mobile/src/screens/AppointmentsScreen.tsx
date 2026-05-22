@@ -6,7 +6,6 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
@@ -14,6 +13,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
 import { Plus, ChevronRight } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
+import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
 import {
   fetchPatientAppointments,
   cancelAppointment,
@@ -94,6 +94,7 @@ export default function AppointmentsScreen() {
   const insets = useSafeAreaInsets()
   const navigation = useNavigation<Nav>()
   const { patient } = useAuthStore()
+  const { showConfirm } = useConfirmDialog()
 
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [practitionerId, setPractitionerId] = useState<string | null>(null)
@@ -114,22 +115,17 @@ export default function AppointmentsScreen() {
   useFocusEffect(useCallback(() => { load().catch(() => setLoading(false)) }, [load]))
 
   const handleCancel = useCallback((id: string) => {
-    Alert.alert(
-      t('agenda.appointment.cancel_btn'),
-      t('agenda.appointment.cancel_confirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await cancelAppointment(id)
-            void load()
-          },
-        },
-      ],
-    )
-  }, [t, load])
+    showConfirm({
+      title: t('agenda.appointment.cancel_btn'),
+      message: t('agenda.appointment.cancel_confirm'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await cancelAppointment(id)
+        void load()
+      },
+    })
+  }, [t, load, showConfirm])
 
   const upcoming = appointments.filter(isUpcoming)
   const past = appointments.filter(a => !isUpcoming(a))

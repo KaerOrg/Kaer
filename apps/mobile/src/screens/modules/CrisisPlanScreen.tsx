@@ -7,7 +7,6 @@ import {
   Pressable,
   Image,
   TextInput,
-  Alert,
   ActivityIndicator,
   Linking,
   Modal,
@@ -23,6 +22,8 @@ import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../contexts/ToastContext'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import {
   generateId,
@@ -54,6 +55,8 @@ function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMod
   const [anchorPhrase, setAnchorPhrase] = useState('')
   const [editingPhrase, setEditingPhrase] = useState(false)
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   useFocusEffect(useCallback(() => {
     let active = true
@@ -75,29 +78,21 @@ function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMod
       const anchor = await pickAndSaveAnchorPhoto(anchors.length)
       if (anchor) setAnchors(prev => [...prev, anchor])
     } catch {
-      Alert.alert(
-        t('common.error'),
-        t('modules.crisis_plan.photo_error'),
-      )
+      showToast(t('modules.crisis_plan.photo_error'), 'error')
     }
-  }, [anchors.length, t])
+  }, [anchors.length, t, showToast])
 
   const handleDeletePhoto = useCallback((anchor: CrisisAnchor) => {
-    Alert.alert(
-      t('modules.crisis_plan.delete_photo_title') || 'Supprimer cette photo ?',
-      undefined,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'), style: 'destructive',
-          onPress: async () => {
-            await removeAnchorPhoto(anchor)
-            setAnchors(prev => prev.filter(a => a.id !== anchor.id))
-          },
-        },
-      ],
-    )
-  }, [t])
+    showConfirm({
+      title: t('modules.crisis_plan.delete_photo_title') || 'Supprimer cette photo ?',
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await removeAnchorPhoto(anchor)
+        setAnchors(prev => prev.filter(a => a.id !== anchor.id))
+      },
+    })
+  }, [t, showConfirm])
 
   const handleSavePhrase = useCallback(async () => {
     await saveAnchorPhrase(anchorPhrase)
@@ -225,6 +220,7 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
   const [commitmentPhrase, setCommitmentPhrase] = useState('')
   const [signingName, setSigningName] = useState('')
   const [signing, setSigning] = useState(false)
+  const { showToast } = useToast()
 
   useFocusEffect(useCallback(() => {
     let active = true
@@ -247,9 +243,9 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
       setSigning(false)
       setSigningName('')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     }
-  }, [signingName, t])
+  }, [signingName, t, showToast])
 
   const formattedDate = commitment
     ? new Date(commitment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -322,6 +318,7 @@ export default function CrisisPlanScreen({ route }: Props) {
   const { t } = useTranslation()
   const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore(s => s.patient)
+  const { showConfirm } = useConfirmDialog()
 
   const [loading, setLoading] = useState(true)
   const [urgencyVisible, setUrgencyVisible] = useState(route.params?.initialUrgency ?? false)
@@ -406,17 +403,17 @@ export default function CrisisPlanScreen({ route }: Props) {
   }, [])
 
   const handleDelete = useCallback((item: PlanItem) => {
-    Alert.alert(t('modules.crisis_plan.delete_item_title'), `"${item.text}"`, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'), style: 'destructive',
-        onPress: async () => {
-          await deletePlanItem(item.id)
-          setItems(prev => prev.filter(i => i.id !== item.id))
-        },
+    showConfirm({
+      title: t('modules.crisis_plan.delete_item_title'),
+      message: `"${item.text}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deletePlanItem(item.id)
+        setItems(prev => prev.filter(i => i.id !== item.id))
       },
-    ])
-  }, [t])
+    })
+  }, [t, showConfirm])
 
   if (loading) {
     return (

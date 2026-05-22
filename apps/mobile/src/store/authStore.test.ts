@@ -1,5 +1,5 @@
 jest.mock('../services/notificationService', () => ({
-  registerPushToken: jest.fn().mockResolvedValue(null),
+  registerPushTokenIfGranted: jest.fn().mockResolvedValue(null),
 }))
 
 jest.mock('../lib/supabase', () => ({

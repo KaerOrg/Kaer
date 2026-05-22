@@ -5,9 +5,13 @@
 import * as Notifications from 'expo-notifications'
 import Constants, { ExecutionEnvironment } from 'expo-constants'
 import { Platform } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from '../lib/supabase'
 
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient
+
+// Clé AsyncStorage : mémorise que l'écran d'explication des notifications a déjà été présenté.
+const ONBOARDING_SEEN_KEY = 'notif_onboarding_shown'
 
 export type NotificationPlatform = 'ios' | 'android'
 
@@ -73,6 +77,44 @@ export async function registerPushToken(patientId: string): Promise<string | nul
 
   if (error) return null
   return token
+}
+
+/**
+ * Enregistre le token push uniquement si la permission est déjà accordée.
+ * Appelé au login pour rafraîchir le token sans redéclencher de prompt système
+ * (le prompt initial est géré par l'écran d'onboarding des notifications).
+ */
+export async function registerPushTokenIfGranted(patientId: string): Promise<string | null> {
+  const { status } = await Notifications.getPermissionsAsync()
+  if (status !== 'granted') return null
+  return registerPushToken(patientId)
+}
+
+// ── Onboarding notifications (écran d'explication + permission) ──────────────
+
+/**
+ * Détermine si l'écran d'explication des notifications doit être présenté :
+ * permission encore indéterminée ET écran jamais affiché auparavant.
+ * Tolère une erreur AsyncStorage en ne montrant pas l'écran (jamais bloquant).
+ */
+export async function shouldShowNotificationOnboarding(): Promise<boolean> {
+  try {
+    const seen = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY)
+    if (seen !== null) return false
+    const { status } = await Notifications.getPermissionsAsync()
+    return status === 'undetermined'
+  } catch {
+    return false
+  }
+}
+
+/** Mémorise que l'écran d'onboarding des notifications a été présenté. */
+export async function markNotificationOnboardingSeen(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, '1')
+  } catch {
+    // non bloquant — au pire l'écran sera reproposé au prochain lancement
+  }
 }
 
 // ── Routines (lecture patient) ──────────────────────────────────────────────

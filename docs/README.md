@@ -73,6 +73,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 | [`mobile-app.md`](../apps/mobile/docs/mobile-app.md) | Vue d'ensemble : structure, navigation, écrans, SQLite, notifications |
 | [`invitation-flow.md`](../apps/mobile/docs/invitation-flow.md) | Volet mobile du flux d'invitation |
 | [`avatar.md`](../apps/mobile/docs/avatar.md) | Photo de profil patient : pick, upload Supabase Storage, RLS |
+| [`notification-permission.md`](../apps/mobile/docs/notification-permission.md) | Écran d'onboarding : explication + demande de permission push |
 
 ## Ajouter un document
 

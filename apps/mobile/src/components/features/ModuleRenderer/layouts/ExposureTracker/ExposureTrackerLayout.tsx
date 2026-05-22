@@ -21,7 +21,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  View, Text, Pressable, ScrollView, TextInput, Alert, ActivityIndicator,
+  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -35,6 +35,8 @@ import {
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useToast } from '../../../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { PipPicker } from '../../../../ui/PipPicker'
 import type { ContentField } from '../../../../../services/moduleService'
 import { EntryListCard } from './EntryListCard'
@@ -69,6 +71,8 @@ export interface ExposureTrackerLayoutProps {
 export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   // ── Field resolution helpers ─────────────────────────────────────────────
   const configField = useMemo(() => fields.find(f => f.field_type === 'exposure_tracker_config'), [fields])
@@ -183,10 +187,7 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
       : situationFreeText.trim() || null
 
     if (!resolvedLabel) {
-      Alert.alert(
-        lbl('situation_missing_title') || t('common.error'),
-        lbl('situation_missing_msg'),
-      )
+      showToast(lbl('situation_missing_msg') || t('common.error'), 'info')
       return
     }
 
@@ -214,52 +215,44 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
       setMode('list')
       setEditingId(null)
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
   }, [
     situationId, situations, situationFreeText, sudsBefore, selectedStrategies,
     customStrategy, sudsAfter, notes, editingId, patient, engagementEventType,
-    reloadAll, lbl, t,
+    reloadAll, lbl, t, showToast,
   ])
 
   const handleDeleteFromEntry = useCallback(() => {
     if (!editingId) return
-    Alert.alert(
-      lbl('delete_entry_title') || t('common.delete'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'), style: 'destructive',
-          onPress: async () => {
-            await deleteFearEntry(editingId)
-            await reloadAll()
-            setMode('list')
-            setEditingId(null)
-          },
-        },
-      ]
-    )
-  }, [editingId, reloadAll, lbl, t])
+    showConfirm({
+      title: lbl('delete_entry_title') || t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFearEntry(editingId)
+        await reloadAll()
+        setMode('list')
+        setEditingId(null)
+      },
+    })
+  }, [editingId, reloadAll, lbl, t, showConfirm])
 
   const handleDeleteFromList = useCallback((entry: FearEntry) => {
-    Alert.alert(
-      lbl('delete_entry_title') || t('common.delete'),
-      `"${entry.situation_label}"`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'), style: 'destructive',
-          onPress: async () => {
-            await deleteFearEntry(entry.id)
-            await reloadAll()
-          },
-        },
-      ]
-    )
-  }, [reloadAll, lbl, t])
+    showConfirm({
+      title: lbl('delete_entry_title') || t('common.delete'),
+      message: `"${entry.situation_label}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFearEntry(entry.id)
+        await reloadAll()
+      },
+    })
+  }, [reloadAll, lbl, t, showConfirm])
 
   // ── Situations panel ─────────────────────────────────────────────────────
   const handleAddSituation = useCallback(async () => {
@@ -278,20 +271,16 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
   }, [newSituationLabel])
 
   const handleDeleteSituation = useCallback((sit: FearSituation) => {
-    Alert.alert(
-      lbl('situation_delete_title') || t('common.delete'),
-      `"${sit.label}"`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'), style: 'destructive',
-          onPress: async () => {
-            await deleteFearSituation(sit.id)
-            setSituations(prev => prev.filter(p => p.id !== sit.id))
-          },
-        },
-      ]
-    )
+    showConfirm({
+      title: lbl('situation_delete_title') || t('common.delete'),
+      message: `"${sit.label}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFearSituation(sit.id)
+        setSituations(prev => prev.filter(p => p.id !== sit.id))
+      },
+    })
   }, [lbl, t])
 
   // ── Strategy chip resolution for cards ───────────────────────────────────
