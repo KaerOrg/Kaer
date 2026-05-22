@@ -4,12 +4,12 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-vi.mock('../../../services/psyeduService', () => ({
+vi.mock('../../../../services/psyeduService', () => ({
   fetchTopicsByModule: vi.fn().mockResolvedValue([]),
   fetchBlocksByTopic: vi.fn().mockResolvedValue([]),
 }))
 
-vi.mock('../../../services/crisisPlanService', () => ({
+vi.mock('../../../../services/crisisPlanService', () => ({
   fetchCrisisPlanConfig: vi.fn().mockResolvedValue({
     practitionerMessage: '',
     copingCards: [],
@@ -23,7 +23,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
 import { FieldRenderer } from './FieldRenderer'
-import type { ContentField } from '../../../services/moduleService'
+import type { ContentField } from '../../../../services/moduleService'
 
 function field(field_type: string, overrides: Partial<ContentField> = {}): ContentField {
   return {

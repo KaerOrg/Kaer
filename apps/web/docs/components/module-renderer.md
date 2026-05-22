@@ -33,7 +33,7 @@ Ce fichier documente uniquement les détails spécifiques à l'implémentation w
 
 1. Créer `fields/MonComposant/MonComposant.tsx` + `MonComposant.test.tsx` + `index.ts`
 2. Exporter dans `fields/index.ts`
-3. Enregistrer dans `FIELD_REGISTRY` de `FieldRenderer.tsx`
+3. Enregistrer dans `FIELD_REGISTRY` de `layouts/CardsLayout/renderCardBody.tsx`
 
 ## Layout `daily_checkin`
 
@@ -53,9 +53,28 @@ Props lues sur `daily_checkin_config` : `tab_today_label`, `tab_history_label`,
 Aucun rendu interactif : tabs, boutons et zone de notes sont des `<span>` /
 `<div>` stylés, en lecture seule.
 
+## Structure du dossier `FieldRenderer/`
+
+Le moteur de rendu est éclaté en fichiers à **responsabilité unique** — un fichier =
+un composant (ou un helper). `FieldRenderer/` ne contient **aucune** logique de layout :
+chaque layout vit dans `layouts/*`.
+
+| Fichier | Responsabilité unique |
+|---|---|
+| `FieldRenderer.tsx` | Point d'entrée — extrait un `disclaimer_banner`, délègue à `LayoutDispatcher` |
+| `LayoutDispatcher.tsx` | Route un `preview_kind` vers son layout `layouts/*` |
+| `DisclaimerBanner.tsx` | Rend le bandeau d'avertissement MDR |
+| `partitionBySection.ts` | Helper pur — répartit les fields par `section_id` |
+| `types.ts` | Type `FieldRendererProps` |
+| `index.ts` | Re-exports publics |
+
+> **Règle :** ne jamais ajouter de logique de layout, de groupement de fields ou de
+> rendu de widget dans `FieldRenderer.tsx` ou `LayoutDispatcher.tsx`. Le dispatcher
+> reste une simple table de routage `preview_kind → layout`.
+
 ## Ajouter un `preview_kind`
 
-1. Créer le layout (fonction dans `FieldRenderer.tsx`)
-2. Ajouter le cas dans le dispatch `FieldRenderer`
+1. Créer le layout dans `layouts/MonLayout/MonLayout.tsx` (+ `index.ts` + test), l'exporter dans `layouts/index.ts`
+2. Ajouter le cas de routage dans `FieldRenderer/LayoutDispatcher.tsx`
 3. Ajouter les classes CSS dans `ModulePreviewPanel.css`
-4. Mettre à jour `MODULE_ENGINE.md`
+4. Mettre à jour `docs/module-engine.md`

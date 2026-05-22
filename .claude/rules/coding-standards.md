@@ -26,6 +26,47 @@
 
 ---
 
+## Un fichier = un composant — règle absolue
+
+> **Un fichier `.tsx` exporte exactement un composant React.** Pas de second composant
+> « utilitaire », pas de sous-composant privé déclaré à côté, pas de helper volumineux
+> en vrac. Un fichier de composant a **une seule responsabilité**.
+
+Dès qu'un fichier contient un deuxième composant, un helper non trivial, une grosse
+constante de config ou de la logique qui n'est pas le cœur du composant : **extraire**
+dans un fichier voisin du même dossier.
+
+**Convention de dossier** (déjà appliquée par `layouts/*`, `fields/*`, `ui/*`) :
+
+```
+NomComposant/
+  NomComposant.tsx        ← le composant, et lui seul
+  NomComposant.test.tsx   ← son test, dans le même dossier
+  SousPiece.tsx           ← chaque pièce extraite = son propre fichier
+  helper.ts               ← helper pur = son propre fichier + son test
+  types.ts                ← types partagés du dossier
+  index.ts                ← re-exports publics
+```
+
+Ne jamais laisser un fichier de composant à plat à la racine d'un dossier qui suit
+déjà la convention « un dossier par composant ».
+
+**Pourquoi.** Un fichier qui accueille « juste un petit helper de plus » devient une
+poubelle : chaque session y empile un bout de logique, le fichier central devient
+illisible et impossible à faire évoluer sans risque. L'incident de référence :
+`ModuleRenderer/FieldRenderer.tsx` avait fini par contenir le composant d'entrée,
+le dispatcher de layout, le rendu du bandeau disclaimer et la logique de groupement
+de fields — quatre responsabilités dans un fichier « central ». Il a été éclaté en
+`FieldRenderer/{FieldRenderer,LayoutDispatcher,DisclaimerBanner}.tsx` +
+`partitionBySection.ts` + `types.ts`.
+
+**Cas des fichiers « centraux » (routeurs, dispatchers, points d'entrée).** Ils sont
+les plus exposés au phénomène. Leur unique responsabilité doit rester le routage /
+l'orchestration. Toute logique métier (groupement, transformation, rendu spécifique)
+part dans un layout, un widget ou un helper dédié — jamais inline dans le routeur.
+
+---
+
 ## Checklist obligatoire avant tout nouveau CSS, composant UI, ou field_type
 
 > **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, d'implémenter un nouveau composant dans une page, ou d'introduire un nouveau `field_type` dans `module_content_fields`.**
