@@ -65,10 +65,10 @@ jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import * as engagementService from '../../../services/engagementService'
+import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -201,12 +201,11 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
   })
 
   it('refuse de sauver sans situation renseignée', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('exposure-tracker-entry')
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
-    expect(alertSpy).toHaveBeenCalled()
+    expect(useToast().showToast).toHaveBeenCalled()
     expect(database.saveFearEntry).not.toHaveBeenCalled()
   })
 
@@ -283,33 +282,24 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
 
   it('supprime une entry depuis la liste après confirmation', async () => {
     ;(database.getAllFearEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
     renderLayout()
-    fireEvent.press(await screen.findByTestId('delete-entry-1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteFearEntry).toHaveBeenCalledWith('entry-1')
+    const deleteBtn = await screen.findByTestId('delete-entry-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteFearEntry).toHaveBeenCalledWith('entry-1')
+    })
   })
 
   it('supprime une entry depuis le mode entry après confirmation', async () => {
     ;(database.getAllFearEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
     ;(database.getFearEntry as jest.Mock).mockResolvedValue(MOCK_ENTRY)
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
     renderLayout()
     fireEvent.press(await screen.findByTestId('edit-entry-1'))
     const deleteBtn = await screen.findByTestId('delete-button')
-    fireEvent.press(deleteBtn)
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteFearEntry).toHaveBeenCalledWith('entry-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteFearEntry).toHaveBeenCalledWith('entry-1')
+    })
   })
 
   it('bascule sur l\'onglet Situations et ajoute une situation', async () => {
@@ -326,16 +316,12 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
 
   it('supprime une situation depuis le panneau après confirmation', async () => {
     ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_SITUATION])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
     renderLayout()
     fireEvent.press(await screen.findByTestId('tab-situations'))
-    fireEvent.press(await screen.findByTestId('delete-situation-sit-1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteFearSituation).toHaveBeenCalledWith('sit-1')
+    const deleteBtn = await screen.findByTestId('delete-situation-sit-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteFearSituation).toHaveBeenCalledWith('sit-1')
+    })
   })
 })

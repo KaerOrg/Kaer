@@ -55,7 +55,6 @@ jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import * as engagementService from '../../../services/engagementService'
@@ -80,6 +79,8 @@ function makeField(overrides: Partial<ContentField> & { children?: ContentField[
 const MOCK_FIELDS: ContentField[] = [
   makeField({
     id: 'db.cfg', field_type: 'decision_grid_config', sort_order: 0,
+    // Le composant lit tous les libellés depuis configField.props via `lbl(key)` ;
+    // ils ne sont pas des champs séparés (cf. DecisionGridLayout.tsx).
     props: {
       engagement_event_type: 'UPDATE_DECISIONAL_BALANCE',
       target_behavior_key: 'target_behavior',
@@ -87,19 +88,18 @@ const MOCK_FIELDS: ContentField[] = [
       weight_max: '5',
       weight_default: '3',
       gauge_fill_color: '#EC4899',
+      target_label: 'modules.decisional_balance.behavior_label',
+      target_placeholder: 'modules.decisional_balance.behavior_placeholder',
+      save_label: 'modules.decisional_balance.save',
+      saved_message: 'modules.decisional_balance.saved_message',
+      gauge_title: 'modules.decisional_balance.gauge_title',
+      gauge_change_label: 'modules.decisional_balance.gauge_label_change',
+      gauge_status_label: 'modules.decisional_balance.gauge_label_status',
+      add_label: 'modules.decisional_balance.add_trigger',
+      arg_placeholder: 'modules.decisional_balance.arg_placeholder',
+      weight_label: 'modules.decisional_balance.weight_label',
     },
   }),
-  // UI labels
-  makeField({ id: 'db.target_label',       field_type: 'decision_grid_target_label',       text_code: 'modules.decisional_balance.behavior_label',           sort_order: 1 }),
-  makeField({ id: 'db.target_placeholder', field_type: 'decision_grid_target_placeholder', text_code: 'modules.decisional_balance.behavior_placeholder',     sort_order: 2 }),
-  makeField({ id: 'db.save_label',         field_type: 'decision_grid_save_label',         text_code: 'modules.decisional_balance.save',                     sort_order: 3 }),
-  makeField({ id: 'db.saved_message',      field_type: 'decision_grid_saved_message',      text_code: 'modules.decisional_balance.saved_message',            sort_order: 4 }),
-  makeField({ id: 'db.gauge_title',        field_type: 'decision_grid_gauge_title',        text_code: 'modules.decisional_balance.gauge_title',              sort_order: 5 }),
-  makeField({ id: 'db.gauge_change',       field_type: 'decision_grid_gauge_change_label', text_code: 'modules.decisional_balance.gauge_label_change',       sort_order: 6 }),
-  makeField({ id: 'db.gauge_status',       field_type: 'decision_grid_gauge_status_label', text_code: 'modules.decisional_balance.gauge_label_status',       sort_order: 7 }),
-  makeField({ id: 'db.add_label',          field_type: 'decision_grid_add_label',          text_code: 'modules.decisional_balance.add_trigger',              sort_order: 8 }),
-  makeField({ id: 'db.arg_placeholder',    field_type: 'decision_grid_arg_placeholder',    text_code: 'modules.decisional_balance.arg_placeholder',          sort_order: 9 }),
-  makeField({ id: 'db.weight_label',       field_type: 'decision_grid_weight_label',       text_code: 'modules.decisional_balance.weight_label',             sort_order: 10 }),
   // Quadrants
   makeField({
     id: 'db.q1.h', field_type: 'column_header', section_id: 'pros_change', sort_order: 10,
@@ -226,7 +226,6 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
   })
 
   it("le bouton Sauvegarder appelle setModuleSetting + logEvent", async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('save-decision-grid')).toBeTruthy())
 
@@ -241,7 +240,6 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
         'patient-test-id', 'UPDATE_DECISIONAL_BALANCE', {}
       )
     })
-    alertSpy.mockRestore()
   })
 
   it("la suppression demande confirmation puis appelle deletePlanItem", async () => {
@@ -250,10 +248,6 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
       text: 'Stress', sort_order: 0, weight: 4, created_at: '2025-01-01',
     }
     ;(database.getAllPlanItemsForModule as jest.Mock).mockResolvedValueOnce([existingItem])
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, btns) => {
-      const dest = btns?.find((b) => b.style === 'destructive')
-      void dest?.onPress?.()
-    })
 
     renderLayout()
     await waitFor(() => expect(screen.getByText('Stress')).toBeTruthy())
@@ -262,7 +256,6 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
     await waitFor(() => {
       expect(database.deletePlanItem).toHaveBeenCalledWith('arg-2')
     })
-    alertSpy.mockRestore()
   })
 
   it("la jauge agrège uniquement les quadrants avec gauge_role", async () => {

@@ -134,7 +134,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 | `apps/mobile/src/lib/database.ts` | Table SQLite générique `scale_entries` |
 | `supabase/schema.sql` | `module_content_fields` + `field_props` par échelle |
 
-> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer.tsx`
+> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer/` (dossier — entrée + dispatcher + helper ; layouts dans `../layouts/<Nom>/`)
 
 **Ajouter une nouvelle échelle générique :**
 1. Ajouter la config dans `SCALE_SCORING` (scaleScoring.ts)

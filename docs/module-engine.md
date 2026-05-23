@@ -362,9 +362,22 @@ RLS Supabase garantit que seuls les utilisateurs authentifiés accèdent aux tab
 
 ## 3. Moteur de rendu — `FieldRenderer`
 
-Fichiers :
-- Web : `apps/web/src/components/ModuleRenderer/FieldRenderer.tsx`
-- Mobile : `apps/mobile/src/components/ModuleRenderer/FieldRenderer.tsx`
+Le moteur est un **dossier** `FieldRenderer/` (un fichier = une responsabilité),
+pas un fichier monolithique :
+
+- Web : `apps/web/src/components/features/ModuleRenderer/FieldRenderer/`
+- Mobile : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer/`
+
+Chaque dossier contient : `FieldRenderer.tsx` (point d'entrée — extrait le
+`disclaimer_banner`, délègue), `LayoutDispatcher.tsx` (routage `preview_kind`
+→ layout), `partitionBySection.ts` (helper pur de groupement), `types.ts`,
+`index.ts`. Les layouts vivent chacun dans leur dossier `../layouts/<Nom>/`
+(`<Nom>Layout.tsx` + `styles.ts` + `index.ts`).
+
+> **Catalogue complet des layouts mobile** (preview_kind → dossier → composant →
+> persistance) : [`apps/mobile/docs/design-system.md`](../apps/mobile/docs/design-system.md)
+> § *Layouts du ModuleRenderer*. Côté web :
+> [`apps/web/docs/components/module-renderer.md`](../apps/web/docs/components/module-renderer.md).
 
 **Props :**
 
@@ -412,6 +425,11 @@ const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 ---
 
 ## 4. Layouts internes
+
+> Liste illustrative du pattern. Le **catalogue exhaustif** des layouts mobile
+> (19 layouts, dossier, composant, persistance) est tenu à jour dans
+> [`apps/mobile/docs/design-system.md`](../apps/mobile/docs/design-system.md)
+> § *Layouts du ModuleRenderer*.
 
 ### `StepsLayout`
 

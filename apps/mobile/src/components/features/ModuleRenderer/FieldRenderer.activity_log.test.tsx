@@ -57,10 +57,10 @@ jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import * as engagementService from '../../../services/engagementService'
+import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -196,12 +196,11 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
   })
 
   it('refuse de sauver sans nom d\'activité', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
-    expect(alertSpy).toHaveBeenCalled()
+    expect(useToast().showToast).toHaveBeenCalled()
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 
@@ -284,33 +283,22 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
   it('supprime une entrée depuis le mode entry après confirmation', async () => {
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
     ;(database.getActivityRecord as jest.Mock).mockResolvedValue(MOCK_RECORD)
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
-
     renderLayout()
     fireEvent.press(await screen.findByTestId('edit-rec-1'))
     const deleteBtn = await screen.findByTestId('delete-button')
-    fireEvent.press(deleteBtn)
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteActivityRecord).toHaveBeenCalledWith('rec-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteActivityRecord).toHaveBeenCalledWith('rec-1')
+    })
   })
 
   it('supprime une entrée directement depuis la liste après confirmation', async () => {
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
-
     renderLayout()
-    fireEvent.press(await screen.findByTestId('delete-rec-1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteActivityRecord).toHaveBeenCalledWith('rec-1')
+    const deleteBtn = await screen.findByTestId('delete-rec-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteActivityRecord).toHaveBeenCalledWith('rec-1')
+    })
   })
 })
