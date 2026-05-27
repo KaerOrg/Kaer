@@ -103,10 +103,13 @@ const cardStyles = StyleSheet.create({
   chevron: { fontSize: 26, color: colors.textMuted, fontWeight: '300' },
 })
 
+// Modules avec preview_kind='questionnaire' qui appartiennent aux outils thérapeutiques, pas aux échelles.
+const QUESTIONNAIRE_AS_TOOL = new Set(['medication_side_effects'])
+
 function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress }: ModuleSectionsProps) {
   const { t } = useTranslation()
-  const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire')
-  const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire')
+  const tools = modules.filter(m => m.module?.preview_kind !== 'questionnaire' || QUESTIONNAIRE_AS_TOOL.has(m.module_type))
+  const scales = modules.filter(m => m.module?.preview_kind === 'questionnaire' && !QUESTIONNAIRE_AS_TOOL.has(m.module_type))
 
   return (
     <View style={{ gap: spacing.md }}>
@@ -189,7 +192,7 @@ export default function HomeScreen() {
       return
     }
     // 2. Questionnaire sans écran custom → moteur générique ScaleHistory
-    if (mod.module?.preview_kind === 'questionnaire') {
+    if (mod.module?.preview_kind === 'questionnaire' || mod.module?.preview_kind === 'mood_tracker') {
       navigation.navigate('ScaleHistory', { scale_id: mod.module_type })
       return
     }

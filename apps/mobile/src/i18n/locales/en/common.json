@@ -1180,6 +1180,18 @@
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Submit questionnaire"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Psychotic Experiences",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Alcohol Screening",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Suicide Risk",
+      "description": ""
     }
   },
   "agenda": {

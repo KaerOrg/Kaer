@@ -743,6 +743,18 @@
     "motivational_balance": {
       "label": "Balance motivationnelle",
       "description": "Pour comprendre ton ambivalence et ce qui te pousse à changer"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Expériences psychotiques",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Consommation d'alcool",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Risque suicidaire",
+      "description": ""
     }
   }
 }

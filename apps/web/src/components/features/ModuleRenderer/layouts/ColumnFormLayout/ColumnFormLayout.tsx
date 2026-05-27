@@ -43,41 +43,35 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
 
   return (
     <div className="cf">
-      {/* État vide / intro ─────────────────────────────────────────────── */}
-      {(emptyTitle || emptyText) && (
-        <div className="cf-empty">
-          {emptyTitle && <span className="cf-empty__title">{emptyTitle}</span>}
-          {emptyText && <span className="cf-empty__text">{emptyText}</span>}
-        </div>
-      )}
-
-      {/* Entrée mock construite dynamiquement à partir des vrais en-têtes */}
+      {/* Entrée mock — format fidèle au rendu mobile (puce colorée par colonne) */}
       {headers.length > 0 && (
-        <article className="cf-entry-card">
-          <header className="cf-entry-card__head">
-            <span className="cf-entry-card__date">aujourd'hui · 09:30</span>
-            <div className="cf-entry-card__actions">
-              <Pencil size={14} className="cf-entry-card__action" />
-              <Trash2 size={14} className="cf-entry-card__action" />
+        <article className="cf-record">
+          <header className="cf-record__head">
+            <span className="cf-record__date">il y a 2 jours</span>
+            <div className="cf-record__icons">
+              <Pencil size={13} />
+              <Trash2 size={13} />
             </div>
           </header>
-          <div className="cf-entry-card__body">
-            {headers.slice(0, 2).map(h => {
-              const color = h.props['color'] ?? '#6366F1'
+          <div className="cf-record__body">
+            {headers.map(h => {
+              const accent = h.props['color'] ?? '#6366F1'
               const label = h.text_code ? t(h.text_code) : ''
               const children = childrenByHeader.get(h.id) ?? []
-              const firstChild = children[0]
-              let mockValue = '—'
-              if (firstChild?.field_type === 'column_slider_field') {
-                const max = Number(firstChild.props['max'] ?? 100)
-                const min = Number(firstChild.props['min'] ?? 0)
-                const val = Math.round((min + max) * 0.65)
-                mockValue = max <= 10 ? `${val} / ${max}` : `${val} %`
-              }
+              const sliderChild = children.find(c => c.field_type === 'column_slider_field')
+              const annotation = sliderChild
+                ? (() => {
+                    const max = Number(sliderChild.props['max'] ?? 100)
+                    const min = Number(sliderChild.props['min'] ?? 0)
+                    const val = Math.round((min + max) * 0.65)
+                    return max <= 10 ? ` (${val} / ${max})` : ` (${val} %)`
+                  })()
+                : ''
               return (
-                <div key={h.id} className="cf-entry-card__field">
-                  <span className="cf-entry-card__field-label" style={{ color }}>{label}</span>
-                  <span className="cf-entry-card__field-value">{mockValue}</span>
+                <div key={h.id} className="cf-record__row">
+                  <div className="cf-record__dot" style={{ background: accent }} />
+                  <span className="cf-record__label" style={{ color: accent }}>{label}</span>
+                  <span className="cf-record__val">—{annotation}</span>
                 </div>
               )
             })}

@@ -57,7 +57,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('breathing_techniques',    'anxiety',     'fields',      19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
-  ('decisional_balance',      'addiction',   'grid2x2',     22, false)
+  ('decisional_balance',      'motivation',  'grid2x2',     22, false)
 on conflict (id) do nothing;
 
 -- Icônes / couleurs : appliqué uniquement sur les rangs où icon est vide
@@ -1027,15 +1027,18 @@ where prop_key = 'icon';
 
 -- ── Modules additionnels (échelles cliniques) ────────────────────────────────
 insert into public.modules (id, category_id, preview_kind, sort_order, is_invite_excluded, icon, mobile_icon, color) values
-  ('epds',  'assessments', 'questionnaire', 28, false, '', 'heart-pulse',            '#EC4899'),
-  ('nsi',   'assessments', 'questionnaire', 60, false, '', 'weather-night',          '#7C3AED'),
-  ('rcads', 'assessments', 'questionnaire', 70, false, '', 'clipboard-text-outline', '#6366F1')
+  ('epds',   'assessments', 'questionnaire', 28,  false, '', 'heart-pulse',            '#EC4899'),
+  ('nsi',    'assessments', 'questionnaire', 60,  false, '', 'weather-night',          '#7C3AED'),
+  ('rcads',  'assessments', 'questionnaire', 70,  false, '', 'clipboard-text-outline', '#6366F1'),
+  ('cape42', 'assessments', 'coming_soon',   80,  false, 'brain-circuit', 'head-cog-outline', '#6366F1'),
+  ('audit',  'assessments', 'coming_soon',   90,  false, 'droplets',      'water-outline',    '#6366F1'),
+  ('cssrs',  'assessments', 'coming_soon',   95,  false, 'shield-alert',  'shield-alert-outline', '#6366F1')
 on conflict (id) do nothing;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
 update public.modules set preview_kind = 'questionnaire'     where id = 'medication_side_effects' and preview_kind = 'fields';
-update public.modules set preview_kind = 'questionnaire'     where id = 'mood_tracker'            and preview_kind = 'fields';
+update public.modules set preview_kind = 'mood_tracker'      where id = 'mood_tracker'            and preview_kind = 'fields';
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';

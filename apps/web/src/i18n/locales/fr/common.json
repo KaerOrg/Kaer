@@ -307,7 +307,7 @@
     },
     "decisional_balance": {
       "label": "Balance décisionnelle",
-      "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
+      "description": "Outil d'entretien motivationnel : peser les avantages et inconvénients d'un changement de comportement.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
     "phq9": {
@@ -525,6 +525,18 @@
       "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
       "progress": "{answered} / {total} réponses",
       "submit": "Valider le questionnaire"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Expériences psychotiques",
+      "description": "Évaluation des expériences psychotiques subcliniques (42 items)."
+    },
+    "audit": {
+      "label": "AUDIT — Dépistage alcool",
+      "description": "Alcohol Use Disorders Identification Test — OMS (10 items)."
+    },
+    "cssrs": {
+      "label": "C-SSRS — Risque suicidaire",
+      "description": "Columbia Suicide Severity Rating Scale — hétéro-évaluation praticien."
     }
   },
   "category": {
@@ -912,7 +924,7 @@
     },
     "decisional_balance": {
       "label": "Balance décisionnelle",
-      "description": "Outil d'entretien motivationnel : avantages/inconvénients à consommer vs. à arrêter.",
+      "description": "Outil d'entretien motivationnel : peser les avantages et inconvénients d'un changement de comportement.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
     },
     "phq9": {

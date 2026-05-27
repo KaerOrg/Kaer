@@ -429,6 +429,18 @@
       "progress": "{answered} / {total} answers",
       "submit": "Submit questionnaire"
     },
+    "cape42": {
+      "label": "CAPE-42 — Psychotic Experiences",
+      "description": "Community Assessment of Psychic Experiences (42 items)."
+    },
+    "audit": {
+      "label": "AUDIT — Alcohol Screening",
+      "description": "Alcohol Use Disorders Identification Test — WHO (10 items)."
+    },
+    "cssrs": {
+      "label": "C-SSRS — Suicide Risk",
+      "description": "Columbia Suicide Severity Rating Scale — clinician-administered."
+    },
     "crisis_plan": {
       "label": "Crisis Plan",
       "description": "Personalized action plan for difficult moments (Stanley & Brown).",
@@ -593,7 +605,7 @@
     },
     "decisional_balance": {
       "label": "Decisional Balance",
-      "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
+      "description": "Motivational interviewing tool: weighing the pros and cons of a behaviour change.",
       "new_btn": "New balance",
       "empty_title": "No balance yet",
       "empty_text": "Use the button above to fill in your first decisional balance."
@@ -810,7 +822,7 @@
     },
     "decisional_balance": {
       "label": "Decisional Balance",
-      "description": "Motivational interviewing tool: pros/cons of continuing vs. stopping.",
+      "description": "Motivational interviewing tool: weighing the pros and cons of a behaviour change.",
       "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
     },
     "phq9": {

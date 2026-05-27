@@ -25,15 +25,28 @@ export default function Navigation() {
   const { patient, loading, loadSession } = useAuthStore()
 
   useEffect(() => {
+    const withTimeout = (p: Promise<void>, ms: number, label: string): Promise<void> =>
+      Promise.race([
+        p,
+        new Promise<void>(resolve => setTimeout(() => {
+          logger.warn(`[Boot] ${label} timed out after ${ms}ms — continuing`)
+          resolve()
+        }, ms)),
+      ])
+
     const init = async () => {
       logger.log('[Boot] start')
       try {
         logger.log('[Boot] initDatabase...')
-        await initDatabase()
+        await withTimeout(initDatabase(), 8000, 'initDatabase')
         logger.log('[Boot] initDatabase OK')
-        await setupAndroidChannel()
       } catch (e) {
         logger.error('[Boot] initDatabase failed', e)
+      }
+      try {
+        await withTimeout(setupAndroidChannel(), 3000, 'setupAndroidChannel')
+      } catch (e) {
+        logger.error('[Boot] setupAndroidChannel failed', e)
       }
       logger.log('[Boot] loadSession...')
       await loadSession()

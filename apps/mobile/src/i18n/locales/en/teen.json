@@ -717,6 +717,18 @@
       "label": "Motivational balance",
       "description": "Understanding your ambivalence and what drives change"
     },
+    "cape42": {
+      "label": "CAPE-42 — Psychotic Experiences",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Alcohol Use",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Suicide Risk",
+      "description": ""
+    },
     "exposure_hierarchy": {
       "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
       "info_btn": "What is this technique?",

@@ -3666,7 +3666,7 @@ function FieldRendererCore({ preview_kind, fields, questionnaire, accentColor, p
   const footer = visibleFields.find(f => f.field_type === 'footer_note')
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
-  if (preview_kind === 'questionnaire') {
+  if (preview_kind === 'questionnaire' || preview_kind === 'mood_tracker') {
     if (questionnaire == null) return null
     return (
       <QuestionnaireLayout

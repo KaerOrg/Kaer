@@ -12,6 +12,7 @@ import {
   ExposureTrackerLayout,
   FallbackLayout,
   FieldsLayout,
+  MoodTrackerLayout,
   Grid2x2Layout,
   GuidedExerciseLayout,
   PatientScenarioLayout,
@@ -140,6 +141,10 @@ function FieldRendererCore({ preview_kind, fields, expandedCard, onToggleCard, m
       sections.get(f.section_id)!.push(f)
     }
     return <Grid2x2Layout sections={sections} footer={footer} t={t} />
+  }
+
+  if (preview_kind === 'mood_tracker') {
+    return <MoodTrackerLayout fields={contentFields} footer={footer} t={t} />
   }
 
   if (preview_kind === 'questionnaire') {

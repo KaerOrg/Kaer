@@ -1390,6 +1390,18 @@
     "motivational_balance": {
       "label": "Balance motivationnelle",
       "description": "Psychoéducation sur l'ambivalence et le changement"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Expériences psychotiques",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Dépistage alcool",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Risque suicidaire",
+      "description": ""
     }
   },
   "module": {
