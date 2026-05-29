@@ -5,6 +5,7 @@ import { colors, radius } from '../../../../../../theme'
 export interface LikertOption {
   value: number
   label: string
+  color?: string
 }
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 export function LikertWidget({ options, selected, onSelect, accentColor }: Props) {
   const activeColor = accentColor ?? colors.primary
+  const hasColorPalette = options.some(o => o.color != null)
 
   const handlePress = useCallback((value: number) => { onSelect(value) }, [onSelect])
 
@@ -23,18 +25,35 @@ export function LikertWidget({ options, selected, onSelect, accentColor }: Props
     <View style={styles.row}>
       {options.map(opt => {
         const isSelected = selected === opt.value
+        const dotColor = opt.color ?? activeColor
         return (
           <Pressable
             key={opt.value}
             style={[
               styles.option,
-              isSelected && { backgroundColor: activeColor, borderColor: activeColor },
+              isSelected && {
+                backgroundColor: dotColor + '22',
+                borderColor: dotColor,
+              },
             ]}
             onPress={() => handlePress(opt.value)}
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
           >
-            <Text style={[styles.label, isSelected && styles.labelSelected]} numberOfLines={2}>
+            {hasColorPalette && (
+              <View style={[
+                styles.dot,
+                { borderColor: dotColor },
+                isSelected && { backgroundColor: dotColor },
+              ]} />
+            )}
+            <Text
+              style={[
+                styles.label,
+                isSelected && { color: dotColor, fontWeight: '700' },
+              ]}
+              numberOfLines={2}
+            >
               {opt.label}
             </Text>
           </Pressable>
@@ -56,7 +75,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 52,
+    gap: 4,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    backgroundColor: 'transparent',
   },
   label: { fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 15 },
-  labelSelected: { color: colors.white, fontWeight: '600' },
 })

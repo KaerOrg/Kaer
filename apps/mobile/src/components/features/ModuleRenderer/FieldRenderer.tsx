@@ -239,7 +239,7 @@ function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTex
   const options: LikertOption[] = fields
     .filter(f => f.field_type === 'scale_option')
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map(f => ({ value: parseInt(f.props['value'] ?? '0', 10), label: t(f.text_code ?? '') }))
+    .map(f => ({ value: parseInt(f.props['value'] ?? '0', 10), label: t(f.text_code ?? ''), color: f.props['color'] as string | undefined }))
 
   const legendItems = fields
     .filter(f => f.field_type === 'scale_legend_item')
@@ -362,7 +362,7 @@ function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTex
           const questionOptions = f.children
             .filter(c => c.field_type === 'scale_option')
             .sort((a, b) => a.sort_order - b.sort_order)
-            .map(c => ({ value: parseInt(c.props['value'] ?? '0', 10), label: t(c.text_code ?? '') }))
+            .map(c => ({ value: parseInt(c.props['value'] ?? '0', 10), label: t(c.text_code ?? ''), color: c.props['color'] as string | undefined }))
           const finalOptions = questionOptions.length > 0 ? questionOptions : options
           return (
             <View key={f.id} style={styles.questionCard}>

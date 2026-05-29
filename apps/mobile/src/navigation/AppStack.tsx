@@ -11,6 +11,7 @@ import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
+import MedicationSideEffectsHistoryScreen from '../screens/modules/MedicationSideEffectsHistoryScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
@@ -29,11 +30,12 @@ export type AppStackParamList = {
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
   ScaleHistory: { scale_id: string }
-  ScaleEntry: { scale_id: string }
+  ScaleEntry: { scale_id: string; entry_id?: string }
   ModuleContent: { moduleType: string }
   BookAppointment: { practitionerId: string }
   CrisisPlan: undefined
   CrisisUrgency: undefined
+  MedicationSideEffectsHistory: undefined
 }
 
 export type TabParamList = {
@@ -136,6 +138,11 @@ export default function AppStack() {
         name="CrisisUrgency"
         component={CrisisUrgencyScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="MedicationSideEffectsHistory"
+        component={MedicationSideEffectsHistoryScreen}
+        options={{ title: '' }}
       />
     </Stack.Navigator>
   )

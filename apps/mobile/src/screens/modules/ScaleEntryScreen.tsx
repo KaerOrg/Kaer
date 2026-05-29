@@ -7,18 +7,23 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
-import { saveScaleEntry, generateId } from '../../lib/database'
+import { saveScaleEntry, getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../lib/database'
+import { logScaleSubmission } from '../../services/notificationService'
+import { useAuthStore } from '../../store/authStore'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleEntry'>
@@ -28,25 +33,43 @@ type LoadState =
   | { status: 'error'; message: string }
   | { status: 'ready'; fields: ContentField[] }
 
+function formatEntryDate(d: Date): string {
+  return d.toLocaleDateString('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+}
+
 export default function ScaleEntryScreen() {
   const navigation = useNavigation<Nav>()
   const { params } = useRoute<RouteT>()
-  const { scale_id } = params
+  const { scale_id, entry_id } = params
+  const isEditing = entry_id != null
   const { isTeenMode, teenColor } = useTeen()
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(scale_id)
 
+  const { patient } = useAuthStore()
   const config = SCALE_SCORING[scale_id]
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
   const [answers, setAnswers] = useState<(number | null)[]>([])
   const [textInputValues, setTextInputValues] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [entryDate, setEntryDate] = useState(new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [lastEntry, setLastEntry] = useState<ScaleEntry | null>(null)
+  const [reuseApplied, setReuseApplied] = useState(false)
   const isMounted = useRef(true)
 
   useEffect(() => {
     isMounted.current = true
     return () => { isMounted.current = false }
   }, [])
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEditing ? t('common.modify') : t('common.new_entry', { defaultValue: '' }),
+    })
+  }, [isEditing, navigation, t])
 
   const loadFields = useCallback(async () => {
     setLoadState({ status: 'loading' })
@@ -64,7 +87,31 @@ export default function ScaleEntryScreen() {
     }
   }, [scale_id, t])
 
+  // Load fields first, then pre-fill from existing entry if editing
   useEffect(() => { void loadFields() }, [loadFields])
+
+  // Charger la dernière saisie pour le bouton "Reprendre les valeurs" (nouveau seulement)
+  useEffect(() => {
+    if (isEditing) return
+    getLatestScaleEntry(scale_id).then(entry => {
+      if (isMounted.current) setLastEntry(entry)
+    }).catch(() => {})
+  }, [scale_id, isEditing])
+
+  useEffect(() => {
+    if (!isEditing || !entry_id) return
+    getScaleEntryById(entry_id).then(existing => {
+      if (!existing || !isMounted.current) return
+      setAnswers(existing.answers.map(v => v ?? null))
+      setEntryDate(new Date(existing.created_at))
+    }).catch(() => {/* silent — entry not found, keep empty form */})
+  }, [entry_id, isEditing])
+
+  const handleReuseLastEntry = useCallback(() => {
+    if (!lastEntry) return
+    setAnswers(lastEntry.answers.map(v => (typeof v === 'number' ? v : null)))
+    setReuseApplied(true)
+  }, [lastEntry])
 
   const handleAnswer = useCallback((index: number, value: number) => {
     setAnswers(prev => {
@@ -76,6 +123,11 @@ export default function ScaleEntryScreen() {
 
   const handleTextInput = useCallback((fieldId: string, value: string) => {
     setTextInputValues(prev => ({ ...prev, [fieldId]: value }))
+  }, [])
+
+  const handleDateChange = useCallback((_: unknown, date?: Date) => {
+    if (Platform.OS === 'android') setShowDatePicker(false)
+    if (date) setEntryDate(date)
   }, [])
 
   const answeredCount = answers.filter(a => a !== null).length
@@ -121,16 +173,19 @@ export default function ScaleEntryScreen() {
     }
 
     await saveScaleEntry({
-      id: generateId(),
+      id: entry_id ?? generateId(),
       scale_id,
       answers: answers as number[],
       total_score: totalScore,
       subscale_scores: subscaleScores,
-      created_at: new Date().toISOString(),
+      created_at: entryDate.toISOString(),
     })
+    if (patient && !isEditing) {
+      logScaleSubmission(patient.id, scale_id)
+    }
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, answers, config, navigation, scale_id, t, totalItems, answeredCount])
+  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, t, totalItems, answeredCount, loadState, textInputValues])
 
   if (loadState.status === 'loading') {
     return (
@@ -151,9 +206,49 @@ export default function ScaleEntryScreen() {
     )
   }
 
+  const activeColor = accentColor ?? colors.primary
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.container}>
+
+        {/* Date row — toujours visible, permet de corriger la date */}
+        <Pressable
+          style={styles.dateRow}
+          onPress={() => setShowDatePicker(v => !v)}
+          accessibilityRole="button"
+        >
+          <MaterialCommunityIcons name="calendar-edit" size={18} color={activeColor} />
+          <Text style={styles.dateLabelText}>{t('common.entry_date')}</Text>
+          <Text style={[styles.dateValue, { color: activeColor }]}>
+            {formatEntryDate(entryDate)}
+          </Text>
+          <MaterialCommunityIcons name="chevron-down" size={16} color={colors.textMuted} />
+        </Pressable>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={entryDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'inline' : 'default'}
+            maximumDate={new Date()}
+            onChange={handleDateChange}
+          />
+        )}
+
+        {!isEditing && lastEntry != null && !reuseApplied && (
+          <Pressable
+            style={[styles.reuseBtn, { borderColor: activeColor + '40', backgroundColor: activeColor + '08' }]}
+            onPress={handleReuseLastEntry}
+          >
+            <MaterialCommunityIcons name="content-copy" size={14} color={activeColor} />
+            <Text style={[styles.reuseBtnText, { color: activeColor }]}>
+              {t('common.reuse_last_values', {
+                date: new Date(lastEntry.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+              })}
+            </Text>
+          </Pressable>
+        )}
 
         <FieldRenderer
           preview_kind="questionnaire"
@@ -177,14 +272,18 @@ export default function ScaleEntryScreen() {
           <Pressable
             style={[
               styles.submitBtn,
+              { backgroundColor: activeColor },
               !allAnswered && styles.submitBtnDisabled,
-              isTeenMode && accentColor != null && allAnswered && { backgroundColor: accentColor },
             ]}
             onPress={handleSubmit}
             disabled={saving || !allAnswered}
           >
             <Text style={styles.submitBtnText}>
-              {saving ? t('common.saving') : t(`modules.${scale_id}.submit`)}
+              {saving
+                ? t('common.saving')
+                : isEditing
+                  ? t('common.save_changes')
+                  : t(`modules.${scale_id}.submit`)}
             </Text>
           </Pressable>
         </View>
@@ -198,15 +297,30 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
   container: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  dateLabelText: { fontSize: 13, color: colors.textMuted, flex: 0 },
+  dateValue: { flex: 1, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   footer: { gap: spacing.sm, marginTop: 4 },
   progress: { textAlign: 'center', fontSize: 13, color: colors.textMuted },
   submitBtn: {
-    backgroundColor: colors.primary, borderRadius: radius.md,
-    paddingVertical: 16, alignItems: 'center',
+    borderRadius: radius.md,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
   submitBtnDisabled: { backgroundColor: colors.border },
   submitBtnText: { color: colors.white, fontWeight: '700', fontSize: 15 },
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: 16 },
   retryBtn: { backgroundColor: colors.primary, borderRadius: radius.md, paddingHorizontal: 24, paddingVertical: 12 },
   retryText: { color: colors.white, fontWeight: '600' },
+  reuseBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.md, borderWidth: 1, alignSelf: 'flex-start' },
+  reuseBtnText: { fontSize: 13, fontWeight: '600' },
 })

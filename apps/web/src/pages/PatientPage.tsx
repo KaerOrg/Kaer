@@ -43,6 +43,10 @@ import {
   updatePsychoeducationCards,
   unlockRim,
   updateRim,
+  fetchSideEffectsEvents,
+  updateSideEffectsEvents,
+  fetchSideEffectsObservance,
+  type SideEffectsEvent,
 } from '../services/moduleAssignmentService'
 import {
   fetchCrisisPlanConfig,
@@ -136,6 +140,14 @@ export function PatientPage() {
   const [crisisConfig, setCrisisConfig] = useState<CrisisPlanConfig>({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
   const [crisisCardDraft, setCrisisCardDraft] = useState<{ thought: string; response: string } | null>(null)
   const [savingCrisis, setSavingCrisis] = useState(false)
+
+  // ── medication_side_effects ──────────────────────────────────────────────
+  const [mseEditorOpen, setMseEditorOpen] = useState(false)
+  const [mseEventsDraft, setMseEventsDraft] = useState<SideEffectsEvent[]>([])
+  const [mseNewEventDate, setMseNewEventDate] = useState('')
+  const mseNewEventLabelRef = useRef<HTMLInputElement>(null)
+  const [mseSavingEvents, setMseSavingEvents] = useState(false)
+  const [mseObservance, setMseObservance] = useState<{ count: number; lastDate: string | null } | null>(null)
 
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
 
@@ -460,6 +472,52 @@ export function PatientPage() {
   const removeCopingCard = (cardId: string) => {
     setCrisisConfig(prev => ({ ...prev, copingCards: prev.copingCards.filter(c => c.id !== cardId) }))
   }
+
+  // ── medication_side_effects callbacks ────────────────────────────────────
+
+  const mseMod = modules.find(m => m.module_type === 'medication_side_effects')
+
+  useEffect(() => {
+    if (!mseMod || !id) return
+    fetchSideEffectsObservance(id).then(setMseObservance).catch(() => {})
+  }, [mseMod?.id, id])
+
+  const openMseEditor = useCallback(async () => {
+    if (!mseMod) return
+    const [evs, obs] = await Promise.all([
+      fetchSideEffectsEvents(mseMod.id),
+      id ? fetchSideEffectsObservance(id) : Promise.resolve({ count: 0, lastDate: null }),
+    ])
+    setMseEventsDraft(evs)
+    setMseObservance(obs)
+    setMseNewEventDate(new Date().toISOString().slice(0, 10))
+    setMseEditorOpen(true)
+  }, [mseMod, id])
+
+  const closeMseEditor = useCallback(() => {
+    setMseEditorOpen(false)
+  }, [])
+
+  const addMseEvent = useCallback(() => {
+    const label = mseNewEventLabelRef.current?.value.trim() ?? ''
+    if (!label || !mseNewEventDate) return
+    setMseEventsDraft(prev => [...prev, { date: mseNewEventDate, label }])
+    if (mseNewEventLabelRef.current) mseNewEventLabelRef.current.value = ''
+  }, [mseNewEventDate])
+
+  const removeMseEvent = useCallback((idx: number) => {
+    setMseEventsDraft(prev => prev.filter((_, i) => i !== idx))
+  }, [])
+
+  const saveMseEvents = useCallback(async () => {
+    if (!mseMod) return
+    setMseSavingEvents(true)
+    const { ok } = await updateSideEffectsEvents(mseMod.id, mseEventsDraft)
+    setMseSavingEvents(false)
+    if (!ok) { toast.error(t('common.error_generic')); return }
+    toast.success(t('common.saved'))
+    setMseEditorOpen(false)
+  }, [mseMod, mseEventsDraft, toast, t])
 
   // ── Notes praticien ──────────────────────────────────────────────────────
 
@@ -925,6 +983,183 @@ export function PatientPage() {
                   {t('patient.crisis_btn_save')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={closeCrisisEditor}>
+                  {t('common.cancel')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    if (moduleType === 'medication_side_effects') {
+      const handleMseToggle = () => {
+        if (unlocked && mod) { closeMseEditor(); revokeModule(mod.id) }
+        else unlockModule(moduleType)
+      }
+
+      return (
+        <div key="medication_side_effects" className={`module-card-wrapper module-card-wrapper-block ${mseEditorOpen && unlocked ? 'module-card-wrapper-block--wide' : ''} ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+          <Card
+            className="module-card-item"
+            header={{
+              icon: modIcon,
+              title: t('modules.medication_side_effects.label'),
+              subtitle: t('modules.medication_side_effects.description'),
+              right: moduleToggle(unlocked, unlockingModule === moduleType, handleMseToggle),
+            }}
+            actions={
+              <>
+                {unlocked && mod && (
+                  <button
+                    type="button"
+                    className="module-card__notif-btn"
+                    title={t('notifications.configure_button')}
+                    onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t('modules.medication_side_effects.label'), moduleIconName: modItem.icon })}
+                  >
+                    <Bell size={14} />
+                  </button>
+                )}
+                {unlocked && mod && !mseEditorOpen && (
+                  <Button variant="ghost" size="sm" onClick={openMseEditor}>
+                    {t('modules.medication_side_effects.events_section')}
+                  </Button>
+                )}
+                <button
+                  className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => togglePreview(moduleType)}
+                  title={t('patient.patient_view')}
+                >
+                  {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {t('patient.preview_button')}
+                </button>
+              </>
+            }
+          >
+            {unlocked && mod && (
+              <div className="module-card__date">
+                {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+                {mseObservance !== null && (
+                  <span className="psycho-observance-summary">
+                    {' · '}
+                    {mseObservance.count === 0
+                      ? t('modules.medication_side_effects.observance_never')
+                      : mseObservance.count === 1
+                        ? t('modules.medication_side_effects.observance_count', { count: mseObservance.count })
+                        : t('modules.medication_side_effects.observance_count_plural', { count: mseObservance.count })}
+                    {mseObservance.count > 0 && mseObservance.lastDate && (
+                      <>{' · '}{t('modules.medication_side_effects.observance_last', {
+                        date: new Date(mseObservance.lastDate).toLocaleDateString(i18n.language),
+                      })}</>
+                    )}
+                  </span>
+                )}
+              </div>
+            )}
+          </Card>
+
+          {previewModule === moduleType && (
+            <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
+          )}
+
+          {mseEditorOpen && unlocked && mod && (
+            <div className="psycho-card-picker">
+              {/* Observance résumé */}
+              {mseObservance !== null && (
+                <div style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 8, background: '#F8FAFC', border: '1px solid #E5E7EB' }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>
+                    {t('modules.medication_side_effects.observance_section')}
+                  </p>
+                  {mseObservance.count === 0 ? (
+                    <p style={{ fontSize: 13, color: '#6B7280', margin: 0 }}>
+                      {t('modules.medication_side_effects.observance_never')}
+                    </p>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: 13, color: '#111827', margin: '0 0 2px' }}>
+                        {mseObservance.count === 1
+                          ? t('modules.medication_side_effects.observance_count', { count: mseObservance.count })
+                          : t('modules.medication_side_effects.observance_count_plural', { count: mseObservance.count })}
+                      </p>
+                      {mseObservance.lastDate && (
+                        <p style={{ fontSize: 12, color: '#6B7280', margin: 0 }}>
+                          {t('modules.medication_side_effects.observance_last', {
+                            date: new Date(mseObservance.lastDate).toLocaleDateString(i18n.language),
+                          })}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Events section */}
+              <p className="psycho-card-picker__label">{t('modules.medication_side_effects.events_section')}</p>
+              <p style={{ fontSize: 12, color: '#6B7280', marginTop: -8, marginBottom: 12 }}>
+                {t('modules.medication_side_effects.events_hint')}
+              </p>
+
+              {/* Existing events */}
+              {mseEventsDraft.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                  {mseEventsDraft
+                    .slice()
+                    .sort((a, b) => b.date.localeCompare(a.date))
+                    .map((ev, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid #E5E7EB', borderLeft: '3px solid #8B5CF6' }}>
+                        <span style={{ fontSize: 12, color: '#6B7280', minWidth: 80 }}>
+                          {new Date(ev.date).toLocaleDateString(i18n.language)}
+                        </span>
+                        <span style={{ fontSize: 13, color: '#111827', flex: 1 }}>{ev.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeMseEvent(mseEventsDraft.indexOf(ev))}
+                          style={{ fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                        >
+                          {t('modules.medication_side_effects.event_delete')}
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* Add new event form */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>
+                    {t('modules.medication_side_effects.event_date_label')}
+                  </label>
+                  <input
+                    type="date"
+                    value={mseNewEventDate}
+                    max={new Date().toISOString().slice(0, 10)}
+                    onChange={e => setMseNewEventDate(e.target.value)}
+                    style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13 }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>
+                    {t('modules.medication_side_effects.event_add')}
+                  </label>
+                  <input
+                    ref={mseNewEventLabelRef}
+                    type="text"
+                    placeholder={t('modules.medication_side_effects.event_label_placeholder')}
+                    style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13 }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                  <Button size="sm" variant="ghost" onClick={addMseEvent} style={{ marginTop: 'auto', alignSelf: 'flex-end' }}>
+                    + {t('modules.medication_side_effects.event_save')}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="psycho-card-picker__actions" style={{ marginTop: 16 }}>
+                <Button size="sm" loading={mseSavingEvents} onClick={saveMseEvents}>
+                  {t('common.save')}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={closeMseEditor}>
                   {t('common.cancel')}
                 </Button>
               </div>

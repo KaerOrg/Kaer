@@ -3,10 +3,13 @@
     "loading": "Loading…",
     "cancel": "Cancel",
     "save": "Save",
+    "saved": "Saved",
     "back": "Back",
     "error_generic": "An error occurred.",
     "close": "Close",
-    "delete": "Delete"
+    "delete": "Delete",
+    "show_more": "Show 3 more symptoms",
+    "show_less": "Collapse"
   },
   "nav": {
     "profile_menu": "Profile menu",
@@ -176,6 +179,7 @@
     "rdv_empty_upcoming": "No upcoming appointments.",
     "rdv_empty_past": "No past appointments.",
     "patient_view_tab": "Patient view",
+    "preview_questionnaire_label": "Entry questionnaire",
     "sources_tab": "Sources & recommendations",
     "sources_intro": "Sources verified via PubMed and official health organisation websites.",
     "sources_empty": "No sources available for this module.",
@@ -476,11 +480,23 @@
       "empty_text": "Use the button above to access the toolkit."
     },
     "medication_side_effects": {
-      "label": "Psychotropic Tolerance Thermometer",
-      "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
+      "label": "Treatment side effects tracker",
+      "description": "Daily self-assessment (0-3): drowsiness, restlessness, tremors, dry mouth.",
       "new_btn": "New report",
       "empty_title": "No report yet",
-      "empty_text": "Use the button above to complete your first report."
+      "empty_text": "Use the button above to complete your first report.",
+      "events_section": "Treatment events",
+      "events_hint": "These milestones appear on the patient's chart (e.g. dose change, new medication). Neutral display — no interpretation.",
+      "event_add": "Add an event",
+      "event_date_label": "Date",
+      "event_label_placeholder": "E.g. Dose change, New medication…",
+      "event_save": "Add",
+      "event_delete": "Delete",
+      "observance_section": "Adherence",
+      "observance_count": "{{count}} entry this month",
+      "observance_count_plural": "{{count}} entries this month",
+      "observance_last": "Last entry: {{date}}",
+      "observance_never": "No entries recorded"
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",
@@ -676,8 +692,8 @@
       "description": "DBT-inspired emergency physiological action cards for breaking acute crises."
     },
     "medication_side_effects": {
-      "label": "Psychotropic Tolerance Thermometer",
-      "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
+      "label": "Treatment side effects tracker",
+      "description": "Daily self-assessment (0-3): drowsiness, restlessness, tremors, dry mouth.",
       "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
     },
     "medication_adherence": {

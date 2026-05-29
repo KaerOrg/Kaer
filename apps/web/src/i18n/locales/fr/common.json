@@ -3,10 +3,13 @@
     "loading": "Chargement…",
     "cancel": "Annuler",
     "save": "Enregistrer",
+    "saved": "Enregistré",
     "back": "Retour",
     "error_generic": "Une erreur est survenue.",
     "close": "Fermer",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "show_more": "Voir les 3 autres symptômes",
+    "show_less": "Réduire"
   },
   "nav": {
     "profile_menu": "Menu profil",
@@ -176,6 +179,7 @@
     "rdv_empty_upcoming": "Aucun rendez-vous à venir.",
     "rdv_empty_past": "Aucun rendez-vous passé.",
     "patient_view_tab": "Vue patient",
+    "preview_questionnaire_label": "Questionnaire de saisie",
     "sources_tab": "Sources & recommandations",
     "sources_intro": "Sources vérifiées via PubMed et les sites officiels des organismes de santé.",
     "sources_empty": "Aucune source disponible pour ce module.",
@@ -225,9 +229,21 @@
       "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
     },
     "medication_side_effects": {
-      "label": "Thermomètre de tolérance aux psychotropes",
-      "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
-      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
+      "label": "Suivi des effets indésirables du traitement",
+      "description": "Auto-évaluation quotidienne (0-3) : somnolence, agitation, tremblements, sécheresse buccale.",
+      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app.",
+      "events_section": "Événements du traitement",
+      "events_hint": "Ces jalons apparaissent sur le graphique du patient (ex. : changement de dose, début d'un nouveau médicament). Aucune interprétation — affichage neutre.",
+      "event_add": "Ajouter un événement",
+      "event_date_label": "Date",
+      "event_label_placeholder": "Ex. : Changement de dose, Nouveau traitement…",
+      "event_save": "Ajouter",
+      "event_delete": "Supprimer",
+      "observance_section": "Observance",
+      "observance_count": "{{count}} saisie ce mois-ci",
+      "observance_count_plural": "{{count}} saisies ce mois-ci",
+      "observance_last": "Dernière saisie : {{date}}",
+      "observance_never": "Aucune saisie enregistrée"
     },
     "medication_adherence": {
       "label": "Module Observance",
@@ -778,8 +794,8 @@
       "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
     },
     "medication_side_effects": {
-      "label": "Thermomètre de tolérance aux psychotropes",
-      "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
+      "label": "Suivi des effets indésirables du traitement",
+      "description": "Auto-évaluation quotidienne (0-3) : somnolence, agitation, tremblements, sécheresse buccale.",
       "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
     },
     "medication_adherence": {

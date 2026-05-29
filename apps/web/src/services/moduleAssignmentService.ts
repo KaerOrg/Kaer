@@ -109,6 +109,63 @@ export async function updateRim(
   return { ok: !error }
 }
 
+// ── medication_side_effects ───────────────────────────────────────────────────
+
+export interface SideEffectsEvent {
+  date: string   // YYYY-MM-DD
+  label: string
+}
+
+export async function fetchSideEffectsEvents(moduleId: string): Promise<SideEffectsEvent[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  if (!data?.config) return []
+  const cfg = data.config as Record<string, unknown>
+  const events = cfg['events']
+  if (!Array.isArray(events)) return []
+  return events as SideEffectsEvent[]
+}
+
+export async function updateSideEffectsEvents(
+  moduleId: string,
+  events: SideEffectsEvent[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, events },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
+export async function fetchSideEffectsObservance(
+  patientId: string,
+): Promise<{ count: number; lastDate: string | null }> {
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const { data } = await supabase
+    .from('patient_engagement_logs')
+    .select('created_at')
+    .eq('patient_id', patientId)
+    .eq('event_type', 'SCALE_SUBMITTED')
+    .contains('metadata', { module_type: 'medication_side_effects' })
+    .gte('created_at', monthStart)
+    .order('created_at', { ascending: false })
+  const rows = data ?? []
+  return {
+    count: rows.length,
+    lastDate: rows[0]?.created_at ?? null,
+  }
+}
+
 /** Pour le dispensaire : assigne un questionnaire à un patient. */
 export async function proposeScale(
   patientId: string,
