@@ -51,12 +51,12 @@ Valeurs de `preview_kind` et leur layout :
 |---|---|---|
 | `steps` | Liste ordonnée verticale de sections | `crisis_plan`, `beck_columns` |
 | `fields` | Grille de champs avec widget | `sleep_diary`, `medication_adherence` |
-| `grid2x2` | Matrice 2×2 | `decisional_balance` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
 | `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18`, `mood_tracker` |
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
+| `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -115,53 +115,130 @@ create table public.module_content_fields (
 
 **Conventions d'identifiants** : `{module}.{type}_{n}` — ex. `sleep.field_1`, `crisis.step_1_title`.
 
-**`field_type`** — les 22 valeurs reconnues :
+**`field_type` — inventaire complet**
 
-| `field_type` | Composant React | Contexte |
+> **Règle absolue avant tout nouveau `field_type` :** consulter cette table. Si un type existant couvre le besoin avec une nouvelle `field_prop`, l'étendre — ne pas créer un nouveau type. Tout nouveau `field_type` génère une divergence web/mobile permanente à maintenir. Justifier par écrit dans la doc du module si la création est inévitable.
+>
+> **Correspondances fréquentes à vérifier en priorité :**
+> - Bannière / alerte / disclaimer → `disclaimer_banner` (props : `color`, `icon`, `text_code`, `tone`)
+> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `bgColor`, `label_code`)
+> - Note de bas d'écran → `footer_note`
+> - Onglet → `tab` (layout `tabbed`)
+
+**Génériques (tout layout)**
+
+| `field_type` | Rendu | Props clés | Contexte |
+|---|---|---|---|
+| `module_label` | Silencieux | — | Filtré avant rendu |
+| `module_description` | Silencieux | — | Filtré avant rendu |
+| `coming_soon` | Silencieux | — | Module non implémenté |
+| `footer_note` | Note texte bas de panel | — | Filtré, affiché séparément après le contenu |
+| `disclaimer_banner` | Bandeau d'avertissement | `color`, `icon`, `module_key`, `text_code`, `tone` | Bandeau haut d'écran configurable. `text_code` override la clé i18n par défaut (`modules.<key>.disclaimer`). `tone` : `"info"` (défaut) ou `"danger"` (fond rouge). Utilisé pour MDR, précautions cliniques, urgences |
+| `tab` | Onglet du layout `tabbed` | `tab_key`, `preview_kind` | Définit un onglet et son sous-layout |
+
+**Layout `fields`**
+
+| `field_type` | Rendu | Props clés |
 |---|---|---|
-| `field_row` | `FieldRow` | Champ de saisie dans layout `fields` |
-| `step_title` | `FieldText` | Titre d'une étape dans layout `steps` |
-| `step_hint` | `FieldText` | Sous-titre d'une étape |
-| `quadrant_title` | `FieldText` | Titre d'un quadrant dans `grid2x2` |
-| `quadrant_subtitle` | `FieldText` | Sous-titre d'un quadrant |
-| `card_title` | `FieldText` | Titre d'une carte accordéon |
-| `card_summary` | `FieldText` | Résumé affiché dans le header fermé |
-| `card_heading_2` | `FieldText` | `<h2>` / texte gras grand |
-| `card_heading_3` | `FieldText` | `<h3>` |
-| `card_heading_4` | `FieldText` | `<h4>` |
-| `card_paragraph` | `FieldText` | Paragraphe courant |
-| `card_paragraph_bold` | `FieldText` | Paragraphe gras |
-| `card_italic_note` | `FieldText` | Note en italique |
-| `card_callout` | `FieldText` | Encart coloré (bordure gauche) |
-| `card_list_item` | `FieldListItem` | Puce `•` groupée en `<ul>` |
-| `card_numbered_item` | `FieldListItem` | Item numéroté groupé en `<ol>` |
-| `card_definition` | `CardDefinition` | Terme + définition |
-| `card_divider` | `CardDivider` | Séparateur horizontal |
-| `footer_note` | `FieldText` | Note de bas de panel (filtrée, affichée séparément) |
-| `module_label` | `NullField` | Silencieux — filtré avant rendu |
-| `module_description` | `NullField` | Silencieux — filtré avant rendu |
-| `coming_soon` | `NullField` | Silencieux |
-| `scale_instruction` | `Text` inline | Bloc intro dans layout `questionnaire` |
-| `scale_option` | `LikertWidget` (option) | Choix de réponse Likert — prop `value` obligatoire |
-| `scale_legend_item` | Légende numérique | BSL-23 — valeur + libellé affiché sous instructions — prop `value` obligatoire |
-| `scale_warning` | Bandeau jaune | SNAP-IV — avertissement hétéro-évaluation |
-| `scale_section` | En-tête de section | SNAP-IV (Inattention / HI / TOD), ASRS-18 (Partie A / B) |
-| `scale_question` | Question + `LikertWidget` | Chaque item du questionnaire — indexé dans l'ordre `sort_order` |
-| `scale_slider_question` | Question + pips numériques | Sélecteur pip 1–N — props `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` — ex. `mood_tracker` |
-| `scale_number_input` | Champ numérique libre | Saisie numérique clavier — prop `subscale_key` |
-| `scale_text_input` | Champ texte libre | Notes libres — prop `placeholder_code`, `subscale_key` |
-| `exercise_title` | Titre de l'exercice | Layout `guided_exercise` — écran intro |
-| `exercise_intro` | Paragraphe intro | Layout `guided_exercise` — plusieurs lignes possibles |
-| `exercise_start_btn` | Label bouton démarrer | Layout `guided_exercise` — texte du bouton Démarrer |
-| `exercise_next_btn` | Label bouton suivant | Layout `guided_exercise` — texte du bouton Suivant |
-| `exercise_finish_btn` | Label bouton terminer | Layout `guided_exercise` |
-| `exercise_stop_btn` | Label bouton annuler | Layout `guided_exercise` |
-| `exercise_done_text` | Texte écran fin | Layout `guided_exercise` |
-| `exercise_safety_title` | Titre section urgence | Layouts `guided_exercise`, `patient_scenario` |
-| `exercise_safety` | Entrée urgence cliquable | Layouts `guided_exercise`, `patient_scenario` — props `phone`, `icon` |
-| `rim_disclaimer` | Disclaimer RIM | Layout `patient_scenario` |
-| `rim_step` | Étape protocole RIM | Layout `patient_scenario` — prop `step_number` |
-| `ambient_sound` | Bouton son d'ambiance | Layout `patient_scenario` — props `key`, `icon`, `available` |
+| `field_row` | `FieldRow` — ligne de saisie | `widget_type`, `icon`, `detail_code`, etc. |
+
+**Layout `steps` / `editable_steps`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number` |
+| `step_hint` | Sous-titre / question guide | `color`, `step_number` |
+
+**Layout `editable_steps` — champs suffixes** (sans `section_id`, rendus après les étapes, triés par `sort_order`)
+
+| `field_type` | Rendu | Props clés | Contexte |
+|---|---|---|---|
+| `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
+| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Bouton coloré non-cliquable (aperçu web), actif sur mobile |
+| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | Affiche le message praticien (Supabase `crisis_plan_configs`), 3 emplacements photos, champ phrase. Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Liste les cartes praticien (Supabase `crisis_plan_coping_cards`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
+
+**Layout `cards`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `card_title` | Titre accordéon | — |
+| `card_summary` | Résumé header fermé | — |
+| `card_heading` | `<h2>`/`<h3>`/`<h4>` | `level` (`'2'`/`'3'`/`'4'`, défaut `'2'`) |
+| `card_inline` | Segment inline dans un `<p>` | `bold='true'` (défaut: plain) |
+| `card_paragraph` | Paragraphe | `bold='true'` / `italic='true'` |
+| `card_callout` | Encart (bordure gauche colorée) | `color` |
+| `card_list_item` | Puce `•` | — |
+| `card_numbered_item` | Item numéroté | — |
+| `card_definition` | Terme + définition | — |
+| `card_divider` | Séparateur horizontal | — |
+
+**Layout `questionnaire`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `scale_instruction` | Bloc intro | — |
+| `scale_option` | Choix Likert | `value` (obligatoire) |
+| `scale_legend_item` | Légende numérique (BSL-23) | `value` (obligatoire) |
+| `scale_warning` | Bandeau jaune avertissement | — |
+| `scale_section` | En-tête de section | — |
+| `scale_question` | Question + LikertWidget | — |
+| `scale_slider_question` | Question + pips numériques | `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` |
+| `scale_number_input` | Champ numérique libre | `subscale_key` |
+| `scale_text_input` | Champ texte libre | `placeholder_code`, `subscale_key` |
+
+**Layout `guided_exercise`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `exercise_title` | Titre exercice | — |
+| `exercise_intro` | Paragraphe intro | — |
+| `exercise_start_btn` | Label bouton Démarrer | — |
+| `exercise_next_btn` | Label bouton Suivant | — |
+| `exercise_finish_btn` | Label bouton Terminer | — |
+| `exercise_stop_btn` | Label bouton Annuler | — |
+| `exercise_done_text` | Texte écran fin | — |
+| `exercise_safety_title` | Titre section urgence | — |
+| `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
+**Layout `patient_scenario` (RIM)**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `rim_disclaimer` | Disclaimer RIM | — |
+| `rim_step` | Étape protocole | `step_number` |
+| `ambient_sound` | Bouton son d'ambiance | `key`, `icon`, `available` |
+
+**Layout `column_form`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `column_form_config` | Config du formulaire | `columns` |
+| `column_header` | En-tête de colonne | `color` |
+| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index` |
+| `column_time_field` | Champ heure dans colonne | `column_index` |
+| `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
+
+**Layout `daily_checkin`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `daily_checkin_config` | Config checklist | — |
+| `daily_status_option` | Option de statut | `value`, `color`, `icon` |
+
+**Layout `sleep_journal`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `sleep_journal_config` | Config agenda sommeil | `fields` (liste des champs activés) |
+
+**Layout `tree_selector`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `tree_selector_config` | Config sélecteur arborescent | `max_depth` |
+| `tree_node` | Nœud de l'arbre | `depth`, `parent_id`, `icon` |
 
 **Props `questionnaire` :**
 
@@ -209,6 +286,8 @@ create table public.field_props (
 | `subscale_key` | `"mood"` | `scale_slider_question`, `scale_number_input`, `scale_text_input` — clé dans `subscale_scores` JSON |
 | `placeholder_code` | `"modules.mood.notes_placeholder"` | `scale_text_input`, `scale_number_input` |
 | `phone` | `"3114"` | `exercise_safety` — numéro composé au tap |
+| `text_code` | `"modules.crisis_plan.urgency_title"` | `disclaimer_banner` — clé i18n alternative (override la clé `modules.<module_key>.disclaimer` par défaut) |
+| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge) |
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 
@@ -283,9 +362,22 @@ RLS Supabase garantit que seuls les utilisateurs authentifiés accèdent aux tab
 
 ## 3. Moteur de rendu — `FieldRenderer`
 
-Fichiers :
-- Web : `apps/web/src/components/ModuleRenderer/FieldRenderer.tsx`
-- Mobile : `apps/mobile/src/components/ModuleRenderer/FieldRenderer.tsx`
+Le moteur est un **dossier** `FieldRenderer/` (un fichier = une responsabilité),
+pas un fichier monolithique :
+
+- Web : `apps/web/src/components/features/ModuleRenderer/FieldRenderer/`
+- Mobile : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer/`
+
+Chaque dossier contient : `FieldRenderer.tsx` (point d'entrée — extrait le
+`disclaimer_banner`, délègue), `LayoutDispatcher.tsx` (routage `preview_kind`
+→ layout), `partitionBySection.ts` (helper pur de groupement), `types.ts`,
+`index.ts`. Les layouts vivent chacun dans leur dossier `../layouts/<Nom>/`
+(`<Nom>Layout.tsx` + `styles.ts` + `index.ts`).
+
+> **Catalogue complet des layouts mobile** (preview_kind → dossier → composant →
+> persistance) : [`apps/mobile/docs/design-system.md`](../apps/mobile/docs/design-system.md)
+> § *Layouts du ModuleRenderer*. Côté web :
+> [`apps/web/docs/components/module-renderer.md`](../apps/web/docs/components/module-renderer.md).
 
 **Props :**
 
@@ -314,7 +406,6 @@ interface FieldRendererProps {
 'steps'           → StepsLayout         (groups par section_id, champ step_title requis)
 'cards'           → CardsLayout         (groups par section_id, accordéon card_title/card_summary)
 'fields'          → FieldsLayout        (filtre field_type === 'field_row', FieldRow par champ)
-'grid2x2'         → Grid2x2Layout       (groups par section_id, quadrant_title/quadrant_subtitle)
 'questionnaire'   → QuestionnaireLayout (mobile uniquement — ScaleEntryScreen pilote les réponses)
 'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
@@ -334,6 +425,11 @@ const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 ---
 
 ## 4. Layouts internes
+
+> Liste illustrative du pattern. Le **catalogue exhaustif** des layouts mobile
+> (19 layouts, dossier, composant, persistance) est tenu à jour dans
+> [`apps/mobile/docs/design-system.md`](../apps/mobile/docs/design-system.md)
+> § *Layouts du ModuleRenderer*.
 
 ### `StepsLayout`
 
@@ -372,20 +468,16 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_callout:        FieldText,
   card_definition:     CardDefinition,
   card_divider:        CardDivider,
-  card_heading_2:      FieldText,
-  card_heading_3:      FieldText,
-  card_heading_4:      FieldText,
-  card_italic_note:    FieldText,
+  card_heading:        FieldText,
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
-  card_paragraph_bold: FieldText,
   coming_soon:         NullField,
   module_description:  NullField,
   module_label:        NullField,
 }
-// card_inline_bold et card_inline_text ne sont PAS dans ce registre —
-// rendus via renderInlineChildren() sur les champs enfants.
+// card_inline n'est PAS dans ce registre —
+// rendu via renderInlineChildren() sur les champs enfants.
 ```
 
 ---
@@ -465,5 +557,85 @@ Seulement si le module ne peut pas être rendu par `FieldRenderer` (timer, anima
       useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
     }))
     ```
+
+---
+
+## Schéma `ClinicalScale` — Échelles et questionnaires d'évaluation
+
+### État actuel (transitoire)
+
+Fichier source temporaire : `apps/web/src/data/scales.ts`
+
+Les métadonnées des échelles sont actuellement définies statiquement dans `CLINICAL_SCALES` et rendues dans l'accordéon **"Échelles et questionnaires d'évaluation"** de `PatientModulesTab`. **Ce fichier est voué à disparaître** — voir section *Architecture cible* ci-dessous.
+
+### Architecture cible — `module_content_fields` avec `field_type: 'scale_meta'`
+
+Les métadonnées des échelles cliniques **appartiennent à `module_content_fields`**, pas à un fichier TypeScript statique ni à des colonnes supplémentaires sur `modules`.
+
+**Pourquoi `module_content_fields` et non pas des colonnes sur `modules` :**
+
+`module_content_fields` sert **deux usages simultanés** :
+1. **Mobile patient** — le `FieldRenderer` lit les champs pour construire les écrans de saisie (`ScaleEntryScreen`)
+2. **Web praticien** — le `ModuleRenderer` lit les mêmes champs pour générer l'aperçu dans `ModulePreviewPanel`
+
+Les métadonnées d'une échelle (description clinique, population cible, type d'évaluation) font partie de ce contenu de module — elles ont leur place naturelle dans `module_content_fields`, avec un `field_type` dédié : `'scale_meta'`.
+
+Ajouter une échelle devient alors un **INSERT en base uniquement**, sans redéploiement frontend.
+
+### Schéma `field_type: 'scale_meta'`
+
+Un champ `scale_meta` correspond à **un enregistrement dans `module_content_fields`** :
+
+| Colonne | Valeur |
+|---|---|
+| `module_id` | UUID du module (ex. `phq9`) |
+| `field_type` | `'scale_meta'` |
+| `text_code` | Clé i18n de la **description clinique** (ex. `modules.phq9.description`) |
+| `sort_order` | `0` — affiché en premier dans la carte |
+
+Les attributs structurés sont stockés dans **`field_props`** (une ligne par attribut) :
+
+| `prop_key` | `prop_value` (type text) | Rôle |
+|---|---|---|
+| `evaluation_type` | `'auto'` ou `'hetero'` | Badge Auto / Hétéro dans `ScaleMetaBadges` |
+| `target_ages` | JSON array (`'["ado","adulte"]'`) | Chips de population colorés via `AGE_BADGE_CONFIG` |
+| `validated_age_range` | `'≥ 18 ans'` | Plage d'âge validée en texte libre |
+| `no_toggle` | `'true'` ou `'false'` | Si `'true'` : remplace le toggle par un bouton d'action custom (ex. C-SSRS) |
+| `reference_label` | `'Kroenke et al., 2001'` | Label de la référence bibliographique |
+| `reference_url` | URL vers la publication | Lien vers la source |
+
+La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
+
+### Comportement `no_toggle`
+
+```
+no_toggle = 'false' (défaut) → toggle standard unlock/revoke → crée/supprime un patient_module en base
+no_toggle = 'true'           → bouton d'action custom → ouvre un panel dédié (ex. C-SSRS)
+```
+
+### Implémentation après migration
+
+1. **Nouveau service** `fetchScaleMeta(moduleId)` dans `apps/web/src/services/scaleService.ts`
+   - Lit `module_content_fields` où `field_type = 'scale_meta'` et `module_id = moduleId`
+   - Joint `field_props` pour assembler `evaluationType`, `targetAges`, `validatedAgeRange`, `noToggle`, `reference`
+   - Appelle `t(field.text_code)` pour la description
+
+2. **Suppression de `CLINICAL_SCALES`** (`apps/web/src/data/scales.ts`)
+   - `PatientModulesTab` charge les métadonnées via `fetchScaleMeta` au lieu d'importer le tableau statique
+
+3. **`ScaleMetaBadges`** ne change pas — reçoit toujours les mêmes props, la source change
+
+4. **Seed SQL** : insérer un champ `scale_meta` par échelle dans `module_content_fields` + les `field_props` correspondants
+
+### Ajouter une nouvelle échelle (après migration)
+
+1. `INSERT` dans `module_content_fields` : `field_type = 'scale_meta'`, `text_code = 'modules.<id>.description'`
+2. `INSERT` dans `field_props` : `evaluation_type`, `target_ages`, `validated_age_range`, `no_toggle`, `reference_label`, `reference_url`
+3. Ajouter les clés i18n `modules.<id>.label`, `modules.<id>.full_title`, `modules.<id>.description` dans `fr/common.json` et `en/common.json`
+4. Ajouter la config scoring dans `SCALE_SCORING` (`apps/mobile/src/lib/scaleScoring.ts`)
+5. Ajouter les clés `modules.<id>.*` (questions, options) dans `fr/teen.json` et `en/teen.json`
+6. Ajouter l'entrée dans `GENERIC_SCALE_TYPES` et `MODULE_CONFIG` dans `HomeScreen.tsx`
+
+> Si l'échelle a une logique conditionnelle (branches, scores intermédiaires) : `no_toggle: true` + écran dédié côté mobile plutôt que `ScaleEntryScreen` générique.
 
 > Règle : ne jamais livrer un module mobile sans son pendant web. Un module invisible dans l'armoire praticien ne peut pas être débloqué.

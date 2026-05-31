@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { logger } from '@psytool/shared'
 
 export interface PatientProfile {
   id: string
@@ -26,13 +27,18 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
     .eq('id', session.user.id)
     .single()
 
+  if (!profile) {
+    await supabase.auth.signOut()
+    return null
+  }
+
   return {
     id: session.user.id,
     email: session.user.email!,
-    first_name: profile?.first_name ?? '',
-    last_name: profile?.last_name ?? '',
-    phone: profile?.phone ?? null,
-    avatar_url: profile?.avatar_url ?? null,
+    first_name: profile.first_name ?? '',
+    last_name: profile.last_name ?? '',
+    phone: profile.phone ?? null,
+    avatar_url: profile.avatar_url ?? null,
   }
 }
 
@@ -40,6 +46,7 @@ export function onAuthChange(
   cb: (patient: PatientProfile | null) => void | Promise<void>
 ): { unsubscribe: () => void } {
   const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    logger.log('[onAuthChange] event', _event, 'userId', session?.user?.id ?? 'null')
     if (!session?.user) {
       void cb(null)
       return
@@ -73,8 +80,27 @@ export async function fetchTeenContext(patientId: string): Promise<TeenContext> 
 }
 
 export async function signInWithPassword(email: string, password: string): Promise<void> {
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  logger.log('[signIn] start', email)
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  logger.log('[signIn] supabase response', { userId: data?.user?.id, error: error?.message })
   if (error) throw new Error(error.message)
+
+  const userId = data.user?.id
+  if (!userId) throw new Error('Erreur lors de la connexion')
+
+  logger.log('[signIn] checking patients table for', userId)
+  const { data: patient, error: patientError } = await supabase
+    .from('patients')
+    .select('id')
+    .eq('id', userId)
+    .single()
+  logger.log('[signIn] patients query result', { found: !!patient, error: patientError?.message })
+
+  if (!patient) {
+    await supabase.auth.signOut()
+    throw new Error("Ce compte n'est pas un compte patient. Veuillez utiliser l'application web praticien.")
+  }
+  logger.log('[signIn] success')
 }
 
 interface InvitationRow {

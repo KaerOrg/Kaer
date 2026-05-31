@@ -640,5 +640,88 @@
         "s2": "Burns DD (1980) — Feeling Good: The New Mood Therapy — Harper Collins"
       }
     }
+  },
+  "motivational_balance": {
+    "ambivalence": {
+      "title": "Comprendre l'ambivalence",
+      "summary": "Vouloir et ne pas vouloir — un état normal, pas un défaut",
+      "why": {
+        "p1": "L'**ambivalence** est le fait de vouloir changer et de ne pas vouloir changer en même temps. C'est l'état le plus fréquent chez toute personne qui envisage un changement.",
+        "p2": "Ce n'est pas un manque de volonté, ni une faiblesse. C'est une réaction humaine normale face à toute décision qui implique un coût — même si ce changement est bénéfique.",
+        "tip1": "L'ambivalence est le carburant du travail motivationnel. Vous n'êtes pas bloqué(e) — vous êtes en train d'explorer.",
+        "bq1": "« Personne ne change en étant forcé. Mais tout le monde peut changer en étant entendu. » — Miller & Rollnick"
+      },
+      "how": {
+        "intro": "Explorer son ambivalence, c'est nommer les deux côtés sans les juger.",
+        "item1": "Identifier les raisons de changer (ce qui me pousse à avancer)",
+        "item2": "Identifier les raisons de rester (ce qui me retient, ce que je perdrais)",
+        "item3": "Les tenir ensemble, sans chercher à résoudre trop vite"
+      },
+      "src1": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed",
+      "src2": "HAS (2014) — Mésusage de substances, du repérage au traitement"
+    },
+    "stages_of_change": {
+      "title": "Les stades du changement",
+      "summary": "La roue de Prochaska : comprendre où l'on en est",
+      "why": {
+        "p1": "Le modèle transthéorique de **Prochaska & DiClemente** (1983) décrit le changement comme un processus en plusieurs stades — non comme une décision binaire.",
+        "p2": "Savoir à quel stade on se trouve permet d'adapter le travail en consultation. Il n'y a pas de « bon » stade — chaque position a une logique.",
+        "stage1": "**Pré-contemplation** — Je ne vois pas de problème à changer",
+        "stage2": "**Contemplation** — J'y pense, mais je ne suis pas décidé(e)",
+        "stage3": "**Préparation** — Je prévois de changer bientôt",
+        "stage4": "**Action** — J'ai commencé à agir",
+        "stage5": "**Maintien** — Je maintiens le changement dans la durée",
+        "stage6": "**Rechute** — J'ai repris l'ancienne habitude — c'est une étape normale du processus",
+        "tip1": "La rechute fait partie du modèle. La plupart des personnes passent plusieurs fois par la roue avant de stabiliser un changement."
+      },
+      "how": {
+        "intro": "Ce que vous pouvez faire selon votre stade :",
+        "item1": "En contemplation : explorer les avantages et les freins sans se presser",
+        "item2": "En préparation : définir un comportement cible concret et réaliste",
+        "item3": "En maintien : identifier ce qui soutient le changement et le renforcer"
+      },
+      "src1": "Prochaska JO & DiClemente CC (1983) — Transtheoretical Model — PubMed",
+      "src2": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed"
+    },
+    "values_and_change": {
+      "title": "Mes valeurs, moteur du changement",
+      "summary": "Relier le changement à ce qui compte vraiment pour soi",
+      "why": {
+        "p1": "La **théorie de l'autodétermination** (Deci & Ryan, 2000) montre que les changements durables sont ancrés dans une motivation **autonome** — c'est-à-dire dans ce qui compte profondément pour la personne.",
+        "p2": "Quand le changement est relié à ses valeurs (famille, santé, liberté…), il devient plus robuste et moins dépendant du regard des autres.",
+        "tip1": "Demandez-vous : « Pour quoi est-ce que je veux changer ? » — pas seulement « pourquoi ».",
+        "bq1": "« La motivation durable vient de l'intérieur — pas de la pression extérieure. » — Deci & Ryan"
+      },
+      "how": {
+        "intro": "Identifier ses valeurs en lien avec le changement.",
+        "item1": "Choisir 2 ou 3 valeurs qui comptent vraiment pour vous en ce moment",
+        "item2": "Se demander comment le changement envisagé sert ces valeurs",
+        "item3": "Revenir à ces valeurs quand la motivation faiblit — c'est une ancre"
+      },
+      "src1": "Deci EL & Ryan RM (2000) — Self-Determination Theory — PubMed",
+      "src2": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed"
+    },
+    "change_talk": {
+      "title": "Parler du changement",
+      "summary": "Le discours-changement : quand les mots annoncent l'action",
+      "why": {
+        "p1": "Le **discours-changement** (change talk) désigne tout ce que la personne dit qui va dans le sens du changement. La recherche montre que plus quelqu'un en parle, plus il est probable qu'il agisse.",
+        "p2": "Il existe deux types de discours-changement :",
+        "item1": "**Préparatoire** : Désir (« Je voudrais… »), Capacité (« Je pourrais… »), Raisons (« Ce serait mieux si… »), Besoin (« Il faut que… »)",
+        "item2": "**Mobilisateur** : Engagement (« Je vais… »), Activation (« Je suis prêt(e)… »), Premiers pas (« J'ai déjà commencé à… »)",
+        "item3": "Le discours de maintien (sustain talk) — « Mais d'un autre côté… » — est normal et coexiste avec le discours-changement",
+        "item4": "Entendre du discours-changement chez soi, c'est déjà avancer",
+        "tip1": "Le rôle du soignant en EM est d'explorer et de renforcer le discours-changement — pas de convaincre."
+      },
+      "how": {
+        "intro": "Reconnaître son propre discours-changement.",
+        "item1": "Écouter ce que vous dites quand vous parlez du changement",
+        "item2": "Repérer les phrases « je voudrais », « je pourrais », « j'ai besoin de »",
+        "item3": "Les noter — ils reflètent votre motivation réelle"
+      },
+      "bq1": "« C'est la personne elle-même qui doit exprimer ses arguments pour le changement. » — Miller & Rollnick",
+      "src1": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed",
+      "src2": "Amrhein PC et al. (2003) — The meaning of client language about change — PubMed"
+    }
   }
 }

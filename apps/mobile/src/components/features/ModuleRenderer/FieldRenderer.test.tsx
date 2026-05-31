@@ -177,37 +177,6 @@ describe('FieldRenderer — layout cards', () => {
   })
 })
 
-// ─── Layout : grid2x2 ────────────────────────────────────────────────────────
-
-describe('FieldRenderer — layout grid2x2', () => {
-  it('affiche les titres des quadrants', () => {
-    render(
-      <FieldRenderer
-        preview_kind="grid2x2"
-        fields={[
-          f({ id: 'q1', field_type: 'quadrant_title', text_code: 'quad.a', section_id: 'q1', props: { color: '#059669' } }),
-          f({ id: 'q2', field_type: 'quadrant_title', text_code: 'quad.b', section_id: 'q2', props: { color: '#DC2626' } }),
-        ]}
-      />,
-    )
-    expect(screen.getByText('quad.a')).toBeTruthy()
-    expect(screen.getByText('quad.b')).toBeTruthy()
-  })
-
-  it('affiche les sous-titres des quadrants', () => {
-    render(
-      <FieldRenderer
-        preview_kind="grid2x2"
-        fields={[
-          f({ id: 'qt', field_type: 'quadrant_title',    text_code: 'q.title',    section_id: 'q1' }),
-          f({ id: 'qs', field_type: 'quadrant_subtitle', text_code: 'q.subtitle', section_id: 'q1' }),
-        ]}
-      />,
-    )
-    expect(screen.getByText('q.subtitle')).toBeTruthy()
-  })
-})
-
 // ─── Layout : patient_scenario ───────────────────────────────────────────────
 
 // Utilise des text_codes fictifs (non présents dans les locales) pour que t() retourne la clé brute

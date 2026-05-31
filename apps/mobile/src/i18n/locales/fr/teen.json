@@ -7,7 +7,8 @@
   "home": {
     "title": "Tes modules",
     "subheading": "Activés par ton soignant",
-    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe."
+    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe.",
+    "today_section": "Prévu aujourd'hui"
   },
   "modules": {
     "crisis_plan": {
@@ -742,7 +743,25 @@
     },
     "motivational_balance": {
       "label": "Balance motivationnelle",
-      "description": "Pour comprendre ton ambivalence et ce qui te pousse à changer"
+      "description": "Pour comprendre ton ambivalence et ce qui te pousse à changer",
+      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "stage_subtitle": "Sélectionne le stade qui te correspond le mieux aujourd'hui.",
+      "stage_1_desc": "Je ne vois pas de raison de changer",
+      "stage_2_desc": "J'y pense, mais je ne suis pas encore décidé(e)",
+      "stage_3_desc": "Je prévois de changer bientôt",
+      "stage_4_desc": "J'ai commencé à changer",
+      "stage_5_desc": "Je maintiens le changement",
+      "stage_6_desc": "J'ai repris l'ancienne habitude — c'est tout à fait normal",
+      "rulers_importance_q": "À quel point c'est important pour toi de changer ?",
+      "rulers_importance_why_label": "Pourquoi ce score et pas moins ?",
+      "rulers_importance_why_placeholder": "Ce qui me motive à vouloir changer…",
+      "rulers_confidence_q": "Si tu décidais de changer, à quel point tu te sentirais capable ?",
+      "rulers_confidence_why_label": "Qu'est-ce qui te rendrait plus confiant(e) ?",
+      "rulers_confidence_why_placeholder": "Ce dont j'aurais besoin pour y croire…",
+      "rulers_commitment_placeholder": "En une phrase, ce que je retiens de cette séance…",
+      "balance_values_subtitle": "Choisis jusqu'à 3 valeurs — elles ancreront ta balance.",
+      "balance_item_placeholder": "Saisir un argument…",
+      "balance_commitment_placeholder": "En une phrase, ce que je retiens aujourd'hui…"
     },
     "cape42": {
       "label": "CAPE-42 — Expériences psychotiques",

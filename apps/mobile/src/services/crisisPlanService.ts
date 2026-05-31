@@ -26,22 +26,27 @@ export interface CrisisPlanPractitionerConfig {
 export async function fetchPractitionerConfig(
   patientId: string
 ): Promise<CrisisPlanPractitionerConfig> {
-  const { data } = await supabase
-    .from('patient_modules')
-    .select('config')
-    .eq('patient_id', patientId)
-    .eq('module_type', 'crisis_plan')
-    .is('revoked_at', null)
-    .maybeSingle()
-
-  const cfg = (data?.config as Record<string, unknown> | null)?.crisisPlan as
-    | Partial<CrisisPlanPractitionerConfig>
-    | undefined
+  const [configResult, cardsResult] = await Promise.all([
+    supabase
+      .from('crisis_plan_configs')
+      .select('practitioner_message, commitment_phrase')
+      .eq('patient_id', patientId)
+      .maybeSingle(),
+    supabase
+      .from('crisis_plan_coping_cards')
+      .select('id, thought, response, sort_order')
+      .eq('patient_id', patientId)
+      .order('sort_order', { ascending: true }),
+  ])
 
   return {
-    practitionerMessage: cfg?.practitionerMessage ?? '',
-    copingCards: cfg?.copingCards ?? [],
-    commitmentPhrase: cfg?.commitmentPhrase ?? '',
+    practitionerMessage: configResult.data?.practitioner_message ?? '',
+    copingCards: (cardsResult.data ?? []).map(c => ({
+      id: c.id as string,
+      thought: c.thought as string,
+      response: c.response as string,
+    })),
+    commitmentPhrase: configResult.data?.commitment_phrase ?? '',
   }
 }
 

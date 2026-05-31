@@ -14,7 +14,8 @@ import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
-import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
+import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
+import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
 import { getTechnique } from '../constants/breathingTechniques'
 import { colors } from '../theme'
 
@@ -31,9 +32,10 @@ export type AppStackParamList = {
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string }
   ModuleContent: { moduleType: string }
+  MotivationalBalance: undefined
+  MotivationalBalanceDetail: { topicId: string; topicKey: string }
   BookAppointment: { practitionerId: string }
-  CrisisPlan: undefined
-  CrisisUrgency: undefined
+  CrisisPlan: { initialUrgency?: boolean }
 }
 
 export type TabParamList = {
@@ -133,9 +135,19 @@ export default function AppStack() {
         options={{ title: 'Plan de crise' }}
       />
       <Stack.Screen
-        name="CrisisUrgency"
-        component={CrisisUrgencyScreen}
-        options={{ headerShown: false }}
+        name="MotivationalBalance"
+        component={MotivationalBalanceScreen}
+        options={{ title: 'Balance motivationnelle' }}
+      />
+      <Stack.Screen
+        name="MotivationalBalanceDetail"
+        component={MotivationalBalanceDetailScreen}
+        options={({ route }) => ({
+          title: route.params.topicKey
+            .split('_')
+            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(' '),
+        })}
       />
     </Stack.Navigator>
   )

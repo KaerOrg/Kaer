@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react'
-import { View, ActivityIndicator } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { View, ActivityIndicator, StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
 import { logger } from '@psytool/shared'
 import { useAuthStore } from '../store/authStore'
 import { initDatabase } from '../lib/database'
-import { setupAndroidChannel } from '../services/notificationService'
+import { setupAndroidChannel, shouldShowNotificationOnboarding } from '../services/notificationService'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'
+import NotificationPermissionScreen from '../screens/NotificationPermissionScreen'
 import { colors } from '../theme'
 
 // Schéma de deep link : psytool://invite?token=xxx
@@ -21,8 +22,20 @@ const linking = {
   },
 }
 
+// Étape d'onboarding notifications, évaluée une fois le patient connecté.
+type NotifGate = 'checking' | 'show' | 'done'
+
+function BootSpinner() {
+  return (
+    <View style={styles.spinner}>
+      <ActivityIndicator color={colors.primary} size="large" />
+    </View>
+  )
+}
+
 export default function Navigation() {
   const { patient, loading, loadSession } = useAuthStore()
+  const [notifGate, setNotifGate] = useState<NotifGate>('checking')
 
   useEffect(() => {
     const withTimeout = (p: Promise<void>, ms: number, label: string): Promise<void> =>
@@ -55,12 +68,28 @@ export default function Navigation() {
     init()
   }, [])
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator color={colors.primary} size="large" />
-      </View>
-    )
+  useEffect(() => {
+    if (!patient) {
+      setNotifGate('checking')
+      return
+    }
+    let cancelled = false
+    shouldShowNotificationOnboarding().then((show) => {
+      if (!cancelled) setNotifGate(show ? 'show' : 'done')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [patient])
+
+  const handleNotifDone = useCallback(() => setNotifGate('done'), [])
+
+  if (loading) return <BootSpinner />
+
+  if (patient && notifGate === 'checking') return <BootSpinner />
+
+  if (patient && notifGate === 'show') {
+    return <NotificationPermissionScreen onDone={handleNotifDone} />
   }
 
   return (
@@ -69,3 +98,12 @@ export default function Navigation() {
     </NavigationContainer>
   )
 }
+
+const styles = StyleSheet.create({
+  spinner: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+  },
+})

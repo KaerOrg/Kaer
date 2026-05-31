@@ -26,9 +26,50 @@
 
 ---
 
-## Checklist obligatoire avant tout nouveau CSS ou composant UI
+## Un fichier = un composant — règle absolue
 
-> **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, ou d'implémenter un nouveau composant dans une page.**
+> **Un fichier `.tsx` exporte exactement un composant React.** Pas de second composant
+> « utilitaire », pas de sous-composant privé déclaré à côté, pas de helper volumineux
+> en vrac. Un fichier de composant a **une seule responsabilité**.
+
+Dès qu'un fichier contient un deuxième composant, un helper non trivial, une grosse
+constante de config ou de la logique qui n'est pas le cœur du composant : **extraire**
+dans un fichier voisin du même dossier.
+
+**Convention de dossier** (déjà appliquée par `layouts/*`, `fields/*`, `ui/*`) :
+
+```
+NomComposant/
+  NomComposant.tsx        ← le composant, et lui seul
+  NomComposant.test.tsx   ← son test, dans le même dossier
+  SousPiece.tsx           ← chaque pièce extraite = son propre fichier
+  helper.ts               ← helper pur = son propre fichier + son test
+  types.ts                ← types partagés du dossier
+  index.ts                ← re-exports publics
+```
+
+Ne jamais laisser un fichier de composant à plat à la racine d'un dossier qui suit
+déjà la convention « un dossier par composant ».
+
+**Pourquoi.** Un fichier qui accueille « juste un petit helper de plus » devient une
+poubelle : chaque session y empile un bout de logique, le fichier central devient
+illisible et impossible à faire évoluer sans risque. L'incident de référence :
+`ModuleRenderer/FieldRenderer.tsx` avait fini par contenir le composant d'entrée,
+le dispatcher de layout, le rendu du bandeau disclaimer et la logique de groupement
+de fields — quatre responsabilités dans un fichier « central ». Il a été éclaté en
+`FieldRenderer/{FieldRenderer,LayoutDispatcher,DisclaimerBanner}.tsx` +
+`partitionBySection.ts` + `types.ts`.
+
+**Cas des fichiers « centraux » (routeurs, dispatchers, points d'entrée).** Ils sont
+les plus exposés au phénomène. Leur unique responsabilité doit rester le routage /
+l'orchestration. Toute logique métier (groupement, transformation, rendu spécifique)
+part dans un layout, un widget ou un helper dédié — jamais inline dans le routeur.
+
+---
+
+## Checklist obligatoire avant tout nouveau CSS, composant UI, ou field_type
+
+> **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, d'implémenter un nouveau composant dans une page, ou d'introduire un nouveau `field_type` dans `module_content_fields`.**
 
 **Étape 1 — Chercher dans le design system web :**
 ```
@@ -40,14 +81,34 @@ apps/web/docs/design-system.md  ← référence CSS custom properties, classes u
 apps/mobile/src/components/ui/
 apps/mobile/docs/design-system.md
 ```
-**Étape 3 — Un composant existant a le même but fonctionnel mais ne couvre pas exactement le besoin ?**
+**Étape 3 — Pour tout `field_type` ou layout FieldRenderer — consulter l'inventaire complet :**
+```
+docs/module-engine.md  ← section "Inventaire complet des field_types" (44+ types recensés)
+```
+Un `field_type` introduit sans avoir consulté cette table est un bug d'architecture : un équivalent existe probablement déjà.
+
+**Étape 4 — Un composant existant a le même but fonctionnel mais ne couvre pas exactement le besoin ?**
 → **Le retravailler en priorité** : ajouter une prop, une variante, un slot. C'est la voie normale.
-→ Créer un nouveau composant uniquement si le rework implique un virage trop important (changement de contrat, rupture de l'API existante, logique fondamentalement différente). Ce cas doit rester marginal — justifier explicitement pourquoi l'extension n'était pas possible.
+→ Créer un nouveau composant uniquement si le rework implique un virage trop important (changement de contrat, rupture de l'API existante, logique fondamentalement différente). Ce cas doit rester **marginal et rarissime** — justifier explicitement pourquoi l'extension n'était pas possible.
+
+**Étape 5 — Si un nouveau composant est créé malgré tout :**
+Mettre à jour le document de référence correspondant **dans le même commit** :
+
+| Composant créé | Document à mettre à jour |
+|---|---|
+| Nouveau `field_type` | `docs/module-engine.md` — inventaire des field_types |
+| Nouveau widget web/mobile | `apps/web/docs/design-system.md` ou `apps/mobile/docs/design-system.md` |
+| Nouveau service | `docs/services.md` |
+| Nouveau layout (`preview_kind`) | `docs/module-engine.md` — section layouts |
+| Nouveau composant UI primitif | Design system doc de l'app |
+
+Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
 
 **Anti-patterns bloquants — refuser d'écrire :**
 - Markup HTML qui duplique un composant existant (`Toggle`, `Card`, `Button`, `StatusBadge`…)
 - Style inline `style={{ ... }}` pour autre chose qu'un calcul dynamique ponctuel
 - Classe CSS définie dans le `.css` d'une page pour un pattern déjà présent dans un composant
+- Nouveau `field_type` introduit sans consultation de l'inventaire `docs/module-engine.md`
 - Couleur, taille, espacement hardcodés (#FFFFFF, 14px, 8px) — utiliser les tokens CSS (`var(--color-*)`, `var(--spacing-*)`, `var(--font-size-*)`)
 
 **Rappel :** la session où `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` illustre exactement ce problème. Coût : bug de cohérence visuelle découvert à la revue, refactorisation supplémentaire.

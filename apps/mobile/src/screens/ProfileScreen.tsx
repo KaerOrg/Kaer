@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Alert,
   Switch,
   TouchableOpacity,
   Platform,
@@ -17,6 +16,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
+import { useToast } from '../contexts/ToastContext'
+import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
+import { useActionSheet } from '../contexts/ActionSheetContext'
 import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
@@ -47,14 +49,17 @@ interface AvatarSectionProps {
 
 function AvatarSection({ uri, uploading, onPickSource }: AvatarSectionProps) {
   const { t } = useTranslation()
+  const { showActionSheet } = useActionSheet()
 
   const handlePress = useCallback(() => {
-    Alert.alert(t('profile.avatar_change_title'), t('profile.avatar_source_prompt'), [
-      { text: t('profile.avatar_gallery'), onPress: () => onPickSource('library') },
-      { text: t('profile.avatar_camera'), onPress: () => onPickSource('camera') },
-      { text: t('common.cancel'), style: 'cancel' },
-    ])
-  }, [onPickSource, t])
+    showActionSheet({
+      title: t('profile.avatar_change_title'),
+      options: [
+        { label: t('profile.avatar_gallery'), onPress: () => onPickSource('library') },
+        { label: t('profile.avatar_camera'), onPress: () => onPickSource('camera') },
+      ],
+    })
+  }, [onPickSource, t, showActionSheet])
 
   return (
     <View style={avatarStyles.wrapper}>
@@ -96,6 +101,9 @@ const avatarStyles = StyleSheet.create({
 export default function ProfileScreen() {
   const { t } = useTranslation()
   const { patient, logout, updateAvatar, updateProfile, language, setLanguage } = useAuthStore()
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
+  const { showActionSheet } = useActionSheet()
 
   const [firstName, setFirstName] = useState(patient?.first_name ?? '')
   const [lastName, setLastName] = useState(patient?.last_name ?? '')
@@ -123,7 +131,7 @@ export default function ProfileScreen() {
     if (value) {
       const granted = await requestNotificationPermission()
       if (!granted) {
-        Alert.alert(t('profile.notif_denied_title'), t('profile.notif_denied_message'))
+        showToast(t('profile.notif_denied_message'), 'info')
         return
       }
       await scheduleSleepDiaryReminder(notifTime.getHours(), notifTime.getMinutes())
@@ -156,7 +164,7 @@ export default function ProfileScreen() {
       await saveAvatarUrl(patient.id, publicUrl)
       updateAvatar(publicUrl)
     } catch {
-      Alert.alert(t('common.error'), t('profile.avatar_error'))
+      showToast(t('profile.avatar_error'), 'error')
     } finally {
       setAvatarUploading(false)
     }
@@ -171,29 +179,30 @@ export default function ProfileScreen() {
     })
     setSavingProfile(false)
     if (result.ok) {
-      Alert.alert(t('common.saved_title'), t('profile.save_profile_success'))
+      showToast(t('profile.save_profile_success'), 'success')
     } else {
-      Alert.alert(t('common.error'), t('profile.save_profile_error'))
+      showToast(t('profile.save_profile_error'), 'error')
     }
   }, [firstName, lastName, phone, updateProfile, t])
 
   const handleLogout = () => {
-    Alert.alert(t('profile.logout_title'), t('profile.logout_message'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('profile.logout_confirm'), style: 'destructive', onPress: logout },
-    ])
+    showConfirm({
+      title: t('profile.logout_title'),
+      message: t('profile.logout_message'),
+      confirmLabel: t('profile.logout_confirm'),
+      destructive: true,
+      onConfirm: logout,
+    })
   }
 
   const handleLanguageChange = () => {
-    const options = SUPPORTED.map((lng) => ({
-      text: LANGUAGE_LABELS[lng] ?? lng,
-      onPress: () => setLanguage(lng),
-      style: language === lng ? ('default' as const) : ('default' as const),
-    }))
-    Alert.alert(t('profile.language_label'), undefined, [
-      ...options,
-      { text: t('common.cancel'), style: 'cancel' },
-    ])
+    showActionSheet({
+      title: t('profile.language_label'),
+      options: SUPPORTED.map((lng) => ({
+        label: LANGUAGE_LABELS[lng] ?? lng,
+        onPress: () => setLanguage(lng),
+      })),
+    })
   }
 
   const profileDirty =

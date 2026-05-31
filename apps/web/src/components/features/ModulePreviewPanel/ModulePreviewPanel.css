@@ -41,39 +41,16 @@
   margin-top: -1px;
 }
 
-/* ── Onglets (Vue patient / Sources) ──────────────────────────────────────── */
+/* ── Onglets (composant ui/Tabs) — sizing compact pour le panneau ─────────── */
 
-.preview-panel__tabs {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
+.preview-panel__tabs.tabs--horizontal {
   margin-bottom: 16px;
   padding: 0 16px;
 }
 
-.preview-panel__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
+.preview-panel__tabs .tabs__item {
   font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 12px 9px;
-  cursor: pointer;
-  transition: color 0.15s, border-bottom-color 0.15s;
-  margin-bottom: -1px;
-}
-
-.preview-panel__tab:hover {
-  color: var(--color-text-primary);
-}
-
-.preview-panel__tab--active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: 600;
+  padding: 9px 12px;
 }
 
 /* ── Inner (contenu sous les onglets) ─────────────────────────────────────── */
@@ -2495,6 +2472,11 @@
 .preview-disclaimer__icon { flex-shrink: 0; margin-top: 2px; }
 
 .preview-disclaimer__text { font-size: 12px; line-height: 1.5; }
+
+.preview-disclaimer--danger {
+  background: color-mix(in srgb, #DC2626 10%, transparent);
+  color: #DC2626;
+}
 
 /* ── Chrono Month (preview_kind='chrono_month') ────────────────────────── */
 

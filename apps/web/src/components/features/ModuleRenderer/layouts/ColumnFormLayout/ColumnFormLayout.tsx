@@ -13,15 +13,16 @@ interface Props {
 // du formulaire d'entrée colonne-par-colonne (texte + slider). Source
 // mobile : ColumnFormLayout (FieldRenderer.tsx).
 export function ColumnFormLayout({ fields, footer, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'column_form_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const newBtn = ft('column_form_new_btn_label')
-  const saveLabel = ft('column_form_save_label')
-  const emptyTitle = ft('column_form_empty_title')
-  const emptyText = ft('column_form_empty_text')
+  const newBtn = lbl('new_btn_label')
+  const saveLabel = lbl('save_label')
+  const emptyTitle = lbl('empty_title')
+  const emptyText = lbl('empty_text')
 
   // Colonnes : header + ses enfants text/slider
   const headers = fields

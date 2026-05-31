@@ -108,12 +108,3 @@ export async function updateRim(
   const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
   return { ok: !error }
 }
-
-/** Pour le dispensaire : assigne un questionnaire à un patient. */
-export async function proposeScale(
-  patientId: string,
-  practitionerId: string,
-  scaleId: string
-): Promise<{ ok: boolean; code?: string }> {
-  return unlockModule(patientId, practitionerId, scaleId as ModuleType, {})
-}

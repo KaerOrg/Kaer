@@ -7,7 +7,6 @@ vi.mock('../lib/supabase', () => ({
 import { supabase } from '../lib/supabase'
 import {
   fetchPatientModules,
-  proposeScale,
   revokeModule,
   unlockModule,
   unlockPsychoeducation,
@@ -148,17 +147,5 @@ describe('moduleAssignmentService.unlockRim / updateRim', () => {
       alternative_scenario: 'alt',
       original_scenario: 'orig',
     })
-  })
-})
-
-describe('moduleAssignmentService.proposeScale', () => {
-  it('délègue à unlockModule avec un config vide', async () => {
-    const insert = vi.fn().mockResolvedValue({ error: null })
-    vi.mocked(supabase.from).mockReturnValue({ insert } as never)
-
-    const result = await proposeScale('pat-1', 'p-1', 'phq9')
-
-    expect(result).toEqual({ ok: true })
-    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ module_type: 'phq9', config: {} }))
   })
 })

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
@@ -16,6 +15,7 @@ import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTranslation } from 'react-i18next'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 
 type RouteType = RouteProp<AppStackParamList, 'BreathingExercise'>
 
@@ -133,6 +133,7 @@ export default function BreathingExerciseScreen() {
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
   const patient = useAuthStore((s) => s.patient)
+  const { showConfirm } = useConfirmDialog()
 
   const technique = getTechnique(route.params.techniqueKey)
 
@@ -170,21 +171,16 @@ export default function BreathingExerciseScreen() {
   }, [totalSeconds, technique, patient])
 
   const handleStop = useCallback(() => {
-    Alert.alert(
-      t('modules.breathing_techniques.stop_confirm_title'),
-      t('modules.breathing_techniques.stop_confirm_msg'),
-      [
-        { text: t('modules.breathing_techniques.stop_confirm_continue'), style: 'cancel' },
-        {
-          text: t('modules.breathing_techniques.stop_confirm_finish'),
-          onPress: async () => {
-            await stop(true)
-            navigation.goBack()
-          },
-        },
-      ]
-    )
-  }, [stop, navigation])
+    showConfirm({
+      title: t('modules.breathing_techniques.stop_confirm_title'),
+      message: t('modules.breathing_techniques.stop_confirm_msg'),
+      confirmLabel: t('modules.breathing_techniques.stop_confirm_finish'),
+      onConfirm: async () => {
+        await stop(true)
+        navigation.goBack()
+      },
+    })
+  }, [stop, navigation, showConfirm, t])
 
   // Tick toutes les secondes
   useEffect(() => {
