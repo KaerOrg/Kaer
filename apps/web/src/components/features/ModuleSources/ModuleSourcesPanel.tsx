@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, BookOpen, FlaskConical, GitBranch, FileText, Users } from 'lucide-react'
 import type { ModuleSource, ModuleSourceType } from '@psytool/shared'
-import { fetchSourcesByModule } from '../../services/moduleSourcesService'
+import { fetchSourcesByModule } from '../../../services/moduleSourcesService'
 import './ModuleSourcesPanel.css'
 
 interface Props {
