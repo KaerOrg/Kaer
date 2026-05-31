@@ -155,12 +155,16 @@ Dans les fichiers `.css` co-localisés :
 - `StyleSheet.create` avec valeurs numériques ou couleurs en dur sans import du thème → **violation**
 - Import du thème manquant quand des couleurs/spacing sont utilisés → **violation**
 
-#### RULE — Internationalisation : zéro texte en dur
-*(source : coding-standards.md § "Internationalisation")*
+#### RULE — Internationalisation : zéro texte en dur (code ET données)
+*(source : coding-standards.md § "Internationalisation" — « aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données »)*
 
-Chercher des strings littérales françaises ou anglaises dans le JSX (entre `>` et `<`, ou dans des props `label=`, `placeholder=`, `title=`, `message=`) qui ne passent pas par `t(...)`, `tt(...)` ou `tg(...)`.
+> **Règle absolue et bloquante.** Aucun texte visible par l'utilisateur ne doit être en dur, où qu'il soit : JSX, props, constantes, **ou base de données / fichiers seed**.
 
-Exceptions légitimes : valeurs techniques (IDs, noms de routes, formats de date ISO, URLs).
+**a) Texte en dur dans le code** — chercher des strings littérales françaises ou anglaises dans le JSX (entre `>` et `<`, ou dans des props `label=`, `placeholder=`, `title=`, `message=`, `alt=`, `aria-label=`) qui ne passent pas par `t(...)`, `tt(...)` ou `tg(...)` → **violation bloquante**.
+
+**b) Texte en dur rendu depuis la base** — si le composant rend une colonne de données directement (`{row.label}`, `{source.description}`, `{topic.title}`…) **sans** passer par `t(...)`, vérifier que cette colonne contient une **clé i18n** (`text_code`) et non de la prose. Si la colonne contient du texte humain (français/anglais) affiché tel quel → **violation bloquante** : la donnée doit être un `text_code` résolu via `t()`, le texte vivant dans les locales.
+
+Exceptions légitimes : valeurs techniques (IDs, noms de routes, formats de date ISO, URLs), et noms propres non traduisibles (PMID, DOI bruts). Une **citation bibliographique** (titre d'étude, auteur, revue) reste du texte visible : si elle est multilingue dans l'UI, elle passe par i18n ; si elle est volontairement mono-langue, le justifier explicitement dans la PR (sinon **point d'attention**).
 
 Si des clés `modules.<id>.*` sont référencées ou si le fichier est un écran de module → vérifier que les clés existent aussi dans `teen.json` (mobile uniquement).
 
@@ -208,6 +212,17 @@ Tout fichier de seed doit utiliser `ON CONFLICT ... DO UPDATE` ou `ON CONFLICT .
 *(source : coding-standards.md § "Sécurité")*
 
 Dans les policies RLS, vérifier que les conditions de propriété utilisent `auth.uid()` et non un paramètre passé par le client. Ex. `using (user_id = auth.uid())` → ok. `using (user_id = current_setting('app.user_id'))` → **point d'attention**.
+
+#### RULE — Seed : aucun texte visible en dur (clés i18n uniquement)
+*(source : coding-standards.md § "Internationalisation" + config-first.md)*
+
+Pour tout `insert` dans un fichier seed, inspecter les valeurs des colonnes destinées à être **affichées** (`label`, `description`, `text_code`, `title`, `name`, `instructions`, `subtitle`…) :
+
+- Une colonne `text_code` (ou équivalent résolu via `t()` à l'affichage) doit contenir une **clé i18n** (`modules.x.y`, `scales.descriptions.x`…), jamais le texte lui-même → texte brut = **violation bloquante**.
+- Une colonne de texte visible insérée en **prose française/anglaise** (ex. `'45 % de comportements en moins'`) qui sera rendue telle quelle côté UI → **violation bloquante** : déplacer le texte dans les locales et stocker une clé.
+- Vérifier la parité : si le seed insère une clé `modules.<id>.*`, les locales `fr`/`en` (+ `teen` mobile) doivent contenir cette clé (cf. RULE i18n).
+
+Exception : données purement techniques (UUID, URL, PMID/DOI, `source_type` énuméré, `sort_order`).
 
 ---
 
@@ -327,6 +342,48 @@ Patterns à surveiller particulièrement (composants souvent recréés) :
 
 ---
 
+## Étape 5 — Documentation ET tests : obligatoires et bloquants (transversal)
+*(source : CLAUDE.md § "Règles de développement" — « Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée. »)*
+
+> **Règle absolue, sans exception.** Elle s'applique à **toute nouvelle feature**, pas seulement aux modules thérapeutiques : nouveau composant, service, hook, écran, util, table, pattern UI, prop/variante d'un composant existant.
+>
+> Le critère « nouveau module » des règles précédentes (`docs/modules/<id>.md`) n'est qu'**un cas particulier** de cette règle générale. Une feature qui n'est pas un module (ex. un onglet, un panneau, un service de lecture) y est **tout autant soumise**.
+
+### 5.1 — Tests obligatoires (bloquant)
+
+Pour **chaque fichier source créé**, chercher dans la branche le fichier de test correspondant (`*.test.ts` / `*.test.tsx` à côté, ou suite dédiée). Absent → **violation bloquante**, sauf exception triviale ci-dessous.
+
+| Fichier source créé | Test attendu | Manquant |
+|---|---|---|
+| `*Service.ts` (service de données) | `*Service.test.ts` — happy path **+** cas d'erreur (Supabase/SQLite échoue) | **violation bloquante** |
+| `use<Xxx>.ts` (hook) | test du hook (états + transitions) | **violation bloquante** |
+| Composant / écran avec logique ou callbacks | test de rendu par défaut **+** test d'interaction | **violation bloquante** |
+| Util pur / fonction de scoring | test des cas limites | **violation bloquante** |
+| Primitive `ui/` purement présentationnelle (zéro logique) | test de rendu | **point d'attention** |
+
+Vérification : `find <dir> -name '<base>.test.*'` pour chaque source. Ne pas se contenter d'un test qui existe « quelque part » — il doit **couvrir le code ajouté** (happy path + erreur au minimum, cf. § "Couverture minimale").
+
+### 5.2 — Documentation obligatoire (bloquant)
+
+Toute nouvelle feature doit **livrer ou mettre à jour** de la documentation `.md`. Si la PR ajoute une feature et qu'**aucun fichier `.md` n'est créé ni modifié** → **violation bloquante**.
+
+| Surface ajoutée | Doc attendue |
+|---|---|
+| Nouveau module thérapeutique | `docs/modules/<id>.md` + `docs/modules.md` + `CLAUDE.md` (déjà couvert § module) |
+| Nouveau composant réutilisable (`ui/` ou `features/`) | section dans le design system de l'app (`apps/<app>/docs/design-system.md` ou `apps/<app>/docs/components/<nom>.md`) |
+| Nouvelle prop / variante d'un composant existant | mise à jour de la doc de ce composant |
+| Nouveau service | entrée dans `docs/services.md` |
+| Nouvelle table / pattern transversal | doc dans `docs/` |
+| Nouvelle feature web/mobile (onglet, panneau, écran…) | doc fonctionnelle dans `docs/` ou `apps/<app>/docs/` |
+
+**Indexation** : toute doc créée doit être référencée (`docs/README.md` et/ou l'index du design system). Doc présente mais **non indexée** → **point d'attention**.
+
+### 5.3 — Exception
+
+Un **refactor pur** ou un **bugfix** sans nouvelle surface fonctionnelle ne requiert pas de nouveau `.md` ni de nouveau test — mais doit **garder la doc et les tests existants à jour** (un test cassé ou une doc devenue fausse → **violation bloquante**).
+
+---
+
 ## Format du rapport final
 
 ```
@@ -405,7 +462,7 @@ Appel direct `supabase.from('modules')` dans un composant.
 - [ ] Un seul composant par fichier .tsx
 - [ ] Primitives RN correctes (Pressable, FlashList, expo-image)
 - [ ] Design system — zéro valeur hardcodée (web CSS + mobile StyleSheet)
-- [ ] i18n — zéro texte en dur + parité fr/en + teen.json (mobile)
+- [ ] i18n — zéro texte en dur **dans le code ET en base/seed** + parité fr/en + teen.json (mobile)
 - [ ] Sécurité — RLS sur nouvelles tables, auth.uid() dans policies
 - [ ] Schéma — schema.sql à jour
 
@@ -419,6 +476,9 @@ Appel direct `supabase.from('modules')` dans un composant.
 - [ ] Mode Ado (mobile) — useTeen + TeenAccent + mock test
 - [ ] Parité web ≡ mobile (si module)
 - [ ] Service — cache + JSDoc + test + docs/services.md
-- [ ] Tests — mocks corrects, happy path + erreur couverts
-- [ ] Documentation — docs/modules/<id>.md + docs/modules.md + CLAUDE.md (si nouveau module)
+
+### Obligatoires et bloquants pour TOUTE nouvelle feature (Étape 5)
+- [ ] **Tests** — chaque source créé (service / hook / composant / util) a son test couvrant happy path + erreur
+- [ ] **Documentation** — au moins un `.md` créé/mis à jour (module, composant, service, pattern…) **et indexé**
+- [ ] **Zéro texte en dur** — ni dans le code, ni en base/seed (colonnes affichées = clés i18n)
 ```
