@@ -1,4 +1,4 @@
-import { render, container as _c } from '@testing-library/react'
+import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { LineChart } from './LineChart'
 
