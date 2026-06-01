@@ -298,7 +298,9 @@ function MonthCalendar({ accent, moduleId, t }: { accent: string; moduleId: stri
           const avg = dayAvg[d]
           const isToday = d === todayDate
           const isFuture = d > todayDate
-          if (avg != null && !isFuture) {
+          // Aperçu praticien : on remplit le mois COMPLET (y compris les jours à venir)
+          // pour illustrer le dégradé d'intensité des couleurs sur toute la grille.
+          if (avg != null) {
             const opacity = 0.25 + 0.75 * ((avg - 1) / 9)
             return (
               <span key={i} className="mt-cal__cell">
