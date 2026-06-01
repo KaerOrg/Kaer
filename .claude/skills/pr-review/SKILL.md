@@ -60,6 +60,48 @@ Tu es un **reviewer senior** pour PsyTool. Tu lis chaque fichier modifié ou ajo
 
 ---
 
+## Étape CI — Reproduire exactement les checks GitHub Actions
+
+> **À exécuter avant toute analyse de code.** Ces commandes sont copiées mot pour mot
+> depuis `.github/workflows/ci.yml`. Toute divergence de commande (chemin, flag,
+> outil) masque des erreurs, comme `tsc --project` ≠ `cd apps/web && tsc -b`.
+
+Lancer les 5 jobs en parallèle (ou séquentiellement si les ressources le limitent) :
+
+```bash
+# Job: typecheck-web  (flag -b = build mode, résout les références de projet)
+cd apps/web && npx tsc -b --noEmit
+
+# Job: lint-web
+cd apps/web && npx eslint .
+
+# Job: test-web
+cd apps/web && npx vitest run
+
+# Job: typecheck-mobile  (cd obligatoire — la résolution moduleResolution:bundler
+#   diffère selon le répertoire de travail, cf. expo-file-system/legacy)
+cd apps/mobile && npx tsc --noEmit
+
+# Job: test-mobile
+cd apps/mobile && npx jest --passWithNoTests
+```
+
+> **Règle du `cd` :** ne jamais substituer `npx tsc --project apps/<app>/tsconfig.json`
+> au `cd apps/<app> && npx tsc`. La résolution de modules change avec le répertoire
+> courant (notamment `moduleResolution: "bundler"` + sous-chemins de packages sans
+> champ `exports`) — ce qui passe depuis la racine peut échouer en CI.
+
+### Interprétation des résultats
+
+| Résultat | Action |
+|---|---|
+| Toutes les commandes passent (exit 0) | Continuer à l'Étape 0 |
+| Au moins une commande échoue | **S'arrêter**, corriger les erreurs CI en premier, puis relancer avant de poursuivre la review |
+
+Reporter dans le rapport final la liste des jobs CI avec leur statut (✅ / ❌).
+
+---
+
 ## Étape 0 — Préparer le périmètre
 
 ```bash
@@ -562,6 +604,15 @@ Un **refactor pur** ou un **bugfix** sans nouvelle surface fonctionnelle ne requ
 ```
 # PR Review — <nom de branche>
 Date : <date>
+
+## CI GitHub Actions (commandes exactes du workflow)
+| Job | Commande | Statut |
+|---|---|---|
+| typecheck-web | `cd apps/web && npx tsc -b --noEmit` | ✅/❌ |
+| lint-web | `cd apps/web && npx eslint .` | ✅/❌ |
+| test-web | `cd apps/web && npx vitest run` | ✅/❌ |
+| typecheck-mobile | `cd apps/mobile && npx tsc --noEmit` | ✅/❌ |
+| test-mobile | `cd apps/mobile && npx jest --passWithNoTests` | ✅/❌ |
 
 ## Synchronisation avec main
 - Merge `origin/main` : <propre (fast-forward / auto-merge) | conflits résolus>
