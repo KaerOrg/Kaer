@@ -443,7 +443,41 @@ d'après un module précis. Un `preview_kind` portant un nom de module
 (un autre module voulant le même écran hériterait d'un nom trompeur). Recommander
 un nom de pattern et la dérivation des clés i18n via le `module_id` des fields.
 
-### 4.4 — Posture du reviewer
+### 4.4 — Composants découplés du métier : le métier s'injecte par les props
+
+> **Un composant du design system est une coquille générique. Le métier n'en fait
+> jamais partie — il y entre par les props.** Plus un composant est détaché du
+> domaine (patient, module, échelle, agenda, craving…), plus il est réutilisable.
+> Un primitive qui « connaît » un module précis n'est plus un primitive : c'est du
+> métier déguisé en design system.
+
+S'applique à **tout composant**, mais avec un seuil de sévérité selon le dossier :
+
+| Dossier | Attendu | Couplage métier en dur |
+|---|---|---|
+| `components/ui/` | **Zéro** connaissance métier. Ne sait rien des patients/modules/échelles. Tout vient des props. | **Violation bloquante** |
+| `components/features/` | Connaît **un** domaine, mais reste paramétrable : les données arrivent par props, pas codées en dur dans le composant. | **Point d'attention** → bloquant si le composant n'est utilisable que pour une seule entité figée |
+
+**Signaux de couplage à traquer dans un composant** (surtout sous `ui/`) :
+
+- Référence à un **module/échelle/domaine précis** en dur : `if (moduleId === 'phq9')`, `'mood_tracker'`, clé i18n figée `t('modules.craving_journal.x')` dans un composant censé être générique → **violation bloquante**. La clé/le libellé doit **arriver par une prop** (`label`, `textCode`) ou être **dérivé** du `module_id` reçu (cf. config-first.md § « un layout générique ne hardcode pas les clés i18n d'un module »).
+- **Données métier** (liste de questions, options, étapes, valeurs cliniques) **codées dans le composant** au lieu d'être reçues en props → **violation bloquante** (recoupe Étape 3 config-first).
+- **Appel service / fetch / accès store** depuis un composant `ui/` → **violation bloquante** : un primitive ne va pas chercher ses données, on les lui passe. (Un `features/` peut consommer un hook de domaine, mais privilégier la réception par props quand c'est raisonnable.)
+- **Import depuis `features/` dans un `ui/`**, ou import d'un service/contexte métier dans un `ui/` → **violation bloquante** (recoupe la règle de dépendance `features → ui`).
+- Nom de prop **trop spécifique** trahissant le couplage (`phq9Score`, `patientCravingValue`) là où un nom générique (`value`, `label`) conviendrait → **point d'attention**.
+
+**Test décisif :** « si un autre domaine (autre module, autre écran) voulait ce
+composant, faudrait-il modifier le composant lui-même ? » Si oui → le métier est
+*dans* le composant au lieu d'être *injecté*. La correction attendue : **remonter
+le métier dans le parent** et l'exposer en prop (`label`, `value`, `items`,
+`onSelect`, `renderItem`, `textCode`…), laissant le composant agnostique.
+
+Référence : `ValueBar`/`Sparkline` (purs, tout par props) et la règle « nommer un
+layout par son motif, pas par un module » de [`config-first.md`](../../rules/config-first.md).
+Si la PR **retire** un couplage métier d'un composant pour le passer en prop → le
+**saluer** dans les points positifs.
+
+### 4.5 — Posture du reviewer
 
 - Ne **jamais** clore une duplication par « mais ça fonctionne » / « c'est mineur ».
   Le rôle du gardien est précisément d'empêcher la dette qui « fonctionne ».
@@ -490,6 +524,32 @@ Toute nouvelle feature doit **livrer ou mettre à jour** de la documentation `.m
 | Nouvelle feature web/mobile (onglet, panneau, écran…) | doc fonctionnelle dans `docs/` ou `apps/<app>/docs/` |
 
 **Indexation** : toute doc créée doit être référencée (`docs/README.md` et/ou l'index du design system). Doc présente mais **non indexée** → **point d'attention**.
+
+### 5.2.1 — Vérification mécanique : chaque composant ajouté a une VRAIE section de doc (bloquant)
+
+> **Une mention dans la liste d'inventaire n'est PAS de la documentation.** Un
+> composant cité dans la phrase « Primitives — Accordion, Button, Card… » mais sans
+> section décrivant ses props/usage est **non documenté**. C'est le trou exact par
+> lequel 8 primitives (`Button`, `Card`, `Modal`, `StatusBadge`, `ConfirmDialog`,
+> `Toast`…) ont vécu sans doc : le reviewer voyait le nom et croyait la doc présente.
+
+Pour **chaque composant créé** dans `apps/<app>/src/components/ui/` ou `components/features/`
+(repérable par un dossier `NomComposant/` nouveau dans le diff `A`) :
+
+```bash
+# Le nom apparaît-il AILLEURS que dans la ligne d'inventaire / l'arbre de fichiers ?
+grep -n "NomComposant" apps/<app>/docs/design-system.md
+ls apps/<app>/docs/components/NomComposant*.md 2>/dev/null
+```
+
+Verdict :
+- Le composant a une **section dédiée** (`### NomComposant`) avec props/usage, **ou** un fichier `docs/components/<nom>.md` → **conforme**.
+- Le composant n'apparaît **que** dans la liste d'inventaire (ligne « Primitives — … ») et/ou l'arbre de fichiers, **sans section ni props** → **violation bloquante** : la doc d'inventaire ne documente pas, elle liste.
+- Le composant n'apparaît **nulle part** dans la doc → **violation bloquante**.
+
+Une section de doc valable contient au minimum : le **chemin** du composant, un **exemple d'usage**, et la **table des props** (nom, type, rôle). Une simple phrase descriptive sans props → **point d'attention**.
+
+**Cas des composants pilotés par contexte** (Toast/ConfirmDialog/ActionSheet et équivalents) : la doc doit indiquer le **hook de déclenchement** (`useToast`, `useConfirmDialog`…) et sa signature, pas seulement les props présentationnelles — sinon un dev remontera le composant à la main au lieu d'appeler le hook.
 
 ### 5.3 — Exception
 
@@ -597,5 +657,6 @@ Appel direct `supabase.from('modules')` dans un composant.
 ### Obligatoires et bloquants pour TOUTE nouvelle feature (Étape 5)
 - [ ] **Tests** — chaque source créé (service / hook / composant / util) a son test couvrant happy path + erreur
 - [ ] **Documentation** — au moins un `.md` créé/mis à jour (module, composant, service, pattern…) **et indexé**
+- [ ] **Chaque composant ajouté (`ui/`/`features/`) a une vraie section de doc** (chemin + usage + props) — pas seulement une mention d'inventaire (§5.2.1)
 - [ ] **Zéro texte en dur** — ni dans le code, ni en base/seed (colonnes affichées = clés i18n)
 ```

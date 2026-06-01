@@ -143,6 +143,108 @@ Props clés : `value: number | null`, `steps: number[]`, `color: string`, `showH
 
 ---
 
+### InputField (`src/components/ui/InputField/`)
+
+Champ texte étiqueté avec message d'erreur. Étend `TextInputProps` (donc `value`,
+`onChangeText`, `placeholder`, `keyboardType`, `secureTextEntry`…).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Libellé (obligatoire) |
+| `error` | `string` | Message d'erreur inline (validation de champ) |
+| `containerStyle` | `ViewStyle` | Style du conteneur |
+| …natifs | `TextInputProps` | `value`, `onChangeText`, `placeholder`… |
+
+### StatusBadge (`src/components/ui/StatusBadge/`)
+
+Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `variant` | `'info' \| 'success' \| 'warning' \| 'danger' \| 'neutral'` | `'neutral'` | Couleur |
+| `label` | `string` | — | Texte (obligatoire) |
+| `value` | `string \| number` | — | Valeur additionnelle |
+| `icon` | `string` | — | Nom d'icône `lucide-react-native` |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### Accordion (`src/components/ui/Accordion/`)
+
+Section repliable (titre cliquable + contenu).
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `badge` | `number` | — | Compteur à droite |
+| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
+| `children` | `ReactNode` | — | Contenu (obligatoire) |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### EmptyState (`src/components/ui/EmptyState/`)
+
+État vide — icône + titre + description + action optionnelle.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `string` | Nom d'icône `lucide-react-native` |
+| `title` | `string` | Titre (obligatoire) |
+| `description` | `string` | Texte explicatif |
+| `action` | `{ label: string; onPress: () => void }` | Bouton d'action optionnel |
+| `style` | `ViewStyle` | Style additionnel |
+
+### SectionDateList (`src/components/ui/SectionDateList/`)
+
+`SectionList` générique groupé par date — réutilisé par les modules journal
+(activités, craving, etc.). Étend `SectionListProps` sauf `sections`/`renderSectionHeader`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `sections` | `DateSection<T>[]` | `{ title: string; data: T[] }[]` |
+| `sectionHeaderStyle` | `object` | Style du header de section |
+| …natifs | `SectionListProps<T>` | `renderItem`, `keyExtractor`, `ListEmptyComponent`… |
+
+Helper de type `GroupByDateFn` exporté pour typer une fonction de groupement par `created_at`.
+
+---
+
+### ActionSheet / ConfirmDialog / Toast — feedback sans `Alert.alert`
+
+> **Règle d'or : zéro `Alert.alert`, zéro alerte OS.** Tout feedback ou confirmation
+> passe par ces trois primitives, déclenchées **via leur contexte** (jamais montées à
+> la main). Voir la règle complète en mémoire projet *« Zero Alert.alert »*.
+
+Ces composants sont **présentationnels** (`src/components/ui/{ActionSheet,ConfirmDialog,Toast}/index.tsx`)
+et montés une seule fois par leur provider racine. On ne les instancie jamais
+directement — on appelle le hook du contexte correspondant :
+
+| Besoin | Hook | Appel |
+|---|---|---|
+| Confirmation destructive (supprimer, révoquer) | `useConfirmDialog()` | `showConfirm({ title, message?, confirmLabel?, destructive?, onConfirm })` |
+| Choix parmi N options | `useActionSheet()` | `showActionSheet({ title?, options: { label, onPress, destructive? }[] })` |
+| Feedback passif (succès, erreur, info) | `useToast()` | `showToast(message, variant?)` — `variant`: `'success'`(défaut)`\|'error'\|'info'` |
+
+```tsx
+const { showConfirm } = useConfirmDialog()
+showConfirm({
+  title: t('appointment.cancel_title'),
+  message: t('appointment.cancel_msg'),
+  destructive: true,
+  confirmLabel: t('common.confirm'),
+  onConfirm: () => cancelAppointment(id),
+})
+```
+
+Le `cancelLabel` d'`ActionSheet`/`ConfirmDialog` est injecté par le provider (i18n) —
+ne pas le passer depuis l'écran. `Toast` s'auto-masque après un délai géré par le provider.
+
+| Composant | Props présentationnelles (gérées par le provider) |
+|---|---|
+| `ConfirmDialog` | `visible`, `onCancel`, `cancelLabel` + `ConfirmDialogConfig` |
+| `ActionSheet` | `visible`, `onClose` + `ActionSheetConfig` (`title?`, `options`, `cancelLabel`) |
+| `Toast` | `message`, `variant`, `visible` |
+
+---
+
 ## Widgets du ModuleRenderer
 
 Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version web mais en React Native.
