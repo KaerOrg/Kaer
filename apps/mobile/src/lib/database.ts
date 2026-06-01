@@ -63,6 +63,9 @@ export async function initDatabase(): Promise<void> {
     () => createTreeSelectionsTable(database),
     () => createModuleSettingsTable(database),
     () => createCrisisAnchorsTable(database),
+    () => createEMRulersTable(database),
+    () => createEMBalanceItemsTable(database),
+    () => createEMValuesTable(database),
   ]
   for (const step of steps) {
     try { await step() } catch { /* table déjà présente ou erreur isolée — on continue */ }
@@ -1508,4 +1511,78 @@ export async function saveTreeSelection(
 export async function deleteTreeSelection(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM tree_selections WHERE id = ?', [id])
+}
+
+// ─── Entretien Motivationnel (EM) ────────────────────────────────────────────
+// 3 tables : em_rulers (données par séance), em_balance_items (balance),
+// em_values (valeurs sélectionnées — état persistant)
+
+export interface EMRuler {
+  id: string
+  behavior_target: string | null   // comportement exploré
+  stage: number | null             // stade Prochaska 1–6
+  importance_score: number | null  // 0–10
+  importance_why: string | null    // réponse "pourquoi ce score ?"
+  confidence_score: number | null  // 0–10
+  confidence_why: string | null    // réponse "qu'est-ce qui vous rendrait plus confiant ?"
+  commitment_text: string | null   // phrase d'engagement de séance
+  created_at: string
+}
+
+export interface EMBalanceItem {
+  id: string
+  behavior_target: string  // comportement auquel cet item se rapporte
+  side: 'for' | 'against'  // Pour changer / Contre changer
+  text: string
+  weight: number           // 1–3
+  sort_order: number
+  created_at: string
+}
+
+export interface EMValue {
+  id: string
+  value_key: string  // clé i18n de la valeur (ex: 'family', 'health', 'freedom')
+  sort_order: number
+  created_at: string
+}
+
+export async function createEMRulersTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS em_rulers (
+      id TEXT PRIMARY KEY,
+      behavior_target TEXT,
+      stage INTEGER,
+      importance_score INTEGER,
+      importance_why TEXT,
+      confidence_score INTEGER,
+      confidence_why TEXT,
+      commitment_text TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export async function createEMBalanceItemsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS em_balance_items (
+      id TEXT PRIMARY KEY,
+      behavior_target TEXT NOT NULL DEFAULT '',
+      side TEXT NOT NULL,
+      text TEXT NOT NULL,
+      weight INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export async function createEMValuesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS em_values (
+      id TEXT PRIMARY KEY,
+      value_key TEXT NOT NULL UNIQUE,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
 }

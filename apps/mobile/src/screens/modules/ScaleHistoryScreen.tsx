@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -20,6 +19,7 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleHistory'>
@@ -31,6 +31,7 @@ export default function ScaleHistoryScreen() {
   const { scale_id } = params
   const { isTeenMode, teenColor } = useTeen()
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { showConfirm } = useConfirmDialog()
   const accentColor = teenColor(scale_id)
 
   React.useEffect(() => {
@@ -60,22 +61,17 @@ export default function ScaleHistoryScreen() {
   )
 
   const handleDelete = useCallback((id: string) => {
-    Alert.alert(
-      t('common.delete_record_title'),
-      t('common.irreversible'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deleteScaleEntry(id)
-            setEntries(prev => prev.filter(e => e.id !== id))
-          },
-        },
-      ]
-    )
-  }, [t])
+    showConfirm({
+      title: t('common.delete_record_title'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteScaleEntry(id)
+        setEntries(prev => prev.filter(e => e.id !== id))
+      },
+    })
+  }, [t, showConfirm])
 
   if (loading) {
     return (

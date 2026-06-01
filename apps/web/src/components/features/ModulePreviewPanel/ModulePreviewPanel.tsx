@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../../services/moduleService'
+import { Tabs, type TabItem } from '../../ui/Tabs'
 import { FieldRenderer } from '../ModuleRenderer'
-import { ModuleSourcesPanel } from '../../ModuleSources/ModuleSourcesPanel'
+import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
 import { MedicationSideEffectsPreview } from './MedicationSideEffectsPreview'
 import './ModulePreviewPanel.css'
 
@@ -43,6 +44,18 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
     setExpandedCard(prev => (prev === id ? null : id))
   }, [])
 
+  const handleTabChange = useCallback((id: string) => {
+    setActiveTab(id === 'sources' ? 'sources' : 'preview')
+  }, [])
+
+  const tabs = useMemo<TabItem[]>(
+    () => [
+      { id: 'preview', label: t('patient.patient_view_tab'), icon: <Eye size={12} /> },
+      { id: 'sources', label: t('patient.sources_tab'), icon: <BookOpen size={12} /> },
+    ],
+    [t],
+  )
+
   const accentColor = color ?? DEFAULT_ACCENT
 
   const meaningfulFieldsCount = result
@@ -61,24 +74,13 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
   return (
     <div className="preview-panel" style={{ borderTopColor: accentColor }}>
-      <div className="preview-panel__tabs">
-        <button
-          className={`preview-panel__tab ${activeTab === 'preview' ? 'preview-panel__tab--active' : ''}`}
-          style={activeTab === 'preview' ? { color: accentColor, borderBottomColor: accentColor } : undefined}
-          onClick={() => setActiveTab('preview')}
-        >
-          <Eye size={12} />
-          {t('patient.patient_view_tab')}
-        </button>
-        <button
-          className={`preview-panel__tab ${activeTab === 'sources' ? 'preview-panel__tab--active' : ''}`}
-          style={activeTab === 'sources' ? { color: accentColor, borderBottomColor: accentColor } : undefined}
-          onClick={() => setActiveTab('sources')}
-        >
-          <BookOpen size={12} />
-          {t('patient.sources_tab')}
-        </button>
-      </div>
+      <Tabs
+        className="preview-panel__tabs"
+        tabs={tabs}
+        activeTab={activeTab}
+        onChange={handleTabChange}
+        accentColor={accentColor}
+      />
 
       {activeTab === 'preview' && (
         <>

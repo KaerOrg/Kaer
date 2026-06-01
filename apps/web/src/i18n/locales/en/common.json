@@ -98,6 +98,56 @@
     "module_count_one": "{{count}} module",
     "module_count_other": "{{count}} modules"
   },
+  "scales": {
+    "eval_auto": "Self-report",
+    "eval_hetero": "Clinician-rated",
+    "validated_prefix": "Validated",
+    "age": {
+      "perinatal": "Perinatal",
+      "enfant": "Child",
+      "ado": "Teen",
+      "adulte": "Adult",
+      "senior": "Senior"
+    },
+    "category": {
+      "humeur": "Mood",
+      "anxiete": "Anxiety",
+      "sommeil": "Sleep",
+      "addictologie": "Addiction",
+      "psychose": "Psychosis",
+      "personnalite": "Personality",
+      "neurodev": "Neurodev",
+      "trauma": "Trauma"
+    },
+    "full_title": {
+      "phq9": "Patient Health Questionnaire",
+      "gad7": "Generalized Anxiety Disorder 7",
+      "epds": "Edinburgh Postnatal Depression Scale",
+      "rcads": "Revised Children's Anxiety and Depression Scale",
+      "bsl23": "Borderline Symptom List 23",
+      "cape42": "Community Assessment of Psychic Experiences",
+      "audit": "Alcohol Use Disorders Identification Test",
+      "nsi": "Nightmare Severity Index",
+      "asrs18": "Adult ADHD Self-Report Scale v1.1 — Full Assessment (18 items)",
+      "asrs6": "Adult ADHD Self-Report Scale v1.1 — Screener (6 items)",
+      "snap_iv": "Swanson, Nolan and Pelham Rating Scale – version IV",
+      "cssrs": "Columbia Suicide Severity Rating Scale"
+    },
+    "descriptions": {
+      "phq9": "9-item depression screening and severity questionnaire. Global reference for longitudinal follow-up.",
+      "gad7": "7-item rapid assessment of generalized anxiety disorder. Sensitive to therapeutic change.",
+      "epds": "Perinatal depression screening (antenatal and postnatal). International reference recommended by NICE.",
+      "rcads": "Measures anxious and depressive symptoms in children and adolescents. Self-report and parent versions available.",
+      "bsl23": "Measures severity of borderline personality disorder symptoms. Longitudinal monitoring tool in DBT.",
+      "cape42": "Assessment of subclinical positive, negative and depressive experiences in general and clinical populations.",
+      "audit": "WHO 10-item screening for problematic alcohol use. Recommended for early detection in primary care.",
+      "nsi": "9-item multidimensional nightmare severity assessment (score 0–45). Measures wake frequency, emotional intensity and daytime impact.",
+      "asrs18": "Full ADHD self-report (18 items, Parts A+B, ASRS v1.1). Total score 0–72, Part A 0–24, Part B 0–48.",
+      "asrs6": "6-item ADHD screening (Part A, ASRS v1.1). Total score 0–24. WHO-validated for rapid detection.",
+      "snap_iv": "26-item behavioural ADHD screening (18 DSM-IV + 8 ODD criteria). Clinician-rated by parent or teacher.",
+      "cssrs": "Structured assessment of suicidal ideation and behaviour. Columbia University / NIMH — 'Since last visit' version."
+    }
+  },
   "patient": {
     "back": "← Back to my patients",
     "teen_mode_label": "Teen mode",
@@ -159,6 +209,7 @@
     "crisis_card_delete": "Delete this card",
     "crisis_btn_save": "Save configuration",
     "crisis_error_save": "Save error. Please try again.",
+    "cssrs_evaluations": "Assessments",
     "tab_overview": "Overview",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -203,7 +254,11 @@
     "cat_anxiety_label": "Anxiety, Phobias & OCD",
     "cat_anxiety_subtitle": "",
     "cat_addiction_label": "Addictology & Impulsivity",
-    "cat_addiction_subtitle": "The often-forgotten module"
+    "cat_addiction_subtitle": "The often-forgotten module",
+    "scale_read": "Read",
+    "scale_unread": "Unread",
+    "cssrs_modal_title": "C-SSRS — Suicide Screening",
+    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated"
   },
   "modules": {
     "nav_link": "Modules",
@@ -463,7 +518,29 @@
       "step_5_hint": "Which professionals or services can I contact?",
       "step_6_title": "Securing My Environment",
       "step_6_hint": "How can I make my surroundings safer?",
-      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention",
+      "urgency_title": "I am in crisis",
+      "urgency_subtitle": "Here are your emergency contacts and resources.",
+      "urgency_close_contacts": "Trusted people to call",
+      "urgency_professionals": "Professionals & emergency services",
+      "urgency_no_items": "No contacts filled in your plan.",
+      "anchors_title": "My reasons to hold on",
+      "anchors_subtitle": "Images and a phrase that remind you why life is worth living.",
+      "anchor_phrase_label": "My grounding phrase",
+      "anchors_preview_info": "The patient adds up to 3 photos and a personal phrase on their phone.",
+      "coping_cards_title": "My coping cards",
+      "coping_cards_subtitle": "Personalised strategies prepared with your practitioner.",
+      "coping_cards_empty": "No cards configured — add some in the editor above.",
+      "coping_card_thought": "Difficult thought",
+      "coping_card_response": "What I can tell myself",
+      "commitment_title": "My commitment",
+      "commitment_phrase_default": "I commit to using this plan before any act of self-harm, and to calling my practitioner if I don't feel capable.",
+      "commitment_not_configured": "No commitment phrase configured.",
+      "emergency_bar_label": "Emergency numbers — always accessible",
+      "emergency_samu": "15 — Emergency",
+      "emergency_samu_label": "Medical emergency",
+      "emergency_3114": "3114 — Prevention",
+      "emergency_3114_label": "National helpline"
     },
     "therapeutic_commitment": {
       "label": "Therapeutic Commitment",
@@ -537,6 +614,23 @@
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",
       "description": "Daily tracking of mood and energy level on a visual scale.",
+      "footer": "Single daily entry. History available with mini-charts per dimension (last 30 days). Data stored locally on the device.",
+      "tab_today": "Today",
+      "tab_history": "History",
+      "history_title": "Last 30 days",
+      "score_label": "Avg.",
+      "dim_mood": "Mood",
+      "dim_energy": "Energy",
+      "dim_anxiety": "Anxiety",
+      "dim_pleasure": "Pleasure",
+      "dim_mood_low": "Very low",
+      "dim_mood_high": "Very high",
+      "dim_energy_low": "Exhausted",
+      "dim_energy_high": "Full of energy",
+      "dim_anxiety_low": "None",
+      "dim_anxiety_high": "Very intense",
+      "dim_pleasure_low": "Nothing moved me",
+      "dim_pleasure_high": "Fully felt",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -544,6 +638,7 @@
     "emotion_wheel": {
       "label": "Emotion Wheel",
       "description": "Explore and precisely name emotions to address alexithymia.",
+      "footer": "Emotion wheel — affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -558,6 +653,7 @@
     "beck_columns": {
       "label": "Beck Columns",
       "description": "Thought journal: Situation, Emotion, Automatic Thought, Alternative Thought.",
+      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022).",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first thought record."
@@ -587,6 +683,7 @@
     "fear_thermometer": {
       "label": "Fear Thermometer",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
+      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -625,6 +722,10 @@
       "new_btn": "New balance",
       "empty_title": "No balance yet",
       "empty_text": "Use the button above to fill in your first decisional balance."
+    },
+    "motivational_balance": {
+      "label": "Motivational Balance",
+      "description": "Motivational Interviewing (Miller & Rollnick): Prochaska stages, importance/confidence rulers 0-10, values balance."
     }
   },
   "category": {
@@ -656,12 +757,12 @@
       "label": "Addictology & Impulsivity",
       "subtitle": ""
     },
-    "assessments": {
-      "label": "Scales and Assessment Questionnaires",
-      "subtitle": ""
-    },
     "motivation": {
-      "label": "Motivation & Therapeutic Engagement",
+      "label": "Motivational Interviewing",
+      "subtitle": "Exploring ambivalence to change"
+    },
+    "assessments": {
+      "label": "Assessment Scales & Questionnaires",
       "subtitle": ""
     }
   },
@@ -911,7 +1012,17 @@
     "filter_label": "Filter by tag",
     "filter_clear": "Show all",
     "empty_filtered": "No notes for this tag.",
-    "tag_search_placeholder": "Search a tag…"
+    "tag_search_placeholder": "Search a tag…",
+    "mic_start": "Dictate a note",
+    "mic_stop": "Stop recording",
+    "mic_processing": "Transcribing…",
+    "mic_error_not_supported": "Your browser does not support audio recording.",
+    "mic_error_permission": "Microphone access denied. Check your browser permissions.",
+    "mic_error_too_large": "Recording too long. Please record shorter segments.",
+    "mic_error_network": "Network error during transcription. Check your connection.",
+    "mic_error_server": "Transcription error. Please try again.",
+    "mic_error_recorder": "Recording error. The recording has been stopped.",
+    "mic_error_disconnected": "Microphone disconnected. The recording has been stopped."
   },
   "agenda": {
     "nav_link": "Schedule",
@@ -992,5 +1103,24 @@
       "error_update_status": "Error updating status."
     },
     "filter_patient_label": "Search a patient…"
+  },
+  "dispensaire": {
+    "title": "Clinical Library",
+    "subtitle": "Library of validated questionnaires. Send them directly to your patients.",
+    "sidebar_title": "Clinical themes",
+    "all_scales": "All scales",
+    "legend_ages": "Validated age ranges:",
+    "empty_category": "No scales available in this category yet.",
+    "empty_soon": "New questionnaires will be added soon.",
+    "propose_btn": "Propose to a patient",
+    "reference_aria": "Validated reference",
+    "modal_subtitle": "Choose a patient",
+    "close": "Close",
+    "loading_patients": "Loading patients…",
+    "no_patients": "No patients in your list yet.",
+    "sent": "Sent",
+    "send": "Send",
+    "error_duplicate": "{{label}} already has this questionnaire.",
+    "error_send": "Send failed. Please try again."
   }
 }

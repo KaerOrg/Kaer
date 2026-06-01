@@ -18,22 +18,22 @@ const ICON_MAP: Record<string, LucideIcon> = {
 // sous-titre, items avec étoiles 1-5, bouton Ajouter), jauge motivation
 // horizontale, bouton Sauvegarder. Source mobile : DecisionGridLayout.tsx.
 export function DecisionGridLayout({ fields, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'decision_grid_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const targetLabel = ft('decision_grid_target_label')
-  const targetPlaceholder = ft('decision_grid_target_placeholder')
-  const addLabel = ft('decision_grid_add_label')
-  const argPlaceholder = ft('decision_grid_arg_placeholder')
-  const gaugeTitle = ft('decision_grid_gauge_title')
-  const gaugeChange = ft('decision_grid_gauge_change_label')
-  const gaugeStatus = ft('decision_grid_gauge_status_label')
-  const saveLabel = ft('decision_grid_save_label')
+  const targetLabel = lbl('target_label')
+  const targetPlaceholder = lbl('target_placeholder')
+  const addLabel = lbl('add_label')
+  const argPlaceholder = lbl('arg_placeholder')
+  const gaugeTitle = lbl('gauge_title')
+  const gaugeChange = lbl('gauge_change_label')
+  const gaugeStatus = lbl('gauge_status_label')
+  const saveLabel = lbl('save_label')
 
-  const config = fields.find(f => f.field_type === 'decision_grid_config')
-  const gaugeFill = config?.props['gauge_fill_color'] ?? '#EC4899'
+  const gaugeFill = configField?.props['gauge_fill_color'] ?? '#EC4899'
 
   const quadrants = fields
     .filter(f => f.field_type === 'column_header')

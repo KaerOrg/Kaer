@@ -36,7 +36,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Divider, EmptyState, InputField, PipPicker, SectionDateList, StatusBadge |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PipPicker, SectionDateList, StatusBadge, Toast |
 | `components/features/` | Composants métier — Chart, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -143,6 +143,108 @@ Props clés : `value: number | null`, `steps: number[]`, `color: string`, `showH
 
 ---
 
+### InputField (`src/components/ui/InputField/`)
+
+Champ texte étiqueté avec message d'erreur. Étend `TextInputProps` (donc `value`,
+`onChangeText`, `placeholder`, `keyboardType`, `secureTextEntry`…).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Libellé (obligatoire) |
+| `error` | `string` | Message d'erreur inline (validation de champ) |
+| `containerStyle` | `ViewStyle` | Style du conteneur |
+| …natifs | `TextInputProps` | `value`, `onChangeText`, `placeholder`… |
+
+### StatusBadge (`src/components/ui/StatusBadge/`)
+
+Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `variant` | `'info' \| 'success' \| 'warning' \| 'danger' \| 'neutral'` | `'neutral'` | Couleur |
+| `label` | `string` | — | Texte (obligatoire) |
+| `value` | `string \| number` | — | Valeur additionnelle |
+| `icon` | `string` | — | Nom d'icône `lucide-react-native` |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### Accordion (`src/components/ui/Accordion/`)
+
+Section repliable (titre cliquable + contenu).
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `badge` | `number` | — | Compteur à droite |
+| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
+| `children` | `ReactNode` | — | Contenu (obligatoire) |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### EmptyState (`src/components/ui/EmptyState/`)
+
+État vide — icône + titre + description + action optionnelle.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `string` | Nom d'icône `lucide-react-native` |
+| `title` | `string` | Titre (obligatoire) |
+| `description` | `string` | Texte explicatif |
+| `action` | `{ label: string; onPress: () => void }` | Bouton d'action optionnel |
+| `style` | `ViewStyle` | Style additionnel |
+
+### SectionDateList (`src/components/ui/SectionDateList/`)
+
+`SectionList` générique groupé par date — réutilisé par les modules journal
+(activités, craving, etc.). Étend `SectionListProps` sauf `sections`/`renderSectionHeader`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `sections` | `DateSection<T>[]` | `{ title: string; data: T[] }[]` |
+| `sectionHeaderStyle` | `object` | Style du header de section |
+| …natifs | `SectionListProps<T>` | `renderItem`, `keyExtractor`, `ListEmptyComponent`… |
+
+Helper de type `GroupByDateFn` exporté pour typer une fonction de groupement par `created_at`.
+
+---
+
+### ActionSheet / ConfirmDialog / Toast — feedback sans `Alert.alert`
+
+> **Règle d'or : zéro `Alert.alert`, zéro alerte OS.** Tout feedback ou confirmation
+> passe par ces trois primitives, déclenchées **via leur contexte** (jamais montées à
+> la main). Voir la règle complète en mémoire projet *« Zero Alert.alert »*.
+
+Ces composants sont **présentationnels** (`src/components/ui/{ActionSheet,ConfirmDialog,Toast}/index.tsx`)
+et montés une seule fois par leur provider racine. On ne les instancie jamais
+directement — on appelle le hook du contexte correspondant :
+
+| Besoin | Hook | Appel |
+|---|---|---|
+| Confirmation destructive (supprimer, révoquer) | `useConfirmDialog()` | `showConfirm({ title, message?, confirmLabel?, destructive?, onConfirm })` |
+| Choix parmi N options | `useActionSheet()` | `showActionSheet({ title?, options: { label, onPress, destructive? }[] })` |
+| Feedback passif (succès, erreur, info) | `useToast()` | `showToast(message, variant?)` — `variant`: `'success'`(défaut)`\|'error'\|'info'` |
+
+```tsx
+const { showConfirm } = useConfirmDialog()
+showConfirm({
+  title: t('appointment.cancel_title'),
+  message: t('appointment.cancel_msg'),
+  destructive: true,
+  confirmLabel: t('common.confirm'),
+  onConfirm: () => cancelAppointment(id),
+})
+```
+
+Le `cancelLabel` d'`ActionSheet`/`ConfirmDialog` est injecté par le provider (i18n) —
+ne pas le passer depuis l'écran. `Toast` s'auto-masque après un délai géré par le provider.
+
+| Composant | Props présentationnelles (gérées par le provider) |
+|---|---|
+| `ConfirmDialog` | `visible`, `onCancel`, `cancelLabel` + `ConfirmDialogConfig` |
+| `ActionSheet` | `visible`, `onClose` + `ActionSheetConfig` (`title?`, `options`, `cancelLabel`) |
+| `Toast` | `message`, `variant`, `visible` |
+
+---
+
 ## Widgets du ModuleRenderer
 
 Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version web mais en React Native.
@@ -160,7 +262,102 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 | `TextareaWidget` | `View` vide h=52 avec bordure, opacité 0.5 | `"textarea"` |
 | `InfoWidget` | Icône `reorder-four-outline` + texte italique muted | `"info"` |
 
-Chemin : `src/components/ModuleRenderer/fields/widgets/<Widget>/<Widget>.tsx`
+Chemin : `src/components/features/ModuleRenderer/fields/widgets/<Widget>/<Widget>.tsx`
+
+---
+
+## Layouts du ModuleRenderer
+
+Le moteur de rendu de module est entièrement éclaté en composants à
+**responsabilité unique** — un fichier = un composant. Chaque `preview_kind`
+est rendu par un **layout** dédié, vivant dans son propre dossier.
+
+### Le moteur — dossier `FieldRenderer/`
+
+`src/components/features/ModuleRenderer/FieldRenderer/`
+
+| Fichier | Responsabilité unique |
+|---|---|
+| `FieldRenderer.tsx` | Point d'entrée — extrait le `disclaimer_banner`, délègue au dispatcher |
+| `LayoutDispatcher.tsx` | Route un `preview_kind` vers son layout |
+| `partitionBySection.ts` | Helper pur — répartit les fields par `section_id` (`{ sections, unsectioned }`) |
+| `types.ts` | `FieldRendererProps`, `QuestionnaireInteraction` |
+| `index.ts` | Re-exports publics (`FieldRenderer`, types) |
+
+> **Règle :** ne jamais ajouter de logique de layout, de groupement de fields
+> ou de rendu de widget dans `FieldRenderer.tsx` / `LayoutDispatcher.tsx`.
+> Le dispatcher reste une simple table de routage `preview_kind → layout`.
+
+### Convention d'un layout
+
+`src/components/features/ModuleRenderer/layouts/<Nom>/`
+
+| Fichier | Rôle |
+|---|---|
+| `<Nom>Layout.tsx` | Le composant de layout, et lui seul |
+| `styles.ts` | Le `StyleSheet` du layout |
+| `index.ts` | Re-export `{ <Nom>Layout }` + son type de props |
+| `<SousComposant>.tsx` | Une pièce extraite, si nécessaire (optionnel) |
+
+### Catalogue des layouts
+
+Tout layout est réutilisable : un même layout sert plusieurs modules via leur
+`preview_kind`. Pour ajouter un module, on réutilise un layout existant — on
+n'en crée un nouveau qu'en dernier recours.
+
+| `preview_kind` | Dossier | Composant | Rôle | Persistance |
+|---|---|---|---|---|
+| `steps` | `Steps/` | `StepsLayout` | Étapes numérotées (lecture seule) | — |
+| `cards` | `Cards/` | `CardsLayout` | Cartes accordéon dépliables (lecture seule) | — |
+| `fields` | `Fields/` | `FieldsLayout` | Lignes clé/valeur + note de bas de page (lecture seule) | — |
+| `questionnaire` | `Questionnaire/` | `QuestionnaireLayout` | Échelle clinique interactive (Likert / slider à pips) | parent (`ScaleEntryScreen`) |
+| `guided_exercise` | `GuidedExercise/` | `GuidedExerciseLayout` | Exercice guidé — 3 modes intro / guided / done | — |
+| `patient_scenario` | `PatientScenario/` | `PatientScenarioLayout` | Scénario alternatif par patient (RIM) | Supabase (`patient_modules.config`) |
+| `editable_steps` | `EditableSteps/` | `EditableStepsLayout` | Plan éditable par sections (crisis_plan) | SQLite `plan_items` |
+| `daily_checkin` | `DailyCheckin/` | `DailyCheckinLayout` | Saisie quotidienne — 1 statut / jour, 2 onglets | SQLite `daily_entries` |
+| `column_form` | `ColumnForm/` | `ColumnFormLayout` | Formulaire à colonnes hétérogènes (beck_columns) | SQLite `form_entries` |
+| `tree_selector` | `TreeSelector/` | `TreeSelectorLayout` | Sélecteur d'arbre hiérarchique guidé (emotion_wheel) | SQLite `tree_selections` |
+| `sleep_journal` | `SleepJournal/` | `SleepJournalLayout` | Agenda du sommeil — 3 modes list / entry / month | SQLite `sleep_diary_entries` |
+| `tabbed` | `Tabs/` | `TabsLayout` | Onglets génériques — rend récursivement `FieldRenderer` | — |
+| `crisis_urgency` | `CrisisUrgency/` | `CrisisUrgencyLayout` | Mode urgence 1-tap (gros boutons d'appel) | — |
+| `activity_log` | `ActivityLog/` | `ActivityLogLayout` | Journal d'activités (Plaisir / Maîtrise) | SQLite `activity_records` |
+| `exposure_tracker` | `ExposureTracker/` | `ExposureTrackerLayout` | Thermomètre de la peur (SUDS avant / après) | SQLite `fear_situations` |
+| `decision_grid` | `DecisionGrid/` | `DecisionGridLayout` | Balance décisionnelle 2×2 + items pondérés | SQLite `plan_items` |
+| `psyedu` | `PsyEdu/` | `PsyEduLayout` | Fiches psychoéducatives | Supabase (`psyedu_topics` / `psyedu_blocks`) |
+| `chrono_month` | `ChronoMonth/` | `ChronoMonthLayout` | Grille calendrier chronobiologie | SQLite `chrono_entries` |
+| `exposure_hierarchy` | `ExposureHierarchy/` | `ExposureHierarchyLayout` | Hiérarchie d'exposition graduée | SQLite `exposure_hierarchies` |
+
+> `coming_soon` et tout `preview_kind` inconnu rendent `null`.
+
+### Composants réutilisables partagés — `layouts/shared/`
+
+| Composant | Rôle | Réutilisé par |
+|---|---|---|
+| `EditableItemsList` | Liste d'items CRUD inline (avec poids optionnel) | `editable_steps`, `decision_grid` |
+| `WeightPicker` | Sélecteur de poids 1–5 étoiles | `EditableItemsList` |
+| `ExerciseSafetySection` | Encart rouge de numéros d'urgence cliquables (`tel:`) | `guided_exercise`, `patient_scenario` |
+
+### Sous-composants de layout
+
+| Composant | Dossier | Rôle |
+|---|---|---|
+| `ColumnTimeField` | `ColumnForm/` | Champ TimePicker « HH:MM » optionnel, mémoïsé |
+| `renderCardBodyFields` | `Cards/` | Rend le corps d'une carte (registry des `field_type` de carte) |
+| `ActivityListCard` | `ActivityLog/` | Carte d'une activité dans la liste |
+| `EntryListCard` | `ExposureTracker/` | Carte d'une saisie SUDS |
+
+### Ajouter un nouveau layout
+
+1. Créer `layouts/<Nom>/` : `<Nom>Layout.tsx` + `styles.ts` + `index.ts`.
+2. Ajouter le cas de routage dans `FieldRenderer/LayoutDispatcher.tsx`.
+3. Ajouter le `preview_kind` au type `PreviewKind` (`services/moduleService`).
+4. Documenter le layout dans le catalogue ci-dessus **dans le même commit**.
+
+### Conformité MDR 2017/745
+
+Tous les layouts respectent la règle d'or : **affichage de valeurs brutes, zéro
+interprétation**. Les couleurs (qualité de sommeil, pastilles de statut) sont
+des conventions d'affichage fournies par la base, jamais des verdicts cliniques.
 
 ---
 
@@ -246,32 +443,25 @@ apps/mobile/src/
 │   ├── TeenAccent.tsx    # bande colorée 4px
 │   ├── Button/           # variantes primary/secondary/ghost/danger
 │   ├── Card/             # variantes default/outlined/elevated/active
-│   └── ModuleRenderer/
-│       ├── FieldRenderer.tsx             # dispatch preview_kind → layout
-│       └── fields/
-│           ├── index.ts
-│           ├── types.ts                  # FieldProps interface
-│           ├── renderInlineChildren.tsx
-│           ├── FieldRow/                 # header vertical + FieldWidget
-│           ├── FieldWidget/              # dispatch widget_type → widget
-│           ├── FieldText/
-│           ├── FieldListItem/
-│           ├── CardDefinition/
-│           ├── CardDivider/
-│           ├── CardInline/
-│           ├── NullField/
-│           └── widgets/
-│               ├── index.ts
-│               ├── TimeWidget/
-│               ├── SliderWidget/
-│               ├── StarsWidget/
-│               ├── BooleanWidget/
-│               ├── RadioWidget/
-│               ├── DateWidget/
-│               ├── TextWidget/
-│               ├── CheckboxWidget/
-│               ├── TextareaWidget/
-│               └── InfoWidget/
+│   └── features/ModuleRenderer/
+│       ├── FieldRenderer/               # moteur — un fichier = une responsabilité
+│       │   ├── FieldRenderer.tsx        # entrée : extrait disclaimer, délègue
+│       │   ├── LayoutDispatcher.tsx     # routage preview_kind → layout
+│       │   ├── partitionBySection.ts    # helper pur de groupement par section
+│       │   ├── types.ts                 # FieldRendererProps, QuestionnaireInteraction
+│       │   └── index.ts
+│       ├── layouts/                     # un dossier par layout (preview_kind)
+│       │   ├── Steps/ Fields/ Cards/ Questionnaire/ GuidedExercise/
+│       │   ├── PatientScenario/ EditableSteps/ DailyCheckin/ ColumnForm/
+│       │   ├── TreeSelector/ SleepJournal/ Tabs/ CrisisUrgency/
+│       │   ├── ActivityLog/ ExposureTracker/ DecisionGrid/ PsyEdu/
+│       │   ├── ChronoMonth/ ExposureHierarchy/
+│       │   └── shared/                  # EditableItemsList, WeightPicker, ExerciseSafetySection
+│       └── fields/                      # field_type → composant + widgets
+│           ├── FieldRow/ FieldWidget/ FieldText/ FieldListItem/
+│           ├── CardDefinition/ InlineText/ CrisisUrgencyContactsWidget/
+│           └── widgets/                 # TimeWidget, SliderWidget, … (10 widgets)
 ```
 
+Chaque dossier de layout contient : `<Nom>Layout.tsx` + `styles.ts` + `index.ts`.
 Chaque dossier de widget contient : `Widget.tsx` + `Widget.test.tsx` + `index.ts`.

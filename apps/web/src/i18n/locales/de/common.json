@@ -191,8 +191,71 @@
     "next_week": "Nächste Woche",
     "configure": "Verfügbarkeit",
     "no_rules": "Keine Zeitfenster definiert.",
-    "days_short": { "0": "Mo", "1": "Di", "2": "Mi", "3": "Do", "4": "Fr", "5": "Sa", "6": "So" },
-    "editor": { "title": "Meine Verfügbarkeit", "add_rule": "Zeitfenster hinzufügen", "slot_duration": "Termindauer", "minutes": "min", "auto_confirm": "Automatische Bestätigung", "delete_rule": "Löschen" },
-    "appointment": { "new": "Neuer Termin", "status_pending": "Ausstehend", "status_confirmed": "Bestätigt", "status_cancelled": "Abgesagt", "status_completed": "Abgeschlossen" }
+    "days_short": {
+      "0": "Mo",
+      "1": "Di",
+      "2": "Mi",
+      "3": "Do",
+      "4": "Fr",
+      "5": "Sa",
+      "6": "So"
+    },
+    "editor": {
+      "title": "Meine Verfügbarkeit",
+      "add_rule": "Zeitfenster hinzufügen",
+      "slot_duration": "Termindauer",
+      "minutes": "min",
+      "auto_confirm": "Automatische Bestätigung",
+      "delete_rule": "Löschen"
+    },
+    "appointment": {
+      "new": "Neuer Termin",
+      "status_pending": "Ausstehend",
+      "status_confirmed": "Bestätigt",
+      "status_cancelled": "Abgesagt",
+      "status_completed": "Abgeschlossen"
+    }
+  },
+  "scales": {
+    "eval_auto": "Selbstbeurteilung",
+    "eval_hetero": "Fremdbeurteilung",
+    "validated_prefix": "Validiert",
+    "age": {
+      "perinatal": "Perinatal",
+      "enfant": "Kind",
+      "ado": "Jugendliche/r",
+      "adulte": "Erwachsene/r",
+      "senior": "Senior/in"
+    },
+    "category": {
+      "humeur": "Stimmung",
+      "anxiete": "Angst",
+      "sommeil": "Schlaf",
+      "addictologie": "Sucht",
+      "psychose": "Psychose",
+      "personnalite": "Persönlichkeit",
+      "neurodev": "Neuroentwicklung",
+      "trauma": "Trauma"
+    },
+    "descriptions": {}
+  },
+  "dispensaire": {
+    "title": "Klinische Bibliothek",
+    "subtitle": "Validierte Fragebögen. Direkt an Ihre Patienten senden.",
+    "sidebar_title": "Klinische Themen",
+    "all_scales": "Alle Skalen",
+    "legend_ages": "Validierte Altersgruppen:",
+    "empty_category": "Keine Skalen in dieser Kategorie.",
+    "empty_soon": "Neue Fragebögen folgen bald.",
+    "propose_btn": "Einem Patienten vorschlagen",
+    "reference_aria": "Validierte Referenz",
+    "modal_subtitle": "Patient auswählen",
+    "close": "Schließen",
+    "loading_patients": "Patienten laden…",
+    "no_patients": "Noch keine Patienten.",
+    "sent": "Gesendet",
+    "send": "Senden",
+    "error_duplicate": "{{label}} hat diesen Fragebogen bereits.",
+    "error_send": "Fehler beim Senden. Erneut versuchen."
   }
 }

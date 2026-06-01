@@ -57,7 +57,8 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('breathing_techniques',    'anxiety',     'fields',      19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
-  ('decisional_balance',      'motivation',  'grid2x2',     22, false)
+  ('decisional_balance',      'addiction',   'decision_grid', 22, false),
+  ('motivational_balance',    'motivation',  'tabbed',      23, false)
 on conflict (id) do nothing;
 
 -- Icônes / couleurs : appliqué uniquement sur les rangs où icon est vide
@@ -86,6 +87,7 @@ update public.modules set
     when 'cognitive_saturation'    then 'refresh-cw'
     when 'craving_journal'         then 'bookmark'
     when 'decisional_balance'      then 'scale'
+    when 'motivational_balance'    then 'trending-up'
     else ''
   end,
   mobile_icon = case id
@@ -111,6 +113,7 @@ update public.modules set
     when 'cognitive_saturation'    then 'chat-processing-outline'
     when 'craving_journal'         then 'lightning-bolt-outline'
     when 'decisional_balance'      then 'scale-balance'
+    when 'motivational_balance'    then 'trending-up'
     else ''
   end,
   color = case id
@@ -136,6 +139,7 @@ update public.modules set
     when 'cognitive_saturation'    then '#F59E0B'
     when 'craving_journal'         then '#EC4899'
     when 'decisional_balance'      then '#EC4899'
+    when 'motivational_balance'    then '#0EA5E9'
     else '#6366F1'
   end
 where icon = '';
@@ -371,28 +375,28 @@ on conflict (field_id, prop_key) do nothing;
 update public.modules set preview_kind = 'daily_checkin' where id = 'medication_adherence';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('madh.cfg',                'medication_adherence', 'daily_checkin_config',         null,                                              0),
-  ('madh.tab_today',          'medication_adherence', 'daily_tab_today_label',         'modules.medication_adherence.tab_today',          5),
-  ('madh.tab_history',        'medication_adherence', 'daily_tab_history_label',       'modules.medication_adherence.tab_history',        6),
-  ('madh.today_label',        'medication_adherence', 'daily_today_label',             'modules.medication_adherence.today_label',        10),
-  ('madh.already_saved',      'medication_adherence', 'daily_already_saved_label',     'modules.medication_adherence.already_saved',      11),
-  ('madh.question',           'medication_adherence', 'daily_question',                'modules.medication_adherence.intro',               20),
-  ('madh.opt_taken',          'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_taken',       30),
-  ('madh.opt_partial',        'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_partial',     31),
-  ('madh.opt_missed',         'medication_adherence', 'daily_status_option',           'modules.medication_adherence.status_missed',      32),
-  ('madh.notes_label',        'medication_adherence', 'daily_notes_label',             'common.notes_optional',                            40),
-  ('madh.notes_placeholder',  'medication_adherence', 'daily_notes_placeholder',       'modules.medication_adherence.notes_placeholder',  41),
-  ('madh.save_label',         'medication_adherence', 'daily_save_label',              'modules.medication_adherence.save',                50),
-  ('madh.update_label',       'medication_adherence', 'daily_update_label',            'common.update',                                    51),
-  ('madh.history_empty',      'medication_adherence', 'daily_history_empty_text',      'modules.medication_adherence.empty_history',      60),
-  ('madh.missing_title',      'medication_adherence', 'daily_status_missing_title',    'modules.medication_adherence.status_missing',     70),
-  ('madh.missing_msg',        'medication_adherence', 'daily_status_missing_msg',      'modules.medication_adherence.status_missing_msg', 71),
-  ('madh.delete_title',       'medication_adherence', 'daily_delete_title',            'modules.medication_adherence.delete_entry_title', 72),
-  ('madh.saved_message',      'medication_adherence', 'daily_saved_message',           'modules.medication_adherence.saved_message',      73)
+  ('madh.cfg',         'medication_adherence', 'daily_checkin_config', null,                                          0),
+  ('madh.opt_taken',   'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_taken',  30),
+  ('madh.opt_partial', 'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_partial', 31),
+  ('madh.opt_missed',  'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_missed',  32)
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('madh.cfg',          'engagement_event_type', 'SAVE_MEDICATION_ADHERENCE'),
+  ('madh.cfg', 'engagement_event_type', 'SAVE_MEDICATION_ADHERENCE'),
+  ('madh.cfg', 'tab_today_label',       'modules.medication_adherence.tab_today'),
+  ('madh.cfg', 'tab_history_label',     'modules.medication_adherence.tab_history'),
+  ('madh.cfg', 'today_label',           'modules.medication_adherence.today_label'),
+  ('madh.cfg', 'already_saved_label',   'modules.medication_adherence.already_saved'),
+  ('madh.cfg', 'question',              'modules.medication_adherence.intro'),
+  ('madh.cfg', 'notes_label',           'common.notes_optional'),
+  ('madh.cfg', 'notes_placeholder',     'modules.medication_adherence.notes_placeholder'),
+  ('madh.cfg', 'save_label',            'modules.medication_adherence.save'),
+  ('madh.cfg', 'update_label',          'common.update'),
+  ('madh.cfg', 'history_empty_text',    'modules.medication_adherence.empty_history'),
+  ('madh.cfg', 'status_missing_title',  'modules.medication_adherence.status_missing'),
+  ('madh.cfg', 'status_missing_msg',    'modules.medication_adherence.status_missing_msg'),
+  ('madh.cfg', 'delete_title',          'modules.medication_adherence.delete_entry_title'),
+  ('madh.cfg', 'saved_message',         'modules.medication_adherence.saved_message'),
   ('madh.opt_taken',    'value',    'taken'),
   ('madh.opt_taken',    'icon',     'check-circle-outline'),
   ('madh.opt_taken',    'color',    '#10B981'),
@@ -418,14 +422,7 @@ on conflict (field_id, prop_key) do nothing;
 update public.modules set preview_kind = 'column_form' where id = 'beck_columns';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('beck.cfg',              'beck_columns', 'column_form_config',           null,                                            0),
-  ('beck.new_btn',          'beck_columns', 'column_form_new_btn_label',     'modules.beck_columns.new_thought',              1),
-  ('beck.save_label',       'beck_columns', 'column_form_save_label',        'modules.beck_columns.save',                     2),
-  ('beck.empty_title',      'beck_columns', 'column_form_empty_title',       'modules.beck_columns.empty_title',              3),
-  ('beck.empty_text',       'beck_columns', 'column_form_empty_text',        'modules.beck_columns.intro',                    4),
-  ('beck.delete_title',     'beck_columns', 'column_form_delete_title',      'modules.beck_columns.delete_record_title',      5),
-  ('beck.validation_title', 'beck_columns', 'column_form_validation_title',  'modules.beck_columns.empty_alert_title',        6),
-  ('beck.validation_msg',   'beck_columns', 'column_form_validation_msg',    'modules.beck_columns.empty_alert_msg',          7)
+  ('beck.cfg', 'beck_columns', 'column_form_config', null, 0)
 on conflict (id) do nothing;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) values
@@ -455,6 +452,13 @@ on conflict (id) do nothing;
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
   ('beck.cfg', 'required_keys_any',     'situation,automatic_thought'),
+  ('beck.cfg', 'new_btn_label',         'modules.beck_columns.new_thought'),
+  ('beck.cfg', 'save_label',            'modules.beck_columns.save'),
+  ('beck.cfg', 'empty_title',           'modules.beck_columns.empty_title'),
+  ('beck.cfg', 'empty_text',            'modules.beck_columns.intro'),
+  ('beck.cfg', 'delete_title',          'modules.beck_columns.delete_record_title'),
+  ('beck.cfg', 'validation_title',      'modules.beck_columns.empty_alert_title'),
+  ('beck.cfg', 'validation_msg',        'modules.beck_columns.empty_alert_msg'),
   ('beck.col1.h', 'color',       '#0EA5E9'),
   ('beck.col1.h', 'step_number', '1'),
   ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),
@@ -515,25 +519,7 @@ on conflict (field_id, prop_key) do nothing;
 update public.modules set preview_kind = 'tree_selector' where id = 'emotion_wheel';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('ew.cfg',                   'emotion_wheel', 'tree_selector_config',              null,                                                  0),
-  ('ew.intro',                 'emotion_wheel', 'tree_selector_intro',               'modules.emotion_wheel.intro',                         1),
-  ('ew.step1.title',           'emotion_wheel', 'tree_selector_step_1_title',        'modules.emotion_wheel.step_primary_title',            2),
-  ('ew.step1.hint',            'emotion_wheel', 'tree_selector_step_1_hint',         'modules.emotion_wheel.step_primary_hint',             3),
-  ('ew.step2.hint',            'emotion_wheel', 'tree_selector_step_2_hint',         'modules.emotion_wheel.step_secondary_hint',           4),
-  ('ew.step3.title',           'emotion_wheel', 'tree_selector_step_3_title',        'modules.emotion_wheel.step_specific_title',           5),
-  ('ew.step3.hint',            'emotion_wheel', 'tree_selector_step_3_hint',         'modules.emotion_wheel.step_specific_hint',            6),
-  ('ew.intensity.title',       'emotion_wheel', 'tree_selector_intensity_title',     'modules.emotion_wheel.step_intensity_title',          7),
-  ('ew.intensity.hint',        'emotion_wheel', 'tree_selector_intensity_hint',      'modules.emotion_wheel.step_intensity_hint',           8),
-  ('ew.notes.title',           'emotion_wheel', 'tree_selector_notes_title',         'modules.emotion_wheel.step_notes_title',              9),
-  ('ew.notes.hint',            'emotion_wheel', 'tree_selector_notes_hint',          'modules.emotion_wheel.step_notes_hint',              10),
-  ('ew.notes.placeholder',     'emotion_wheel', 'tree_selector_notes_placeholder',   'modules.emotion_wheel.notes_free_placeholder',       11),
-  ('ew.continue_btn',          'emotion_wheel', 'tree_selector_continue_btn',        'modules.emotion_wheel.continue',                     12),
-  ('ew.save_btn',              'emotion_wheel', 'tree_selector_save_btn',            'modules.emotion_wheel.save',                         13),
-  ('ew.new_btn',               'emotion_wheel', 'tree_selector_new_btn',             'modules.emotion_wheel.identify_btn',                 14),
-  ('ew.history_label',         'emotion_wheel', 'tree_selector_history_label',       'modules.emotion_wheel.history_label',                15),
-  ('ew.empty_title',           'emotion_wheel', 'tree_selector_empty_title',         'modules.emotion_wheel.empty_title',                  16),
-  ('ew.empty_text',            'emotion_wheel', 'tree_selector_empty_text',          'modules.emotion_wheel.empty_text',                   17),
-  ('ew.delete_title',          'emotion_wheel', 'tree_selector_delete_title',        'modules.emotion_wheel.delete_entry_title',           18)
+  ('ew.cfg', 'emotion_wheel', 'tree_selector_config', null, 0)
 on conflict (id) do nothing;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -661,6 +647,24 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'intensity_min',    '1'),
   ('ew.cfg', 'intensity_max',    '10'),
   ('ew.cfg', 'enable_notes',     '1'),
+  ('ew.cfg', 'intro',            'modules.emotion_wheel.intro'),
+  ('ew.cfg', 'step_1_title',     'modules.emotion_wheel.step_primary_title'),
+  ('ew.cfg', 'step_1_hint',      'modules.emotion_wheel.step_primary_hint'),
+  ('ew.cfg', 'step_2_hint',      'modules.emotion_wheel.step_secondary_hint'),
+  ('ew.cfg', 'step_3_title',     'modules.emotion_wheel.step_specific_title'),
+  ('ew.cfg', 'step_3_hint',      'modules.emotion_wheel.step_specific_hint'),
+  ('ew.cfg', 'intensity_title',  'modules.emotion_wheel.step_intensity_title'),
+  ('ew.cfg', 'intensity_hint',   'modules.emotion_wheel.step_intensity_hint'),
+  ('ew.cfg', 'notes_title',      'modules.emotion_wheel.step_notes_title'),
+  ('ew.cfg', 'notes_hint',       'modules.emotion_wheel.step_notes_hint'),
+  ('ew.cfg', 'notes_placeholder','modules.emotion_wheel.notes_free_placeholder'),
+  ('ew.cfg', 'continue_btn',     'modules.emotion_wheel.continue'),
+  ('ew.cfg', 'save_btn',         'modules.emotion_wheel.save'),
+  ('ew.cfg', 'new_btn',          'modules.emotion_wheel.identify_btn'),
+  ('ew.cfg', 'history_label',    'modules.emotion_wheel.history_label'),
+  ('ew.cfg', 'empty_title',      'modules.emotion_wheel.empty_title'),
+  ('ew.cfg', 'empty_text',       'modules.emotion_wheel.empty_text'),
+  ('ew.cfg', 'delete_title',     'modules.emotion_wheel.delete_entry_title'),
   ('ew.joy',          'color', '#F59E0B'),
   ('ew.joy',          'icon',  'emoticon-happy-outline'),
   ('ew.trust',        'color', '#10B981'),
@@ -695,54 +699,8 @@ delete from public.module_content_fields where module_id = 'sleep_diary';
 update public.modules set preview_kind = 'sleep_journal' where id = 'sleep_diary';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('sj.cfg',                   'sleep_diary', 'sleep_journal_config',                   null,                                       0),
-  ('sj.cta_title',             'sleep_diary', 'sleep_journal_cta_title',                'modules.sleep_diary.cta_title',            1),
-  ('sj.monthly_button',        'sleep_diary', 'sleep_journal_monthly_button_label',     'modules.sleep_diary.monthly_button',       2),
-  ('sj.list_header',           'sleep_diary', 'sleep_journal_list_header',              'modules.sleep_diary.list_header',          3),
-  ('sj.incomplete',            'sleep_diary', 'sleep_journal_incomplete_label',         'modules.sleep_diary.incomplete',           4),
-  ('sj.empty_day',             'sleep_diary', 'sleep_journal_empty_day_label',          'modules.sleep_diary.empty_day',            5),
-  ('sj.section_schedule',      'sleep_diary', 'sleep_journal_section_schedule_title',   'modules.sleep_diary.section_schedule',     6),
-  ('sj.section_awakenings',    'sleep_diary', 'sleep_journal_section_awakenings_title', 'modules.sleep_diary.section_awakenings',   7),
-  ('sj.section_nightmares',    'sleep_diary', 'sleep_journal_section_nightmares_title', 'modules.sleep_diary.section_nightmares',   8),
-  ('sj.section_quality',       'sleep_diary', 'sleep_journal_section_quality_title',    'modules.sleep_diary.section_quality',      9),
-  ('sj.section_notes',         'sleep_diary', 'sleep_journal_section_notes_title',      'modules.sleep_diary.notes_label',         10),
-  ('sj.bedtime_label',         'sleep_diary', 'sleep_journal_bedtime_label',            'modules.sleep_diary.bedtime_label',       11),
-  ('sj.wake_time_label',       'sleep_diary', 'sleep_journal_wake_time_label',          'modules.sleep_diary.wake_time_label',     12),
-  ('sj.onset_label',           'sleep_diary', 'sleep_journal_onset_label',              'modules.sleep_diary.onset_label',         13),
-  ('sj.awakenings_label',      'sleep_diary', 'sleep_journal_awakenings_label',         'modules.sleep_diary.awakenings_label',    14),
-  ('sj.awakenings_dur_label',  'sleep_diary', 'sleep_journal_awakenings_duration_label','modules.sleep_diary.awakenings_duration_label', 15),
-  ('sj.nightmares_label',      'sleep_diary', 'sleep_journal_nightmares_label',         'modules.sleep_diary.nightmares_label',    16),
-  ('sj.quality_label',         'sleep_diary', 'sleep_journal_quality_label',            'modules.sleep_diary.quality_label',       17),
-  ('sj.quality_missing_title', 'sleep_diary', 'sleep_journal_quality_missing_title',    'modules.sleep_diary.quality_missing',     18),
-  ('sj.quality_missing_msg',   'sleep_diary', 'sleep_journal_quality_missing_msg',      'modules.sleep_diary.quality_missing_msg', 19),
-  ('sj.efficiency_label',      'sleep_diary', 'sleep_journal_efficiency_label',         'modules.sleep_diary.sleep_efficiency',    20),
-  ('sj.date_label',            'sleep_diary', 'sleep_journal_date_label',               'modules.sleep_diary.date_label',          21),
-  ('sj.save_label',            'sleep_diary', 'sleep_journal_save_label',               'modules.sleep_diary.save_night',          22),
-  ('sj.update_label',          'sleep_diary', 'sleep_journal_update_label',             'modules.sleep_diary.update_entry',        23),
-  ('sj.delete_label',          'sleep_diary', 'sleep_journal_delete_label',             'modules.sleep_diary.delete_entry',        24),
-  ('sj.delete_title',          'sleep_diary', 'sleep_journal_delete_title',             'modules.sleep_diary.delete_entry',        25),
-  ('sj.notes_placeholder',     'sleep_diary', 'sleep_journal_notes_placeholder',        'modules.sleep_diary.notes_placeholder',   26),
-  ('sj.month_summary',         'sleep_diary', 'sleep_journal_month_summary_title',      'modules.sleep_diary.month_summary',       27),
-  ('sj.legend_title',          'sleep_diary', 'sleep_journal_legend_title',             'modules.sleep_diary.legend',              28),
-  ('sj.legend_good',           'sleep_diary', 'sleep_journal_legend_good_label',        'modules.sleep_diary.legend_good',         29),
-  ('sj.legend_average',        'sleep_diary', 'sleep_journal_legend_average_label',     'modules.sleep_diary.legend_average',      30),
-  ('sj.legend_bad',            'sleep_diary', 'sleep_journal_legend_bad_label',         'modules.sleep_diary.legend_bad',          31),
-  ('sj.legend_empty',          'sleep_diary', 'sleep_journal_legend_empty_label',       'modules.sleep_diary.legend_empty',        32),
-  ('sj.legend_nightmare',      'sleep_diary', 'sleep_journal_legend_nightmare_label',   'modules.sleep_diary.legend_nightmare',    33),
-  ('sj.stat_avg_duration',     'sleep_diary', 'sleep_journal_stat_avg_duration_label',  'modules.sleep_diary.stat_avg_duration',   34),
-  ('sj.stat_avg_awakenings',   'sleep_diary', 'sleep_journal_stat_avg_awakenings_label','modules.sleep_diary.stat_avg_awakenings', 35),
-  ('sj.stat_nights_filled',    'sleep_diary', 'sleep_journal_stat_nights_filled_label', 'modules.sleep_diary.stat_nights_filled',  36),
-  ('sj.stat_nightmares',       'sleep_diary', 'sleep_journal_stat_nightmares_label',    'modules.sleep_diary.stat_nightmares',     37),
-  ('sj.minutes_unit',          'sleep_diary', 'sleep_journal_minutes_unit',             'modules.sleep_diary.minutes_unit',        38),
-  ('sj.tap_to_modify',         'sleep_diary', 'sleep_journal_tap_to_modify_hint',       'modules.sleep_diary.tap_to_modify',       39),
-  ('sj.confirm_label',         'sleep_diary', 'sleep_journal_confirm_label',            'modules.sleep_diary.confirm_label',       40),
-  ('sj.back_label',            'sleep_diary', 'sleep_journal_back_label',               'modules.sleep_diary.back_btn',            41),
-  ('sj.quality_label_1',       'sleep_diary', 'sleep_journal_quality_label_1',          'modules.sleep_diary.quality_very_bad',    42),
-  ('sj.quality_label_2',       'sleep_diary', 'sleep_journal_quality_label_2',          'modules.sleep_diary.quality_bad',         43),
-  ('sj.quality_label_3',       'sleep_diary', 'sleep_journal_quality_label_3',          'modules.sleep_diary.quality_average',     44),
-  ('sj.quality_label_4',       'sleep_diary', 'sleep_journal_quality_label_4',          'modules.sleep_diary.quality_good',        45),
-  ('sj.quality_label_5',       'sleep_diary', 'sleep_journal_quality_label_5',          'modules.sleep_diary.quality_excellent',   46),
-  ('sj.footer',                'sleep_diary', 'footer_note',                             'modules.sleep_diary.footer',              999)
+  ('sj.cfg',    'sleep_diary', 'sleep_journal_config', null,                          0),
+  ('sj.footer', 'sleep_diary', 'footer_note',          'modules.sleep_diary.footer', 999)
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -754,7 +712,53 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'efficiency_warning',          '70'),
   ('sj.cfg', 'quality_max',                 '5'),
   ('sj.cfg', 'quality_good_threshold',      '4'),
-  ('sj.cfg', 'quality_avg_threshold',       '3')
+  ('sj.cfg', 'quality_avg_threshold',       '3'),
+  ('sj.cfg', 'cta_title',                   'modules.sleep_diary.cta_title'),
+  ('sj.cfg', 'monthly_button_label',        'modules.sleep_diary.monthly_button'),
+  ('sj.cfg', 'list_header',                 'modules.sleep_diary.list_header'),
+  ('sj.cfg', 'incomplete_label',            'modules.sleep_diary.incomplete'),
+  ('sj.cfg', 'empty_day_label',             'modules.sleep_diary.empty_day'),
+  ('sj.cfg', 'section_schedule_title',      'modules.sleep_diary.section_schedule'),
+  ('sj.cfg', 'section_awakenings_title',    'modules.sleep_diary.section_awakenings'),
+  ('sj.cfg', 'section_nightmares_title',    'modules.sleep_diary.section_nightmares'),
+  ('sj.cfg', 'section_quality_title',       'modules.sleep_diary.section_quality'),
+  ('sj.cfg', 'section_notes_title',         'modules.sleep_diary.notes_label'),
+  ('sj.cfg', 'bedtime_label',               'modules.sleep_diary.bedtime_label'),
+  ('sj.cfg', 'wake_time_label',             'modules.sleep_diary.wake_time_label'),
+  ('sj.cfg', 'onset_label',                 'modules.sleep_diary.onset_label'),
+  ('sj.cfg', 'awakenings_label',            'modules.sleep_diary.awakenings_label'),
+  ('sj.cfg', 'awakenings_duration_label',   'modules.sleep_diary.awakenings_duration_label'),
+  ('sj.cfg', 'nightmares_label',            'modules.sleep_diary.nightmares_label'),
+  ('sj.cfg', 'quality_label',               'modules.sleep_diary.quality_label'),
+  ('sj.cfg', 'quality_missing_title',       'modules.sleep_diary.quality_missing'),
+  ('sj.cfg', 'quality_missing_msg',         'modules.sleep_diary.quality_missing_msg'),
+  ('sj.cfg', 'efficiency_label',            'modules.sleep_diary.sleep_efficiency'),
+  ('sj.cfg', 'date_label',                  'modules.sleep_diary.date_label'),
+  ('sj.cfg', 'save_label',                  'modules.sleep_diary.save_night'),
+  ('sj.cfg', 'update_label',                'modules.sleep_diary.update_entry'),
+  ('sj.cfg', 'delete_label',                'modules.sleep_diary.delete_entry'),
+  ('sj.cfg', 'delete_title',                'modules.sleep_diary.delete_entry'),
+  ('sj.cfg', 'notes_placeholder',           'modules.sleep_diary.notes_placeholder'),
+  ('sj.cfg', 'month_summary_title',         'modules.sleep_diary.month_summary'),
+  ('sj.cfg', 'legend_title',                'modules.sleep_diary.legend'),
+  ('sj.cfg', 'legend_good_label',           'modules.sleep_diary.legend_good'),
+  ('sj.cfg', 'legend_average_label',        'modules.sleep_diary.legend_average'),
+  ('sj.cfg', 'legend_bad_label',            'modules.sleep_diary.legend_bad'),
+  ('sj.cfg', 'legend_empty_label',          'modules.sleep_diary.legend_empty'),
+  ('sj.cfg', 'legend_nightmare_label',      'modules.sleep_diary.legend_nightmare'),
+  ('sj.cfg', 'stat_avg_duration_label',     'modules.sleep_diary.stat_avg_duration'),
+  ('sj.cfg', 'stat_avg_awakenings_label',   'modules.sleep_diary.stat_avg_awakenings'),
+  ('sj.cfg', 'stat_nights_filled_label',    'modules.sleep_diary.stat_nights_filled'),
+  ('sj.cfg', 'stat_nightmares_label',       'modules.sleep_diary.stat_nightmares'),
+  ('sj.cfg', 'minutes_unit',                'modules.sleep_diary.minutes_unit'),
+  ('sj.cfg', 'tap_to_modify_hint',          'modules.sleep_diary.tap_to_modify'),
+  ('sj.cfg', 'confirm_label',               'modules.sleep_diary.confirm_label'),
+  ('sj.cfg', 'back_label',                  'modules.sleep_diary.back_btn'),
+  ('sj.cfg', 'quality_label_1',             'modules.sleep_diary.quality_very_bad'),
+  ('sj.cfg', 'quality_label_2',             'modules.sleep_diary.quality_bad'),
+  ('sj.cfg', 'quality_label_3',             'modules.sleep_diary.quality_average'),
+  ('sj.cfg', 'quality_label_4',             'modules.sleep_diary.quality_good'),
+  ('sj.cfg', 'quality_label_5',             'modules.sleep_diary.quality_excellent')
 on conflict (field_id, prop_key) do nothing;
 
 
@@ -771,38 +775,8 @@ delete from public.module_content_fields where module_id = 'behavioral_activatio
 update public.modules set preview_kind = 'activity_log' where id = 'behavioral_activation';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('al.cfg',                'behavioral_activation', 'activity_log_config',                  null,                                                  0),
-  ('al.tab_list',           'behavioral_activation', 'activity_log_tab_list_label',          'modules.behavioral_activation.tab_list',              1),
-  ('al.tab_month',          'behavioral_activation', 'activity_log_tab_month_label',         'modules.behavioral_activation.tab_month',             2),
-  ('al.add_btn',            'behavioral_activation', 'activity_log_add_btn',                 'modules.behavioral_activation.add_btn',               3),
-  ('al.empty_title',        'behavioral_activation', 'activity_log_empty_title',             'modules.behavioral_activation.empty_title',           4),
-  ('al.empty_text',         'behavioral_activation', 'activity_log_empty_text',              'modules.behavioral_activation.empty_text',            5),
-  ('al.section_activity',   'behavioral_activation', 'activity_log_section_activity_title',  'modules.behavioral_activation.section_activity',      10),
-  ('al.section_evaluation', 'behavioral_activation', 'activity_log_section_evaluation_title','modules.behavioral_activation.section_evaluation',    11),
-  ('al.section_notes',      'behavioral_activation', 'activity_log_section_notes_title',     'modules.behavioral_activation.section_notes',         12),
-  ('al.activity_placeholder','behavioral_activation','activity_log_activity_placeholder',    'modules.behavioral_activation.activity_placeholder',  13),
-  ('al.pleasure_label',     'behavioral_activation', 'activity_log_pleasure_label',          'modules.behavioral_activation.pleasure_label',        14),
-  ('al.pleasure_sublabel',  'behavioral_activation', 'activity_log_pleasure_sublabel',       'modules.behavioral_activation.pleasure_sublabel',     15),
-  ('al.mastery_label',      'behavioral_activation', 'activity_log_mastery_label',           'modules.behavioral_activation.mastery_label',         16),
-  ('al.mastery_sublabel',   'behavioral_activation', 'activity_log_mastery_sublabel',        'modules.behavioral_activation.mastery_sublabel',      17),
-  ('al.done_label',         'behavioral_activation', 'activity_log_done_label',              'modules.behavioral_activation.done_label',            18),
-  ('al.mark_done',          'behavioral_activation', 'activity_log_mark_done_label',         'modules.behavioral_activation.mark_done',             19),
-  ('al.mark_undone',        'behavioral_activation', 'activity_log_mark_undone_label',       'modules.behavioral_activation.mark_undone',           20),
-  ('al.notes_placeholder',  'behavioral_activation', 'activity_log_notes_placeholder',       'common.notes_placeholder',                            21),
-  ('al.date_label',         'behavioral_activation', 'activity_log_date_label',              'modules.behavioral_activation.date_label',            22),
-  ('al.date_confirm',       'behavioral_activation', 'activity_log_date_confirm_label',      'modules.behavioral_activation.date_confirm',          23),
-  ('al.save_label',         'behavioral_activation', 'activity_log_save_label',              'modules.behavioral_activation.save',                  30),
-  ('al.update_label',       'behavioral_activation', 'activity_log_update_label',            'common.update',                                       31),
-  ('al.delete_label',       'behavioral_activation', 'activity_log_delete_label',            'common.delete',                                       32),
-  ('al.delete_title',       'behavioral_activation', 'activity_log_delete_title',            'modules.behavioral_activation.delete_activity_title', 33),
-  ('al.name_missing_title', 'behavioral_activation', 'activity_log_name_missing_title',      'modules.behavioral_activation.name_missing',          34),
-  ('al.name_missing_msg',   'behavioral_activation', 'activity_log_name_missing_msg',        'modules.behavioral_activation.name_missing_msg',      35),
-  ('al.legend_done',        'behavioral_activation', 'activity_log_legend_done_label',       'modules.behavioral_activation.legend_done',           40),
-  ('al.legend_planned',     'behavioral_activation', 'activity_log_legend_planned_label',    'modules.behavioral_activation.legend_planned',        41),
-  ('al.month_hint_tap',     'behavioral_activation', 'activity_log_month_hint_tap',          'modules.behavioral_activation.month_hint_tap',        42),
-  ('al.month_hint_empty',   'behavioral_activation', 'activity_log_month_hint_empty',        'modules.behavioral_activation.month_hint_empty',      43),
-  ('al.back_label',         'behavioral_activation', 'activity_log_back_label',              'modules.behavioral_activation.back_btn',              44),
-  ('al.sug_walk',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_walk',       100),
+  ('al.cfg',          'behavioral_activation', 'activity_log_config',     null,                                                  0),
+  ('al.sug_walk',     'behavioral_activation', 'activity_log_suggestion', 'modules.behavioral_activation.suggestion_walk',       100),
   ('al.sug_groceries',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_groceries',  101),
   ('al.sug_gym',            'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_gym',        102),
   ('al.sug_bike',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_bike',       103),
@@ -825,18 +799,48 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('al.cfg', 'engagement_event_type', 'SAVE_BEHAVIORAL_ACTIVATION'),
-  ('al.cfg', 'pleasure_min',          '0'),
-  ('al.cfg', 'pleasure_max',          '10'),
-  ('al.cfg', 'pleasure_step',         '1'),
-  ('al.cfg', 'mastery_min',           '0'),
-  ('al.cfg', 'mastery_max',           '10'),
-  ('al.cfg', 'mastery_step',          '1'),
-  ('al.cfg', 'pleasure_color',        '#059669'),
-  ('al.cfg', 'mastery_color',         '#4F46E5'),
-  ('al.cfg', 'dot_done_color',        '#10B981'),
-  ('al.cfg', 'dot_planned_color',     '#3B82F6'),
-  ('al.cfg', 'locale',                'fr-FR')
+  ('al.cfg', 'engagement_event_type',  'SAVE_BEHAVIORAL_ACTIVATION'),
+  ('al.cfg', 'pleasure_min',           '0'),
+  ('al.cfg', 'pleasure_max',           '10'),
+  ('al.cfg', 'pleasure_step',          '1'),
+  ('al.cfg', 'mastery_min',            '0'),
+  ('al.cfg', 'mastery_max',            '10'),
+  ('al.cfg', 'mastery_step',           '1'),
+  ('al.cfg', 'pleasure_color',         '#059669'),
+  ('al.cfg', 'mastery_color',          '#4F46E5'),
+  ('al.cfg', 'dot_done_color',         '#10B981'),
+  ('al.cfg', 'dot_planned_color',      '#3B82F6'),
+  ('al.cfg', 'locale',                 'fr-FR'),
+  ('al.cfg', 'tab_list_label',         'modules.behavioral_activation.tab_list'),
+  ('al.cfg', 'tab_month_label',        'modules.behavioral_activation.tab_month'),
+  ('al.cfg', 'add_btn',                'modules.behavioral_activation.add_btn'),
+  ('al.cfg', 'empty_title',            'modules.behavioral_activation.empty_title'),
+  ('al.cfg', 'empty_text',             'modules.behavioral_activation.empty_text'),
+  ('al.cfg', 'section_activity_title', 'modules.behavioral_activation.section_activity'),
+  ('al.cfg', 'section_evaluation_title','modules.behavioral_activation.section_evaluation'),
+  ('al.cfg', 'section_notes_title',    'modules.behavioral_activation.section_notes'),
+  ('al.cfg', 'activity_placeholder',   'modules.behavioral_activation.activity_placeholder'),
+  ('al.cfg', 'pleasure_label',         'modules.behavioral_activation.pleasure_label'),
+  ('al.cfg', 'pleasure_sublabel',      'modules.behavioral_activation.pleasure_sublabel'),
+  ('al.cfg', 'mastery_label',          'modules.behavioral_activation.mastery_label'),
+  ('al.cfg', 'mastery_sublabel',       'modules.behavioral_activation.mastery_sublabel'),
+  ('al.cfg', 'done_label',             'modules.behavioral_activation.done_label'),
+  ('al.cfg', 'mark_done_label',        'modules.behavioral_activation.mark_done'),
+  ('al.cfg', 'mark_undone_label',      'modules.behavioral_activation.mark_undone'),
+  ('al.cfg', 'notes_placeholder',      'common.notes_placeholder'),
+  ('al.cfg', 'date_label',             'modules.behavioral_activation.date_label'),
+  ('al.cfg', 'date_confirm_label',     'modules.behavioral_activation.date_confirm'),
+  ('al.cfg', 'save_label',             'modules.behavioral_activation.save'),
+  ('al.cfg', 'update_label',           'common.update'),
+  ('al.cfg', 'delete_label',           'common.delete'),
+  ('al.cfg', 'delete_title',           'modules.behavioral_activation.delete_activity_title'),
+  ('al.cfg', 'name_missing_title',     'modules.behavioral_activation.name_missing'),
+  ('al.cfg', 'name_missing_msg',       'modules.behavioral_activation.name_missing_msg'),
+  ('al.cfg', 'legend_done_label',      'modules.behavioral_activation.legend_done'),
+  ('al.cfg', 'legend_planned_label',   'modules.behavioral_activation.legend_planned'),
+  ('al.cfg', 'month_hint_tap',         'modules.behavioral_activation.month_hint_tap'),
+  ('al.cfg', 'month_hint_empty',       'modules.behavioral_activation.month_hint_empty'),
+  ('al.cfg', 'back_label',             'modules.behavioral_activation.back_btn')
 on conflict (field_id, prop_key) do nothing;
 
 
@@ -853,48 +857,13 @@ delete from public.module_content_fields where module_id = 'fear_thermometer';
 update public.modules set preview_kind = 'exposure_tracker' where id = 'fear_thermometer';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('et.cfg',                   'fear_thermometer', 'exposure_tracker_config',                   null,                                                  0),
-  ('et.tab_entries',           'fear_thermometer', 'exposure_tracker_tab_entries_label',        'modules.fear_thermometer.tab_entries',                1),
-  ('et.tab_situations',        'fear_thermometer', 'exposure_tracker_tab_situations_label',     'modules.fear_thermometer.tab_situations',             2),
-  ('et.add_btn',               'fear_thermometer', 'exposure_tracker_add_btn',                  'modules.fear_thermometer.new_entry',                  3),
-  ('et.empty_title',           'fear_thermometer', 'exposure_tracker_empty_title',              'modules.fear_thermometer.empty_title',                4),
-  ('et.empty_text',            'fear_thermometer', 'exposure_tracker_empty_text',               'modules.fear_thermometer.empty_text',                 5),
-  ('et.section_trigger',       'fear_thermometer', 'exposure_tracker_section_trigger_title',    'modules.fear_thermometer.section_trigger',            10),
-  ('et.section_before',        'fear_thermometer', 'exposure_tracker_section_before_title',     'modules.fear_thermometer.section_before',             11),
-  ('et.section_strategies',    'fear_thermometer', 'exposure_tracker_section_strategies_title', 'modules.fear_thermometer.section_strategies',         12),
-  ('et.section_after',         'fear_thermometer', 'exposure_tracker_section_after_title',      'modules.fear_thermometer.section_after',              13),
-  ('et.section_notes',         'fear_thermometer', 'exposure_tracker_section_notes_title',      'modules.fear_thermometer.section_notes',              14),
-  ('et.sit_mode_catalogue',    'fear_thermometer', 'exposure_tracker_situation_mode_catalogue', 'modules.fear_thermometer.situation_mode_catalogue',   20),
-  ('et.sit_mode_free',         'fear_thermometer', 'exposure_tracker_situation_mode_free',      'modules.fear_thermometer.situation_mode_free',        21),
-  ('et.sit_free_ph',           'fear_thermometer', 'exposure_tracker_situation_free_placeholder','modules.fear_thermometer.situation_free_placeholder',22),
-  ('et.sit_cat_empty',         'fear_thermometer', 'exposure_tracker_situation_catalogue_empty','modules.fear_thermometer.situation_catalogue_empty',  23),
-  ('et.suds_before_label',     'fear_thermometer', 'exposure_tracker_suds_before_label',        'modules.fear_thermometer.suds_before',                30),
-  ('et.suds_before_hint',      'fear_thermometer', 'exposure_tracker_suds_before_hint',         'modules.fear_thermometer.suds_hint_before',           31),
-  ('et.suds_after_label',      'fear_thermometer', 'exposure_tracker_suds_after_label',         'modules.fear_thermometer.suds_after',                 32),
-  ('et.suds_after_hint',       'fear_thermometer', 'exposure_tracker_suds_after_hint',          'modules.fear_thermometer.suds_hint_after',            33),
-  ('et.suds_skip_null',        'fear_thermometer', 'exposure_tracker_suds_skip_null',           'modules.fear_thermometer.suds_skip_null',             34),
-  ('et.suds_skip_later',       'fear_thermometer', 'exposure_tracker_suds_skip_later',          'modules.fear_thermometer.suds_skip_later',            35),
-  ('et.strategies_hint',       'fear_thermometer', 'exposure_tracker_strategies_hint',          'modules.fear_thermometer.strategies_hint',            40),
-  ('et.strategy_custom_ph',    'fear_thermometer', 'exposure_tracker_strategy_custom_placeholder','modules.fear_thermometer.strategy_custom_placeholder',41),
-  ('et.notes_placeholder',     'fear_thermometer', 'exposure_tracker_notes_placeholder',        'modules.fear_thermometer.notes_placeholder',          50),
-  ('et.save_label',            'fear_thermometer', 'exposure_tracker_save_label',               'modules.fear_thermometer.save',                       60),
-  ('et.update_label',          'fear_thermometer', 'exposure_tracker_update_label',             'common.update',                                       61),
-  ('et.delete_label',          'fear_thermometer', 'exposure_tracker_delete_label',             'common.delete',                                       62),
-  ('et.back_label',            'fear_thermometer', 'exposure_tracker_back_label',               'common.back',                                         63),
-  ('et.sit_missing_title',     'fear_thermometer', 'exposure_tracker_situation_missing_title',  'modules.fear_thermometer.situation_missing',          70),
-  ('et.sit_missing_msg',       'fear_thermometer', 'exposure_tracker_situation_missing_msg',    'modules.fear_thermometer.situation_missing_msg',      71),
-  ('et.delete_entry_title',    'fear_thermometer', 'exposure_tracker_delete_entry_title',       'modules.fear_thermometer.delete_entry_title',         72),
-  ('et.sit_delete_title',      'fear_thermometer', 'exposure_tracker_situation_delete_title',   'modules.fear_thermometer.delete_situation_title',     73),
-  ('et.panel_title',           'fear_thermometer', 'exposure_tracker_situations_panel_title',   'modules.fear_thermometer.situations_title',           80),
-  ('et.panel_hint',            'fear_thermometer', 'exposure_tracker_situations_panel_hint',    'modules.fear_thermometer.situations_hint',            81),
-  ('et.sit_placeholder',       'fear_thermometer', 'exposure_tracker_situation_placeholder',    'modules.fear_thermometer.situation_placeholder',      82),
-  ('et.sit_empty',             'fear_thermometer', 'exposure_tracker_situation_empty',          'modules.fear_thermometer.situation_empty',            83),
-  ('et.strategy_breathing',    'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_breathing',         100),
-  ('et.strategy_grounding',    'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_grounding',         101),
-  ('et.strategy_movement',     'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_movement',          102),
-  ('et.strategy_exposure',     'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_exposure',          103),
-  ('et.strategy_distraction',  'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_distraction',       104),
-  ('et.strategy_contact',      'fear_thermometer', 'exposure_tracker_strategy',                 'modules.fear_thermometer.strategy_contact',           105)
+  ('et.cfg',                  'fear_thermometer', 'exposure_tracker_config',   null,                                                 0),
+  ('et.strategy_breathing',   'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_breathing',        100),
+  ('et.strategy_grounding',   'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_grounding',        101),
+  ('et.strategy_movement',    'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_movement',         102),
+  ('et.strategy_exposure',    'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_exposure',         103),
+  ('et.strategy_distraction', 'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_distraction',      104),
+  ('et.strategy_contact',     'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_contact',          105)
 on conflict (id) do nothing;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -902,13 +871,48 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('et.cfg', 'engagement_event_type', 'SAVE_FEAR_ENTRY'),
-  ('et.cfg', 'suds_min',              '0'),
-  ('et.cfg', 'suds_max',              '100'),
-  ('et.cfg', 'suds_step',             '10'),
-  ('et.cfg', 'suds_default_before',   '50'),
-  ('et.cfg', 'suds_before_color',     '#EF4444'),
-  ('et.cfg', 'suds_after_color',      '#059669')
+  ('et.cfg', 'engagement_event_type',        'SAVE_FEAR_ENTRY'),
+  ('et.cfg', 'suds_min',                     '0'),
+  ('et.cfg', 'suds_max',                     '100'),
+  ('et.cfg', 'suds_step',                    '10'),
+  ('et.cfg', 'suds_default_before',          '50'),
+  ('et.cfg', 'suds_before_color',            '#EF4444'),
+  ('et.cfg', 'suds_after_color',             '#059669'),
+  ('et.cfg', 'tab_entries_label',            'modules.fear_thermometer.tab_entries'),
+  ('et.cfg', 'tab_situations_label',         'modules.fear_thermometer.tab_situations'),
+  ('et.cfg', 'add_btn',                      'modules.fear_thermometer.new_entry'),
+  ('et.cfg', 'empty_title',                  'modules.fear_thermometer.empty_title'),
+  ('et.cfg', 'empty_text',                   'modules.fear_thermometer.empty_text'),
+  ('et.cfg', 'section_trigger_title',        'modules.fear_thermometer.section_trigger'),
+  ('et.cfg', 'section_before_title',         'modules.fear_thermometer.section_before'),
+  ('et.cfg', 'section_strategies_title',     'modules.fear_thermometer.section_strategies'),
+  ('et.cfg', 'section_after_title',          'modules.fear_thermometer.section_after'),
+  ('et.cfg', 'section_notes_title',          'modules.fear_thermometer.section_notes'),
+  ('et.cfg', 'situation_mode_catalogue',     'modules.fear_thermometer.situation_mode_catalogue'),
+  ('et.cfg', 'situation_mode_free',          'modules.fear_thermometer.situation_mode_free'),
+  ('et.cfg', 'situation_free_placeholder',   'modules.fear_thermometer.situation_free_placeholder'),
+  ('et.cfg', 'situation_catalogue_empty',    'modules.fear_thermometer.situation_catalogue_empty'),
+  ('et.cfg', 'suds_before_label',            'modules.fear_thermometer.suds_before'),
+  ('et.cfg', 'suds_before_hint',             'modules.fear_thermometer.suds_hint_before'),
+  ('et.cfg', 'suds_after_label',             'modules.fear_thermometer.suds_after'),
+  ('et.cfg', 'suds_after_hint',              'modules.fear_thermometer.suds_hint_after'),
+  ('et.cfg', 'suds_skip_null',               'modules.fear_thermometer.suds_skip_null'),
+  ('et.cfg', 'suds_skip_later',              'modules.fear_thermometer.suds_skip_later'),
+  ('et.cfg', 'strategies_hint',              'modules.fear_thermometer.strategies_hint'),
+  ('et.cfg', 'strategy_custom_placeholder',  'modules.fear_thermometer.strategy_custom_placeholder'),
+  ('et.cfg', 'notes_placeholder',            'modules.fear_thermometer.notes_placeholder'),
+  ('et.cfg', 'save_label',                   'modules.fear_thermometer.save'),
+  ('et.cfg', 'update_label',                 'common.update'),
+  ('et.cfg', 'delete_label',                 'common.delete'),
+  ('et.cfg', 'back_label',                   'common.back'),
+  ('et.cfg', 'situation_missing_title',      'modules.fear_thermometer.situation_missing'),
+  ('et.cfg', 'situation_missing_msg',        'modules.fear_thermometer.situation_missing_msg'),
+  ('et.cfg', 'delete_entry_title',           'modules.fear_thermometer.delete_entry_title'),
+  ('et.cfg', 'situation_delete_title',       'modules.fear_thermometer.delete_situation_title'),
+  ('et.cfg', 'situations_panel_title',       'modules.fear_thermometer.situations_title'),
+  ('et.cfg', 'situations_panel_hint',        'modules.fear_thermometer.situations_hint'),
+  ('et.cfg', 'situation_placeholder',        'modules.fear_thermometer.situation_placeholder'),
+  ('et.cfg', 'situation_empty',              'modules.fear_thermometer.situation_empty')
 on conflict (field_id, prop_key) do nothing;
 
 
@@ -918,28 +922,13 @@ on conflict (field_id, prop_key) do nothing;
 -- Grille 2×2 + items pondérés (1–5 étoiles) + jauge motivation.
 -- ============================================================
 
-delete from public.field_props where field_id in (
-  'db.cfg','db.q1.h','db.q2.h','db.q3.h','db.q4.h',
-  'db.target_label','db.target_placeholder','db.save_label','db.saved_message',
-  'db.gauge_title','db.gauge_change_label','db.gauge_status_label',
-  'db.add_label','db.arg_placeholder','db.weight_label','db.delete_title'
-);
+delete from public.field_props where field_id in ('db.cfg','db.q1.h','db.q2.h','db.q3.h','db.q4.h');
 delete from public.module_content_fields where module_id = 'decisional_balance';
 
 update public.modules set preview_kind = 'decision_grid' where id = 'decisional_balance';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('db.cfg',                 'decisional_balance', 'decision_grid_config',              null,                                                  0),
-  ('db.target_label',        'decisional_balance', 'decision_grid_target_label',        'modules.decisional_balance.behavior_label',           1),
-  ('db.target_placeholder',  'decisional_balance', 'decision_grid_target_placeholder',  'modules.decisional_balance.behavior_placeholder',     2),
-  ('db.save_label',          'decisional_balance', 'decision_grid_save_label',          'modules.decisional_balance.save',                     3),
-  ('db.saved_message',       'decisional_balance', 'decision_grid_saved_message',       'modules.decisional_balance.saved_message',            4),
-  ('db.gauge_title',         'decisional_balance', 'decision_grid_gauge_title',         'modules.decisional_balance.gauge_title',              5),
-  ('db.gauge_change_label',  'decisional_balance', 'decision_grid_gauge_change_label',  'modules.decisional_balance.gauge_label_change',       6),
-  ('db.gauge_status_label',  'decisional_balance', 'decision_grid_gauge_status_label',  'modules.decisional_balance.gauge_label_status',       7),
-  ('db.add_label',           'decisional_balance', 'decision_grid_add_label',           'modules.decisional_balance.add_trigger',              8),
-  ('db.arg_placeholder',     'decisional_balance', 'decision_grid_arg_placeholder',     'modules.decisional_balance.arg_placeholder',          9),
-  ('db.weight_label',        'decisional_balance', 'decision_grid_weight_label',        'modules.decisional_balance.weight_label',             10)
+  ('db.cfg', 'decisional_balance', 'decision_grid_config', null, 0)
 on conflict (id) do nothing;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) values
@@ -956,6 +945,16 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('db.cfg', 'weight_max',            '5'),
   ('db.cfg', 'weight_default',        '3'),
   ('db.cfg', 'gauge_fill_color',      '#EC4899'),
+  ('db.cfg', 'target_label',          'modules.decisional_balance.behavior_label'),
+  ('db.cfg', 'target_placeholder',    'modules.decisional_balance.behavior_placeholder'),
+  ('db.cfg', 'save_label',            'modules.decisional_balance.save'),
+  ('db.cfg', 'saved_message',         'modules.decisional_balance.saved_message'),
+  ('db.cfg', 'gauge_title',           'modules.decisional_balance.gauge_title'),
+  ('db.cfg', 'gauge_change_label',    'modules.decisional_balance.gauge_label_change'),
+  ('db.cfg', 'gauge_status_label',    'modules.decisional_balance.gauge_label_status'),
+  ('db.cfg', 'add_label',             'modules.decisional_balance.add_trigger'),
+  ('db.cfg', 'arg_placeholder',       'modules.decisional_balance.arg_placeholder'),
+  ('db.cfg', 'weight_label',          'modules.decisional_balance.weight_label'),
   ('db.q1.h', 'color',         '#059669'),
   ('db.q1.h', 'bg_color',      '#ECFDF5'),
   ('db.q1.h', 'icon',          'thumb-up-outline'),
@@ -1038,7 +1037,7 @@ on conflict (id) do nothing;
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
 update public.modules set preview_kind = 'questionnaire'     where id = 'medication_side_effects' and preview_kind = 'fields';
-update public.modules set preview_kind = 'mood_tracker'      where id = 'mood_tracker'            and preview_kind = 'fields';
+update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tracker'            and preview_kind in ('fields', 'mood_tracker');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';
@@ -1060,9 +1059,16 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.step_5.hint', 'crisis_plan', 'step_5', NULL, 'step_hint', 'modules.crisis_plan.step_5_hint', 51),
   ('crisis_plan.step_6.title', 'crisis_plan', 'step_6', NULL, 'step_title', 'modules.crisis_plan.step_6_title', 60),
   ('crisis_plan.step_6.hint', 'crisis_plan', 'step_6', NULL, 'step_hint', 'modules.crisis_plan.step_6_hint', 61),
+  -- Bannière urgence — disclaimer_banner avec tone=danger (sort_order 5 = avant les étapes)
+  ('crisis_plan.urgency_banner', 'crisis_plan', NULL, NULL, 'disclaimer_banner', 'modules.crisis_plan.urgency_title', 5),
+  -- Sections VHB-EF (sort_order 70-90 : après les étapes, avant le footer)
+  ('crisis_plan.anchors', 'crisis_plan', NULL, NULL, 'crisis_anchors_preview', 'modules.crisis_plan.anchors_title', 70),
+  ('crisis_plan.coping_cards', 'crisis_plan', NULL, NULL, 'crisis_coping_cards_preview', 'modules.crisis_plan.coping_cards_title', 80),
+  ('crisis_plan.commitment', 'crisis_plan', NULL, NULL, 'crisis_commitment_preview', 'modules.crisis_plan.commitment_title', 90),
   ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'module.crisis_plan.footer', 99),
   ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 130),
-  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140)
+  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140),
+  ('crisis_plan.urgency_contacts', 'crisis_plan', NULL, NULL, 'crisis_urgency_contacts', NULL, 150)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : EPDS ─────────────────────────────────────────────
@@ -1129,14 +1135,9 @@ on conflict (id) do nothing;
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('gr.label', 'grounding', NULL, NULL, 'module_label', 'module.grounding.label', 0),
   ('gr.desc', 'grounding', NULL, NULL, 'module_description', 'module.grounding.description', 1),
-  ('gr.title', 'grounding', NULL, NULL, 'exercise_title', 'modules.grounding.technique_title', 2),
+  ('gr.cfg', 'grounding', NULL, NULL, 'exercise_config', NULL, 2),
   ('gr.intro1', 'grounding', NULL, NULL, 'exercise_intro', 'modules.grounding.intro_text_1', 3),
   ('gr.intro2', 'grounding', NULL, NULL, 'exercise_intro', 'modules.grounding.intro_text_2', 4),
-  ('gr.start_btn', 'grounding', NULL, NULL, 'exercise_start_btn', 'modules.grounding.start_btn', 5),
-  ('gr.next_btn', 'grounding', NULL, NULL, 'exercise_next_btn', 'modules.grounding.next_step', 6),
-  ('gr.finish_btn', 'grounding', NULL, NULL, 'exercise_finish_btn', 'modules.grounding.finish', 7),
-  ('gr.stop_btn', 'grounding', NULL, NULL, 'exercise_stop_btn', 'modules.grounding.stop_btn', 8),
-  ('gr.done_text', 'grounding', NULL, NULL, 'exercise_done_text', 'modules.grounding.done_text', 9),
   ('gr.safety_title', 'grounding', NULL, NULL, 'exercise_safety_title', 'modules.grounding.safety_title', 10),
   ('gr.safety_3114', 'grounding', NULL, NULL, 'exercise_safety', 'modules.grounding.safety_3114', 11),
   ('gr.safety_15', 'grounding', NULL, NULL, 'exercise_safety', 'modules.grounding.safety_15', 12),
@@ -1294,6 +1295,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('cj.soon',            'craving_journal',        NULL, NULL, 'coming_soon',        NULL, 99),
   ('dwp.label',          'diet_weight_psycho',     NULL, NULL, 'module_label',       'module.diet_weight_psycho.label', 0),
   ('dwp.desc',           'diet_weight_psycho',     NULL, NULL, 'module_description', 'module.diet_weight_psycho.description', 1),
+  ('dwp.disclaimer',     'diet_weight_psycho',     NULL, NULL, 'disclaimer_banner',  NULL, 2),
   ('dwp.soon',           'diet_weight_psycho',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('dt.label',           'distress_tolerance',     NULL, NULL, 'module_label',       'module.distress_tolerance.label', 0),
   ('dt.desc',            'distress_tolerance',     NULL, NULL, 'module_description', 'module.distress_tolerance.description', 1),
@@ -1303,7 +1305,9 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('eh.soon',            'exposure_hierarchy',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('tc.label',           'therapeutic_commitment', NULL, NULL, 'module_label',       'module.therapeutic_commitment.label', 0),
   ('tc.desc',            'therapeutic_commitment', NULL, NULL, 'module_description', 'module.therapeutic_commitment.description', 1),
-  ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99)
+  ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99),
+  ('mb.label',           'motivational_balance',   NULL, NULL, 'module_label',       'module.motivational_balance.label', 0),
+  ('mb.desc',            'motivational_balance',   NULL, NULL, 'module_description', 'module.motivational_balance.description', 1)
 on conflict (id) do nothing;
 
 
@@ -1321,150 +1325,150 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('gr_card.summary', 'psychoeducation', 'card_grounding_01', NULL, 'card_summary', 'card.grounding_01.summary', 2),
   ('lith_card.summary', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_summary', 'card.lithium_01.summary', 2),
   ('sleep_card.summary', 'psychoeducation', 'card_sleep_01', NULL, 'card_summary', 'card.sleep_01.summary', 2),
-  ('app_card.h_main', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_heading_2', 'card.appetite_01.h_main', 3),
-  ('cbt_card.h_main', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_2', 'card.cbt_01.h_main', 3),
-  ('gr_card.h_main', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_2', 'card.grounding_01.h_main', 3),
-  ('lith_card.h_main', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading_2', 'card.lithium_01.h_main', 3),
+  ('app_card.h_main', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_heading', 'card.appetite_01.h_main', 3),
+  ('cbt_card.h_main', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.h_main', 3),
+  ('gr_card.h_main', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_main', 3),
+  ('lith_card.h_main', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading', 'card.lithium_01.h_main', 3),
   ('sleep_card.intro', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.intro', 3),
   ('app_card.intro', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_paragraph', NULL, 4),
   ('cbt_card.intro', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.intro', 4),
   ('gr_card.intro_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', NULL, 4),
   ('app_card.def_1', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_definition', 'card.appetite_01.def_1.term', 10),
-  ('cbt_card.h_10', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_3', 'card.cbt_01.h_10', 10),
-  ('gr_card.h_quand', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_3', 'card.grounding_01.h_quand', 10),
-  ('lith_card.h_3regles', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading_3', 'card.lithium_01.h_3regles', 10),
-  ('sleep_card.h_horaires', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_horaires', 10),
-  ('cbt_card.d1.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d1.heading', 11),
+  ('cbt_card.h_10', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.h_10', 10),
+  ('gr_card.h_quand', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_quand', 10),
+  ('lith_card.h_3regles', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading', 'card.lithium_01.h_3regles', 10),
+  ('sleep_card.h_horaires', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_horaires', 10),
+  ('cbt_card.d1.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d1.heading', 11),
   ('gr_card.li_q1', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_q1', 11),
   ('lith_card.li_r1', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_numbered_item', 'card.lithium_01.li_r1', 11),
-  ('sleep_card.p_horaires', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph_bold', 'card.sleep_01.p_horaires', 11),
+  ('sleep_card.p_horaires', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.p_horaires', 11),
   ('cbt_card.d1.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d1.body', 12),
   ('gr_card.li_q2', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_q2', 12),
   ('lith_card.li_r2', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_numbered_item', 'card.lithium_01.li_r2', 12),
-  ('cbt_card.d1.example', 'psychoeducation', 'card_cbt_01', NULL, 'card_italic_note', 'card.cbt_01.d1.example', 13),
+  ('cbt_card.d1.example', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d1.example', 13),
   ('gr_card.li_q3', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_q3', 13),
   ('lith_card.li_r3', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_numbered_item', 'card.lithium_01.li_r3', 13),
   ('gr_card.li_q4', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_q4', 14),
   ('gr_card.divider_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_divider', NULL, 19),
   ('app_card.def_2', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_definition', 'card.appetite_01.def_2.term', 20),
-  ('cbt_card.d2.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d2.heading', 20),
-  ('gr_card.h_comment', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_3', 'card.grounding_01.h_comment', 20),
-  ('lith_card.h_eviter', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading_3', 'card.lithium_01.h_eviter', 20),
-  ('sleep_card.h_lumiere', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_lumiere', 20),
+  ('cbt_card.d2.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d2.heading', 20),
+  ('gr_card.h_comment', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_comment', 20),
+  ('lith_card.h_eviter', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_heading', 'card.lithium_01.h_eviter', 20),
+  ('sleep_card.h_lumiere', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_lumiere', 20),
   ('cbt_card.d2.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d2.body', 21),
-  ('gr_card.p_inspir', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph_bold', 'card.grounding_01.p_inspir', 21),
+  ('gr_card.p_inspir', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_inspir', 21),
   ('lith_card.li_e1', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_list_item', 'card.lithium_01.li_e1', 21),
   ('sleep_card.li_lumiere_1', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', NULL, 21),
-  ('cbt_card.d2.example', 'psychoeducation', 'card_cbt_01', NULL, 'card_italic_note', 'card.cbt_01.d2.example', 22),
+  ('cbt_card.d2.example', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d2.example', 22),
   ('lith_card.li_e2', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_list_item', 'card.lithium_01.li_e2', 22),
   ('sleep_card.li_lumiere_2', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', NULL, 22),
   ('sleep_card.li_lumiere_3', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', 'card.sleep_01.li_lumiere_3', 23),
   ('lith_card.divider', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_divider', NULL, 29),
   ('app_card.def_3', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_definition', 'card.appetite_01.def_3.term', 30),
-  ('cbt_card.d3.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d3.heading', 30),
-  ('gr_card.h_5', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_4', 'card.grounding_01.h_5', 30),
+  ('cbt_card.d3.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d3.heading', 30),
+  ('gr_card.h_5', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_5', 30),
   ('lith_card.callout', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_callout', 'card.lithium_01.callout', 30),
-  ('sleep_card.h_temp', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_temp', 30),
+  ('sleep_card.h_temp', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_temp', 30),
   ('cbt_card.d3.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d3.body', 31),
   ('gr_card.p_5', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_5', 31),
   ('sleep_card.p_temp', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', NULL, 31),
   ('lith_card.divider_2', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_divider', NULL, 39),
   ('app_card.def_4', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_definition', 'card.appetite_01.def_4.term', 40),
-  ('cbt_card.d4.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d4.heading', 40),
-  ('gr_card.h_4', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_4', 'card.grounding_01.h_4', 40),
-  ('lith_card.note', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_italic_note', 'card.lithium_01.note', 40),
-  ('sleep_card.h_alim', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_alim', 40),
+  ('cbt_card.d4.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d4.heading', 40),
+  ('gr_card.h_4', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_4', 40),
+  ('lith_card.note', 'psychoeducation', 'card_medication_lithium_01', NULL, 'card_paragraph', 'card.lithium_01.note', 40),
+  ('sleep_card.h_alim', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_alim', 40),
   ('cbt_card.d4.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d4.body', 41),
   ('gr_card.p_4', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_4', 41),
   ('sleep_card.li_alim_1', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', NULL, 41),
   ('sleep_card.li_alim_2', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', NULL, 42),
   ('sleep_card.li_alim_3', 'psychoeducation', 'card_sleep_01', NULL, 'card_list_item', 'card.sleep_01.li_alim_3', 43),
   ('app_card.callout', 'psychoeducation', 'card_medication_appetite_01', NULL, 'card_callout', 'card.appetite_01.callout', 50),
-  ('cbt_card.d5.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d5.heading', 50),
-  ('gr_card.h_3', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_4', 'card.grounding_01.h_3', 50),
-  ('sleep_card.h_sport', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_sport', 50),
+  ('cbt_card.d5.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d5.heading', 50),
+  ('gr_card.h_3', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_3', 50),
+  ('sleep_card.h_sport', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_sport', 50),
   ('cbt_card.d5.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d5.body', 51),
   ('gr_card.p_3', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_3', 51),
   ('sleep_card.p_sport', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', NULL, 51),
-  ('cbt_card.d6.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d6.heading', 60),
-  ('gr_card.h_2', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_4', 'card.grounding_01.h_2', 60),
-  ('sleep_card.h_lit', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_lit', 60),
+  ('cbt_card.d6.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d6.heading', 60),
+  ('gr_card.h_2', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_2', 60),
+  ('sleep_card.h_lit', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_lit', 60),
   ('cbt_card.d6.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d6.body', 61),
   ('gr_card.p_2', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_2', 61),
   ('sleep_card.p_lit', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.p_lit', 61),
-  ('cbt_card.d7.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d7.heading', 70),
-  ('gr_card.h_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_4', 'card.grounding_01.h_1', 70),
-  ('sleep_card.h_rituel', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_rituel', 70),
+  ('cbt_card.d7.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d7.heading', 70),
+  ('gr_card.h_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_1', 70),
+  ('sleep_card.h_rituel', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_rituel', 70),
   ('cbt_card.d7.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d7.body', 71),
   ('gr_card.p_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_1', 71),
   ('sleep_card.p_rituel', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.p_rituel', 71),
   ('gr_card.divider_2', 'psychoeducation', 'card_grounding_01', NULL, 'card_divider', NULL, 79),
-  ('cbt_card.d8.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d8.heading', 80),
-  ('gr_card.p_retenir_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph_bold', 'card.grounding_01.p_retenir_1', 80),
-  ('sleep_card.h_insomnie', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_insomnie', 80),
+  ('cbt_card.d8.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d8.heading', 80),
+  ('gr_card.p_retenir_1', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.p_retenir_1', 80),
+  ('sleep_card.h_insomnie', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_insomnie', 80),
   ('cbt_card.d8.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d8.body', 81),
-  ('gr_card.h_retenir', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading_3', 'card.grounding_01.h_retenir', 81),
+  ('gr_card.h_retenir', 'psychoeducation', 'card_grounding_01', NULL, 'card_heading', 'card.grounding_01.h_retenir', 81),
   ('sleep_card.p_insomnie', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', NULL, 81),
   ('gr_card.li_r1', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_r1', 82),
   ('gr_card.li_r2', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', NULL, 83),
   ('gr_card.li_r3', 'psychoeducation', 'card_grounding_01', NULL, 'card_list_item', 'card.grounding_01.li_r3', 84),
-  ('cbt_card.d9.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d9.heading', 90),
+  ('cbt_card.d9.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d9.heading', 90),
   ('gr_card.divider_3', 'psychoeducation', 'card_grounding_01', NULL, 'card_divider', NULL, 90),
-  ('sleep_card.h_sieste', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_sieste', 90),
+  ('sleep_card.h_sieste', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_sieste', 90),
   ('cbt_card.d9.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d9.body', 91),
-  ('gr_card.note', 'psychoeducation', 'card_grounding_01', NULL, 'card_italic_note', 'card.grounding_01.note', 91),
+  ('gr_card.note', 'psychoeducation', 'card_grounding_01', NULL, 'card_paragraph', 'card.grounding_01.note', 91),
   ('sleep_card.p_sieste', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', NULL, 91),
-  ('cbt_card.d10.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_4', 'card.cbt_01.d10.heading', 100),
-  ('sleep_card.h_agenda', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading_3', 'card.sleep_01.h_agenda', 100),
+  ('cbt_card.d10.heading', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.d10.heading', 100),
+  ('sleep_card.h_agenda', 'psychoeducation', 'card_sleep_01', NULL, 'card_heading', 'card.sleep_01.h_agenda', 100),
   ('cbt_card.d10.body', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.d10.body', 101),
   ('sleep_card.p_agenda', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.p_agenda', 101),
   ('cbt_card.divider_1', 'psychoeducation', 'card_cbt_01', NULL, 'card_divider', NULL, 109),
-  ('cbt_card.h_comment', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading_3', 'card.cbt_01.h_comment', 110),
+  ('cbt_card.h_comment', 'psychoeducation', 'card_cbt_01', NULL, 'card_heading', 'card.cbt_01.h_comment', 110),
   ('sleep_card.divider', 'psychoeducation', 'card_sleep_01', NULL, 'card_divider', NULL, 110),
   ('cbt_card.li_c1', 'psychoeducation', 'card_cbt_01', NULL, 'card_numbered_item', 'card.cbt_01.li_c1', 111),
-  ('sleep_card.note', 'psychoeducation', 'card_sleep_01', NULL, 'card_italic_note', 'card.sleep_01.note', 111),
+  ('sleep_card.note', 'psychoeducation', 'card_sleep_01', NULL, 'card_paragraph', 'card.sleep_01.note', 111),
   ('cbt_card.li_c2', 'psychoeducation', 'card_cbt_01', NULL, 'card_numbered_item', 'card.cbt_01.li_c2', 112),
   ('cbt_card.li_c3', 'psychoeducation', 'card_cbt_01', NULL, 'card_numbered_item', 'card.cbt_01.li_c3', 113),
   ('cbt_card.divider_2', 'psychoeducation', 'card_cbt_01', NULL, 'card_divider', NULL, 119),
-  ('cbt_card.note', 'psychoeducation', 'card_cbt_01', NULL, 'card_italic_note', 'card.cbt_01.note', 120)
+  ('cbt_card.note', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.note', 120)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : psychoeducation — children (inline spans) ────────
 -- Doivent venir APRÈS les parents (FK parent_field_id).
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
-  ('app_card.intro_s1', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline_text', 'card.appetite_01.intro_s1', 1),
-  ('app_card.intro_s2', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline_bold', 'card.appetite_01.intro_s2', 2),
-  ('app_card.intro_s3', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline_text', 'card.appetite_01.intro_s3', 3),
-  ('gr_card.intro_1_s1', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline_text', 'card.grounding_01.intro_1_s1', 1),
-  ('gr_card.intro_1_s2', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline_bold', 'card.grounding_01.intro_1_s2', 2),
-  ('gr_card.intro_1_s3', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline_text', 'card.grounding_01.intro_1_s3', 3),
-  ('gr_card.li_r2_s1', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline_text', 'card.grounding_01.li_r2_s1', 1),
-  ('gr_card.li_r2_s2', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline_bold', 'card.grounding_01.li_r2_s2', 2),
-  ('gr_card.li_r2_s3', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline_text', 'card.grounding_01.li_r2_s3', 3),
-  ('sleep_card.li_a1_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline_text', 'card.sleep_01.li_a1_seg1', 1),
-  ('sleep_card.li_a1_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline_bold', 'card.sleep_01.li_a1_seg2', 2),
-  ('sleep_card.li_a1_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline_text', 'card.sleep_01.li_a1_seg3', 3),
-  ('sleep_card.li_a2_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline_text', 'card.sleep_01.li_a2_seg1', 1),
-  ('sleep_card.li_a2_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline_bold', 'card.sleep_01.li_a2_seg2', 2),
-  ('sleep_card.li_a2_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline_text', 'card.sleep_01.li_a2_seg3', 3),
-  ('sleep_card.li_l1_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline_text', 'card.sleep_01.li_l1_seg1', 1),
-  ('sleep_card.li_l1_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline_bold', 'card.sleep_01.li_l1_seg2', 2),
-  ('sleep_card.li_l1_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline_text', 'card.sleep_01.li_l1_seg3', 3),
-  ('sleep_card.li_l2_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline_text', 'card.sleep_01.li_l2_seg1', 1),
-  ('sleep_card.li_l2_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline_bold', 'card.sleep_01.li_l2_seg2', 2),
-  ('sleep_card.li_l2_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline_text', 'card.sleep_01.li_l2_seg3', 3),
-  ('sleep_card.p_ins_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline_text', 'card.sleep_01.p_ins_seg1', 1),
-  ('sleep_card.p_ins_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline_bold', 'card.sleep_01.p_ins_seg2', 2),
-  ('sleep_card.p_ins_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline_text', 'card.sleep_01.p_ins_seg3', 3),
-  ('sleep_card.p_sie_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline_text', 'card.sleep_01.p_sie_seg1', 1),
-  ('sleep_card.p_sie_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline_bold', 'card.sleep_01.p_sie_seg2', 2),
-  ('sleep_card.p_sie_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline_text', 'card.sleep_01.p_sie_seg3', 3),
-  ('sleep_card.p_sport_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline_text', 'card.sleep_01.p_sport_seg1', 1),
-  ('sleep_card.p_sport_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline_bold', 'card.sleep_01.p_sport_seg2', 2),
-  ('sleep_card.p_sport_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline_text', 'card.sleep_01.p_sport_seg3', 3),
-  ('sleep_card.p_temp_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline_text', 'card.sleep_01.p_temp_seg1', 1),
-  ('sleep_card.p_temp_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline_bold', 'card.sleep_01.p_temp_seg2', 2),
-  ('sleep_card.p_temp_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline_text', 'card.sleep_01.p_temp_seg3', 3)
+  ('app_card.intro_s1', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline', 'card.appetite_01.intro_s1', 1),
+  ('app_card.intro_s2', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline', 'card.appetite_01.intro_s2', 2),
+  ('app_card.intro_s3', 'psychoeducation', 'card_medication_appetite_01', 'app_card.intro', 'card_inline', 'card.appetite_01.intro_s3', 3),
+  ('gr_card.intro_1_s1', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline', 'card.grounding_01.intro_1_s1', 1),
+  ('gr_card.intro_1_s2', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline', 'card.grounding_01.intro_1_s2', 2),
+  ('gr_card.intro_1_s3', 'psychoeducation', 'card_grounding_01', 'gr_card.intro_1', 'card_inline', 'card.grounding_01.intro_1_s3', 3),
+  ('gr_card.li_r2_s1', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline', 'card.grounding_01.li_r2_s1', 1),
+  ('gr_card.li_r2_s2', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline', 'card.grounding_01.li_r2_s2', 2),
+  ('gr_card.li_r2_s3', 'psychoeducation', 'card_grounding_01', 'gr_card.li_r2', 'card_inline', 'card.grounding_01.li_r2_s3', 3),
+  ('sleep_card.li_a1_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline', 'card.sleep_01.li_a1_seg1', 1),
+  ('sleep_card.li_a1_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline', 'card.sleep_01.li_a1_seg2', 2),
+  ('sleep_card.li_a1_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_1', 'card_inline', 'card.sleep_01.li_a1_seg3', 3),
+  ('sleep_card.li_a2_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline', 'card.sleep_01.li_a2_seg1', 1),
+  ('sleep_card.li_a2_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline', 'card.sleep_01.li_a2_seg2', 2),
+  ('sleep_card.li_a2_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_alim_2', 'card_inline', 'card.sleep_01.li_a2_seg3', 3),
+  ('sleep_card.li_l1_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline', 'card.sleep_01.li_l1_seg1', 1),
+  ('sleep_card.li_l1_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline', 'card.sleep_01.li_l1_seg2', 2),
+  ('sleep_card.li_l1_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_1', 'card_inline', 'card.sleep_01.li_l1_seg3', 3),
+  ('sleep_card.li_l2_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline', 'card.sleep_01.li_l2_seg1', 1),
+  ('sleep_card.li_l2_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline', 'card.sleep_01.li_l2_seg2', 2),
+  ('sleep_card.li_l2_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.li_lumiere_2', 'card_inline', 'card.sleep_01.li_l2_seg3', 3),
+  ('sleep_card.p_ins_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline', 'card.sleep_01.p_ins_seg1', 1),
+  ('sleep_card.p_ins_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline', 'card.sleep_01.p_ins_seg2', 2),
+  ('sleep_card.p_ins_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_insomnie', 'card_inline', 'card.sleep_01.p_ins_seg3', 3),
+  ('sleep_card.p_sie_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline', 'card.sleep_01.p_sie_seg1', 1),
+  ('sleep_card.p_sie_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline', 'card.sleep_01.p_sie_seg2', 2),
+  ('sleep_card.p_sie_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sieste', 'card_inline', 'card.sleep_01.p_sie_seg3', 3),
+  ('sleep_card.p_sport_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline', 'card.sleep_01.p_sport_seg1', 1),
+  ('sleep_card.p_sport_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline', 'card.sleep_01.p_sport_seg2', 2),
+  ('sleep_card.p_sport_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_sport', 'card_inline', 'card.sleep_01.p_sport_seg3', 3),
+  ('sleep_card.p_temp_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg1', 1),
+  ('sleep_card.p_temp_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg2', 2),
+  ('sleep_card.p_temp_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg3', 3)
 on conflict (id) do nothing;
 
 
@@ -1488,8 +1492,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.field_6', 'icon', 'calendar')
 on conflict (field_id, prop_key) do nothing;
 
--- crisis_plan : couleurs/icônes par étape + boutons urgence
+-- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF
 insert into public.field_props (field_id, prop_key, prop_value) values
+  -- Bannière urgence (disclaimer_banner étendu : text_code + tone)
+  ('crisis_plan.urgency_banner', 'text_code', 'modules.crisis_plan.urgency_title'),
+  ('crisis_plan.urgency_banner', 'tone', 'danger'),
+  -- Boutons urgence
   ('crisis_plan.emergency_15', 'bgColor', '#0D9488'),
   ('crisis_plan.emergency_15', 'label_code', 'modules.crisis_plan.emergency_samu_label'),
   ('crisis_plan.emergency_15', 'phone', '15'),
@@ -1548,8 +1556,14 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('epds.q10.opt0', 'value', '3'), ('epds.q10.opt1', 'value', '2'), ('epds.q10.opt2', 'value', '1'), ('epds.q10.opt3', 'value', '0')
 on conflict (field_id, prop_key) do nothing;
 
--- grounding : couleurs/icônes par sens
+-- grounding : config labels + couleurs/icônes par sens
 insert into public.field_props (field_id, prop_key, prop_value) values
+  ('gr.cfg', 'title',      'modules.grounding.technique_title'),
+  ('gr.cfg', 'start_btn',  'modules.grounding.start_btn'),
+  ('gr.cfg', 'next_btn',   'modules.grounding.next_step'),
+  ('gr.cfg', 'finish_btn', 'modules.grounding.finish'),
+  ('gr.cfg', 'stop_btn',   'modules.grounding.stop_btn'),
+  ('gr.cfg', 'done_text',  'modules.grounding.done_text'),
   ('gr.hear.title', 'color', '#059669'),
   ('gr.hear.title', 'icon', 'ear-hearing'),
   ('gr.hear.title', 'step_number', '3'),
@@ -1899,14 +1913,8 @@ values
   ('cj.tab.journal', 'craving_journal', null, null, 'tab',
    'modules.craving_journal.tab_journal', 20),
 
-  -- column_form config + labels (enfants du tab.journal)
-  ('cj.cfg',          'craving_journal', null, 'cj.tab.journal', 'column_form_config',           null, 0),
-  ('cj.new_btn',      'craving_journal', null, 'cj.tab.journal', 'column_form_new_btn_label',
-   'modules.craving_journal.new_entry_btn', 1),
-  ('cj.empty_title',  'craving_journal', null, 'cj.tab.journal', 'column_form_empty_title',
-   'modules.craving_journal.empty_title', 2),
-  ('cj.empty_text',   'craving_journal', null, 'cj.tab.journal', 'column_form_empty_text',
-   'modules.craving_journal.empty_text', 3),
+  -- column_form config (enfant du tab.journal)
+  ('cj.cfg', 'craving_journal', null, 'cj.tab.journal', 'column_form_config', null, 0),
 
   -- column 1 : intensité (slider 0-10)
   ('cj.col1.h',       'craving_journal', 'cj.intensity', 'cj.tab.journal', 'column_header',
@@ -1946,7 +1954,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('cj.tab.journal', 'sub_preview_kind', 'column_form'),
   ('cj.tab.journal', 'icon_name',        'Heart'),
   -- column_form config
-  ('cj.cfg',         'engagement_event_type', 'SAVE_CRAVING_ENTRY'),
+  ('cj.cfg', 'engagement_event_type', 'SAVE_CRAVING_ENTRY'),
+  ('cj.cfg', 'new_btn_label',         'modules.craving_journal.new_entry_btn'),
+  ('cj.cfg', 'empty_title',           'modules.craving_journal.empty_title'),
+  ('cj.cfg', 'empty_text',            'modules.craving_journal.empty_text'),
   -- intensité slider 0-10
   ('cj.col1.h',      'color',         '#7C3AED'),
   ('cj.col1.h',      'step_number',   '1'),
@@ -1999,14 +2010,8 @@ values
   ('chrono.tab.month', 'chronobiology_tracker', null, null, 'tab',
    'modules.chrono_bio.view_month', 30),
 
-  -- column_form config + labels (enfants du tab.journal)
-  ('chrono.cfg',         'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_config',           null, 0),
-  ('chrono.new_btn',     'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_new_btn_label',
-   'modules.chrono_bio.add_today', 1),
-  ('chrono.empty_title', 'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_empty_title',
-   'modules.chrono_bio.history_label', 2),
-  ('chrono.empty_text',  'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_empty_text',
-   'modules.chrono_bio.empty_history', 3),
+  -- column_form config (enfant du tab.journal)
+  ('chrono.cfg', 'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_config', null, 0),
 
   -- 1 colonne avec 5 column_time_field
   ('chrono.col.h',       'chronobiology_tracker', 'chrono.anchors', 'chrono.tab.journal', 'column_header',
@@ -2032,6 +2037,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.tab.month',   'tab_key',          'month'),
   ('chrono.tab.month',   'sub_preview_kind', 'chrono_month'),
   ('chrono.tab.month',   'icon_name',        'Sun'),
+  -- column_form config
+  ('chrono.cfg', 'new_btn_label', 'modules.chrono_bio.add_today'),
+  ('chrono.cfg', 'empty_title',   'modules.chrono_bio.history_label'),
+  ('chrono.cfg', 'empty_text',    'modules.chrono_bio.empty_history'),
   -- column header
   ('chrono.col.h',       'color',            '#3B82F6'),
   ('chrono.col.h',       'step_number',      '1'),
@@ -2046,3 +2055,75 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.col.last',    'optional',         '1'),
   ('chrono.col.bed',     'key',              'bedtime'),
   ('chrono.col.bed',     'optional',         '1');
+
+-- Level prop pour tous les card_heading (migré depuis card_heading_2/3/4)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('app_card.h_main',    'level', '2'),
+  ('cbt_card.h_main',    'level', '2'),
+  ('gr_card.h_main',     'level', '2'),
+  ('lith_card.h_main',   'level', '2'),
+  ('cbt_card.h_10',      'level', '3'),
+  ('cbt_card.h_comment', 'level', '3'),
+  ('gr_card.h_comment',  'level', '3'),
+  ('gr_card.h_quand',    'level', '3'),
+  ('gr_card.h_retenir',  'level', '3'),
+  ('lith_card.h_3regles','level', '3'),
+  ('lith_card.h_eviter', 'level', '3'),
+  ('sleep_card.h_agenda','level', '3'),
+  ('sleep_card.h_alim',  'level', '3'),
+  ('sleep_card.h_horaires','level','3'),
+  ('sleep_card.h_insomnie','level','3'),
+  ('sleep_card.h_lit',   'level', '3'),
+  ('sleep_card.h_lumiere','level', '3'),
+  ('sleep_card.h_rituel','level', '3'),
+  ('sleep_card.h_sieste','level', '3'),
+  ('sleep_card.h_sport', 'level', '3'),
+  ('sleep_card.h_temp',  'level', '3'),
+  ('cbt_card.d1.heading','level', '4'),
+  ('cbt_card.d2.heading','level', '4'),
+  ('cbt_card.d3.heading','level', '4'),
+  ('cbt_card.d4.heading','level', '4'),
+  ('cbt_card.d5.heading','level', '4'),
+  ('cbt_card.d6.heading','level', '4'),
+  ('cbt_card.d7.heading','level', '4'),
+  ('cbt_card.d8.heading','level', '4'),
+  ('cbt_card.d9.heading','level', '4'),
+  ('cbt_card.d10.heading','level','4'),
+  ('gr_card.h_1',        'level', '4'),
+  ('gr_card.h_2',        'level', '4'),
+  ('gr_card.h_3',        'level', '4'),
+  ('gr_card.h_4',        'level', '4'),
+  ('gr_card.h_5',        'level', '4')
+on conflict (field_id, prop_key) do nothing;
+
+-- bold prop pour les card_inline (ex card_inline_bold)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('app_card.intro_s2',   'bold', 'true'),
+  ('gr_card.intro_1_s2',  'bold', 'true'),
+  ('gr_card.li_r2_s2',    'bold', 'true'),
+  ('sleep_card.li_a1_seg2','bold','true'),
+  ('sleep_card.li_a2_seg2','bold','true'),
+  ('sleep_card.li_l1_seg2','bold','true'),
+  ('sleep_card.li_l2_seg2','bold','true'),
+  ('sleep_card.p_ins_seg2','bold','true'),
+  ('sleep_card.p_sie_seg2','bold','true'),
+  ('sleep_card.p_sport_seg2','bold','true'),
+  ('sleep_card.p_temp_seg2','bold','true')
+on conflict (field_id, prop_key) do nothing;
+
+-- bold prop pour les card_paragraph (ex card_paragraph_bold)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('sleep_card.p_horaires', 'bold', 'true'),
+  ('gr_card.p_inspir',      'bold', 'true'),
+  ('gr_card.p_retenir_1',   'bold', 'true')
+on conflict (field_id, prop_key) do nothing;
+
+-- italic prop pour les card_paragraph (ex card_italic_note)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('cbt_card.d1.example', 'italic', 'true'),
+  ('cbt_card.d2.example', 'italic', 'true'),
+  ('lith_card.note',      'italic', 'true'),
+  ('gr_card.note',        'italic', 'true'),
+  ('sleep_card.note',     'italic', 'true'),
+  ('cbt_card.note',       'italic', 'true')
+on conflict (field_id, prop_key) do nothing;

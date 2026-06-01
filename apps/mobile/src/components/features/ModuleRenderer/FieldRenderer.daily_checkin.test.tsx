@@ -39,8 +39,8 @@ jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
+import { useToast } from '../../../contexts/ToastContext'
 import * as database from '../../../lib/database'
 import * as engagement from '../../../services/engagementService'
 import type { ContentField } from '../../../services/moduleService'
@@ -64,7 +64,17 @@ function makeField(overrides: Partial<ContentField>): ContentField {
 }
 
 const MOCK_FIELDS: ContentField[] = [
-  makeField({ id: 'cfg',           field_type: 'daily_checkin_config',         sort_order: 0,   props: { engagement_event_type: 'SAVE_MEDICATION_ADHERENCE' } }),
+  // Le composant DailyCheckinLayout lit ses libellés depuis configField.props
+  // via `lbl(key)` ; on les place ici (sinon le badge "déjà saisi" et le toast
+  // de validation ne disposent pas de leur clé).
+  makeField({
+    id: 'cfg', field_type: 'daily_checkin_config', sort_order: 0,
+    props: {
+      engagement_event_type: 'SAVE_MEDICATION_ADHERENCE',
+      already_saved_label: 'modules.medication_adherence.already_saved',
+      status_missing_msg: 'modules.medication_adherence.status_missing_msg',
+    },
+  }),
   makeField({ id: 'tab_today',     field_type: 'daily_tab_today_label',         sort_order: 5,   text_code: 'modules.medication_adherence.tab_today' }),
   makeField({ id: 'tab_history',   field_type: 'daily_tab_history_label',       sort_order: 6,   text_code: 'modules.medication_adherence.tab_history' }),
   makeField({ id: 'today_lbl',     field_type: 'daily_today_label',             sort_order: 10,  text_code: 'modules.medication_adherence.today_label' }),
@@ -132,18 +142,15 @@ describe('FieldRenderer — daily_checkin (DailyCheckinLayout)', () => {
   })
 
   it('alerte et n\'enregistre pas si aucun statut n\'est sélectionné', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('save-button')).toBeTruthy())
     fireEvent.press(screen.getByTestId('save-button'))
 
-    await waitFor(() => expect(alertSpy).toHaveBeenCalled())
+    await waitFor(() => expect(useToast().showToast).toHaveBeenCalled())
     expect(database.saveDailyEntry).not.toHaveBeenCalled()
-    alertSpy.mockRestore()
   })
 
   it('enregistre une nouvelle saisie avec le statut sélectionné et appelle logEvent', async () => {
-    jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('status-taken')).toBeTruthy())
 
@@ -208,22 +215,15 @@ describe('FieldRenderer — daily_checkin (DailyCheckinLayout)', () => {
     ;(database.getAllDailyEntries as jest.Mock).mockResolvedValue([
       { id: 'h1', module_id: 'medication_adherence', date: '2026-05-05', status: 'taken', notes: null, created_at: '2026-05-05T08:00:00Z' },
     ])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
-      const destructive = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = destructive?.onPress as () => Promise<void>
-    })
-
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('tab-history')).toBeTruthy())
     fireEvent.press(screen.getByTestId('tab-history'))
-    await waitFor(() => expect(screen.getByTestId('delete-h1')).toBeTruthy())
+    const deleteBtn = await screen.findByTestId('delete-h1')
+    await act(async () => { fireEvent.press(deleteBtn) })
 
-    fireEvent.press(screen.getByTestId('delete-h1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-
-    expect(database.deleteDailyEntry).toHaveBeenCalledWith('h1')
+    await waitFor(() => {
+      expect(database.deleteDailyEntry).toHaveBeenCalledWith('h1')
+    })
     await waitFor(() => expect(screen.queryByTestId('history-h1')).toBeNull())
   })
 })

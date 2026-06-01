@@ -71,7 +71,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 | Widget | Classe CSS | Élément HTML | Notes |
 |---|---|---|---|
 | `TimeWidget` | `.fw-time` | `<input type="time">` | `defaultValue="22:00"` |
-| `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Spec `slider:min:max:unit` |
+| `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `ValueBar`, pas ce widget |
 | `StarsWidget` | `.fw-stars` | `<span>` × N avec `.fw-star--on`/`.fw-star--off` | Spec `stars:count` |
 | `BooleanWidget` | `.fw-boolean` | `<span class="fw-boolean__opt">` × 2 | `.fw-boolean__opt--active` sur "Non" |
 | `RadioWidget` | `.fw-radio` + `fw-radio--ok/partial/miss` | `<span>` coloré | ok=vert, partial=ambre, miss=rouge |
@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, SearchInput, SelectField, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -151,6 +151,287 @@ apps/web/src/
 ```
 
 Chaque dossier contient : `ComponentName.tsx` + `ComponentName.test.tsx` + `index.ts`.
+
+---
+
+## Primitives d'aperçu module — `Tabs` (compact), `ValueBar`, `Sparkline`
+
+Les layouts du `ModuleRenderer` reproduisent l'écran mobile du patient. Trois
+primitives partagées évitent de redéclarer onglets, sliders et mini-courbes dans
+chaque layout :
+
+### `Tabs` — variante `compact`
+
+`Tabs` (déjà la barre d'onglets praticien) accepte `variant="compact"` : une barre
+dense (13px, soulignement fin) pour les aperçus mobile-mock. À utiliser au lieu de
+réécrire des `__tab`/`role="tab"` à la main.
+
+```tsx
+<Tabs tabs={tabs} activeTab={active} onChange={setActive} variant="compact" />
+```
+
+`variant` : `'horizontal'` (défaut) · `'vertical'` · `'compact'`. `accentColor`
+surcharge la couleur de l'onglet actif (défaut `var(--color-primary)`).
+Utilisé par `SliderDashboardLayout` et `DailyCheckinLayout`.
+
+### `ValueBar` — barre de valeur statique
+
+`components/ui/ValueBar/`. Affiche une dimension : libellé + valeur + jauge colorée
+positionnée dans `[min, max]` + repères d'extrémité. Passif, sans saisie (MDR : affiche,
+n'interprète pas).
+
+```tsx
+<ValueBar label="Humeur" value={7} min={1} max={10} color="#8B5CF6"
+          lowHint="Très basse" highHint="Très élevée" />
+```
+
+Props : `label`, `value`, `min?=1`, `max?=10`, `color?=var(--color-primary)`,
+`lowHint?`, `highHint?`.
+
+#### `ValueBar` (display) vs `SliderWidget` (input) — ne pas confondre
+
+Les deux ressemblent visuellement à une « barre + valeur », mais jouent des rôles
+**opposés**. Ce ne sont pas des doublons : on a délibérément un composant par rôle
+(un fichier = une responsabilité).
+
+| | `ValueBar` | `SliderWidget` |
+|---|---|---|
+| Rôle | **Restitution** — on lit une valeur déjà saisie | **Saisie** — on glisse pour changer la valeur |
+| Dossier | `components/ui/ValueBar/` | `components/features/.../widgets/SliderWidget/` |
+| Catégorie | Primitive design system (`ui/`) | Widget d'aperçu module (`fw-*`) |
+| Élément | `<div>` étiqueté (header dot+label+value, piste, hints) | `<input type="range">` + `<span>` valeur |
+| Interaction | Aucune — le `thumb` est purement décoratif | Glissable (`onChange` + state) |
+| Markup | Ligne de restitution complète (label + jauge + repères) | Range nu + chiffre |
+| Utilisé par | `SliderDashboardLayout` (onglet « Aujourd'hui », une barre/dimension) | `FieldWidget` via `widget_type="slider:min:max:unit"` |
+
+> **Pourquoi pas un seul « slider readonly » ?** Un `<input type="range" disabled>`
+> s'annoncerait aux lecteurs d'écran comme un *contrôle désactivé* (faux : c'est une
+> donnée en lecture), hériterait du style natif à neutraliser, et n'offrirait pas le
+> header étiqueté + les hints de `ValueBar`. Surtout, fusionner les deux rouvrirait
+> la porte à « retirer le `disabled` pour gagner un input » — soit transformer un
+> affichage passif en saisie, ce qui touche la règle d'or non-DM (MDR 2017/745).
+> Règle : **pour saisir → `SliderWidget` ; pour afficher → `ValueBar`.**
+
+### `Sparkline` — mini-courbe
+
+`components/ui/Sparkline/`. Petit graphe linéaire SVG sans axe ni légende — une
+tendance brute. Passif (MDR).
+
+```tsx
+<Sparkline values={[6,7,6,5,7,8]} color="#8B5CF6" min={1} max={10} className="…" />
+```
+
+Props : `values` (≥2 points), `color?`, `min?=1`, `max?=10`, `width?=80`,
+`height?=24`, `className?`.
+
+---
+
+## Primitives génériques (`components/ui/`)
+
+Briques de base réutilisables, sans logique métier. **Toujours les importer avant
+d'écrire du markup** — réimplémenter `Button`/`Card`/`Modal`/`Toggle` à la main est
+un anti-pattern bloquant en revue (cf. [`coding-standards.md`](../../../.claude/rules/coding-standards.md) § *Checklist obligatoire*).
+Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
+
+### `Button`
+
+`components/ui/Button/`. Bouton du design system — étend `ButtonHTMLAttributes` (donc
+`onClick`, `disabled`, `type`, etc. natifs).
+
+```tsx
+<Button variant="primary" size="md" loading={saving} onClick={onSave}>
+  {t('common.save')}
+</Button>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost'` | `'primary'` | Style visuel |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Taille |
+| `loading` | `boolean` | `false` | Affiche un spinner et désactive le bouton |
+| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-*`… |
+
+### `Card`
+
+`components/ui/Card/`. Conteneur principal — header structuré optionnel + zone
+d'actions + contenu. Base de la plupart des panneaux.
+
+```tsx
+<Card
+  header={{ title: t('patient.modules'), subtitle: t('patient.modules_sub'), icon: <Boxes />, right: <Toggle … /> }}
+  variant="elevated"
+>
+  {children}
+</Card>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `header` | `CardHeader` | — | `{ title, subtitle?, icon?, right? }` |
+| `actions` | `ReactNode` | — | Zone d'actions (bas de carte) |
+| `variant` | `'default' \| 'outlined' \| 'elevated'` | `'default'` | Style de bordure/ombre |
+| `state` | `'active' \| 'disabled'` | — | État visuel |
+| `children` | `ReactNode` | — | Contenu |
+| `className` | `string` | — | Classe additionnelle |
+
+### `Modal`
+
+`components/ui/Modal/`. Boîte de dialogue accessible (`role="dialog"`, `aria-modal`,
+fermeture sur `Échap` + clic sur l'overlay).
+
+```tsx
+<Modal title={t('appointment.new')} subtitle={dateLabel} icon={<Calendar />} onClose={close}
+       footer={<Button onClick={save}>{t('common.confirm')}</Button>}>
+  {formContent}
+</Modal>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `icon` | `ReactNode` | — | Icône en tête |
+| `onClose` | `() => void` | — | Appelé sur `Échap`, clic overlay, ou croix |
+| `footer` | `ReactNode` | — | Pied (actions) |
+| `noPadding` | `boolean` | `false` | Supprime le padding du body |
+| `maxWidth` | `number` | — | Largeur max en px |
+| `children` | `ReactNode` | — | Corps |
+
+### `InputField`
+
+`components/ui/InputField/`. Champ texte étiqueté avec message d'erreur. Étend
+`InputHTMLAttributes` (donc `value`/`defaultValue`, `type`, `placeholder`, `onChange`…).
+
+```tsx
+<InputField label={t('auth.email')} type="email" error={emailError} defaultValue="" />
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Libellé (obligatoire) |
+| `error` | `string` | Message d'erreur inline (validation de champ) |
+| …natifs | `InputHTMLAttributes` | `type`, `value`, `onChange`, `placeholder`… |
+
+### `SearchInput`
+
+`components/ui/SearchInput/`. Champ de recherche contrôlé (icône loupe + input).
+
+```tsx
+<SearchInput value={query} onChange={setQuery} placeholder={t('common.search')} ariaLabel={t('common.search')} />
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `string` | Valeur contrôlée |
+| `onChange` | `(value: string) => void` | Reçoit la nouvelle valeur (pas l'event) |
+| `placeholder` | `string` | Placeholder (obligatoire) |
+| `ariaLabel` | `string` | Label accessibilité |
+
+### `StatusBadge`
+
+`components/ui/StatusBadge/`. Badge d'état coloré, lecture seule.
+
+```tsx
+<StatusBadge variant="success" label={t('appointment.confirmed')} icon={<Check />} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `variant` | `'info' \| 'success' \| 'warning' \| 'danger' \| 'neutral'` | `'neutral'` | Couleur |
+| `label` | `string` | — | Texte (obligatoire) |
+| `value` | `string \| number` | — | Valeur additionnelle |
+| `icon` | `ReactNode` | — | Icône |
+| `className` | `string` | — | Classe additionnelle |
+
+### `Accordion`
+
+`components/ui/Accordion/`. Section repliable (titre cliquable + contenu).
+
+```tsx
+<Accordion title={t('crisis.coping')} icon={<HeartPulse />} badge={items.length} defaultOpen>
+  {items}
+</Accordion>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `icon` | `ReactNode` | — | Icône |
+| `subtitle` | `string` | — | Sous-titre |
+| `badge` | `number` | — | Compteur affiché à droite |
+| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
+| `children` | `ReactNode` | — | Contenu (obligatoire) |
+| `className` | `string` | — | Classe additionnelle |
+
+### `EmptyState`
+
+`components/ui/EmptyState/`. État vide — icône + titre + description + action optionnelle.
+
+```tsx
+<EmptyState icon={<Inbox />} title={t('patients.empty')} description={t('patients.empty_sub')}
+            action={{ label: t('patients.invite'), onClick: openInvite }} />
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `ReactNode` | Icône illustrative |
+| `title` | `string` | Titre (obligatoire) |
+| `description` | `string` | Texte explicatif |
+| `action` | `{ label: string; onClick: () => void }` | Bouton d'action optionnel |
+| `className` | `string` | Classe additionnelle |
+
+> `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast` ont une doc dédiée dans
+> [`docs/components/`](components/). `Tabs`, `ValueBar`, `Sparkline`, `ScaleMetaBadges`
+> sont documentés ci-dessus/ci-dessous.
+
+---
+
+## Composant `ScaleMetaBadges`
+
+Fichier : `components/ui/ScaleMetaBadges/ScaleMetaBadges.tsx`
+
+Affiche la description et les chips méta d'une échelle clinique : badge Auto/Hétéro, chip nosologique, chips d'âge colorés. À utiliser comme enfant du composant `Card`.
+
+```tsx
+import { ScaleMetaBadges } from '../components/ui/ScaleMetaBadges/ScaleMetaBadges'
+
+<Card header={{ ... }}>
+  <ScaleMetaBadges
+    description={scale.description}
+    evaluationType={scale.evaluationType}   // 'auto' | 'hetero'
+    category={scale.category}               // string — chip nosologique
+    targetAges={scale.targetAges}           // TargetAge[] — chips colorés via AGE_BADGE_CONFIG
+  />
+</Card>
+```
+
+### Props
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `description` | `string` | Texte descriptif affiché au-dessus des chips |
+| `evaluationType` | `'auto' \| 'hetero'` | Badge coloré — bleu (auto-évaluation) ou vert (hétéro-évaluation) |
+| `category` | `string` | Chip nosologique gris (ex. `'Humeur'`, `'Anxiété'`) |
+| `targetAges` | `readonly TargetAge[]` | Chips d'âge colorés — couleurs définies dans `AGE_BADGE_CONFIG` de `data/scales.ts` |
+
+### Labels i18n
+
+| Clé | `fr` | `en` |
+|---|---|---|
+| `scales.eval_auto` | Auto | Self-report |
+| `scales.eval_hetero` | Hétéro | Clinician-rated |
+
+### Classes CSS (dans `ScaleMetaBadges.css`)
+
+| Classe | Rôle |
+|---|---|
+| `.scale-meta__desc` | Texte descriptif |
+| `.scale-meta__chips` | Conteneur flex des chips |
+| `.scale-meta__eval-badge` | Badge Auto/Hétéro — base |
+| `.scale-meta__eval-badge--auto` | Variante bleue |
+| `.scale-meta__eval-badge--hetero` | Variante verte |
+| `.scale-meta__category-chip` | Chip nosologique gris |
+| `.scale-meta__age-chip` | Chip d'âge — couleur appliquée en inline via `AGE_BADGE_CONFIG` |
 
 ---
 

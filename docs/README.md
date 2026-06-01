@@ -18,6 +18,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`setup.md`](setup.md) | Installation, configuration et lancement |
 | [`invitation-flow.md`](invitation-flow.md) | Flux complet d'invitation patient (web ↔ email ↔ mobile) |
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
+| [`module-sources.md`](module-sources.md) | Onglet « Sources & recommandations » du panneau praticien (table `module_sources`) |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
 | [`terminologie-praticiens.md`](terminologie-praticiens.md) | Glossaire métier (IDE, IPA, etc.) |
@@ -73,6 +74,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 | [`mobile-app.md`](../apps/mobile/docs/mobile-app.md) | Vue d'ensemble : structure, navigation, écrans, SQLite, notifications |
 | [`invitation-flow.md`](../apps/mobile/docs/invitation-flow.md) | Volet mobile du flux d'invitation |
 | [`avatar.md`](../apps/mobile/docs/avatar.md) | Photo de profil patient : pick, upload Supabase Storage, RLS |
+| [`notification-permission.md`](../apps/mobile/docs/notification-permission.md) | Écran d'onboarding : explication + demande de permission push |
 
 ## Ajouter un document
 

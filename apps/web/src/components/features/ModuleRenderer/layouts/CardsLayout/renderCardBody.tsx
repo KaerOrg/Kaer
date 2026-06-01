@@ -14,14 +14,10 @@ const FIELD_REGISTRY: Record<string, ComponentType<FieldProps>> = {
   card_callout:        FieldText,
   card_definition:     CardDefinition,
   card_divider:        CardDivider,
-  card_heading_2:      FieldText,
-  card_heading_3:      FieldText,
-  card_heading_4:      FieldText,
+  card_heading:        FieldText,
   card_list_item:      FieldListItem,
   card_numbered_item:  FieldListItem,
   card_paragraph:      FieldText,
-  card_paragraph_bold: FieldText,
-  card_italic_note:    FieldText,
 }
 
 function renderField(f: ContentField, t: (key: string) => string): ReactNode {

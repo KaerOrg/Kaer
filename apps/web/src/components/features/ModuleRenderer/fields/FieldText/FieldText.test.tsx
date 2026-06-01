@@ -15,14 +15,19 @@ function inlineChild(variant: 'bold' | 'text', text_code: string): ContentField 
 
 describe('FieldText — headings', () => {
   it.each([
-    ['card_heading_2', 'h2'],
-    ['card_heading_3', 'h3'],
-    ['card_heading_4', 'h4'],
-  ] as const)('%s rend <%s> avec le texte traduit', (fieldType, tag) => {
-    const { container } = render(<FieldText field={field(fieldType)} t={t} />)
+    ['2', 'h2'],
+    ['3', 'h3'],
+    ['4', 'h4'],
+  ] as const)('card_heading level=%s rend <%s>', (level, tag) => {
+    const { container } = render(<FieldText field={field('card_heading', { props: { level } })} t={t} />)
     const el = container.querySelector(tag)
     expect(el).toBeTruthy()
     expect(el?.textContent).toBe('some.key')
+  })
+
+  it('card_heading sans level rend <h2> par défaut', () => {
+    const { container } = render(<FieldText field={field('card_heading')} t={t} />)
+    expect(container.querySelector('h2')).toBeTruthy()
   })
 })
 
@@ -72,25 +77,6 @@ describe('FieldText — step', () => {
   it('step_hint rend le texte entre guillemets', () => {
     const { container } = render(<FieldText field={field('step_hint', { text_code: 'hint.key' })} t={t} />)
     expect(container.querySelector('div.preview-step__hint')?.textContent).toBe('"hint.key"')
-  })
-})
-
-describe('FieldText — quadrant', () => {
-  it('quadrant_title applique la couleur depuis props.color', () => {
-    const { container } = render(
-      <FieldText field={field('quadrant_title', { props: { color: '#FF0000' } })} t={t} />
-    )
-    expect(container.querySelector('div.preview-quadrant__title')?.style.color).toBe('rgb(255, 0, 0)')
-  })
-
-  it('quadrant_title utilise la couleur par défaut si props.color absent', () => {
-    const { container } = render(<FieldText field={field('quadrant_title')} t={t} />)
-    expect(container.querySelector('div.preview-quadrant__title')?.style.color).toBe('rgb(99, 102, 241)')
-  })
-
-  it('quadrant_subtitle rend <div class="preview-quadrant__subtitle">', () => {
-    const { container } = render(<FieldText field={field('quadrant_subtitle')} t={t} />)
-    expect(container.querySelector('div.preview-quadrant__subtitle')).toBeTruthy()
   })
 })
 

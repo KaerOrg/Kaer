@@ -44,7 +44,6 @@ jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import type { ContentField } from '../../../services/moduleService'
@@ -283,18 +282,13 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
 
   it('supprime une entrée après confirmation', async () => {
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
-      const destructive = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = destructive?.onPress as () => Promise<void>
-    })
-
     renderLayout()
-    fireEvent.press(await screen.findByTestId('delete-sel-1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
+    const deleteBtn = await screen.findByTestId('delete-sel-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
 
-    expect(database.deleteTreeSelection).toHaveBeenCalledWith('sel-1')
+    await waitFor(() => {
+      expect(database.deleteTreeSelection).toHaveBeenCalledWith('sel-1')
+    })
     await waitFor(() => expect(screen.queryByTestId('entry-card-sel-1')).toBeNull())
   })
 })
