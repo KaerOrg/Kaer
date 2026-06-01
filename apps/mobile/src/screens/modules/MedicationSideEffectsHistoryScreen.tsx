@@ -8,7 +8,6 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native'
-import Svg, { Polyline, Circle, Line, Text as SvgText } from 'react-native-svg'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -22,12 +21,20 @@ import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useAuthStore } from '../../store/authStore'
 import { fetchModuleEvents, type SideEffectsEvent } from '../../services/homeService'
+import {
+  DimensionChart,
+  RangeSelector,
+  buildChartData,
+  buildXLabels,
+  computeStreak,
+} from '../../components/features/TimeRangeCharts'
+import type { TimeRange } from '../../components/features/TimeRangeCharts'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
-type TimeRange = '7J' | '1M' | '6M' | '1A'
 
 const SCALE_ID = 'medication_side_effects'
 const MODULE_COLOR = '#8B5CF6'
+const Y_MAX = 3
 
 const SYMPTOM_KEYS = [
   'sedation',
@@ -47,455 +54,7 @@ const SYMPTOM_LABEL_KEYS: Record<string, string> = {
   nausea:    'effect_nausea_label',
 }
 
-// ── Data point ───────────────────────────────────────────────────────────────
-
-interface DataPoint {
-  value: number
-  hasValue: boolean
-}
-
-// ── X-axis labels ─────────────────────────────────────────────────────────────
-
-interface XLabel {
-  index: number
-  label: string
-}
-
-function buildXLabels(range: TimeRange, locale: string): XLabel[] {
-  const now = new Date()
-
-  if (range === '7J') {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(now)
-      d.setDate(d.getDate() - (6 - i))
-      return { index: i, label: String(d.getDate()) }
-    })
-  }
-
-  if (range === '1M') {
-    return [0, 9, 19, 29].map(i => {
-      const d = new Date(now)
-      d.setDate(d.getDate() - (29 - i))
-      const label = d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
-        .replace(/\./g, '').replace(/\s+/g, ' ')
-      return { index: i, label }
-    })
-  }
-
-  if (range === '6M') {
-    const labels: XLabel[] = []
-    let lastMonth = -1
-    for (let i = 0; i < 26; i++) {
-      const bucketEnd = new Date(now)
-      bucketEnd.setDate(bucketEnd.getDate() - (25 - i) * 7)
-      const month = bucketEnd.getMonth()
-      if (month !== lastMonth) {
-        lastMonth = month
-        const label = bucketEnd
-          .toLocaleDateString(locale, { month: 'short' })
-          .replace(/\./g, '')
-          .slice(0, 4)
-        labels.push({ index: i, label })
-      }
-    }
-    return labels
-  }
-
-  // 1A — one label per month
-  return Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1)
-    const label = d
-      .toLocaleDateString(locale, { month: 'short' })
-      .replace(/\./g, '')
-      .slice(0, 3)
-    return { index: i, label }
-  })
-}
-
-// ── Chart data builders ──────────────────────────────────────────────────────
-
-function buildChartData(entries: ScaleEntry[], key: string, range: TimeRange): DataPoint[] {
-  const now = new Date()
-
-  if (range === '7J') {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(now)
-      d.setDate(d.getDate() - (6 - i))
-      const dateStr = d.toISOString().slice(0, 10)
-      const entry = entries.find(e => e.created_at.slice(0, 10) === dateStr)
-      const val = entry?.subscale_scores?.[key] as number | undefined
-      return { value: val ?? 0, hasValue: val != null }
-    })
-  }
-
-  if (range === '1M') {
-    return Array.from({ length: 30 }, (_, i) => {
-      const d = new Date(now)
-      d.setDate(d.getDate() - (29 - i))
-      const dateStr = d.toISOString().slice(0, 10)
-      const entry = entries.find(e => e.created_at.slice(0, 10) === dateStr)
-      const val = entry?.subscale_scores?.[key] as number | undefined
-      return { value: val ?? 0, hasValue: val != null }
-    })
-  }
-
-  if (range === '6M') {
-    return Array.from({ length: 26 }, (_, i) => {
-      const bucketEnd = new Date(now)
-      bucketEnd.setDate(bucketEnd.getDate() - (25 - i) * 7)
-      const bucketStart = new Date(bucketEnd)
-      bucketStart.setDate(bucketStart.getDate() - 6)
-      const bucket = entries.filter(e => {
-        const d = new Date(e.created_at)
-        return d >= bucketStart && d <= bucketEnd
-      })
-      if (bucket.length === 0) return { value: 0, hasValue: false }
-      const avg = bucket.reduce((s, e) => s + ((e.subscale_scores?.[key] as number | undefined) ?? 0), 0) / bucket.length
-      return { value: avg, hasValue: true }
-    })
-  }
-
-  return Array.from({ length: 12 }, (_, i) => {
-    const month = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1)
-    const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0)
-    const bucket = entries.filter(e => {
-      const d = new Date(e.created_at)
-      return d >= month && d <= monthEnd
-    })
-    if (bucket.length === 0) return { value: 0, hasValue: false }
-    const avg = bucket.reduce((s, e) => s + ((e.subscale_scores?.[key] as number | undefined) ?? 0), 0) / bucket.length
-    return { value: avg, hasValue: true }
-  })
-}
-
-function computeAvg(points: DataPoint[]): string {
-  const valid = points.filter(p => p.hasValue)
-  if (valid.length === 0) return '—'
-  const avg = valid.reduce((s, p) => s + p.value, 0) / valid.length
-  return avg.toFixed(1)
-}
-
-function computeStreak(entries: ScaleEntry[]): number {
-  if (entries.length === 0) return 0
-  const datesWithEntry = new Set(entries.map(e => e.created_at.slice(0, 10)))
-  let streak = 0
-  const cur = new Date()
-  cur.setHours(0, 0, 0, 0)
-  while (true) {
-    const dateStr = cur.toISOString().slice(0, 10)
-    if (!datesWithEntry.has(dateStr)) break
-    streak++
-    cur.setDate(cur.getDate() - 1)
-  }
-  return streak
-}
-
-// ── LineChart — 1M / 6M / 1A ─────────────────────────────────────────────────
-
-const SVG_W = 280
-const DATA_H = 56
-const LABEL_H = 14
-const SVG_H = DATA_H + LABEL_H
-const PAD_X = 6
-const PAD_Y = 6
-
-interface LineChartProps {
-  points: DataPoint[]
-  color: string
-  xLabels: XLabel[]
-}
-
-function LineChart({ points, color, xLabels }: LineChartProps) {
-  const n = points.length
-  if (n === 0) return null
-
-  const innerW = SVG_W - PAD_X * 2
-  const innerH = DATA_H - PAD_Y * 2
-
-  const xAt = (i: number) => PAD_X + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW)
-  const yAt = (v: number) => PAD_Y + innerH - (v / 3) * innerH
-
-  // Build connected segments (skip gaps)
-  const segments: string[][] = []
-  let current: string[] = []
-  for (let i = 0; i < n; i++) {
-    if (points[i].hasValue) {
-      current.push(`${xAt(i).toFixed(1)},${yAt(points[i].value).toFixed(1)}`)
-    } else {
-      if (current.length > 1) segments.push(current)
-      current = []
-    }
-  }
-  if (current.length > 1) segments.push(current)
-
-  const baseY = yAt(0)
-  const labelY = DATA_H + LABEL_H - 2
-
-  return (
-    <Svg width="100%" height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} preserveAspectRatio="none">
-      {/* Baseline */}
-      <Line
-        x1={PAD_X} y1={baseY}
-        x2={SVG_W - PAD_X} y2={baseY}
-        stroke="#E5E7EB"
-        strokeWidth="1"
-      />
-
-      {/* Connected segments */}
-      {segments.map((seg, si) => (
-        <Polyline
-          key={si}
-          points={seg.join(' ')}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      ))}
-
-      {/* Data points */}
-      {points.map((p, i) => {
-        if (!p.hasValue) return null
-        return (
-          <Circle
-            key={i}
-            cx={xAt(i)}
-            cy={yAt(p.value)}
-            r={n <= 12 ? 3.5 : 2.5}
-            fill={color}
-            stroke="white"
-            strokeWidth="1.5"
-          />
-        )
-      })}
-
-      {/* X-axis labels */}
-      {xLabels.map(({ index, label }) => (
-        <SvgText
-          key={`xl_${index}`}
-          x={xAt(index)}
-          y={labelY}
-          textAnchor="middle"
-          fontSize={n > 12 ? '7' : '8'}
-          fill="#9CA3AF"
-        >
-          {label}
-        </SvgText>
-      ))}
-    </Svg>
-  )
-}
-
-// ── BarChart — 7J ─────────────────────────────────────────────────────────────
-
-const BAR_H = 48
-
-interface BarChartProps {
-  points: DataPoint[]
-  color: string
-  xLabels: XLabel[]
-}
-
-function BarChart({ points, color, xLabels }: BarChartProps) {
-  return (
-    <View style={barStyles.wrapper}>
-      {/* Value labels above bars */}
-      <View style={barStyles.topLabels}>
-        {points.map((p, i) => (
-          <View key={i} style={barStyles.topCell}>
-            {p.hasValue && p.value > 0 && (
-              <Text style={[barStyles.valueLabel, { color }]}>{p.value}</Text>
-            )}
-          </View>
-        ))}
-      </View>
-
-      {/* Bars */}
-      <View style={barStyles.row}>
-        {points.map((p, i) => {
-          const h = !p.hasValue || p.value === 0 ? 2 : Math.max(4, (p.value / 3) * BAR_H)
-          return (
-            <View
-              key={i}
-              style={[
-                barStyles.bar,
-                {
-                  height: h,
-                  backgroundColor: p.hasValue && p.value > 0 ? color : '#D1D5DB',
-                  opacity: p.hasValue ? 1 : 0.4,
-                },
-              ]}
-            />
-          )
-        })}
-      </View>
-
-      {/* Date labels below bars — one per bar, same flex layout */}
-      <View style={barStyles.bottomLabels}>
-        {points.map((_, i) => (
-          <View key={i} style={barStyles.bottomCell}>
-            <Text style={barStyles.dateLabel}>{xLabels[i]?.label ?? ''}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  )
-}
-
-const barStyles = StyleSheet.create({
-  wrapper: { gap: 2 },
-  topLabels: {
-    flexDirection: 'row',
-    height: 13,
-  },
-  topCell: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  valueLabel: {
-    fontSize: 9,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 2,
-    height: BAR_H,
-  },
-  bar: {
-    flex: 1,
-    borderRadius: 2,
-  },
-  bottomLabels: {
-    flexDirection: 'row',
-    marginTop: 3,
-  },
-  bottomCell: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  dateLabel: {
-    fontSize: 9,
-    color: '#9CA3AF',
-    textAlign: 'center',
-  },
-})
-
-// ── SymptomChart ─────────────────────────────────────────────────────────────
-
-interface SymptomChartProps {
-  label: string
-  points: DataPoint[]
-  color: string
-  avgLabel: string
-  range: TimeRange
-  xLabels: XLabel[]
-}
-
-function SymptomChart({ label, points, color, avgLabel, range, xLabels }: SymptomChartProps) {
-  const avg = computeAvg(points)
-  return (
-    <View style={symptomStyles.card}>
-      <View style={symptomStyles.header}>
-        <Text style={symptomStyles.label} numberOfLines={2}>{label}</Text>
-        <Text style={[symptomStyles.avg, { color }]}>
-          {avg === '—' ? avg : avgLabel.replace('{{value}}', avg)}
-        </Text>
-      </View>
-      {range === '7J'
-        ? <BarChart points={points} color={color} xLabels={xLabels} />
-        : <LineChart points={points} color={color} xLabels={xLabels} />
-      }
-    </View>
-  )
-}
-
-const symptomStyles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: spacing.xs,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  label: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text,
-    lineHeight: 17,
-  },
-  avg: {
-    fontSize: 12,
-    fontWeight: '700',
-    flexShrink: 0,
-  },
-})
-
-// ── RangeSelector ────────────────────────────────────────────────────────────
-
-const RANGES: TimeRange[] = ['7J', '1M', '6M', '1A']
-
-interface RangeSelectorProps {
-  value: TimeRange
-  onChange: (r: TimeRange) => void
-  labels: Record<TimeRange, string>
-  color: string
-}
-
-function RangeSelector({ value, onChange, labels, color }: RangeSelectorProps) {
-  return (
-    <View style={rangeStyles.row}>
-      {RANGES.map(r => (
-        <Pressable
-          key={r}
-          style={[rangeStyles.btn, value === r && { backgroundColor: color, borderColor: color }]}
-          onPress={() => onChange(r)}
-        >
-          <Text style={[rangeStyles.label, value === r && rangeStyles.labelActive]}>
-            {labels[r]}
-          </Text>
-        </Pressable>
-      ))}
-    </View>
-  )
-}
-
-const rangeStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-    flexWrap: 'wrap',
-  },
-  btn: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.textMuted,
-  },
-  labelActive: {
-    color: colors.white,
-  },
-})
-
-// ── Main screen ───────────────────────────────────────────────────────────────
+const RANGES: readonly TimeRange[] = ['7J', '1M', '6M', '1A']
 
 export default function MedicationSideEffectsHistoryScreen() {
   const navigation = useNavigation<Nav>()
@@ -536,22 +95,19 @@ export default function MedicationSideEffectsHistoryScreen() {
   const chartData = useMemo(
     () => Object.fromEntries(
       SYMPTOM_KEYS.map(key => [key, buildChartData(entries, key, timeRange)])
-    ) as Record<string, DataPoint[]>,
+    ) as Record<string, ReturnType<typeof buildChartData>>,
     [entries, timeRange]
   )
 
-  const xLabels = useMemo(
-    () => buildXLabels(timeRange, locale),
-    [timeRange, locale]
-  )
-
+  const xLabels = useMemo(() => buildXLabels(timeRange, locale), [timeRange, locale])
   const streak = useMemo(() => computeStreak(entries), [entries])
 
   const rangeLabels: Record<TimeRange, string> = {
-    '7J': t(`modules.${SCALE_ID}.range_7j`),
-    '1M': t(`modules.${SCALE_ID}.range_1m`),
-    '6M': t(`modules.${SCALE_ID}.range_6m`),
-    '1A': t(`modules.${SCALE_ID}.range_1a`),
+    '7J':  t(`modules.${SCALE_ID}.range_7j`),
+    '1M':  t(`modules.${SCALE_ID}.range_1m`),
+    '3M':  t(`modules.${SCALE_ID}.range_3m`) || '3 mois',
+    '6M':  t(`modules.${SCALE_ID}.range_6m`),
+    '1A':  t(`modules.${SCALE_ID}.range_1a`),
   }
   const avgLabel     = t(`modules.${SCALE_ID}.chart_avg`)
   const chartSection = t(`modules.${SCALE_ID}.chart_section`)
@@ -592,7 +148,6 @@ export default function MedicationSideEffectsHistoryScreen() {
       <TeenAccent color={accentColor} />
       <ScrollView contentContainerStyle={styles.container}>
 
-        {/* Streak badge */}
         {streak > 0 && (
           <View style={[styles.streakBadge, { borderColor: accentColor }]}>
             <MaterialCommunityIcons name="fire" size={18} color={accentColor} />
@@ -604,18 +159,18 @@ export default function MedicationSideEffectsHistoryScreen() {
           </View>
         )}
 
-        {/* Range selector + charts */}
         <View style={styles.section}>
           <Text style={typography.h3}>{chartSection}</Text>
           <RangeSelector
             value={timeRange}
             onChange={setTimeRange}
+            ranges={RANGES}
             labels={rangeLabels}
             color={accentColor}
           />
           <View style={styles.chartGrid}>
             {SYMPTOM_KEYS.map(key => (
-              <SymptomChart
+              <DimensionChart
                 key={key}
                 label={t(`modules.${SCALE_ID}.${SYMPTOM_LABEL_KEYS[key]}`)}
                 points={chartData[key]}
@@ -623,12 +178,12 @@ export default function MedicationSideEffectsHistoryScreen() {
                 avgLabel={avgLabel}
                 range={timeRange}
                 xLabels={xLabels}
+                yMax={Y_MAX}
               />
             ))}
           </View>
         </View>
 
-        {/* Events from practitioner */}
         {events.length > 0 && (
           <View style={styles.section}>
             <Text style={typography.h3}>{t(`modules.${SCALE_ID}.events_title`)}</Text>
@@ -648,7 +203,6 @@ export default function MedicationSideEffectsHistoryScreen() {
           </View>
         )}
 
-        {/* New entry button */}
         <Pressable
           style={[styles.newBtn, { backgroundColor: accentColor }]}
           onPress={() => navigation.navigate('ScaleEntry', { scale_id: SCALE_ID })}
@@ -657,7 +211,6 @@ export default function MedicationSideEffectsHistoryScreen() {
           <Text style={styles.newBtnText}>{newBtnLabel}</Text>
         </Pressable>
 
-        {/* Entry list */}
         {entries.length === 0 ? (
           <View style={styles.empty}>
             <MaterialCommunityIcons name="clipboard-text-outline" size={48} color={colors.border} />
@@ -800,12 +353,7 @@ const styles = StyleSheet.create({
   },
   chipKey: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
   chipValue: { fontSize: 11, color: colors.text },
-  noteInline: {
-    fontSize: 12,
-    color: colors.textMuted,
-    fontStyle: 'italic',
-    marginTop: 6,
-  },
+  noteInline: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', marginTop: 6 },
   cardActions: { flexDirection: 'column', alignItems: 'center', gap: 10, paddingLeft: spacing.sm },
   note: {
     flexDirection: 'row',

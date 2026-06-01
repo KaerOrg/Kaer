@@ -99,7 +99,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `decisional_balance` | Balance décisionnelle | Implémenté — moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé |
 | `behavioral_activation` | Activation comportementale | Implémenté — `preview_kind='activity_log'`, liste activités groupées par date, scores Plaisir/Maîtrise 0–10, statut planifiée/réalisée, SQLite `activity_records` |
 | `grounding` | Ancrage 5-4-3-2-1 | Implémenté — `preview_kind='guided_exercise'`, exercice DBT sensoriel interactif (Linehan 1993), 3 modes (intro/guided/done), sans stockage de données |
-| `mood_tracker` | Thermomètre de l'humeur | Implémenté — saisie quotidienne 4 dimensions (humeur/énergie/anxiété/plaisir 1–10), sparklines 30j, SQLite `mood_entries` (UNIQUE sur `date`) |
+| `mood_tracker` | Thermomètre de l'humeur | Implémenté — 6 dimensions (humeur/énergie/anxiété/plaisir/sommeil/alimentation 1–10, repère « Normal » au centre), écran custom 3 onglets (Saisie/Évolution/Vue d'ensemble), graphiques 7J/1M/3M/1A + axe Y, CompositeChart overlay, repères temporels (Life Chart, SQLite `mood_markers`), heatmap calendrier, rappels, SQLite `scale_entries` |
 | `motivational_balance` | Balance motivationnelle | Implémenté — `preview_kind='tabbed'`, 2 onglets (Fiches psyedu + Balance pour/contre), SQLite local |
 | `medication_adherence` | Observance médicamenteuse | Implémenté — `preview_kind='daily_checkin'`, checklist quotidienne d'observance, SQLite local |
 | `breathing_techniques` | Techniques de respiration | Implémenté — `preview_kind='fields'`, respirations guidées (cohérence cardiaque, respiration abdominale), SQLite local |
@@ -183,7 +183,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Saturation cognitive (`cognitive_saturation`) — défusion ACT, tapotement sur pensée cible, SQLite `cognitive_saturation_sessions`
 - [x] Module Activation comportementale (`behavioral_activation`) — activités P/M 0–10, statut planifiée/réalisée, SQLite `activity_records`
 - [x] Module Ancrage 5-4-3-2-1 (`grounding`) — exercice DBT sensoriel interactif (Linehan 1993), 3 modes, sans stockage de données
-- [x] Module Thermomètre de l'humeur (`mood_tracker`) — 4 dimensions quotidiennes (humeur/énergie/anxiété/plaisir 1–10), sparklines 30j, SQLite `mood_entries`
+- [x] Module Thermomètre de l'humeur (`mood_tracker`) — refonte : 6 dimensions (repère « Normal » bidirectionnel), écran custom 3 onglets (Saisie/Évolution/Vue d'ensemble), graphiques 7J/1M/3M/1A + axe Y + courbes continues, CompositeChart, repères temporels (Life Chart, `mood_markers` SQLite), heatmap calendrier, rappels, SQLite `scale_entries`, 27 tests Jest
 - [x] Module Balance motivationnelle (`motivational_balance`) — 2 onglets psyedu + balance pour/contre, SQLite local
 - [x] Module Observance médicamenteuse (`medication_adherence`) — checklist quotidienne d'observance, SQLite local
 - [x] Module Techniques de respiration (`breathing_techniques`) — respirations guidées (cohérence cardiaque, abdominale), SQLite local

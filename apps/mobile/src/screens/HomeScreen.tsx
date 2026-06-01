@@ -29,6 +29,7 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   breathing_techniques:     'BreathingTechniques',
   crisis_plan:              'CrisisPlan',
   medication_side_effects:  'MedicationSideEffectsHistory',
+  mood_tracker:             'MoodTracker',
 }
 
 

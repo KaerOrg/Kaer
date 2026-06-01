@@ -312,6 +312,7 @@ function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTex
             const icon = (f.props['icon'] as string | undefined) as React.ComponentProps<typeof MaterialCommunityIcons>['name'] | undefined
             const lowHintCode = f.props['low_hint_code'] as string | undefined
             const highHintCode = f.props['high_hint_code'] as string | undefined
+            const midHintCode = f.props['mid_hint_code'] as string | undefined
             const selectedValue = answers[qIndex] ?? null
             const pips = Array.from({ length: max - min + 1 }, (_, i) => min + i)
             return (
@@ -349,9 +350,14 @@ function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTex
                     )
                   })}
                 </View>
-                {(lowHintCode != null || highHintCode != null) && (
+                {(lowHintCode != null || midHintCode != null || highHintCode != null) && (
                   <View style={styles.sliderHints}>
                     <Text style={styles.sliderHint}>{lowHintCode != null ? t(lowHintCode) : ''}</Text>
+                    {midHintCode != null && (
+                      <Text style={[styles.sliderHint, styles.sliderHintMid, { color }]}>
+                        {t(midHintCode)}
+                      </Text>
+                    )}
                     <Text style={styles.sliderHint}>{highHintCode != null ? t(highHintCode) : ''}</Text>
                   </View>
                 )}
@@ -3876,8 +3882,9 @@ const styles = StyleSheet.create({
   sliderPip:       { flex: 1, aspectRatio: 1, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   sliderPipText:   { fontSize: 11, fontWeight: '500', color: colors.textMuted },
   sliderPipTextSelected: { color: colors.white, fontWeight: '700' },
-  sliderHints:     { flexDirection: 'row', justifyContent: 'space-between' },
+  sliderHints:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sliderHint:      { fontSize: 11, color: colors.textMuted },
+  sliderHintMid:   { fontSize: 11, fontWeight: '700', textAlign: 'center' },
 })
 
 const gStyles = StyleSheet.create({

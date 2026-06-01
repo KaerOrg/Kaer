@@ -12,6 +12,7 @@ import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScr
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import MedicationSideEffectsHistoryScreen from '../screens/modules/MedicationSideEffectsHistoryScreen'
+import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
@@ -36,6 +37,7 @@ export type AppStackParamList = {
   CrisisPlan: undefined
   CrisisUrgency: undefined
   MedicationSideEffectsHistory: undefined
+  MoodTracker: undefined
 }
 
 export type TabParamList = {
@@ -142,6 +144,11 @@ export default function AppStack() {
       <Stack.Screen
         name="MedicationSideEffectsHistory"
         component={MedicationSideEffectsHistoryScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="MoodTracker"
+        component={MoodTrackerScreen}
         options={{ title: '' }}
       />
     </Stack.Navigator>
