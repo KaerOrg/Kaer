@@ -126,6 +126,7 @@ export type PreviewKind =
   | 'chrono_month'
   | 'exposure_hierarchy'
   | 'mood_tracker'
+  | 'medication_side_effects'
   | 'crisis_urgency'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.

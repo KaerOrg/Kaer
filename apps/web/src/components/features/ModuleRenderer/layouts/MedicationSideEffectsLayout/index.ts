@@ -1,0 +1,1 @@
+export { MedicationSideEffectsLayout } from './MedicationSideEffectsLayout'

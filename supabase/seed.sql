@@ -1035,7 +1035,6 @@ on conflict (id) do nothing;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
-update public.modules set preview_kind = 'questionnaire'     where id = 'medication_side_effects' and preview_kind = 'fields';
 update public.modules set preview_kind = 'mood_tracker'      where id = 'mood_tracker'            and preview_kind = 'fields';
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
@@ -1250,21 +1249,30 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('mood_tracker.footer', 'mood_tracker', NULL, NULL, 'footer_note', 'modules.mood_tracker.footer', 99)
 on conflict (id) do nothing;
 
--- ── module_content_fields : medication_side_effects (questionnaire) ──────────
+-- ── medication_side_effects : refonte « tracker multi-dimensions » ───────────
+-- 12 effets indésirables suivis en intensité 0–10 (base 0 = absent, pas de repère
+-- central), même mécanique que mood_tracker. Purge des anciens champs (questionnaire
+-- 0-3 / format fields) avant réinsertion. Idempotent (ré-exécutable).
+delete from public.module_content_fields where module_id = 'medication_side_effects';
+delete from public.field_props where field_id like 'mse.%';
+update public.modules set preview_kind = 'medication_side_effects' where id = 'medication_side_effects';
+
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
-  ('mse.instr1', 'medication_side_effects', NULL, NULL, 'scale_instruction', 'modules.medication_side_effects.scale_info', 0),
-  ('mse.opt0', 'medication_side_effects', NULL, NULL, 'scale_option', 'modules.medication_side_effects.scale_absent', 10),
-  ('mse.opt1', 'medication_side_effects', NULL, NULL, 'scale_option', 'modules.medication_side_effects.scale_mild', 11),
-  ('mse.opt2', 'medication_side_effects', NULL, NULL, 'scale_option', 'modules.medication_side_effects.scale_moderate', 12),
-  ('mse.opt3', 'medication_side_effects', NULL, NULL, 'scale_option', 'modules.medication_side_effects.scale_severe', 13),
-  ('mse.q1', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_sedation_label', 100),
-  ('mse.q2', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_akathisia_label', 101),
-  ('mse.q3', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_tremors_label', 102),
-  ('mse.q4', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_dry_mouth_label', 103),
-  ('mse.q5', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_sleep_label', 104),
-  ('mse.q6', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_nausea_label', 105),
-  ('mse.notes', 'medication_side_effects', NULL, NULL, 'scale_text_input', 'modules.medication_side_effects.notes_placeholder', 990),
-  ('mse.footer', 'medication_side_effects', NULL, NULL, 'footer_note', 'modules.medication_side_effects.footer', 999)
+  ('mse.instruction',   'medication_side_effects', NULL, NULL, 'scale_instruction',     'modules.medication_side_effects.instructions',  5),
+  ('mse.q_sedation',    'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_sedation',  10),
+  ('mse.q_sleep',       'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_sleep',     20),
+  ('mse.q_akathisia',   'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_akathisia', 30),
+  ('mse.q_tremors',     'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_tremors',   40),
+  ('mse.q_dry_mouth',   'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_dry_mouth', 50),
+  ('mse.q_nausea',      'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_nausea',    60),
+  ('mse.q_constipation','medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_constipation', 70),
+  ('mse.q_weight',      'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_weight',    80),
+  ('mse.q_appetite_loss','medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_appetite_loss', 90),
+  ('mse.q_dizziness',   'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_dizziness', 100),
+  ('mse.q_headache',    'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_headache',  110),
+  ('mse.q_sexual',      'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_sexual',    120),
+  ('mse.notes',         'medication_side_effects', NULL, NULL, 'scale_text_input',      'modules.medication_side_effects.notes_label',   990),
+  ('mse.footer',        'medication_side_effects', NULL, NULL, 'footer_note',           'modules.medication_side_effects.footer',        999)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : breathing_techniques (fields) ────────────────────
@@ -1586,16 +1594,58 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('gr.touch.title', 'step_number', '4')
 on conflict (field_id, prop_key) do nothing;
 
--- medication_side_effects : valeurs des options
+-- medication_side_effects : sliders 0-10 + couleurs/icônes par effet
+-- Hints partagés (Absent / Très intense), AUCUN mid_hint (échelle unidirectionnelle).
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('mse.opt0', 'value', '0'),
-  ('mse.opt1', 'value', '1'),
-  ('mse.opt2', 'value', '2'),
-  ('mse.opt3', 'value', '3'),
-  ('mse.opt0', 'color', '#9CA3AF'),
-  ('mse.opt1', 'color', '#F59E0B'),
-  ('mse.opt2', 'color', '#F97316'),
-  ('mse.opt3', 'color', '#EF4444'),
+  ('mse.q_sedation', 'color', '#8B5CF6'),     ('mse.q_sedation', 'icon', 'power-sleep'),
+  ('mse.q_sedation', 'min', '0'),             ('mse.q_sedation', 'max', '10'),
+  ('mse.q_sedation', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_sedation', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_sleep', 'color', '#0EA5E9'),        ('mse.q_sleep', 'icon', 'sleep-off'),
+  ('mse.q_sleep', 'min', '0'),                ('mse.q_sleep', 'max', '10'),
+  ('mse.q_sleep', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_sleep', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_akathisia', 'color', '#F59E0B'),    ('mse.q_akathisia', 'icon', 'run-fast'),
+  ('mse.q_akathisia', 'min', '0'),            ('mse.q_akathisia', 'max', '10'),
+  ('mse.q_akathisia', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_akathisia', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_tremors', 'color', '#EF4444'),      ('mse.q_tremors', 'icon', 'vibrate'),
+  ('mse.q_tremors', 'min', '0'),              ('mse.q_tremors', 'max', '10'),
+  ('mse.q_tremors', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_tremors', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_dry_mouth', 'color', '#06B6D4'),    ('mse.q_dry_mouth', 'icon', 'water-off'),
+  ('mse.q_dry_mouth', 'min', '0'),            ('mse.q_dry_mouth', 'max', '10'),
+  ('mse.q_dry_mouth', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_dry_mouth', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_nausea', 'color', '#10B981'),       ('mse.q_nausea', 'icon', 'stomach'),
+  ('mse.q_nausea', 'min', '0'),               ('mse.q_nausea', 'max', '10'),
+  ('mse.q_nausea', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_nausea', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_constipation', 'color', '#A16207'), ('mse.q_constipation', 'icon', 'toilet'),
+  ('mse.q_constipation', 'min', '0'),         ('mse.q_constipation', 'max', '10'),
+  ('mse.q_constipation', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_constipation', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_weight', 'color', '#EC4899'),       ('mse.q_weight', 'icon', 'scale-bathroom'),
+  ('mse.q_weight', 'min', '0'),               ('mse.q_weight', 'max', '10'),
+  ('mse.q_weight', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_weight', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_appetite_loss', 'color', '#14B8A6'),('mse.q_appetite_loss', 'icon', 'food-off'),
+  ('mse.q_appetite_loss', 'min', '0'),        ('mse.q_appetite_loss', 'max', '10'),
+  ('mse.q_appetite_loss', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_appetite_loss', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_dizziness', 'color', '#6366F1'),    ('mse.q_dizziness', 'icon', 'rotate-3d-variant'),
+  ('mse.q_dizziness', 'min', '0'),            ('mse.q_dizziness', 'max', '10'),
+  ('mse.q_dizziness', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_dizziness', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_headache', 'color', '#F97316'),     ('mse.q_headache', 'icon', 'head-flash'),
+  ('mse.q_headache', 'min', '0'),             ('mse.q_headache', 'max', '10'),
+  ('mse.q_headache', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_headache', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.q_sexual', 'color', '#A855F7'),       ('mse.q_sexual', 'icon', 'gender-male-female'),
+  ('mse.q_sexual', 'min', '0'),               ('mse.q_sexual', 'max', '10'),
+  ('mse.q_sexual', 'low_hint_code', 'modules.medication_side_effects.dim_hint_low'),
+  ('mse.q_sexual', 'high_hint_code', 'modules.medication_side_effects.dim_hint_high'),
+  ('mse.notes', 'placeholder_code', 'modules.medication_side_effects.notes_placeholder'),
   ('mse.notes', 'subscale_key', 'notes'),
   ('mse.notes', 'optional', 'true')
 on conflict (field_id, prop_key) do nothing;
@@ -1750,14 +1800,6 @@ from (values
   ('mood.field_3', 'slider:1:10'),
   ('mood.field_4', 'slider:1:10'),
   ('mood.field_5', 'textarea'),
-  -- medication_side_effects
-  ('mse.field_1', 'slider:0:3'),
-  ('mse.field_2', 'slider:0:3'),
-  ('mse.field_3', 'slider:0:3'),
-  ('mse.field_4', 'slider:0:3'),
-  ('mse.field_5', 'slider:0:3'),
-  ('mse.field_6', 'slider:0:3'),
-  ('mse.field_7', 'textarea'),
   -- medication_adherence
   ('madh.field_1', 'radio:ok'),
   ('madh.field_2', 'radio:partial'),
