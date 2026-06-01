@@ -9,7 +9,6 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const PatientPage = lazy(() => import('./pages/PatientPage').then(m => ({ default: m.PatientPage })))
 const PatientRegisterPage = lazy(() => import('./pages/PatientRegisterPage').then(m => ({ default: m.PatientRegisterPage })))
-const DispensairePage = lazy(() => import('./pages/DispensairePage').then(m => ({ default: m.DispensairePage })))
 const ModuleCatalogPage = lazy(() => import('./pages/ModuleCatalogPage').then(m => ({ default: m.ModuleCatalogPage })))
 const ModulePreviewPage = lazy(() => import('./pages/ModulePreviewPage').then(m => ({ default: m.ModulePreviewPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
@@ -60,7 +59,6 @@ function App() {
               <>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/patient/:id" element={<PatientPage />} />
-                <Route path="/dispensaire" element={<DispensairePage />} />
                 <Route path="/modules" element={<ModuleCatalogPage />} />
                 <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
                 <Route path="/profil" element={<ProfilePage />} />

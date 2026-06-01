@@ -210,7 +210,7 @@ export async function cancelAppointment(
 /** Praticien lié au patient courant (pour la réservation). */
 export async function fetchPatientPractitioner(
   patientId: string,
-): Promise<{ id: string; name: string } | null> {
+): Promise<{ id: string } | null> {
   const { data: rel } = await supabase
     .from('practitioner_patients')
     .select('practitioner_id')
@@ -218,11 +218,5 @@ export async function fetchPatientPractitioner(
     .limit(1)
     .single()
   if (!rel) return null
-  const { data: pract } = await supabase
-    .from('practitioners')
-    .select('id, name')
-    .eq('id', rel.practitioner_id)
-    .single()
-  if (!pract) return null
-  return { id: pract.id as string, name: (pract as { id: string; name: string }).name }
+  return { id: rel.practitioner_id as string }
 }

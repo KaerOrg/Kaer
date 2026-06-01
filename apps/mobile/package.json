@@ -4,7 +4,9 @@
   "main": "index.ts",
   "scripts": {
     "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -13,11 +15,11 @@
     "@react-navigation/native": "^7.2.2",
     "@react-navigation/native-stack": "^7.14.10",
     "@supabase/supabase-js": "^2.101.1",
-    "expo": "~54.0.34",
-    "expo-image-picker": "~17.0.11",
-    "expo-linking": "~8.0.12",
+    "expo": "~54.0.33",
+    "expo-image-picker": "~17.0.10",
+    "expo-linking": "~8.0.11",
     "expo-localization": "~17.0.8",
-    "expo-notifications": "~0.32.17",
+    "expo-notifications": "~0.32.16",
     "expo-secure-store": "~15.0.8",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
@@ -26,7 +28,7 @@
     "react": "^19.1.0",
     "react-i18next": "^17.0.4",
     "react-native": "0.81.5",
-    "react-native-get-random-values": "~1.11.0",
+    "react-native-get-random-values": "^2.0.0",
     "react-native-markdown-display": "^7.0.2",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -41,16 +43,14 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-markdown-display)"
     ],
     "moduleNameMapper": {
-      "^react$": "<rootDir>/node_modules/react",
-      "^react/jsx-runtime$": "<rootDir>/node_modules/react/jsx-runtime",
-      "^react/jsx-dev-runtime$": "<rootDir>/node_modules/react/jsx-dev-runtime",
+      "^@react-native-async-storage/async-storage$": "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts",
       "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts",
       "^expo-image-picker$": "<rootDir>/src/__mocks__/expo-image-picker.ts",
       "^react-native-markdown-display$": "<rootDir>/src/__mocks__/react-native-markdown-display.tsx",
       "^react-i18next$": "<rootDir>/src/__mocks__/react-i18next.ts",
       "^expo-localization$": "<rootDir>/src/__mocks__/expo-localization.ts",
-      "^react/(.*)$": "<rootDir>/node_modules/react/$1"
+      "^expo-constants$": "<rootDir>/src/__mocks__/expo-constants.ts"
     }
   },
   "devDependencies": {

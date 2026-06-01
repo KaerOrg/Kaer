@@ -6,7 +6,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native'
 import * as Linking from 'expo-linking'
 import { useTranslation } from 'react-i18next'
@@ -29,6 +28,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const register = useAuthStore((s) => s.register)
 
   useEffect(() => {
@@ -48,16 +48,17 @@ export default function RegisterScreen({ navigation, route }: Props) {
   }
 
   const handleRegister = async () => {
+    setError(null)
     if (!token.trim() || !password || !confirm) {
-      Alert.alert(t('auth.missing_fields_title'), t('auth.register_missing_fields'))
+      setError(t('auth.register_missing_fields'))
       return
     }
     if (password !== confirm) {
-      Alert.alert(t('auth.passwords_mismatch_title'), t('auth.passwords_mismatch_message'))
+      setError(t('auth.passwords_mismatch_message'))
       return
     }
     if (password.length < 8) {
-      Alert.alert(t('auth.password_too_short_title'), t('auth.password_too_short_message'))
+      setError(t('auth.password_too_short_message'))
       return
     }
     setLoading(true)
@@ -65,7 +66,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
       await register(token.trim(), password)
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : t('common.error')
-      Alert.alert(t('auth.register_error_title'), message)
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -112,6 +113,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
             placeholder={t('auth.password_placeholder')}
           />
 
+          {!!error && <Text style={styles.error}>{error}</Text>}
           <Button label={t('auth.register_button')} onPress={handleRegister} loading={loading} />
           <Button
             label={t('auth.already_account')}
@@ -133,4 +135,5 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md },
   title: { fontSize: 24, fontWeight: '700', color: colors.text },
   intro: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
+  error: { fontSize: 13, color: colors.danger, lineHeight: 18, textAlign: 'center' },
 })

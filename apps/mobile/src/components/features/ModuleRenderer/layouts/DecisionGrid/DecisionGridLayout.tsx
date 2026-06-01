@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, KeyboardAvoidingView, Platform } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors } from '../../../../../theme'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
+import { useToast } from '../../../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import {
   generateId,
@@ -52,14 +54,16 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
   const t = useModuleT()
   const { i18n } = useTranslation()
   const patient = useAuthStore((s) => s.patient)
-
-  const ft = useCallback((type: string): string => {
-    const f = fields.find((field) => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
-  }, [fields, t])
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   // ── Configuration ──────────────────────────────────────────────────────────
   const configField = useMemo(() => fields.find((f) => f.field_type === 'decision_grid_config'), [fields])
+
+  const lbl = useCallback((key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }, [configField, t])
   const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const targetBehaviorKey = (configField?.props['target_behavior_key'] ?? 'target_behavior') as string
   const weightMin = parseInt(configField?.props['weight_min'] ?? '1', 10)
@@ -71,8 +75,8 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
     min: weightMin,
     max: weightMax,
     defaultValue: weightDefault,
-    label: ft('decision_grid_weight_label') || undefined,
-  }), [weightMin, weightMax, weightDefault, ft])
+    label: lbl('weight_label') || undefined,
+  }), [weightMin, weightMax, weightDefault, lbl])
 
   // ── Quadrants (sorted by sort_order of their column_header) ────────────────
   const quadrants = useMemo<QuadrantSpec[]>(() => {
@@ -163,22 +167,17 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
   }, [])
 
   const handleDelete = useCallback((item: PlanItem) => {
-    Alert.alert(
-      ft('decision_grid_delete_title') || t('common.delete'),
-      `"${item.text}"`,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await deletePlanItem(item.id)
-            setItems((prev) => prev.filter((i) => i.id !== item.id))
-          },
-        },
-      ],
-    )
-  }, [ft, t])
+    showConfirm({
+      title: lbl('delete_title') || t('common.delete'),
+      message: `"${item.text}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deletePlanItem(item.id)
+        setItems((prev) => prev.filter((i) => i.id !== item.id))
+      },
+    })
+  }, [lbl, t, showConfirm])
 
   // ── Save (target behavior + engagement signal) ────────────────────────────
   const handleSave = useCallback(async () => {
@@ -188,27 +187,27 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
       if (patient?.id && engagementEventType) {
         await logEvent(patient.id, engagementEventType as EngagementEventType, {})
       }
-      const savedMessage = ft('decision_grid_saved_message')
-      Alert.alert(t('common.saved'), savedMessage || '')
+      const savedMessage = lbl('saved_message')
+      showToast(savedMessage || t('common.saved'), 'success')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [moduleId, targetBehaviorKey, targetBehavior, patient, engagementEventType, ft, t])
+  }, [moduleId, targetBehaviorKey, targetBehavior, patient, engagementEventType, lbl, t, showToast])
 
   if (loading) {
     return <View style={dgStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
-  const targetLabel = ft('decision_grid_target_label')
-  const targetPlaceholder = ft('decision_grid_target_placeholder')
-  const saveLabel = ft('decision_grid_save_label') || t('common.save')
-  const addLabel = ft('decision_grid_add_label') || t('common.add')
-  const argPlaceholder = ft('decision_grid_arg_placeholder')
-  const gaugeTitle = ft('decision_grid_gauge_title')
-  const gaugeChangeLabel = ft('decision_grid_gauge_change_label')
-  const gaugeStatusLabel = ft('decision_grid_gauge_status_label')
+  const targetLabel = lbl('target_label')
+  const targetPlaceholder = lbl('target_placeholder')
+  const saveLabel = lbl('save_label') || t('common.save')
+  const addLabel = lbl('add_label') || t('common.add')
+  const argPlaceholder = lbl('arg_placeholder')
+  const gaugeTitle = lbl('gauge_title')
+  const gaugeChangeLabel = lbl('gauge_change_label')
+  const gaugeStatusLabel = lbl('gauge_status_label')
 
   // Distribute quadrants into rows of 2 — robust to any number of quadrants,
   // but designed for the canonical 4-quadrant decisional balance.

@@ -6,14 +6,14 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Alert,
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
 import { Plus, ChevronRight } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
+import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
 import {
   fetchPatientAppointments,
   cancelAppointment,
@@ -91,8 +91,10 @@ function AppointmentItem({
 
 export default function AppointmentsScreen() {
   const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
   const navigation = useNavigation<Nav>()
   const { patient } = useAuthStore()
+  const { showConfirm } = useConfirmDialog()
 
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [practitionerId, setPractitionerId] = useState<string | null>(null)
@@ -113,72 +115,73 @@ export default function AppointmentsScreen() {
   useFocusEffect(useCallback(() => { load().catch(() => setLoading(false)) }, [load]))
 
   const handleCancel = useCallback((id: string) => {
-    Alert.alert(
-      t('agenda.appointment.cancel_btn'),
-      t('agenda.appointment.cancel_confirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await cancelAppointment(id)
-            void load()
-          },
-        },
-      ],
-    )
-  }, [t, load])
+    showConfirm({
+      title: t('agenda.appointment.cancel_btn'),
+      message: t('agenda.appointment.cancel_confirm'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await cancelAppointment(id)
+        void load()
+      },
+    })
+  }, [t, load, showConfirm])
 
   const upcoming = appointments.filter(isUpcoming)
   const past = appointments.filter(a => !isUpcoming(a))
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <>
+          <ScrollView contentContainerStyle={styles.scroll}>
+            {upcoming.length === 0 && past.length === 0 ? (
+              <View style={styles.emptyWrapper}>
+                <EmptyState
+                  icon="📅"
+                  title={t('agenda.empty_title')}
+                  description={t('agenda.empty_description')}
+                />
+              </View>
+            ) : null}
+
+            {upcoming.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>{t('agenda.section_upcoming')}</Text>
+                {upcoming.map(appt => (
+                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
+                ))}
+              </>
+            )}
+
+            {past.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>{t('agenda.section_past')}</Text>
+                {past.map(appt => (
+                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
+                ))}
+              </>
+            )}
+          </ScrollView>
+
           {practitionerId && (
-            <Pressable
-              style={styles.bookBtn}
-              onPress={() =>
-                navigation.navigate('BookAppointment', { practitionerId })
-              }
-            >
-              <Plus size={18} color="#fff" />
-              <Text style={styles.bookBtnText}>{t('agenda.appointment.new')}</Text>
-            </Pressable>
+            <View style={[styles.bookBtnWrapper, { paddingBottom: insets.bottom + spacing.md }]}>
+              <Pressable
+                style={styles.bookBtn}
+                onPress={() =>
+                  navigation.navigate('BookAppointment', { practitionerId })
+                }
+              >
+                <Plus size={18} color="#fff" />
+                <Text style={styles.bookBtnText}>{t('agenda.appointment.new')}</Text>
+              </Pressable>
+            </View>
           )}
-
-          {upcoming.length === 0 && past.length === 0 ? (
-            <EmptyState
-              icon="📅"
-              title={t('agenda.empty_title')}
-              description={t('agenda.empty_description')}
-            />
-          ) : null}
-
-          {upcoming.length > 0 && (
-            <>
-              <Text style={styles.sectionTitle}>{t('agenda.section_upcoming')}</Text>
-              {upcoming.map(appt => (
-                <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
-              ))}
-            </>
-          )}
-
-          {past.length > 0 && (
-            <>
-              <Text style={styles.sectionTitle}>{t('agenda.section_past')}</Text>
-              {past.map(appt => (
-                <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
-              ))}
-            </>
-          )}
-        </ScrollView>
+        </>
       )}
     </SafeAreaView>
   )
@@ -187,7 +190,15 @@ export default function AppointmentsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  scroll: { padding: spacing.md, gap: spacing.sm },
+  scroll: { flexGrow: 1, padding: spacing.md, gap: spacing.sm },
+  emptyWrapper: { flex: 1, justifyContent: 'center' },
+  bookBtnWrapper: {
+    padding: spacing.md,
+    paddingBottom: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.background,
+  },
   bookBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,7 +207,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: radius.md,
     padding: spacing.md,
-    marginBottom: spacing.md,
   },
   bookBtnText: {
     color: '#fff',
@@ -224,8 +234,8 @@ const styles = StyleSheet.create({
   },
   itemContent: {
     flex: 1,
-    padding: spacing.sm,
-    gap: 4,
+    padding: spacing.md,
+    gap: 6,
   },
   itemTime: {
     fontSize: fontSize.body,

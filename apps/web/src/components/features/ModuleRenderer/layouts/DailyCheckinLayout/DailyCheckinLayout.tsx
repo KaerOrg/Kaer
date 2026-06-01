@@ -14,22 +14,23 @@ interface Props {
 // d'un bouton de sauvegarde. Le rendu web est purement passif — pas de saisie
 // possible, pas de logique conditionnelle, conformément à MDR 2017/745.
 export function DailyCheckinLayout({ fields, footer, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'daily_checkin_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
   const statusOptions = fields
     .filter(f => f.field_type === 'daily_status_option')
     .sort((a, b) => a.sort_order - b.sort_order)
 
-  const tabTodayLabel = ft('daily_tab_today_label')
-  const tabHistoryLabel = ft('daily_tab_history_label')
-  const todayLabel = ft('daily_today_label')
-  const question = ft('daily_question')
-  const notesLabel = ft('daily_notes_label')
-  const notesPlaceholder = ft('daily_notes_placeholder')
-  const saveLabel = ft('daily_save_label')
-  const historyEmpty = ft('daily_history_empty_text')
+  const tabTodayLabel = lbl('tab_today_label')
+  const tabHistoryLabel = lbl('tab_history_label')
+  const todayLabel = lbl('today_label')
+  const question = lbl('question')
+  const notesLabel = lbl('notes_label')
+  const notesPlaceholder = lbl('notes_placeholder')
+  const saveLabel = lbl('save_label')
+  const historyEmpty = lbl('history_empty_text')
 
   return (
     <div className="preview-daily">

@@ -1,0 +1,26 @@
+.exercise-safety-field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: #fff;
+  cursor: default;
+}
+
+.exercise-safety-field__content {
+  display: flex;
+  flex-direction: column;
+}
+
+.exercise-safety-field__number {
+  font-size: var(--font-size-md);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.exercise-safety-field__label {
+  font-size: 10px;
+  opacity: 0.85;
+  line-height: 1.3;
+}

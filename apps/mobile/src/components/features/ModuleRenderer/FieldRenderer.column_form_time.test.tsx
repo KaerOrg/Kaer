@@ -125,8 +125,7 @@ describe('FieldRenderer — column_form (column_time_field)', () => {
 
   it('rend un placeholder pour un champ horaire vide en mode entry', async () => {
     renderLayout()
-    await waitFor(() => expect(database.getAllFormEntries).toHaveBeenCalled())
-    fireEvent.press(screen.getByTestId('new-entry'))
+    fireEvent.press(await screen.findByTestId('new-entry'))
     expect(await screen.findByTestId('time-wake_time')).toBeTruthy()
     expect(screen.getByTestId('time-wake_time-button')).toBeTruthy()
     // Pas de bouton clear quand la valeur est vide

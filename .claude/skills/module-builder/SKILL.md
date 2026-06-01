@@ -23,8 +23,26 @@ supabase: modules + module_content_fields + field_props
 
 **Conséquences directes :**
 1. **Zéro page hardcodée.** Aucun module ne s'introduit dans le code par une route React/React-Native dédiée avec son JSX propre. Le module vit en base ; le rendu est dérivé. Pour une dérogation, voir la section *Écran dédié* — strictement encadrée.
-2. **L'aperçu praticien n'est jamais une version dégradée du mobile.** Il consomme la *même* `fetchModuleFields(moduleId)`. Si une info manque côté web, c'est une régression — pas un design choice.
+2. **L'aperçu praticien est au pixel près identique au mobile — pas vaguement proche.** La "Vue patient" web doit montrer **exactement** les mêmes sections dans le même ordre que l'écran mobile, en lecture seule. Si une section est visible par le patient sur mobile, elle doit être visible dans l'aperçu web. Il n'y a pas d'exception tolérée.
 3. **Les composants sont génériques, abstraits du métier.** Un widget ne « sait » pas qu'il sert au module de sommeil. Il prend des props (`min`, `max`, `unit`, `icon`, `variant`, `tone`…) et se comporte. **Plusieurs variations d'un même composant > X composants quasi-identiques.**
+
+### Parité pour les modules à écran dédié (non-FieldRenderer)
+
+Pour les modules dont l'interaction mobile est trop complexe pour `FieldRenderer` (animations Reanimated, machine d'état multi-écrans), la parité web est assurée par un **composant `<ModuleId>Preview`** dédié :
+
+```
+apps/web/src/components/features/<ModuleId>Preview/
+├── <ModuleId>Preview.tsx   ← miroir lecture-seule de l'écran mobile
+├── <ModuleId>Preview.css
+└── index.ts
+```
+
+Ce composant est **branché dans `ModulePreviewPanel`** via `moduleType === '<module_id>'`. Il reproduit **chaque section** de l'écran mobile, en lecture seule :
+- Les données configurées par le praticien (depuis Supabase via le service) sont affichées.
+- Les données locales du patient (photos, phrases, signatures SQLite) sont représentées par des placeholders visuels fidèles.
+- L'ordre des sections est identique à l'écran mobile.
+
+**Patron de référence** : `CrisisPlanPreview` pour `crisis_plan` — banière urgence → 6 étapes → raisons de tenir (message praticien + placeholders photos) → cartes de coping → engagement → barre d'urgence.
 
 ---
 
@@ -82,7 +100,9 @@ Le module va lire des données, en écrire, peut-être en mettre en cache. **Tou
 
 Un service non documenté dans `docs/services.md` n'existe pas. C'est cette discipline qui empêche la prochaine PR de re-dupliquer la même requête.
 
-#### B. Widgets et layouts
+#### B. Widgets, layouts et field_types
+
+> **Avant de concevoir un nouveau `field_type` ou layout, ouvrir `docs/module-engine.md` section "Inventaire complet des field_types" et la lire entièrement.** Cette table recense les 44+ types déjà implémentés. Un `field_type` créé alors qu'un équivalent existait est un bug d'architecture — le veto #15 s'applique.
 
 **Widgets de saisie disponibles** (web + mobile, dialecte miroir) :
 
@@ -236,11 +256,29 @@ ORDER BY sort_order;
 
 ## Phase 3 — Choix « étendre vs créer »
 
-Ce skill **interdit la duplication implicite**. Avant d'écrire un nouveau composant :
+Ce skill **interdit la duplication implicite**. **Créer un nouveau composant est exceptionnel — rarissime.** La règle par défaut est de réutiliser ou d'étendre ce qui existe.
 
-1. **Existe-t-il déjà un widget/layout qui couvre 80 % du besoin ?** Si oui, ajouter une `prop` (variante) au widget existant — pas de nouveau fichier. Documenter la nouvelle prop dans son test et dans la doc du widget.
-2. **Y a-t-il un cas équivalent ailleurs ?** Grep le code (`Grep` tool) sur le besoin (ex. un slider à pips numérotés → `scale_slider_question` existe déjà). Réutiliser.
-3. **Sinon, créer un composant générique** : nom non-métier (`PipPicker`, pas `SleepDurationPicker`), API par props, pas de strings hardcodés, pas de couplage à un module précis. Une variation = une prop. Plusieurs comportements = un `variant: 'tone-a' | 'tone-b'` documenté.
+### Ordre de priorité strict
+
+1. **Existe-t-il déjà un widget/layout/field_type qui couvre 80 % du besoin ?** → Ajouter une `prop` (variante) au widget existant — pas de nouveau fichier. Documenter la nouvelle prop dans son test et dans la doc du widget.
+2. **Y a-t-il un cas équivalent ailleurs ?** → Grep le code (`Grep` tool) sur le besoin (ex. un slider à pips numérotés → `scale_slider_question` existe déjà). Réutiliser.
+3. **L'extension requiert un virage trop important (changement de contrat d'API, rupture de comportement) ?** → Créer un composant générique **uniquement après avoir justifié explicitement pourquoi l'extension n'était pas possible** (inscrire la justification dans le fichier de doc du module).
+
+### Si — et seulement si — un nouveau composant doit être créé
+
+**Nom non-métier** (`PipPicker`, pas `SleepDurationPicker`), API par props, pas de strings hardcodés, pas de couplage à un module précis. Une variation = une prop. Plusieurs comportements = un `variant: 'tone-a' | 'tone-b'` documenté.
+
+**Mise à jour obligatoire des docs** — créer un composant sans mettre à jour la documentation correspondante est interdit (veto #14) :
+
+| Ce qui est créé | Document à mettre à jour |
+|---|---|
+| Nouveau `field_type` (ou extension d'un existant) | `docs/module-engine.md` — section "Inventaire complet des field_types" |
+| Nouveau widget (web ou mobile) | `apps/web/docs/design-system.md` ou `apps/mobile/docs/design-system.md` — section Widgets |
+| Nouveau service ou nouvelle fonction de service | `docs/services.md` — tableau exhaustif des services |
+| Nouveau layout (`preview_kind`) | `docs/module-engine.md` — section "Layouts disponibles (`preview_kind`)" + tableau `FieldRenderer` |
+| Nouveau composant UI primitif | Design system doc de l'app concernée — section Composants primitifs |
+
+Cette règle vaut pour les **modifications d'API** d'un composant existant (nouvelle prop) : si la prop change le comportement documenté, mettre à jour la doc.
 
 Anti-pattern à refuser en revue :
 
@@ -374,12 +412,49 @@ Par défaut : **aucun**. Un commentaire vit pour expliquer un *pourquoi non-évi
 - Animer **uniquement** `transform` et `opacity` (Reanimated)
 - Mobile : `Pressable` > `TouchableOpacity` ; `expo-image` pour les images ; safe areas dans les `ScrollView` ; texte toujours dans `<Text>` (jamais string nue dans le JSX)
 
-### 4.9 Mode Ado (mobile)
+### 4.9 Mode Ado (mobile) — obligatoire sans exception
 
 Tout écran de module mobile **doit** :
 - Importer `useTeen` et `TeenAccent`
 - Passer `teenColor('<module_id>')` à `TeenAccent`
-- Avoir des clés `modules.<id>.*` dans `teen.json` (tutoiement, registre ado)
+- Utiliser `tt(moduleId, textKey)` pour tous les textes propres au module (pas `t()`)
+- Avoir des clés `modules.<id>.*` dans `teen.json` fr + en (tutoiement, registre ado)
+
+Cela vaut aussi pour les **écrans dédiés** (non-`FieldRenderer`) : même si la palette teen n'est pas appliquée pour des raisons UX (ex. écran d'urgence rouge), `useTeen` doit être importé pour adapter les textes.
+
+Patron minimal à respecter :
+
+```tsx
+import { useTeen } from '../../hooks/useTeen'
+import TeenAccent from '../../components/features/TeenAccent'
+
+export default function MyModuleScreen() {
+  const { isTeenMode, tt, teenColor } = useTeen()
+
+  return (
+    <View style={styles.root}>
+      <TeenAccent moduleId="my_module_id" color={teenColor('my_module_id')} />
+      {/* tt('my_module_id', 'title') résout modules.my_module_id.title en teen si actif */}
+      <Text>{tt('my_module_id', 'title')}</Text>
+      ...
+    </View>
+  )
+}
+```
+
+Teen mode dans `teen.json` — chaque clé `modules.<id>.*` de `common.json` a sa variante :
+
+```json
+// fr/teen.json
+{
+  "modules": {
+    "my_module_id": {
+      "title": "Ton titre en tutoiement",
+      "disclaimer": "Ce module est un support à tes consultations."
+    }
+  }
+}
+```
 
 ### 4.10 Style — zéro CSS / StyleSheet dans les composants
 
@@ -643,7 +718,8 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 ### Composants impactés
 - Réutilisés : <liste>
 - Étendus (nouvelles props) : <liste avec props ajoutées>
-- Créés : <liste avec justification — un fichier par composant>
+- Créés : <liste avec justification obligatoire — pourquoi l'extension était impossible — un fichier par composant>
+- Docs mises à jour pour chaque création : <liste — docs/module-engine.md / design-system.md / docs/services.md selon le type>
 - Style : <vérification — aucun style inline, tokens du design system uniquement>
 
 ### Schéma / Seed
@@ -657,6 +733,11 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 
 ### Tests prévus
 - <liste>
+
+### Mode Ado — confirmation
+- `useTeen` + `TeenAccent` intégrés dans chaque écran mobile : <oui>
+- Clés `modules.<id>.*` ajoutées dans `fr/teen.json` et `en/teen.json` : <oui>
+- `tt(moduleId, key)` utilisé pour les textes propres au module : <oui>
 
 ### MDR — confirmation
 - Aucun seuil interprétatif, aucune alerte conditionnelle, aucun label clinique apposé sur des chiffres saisis : <oui>
@@ -688,6 +769,9 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 7. **Veto style en dur** — `style={{...}}` ad hoc, `StyleSheet` avec valeurs hardcodées, classes CSS contenant des couleurs / spacing / radius en clair sont refusés. **Tokens du design system uniquement.**
 8. **Veto multi-composants par fichier** — un fichier `.tsx` n'exporte qu'un seul composant React. Tout sous-composant a son propre fichier.
 9. **Veto service non documenté** — un nouveau service (ou un service étendu) sans JSDoc + test + ligne mise à jour dans `docs/services.md` n'est pas considéré comme livré.
-10. **Web ≡ Mobile** — si l'aperçu web n'a pas accès à un texte/widget que le mobile affiche, c'est un bug à corriger dans le seed ou dans le `FieldRenderer` web — pas un design choice.
+10. **Web ≡ Mobile — parité stricte, pas vague proximité** — chaque section visible par le patient sur mobile doit apparaître dans la "Vue patient" web, dans le même ordre, en lecture seule. Si l'aperçu web omet une section ou la rétrécit à une note statique alors que le mobile l'affiche en plein, c'est une régression bloquante — pas un design choice. Pour les modules data-driven : corriger le seed ou le `FieldRenderer`. Pour les modules à écran dédié : créer ou compléter un composant `<ModuleId>Preview` (voir section *Parité pour les modules à écran dédié*).
 11. **Tests avant clôture** — la tâche n'est pas terminée tant que `tsc --noEmit` et les trois commandes de tests (`test:shared`, `test:web`, `test:mobile`) ne passent pas.
 12. **Doc avant clôture** — `docs/modules/<id>.md`, `docs/modules.md`, `docs/services.md` (si service touché), `CLAUDE.md` mis à jour, sinon la tâche n'est pas terminée.
+13. **Veto teen mode absent** — tout écran mobile sans `useTeen` + `TeenAccent` + clés `teen.json` (fr + en) est refusé. Aucune exception, même pour les écrans d'urgence ou plein-écran : `useTeen` doit être importé pour les textes même si la palette teen est ignorée pour des raisons UX légitimes.
+14. **Veto nouveau composant sans mise à jour doc** — créer un nouveau composant (widget, layout, field_type, service, primitif UI) sans mettre à jour le document de référence correspondant est refusé. La table en Phase 3 liste quel doc mettre à jour selon ce qui est créé. Un composant livré sans sa trace documentaire n'est pas livré — c'est de la dette invisible qui cause le biais de réimplémentation dans les sessions futures.
+15. **Veto nouveau field_type sans consultation de l'inventaire** — avant d'introduire un `field_type` qui n'apparaît pas dans `docs/module-engine.md`, vérifier que aucun des 44+ types existants ne couvre le besoin (par prop ou variante). Si un équivalent existe → l'utiliser ou l'étendre. Si aucun équivalent ne convient → justifier en 3 lignes dans le doc du module et mettre à jour l'inventaire.

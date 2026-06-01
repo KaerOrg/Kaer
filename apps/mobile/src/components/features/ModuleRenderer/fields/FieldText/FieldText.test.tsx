@@ -17,14 +17,10 @@ function field(field_type: string, text_code?: string, extra: Partial<ContentFie
 
 describe('FieldText', () => {
   const VARIANTS: [string, string][] = [
-    ['card_heading_2',   'h2 text'],
-    ['card_heading_3',   'h3 text'],
-    ['card_heading_4',   'h4 text'],
+    ['card_heading',     'heading text'],
     ['card_paragraph',   'paragraph text'],
     ['footer_note',      'footer text'],
     ['step_title',       'step title'],
-    ['quadrant_title',   'quadrant title'],
-    ['quadrant_subtitle','quadrant subtitle'],
     ['card_title',       'card title'],
     ['card_summary',     'card summary'],
   ]
@@ -33,6 +29,13 @@ describe('FieldText', () => {
     render(<FieldText field={field(type, code)} />)
     expect(screen.getByText(code)).toBeTruthy()
   })
+
+  it.each([['2', 'h2 text'], ['3', 'h3 text'], ['4', 'h4 text']] as const)(
+    'card_heading level=%s affiche son texte', (level, code) => {
+      render(<FieldText field={field('card_heading', code, { props: { level } })} />)
+      expect(screen.getByText(code)).toBeTruthy()
+    }
+  )
 
   it('card_paragraph avec bold=true affiche son texte', () => {
     render(<FieldText field={field('card_paragraph', 'bold text', { props: { bold: 'true' } })} />)
@@ -64,11 +67,6 @@ describe('FieldText', () => {
     render(<FieldText field={field('card_paragraph', 'parent.text', { children: [child] })} />)
     expect(screen.getByText('child.text')).toBeTruthy()
     expect(screen.queryByText('parent.text')).toBeNull()
-  })
-
-  it('quadrant_title accepte une prop color', () => {
-    render(<FieldText field={field('quadrant_title', 'titre coloré', { props: { color: '#FF0000' } })} />)
-    expect(screen.getByText('titre coloré')).toBeTruthy()
   })
 
   it("n'affiche rien quand text_code est null et pas de children", () => {
