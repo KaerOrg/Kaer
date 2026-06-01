@@ -1,10 +1,12 @@
-// Shared mock chain — supports both .order() (fetchUnlockedModules) and .contains() (fetchTodayRoutines)
+// Shared mock chain — supports .order() (fetchUnlockedModules), .contains() (fetchTodayRoutines),
+// and .maybeSingle() (fetchModuleEvents)
 const mockContains = jest.fn()
 const mockOrder = jest.fn()
 const mockEq = jest.fn()
+const mockMaybeSingle = jest.fn()
 const mockSelect = jest.fn()
 
-const chain = { eq: mockEq, order: mockOrder, contains: mockContains }
+const chain = { eq: mockEq, order: mockOrder, contains: mockContains, maybeSingle: mockMaybeSingle }
 mockEq.mockReturnValue(chain)
 mockSelect.mockReturnValue(chain)
 
@@ -14,7 +16,7 @@ jest.mock('../lib/supabase', () => ({
   },
 }))
 
-import { fetchUnlockedModules, fetchTodayRoutines } from './homeService'
+import { fetchUnlockedModules, fetchTodayRoutines, fetchModuleEvents } from './homeService'
 
 beforeEach(() => jest.clearAllMocks())
 
@@ -182,5 +184,47 @@ describe('homeService.fetchTodayRoutines', () => {
 
     expect(result.mobile_icon).toBe('help-circle-outline')
     expect(result.preview_kind).toBe('')
+  })
+})
+
+// ── fetchModuleEvents ───────────────────────────────────────────────────────
+
+describe('homeService.fetchModuleEvents', () => {
+  it('retourne les événements depuis config.events (happy path)', async () => {
+    const events = [
+      { date: '2026-04-14', label: 'Changement de dose' },
+      { date: '2026-03-01', label: 'Nouveau traitement' },
+    ]
+    mockMaybeSingle.mockResolvedValue({ data: { config: { events } }, error: null })
+
+    const result = await fetchModuleEvents('pat-1', 'medication_side_effects')
+
+    expect(mockEq).toHaveBeenCalledWith('patient_id', 'pat-1')
+    expect(mockEq).toHaveBeenCalledWith('module_type', 'medication_side_effects')
+    expect(result).toEqual(events)
+  })
+
+  it('retourne [] quand config est null', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null })
+
+    const result = await fetchModuleEvents('pat-1', 'medication_side_effects')
+
+    expect(result).toEqual([])
+  })
+
+  it('retourne [] quand config.events est absent', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: { config: {} }, error: null })
+
+    const result = await fetchModuleEvents('pat-1', 'medication_side_effects')
+
+    expect(result).toEqual([])
+  })
+
+  it('retourne [] quand config.events n\'est pas un tableau', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: { config: { events: 'bad' } }, error: null })
+
+    const result = await fetchModuleEvents('pat-1', 'medication_side_effects')
+
+    expect(result).toEqual([])
   })
 })

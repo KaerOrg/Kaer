@@ -320,7 +320,17 @@
       "observance_count": "{{count}} saisie ce mois-ci",
       "observance_count_plural": "{{count}} saisies ce mois-ci",
       "observance_last": "Dernière saisie : {{date}}",
-      "observance_never": "Aucune saisie enregistrée"
+      "observance_never": "Aucune saisie enregistrée",
+      "effect_sedation_label": "Somnolence",
+      "effect_akathisia_label": "Agitation / akathisie",
+      "effect_tremors_label": "Tremblements",
+      "effect_dry_mouth_label": "Sécheresse buccale",
+      "effect_sleep_label": "Troubles du sommeil",
+      "effect_nausea_label": "Nausées",
+      "streak_days": "jours consécutifs",
+      "streak_hint": "de saisies régulières",
+      "preview_demo_note": "Données illustratives — chaque point correspond à une saisie patient.",
+      "preview_event_label": "Changement de dose"
     },
     "medication_adherence": {
       "label": "Module Observance",

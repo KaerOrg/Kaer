@@ -573,7 +573,17 @@
       "observance_count": "{{count}} entry this month",
       "observance_count_plural": "{{count}} entries this month",
       "observance_last": "Last entry: {{date}}",
-      "observance_never": "No entries recorded"
+      "observance_never": "No entries recorded",
+      "effect_sedation_label": "Drowsiness",
+      "effect_akathisia_label": "Restlessness / akathisia",
+      "effect_tremors_label": "Tremors",
+      "effect_dry_mouth_label": "Dry mouth",
+      "effect_sleep_label": "Sleep disturbances",
+      "effect_nausea_label": "Nausea",
+      "streak_days": "consecutive days",
+      "streak_hint": "of regular entries",
+      "preview_demo_note": "Illustrative data — each point represents a patient entry.",
+      "preview_event_label": "Dose change"
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",

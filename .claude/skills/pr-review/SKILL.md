@@ -461,16 +461,19 @@ Pour chaque composant / classe CSS / bloc de markup introduit :
 |---|---|
 | Boutons d'onglets faits main (`__tab`, `__tabs`, `role="tab"` en dur) | `ui/Tabs` (props `variant`, `accentColor`) ou la variante compacte d'aperçu |
 | Bascule on/off (`__track`/`__thumb`) | `ui/Toggle` |
-| Carte / conteneur encadré (`__card`, bord + ombre + radius) | `ui/Card` (étendre avec une variante si besoin) |
+| Carte / conteneur encadré (`__card`, bord + ombre + radius) | `ui/Card` (étendre avec `onPress` si tappable, sinon `View`) |
 | Carte à en-tête cliquable / repliable | `ui/Accordion`, `ui/Card` |
 | Badge de statut coloré | `ui/StatusBadge` |
-| Bouton primaire/secondaire | `ui/Button` |
+| Bouton primaire/secondaire | `ui/Button` (étendre avec `iconLeft?: ReactNode` si icône nécessaire) |
 | Champ texte + label | `ui/InputField`, `ui/SelectField`, `ui/SearchInput` |
 | Modale / confirmation | `ui/Modal`, `ConfirmDialog` |
-| État vide (illustration + texte) | `ui/EmptyState` |
+| État vide (icône + titre + texte) | `ui/EmptyState` (mobile : `icon` accepte emoji string) |
 | Barre/slider de valeur, jauge | primitive slider/`ValueBar` existante — sinon en créer **une seule**, réutilisable |
 | Bandeau d'avertissement (mobile) | `DisclaimerBanner` |
 | Bande d'accent colorée (mobile) | `TeenAccent` |
+| `Pressable` stylé comme un bouton plein | `ui/Button` — jamais de `Pressable + Text + styles.xxxBtn` ad hoc |
+| `View + icon + Text + Text` comme état vide | `ui/EmptyState` |
+| `Pressable + View(card-like)` navigable | `ui/Card` avec prop `onPress` |
 
 Et au-delà de la liste : **toute** classe CSS nouvelle qui restyle un élément déjà
 couvert par un primitive, **tout** bloc de markup qui reproduit visuellement un
@@ -711,3 +714,162 @@ Appel direct `supabase.from('modules')` dans un composant.
 - [ ] **Chaque composant ajouté (`ui/`/`features/`) a une vraie section de doc** (chemin + usage + props) — pas seulement une mention d'inventaire (§5.2.1)
 - [ ] **Zéro texte en dur** — ni dans le code, ni en base/seed (colonnes affichées = clés i18n)
 ```
+
+---
+
+## Étape finale — Publication du rapport dans la PR et notification
+
+> **À exécuter systématiquement après avoir produit le rapport**, quelle que soit la sévérité des résultats.
+
+### 1. Trouver le numéro de PR
+
+```bash
+gh pr list --head <nom-de-la-branche-courante>
+```
+
+Si aucune PR n'existe pour la branche courante → s'arrêter ici, afficher le rapport uniquement dans la conversation.
+
+### 2. Poster le rapport en commentaire
+
+Publier le rapport complet (tel que produit ci-dessus) comme commentaire sur la PR :
+
+```bash
+gh pr comment <PR_NUMBER> --body "$(cat <<'REVIEW'
+<contenu intégral du rapport>
+REVIEW
+)"
+```
+
+Le rapport doit être posté **tel quel**, sans reformulation ni résumé — le commentaire doit contenir exactement le même contenu que ce qui a été produit à l'étape précédente.
+
+### 3. Notifier l'auteur de la PR
+
+Récupérer l'auteur de la PR et mentionner son handle GitHub dans un second commentaire court :
+
+```bash
+# Récupérer le handle GitHub de l'auteur
+gh pr view <PR_NUMBER> --json author --jq '.author.login'
+```
+
+Puis poster un commentaire de notification :
+
+```bash
+gh pr comment <PR_NUMBER> --body "@<AUTHOR_LOGIN> La review automatique vient d'être postée ci-dessus — $([ <NB_BLOCKING> -gt 0 ] && echo '<NB_BLOCKING> violation(s) bloquante(s) à corriger avant merge.' || echo 'aucune violation bloquante détectée ✅')"
+```
+
+Remplacer `<NB_BLOCKING>` par le nombre réel de violations bloquantes trouvées.
+
+### 4. Retourner les URLs des commentaires
+
+Afficher dans la conversation les URLs des deux commentaires postés, pour confirmation.
+
+### 5. Enrichir la documentation à partir des violations détectées
+
+> **Toujours exécuter**, même s'il n'y a aucune violation — confirmer que les règles existantes couvrent déjà les patterns observés.
+>
+> Objectif : chaque review améliore les règles du projet pour que la même erreur ne passe plus jamais. Les fichiers `.claude/rules/` et `CLAUDE.md` sont vivants — ils s'enrichissent à chaque PR.
+
+#### Principe
+
+> **Priorité d'écriture : rules/docs avant le skill.** L'objectif est que les développeurs ne commettent plus l'erreur — pas seulement que Claude la détecte mieux. Enrichir `.claude/rules/` et `CLAUDE.md` aide tout le monde (devs, autres skills, onboarding) ; enrichir ce skill n'aide que la review. En cas de doute sur où écrire : **rules/docs en premier, skill en dernier recours.**
+
+Pour chaque **violation bloquante** trouvée dans le rapport (les warnings sont ignorés — trop de bruit) :
+
+1. Identifier la règle correspondante dans `.claude/rules/coding-standards.md`, `.claude/rules/config-first.md`, ou `CLAUDE.md`.
+2. Lire la section concernée et vérifier : **la règle a-t-elle déjà un exemple concret illustrant exactement ce pattern ?**
+   - **Oui, l'exemple est déjà là** → rien à faire pour cette violation, passer à la suivante.
+   - **Non, la règle est présente mais sans exemple de ce cas précis** → ajouter un bloc `> **Cas rencontré :**` avec le code fautif extrait du fichier reviewé.
+   - **Le pattern n'est couvert par aucune règle existante** → ajouter une nouvelle entrée dans la section pertinente du fichier de règle (ou dans `CLAUDE.md` si transversal). N'enrichir le skill lui-même que si le pattern est propre au processus de review (ex. un nouveau type de fichier à analyser, une étape manquante) — jamais pour une règle métier ou de code.
+
+#### Format d'un enrichissement
+
+Insérer directement dans le fichier de règle, juste après la rule concernée :
+
+```markdown
+> **Cas rencontré — <branche> (<date>) :**
+> ```tsx
+> // ❌ Code fautif extrait de apps/mobile/src/screens/modules/FooScreen.tsx:42
+> supabase.from('modules').select('*')  // dans un composant
+> ```
+> → Déplacer dans un service : `moduleService.fetchModules()`.
+```
+
+#### Mapping violation → fichier de règle
+
+| Catégorie de violation | Fichier à enrichir | Section |
+|---|---|---|
+| Accès données (Supabase/SQLite dans composant) | `coding-standards.md` | § "Accès aux données" |
+| TypeScript (`any`, suppressions) | `coding-standards.md` | § "Suppressions interdites" / "TypeScript strict" |
+| Render inline (objets, callbacks) | `coding-standards.md` | § "Render — zéro déclaration inline" |
+| i18n (texte en dur) | `coding-standards.md` | § "Internationalisation" |
+| Design system (duplication d'un primitive) | `coding-standards.md` | § "Checklist obligatoire" |
+| Config-first (données en TS statique) | `config-first.md` | § "L'erreur classique" |
+| MDR 2017/745 | `CLAUDE.md` | § "RÈGLE D'OR — INTERDIT" |
+| Tests / documentation manquants | `CLAUDE.md` | § "Règles de développement" |
+| Mode Ado (useTeen/TeenAccent manquants) | `CLAUDE.md` | § "Pattern : Mode Ado" |
+| RLS / schema.sql | `coding-standards.md` | § "Sécurité" / "Schéma" |
+
+#### Après les enrichissements
+
+Afficher dans la conversation la liste des fichiers de règles modifiés et les enrichissements apportés, sous la forme :
+
+```
+📚 Documentation enrichie :
+- coding-standards.md — § "Accès aux données" : +1 exemple (FooScreen.tsx:42)
+- config-first.md — § "L'erreur classique" : +1 exemple (BarModule)
+```
+
+Si aucune règle n'a nécessité d'enrichissement : `📚 Règles déjà à jour — aucun enrichissement nécessaire.`
+
+### 6. Archiver le rapport
+
+Sauvegarder le rapport dans `.claude/pr-reviews/` pour permettre de mesurer rétrospectivement l'efficacité des enrichissements de règles.
+
+**a)** Créer le dossier si nécessaire :
+
+```bash
+mkdir -p .claude/pr-reviews
+```
+
+**b)** Nommer le fichier `YYYY-MM-DD_<branche>.md` :
+
+```bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD | tr '/' '-')
+DATE=$(date +%Y-%m-%d)
+# → .claude/pr-reviews/${DATE}_${BRANCH}.md
+```
+
+**c)** Écrire le fichier avec un front matter YAML suivi du rapport complet :
+
+```markdown
+---
+date: YYYY-MM-DD
+branch: <nom-de-branche>
+pr_number: <numéro ou null>
+pr_url: <URL complète ou null>
+ci_pass: true|false
+merge_clean: true|false
+violations:
+  mdr: N
+  data_access: N
+  typescript: N
+  i18n: N
+  tests: N
+  docs: N
+  design_system: N
+  config_first: N
+  rls_schema: N
+  one_component_per_file: N
+  teen_mode: N
+warnings: N
+files_created: N
+files_modified: N
+rules_enriched: N
+---
+
+<rapport complet tel que produit ci-dessus>
+```
+
+Le champ `rules_enriched` indique le nombre de fichiers de règles modifiés à l'étape 5 — c'est le signal clé pour mesurer si les enrichissements réduisent les violations au fil du temps.
+
+**d)** Confirmer en affichant le chemin du fichier archivé dans la conversation.

@@ -25,7 +25,6 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { colors } from '../../../../../theme'
 import {
   getAllFearEntries, getFearEntry, saveFearEntry, deleteFearEntry,
@@ -639,7 +638,7 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
             )}
             {footer != null && (
               <View style={etStyles.infoBox}>
-                <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+                <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
                 <Text style={etStyles.footerText}>{t(footer.text_code ?? '')}</Text>
               </View>
             )}
