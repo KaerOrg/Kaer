@@ -42,7 +42,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   const footer = visibleFields.find(f => f.field_type === 'footer_note')
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
-  if (preview_kind === 'questionnaire' || preview_kind === 'mood_tracker') {
+  if (preview_kind === 'questionnaire' || preview_kind === 'slider_dashboard') {
     if (questionnaire == null) return null
     return (
       <QuestionnaireLayout

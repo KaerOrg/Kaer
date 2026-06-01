@@ -639,27 +639,7 @@
   box-shadow: var(--shadow-sm);
 }
 
-.preview-daily__tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--color-border);
-  margin: -16px -16px 4px;
-  padding: 0 12px;
-}
-
-.preview-daily__tab {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  padding: 12px 14px;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-
-.preview-daily__tab--active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
+/* Onglets : ui/Tabs variant="compact" (plus de classes preview-daily__tab* faites main). */
 
 .preview-daily__date {
   font-size: 11px;
@@ -2876,140 +2856,35 @@
   line-height: 1.4;
 }
 
-/* ── MoodTrackerLayout (mood_tracker) ──────────────────────────────────────── */
+/* ── SliderDashboardLayout (slider_dashboard) ──────────────────────────────── */
+/* Onglets : ui/Tabs variant="compact". Lignes-slider : ui/ValueBar. Courbes : ui/Sparkline. */
 
-.mt {
+.sd {
   display: flex;
   flex-direction: column;
 }
 
-.mt__tabs {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 16px;
+.sd__tabs {
   padding: 0 16px;
 }
 
-.mt__tab {
-  flex: 1;
-  padding: 9px 12px 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  margin-bottom: -1px;
-  transition: color 0.15s, border-bottom-color 0.15s;
-}
-
-.mt__tab:hover { color: var(--color-text-primary); }
-
-.mt__tab--active {
-  color: #F97316;
-  border-bottom-color: #F97316;
-  font-weight: 600;
-}
-
-.mt__content {
+.sd__content {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 0 16px 8px;
 }
 
-.mt__instruction {
+.sd__instruction {
   font-size: 13px;
   color: var(--color-text-secondary);
   margin: 0 0 2px;
   font-style: italic;
 }
 
-/* ── Slider card ─────────────────────────────────────────────────────────── */
+/* Notes (aperçu passif) */
 
-.mt-slider-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mt-slider-card__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mt-slider-card__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.mt-slider-card__label {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.mt-slider-card__value {
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.mt-slider {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.mt-slider__track {
-  position: relative;
-  height: 6px;
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-.mt-slider__fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  border-radius: 3px;
-  opacity: 0.3;
-}
-
-.mt-slider__thumb {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2.5px solid white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-}
-
-.mt-slider__hints {
-  display: flex;
-  justify-content: space-between;
-}
-
-.mt-slider__hint {
-  font-size: 11px;
-  color: var(--color-text-muted, var(--color-text-secondary));
-}
-
-/* ── Notes ───────────────────────────────────────────────────────────────── */
-
-.mt-notes {
+.sd-notes {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -3020,13 +2895,13 @@
   gap: 8px;
 }
 
-.mt-notes__label {
+.sd-notes__label {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
 
-.mt-notes__input {
+.sd-notes__input {
   min-height: 52px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -3036,21 +2911,21 @@
   color: var(--color-text-secondary);
 }
 
-.mt-notes__input::before {
+.sd-notes__input::before {
   content: attr(data-placeholder);
   color: var(--color-text-secondary);
   font-style: italic;
   opacity: 0.6;
 }
 
-/* ── Bouton save ─────────────────────────────────────────────────────────── */
+/* Bouton save (passif) */
 
-.mt__save-btn {
+.sd__save-btn {
   width: 100%;
   padding: 12px;
   border-radius: var(--radius-md);
-  background: #F97316;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-surface);
   font-size: 14px;
   font-weight: 600;
   border: none;
@@ -3059,9 +2934,9 @@
   margin-top: 4px;
 }
 
-/* ── Historique ──────────────────────────────────────────────────────────── */
+/* Historique */
 
-.mt__history-title {
+.sd__history-title {
   font-size: 11px;
   font-weight: 600;
   color: var(--color-text-secondary);
@@ -3070,7 +2945,7 @@
   margin: 0;
 }
 
-.mt-history {
+.sd-history {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -3081,13 +2956,13 @@
   gap: 14px;
 }
 
-.mt-history__row {
+.sd-history__row {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.mt-history__meta {
+.sd-history__meta {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -3095,14 +2970,14 @@
   flex-shrink: 0;
 }
 
-.mt-history__dot {
+.sd-history__dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.mt-history__dim {
+.sd-history__dim {
   font-size: 12px;
   font-weight: 500;
   color: var(--color-text-secondary);
@@ -3111,12 +2986,11 @@
   text-overflow: ellipsis;
 }
 
-.mt-sparkline {
+.sd-history__spark {
   flex: 1;
-  display: block;
 }
 
-.mt-history__val {
+.sd-history__val {
   font-size: 16px;
   font-weight: 700;
   width: 22px;
@@ -3124,7 +2998,7 @@
   flex-shrink: 0;
 }
 
-.mt-history__chips {
+.sd-history__chips {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -3132,13 +3006,13 @@
   margin-top: 2px;
 }
 
-.mt-history__score-label {
+.sd-history__score-label {
   font-size: 12px;
   color: var(--color-text-secondary);
   font-weight: 500;
 }
 
-.mt-history__chip {
+.sd-history__chip {
   font-size: 11px;
   font-weight: 600;
   padding: 3px 9px;

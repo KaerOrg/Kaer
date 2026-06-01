@@ -12,11 +12,11 @@ import {
   FallbackLayout,
   FieldsLayout,
   GuidedExerciseLayout,
-  MoodTrackerLayout,
   PatientScenarioLayout,
   PsyEduLayout,
   QuestionnaireLayout,
   SleepJournalLayout,
+  SliderDashboardLayout,
   StepsLayout,
   TabsLayout,
   TreeSelectorLayout,
@@ -104,7 +104,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   }
 
   if (preview_kind === 'questionnaire') return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
-  if (preview_kind === 'mood_tracker') return <MoodTrackerLayout fields={contentFields} footer={footer} t={t} />
+  if (preview_kind === 'slider_dashboard') return <SliderDashboardLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={contentFields} t={t} />

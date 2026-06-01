@@ -21,8 +21,6 @@ export function ColumnFormLayout({ fields, footer, t }: Props) {
 
   const newBtn = lbl('new_btn_label')
   const saveLabel = lbl('save_label')
-  const emptyTitle = lbl('empty_title')
-  const emptyText = lbl('empty_text')
 
   // Colonnes : header + ses enfants text/slider
   const headers = fields

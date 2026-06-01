@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -151,6 +151,54 @@ apps/web/src/
 ```
 
 Chaque dossier contient : `ComponentName.tsx` + `ComponentName.test.tsx` + `index.ts`.
+
+---
+
+## Primitives d'aperçu module — `Tabs` (compact), `ValueBar`, `Sparkline`
+
+Les layouts du `ModuleRenderer` reproduisent l'écran mobile du patient. Trois
+primitives partagées évitent de redéclarer onglets, sliders et mini-courbes dans
+chaque layout :
+
+### `Tabs` — variante `compact`
+
+`Tabs` (déjà la barre d'onglets praticien) accepte `variant="compact"` : une barre
+dense (13px, soulignement fin) pour les aperçus mobile-mock. À utiliser au lieu de
+réécrire des `__tab`/`role="tab"` à la main.
+
+```tsx
+<Tabs tabs={tabs} activeTab={active} onChange={setActive} variant="compact" />
+```
+
+`variant` : `'horizontal'` (défaut) · `'vertical'` · `'compact'`. `accentColor`
+surcharge la couleur de l'onglet actif (défaut `var(--color-primary)`).
+Utilisé par `SliderDashboardLayout` et `DailyCheckinLayout`.
+
+### `ValueBar` — barre de valeur statique
+
+`components/ui/ValueBar/`. Affiche une dimension : libellé + valeur + jauge colorée
+positionnée dans `[min, max]` + repères d'extrémité. Passif, sans saisie (MDR : affiche,
+n'interprète pas).
+
+```tsx
+<ValueBar label="Humeur" value={7} min={1} max={10} color="#8B5CF6"
+          lowHint="Très basse" highHint="Très élevée" />
+```
+
+Props : `label`, `value`, `min?=1`, `max?=10`, `color?=var(--color-primary)`,
+`lowHint?`, `highHint?`.
+
+### `Sparkline` — mini-courbe
+
+`components/ui/Sparkline/`. Petit graphe linéaire SVG sans axe ni légende — une
+tendance brute. Passif (MDR).
+
+```tsx
+<Sparkline values={[6,7,6,5,7,8]} color="#8B5CF6" min={1} max={10} className="…" />
+```
+
+Props : `values` (≥2 points), `color?`, `min?=1`, `max?=10`, `width?=80`,
+`height?=24`, `className?`.
 
 ---
 

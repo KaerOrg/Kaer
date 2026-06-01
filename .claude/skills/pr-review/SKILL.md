@@ -364,32 +364,94 @@ Test décisif : "cette donnée pourrait-elle changer sans modifier le code ?" Si
 
 ---
 
-## Étape 4 — Composants réutilisés vs recréés
+## Étape 4 — Design system d'abord : réutiliser, sinon étendre, jamais redupliquer
 
-Avant d'analyser les nouveaux composants, lire l'inventaire existant :
+> **Tu es le gardien du code, pas un tampon encreur.** « Ça marche, c'est juste
+> perfectible » n'est **pas** un motif pour laisser passer. Une UI qui réinvente
+> un primitive déjà présent au design system est une **violation bloquante**, même
+> si elle fonctionne, même si elle est jolie. Ne te raisonne pas pour fermer les
+> yeux : si une duplication existe, tu la nommes, tu cites le composant existant,
+> et tu indiques la prop/variante qui aurait suffi.
+
+Cette étape s'applique à **tout fichier créé OU modifié** dès qu'il introduit de
+l'UI : nouveau composant `.tsx`, **nouvelle classe CSS**, **bloc de markup JSX**,
+nouveau `field_type`, nouveau layout (`preview_kind`). Pas seulement les fichiers `A`.
+
+### 4.0 — Lire l'inventaire AVANT de juger (obligatoire)
 
 ```bash
-ls apps/web/src/components/ui/
-ls apps/web/src/components/features/
+ls apps/web/src/components/ui/        # primitives web
+ls apps/web/src/components/features/  # composants métier web
 ls apps/mobile/src/components/ui/
 ls apps/mobile/src/components/features/
 ```
+Plus les références : `apps/web/docs/design-system.md`, `apps/mobile/docs/design-system.md`,
+et l'inventaire des field_types/layouts dans `docs/module-engine.md`.
 
-Pour chaque fichier `.tsx` **créé** (pas modifié) :
+Un rapport qui conclut « pas de duplication » **sans avoir listé l'inventaire** est
+invalide : la duplication la plus fréquente vient de l'ignorance de ce qui existe.
 
-1. Identifier sa responsabilité fonctionnelle précise
-2. Chercher dans l'inventaire ci-dessus un composant avec la même responsabilité
-3. Si un équivalent existe → **violation** : nommer le composant existant + la prop manquante qui aurait suffi
+### 4.1 — L'arbre de décision (à appliquer à CHAQUE morceau d'UI ajouté)
 
-Patterns à surveiller particulièrement (composants souvent recréés) :
-- Toggle on/off → `Toggle` dans `ui/`
-- Carte avec header cliquable → `Card`, `Accordion`
-- Badge de statut → `StatusBadge`
-- Bouton primaire/secondaire → `Button`
-- Modal de confirmation → `ConfirmDialog`
-- Champ texte avec label → `InputField`
-- Bandeau d'avertissement → `DisclaimerBanner` (mobile)
-- Bande colorée en haut d'écran → `TeenAccent` (mobile)
+Pour chaque composant / classe CSS / bloc de markup introduit :
+
+1. **Quelle est sa responsabilité fonctionnelle précise ?** (onglets, carte, bascule,
+   barre de valeur, badge, champ, accordéon, bandeau, slider…)
+2. **Un composant du design system couvre-t-il ce besoin ?**
+
+| Situation | Verdict |
+|---|---|
+| Un composant DS fait **exactement** ça → il fallait l'importer | **Violation bloquante** — markup/CSS fait main qui duplique un primitive existant. Cite le composant + l'usage attendu. |
+| Un composant DS couvre le besoin **mais pas tout à fait** (taille, variante, couleur d'accent, slot manquant) → il fallait **l'étendre** : ajouter une **prop / variante / slot** | **Violation bloquante** — un composant parallèle a été créé (ou du markup ad hoc écrit) au lieu d'étendre l'existant. Nomme le composant + la prop qui aurait suffi. |
+| **Rien** au design system ne correspond → création légitime d'un nouveau primitive | **Autorisé**, mais alors : il va dans `ui/` (générique) ou `features/` (métier), **+ doc design-system + test** (Étape 5), sinon **violation**. |
+
+> **Extension > duplication, toujours.** « Le composant existant ne fait pas
+> exactement ce que je veux » n'autorise **pas** à en écrire un nouveau : la voie
+> normale est d'ajouter une prop/variante au composant existant (ex. `variant`,
+> `size`, `accentColor`, un slot `children`). Créer un composant parallèle n'est
+> justifié **que** si l'extension romprait le contrat public du composant
+> (changement d'API incompatible) — et ce cas doit être **explicitement argumenté**
+> dans la PR. À défaut d'argumentaire : **violation bloquante**.
+
+### 4.2 — Catalogue des duplications à traquer (liste non exhaustive)
+
+| Tu vois… | Cherche d'abord… |
+|---|---|
+| Boutons d'onglets faits main (`__tab`, `__tabs`, `role="tab"` en dur) | `ui/Tabs` (props `variant`, `accentColor`) ou la variante compacte d'aperçu |
+| Bascule on/off (`__track`/`__thumb`) | `ui/Toggle` |
+| Carte / conteneur encadré (`__card`, bord + ombre + radius) | `ui/Card` (étendre avec une variante si besoin) |
+| Carte à en-tête cliquable / repliable | `ui/Accordion`, `ui/Card` |
+| Badge de statut coloré | `ui/StatusBadge` |
+| Bouton primaire/secondaire | `ui/Button` |
+| Champ texte + label | `ui/InputField`, `ui/SelectField`, `ui/SearchInput` |
+| Modale / confirmation | `ui/Modal`, `ConfirmDialog` |
+| État vide (illustration + texte) | `ui/EmptyState` |
+| Barre/slider de valeur, jauge | primitive slider/`ValueBar` existante — sinon en créer **une seule**, réutilisable |
+| Bandeau d'avertissement (mobile) | `DisclaimerBanner` |
+| Bande d'accent colorée (mobile) | `TeenAccent` |
+
+Et au-delà de la liste : **toute** classe CSS nouvelle qui restyle un élément déjà
+couvert par un primitive, **tout** bloc de markup qui reproduit visuellement un
+primitive → même verdict (4.1).
+
+### 4.3 — Nommage des layouts (`preview_kind`) : par motif, pas par module
+
+Un layout/`preview_kind` doit être nommé d'après son **motif visuel réutilisable**
+(`column_form`, `tree_selector`, `decision_grid`, `slider_dashboard`), **pas**
+d'après un module précis. Un `preview_kind` portant un nom de module
+(`mood_tracker`, `phq9`…) → **point d'attention** : il bride la réutilisation
+(un autre module voulant le même écran hériterait d'un nom trompeur). Recommander
+un nom de pattern et la dérivation des clés i18n via le `module_id` des fields.
+
+### 4.4 — Posture du reviewer
+
+- Ne **jamais** clore une duplication par « mais ça fonctionne » / « c'est mineur ».
+  Le rôle du gardien est précisément d'empêcher la dette qui « fonctionne ».
+- Toujours rendre la remarque **actionnable** : `fichier:ligne` + composant DS exact
+  + la prop/variante précise qui résout le besoin.
+- Si la PR **étend** correctement un composant existant (nouvelle prop documentée +
+  testée) → le **saluer** explicitement dans les points positifs : c'est le
+  comportement attendu.
 
 ---
 

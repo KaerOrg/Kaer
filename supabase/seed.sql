@@ -1037,7 +1037,7 @@ on conflict (id) do nothing;
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
 update public.modules set preview_kind = 'questionnaire'     where id = 'medication_side_effects' and preview_kind = 'fields';
-update public.modules set preview_kind = 'mood_tracker'      where id = 'mood_tracker'            and preview_kind = 'fields';
+update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tracker'            and preview_kind in ('fields', 'mood_tracker');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';

@@ -70,6 +70,45 @@ C'est un effort constant, pas croissant. La dette du tableau statique, elle, est
 
 Si tu hésites : pose-toi la question — "est-ce que le praticien ou l'équipe pourrait vouloir modifier ça sans que je touche au code ?" Si oui, c'est en base.
 
+## Nommer un layout par son motif, pas par un module
+
+Un `preview_kind` (et le composant `layout` correspondant) décrit **une forme
+d'écran réutilisable**, pas un module. Il doit donc être nommé d'après son **motif
+visuel** — comme `column_form`, `tree_selector`, `decision_grid`, `sleep_journal`,
+`slider_dashboard` — et **jamais** d'après un module précis (`mood_tracker`, `phq9`…).
+
+Pourquoi : un `preview_kind` nommé d'après un module bride la réutilisation. Le jour
+où un autre module veut le même écran (ex. multi-sliders + sparklines), il devrait
+poser `preview_kind='mood_tracker'`, ce qui sonne faux et brouille l'intention. Un
+nom de motif (`slider_dashboard`) se réutilise sans gêne.
+
+Corollaire — **un layout générique ne hardcode pas les clés i18n d'un module.**
+Les libellés propres au module (onglets, titres de section, etc.) se résolvent en
+dérivant la clé depuis le `module_id` porté par les fields :
+
+```ts
+// ❌ Hardcode un module dans un layout censé être générique
+t('modules.mood_tracker.tab_today')
+
+// ✅ Dérive du module courant — le layout reste réutilisable
+const moduleId = fields[0]?.module_id
+t(`modules.${moduleId}.tab_today`)
+```
+
+> Test décisif : « si un deuxième module voulait ce layout, faudrait-il toucher au
+> code du layout ? » Si oui (nom de module en dur, clés i18n figées), c'est un défaut
+> de généricité — à corriger avant merge.
+
+## Design system d'abord — étendre, ne pas redupliquer
+
+Avant d'écrire de l'UI (composant, classe CSS, bloc de markup), vérifier le design
+system. S'il existe un composant qui couvre le besoin → l'importer. S'il couvre le
+besoin **mais pas exactement** → **l'étendre** (prop, variante, slot), jamais en
+créer un parallèle. Ne créer un nouveau primitive que si **rien** ne correspond —
+et alors avec doc design-system + test. Détail et arbre de décision :
+[`coding-standards.md`](coding-standards.md) § *Checklist obligatoire* et le skill
+[`pr-review`](../skills/pr-review/SKILL.md) Étape 4.
+
 ## Application dans PsyTool
 
 Ce principe est déjà suivi pour :
