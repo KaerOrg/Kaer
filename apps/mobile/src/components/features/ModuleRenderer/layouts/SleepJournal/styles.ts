@@ -6,6 +6,8 @@ export const styles = StyleSheet.create({
   center:            { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   // ── List
   listContent:       { padding: spacing.lg, paddingBottom: spacing.xl, gap: spacing.xs },
+  infoBox:           { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: spacing.md, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  footerText:        { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
   ctaContainer:      { gap: spacing.sm, marginBottom: spacing.md },
   ctaCard: {
     backgroundColor: colors.primary, borderRadius: radius.lg,

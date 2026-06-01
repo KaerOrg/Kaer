@@ -1,12 +1,17 @@
 import { Info } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
 import { FieldText } from '../../fields'
+import { Tabs } from '../../../../ui/Tabs'
+import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
 
 interface Props {
   fields: ContentField[]
   footer: ContentField | undefined
   t: (key: string) => string
 }
+
+// Aperçu passif : les onglets ne basculent pas (un seul écran montré). onChange inerte.
+const NOOP = () => {}
 
 // Aperçu passif du module mobile « 1 statut par jour ». L'écran patient se
 // compose de 2 onglets (Aujourd'hui / Historique), d'une question + boutons de
@@ -32,21 +37,14 @@ export function DailyCheckinLayout({ fields, footer, t }: Props) {
   const saveLabel = lbl('save_label')
   const historyEmpty = lbl('history_empty_text')
 
+  const tabs: TabItem[] = []
+  if (tabTodayLabel) tabs.push({ id: 'today', label: tabTodayLabel })
+  if (tabHistoryLabel) tabs.push({ id: 'history', label: tabHistoryLabel })
+
   return (
     <div className="preview-daily">
-      {(tabTodayLabel || tabHistoryLabel) && (
-        <div className="preview-daily__tabs" role="tablist">
-          {tabTodayLabel && (
-            <span className="preview-daily__tab preview-daily__tab--active" role="tab" aria-selected="true">
-              {tabTodayLabel}
-            </span>
-          )}
-          {tabHistoryLabel && (
-            <span className="preview-daily__tab" role="tab" aria-selected="false">
-              {tabHistoryLabel}
-            </span>
-          )}
-        </div>
+      {tabs.length > 0 && (
+        <Tabs tabs={tabs} activeTab="today" onChange={NOOP} variant="compact" />
       )}
 
       {todayLabel && <div className="preview-daily__date">{todayLabel}</div>}

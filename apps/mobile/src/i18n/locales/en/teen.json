@@ -53,7 +53,29 @@
       "col_thought": "What I thought right away",
       "col_distortion": "The thought trap",
       "col_reframe": "Another way to see it",
-      "save": "Done"
+      "save": "Done",
+      "entry_col_1_title": "Situation",
+      "entry_col_1_hint": "Where were you? What was happening? Who was there?",
+      "entry_col_1_placeholder": "Describe what happened...",
+      "entry_col_2_title": "Emotion(s)",
+      "entry_col_2_hint": "What did you feel?",
+      "entry_col_2_placeholder": "E.g. anxiety, sadness, anger...",
+      "entry_col_2_intensity": "How intense at first",
+      "entry_col_3_title": "Automatic thought",
+      "entry_col_3_hint": "What thought crossed your mind at that moment?",
+      "entry_col_3_placeholder": "E.g. I'm useless, this is going to go badly...",
+      "entry_col_3_belief": "How much did you believe it?",
+      "entry_col_4_title": "Rational response",
+      "entry_col_4_hint": "Another way to see this? What facts contradict the thought?",
+      "entry_col_4_placeholder": "Write a more balanced thought...",
+      "entry_col_5_title": "Outcome",
+      "entry_col_5_hint": "How do you feel now, after working through this?",
+      "entry_col_5_placeholder": "Emotion after reflection...",
+      "entry_col_5_intensity": "Emotion intensity now",
+      "entry_col_5_belief": "How much do you believe this new thought?",
+      "empty_alert_title": "Nothing to save",
+      "empty_alert_msg": "Fill in at least the situation or the automatic thought.",
+      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
     },
     "grounding": {
       "title": "Back to the present",
@@ -124,7 +146,8 @@
       "strategy_movement": "Move / walk",
       "strategy_exposure": "Stay in the situation",
       "strategy_distraction": "Think about something else",
-      "strategy_contact": "Talk to someone"
+      "strategy_contact": "Talk to someone",
+      "footer": "The SUDS scale measures your stress level — used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014."
     },
     "decisional_balance": {
       "title": "The pros and cons",
@@ -187,7 +210,8 @@
       "month_btn": "Monthly view",
       "back_btn": "Back",
       "notes_label": "Notes (optional)",
-      "notes_placeholder": "Context, dreams, anything you want…"
+      "notes_placeholder": "Context, dreams, anything you want…",
+      "footer": "CBT-I night journal — evidence-based technique for insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
       "title": "My treatment — side effects",
@@ -323,6 +347,7 @@
       "step_notes_title": "Anything to add? (optional)",
       "step_notes_hint": "Context, situation, related thought… Free text.",
       "notes_free_placeholder": "Free note (optional)",
+      "footer": "Emotion wheel — putting words to your feelings actually helps. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
       "node": {
         "joy": "Joy",
         "joy__serenity": "Serenity",
@@ -710,6 +735,29 @@
       "balance_values_subtitle": "Choose up to 3 values — they'll anchor your balance.",
       "balance_item_placeholder": "Enter an argument…",
       "balance_commitment_placeholder": "In one sentence, what I'm taking away from today…"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Psychotic Experiences",
+      "description": "Self-assessment of unusual perceptions and beliefs"
+    },
+    "audit": {
+      "label": "AUDIT — Alcohol Use",
+      "description": "Alcohol use questionnaire"
+    },
+    "cssrs": {
+      "label": "C-SSRS — Suicide Risk",
+      "description": "Suicide risk assessment questionnaire"
+    },
+    "exposure_hierarchy": {
+      "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
+      "info_btn": "What is this technique?",
+      "info_body": "The exposure hierarchy is a validated CBT technique. You list situations you avoid, rate them 0 to 100 by difficulty (SUDs score), then face them gradually starting with the easiest.",
+      "empty_text": "Create your first exposure hierarchy with your clinician.",
+      "suds_hint": "From 0 (no stress) to 100 (max stress). This number is personal — no right or wrong answer.",
+      "description_label": "Situation to face",
+      "description_hint": "Describe precisely the situation you avoid.",
+      "description_placeholder": "E.g. Taking the lift alone to the 5th floor",
+      "session_question_teen": "What is your anxiety level towards this situation right now?"
     }
   }
 }

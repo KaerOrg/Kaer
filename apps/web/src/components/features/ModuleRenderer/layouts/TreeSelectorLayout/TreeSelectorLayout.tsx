@@ -1,8 +1,10 @@
-import { ChevronRight, Heart, Palette, Plus, Smile, Trash2 } from 'lucide-react'
+import { ChevronRight, Heart, Info, Palette, Plus, Smile, Trash2 } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
+import { FieldText } from '../../fields'
 
 interface Props {
   fields: ContentField[]
+  footer: ContentField | undefined
   t: (key: string) => string
 }
 
@@ -10,7 +12,7 @@ interface Props {
 // 'tree_selector') — intro, bouton "Identifier", grille des nœuds racines L1
 // (8 émotions Plutchik colorées), section historique avec carte mock.
 // Source mobile : TreeSelectorLayout (FieldRenderer.tsx).
-export function TreeSelectorLayout({ fields, t }: Props) {
+export function TreeSelectorLayout({ fields, footer, t }: Props) {
   const configField = fields.find(f => f.field_type === 'tree_selector_config')
   const lbl = (key: string): string => {
     const code = configField?.props[key]
@@ -89,6 +91,13 @@ export function TreeSelectorLayout({ fields, t }: Props) {
             </div>
           )}
         </section>
+      )}
+
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
+        </div>
       )}
     </div>
   )

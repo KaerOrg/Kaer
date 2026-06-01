@@ -386,7 +386,8 @@
       "month_btn": "Vue mensuelle",
       "back_btn": "Retour",
       "notes_label": "Notes (optionnel)",
-      "notes_placeholder": "Contexte, rêves, remarques…"
+      "notes_placeholder": "Contexte, rêves, remarques…",
+      "footer": "Agenda TCC-I — traitement de 1ère ligne pour l'insomnie chronique. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "psyedu_sleep": {
       "label": "Sommeil & récupération",
@@ -515,6 +516,7 @@
       "step_notes_title": "Une note à ajouter ? (optionnel)",
       "step_notes_hint": "Contexte, situation, pensée associée… Ce champ est libre.",
       "notes_free_placeholder": "Note libre (facultatif)",
+      "footer": "Roue des émotions — labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "node": {
         "joy": "Joie",
         "joy__serenity": "Sérénité",
@@ -710,7 +712,8 @@
       "entry_col_5_intensity": "Intensité de l'émotion maintenant",
       "entry_col_5_belief": "À quel point croyez-vous à cette nouvelle pensée ?",
       "empty_alert_title": "Enregistrement vide",
-      "empty_alert_msg": "Renseignez au moins la situation ou la pensée automatique."
+      "empty_alert_msg": "Renseignez au moins la situation ou la pensée automatique.",
+      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",
@@ -802,7 +805,8 @@
       "sound_stream": "Ruisseau",
       "safety_title": "En cas de détresse",
       "safety_3114": "3114 — Numéro national prévention suicide",
-      "safety_15": "15 — SAMU"
+      "safety_15": "15 — SAMU",
+      "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
       "label": "Thermomètre de la peur",
@@ -851,7 +855,8 @@
       "strategy_movement": "Marche / mouvement",
       "strategy_exposure": "Rester dans la situation (exposition)",
       "strategy_distraction": "Distraction cognitive",
-      "strategy_contact": "Contact avec un proche"
+      "strategy_contact": "Contact avec un proche",
+      "footer": "Échelle SUDS (Subjective Units of Distress Scale) — mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
     },
     "exposure_hierarchy": {
       "label": "Hiérarchie d'exposition",
@@ -1461,6 +1466,18 @@
       "values_security": "Sécurité",
       "values_justice": "Justice",
       "values_growth": "Évolution personnelle"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Expériences psychotiques",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Dépistage alcool",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Risque suicidaire",
+      "description": ""
     }
   },
   "module": {

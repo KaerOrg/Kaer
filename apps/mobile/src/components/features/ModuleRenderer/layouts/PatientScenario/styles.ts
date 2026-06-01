@@ -3,6 +3,8 @@ import { colors, spacing, radius } from '../../../../../theme'
 
 export const styles = StyleSheet.create({
   container:       { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  infoBox:         { flexDirection: 'row', gap: 6, alignItems: 'flex-start', padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  footerText:      { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
   emptyCenter:     { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl, gap: spacing.md, minHeight: 300 },
   emptyTitle:      { fontSize: 20, fontWeight: '600', color: colors.text, textAlign: 'center' },
   emptyText:       { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 22 },

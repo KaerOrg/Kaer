@@ -5,7 +5,100 @@ description: Valide les bonnes pratiques d'implémentation PsyTool sur la branch
 
 # PR Review — PsyTool
 
-Tu es un **reviewer senior** pour PsyTool. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. Tu ne modifies aucun fichier. Tu produis un rapport structuré avec références `fichier:ligne` exactes.
+Tu es un **reviewer senior** pour PsyTool. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. Tu ne modifies aucun fichier (hormis la résolution de conflits à l'étape préliminaire). Tu produis un rapport structuré avec références `fichier:ligne` exactes.
+
+---
+
+## Étape préliminaire — Synchroniser la branche avec `main`
+
+> **À exécuter en tout premier, avant de calculer le périmètre.** La review doit porter sur une branche à jour avec `main`, sinon le diff `main...HEAD` est faussé et des conflits restent cachés jusqu'au merge.
+
+1. Vérifier que l'arbre de travail est propre. Si des changements non commités existent :
+
+   ```bash
+   git status --porcelain
+   ```
+
+   S'il y a des modifications non commitées → **s'arrêter** et demander à l'utilisateur de commiter ou stasher avant de relancer la review. Ne jamais merger par-dessus un arbre sale.
+
+2. Récupérer la dernière version de `main` et la merger dans la branche courante :
+
+   ```bash
+   git fetch origin main
+   git merge origin/main
+   ```
+
+3. Analyser le résultat :
+
+   - **Merge propre (fast-forward ou auto-merge sans conflit)** → continuer directement à l'Étape 0.
+   - **Conflits détectés** (`git merge` retourne un code d'erreur, `CONFLICT` dans la sortie) → passer au point 4.
+
+4. **Résolution des conflits.** Lister les fichiers en conflit :
+
+   ```bash
+   git diff --name-only --diff-filter=U
+   ```
+
+   Pour chaque fichier en conflit :
+   - Lire le fichier en entier avec `Read` pour comprendre les deux versions (marqueurs `<<<<<<<`, `=======`, `>>>>>>>`).
+   - Résoudre le conflit en respectant **toutes les règles du projet** (coding-standards, config-first, MDR, i18n, design system) — la résolution ne doit jamais introduire une violation. En cas de doute sur l'intention métier d'un côté du conflit, **demander à l'utilisateur** plutôt que deviner.
+   - Retirer les marqueurs de conflit et marquer le fichier résolu : `git add <fichier>`.
+
+   Une fois tous les conflits résolus :
+
+   ```bash
+   git commit --no-edit
+   ```
+
+   Terminer le message de commit par :
+
+   ```
+   Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+   ```
+
+5. **Signaler le merge dans le rapport final** : indiquer en tête si le merge de `main` était propre ou s'il a nécessité une résolution de conflits, et lister les fichiers concernés. Les fichiers touchés par la résolution de conflits sont à inclure dans le périmètre de review de l'Étape 0.
+
+---
+
+## Étape CI — Reproduire exactement les checks GitHub Actions
+
+> **À exécuter avant toute analyse de code.** Ces commandes sont copiées mot pour mot
+> depuis `.github/workflows/ci.yml`. Toute divergence de commande (chemin, flag,
+> outil) masque des erreurs, comme `tsc --project` ≠ `cd apps/web && tsc -b`.
+
+Lancer les 5 jobs en parallèle (ou séquentiellement si les ressources le limitent) :
+
+```bash
+# Job: typecheck-web  (flag -b = build mode, résout les références de projet)
+cd apps/web && npx tsc -b --noEmit
+
+# Job: lint-web
+cd apps/web && npx eslint .
+
+# Job: test-web
+cd apps/web && npx vitest run
+
+# Job: typecheck-mobile  (cd obligatoire — la résolution moduleResolution:bundler
+#   diffère selon le répertoire de travail, cf. expo-file-system/legacy)
+cd apps/mobile && npx tsc --noEmit
+
+# Job: test-mobile
+cd apps/mobile && npx jest --passWithNoTests
+```
+
+> **Règle du `cd` :** ne jamais substituer `npx tsc --project apps/<app>/tsconfig.json`
+> au `cd apps/<app> && npx tsc`. La résolution de modules change avec le répertoire
+> courant (notamment `moduleResolution: "bundler"` + sous-chemins de packages sans
+> champ `exports`) — ce qui passe depuis la racine peut échouer en CI.
+
+### Interprétation des résultats
+
+| Résultat | Action |
+|---|---|
+| Toutes les commandes passent (exit 0) | Continuer à l'Étape 0 |
+| Au moins une commande échoue | **S'arrêter**, corriger les erreurs CI en premier, puis relancer avant de poursuivre la review |
+
+Reporter dans le rapport final la liste des jobs CI avec leur statut (✅ / ❌).
 
 ---
 
@@ -313,32 +406,128 @@ Test décisif : "cette donnée pourrait-elle changer sans modifier le code ?" Si
 
 ---
 
-## Étape 4 — Composants réutilisés vs recréés
+## Étape 4 — Design system d'abord : réutiliser, sinon étendre, jamais redupliquer
 
-Avant d'analyser les nouveaux composants, lire l'inventaire existant :
+> **Tu es le gardien du code, pas un tampon encreur.** « Ça marche, c'est juste
+> perfectible » n'est **pas** un motif pour laisser passer. Une UI qui réinvente
+> un primitive déjà présent au design system est une **violation bloquante**, même
+> si elle fonctionne, même si elle est jolie. Ne te raisonne pas pour fermer les
+> yeux : si une duplication existe, tu la nommes, tu cites le composant existant,
+> et tu indiques la prop/variante qui aurait suffi.
+
+Cette étape s'applique à **tout fichier créé OU modifié** dès qu'il introduit de
+l'UI : nouveau composant `.tsx`, **nouvelle classe CSS**, **bloc de markup JSX**,
+nouveau `field_type`, nouveau layout (`preview_kind`). Pas seulement les fichiers `A`.
+
+### 4.0 — Lire l'inventaire AVANT de juger (obligatoire)
 
 ```bash
-ls apps/web/src/components/ui/
-ls apps/web/src/components/features/
+ls apps/web/src/components/ui/        # primitives web
+ls apps/web/src/components/features/  # composants métier web
 ls apps/mobile/src/components/ui/
 ls apps/mobile/src/components/features/
 ```
+Plus les références : `apps/web/docs/design-system.md`, `apps/mobile/docs/design-system.md`,
+et l'inventaire des field_types/layouts dans `docs/module-engine.md`.
 
-Pour chaque fichier `.tsx` **créé** (pas modifié) :
+Un rapport qui conclut « pas de duplication » **sans avoir listé l'inventaire** est
+invalide : la duplication la plus fréquente vient de l'ignorance de ce qui existe.
 
-1. Identifier sa responsabilité fonctionnelle précise
-2. Chercher dans l'inventaire ci-dessus un composant avec la même responsabilité
-3. Si un équivalent existe → **violation** : nommer le composant existant + la prop manquante qui aurait suffi
+### 4.1 — L'arbre de décision (à appliquer à CHAQUE morceau d'UI ajouté)
 
-Patterns à surveiller particulièrement (composants souvent recréés) :
-- Toggle on/off → `Toggle` dans `ui/`
-- Carte avec header cliquable → `Card`, `Accordion`
-- Badge de statut → `StatusBadge`
-- Bouton primaire/secondaire → `Button`
-- Modal de confirmation → `ConfirmDialog`
-- Champ texte avec label → `InputField`
-- Bandeau d'avertissement → `DisclaimerBanner` (mobile)
-- Bande colorée en haut d'écran → `TeenAccent` (mobile)
+Pour chaque composant / classe CSS / bloc de markup introduit :
+
+1. **Quelle est sa responsabilité fonctionnelle précise ?** (onglets, carte, bascule,
+   barre de valeur, badge, champ, accordéon, bandeau, slider…)
+2. **Un composant du design system couvre-t-il ce besoin ?**
+
+| Situation | Verdict |
+|---|---|
+| Un composant DS fait **exactement** ça → il fallait l'importer | **Violation bloquante** — markup/CSS fait main qui duplique un primitive existant. Cite le composant + l'usage attendu. |
+| Un composant DS couvre le besoin **mais pas tout à fait** (taille, variante, couleur d'accent, slot manquant) → il fallait **l'étendre** : ajouter une **prop / variante / slot** | **Violation bloquante** — un composant parallèle a été créé (ou du markup ad hoc écrit) au lieu d'étendre l'existant. Nomme le composant + la prop qui aurait suffi. |
+| **Rien** au design system ne correspond → création légitime d'un nouveau primitive | **Autorisé**, mais alors : il va dans `ui/` (générique) ou `features/` (métier), **+ doc design-system + test** (Étape 5), sinon **violation**. |
+
+> **Extension > duplication, toujours.** « Le composant existant ne fait pas
+> exactement ce que je veux » n'autorise **pas** à en écrire un nouveau : la voie
+> normale est d'ajouter une prop/variante au composant existant (ex. `variant`,
+> `size`, `accentColor`, un slot `children`). Créer un composant parallèle n'est
+> justifié **que** si l'extension romprait le contrat public du composant
+> (changement d'API incompatible) — et ce cas doit être **explicitement argumenté**
+> dans la PR. À défaut d'argumentaire : **violation bloquante**.
+
+### 4.2 — Catalogue des duplications à traquer (liste non exhaustive)
+
+| Tu vois… | Cherche d'abord… |
+|---|---|
+| Boutons d'onglets faits main (`__tab`, `__tabs`, `role="tab"` en dur) | `ui/Tabs` (props `variant`, `accentColor`) ou la variante compacte d'aperçu |
+| Bascule on/off (`__track`/`__thumb`) | `ui/Toggle` |
+| Carte / conteneur encadré (`__card`, bord + ombre + radius) | `ui/Card` (étendre avec une variante si besoin) |
+| Carte à en-tête cliquable / repliable | `ui/Accordion`, `ui/Card` |
+| Badge de statut coloré | `ui/StatusBadge` |
+| Bouton primaire/secondaire | `ui/Button` |
+| Champ texte + label | `ui/InputField`, `ui/SelectField`, `ui/SearchInput` |
+| Modale / confirmation | `ui/Modal`, `ConfirmDialog` |
+| État vide (illustration + texte) | `ui/EmptyState` |
+| Barre/slider de valeur, jauge | primitive slider/`ValueBar` existante — sinon en créer **une seule**, réutilisable |
+| Bandeau d'avertissement (mobile) | `DisclaimerBanner` |
+| Bande d'accent colorée (mobile) | `TeenAccent` |
+
+Et au-delà de la liste : **toute** classe CSS nouvelle qui restyle un élément déjà
+couvert par un primitive, **tout** bloc de markup qui reproduit visuellement un
+primitive → même verdict (4.1).
+
+### 4.3 — Nommage des layouts (`preview_kind`) : par motif, pas par module
+
+Un layout/`preview_kind` doit être nommé d'après son **motif visuel réutilisable**
+(`column_form`, `tree_selector`, `decision_grid`, `slider_dashboard`), **pas**
+d'après un module précis. Un `preview_kind` portant un nom de module
+(`mood_tracker`, `phq9`…) → **point d'attention** : il bride la réutilisation
+(un autre module voulant le même écran hériterait d'un nom trompeur). Recommander
+un nom de pattern et la dérivation des clés i18n via le `module_id` des fields.
+
+### 4.4 — Composants découplés du métier : le métier s'injecte par les props
+
+> **Un composant du design system est une coquille générique. Le métier n'en fait
+> jamais partie — il y entre par les props.** Plus un composant est détaché du
+> domaine (patient, module, échelle, agenda, craving…), plus il est réutilisable.
+> Un primitive qui « connaît » un module précis n'est plus un primitive : c'est du
+> métier déguisé en design system.
+
+S'applique à **tout composant**, mais avec un seuil de sévérité selon le dossier :
+
+| Dossier | Attendu | Couplage métier en dur |
+|---|---|---|
+| `components/ui/` | **Zéro** connaissance métier. Ne sait rien des patients/modules/échelles. Tout vient des props. | **Violation bloquante** |
+| `components/features/` | Connaît **un** domaine, mais reste paramétrable : les données arrivent par props, pas codées en dur dans le composant. | **Point d'attention** → bloquant si le composant n'est utilisable que pour une seule entité figée |
+
+**Signaux de couplage à traquer dans un composant** (surtout sous `ui/`) :
+
+- Référence à un **module/échelle/domaine précis** en dur : `if (moduleId === 'phq9')`, `'mood_tracker'`, clé i18n figée `t('modules.craving_journal.x')` dans un composant censé être générique → **violation bloquante**. La clé/le libellé doit **arriver par une prop** (`label`, `textCode`) ou être **dérivé** du `module_id` reçu (cf. config-first.md § « un layout générique ne hardcode pas les clés i18n d'un module »).
+- **Données métier** (liste de questions, options, étapes, valeurs cliniques) **codées dans le composant** au lieu d'être reçues en props → **violation bloquante** (recoupe Étape 3 config-first).
+- **Appel service / fetch / accès store** depuis un composant `ui/` → **violation bloquante** : un primitive ne va pas chercher ses données, on les lui passe. (Un `features/` peut consommer un hook de domaine, mais privilégier la réception par props quand c'est raisonnable.)
+- **Import depuis `features/` dans un `ui/`**, ou import d'un service/contexte métier dans un `ui/` → **violation bloquante** (recoupe la règle de dépendance `features → ui`).
+- Nom de prop **trop spécifique** trahissant le couplage (`phq9Score`, `patientCravingValue`) là où un nom générique (`value`, `label`) conviendrait → **point d'attention**.
+
+**Test décisif :** « si un autre domaine (autre module, autre écran) voulait ce
+composant, faudrait-il modifier le composant lui-même ? » Si oui → le métier est
+*dans* le composant au lieu d'être *injecté*. La correction attendue : **remonter
+le métier dans le parent** et l'exposer en prop (`label`, `value`, `items`,
+`onSelect`, `renderItem`, `textCode`…), laissant le composant agnostique.
+
+Référence : `ValueBar`/`Sparkline` (purs, tout par props) et la règle « nommer un
+layout par son motif, pas par un module » de [`config-first.md`](../../rules/config-first.md).
+Si la PR **retire** un couplage métier d'un composant pour le passer en prop → le
+**saluer** dans les points positifs.
+
+### 4.5 — Posture du reviewer
+
+- Ne **jamais** clore une duplication par « mais ça fonctionne » / « c'est mineur ».
+  Le rôle du gardien est précisément d'empêcher la dette qui « fonctionne ».
+- Toujours rendre la remarque **actionnable** : `fichier:ligne` + composant DS exact
+  + la prop/variante précise qui résout le besoin.
+- Si la PR **étend** correctement un composant existant (nouvelle prop documentée +
+  testée) → le **saluer** explicitement dans les points positifs : c'est le
+  comportement attendu.
 
 ---
 
@@ -378,6 +567,32 @@ Toute nouvelle feature doit **livrer ou mettre à jour** de la documentation `.m
 
 **Indexation** : toute doc créée doit être référencée (`docs/README.md` et/ou l'index du design system). Doc présente mais **non indexée** → **point d'attention**.
 
+### 5.2.1 — Vérification mécanique : chaque composant ajouté a une VRAIE section de doc (bloquant)
+
+> **Une mention dans la liste d'inventaire n'est PAS de la documentation.** Un
+> composant cité dans la phrase « Primitives — Accordion, Button, Card… » mais sans
+> section décrivant ses props/usage est **non documenté**. C'est le trou exact par
+> lequel 8 primitives (`Button`, `Card`, `Modal`, `StatusBadge`, `ConfirmDialog`,
+> `Toast`…) ont vécu sans doc : le reviewer voyait le nom et croyait la doc présente.
+
+Pour **chaque composant créé** dans `apps/<app>/src/components/ui/` ou `components/features/`
+(repérable par un dossier `NomComposant/` nouveau dans le diff `A`) :
+
+```bash
+# Le nom apparaît-il AILLEURS que dans la ligne d'inventaire / l'arbre de fichiers ?
+grep -n "NomComposant" apps/<app>/docs/design-system.md
+ls apps/<app>/docs/components/NomComposant*.md 2>/dev/null
+```
+
+Verdict :
+- Le composant a une **section dédiée** (`### NomComposant`) avec props/usage, **ou** un fichier `docs/components/<nom>.md` → **conforme**.
+- Le composant n'apparaît **que** dans la liste d'inventaire (ligne « Primitives — … ») et/ou l'arbre de fichiers, **sans section ni props** → **violation bloquante** : la doc d'inventaire ne documente pas, elle liste.
+- Le composant n'apparaît **nulle part** dans la doc → **violation bloquante**.
+
+Une section de doc valable contient au minimum : le **chemin** du composant, un **exemple d'usage**, et la **table des props** (nom, type, rôle). Une simple phrase descriptive sans props → **point d'attention**.
+
+**Cas des composants pilotés par contexte** (Toast/ConfirmDialog/ActionSheet et équivalents) : la doc doit indiquer le **hook de déclenchement** (`useToast`, `useConfirmDialog`…) et sa signature, pas seulement les props présentationnelles — sinon un dev remontera le composant à la main au lieu d'appeler le hook.
+
 ### 5.3 — Exception
 
 Un **refactor pur** ou un **bugfix** sans nouvelle surface fonctionnelle ne requiert pas de nouveau `.md` ni de nouveau test — mais doit **garder la doc et les tests existants à jour** (un test cassé ou une doc devenue fausse → **violation bloquante**).
@@ -389,6 +604,19 @@ Un **refactor pur** ou un **bugfix** sans nouvelle surface fonctionnelle ne requ
 ```
 # PR Review — <nom de branche>
 Date : <date>
+
+## CI GitHub Actions (commandes exactes du workflow)
+| Job | Commande | Statut |
+|---|---|---|
+| typecheck-web | `cd apps/web && npx tsc -b --noEmit` | ✅/❌ |
+| lint-web | `cd apps/web && npx eslint .` | ✅/❌ |
+| test-web | `cd apps/web && npx vitest run` | ✅/❌ |
+| typecheck-mobile | `cd apps/mobile && npx tsc --noEmit` | ✅/❌ |
+| test-mobile | `cd apps/mobile && npx jest --passWithNoTests` | ✅/❌ |
+
+## Synchronisation avec main
+- Merge `origin/main` : <propre (fast-forward / auto-merge) | conflits résolus>
+- Fichiers en conflit résolus (si applicable) : <liste ou "aucun">
 
 ## Fichiers analysés
 - Créés : N fichiers
@@ -480,5 +708,6 @@ Appel direct `supabase.from('modules')` dans un composant.
 ### Obligatoires et bloquants pour TOUTE nouvelle feature (Étape 5)
 - [ ] **Tests** — chaque source créé (service / hook / composant / util) a son test couvrant happy path + erreur
 - [ ] **Documentation** — au moins un `.md` créé/mis à jour (module, composant, service, pattern…) **et indexé**
+- [ ] **Chaque composant ajouté (`ui/`/`features/`) a une vraie section de doc** (chemin + usage + props) — pas seulement une mention d'inventaire (§5.2.1)
 - [ ] **Zéro texte en dur** — ni dans le code, ni en base/seed (colonnes affichées = clés i18n)
 ```

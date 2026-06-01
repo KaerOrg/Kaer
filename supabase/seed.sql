@@ -445,6 +445,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
 on conflict (id) do nothing;
 
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('beck.footer', 'beck_columns', 'footer_note', 'modules.beck_columns.footer', 999)
+on conflict (id) do nothing;
+
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
   ('beck.cfg', 'required_keys_any',     'situation,automatic_thought'),
@@ -516,6 +520,10 @@ update public.modules set preview_kind = 'tree_selector' where id = 'emotion_whe
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('ew.cfg', 'emotion_wheel', 'tree_selector_config', null, 0)
+on conflict (id) do nothing;
+
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('ew.footer', 'emotion_wheel', 'footer_note', 'modules.emotion_wheel.footer', 999)
 on conflict (id) do nothing;
 
 -- Niveau 1 — émotions primaires (8)
@@ -691,7 +699,8 @@ delete from public.module_content_fields where module_id = 'sleep_diary';
 update public.modules set preview_kind = 'sleep_journal' where id = 'sleep_diary';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('sj.cfg', 'sleep_diary', 'sleep_journal_config', null, 0)
+  ('sj.cfg',    'sleep_diary', 'sleep_journal_config', null,                          0),
+  ('sj.footer', 'sleep_diary', 'footer_note',          'modules.sleep_diary.footer', 999)
 on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -857,6 +866,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('et.strategy_contact',     'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_contact',          105)
 on conflict (id) do nothing;
 
+insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
+  ('et.footer', 'fear_thermometer', 'footer_note', 'modules.fear_thermometer.footer', 999)
+on conflict (id) do nothing;
+
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'engagement_event_type',        'SAVE_FEAR_ENTRY'),
   ('et.cfg', 'suds_min',                     '0'),
@@ -1013,15 +1026,18 @@ where prop_key = 'icon';
 
 -- ── Modules additionnels (échelles cliniques) ────────────────────────────────
 insert into public.modules (id, category_id, preview_kind, sort_order, is_invite_excluded, icon, mobile_icon, color) values
-  ('epds',  'assessments', 'questionnaire', 28, false, '', 'heart-pulse',            '#EC4899'),
-  ('nsi',   'assessments', 'questionnaire', 60, false, '', 'weather-night',          '#7C3AED'),
-  ('rcads', 'assessments', 'questionnaire', 70, false, '', 'clipboard-text-outline', '#6366F1')
+  ('epds',   'assessments', 'questionnaire', 28,  false, '', 'heart-pulse',            '#EC4899'),
+  ('nsi',    'assessments', 'questionnaire', 60,  false, '', 'weather-night',          '#7C3AED'),
+  ('rcads',  'assessments', 'questionnaire', 70,  false, '', 'clipboard-text-outline', '#6366F1'),
+  ('cape42', 'assessments', 'coming_soon',   80,  false, 'brain-circuit', 'head-cog-outline', '#6366F1'),
+  ('audit',  'assessments', 'coming_soon',   90,  false, 'droplets',      'water-outline',    '#6366F1'),
+  ('cssrs',  'assessments', 'coming_soon',   95,  false, 'shield-alert',  'shield-alert-outline', '#6366F1')
 on conflict (id) do nothing;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
 update public.modules set preview_kind = 'questionnaire'     where id = 'medication_side_effects' and preview_kind = 'fields';
-update public.modules set preview_kind = 'questionnaire'     where id = 'mood_tracker'            and preview_kind = 'fields';
+update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tracker'            and preview_kind in ('fields', 'mood_tracker');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';
@@ -1218,7 +1234,8 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('rim.sound_stream', 'rim', NULL, NULL, 'ambient_sound', 'modules.rim.sound_stream', 110),
   ('rim.safety_title', 'rim', NULL, NULL, 'exercise_safety_title', 'modules.rim.safety_title', 120),
   ('rim.safety_3114', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_3114', 130),
-  ('rim.safety_15', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_15', 140)
+  ('rim.safety_15', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_15', 140),
+  ('rim.footer', 'rim', NULL, NULL, 'footer_note', 'modules.rim.footer', 999)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : mood_tracker (questionnaire avec sliders) ────────

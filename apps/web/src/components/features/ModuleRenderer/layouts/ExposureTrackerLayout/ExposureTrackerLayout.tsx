@@ -1,8 +1,10 @@
-import { Check, MapPin, Pencil, Plus, Thermometer, Trash2 } from 'lucide-react'
+import { Check, Info, MapPin, Pencil, Plus, Thermometer, Trash2 } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
+import { FieldText } from '../../fields'
 
 interface Props {
   fields: ContentField[]
+  footer: ContentField | undefined
   t: (key: string) => string
 }
 
@@ -10,7 +12,7 @@ interface Props {
 // 'exposure_tracker') — tabs Saisies/Situations + 1 carte de saisie mock
 // (situation, barres SUDs avant/après, stratégies, notes), puis aperçu du
 // formulaire d'entrée. Source mobile : ExposureTrackerLayout.tsx.
-export function ExposureTrackerLayout({ fields, t }: Props) {
+export function ExposureTrackerLayout({ fields, footer, t }: Props) {
   const configField = fields.find(f => f.field_type === 'exposure_tracker_config')
   const lbl = (key: string): string => {
     const code = configField?.props[key]
@@ -99,6 +101,13 @@ export function ExposureTrackerLayout({ fields, t }: Props) {
         <div className="et-fab">
           <Plus size={18} />
           <span>{addBtn}</span>
+        </div>
+      )}
+
+      {footer && (
+        <div className="preview-panel__info">
+          <Info size={13} className="preview-panel__info-icon" />
+          <FieldText field={footer} t={t} />
         </div>
       )}
 

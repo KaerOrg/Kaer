@@ -214,7 +214,7 @@ export default function HomeScreen() {
       return
     }
     // 2. Questionnaire sans écran custom → moteur générique ScaleHistory
-    if (mod.module?.preview_kind === 'questionnaire') {
+    if (mod.module?.preview_kind === 'questionnaire' || mod.module?.preview_kind === 'mood_tracker') {
       navigation.navigate('ScaleHistory', { scale_id: mod.module_type })
       return
     }

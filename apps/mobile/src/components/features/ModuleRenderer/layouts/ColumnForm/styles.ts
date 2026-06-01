@@ -8,6 +8,8 @@ export const styles = StyleSheet.create({
   // ── Liste
   listContent:       { padding: spacing.md, paddingBottom: spacing.lg },
   list:              { gap: spacing.sm },
+  infoBox:           { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: spacing.md, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  footerText:        { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
   empty: {
     alignItems: 'center', paddingVertical: spacing.xl * 2, gap: spacing.md,
   },

@@ -324,7 +324,8 @@
       "month_btn": "Monthly view",
       "back_btn": "Back",
       "notes_label": "Notes (optional)",
-      "notes_placeholder": "Context, dreams, remarks…"
+      "notes_placeholder": "Context, dreams, remarks…",
+      "footer": "CBT-I sleep diary — first-line treatment for chronic insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "diet_weight_psycho": {
       "label": "Diet & weight",
@@ -401,6 +402,7 @@
       "step_notes_title": "Anything to add? (optional)",
       "step_notes_hint": "Context, situation, related thought… Free text.",
       "notes_free_placeholder": "Free note (optional)",
+      "footer": "Emotion wheel — affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "node": {
         "joy": "Joy",
         "joy__serenity": "Serenity",
@@ -575,7 +577,29 @@
       "col_thought": "Automatic thought",
       "col_distortion": "Cognitive distortion",
       "col_reframe": "Alternative thought",
-      "save": "Save"
+      "save": "Save",
+      "entry_col_1_title": "Situation",
+      "entry_col_1_hint": "Where were you? What was happening? Who was there?",
+      "entry_col_1_placeholder": "Describe the situation...",
+      "entry_col_2_title": "Emotion(s)",
+      "entry_col_2_hint": "What emotion did you feel?",
+      "entry_col_2_placeholder": "E.g. anxiety, sadness, anger...",
+      "entry_col_2_intensity": "Initial intensity",
+      "entry_col_3_title": "Automatic thought",
+      "entry_col_3_hint": "What thought came to mind at that moment?",
+      "entry_col_3_placeholder": "E.g. I'm useless, this is going to go badly...",
+      "entry_col_3_belief": "How much did you believe it?",
+      "entry_col_4_title": "Rational response",
+      "entry_col_4_hint": "Another way to see the situation? What facts contradict this thought?",
+      "entry_col_4_placeholder": "Write a more balanced alternative thought...",
+      "entry_col_5_title": "Outcome",
+      "entry_col_5_hint": "How do you feel now, after this work?",
+      "entry_col_5_placeholder": "Emotion after review...",
+      "entry_col_5_intensity": "Emotion intensity now",
+      "entry_col_5_belief": "How much do you believe this new thought?",
+      "empty_alert_title": "Empty record",
+      "empty_alert_msg": "Please fill in at least the situation or the automatic thought.",
+      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
     },
     "cognitive_distortions": {
       "label": "Cognitive distortions",
@@ -618,7 +642,8 @@
       "sound_stream": "Stream",
       "safety_title": "In case of distress",
       "safety_3114": "3114 — National suicide prevention line",
-      "safety_15": "15 — Emergency services"
+      "safety_15": "15 — Emergency services",
+      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
     },
     "fear_thermometer": {
       "label": "Fear thermometer",
@@ -667,11 +692,53 @@
       "strategy_movement": "Walking / movement",
       "strategy_exposure": "Stay in the situation (exposure)",
       "strategy_distraction": "Cognitive distraction",
-      "strategy_contact": "Reach out to someone"
+      "strategy_contact": "Reach out to someone",
+      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
     },
     "exposure_hierarchy": {
       "label": "Exposure hierarchy",
-      "description": "Build your gradual exposure steps"
+      "description": "Build your gradual exposure steps",
+      "disclaimer": "This module supports your consultations. The techniques presented were discussed with your clinician — it does not replace your therapeutic follow-up.",
+      "info_btn": "About this technique",
+      "info_title": "Exposure hierarchy",
+      "info_body": "The exposure hierarchy is a validated CBT technique. You list situations you avoid, rate them from 0 to 100 by difficulty (SUDs score), then face them gradually starting with the easiest.",
+      "info_sources": "References",
+      "untitled": "Untitled hierarchy",
+      "empty_title": "No hierarchy",
+      "empty_text": "Create your first exposure hierarchy with your clinician.",
+      "add_hierarchy": "New hierarchy",
+      "new_hierarchy_title": "New hierarchy",
+      "new_hierarchy_placeholder": "Title (e.g. Fear of lifts)",
+      "delete_confirm": "Delete '{{title}}' and all its situations?",
+      "items_empty_title": "No situations",
+      "items_empty_text": "Add your first situation to face.",
+      "add_item": "Add a situation",
+      "delete_item_confirm": "Delete this situation?",
+      "toggle_done": "Mark as done",
+      "suds_legend": "SUDs score: 0 = no anxiety · 100 = maximum anxiety",
+      "suds_label": "SUDs score — Difficulty level",
+      "suds_hint": "From 0 (no anxiety) to 100 (maximum anxiety). This number is personal — there is no right or wrong answer.",
+      "suds_low": "0",
+      "suds_high": "100",
+      "description_label": "Situation to face",
+      "description_hint": "Describe precisely the situation you avoid.",
+      "description_placeholder": "E.g. Taking the lift alone to the 5th floor",
+      "description_required": "Please describe the situation before saving.",
+      "session_number": "Session no. {{n}}",
+      "session_question": "What is your anxiety level towards this situation right now?",
+      "session_question_hint": "Give your immediate feeling, from 0 (no anxiety) to 100 (maximum anxiety).",
+      "session_save": "Save this session",
+      "last_session_suds": "Previous session:",
+      "anchor_0": "No or very slight anxiety",
+      "anchor_50": "Moderate, noticeable anxiety",
+      "anchor_100": "Intense anxiety, hard to bear",
+      "history_no_sessions": "No sessions recorded.\nRecord your first session to see your progress.",
+      "history_add_session": "Record a session",
+      "history_delete_session": "Delete this session?",
+      "items_count": "situation",
+      "items_count_plural": "situations",
+      "sessions_count": "session",
+      "sessions_count_plural": "sessions"
     },
     "breathing_techniques": {
       "label": "Breathing techniques",
@@ -707,7 +774,25 @@
       "label": "Cognitive saturation",
       "description": "Interrupt rumination",
       "title": "Cognitive saturation",
-      "intro": "Interrupt rumination through rapid repetition."
+      "intro": "Interrupt rumination through rapid repetition.",
+      "start_btn": "Start an exercise",
+      "intro_text": "Repeat a word or thought quickly and many times until it gradually loses its emotional charge and becomes 'just sounds'.",
+      "empty_title": "No sessions yet",
+      "empty_text": "Tap the button above to start your first exercise.",
+      "history_label": "History ({{count}})",
+      "delete_session_title": "Delete this session?",
+      "input_title": "Which word or thought would you like to work on?",
+      "input_hint": "Choose a short word or brief thought that overwhelms you. Examples: 'worthless', 'danger', 'I'm going to fail'.",
+      "input_placeholder": "Enter a word or short thought…",
+      "how_it_works": "How it works",
+      "instructions": "1. Repeat your word out loud, as fast as possible.\n2. Tap the word on each repetition to count.\n3. Keep going for {{seconds}} seconds.\n\nWith enough repetitions, the word loses its meaning and emotional charge — this is the semantic saturation effect.",
+      "tap_hint": "Tap on each repetition",
+      "repetitions": "repetitions",
+      "duration": "duration",
+      "done_text": "Notice whether the word feels different to you now.",
+      "done_title": "Exercise complete",
+      "repetitions_stat": "repetitions",
+      "duration_stat": "duration"
     },
     "craving_journal": {
       "label": "Craving journal",
@@ -1176,6 +1261,18 @@
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Submit questionnaire"
+    },
+    "cape42": {
+      "label": "CAPE-42 — Psychotic Experiences",
+      "description": ""
+    },
+    "audit": {
+      "label": "AUDIT — Alcohol Screening",
+      "description": ""
+    },
+    "cssrs": {
+      "label": "C-SSRS — Suicide Risk",
+      "description": ""
     }
   },
   "agenda": {

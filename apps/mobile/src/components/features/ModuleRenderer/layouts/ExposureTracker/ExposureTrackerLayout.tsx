@@ -25,6 +25,7 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { colors } from '../../../../../theme'
 import {
   getAllFearEntries, getFearEntry, saveFearEntry, deleteFearEntry,
@@ -65,10 +66,11 @@ function deserializeStrategies(raw: string): { selected: string[]; custom: strin
 
 export interface ExposureTrackerLayoutProps {
   fields: ContentField[]
+  footer?: ContentField
   moduleId: string
 }
 
-export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
+export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutProps) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
@@ -634,6 +636,12 @@ export function ExposureTrackerLayout({ fields }: ExposureTrackerLayoutProps) {
                   onDelete={() => handleDeleteFromList(e)}
                 />
               ))
+            )}
+            {footer != null && (
+              <View style={etStyles.infoBox}>
+                <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+                <Text style={etStyles.footerText}>{t(footer.text_code ?? '')}</Text>
+              </View>
             )}
           </ScrollView>
           <Pressable

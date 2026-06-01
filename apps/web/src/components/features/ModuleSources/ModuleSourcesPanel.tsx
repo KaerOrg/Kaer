@@ -55,11 +55,6 @@ export function ModuleSourcesPanel({ moduleId }: Props) {
                   <Icon size={11} />
                   {t(`patient.sources_type_${source.source_type}`)}
                 </span>
-                {source.evidence_grade && (
-                  <span className={`sources-item__grade sources-item__grade--${source.evidence_grade.toLowerCase()}`}>
-                    {t('patient.sources_grade', { grade: source.evidence_grade })}
-                  </span>
-                )}
               </div>
 
               <div className="sources-item__label">
