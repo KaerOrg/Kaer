@@ -43,6 +43,7 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|react-native-markdown-display)"
     ],
     "moduleNameMapper": {
+      "^expo-file-system/legacy$": "<rootDir>/src/__mocks__/expo-file-system-legacy.ts",
       "^@react-native-async-storage/async-storage$": "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js",
       "^expo-sqlite$": "<rootDir>/src/__mocks__/expo-sqlite.ts",
       "^expo-notifications$": "<rootDir>/src/__mocks__/expo-notifications.ts",
