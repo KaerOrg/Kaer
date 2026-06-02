@@ -132,6 +132,37 @@ export async function getRoutinesForModule(
   return data ?? []
 }
 
+export interface NotificationRoutineWithModule extends NotificationRoutine {
+  module_type: string
+}
+
+export async function getAllRoutinesForPatient(
+  patientId: string
+): Promise<NotificationRoutineWithModule[]> {
+  const { data } = await supabase
+    .from('notification_routines')
+    .select('*, patient_module:patient_modules(module_type)')
+    .eq('patient_id', patientId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+
+  if (!data) return []
+  return data.map(r => ({
+    ...r,
+    module_type: (r.patient_module as { module_type: string } | null)?.module_type ?? '',
+  }))
+}
+
+// ── Signal d'observance (action patient) ───────────────────────────────────
+
+export function logScaleSubmission(patientId: string, scaleId: string): void {
+  void supabase.from('patient_engagement_logs').insert({
+    patient_id: patientId,
+    event_type: 'SCALE_SUBMITTED',
+    metadata: { module_type: scaleId },
+  })
+}
+
 // ── Pause / reprise (action patient) ───────────────────────────────────────
 
 export async function pauseRoutine(

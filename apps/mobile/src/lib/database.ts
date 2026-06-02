@@ -1222,6 +1222,38 @@ export async function getAllScaleEntries(scaleId: string): Promise<ScaleEntry[]>
   }))
 }
 
+export async function getScaleEntryById(id: string): Promise<ScaleEntry | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<{
+    id: string
+    scale_id: string
+    answers: string
+    total_score: number
+    subscale_scores: string | null
+    created_at: string
+  }>('SELECT * FROM scale_entries WHERE id = ?', [id])
+  if (!row) return null
+  return {
+    ...row,
+    answers: JSON.parse(row.answers) as number[],
+    subscale_scores: row.subscale_scores ? JSON.parse(row.subscale_scores) as Record<string, number | string> : null,
+  }
+}
+
+export async function getLatestScaleEntry(scaleId: string): Promise<ScaleEntry | null> {
+  const database = getDb()
+  const row = await database.getFirstAsync<{
+    id: string; scale_id: string; answers: string
+    total_score: number; subscale_scores: string | null; created_at: string
+  }>('SELECT * FROM scale_entries WHERE scale_id = ? ORDER BY created_at DESC LIMIT 1', [scaleId])
+  if (!row) return null
+  return {
+    ...row,
+    answers: JSON.parse(row.answers) as number[],
+    subscale_scores: row.subscale_scores ? JSON.parse(row.subscale_scores) as Record<string, number | string> : null,
+  }
+}
+
 export async function saveScaleEntry(entry: ScaleEntry): Promise<void> {
   const database = getDb()
   await database.runAsync(

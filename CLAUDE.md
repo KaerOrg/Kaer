@@ -227,6 +227,17 @@ PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif M
 
 Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le risque de requalification, et proposer une alternative d'affichage passif conforme.
 
+> **Cas rencontré — refonte-effets-du-traitement (2026-06-02) :**
+> Un dégradé de couleur de **sévérité** apposé sur les options de réponse d'une
+> échelle clinique (`medication_side_effects`) — `field_props` : option « absent »
+> = gris `#9CA3AF` … option « sévère » = **rouge `#EF4444`**, rendu par `LikertWidget`.
+> ```
+> ❌ Le rouge est piloté par la valeur clinique la plus grave → le code interprète
+>    (sévère = alarmant) au lieu d'afficher la valeur brute.
+> ```
+> → Couleurs d'options **neutres et uniformes**. Le codage couleur d'une gravité
+> clinique est interdit, même statique (pas seulement quand un seuil le déclenche).
+
 ---
 
 ## Règles de développement

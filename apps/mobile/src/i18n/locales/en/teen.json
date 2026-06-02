@@ -214,11 +214,14 @@
       "footer": "CBT-I night journal — evidence-based technique for insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
-      "title": "My treatment — side effects",
+      "label": "Treatment side effects tracker",
+      "title": "My treatment effects",
       "intro": "Feeling weird effects from your meds? Log them here.",
       "save": "Done",
-      "chip_sedation": "Sedat.",
-      "chip_akathisia": "Akath.",
+      "effect_sedation_label": "Drowsiness (sedation)",
+      "effect_akathisia_label": "Restlessness, urge to move (akathisia)",
+      "chip_sedation": "Drowsy",
+      "chip_akathisia": "Agitat.",
       "chip_tremors": "Trem.",
       "chip_dry_mouth": "Mouth",
       "chip_sleep": "Sleep",
@@ -230,7 +233,19 @@
       "empty_title": "Nothing yet",
       "empty_text": "Tap the button to get started.",
       "progress": "{{answered}} / {{total}} answers",
-      "submit": "Send my answers"
+      "submit": "Send my answers",
+      "chart_section": "Trend per symptom",
+      "range_7j": "7 d.",
+      "range_1m": "1 mo.",
+      "range_6m": "6 mo.",
+      "range_1a": "1 yr.",
+      "chart_avg": "avg. {{value}}",
+      "streak": "{{count}} day in a row",
+      "streak_plural": "{{count}} days in a row",
+      "streak_none": "Start today!",
+      "events_title": "Notes from your clinician",
+      "events_empty": "Your clinician hasn't added any notes yet.",
+      "notes_label": "Note"
     },
     "medication_adherence": {
       "title": "My medication log",

@@ -1262,6 +1262,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('mse.q4', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_dry_mouth_label', 103),
   ('mse.q5', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_sleep_label', 104),
   ('mse.q6', 'medication_side_effects', NULL, NULL, 'scale_question', 'modules.medication_side_effects.effect_nausea_label', 105),
+  ('mse.notes', 'medication_side_effects', NULL, NULL, 'scale_text_input', 'modules.medication_side_effects.notes_placeholder', 990),
   ('mse.footer', 'medication_side_effects', NULL, NULL, 'footer_note', 'modules.medication_side_effects.footer', 999)
 on conflict (id) do nothing;
 
@@ -1589,7 +1590,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('mse.opt0', 'value', '0'),
   ('mse.opt1', 'value', '1'),
   ('mse.opt2', 'value', '2'),
-  ('mse.opt3', 'value', '3')
+  ('mse.opt3', 'value', '3'),
+  -- MDR 2017/745 : aucune couleur interprétative sur les options d'une échelle
+  -- clinique. Un dégradé de gravité (gris→rouge) ferait conclure le code ; les
+  -- options restent neutres et uniformes.
+  ('mse.notes', 'subscale_key', 'notes'),
+  ('mse.notes', 'optional', 'true')
 on conflict (field_id, prop_key) do nothing;
 
 -- mood_tracker : sliders 1-10 + couleurs/icônes/hints par dimension

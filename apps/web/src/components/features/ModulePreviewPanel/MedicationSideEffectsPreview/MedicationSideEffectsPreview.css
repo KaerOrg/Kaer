@@ -1,0 +1,132 @@
+/* Aperçu praticien (mockup) du module medication_side_effects.
+   Couleur d'accent injectée par le parent via --mse-accent (prop accentColor).
+   MDR : données de démonstration neutres, aucun label/seuil interprétatif. */
+
+.mse-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Bandeau « streak » (jours de suivi consécutifs — usage, pas clinique) ── */
+.mse-preview__streak-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mse-preview__streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--mse-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mse-accent) 30%, transparent);
+}
+
+.mse-preview__streak-icon {
+  font-size: 14px;
+}
+
+.mse-preview__streak-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mse-accent);
+}
+
+.mse-preview__streak-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Sélecteur de période ── */
+.mse-preview__ranges {
+  display: flex;
+  gap: 6px;
+}
+
+.mse-preview__range {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.mse-preview__range--active {
+  background: var(--mse-accent);
+  color: var(--color-surface);
+  border-color: var(--mse-accent);
+}
+
+/* ── Bloc d'un symptôme ── */
+.mse-preview__symptom-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+
+.mse-preview__symptom-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mse-preview__symptom-scale {
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+/* ── Bouton « voir plus / moins » ── */
+.mse-preview__toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mse-accent);
+  padding: 0;
+  align-self: flex-start;
+}
+
+/* ── Section événements ── */
+.mse-preview__events-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px;
+}
+
+.mse-preview__event {
+  border-left: 3px solid var(--mse-accent);
+  padding: 2px 0 2px 8px;
+}
+
+.mse-preview__event-date {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mse-accent);
+}
+
+.mse-preview__event-label {
+  font-size: 11px;
+  color: var(--color-text);
+  margin-left: 6px;
+}
+
+.mse-preview__demo-note {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}

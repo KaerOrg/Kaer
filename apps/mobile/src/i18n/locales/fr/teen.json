@@ -214,11 +214,14 @@
       "footer": "Journal de nuit TCC-I — technique validée pour l'insomnie. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
-      "title": "Mon traitement — effets ressentis",
+      "label": "Suivi des effets indésirables du traitement",
+      "title": "Effets de mon traitement",
       "intro": "Tu ressens des effets bizarres avec ton traitement ? Note-les ici.",
       "save": "Valider",
-      "chip_sedation": "Séda.",
-      "chip_akathisia": "Akath.",
+      "effect_sedation_label": "Somnolence (sédation)",
+      "effect_akathisia_label": "Agitation, besoin de bouger (akathisie)",
+      "chip_sedation": "Somno.",
+      "chip_akathisia": "Agitation",
       "chip_tremors": "Trem.",
       "chip_dry_mouth": "Bouche",
       "chip_sleep": "Sommeil",
@@ -230,7 +233,19 @@
       "empty_title": "Rien pour l'instant",
       "empty_text": "Appuie sur le bouton pour commencer.",
       "progress": "{{answered}} / {{total}} réponses",
-      "submit": "Envoyer mes réponses"
+      "submit": "Envoyer mes réponses",
+      "chart_section": "Évolution par symptôme",
+      "range_7j": "7 j.",
+      "range_1m": "1 mois",
+      "range_6m": "6 mois",
+      "range_1a": "1 an",
+      "chart_avg": "moy. {{value}}",
+      "streak": "{{count}} jour de suite",
+      "streak_plural": "{{count}} jours de suite",
+      "streak_none": "Lance-toi aujourd'hui !",
+      "events_title": "Notes de ton soignant",
+      "events_empty": "Ton soignant n'a pas encore ajouté de note.",
+      "notes_label": "Note"
     },
     "medication_adherence": {
       "title": "Mes prises de traitement",

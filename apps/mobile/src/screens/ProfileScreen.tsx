@@ -13,7 +13,6 @@ import {
   TextInput,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from '../contexts/ToastContext'
@@ -22,12 +21,8 @@ import { useActionSheet } from '../contexts/ActionSheetContext'
 import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
-import {
-  requestNotificationPermission,
-  scheduleSleepDiaryReminder,
-  cancelSleepDiaryReminder,
-  getSleepDiaryReminderTime,
-} from '../services/notificationService'
+import { requestNotificationPermission } from '../services/notificationService'
+import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
 import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../services/avatarService'
 
 const AVATAR_SIZE = 84
@@ -111,48 +106,14 @@ export default function ProfileScreen() {
   const [savingProfile, setSavingProfile] = useState(false)
 
   const [shareData, setShareData] = useState(false)
-  const [notifEnabled, setNotifEnabled] = useState(false)
-  const [notifTime, setNotifTime] = useState(new Date(new Date().setHours(8, 0, 0, 0)))
-  const [showTimePicker, setShowTimePicker] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
 
-  useEffect(() => {
-    getSleepDiaryReminderTime().then((time) => {
-      if (time) {
-        setNotifEnabled(true)
-        const d = new Date()
-        d.setHours(time.hour, time.minute, 0, 0)
-        setNotifTime(d)
-      }
-    })
-  }, [])
-
-  const handleToggleNotif = async (value: boolean) => {
-    if (value) {
-      const granted = await requestNotificationPermission()
-      if (!granted) {
-        showToast(t('profile.notif_denied_message'), 'info')
-        return
-      }
-      await scheduleSleepDiaryReminder(notifTime.getHours(), notifTime.getMinutes())
-    } else {
-      await cancelSleepDiaryReminder()
+  const handleRequestNotifPermission = useCallback(async () => {
+    const granted = await requestNotificationPermission()
+    if (!granted) {
+      showToast(t('profile.notif_denied_message'), 'info')
     }
-    setNotifEnabled(value)
-  }
-
-  const handleTimeChange = async (_: unknown, date?: Date) => {
-    setShowTimePicker(Platform.OS === 'ios')
-    if (date) {
-      setNotifTime(date)
-      if (notifEnabled) {
-        await scheduleSleepDiaryReminder(date.getHours(), date.getMinutes())
-      }
-    }
-  }
-
-  const formatTime = (date: Date) =>
-    `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+  }, [t])
 
   const handlePickSource = useCallback(async (source: AvatarSource) => {
     if (!patient) return
@@ -294,39 +255,8 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.section_reminders')}</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <View style={styles.rowInfo}>
-                <Text style={styles.rowLabel}>{t('profile.sleep_reminder_label')}</Text>
-                <Text style={styles.rowHint}>{t('profile.sleep_reminder_hint')}</Text>
-              </View>
-              <Switch
-                value={notifEnabled}
-                onValueChange={handleToggleNotif}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={colors.white}
-              />
-            </View>
-
-            {notifEnabled && (
-              <>
-                <View style={styles.separator} />
-                <TouchableOpacity style={styles.row} onPress={() => setShowTimePicker(true)}>
-                  <Text style={styles.rowLabel}>{t('profile.reminder_time_label')}</Text>
-                  <Text style={styles.timeValue}>{formatTime(notifTime)}</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-
-          {showTimePicker && (
-            <DateTimePicker
-              value={notifTime}
-              mode="time"
-              is24Hour={true}
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleTimeChange}
-            />
+          {patient?.id != null && (
+            <NotificationRoutinePanel patientId={patient.id} />
           )}
         </View>
 

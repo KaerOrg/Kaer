@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -211,6 +211,39 @@ Les deux ressemblent visuellement à une « barre + valeur », mais jouent des r
 > la porte à « retirer le `disabled` pour gagner un input » — soit transformer un
 > affichage passif en saisie, ce qui touche la règle d'or non-DM (MDR 2017/745).
 > Règle : **pour saisir → `SliderWidget` ; pour afficher → `ValueBar`.**
+
+### Groupe `ui/Chart/` — primitifs graphiques interactifs
+
+`components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.
+
+Type partagé (`chartTypes.ts`) :
+
+```ts
+type ChartDataPoint = number | null
+interface ChartProps { data: ChartDataPoint[]; color: string; maxY?: number }
+```
+
+#### `LineChart` — courbe avec gaps
+
+Segments interrompus sur les `null`, marqueurs circulaires sur les points présents.
+
+```tsx
+import { LineChart } from '../components/ui/Chart'
+<LineChart data={[1, 2, null, 3, 2]} color="#8B5CF6" maxY={3} />
+```
+
+#### `BarChart` — barres verticales
+
+Barres colorées proportionnelles à la valeur, gaps (`null`) rendus comme trait grisé.
+
+```tsx
+import { BarChart } from '../components/ui/Chart'
+<BarChart data={[2, null, 1, 3]} color="#EC4899" maxY={3} />
+```
+
+> **Règle : tout graphique de séries temporelles web utilise `LineChart` ou `BarChart` depuis `ui/Chart/`. `Sparkline` reste pour les tendances compactes sans axe.**
+
+---
 
 ### `Sparkline` — mini-courbe
 

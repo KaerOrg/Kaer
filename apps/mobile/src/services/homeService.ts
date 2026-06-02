@@ -1,5 +1,27 @@
 import { supabase } from '../lib/supabase'
 
+export interface SideEffectsEvent {
+  date: string  // ISO date string (YYYY-MM-DD)
+  label: string
+}
+
+export async function fetchModuleEvents(
+  patientId: string,
+  moduleType: string,
+): Promise<SideEffectsEvent[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('patient_id', patientId)
+    .eq('module_type', moduleType)
+    .maybeSingle()
+  if (!data?.config) return []
+  const cfg = data.config as Record<string, unknown>
+  const events = cfg['events']
+  if (!Array.isArray(events)) return []
+  return events as SideEffectsEvent[]
+}
+
 export interface UnlockedModule {
   id: string
   module_type: string

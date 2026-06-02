@@ -110,22 +110,26 @@ export default function ScaleHistoryScreen() {
               const displayScore = config?.score_decimals > 0
                 ? entry.total_score.toFixed(config.score_decimals)
                 : String(Math.round(entry.total_score))
+              const entryAccent = isTeenMode && accentColor != null ? accentColor : colors.primary
 
               return (
-                <View key={entry.id} style={styles.card}>
+                <Pressable
+                  key={entry.id}
+                  style={styles.card}
+                  onPress={() => navigation.navigate('ScaleEntry', { scale_id, entry_id: entry.id })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.modify')}
+                >
                   <View style={styles.cardMain}>
                     <Text style={styles.cardDate}>{formatDateLong(entry.created_at)}</Text>
                     <View style={styles.scoreRow}>
                       <Text style={styles.scoreLabel}>{scoreLabel}</Text>
-                      <Text style={[
-                        styles.scoreValue,
-                        isTeenMode && accentColor != null && { color: accentColor },
-                      ]}>
+                      <Text style={[styles.scoreValue, { color: entryAccent }]}>
                         {displayScore}
                         <Text style={styles.scoreMax}> {scoreMax}</Text>
                       </Text>
                     </View>
-                    {/* Chips sous-scores (SNAP-IV, ASRS-18) */}
+                    {/* Chips sous-scores (SNAP-IV, ASRS-18, etc.) */}
                     {config?.chips != null && entry.subscale_scores != null && (
                       <View style={styles.chips}>
                         {config.chips.map(chipKey => {
@@ -142,14 +146,17 @@ export default function ScaleHistoryScreen() {
                       </View>
                     )}
                   </View>
-                  <Pressable
-                    onPress={() => handleDelete(entry.id)}
-                    hitSlop={8}
-                    accessibilityLabel={t('common.delete')}
-                  >
-                    <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-                  </Pressable>
-                </View>
+                  <View style={styles.cardActions}>
+                    <MaterialCommunityIcons name="pencil-outline" size={17} color={entryAccent} />
+                    <Pressable
+                      onPress={() => handleDelete(entry.id)}
+                      hitSlop={8}
+                      accessibilityLabel={t('common.delete')}
+                    >
+                      <MaterialCommunityIcons name="trash-can-outline" size={17} color={colors.textMuted} />
+                    </Pressable>
+                  </View>
+                </Pressable>
               )
             })}
           </View>
@@ -206,6 +213,7 @@ const styles = StyleSheet.create({
   scoreLabel: { fontSize: 13, color: colors.textMuted },
   scoreValue: { fontSize: 22, fontWeight: '700', color: colors.primary },
   scoreMax: { fontSize: 13, fontWeight: '400', color: colors.textMuted },
+  cardActions: { flexDirection: 'column', alignItems: 'center', gap: 10, paddingLeft: spacing.sm },
   chips: { flexDirection: 'row', gap: 6, marginTop: 8, flexWrap: 'wrap' },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 4,

@@ -1,4 +1,4 @@
-# Module Effets du Traitement (`medication_side_effects`)
+# Module Suivi des effets indésirables du traitement (`medication_side_effects`)
 
 ## Objectif clinique
 
@@ -18,20 +18,22 @@ Ce module est un **carnet de bord numérique**. Il n'est pas un dispositif médi
 | Aucun score global calculé | Pas de total, pas de taux, pas de label interprétatif |
 | Aucune alerte conditionnelle | Pas de notification déclenchée par une valeur ≥ seuil |
 | Aucune comparaison à une norme | Pas de référence à un "niveau acceptable" |
-| Affichage neutre des couleurs | Les couleurs (vert/orange/rouge) reflètent uniquement le niveau 1/2/3 déclaré, sans message associé |
+| Couleurs d'options neutres | Les options de réponse n'ont **aucune** couleur de gravité (pas de dégradé vert→rouge) : seul le chiffre 0–3 déclaré est affiché, sans encodage interprétatif |
 
 ---
 
 ## Les 6 effets surveillés
 
-| Effet | Clé | Classes concernées | Référence UKU |
-|---|---|---|---|
-| Sédation | `sedation` | Toutes classes | Item 1.1 |
-| Akathisie | `akathisia` | Antipsychotiques | Item 2.3 |
-| Tremblements | `tremors` | Lithium, valproate, antipsychotiques | Item 2.4 |
-| Sécheresse buccale | `dry_mouth` | Anticholinergiques, tricycliques | Item 3.1 |
-| Troubles du sommeil | `sleep_disturbance` | ISRS, IRSN, stabilisateurs | Item 1.3 |
-| Nausées / troubles digestifs | `nausea` | Lithium, valproate, ISRS | Item 3.4 |
+Le libellé patient utilise un terme courant suivi du terme médical entre parenthèses, pour que le praticien et le patient parlent le même langage en consultation.
+
+| Libellé patient | Terme médical | Clé | Classes concernées | Référence UKU |
+|---|---|---|---|---|
+| Somnolence | sédation | `sedation` | Toutes classes | Item 1.1 |
+| Agitation, besoin de bouger | akathisie | `akathisia` | Antipsychotiques | Item 2.3 |
+| Tremblements | — | `tremors` | Lithium, valproate, antipsychotiques | Item 2.4 |
+| Sécheresse buccale | — | `dry_mouth` | Anticholinergiques, tricycliques | Item 3.1 |
+| Troubles du sommeil | — | `sleep` | ISRS, IRSN, stabilisateurs | Item 1.3 |
+| Nausées / troubles digestifs | — | `nausea` | Lithium, valproate, ISRS | Item 3.4 |
 
 **Échelle 0–3 :** 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère
 
@@ -73,9 +75,11 @@ Aucune donnée clinique transmise au serveur.
 | Fichier | Rôle |
 |---|---|
 | `apps/mobile/src/lib/database.ts` | Types, table SQLite, fonctions CRUD |
-| `apps/mobile/src/screens/modules/MedicationSideEffectsScreen.tsx` | Écran mobile |
-| `apps/mobile/src/screens/modules/MedicationSideEffectsScreen.test.tsx` | Tests Jest + RNTL (9 cas) |
-| `apps/mobile/src/navigation/AppStack.tsx` | Route `MedicationSideEffects` |
+| `apps/mobile/src/lib/scaleScoring.ts` | Config scoring (`medication_side_effects`) + subscale scores |
+| `apps/mobile/src/screens/modules/MedicationSideEffectsHistoryScreen.tsx` | Écran historique dédié — graphiques par symptôme + sélecteur 1M/3M/1A |
+| `apps/mobile/src/screens/modules/ScaleEntryScreen.tsx` | Saisie via moteur générique (FieldRenderer) |
+| `apps/mobile/src/navigation/AppStack.tsx` | Route `MedicationSideEffectsHistory` |
+| `apps/mobile/src/screens/HomeScreen.tsx` | Entrée `medication_side_effects` dans `CUSTOM_ROUTES` |
 | `apps/web/src/lib/modulePreviewContent.ts` | Aperçu praticien |
 
 ---
@@ -89,13 +93,28 @@ npx jest MedicationSideEffectsScreen.test.tsx
 
 ---
 
+## Graphiques par symptôme
+
+L'écran `MedicationSideEffectsHistoryScreen` affiche un graphique en barres pour chacun des 6 symptômes, avec un sélecteur de période :
+
+| Période | Granularité | Nombre de barres |
+|---|---|---|
+| 1 mois | Jour par jour | 30 barres |
+| 3 mois | Moyenne hebdomadaire | 13 barres |
+| 1 an | Moyenne mensuelle | 12 barres |
+
+**Conformité MDR :** les graphiques affichent uniquement les valeurs brutes ou leurs moyennes arithmétiques. Aucune couleur d'alerte, aucun seuil, aucun message d'interprétation.
+
+---
+
 ## Checklist de livraison
 
 - [x] Web : `medication_side_effects` présent dans `MODULE_LABELS`, `MODULE_DESCRIPTIONS`, `MODULE_CATEGORIES` (iatrogenic)
+- [x] Web : libellé unifié "Suivi des effets indésirables du traitement" (mobile + web)
 - [x] Web : aperçu praticien dans `MODULE_PREVIEW`
-- [x] Mobile : `MedicationSideEffectsScreen.tsx` créé
-- [x] Mobile : route `MedicationSideEffects` dans `AppStack.tsx`
-- [x] Mobile : `available: true` + navigation dans `HomeScreen.tsx`
+- [x] Mobile : `MedicationSideEffectsHistoryScreen.tsx` créé (graphiques + historique)
+- [x] Mobile : route `MedicationSideEffectsHistory` dans `AppStack.tsx`
+- [x] Mobile : entrée dans `CUSTOM_ROUTES` (`HomeScreen.tsx`)
 - [x] Mobile : table SQLite dans `database.ts` + `initDatabase`
-- [x] Tests : 9 cas couverts (affichage des 6 effets, échelle 0–3, sauvegarde, historique, pré-remplissage)
+- [x] Mobile : terminologie patient — "somnolence (sédation)", "agitation, besoin de bouger (akathisie)"
 - [x] Conformité MDR : aucun seuil interprétatif, aucune alerte, valeurs brutes uniquement

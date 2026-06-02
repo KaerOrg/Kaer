@@ -29,6 +29,7 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   psychoeducation:          'Psychoeducation',
   breathing_techniques:     'BreathingTechniques',
   crisis_plan:              'CrisisPlan',
+  medication_side_effects:  'MedicationSideEffectsHistory',
   motivational_balance:     'MotivationalBalance',
 }
 
@@ -214,7 +215,7 @@ export default function HomeScreen() {
       return
     }
     // 2. Questionnaire sans écran custom → moteur générique ScaleHistory
-    if (mod.module?.preview_kind === 'questionnaire' || mod.module?.preview_kind === 'mood_tracker') {
+    if (mod.module?.preview_kind === 'questionnaire' || mod.module?.preview_kind === 'slider_dashboard') {
       navigation.navigate('ScaleHistory', { scale_id: mod.module_type })
       return
     }

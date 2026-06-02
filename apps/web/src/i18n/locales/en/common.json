@@ -3,10 +3,13 @@
     "loading": "Loading…",
     "cancel": "Cancel",
     "save": "Save",
+    "saved": "Saved",
     "back": "Back",
     "error_generic": "An error occurred.",
     "close": "Close",
-    "delete": "Delete"
+    "delete": "Delete",
+    "show_more": "Show 3 more symptoms",
+    "show_less": "Collapse"
   },
   "nav": {
     "profile_menu": "Profile menu",
@@ -227,6 +230,7 @@
     "rdv_empty_upcoming": "No upcoming appointments.",
     "rdv_empty_past": "No past appointments.",
     "patient_view_tab": "Patient view",
+    "preview_questionnaire_label": "Entry questionnaire",
     "sources_tab": "Sources & recommendations",
     "sources_intro": "Sources verified via PubMed and official health organisation websites.",
     "sources_empty": "No sources available for this module.",
@@ -553,11 +557,33 @@
       "empty_text": "Use the button above to access the toolkit."
     },
     "medication_side_effects": {
-      "label": "Psychotropic Tolerance Thermometer",
-      "description": "Self-assessment scales (0-3): sedation, akathisia, tremors, dry mouth.",
+      "label": "Treatment side effects tracker",
+      "description": "Daily self-assessment (0-3): drowsiness, restlessness, tremors, dry mouth.",
       "new_btn": "New report",
       "empty_title": "No report yet",
-      "empty_text": "Use the button above to complete your first report."
+      "empty_text": "Use the button above to complete your first report.",
+      "events_section": "Treatment events",
+      "events_hint": "These milestones appear on the patient's chart (e.g. dose change, new medication). Neutral display — no interpretation.",
+      "event_add": "Add an event",
+      "event_date_label": "Date",
+      "event_label_placeholder": "E.g. Dose change, New medication…",
+      "event_save": "Add",
+      "event_delete": "Delete",
+      "observance_section": "Adherence",
+      "observance_count": "{{count}} entry this month",
+      "observance_count_plural": "{{count}} entries this month",
+      "observance_last": "Last entry: {{date}}",
+      "observance_never": "No entries recorded",
+      "effect_sedation_label": "Drowsiness",
+      "effect_akathisia_label": "Restlessness / akathisia",
+      "effect_tremors_label": "Tremors",
+      "effect_dry_mouth_label": "Dry mouth",
+      "effect_sleep_label": "Sleep disturbances",
+      "effect_nausea_label": "Nausea",
+      "streak_days": "consecutive days",
+      "streak_hint": "of regular entries",
+      "preview_demo_note": "Illustrative data — each point represents a patient entry.",
+      "preview_event_label": "Dose change"
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",
@@ -748,6 +774,207 @@
     "assessments": {
       "label": "Assessment Scales & Questionnaires",
       "subtitle": ""
+    }
+  },
+  "module": {
+    "crisis_plan": {
+      "label": "Crisis Plan",
+      "description": "Personalized action plan for difficult moments (Stanley & Brown).",
+      "step_1_title": "Warning Signs",
+      "step_1_hint": "How do I feel when a crisis is approaching?",
+      "step_2_title": "Internal Coping Strategies",
+      "step_2_hint": "What can I do on my own to calm down?",
+      "step_3_title": "Distracting People or Places",
+      "step_3_hint": "Who can I see or where can I go to distract myself?",
+      "step_4_title": "People to Contact",
+      "step_4_hint": "Who can listen and help me if I feel at risk?",
+      "step_5_title": "Professionals and Emergency Services",
+      "step_5_hint": "Which professionals or services can I contact?",
+      "step_6_title": "Securing My Environment",
+      "step_6_hint": "How can I make my surroundings safer?",
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
+    },
+    "therapeutic_commitment": {
+      "label": "Therapeutic Commitment",
+      "description": "Therapeutic alliance: commitment to using resources before any crisis act."
+    },
+    "distress_tolerance": {
+      "label": "Distress Tolerance Toolkit",
+      "description": "DBT-inspired emergency physiological action cards for breaking acute crises."
+    },
+    "medication_side_effects": {
+      "label": "Treatment side effects tracker",
+      "description": "Daily self-assessment (0-3): drowsiness, restlessness, tremors, dry mouth.",
+      "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
+    },
+    "medication_adherence": {
+      "label": "Medication Adherence Module",
+      "description": "Weekly self-report on medication adherence.",
+      "field_1": {
+        "label": "Taken",
+        "detail": "Medication taken in full"
+      },
+      "field_2": {
+        "label": "Partially",
+        "detail": "Medication partially taken (missed dose, difficulty)"
+      },
+      "field_3": {
+        "label": "Not Taken",
+        "detail": "Medication not taken this day"
+      },
+      "field_4": {
+        "label": "Free Notes",
+        "detail": "Optional text field (missed dose, remark…)"
+      },
+      "field_5": {
+        "label": "History",
+        "detail": "Raw list of the last 30 days (date, status, note)"
+      },
+      "footer": "Data stored locally on the patient's phone. The patient self-reports their status each day — no algorithmic interpretation (MDR 2017/745 compliance). Last 30 days of history available in the app."
+    },
+    "psychoeducation": {
+      "label": "Psychoeducation",
+      "description": "Therapeutic knowledge cards: sleep, grounding, distortions, drug interactions."
+    },
+    "sleep_diary": {
+      "label": "Sleep Diary",
+      "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
+      "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%."
+    },
+    "diet_weight_psycho": {
+      "label": "Diet & Weight Psychoeducation",
+      "description": "Understanding and managing cravings and weight gain on antipsychotics."
+    },
+    "chronobiology_tracker": {
+      "label": "Chronobiology Regularity Tracker",
+      "description": "Track zeitgebers: wake time, bedtime, first meal — essential for bipolar disorders."
+    },
+    "mood_tracker": {
+      "label": "Mood & Energy Thermometer",
+      "description": "Daily tracking of mood and energy level on a visual scale.",
+      "footer": "Single daily entry. History available with mini-charts per dimension (last 30 days). Data stored locally on the device."
+    },
+    "emotion_wheel": {
+      "label": "Emotion Wheel",
+      "description": "Explore and precisely name emotions to address alexithymia."
+    },
+    "behavioral_activation": {
+      "label": "Behavioral Activation Journal",
+      "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
+      "footer": "The patient plans and rates activities on two dimensions (P and M). Data stored locally. No global score — raw P and M values are reviewed by the clinician during sessions to guide motivational interviewing."
+    },
+    "beck_columns": {
+      "label": "Beck Columns",
+      "description": "Thought journal: Situation, Emotion, Automatic Thought, Alternative Thought.",
+      "step_1": {
+        "title": "Situation",
+        "hint": "Where was I? What was happening? Who was present?"
+      },
+      "step_2": {
+        "title": "Emotion(s)",
+        "hint": "What emotion did I feel? How intense was it (0–100)?"
+      },
+      "step_3": {
+        "title": "Automatic Thought",
+        "hint": "What thought came to mind? How much did I believe it (0–100)?"
+      },
+      "step_4": {
+        "title": "Rational Response",
+        "hint": "Another way to see the situation? What facts contradict this thought?"
+      },
+      "step_5": {
+        "title": "Outcome",
+        "hint": "What emotion now? Intensity (0–100)? Belief in the alternative thought (0–100)?"
+      },
+      "footer": "Each record is stored locally on the patient's device. History is accessible at any time."
+    },
+    "cognitive_distortions": {
+      "label": "Cognitive Distortions Detector",
+      "description": "Educational cards on thinking traps (all-or-nothing, overgeneralization, mind-reading…)"
+    },
+    "grounding": {
+      "label": "Grounding Techniques",
+      "description": "5-4-3-2-1 exercise to return to the present during dissociation or severe rumination."
+    },
+    "rim": {
+      "label": "RIM – Mental Imagery Reprocessing",
+      "description": "Mental imagery reprocessing technique.",
+      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
+    },
+    "fear_thermometer": {
+      "label": "Fear Thermometer",
+      "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
+      "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0–100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
+    },
+    "exposure_hierarchy": {
+      "label": "Exposure Hierarchy",
+      "description": "Graduated exposure step builder for phobias and OCD."
+    },
+    "breathing_techniques": {
+      "label": "Breathing Techniques",
+      "description": "Visual guide to box breathing and cardiac coherence with local counter.",
+      "field_1": {
+        "label": "Cardiac Coherence",
+        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inhale / 5s exhale · 5 min recommended"
+      },
+      "field_2": {
+        "label": "Diaphragmatic Breathing",
+        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inhale / 7s exhale · 5 min recommended"
+      },
+      "field_3": {
+        "label": "Box Breathing",
+        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommended"
+      },
+      "field_4": {
+        "label": "4-7-8 Technique",
+        "detail": "Expert consensus — Grade C · 4s-7s-8s · sleep onset, anxiety crisis · 3 min"
+      },
+      "field_5": {
+        "label": "Mindful Breathing",
+        "detail": "MBCT Segal et al. (2002) — Grade A depressive relapse · 4-1-6-1 · 10 min recommended"
+      },
+      "field_6": {
+        "label": "Session History",
+        "detail": "Technique used + actual duration — raw data, no interpretation"
+      },
+      "footer": "Animated guide at a fixed pace — no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
+    },
+    "cognitive_saturation": {
+      "label": "Cognitive Saturation",
+      "description": "Rapid repetition exercise to interrupt ruminations."
+    },
+    "craving_journal": {
+      "label": "Craving Journal",
+      "description": "Log the urge intensity (0-10), the trigger, and the avoidance strategy used."
+    },
+    "decisional_balance": {
+      "label": "Decisional Balance",
+      "description": "Motivational interviewing tool: weighing the pros and cons of a behaviour change.",
+      "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
+    },
+    "phq9": {
+      "label": "PHQ-9",
+      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27."
+    },
+    "gad7": {
+      "label": "GAD-7",
+      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0–21."
+    },
+    "bsl23": {
+      "label": "BSL-23",
+      "description": "23-item borderline symptom scale. Average score 0–4."
+    },
+    "snap_iv": {
+      "label": "SNAP-IV",
+      "description": "ADHD screening for children/adolescents — 26 items, 3 subscales."
+    },
+    "asrs6": {
+      "label": "ASRS v1.1 — Screener",
+      "description": "Adult ADHD rapid screening — 6-item Part A (Kessler et al., 2005)."
+    },
+    "asrs18": {
+      "label": "ASRS v1.1 — Full Assessment",
+      "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005)."
     }
   },
   "notifications": {

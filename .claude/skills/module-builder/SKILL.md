@@ -55,9 +55,12 @@ Ouvrir et **lire intégralement** :
 | `docs/module-engine.md` | Circuit complet schéma SQL → service → FieldRenderer → widgets — **source de vérité du moteur** |
 | `docs/modules.md` | Liste des modules implémentés, statuts, conventions |
 | `CLAUDE.md` | Contexte projet, tableau des modules, règle MDR, règles de dev |
-| `.claude/rules/coding-standards.md` | Standards stricts (TS, render, services, sécurité) |
+| `.claude/rules/coding-standards.md` | Standards stricts (TS, render, services, sécurité, sync) |
+| `.claude/rules/config-first.md` | Données en base, jamais dans des tableaux TypeScript statiques |
+| `.claude/rules/sync-service.md` | Pattern syncUpsert/syncDelete — obligatoire pour tout service mobile qui écrit des données patient |
 | `apps/web/docs/design-system.md` | Tokens CSS, classes `preview-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet, primitives, Teen mode |
+| `apps/mobile/src/services/syncHelpers.ts` | Helpers de sync — `syncUpsert` / `syncDelete` — source de vérité du pattern |
 | `supabase/schema.sql` | DDL — toujours la source de vérité du schéma |
 | `supabase/seed.sql` + `supabase/seed/*.sql` | Convention de seed idempotent |
 
@@ -343,6 +346,33 @@ Quatre couches, **étanches** :
 
 **Interdit en composant** : `import { supabase } from '../lib/supabase'` suivi de `supabase.from(...)` ; `db.execAsync(...)` direct ; `fetch(...)` direct ; `localStorage.setItem(...)` direct. **Obligatoire** : passer par une fonction d'un service.
 
+#### Synchronisation distante — toujours via syncHelpers
+
+Toute fonction de service mobile qui **écrit ou supprime** des données patient en
+SQLite doit passer par `syncUpsert` / `syncDelete` de `syncHelpers.ts`.
+Ne jamais appeler `dbSave()` seul — les données resteraient orphelines côté patient
+même si le consentement de partage est activé.
+
+```ts
+// ✅ Patron canonique — le même dans tous les services existants
+import { syncUpsert, syncDelete } from './syncHelpers'
+
+export async function saveMyEntry(entry: MyEntry): Promise<void> {
+  await syncUpsert(() => dbSave(entry), {
+    local_id: entry.id,
+    module_id: entry.module_id,
+    entry_kind: 'my_entry_kind',   // doit exister dans EntryKind (syncOutbox.ts)
+    payload: { /* champs à répliquer */ },
+  })
+}
+```
+
+Si le type de données du module n'est pas encore dans `EntryKind`
+(`apps/mobile/src/lib/syncOutbox.ts`) → l'ajouter à l'union **avant** le service.
+Ne jamais caster `'my_kind' as EntryKind`.
+
+Règle complète, exceptions légitimes et mock de test dans [`.claude/rules/sync-service.md`](../../.claude/rules/sync-service.md).
+
 #### Zéro duplication — règle dure
 
 Avant d'écrire `await supabase.from('xxx')` dans un service :
@@ -539,6 +569,7 @@ export function MyLayout({ ... }) { return <MyLayoutHeader ... /> }
 3. [TYPES]      packages/shared/src/index.ts → ajouter ModuleType
 4. [SCHEMA]     supabase/schema.sql → si nouvelle colonne / index / RLS nécessaire
 5. [SEED]       supabase/seed/<module_id>_seed.sql idempotent → mcp__supabase__apply_migration
+5b.[SYNC]       syncOutbox.ts → ajouter l'EntryKind si absent ; service → syncUpsert/syncDelete
 6. [VERIFY]     mcp__supabase__execute_sql → vérifier modules / module_content_fields / field_props
 7. [I18N]       fr/en common.json + fr/en teen.json (mobile) — autres langues skippables si demandé
 8. [WIDGETS]    Étendre les widgets existants ou en créer (web + mobile en miroir) — tests inclus
@@ -739,6 +770,12 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 - Clés `modules.<id>.*` ajoutées dans `fr/teen.json` et `en/teen.json` : <oui>
 - `tt(moduleId, key)` utilisé pour les textes propres au module : <oui>
 
+### Synchronisation — confirmation
+- Chaque fonction `save*` du service appelle `syncUpsert` : <oui/non — si non, justification>
+- Chaque fonction `delete*` du service appelle `syncDelete` : <oui/non — si non, justification>
+- `EntryKind` ajouté dans `syncOutbox.ts` si nouveau type : <oui/N/A>
+- Mock `jest.mock('../services/sync', ...)` présent dans les tests du service : <oui>
+
 ### MDR — confirmation
 - Aucun seuil interprétatif, aucune alerte conditionnelle, aucun label clinique apposé sur des chiffres saisis : <oui>
 
@@ -775,3 +812,5 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 13. **Veto teen mode absent** — tout écran mobile sans `useTeen` + `TeenAccent` + clés `teen.json` (fr + en) est refusé. Aucune exception, même pour les écrans d'urgence ou plein-écran : `useTeen` doit être importé pour les textes même si la palette teen est ignorée pour des raisons UX légitimes.
 14. **Veto nouveau composant sans mise à jour doc** — créer un nouveau composant (widget, layout, field_type, service, primitif UI) sans mettre à jour le document de référence correspondant est refusé. La table en Phase 3 liste quel doc mettre à jour selon ce qui est créé. Un composant livré sans sa trace documentaire n'est pas livré — c'est de la dette invisible qui cause le biais de réimplémentation dans les sessions futures.
 15. **Veto nouveau field_type sans consultation de l'inventaire** — avant d'introduire un `field_type` qui n'apparaît pas dans `docs/module-engine.md`, vérifier que aucun des 44+ types existants ne couvre le besoin (par prop ou variante). Si un équivalent existe → l'utiliser ou l'étendre. Si aucun équivalent ne convient → justifier en 3 lignes dans le doc du module et mettre à jour l'inventaire.
+16. **Veto sync absent** — tout service mobile de module qui appelle `dbSave()` / `db.execAsync()` sans passer par `syncUpsert` / `syncDelete` (`syncHelpers.ts`) est refusé. Aucune exception pour les modules avec stockage SQLite patient. Un `EntryKind` absent de `syncOutbox.ts` plutôt que casté `as EntryKind` est également un veto.
+17. **Veto config TypeScript statique** — tout tableau ou objet TypeScript (`const MY_DATA = [...]`) qui encode des métadonnées de module (labels, descriptions, catégories, contenu éditorial) au lieu d'être lu depuis `module_content_fields` / `field_props` est refusé. Règle complète : [`.claude/rules/config-first.md`](../../.claude/rules/config-first.md).
