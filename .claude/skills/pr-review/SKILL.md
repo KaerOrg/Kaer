@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Valide les bonnes pratiques d'implémentation PsyTool sur la branche courante — lit chaque fichier modifié/ajouté en entier et applique toutes les règles des `.claude/rules/` (coding-standards, config-first), plus les règles CLAUDE.md (MDR, module engine, design system, i18n, tests, doc). Triggers — "review la PR", "valide la branche", "pr-review", "vérifie les pratiques", "audit la branche".
+description: Valide les bonnes pratiques d'implémentation PsyTool sur la branche courante — lit chaque fichier modifié/ajouté en entier et applique toutes les règles des `.claude/rules/` (coding-standards, config-first, sync-service), plus les règles CLAUDE.md (MDR, module engine, design system, i18n, tests, doc). Triggers — "review la PR", "valide la branche", "pr-review", "vérifie les pratiques", "audit la branche".
 ---
 
 # PR Review — PsyTool
@@ -117,6 +117,7 @@ Ignorer : fichiers supprimés (`D`), `package-lock.json`, fichiers binaires, `*.
 Lire les rules de référence si elles ne sont pas en contexte :
 - `.claude/rules/coding-standards.md`
 - `.claude/rules/config-first.md`
+- `.claude/rules/sync-service.md`
 
 ---
 
@@ -154,7 +155,7 @@ Chercher ces patterns dans le fichier lu. Si trouvé dans un `.tsx` qui n'est pa
 
 **Exception légitime** : un store Zustand peut importer un service, pas supabase directement.
 
-#### RULE — TypeScript strict : zéro suppressions, zéro any
+#### RULE — TypeScript strict : zéro suppressions, zéro any, zéro unknown
 *(source : coding-standards.md § "Suppressions interdites" + "TypeScript strict")*
 
 Chercher dans le fichier :
@@ -162,9 +163,14 @@ Chercher dans le fichier :
 - `// eslint-disable`, `// biome-ignore` → **violation bloquante**
 - `: any` (type annotation) → **violation bloquante**
 - `as any` → **violation bloquante**
-- `as unknown as ` → **violation bloquante**
+- `as unknown` (seul ou en double-cast `as unknown as`) → **violation bloquante** — les casts via `unknown` contournent la sécurité du typage au même titre que `as any`
+- `<any>` (cast JSX/TypeScript) → **violation bloquante**
+- `Record<string, any>`, `Array<any>`, `Promise<any>` → **violation bloquante**
+- `Function` (type brut sans signature) → **violation bloquante** : typer explicitement avec une signature `(...args) => ReturnType`
 - Props de composant sans interface typée explicite (composant exporte une fonction sans `interface Props` ou type inline) → **violation**
 - États sans discriminated union quand plusieurs états sont possibles → **point d'attention**
+
+**Exception légitime** : `unknown` comme type de valeur capturée dans un `catch` (`catch (err: unknown)`) est autorisé et recommandé — ne pas le signaler.
 
 #### RULE — Render : zéro allocation inline
 *(source : coding-standards.md § "Render — zéro déclaration inline")*
@@ -277,6 +283,23 @@ Pour chaque fichier `*Service.ts` créé ou modifié :
 - Les fonctions exportées ont-elles une JSDoc (même courte : paramètres + retour) ? Sinon → **point d'attention**
 - Un fichier `*Service.test.ts` existe-t-il à côté ? Sinon → **violation**
 - `docs/services.md` sera-t-il mis à jour ? (vérifier si le fichier est dans la PR) Sinon → **point d'attention**
+
+#### RULE — Synchronisation distante (mobile) : syncUpsert/syncDelete obligatoires
+*(source : .claude/rules/sync-service.md + coding-standards.md § "Synchronisation distante")*
+
+Applicable uniquement aux services dans `apps/mobile/src/services/` qui gèrent des **entrées patient en SQLite**.
+
+Pour chaque fichier `*Service.ts` mobile créé ou modifié, chercher toutes les fonctions qui appellent un `db*` (écriture ou suppression) — `dbSave`, `dbDelete`, `db.execAsync`, `db.runAsync` :
+
+- L'appel `dbSave(...)` / `dbDelete(...)` est-il **encapsulé dans `syncUpsert(...)` ou `syncDelete(...)` de `syncHelpers.ts`** ? Sinon → **violation bloquante**.
+- `RemoteSyncService.getInstance().enqueue(...)` appelé **directement** (sans passer par `syncHelpers`) → **violation** : duplique `syncUpsert`, passer par le helper.
+- Le `entry_kind` passé à `syncUpsert` / `syncDelete` est-il **une valeur de l'union `EntryKind`** dans `apps/mobile/src/lib/syncOutbox.ts` ? Si un cast `as EntryKind` est présent → **violation** : ajouter la valeur à l'union.
+- Le mock de test `jest.mock('../services/sync', () => ({ RemoteSyncService: { getInstance: () => ({ enqueue: mockEnqueue }) } }))` est-il présent dans `*Service.test.ts` ? Sinon → **violation**.
+
+**Exceptions légitimes** (ne pas signaler) :
+- Services sans écriture de données patient locales : `psyeduService`, `authService`, `appointmentService`, `moduleService`, `homeService`, `notificationService`, etc. (lecture-only ou écriture directe Supabase).
+- Modules sans stockage local (`grounding` — zéro persistance).
+- Exception documentée par un commentaire JSDoc dans la fonction (ex. `// Pas de sync : données techniques, pas cliniques`).
 
 ---
 
@@ -686,7 +709,7 @@ Appel direct `supabase.from('modules')` dans un composant.
 
 ### coding-standards.md
 - [ ] Zéro Supabase/SQLite dans les composants
-- [ ] TypeScript strict (zéro any, zéro suppression)
+- [ ] TypeScript strict (zéro any, zéro as any, zéro as unknown, zéro suppression)
 - [ ] Zéro allocation inline dans le render
 - [ ] useState vs useRef correct
 - [ ] Architecture ui/ vs features/ respectée
@@ -700,6 +723,13 @@ Appel direct `supabase.from('modules')` dans un composant.
 ### config-first.md
 - [ ] Zéro tableau/objet TypeScript décrivant le contenu d'un module
 - [ ] Nouveau contenu → seed SQL (module_content_fields / field_props / psyedu)
+
+### sync-service.md (mobile uniquement)
+- [ ] Chaque `dbSave(...)` mobile encapsulé dans `syncUpsert(...)` (syncHelpers)
+- [ ] Chaque `dbDelete(...)` mobile encapsulé dans `syncDelete(...)` (syncHelpers)
+- [ ] Zéro appel direct à `RemoteSyncService.getInstance().enqueue()`
+- [ ] `entry_kind` est une valeur de l'union `EntryKind` (zéro cast `as EntryKind`)
+- [ ] Mock `jest.mock('../services/sync', ...)` dans les tests du service mobile
 
 ### CLAUDE.md
 - [ ] MDR 2017/745 — aucun seuil, alerte ou interprétation automatique
@@ -804,6 +834,7 @@ Insérer directement dans le fichier de règle, juste après la rule concernée 
 | i18n (texte en dur) | `coding-standards.md` | § "Internationalisation" |
 | Design system (duplication d'un primitive) | `coding-standards.md` | § "Checklist obligatoire" |
 | Config-first (données en TS statique) | `config-first.md` | § "L'erreur classique" |
+| Sync absent (dbSave sans syncUpsert, mobile) | `sync-service.md` | § "Pattern obligatoire" |
 | MDR 2017/745 | `CLAUDE.md` | § "RÈGLE D'OR — INTERDIT" |
 | Tests / documentation manquants | `CLAUDE.md` | § "Règles de développement" |
 | Mode Ado (useTeen/TeenAccent manquants) | `CLAUDE.md` | § "Pattern : Mode Ado" |
