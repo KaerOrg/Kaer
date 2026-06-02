@@ -112,7 +112,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | Implémenté — 18 items (Parties A+B), score 0-72, 2 sous-scores, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `epds` | EPDS — Dépression postnatale | Implémenté — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries` |
 | `nsi` | NSI — Sévérité des cauchemars | Implémenté — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), pattern générique ModuleRenderer, SQLite `nsi_entries` |
-| `medication_side_effects` | Effets secondaires médicamenteux | Implémenté — questionnaire générique ModuleRenderer, SQLite `scale_entries` |
+| `medication_side_effects` | Effets indésirables du traitement | Implémenté — refonte « tracker multi-dimensions » façon `mood_tracker` (composant générique `DimensionTrackerView` mobile + `DimensionTrackerLayout` web), 3 onglets Saisie/Évolution/Vue d'ensemble, **effets suivis paramétrables par patient** (sous-ensemble des 12 + effets personnalisés, config partagée praticien↔patient dans `patient_modules.config.tracked_effects`), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries` |
 | `psychoeducation` | Psychoéducation | Implémenté — `preview_kind='cards'`, cartes de savoir thérapeutique, statut lecture par carte, IDs débloqués en Supabase |
 | `diet_weight_psycho` | Alimentation et psychotropes | Implémenté — `preview_kind='psyedu'`, 8 fiches `psyedu_topics`/`psyedu_blocks` (general, antipsychotics, methylphenidate, antidepressants, mood_stabilizers, sleep, nutrition, activity) |
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
@@ -190,7 +190,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Techniques de respiration (`breathing_techniques`) — respirations guidées (cohérence cardiaque, abdominale), SQLite local
 - [x] Module EPDS — Dépression postnatale (`epds`) — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries`
 - [x] Module NSI — Sévérité des cauchemars (`nsi`) — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), SQLite `nsi_entries`
-- [x] Module Effets secondaires médicamenteux (`medication_side_effects`) — questionnaire générique ModuleRenderer, SQLite `scale_entries`
+- [x] Module Effets indésirables du traitement (`medication_side_effects`) — refonte tracker multi-dimensions (pattern `mood_tracker` via composant générique partagé `DimensionTrackerView`/`DimensionTrackerLayout`), effets suivis paramétrables par patient (12 fixes + personnalisés, config `patient_modules.config.tracked_effects` partagée web↔mobile), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries`, tests Jest + Vitest
 - [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
 - [ ] Notifications push
 
