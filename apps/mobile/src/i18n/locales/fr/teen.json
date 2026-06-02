@@ -296,7 +296,11 @@
       "reminder_none": "Aucun rappel configuré par ton soignant.",
       "history_empty": "Le suivi s'affichera dès tes premières saisies.",
       "custom_placeholder": "Nom de l'effet à suivre…",
-      "custom_delete_title": "Retirer cet effet perso ?"
+      "custom_delete_title": "Retirer cet effet perso ?",
+      "config_button": "Configurer mes effets",
+      "config_hint": "Choisis les effets qui te concernent. Tu peux aussi en ajouter un perso.",
+      "config_empty_text": "Appuie sur « Configurer mes effets » pour choisir ce que tu veux suivre.",
+      "config_add_placeholder": "Ajouter un effet (ex. bouffées de chaleur)…"
     },
     "medication_adherence": {
       "title": "Mes prises de traitement",

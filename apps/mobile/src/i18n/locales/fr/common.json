@@ -360,7 +360,14 @@
       "chip_appetite_loss": "Appétit ↓",
       "chip_dizziness": "Vertiges",
       "chip_headache": "Tête",
-      "chip_sexual": "Sexuel"
+      "chip_sexual": "Sexuel",
+      "config_button": "Configurer les effets suivis",
+      "config_title": "Effets à suivre",
+      "config_hint": "Choisissez les effets qui vous concernent. Vous pouvez aussi ajouter un effet personnalisé.",
+      "config_custom_title": "Effets personnalisés",
+      "config_add_placeholder": "Ajouter un effet (ex. bouffées de chaleur)…",
+      "config_empty_title": "Aucun effet configuré",
+      "config_empty_text": "Appuyez sur « Configurer les effets suivis » pour choisir ce que vous voulez suivre."
     },
     "medication_adherence": {
       "label": "Observance du traitement",

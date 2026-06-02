@@ -308,7 +308,14 @@
       "chip_appetite_loss": "Appetite ↓",
       "chip_dizziness": "Dizziness",
       "chip_headache": "Headache",
-      "chip_sexual": "Sexual"
+      "chip_sexual": "Sexual",
+      "config_button": "Configure tracked effects",
+      "config_title": "Effects to track",
+      "config_hint": "Choose the effects that concern you. You can also add a custom one.",
+      "config_custom_title": "Custom effects",
+      "config_add_placeholder": "Add an effect (e.g. hot flashes)…",
+      "config_empty_title": "No effect configured",
+      "config_empty_text": "Tap “Configure tracked effects” to choose what to track."
     },
     "medication_adherence": {
       "label": "Treatment adherence",

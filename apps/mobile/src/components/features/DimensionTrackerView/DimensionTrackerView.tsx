@@ -64,6 +64,15 @@ export interface DimensionTrackerConfig {
   dimensionKeys: readonly string[]
   dimensionColors: Record<string, string>
   emptyIcon?: IconName
+  /** Libellés explicites par clé (effets personnalisés). Sinon résolus via i18n dim_<key>. */
+  dimensionLabels?: Record<string, string>
+  /** Libellés courts (chips) explicites par clé. Sinon résolus via i18n chip_<key>. */
+  dimensionChipLabels?: Record<string, string>
+  /** Navigation vers la saisie (sinon ScaleEntry par défaut). */
+  onNewEntry?: () => void
+  onEditEntry?: (entryId: string) => void
+  /** Active un bouton « Configurer » (modules à effets paramétrables par patient). */
+  onConfigure?: () => void
 }
 
 export function DimensionTrackerView({ config }: { config: DimensionTrackerConfig }) {
@@ -72,6 +81,13 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
   const { isTeenMode, teenColor } = useTeen()
   const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(scaleId) ?? moduleColor
+
+  const dimLabel = (key: string): string =>
+    config.dimensionLabels?.[key] ?? t(`modules.${scaleId}.dim_${key}`)
+  const chipLabel = (key: string): string =>
+    config.dimensionChipLabels?.[key] ?? t(`modules.${scaleId}.chip_${key}`)
+  const goNewEntry = config.onNewEntry ?? (() => navigation.navigate('ScaleEntry', { scale_id: scaleId }))
+  const goEditEntry = config.onEditEntry ?? ((id: string) => navigation.navigate('ScaleEntry', { scale_id: scaleId, entry_id: id }))
   const patient = useAuthStore(s => s.patient)
 
   const [activeTab, setActiveTab] = useState<Tab>('entry')
@@ -187,11 +203,11 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
   const compositeSeriesMemo = useMemo(
     () => dimensionKeys.map(key => ({
       key,
-      label: t(`modules.${scaleId}.dim_${key}`),
+      label: config.dimensionLabels?.[key] ?? t(`modules.${scaleId}.dim_${key}`),
       color: dimensionColors[key] ?? accentColor,
       points: chartData[key],
     })),
-    [chartData, t, accentColor, dimensionKeys, dimensionColors, scaleId]
+    [chartData, t, accentColor, dimensionKeys, dimensionColors, scaleId, config.dimensionLabels]
   )
 
   const visibleMarkers = useMemo(() => {
@@ -302,9 +318,26 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
         {/* ── Onglet SAISIE ── */}
         {activeTab === 'entry' && (
           <View style={styles.section}>
+            {config.onConfigure != null && (
+              <Pressable style={styles.configBtn} onPress={config.onConfigure} accessibilityRole="button">
+                <MaterialCommunityIcons name="cog-outline" size={16} color={accentColor} />
+                <Text style={[styles.configBtnText, { color: accentColor }]}>
+                  {t(`modules.${scaleId}.config_button`)}
+                </Text>
+              </Pressable>
+            )}
+
+            {dimensionKeys.length === 0 ? (
+              <View style={styles.empty}>
+                <MaterialCommunityIcons name="cog-outline" size={48} color={colors.border} />
+                <Text style={styles.emptyTitle}>{t(`modules.${scaleId}.config_empty_title`)}</Text>
+                <Text style={styles.emptyText}>{t(`modules.${scaleId}.config_empty_text`)}</Text>
+              </View>
+            ) : (
+            <>
             <Pressable
               style={[styles.newBtn, { backgroundColor: accentColor }]}
-              onPress={() => navigation.navigate('ScaleEntry', { scale_id: scaleId })}
+              onPress={goNewEntry}
             >
               <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
               <Text style={styles.newBtnText}>
@@ -326,7 +359,7 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
                     <Pressable
                       key={entry.id}
                       style={styles.card}
-                      onPress={() => navigation.navigate('ScaleEntry', { scale_id: scaleId, entry_id: entry.id })}
+                      onPress={() => goEditEntry(entry.id)}
                       accessibilityRole="button"
                       accessibilityLabel={t('common.modify')}
                     >
@@ -348,7 +381,7 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
                                 <View key={key} style={styles.chip}>
                                   <View style={[styles.chipDot, { backgroundColor: dimensionColors[key] }]} />
                                   <Text style={styles.chipKey}>
-                                    {t(`modules.${scaleId}.chip_${key}`)}
+                                    {chipLabel(key)}
                                   </Text>
                                   <Text style={styles.chipValue}>{val}</Text>
                                 </View>
@@ -431,6 +464,8 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
                 </View>
               </View>
             </Modal>
+            </>
+            )}
           </View>
         )}
 
@@ -523,7 +558,7 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
                   {dimensionKeys.map(key => (
                     <DimensionChart
                       key={key}
-                      label={t(`modules.${scaleId}.dim_${key}`)}
+                      label={dimLabel(key)}
                       points={chartData[key]}
                       color={dimensionColors[key] ?? accentColor}
                       avgLabel={t(`modules.${scaleId}.chart_avg`)}
@@ -663,6 +698,17 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   newBtnText: { color: colors.white, fontWeight: '600', fontSize: 15 },
+
+  configBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    alignSelf: 'flex-end',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  configBtnText: { fontSize: 13, fontWeight: '600' },
 
   empty: { alignItems: 'center', paddingVertical: spacing.xl, gap: 8 },
   emptyTitle: { ...typography.h3, color: colors.textMuted, textAlign: 'center' },

@@ -296,7 +296,10 @@
       "reminder_none": "No reminder set by your clinician.",
       "history_empty": "Tracking will show up after your first entries.",
       "custom_placeholder": "Name of the effect to track…",
-      "custom_delete_title": "Remove this custom effect?"
+      "custom_delete_title": "Remove this custom effect?",
+      "config_button": "Configure my effects",
+      "config_hint": "Pick the effects that concern you. You can also add a custom one.",
+      "config_empty_text": "Tap “Configure my effects” to choose what to track."
     },
     "medication_adherence": {
       "title": "My medication log",
