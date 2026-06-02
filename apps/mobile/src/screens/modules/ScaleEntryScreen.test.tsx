@@ -13,7 +13,7 @@ jest.setTimeout(15000)
 const mockGoBack = jest.fn()
 
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ goBack: mockGoBack }),
+  useNavigation: () => ({ goBack: mockGoBack, setOptions: jest.fn() }),
   useRoute: () => ({ params: { scale_id: 'phq9' } }),
 }))
 
@@ -28,6 +28,21 @@ jest.mock('react-i18next', () => ({
 
 // Prevent AppStack from importing all 30+ screen components (OOM)
 jest.mock('../../navigation/AppStack', () => ({}))
+
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react')
+  const { View } = require('react-native')
+  return { __esModule: true, default: () => React.createElement(View, null) }
+})
+
+jest.mock('../../store/authStore', () => ({
+  useAuthStore: (sel?: (s: { patient: null }) => unknown) =>
+    sel ? sel({ patient: null }) : { patient: null },
+}))
+
+jest.mock('../../services/notificationService', () => ({
+  logScaleSubmission: jest.fn(),
+}))
 
 jest.mock('../../theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999' },
@@ -67,6 +82,8 @@ jest.mock('../../services/moduleService', () => ({
 
 jest.mock('../../lib/database', () => ({
   saveScaleEntry: jest.fn().mockResolvedValue(undefined),
+  getScaleEntryById: jest.fn().mockResolvedValue(null),
+  getLatestScaleEntry: jest.fn().mockResolvedValue(null),
   generateId: jest.fn().mockReturnValue('test-id'),
 }))
 

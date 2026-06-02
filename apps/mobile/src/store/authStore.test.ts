@@ -1,5 +1,5 @@
 jest.mock('../services/notificationService', () => ({
-  registerPushToken: jest.fn().mockResolvedValue(null),
+  registerPushTokenIfGranted: jest.fn().mockResolvedValue(null),
 }))
 
 jest.mock('../lib/supabase', () => ({
@@ -77,9 +77,10 @@ describe('authStore — loadSession', () => {
 describe('authStore — login', () => {
   it('se connecte sans erreur', async () => {
     jest.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-      data: {},
+      data: { user: { id: 'pat-1' } },
       error: null,
     } as never)
+    mockFrom({ id: 'pat-1' })
 
     await expect(
       useAuthStore.getState().login('patient@example.com', 'pass123')

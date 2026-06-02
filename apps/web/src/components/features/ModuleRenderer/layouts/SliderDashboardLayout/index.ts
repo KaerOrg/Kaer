@@ -1,0 +1,1 @@
+export { SliderDashboardLayout } from './SliderDashboardLayout'

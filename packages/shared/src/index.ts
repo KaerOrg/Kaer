@@ -38,6 +38,8 @@ export type ModuleType =
   // Addictologie & Impulsivité
   | 'craving_journal'
   | 'decisional_balance'
+  // Entretien Motivationnel
+  | 'motivational_balance'
   // Échelles & Questionnaires cliniques
   | 'phq9'
   | 'gad7'
@@ -123,7 +125,8 @@ export type PreviewKind =
   | 'tabbed'
   | 'chrono_month'
   | 'exposure_hierarchy'
-  | 'mood_tracker'
+  | 'slider_dashboard'
+  | 'crisis_urgency'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

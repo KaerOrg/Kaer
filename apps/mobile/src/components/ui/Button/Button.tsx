@@ -4,19 +4,22 @@ import { colors } from '../../../theme'
 import { styles } from './Button.styles'
 import type { ButtonProps } from './Button.types'
 
-export const Button = React.memo(function Button({ label, onPress, variant = 'primary', loading, disabled, style }: ButtonProps) {
+export const Button = React.memo(function Button({ label, onPress, variant = 'primary', loading, disabled, style, iconLeft }: ButtonProps) {
   const isDisabled = disabled || loading
 
   return (
     <Pressable
-      style={[styles.base, styles[variant], isDisabled ? styles.disabled : null, style]}
+      style={[styles.base, styles[variant], isDisabled ? styles.disabled : null, iconLeft ? styles.withIcon : null, style]}
       onPress={onPress}
       disabled={isDisabled}
     >
       {loading ? (
         <ActivityIndicator testID="activity-indicator" color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary} size="small" />
       ) : (
-        <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text>
+        <>
+          {iconLeft}
+          <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text>
+        </>
       )}
     </Pressable>
   )

@@ -118,6 +118,7 @@ Voir [`docs/invitation-flow.md`](docs/invitation-flow.md) pour le schéma comple
 | `chronobiology_tracker` | Régularité chronobiologique | Implémenté — `preview_kind='tabbed'` avec 3 onglets : Fiches (`psyedu`), Journal (`column_form` + 5 `column_time_field` optionnels), Mois (`chrono_month`) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), En crise (`cards`) ; bandeau MDR via `disclaimer_banner` field |
 | `craving_journal` | Journal de craving (TCC addictologie) | Implémenté — `preview_kind='tabbed'` avec 2 onglets : Fiches (`psyedu`), Journal (`column_form` : intensity slider 0-10 + 4 textareas trigger/emotion/thought/coping) ; bandeau MDR |
+| `motivational_balance` | Balance motivationnelle (Entretien Motivationnel) | Implémenté — écran custom, 4 onglets : Fiches (`psyedu`, 4 topics), Stade (roue Prochaska 6 stades), Thermomètres (importance + confiance 0-10 + question de suivi + phrase d'engagement), Balance (12 valeurs + 2 colonnes Pour/Contre + poids 1-3) ; bouton "i" sources (Miller & Rollnick, Prochaska, SDT, HAS, NICE) ; SQLite local 3 tables (`em_rulers`, `em_balance_items`, `em_values`) ; teen mode ; bandeau MDR ; catégorie Supabase `motivation` |
 | `cognitive_distortions` | Distorsions cognitives | Prévu (`preview_kind='coming_soon'`) |
 | `therapeutic_commitment` | Engagement thérapeutique | Prévu (`preview_kind='coming_soon'`) |
 
@@ -133,7 +134,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 | `apps/mobile/src/lib/database.ts` | Table SQLite générique `scale_entries` |
 | `supabase/schema.sql` | `module_content_fields` + `field_props` par échelle |
 
-> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer.tsx`
+> Chemin du moteur : `apps/mobile/src/components/features/ModuleRenderer/FieldRenderer/` (dossier — entrée + dispatcher + helper ; layouts dans `../layouts/<Nom>/`)
 
 **Ajouter une nouvelle échelle générique :**
 1. Ajouter la config dans `SCALE_SCORING` (scaleScoring.ts)
@@ -184,7 +185,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Activation comportementale (`behavioral_activation`) — activités P/M 0–10, statut planifiée/réalisée, SQLite `activity_records`
 - [x] Module Ancrage 5-4-3-2-1 (`grounding`) — exercice DBT sensoriel interactif (Linehan 1993), 3 modes, sans stockage de données
 - [x] Module Thermomètre de l'humeur (`mood_tracker`) — refonte : 6 dimensions (repère « Normal » bidirectionnel), écran custom 3 onglets (Saisie/Évolution/Vue d'ensemble), graphiques 7J/1M/3M/1A + axe Y + courbes continues, CompositeChart, repères temporels (Life Chart, `mood_markers` SQLite), heatmap calendrier, rappels, SQLite `scale_entries`, 27 tests Jest
-- [x] Module Balance motivationnelle (`motivational_balance`) — 2 onglets psyedu + balance pour/contre, SQLite local
+- [x] Module Balance motivationnelle (`motivational_balance`) — 4 onglets (Fiches psyedu, Stade Prochaska, Thermomètres importance/confiance 0-10 + question de suivi, Balance valeurs + 2 colonnes), bouton "i" sources scientifiques, SQLite local (3 tables), teen mode, bandeau MDR, 10 tests Jest
 - [x] Module Observance médicamenteuse (`medication_adherence`) — checklist quotidienne d'observance, SQLite local
 - [x] Module Techniques de respiration (`breathing_techniques`) — respirations guidées (cohérence cardiaque, abdominale), SQLite local
 - [x] Module EPDS — Dépression postnatale (`epds`) — 10 items, score 0-30, pattern générique ModuleRenderer, SQLite `scale_entries`
@@ -226,6 +227,17 @@ PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif M
 
 Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le risque de requalification, et proposer une alternative d'affichage passif conforme.
 
+> **Cas rencontré — refonte-effets-du-traitement (2026-06-02) :**
+> Un dégradé de couleur de **sévérité** apposé sur les options de réponse d'une
+> échelle clinique (`medication_side_effects`) — `field_props` : option « absent »
+> = gris `#9CA3AF` … option « sévère » = **rouge `#EF4444`**, rendu par `LikertWidget`.
+> ```
+> ❌ Le rouge est piloté par la valeur clinique la plus grave → le code interprète
+>    (sévère = alarmant) au lieu d'afficher la valeur brute.
+> ```
+> → Couleurs d'options **neutres et uniformes**. Le codage couleur d'une gravité
+> clinique est interdit, même statique (pas seulement quand un seuil le déclenche).
+
 ---
 
 ## Règles de développement
@@ -234,6 +246,7 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
 - **Feedback utilisateur web — toujours utiliser `useToast()`** pour les résultats d'opérations réseau (save, update, delete, erreur serveur). Ne jamais créer d'état `error`/`success` local pour une opération réseau. Réserver les états locaux inline à la validation de champ (email invalide, champ requis). Hook : `import { useToast } from '../contexts/ToastContext'` — doc complète : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Pas de SQL ni d'appel Supabase dans un composant** — toute opération de données passe par une fonction d'un service `apps/<app>/src/services/<domaine>Service.ts`. Seules exceptions : les clients d'infrastructure dans `src/lib/` (`supabase.ts`, `database.ts` SQLite). Détails et procédure : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) section *Accès aux données* + [`docs/services.md`](docs/services.md).
 - **Nouveau module = passer par le skill [`module-builder`](.claude/skills/module-builder/SKILL.md).** Il enforce la règle data-first (`modules` + `module_content_fields` + `field_props` → `FieldRenderer` web et mobile) : zéro page hardcodée, parité aperçu praticien web ≡ écran patient mobile garantie par construction, composants génériques réutilisés avant d'être créés, tests et documentation obligatoires. Lecture préalable indispensable : [`docs/module-engine.md`](docs/module-engine.md).
+- **Avant tout merge = passer par le skill [`pr-review`](.claude/skills/pr-review/SKILL.md).** Il lit chaque fichier modifié/ajouté en entier et applique toutes les rules du projet (coding-standards, config-first, MDR, design system, i18n, tests, doc). Produit un rapport avec violations bloquantes et points d'attention, avec références `fichier:ligne`.
 - **Pour les modules legacy à écran mobile dédié** (animation Reanimated, machine d'état multi-écrans interactive), garder l'ordre web-puis-mobile :
   1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.

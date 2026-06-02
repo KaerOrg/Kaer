@@ -6,7 +6,6 @@ import {
   Pressable,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TextInput,
   Modal,
 } from 'react-native'
@@ -14,20 +13,15 @@ import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react-native'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../../../../theme'
 import {
-  listExposureHierarchies,
-  createExposureHierarchy,
-  deleteExposureHierarchy,
-  getAllFearSituations,
-  saveFearSituation,
-  deleteFearSituation,
-  getAllFearEntries,
-  generateId,
-  type ExposureHierarchy,
-  type FearSituation,
-  type FearEntry,
+  listExposureHierarchies, getAllFearSituations, getAllFearEntries, generateId,
+  type ExposureHierarchy, type FearSituation, type FearEntry,
 } from '../../../../../lib/database'
+import {
+  createExposureHierarchy, deleteExposureHierarchy, saveFearSituation, deleteFearSituation,
+} from '../../../../../services/fearTrackerService'
 import { PipPicker } from '../../../../ui/PipPicker'
 import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../Chart'
+import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 
 type Mode =
   | { kind: 'hierarchies' }
@@ -49,6 +43,7 @@ interface Props {
 // MDR : aucun seuil interprétatif. SUDs et progression affichés bruts.
 export function ExposureHierarchyLayout({ moduleId }: Props) {
   const { t } = useTranslation()
+  const { showConfirm } = useConfirmDialog()
 
   const [mode, setMode] = useState<Mode>({ kind: 'hierarchies' })
   const [loading, setLoading] = useState(true)
@@ -90,23 +85,18 @@ export function ExposureHierarchyLayout({ moduleId }: Props) {
 
   const handleDeleteHierarchy = useCallback(
     (h: ExposureHierarchy) => {
-      Alert.alert(
-        t('common.delete'),
-        t('common.irreversible'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: async () => {
-              await deleteExposureHierarchy(h.id)
-              void reload()
-            },
-          },
-        ]
-      )
+      showConfirm({
+        title: t('common.delete'),
+        message: t('common.irreversible'),
+        confirmLabel: t('common.delete'),
+        destructive: true,
+        onConfirm: async () => {
+          await deleteExposureHierarchy(h.id)
+          void reload()
+        },
+      })
     },
-    [reload, t]
+    [reload, t, showConfirm]
   )
 
   // ── Items mode ────────────────────────────────────────────────────────
@@ -136,23 +126,18 @@ export function ExposureHierarchyLayout({ moduleId }: Props) {
 
   const handleDeleteItem = useCallback(
     (s: FearSituation) => {
-      Alert.alert(
-        t('common.delete'),
-        t('common.irreversible'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: async () => {
-              await deleteFearSituation(s.id)
-              void reload()
-            },
-          },
-        ]
-      )
+      showConfirm({
+        title: t('common.delete'),
+        message: t('common.irreversible'),
+        confirmLabel: t('common.delete'),
+        destructive: true,
+        onConfirm: async () => {
+          await deleteFearSituation(s.id)
+          void reload()
+        },
+      })
     },
-    [reload, t]
+    [reload, t, showConfirm]
   )
 
   // ── Item history mode ─────────────────────────────────────────────────

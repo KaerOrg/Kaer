@@ -12,14 +12,19 @@ interface Props {
 // démarrage, section consignes de sécurité. Source mobile :
 // GuidedExerciseLayout (FieldRenderer.tsx).
 export function GuidedExerciseLayout({ fields, t }: Props) {
+  const configField = fields.find(f => f.field_type === 'exercise_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
+  }
   const ft = (type: string): string => {
     const f = fields.find(field => field.field_type === type)
     return f?.text_code ? t(f.text_code) : ''
   }
 
-  const title = ft('exercise_title')
+  const title = lbl('title')
   const intros = fields.filter(f => f.field_type === 'exercise_intro')
-  const startBtn = ft('exercise_start_btn')
+  const startBtn = lbl('start_btn')
   const safetyTitle = ft('exercise_safety_title')
   const safetyItems = fields.filter(f => f.field_type === 'exercise_safety')
 

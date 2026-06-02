@@ -4,9 +4,9 @@ jest.mock('../../hooks/useTeen', () => ({
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import ScaleHistoryScreen from './ScaleHistoryScreen'
 import * as database from '../../lib/database'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
 
@@ -17,7 +17,7 @@ let mockScaleId = 'phq9'
 jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
-    useNavigation: () => ({ navigate: mockNavigate }),
+    useNavigation: () => ({ navigate: mockNavigate, setOptions: jest.fn() }),
     useRoute: () => ({ params: { scale_id: mockScaleId } }),
     useFocusEffect: (cb: () => () => void) => {
       React.useEffect(() => cb(), [])
@@ -120,19 +120,14 @@ describe('ScaleHistoryScreen', () => {
 
   it('déclenche une confirmation avant suppression', async () => {
     ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([PHQ9_ENTRY])
-    const alertSpy = jest.spyOn(Alert, 'alert')
     render(<ScaleHistoryScreen />)
     await waitFor(() => expect(screen.getByText('9 score_max')).toBeTruthy())
     fireEvent.press(screen.getByLabelText('delete'))
-    expect(alertSpy).toHaveBeenCalled()
+    expect(useConfirmDialog().showConfirm).toHaveBeenCalled()
   })
 
   it('supprime une entrée après confirmation', async () => {
     ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([PHQ9_ENTRY])
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const destructive = buttons?.find(b => b.style === 'destructive')
-      destructive?.onPress?.()
-    })
     render(<ScaleHistoryScreen />)
     await waitFor(() => expect(screen.getByText('9 score_max')).toBeTruthy())
     fireEvent.press(screen.getByLabelText('delete'))

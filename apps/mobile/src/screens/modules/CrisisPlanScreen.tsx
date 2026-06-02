@@ -7,27 +7,28 @@ import {
   Pressable,
   Image,
   TextInput,
-  Alert,
   ActivityIndicator,
   Linking,
+  Modal,
+  StatusBar,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useFocusEffect } from '@react-navigation/native'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { AppStackParamList } from '../../navigation/AppStack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
-import { AppStackParamList } from '../../navigation/AppStack'
 import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../contexts/ToastContext'
+import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
+import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import {
-  generateId,
-  getAllPlanItemsForModule,
-  savePlanItem,
-  deletePlanItem,
-  type PlanItem,
+  generateId, getAllPlanItemsForModule, type PlanItem,
 } from '../../lib/database'
+import { savePlanItem, deletePlanItem } from '../../services/planItemService'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
 import { EditableItemsList } from '../../components/features/ModuleRenderer/layouts/shared/EditableItemsList'
 import {
@@ -43,8 +44,6 @@ import {
   type CrisisCommitment,
 } from '../../services/crisisPlanService'
 
-type Nav = NativeStackNavigationProp<AppStackParamList>
-
 // ─── Sous-composant : Section "Mes raisons de tenir" ─────────────────────────
 
 function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMode: boolean }) {
@@ -53,6 +52,8 @@ function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMod
   const [anchorPhrase, setAnchorPhrase] = useState('')
   const [editingPhrase, setEditingPhrase] = useState(false)
   const patient = useAuthStore(s => s.patient)
+  const { showToast } = useToast()
+  const { showConfirm } = useConfirmDialog()
 
   useFocusEffect(useCallback(() => {
     let active = true
@@ -74,29 +75,21 @@ function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMod
       const anchor = await pickAndSaveAnchorPhoto(anchors.length)
       if (anchor) setAnchors(prev => [...prev, anchor])
     } catch {
-      Alert.alert(
-        t('common.error'),
-        t('modules.crisis_plan.photo_error'),
-      )
+      showToast(t('modules.crisis_plan.photo_error'), 'error')
     }
-  }, [anchors.length, t])
+  }, [anchors.length, t, showToast])
 
   const handleDeletePhoto = useCallback((anchor: CrisisAnchor) => {
-    Alert.alert(
-      t('modules.crisis_plan.delete_photo_title') || 'Supprimer cette photo ?',
-      undefined,
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'), style: 'destructive',
-          onPress: async () => {
-            await removeAnchorPhoto(anchor)
-            setAnchors(prev => prev.filter(a => a.id !== anchor.id))
-          },
-        },
-      ],
-    )
-  }, [t])
+    showConfirm({
+      title: t('modules.crisis_plan.delete_photo_title') || 'Supprimer cette photo ?',
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await removeAnchorPhoto(anchor)
+        setAnchors(prev => prev.filter(a => a.id !== anchor.id))
+      },
+    })
+  }, [t, showConfirm])
 
   const handleSavePhrase = useCallback(async () => {
     await saveAnchorPhrase(anchorPhrase)
@@ -224,6 +217,7 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
   const [commitmentPhrase, setCommitmentPhrase] = useState('')
   const [signingName, setSigningName] = useState('')
   const [signing, setSigning] = useState(false)
+  const { showToast } = useToast()
 
   useFocusEffect(useCallback(() => {
     let active = true
@@ -246,9 +240,9 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
       setSigning(false)
       setSigningName('')
     } catch {
-      Alert.alert(t('common.error'), t('common.save_error'))
+      showToast(t('common.save_error'), 'error')
     }
-  }, [signingName, t])
+  }, [signingName, t, showToast])
 
   const formattedDate = commitment
     ? new Date(commitment.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -315,13 +309,16 @@ function CommitmentSection({ t, patientId }: { t: (k: string) => string; patient
 
 // ─── Écran principal ──────────────────────────────────────────────────────────
 
-export default function CrisisPlanScreen() {
+type Props = NativeStackScreenProps<AppStackParamList, 'CrisisPlan'>
+
+export default function CrisisPlanScreen({ route }: Props) {
   const { t } = useTranslation()
-  const { isTeenMode, teenColor } = useTeen()
-  const navigation = useNavigation<Nav>()
+  const { isTeenMode, tt, teenColor } = useTeen()
   const patient = useAuthStore(s => s.patient)
+  const { showConfirm } = useConfirmDialog()
 
   const [loading, setLoading] = useState(true)
+  const [urgencyVisible, setUrgencyVisible] = useState(route.params?.initialUrgency ?? false)
   const [loadError, setLoadError] = useState(false)
   const [sections, setSections] = useState<Map<string, ContentField[]>>(new Map())
   const [uiFields, setUiFields] = useState<ContentField[]>([])
@@ -403,17 +400,17 @@ export default function CrisisPlanScreen() {
   }, [])
 
   const handleDelete = useCallback((item: PlanItem) => {
-    Alert.alert(t('modules.crisis_plan.delete_item_title'), `"${item.text}"`, [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'), style: 'destructive',
-        onPress: async () => {
-          await deletePlanItem(item.id)
-          setItems(prev => prev.filter(i => i.id !== item.id))
-        },
+    showConfirm({
+      title: t('modules.crisis_plan.delete_item_title'),
+      message: `"${item.text}"`,
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deletePlanItem(item.id)
+        setItems(prev => prev.filter(i => i.id !== item.id))
       },
-    ])
-  }, [t])
+    })
+  }, [t, showConfirm])
 
   if (loading) {
     return (
@@ -426,6 +423,7 @@ export default function CrisisPlanScreen() {
   }
 
   return (
+    <>
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       <TeenAccent color={teenColor('crisis_plan')} />
       <View style={styles.flex}>
@@ -437,7 +435,7 @@ export default function CrisisPlanScreen() {
           {/* Bouton mode urgence */}
           <Pressable
             style={styles.urgencyBanner}
-            onPress={() => navigation.navigate('CrisisUrgency')}
+            onPress={() => setUrgencyVisible(true)}
           >
             <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />
             <Text style={styles.urgencyBannerText}>{t('modules.crisis_plan.urgency_title')}</Text>
@@ -558,6 +556,31 @@ export default function CrisisPlanScreen() {
         )}
       </View>
     </SafeAreaView>
+
+      {/* Modal urgence */}
+      <Modal visible={urgencyVisible} animationType="slide" statusBarTranslucent>
+        <View style={styles.urgencyRoot}>
+          <StatusBar barStyle="light-content" backgroundColor="#DC2626" />
+          <SafeAreaView style={styles.urgencyHeader} edges={['top']}>
+            <View style={styles.urgencyHeaderInner}>
+              <View style={styles.urgencyHeaderLeft}>
+                <MaterialCommunityIcons name="alert-circle" size={28} color="#fff" />
+                <View>
+                  <Text style={styles.urgencyTitle}>{tt('crisis_plan', 'urgency_title')}</Text>
+                  <Text style={styles.urgencySubtitle}>{tt('crisis_plan', 'urgency_subtitle')}</Text>
+                </View>
+              </View>
+              <Pressable style={styles.urgencyClose} onPress={() => setUrgencyVisible(false)} accessibilityRole="button">
+                <MaterialCommunityIcons name="close" size={24} color="#fff" />
+              </Pressable>
+            </View>
+          </SafeAreaView>
+          <SafeAreaView style={styles.urgencyContent} edges={['bottom']}>
+            <FieldRenderer preview_kind="crisis_urgency" fields={uiFields} moduleId="crisis_plan" />
+          </SafeAreaView>
+        </View>
+      </Modal>
+    </>
   )
 }
 
@@ -578,6 +601,19 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   urgencyBannerText: { flex: 1, color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  // Modal urgence
+  urgencyRoot:       { flex: 1, backgroundColor: colors.background },
+  urgencyHeader:     { backgroundColor: '#DC2626' },
+  urgencyHeaderInner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: spacing.md, paddingVertical: spacing.md, gap: spacing.sm,
+  },
+  urgencyHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  urgencyTitle:      { color: '#fff', fontSize: 18, fontWeight: '700' },
+  urgencySubtitle:   { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 1 },
+  urgencyClose:      { padding: 4 },
+  urgencyContent:    { flex: 1 },
 
   // Étapes accordion
   card: {

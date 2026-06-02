@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   ActivityIndicator,
   Platform,
 } from 'react-native'
@@ -15,7 +14,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
-import { saveScaleEntry, getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../lib/database'
+import { getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../lib/database'
+import { saveScaleEntry } from '../../services/scaleEntryService'
 import { logScaleSubmission } from '../../services/notificationService'
 import { useAuthStore } from '../../store/authStore'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
@@ -24,6 +24,7 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useToast } from '../../contexts/ToastContext'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleEntry'>
@@ -46,6 +47,7 @@ export default function ScaleEntryScreen() {
   const isEditing = entry_id != null
   const { isTeenMode, teenColor } = useTeen()
   const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { showToast } = useToast()
   const accentColor = teenColor(scale_id)
 
   const { patient } = useAuthStore()
@@ -137,10 +139,7 @@ export default function ScaleEntryScreen() {
   const handleSubmit = useCallback(async () => {
     if (!allAnswered) {
       const remaining = totalItems - answeredCount
-      Alert.alert(
-        t('common.error'),
-        `${remaining} question${remaining > 1 ? 's' : ''} sans réponse.`
-      )
+      showToast(`${remaining} question${remaining > 1 ? 's' : ''} sans réponse.`, 'info')
       return
     }
     if (config == null) return

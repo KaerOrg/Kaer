@@ -56,9 +56,9 @@ jest.mock('@react-navigation/native', () => ({
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
+import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -217,12 +217,11 @@ describe('FieldRenderer — sleep_journal (SleepJournalLayout)', () => {
   })
 
   it('refuse de sauver sans étoiles de qualité', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
     renderLayout()
     fireEvent.press(await screen.findByTestId('cta-yesterday'))
     await screen.findByTestId('sleep-journal-entry')
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
-    expect(alertSpy).toHaveBeenCalled()
+    expect(useToast().showToast).toHaveBeenCalled()
     expect(database.saveSleepEntry).not.toHaveBeenCalled()
   })
 
@@ -294,18 +293,13 @@ describe('FieldRenderer — sleep_journal (SleepJournalLayout)', () => {
 
   it('supprime une entrée existante après confirmation', async () => {
     ;(database.getSleepEntry as jest.Mock).mockResolvedValue(MOCK_ENTRY)
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => {
-      const d = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = d?.onPress as () => Promise<void>
-    })
 
     renderLayout()
     fireEvent.press(await screen.findByTestId('cta-yesterday'))
     const deleteBtn = await screen.findByTestId('delete-button')
-    fireEvent.press(deleteBtn)
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-    expect(database.deleteSleepEntry).toHaveBeenCalledWith('sleep-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteSleepEntry).toHaveBeenCalledWith('sleep-1')
+    })
   })
 })

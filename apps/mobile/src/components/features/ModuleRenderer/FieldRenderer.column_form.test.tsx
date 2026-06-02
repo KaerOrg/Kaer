@@ -41,10 +41,10 @@ jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
-import { Alert } from 'react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import * as engagement from '../../../services/engagementService'
+import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -175,14 +175,12 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
   })
 
   it('alerte et n\'enregistre pas si aucun champ requis n\'est rempli', async () => {
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
     renderLayout()
     fireEvent.press(await screen.findByTestId('new-entry'))
     fireEvent.press(screen.getByTestId('save-entry'))
 
-    await waitFor(() => expect(alertSpy).toHaveBeenCalled())
+    await waitFor(() => expect(useToast().showToast).toHaveBeenCalled())
     expect(database.saveFormEntry).not.toHaveBeenCalled()
-    alertSpy.mockRestore()
   })
 
   it('enregistre une nouvelle entrée et appelle logEvent', async () => {
@@ -231,18 +229,12 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
 
   it('supprime une entrée après confirmation', async () => {
     ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
-    let capturedDestructive: (() => Promise<void>) | undefined
-    jest.spyOn(Alert, 'alert').mockImplementation((_title, _msg, buttons) => {
-      const destructive = (buttons ?? []).find(b => b.style === 'destructive')
-      capturedDestructive = destructive?.onPress as () => Promise<void>
-    })
-
     renderLayout()
-    fireEvent.press(await screen.findByTestId('delete-entry-1'))
-    expect(capturedDestructive).toBeDefined()
-    await act(async () => { await capturedDestructive!() })
-
-    expect(database.deleteFormEntry).toHaveBeenCalledWith('entry-1')
+    const deleteBtn = await screen.findByTestId('delete-entry-1')
+    await act(async () => { fireEvent.press(deleteBtn) })
+    await waitFor(() => {
+      expect(database.deleteFormEntry).toHaveBeenCalledWith('entry-1')
+    })
     await waitFor(() => expect(screen.queryByTestId('record-entry-1')).toBeNull())
   })
 })

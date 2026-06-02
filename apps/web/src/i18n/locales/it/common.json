@@ -191,8 +191,71 @@
     "next_week": "Settimana successiva",
     "configure": "Disponibilità",
     "no_rules": "Nessuna fascia oraria definita.",
-    "days_short": { "0": "Lun", "1": "Mar", "2": "Mer", "3": "Gio", "4": "Ven", "5": "Sab", "6": "Dom" },
-    "editor": { "title": "La mia disponibilità", "add_rule": "Aggiungi fascia", "slot_duration": "Durata appuntamento", "minutes": "min", "auto_confirm": "Conferma automatica", "delete_rule": "Elimina" },
-    "appointment": { "new": "Nuovo appuntamento", "status_pending": "In attesa", "status_confirmed": "Confermato", "status_cancelled": "Annullato", "status_completed": "Completato" }
+    "days_short": {
+      "0": "Lun",
+      "1": "Mar",
+      "2": "Mer",
+      "3": "Gio",
+      "4": "Ven",
+      "5": "Sab",
+      "6": "Dom"
+    },
+    "editor": {
+      "title": "La mia disponibilità",
+      "add_rule": "Aggiungi fascia",
+      "slot_duration": "Durata appuntamento",
+      "minutes": "min",
+      "auto_confirm": "Conferma automatica",
+      "delete_rule": "Elimina"
+    },
+    "appointment": {
+      "new": "Nuovo appuntamento",
+      "status_pending": "In attesa",
+      "status_confirmed": "Confermato",
+      "status_cancelled": "Annullato",
+      "status_completed": "Completato"
+    }
+  },
+  "scales": {
+    "eval_auto": "Autovalutazione",
+    "eval_hetero": "Eterovalutazione",
+    "validated_prefix": "Validato",
+    "age": {
+      "perinatal": "Perinatale",
+      "enfant": "Bambino/a",
+      "ado": "Adolescente",
+      "adulte": "Adulto/a",
+      "senior": "Anziano/a"
+    },
+    "category": {
+      "humeur": "Umore",
+      "anxiete": "Ansia",
+      "sommeil": "Sonno",
+      "addictologie": "Dipendenza",
+      "psychose": "Psicosi",
+      "personnalite": "Personalità",
+      "neurodev": "Neurosviluppo",
+      "trauma": "Trauma"
+    },
+    "descriptions": {}
+  },
+  "dispensaire": {
+    "title": "Biblioteca Clinica",
+    "subtitle": "Questionari validati. Inviateli direttamente ai vostri pazienti.",
+    "sidebar_title": "Temi clinici",
+    "all_scales": "Tutte le scale",
+    "legend_ages": "Fasce d'età validate:",
+    "empty_category": "Nessuna scala disponibile in questa categoria.",
+    "empty_soon": "Presto verranno aggiunti nuovi questionari.",
+    "propose_btn": "Proponi a un paziente",
+    "reference_aria": "Riferimento validato",
+    "modal_subtitle": "Scegli un paziente",
+    "close": "Chiudi",
+    "loading_patients": "Caricamento pazienti…",
+    "no_patients": "Nessun paziente ancora.",
+    "sent": "Inviato",
+    "send": "Invia",
+    "error_duplicate": "{{label}} ha già questo questionario.",
+    "error_send": "Errore durante l'invio. Riprova."
   }
 }

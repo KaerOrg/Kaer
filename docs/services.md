@@ -47,6 +47,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
 | [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | `fetchPsychoCards`, `fetchModulePreviewKind` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
 | [`moduleCatalogService.ts`](../apps/web/src/services/moduleCatalogService.ts) | Catégories + modules pour l'armoire thérapeutique et le formulaire d'invitation |
+| [`moduleSourcesService.ts`](../apps/web/src/services/moduleSourcesService.ts) | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` — sources & recommandations d'un module ([doc](module-sources.md)) |
 
 Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrapper Zustand : il délègue toutes les opérations Supabase à `authService.ts` et n'expose qu'un état réactif.
 
@@ -61,8 +62,26 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`notificationService.ts`](../apps/mobile/src/services/notificationService.ts) | Permissions et planification des rappels (stubs Expo Go SDK 53+) |
 | [`avatarService.ts`](../apps/mobile/src/services/avatarService.ts) | Picker image, upload Supabase Storage, mise à jour `patients.avatar_url` |
 | [`psychoeducationService.ts`](../apps/mobile/src/services/psychoeducationService.ts) | `markCardAsRead` — réécriture du JSONB `unlocked_cards` |
+| [`syncHelpers.ts`](../apps/mobile/src/services/syncHelpers.ts) | `syncUpsert(dbFn, params)` + `syncDelete(dbFn, localId, moduleId, entryKind)` — helpers partagés par tous les services de données pour le dual-write SQLite + Supabase. |
+| [`scaleEntryService.ts`](../apps/mobile/src/services/scaleEntryService.ts) | `saveScaleEntry`, `deleteScaleEntry` — questionnaires cliniques (PHQ-9, GAD-7, BSL-23…) |
+| [`sleepDiaryService.ts`](../apps/mobile/src/services/sleepDiaryService.ts) | `saveSleepEntry`, `deleteSleepEntry` — agenda du sommeil |
+| [`formEntryService.ts`](../apps/mobile/src/services/formEntryService.ts) | `saveFormEntry`, `deleteFormEntry` — formulaires multi-colonnes (Beck, craving) |
+| [`dailyEntryService.ts`](../apps/mobile/src/services/dailyEntryService.ts) | `saveDailyEntry`, `deleteDailyEntry` — saisies quotidiennes (observance) |
+| [`treeSelectionService.ts`](../apps/mobile/src/services/treeSelectionService.ts) | `saveTreeSelection`, `deleteTreeSelection` — sélecteurs hiérarchiques (roue des émotions) |
+| [`planItemService.ts`](../apps/mobile/src/services/planItemService.ts) | `savePlanItem`, `deletePlanItem`, `setModuleSetting` — plans éditables + settings module |
+| [`activityRecordService.ts`](../apps/mobile/src/services/activityRecordService.ts) | `saveActivityRecord`, `deleteActivityRecord` — activation comportementale |
+| [`fearTrackerService.ts`](../apps/mobile/src/services/fearTrackerService.ts) | `saveFearEntry`, `deleteFearEntry`, `saveFearSituation`, `deleteFearSituation`, `createExposureHierarchy`, `deleteExposureHierarchy` |
+| [`breathingService.ts`](../apps/mobile/src/services/breathingService.ts) | `saveBreathingSession` — techniques de respiration |
 
 Le [`store/authStore.ts`](../apps/mobile/src/store/authStore.ts) est un thin wrapper Zustand qui délègue à `authService.ts`.
+
+### Sous-dossier `services/sync/`
+
+| Fichier | Domaine |
+|---|---|
+| [`sync/RemoteSyncService.ts`](../apps/mobile/src/services/sync/RemoteSyncService.ts) | Singleton. Draine `sync_outbox` (SQLite) vers `patient_entries` (Supabase) par batchs de 50. Gate de consentement MDR, guard de ré-entrance, retry jusqu'à 5×. Voir [docs/patient-data-sync.md](patient-data-sync.md). |
+
+La table `sync_outbox` (SQLite) est gérée par `SyncOutboxStore` dans `src/lib/syncOutbox.ts` — c'est un client infra, pas un service métier.
 
 ## Pattern : signal d'observance (`engagementService.logEvent`)
 

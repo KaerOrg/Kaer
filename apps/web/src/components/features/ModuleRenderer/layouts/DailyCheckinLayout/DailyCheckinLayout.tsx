@@ -1,6 +1,8 @@
 import { Info } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
 import { FieldText } from '../../fields'
+import { Tabs } from '../../../../ui/Tabs'
+import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
 
 interface Props {
   fields: ContentField[]
@@ -8,44 +10,41 @@ interface Props {
   t: (key: string) => string
 }
 
+// Aperçu passif : les onglets ne basculent pas (un seul écran montré). onChange inerte.
+const NOOP = () => {}
+
 // Aperçu passif du module mobile « 1 statut par jour ». L'écran patient se
 // compose de 2 onglets (Aujourd'hui / Historique), d'une question + boutons de
 // statut (couleurs depuis `props.color`/`bg_color`), d'une zone de notes, et
 // d'un bouton de sauvegarde. Le rendu web est purement passif — pas de saisie
 // possible, pas de logique conditionnelle, conformément à MDR 2017/745.
 export function DailyCheckinLayout({ fields, footer, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'daily_checkin_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
   const statusOptions = fields
     .filter(f => f.field_type === 'daily_status_option')
     .sort((a, b) => a.sort_order - b.sort_order)
 
-  const tabTodayLabel = ft('daily_tab_today_label')
-  const tabHistoryLabel = ft('daily_tab_history_label')
-  const todayLabel = ft('daily_today_label')
-  const question = ft('daily_question')
-  const notesLabel = ft('daily_notes_label')
-  const notesPlaceholder = ft('daily_notes_placeholder')
-  const saveLabel = ft('daily_save_label')
-  const historyEmpty = ft('daily_history_empty_text')
+  const tabTodayLabel = lbl('tab_today_label')
+  const tabHistoryLabel = lbl('tab_history_label')
+  const todayLabel = lbl('today_label')
+  const question = lbl('question')
+  const notesLabel = lbl('notes_label')
+  const notesPlaceholder = lbl('notes_placeholder')
+  const saveLabel = lbl('save_label')
+  const historyEmpty = lbl('history_empty_text')
+
+  const tabs: TabItem[] = []
+  if (tabTodayLabel) tabs.push({ id: 'today', label: tabTodayLabel })
+  if (tabHistoryLabel) tabs.push({ id: 'history', label: tabHistoryLabel })
 
   return (
     <div className="preview-daily">
-      {(tabTodayLabel || tabHistoryLabel) && (
-        <div className="preview-daily__tabs" role="tablist">
-          {tabTodayLabel && (
-            <span className="preview-daily__tab preview-daily__tab--active" role="tab" aria-selected="true">
-              {tabTodayLabel}
-            </span>
-          )}
-          {tabHistoryLabel && (
-            <span className="preview-daily__tab" role="tab" aria-selected="false">
-              {tabHistoryLabel}
-            </span>
-          )}
-        </div>
+      {tabs.length > 0 && (
+        <Tabs tabs={tabs} activeTab="today" onChange={NOOP} variant="compact" />
       )}
 
       {todayLabel && <div className="preview-daily__date">{todayLabel}</div>}

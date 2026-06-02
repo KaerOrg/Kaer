@@ -500,6 +500,57 @@ create policy "Practitioners can view logs of their patients"
 
 
 -- ============================================================
+-- TABLES : crisis_plan_configs + crisis_plan_coping_cards
+-- ============================================================
+-- Config praticien pour le plan de crise (VHB-EF).
+-- Remplace le JSON dans patient_modules.config.crisisPlan.
+
+create table if not exists public.crisis_plan_configs (
+  patient_id        uuid primary key references public.patients(id) on delete cascade,
+  practitioner_message text not null default '',
+  commitment_phrase text not null default '',
+  updated_at        timestamptz not null default now()
+);
+
+create table if not exists public.crisis_plan_coping_cards (
+  id         uuid primary key default gen_random_uuid(),
+  patient_id uuid not null references public.patients(id) on delete cascade,
+  thought    text not null default '',
+  response   text not null default '',
+  sort_order integer not null default 0
+);
+
+alter table public.crisis_plan_configs enable row level security;
+alter table public.crisis_plan_coping_cards enable row level security;
+
+drop policy if exists "patient_read_own_crisis_config" on public.crisis_plan_configs;
+create policy "patient_read_own_crisis_config"
+  on public.crisis_plan_configs for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "practitioner_rw_crisis_config" on public.crisis_plan_configs;
+create policy "practitioner_rw_crisis_config"
+  on public.crisis_plan_configs for all
+  using (auth.uid() in (
+    select pp.practitioner_id from public.practitioner_patients pp
+    where pp.patient_id = crisis_plan_configs.patient_id
+  ));
+
+drop policy if exists "patient_read_own_coping_cards" on public.crisis_plan_coping_cards;
+create policy "patient_read_own_coping_cards"
+  on public.crisis_plan_coping_cards for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "practitioner_rw_coping_cards" on public.crisis_plan_coping_cards;
+create policy "practitioner_rw_coping_cards"
+  on public.crisis_plan_coping_cards for all
+  using (auth.uid() in (
+    select pp.practitioner_id from public.practitioner_patients pp
+    where pp.patient_id = crisis_plan_coping_cards.patient_id
+  ));
+
+
+-- ============================================================
 -- TABLE : practitioner_patient_notes (Notes privées praticien)
 -- ============================================================
 -- Notes libres liées à un patient, visibles uniquement du praticien.
@@ -1137,3 +1188,99 @@ drop policy if exists "module_sources_authenticated_select" on public.module_sou
 create policy "module_sources_authenticated_select" on public.module_sources
   for select to authenticated
   using (true);
+
+
+-- ============================================================
+-- TABLE : patient_entries (Données d'exercices patient — sync cloud)
+-- ============================================================
+-- Table générique recevant toutes les données d'exercices des patients.
+-- Chaque ligne correspond à une entrée d'un module : questionnaire, journal,
+-- formulaire, sélection, item de plan, etc.
+--
+-- Architecture outbox : le mobile écrit d'abord dans sync_outbox (SQLite),
+-- puis RemoteSyncService draine vers cette table via upsert idempotent.
+--
+-- Consentement requis (MDR 2017/745) : le patient doit opt-in explicitement
+-- avant que toute donnée ne soit envoyée. Aucune logique interprétative côté
+-- serveur — le champ payload est opaque, affiché brut au praticien.
+--
+-- Accès :
+--   • Patient  → CRUD sur ses propres lignes
+--   • Praticien → SELECT uniquement sur les patients liés via practitioner_patients
+
+create table if not exists public.patient_entries (
+  id                uuid        primary key default gen_random_uuid(),
+  patient_id        uuid        not null references public.patients(id) on delete cascade,
+  local_id          text        not null,
+  module_id         text        not null,
+  entry_kind        text        not null check (entry_kind in (
+    'scale_entry',
+    'sleep_diary_entry',
+    'form_entry',
+    'daily_entry',
+    'tree_selection',
+    'plan_item',
+    'activity_record',
+    'fear_entry',
+    'fear_situation',
+    'exposure_hierarchy',
+    'breathing_session',
+    'cognitive_saturation_session',
+    'crisis_anchor',
+    'em_ruler',
+    'em_balance_item',
+    'em_value',
+    'module_setting'
+  )),
+  payload           jsonb       not null default '{}'::jsonb,
+  client_created_at timestamptz not null,
+  synced_at         timestamptz not null default now(),
+  constraint patient_entries_patient_local_uniq unique (patient_id, local_id)
+);
+
+-- Index pour la lecture praticien par module/type (dashboard, graphiques)
+create index if not exists idx_patient_entries_patient_module
+  on public.patient_entries(patient_id, module_id, entry_kind);
+
+-- Index pour trier les entrées d'un patient par date
+create index if not exists idx_patient_entries_patient_date
+  on public.patient_entries(patient_id, client_created_at desc);
+
+alter table public.patient_entries enable row level security;
+
+-- Patient : lecture de ses propres entrées
+drop policy if exists "patient_entries_patient_select" on public.patient_entries;
+create policy "patient_entries_patient_select"
+  on public.patient_entries for select
+  using (auth.uid() = patient_id);
+
+-- Patient : insertion de ses propres entrées
+drop policy if exists "patient_entries_patient_insert" on public.patient_entries;
+create policy "patient_entries_patient_insert"
+  on public.patient_entries for insert
+  with check (auth.uid() = patient_id);
+
+-- Patient : mise à jour de ses propres entrées (upsert retombe ici)
+drop policy if exists "patient_entries_patient_update" on public.patient_entries;
+create policy "patient_entries_patient_update"
+  on public.patient_entries for update
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+-- Patient : suppression de ses propres entrées
+drop policy if exists "patient_entries_patient_delete" on public.patient_entries;
+create policy "patient_entries_patient_delete"
+  on public.patient_entries for delete
+  using (auth.uid() = patient_id);
+
+-- Praticien : lecture seule sur les entrées de ses patients liés
+drop policy if exists "patient_entries_practitioner_select" on public.patient_entries;
+create policy "patient_entries_practitioner_select"
+  on public.patient_entries for select
+  using (
+    exists (
+      select 1 from public.practitioner_patients
+      where practitioner_id = auth.uid()
+        and patient_id = public.patient_entries.patient_id
+    )
+  );
