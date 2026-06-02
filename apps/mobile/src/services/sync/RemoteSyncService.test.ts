@@ -124,7 +124,7 @@ describe('RemoteSyncService', () => {
       const result = await svc.sync()
 
       expect(supabase.from).toHaveBeenCalledWith('patient_entries')
-      const upsertCall = (supabase.from('patient_entries') as { upsert: jest.Mock }).upsert
+      const upsertCall = jest.mocked(supabase.from).mock.results[0].value.upsert
       expect(upsertCall).toHaveBeenCalledWith(
         expect.objectContaining({
           patient_id: 'pat-1',

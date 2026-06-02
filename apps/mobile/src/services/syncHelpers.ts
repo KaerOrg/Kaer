@@ -10,7 +10,7 @@ type UpsertParams = Omit<EnqueueParams, 'operation' | 'client_created_at'>
 // Écrit en SQLite puis enqueue un upsert vers Supabase (fire-and-forget).
 // client_created_at est horodaté au moment de l'appel.
 export async function syncUpsert(
-  dbFn: () => Promise<void>,
+  dbFn: () => Promise<unknown>,
   params: UpsertParams,
 ): Promise<void> {
   await dbFn()
@@ -24,7 +24,7 @@ export async function syncUpsert(
 // Supprime en SQLite puis enqueue un delete vers Supabase (fire-and-forget).
 // Le payload est vide : seul local_id est nécessaire pour identifier la ligne.
 export async function syncDelete(
-  dbFn: () => Promise<void>,
+  dbFn: () => Promise<unknown>,
   localId: string,
   moduleId: string,
   entryKind: EntryKind,
