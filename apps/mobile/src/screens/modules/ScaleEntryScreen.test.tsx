@@ -13,7 +13,7 @@ jest.setTimeout(15000)
 const mockGoBack = jest.fn()
 
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ goBack: mockGoBack }),
+  useNavigation: () => ({ goBack: mockGoBack, setOptions: jest.fn() }),
   useRoute: () => ({ params: { scale_id: 'phq9' } }),
 }))
 
@@ -24,6 +24,7 @@ jest.mock('react-native-safe-area-context', () => ({
 const stableT = (key: string) => key.split('.').pop() ?? key
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: stableT }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
 }))
 
 // Prevent AppStack from importing all 30+ screen components (OOM)
@@ -68,6 +69,7 @@ jest.mock('../../services/moduleService', () => ({
 jest.mock('../../lib/database', () => ({
   saveScaleEntry: jest.fn().mockResolvedValue(undefined),
   generateId: jest.fn().mockReturnValue('test-id'),
+  getLatestScaleEntry: jest.fn().mockResolvedValue(null),
 }))
 
 jest.mock('../../lib/scaleScoring', () => ({

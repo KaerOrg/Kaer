@@ -70,6 +70,11 @@
   padding: var(--spacing-xl) var(--spacing-lg);
 }
 
+/* Variante large : pages à tableau dense (file active). */
+.layout__main--wide {
+  max-width: 1600px;
+}
+
 /* ── Variante avec sidebar ───────────────────────────────────────────────── */
 
 /* Avec sidebar : le body est full-width, sidebar collée à gauche */

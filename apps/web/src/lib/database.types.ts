@@ -465,6 +465,123 @@ export interface Database {
         }
         Relationships: []
       }
+      caseload_entries: {
+        Row: {
+          id: string
+          practitioner_id: string
+          patient_id: string | null
+          display_name: string
+          status: string
+          is_important: boolean
+          wake_date: string | null
+          care_pathways: string[]
+          last_reviewed_at: string | null
+          created_at: string
+          updated_at: string
+          archived_at: string | null
+        }
+        Insert: {
+          practitioner_id: string
+          display_name: string
+          patient_id?: string | null
+          status?: string
+          is_important?: boolean
+          wake_date?: string | null
+          care_pathways?: string[]
+          last_reviewed_at?: string | null
+        }
+        Update: {
+          display_name?: string
+          patient_id?: string | null
+          status?: string
+          is_important?: boolean
+          wake_date?: string | null
+          care_pathways?: string[]
+          last_reviewed_at?: string | null
+          archived_at?: string | null
+        }
+        Relationships: []
+      }
+      caseload_waits: {
+        Row: {
+          id: string
+          entry_id: string
+          practitioner_id: string
+          label: string
+          relance_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          entry_id: string
+          practitioner_id: string
+          label: string
+          relance_date?: string | null
+        }
+        Update: {
+          label?: string
+          relance_date?: string | null
+        }
+        Relationships: []
+      }
+      caseload_actions: {
+        Row: {
+          id: string
+          entry_id: string
+          practitioner_id: string
+          label: string
+          due_date: string | null
+          due_time: string | null
+          is_done: boolean
+          done_at: string | null
+          recurrence_days: number | null
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          entry_id: string
+          practitioner_id: string
+          label: string
+          due_date?: string | null
+          due_time?: string | null
+          is_done?: boolean
+          done_at?: string | null
+          recurrence_days?: number | null
+          sort_order?: number
+        }
+        Update: {
+          label?: string
+          due_date?: string | null
+          due_time?: string | null
+          is_done?: boolean
+          done_at?: string | null
+          recurrence_days?: number | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      caseload_notes: {
+        Row: {
+          id: string
+          entry_id: string
+          practitioner_id: string
+          body: string
+          is_pinned: boolean
+          created_at: string
+        }
+        Insert: {
+          entry_id: string
+          practitioner_id: string
+          body: string
+          is_pinned?: boolean
+        }
+        Update: {
+          body?: string
+          is_pinned?: boolean
+        }
+        Relationships: []
+      }
       practitioner_patient_notes: {
         Row: {
           id: string

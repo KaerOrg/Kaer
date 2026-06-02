@@ -17,7 +17,7 @@ let mockScaleId = 'phq9'
 jest.mock('@react-navigation/native', () => {
   const React = require('react')
   return {
-    useNavigation: () => ({ navigate: mockNavigate }),
+    useNavigation: () => ({ navigate: mockNavigate, setOptions: jest.fn() }),
     useRoute: () => ({ params: { scale_id: mockScaleId } }),
     useFocusEffect: (cb: () => () => void) => {
       React.useEffect(() => cb(), [])

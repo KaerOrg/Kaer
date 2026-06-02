@@ -48,6 +48,9 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | `fetchPsychoCards`, `fetchModulePreviewKind` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
 | [`moduleCatalogService.ts`](../apps/web/src/services/moduleCatalogService.ts) | Catégories + modules pour l'armoire thérapeutique et le formulaire d'invitation |
 | [`moduleSourcesService.ts`](../apps/web/src/services/moduleSourcesService.ts) | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` — sources & recommandations d'un module ([doc](module-sources.md)) |
+| [`caseloadService.ts`](../apps/web/src/services/caseloadService.ts) | File active praticien : `fetchCaseload` (assemble dossiers + actions + attentes), CRUD `caseload_entries` (création, édition inline, statut), `caseload_actions` (coche `setActionDone`…), `caseload_waits` (attentes de retour) et `caseload_notes` (observations : `fetchCaseloadNotes`/`createCaseloadNote`) + ré-export des fonctions pures de [`caseloadLogic.ts`](../apps/web/src/lib/caseloadLogic.ts). Spec : [`spec/file-active.md`](spec/file-active.md) |
+
+> **Logique pure isolée** : `apps/web/src/lib/caseloadLogic.ts` ne dépend pas du client Supabase — alerte (`computeActionAlert`, `computeEntryAlert` = action ouverte la plus urgente), tri et liste « Aujourd'hui » y sont calculés (testables sans mock). Le service ne fait que l'accès aux données + ré-export. C'est le pattern à suivre pour toute logique métier dérivée (séparer le pur du réseau).
 
 Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrapper Zustand : il délègue toutes les opérations Supabase à `authService.ts` et n'expose qu'un état réactif.
 
