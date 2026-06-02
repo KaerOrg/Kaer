@@ -12,6 +12,7 @@ import {
   type PlanItem,
 } from '../lib/database'
 import type { CrisisPlanCopingCard } from '@psytool/shared'
+import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { CrisisAnchor }
 
@@ -94,7 +95,12 @@ export async function pickAndSaveAnchorPhoto(
     sort_order: existingCount,
     created_at: new Date().toISOString(),
   }
-  await saveCrisisAnchor(anchor)
+  await syncUpsert(() => saveCrisisAnchor(anchor), {
+    local_id: anchor.id,
+    module_id: 'crisis_plan',
+    entry_kind: 'crisis_anchor',
+    payload: { uri: anchor.uri, sort_order: anchor.sort_order },
+  })
   return anchor
 }
 
@@ -103,7 +109,7 @@ export async function removeAnchorPhoto(anchor: CrisisAnchor): Promise<void> {
   if (info.exists) {
     await FileSystem.deleteAsync(anchor.uri, { idempotent: true })
   }
-  await deleteCrisisAnchor(anchor.id)
+  await syncDelete(() => deleteCrisisAnchor(anchor.id), anchor.id, 'crisis_plan', 'crisis_anchor')
 }
 
 // ─── Phrase d'ancrage (SQLite module_settings) ───────────────────────────────
@@ -115,7 +121,12 @@ export async function getAnchorPhrase(): Promise<string> {
 }
 
 export async function saveAnchorPhrase(phrase: string): Promise<void> {
-  await setModuleSetting('crisis_plan', ANCHOR_PHRASE_KEY, phrase)
+  await syncUpsert(() => setModuleSetting('crisis_plan', ANCHOR_PHRASE_KEY, phrase), {
+    local_id: `crisis_plan:${ANCHOR_PHRASE_KEY}`,
+    module_id: 'crisis_plan',
+    entry_kind: 'module_setting',
+    payload: { key: ANCHOR_PHRASE_KEY, value: phrase },
+  })
 }
 
 // ─── Engagement thérapeutique (SQLite module_settings) ───────────────────────
@@ -142,7 +153,12 @@ export async function saveCommitment(name: string): Promise<void> {
     name: name.trim(),
     date: new Date().toISOString(),
   }
-  await setModuleSetting('crisis_plan', COMMITMENT_KEY, JSON.stringify(commitment))
+  await syncUpsert(() => setModuleSetting('crisis_plan', COMMITMENT_KEY, JSON.stringify(commitment)), {
+    local_id: `crisis_plan:${COMMITMENT_KEY}`,
+    module_id: 'crisis_plan',
+    entry_kind: 'module_setting',
+    payload: { key: COMMITMENT_KEY, value: commitment },
+  })
 }
 
 // ─── Items des étapes 4 et 5 (mode urgence) ──────────────────────────────────

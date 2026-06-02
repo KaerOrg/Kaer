@@ -18,9 +18,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllTreeSelections, saveTreeSelection, deleteTreeSelection, generateId,
+  getAllTreeSelections, generateId,
   type TreeSelection, type TreeSelectionPathNode,
 } from '../../../../../lib/database'
+import { saveTreeSelection, deleteTreeSelection } from '../../../../../services/treeSelectionService'
 import { formatDateTime } from '../../../../../lib/dateUtils'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'

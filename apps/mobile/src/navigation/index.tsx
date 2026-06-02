@@ -6,6 +6,7 @@ import { logger } from '@psytool/shared'
 import { useAuthStore } from '../store/authStore'
 import { initDatabase } from '../lib/database'
 import { setupAndroidChannel, shouldShowNotificationOnboarding } from '../services/notificationService'
+import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'
 import NotificationPermissionScreen from '../screens/NotificationPermissionScreen'
@@ -36,6 +37,7 @@ function BootSpinner() {
 export default function Navigation() {
   const { patient, loading, loadSession } = useAuthStore()
   const [notifGate, setNotifGate] = useState<NotifGate>('checking')
+  useSyncOnForeground()
 
   useEffect(() => {
     const withTimeout = (p: Promise<void>, ms: number, label: string): Promise<void> =>

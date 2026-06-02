@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite'
+import { getSyncOutboxStore } from './syncOutbox'
 
 let db: SQLite.SQLiteDatabase | null = null
 
@@ -66,6 +67,7 @@ export async function initDatabase(): Promise<void> {
     () => createEMRulersTable(database),
     () => createEMBalanceItemsTable(database),
     () => createEMValuesTable(database),
+    () => getSyncOutboxStore(database).init(),
   ]
   for (const step of steps) {
     try { await step() } catch { /* table déjà présente ou erreur isolée — on continue */ }

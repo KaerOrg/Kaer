@@ -65,6 +65,14 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 
 Le [`store/authStore.ts`](../apps/mobile/src/store/authStore.ts) est un thin wrapper Zustand qui délègue à `authService.ts`.
 
+### Sous-dossier `services/sync/`
+
+| Fichier | Domaine |
+|---|---|
+| [`sync/RemoteSyncService.ts`](../apps/mobile/src/services/sync/RemoteSyncService.ts) | Singleton. Draine `sync_outbox` (SQLite) vers `patient_entries` (Supabase) par batchs de 50. Gate de consentement MDR, guard de ré-entrance, retry jusqu'à 5×. Voir [docs/patient-data-sync.md](patient-data-sync.md). |
+
+La table `sync_outbox` (SQLite) est gérée par `SyncOutboxStore` dans `src/lib/syncOutbox.ts` — c'est un client infra, pas un service métier.
+
 ## Pattern : signal d'observance (`engagementService.logEvent`)
 
 Tous les écrans mobiles qui produisent une donnée patient appellent `logEvent(patientId, eventType)` après une sauvegarde locale réussie. Un seul site d'écriture vers `patient_engagement_logs`, types d'événements centralisés (`SAVE_BECK_THOUGHT_RECORD`, `SAVE_FEAR_ENTRY`, `UPDATE_DECISIONAL_BALANCE`, etc.).

@@ -1,0 +1,49 @@
+const mockSaveDb = jest.fn().mockResolvedValue(undefined)
+const mockDeleteDb = jest.fn().mockResolvedValue(undefined)
+jest.mock('../lib/database', () => ({
+  saveActivityRecord: (...a: unknown[]) => mockSaveDb(...a),
+  deleteActivityRecord: (...a: unknown[]) => mockDeleteDb(...a),
+}))
+
+const mockEnqueue = jest.fn().mockResolvedValue(undefined)
+jest.mock('./sync', () => ({
+  RemoteSyncService: { getInstance: () => ({ enqueue: mockEnqueue }) },
+}))
+
+import { saveActivityRecord, deleteActivityRecord } from './activityRecordService'
+
+const record = {
+  id: 'ar-1',
+  date: '2025-01-01',
+  label: 'Promenade',
+  pleasure: 7,
+  mastery: 5,
+  done: 1 as const,
+  notes: null,
+}
+
+beforeEach(() => jest.clearAllMocks())
+
+describe('activityRecordService', () => {
+  it('saveActivityRecord : écrit SQLite puis enqueue behavioral_activation', async () => {
+    await saveActivityRecord(record)
+    expect(mockSaveDb).toHaveBeenCalledWith(record)
+    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
+      local_id: 'ar-1',
+      module_id: 'behavioral_activation',
+      entry_kind: 'activity_record',
+      operation: 'upsert',
+      payload: expect.objectContaining({ label: 'Promenade', pleasure: 7 }),
+    }))
+  })
+
+  it('deleteActivityRecord : supprime SQLite et enqueue delete', async () => {
+    await deleteActivityRecord('ar-1')
+    expect(mockDeleteDb).toHaveBeenCalledWith('ar-1')
+    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
+      local_id: 'ar-1',
+      module_id: 'behavioral_activation',
+      operation: 'delete',
+    }))
+  })
+})
