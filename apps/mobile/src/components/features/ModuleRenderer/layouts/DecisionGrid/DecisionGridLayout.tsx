@@ -9,14 +9,9 @@ import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import {
-  generateId,
-  getAllPlanItemsForModule,
-  savePlanItem,
-  deletePlanItem,
-  getModuleSetting,
-  setModuleSetting,
-  type PlanItem,
+  generateId, getAllPlanItemsForModule, getModuleSetting, type PlanItem,
 } from '../../../../../lib/database'
+import { savePlanItem, deletePlanItem, setModuleSetting } from '../../../../../services/planItemService'
 import type { ContentField } from '../../../../../services/moduleService'
 import { QuadrantCard } from './QuadrantCard'
 import { MotivationGauge } from './MotivationGauge'

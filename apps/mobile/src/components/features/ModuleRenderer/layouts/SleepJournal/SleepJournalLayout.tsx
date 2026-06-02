@@ -20,10 +20,11 @@ import { useNavigation } from '@react-navigation/native'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth, saveSleepEntry,
-  deleteSleepEntry, computeSleepDuration, computeSleepEfficiency, generateId,
+  getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth,
+  computeSleepDuration, computeSleepEfficiency, generateId,
   type SleepEntry,
 } from '../../../../../lib/database'
+import { saveSleepEntry, deleteSleepEntry } from '../../../../../services/sleepDiaryService'
 import { formatDateFull, formatDateShort } from '../../../../../lib/dateUtils'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'

@@ -17,8 +17,9 @@ import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllFormEntries, saveFormEntry, deleteFormEntry, generateId, type FormEntry,
+  getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
+import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'

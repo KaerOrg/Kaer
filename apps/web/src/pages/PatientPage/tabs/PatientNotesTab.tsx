@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
-import { SpeechToTextButton } from '../../../components/SpeechToTextButton'
+import { SpeechToTextButton } from '../../../components/ui/SpeechToTextButton'
 import {
   saveNote,
   updateNote,
