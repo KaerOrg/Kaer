@@ -100,15 +100,21 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
   },
   mood_tracker: {
     formula: 'mean',
-    items_count: 4,
+    items_count: 6,
     score_decimals: 0,
-    chips: ['chip_mood', 'chip_energy', 'chip_anxiety', 'chip_pleasure'],
-    computeScore: (answers) => Math.round(answers.reduce<number>((s, a) => s + (a ?? 0), 0) / 4),
+    chips: ['chip_mood', 'chip_energy', 'chip_anxiety', 'chip_pleasure', 'chip_sleep', 'chip_food'],
+    computeScore: (answers) => {
+      const valid = answers.filter((a): a is number => a != null && !isNaN(a))
+      if (valid.length === 0) return 0
+      return Math.round(valid.reduce<number>((s, a) => s + a, 0) / valid.length)
+    },
     computeSubscaleScores: (answers) => ({
-      mood:    answers[0] ?? 0,
-      energy:  answers[1] ?? 0,
-      anxiety: answers[2] ?? 0,
+      mood:     answers[0] ?? 0,
+      energy:   answers[1] ?? 0,
+      anxiety:  answers[2] ?? 0,
       pleasure: answers[3] ?? 0,
+      sleep:    answers[4] ?? 0,
+      food:     answers[5] ?? 0,
     }),
   },
   epds: {

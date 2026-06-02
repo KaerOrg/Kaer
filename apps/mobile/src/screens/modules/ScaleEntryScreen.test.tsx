@@ -23,7 +23,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 const stableT = (key: string) => key.split('.').pop() ?? key
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: stableT }),
+  useTranslation: () => ({ t: stableT, i18n: { language: 'fr' } }),
 }))
 
 // Prevent AppStack from importing all 30+ screen components (OOM)

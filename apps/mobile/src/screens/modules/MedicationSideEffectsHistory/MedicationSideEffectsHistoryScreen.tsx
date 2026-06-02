@@ -12,7 +12,8 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { getAllScaleEntries, deleteScaleEntry, type ScaleEntry } from '../../../lib/database'
+import { getAllScaleEntries, type ScaleEntry } from '../../../lib/database'
+import { deleteScaleEntry } from '../../../services/scaleEntryService'
 import { SCALE_SCORING } from '../../../lib/scaleScoring'
 import { formatDateLong } from '../../../lib/dateUtils'
 import { AppStackParamList } from '../../../navigation/AppStack'
@@ -26,8 +27,7 @@ import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { EmptyState } from '../../../components/ui/EmptyState'
 import { PillSelector } from '../../../components/ui/PillSelector'
-import { buildChartData, buildXLabels, computeStreak } from './chartUtils'
-import { SymptomChart } from './SymptomChart'
+import { DimensionChart, buildChartData, buildXLabels, computeStreak } from '../../../components/features/TimeRangeCharts'
 import type { TimeRange } from './types'
 import type { DataPoint } from '../../../components/ui/Chart'
 
@@ -155,7 +155,7 @@ export default function MedicationSideEffectsHistoryScreen() {
           />
           <View style={styles.chartGrid}>
             {SYMPTOM_KEYS.map(key => (
-              <SymptomChart
+              <DimensionChart
                 key={key}
                 label={t(`modules.${SCALE_ID}.effect_${key}_label`)}
                 points={chartData[key]}
@@ -163,6 +163,7 @@ export default function MedicationSideEffectsHistoryScreen() {
                 avgLabel={avgLabel}
                 range={timeRange}
                 xLabels={xLabels}
+                yMax={3}
               />
             ))}
           </View>

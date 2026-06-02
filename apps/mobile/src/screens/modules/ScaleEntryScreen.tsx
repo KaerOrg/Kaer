@@ -34,8 +34,8 @@ type LoadState =
   | { status: 'error'; message: string }
   | { status: 'ready'; fields: ContentField[] }
 
-function formatEntryDate(d: Date): string {
-  return d.toLocaleDateString('fr-FR', {
+function formatEntryDate(d: Date, locale: string): string {
+  return d.toLocaleDateString(locale, {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   })
 }
@@ -46,7 +46,7 @@ export default function ScaleEntryScreen() {
   const { scale_id, entry_id } = params
   const isEditing = entry_id != null
   const { isTeenMode, teenColor } = useTeen()
-  const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const { showToast } = useToast()
   const accentColor = teenColor(scale_id)
 
@@ -220,7 +220,7 @@ export default function ScaleEntryScreen() {
           <MaterialCommunityIcons name="calendar-edit" size={18} color={activeColor} />
           <Text style={styles.dateLabelText}>{t('common.entry_date')}</Text>
           <Text style={[styles.dateValue, { color: activeColor }]}>
-            {formatEntryDate(entryDate)}
+            {formatEntryDate(entryDate, i18n.language)}
           </Text>
           <MaterialCommunityIcons name="chevron-down" size={16} color={colors.textMuted} />
         </Pressable>

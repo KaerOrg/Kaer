@@ -58,6 +58,7 @@ export async function initDatabase(): Promise<void> {
     () => createASRS6Table(database),
     () => createASRS18Table(database),
     () => createScaleEntriesTable(database),
+    () => createMoodMarkersTable(database),
     () => createPlanItemsTable(database),
     () => createDailyEntriesTable(database),
     () => createFormEntriesTable(database),
@@ -1272,6 +1273,49 @@ export async function saveScaleEntry(entry: ScaleEntry): Promise<void> {
 export async function deleteScaleEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM scale_entries WHERE id = ?', [id])
+}
+
+// ─── mood_markers — repères temporels (Life Chart Method) ─────────────────────
+// Contexte saisi par le patient (« début lithium », « arrêt de travail »…) affiché
+// comme trait vertical sur les courbes. Données brutes, aucune interprétation (MDR).
+
+export async function createMoodMarkersTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS mood_markers (
+      id TEXT PRIMARY KEY,
+      date TEXT NOT NULL,
+      label TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_mood_markers_date ON mood_markers(date);
+  `)
+}
+
+export interface MoodMarker {
+  id: string
+  date: string   // YYYY-MM-DD
+  label: string
+  created_at: string
+}
+
+export async function getAllMoodMarkers(): Promise<MoodMarker[]> {
+  const database = getDb()
+  return database.getAllAsync<MoodMarker>(
+    'SELECT * FROM mood_markers ORDER BY date DESC'
+  )
+}
+
+export async function saveMoodMarker(marker: MoodMarker): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO mood_markers (id, date, label, created_at) VALUES (?, ?, ?, ?)`,
+    [marker.id, marker.date, marker.label, marker.created_at]
+  )
+}
+
+export async function deleteMoodMarker(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM mood_markers WHERE id = ?', [id])
 }
 
 // ─── daily_entries — table générique pour les saisies quotidiennes ───────────

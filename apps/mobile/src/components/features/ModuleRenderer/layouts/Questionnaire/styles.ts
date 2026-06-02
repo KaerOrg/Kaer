@@ -56,6 +56,7 @@ export const styles = StyleSheet.create({
   sliderPip:       { flex: 1, aspectRatio: 1, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   sliderPipText:   { fontSize: 11, fontWeight: '500', color: colors.textMuted },
   sliderPipTextSelected: { color: colors.white, fontWeight: '700' },
-  sliderHints:     { flexDirection: 'row', justifyContent: 'space-between' },
+  sliderHints:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sliderHint:      { fontSize: 11, color: colors.textMuted },
+  sliderHintMid:   { fontSize: 11, fontWeight: '700', textAlign: 'center' },
 })

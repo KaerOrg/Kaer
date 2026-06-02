@@ -5,6 +5,9 @@ dist
 build
 .expo
 
+# TypeScript incremental build artifacts
+*.tsbuildinfo
+
 # IDE
 .idea/
 
