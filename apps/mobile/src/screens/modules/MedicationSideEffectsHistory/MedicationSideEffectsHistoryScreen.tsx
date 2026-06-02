@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { getAllScaleEntries, deleteScaleEntry, type ScaleEntry } from '../../../lib/database'
+import { SCALE_SCORING } from '../../../lib/scaleScoring'
 import { formatDateLong } from '../../../lib/dateUtils'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '../../../theme'
@@ -36,23 +37,10 @@ const SCALE_ID = 'medication_side_effects'
 const MODULE_COLOR = '#8B5CF6'
 const TIME_RANGES: TimeRange[] = ['7J', '1M', '6M', '1A']
 
-const SYMPTOM_KEYS = [
-  'sedation',
-  'akathisia',
-  'tremors',
-  'dry_mouth',
-  'sleep',
-  'nausea',
-] as const
-
-const SYMPTOM_LABEL_KEYS: Record<string, string> = {
-  sedation:  'effect_sedation_label',
-  akathisia: 'effect_akathisia_label',
-  tremors:   'effect_tremors_label',
-  dry_mouth: 'effect_dry_mouth_label',
-  sleep:     'effect_sleep_label',
-  nausea:    'effect_nausea_label',
-}
+// Source unique des sous-échelles : la config de scoring (chips). Évite de
+// redéclarer la liste des symptômes — elle vit déjà dans scaleScoring.ts.
+// Les libellés suivent la convention `effect_<key>_label`.
+const SYMPTOM_KEYS = (SCALE_SCORING[SCALE_ID]?.chips ?? []).map(c => c.replace(/^chip_/, ''))
 
 export default function MedicationSideEffectsHistoryScreen() {
   const navigation = useNavigation<Nav>()
@@ -169,7 +157,7 @@ export default function MedicationSideEffectsHistoryScreen() {
             {SYMPTOM_KEYS.map(key => (
               <SymptomChart
                 key={key}
-                label={t(`modules.${SCALE_ID}.${SYMPTOM_LABEL_KEYS[key]}`)}
+                label={t(`modules.${SCALE_ID}.effect_${key}_label`)}
                 points={chartData[key]}
                 color={accentColor}
                 avgLabel={avgLabel}

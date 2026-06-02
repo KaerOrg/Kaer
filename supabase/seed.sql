@@ -1591,10 +1591,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('mse.opt1', 'value', '1'),
   ('mse.opt2', 'value', '2'),
   ('mse.opt3', 'value', '3'),
-  ('mse.opt0', 'color', '#9CA3AF'),
-  ('mse.opt1', 'color', '#F59E0B'),
-  ('mse.opt2', 'color', '#F97316'),
-  ('mse.opt3', 'color', '#EF4444'),
+  -- MDR 2017/745 : aucune couleur interprétative sur les options d'une échelle
+  -- clinique. Un dégradé de gravité (gris→rouge) ferait conclure le code ; les
+  -- options restent neutres et uniformes.
   ('mse.notes', 'subscale_key', 'notes'),
   ('mse.notes', 'optional', 'true')
 on conflict (field_id, prop_key) do nothing;

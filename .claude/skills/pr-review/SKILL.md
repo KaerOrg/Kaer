@@ -196,6 +196,50 @@ Chercher à l'intérieur du corps des fonctions composant (entre `{` et `return`
 
 - Config Reanimated (`inputRange`, `outputRange`) déclarée dans le composant → doit être à niveau module.
 
+#### RULE — Bonnes pratiques React (Vercel guidelines)
+*(source : React docs + Vercel best practices)*
+
+Ces règles s'appliquent à tous les fichiers `.tsx` / `.ts` React.
+
+**Règles des Hooks (Rules of Hooks) — violations bloquantes :**
+- Hook appelé dans une condition, une boucle, ou une fonction imbriquée (pas au niveau racine du composant) → **violation bloquante**
+  ```ts
+  // ❌ if (condition) { useState(...) }
+  // ❌ for (...) { useEffect(...) }
+  ```
+- Hook appelé dans une fonction utilitaire non-composant (nom ne commençant pas par `use`) → **violation bloquante**
+
+**Effets — violations bloquantes :**
+- `useEffect` avec effet qui crée un abonnement (event listener, timer, observable, subscription) **sans fonction de cleanup retournée** → **violation bloquante**
+  ```ts
+  // ❌ useEffect(() => { window.addEventListener('resize', handler) }) — fuite mémoire
+  // ✅ useEffect(() => { window.addEventListener('resize', handler); return () => window.removeEventListener('resize', handler) })
+  ```
+- `useEffect` sans tableau de dépendances (`[]`) alors que l'effet dépend de valeurs extérieures → **violation** (boucle infinie potentielle)
+- `useEffect` utilisé uniquement pour transformer des données dérivables dans le render → **point d'attention** : dériver pendant le render, pas dans un effet
+
+**Keys dans les listes — violations bloquantes :**
+- `<Component key={index} />` dans une liste dont l'ordre peut changer (ajout/suppression/tri) → **violation bloquante** : utiliser un identifiant stable (`id`, `uuid`)
+- Élément rendu dans `.map()` sans `key` prop → **violation bloquante**
+
+**Memoïsation — points d'attention :**
+- `React.memo` absent sur un composant enfant coûteux qui reçoit des callbacks → **point d'attention**
+- `useMemo` / `useCallback` avec tableau de dépendances vide `[]` alors que la valeur dépend de props/state → **point d'attention**
+- Dépendance objet non-primitif dans `useEffect` / `useMemo` / `useCallback` (objet recréé à chaque render) → **point d'attention** : stabiliser ou extraire les props primitives
+
+**Gestion d'erreurs :**
+- Composant qui peut planter (fetch, parse, valeur nullable) sans Error Boundary parent → **point d'attention**
+- `async` directement dans `useEffect` (le callback ne peut pas être `async`) → **violation**
+  ```ts
+  // ❌ useEffect(async () => { ... })
+  // ✅ useEffect(() => { const load = async () => {...}; void load() }, [])
+  ```
+
+**Patterns web (Vite / déploiement Vercel) :**
+- Import dynamique (`React.lazy` / `import(...)`) sans `Suspense` wrapper → **violation**
+- `console.log` / `console.debug` laissés dans le code de production → **point d'attention** (ne pas bloquer si délibéré/debug)
+- Image importée avec `<img>` brut au lieu d'`expo-image` (mobile) ou d'un composant optimisé (web) → **point d'attention**
+
 #### RULE — useState vs useRef
 *(source : coding-standards.md § "React performance")*
 
@@ -707,6 +751,13 @@ Appel direct `supabase.from('modules')` dans un composant.
 
 ## Checklist finale
 
+### Bonnes pratiques React / Vercel
+- [ ] Rules of Hooks respectées (pas de hook dans condition/boucle/fonction non-hook)
+- [ ] useEffect avec abonnement a une cleanup
+- [ ] Clés stables dans les listes `.map()` (pas d'index si ordre peut changer)
+- [ ] Zéro `async` callback direct dans `useEffect`
+- [ ] Imports dynamiques avec `Suspense` si `React.lazy`
+
 ### coding-standards.md
 - [ ] Zéro Supabase/SQLite dans les composants
 - [ ] TypeScript strict (zéro any, zéro as any, zéro as unknown, zéro suppression)
@@ -828,8 +879,9 @@ Insérer directement dans le fichier de règle, juste après la rule concernée 
 
 | Catégorie de violation | Fichier à enrichir | Section |
 |---|---|---|
+| React (hooks, effets, keys, async) | `coding-standards.md` | § "React performance" + RULE Vercel |
 | Accès données (Supabase/SQLite dans composant) | `coding-standards.md` | § "Accès aux données" |
-| TypeScript (`any`, suppressions) | `coding-standards.md` | § "Suppressions interdites" / "TypeScript strict" |
+| TypeScript (`any`, `unknown`, suppressions) | `coding-standards.md` | § "Suppressions interdites" / "TypeScript strict" |
 | Render inline (objets, callbacks) | `coding-standards.md` | § "Render — zéro déclaration inline" |
 | i18n (texte en dur) | `coding-standards.md` | § "Internationalisation" |
 | Design system (duplication d'un primitive) | `coding-standards.md` | § "Checklist obligatoire" |

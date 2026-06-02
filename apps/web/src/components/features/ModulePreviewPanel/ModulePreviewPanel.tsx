@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, type ComponentType } from 'react'
 import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../../services/moduleService'
@@ -9,6 +9,13 @@ import { MedicationSideEffectsPreview } from './MedicationSideEffectsPreview'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
+
+// Map de dispatch technique module → composant d'aperçu riche (mockup praticien).
+// Comme MODULE_ICONS : c'est une correspondance de code, pas du contenu. Le panneau
+// reste générique — ajouter un aperçu custom = une entrée ici, zéro `if` en dur.
+const CUSTOM_PREVIEWS: Record<string, ComponentType<{ accentColor?: string }>> = {
+  medication_side_effects: MedicationSideEffectsPreview,
+}
 
 // Layouts dont le contenu vit dans une autre table que module_content_fields
 // (psyedu_topics/blocks, form_entries, exposure_hierarchies). Ils peuvent
@@ -57,6 +64,7 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
   )
 
   const accentColor = color ?? DEFAULT_ACCENT
+  const CustomPreview = CUSTOM_PREVIEWS[moduleType]
 
   const meaningfulFieldsCount = result
     ? result.fields.filter(
@@ -84,14 +92,18 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
       {activeTab === 'preview' && (
         <>
-          {moduleType === 'medication_side_effects' ? (
+          {loading && (
+            <div className="preview-panel__coming-soon">{t('common.loading')}</div>
+          )}
+
+          {!loading && CustomPreview && (
             <div className="preview-panel__inner">
-              <MedicationSideEffectsPreview />
+              <CustomPreview accentColor={accentColor} />
               {result && !showComingSoon && (
                 <>
-                  <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #F3F4F6' }} />
-                  <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 12px' }}>
-                    {t('patient.preview_questionnaire_label', { defaultValue: 'Questionnaire de saisie' })}
+                  <hr className="preview-panel__divider" />
+                  <p className="preview-panel__section-label">
+                    {t('patient.preview_questionnaire_label')}
                   </p>
                   <FieldRenderer
                     preview_kind={result.preview_kind}
@@ -103,28 +115,22 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
                 </>
               )}
             </div>
-          ) : (
-            <>
-              {loading && (
-                <div className="preview-panel__coming-soon">{t('common.loading')}</div>
-              )}
+          )}
 
-              {!loading && showComingSoon && (
-                <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
-              )}
+          {!loading && !CustomPreview && showComingSoon && (
+            <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
+          )}
 
-              {!loading && result && !showComingSoon && (
-                <div className="preview-panel__inner">
-                  <FieldRenderer
-                    preview_kind={result.preview_kind}
-                    fields={result.fields}
-                    moduleId={moduleType}
-                    expandedCard={expandedCard}
-                    onToggleCard={handleToggleCard}
-                  />
-                </div>
-              )}
-            </>
+          {!loading && !CustomPreview && result && !showComingSoon && (
+            <div className="preview-panel__inner">
+              <FieldRenderer
+                preview_kind={result.preview_kind}
+                fields={result.fields}
+                moduleId={moduleType}
+                expandedCard={expandedCard}
+                onToggleCard={handleToggleCard}
+              />
+            </div>
           )}
         </>
       )}

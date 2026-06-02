@@ -18,7 +18,7 @@ Ce module est un **carnet de bord numérique**. Il n'est pas un dispositif médi
 | Aucun score global calculé | Pas de total, pas de taux, pas de label interprétatif |
 | Aucune alerte conditionnelle | Pas de notification déclenchée par une valeur ≥ seuil |
 | Aucune comparaison à une norme | Pas de référence à un "niveau acceptable" |
-| Affichage neutre des couleurs | Les couleurs (vert/orange/rouge) reflètent uniquement le niveau 1/2/3 déclaré, sans message associé |
+| Couleurs d'options neutres | Les options de réponse n'ont **aucune** couleur de gravité (pas de dégradé vert→rouge) : seul le chiffre 0–3 déclaré est affiché, sans encodage interprétatif |
 
 ---
 

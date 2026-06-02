@@ -1,13 +1,21 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BarChart, LineChart } from '../../../ui/Chart'
+import './MedicationSideEffectsPreview.css'
 
 type TimeRange = '7J' | '1M' | '6M' | '1A'
 
-const MODULE_COLOR = '#8B5CF6'
+interface Props {
+  /** Couleur d'accent du module, injectée par le panneau parent. */
+  accentColor?: string
+}
+
+const DEFAULT_ACCENT = '#8B5CF6'
 
 const SYMPTOM_KEYS = ['sedation', 'akathisia', 'tremors', 'dry_mouth', 'sleep', 'nausea'] as const
 
+// Palette catégorielle des séries du graphique de démonstration (une couleur
+// distincte par symptôme) — donnée de data-viz, pas du theming.
 const SYMPTOM_COLORS: Record<string, string> = {
   sedation:  '#8B5CF6',
   akathisia: '#EC4899',
@@ -54,77 +62,61 @@ const DEMO_DATA: Record<TimeRange, Record<string, (number | null)[]>> = {
 
 const DEMO_STREAK: Record<TimeRange, number> = { '7J': 5, '1M': 21, '6M': 21, '1A': 21 }
 
-export function MedicationSideEffectsPreview() {
+const RANGES: TimeRange[] = ['7J', '1M', '6M', '1A']
+
+export function MedicationSideEffectsPreview({ accentColor = DEFAULT_ACCENT }: Props) {
   const { t } = useTranslation()
   const [range, setRange] = useState<TimeRange>('1M')
   const [showAll, setShowAll] = useState(false)
 
   const visibleKeys = showAll ? SYMPTOM_KEYS : SYMPTOM_KEYS.slice(0, 3)
   const streak = DEMO_STREAK[range]
+  const rootStyle = { '--mse-accent': accentColor } as CSSProperties
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div className="mse-preview" style={rootStyle}>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
-          background: `${MODULE_COLOR}15`, borderRadius: 20,
-          padding: '4px 10px', border: `1px solid ${MODULE_COLOR}30`,
-        }}>
-          <span style={{ fontSize: 14 }}>🔥</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: MODULE_COLOR }}>
+      <div className="mse-preview__streak-row">
+        <div className="mse-preview__streak-badge">
+          <span className="mse-preview__streak-icon">🔥</span>
+          <span className="mse-preview__streak-count">
             {streak} {t('modules.medication_side_effects.streak_days')}
           </span>
         </div>
-        <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+        <span className="mse-preview__streak-hint">
           {t('modules.medication_side_effects.streak_hint')}
         </span>
       </div>
 
-      <div style={{ display: 'flex', gap: 6 }}>
-        {(['7J', '1M', '6M', '1A'] as TimeRange[]).map(r => (
+      <div className="mse-preview__ranges">
+        {RANGES.map(r => (
           <button
             key={r}
+            type="button"
             onClick={() => setRange(r)}
-            style={{
-              padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600,
-              background: r === range ? MODULE_COLOR : 'transparent',
-              color: r === range ? 'var(--color-surface)' : 'var(--color-text-muted)',
-              border: `1px solid ${r === range ? MODULE_COLOR : 'var(--color-border)'}`,
-              cursor: 'pointer',
-            }}
+            className={r === range ? 'mse-preview__range mse-preview__range--active' : 'mse-preview__range'}
           >
             {r}
           </button>
         ))}
       </div>
 
-      {visibleKeys.map(key => {
-        const color = SYMPTOM_COLORS[key]
-        return (
-          <div key={key}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                {t(`modules.medication_side_effects.effect_${key}_label`)}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>0 – 3</span>
-            </div>
-            {range === '7J'
-              ? <BarChart data={DEMO_DATA[range][key]} color={color} />
-              : <LineChart data={DEMO_DATA[range][key]} color={color} />
-            }
+      {visibleKeys.map(key => (
+        <div key={key}>
+          <div className="mse-preview__symptom-head">
+            <span className="mse-preview__symptom-label">
+              {t(`modules.medication_side_effects.effect_${key}_label`)}
+            </span>
+            <span className="mse-preview__symptom-scale">0 – 3</span>
           </div>
-        )
-      })}
+          {range === '7J'
+            ? <BarChart data={DEMO_DATA[range][key]} color={SYMPTOM_COLORS[key]} />
+            : <LineChart data={DEMO_DATA[range][key]} color={SYMPTOM_COLORS[key]} />
+          }
+        </div>
+      ))}
 
-      <button
-        onClick={() => setShowAll(v => !v)}
-        style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: 11, fontWeight: 600, color: MODULE_COLOR,
-          padding: 0, alignSelf: 'flex-start',
-        }}
-      >
+      <button type="button" onClick={() => setShowAll(v => !v)} className="mse-preview__toggle">
         {showAll
           ? `↑ ${t('common.show_less')}`
           : `+ ${t('common.show_more')}`
@@ -132,18 +124,18 @@ export function MedicationSideEffectsPreview() {
       </button>
 
       <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text)', textTransform: 'uppercase', letterSpacing: '0.4px', margin: '0 0 6px' }}>
+        <p className="mse-preview__events-title">
           {t('modules.medication_side_effects.events_section')}
         </p>
-        <div style={{ borderLeft: `3px solid ${MODULE_COLOR}`, paddingLeft: 8, paddingTop: 2, paddingBottom: 2 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: MODULE_COLOR }}>14/04/2026</span>
-          <span style={{ fontSize: 11, color: 'var(--color-text)', marginLeft: 6 }}>
+        <div className="mse-preview__event">
+          <span className="mse-preview__event-date">14/04/2026</span>
+          <span className="mse-preview__event-label">
             {t('modules.medication_side_effects.preview_event_label')}
           </span>
         </div>
       </div>
 
-      <p style={{ fontSize: 10, color: 'var(--color-text-muted)', fontStyle: 'italic', margin: 0 }}>
+      <p className="mse-preview__demo-note">
         {t('modules.medication_side_effects.preview_demo_note')}
       </p>
     </div>
