@@ -69,8 +69,8 @@ export interface DimensionTrackerConfig {
 export function DimensionTrackerView({ config }: { config: DimensionTrackerConfig }) {
   const { scaleId, moduleColor, yMax, ranges, dimensionKeys, dimensionColors } = config
   const navigation = useNavigation<Nav>()
-  const { teenColor } = useTeen()
-  const { t, i18n } = useTranslation()
+  const { isTeenMode, teenColor } = useTeen()
+  const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(scaleId) ?? moduleColor
   const patient = useAuthStore(s => s.patient)
 
