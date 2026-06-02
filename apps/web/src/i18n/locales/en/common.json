@@ -9,7 +9,8 @@
     "close": "Close",
     "delete": "Delete",
     "show_more": "Show 3 more symptoms",
-    "show_less": "Collapse"
+    "show_less": "Collapse",
+    "done": "Done"
   },
   "nav": {
     "profile_menu": "Profile menu",
@@ -641,7 +642,14 @@
       "chip_appetite_loss": "Appetite ↓",
       "chip_dizziness": "Dizziness",
       "chip_headache": "Headache",
-      "chip_sexual": "Sexual"
+      "chip_sexual": "Sexual",
+      "config_button": "Configure effects",
+      "config_title": "Tracked side effects",
+      "config_hint": "Tick the effects that concern this patient. You can add custom effects. The patient will only see these.",
+      "config_custom_title": "Custom effects",
+      "config_add_placeholder": "Add a custom effect…",
+      "config_add": "Add",
+      "config_tracked_count": "{{count}} effect(s) tracked"
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",

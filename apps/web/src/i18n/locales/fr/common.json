@@ -9,7 +9,8 @@
     "close": "Fermer",
     "delete": "Supprimer",
     "show_more": "Voir les 3 autres symptômes",
-    "show_less": "Réduire"
+    "show_less": "Réduire",
+    "done": "Terminé"
   },
   "nav": {
     "profile_menu": "Menu profil",
@@ -390,7 +391,14 @@
       "chip_appetite_loss": "Appétit ↓",
       "chip_dizziness": "Vertiges",
       "chip_headache": "Tête",
-      "chip_sexual": "Sexuel"
+      "chip_sexual": "Sexuel",
+      "config_button": "Configurer les effets",
+      "config_title": "Effets indésirables suivis",
+      "config_hint": "Cochez les effets qui concernent ce patient. Vous pouvez ajouter des effets personnalisés. Le patient ne verra que ces effets.",
+      "config_custom_title": "Effets personnalisés",
+      "config_add_placeholder": "Ajouter un effet personnalisé…",
+      "config_add": "Ajouter",
+      "config_tracked_count": "{{count}} effet(s) suivi(s)"
     },
     "medication_adherence": {
       "label": "Module Observance",

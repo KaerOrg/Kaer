@@ -5,6 +5,7 @@ import type {
   PatientModule,
   PsychoeducationCardEntry,
 } from '../lib/database.types'
+import type { TrackedEffect } from '../lib/sideEffectsCatalog'
 
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
   const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)
@@ -110,6 +111,37 @@ export async function updateRim(
 }
 
 // ── medication_side_effects ───────────────────────────────────────────────────
+
+// Effets suivis configurés pour ce patient (config partagée praticien↔patient,
+// dans patient_modules.config.tracked_effects). cf. lib/sideEffectsCatalog.
+export async function fetchTrackedEffects(moduleId: string): Promise<TrackedEffect[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const cfg = (data?.config ?? {}) as Record<string, unknown>
+  const tracked = cfg['tracked_effects']
+  if (!Array.isArray(tracked)) return []
+  return tracked as TrackedEffect[]
+}
+
+export async function updateTrackedEffects(
+  moduleId: string,
+  effects: TrackedEffect[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, tracked_effects: effects },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
 
 export interface SideEffectsEvent {
   date: string   // YYYY-MM-DD
