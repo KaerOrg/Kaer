@@ -5,7 +5,6 @@ import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '..
 import { Tabs, type TabItem } from '../../ui/Tabs'
 import { FieldRenderer } from '../ModuleRenderer'
 import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
-import { MedicationSideEffectsPreview } from './MedicationSideEffectsPreview'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
@@ -84,47 +83,24 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
       {activeTab === 'preview' && (
         <>
-          {moduleType === 'medication_side_effects' ? (
+          {loading && (
+            <div className="preview-panel__coming-soon">{t('common.loading')}</div>
+          )}
+
+          {!loading && showComingSoon && (
+            <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
+          )}
+
+          {!loading && result && !showComingSoon && (
             <div className="preview-panel__inner">
-              <MedicationSideEffectsPreview />
-              {result && !showComingSoon && (
-                <>
-                  <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #F3F4F6' }} />
-                  <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 12px' }}>
-                    {t('patient.preview_questionnaire_label', { defaultValue: 'Questionnaire de saisie' })}
-                  </p>
-                  <FieldRenderer
-                    preview_kind={result.preview_kind}
-                    fields={result.fields}
-                    moduleId={moduleType}
-                    expandedCard={expandedCard}
-                    onToggleCard={handleToggleCard}
-                  />
-                </>
-              )}
+              <FieldRenderer
+                preview_kind={result.preview_kind}
+                fields={result.fields}
+                moduleId={moduleType}
+                expandedCard={expandedCard}
+                onToggleCard={handleToggleCard}
+              />
             </div>
-          ) : (
-            <>
-              {loading && (
-                <div className="preview-panel__coming-soon">{t('common.loading')}</div>
-              )}
-
-              {!loading && showComingSoon && (
-                <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
-              )}
-
-              {!loading && result && !showComingSoon && (
-                <div className="preview-panel__inner">
-                  <FieldRenderer
-                    preview_kind={result.preview_kind}
-                    fields={result.fields}
-                    moduleId={moduleType}
-                    expandedCard={expandedCard}
-                    onToggleCard={handleToggleCard}
-                  />
-                </div>
-              )}
-            </>
           )}
         </>
       )}
