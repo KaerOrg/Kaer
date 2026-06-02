@@ -629,7 +629,19 @@
       "custom_placeholder": "Name of the effect to track…",
       "custom_added": "Effect added.",
       "custom_delete_title": "Remove this custom effect?",
-      "footer": "Raw figures entered by the patient. To be interpreted in consultation."
+      "footer": "Raw figures entered by the patient. To be interpreted in consultation.",
+      "chip_sedation": "Drowsiness",
+      "chip_sleep": "Sleep",
+      "chip_akathisia": "Akathisia",
+      "chip_tremors": "Tremors",
+      "chip_dry_mouth": "Dry mouth",
+      "chip_nausea": "Nausea",
+      "chip_constipation": "Constipation",
+      "chip_weight": "Weight",
+      "chip_appetite_loss": "Appetite ↓",
+      "chip_dizziness": "Dizziness",
+      "chip_headache": "Headache",
+      "chip_sexual": "Sexual"
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",

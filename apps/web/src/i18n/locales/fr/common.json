@@ -378,7 +378,19 @@
       "custom_add": "Ajouter un effet",
       "custom_placeholder": "Nom de l'effet à suivre…",
       "custom_added": "Effet ajouté.",
-      "custom_delete_title": "Retirer cet effet personnalisé ?"
+      "custom_delete_title": "Retirer cet effet personnalisé ?",
+      "chip_sedation": "Somnolence",
+      "chip_sleep": "Sommeil",
+      "chip_akathisia": "Akathisie",
+      "chip_tremors": "Tremblements",
+      "chip_dry_mouth": "Bouche sèche",
+      "chip_nausea": "Nausées",
+      "chip_constipation": "Constipation",
+      "chip_weight": "Poids",
+      "chip_appetite_loss": "Appétit ↓",
+      "chip_dizziness": "Vertiges",
+      "chip_headache": "Tête",
+      "chip_sexual": "Sexuel"
     },
     "medication_adherence": {
       "label": "Module Observance",
