@@ -15,15 +15,14 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
+import { getAllScaleEntries, type ScaleEntry } from '../../lib/database'
+import { deleteScaleEntry } from '../../services/scaleEntryService'
 import {
-  getAllScaleEntries,
-  deleteScaleEntry,
   getAllMoodMarkers,
   saveMoodMarker,
   deleteMoodMarker,
-  type ScaleEntry,
   type MoodMarker,
-} from '../../lib/database'
+} from '../../services/moodMarkerService'
 import { formatDateLong } from '../../lib/dateUtils'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '../../theme'
@@ -38,7 +37,6 @@ import {
 import {
   DimensionChart,
   CompositeChart,
-  RangeSelector,
   MonthCalendar,
   buildChartData,
   buildCompositeData,
@@ -47,6 +45,7 @@ import {
   markerXFraction,
 } from '../../components/features/TimeRangeCharts'
 import type { TimeRange, ChartMarker } from '../../components/features/TimeRangeCharts'
+import { PillSelector } from '../../components/ui/PillSelector'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Tab = 'entry' | 'charts' | 'month'
@@ -67,6 +66,8 @@ const DIMENSION_COLORS: Record<string, string> = {
 }
 
 const RANGES: readonly TimeRange[] = ['7J', '1M', '3M', '1A']
+const RANGE_OPTIONS: string[] = [...RANGES]
+const TABS: readonly Tab[] = ['entry', 'charts', 'month']
 
 export default function MoodTrackerScreen() {
   const navigation = useNavigation<Nav>()
@@ -131,13 +132,15 @@ export default function MoodTrackerScreen() {
 
   const xLabels = useMemo(() => buildXLabels(timeRange, locale), [timeRange, locale])
 
-  const rangeLabels: Record<TimeRange, string> = {
+  const handleRangeChange = useCallback((v: string) => setTimeRange(v as TimeRange), [])
+
+  const rangeLabels = useMemo<Record<TimeRange, string>>(() => ({
     '7J': t(`modules.${SCALE_ID}.range_7j`),
     '1M': t(`modules.${SCALE_ID}.range_1m`),
     '3M': t(`modules.${SCALE_ID}.range_3m`),
     '6M': t(`modules.${SCALE_ID}.range_3m`), // fallback unused
     '1A': t(`modules.${SCALE_ID}.range_1a`),
-  }
+  }), [t])
 
   const handleDelete = useCallback((id: string) => {
     Alert.alert(
@@ -274,7 +277,7 @@ export default function MoodTrackerScreen() {
 
       {/* ── Tab bar ── */}
       <View style={styles.tabBar}>
-        {(['entry', 'charts', 'month'] as Tab[]).map(tab => (
+        {TABS.map(tab => (
           <Pressable
             key={tab}
             style={[styles.tab, activeTab === tab && { borderBottomColor: accentColor, borderBottomWidth: 2 }]}
@@ -444,10 +447,10 @@ export default function MoodTrackerScreen() {
         ══════════════════════════════════════════════════════════════════ */}
         {activeTab === 'charts' && (
           <View style={styles.section}>
-            <RangeSelector
+            <PillSelector
+              options={RANGE_OPTIONS}
               value={timeRange}
-              onChange={setTimeRange}
-              ranges={RANGES}
+              onChange={handleRangeChange}
               labels={rangeLabels}
               color={accentColor}
             />
@@ -700,7 +703,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.neutral,
     borderRadius: radius.sm,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -740,7 +743,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 6,
     padding: spacing.sm,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.background,
     borderRadius: radius.sm,
   },
   noteText: { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
@@ -825,7 +828,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markerBadgeText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
+  markerBadgeText: { fontSize: 11, fontWeight: '800', color: colors.white },
   markerInfo: { flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 8 },
   markerDate: { fontSize: 12, fontWeight: '700', color: colors.textMuted, minWidth: 56 },
   markerLabelText: { fontSize: 13, color: colors.text, flex: 1 },

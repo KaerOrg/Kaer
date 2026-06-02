@@ -583,7 +583,8 @@
       "streak_days": "consecutive days",
       "streak_hint": "of regular entries",
       "preview_demo_note": "Illustrative data — each point represents a patient entry.",
-      "preview_event_label": "Dose change"
+      "preview_event_label": "Dose change",
+      "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",

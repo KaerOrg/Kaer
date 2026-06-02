@@ -97,6 +97,7 @@
       "new_btn": "Nouvelle saisie",
       "empty_title": "Rien encore",
       "empty_text": "Enregistre ta première saisie pour voir ton historique.",
+      "notes_placeholder": "Contexte, événement du jour, remarque...",
       "footer": "Tes chiffres sont privés et consultés avec ton thérapeute.",
       "progress": "{{answered}} / {{total}} dimensions renseignées",
       "submit": "Valider",
@@ -283,7 +284,8 @@
       "streak_none": "Lance-toi aujourd'hui !",
       "events_title": "Notes de ton soignant",
       "events_empty": "Ton soignant n'a pas encore ajouté de note.",
-      "notes_label": "Note"
+      "notes_label": "Note",
+      "notes_placeholder": "Contexte, remarque, moment de la journée…"
     },
     "medication_adherence": {
       "title": "Mes prises de traitement",

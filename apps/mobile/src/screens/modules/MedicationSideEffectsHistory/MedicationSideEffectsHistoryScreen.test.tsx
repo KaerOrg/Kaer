@@ -35,6 +35,9 @@ jest.mock('@react-navigation/native', () => {
 
 jest.mock('../../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
+}))
+
+jest.mock('../../../services/scaleEntryService', () => ({
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
 }))
 
@@ -51,7 +54,8 @@ jest.mock('../../../components/features/TeenAccent', () => ({
 }))
 
 import MedicationSideEffectsHistoryScreen from './MedicationSideEffectsHistoryScreen'
-import { getAllScaleEntries, deleteScaleEntry } from '../../../lib/database'
+import { getAllScaleEntries } from '../../../lib/database'
+import { deleteScaleEntry } from '../../../services/scaleEntryService'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 beforeEach(() => jest.clearAllMocks())

@@ -97,6 +97,7 @@
       "new_btn": "New entry",
       "empty_title": "Nothing yet",
       "empty_text": "Record your first entry to see your history.",
+      "notes_placeholder": "Context, today's event, remark...",
       "footer": "Your numbers are private and reviewed with your therapist.",
       "progress": "{{answered}} / {{total}} dimensions rated",
       "submit": "Done",
@@ -283,7 +284,8 @@
       "streak_none": "Start today!",
       "events_title": "Notes from your clinician",
       "events_empty": "Your clinician hasn't added any notes yet.",
-      "notes_label": "Note"
+      "notes_label": "Note",
+      "notes_placeholder": "Context, note, time of day…"
     },
     "medication_adherence": {
       "title": "My medication log",

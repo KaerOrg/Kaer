@@ -25,7 +25,9 @@ export function BarChart({ points, color, xLabels, maxBarHeight = 48, maxY = 3 }
         {points.map((p, i) => (
           <View key={i} style={styles.topCell}>
             {p.hasValue && p.value > 0 && (
-              <Text style={[styles.valueLabel, { color }]}>{Math.round(p.value)}</Text>
+              <Text style={[styles.valueLabel, { color }]}>
+                {Number.isInteger(p.value) ? p.value : p.value.toFixed(1)}
+              </Text>
             )}
           </View>
         ))}

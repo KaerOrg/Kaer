@@ -74,13 +74,14 @@ Composants extraits, partagés avec `MedicationSideEffectsHistoryScreen` :
 
 | Fichier | Rôle |
 |---|---|
-| `chartUtils.ts` | Fonctions pures : `buildChartData`, `buildCompositeData`, `buildXLabels`, `computeAvg`, `computeStreak`, `markerXFraction` |
-| `LineChart.tsx` | SVG polyline (tous points connectés) + axe Y — 1M/3M/6M/1A — `yMax` configurable |
-| `BarChart.tsx` | SVG barres — 7J — `yMax` configurable |
-| `DimensionChart.tsx` | Card = header (label + moyenne) + BarChart ou LineChart selon plage |
-| `CompositeChart.tsx` | Multi-lignes overlay + moyenne épaisse + axe Y + repères verticaux (`ChartMarker[]`) + légende |
-| `RangeSelector.tsx` | Sélecteur de période générique — ranges et labels configurables |
+| `chartUtils.ts` | Fonctions pures : `buildChartData`, `buildCompositeData`, `buildXLabels`, `computeAvg`, `computeStreak`, `markerXFraction` (source unique, importée aussi par l'écran effets secondaires). Types `DataPoint`/`XLabel` ré-exportés depuis `ui/Chart`. |
+| `DimensionChart.tsx` | Card = header (label + moyenne) + `BarChart`/`LineChart` **du design system** (`ui/Chart`) selon la plage, `yMax` configurable. Composant unique de mini-graphe par métrique (mood **et** effets secondaires). |
+| `CompositeChart.tsx` | Multi-lignes overlay + moyenne épaisse + axe Y + repères verticaux (`ChartMarker[]`) + légende — pas d'équivalent au DS (multi-séries), reste sur mesure |
 | `MonthCalendar.tsx` | Grille calendrier mensuelle, cercles colorés (opacité ∝ score) + badge de complétude |
+
+> Les primitives `LineChart`/`BarChart` ne sont **pas** redéfinies ici : `DimensionChart`
+> consomme `components/ui/Chart`. Le sélecteur de période réutilise `components/ui/PillSelector`
+> (pas de `RangeSelector` dédié).
 
 ### Rappels
 - Infrastructure Supabase `notification_routines` existante — aucune table supplémentaire

@@ -22,6 +22,7 @@ export type EntryKind =
   | 'em_balance_item'
   | 'em_value'
   | 'module_setting'
+  | 'mood_marker'
 
 export interface OutboxItem {
   id: string
