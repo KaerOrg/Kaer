@@ -300,7 +300,8 @@
       "config_button": "Configurer mes effets",
       "config_hint": "Choisis les effets qui te concernent. Tu peux aussi en ajouter un perso.",
       "config_empty_text": "Appuie sur « Configurer mes effets » pour choisir ce que tu veux suivre.",
-      "config_add_placeholder": "Ajouter un effet (ex. bouffées de chaleur)…"
+      "config_add_placeholder": "Ajouter un effet (ex. bouffées de chaleur)…",
+      "entry_date_label": "Jour de la saisie"
     },
     "medication_adherence": {
       "title": "Mes prises de traitement",

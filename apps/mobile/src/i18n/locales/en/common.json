@@ -315,7 +315,8 @@
       "config_custom_title": "Custom effects",
       "config_add_placeholder": "Add an effect (e.g. hot flashes)…",
       "config_empty_title": "No effect configured",
-      "config_empty_text": "Tap “Configure tracked effects” to choose what to track."
+      "config_empty_text": "Tap “Configure tracked effects” to choose what to track.",
+      "entry_date_label": "Entry day"
     },
     "medication_adherence": {
       "label": "Treatment adherence",

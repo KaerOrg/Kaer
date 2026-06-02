@@ -299,7 +299,8 @@
       "custom_delete_title": "Remove this custom effect?",
       "config_button": "Configure my effects",
       "config_hint": "Pick the effects that concern you. You can also add a custom one.",
-      "config_empty_text": "Tap “Configure my effects” to choose what to track."
+      "config_empty_text": "Tap “Configure my effects” to choose what to track.",
+      "entry_date_label": "Entry day"
     },
     "medication_adherence": {
       "title": "My medication log",

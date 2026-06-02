@@ -25,7 +25,7 @@ export default function MedicationSideEffectsEntryScreen() {
   const { effects, entry_id } = params
   const isEditing = entry_id != null
   const { isTeenMode, teenColor } = useTeen()
-  const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(SCALE_ID) ?? '#8B5CF6'
   const patient = useAuthStore(s => s.patient)
   const isMounted = useRef(true)
@@ -33,6 +33,8 @@ export default function MedicationSideEffectsEntryScreen() {
   const [values, setValues] = useState<Record<string, number | null>>(
     () => Object.fromEntries(effects.map(e => [e.key, null]))
   )
+  // Date de la saisie — modifiable pour rapporter un jour passé (ex. la veille).
+  const [entryDate, setEntryDate] = useState<Date>(new Date())
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
 
@@ -58,12 +60,24 @@ export default function MedicationSideEffectsEntryScreen() {
         }
         return next
       })
+      setEntryDate(new Date(existing.created_at))
       setLoading(false)
     }).catch(() => { if (isMounted.current) setLoading(false) })
   }, [entry_id, isEditing, effects])
 
   const setValue = useCallback((key: string, v: number) => {
     setValues(prev => ({ ...prev, [key]: v }))
+  }, [])
+
+  const shiftDate = useCallback((days: number) => {
+    setEntryDate(prev => {
+      const next = new Date(prev)
+      next.setDate(next.getDate() + days)
+      const today = new Date()
+      today.setHours(23, 59, 59, 999)
+      if (next > today) return prev // pas de date future
+      return next
+    })
   }, [])
 
   const answeredCount = useMemo(() => effects.filter(e => values[e.key] != null).length, [effects, values])
@@ -84,12 +98,12 @@ export default function MedicationSideEffectsEntryScreen() {
       answers,
       total_score: total,
       subscale_scores: subscale,
-      created_at: isEditing ? new Date().toISOString() : new Date().toISOString(),
+      created_at: entryDate.toISOString(),
     })
     if (patient && !isEditing) logScaleSubmission(patient.id, SCALE_ID)
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, saving, effects, values, entry_id, isEditing, patient, navigation])
+  }, [allAnswered, saving, effects, values, entry_id, isEditing, patient, navigation, entryDate])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={accentColor} size="large" /></View>
@@ -100,6 +114,22 @@ export default function MedicationSideEffectsEntryScreen() {
       <TeenAccent color={accentColor} />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.instruction}>{t(`modules.${SCALE_ID}.instructions`)}</Text>
+
+        {/* Date de la saisie — modifiable pour rapporter un jour passé */}
+        <View style={styles.dateCard}>
+          <Text style={styles.dateLabel}>{t(`modules.${SCALE_ID}.entry_date_label`)}</Text>
+          <View style={styles.dateRow}>
+            <Pressable onPress={() => shiftDate(-1)} style={styles.dateBtn} hitSlop={8} accessibilityLabel={t('common.previous', { defaultValue: '' })}>
+              <MaterialCommunityIcons name="chevron-left" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={styles.dateValue}>
+              {entryDate.toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })}
+            </Text>
+            <Pressable onPress={() => shiftDate(1)} style={styles.dateBtn} hitSlop={8} accessibilityLabel={t('common.next', { defaultValue: '' })}>
+              <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text} />
+            </Pressable>
+          </View>
+        </View>
 
         {effects.map(effect => {
           const val = values[effect.key]
@@ -159,6 +189,18 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },
   instruction: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
+  dateCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 6,
+  },
+  dateLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dateBtn: { padding: 2 },
+  dateValue: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '600', color: colors.text, textTransform: 'capitalize' },
   card: {
     backgroundColor: colors.card,
     borderRadius: radius.md,

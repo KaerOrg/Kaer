@@ -367,7 +367,8 @@
       "config_custom_title": "Effets personnalisés",
       "config_add_placeholder": "Ajouter un effet (ex. bouffées de chaleur)…",
       "config_empty_title": "Aucun effet configuré",
-      "config_empty_text": "Appuyez sur « Configurer les effets suivis » pour choisir ce que vous voulez suivre."
+      "config_empty_text": "Appuyez sur « Configurer les effets suivis » pour choisir ce que vous voulez suivre.",
+      "entry_date_label": "Jour de la saisie"
     },
     "medication_adherence": {
       "label": "Observance du traitement",
