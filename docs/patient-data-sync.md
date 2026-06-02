@@ -166,66 +166,60 @@ const { synced, failed, skipped } = await RemoteSyncService.getInstance().sync()
 
 ## Intégration dans un service de module
 
-Pattern à suivre pour brancher un module existant sur la sync :
+Utiliser les helpers `syncUpsert` / `syncDelete` de `syncHelpers.ts` — ils encapsulent le lazy require, le fire-and-forget, `operation` et `client_created_at`.
 
 ```typescript
-// apps/mobile/src/services/scaleService.ts (exemple)
-import { RemoteSyncService } from './sync'
+// apps/mobile/src/services/scaleEntryService.ts
+import { saveScaleEntry as dbSave, deleteScaleEntry as dbDelete, type ScaleEntry } from '../lib/database'
+import { syncUpsert, syncDelete } from './syncHelpers'
 
 export async function saveScaleEntry(entry: ScaleEntry): Promise<void> {
-  // 1. Écriture SQLite (toujours en premier)
-  await dbSaveScaleEntry(entry)
-
-  // 2. Sync cloud (non-bloquant — fire and forget)
-  void RemoteSyncService.getInstance().enqueue({
+  await syncUpsert(() => dbSave(entry), {
     local_id: entry.id,
     module_id: entry.scale_id,
     entry_kind: 'scale_entry',
-    operation: 'upsert',
     payload: {
       scale_id: entry.scale_id,
       answers: entry.answers,
       total_score: entry.total_score,
       subscale_scores: entry.subscale_scores,
-      created_at: entry.created_at,
     },
-    client_created_at: entry.created_at,
   })
 }
 
-export async function deleteScaleEntry(id: string, entry: ScaleEntry): Promise<void> {
-  await dbDeleteScaleEntry(id)
-
-  void RemoteSyncService.getInstance().enqueue({
-    local_id: id,
-    module_id: entry.scale_id,
-    entry_kind: 'scale_entry',
-    operation: 'delete',
-    payload: {},
-    client_created_at: entry.created_at,
-  })
+export async function deleteScaleEntry(id: string): Promise<void> {
+  await syncDelete(() => dbDelete(id), id, 'scale', 'scale_entry')
 }
 ```
+
+### `syncHelpers.ts` — `apps/mobile/src/services/syncHelpers.ts`
+
+| Fonction | Rôle |
+|---|---|
+| `syncUpsert(dbFn, params)` | Attend `dbFn()`, puis enqueue un upsert fire-and-forget. Ajoute `operation: 'upsert'` et `client_created_at` automatiquement. |
+| `syncDelete(dbFn, localId, moduleId, entryKind)` | Attend `dbFn()`, puis enqueue un delete avec `payload: {}`. |
+
+Les deux fonctions utilisent un **lazy `require('./sync')`** : `RemoteSyncService` n'est jamais chargé au moment du montage du module, uniquement lors de l'appel (compatible tests Jest).
 
 ---
 
 ## Déclenchement du sync
 
-Le sync doit être appelé aux moments suivants (Phase 2 — non encore implémenté) :
+Le hook `useSyncOnForeground` (`apps/mobile/src/hooks/useSyncOnForeground.ts`) déclenche `sync()` à chaque retour en foreground. Il est monté dans `Navigation` (composant racine) :
 
 ```typescript
-// Hook à placer dans le composant racine (App.tsx)
+// apps/mobile/src/hooks/useSyncOnForeground.ts
 import { AppState } from 'react-native'
-import { RemoteSyncService } from './services/sync'
+import { RemoteSyncService } from '../services/sync'
 
-useEffect(() => {
-  const sub = AppState.addEventListener('change', state => {
-    if (state === 'active') {
-      void RemoteSyncService.getInstance().sync()
-    }
-  })
-  return () => sub.remove()
-}, [])
+export function useSyncOnForeground(): void {
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', next => {
+      if (next === 'active') void RemoteSyncService.getInstance().sync()
+    })
+    return () => sub.remove()
+  }, [])
+}
 ```
 
 Pour la reconnexion réseau, utiliser `@react-native-community/netinfo` (non encore installé).
@@ -237,7 +231,7 @@ Pour la reconnexion réseau, utiliser `@react-native-community/netinfo` (non enc
 | Phase | État | Description |
 |---|---|---|
 | **1 — Infrastructure** | ✅ Livré | `patient_entries` Supabase, `SyncOutboxStore`, `RemoteSyncService`, 26 tests |
-| **2 — Dual-write modules** | 🔜 À faire | Modifier chaque service mobile pour appeler `enqueue()` après save/delete |
+| **2 — Dual-write modules** | ✅ Livré | `syncUpsert`/`syncDelete` helpers, 9 services + crisis + motivational, hook foreground, 54 tests |
 | **3 — Vue praticien** | 🔜 À faire | `PatientDataService` web + composants de visualisation neutre (sans interprétation) |
 
 ---
