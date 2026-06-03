@@ -1214,6 +1214,7 @@ create table if not exists public.caseload_entries (
   status           text        not null default 'active' check (status in ('active', 'paused', 'archived')),
   is_important     boolean     not null default false,
   wake_date        date,
+  invited_email    text,
   care_pathways    text[]      not null default '{}',
   last_reviewed_at date,
   created_at       timestamptz not null default now(),
@@ -1232,9 +1233,14 @@ alter table public.caseload_entries drop column if exists priority;
 -- « En attente de retour » devient multiple (table caseload_waits).
 alter table public.caseload_entries drop column if exists waiting_on;
 alter table public.caseload_entries drop column if exists relance_date;
+-- Suivi des dossiers libres issus d'une invitation en attente (conversion auto).
+alter table public.caseload_entries add column if not exists invited_email text;
 
 create index if not exists idx_caseload_entries_practitioner
   on public.caseload_entries(practitioner_id, status);
+create index if not exists idx_caseload_entries_invited_email
+  on public.caseload_entries(practitioner_id, invited_email)
+  where invited_email is not null;
 
 drop trigger if exists caseload_entries_updated_at on public.caseload_entries;
 create trigger caseload_entries_updated_at
@@ -1308,6 +1314,7 @@ create table if not exists public.caseload_actions (
   label            text        not null,
   due_date         date,
   due_time         time,
+  is_urgent        boolean     not null default false,
   is_done          boolean     not null default false,
   done_at          timestamptz,
   recurrence_days  int         check (recurrence_days is null or recurrence_days > 0),
@@ -1316,8 +1323,9 @@ create table if not exists public.caseload_actions (
   updated_at       timestamptz not null default now()
 );
 
--- Migration idempotente : heure optionnelle ajoutée après coup.
+-- Migration idempotente : heure optionnelle + urgence manuelle ajoutées après coup.
 alter table public.caseload_actions add column if not exists due_time time;
+alter table public.caseload_actions add column if not exists is_urgent boolean not null default false;
 
 create index if not exists idx_caseload_actions_entry
   on public.caseload_actions(entry_id, is_done, due_date);

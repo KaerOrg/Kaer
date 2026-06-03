@@ -60,11 +60,28 @@ Au survol : **✓ Fait · ⏰ Reporter (+1j / +1sem / date) · ✎ Note**.
 Le tableau complet, triable et filtrable. C'est ici qu'on saisit et qu'on a la vue large.
 Saisie **au clic dans la cellule** (édition inline, enregistrement automatique).
 **Une ligne par patient** : la cellule « Actions » montre l'action la plus urgente + un badge
-« +N » ; un clic **déplie** un panneau à 3 sections — **Actions** (cocher / ajouter / supprimer,
-chacune avec date + heure optionnelle), **En attente de retour** (étiquette + date de relance
-optionnelle), **Observations** (la plus récente + historique daté). Les **« Soins en cours »** et
-le résumé **« En attente de retour »** s'affichent dans la ligne ; l'**⭐ Important** épingle le
-patient en haut.
+« +N » ; un clic **déplie** un panneau à 4 sections — **Patient de l'app** (statut de liaison,
+lecture seule), **Actions** (cocher / ajouter / supprimer, chacune avec date + heure optionnelle),
+**En attente de retour** (étiquette + date de relance optionnelle), **Observations** (la plus
+récente + historique daté). Les **« Soins en cours »** et le résumé **« En attente de retour »**
+s'affichent dans la ligne ; l'**⭐ Important** épingle le patient en haut.
+
+**Édition du nom sécurisée.** Le nom du patient s'affiche en **lecture seule** ; l'édition demande
+un clic explicite sur le **crayon**, puis une **validation** (Entrée / ✓) — pas de modification
+accidentelle (composant `EditableName`). Les autres champs (actions, attentes, soins, observations)
+restent éditables au clic, car ce sont des contenus à faible risque.
+
+**Liaison patient (app) — automatique.** Au chargement, `syncCaseloadWithPatients` (idempotent) :
+- **patient inscrit** (`practitioner_patients`) sans dossier lié → **dossier lié** créé ;
+- **invitation en attente** (`invitations`, non acceptée) sans dossier → **dossier libre** créé, marqué
+  `invited_email` (statut « Invité — en attente d'inscription ») ;
+- patient qui **s'inscrit** alors qu'un dossier libre existait à son email → ce dossier est **converti**
+  en dossier lié (`patient_id` posé, `invited_email` effacé) — **pas de doublon**.
+
+Déduplication sur **tous statuts** (un dossier archivé ne réapparaît pas). Une fois lié, les **modules
+débloqués** du patient (`patient_modules`, via `fetchPatientsWithModules`) s'affichent **automatiquement**
+en chips lecture seule dans « Soins en cours », à côté des étiquettes manuelles (coexistence ; les modules
+ne sont jamais édités ici). Les dossiers saisis à la main pour des patients hors app restent **libres**.
 
 ```
 ┌─┬───────────────┬──────────────────────┬───────────────┬──────────┐
@@ -74,8 +91,17 @@ patient en haut.
   ↑ bord = priorité   ↑ étiquettes pastel    ↑ délai relatif  ↑ pastille
 ```
 
-Filtres en **chips** au-dessus : `Actifs` `Urgents` `En retard` `En attente d'un tiers`.
+Filtres en **chips** au-dessus : `Important` `En retard` `En attente`.
 Recherche par nom. En-tête figé au scroll. Lignes compactes.
+
+**Ordre des colonnes** : Patient · Statut · ⭐ (étoile, colonne étroite sans titre) · Soins en cours ·
+Actions · En attente de retour · Délais. Soins et Actions sont voisins, comme Actions et En attente —
+regroupement logique. Dégradé horizontal très léger (déclinaison du teal Kaer) pour délimiter les colonnes.
+
+**Archivage / désarchivage** : le `select` Statut d'une ligne permet d'archiver (→ `archived`, masqué du
+filtre « Actifs et en veille »). Le filtre Statut **« Archivés »** les retrouve ; il suffit de repasser le
+`select` sur *Actif* ou *En veille* pour **désarchiver** (`archived_at` remis à `null`). `fetchCaseload`
+est appelé avec `includeArchived: true` ; le filtrage actif/archivé est client-side (`selectCaseloadRows`).
 
 ### ③ Vue d'ensemble (les compteurs « en un coup d'œil »)
 
@@ -95,6 +121,7 @@ caseload_entries (
   status          text CHECK (active|paused|archived) DEFAULT 'active',
   is_important    boolean DEFAULT false,         -- ⭐ patient épinglé en haut (MANUEL)
   wake_date       date NULL,                     -- « revoir le » (réveil d'un dossier en veille)
+  invited_email   text NULL,                     -- dossier libre issu d'une invitation en attente (conversion auto à l'inscription)
   care_pathways   text[] DEFAULT '{}',           -- « Soins en cours » : étiquettes HOP, psychothérapie, ETP…
   last_reviewed_at date NULL,                     -- « Revu le » — MANUEL (dernier contact réel)
   updated_at      timestamptz,                    -- « Modifié le » — AUTO (trigger)
@@ -113,6 +140,7 @@ caseload_actions (
   label           text,                          -- la tâche à faire
   due_date        date NULL,                     -- échéance propre à CETTE action (pilote la couleur)
   due_time        time NULL,                     -- heure optionnelle (confort d'affichage, ne déclenche rien)
+  is_urgent       boolean DEFAULT false,         -- urgence FORCÉE à la main (ex. signalement) → critique
   is_done         boolean DEFAULT false,         -- coche « fait »
   done_at         timestamptz NULL,
   recurrence_days int NULL,                       -- récurrence de l'action (ex. 90 = tous les 3 mois)
@@ -181,14 +209,20 @@ Fonctions pures (`caseloadLogic.ts`) : `computeActionAlert(action, today)` pour 
 Résultat : `'critical' | 'upcoming' | 'ok'`.
 **Aucune valeur n'est stockée** : tout se recalcule à l'affichage à partir de dates que *le praticien a saisies*.
 
-| Niveau | Pastille | Condition (administrative, sur les dates) |
-|---|---|---|
-| `critical` | 🟥 Critique | `due_date` dépassée OU `due_date = aujourd'hui` |
-| `upcoming` | 🟧 À venir | `due_date` dans les 7 prochains jours |
-| `ok` | 🟩 OK | sinon |
+> Colonne affichée **« Délais »** (libellé UI). La feature est nommée **« Mes suivis »** côté praticien
+> (route `/file-active`, tables `caseload_*` inchangées).
 
-- **L'urgence vient des dates uniquement** — aucun niveau de priorité, aucun curseur. Le drapeau ⭐ Important ne change pas l'alerte ; il **épingle** le patient en haut du tri.
+| Niveau (`AlertLevel`) | Pastille | Condition (administrative, sur les dates) |
+|---|---|---|
+| `critical` | 🟥 **Urgent** | `due_date` à **moins de 3 jours** (`≤ 2 j` : en retard, aujourd'hui, demain, après-demain) OU **action marquée urgente** (`is_urgent`, forçage manuel) |
+| `upcoming` | 🟧 À venir | `due_date` dans **3 à 7 jours** |
+| `ok` | 🟩 OK | sinon (`> 7 j` ou aucune échéance) |
+
+> Seuils dans `caseloadLogic.ts` : `URGENT_WITHIN_DAYS = 2`, `UPCOMING_WITHIN_DAYS = 7` (réglables).
+
+- **L'urgence vient des dates OU d'un forçage manuel par action** (`is_urgent`) — ex. rédiger un signalement est urgent quelle que soit la date. Aucun niveau de priorité, aucun curseur. Le drapeau ⭐ Important ne change pas l'alerte ; il **épingle** le patient en haut du tri.
 - **Jamais la couleur seule** : chaque pastille porte aussi un mot (« Critique ») et une forme — lisible en cas de daltonisme.
+- **Pastille auto-explicative** : le **délai** est affiché à côté du libellé (« À venir · 3 j », « Critique · retard 2 j », « Critique · auj. ») — on comprend sans réfléchir. Le délai vient de l'**action la plus urgente** du dossier.
 
 ## 7. Tri de la vue « Aujourd'hui »
 

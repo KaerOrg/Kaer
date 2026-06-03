@@ -474,6 +474,7 @@ export interface Database {
           status: string
           is_important: boolean
           wake_date: string | null
+          invited_email: string | null
           care_pathways: string[]
           last_reviewed_at: string | null
           created_at: string
@@ -487,6 +488,7 @@ export interface Database {
           status?: string
           is_important?: boolean
           wake_date?: string | null
+          invited_email?: string | null
           care_pathways?: string[]
           last_reviewed_at?: string | null
         }
@@ -496,6 +498,7 @@ export interface Database {
           status?: string
           is_important?: boolean
           wake_date?: string | null
+          invited_email?: string | null
           care_pathways?: string[]
           last_reviewed_at?: string | null
           archived_at?: string | null
@@ -532,6 +535,7 @@ export interface Database {
           label: string
           due_date: string | null
           due_time: string | null
+          is_urgent: boolean
           is_done: boolean
           done_at: string | null
           recurrence_days: number | null
@@ -545,6 +549,7 @@ export interface Database {
           label: string
           due_date?: string | null
           due_time?: string | null
+          is_urgent?: boolean
           is_done?: boolean
           done_at?: string | null
           recurrence_days?: number | null
@@ -554,6 +559,7 @@ export interface Database {
           label?: string
           due_date?: string | null
           due_time?: string | null
+          is_urgent?: boolean
           is_done?: boolean
           done_at?: string | null
           recurrence_days?: number | null

@@ -1,5 +1,6 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { EditableName } from './EditableName'
 import type { CaseloadEntry, CaseloadEntryInput } from '../../../lib/caseload.types'
 
 export interface NameCellProps {
@@ -7,30 +8,20 @@ export interface NameCellProps {
   onPatch: (id: string, patch: CaseloadEntryInput) => void
 }
 
-/** Nom affiché du dossier — input non contrôlé, renommage au blur. */
+/** Nom affiché du dossier — édition explicite via `EditableName` (lecture seule + crayon). */
 function NameCellComponent({ entry, onPatch }: NameCellProps) {
   const { t } = useTranslation()
 
   const handleName = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const value = e.target.value.trim()
-      if (!value) {
-        e.target.value = entry.display_name
-        return
-      }
-      if (value !== entry.display_name) onPatch(entry.id, { display_name: value })
-    },
-    [entry.id, entry.display_name, onPatch]
+    (next: string) => onPatch(entry.id, { display_name: next }),
+    [entry.id, onPatch]
   )
 
   return (
-    <input
-      key={`name-${entry.display_name}`}
-      className="caseload-input caseload-input--name"
-      defaultValue={entry.display_name}
-      onBlur={handleName}
-      title={entry.display_name}
-      aria-label={t('file_active.col.patient')}
+    <EditableName
+      value={entry.display_name}
+      onSave={handleName}
+      ariaLabel={t('file_active.col.patient')}
     />
   )
 }

@@ -19,7 +19,7 @@ const TODAY = '2026-06-02'
 function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
   return {
     id: 'e-1', practitioner_id: 'p-1', patient_id: null, display_name: 'Bernard Hugo',
-    status: 'active', is_important: false, wake_date: null,
+    status: 'active', is_important: false, wake_date: null, invited_email: null,
     care_pathways: [], last_reviewed_at: null, created_at: '2026-06-01T10:00:00Z',
     updated_at: '2026-06-01T10:00:00Z', archived_at: null, ...overrides,
   }
@@ -28,7 +28,7 @@ function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
 function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
   return {
     id: 'a-1', entry_id: 'e-1', practitioner_id: 'p-1', label: 'Renouvellement', due_date: '2026-05-30',
-    due_time: null, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
+    due_time: null, is_urgent: false, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
     created_at: '2026-06-01T10:00:00Z', updated_at: '2026-06-01T10:00:00Z', ...overrides,
   }
 }
@@ -64,9 +64,28 @@ describe('CaseloadTable', () => {
 
   it('affiche le patient, l\'action la plus urgente et la pastille critique', () => {
     renderTable()
-    expect(screen.getByDisplayValue('Bernard Hugo')).toBeInTheDocument()
+    expect(screen.getByText('Bernard Hugo')).toBeInTheDocument()
     expect(screen.getByText('Renouvellement')).toBeInTheDocument()
-    expect(screen.getByText('Critique')).toBeInTheDocument()
+    expect(screen.getByText('Urgent')).toBeInTheDocument()
+  })
+
+  it('affiche le délai sur la pastille « À venir »', () => {
+    const row: CaseloadRowData = { entry: makeEntry(), actions: [makeAction({ due_date: '2026-06-05' })], waits: [] }
+    renderTable({ rows: [row] })
+    expect(screen.getByText('À venir')).toBeInTheDocument()
+    expect(screen.getByText('3 j')).toBeInTheDocument()
+  })
+
+  it('ne modifie le nom qu\'après clic sur le crayon puis validation', () => {
+    const onPatch = vi.fn()
+    renderTable({ onPatch })
+    // par défaut : pas de champ de saisie du nom
+    expect(screen.queryByDisplayValue('Bernard Hugo')).toBeNull()
+    fireEvent.click(screen.getByLabelText('Modifier le nom'))
+    const input = screen.getByDisplayValue('Bernard Hugo')
+    fireEvent.change(input, { target: { value: 'Bernard H.' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(onPatch).toHaveBeenCalledWith('e-1', { display_name: 'Bernard H.' })
   })
 
   it('appelle onCreate à la capture rapide', () => {
@@ -102,6 +121,14 @@ describe('CaseloadTable', () => {
     expect(onToggleDone).toHaveBeenCalledWith('e-1', 'a-1', true)
   })
 
+  it('déplie la ligne et force une action en urgent', async () => {
+    const onPatchAction = vi.fn()
+    renderTable({ onPatchAction })
+    fireEvent.click(screen.getByRole('button', { expanded: false }))
+    fireEvent.click(await screen.findByLabelText('Marquer cette action comme urgente'))
+    expect(onPatchAction).toHaveBeenCalledWith('e-1', 'a-1', { is_urgent: true })
+  })
+
   it('déplie la ligne et ajoute une attente de retour', async () => {
     const onAddWait = vi.fn()
     renderTable({ onAddWait })
@@ -111,16 +138,7 @@ describe('CaseloadTable', () => {
     expect(onAddWait).toHaveBeenCalledWith('e-1', 'Retour ASE', null)
   })
 
-  it('lie un dossier à un patient de l\'app', () => {
-    const onPatch = vi.fn()
-    const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: [] }]
-    renderTable({ onPatch, patients })
-    fireEvent.click(screen.getByRole('button', { expanded: false }))
-    fireEvent.change(screen.getByLabelText("Lier à un patient de l'app"), { target: { value: 'pat-1' } })
-    expect(onPatch).toHaveBeenCalledWith('e-1', { patient_id: 'pat-1' })
-  })
-
-  it('affiche le patient lié et ses modules débloqués', () => {
+  it('affiche le patient lié (statut) et ses modules débloqués', async () => {
     const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [] }
     const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: ['phq9'] }]
     const { container } = renderTable({ rows: [row], patients })
@@ -128,6 +146,13 @@ describe('CaseloadTable', () => {
     expect(container.querySelector('.module-chips .chip')).not.toBeNull()
     // le patient lié apparaît dans le panneau
     fireEvent.click(screen.getByRole('button', { expanded: false }))
-    expect(screen.getByText('Léa Martin — lea@x.fr')).toBeInTheDocument()
+    expect(await screen.findByText(/Léa Martin — lea@x\.fr/)).toBeInTheDocument()
+  })
+
+  it('affiche le statut « invité » pour un dossier issu d\'une invitation', async () => {
+    const row: CaseloadRowData = { entry: makeEntry({ invited_email: 'tom@x.fr' }), actions: [], waits: [] }
+    renderTable({ rows: [row] })
+    fireEvent.click(screen.getByRole('button', { expanded: false }))
+    expect(await screen.findByText(/tom@x\.fr/)).toBeInTheDocument()
   })
 })

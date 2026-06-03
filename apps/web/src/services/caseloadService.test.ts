@@ -19,6 +19,7 @@ import {
   deleteCaseloadWait,
   createCaseloadNote,
   fetchCaseloadNotes,
+  syncCaseloadWithPatients,
 } from './caseloadService'
 import type { CaseloadAction, CaseloadEntry, CaseloadNote, CaseloadWait } from '../lib/caseload.types'
 
@@ -36,7 +37,7 @@ function makeChain(result: { data: unknown; error?: unknown } = { data: null, er
 function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
   return {
     id: 'e-1', practitioner_id: 'p-1', patient_id: null, display_name: 'Bernard Hugo',
-    status: 'active', is_important: false, wake_date: null,
+    status: 'active', is_important: false, wake_date: null, invited_email: null,
     care_pathways: [], last_reviewed_at: null, created_at: '2026-06-01T10:00:00Z',
     updated_at: '2026-06-01T10:00:00Z', archived_at: null, ...overrides,
   }
@@ -45,7 +46,7 @@ function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
 function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
   return {
     id: 'a-1', entry_id: 'e-1', practitioner_id: 'p-1', label: 'Renouvellement', due_date: null,
-    due_time: null, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
+    due_time: null, is_urgent: false, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
     created_at: '2026-06-01T10:00:00Z', updated_at: '2026-06-01T10:00:00Z', ...overrides,
   }
 }
@@ -235,5 +236,61 @@ describe('fetchCaseloadNotes', () => {
   it('renvoie un tableau vide en cas d\'erreur', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'x' } }) as never)
     expect(await fetchCaseloadNotes('e-1')).toEqual([])
+  })
+})
+
+describe('syncCaseloadWithPatients', () => {
+  type Thenable = { then: (r: (v: unknown) => unknown) => unknown }
+  const resolved = (): Thenable => ({ then: r => Promise.resolve({ error: null }).then(r) })
+
+  it('ne touche pas la base sans inscrit ni invitation', async () => {
+    expect(await syncCaseloadWithPatients('p-1', [], [])).toEqual({ created: 0, linked: 0 })
+    expect(supabase.from).not.toHaveBeenCalled()
+  })
+
+  it('crée un dossier lié pour un inscrit, libre pour une invitation', async () => {
+    const insert = vi.fn().mockReturnValue(resolved())
+    const chain = makeChain({ data: [], error: null })
+    chain.insert = insert
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    const result = await syncCaseloadWithPatients(
+      'p-1',
+      [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }],
+      [{ email: 'tom@x.fr', name: 'Tom' }]
+    )
+
+    expect(result).toEqual({ created: 2, linked: 0 })
+    expect(insert).toHaveBeenCalledWith([
+      expect.objectContaining({ patient_id: 'pat-1', display_name: 'Léa' }),
+      expect.objectContaining({ invited_email: 'tom@x.fr', display_name: 'Tom' }),
+    ])
+  })
+
+  it('convertit un dossier libre en lié quand l\'invité s\'inscrit', async () => {
+    const insert = vi.fn()
+    const update = vi.fn().mockReturnValue({ eq: () => resolved() })
+    const chain = makeChain({ data: [{ id: 'free-1', patient_id: null, invited_email: 'lea@x.fr' }], error: null })
+    chain.insert = insert
+    chain.update = update
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    const result = await syncCaseloadWithPatients('p-1', [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }], [])
+
+    expect(result).toEqual({ created: 0, linked: 1 })
+    expect(insert).not.toHaveBeenCalled()
+    expect(update).toHaveBeenCalledWith({ patient_id: 'pat-1', invited_email: null })
+  })
+
+  it('ne recrée rien si tout est déjà couvert', async () => {
+    const insert = vi.fn()
+    const chain = makeChain({ data: [{ id: 'e1', patient_id: 'pat-1', invited_email: null }], error: null })
+    chain.insert = insert
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    const result = await syncCaseloadWithPatients('p-1', [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }], [])
+
+    expect(result).toEqual({ created: 0, linked: 0 })
+    expect(insert).not.toHaveBeenCalled()
   })
 })

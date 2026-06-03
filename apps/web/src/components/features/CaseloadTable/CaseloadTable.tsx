@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList } from 'lucide-react'
+import { ClipboardList, Star } from 'lucide-react'
 import { DataTable, type DataTableColumn } from '../../ui/DataTable'
 import { EmptyState } from '../../ui/EmptyState'
-import { computeEntryAlert } from '../../../lib/caseloadLogic'
 import { AddEntryForm, type AddEntryFormProps } from './AddEntryForm'
 import { CaseloadFilters } from './CaseloadFilters'
 import { NameCell } from './NameCell'
@@ -11,7 +10,7 @@ import { StatusCell } from './StatusCell'
 import { ImportantCell } from './ImportantCell'
 import { ActionsSummaryCell } from './ActionsSummaryCell'
 import { CareCell } from './CareCell'
-import { AlertPill } from './AlertPill'
+import { AlertCell } from './AlertCell'
 import { WaitSummary } from './WaitSummary'
 import { RowDetail } from './RowDetail'
 import { selectCaseloadRows } from './filterCaseload'
@@ -90,10 +89,17 @@ export function CaseloadTable({
       },
       {
         id: 'important',
-        header: t('file_active.col.important'),
+        header: <Star size={14} className="caseload-th__icon" aria-label={t('file_active.col.important')} />,
         headerClassName: 'caseload-th--important',
         cellClassName: 'caseload-cell--important',
         cell: row => <ImportantCell entry={row.entry} onPatch={onPatch} />,
+      },
+      {
+        id: 'care_pathways',
+        header: t('file_active.col.care_pathways'),
+        headerClassName: 'caseload-th--care_pathways',
+        cellClassName: 'caseload-cell--care',
+        cell: row => <CareCell entry={row.entry} patients={patients} onPatch={onPatch} />,
       },
       {
         id: 'actions',
@@ -110,13 +116,6 @@ export function CaseloadTable({
         ),
       },
       {
-        id: 'care_pathways',
-        header: t('file_active.col.care_pathways'),
-        headerClassName: 'caseload-th--care_pathways',
-        cellClassName: 'caseload-cell--care',
-        cell: row => <CareCell entry={row.entry} patients={patients} onPatch={onPatch} />,
-      },
-      {
         id: 'waiting',
         header: t('file_active.col.waiting'),
         headerClassName: 'caseload-th--waiting',
@@ -128,7 +127,7 @@ export function CaseloadTable({
         header: t('file_active.col.alert'),
         headerClassName: 'caseload-th--alert',
         cellClassName: 'caseload-cell--alert',
-        cell: row => <AlertPill level={computeEntryAlert(row.actions, today)} />,
+        cell: row => <AlertCell actions={row.actions} today={today} />,
       },
     ],
     [t, today, patients, onPatch, onStatus]

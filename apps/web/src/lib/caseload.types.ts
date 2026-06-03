@@ -16,6 +16,7 @@ export interface CaseloadEntry {
   readonly status: CaseloadStatus
   readonly is_important: boolean
   readonly wake_date: string | null
+  readonly invited_email: string | null
   readonly care_pathways: readonly string[]
   readonly last_reviewed_at: string | null
   readonly created_at: string
@@ -59,6 +60,7 @@ export interface CaseloadAction {
   readonly label: string
   readonly due_date: string | null
   readonly due_time: string | null
+  readonly is_urgent: boolean
   readonly is_done: boolean
   readonly done_at: string | null
   readonly recurrence_days: number | null
@@ -72,6 +74,7 @@ export interface CaseloadActionInput {
   label?: string
   due_date?: string | null
   due_time?: string | null
+  is_urgent?: boolean
   is_done?: boolean
   recurrence_days?: number | null
   sort_order?: number

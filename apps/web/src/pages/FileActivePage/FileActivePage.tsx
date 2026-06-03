@@ -16,8 +16,10 @@ import {
   createCaseloadWait,
   updateCaseloadWait,
   deleteCaseloadWait,
+  syncCaseloadWithPatients,
 } from '../../services/caseloadService'
 import { fetchPatientsWithModules } from '../../services/patientService'
+import { fetchPendingInvitations } from '../../services/invitationService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
@@ -41,19 +43,29 @@ export function FileActivePage() {
 
   const loadRows = useCallback(async () => {
     if (!practitioner) return
-    const [caseloadRows, appPatients] = await Promise.all([
-      fetchCaseload(practitioner.id),
+    const [initialRows, appPatients, pendingInvites] = await Promise.all([
+      fetchCaseload(practitioner.id, { includeArchived: true }),
       fetchPatientsWithModules(practitioner.id),
+      fetchPendingInvitations(practitioner.id),
     ])
-    setRows(caseloadRows)
-    setPatients(
-      appPatients.map(p => ({
-        id: p.id,
-        name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
-        email: p.email,
-        moduleTypes: p.modules.map(m => m.module_type),
+    const linkable: LinkablePatient[] = appPatients.map(p => ({
+      id: p.id,
+      name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
+      email: p.email,
+      moduleTypes: p.modules.map(m => m.module_type),
+    }))
+    // Auto : patients inscrits → dossier lié ; invitations en attente → dossier libre
+    // (converti en lié à l'inscription). Idempotent.
+    const { created, linked } = await syncCaseloadWithPatients(
+      practitioner.id,
+      linkable.map(p => ({ id: p.id, name: p.name, email: p.email })),
+      pendingInvites.map(inv => ({
+        email: inv.patient_email,
+        name: [inv.patient_first_name, inv.patient_last_name].filter(Boolean).join(' ') || inv.patient_email,
       }))
     )
+    setRows(created + linked > 0 ? await fetchCaseload(practitioner.id, { includeArchived: true }) : initialRows)
+    setPatients(linkable)
     setLoading(false)
   }, [practitioner])
 
@@ -104,11 +116,9 @@ export function FileActivePage() {
         return
       }
       const entry = result.entry
-      setRows(prev =>
-        entry.status === 'archived'
-          ? prev.filter(r => r.entry.id !== id)
-          : prev.map(r => (r.entry.id === id ? { ...r, entry } : r))
-      )
+      // On garde le dossier en mémoire quel que soit le statut : le filtre « Tous »
+      // masque les archivés, mais le filtre « Archivés » les retrouve (et permet de désarchiver).
+      setRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
       if (entry.status === 'archived') toast.success(t('file_active.archived'))
     },
     [toast, t, loadRows]
