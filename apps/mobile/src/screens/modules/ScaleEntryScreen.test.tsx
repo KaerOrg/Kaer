@@ -85,7 +85,6 @@ jest.mock('../../lib/database', () => ({
   getScaleEntryById: jest.fn().mockResolvedValue(null),
   getLatestScaleEntry: jest.fn().mockResolvedValue(null),
   generateId: jest.fn().mockReturnValue('test-id'),
-  getLatestScaleEntry: jest.fn().mockResolvedValue(null),
 }))
 
 jest.mock('../../lib/scaleScoring', () => ({

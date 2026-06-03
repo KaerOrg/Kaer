@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { colors } from '../../../theme'
-import type { DataPoint, XLabel } from './chartTypes'
+import { colors } from '../../../../theme'
+import type { DataPoint, XLabel } from './chartUtils'
 
 export interface BarChartProps {
   points: DataPoint[]

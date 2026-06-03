@@ -3,14 +3,14 @@ import { render, screen } from '@testing-library/react-native'
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../../theme', () => ({
+jest.mock('../../../../theme', () => ({
   colors: { card: '#fff', border: '#ccc', text: '#111', textMuted: '#999' },
   spacing: { sm: 8 },
   radius: { full: 999 },
 }))
 
 import { MonthCalendar } from './MonthCalendar'
-import type { ScaleEntry } from '../../../lib/database'
+import type { ScaleEntry } from '../../../../lib/database'
 
 const today = new Date()
 const iso = (d: Date) => d.toISOString().slice(0, 10)
