@@ -503,7 +503,8 @@
     },
     "emotion_wheel": {
       "label": "Roue des émotions",
-      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie."
+      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie.",
+      "footer": "Roue des émotions — labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012."
     },
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
@@ -1175,10 +1176,6 @@
       "label": "Balance décisionnelle",
       "description": "Outil d'entretien motivationnel : peser les avantages et inconvénients d'un changement de comportement.",
       "footer": "Chaque argument est pondéré de 1 à 5 étoiles (importance). Jauge de motivation dynamique : compare le score Changement vs Statu Quo."
-    },
-    "motivational_balance": {
-      "label": "Balance motivationnelle",
-      "description": "Entretien Motivationnel (Miller & Rollnick) : stades Prochaska, thermomètres importance/confiance 0-10, balance valeurs."
     },
     "phq9": {
       "label": "PHQ-9",

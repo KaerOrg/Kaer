@@ -15,4 +15,7 @@ export interface CardProps {
   state?: 'active' | 'disabled'
   style?: ViewStyle
   accentColor?: string
+  /** Rend la carte pressable (navigation). */
+  onPress?: () => void
+  accessibilityLabel?: string
 }

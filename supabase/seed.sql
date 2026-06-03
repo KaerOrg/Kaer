@@ -1035,7 +1035,8 @@ on conflict (id) do nothing;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
-update public.modules set preview_kind = 'mood_tracker'      where id = 'mood_tracker'            and preview_kind in ('fields', 'slider_dashboard');
+update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tracker'            and preview_kind in ('fields', 'mood_tracker');
+update public.modules set preview_kind = 'slider_dashboard'  where id = 'medication_side_effects' and preview_kind in ('fields', 'questionnaire', 'medication_side_effects');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';
@@ -1255,7 +1256,7 @@ on conflict (id) do nothing;
 -- 0-3 / format fields) avant réinsertion. Idempotent (ré-exécutable).
 delete from public.module_content_fields where module_id = 'medication_side_effects';
 delete from public.field_props where field_id like 'mse.%';
-update public.modules set preview_kind = 'medication_side_effects' where id = 'medication_side_effects';
+update public.modules set preview_kind = 'slider_dashboard' where id = 'medication_side_effects';
 
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('mse.instruction',   'medication_side_effects', NULL, NULL, 'scale_instruction',     'modules.medication_side_effects.instructions',  5),
@@ -1274,6 +1275,14 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('mse.notes',         'medication_side_effects', NULL, NULL, 'scale_text_input',      'modules.medication_side_effects.notes_label',   990),
   ('mse.footer',        'medication_side_effects', NULL, NULL, 'footer_note',           'modules.medication_side_effects.footer',        999)
 on conflict (id) do nothing;
+
+-- ── accent_color : couleur d'identité visuelle des trackers slider_dashboard ──
+-- Lue par le layout générique (SliderDashboardLayout) — onglet actif, calendrier,
+-- rappel. Donnée de présentation portée par la config (instruction field), pas en dur.
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('mood_tracker.instruction', 'accent_color', '#F97316'),
+  ('mse.instruction',          'accent_color', '#8B5CF6')
+on conflict (field_id, prop_key) do nothing;
 
 -- ── module_content_fields : breathing_techniques (fields) ────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values

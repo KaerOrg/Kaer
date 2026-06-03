@@ -27,8 +27,8 @@ export function DimensionChart({ label, points, color, avgLabel, range, xLabels,
         </Text>
       </View>
       {range === '7J'
-        ? <BarChart points={points} color={color} xLabels={xLabels} yMax={yMax} />
-        : <LineChart points={points} color={color} xLabels={xLabels} yMax={yMax} />
+        ? <BarChart points={points} color={color} xLabels={xLabels} maxY={yMax} />
+        : <LineChart points={points} color={color} xLabels={xLabels} maxY={yMax} />
       }
     </View>
   )

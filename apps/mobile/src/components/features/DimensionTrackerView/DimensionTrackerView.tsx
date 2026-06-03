@@ -38,7 +38,6 @@ import {
 import {
   DimensionChart,
   CompositeChart,
-  RangeSelector,
   MonthCalendar,
   buildChartData,
   buildCompositeData,
@@ -47,6 +46,7 @@ import {
   markerXFraction,
 } from '../../ui/Chart/TimeRangeCharts'
 import type { TimeRange, ChartMarker } from '../../ui/Chart/TimeRangeCharts'
+import { PillSelector } from '../../ui/PillSelector'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Tab = 'entry' | 'charts' | 'month'
@@ -94,6 +94,12 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
   const [entries, setEntries] = useState<ScaleEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>('1M')
+  // PillSelector renvoie un string : on re-narrow vers TimeRange via les ranges
+  // configurées (sans cast `as`, interdit par les standards de code).
+  const onRangeChange = useCallback((v: string) => {
+    const match = ranges.find(r => r === v)
+    if (match) setTimeRange(match)
+  }, [ranges])
   const [routine, setRoutine] = useState<NotificationRoutine | null>(null)
   const [showTimePicker, setShowTimePicker] = useState(false)
   const [pickerHour, setPickerHour] = useState('08')
@@ -472,10 +478,10 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
         {/* ── Onglet GRAPHIQUES ── */}
         {activeTab === 'charts' && (
           <View style={styles.section}>
-            <RangeSelector
+            <PillSelector
+              options={ranges}
               value={timeRange}
-              onChange={setTimeRange}
-              ranges={ranges}
+              onChange={onRangeChange}
               labels={rangeLabels}
               color={accentColor}
             />

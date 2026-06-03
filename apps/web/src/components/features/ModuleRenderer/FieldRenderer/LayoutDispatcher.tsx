@@ -12,12 +12,11 @@ import {
   FallbackLayout,
   FieldsLayout,
   GuidedExerciseLayout,
-  MoodTrackerLayout,
-  MedicationSideEffectsLayout,
   PatientScenarioLayout,
   PsyEduLayout,
   QuestionnaireLayout,
   SleepJournalLayout,
+  SliderDashboardLayout,
   StepsLayout,
   TabsLayout,
   TreeSelectorLayout,
@@ -105,8 +104,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   }
 
   if (preview_kind === 'questionnaire') return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
-  if (preview_kind === 'mood_tracker') return <MoodTrackerLayout fields={contentFields} footer={footer} t={t} />
-  if (preview_kind === 'medication_side_effects') return <MedicationSideEffectsLayout fields={contentFields} footer={footer} t={t} />
+  if (preview_kind === 'slider_dashboard') return <SliderDashboardLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={contentFields} t={t} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={contentFields} t={t} />
@@ -115,7 +113,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={contentFields} t={t} />
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={contentFields} t={t} />
   if (preview_kind === 'guided_exercise') return <GuidedExerciseLayout fields={contentFields} t={t} />
-  if (preview_kind === 'patient_scenario') return <PatientScenarioLayout fields={contentFields} t={t} />
+  if (preview_kind === 'patient_scenario') return <PatientScenarioLayout fields={contentFields} footer={footer} t={t} />
 
   return <FallbackLayout fields={contentFields} footer={footer} t={t} />
 }

@@ -85,7 +85,7 @@ export function MonthCalendar({ entries, dimensionKeys, accentColor, locale, day
   const daysWithEntry = Array.from({ length: daysInMonth }, (_, i) => {
     const d = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
     return entryMap.has(d) ? 1 : 0
-  }).reduce((s, v) => s + v, 0)
+  }).reduce<number>((s, v) => s + v, 0)
 
   return (
     <View style={styles.container}>

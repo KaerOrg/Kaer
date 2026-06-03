@@ -20,9 +20,9 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
 import {
-  getAllActivityRecords, getActivityRecord, saveActivityRecord, deleteActivityRecord,
-  generateId, type ActivityRecord,
+  getAllActivityRecords, getActivityRecord, generateId, type ActivityRecord,
 } from '../../../../../lib/database'
+import { saveActivityRecord, deleteActivityRecord } from '../../../../../services/activityRecordService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'

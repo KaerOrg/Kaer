@@ -2,18 +2,11 @@
 // Utilisées par MoodTrackerScreen et MedicationSideEffectsHistoryScreen.
 
 import type { ScaleEntry } from '../../../../lib/database'
+import type { DataPoint, XLabel } from '../chartTypes'
+
+export type { DataPoint, XLabel }
 
 export type TimeRange = '7J' | '1M' | '3M' | '6M' | '1A'
-
-export interface DataPoint {
-  value: number
-  hasValue: boolean
-}
-
-export interface XLabel {
-  index: number
-  label: string
-}
 
 // ── X-axis labels ─────────────────────────────────────────────────────────────
 

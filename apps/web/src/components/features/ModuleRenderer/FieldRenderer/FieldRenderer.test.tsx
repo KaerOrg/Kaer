@@ -178,9 +178,9 @@ describe('FieldRenderer — layout daily_checkin', () => {
       <FieldRenderer preview_kind="daily_checkin" fields={fields} expandedCard={null} onToggleCard={noop} />
     )
     expect(container.querySelector('.preview-daily')).toBeTruthy()
-    const tabs = container.querySelectorAll('.preview-daily__tab')
+    const tabs = container.querySelectorAll('[role="tab"]')
     expect(tabs).toHaveLength(2)
-    expect(tabs[0].classList.contains('preview-daily__tab--active')).toBe(true)
+    expect(tabs[0].getAttribute('aria-selected')).toBe('true')
     expect(tabs[0].textContent).toBe('m.tab_today')
     expect(tabs[1].textContent).toBe('m.tab_history')
     expect(container.querySelector('.preview-daily__question')?.textContent).toBe('m.question')

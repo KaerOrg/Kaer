@@ -42,7 +42,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   const footer = visibleFields.find(f => f.field_type === 'footer_note')
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
-  if (preview_kind === 'questionnaire') {
+  if (preview_kind === 'questionnaire' || preview_kind === 'slider_dashboard') {
     if (questionnaire == null) return null
     return (
       <QuestionnaireLayout
@@ -80,7 +80,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   }
 
   if (preview_kind === 'patient_scenario') {
-    return <PatientScenarioLayout fields={visibleFields} patientConfig={patientConfig ?? null} />
+    return <PatientScenarioLayout fields={visibleFields} footer={footer} patientConfig={patientConfig ?? null} />
   }
 
   if (preview_kind === 'editable_steps') {
@@ -89,11 +89,11 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   }
 
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={visibleFields} />
+  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={visibleFields} footer={footer} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'exposure_tracker') return <ExposureTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'exposure_tracker') return <ExposureTrackerLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'decision_grid') return <DecisionGridLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'psyedu') return <PsyEduLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />

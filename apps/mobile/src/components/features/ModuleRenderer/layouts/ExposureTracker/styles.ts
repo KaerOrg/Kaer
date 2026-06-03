@@ -256,6 +256,6 @@ export const etStyles = StyleSheet.create({
     paddingVertical: 6,
   },
   panelItemLabel: { flex: 1, fontSize: 13, color: colors.text },
-  infoBox:        { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: 12, marginHorizontal: spacing.md, marginBottom: 4, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  infoBox:        { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: 12, marginHorizontal: spacing.md, marginBottom: 4, padding: 10, backgroundColor: colors.neutral, borderRadius: radius.sm },
   footerText:     { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
 })

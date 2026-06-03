@@ -15,9 +15,9 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getDailyEntry, getAllDailyEntries, saveDailyEntry, deleteDailyEntry,
-  generateId, type DailyEntry,
+  getDailyEntry, getAllDailyEntries, generateId, type DailyEntry,
 } from '../../../../../lib/database'
+import { saveDailyEntry, deleteDailyEntry } from '../../../../../services/dailyEntryService'
 import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'

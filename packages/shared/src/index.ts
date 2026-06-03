@@ -125,8 +125,7 @@ export type PreviewKind =
   | 'tabbed'
   | 'chrono_month'
   | 'exposure_hierarchy'
-  | 'mood_tracker'
-  | 'medication_side_effects'
+  | 'slider_dashboard'
   | 'crisis_urgency'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.

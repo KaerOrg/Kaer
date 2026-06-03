@@ -176,6 +176,38 @@ function MyScreen() {
 }
 ```
 
+## Synchronisation distante (mobile) — toujours via syncHelpers
+
+> **Règle absolue pour tout service mobile qui écrit ou supprime des données patient en SQLite.**
+
+Toute fonction de service qui persiste une entrée patient localement doit enchaîner
+la synchronisation vers Supabase via `syncUpsert` / `syncDelete` de
+`apps/mobile/src/services/syncHelpers.ts`. Ne jamais appeler `dbSave()` seul.
+
+```ts
+// ✅ OUI — écriture locale + sync outbox atomique
+import { syncUpsert, syncDelete } from './syncHelpers'
+
+export async function saveMyEntry(entry: MyEntry): Promise<void> {
+  await syncUpsert(() => dbSave(entry), {
+    local_id: entry.id,
+    module_id: entry.module_id,
+    entry_kind: 'my_entry_kind',   // valeur de EntryKind dans syncOutbox.ts
+    payload: { ...entry },
+  })
+}
+
+// ❌ NON — données jamais synchronisées
+export async function saveMyEntry(entry: MyEntry): Promise<void> {
+  await dbSave(entry)
+}
+```
+
+- **Nouveau type de données** → ajouter la valeur à `EntryKind` dans `syncOutbox.ts` **avant** d'écrire le service.
+- **Gate consentement** géré par `RemoteSyncService` — pas de `if (consentEnabled)` dans le service.
+- **Mock de test standard** : `jest.mock('../services/sync', () => ({ RemoteSyncService: { getInstance: () => ({ enqueue: mockEnqueue }) } }))`
+- Détail et exceptions légitimes : [`.claude/rules/sync-service.md`](sync-service.md).
+
 ## Suppressions interdites
 
 Ne jamais utiliser :
@@ -187,7 +219,10 @@ Si le compilateur ou le linter signale une erreur, la corriger — jamais la sup
 
 ## TypeScript strict
 
-- Zéro `any`, zéro `as unknown`
+- Zéro `any`, zéro `as any`, zéro `as unknown` (seul ou en double-cast `as unknown as X`)
+- Zéro `Function` comme type brut — toujours écrire la signature `(...args) => ReturnType`
+- Zéro `Record<string, any>`, `Array<any>`, `Promise<any>`
+- `catch (err: unknown)` est la seule forme autorisée de `unknown` — pour les `catch`, pas de `any`
 - `readonly` sur les données venant de Supabase
 - Discriminated unions pour les états : `| { status: 'idle' } | { status: 'loading' } | { status: 'error'; error: Error }`
 

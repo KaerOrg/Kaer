@@ -17,16 +17,16 @@ import { styles } from './styles'
 export interface PatientScenarioLayoutProps {
   /** Fields du module (disclaimer, étapes, sons). */
   fields: ContentField[]
+  /** Note de bas de page MDR (sources scientifiques) — affichée en bas de l'écran. */
+  footer?: ContentField
   /** Config par patient (`patient_modules.config`) — scénarios personnalisés. */
   patientConfig: Record<string, unknown> | null
 }
 
-export function PatientScenarioLayout({ fields, patientConfig }: PatientScenarioLayoutProps) {
+export function PatientScenarioLayout({ fields, footer, patientConfig }: PatientScenarioLayoutProps) {
   const t = useModuleT()
   const [showOriginal, setShowOriginal] = useState(false)
   const [activeSound, setActiveSound] = useState<string | null>(null)
-
-  const footer = fields.find(f => f.field_type === 'footer_note')
 
   const alternativeScenario = typeof patientConfig?.alternative_scenario === 'string'
     ? patientConfig.alternative_scenario

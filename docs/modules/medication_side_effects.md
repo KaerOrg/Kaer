@@ -81,7 +81,7 @@ modifiable par le **praticien** (app web) ET le **patient** (app mobile), via la
 | Brique | Fichier | Partagé |
 |---|---|---|
 | Vue mobile (3 onglets, courbes, repères, calendrier) | `apps/mobile/src/components/features/DimensionTrackerView/` | ✅ mood_tracker |
-| Aperçu web praticien | `apps/web/.../ModuleRenderer/layouts/DimensionTrackerLayout/` | ✅ mood_tracker |
+| Aperçu web praticien | `apps/web/.../ModuleRenderer/layouts/SliderDashboardLayout/` (générique `slider_dashboard`) | ✅ mood_tracker |
 | Courbes / calendrier / sélecteur de période | `apps/mobile/src/components/features/TimeRangeCharts/` | ✅ toutes |
 | Stockage saisies | SQLite `scale_entries` (`subscale_scores` par clé d'effet) | ✅ toutes |
 | Repères temporels (événements de traitement) | SQLite `mood_markers` (colonne `scale_id`) + `getAllTimelineMarkers`/`saveTimelineMarker`/`deleteTimelineMarker` | ✅ mood_tracker |
@@ -102,7 +102,7 @@ modifiable par le **praticien** (app web) ET le **patient** (app mobile), via la
 
 ### Seed
 
-- `modules.preview_kind = 'medication_side_effects'`.
+- `modules.preview_kind = 'slider_dashboard'` (layout générique partagé avec `mood_tracker`).
 - `module_content_fields` : 12 `scale_slider_question` (0–10) + `scale_instruction` + `footer_note`
   → servent à l'**aperçu web** (catalogue illustratif). La saisie patient réelle est pilotée par
   la config `tracked_effects`, pas par ces champs.

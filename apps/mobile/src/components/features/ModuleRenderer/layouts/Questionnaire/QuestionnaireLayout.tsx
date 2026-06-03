@@ -109,6 +109,7 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
             const icon = (f.props['icon'] as string | undefined) as ComponentProps<typeof MaterialCommunityIcons>['name'] | undefined
             const lowHintCode = f.props['low_hint_code'] as string | undefined
             const highHintCode = f.props['high_hint_code'] as string | undefined
+            const midHintCode = f.props['mid_hint_code'] as string | undefined
             const selectedValue = answers[qIndex] ?? null
             const pips = Array.from({ length: max - min + 1 }, (_, i) => min + i)
             return (
@@ -146,9 +147,14 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
                     )
                   })}
                 </View>
-                {(lowHintCode != null || highHintCode != null) && (
+                {(lowHintCode != null || midHintCode != null || highHintCode != null) && (
                   <View style={styles.sliderHints}>
                     <Text style={styles.sliderHint}>{lowHintCode != null ? t(lowHintCode) : ''}</Text>
+                    {midHintCode != null && (
+                      <Text style={[styles.sliderHint, styles.sliderHintMid, { color }]}>
+                        {t(midHintCode)}
+                      </Text>
+                    )}
                     <Text style={styles.sliderHint}>{highHintCode != null ? t(highHintCode) : ''}</Text>
                   </View>
                 )}

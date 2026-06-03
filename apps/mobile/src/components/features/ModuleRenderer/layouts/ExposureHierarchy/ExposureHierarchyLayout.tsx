@@ -13,18 +13,12 @@ import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react-native'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '../../../../../theme'
 import {
-  listExposureHierarchies,
-  createExposureHierarchy,
-  deleteExposureHierarchy,
-  getAllFearSituations,
-  saveFearSituation,
-  deleteFearSituation,
-  getAllFearEntries,
-  generateId,
-  type ExposureHierarchy,
-  type FearSituation,
-  type FearEntry,
+  listExposureHierarchies, getAllFearSituations, getAllFearEntries, generateId,
+  type ExposureHierarchy, type FearSituation, type FearEntry,
 } from '../../../../../lib/database'
+import {
+  createExposureHierarchy, deleteExposureHierarchy, saveFearSituation, deleteFearSituation,
+} from '../../../../../services/fearTrackerService'
 import { PipPicker } from '../../../../ui/PipPicker'
 import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../../ui/Chart'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'

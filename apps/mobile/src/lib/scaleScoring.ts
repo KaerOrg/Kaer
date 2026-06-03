@@ -104,7 +104,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     score_decimals: 0,
     chips: ['chip_mood', 'chip_energy', 'chip_anxiety', 'chip_pleasure', 'chip_sleep', 'chip_food'],
     computeScore: (answers) => {
-      const valid = answers.filter(a => a != null && !isNaN(a))
+      const valid = answers.filter((a): a is number => a != null && !isNaN(a))
       if (valid.length === 0) return 0
       return Math.round(valid.reduce<number>((s, a) => s + (a ?? 0), 0) / valid.length)
     },

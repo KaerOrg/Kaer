@@ -97,6 +97,7 @@
       "new_btn": "New entry",
       "empty_title": "Nothing yet",
       "empty_text": "Record your first entry to see your history.",
+      "notes_placeholder": "Context, today's event, remark...",
       "footer": "Your numbers are private and reviewed with your therapist.",
       "progress": "{{answered}} / {{total}} dimensions rated",
       "submit": "Done",
@@ -808,15 +809,15 @@
     },
     "cape42": {
       "label": "CAPE-42 — Psychotic Experiences",
-      "description": ""
+      "description": "Self-assessment of unusual perceptions and beliefs"
     },
     "audit": {
       "label": "AUDIT — Alcohol Use",
-      "description": ""
+      "description": "Alcohol use questionnaire"
     },
     "cssrs": {
       "label": "C-SSRS — Suicide Risk",
-      "description": ""
+      "description": "Suicide risk assessment questionnaire"
     },
     "exposure_hierarchy": {
       "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",

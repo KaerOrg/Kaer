@@ -36,3 +36,23 @@ jest.mock('./src/contexts/ActionSheetContext', () => {
     ActionSheetProvider: ({ children }: { children: ReactNode }) => children,
   }
 })
+
+// Doublure globale du moteur de sync cloud.
+// Empêche RemoteSyncService (et sa chaîne d'imports : supabase, authStore,
+// syncOutbox) de se charger dans les tests de layouts/screens.
+// Les tests unitaires des services de sync surchargent ce mock avec leur propre
+// jest.mock() dans leurs fichiers respectifs.
+jest.mock('./src/services/sync', () => ({
+  RemoteSyncService: {
+    getInstance: () => ({
+      enqueue: jest.fn().mockResolvedValue(undefined),
+      sync: jest.fn().mockResolvedValue({ synced: 0, failed: 0, skipped: 0 }),
+      setConsentEnabled: jest.fn(),
+      isConsentEnabled: jest.fn().mockReturnValue(false),
+      isSyncing: jest.fn().mockReturnValue(false),
+      pendingCount: jest.fn().mockResolvedValue(0),
+    }),
+    reset: jest.fn(),
+    createForTest: jest.fn(),
+  },
+}))
