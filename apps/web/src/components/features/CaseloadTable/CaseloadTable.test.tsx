@@ -125,7 +125,7 @@ describe('CaseloadTable', () => {
     const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: ['phq9'] }]
     const { container } = renderTable({ rows: [row], patients })
     // chip module visible dans la colonne Soins (sans dépliage)
-    expect(container.querySelector('.module-chip')).not.toBeNull()
+    expect(container.querySelector('.module-chips .chip')).not.toBeNull()
     // le patient lié apparaît dans le panneau
     fireEvent.click(screen.getByRole('button', { expanded: false }))
     expect(screen.getByText('Léa Martin — lea@x.fr')).toBeInTheDocument()

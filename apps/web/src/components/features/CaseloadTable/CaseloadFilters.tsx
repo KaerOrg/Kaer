@@ -51,19 +51,19 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         <Chip
           selectable
           selected={value.onlyImportant}
-          onClick={() => onChange({ ...value, onlyImportant: !value.onlyImportant })}
+          onClick={toggleImportant}
           label={t('file_active.filters.chip_important')}
         />
         <Chip
           selectable
           selected={value.onlyOverdue}
-          onClick={() => onChange({ ...value, onlyOverdue: !value.onlyOverdue })}
+          onClick={toggleOverdue}
           label={t('file_active.filters.chip_overdue')}
         />
         <Chip
           selectable
           selected={value.onlyWaiting}
-          onClick={() => onChange({ ...value, onlyWaiting: !value.onlyWaiting })}
+          onClick={toggleWaiting}
           label={t('file_active.filters.chip_waiting')}
         />
       </div>

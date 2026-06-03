@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -374,6 +374,32 @@ fermeture sur `Échap` + clic sur l'overlay).
 | `label` | `string` | — | Texte (obligatoire) |
 | `value` | `string \| number` | — | Valeur additionnelle |
 | `icon` | `ReactNode` | — | Icône |
+| `className` | `string` | — | Classe additionnelle |
+
+### `Chip`
+
+`components/ui/Chip/`. Puce / token en pilule. Trois usages dans une seule primitive :
+affichage (icône + label coloré par `tone`), supprimable (`onRemove` → bouton ×, pour
+les tags éditables), sélectionnable (`selectable` → bouton-bascule, pour les filtres).
+Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
+
+```tsx
+<Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
+<Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
+<Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `label` | `string` | — | Texte (obligatoire) |
+| `tone` | `'neutral' \| 'info' \| 'warning'` | `'neutral'` | Couleur (ignoré si `selectable`) |
+| `icon` | `ReactNode` | — | Icône en tête |
+| `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
+| `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
+| `onClick` | `() => void` | — | Clic sur la puce sélectionnable |
+| `onRemove` | `() => void` | — | Affiche un bouton × de suppression |
+| `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
+| `title` | `string` | — | Tooltip natif |
 | `className` | `string` | — | Classe additionnelle |
 
 ### `Accordion`
