@@ -89,7 +89,7 @@ Composants extraits, partagés avec `MedicationSideEffectsHistoryScreen` :
 - Le patient ajuste l'heure dans l'onglet Saisie via un **modal JS** (deux champs heure/minute → `updateTimeOverride`)
 - Pas de `@react-native-community/datetimepicker` (non supporté dans Expo Go SDK 53+)
 
-### Aperçu web praticien — `MoodTrackerLayout.tsx`
+### Aperçu web praticien — `SliderDashboardLayout` (`preview_kind='slider_dashboard'`, générique)
 **Parité complète avec le mobile** — le praticien navigue dans les **3 mêmes onglets** :
 - **Saisie** : 6 sliders (avec repère « Normal ») + notes + section rappel
 - **Évolution** : badge streak + sélecteur 7J/1M/3M/1A + CompositeChart SVG (axe Y, 6 lignes + moyenne, repères verticaux) + liste des repères + 6 graphiques par dimension (barres 7J / courbes sinon, axe Y)

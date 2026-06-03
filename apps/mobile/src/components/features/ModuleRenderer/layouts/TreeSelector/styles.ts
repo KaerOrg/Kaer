@@ -13,8 +13,6 @@ export const styles = StyleSheet.create({
   startBtnText:     { fontSize: 16, fontWeight: '700', color: colors.white },
   // ── Historique
   historyContent:   { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
-  infoBox:          { flexDirection: 'row', gap: 6, alignItems: 'flex-start', padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
-  footerText:       { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
   introCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
     flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm,
@@ -142,4 +140,7 @@ export const styles = StyleSheet.create({
   },
   saveBtnText:      { fontSize: 16, fontWeight: '700', color: colors.white },
   btnDisabled:      { opacity: 0.6 },
+  // Note de bas de page (footer_note)
+  infoBox:          { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: spacing.sm, padding: 10, backgroundColor: '#F3F4F6', borderRadius: 8 },
+  footerText:       { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
 })

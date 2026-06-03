@@ -115,7 +115,6 @@ const cardStyles = StyleSheet.create({
 
 function ModuleSections({ modules, isTeenMode, teenColor, handleModulePress }: ModuleSectionsProps) {
   const { t } = useTranslation()
-
   const grouped = new Map<string, UnlockedModule[]>()
   for (const mod of modules) {
     const catId = mod.module?.category_id ?? 'other'

@@ -425,6 +425,13 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
               })}
             </View>
           )}
+
+          {level === 1 && footer != null && (
+            <View style={styles.infoBox}>
+              <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
+              <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
+            </View>
+          )}
         </ScrollView>
       </View>
     )

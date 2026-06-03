@@ -106,7 +106,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     computeScore: (answers) => {
       const valid = answers.filter((a): a is number => a != null && !isNaN(a))
       if (valid.length === 0) return 0
-      return Math.round(valid.reduce<number>((s, a) => s + a, 0) / valid.length)
+      return Math.round(valid.reduce<number>((s, a) => s + (a ?? 0), 0) / valid.length)
     },
     computeSubscaleScores: (answers) => ({
       mood:     answers[0] ?? 0,
@@ -124,18 +124,30 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     computeScore: sum,
   },
   medication_side_effects: {
-    formula: 'sum',
-    items_count: 6,
+    formula: 'mean',
+    items_count: 12,
     score_decimals: 0,
-    chips: ['chip_sedation', 'chip_akathisia', 'chip_tremors', 'chip_dry_mouth', 'chip_sleep', 'chip_nausea'],
-    computeScore: sum,
+    chips: ['chip_sedation', 'chip_sleep', 'chip_akathisia', 'chip_tremors', 'chip_dry_mouth', 'chip_nausea',
+      'chip_constipation', 'chip_weight', 'chip_appetite_loss', 'chip_dizziness', 'chip_headache', 'chip_sexual'],
+    computeScore: (answers) => {
+      const valid = answers.filter(a => a != null && !isNaN(a))
+      if (valid.length === 0) return 0
+      return Math.round(valid.reduce<number>((s, a) => s + (a ?? 0), 0) / valid.length)
+    },
+    // Ordre = sort_order des sliders dans le seed (sedation 10 → sexual 120)
     computeSubscaleScores: (answers) => ({
-      sedation:  answers[0] ?? 0,
-      akathisia: answers[1] ?? 0,
-      tremors:   answers[2] ?? 0,
-      dry_mouth: answers[3] ?? 0,
-      sleep:     answers[4] ?? 0,
-      nausea:    answers[5] ?? 0,
+      sedation:      answers[0] ?? 0,
+      sleep:         answers[1] ?? 0,
+      akathisia:     answers[2] ?? 0,
+      tremors:       answers[3] ?? 0,
+      dry_mouth:     answers[4] ?? 0,
+      nausea:        answers[5] ?? 0,
+      constipation:  answers[6] ?? 0,
+      weight:        answers[7] ?? 0,
+      appetite_loss: answers[8] ?? 0,
+      dizziness:     answers[9] ?? 0,
+      headache:      answers[10] ?? 0,
+      sexual:        answers[11] ?? 0,
     }),
   },
 }

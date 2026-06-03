@@ -1,6 +1,6 @@
 export interface PillSelectorProps {
   /** Identifiants des options dans l'ordre d'affichage. */
-  options: string[]
+  options: readonly string[]
   /** Identifiant de l'option sélectionnée. */
   value: string
   onChange: (value: string) => void

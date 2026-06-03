@@ -8,7 +8,6 @@
 import { useState, type ComponentProps } from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleT } from '../../../../../hooks/useModuleT'
@@ -163,7 +162,7 @@ export function PatientScenarioLayout({ fields, footer, patientConfig }: Patient
 
       {footer != null && (
         <View style={styles.infoBox}>
-          <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+          <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
           <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
         </View>
       )}

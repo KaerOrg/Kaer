@@ -89,9 +89,9 @@ jest.mock('../../store/authStore', () => ({
 jest.mock('../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
-  getAllMoodMarkers: jest.fn().mockResolvedValue([]),
-  saveMoodMarker: jest.fn().mockResolvedValue(undefined),
-  deleteMoodMarker: jest.fn().mockResolvedValue(undefined),
+  getAllTimelineMarkers: jest.fn().mockResolvedValue([]),
+  saveTimelineMarker: jest.fn().mockResolvedValue(undefined),
+  deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('../../services/notificationService', () => ({

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   ScrollView,
   Switch,
   TouchableOpacity,
-  Platform,
   Image,
   ActivityIndicator,
   Pressable,
@@ -21,7 +20,6 @@ import { useActionSheet } from '../contexts/ActionSheetContext'
 import Button from '../components/ui/Button'
 import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
-import { requestNotificationPermission } from '../services/notificationService'
 import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
 import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../services/avatarService'
 
@@ -107,13 +105,6 @@ export default function ProfileScreen() {
 
   const [shareData, setShareData] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
-
-  const handleRequestNotifPermission = useCallback(async () => {
-    const granted = await requestNotificationPermission()
-    if (!granted) {
-      showToast(t('profile.notif_denied_message'), 'info')
-    }
-  }, [t])
 
   const handlePickSource = useCallback(async (source: AvatarSource) => {
     if (!patient) return

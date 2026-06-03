@@ -53,7 +53,7 @@ Valeurs de `preview_kind` et leur layout :
 | `fields` | Grille de champs avec widget | `sleep_diary`, `medication_adherence` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
 | `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18` |
-| `slider_dashboard` | Tableau de bord multi-sliders (onglets Aujourd'hui/Historique, `ValueBar` + `Sparkline`) — nommé par motif, réutilisable. Aperçu web `SliderDashboardLayout` ; mobile reuse le circuit `questionnaire` | `mood_tracker` |
+| `slider_dashboard` | Tableau de bord multi-dimensions — 3 onglets (Saisie / Évolution / Vue d'ensemble), courbes par dimension + composite, sélecteur 7J/1M/3M/1A, repères temporels, heatmap calendrier. Nommé par motif, réutilisable : `moduleId` dérivé des fields, accent lu en config (`accent_color`). Aperçu web `SliderDashboardLayout` ; écran patient mobile `DimensionTrackerView` | `mood_tracker`, `medication_side_effects` |
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
@@ -408,7 +408,7 @@ interface FieldRendererProps {
 'cards'           → CardsLayout         (groups par section_id, accordéon card_title/card_summary)
 'fields'          → FieldsLayout        (filtre field_type === 'field_row', FieldRow par champ)
 'questionnaire'   → QuestionnaireLayout (mobile uniquement — ScaleEntryScreen pilote les réponses)
-'slider_dashboard'→ QuestionnaireLayout (mobile : réutilise le circuit questionnaire ; aperçu web dédié SliderDashboardLayout)
+'slider_dashboard'→ SliderDashboardLayout (aperçu web générique ; écran patient mobile = DimensionTrackerView)
 'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
 'editable_steps'  → EditableStepsLayout (mobile uniquement — étapes éditables, Crisis Plan)

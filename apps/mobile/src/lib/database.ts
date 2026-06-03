@@ -59,6 +59,7 @@ export async function initDatabase(): Promise<void> {
     () => createASRS18Table(database),
     () => createScaleEntriesTable(database),
     () => createMoodMarkersTable(database),
+    () => createCustomDimensionsTable(database),
     () => createPlanItemsTable(database),
     () => createDailyEntriesTable(database),
     () => createFormEntriesTable(database),
@@ -79,6 +80,8 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE sleep_diary_entries ADD COLUMN awakenings_duration_minutes INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
     `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
+    // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
+    `ALTER TABLE mood_markers ADD COLUMN scale_id TEXT NOT NULL DEFAULT 'mood_tracker'`,
     // Copie des entrées des tables dédiées vers scale_entries
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'phq9',answers,score,NULL,created_at FROM phq9_entries`,
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'bsl23',answers,mean_score,NULL,created_at FROM bsl23_entries`,
@@ -1275,22 +1278,58 @@ export async function deleteScaleEntry(id: string): Promise<void> {
   await database.runAsync('DELETE FROM scale_entries WHERE id = ?', [id])
 }
 
-// ─── mood_markers — repères temporels (Life Chart Method) ─────────────────────
-// Contexte saisi par le patient (« début lithium », « arrêt de travail »…) affiché
+// ─── mood_markers — repères temporels génériques (Life Chart Method) ──────────
+// Contexte saisi par le patient (« début lithium », « passage à 150 mg »…) affiché
 // comme trait vertical sur les courbes. Données brutes, aucune interprétation (MDR).
+// Table partagée par tous les modules « tracker multi-dimensions » : la colonne
+// `scale_id` cloisonne les repères par module (mood_tracker, medication_side_effects…).
 
 export async function createMoodMarkersTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS mood_markers (
       id TEXT PRIMARY KEY,
+      scale_id TEXT NOT NULL DEFAULT 'mood_tracker',
       date TEXT NOT NULL,
       label TEXT NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_mood_markers_date ON mood_markers(date);
+    CREATE INDEX IF NOT EXISTS idx_mood_markers_scale_id ON mood_markers(scale_id);
   `)
 }
 
+export interface TimelineMarker {
+  id: string
+  scale_id: string
+  date: string   // YYYY-MM-DD
+  label: string
+  created_at: string
+}
+
+export async function getAllTimelineMarkers(scaleId: string): Promise<TimelineMarker[]> {
+  const database = getDb()
+  return database.getAllAsync<TimelineMarker>(
+    'SELECT * FROM mood_markers WHERE scale_id = ? ORDER BY date DESC',
+    [scaleId]
+  )
+}
+
+export async function saveTimelineMarker(marker: TimelineMarker): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO mood_markers (id, scale_id, date, label, created_at) VALUES (?, ?, ?, ?, ?)`,
+    [marker.id, marker.scale_id, marker.date, marker.label, marker.created_at]
+  )
+}
+
+export async function deleteTimelineMarker(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM mood_markers WHERE id = ?', [id])
+}
+
+// ─── Alias rétro-compatibles (mood_tracker) — délèguent au CRUD générique ─────
+// MoodTrackerScreen reste inchangé tant qu'il n'est pas migré vers le composant
+// générique : il manipule des MoodMarker sans scale_id, ajouté ici à 'mood_tracker'.
 export interface MoodMarker {
   id: string
   date: string   // YYYY-MM-DD
@@ -1298,24 +1337,67 @@ export interface MoodMarker {
   created_at: string
 }
 
-export async function getAllMoodMarkers(): Promise<MoodMarker[]> {
+export function getAllMoodMarkers(): Promise<MoodMarker[]> {
+  return getAllTimelineMarkers('mood_tracker')
+}
+
+export function saveMoodMarker(marker: MoodMarker): Promise<void> {
+  return saveTimelineMarker({ ...marker, scale_id: 'mood_tracker' })
+}
+
+export function deleteMoodMarker(id: string): Promise<void> {
+  return deleteTimelineMarker(id)
+}
+
+// ─── custom_dimensions — dimensions personnalisées ajoutées par le patient ────
+// Pour les modules tracker permettant l'ajout d'axes libres (ex. effets
+// indésirables plus rares non listés). Le libellé est une donnée patient (texte
+// libre, hors i18n) ; la couleur est décorative (aucun jugement clinique — MDR).
+
+export async function createCustomDimensionsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS custom_dimensions (
+      id TEXT PRIMARY KEY,
+      scale_id TEXT NOT NULL,
+      dim_key TEXT NOT NULL,
+      label TEXT NOT NULL,
+      color TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_dimensions_scale_id ON custom_dimensions(scale_id);
+  `)
+}
+
+export interface CustomDimension {
+  id: string
+  scale_id: string
+  dim_key: string
+  label: string
+  color: string
+  sort_order: number
+  created_at: string
+}
+
+export async function getCustomDimensions(scaleId: string): Promise<CustomDimension[]> {
   const database = getDb()
-  return database.getAllAsync<MoodMarker>(
-    'SELECT * FROM mood_markers ORDER BY date DESC'
+  return database.getAllAsync<CustomDimension>(
+    'SELECT * FROM custom_dimensions WHERE scale_id = ? ORDER BY sort_order ASC, created_at ASC',
+    [scaleId]
   )
 }
 
-export async function saveMoodMarker(marker: MoodMarker): Promise<void> {
+export async function saveCustomDimension(dim: CustomDimension): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO mood_markers (id, date, label, created_at) VALUES (?, ?, ?, ?)`,
-    [marker.id, marker.date, marker.label, marker.created_at]
+    `INSERT OR REPLACE INTO custom_dimensions (id, scale_id, dim_key, label, color, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [dim.id, dim.scale_id, dim.dim_key, dim.label, dim.color, dim.sort_order, dim.created_at]
   )
 }
 
-export async function deleteMoodMarker(id: string): Promise<void> {
+export async function deleteCustomDimension(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync('DELETE FROM mood_markers WHERE id = ?', [id])
+  await database.runAsync('DELETE FROM custom_dimensions WHERE id = ?', [id])
 }
 
 // ─── daily_entries — table générique pour les saisies quotidiennes ───────────
