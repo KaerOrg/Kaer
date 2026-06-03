@@ -1,4 +1,5 @@
-import { memo, useCallback, useState, type ReactNode } from 'react'
+import { memo, useCallback, useMemo, useState, type ReactNode } from 'react'
+import { DataTableCell } from './DataTableCell'
 import type { DataTableColumn, DataTableRowContext } from './DataTable.types'
 
 interface DataTableRowProps<T> {
@@ -11,15 +12,13 @@ interface DataTableRowProps<T> {
 function DataTableRowInner<T>({ row, columns, renderDetail, rowClassName }: DataTableRowProps<T>) {
   const [expanded, setExpanded] = useState(false)
   const toggleExpanded = useCallback(() => setExpanded(v => !v), [])
-  const ctx: DataTableRowContext = { expanded, toggleExpanded }
+  const ctx = useMemo<DataTableRowContext>(() => ({ expanded, toggleExpanded }), [expanded, toggleExpanded])
 
   return (
     <>
       <tr className={`data-table__row ${rowClassName ?? ''}`}>
         {columns.map(col => (
-          <td key={col.id} className={`data-table__cell ${col.cellClassName ?? ''}`}>
-            {col.cell(row, ctx)}
-          </td>
+          <DataTableCell key={col.id} column={col} row={row} ctx={ctx} />
         ))}
       </tr>
 

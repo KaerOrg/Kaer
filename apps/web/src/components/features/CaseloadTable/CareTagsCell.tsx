@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { CareTag } from './CareTag'
 
 export interface CareTagsCellProps {
   pathways: readonly string[]
@@ -37,17 +37,7 @@ export function CareTagsCell({ pathways, onChange }: CareTagsCellProps) {
   return (
     <div className="care-tags">
       {pathways.map(tag => (
-        <span key={tag} className="care-tag">
-          {tag}
-          <button
-            type="button"
-            className="care-tag__remove"
-            onClick={() => removeTag(tag)}
-            aria-label={t('file_active.care.remove', { tag })}
-          >
-            <X size={12} />
-          </button>
-        </span>
+        <CareTag key={tag} tag={tag} onRemove={removeTag} />
       ))}
       <input
         ref={inputRef}

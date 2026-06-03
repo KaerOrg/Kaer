@@ -1,6 +1,8 @@
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SearchInput } from '../../ui/SearchInput'
 import { SelectField } from '../../ui/SelectField/SelectField'
+import { Chip } from '../../ui/Chip'
 import type { CaseloadFilterState } from './types'
 
 export interface CaseloadFiltersProps {
@@ -10,6 +12,19 @@ export interface CaseloadFiltersProps {
 
 export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
   const { t } = useTranslation()
+
+  const toggleImportant = useCallback(
+    () => onChange({ ...value, onlyImportant: !value.onlyImportant }),
+    [value, onChange]
+  )
+  const toggleOverdue = useCallback(
+    () => onChange({ ...value, onlyOverdue: !value.onlyOverdue }),
+    [value, onChange]
+  )
+  const toggleWaiting = useCallback(
+    () => onChange({ ...value, onlyWaiting: !value.onlyWaiting }),
+    [value, onChange]
+  )
 
   return (
     <div className="caseload-filters">
@@ -33,30 +48,24 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
       </SelectField>
 
       <div className="caseload-filters__chips" role="group" aria-label={t('file_active.filters.chips_label')}>
-        <button
-          type="button"
-          className={`caseload-chip ${value.onlyImportant ? 'caseload-chip--active' : ''}`}
-          aria-pressed={value.onlyImportant}
+        <Chip
+          selectable
+          selected={value.onlyImportant}
           onClick={() => onChange({ ...value, onlyImportant: !value.onlyImportant })}
-        >
-          {t('file_active.filters.chip_important')}
-        </button>
-        <button
-          type="button"
-          className={`caseload-chip ${value.onlyOverdue ? 'caseload-chip--active' : ''}`}
-          aria-pressed={value.onlyOverdue}
+          label={t('file_active.filters.chip_important')}
+        />
+        <Chip
+          selectable
+          selected={value.onlyOverdue}
           onClick={() => onChange({ ...value, onlyOverdue: !value.onlyOverdue })}
-        >
-          {t('file_active.filters.chip_overdue')}
-        </button>
-        <button
-          type="button"
-          className={`caseload-chip ${value.onlyWaiting ? 'caseload-chip--active' : ''}`}
-          aria-pressed={value.onlyWaiting}
+          label={t('file_active.filters.chip_overdue')}
+        />
+        <Chip
+          selectable
+          selected={value.onlyWaiting}
           onClick={() => onChange({ ...value, onlyWaiting: !value.onlyWaiting })}
-        >
-          {t('file_active.filters.chip_waiting')}
-        </button>
+          label={t('file_active.filters.chip_waiting')}
+        />
       </div>
     </div>
   )

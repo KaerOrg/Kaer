@@ -462,6 +462,15 @@ const columns: DataTableColumn<Row>[] = [
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
 
+Sous-composant exporté **`DataTableCell`** — le `<td>` générique (classe de base
+`data-table__cell` + `className` métier optionnelle). `DataTable` l'utilise en
+interne pour chaque cellule ; il est aussi réutilisable directement par tout layout
+tabulaire sur mesure qui ne passe pas par `columns`.
+
+```tsx
+<DataTableCell className="cell-name">{row.name}</DataTableCell>
+```
+
 **Règles d'usage :**
 - Le **filtrage et la distinction des états vides** (aucune donnée vs aucun résultat)
   restent côté appelant : `DataTable` reçoit les lignes à afficher et un seul
