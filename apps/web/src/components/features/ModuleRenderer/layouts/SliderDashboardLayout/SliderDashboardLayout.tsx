@@ -4,6 +4,8 @@ import type { ContentField } from '../../../../../services/moduleService'
 import { FieldText } from '../../fields'
 import { Tabs } from '../../../../ui/Tabs'
 import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
+import { SegmentedControl } from '../../../../ui/SegmentedControl'
+import type { SegmentOption } from '../../../../ui/SegmentedControl'
 import { CompositeChart } from './CompositeChart'
 import { DimensionChart } from './DimensionChart'
 import { MonthCalendar } from './MonthCalendar'
@@ -73,6 +75,11 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
       { id: 'm2', daysAgo: 5, labelKey: `modules.${moduleId}.markers_example_2` },
     ],
     [moduleId],
+  )
+
+  const rangeOptions = useMemo<readonly SegmentOption<TimeRange>[]>(
+    () => RANGES.map(r => ({ value: r, label: t(`modules.${moduleId}.${RANGE_KEY[r]}`) || r })),
+    [t, moduleId],
   )
 
   const series = useMemo<DimSeries[]>(
@@ -160,18 +167,14 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
             {t(`modules.${moduleId}.streak_plural`).replace('{{count}}', '14')}
           </div>
 
-          <div className="mt-range">
-            {RANGES.map(r => (
-              <button
-                key={r}
-                type="button"
-                className={`mt-range__btn${timeRange === r ? ' mt-range__btn--active' : ''}`}
-                onClick={() => setTimeRange(r)}
-              >
-                {t(`modules.${moduleId}.${RANGE_KEY[r]}`) || r}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            variant="pills"
+            options={rangeOptions}
+            value={timeRange}
+            onChange={setTimeRange}
+            accentColor={accent}
+            ariaLabel={t(`modules.${moduleId}.tab_charts`)}
+          />
 
           <CompositeChart series={series} range={timeRange} markers={markers} moduleId={moduleId} t={t} />
 

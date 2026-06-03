@@ -25,13 +25,22 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
     () => onChange({ ...value, onlyWaiting: !value.onlyWaiting }),
     [value, onChange]
   )
+  const handleSearch = useCallback(
+    (search: string) => onChange({ ...value, search }),
+    [value, onChange]
+  )
+  const handleStatus = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) =>
+      onChange({ ...value, status: e.target.value as CaseloadFilterState['status'] }),
+    [value, onChange]
+  )
 
   return (
     <div className="caseload-filters">
       <div className="caseload-filters__search">
         <SearchInput
           value={value.search}
-          onChange={search => onChange({ ...value, search })}
+          onChange={handleSearch}
           placeholder={t('file_active.filters.search_placeholder')}
         />
       </div>
@@ -40,7 +49,7 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         label={t('file_active.filters.status_label')}
         id="caseload-status-filter"
         value={value.status}
-        onChange={e => onChange({ ...value, status: e.target.value as CaseloadFilterState['status'] })}
+        onChange={handleStatus}
       >
         <option value="all">{t('file_active.filters.status_all')}</option>
         <option value="active">{t('file_active.status.active')}</option>

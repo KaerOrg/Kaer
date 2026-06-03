@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CaseloadStatus } from '../../../lib/caseload.types'
 
@@ -14,11 +14,16 @@ export interface StatusCellProps {
 function StatusCellComponent({ id, status, onStatus }: StatusCellProps) {
   const { t } = useTranslation()
 
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => onStatus(id, e.target.value as CaseloadStatus),
+    [id, onStatus]
+  )
+
   return (
     <select
       className="caseload-select"
       value={status}
-      onChange={e => onStatus(id, e.target.value as CaseloadStatus)}
+      onChange={handleChange}
       aria-label={t('file_active.col.status')}
     >
       {STATUSES.map(s => (

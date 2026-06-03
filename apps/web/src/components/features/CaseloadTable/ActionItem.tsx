@@ -45,6 +45,13 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
     [action.id, time, onPatch]
   )
 
+  const handleToggle = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => onToggleDone(action.id, e.target.checked),
+    [action.id, onToggleDone]
+  )
+
+  const handleDelete = useCallback(() => onDelete(action.id), [action.id, onDelete])
+
   const dueText =
     due.kind === 'none'
       ? ''
@@ -57,7 +64,7 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
         type="checkbox"
         className="action-item__check"
         checked={action.is_done}
-        onChange={e => onToggleDone(action.id, e.target.checked)}
+        onChange={handleToggle}
         aria-label={t('file_active.action.done_label')}
       />
       <input
@@ -87,7 +94,7 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
       <button
         type="button"
         className="action-item__delete"
-        onClick={() => onDelete(action.id)}
+        onClick={handleDelete}
         aria-label={t('file_active.action.delete_label')}
       >
         <Trash2 size={14} />

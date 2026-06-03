@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -89,13 +90,22 @@ export function LineChart({
   showLegend = false,
   locale = 'fr-FR',
 }: Props) {
+  const formatTick = useCallback(
+    (value: string) => new Date(value).toLocaleDateString(locale, { month: 'short' }),
+    [locale]
+  )
+
+  const legendFormatter = useCallback(
+    (value: string) => (
+      <span style={{ color: '#64748B' }}>{series.find(s => s.key === value)?.label ?? value}</span>
+    ),
+    [series]
+  )
+
   if (data.length < 2) return null
 
   const isSingleSeries = series.length === 1
   const TooltipContent = buildTooltipContent(series, locale)
-
-  const formatTick = (value: string) =>
-    new Date(value).toLocaleDateString(locale, { month: 'short' })
 
   const sharedAxisProps = {
     xAxis: (
@@ -168,11 +178,7 @@ export function LineChart({
             wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
             iconType="circle"
             iconSize={8}
-            formatter={(value: string) => (
-              <span style={{ color: '#64748B' }}>
-                {series.find(s => s.key === value)?.label ?? value}
-              </span>
-            )}
+            formatter={legendFormatter}
           />
         )}
         {series.map(s => (

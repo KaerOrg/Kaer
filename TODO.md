@@ -11,7 +11,13 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
 → « Render — zéro déclaration inline ».
 
 **État.** Règle `react/jsx-no-bind` active en **`warn`** dans `apps/web/eslint.config.js`
-(désactivée dans les `*.test.tsx`). **164 warnings sur 41 fichiers** au 2026-06-03.
+(désactivée dans les `*.test.tsx`). **147 warnings sur 33 fichiers** au 2026-06-03.
+
+> ✅ **Les 17 warnings introduits par la branche `tableau-de-bord-outil-de-suivi` sont résorbés**
+> (CaseloadTable `ActionItem`/`WaitItem`/`StatusCell`/`CaseloadFilters`, `Tabs`→`TabButton`,
+> `LineChart`, `SliderDashboardLayout`, `PatientEvolutionTab`, `PatientModulesTab`→extraction
+> `MedicationSideEffectsCard` + `SideEffectToggleRow`/`CustomEffectRow`). Le reste ci-dessous
+> est de la dette préexistante, hors périmètre de la PR.
 
 **Cible.** Résorber fichier par fichier, puis passer la règle en **`error`**.
 
@@ -19,12 +25,14 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
 - Callback passé à un enfant → `useCallback`.
 - Per-item dans un `.map()` → extraire un **composant feuille mémoïsé** (`memo`) qui
   fige le closure via `useCallback` interne. Références : `CaseloadTable/WaitItem.tsx`,
-  `ActionItem.tsx`, `CareTag.tsx`. Le parent passe un callback stable `(id) => void`.
+  `ActionItem.tsx`, `CareTag.tsx`, `ui/Tabs/TabButton.tsx`. Parent passe un callback stable `(id) => void`.
+- Variable `const x = (…) => …` dans le corps du composant passée en prop → la règle la
+  flague aussi (elle résout la définition). La stabiliser via `useCallback`.
 - Objet/tableau en prop (`style={{}}`, `action={{}}`) → `useMemo` / variable pré-calculée.
 
-**Suivi de progression** (`npx eslint --format json . | …`, voir compteur ci-dessus) :
+**Suivi de progression** (dette préexistante, `npx eslint --format json .`) :
 
-- [ ] `src/pages/PatientPage/tabs/PatientModulesTab.tsx` — 25
+- [ ] `src/pages/PatientPage/tabs/PatientModulesTab.tsx` — 19
 - [ ] `src/pages/PatientPage/tabs/PatientNotesTab.tsx` — 19
 - [ ] `src/components/features/CSSRSScreenPanel.tsx` — 17
 - [ ] `src/pages/DashboardPage/DashboardPage.tsx` — 12
@@ -40,19 +48,15 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
 - [ ] `src/components/features/Layout/ProfileDropdown/ProfileDropdown.tsx` — 3
 - [ ] `src/components/features/ModuleRenderer/fields/widgets/StarsWidget/StarsWidget.tsx` — 3
 - [ ] `src/components/features/WeekGrid/WeekGrid.tsx` — 3
-- [ ] `src/components/features/CaseloadTable/ActionItem.tsx` — 2
-- [ ] `src/components/features/CaseloadTable/CaseloadFilters.tsx` — 2
 - [ ] `src/components/features/ModuleRenderer/fields/widgets/BooleanWidget/BooleanWidget.tsx` — 2
-- [ ] `src/components/ui/Chart/LineChart/LineChart.tsx` — 2
 - [ ] `src/pages/ModuleCatalogPage/ModuleCatalogPage.tsx` — 2
-- [ ] Fichiers à 1 warning (≈ 20) : `ActivityFeedPanel`, `CaseloadTable/StatusCell`,
-      `CaseloadTable/WaitItem`, `ModuleRenderer/FieldRenderer/LayoutDispatcher`, widgets
-      `Checkbox`/`Slider`, layouts `Cards`/`ExposureHierarchy`/`PsyEdu`/`SliderDashboard`/`Tabs`,
-      `ui/Accordion`, `ui/Modal`, `ui/SearchInput`, `ui/Tabs`, `ui/Toast`, `ui/Toggle`,
-      `ModulePreviewPage`, `PatientPage/tabs/PatientEvolutionTab`, `PatientOverviewTab`.
+- [ ] Fichiers à 1 warning (15) : `ActivityFeedPanel`, `ModuleRenderer/FieldRenderer/LayoutDispatcher`,
+      widgets `Checkbox`/`Slider`, layouts `Cards`/`ExposureHierarchy`/`PsyEdu`/`Tabs`,
+      `ui/Accordion`, `ui/Modal`, `ui/SearchInput`, `ui/Toast`, `ui/Toggle`,
+      `ModulePreviewPage`, `PatientPage/tabs/PatientOverviewTab`.
 
 ## 2. `react-hooks/static-components` (préexistant)
 
-- [ ] `src/components/ui/Chart/LineChart/LineChart.tsx:124` — `error` :
-      « Cannot create components during render ». **Fait échouer `npm run lint`** (1 error).
-      Présent sur `HEAD` avant la création du `Chip` — à corriger pour rendre le lint vert.
+- [ ] `src/components/ui/Chart/LineChart/LineChart.tsx:134` — `error` :
+      « Cannot create components during render » (`buildTooltipContent` crée un composant
+      pendant le render). **Fait échouer `npm run lint`** (seule `error`). Hors périmètre PR.

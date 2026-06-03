@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -401,6 +401,51 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 | `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
 | `title` | `string` | — | Tooltip natif |
 | `className` | `string` | — | Classe additionnelle |
+
+### `SegmentedControl<T>`
+
+`components/ui/SegmentedControl/`. Interrupteur de sélection : un groupe de segments
+dont **un seul** est actif (sélecteur de plage temporelle, filtre exclusif, choix unique
+parmi N options visibles). Générique sur le type de valeur `T extends string` — la valeur
+émise par `onChange` est typée. Accessibilité native : `role="radiogroup"` + segments
+`role="radio"` / `aria-checked`. Chaque segment est mémoïsé (callback figé) — zéro
+re-rendu inutile.
+
+> **Ne pas confondre avec `Tabs`** : `Tabs` change de **panneau de contenu** (onglets,
+> avec icônes/badges). `SegmentedControl` change une **valeur** (un filtre, une période)
+> sans notion de panneau. Pour un interrupteur on/off binaire → `Toggle`.
+
+Deux variantes visuelles :
+
+| Variante | Aspect | Usage de référence |
+|---|---|---|
+| `track` (défaut) | Piste segmentée (conteneur unique, segments à l'intérieur) | Sélecteur 3m/6m/1an de `PatientEvolutionTab` |
+| `pills` | Pastilles indépendantes côte à côte | Sélecteur 7J/1M/3M/1A de `SliderDashboardLayout` |
+
+```tsx
+const options = useMemo<readonly SegmentOption<TimeRange>[]>(
+  () => RANGES.map(r => ({ value: r, label: t(`evolution.range_${r}`) })),
+  [t],
+)
+<SegmentedControl options={options} value={range} onChange={setRange} ariaLabel={t('evolution.title')} />
+
+// Variante pastilles + accent dynamique (couleur du segment actif pilotée par le module)
+<SegmentedControl variant="pills" options={options} value={range} onChange={setRange} accentColor={accent} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `options` | `readonly SegmentOption<T>[]` | — | Liste `{ value, label }` (obligatoire). Mémoïser si dérivée de `t()`. |
+| `value` | `T` | — | Valeur sélectionnée (obligatoire) |
+| `onChange` | `(value: T) => void` | — | Appelé avec la valeur du segment cliqué |
+| `variant` | `'track' \| 'pills'` | `'track'` | Aspect visuel |
+| `accentColor` | `string` | `var(--color-primary)` (CSS) | Couleur du segment actif (valeur dynamique) |
+| `ariaLabel` | `string` | — | Libellé accessible du groupe |
+| `className` | `string` | — | Classe additionnelle |
+
+> **Conformité MDR** : `accentColor` est une couleur de **contexte** (accent du module),
+> jamais l'expression d'une valeur clinique. Ne jamais piloter cette couleur par un score
+> ou un seuil — ce serait du codage couleur interprétatif interdit.
 
 ### `Accordion`
 

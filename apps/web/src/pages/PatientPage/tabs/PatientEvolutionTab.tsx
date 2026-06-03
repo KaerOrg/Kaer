@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LineChart } from '../../../components/ui/Chart'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
+import { SegmentedControl } from '../../../components/ui/SegmentedControl'
+import type { SegmentOption } from '../../../components/ui/SegmentedControl'
 import {
   fetchScaleEvolution,
   fetchMoodEvolution,
@@ -15,8 +17,9 @@ import {
 } from '../../../services/engagementService'
 import './PatientEvolutionTab.css'
 
-type TimeRange = '3m' | '6m' | '1y'
+export type TimeRange = '3m' | '6m' | '1y'
 const RANGE_DAYS: Record<TimeRange, number> = { '3m': 90, '6m': 180, '1y': 365 }
+const TIME_RANGES: readonly TimeRange[] = ['3m', '6m', '1y']
 
 const SCALE_CONFIG: Record<string, { color: string; yMax: number }> = {
   phq9:    { color: '#6366F1', yMax: 27 },
@@ -106,6 +109,11 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const days = RANGE_DAYS[range]
   const hasData = scales.length > 0 || moodData.length > 0 || fearData.length > 0 || medData.length > 0
 
+  const rangeOptions = useMemo<readonly SegmentOption<TimeRange>[]>(
+    () => TIME_RANGES.map(r => ({ value: r, label: t(`evolution.range_${r}`) })),
+    [t],
+  )
+
   if (loading) return <div className="evolution-loading">{t('common.loading')}</div>
   if (!hasData) {
     return (
@@ -120,17 +128,12 @@ export function PatientEvolutionTab({ patientId }: Props) {
     <div className="evolution">
       <div className="evolution__header">
         <h2 className="evolution__title">{t('evolution.title')}</h2>
-        <div className="evolution__range-picker">
-          {(['3m', '6m', '1y'] as TimeRange[]).map(r => (
-            <button
-              key={r}
-              className={`evolution__range-btn ${range === r ? 'evolution__range-btn--active' : ''}`}
-              onClick={() => setRange(r)}
-            >
-              {t(`evolution.range_${r}`)}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={rangeOptions}
+          value={range}
+          onChange={setRange}
+          ariaLabel={t('evolution.title')}
+        />
       </div>
 
       <div className="evolution__cards">

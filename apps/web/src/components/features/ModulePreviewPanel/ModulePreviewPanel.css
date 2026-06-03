@@ -3147,31 +3147,7 @@
   white-space: nowrap;
 }
 
-/* ── Sélecteur de période ────────────────────────────────────────────────── */
-
-.mt-range {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.mt-range__btn {
-  padding: 5px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.mt-range__btn--active {
-  background: #F97316;
-  border-color: #F97316;
-  color: #fff;
-}
+/* Sélecteur de période : composant ui/SegmentedControl (variante "pills"). */
 
 /* ── Streak ──────────────────────────────────────────────────────────────── */
 

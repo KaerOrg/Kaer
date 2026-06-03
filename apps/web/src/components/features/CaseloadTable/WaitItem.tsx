@@ -32,6 +32,8 @@ function WaitItemComponent({ wait, onPatch, onDelete }: WaitItemProps) {
     [wait.id, wait.relance_date, onPatch]
   )
 
+  const handleDelete = useCallback(() => onDelete(wait.id), [wait.id, onDelete])
+
   return (
     <div className="wait-item">
       <input
@@ -53,7 +55,7 @@ function WaitItemComponent({ wait, onPatch, onDelete }: WaitItemProps) {
       <button
         type="button"
         className="wait-item__delete"
-        onClick={() => onDelete(wait.id)}
+        onClick={handleDelete}
         aria-label={t('file_active.wait.delete_label')}
       >
         <Trash2 size={14} />
