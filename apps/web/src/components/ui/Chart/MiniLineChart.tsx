@@ -7,7 +7,7 @@ const H = 48
  * Mini-courbe SVG — segments interrompus sur les valeurs `null` (jours manquants),
  * marqueurs circulaires sur les points présents. Primitif pur, aucune logique métier.
  */
-export function LineChart({ data, color, maxY = 3 }: ChartProps) {
+export function MiniLineChart({ data, color, maxY = 3 }: ChartProps) {
   const xScale = (i: number) => (i / (data.length - 1)) * W
   const yScale = (v: number) => H - (v / maxY) * H * 0.9 - 2
 

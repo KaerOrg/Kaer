@@ -14,7 +14,7 @@ export type MoodPoint = {
 
 export type FearPoint = { date: string; suds_before: number; suds_after: number }
 
-export type MedEffectPoint = { date: string } & Record<string, number>
+export type MedEffectPoint = { date: string; [key: string]: number | string }
 
 const SCALE_MODULES = [
   'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
