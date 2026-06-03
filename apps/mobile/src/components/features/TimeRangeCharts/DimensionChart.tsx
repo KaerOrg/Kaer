@@ -1,8 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { colors, spacing, radius } from '../../../theme'
-import { LineChart } from './LineChart'
-import { BarChart } from './BarChart'
+import { LineChart, BarChart } from '../../ui/Chart'
 import { computeAvg } from './chartUtils'
 import type { DataPoint, XLabel, TimeRange } from './chartUtils'
 
@@ -27,8 +26,8 @@ export function DimensionChart({ label, points, color, avgLabel, range, xLabels,
         </Text>
       </View>
       {range === '7J'
-        ? <BarChart points={points} color={color} xLabels={xLabels} yMax={yMax} />
-        : <LineChart points={points} color={color} xLabels={xLabels} yMax={yMax} />
+        ? <BarChart points={points} color={color} xLabels={xLabels} maxY={yMax} />
+        : <LineChart points={points} color={color} xLabels={xLabels} maxY={yMax} />
       }
     </View>
   )

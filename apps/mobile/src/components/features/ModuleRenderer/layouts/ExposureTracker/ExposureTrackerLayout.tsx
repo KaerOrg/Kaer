@@ -25,14 +25,14 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import Ionicons from '@expo/vector-icons/Ionicons'
 import { colors } from '../../../../../theme'
 import {
-  getAllFearEntries, getFearEntry, saveFearEntry, deleteFearEntry,
-  getAllFearSituations, saveFearSituation, deleteFearSituation,
-  generateId,
+  getAllFearEntries, getFearEntry, getAllFearSituations, generateId,
   type FearEntry, type FearSituation,
 } from '../../../../../lib/database'
+import {
+  saveFearEntry, deleteFearEntry, saveFearSituation, deleteFearSituation,
+} from '../../../../../services/fearTrackerService'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
@@ -639,7 +639,7 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
             )}
             {footer != null && (
               <View style={etStyles.infoBox}>
-                <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+                <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
                 <Text style={etStyles.footerText}>{t(footer.text_code ?? '')}</Text>
               </View>
             )}

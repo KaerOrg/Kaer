@@ -13,11 +13,13 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllFormEntries, saveFormEntry, deleteFormEntry, generateId, type FormEntry,
+  getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
+import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import { useAuthStore } from '../../../../../store/authStore'
@@ -45,11 +47,13 @@ interface ColumnSpec {
 export interface ColumnFormLayoutProps {
   /** Fields du module (config + colonnes). */
   fields: ContentField[]
+  /** Note de bas de page MDR (sources scientifiques) — affichée en mode liste. */
+  footer?: ContentField
   /** Identifiant du module — clé de persistance des `form_entries`. */
   moduleId: string
 }
 
-export function ColumnFormLayout({ fields, moduleId }: ColumnFormLayoutProps) {
+export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
   const t = useModuleT()
   const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
@@ -406,6 +410,12 @@ export function ColumnFormLayout({ fields, moduleId }: ColumnFormLayoutProps) {
                 </View>
               )
             })}
+          </View>
+        )}
+        {footer != null && (
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
           </View>
         )}
       </ScrollView>

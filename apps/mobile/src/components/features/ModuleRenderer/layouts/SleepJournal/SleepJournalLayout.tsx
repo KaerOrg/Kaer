@@ -15,14 +15,16 @@ import {
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { Ionicons } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/native'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth, saveSleepEntry,
-  deleteSleepEntry, computeSleepDuration, computeSleepEfficiency, generateId,
+  getAllSleepEntries, getSleepEntry, getSleepEntriesForMonth,
+  computeSleepDuration, computeSleepEfficiency, generateId,
   type SleepEntry,
 } from '../../../../../lib/database'
+import { saveSleepEntry, deleteSleepEntry } from '../../../../../services/sleepDiaryService'
 import { formatDateFull, formatDateShort } from '../../../../../lib/dateUtils'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
@@ -96,9 +98,11 @@ function qualityColorOf(quality: number | null, qualityWarning: number, qualityG
 export interface SleepJournalLayoutProps {
   /** Fields du module (config). */
   fields: ContentField[]
+  /** Note de bas de page MDR (sources scientifiques) — affichée en mode liste. */
+  footer?: ContentField
 }
 
-export function SleepJournalLayout({ fields }: SleepJournalLayoutProps) {
+export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) {
   const t = useModuleT()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -377,6 +381,13 @@ export function SleepJournalLayout({ fields }: SleepJournalLayoutProps) {
             </Pressable>
           )
         })}
+
+        {footer != null && (
+          <View style={styles.infoBox}>
+            <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+            <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
+          </View>
+        )}
       </ScrollView>
     )
   }

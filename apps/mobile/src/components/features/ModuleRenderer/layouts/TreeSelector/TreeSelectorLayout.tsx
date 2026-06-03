@@ -14,12 +14,14 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
-  getAllTreeSelections, saveTreeSelection, deleteTreeSelection, generateId,
+  getAllTreeSelections, generateId,
   type TreeSelection, type TreeSelectionPathNode,
 } from '../../../../../lib/database'
+import { saveTreeSelection, deleteTreeSelection } from '../../../../../services/treeSelectionService'
 import { formatDateTime } from '../../../../../lib/dateUtils'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -70,15 +72,16 @@ function intensityValuesFor(min: number, max: number): number[] {
 export interface TreeSelectorLayoutProps {
   /** Fields du module (config + noeuds d'arbre). */
   fields: ContentField[]
+  /** Note de bas de page MDR (sources scientifiques) — affichée en mode historique. */
+  footer?: ContentField
   /** Identifiant du module — clé de persistance des `tree_selections`. */
   moduleId: string
 }
 
-export function TreeSelectorLayout({ fields, moduleId }: TreeSelectorLayoutProps) {
+export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLayoutProps) {
   const t = useModuleT()
   const { showConfirm } = useConfirmDialog()
   // ── Résolution des champs DB-driven
-  const footer = fields.find(f => f.field_type === 'footer_note')
   const configField = fields.find(f => f.field_type === 'tree_selector_config')
   const lbl = (key: string): string => {
     const code = configField?.props[key]
@@ -332,6 +335,13 @@ export function TreeSelectorLayout({ fields, moduleId }: TreeSelectorLayoutProps
                   </View>
                 )
               })}
+            </View>
+          )}
+
+          {footer != null && (
+            <View style={styles.infoBox}>
+              <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
+              <Text style={styles.footerText}>{t(footer.text_code ?? '')}</Text>
             </View>
           )}
         </ScrollView>

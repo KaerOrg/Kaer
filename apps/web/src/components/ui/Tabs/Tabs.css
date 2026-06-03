@@ -35,6 +35,42 @@
   font-weight: 600;
 }
 
+/* ── Onglets compacts (aperçu mobile-mock du panneau module) ─────────────── */
+
+.tabs--compact {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+.tabs--compact .tabs__item {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.tabs--compact .tabs__item:hover {
+  color: var(--color-text);
+}
+
+.tabs--compact .tabs__item--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
 /* ── Navigation verticale (sidebar) ─────────────────────────────────────── */
 
 .tabs--vertical {

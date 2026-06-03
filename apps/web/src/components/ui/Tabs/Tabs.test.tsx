@@ -42,6 +42,13 @@ describe('Tabs', () => {
     expect(screen.getByRole('tab', { name: 'Vue patient' })).not.toHaveAttribute('style')
   })
 
+  it('applique la classe de variante (horizontal par défaut, compact à la demande)', () => {
+    const { rerender, container } = render(<Tabs tabs={TABS} activeTab="preview" onChange={vi.fn()} />)
+    expect(container.querySelector('.tabs--horizontal')).toBeInTheDocument()
+    rerender(<Tabs tabs={TABS} activeTab="preview" onChange={vi.fn()} variant="compact" />)
+    expect(container.querySelector('.tabs--compact')).toBeInTheDocument()
+  })
+
   it('affiche le badge quand > 0, le masque sinon', () => {
     render(
       <Tabs

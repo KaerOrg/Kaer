@@ -36,8 +36,8 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PipPicker, SectionDateList, StatusBadge, Toast |
-| `components/features/` | Composants métier — Chart, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PillSelector, PipPicker, SectionDateList, StatusBadge, Toast |
+| `components/features/` | Composants métier — Chart (domaine), DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent |
 
 **Règle de dépendance : `features → ui` uniquement.**
 
@@ -111,6 +111,16 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 
 Taille de base : `paddingVertical: 12`, `paddingHorizontal: 24`, `borderRadius: 10`, `minHeight: 50`
 
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Texte du bouton (obligatoire) |
+| `onPress` | `() => void` | Callback (obligatoire) |
+| `variant` | `ButtonVariant` | Variante visuelle (défaut `'primary'`) |
+| `loading` | `boolean` | Affiche un spinner à la place du label |
+| `disabled` | `boolean` | Désactive le bouton |
+| `style` | `ViewStyle` | Style additionnel (ex. override `backgroundColor` pour couleur d'accent) |
+| `iconLeft` | `ReactNode` | Nœud affiché à gauche du label (ex. `<MaterialCommunityIcons name="plus" .../>`) |
+
 ### Divider (`src/components/Divider/`)
 
 Séparateur horizontal — `height: 1, backgroundColor: colors.border`.
@@ -128,6 +138,18 @@ Prop `inset?: number` pour retrait horizontal optionnel (ex. dans une liste de r
 
 Base : `borderRadius: 10`, `padding: 16`, `gap: 8`
 
+| Prop | Type | Rôle |
+|---|---|---|
+| `header` | `{ title, subtitle?, icon? }` | En-tête optionnel |
+| `actions` | `ReactNode` | Zone d'actions (coins droits — ex. icônes crayon/poubelle) |
+| `children` | `ReactNode` | Contenu principal |
+| `variant` | `'default' \| 'outlined' \| 'elevated' \| 'active'` | Style visuel (défaut `'default'`) |
+| `accentColor` | `string` | Couleur de bordure d'accentuation |
+| `onPress` | `() => void` | Rend la carte pressable (`Pressable` au lieu de `View`) |
+| `accessibilityLabel` | `string` | Label accessibilité quand `onPress` est fourni |
+
+> **Règle : toute liste d'items tappables utilise `Card` avec `onPress`, jamais `Pressable + View` ad hoc.**
+
 ---
 
 ### PipPicker (`src/components/PipPicker/`)
@@ -140,6 +162,174 @@ Sélecteur de valeur numérique à pips. Deux variantes visuelles :
 | `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns` (0–100 par 10) |
 
 Props clés : `value: number | null`, `steps: number[]`, `color: string`, `showHeader?: boolean` (défaut `true` — `false` si le parent gère son propre header), `showEndLabels?: boolean`.
+
+---
+
+### InputField (`src/components/ui/InputField/`)
+
+Champ texte étiqueté avec message d'erreur. Étend `TextInputProps` (donc `value`,
+`onChangeText`, `placeholder`, `keyboardType`, `secureTextEntry`…).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Libellé (obligatoire) |
+| `error` | `string` | Message d'erreur inline (validation de champ) |
+| `containerStyle` | `ViewStyle` | Style du conteneur |
+| …natifs | `TextInputProps` | `value`, `onChangeText`, `placeholder`… |
+
+### StatusBadge (`src/components/ui/StatusBadge/`)
+
+Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `variant` | `'info' \| 'success' \| 'warning' \| 'danger' \| 'neutral'` | `'neutral'` | Couleur |
+| `label` | `string` | — | Texte (obligatoire) |
+| `value` | `string \| number` | — | Valeur additionnelle |
+| `icon` | `string` | — | Nom d'icône `lucide-react-native` |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### Accordion (`src/components/ui/Accordion/`)
+
+Section repliable (titre cliquable + contenu).
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `badge` | `number` | — | Compteur à droite |
+| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
+| `children` | `ReactNode` | — | Contenu (obligatoire) |
+| `style` | `ViewStyle` | — | Style additionnel |
+
+### EmptyState (`src/components/ui/EmptyState/`)
+
+État vide — icône + titre + description + action optionnelle.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `string` | Emoji ou symbole texte rendu via `<Text>` (ex. `"📋"`, `"📅"`) |
+| `title` | `string` | Titre (obligatoire) |
+| `description` | `string` | Texte explicatif |
+| `action` | `{ label: string; onPress: () => void }` | Bouton d'action optionnel |
+| `style` | `ViewStyle` | Style additionnel |
+
+> **Règle : tout bloc `View + icon + Text + Text` en état vide doit utiliser `EmptyState`.**
+
+---
+
+### Groupe `ui/Chart/` — primitifs graphiques
+
+`src/components/ui/Chart/` regroupe les composants de visualisation purs. Aucun ne connaît le domaine — les données arrivent normalisées via props.
+
+Types partagés (`chartTypes.ts`) :
+
+```ts
+interface DataPoint { value: number; hasValue: boolean }
+interface XLabel    { index: number; label: string }
+```
+
+#### `LineChart`
+
+Courbe SVG temporelle — segments interrompus sur les gaps (`hasValue: false`), marqueurs circulaires sur les points présents, étiquettes d'axe X optionnelles.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `points` | `DataPoint[]` | — | Série temporelle (obligatoire) |
+| `color` | `string` | — | Couleur courbe + marqueurs |
+| `xLabels` | `XLabel[]` | — | Étiquettes axe X (sous-ensemble de points) |
+| `maxY` | `number` | `3` | Valeur max de l'axe Y |
+
+#### `BarChart`
+
+Barres verticales — valeurs affichées au-dessus, étiquettes de date en-dessous. Points absents (`hasValue: false`) rendus comme trait grisé minimal.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `points` | `DataPoint[]` | — | Série temporelle (obligatoire) |
+| `color` | `string` | — | Couleur des barres |
+| `xLabels` | `XLabel[]` | — | Étiquettes axe X |
+| `maxBarHeight` | `number` | `48` | Hauteur max en pixels |
+| `maxY` | `number` | `3` | Valeur max pour normaliser la hauteur |
+
+> **Règle : tout graphique temporel mobile utilise `LineChart` ou `BarChart` depuis `ui/Chart/`. Les charts spécifiques à un domaine (`DesensitizationChart`, `SudsSparkline`) restent dans `features/Chart/`.**
+
+---
+
+### `PillSelector` (`src/components/ui/PillSelector/`)
+
+Sélecteur à pilules — une option active, fond coloré sur la sélection, couleur d'accent configurable. Réutilisable pour tout filtre de période, catégorie, ou mode.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `options` | `string[]` | — | Identifiants des options (obligatoire) |
+| `value` | `string` | — | Option sélectionnée (obligatoire) |
+| `onChange` | `(v: string) => void` | — | Callback de sélection (obligatoire) |
+| `labels` | `Record<string, string>` | — | Libellés par identifiant |
+| `color` | `string` | `colors.primary` | Couleur d'accentuation de la pilule active |
+
+```tsx
+<PillSelector
+  options={['7J', '1M', '6M', '1A']}
+  value={timeRange}
+  onChange={v => setTimeRange(v as TimeRange)}
+  labels={{ '7J': '7 jours', '1M': '1 mois', '6M': '6 mois', '1A': '1 an' }}
+  color={accentColor}
+/>
+```
+
+> **Règle : tout sélecteur à choix exclusif rendu sous forme de pilules utilise `PillSelector`, jamais `Pressable + styles.btn` ad hoc.**
+
+### SectionDateList (`src/components/ui/SectionDateList/`)
+
+`SectionList` générique groupé par date — réutilisé par les modules journal
+(activités, craving, etc.). Étend `SectionListProps` sauf `sections`/`renderSectionHeader`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `sections` | `DateSection<T>[]` | `{ title: string; data: T[] }[]` |
+| `sectionHeaderStyle` | `object` | Style du header de section |
+| …natifs | `SectionListProps<T>` | `renderItem`, `keyExtractor`, `ListEmptyComponent`… |
+
+Helper de type `GroupByDateFn` exporté pour typer une fonction de groupement par `created_at`.
+
+---
+
+### ActionSheet / ConfirmDialog / Toast — feedback sans `Alert.alert`
+
+> **Règle d'or : zéro `Alert.alert`, zéro alerte OS.** Tout feedback ou confirmation
+> passe par ces trois primitives, déclenchées **via leur contexte** (jamais montées à
+> la main). Voir la règle complète en mémoire projet *« Zero Alert.alert »*.
+
+Ces composants sont **présentationnels** (`src/components/ui/{ActionSheet,ConfirmDialog,Toast}/index.tsx`)
+et montés une seule fois par leur provider racine. On ne les instancie jamais
+directement — on appelle le hook du contexte correspondant :
+
+| Besoin | Hook | Appel |
+|---|---|---|
+| Confirmation destructive (supprimer, révoquer) | `useConfirmDialog()` | `showConfirm({ title, message?, confirmLabel?, destructive?, onConfirm })` |
+| Choix parmi N options | `useActionSheet()` | `showActionSheet({ title?, options: { label, onPress, destructive? }[] })` |
+| Feedback passif (succès, erreur, info) | `useToast()` | `showToast(message, variant?)` — `variant`: `'success'`(défaut)`\|'error'\|'info'` |
+
+```tsx
+const { showConfirm } = useConfirmDialog()
+showConfirm({
+  title: t('appointment.cancel_title'),
+  message: t('appointment.cancel_msg'),
+  destructive: true,
+  confirmLabel: t('common.confirm'),
+  onConfirm: () => cancelAppointment(id),
+})
+```
+
+Le `cancelLabel` d'`ActionSheet`/`ConfirmDialog` est injecté par le provider (i18n) —
+ne pas le passer depuis l'écran. `Toast` s'auto-masque après un délai géré par le provider.
+
+| Composant | Props présentationnelles (gérées par le provider) |
+|---|---|
+| `ConfirmDialog` | `visible`, `onCancel`, `cancelLabel` + `ConfirmDialogConfig` |
+| `ActionSheet` | `visible`, `onClose` + `ActionSheetConfig` (`title?`, `options`, `cancelLabel`) |
+| `Toast` | `message`, `variant`, `visible` |
 
 ---
 

@@ -26,12 +26,9 @@ import { useToast } from '../../contexts/ToastContext'
 import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import {
-  generateId,
-  getAllPlanItemsForModule,
-  savePlanItem,
-  deletePlanItem,
-  type PlanItem,
+  generateId, getAllPlanItemsForModule, type PlanItem,
 } from '../../lib/database'
+import { savePlanItem, deletePlanItem } from '../../services/planItemService'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
 import { EditableItemsList } from '../../components/features/ModuleRenderer/layouts/shared/EditableItemsList'
 import {

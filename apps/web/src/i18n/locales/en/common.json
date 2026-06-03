@@ -768,6 +768,7 @@
     "emotion_wheel": {
       "label": "Emotion Wheel",
       "description": "Explore and precisely name emotions to address alexithymia.",
+      "footer": "Emotion wheel — affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -782,6 +783,7 @@
     "beck_columns": {
       "label": "Beck Columns",
       "description": "Thought journal: Situation, Emotion, Automatic Thought, Alternative Thought.",
+      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022).",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first thought record."
@@ -811,6 +813,7 @@
     "fear_thermometer": {
       "label": "Fear Thermometer",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
+      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -1068,10 +1071,6 @@
       "label": "Decisional Balance",
       "description": "Motivational interviewing tool: weighing the pros and cons of a behaviour change.",
       "footer": "Each argument is weighted 1 to 5 stars (importance). Dynamic motivation gauge: compares the Change score vs. the Status Quo score."
-    },
-    "motivational_balance": {
-      "label": "Motivational Balance",
-      "description": "Motivational Interviewing (Miller & Rollnick): Prochaska stages, importance/confidence rulers 0-10, values balance."
     },
     "phq9": {
       "label": "PHQ-9",
