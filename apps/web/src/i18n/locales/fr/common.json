@@ -249,7 +249,7 @@
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
   },
   "modules": {
-    "nav_link": "Configuration",
+    "nav_link": "Bibliothèque",
     "title": "Bibliothèque de modules",
     "subtitle": "Activez les modules disponibles pour vos patients. Seuls les modules activés pourront être débloqués dans la fiche patient.",
     "save_success": "✓ Bibliothèque mise à jour",

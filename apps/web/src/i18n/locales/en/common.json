@@ -263,7 +263,7 @@
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated"
   },
   "modules": {
-    "nav_link": "Configuration",
+    "nav_link": "Library",
     "title": "Module Library",
     "subtitle": "Enable the modules available for your patients. Only enabled modules can be unlocked from a patient's profile.",
     "save_success": "✓ Library updated",

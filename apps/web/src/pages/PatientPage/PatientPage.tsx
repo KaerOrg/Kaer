@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LayoutDashboard, Package2, FileText, CalendarDays, TrendingUp } from 'lucide-react'
@@ -82,6 +82,16 @@ export function PatientPage() {
   // ── UI ────────────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv' | 'evolution'>('overview')
+
+  // RDV « effectués » = rendez-vous passés et non annulés (statut factuel, sans action manuelle du praticien).
+  const appointmentsDoneCount = useMemo(() => {
+    const now = new Date().toISOString()
+    return appointments.filter(
+      a => a.starts_at <= now &&
+        a.status !== 'cancelled_by_patient' &&
+        a.status !== 'cancelled_by_practitioner',
+    ).length
+  }, [appointments])
 
   const reloadModules = useCallback(async () => {
     if (!id) return
@@ -203,6 +213,7 @@ export function PatientPage() {
                 modules={modules}
                 categories={categories}
                 notes={notes}
+                appointmentsDoneCount={appointmentsDoneCount}
                 patientEnrolledAt={patientEnrolledAt}
                 generalNote={generalNote}
                 generalNoteSaving={generalNoteSaving}
