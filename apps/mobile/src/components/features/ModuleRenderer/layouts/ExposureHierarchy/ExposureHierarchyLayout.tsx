@@ -26,7 +26,7 @@ import {
   type FearEntry,
 } from '../../../../../lib/database'
 import { PipPicker } from '../../../../ui/PipPicker'
-import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../Chart'
+import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../../ui/Chart'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 
 type Mode =

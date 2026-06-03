@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '../../../theme'
+import { colors, spacing, radius } from '../../../../theme'
 import { LineChart } from './LineChart'
 import { BarChart } from './BarChart'
 import { computeAvg } from './chartUtils'

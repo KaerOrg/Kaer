@@ -157,6 +157,10 @@
     "language_label": "Langue de l'application"
   },
   "modules": {
+    "scale_history": {
+      "evolution_label": "Évolution du score",
+      "avg": "Moy. : {{value}}"
+    },
     "crisis_plan": {
       "label": "Plan de crise",
       "description": "Plan personnalisé pour les moments difficiles",

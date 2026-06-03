@@ -33,7 +33,7 @@ jest.mock('../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
-jest.mock('../../components/features/TimeRangeCharts', () => {
+jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
   const { Text, Pressable } = require('react-native')
   return {
@@ -291,7 +291,7 @@ describe('MoodTrackerScreen', () => {
 
 describe('chartUtils — buildCompositeData', () => {
   const { buildCompositeData } = jest.requireActual(
-    '../../components/features/TimeRangeCharts/chartUtils'
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const makeEntry = (date, scores) => ({
@@ -331,7 +331,7 @@ describe('chartUtils — buildCompositeData', () => {
 
 describe('chartUtils — computeStreak', () => {
   const { computeStreak } = jest.requireActual(
-    '../../components/features/TimeRangeCharts/chartUtils'
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   it('retourne 0 sans entrée', () => {
@@ -339,11 +339,10 @@ describe('chartUtils — computeStreak', () => {
   })
 
   it('compte les jours consécutifs depuis aujourd\'hui', () => {
-    // Utilise le même calcul de date que computeStreak (minuit local → UTC)
     const getDateStr = (daysAgo) => {
       const d = new Date()
-      d.setHours(0, 0, 0, 0)
-      d.setDate(d.getDate() - daysAgo)
+      d.setUTCHours(0, 0, 0, 0)
+      d.setUTCDate(d.getUTCDate() - daysAgo)
       return d.toISOString().slice(0, 10)
     }
     const entries = [0, 1].map(offset => ({
@@ -360,7 +359,7 @@ describe('chartUtils — computeStreak', () => {
 
 describe('chartUtils — markerXFraction', () => {
   const { markerXFraction } = jest.requireActual(
-    '../../components/features/TimeRangeCharts/chartUtils'
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const dateNDaysAgo = (n) => {

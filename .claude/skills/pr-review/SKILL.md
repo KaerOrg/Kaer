@@ -313,7 +313,61 @@ Test décisif : "cette donnée pourrait-elle changer sans modifier le code ?" Si
 
 ---
 
-## Étape 4 — Composants réutilisés vs recréés
+## Étape 4 — Parité graphique web ≡ mobile (BLOQUANT)
+
+> **Principe fondamental de PsyTool** : l'interface web praticien doit refléter à 100 % ce que le patient voit sur mobile. Si un module affiche un graphique sur mobile, le web **doit** afficher un graphique équivalent dans `PatientEvolutionTab` ou le composant de prévisualisation du module.
+
+### Inventaire de référence — modules avec graphiques sur mobile
+
+| Module | Composants graphiques mobile | Web doit afficher |
+|---|---|---|
+| `mood_tracker` | `DimensionChart` × 6 dimensions + `CompositeChart` + `MonthCalendar` | 1 carte par dimension (humeur, énergie, anxiété, plaisir, sommeil, alimentation) + vue composite + calendrier heatmap |
+| `medication_side_effects` | `DimensionChart` par effet suivi (config `tracked_effects`) | 1 carte par effet suivi |
+| `fear_thermometer` | `DesensitizationChart` (SUDS avant/après, courbe Bezier + gradient + ligne de référence) | Chart SUDS avec ligne de référence |
+| `exposure_hierarchy` | `DesensitizationChart` | idem |
+| `phq9`, `gad7`, `bsl23`, `epds`, `rcads`, `asrs6`, `snap_iv`, `nsi` | `DimensionChart` (barre 7J / courbe 1M+) dans `ScaleHistoryScreen` | `AreaChart` Recharts dans `PatientEvolutionTab` ✓ |
+
+### Procédure de vérification
+
+Pour **chaque module** touchée par la PR (fichier dans `apps/mobile/src/screens/modules/`, `DimensionTrackerView`, ou `apps/web/src/pages/PatientPage/`) :
+
+**1. Identifier les graphiques côté mobile**
+```bash
+grep -r "DimensionChart\|CompositeChart\|DesensitizationChart\|BarChart\|LineChart\|MonthCalendar" \
+  apps/mobile/src/screens/modules/<NomScreen>.tsx \
+  apps/mobile/src/components/features/DimensionTrackerView/ 2>/dev/null
+```
+
+**2. Vérifier l'équivalent côté web**
+```bash
+grep -r "<module_id>\|<NomChart>" \
+  apps/web/src/pages/PatientPage/tabs/PatientEvolutionTab.tsx \
+  apps/web/src/services/engagementService.ts 2>/dev/null
+```
+
+**3. Règles de verdict**
+
+| Situation | Verdict |
+|---|---|
+| Module a des charts mobile → `PatientEvolutionTab` a des charts équivalents | ✅ Conforme |
+| Module a des charts mobile → `PatientEvolutionTab` n'a rien pour ce module | 🚫 **Violation bloquante** |
+| Module a `DimensionChart` mobile → web affiche 1 seul multi-line groupé | ⚠️ **Point d'attention** : les dimensions doivent être des cartes séparées |
+| Module a `DesensitizationChart` mobile (Bezier + gradient + ligne de référence) → web affiche un `LineChart` basique sans ligne de référence | ⚠️ **Point d'attention** : le rendu doit être équivalent |
+| Module a `MonthCalendar` mobile → web n'a pas de vue calendrier/heatmap | ⚠️ **Point d'attention** |
+
+**4. Cas des données manquantes (SQLite local)**
+
+Certains modules stockent leurs données uniquement en SQLite local (pas dans `patient_engagement_logs`). Dans ce cas, vérifier que :
+- Le mobile envoie bien les scores pertinents dans `patient_engagement_logs` lors d'une saisie (event `SCALE_SUBMITTED` ou équivalent avec `score` dans `metadata`)
+- Sinon → **point d'attention bloquant** : signaler que la parité est impossible sans sync des données, et que la PR doit inclure l'envoi des données côté mobile
+
+**5. Ajout d'un nouveau module avec graphique**
+
+Si la PR ajoute un nouveau module qui utilise `DimensionChart`, `CompositeChart` ou `DesensitizationChart` sur mobile **sans** mettre à jour `PatientEvolutionTab` pour ce module → **violation bloquante**.
+
+---
+
+## Étape 5 — Composants réutilisés vs recréés
 
 Avant d'analyser les nouveaux composants, lire l'inventaire existant :
 
@@ -342,7 +396,7 @@ Patterns à surveiller particulièrement (composants souvent recréés) :
 
 ---
 
-## Étape 5 — Documentation ET tests : obligatoires et bloquants (transversal)
+## Étape 6 — Documentation ET tests : obligatoires et bloquants (transversal)
 *(source : CLAUDE.md § "Règles de développement" — « Toute nouvelle feature doit être accompagnée d'un fichier `.md` de documentation ET de tests avant d'être considérée comme terminée. »)*
 
 > **Règle absolue, sans exception.** Elle s'applique à **toute nouvelle feature**, pas seulement aux modules thérapeutiques : nouveau composant, service, hook, écran, util, table, pattern UI, prop/variante d'un composant existant.
@@ -474,7 +528,7 @@ Appel direct `supabase.from('modules')` dans un composant.
 - [ ] MDR 2017/745 — aucun seuil, alerte ou interprétation automatique
 - [ ] Composants existants réutilisés/étendus avant création
 - [ ] Mode Ado (mobile) — useTeen + TeenAccent + mock test
-- [ ] Parité web ≡ mobile (si module)
+- [ ] **Parité graphique web ≡ mobile** — tout module avec charts mobile a son équivalent dans `PatientEvolutionTab` (cf. Étape 4)
 - [ ] Service — cache + JSDoc + test + docs/services.md
 
 ### Obligatoires et bloquants pour TOUTE nouvelle feature (Étape 5)

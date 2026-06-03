@@ -1,7 +1,7 @@
 // Fonctions pures de construction de données pour les graphiques temporels.
 // Utilisées par MoodTrackerScreen et MedicationSideEffectsHistoryScreen.
 
-import type { ScaleEntry } from '../../../lib/database'
+import type { ScaleEntry } from '../../../../lib/database'
 
 export type TimeRange = '7J' | '1M' | '3M' | '6M' | '1A'
 
@@ -150,6 +150,63 @@ export function buildChartData(entries: ScaleEntry[], key: string, range: TimeRa
   })
 }
 
+// ── Total score chart data (pour ScaleHistoryScreen) ─────────────────────────
+
+export function buildTotalScoreChartData(entries: ScaleEntry[], range: TimeRange): DataPoint[] {
+  const now = new Date()
+
+  if (range === '7J') {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now)
+      d.setDate(d.getDate() - (6 - i))
+      const dateStr = d.toISOString().slice(0, 10)
+      const entry = entries.find(e => e.created_at.slice(0, 10) === dateStr)
+      return { value: entry?.total_score ?? 0, hasValue: entry != null }
+    })
+  }
+
+  if (range === '1M') {
+    return Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(now)
+      d.setDate(d.getDate() - (29 - i))
+      const dateStr = d.toISOString().slice(0, 10)
+      const entry = entries.find(e => e.created_at.slice(0, 10) === dateStr)
+      return { value: entry?.total_score ?? 0, hasValue: entry != null }
+    })
+  }
+
+  const weeklyBuckets = (n: number) =>
+    Array.from({ length: n }, (_, i) => {
+      const bucketEnd = new Date(now)
+      bucketEnd.setDate(bucketEnd.getDate() - (n - 1 - i) * 7)
+      const bucketStart = new Date(bucketEnd)
+      bucketStart.setDate(bucketStart.getDate() - 6)
+      const bucket = entries.filter(e => {
+        const d = new Date(e.created_at)
+        return d >= bucketStart && d <= bucketEnd
+      })
+      if (bucket.length === 0) return { value: 0, hasValue: false }
+      const avg = bucket.reduce((s, e) => s + e.total_score, 0) / bucket.length
+      return { value: avg, hasValue: true }
+    })
+
+  if (range === '3M') return weeklyBuckets(13)
+  if (range === '6M') return weeklyBuckets(26)
+
+  // 1A — monthly buckets
+  return Array.from({ length: 12 }, (_, i) => {
+    const month = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1)
+    const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0)
+    const bucket = entries.filter(e => {
+      const d = new Date(e.created_at)
+      return d >= month && d <= monthEnd
+    })
+    if (bucket.length === 0) return { value: 0, hasValue: false }
+    const avg = bucket.reduce((s, e) => s + e.total_score, 0) / bucket.length
+    return { value: avg, hasValue: true }
+  })
+}
+
 // ── Aggregates ────────────────────────────────────────────────────────────────
 
 export function computeAvg(points: DataPoint[]): string {
@@ -163,12 +220,12 @@ export function computeStreak(entries: ScaleEntry[]): number {
   const datesWithEntry = new Set(entries.map(e => e.created_at.slice(0, 10)))
   let streak = 0
   const cur = new Date()
-  cur.setHours(0, 0, 0, 0)
+  cur.setUTCHours(0, 0, 0, 0)
   while (true) {
     const dateStr = cur.toISOString().slice(0, 10)
     if (!datesWithEntry.has(dateStr)) break
     streak++
-    cur.setDate(cur.getDate() - 1)
+    cur.setUTCDate(cur.getUTCDate() - 1)
   }
   return streak
 }

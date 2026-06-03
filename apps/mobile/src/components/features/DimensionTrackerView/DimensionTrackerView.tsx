@@ -45,8 +45,8 @@ import {
   buildXLabels,
   computeStreak,
   markerXFraction,
-} from '../TimeRangeCharts'
-import type { TimeRange, ChartMarker } from '../TimeRangeCharts'
+} from '../../ui/Chart/TimeRangeCharts'
+import type { TimeRange, ChartMarker } from '../../ui/Chart/TimeRangeCharts'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Tab = 'entry' | 'charts' | 'month'

@@ -28,18 +28,18 @@ export function MainNav() {
         {t('file_active.nav_link')}
       </Link>
       <Link
-        to="/modules"
-        className={`main-nav__link ${isModulesActive ? 'main-nav__link--active' : ''}`}
-      >
-        <LayoutGrid size={15} />
-        {t('modules.nav_link')}
-      </Link>
-      <Link
         to="/agenda"
         className={`main-nav__link ${isAgendaActive ? 'main-nav__link--active' : ''}`}
       >
         <CalendarDays size={15} />
         {t('agenda.nav_link')}
+      </Link>
+      <Link
+        to="/modules"
+        className={`main-nav__link ${isModulesActive ? 'main-nav__link--active' : ''}`}
+      >
+        <LayoutGrid size={15} />
+        {t('modules.nav_link')}
       </Link>
     </nav>
   )
