@@ -417,6 +417,63 @@ fermeture sur `Échap` + clic sur l'overlay).
 > [`docs/components/`](components/). `Tabs`, `ValueBar`, `Sparkline`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
+### `DataTable<T>`
+
+`components/ui/DataTable/`. **Table de données générique** — structure `table`,
+en-têtes collants, conteneur scrollable, dépliage par ligne, mise en avant et état
+vide. **Zéro connaissance métier** : colonnes, rendu des cellules, panneau de détail
+et classe de ligne sont injectés par l'appelant. C'est la brique de la matrice
+« Ma file active » (`features/CaseloadTable`), conçue pour être réutilisée par toute
+liste tabulaire praticien (dispensaire, suivi, etc.).
+
+```tsx
+const columns: DataTableColumn<Row>[] = [
+  { id: 'name', header: t('col.name'), cell: row => <NameCell row={row} /> },
+  {
+    id: 'actions',
+    header: t('col.actions'),
+    headerClassName: 'my-th--actions',   // largeur/alignement métier
+    cellClassName: 'my-cell--actions',
+    // ctx donne accès au dépliage de la ligne (chevron cliquable, etc.)
+    cell: (row, ctx) => <Summary row={row} expanded={ctx.expanded} onToggle={ctx.toggleExpanded} />,
+  },
+]
+
+<DataTable
+  columns={columns}
+  rows={visibleRows}
+  getRowId={row => row.id}
+  toolbar={<><AddForm /><Filters /></>}          // au-dessus de la table
+  renderDetail={row => <RowDetail row={row} />}   // panneau dépliable (optionnel)
+  rowClassName={row => (row.important ? 'my-row--flag' : undefined)}
+  emptyState={<EmptyState … />}                   // rendu si rows.length === 0
+  ariaLabel={t('section.title')}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`) |
+| `rows` | `readonly T[]` | Lignes **déjà filtrées** par l'appelant |
+| `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
+| `toolbar` | `ReactNode` | Zone libre au-dessus de la table (filtres, capture rapide) |
+| `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
+| `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
+| `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
+| `ariaLabel` | `string` | Libellé accessible de la `<table>` |
+
+**Règles d'usage :**
+- Le **filtrage et la distinction des états vides** (aucune donnée vs aucun résultat)
+  restent côté appelant : `DataTable` reçoit les lignes à afficher et un seul
+  `emptyState`. L'appelant choisit le bon message selon que le jeu non filtré est vide.
+- Les **largeurs/alignements de colonnes** passent par `headerClassName`/`cellClassName`
+  (classes métier dans le `.css` de la feature) — la base `.data-table__th/__cell`
+  vient du design system.
+- Le **dépliage** est piloté depuis une cellule via `ctx.toggleExpanded` (le chevron
+  vit dans la cellule métier de son choix, pas dans une colonne dédiée imposée).
+- Chaque ligne est **mémoïsée** : passer des `columns` (useMemo) et `renderDetail`
+  (useCallback) stables pour éviter les re-rendus inutiles à grande échelle.
+
 ---
 
 ## Composant `ScaleMetaBadges`

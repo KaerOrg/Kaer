@@ -225,7 +225,8 @@ Tri 100 % mécanique sur des dates saisies par le praticien → transparent et c
 | `apps/web/src/lib/caseload.types.ts` | Types TypeScript (`CaseloadEntry`, `CaseloadNote`, `AlertLevel`, `TodayItem`) |
 | `apps/web/src/services/caseloadService.ts` | CRUD Supabase + fonctions pures `computeAlert`, `buildTodayList` |
 | `apps/web/src/services/caseloadService.test.ts` | Tests vitest (alerte, tri, buckets, edge cases) |
-| `apps/web/src/components/features/CaseloadTable/` | La matrice (vue ②) — édition inline, filtres, tri |
+| `apps/web/src/components/ui/DataTable/` | Table générique du design system (structure, en-têtes, scroll, dépliage, état vide) — sans métier |
+| `apps/web/src/components/features/CaseloadTable/` | La matrice (vue ②) — câble `DataTable` avec colonnes + détail métier (édition inline, filtres, tri) |
 | `apps/web/src/components/features/TodayList/` | La vue « Aujourd'hui » (vue ①) — buckets + actions rapides |
 | `apps/web/src/components/features/CaseloadOverview/` | Les cartes KPI (vue ③) |
 | `apps/web/src/components/features/NoteJournal/` | Historique daté des notes d'un dossier |
