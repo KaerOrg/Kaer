@@ -532,6 +532,7 @@ const columns: DataTableColumn<Row>[] = [
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
+| `className` | `string` | Classe posée sur le conteneur `.data-table-wrap` — permet de **scoper un habillage propre** (couleurs d'en-tête, dégradé de lignes) sans toucher au style générique. Ex. `CaseloadTable` passe `caseload-data-table` et stylise `.caseload-data-table .data-table__th` (en-tête teal). |
 
 Sous-composant exporté **`DataTableCell`** — le `<td>` générique (classe de base
 `data-table__cell` + `className` métier optionnelle). `DataTable` l'utilise en

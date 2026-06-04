@@ -65,18 +65,65 @@
 /* Icône d'en-tête (ex. étoile de la colonne « important »). */
 .caseload-th__icon { vertical-align: middle; }
 
-/* ---- Largeurs de colonnes (appliquées aux <th>/<td> du DataTable via *ClassName) ---- */
+/* ---- Largeurs de colonnes ----
+   min-width = plancher de lisibilité ; la table est en `width:100%` donc les
+   colonnes s'élargissent pour remplir l'espace disponible sur grand écran.
+   Total des planchers volontairement < largeur utile d'un portable (~1180px)
+   pour que la table tienne SANS défilement horizontal. */
 .caseload-th--patient,
-.caseload-cell--name { min-width: 240px; }
-.caseload-th--status { min-width: 96px; }
-.caseload-th--important { width: 40px; text-align: center; padding-left: 0; padding-right: 0; }
+.caseload-cell--name { min-width: 190px; }
+.caseload-th--status { min-width: 84px; }
+.caseload-th--important { width: 36px; text-align: center; padding-left: 0; padding-right: 0; }
 .caseload-th--actions,
-.caseload-cell--actions { min-width: 360px; }
+.caseload-cell--actions { min-width: 280px; }
 .caseload-th--care_pathways,
-.caseload-cell--care { min-width: 210px; }
+.caseload-cell--care { min-width: 170px; }
 .caseload-th--waiting,
-.caseload-cell--waiting { min-width: 220px; }
-.caseload-th--alert { width: 120px; }
+.caseload-cell--waiting { min-width: 180px; }
+.caseload-th--alert { width: 92px; }
+
+/* ================================================================
+   Habillage « file active » — appliqué UNIQUEMENT à cette table via
+   la classe de scope `.caseload-data-table` (prop className du DataTable).
+   Ne déteint pas sur les autres tableaux du design system.
+   Couleurs : déclinaison du teal Kaer (charte produit).
+   ================================================================ */
+
+/* En-tête teal */
+.caseload-data-table .data-table__th {
+  background: #D3ECED;
+  color: #2C6E72;
+  border-bottom: 1px solid #B5DEE0;
+}
+
+.caseload-data-table .data-table__th .caseload-th__icon { color: #2C6E72; }
+
+/* Dégradé horizontal ultra léger (gauche → droite) sur les cellules de ligne */
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(1) { background: #FFFFFF; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(2) { background: #F9FCFD; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(3) { background: #F3FAFA; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(4) { background: #EEF7F8; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(5) { background: #E8F5F5; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(6) { background: #E2F2F3; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(7) { background: #DCF0F1; }
+
+/* Survol : léger assombrissement PAR-DESSUS le dégradé (ne le remplace pas) */
+.caseload-data-table .data-table__row:hover > .data-table__cell {
+  box-shadow: inset 0 0 0 999px rgba(15, 23, 42, 0.025);
+}
+
+/* Séparateurs de colonnes légers */
+.caseload-data-table .data-table__th:not(:last-child),
+.caseload-data-table .data-table__cell:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+/* Puces « En attente de retour » : teinte violette de la charte d'origine
+   (le composant Chip partagé n'a pas de ton violet → override scopé ici). */
+.caseload-data-table .wait-summary .chip {
+  background: #EDE9FE;
+  color: #6D28D9;
+}
 
 /* Met en avant un dossier « important » : colore la bordure gauche neutre du DataTable. */
 .caseload-row--important { border-left-color: var(--color-warning); }
@@ -556,12 +603,6 @@
   color: var(--color-text-muted);
   margin: 0 0 var(--spacing-sm);
 }
-
-.caseload-detail__section--link {
-  border-left-color: #94A3B8;
-  background: #F8FAFC;
-}
-.caseload-detail__section--link .caseload-detail__title { color: #64748B; }
 
 .caseload-detail__section--actions {
   border-left-color: #3B82F6;

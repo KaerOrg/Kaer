@@ -184,6 +184,7 @@ export function CaseloadTable({
       rowClassName={rowClassName}
       emptyState={emptyState}
       ariaLabel={t('file_active.title')}
+      className="caseload-data-table"
     />
   )
 }

@@ -44,4 +44,10 @@ export interface DataTableProps<T> {
   readonly emptyState?: ReactNode
   /** Libellé accessible de la table. */
   readonly ariaLabel?: string
+  /**
+   * Classe additionnelle posée sur le conteneur `.data-table-wrap` — permet à un
+   * consommateur de scoper son propre habillage (couleurs d'en-tête, dégradé de
+   * lignes…) sans toucher au style générique partagé.
+   */
+  readonly className?: string
 }

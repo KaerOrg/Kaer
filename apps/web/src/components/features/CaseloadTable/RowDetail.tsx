@@ -46,7 +46,7 @@ function RowDetailComponent({
 
   return (
     <div className="caseload-detail">
-      <section className="caseload-detail__section">
+      <section className="caseload-detail__section caseload-detail__section--actions">
         <h4 className="caseload-detail__title">{t('file_active.section.actions')}</h4>
         <ActionList
           actions={actions}
@@ -58,12 +58,12 @@ function RowDetailComponent({
         />
       </section>
 
-      <section className="caseload-detail__section">
+      <section className="caseload-detail__section caseload-detail__section--waits">
         <h4 className="caseload-detail__title">{t('file_active.section.waits')}</h4>
         <WaitList waits={waits} onAdd={handleAddWait} onPatch={handlePatchWait} onDelete={handleDeleteWait} />
       </section>
 
-      <section className="caseload-detail__section">
+      <section className="caseload-detail__section caseload-detail__section--observation">
         <h4 className="caseload-detail__title">{t('file_active.section.observation')}</h4>
         <ObservationBlock entryId={entry.id} />
       </section>
