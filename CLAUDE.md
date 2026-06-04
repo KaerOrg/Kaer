@@ -192,6 +192,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module NSI — Sévérité des cauchemars (`nsi`) — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), SQLite `nsi_entries`
 - [x] Module Effets indésirables du traitement (`medication_side_effects`) — refonte tracker multi-dimensions (pattern `mood_tracker` via composant générique partagé `DimensionTrackerView` mobile + `SliderDashboardLayout`/`slider_dashboard` web), effets suivis paramétrables par patient (12 fixes + personnalisés, config `patient_modules.config.tracked_effects` partagée web↔mobile), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries`, tests Jest + Vitest
 - [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
+- [x] MFA praticien (`feat/mfa-praticien`, ticket #26, épic conformité #29) — TOTP via Supabase Auth natif (zéro schéma), opt-in par praticien, récupération admin manuelle. Gestion AAL (`aal1`→`aal2`) dans `authService` (`loginWithPassword`→`mfa_required`, `fetchSessionPractitioner` refuse une demi-session), enrôlement QR (`MfaSettingsCard`/`MfaEnrollModal`), challenge au login (`MfaChallengeForm`). Doc : [`docs/auth-mfa.md`](docs/auth-mfa.md)
 - [ ] Notifications push
 
 ## Vision commerciale

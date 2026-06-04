@@ -7,10 +7,11 @@ import { InputField } from '../../components/ui/InputField'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
+import { MfaChallengeForm } from './MfaChallengeForm'
 import './LoginPage.css'
 
 export function LoginPage() {
-  const { login, register, loading, error, clearError } = useAuthStore()
+  const { login, register, loading, error, clearError, mfaRequired } = useAuthStore()
   const { t, i18n } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [registered, setRegistered] = useState(false)
@@ -41,6 +42,21 @@ export function LoginPage() {
   const switchMode = () => {
     clearError()
     setMode(m => m === 'login' ? 'register' : 'login')
+  }
+
+  if (mfaRequired) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-card__header">
+            <div className="login-card__logo"><BrainCircuit size={36} /></div>
+            <h1 className="login-card__title">PsyTool</h1>
+            <p className="login-card__subtitle">{t('auth.mfa.challenge_subtitle')}</p>
+          </div>
+          <MfaChallengeForm />
+        </div>
+      </div>
+    )
   }
 
   if (registered) {
