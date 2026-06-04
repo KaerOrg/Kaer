@@ -3,11 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { ActionList } from './ActionList'
 import { WaitList } from './WaitList'
 import { ObservationBlock } from './ObservationBlock'
-import { PatientLinkControl } from './PatientLinkControl'
-import type { LinkablePatient } from './types'
 import type {
   CaseloadActionInput,
-  CaseloadEntryInput,
   CaseloadRowData,
   CaseloadWaitInput,
 } from '../../../lib/caseload.types'
@@ -15,8 +12,6 @@ import type {
 export interface RowDetailProps {
   row: CaseloadRowData
   today: string
-  patients: readonly LinkablePatient[]
-  onPatch: (id: string, patch: CaseloadEntryInput) => void
   onAddAction: (entryId: string, label: string, due: string | null) => void
   onToggleDone: (entryId: string, actionId: string, done: boolean) => void
   onPatchAction: (entryId: string, actionId: string, patch: CaseloadActionInput) => void
@@ -26,12 +21,10 @@ export interface RowDetailProps {
   onDeleteWait: (entryId: string, waitId: string) => void
 }
 
-/** Panneau dépliable d'un dossier : liaison patient, actions, attentes, observations. */
+/** Panneau dépliable d'un dossier : actions, attentes, observations. */
 function RowDetailComponent({
   row,
   today,
-  patients,
-  onPatch,
   onAddAction,
   onToggleDone,
   onPatchAction,
@@ -43,7 +36,6 @@ function RowDetailComponent({
   const { t } = useTranslation()
   const { entry, actions, waits } = row
 
-  const handleLink = useCallback((patientId: string | null) => onPatch(entry.id, { patient_id: patientId }), [entry.id, onPatch])
   const handleAdd = useCallback((label: string, due: string | null) => onAddAction(entry.id, label, due), [entry.id, onAddAction])
   const handleToggle = useCallback((actionId: string, done: boolean) => onToggleDone(entry.id, actionId, done), [entry.id, onToggleDone])
   const handlePatchAction = useCallback((actionId: string, patch: CaseloadActionInput) => onPatchAction(entry.id, actionId, patch), [entry.id, onPatchAction])
@@ -54,11 +46,6 @@ function RowDetailComponent({
 
   return (
     <div className="caseload-detail">
-      <section className="caseload-detail__section">
-        <h4 className="caseload-detail__title">{t('file_active.section.link')}</h4>
-        <PatientLinkControl patientId={entry.patient_id} patients={patients} onLink={handleLink} />
-      </section>
-
       <section className="caseload-detail__section">
         <h4 className="caseload-detail__title">{t('file_active.section.actions')}</h4>
         <ActionList

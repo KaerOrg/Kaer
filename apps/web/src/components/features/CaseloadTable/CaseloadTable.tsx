@@ -79,7 +79,15 @@ export function CaseloadTable({
         header: t('file_active.col.patient'),
         headerClassName: 'caseload-th--patient',
         cellClassName: 'caseload-cell--name',
-        cell: row => <NameCell entry={row.entry} onPatch={onPatch} />,
+        cell: (row, ctx) => (
+          <NameCell
+            entry={row.entry}
+            patients={patients}
+            expanded={ctx.expanded}
+            onToggle={ctx.toggleExpanded}
+            onPatch={onPatch}
+          />
+        ),
       },
       {
         id: 'status',
@@ -106,14 +114,7 @@ export function CaseloadTable({
         header: t('file_active.col.actions'),
         headerClassName: 'caseload-th--actions',
         cellClassName: 'caseload-cell--actions',
-        cell: (row, ctx) => (
-          <ActionsSummaryCell
-            actions={row.actions}
-            today={today}
-            expanded={ctx.expanded}
-            onToggle={ctx.toggleExpanded}
-          />
-        ),
+        cell: row => <ActionsSummaryCell actions={row.actions} today={today} />,
       },
       {
         id: 'waiting',
@@ -138,7 +139,6 @@ export function CaseloadTable({
       <RowDetail
         row={row}
         today={today}
-        patients={patients}
         onPatch={onPatch}
         onAddAction={onAddAction}
         onToggleDone={onToggleDone}

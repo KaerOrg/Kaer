@@ -5,6 +5,7 @@ export interface LinkablePatient {
   id: string
   name: string
   email: string
+  birthDate: string | null
   moduleTypes: readonly string[]
 }
 

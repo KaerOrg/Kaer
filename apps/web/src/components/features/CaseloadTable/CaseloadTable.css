@@ -121,6 +121,36 @@
   width: 100%;
 }
 
+/* ---- Cellule nom : chevron (déplie le détail) + nom ---- */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.name-cell__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.name-cell__toggle:hover { color: var(--color-primary); }
+
+.name-cell__dob {
+  flex-shrink: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 /* ---- Nom patient : lecture seule + crayon (édition sécurisée) ---- */
 .editable-name {
   display: flex;
@@ -135,6 +165,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.editable-name__text--clickable { cursor: pointer; }
+.editable-name__text--clickable:hover { text-decoration: underline; }
 
 .editable-name__edit {
   display: inline-flex;
@@ -226,21 +259,8 @@
   align-items: center;
   gap: var(--spacing-xs);
   width: 100%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
   color: var(--color-text);
-}
-
-.actions-summary:hover { background: var(--color-bg); }
-
-.actions-summary__chevron {
-  display: inline-flex;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
 }
 
 .actions-summary__top {
@@ -550,10 +570,10 @@
 .caseload-detail__section--actions .caseload-detail__title { color: #2563EB; }
 
 .caseload-detail__section--waits {
-  border-left-color: #D97706;
-  background: #FFFBEB;
+  border-left-color: #8B5CF6;
+  background: #F5F3FF;
 }
-.caseload-detail__section--waits .caseload-detail__title { color: #B45309; }
+.caseload-detail__section--waits .caseload-detail__title { color: #6D28D9; }
 
 .caseload-detail__section--observation {
   border-left-color: #22C55E;

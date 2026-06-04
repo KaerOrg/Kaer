@@ -1310,6 +1310,8 @@
     "name": {
       "edit": "Edit name"
     },
+    "toggle_detail": "Show / hide case details",
+    "dob_label": "Date of birth",
     "wait": {
       "label_label": "What we're waiting for",
       "relance_prefix": "chase on",

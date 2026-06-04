@@ -59,12 +59,15 @@ Au survol : **✓ Fait · ⏰ Reporter (+1j / +1sem / date) · ✎ Note**.
 
 Le tableau complet, triable et filtrable. C'est ici qu'on saisit et qu'on a la vue large.
 Saisie **au clic dans la cellule** (édition inline, enregistrement automatique).
-**Une ligne par patient** : la cellule « Actions » montre l'action la plus urgente + un badge
-« +N » ; un clic **déplie** un panneau à 4 sections — **Patient de l'app** (statut de liaison,
-lecture seule), **Actions** (cocher / ajouter / supprimer, chacune avec date + heure optionnelle),
-**En attente de retour** (étiquette + date de relance optionnelle), **Observations** (la plus
-récente + historique daté). Les **« Soins en cours »** et le résumé **« En attente de retour »**
-s'affichent dans la ligne ; l'**⭐ Important** épingle le patient en haut.
+**Une ligne par patient** : un clic sur le **nom du patient** (ou son chevron) **déplie** le détail ;
+la cellule « Actions » montre, en lecture seule, l'action la plus urgente + un badge « +N ». Le crayon
+à côté du nom reste réservé à l'édition du nom ; la **date de naissance** du patient lié s'affiche en
+petit à côté du nom. Le panneau déplié a 3 sections — **Actions** (cocher / ajouter / supprimer, chacune
+avec date + heure optionnelle), **En attente de retour** (étiquette + date de relance optionnelle),
+**Observations** (la plus récente + historique daté). Les **« Soins en cours »** et le résumé
+**« En attente de retour »** s'affichent dans la ligne ; l'**⭐ Important** épingle le patient en haut.
+La liaison patient (lié / invité / libre) reste **automatique** (pas d'encart dédié) ; seuls les
+**modules débloqués** du patient lié remontent en chips dans « Soins en cours ».
 
 **Édition du nom sécurisée.** Le nom du patient s'affiche en **lecture seule** ; l'édition demande
 un clic explicite sur le **crayon**, puis une **validation** (Entrée / ✓) — pas de modification

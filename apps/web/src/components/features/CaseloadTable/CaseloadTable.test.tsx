@@ -121,6 +121,13 @@ describe('CaseloadTable', () => {
     expect(onToggleDone).toHaveBeenCalledWith('e-1', 'a-1', true)
   })
 
+  it('ouvre le détail en cliquant sur le nom du patient', async () => {
+    renderTable()
+    expect(screen.queryByText('Aucune observation.')).toBeNull() // panneau fermé
+    fireEvent.click(screen.getByText('Bernard Hugo'))
+    expect(await screen.findByText('Aucune observation.')).toBeInTheDocument() // panneau ouvert
+  })
+
   it('déplie la ligne et force une action en urgent', async () => {
     const onPatchAction = vi.fn()
     renderTable({ onPatchAction })
@@ -138,21 +145,18 @@ describe('CaseloadTable', () => {
     expect(onAddWait).toHaveBeenCalledWith('e-1', 'Retour ASE', null)
   })
 
-  it('affiche le patient lié (statut) et ses modules débloqués', async () => {
+  it('affiche les modules débloqués du patient lié dans « Soins en cours »', () => {
     const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [] }
-    const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: ['phq9'] }]
+    const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', birthDate: null, moduleTypes: ['phq9'] }]
     const { container } = renderTable({ rows: [row], patients })
     // chip module visible dans la colonne Soins (sans dépliage)
     expect(container.querySelector('.module-chips .chip')).not.toBeNull()
-    // le patient lié apparaît dans le panneau
-    fireEvent.click(screen.getByRole('button', { expanded: false }))
-    expect(await screen.findByText(/Léa Martin — lea@x\.fr/)).toBeInTheDocument()
   })
 
-  it('affiche le statut « invité » pour un dossier issu d\'une invitation', async () => {
-    const row: CaseloadRowData = { entry: makeEntry({ invited_email: 'tom@x.fr' }), actions: [], waits: [] }
-    renderTable({ rows: [row] })
-    fireEvent.click(screen.getByRole('button', { expanded: false }))
-    expect(await screen.findByText(/tom@x\.fr/)).toBeInTheDocument()
+  it('affiche la date de naissance à côté du nom (patient lié)', () => {
+    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [] }
+    const patients = [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr', birthDate: '1990-03-12', moduleTypes: [] }]
+    renderTable({ rows: [row], patients })
+    expect(screen.getByText('12/03/1990')).toBeInTheDocument()
   })
 })

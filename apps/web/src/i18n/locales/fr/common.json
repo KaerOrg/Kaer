@@ -1414,6 +1414,8 @@
     "name": {
       "edit": "Modifier le nom"
     },
+    "toggle_detail": "Afficher / masquer le détail du dossier",
+    "dob_label": "Date de naissance",
     "wait": {
       "label_label": "Ce qu'on attend",
       "relance_prefix": "relancer le",

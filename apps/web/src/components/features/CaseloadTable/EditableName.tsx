@@ -6,13 +6,15 @@ export interface EditableNameProps {
   value: string
   onSave: (next: string) => void
   ariaLabel: string
+  /** Clic sur le nom (hors crayon) — sert à déplier/replier le détail du dossier. */
+  onActivate?: () => void
 }
 
 /**
  * Nom du patient en lecture seule par défaut — l'édition demande un clic explicite
  * sur le crayon, puis une validation (Entrée / ✓). Évite toute modification accidentelle.
  */
-export function EditableName({ value, onSave, ariaLabel }: EditableNameProps) {
+export function EditableName({ value, onSave, ariaLabel, onActivate }: EditableNameProps) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -42,7 +44,13 @@ export function EditableName({ value, onSave, ariaLabel }: EditableNameProps) {
   if (!editing) {
     return (
       <div className="editable-name">
-        <span className="editable-name__text" title={value}>{value}</span>
+        <span
+          className={`editable-name__text ${onActivate ? 'editable-name__text--clickable' : ''}`}
+          title={value}
+          onClick={onActivate}
+        >
+          {value}
+        </span>
         <button
           type="button"
           className="editable-name__edit"
