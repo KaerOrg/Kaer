@@ -21,8 +21,6 @@ import {
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
-import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
-import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -55,7 +53,6 @@ export interface ColumnFormLayoutProps {
 
 export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
   const t = useModuleT()
-  const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 
@@ -65,7 +62,6 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     const code = configField?.props[key]
     return code ? t(code) : ''
   }
-  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const requiredKeysProp = configField?.props['required_keys_any'] ?? ''
   const requiredKeysAny = useMemo(
     () => requiredKeysProp.split(',').map(k => k.trim()).filter(Boolean),
@@ -165,9 +161,6 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     try {
       const id = editingId ?? generateId()
       await saveFormEntry({ id, module_id: moduleId, values })
-      if (patient?.id && engagementEventType && !editingId) {
-        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
-      }
       await loadEntries()
       setMode('list')
       setEditingId(null)
@@ -177,7 +170,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     } finally {
       setSaving(false)
     }
-  }, [editingId, values, moduleId, patient, engagementEventType, requiredKeysAny, loadEntries, lbl, t, showToast])
+  }, [editingId, values, moduleId, requiredKeysAny, loadEntries, lbl, t, showToast])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>

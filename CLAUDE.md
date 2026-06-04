@@ -72,11 +72,11 @@ Row Level Security (RLS) activée sur toutes les tables.
 
 ## Règles métier fondamentales
 
-- **Aucune donnée clinique stockée** côté serveur (pas de diagnostic, pas de notes)
+- **Aucune donnée *interprétée* stockée côté serveur** (pas de diagnostic, pas de notes, pas de score labellisé) — seules les valeurs **brutes** saisies par le patient sont stockées, jamais une conclusion clinique
 - Auth par email/mot de passe uniquement
 - Un patient **ne peut pas s'inscrire seul** — il faut une invitation du praticien
-- Les données d'exercices sont **stockées en local** sur le téléphone du patient par défaut
-- Le patient peut **choisir** de partager ses données avec son praticien
+- Les données d'exercices sont écrites **en local d'abord** (SQLite, offline-first) sur le téléphone du patient, puis **synchronisées vers Supabase** (table `patient_entries`) sous gate de consentement
+- Le partage avec le praticien est piloté par le flag **`patients.share_consent`** (contrôlé par le patient depuis ses réglages, opt-out `default true`) : il alimente `RemoteSyncService.setConsentEnabled` au login ET filtre la RLS de lecture praticien sur `patient_entries`. **Source de vérité unique des saisies = `patient_entries`** ; les graphes praticien la lisent. Les événements de notification (pause des rappels) vivent dans `notification_events`. Circuit complet : [`docs/patient-data-sync.md`](docs/patient-data-sync.md)
 - Le praticien peut **révoquer** un module à tout moment
 - **Notifications** : le praticien programme les rappels, le patient peut ajuster l'heure
 
@@ -164,7 +164,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Agenda du sommeil (`sleep_diary`) — moteur générique (`preview_kind='sleep_journal'`), agenda TCC-I 7 jours, SQLite local
 - [x] Module Plan de crise (`crisis_plan`) — SQLite local, 6 étapes Stanley & Brown, boutons urgence 15/3114, tests Jest+RNTL + enrichissement VHB-EF : 4 nouvelles sections (raisons de tenir, mode urgence 1-tap, cartes coping, engagement), `crisis_anchors` SQLite, `crisisPlanService` mobile+web, 17 tests Jest mobile + 4 tests Vitest web
 - [x] Module Balance décisionnelle (`decisional_balance`) — migré vers moteur générique (`preview_kind = 'decision_grid'`), grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, `plan_items.weight` + `module_settings`, sous-composant `EditableItemsList` partagé avec `editable_steps`, signal d'observance Supabase, 10 tests Jest
-- [x] Table `patient_engagement_logs` créée sur Supabase (RLS, policies insert patient + select praticien)
+- [x] Stockage serveur des saisies consolidé sur `patient_entries` (table unique, sync outbox) + flag de consentement `patients.share_consent` (opt-out, contrôlé patient, filtre RLS praticien) + `notification_events` pour les événements de notification. La table `patient_engagement_logs` (historique) a été supprimée (2026-06-04)
 - [x] Module PHQ-9 (`phq9`) — 9 items, SQLite local, tests RNTL
 - [x] Module GAD-7 (`gad7`) — 7 items, SQLite local, tests RNTL
 - [x] Module BSL-23 (`bsl23`) — 23 items, SQLite local, tests RNTL

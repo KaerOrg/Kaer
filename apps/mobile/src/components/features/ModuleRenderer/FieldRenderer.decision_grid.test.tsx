@@ -41,10 +41,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateShortYear: (str: string) => `sy:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
@@ -57,7 +53,6 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import * as engagementService from '../../../services/engagementService'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -225,7 +220,7 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
     })
   })
 
-  it("le bouton Sauvegarder appelle setModuleSetting + logEvent", async () => {
+  it("le bouton Sauvegarder appelle setModuleSetting", async () => {
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('save-decision-grid')).toBeTruthy())
 
@@ -235,9 +230,6 @@ describe('FieldRenderer — decision_grid (DecisionGridLayout)', () => {
     await waitFor(() => {
       expect(database.setModuleSetting).toHaveBeenCalledWith(
         'decisional_balance', 'target_behavior', 'Mon objectif'
-      )
-      expect(engagementService.logEvent).toHaveBeenCalledWith(
-        'patient-test-id', 'UPDATE_DECISIONAL_BALANCE', {}
       )
     })
   })

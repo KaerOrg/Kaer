@@ -25,10 +25,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateNumeric: (str: string) => `num:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
@@ -42,7 +38,6 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-
 import { FieldRenderer } from './FieldRenderer'
 import { useToast } from '../../../contexts/ToastContext'
 import * as database from '../../../lib/database'
-import * as engagement from '../../../services/engagementService'
 import type { ContentField } from '../../../services/moduleService'
 
 jest.setTimeout(15000)
@@ -150,7 +145,7 @@ describe('FieldRenderer — daily_checkin (DailyCheckinLayout)', () => {
     expect(database.saveDailyEntry).not.toHaveBeenCalled()
   })
 
-  it('enregistre une nouvelle saisie avec le statut sélectionné et appelle logEvent', async () => {
+  it('enregistre une nouvelle saisie avec le statut sélectionné', async () => {
     renderLayout()
     await waitFor(() => expect(screen.getByTestId('status-taken')).toBeTruthy())
 
@@ -168,11 +163,6 @@ describe('FieldRenderer — daily_checkin (DailyCheckinLayout)', () => {
         })
       )
     })
-    expect(engagement.logEvent).toHaveBeenCalledWith(
-      'patient-test-id',
-      'SAVE_MEDICATION_ADHERENCE',
-      {}
-    )
   })
 
   it('pré-remplit le statut et les notes si une saisie existe pour aujourd\'hui', async () => {

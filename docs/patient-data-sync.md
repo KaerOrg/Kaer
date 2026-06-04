@@ -13,9 +13,14 @@ Les données d'exercices patient (questionnaires, journaux, formulaires, etc.) s
 
 L'écriture se fait toujours en SQLite en premier. Supabase est alimenté de façon asynchrone. L'app est 100 % fonctionnelle sans connexion.
 
-### 2. Consentement explicite (MDR 2017/745)
+### 2. Consentement piloté par un flag de profil (MDR 2017/745)
 
-Aucune donnée ne quitte l'appareil sans **opt-in explicite du patient**. `RemoteSyncService.enqueue()` est un no-op tant que `setConsentEnabled(true)` n'a pas été appelé. Le praticien ne peut donc lire les données d'un patient que si ce patient a consenti au partage.
+Le partage est gouverné par le flag **`patients.share_consent`** (opt-out, `default true`), **contrôlé par le patient** depuis ses réglages (`ProfileScreen` → `authStore.setShareConsent`). Ce flag :
+
+- est chargé au login (`fetchTeenContext`) et alimente `RemoteSyncService.setConsentEnabled(flag)` — `enqueue()`/`sync()` restent des no-ops si le flag est `false` ;
+- **filtre aussi la RLS** de lecture praticien sur `patient_entries` (défense en profondeur) : un patient qui coupe le partage devient invisible côté praticien, sans condition à coder dans l'app web.
+
+> **État au 2026-06-04 :** flag opt-out `default true` (les saisies remontent tant que le patient ne coupe pas). Un vrai écran de consentement explicite (opt-in) reste à arbitrer pour la mise en production — cf. [`TODO.md`](../TODO.md) §3.
 
 ### 3. Code affiche, jamais il ne conclut
 
@@ -230,9 +235,20 @@ Pour la reconnexion réseau, utiliser `@react-native-community/netinfo` (non enc
 
 | Phase | État | Description |
 |---|---|---|
-| **1 — Infrastructure** | ✅ Livré | `patient_entries` Supabase, `SyncOutboxStore`, `RemoteSyncService`, 26 tests |
+| **1 — Infrastructure** | ✅ Livré | `SyncOutboxStore`, `RemoteSyncService`, 26 tests. ⚠️ La table `patient_entries` n'a été **appliquée en prod que le 2026-06-04** (elle existait dans `schema.sql` mais n'avait jamais été exécutée — d'où le gap historique). |
 | **2 — Dual-write modules** | ✅ Livré | `syncUpsert`/`syncDelete` helpers, 9 services + crisis + motivational, hook foreground, 54 tests |
-| **3 — Vue praticien** | 🔜 À faire | `PatientDataService` web + composants de visualisation neutre (sans interprétation) |
+| **3 — Vue praticien** | 🟡 Partiel | Les **graphes d'évolution** (`PatientEvolutionTab` + `apps/web/src/services/engagementService.ts`) lisent `patient_entries.payload` (échelles, mood, fear, effets indésirables). Reste : vues neutres pour les modules non encore graphés (sommeil, Beck, émotions…). |
+
+## Historique — suppression de `patient_engagement_logs`
+
+Avant la bascule, les graphes praticien lisaient une table d'« événements » distincte,
+`patient_engagement_logs` (`event_type` + `metadata` léger), alimentée directement par
+`engagementService.logEvent` (mobile) et `notificationService.logScaleSubmission`.
+
+Le 2026-06-04, cette table a été **supprimée** et le système consolidé :
+- Les saisies cliniques (et l'observance, dérivée en comptant les lignes) vivent dans **`patient_entries`** (payload complet, offline-first, idempotent). Les 416 lignes de démo ont été backfillées.
+- Les **événements de notification** (`NOTIFICATION_PAUSED`, alimentant le flux d'activité praticien) vivent dans la table dédiée **`notification_events`** — concept distinct des saisies.
+- `engagementService.logEvent` (mobile) et `logScaleSubmission` ont été supprimés ; les layouts/écrans n'émettent plus de signal séparé.
 
 ---
 

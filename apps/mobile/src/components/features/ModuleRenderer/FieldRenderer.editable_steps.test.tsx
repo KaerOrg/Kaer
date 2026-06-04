@@ -2,7 +2,6 @@ jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../../services/engagementService', () => ({ logEvent: jest.fn() }))
 jest.mock('../../../store/authStore', () => ({ useAuthStore: () => null }))
 
 jest.mock('../../../lib/database', () => ({

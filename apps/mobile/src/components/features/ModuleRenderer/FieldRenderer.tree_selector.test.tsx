@@ -30,10 +30,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateNumeric: (str: string) => `num:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),

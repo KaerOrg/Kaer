@@ -370,7 +370,7 @@ export interface Database {
         Update: Record<string, never>
         Relationships: []
       }
-      patient_engagement_logs: {
+      notification_events: {
         Row: {
           id: string
           patient_id: string
@@ -384,6 +384,30 @@ export interface Database {
           metadata?: Record<string, unknown>
         }
         Update: Record<string, never>
+        Relationships: []
+      }
+      patient_entries: {
+        Row: {
+          id: string
+          patient_id: string
+          local_id: string
+          module_id: string
+          entry_kind: string
+          payload: Record<string, unknown>
+          client_created_at: string
+          synced_at: string
+        }
+        Insert: {
+          patient_id: string
+          local_id: string
+          module_id: string
+          entry_kind: string
+          payload?: Record<string, unknown>
+          client_created_at: string
+        }
+        Update: {
+          payload?: Record<string, unknown>
+        }
         Relationships: []
       }
       availability_rules: {

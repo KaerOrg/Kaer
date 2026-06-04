@@ -42,10 +42,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateShort: (str: string) => `short:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
@@ -59,7 +55,6 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import * as engagementService from '../../../services/engagementService'
 import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
@@ -204,7 +199,7 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 
-  it('enregistre une nouvelle activité et émet le signal d\'engagement', async () => {
+  it('enregistre une nouvelle activité', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
@@ -215,11 +210,6 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
         expect.objectContaining({ label: 'Marche', done: 0 })
       )
     })
-    expect(engagementService.logEvent).toHaveBeenCalledWith(
-      'patient-test-id',
-      'SAVE_BEHAVIORAL_ACTIVATION',
-      expect.any(Object)
-    )
   })
 
   it('toggle l\'état done depuis l\'entrée', async () => {
@@ -246,7 +236,7 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     expect(database.getActivityRecord).toHaveBeenCalledWith('rec-1')
   })
 
-  it('édite sans émettre le signal d\'engagement', async () => {
+  it('édite un enregistrement existant', async () => {
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
     ;(database.getActivityRecord as jest.Mock).mockResolvedValue(MOCK_RECORD)
     renderLayout()
@@ -256,7 +246,6 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalled()
     })
-    expect(engagementService.logEvent).not.toHaveBeenCalled()
   })
 
   it('toggle done directement depuis la liste', async () => {

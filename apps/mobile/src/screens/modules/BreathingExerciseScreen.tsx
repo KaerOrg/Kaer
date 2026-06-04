@@ -11,8 +11,6 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { getTechnique, getCycleDuration, type BreathingPhase } from '../../constants/breathingTechniques'
 import { generateId } from '../../lib/database'
 import { saveBreathingSession } from '../../services/breathingService'
-import { logEvent } from '../../services/engagementService'
-import { useAuthStore } from '../../store/authStore'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTranslation } from 'react-i18next'
@@ -133,7 +131,6 @@ export default function BreathingExerciseScreen() {
   const { t } = useTranslation()
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
-  const patient = useAuthStore((s) => s.patient)
   const { showConfirm } = useConfirmDialog()
 
   const technique = getTechnique(route.params.techniqueKey)
@@ -162,14 +159,11 @@ export default function BreathingExerciseScreen() {
           technique_key: technique.key,
           duration_seconds: totalSeconds,
         })
-        if (patient?.id) {
-          await logEvent(patient.id, 'SAVE_BREATHING_SESSION')
-        }
       } catch {
         // Échec silencieux — la session n'est pas critique
       }
     }
-  }, [totalSeconds, technique, patient])
+  }, [totalSeconds, technique])
 
   const handleStop = useCallback(() => {
     showConfirm({

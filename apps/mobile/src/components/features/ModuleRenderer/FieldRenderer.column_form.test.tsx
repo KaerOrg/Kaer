@@ -27,10 +27,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateNumeric: (str: string) => `num:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
@@ -43,7 +39,6 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import * as engagement from '../../../services/engagementService'
 import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
@@ -183,7 +178,7 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
     expect(database.saveFormEntry).not.toHaveBeenCalled()
   })
 
-  it('enregistre une nouvelle entrée et appelle logEvent', async () => {
+  it('enregistre une nouvelle entrée', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('new-entry'))
     fireEvent.changeText(screen.getByTestId('field-situation'), 'au bureau, lundi matin')
@@ -197,14 +192,9 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
         })
       )
     })
-    expect(engagement.logEvent).toHaveBeenCalledWith(
-      'patient-test-id',
-      'SAVE_BECK_THOUGHT_RECORD',
-      {}
-    )
   })
 
-  it('édite une entrée existante sans déclencher logEvent', async () => {
+  it('édite une entrée existante', async () => {
     ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
     renderLayout()
     fireEvent.press(await screen.findByTestId('edit-entry-1'))
@@ -217,7 +207,6 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
         expect.objectContaining({ id: 'entry-1' })
       )
     })
-    expect(engagement.logEvent).not.toHaveBeenCalled()
   })
 
   it('annule la saisie et revient à la liste', async () => {

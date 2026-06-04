@@ -184,17 +184,17 @@ export async function fetchSideEffectsObservance(
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const { data } = await supabase
-    .from('patient_engagement_logs')
-    .select('created_at')
+    .from('patient_entries')
+    .select('client_created_at')
     .eq('patient_id', patientId)
-    .eq('event_type', 'SCALE_SUBMITTED')
-    .contains('metadata', { module_type: 'medication_side_effects' })
-    .gte('created_at', monthStart)
-    .order('created_at', { ascending: false })
+    .eq('entry_kind', 'scale_entry')
+    .eq('module_id', 'medication_side_effects')
+    .gte('client_created_at', monthStart)
+    .order('client_created_at', { ascending: false })
   const rows = data ?? []
   return {
     count: rows.length,
-    lastDate: rows[0]?.created_at ?? null,
+    lastDate: rows[0]?.client_created_at ?? null,
   }
 }
 

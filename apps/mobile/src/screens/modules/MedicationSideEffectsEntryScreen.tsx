@@ -5,8 +5,8 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { saveScaleEntry, getScaleEntryById, generateId } from '../../lib/database'
-import { logScaleSubmission } from '../../services/notificationService'
+import { getScaleEntryById, generateId } from '../../lib/database'
+import { saveScaleEntry } from '../../services/scaleEntryService'
 import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
@@ -100,10 +100,9 @@ export default function MedicationSideEffectsEntryScreen() {
       subscale_scores: subscale,
       created_at: entryDate.toISOString(),
     })
-    if (patient && !isEditing) logScaleSubmission(patient.id, SCALE_ID)
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, saving, effects, values, entry_id, isEditing, patient, navigation, entryDate])
+  }, [allAnswered, saving, effects, values, entry_id, navigation, entryDate])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={accentColor} size="large" /></View>

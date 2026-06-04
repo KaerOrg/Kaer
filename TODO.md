@@ -60,3 +60,23 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
 - [ ] `src/components/ui/Chart/LineChart/LineChart.tsx:134` — `error` :
       « Cannot create components during render » (`buildTooltipContent` crée un composant
       pendant le render). **Fait échouer `npm run lint`** (seule `error`). Hors périmètre PR.
+
+## 3. Consolidation mono-table `patient_entries` — ✅ livrée (2026-06-04)
+
+Toutes les saisies cliniques vivent désormais dans **`patient_entries`** (pipeline outbox
+`syncUpsert` → `sync_outbox` → `RemoteSyncService`). Le consentement est un flag
+`patients.share_consent` (opt-out, contrôlé par le patient) qui pilote la sync ET filtre la
+RLS de lecture praticien. Les événements de notification sont dans `notification_events`.
+
+Fait :
+- [x] Backfill des 416 lignes de démo `patient_engagement_logs` → `patient_entries`.
+- [x] Graphes web + observance lisent `patient_entries`.
+- [x] `GROUNDING_SESSION_COMPLETED` (mort, non émis) abandonné ; `NOTIFICATION_PAUSED` → `notification_events`.
+- [x] Suppression de `logScaleSubmission` + `logEvent` cliniques + service `engagementService` (mobile).
+- [x] `DROP TABLE patient_engagement_logs` (prod + `schema.sql` + type web).
+- [x] Flag `patients.share_consent` + toggle patient (`ProfileScreen`) + RLS filtrée.
+
+Reste :
+- [ ] **Consentement RGPD** : le flag est en **opt-out `default true`** (les saisies remontent
+      tant que le patient ne coupe pas). Arbitrer un vrai **opt-in explicite** (écran de
+      consentement à l'onboarding + traçabilité du choix) avant mise en production commerciale.

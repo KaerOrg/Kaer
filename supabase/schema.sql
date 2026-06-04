@@ -66,13 +66,20 @@ create table if not exists public.practitioners (
 
 -- 2. Profils des patients (créé automatiquement à l'inscription)
 create table if not exists public.patients (
-  id          uuid        primary key references auth.users(id) on delete cascade,
-  email       text        not null,
-  first_name  text        not null default '',
-  last_name   text        not null default '',
-  avatar_url  text,
-  created_at  timestamptz not null default now()
+  id            uuid        primary key references auth.users(id) on delete cascade,
+  email         text        not null,
+  first_name    text        not null default '',
+  last_name     text        not null default '',
+  avatar_url    text,
+  -- Consentement de partage des saisies vers le praticien (opt-out, contrôlé par le patient).
+  -- Pilote la sync mobile (RemoteSyncService) ET la RLS de lecture praticien sur patient_entries.
+  share_consent boolean     not null default true,
+  created_at    timestamptz not null default now()
 );
+
+-- Idempotent : ajoute la colonne sur une base patients déjà existante.
+alter table public.patients
+  add column if not exists share_consent boolean not null default true;
 
 -- 3. Relation praticien ↔ patient
 create table if not exists public.practitioner_patients (
@@ -469,32 +476,42 @@ create policy "avatars_select_public" on storage.objects
 
 
 -- ============================================================
--- TABLE : patient_engagement_logs (Observance / Engagement)
+-- TABLE : notification_events (Événements de notification)
 -- ============================================================
--- Suivi anonymisé de l'activité patient (aucune donnée clinique).
-create table if not exists public.patient_engagement_logs (
-  id          uuid        default gen_random_uuid() primary key,
-  patient_id  uuid        references auth.users(id) on delete cascade,
+-- Concept distinct des saisies cliniques : journal des actions du patient sur
+-- ses rappels (ex. mise en pause). Alimente le flux d'activité praticien
+-- (ActivityFeedPanel). Pas de donnée clinique.
+create table if not exists public.notification_events (
+  id          uuid        primary key default gen_random_uuid(),
+  patient_id  uuid        not null references public.patients(id) on delete cascade,
   event_type  text        not null,
-  metadata    jsonb       default '{}'::jsonb,
-  created_at  timestamptz default now()
+  metadata    jsonb       not null default '{}'::jsonb,
+  created_at  timestamptz not null default now()
 );
 
-alter table public.patient_engagement_logs enable row level security;
+create index if not exists idx_notification_events_patient_date
+  on public.notification_events(patient_id, created_at desc);
 
-drop policy if exists "Patients can insert their own logs" on public.patient_engagement_logs;
-create policy "Patients can insert their own logs"
-  on public.patient_engagement_logs for insert
+alter table public.notification_events enable row level security;
+
+drop policy if exists "notification_events_patient_insert" on public.notification_events;
+create policy "notification_events_patient_insert"
+  on public.notification_events for insert
   with check (auth.uid() = patient_id);
 
-drop policy if exists "Practitioners can view logs of their patients" on public.patient_engagement_logs;
-create policy "Practitioners can view logs of their patients"
-  on public.patient_engagement_logs for select
+drop policy if exists "notification_events_patient_select" on public.notification_events;
+create policy "notification_events_patient_select"
+  on public.notification_events for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "notification_events_practitioner_select" on public.notification_events;
+create policy "notification_events_practitioner_select"
+  on public.notification_events for select
   using (
     exists (
-      select 1 from public.practitioner_patients
-      where practitioner_id = auth.uid()
-        and patient_id = public.patient_engagement_logs.patient_id
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.notification_events.patient_id
     )
   );
 
@@ -1418,14 +1435,20 @@ create policy "patient_entries_patient_delete"
   on public.patient_entries for delete
   using (auth.uid() = patient_id);
 
--- Praticien : lecture seule sur les entrées de ses patients liés
+-- Praticien : lecture seule sur les entrées de ses patients liés,
+-- UNIQUEMENT si le patient a activé le partage (share_consent = true).
 drop policy if exists "patient_entries_practitioner_select" on public.patient_entries;
 create policy "patient_entries_practitioner_select"
   on public.patient_entries for select
   using (
     exists (
-      select 1 from public.practitioner_patients
-      where practitioner_id = auth.uid()
-        and patient_id = public.patient_entries.patient_id
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.patient_entries.patient_id
+    )
+    and exists (
+      select 1 from public.patients pat
+      where pat.id = public.patient_entries.patient_id
+        and pat.share_consent = true
     )
   );

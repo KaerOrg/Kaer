@@ -19,8 +19,6 @@ import {
 } from '../../../../../lib/database'
 import { saveDailyEntry, deleteDailyEntry } from '../../../../../services/dailyEntryService'
 import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
-import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
-import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -39,7 +37,6 @@ function todayISO(): string {
 
 export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps) {
   const t = useModuleT()
-  const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 
@@ -49,7 +46,6 @@ export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps
     const code = configField?.props[key]
     return code ? t(code) : ''
   }
-  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
 
   const statusOptions = useMemo(
     () => fields
@@ -103,9 +99,6 @@ export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps
         notes: notes.trim() || null,
       }
       await saveDailyEntry(entry)
-      if (patient?.id && engagementEventType) {
-        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
-      }
       setExistingId(entry.id)
       await loadData()
       const savedMsg = lbl('saved_message')
@@ -115,7 +108,7 @@ export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps
     } finally {
       setSaving(false)
     }
-  }, [selectedValue, existingId, notes, moduleId, todayDate, patient, engagementEventType, loadData, lbl, t, showToast])
+  }, [selectedValue, existingId, notes, moduleId, todayDate, loadData, lbl, t, showToast])
 
   const handleDelete = useCallback((entry: DailyEntry) => {
     showConfirm({
