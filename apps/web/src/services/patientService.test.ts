@@ -4,7 +4,12 @@ vi.mock('../lib/supabase', () => ({
   supabase: { from: vi.fn() },
 }))
 
+vi.mock('./auditService', () => ({
+  logDataAccess: vi.fn(),
+}))
+
 import { supabase } from '../lib/supabase'
+import { logDataAccess } from './auditService'
 import {
   fetchPatientHeader,
   fetchPatientOptions,
@@ -137,12 +142,40 @@ describe('patientService.fetchPatientHeader', () => {
     })
   })
 
+  it("journalise l'accès au dossier patient (audit RGPD)", async () => {
+    vi.mocked(supabase.from).mockReturnValue(
+      makeChain({
+        data: {
+          patient_alias: null,
+          patient_first_name: null,
+          patient_last_name: null,
+          teen_mode: false,
+          created_at: '2024-01-01T00:00:00Z',
+          general_note: null,
+          patients: { email: 'p@t.fr', first_name: null, last_name: null },
+        },
+        error: null,
+      }) as never
+    )
+
+    await fetchPatientHeader('p-1', 'pat-1')
+
+    expect(logDataAccess).toHaveBeenCalledWith({
+      action: 'read',
+      targetTable: 'patients',
+      targetId: 'pat-1',
+      patientId: 'pat-1',
+      metadata: { scope: 'header' },
+    })
+  })
+
   it('retourne null si la relation n’existe pas', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
 
     const result = await fetchPatientHeader('p-1', 'pat-1')
 
     expect(result).toBeNull()
+    expect(logDataAccess).not.toHaveBeenCalled()
   })
 })
 

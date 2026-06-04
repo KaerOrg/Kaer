@@ -192,6 +192,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module NSI — Sévérité des cauchemars (`nsi`) — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), SQLite `nsi_entries`
 - [x] Module Effets indésirables du traitement (`medication_side_effects`) — refonte tracker multi-dimensions (pattern `mood_tracker` via composant générique partagé `DimensionTrackerView` mobile + `SliderDashboardLayout`/`slider_dashboard` web), effets suivis paramétrables par patient (12 fixes + personnalisés, config `patient_modules.config.tracked_effects` partagée web↔mobile), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries`, tests Jest + Vitest
 - [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
+- [~] Conformité RGPD/HDS (épic GitHub #29) — chantiers : journal d'audit #25, MFA praticien #26, droits patient (export/effacement) #27, conservation/purge #28. **#25 livré** : table `access_audit_log` (service_role only, RLS sans policy client), triggers `fn_audit_write` sur 12 tables sensibles + RPC `log_data_access` (acteur dérivé de `auth.uid()`, jamais de contenu clinique stocké), service web `auditService.ts` (best-effort), `fetchPatientHeader` instrumenté. Doc : [`docs/audit-log.md`](docs/audit-log.md). Items non-code (hébergement HDS, DPO, DPA, CGU, pentest) suivis dans #29
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -370,6 +371,7 @@ Points d'entrée fréquents :
 | `docs/modules.md` | Liste et statut de tous les modules thérapeutiques |
 | `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
 | `docs/services.md` | Couche services web et mobile (responsabilités, conventions, patterns) |
+| `docs/audit-log.md` | Journal d'audit des accès (RGPD/HDS) — `access_audit_log`, triggers + RPC `log_data_access` |
 | `docs/architecture.md` / `docs/database.md` | Vue d'ensemble technique et schéma BDD |
 | `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |

@@ -530,7 +530,20 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      // Journal d'audit — journalise un accès applicatif (lecture/export/effacement/purge).
+      // L'acteur est dérivé de auth.uid() côté base (SECURITY DEFINER) ; le client ne le passe pas.
+      log_data_access: {
+        Args: {
+          p_action: string
+          p_target_table: string
+          p_target_id?: string | null
+          p_patient_id?: string | null
+          p_metadata?: Record<string, string | number | boolean | null>
+        }
+        Returns: undefined
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
