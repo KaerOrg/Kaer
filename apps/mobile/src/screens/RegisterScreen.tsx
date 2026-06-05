@@ -82,7 +82,7 @@ export default function RegisterScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>PsyTool</Text>
+          <Text style={styles.logo}>Kær</Text>
           <Text style={styles.subtitle}>{t('auth.register_subtitle')}</Text>
         </View>
 

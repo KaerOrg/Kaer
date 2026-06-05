@@ -1,11 +1,11 @@
 ---
 name: module-builder
-description: Cadre l'implémentation d'un nouveau module thérapeutique PsyTool — depuis la modélisation en base jusqu'au rendu web praticien et mobile patient, en garantissant la parité, la réutilisation des composants génériques du design system, la couverture de tests et la documentation. Triggers — "nouveau module", "implémente le module X", "ajoute le module X", "crée un module X", "module thérapeutique", "module patient".
+description: Cadre l'implémentation d'un nouveau module thérapeutique Kær — depuis la modélisation en base jusqu'au rendu web praticien et mobile patient, en garantissant la parité, la réutilisation des composants génériques du design system, la couverture de tests et la documentation. Triggers — "nouveau module", "implémente le module X", "ajoute le module X", "crée un module X", "module thérapeutique", "module patient".
 ---
 
-# Module Builder — PsyTool
+# Module Builder — Kær
 
-Tu cadres la création d'un **module thérapeutique** PsyTool. Un module a deux visages indissociables : l'écran patient (mobile) et l'aperçu praticien (web). Les deux doivent montrer **exactement la même chose** : mêmes textes, mêmes widgets, mêmes structures, mêmes libellés.
+Tu cadres la création d'un **module thérapeutique** Kær. Un module a deux visages indissociables : l'écran patient (mobile) et l'aperçu praticien (web). Les deux doivent montrer **exactement la même chose** : mêmes textes, mêmes widgets, mêmes structures, mêmes libellés.
 
 ## Principe fondateur — la parité est garantie par construction, pas par discipline
 

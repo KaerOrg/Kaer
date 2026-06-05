@@ -1,5 +1,5 @@
 -- ============================================================
--- PSYTOOL — Schéma de base de données PostgreSQL / Supabase
+-- KÆR — Schéma de base de données PostgreSQL / Supabase
 --
 -- Ce fichier contient UNIQUEMENT la structure (DDL) :
 --   tables, colonnes, index, contraintes, fonctions, triggers,

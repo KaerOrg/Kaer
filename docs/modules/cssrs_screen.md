@@ -17,7 +17,7 @@ Traduction française officielle : Columbia University / NIMH.
 La C-SSRS (Columbia Suicide Severity Rating Scale) est l'échelle de référence internationale pour l'évaluation standardisée de l'idéation et des comportements suicidaires. La version de dépistage (Screen) est utilisée pour le repérage rapide en consultation ou entre deux séances.
 
 **Population cible :** 15 ans et plus.
-**Mode d'administration :** Hétéro-évaluation par le clinicien (standard) ou auto-évaluation (version Self-Report — utilisée dans PsyTool).
+**Mode d'administration :** Hétéro-évaluation par le clinicien (standard) ou auto-évaluation (version Self-Report — utilisée dans Kær).
 **Durée :** 5-10 minutes.
 
 ## Structure de l'échelle
@@ -68,7 +68,7 @@ Ces valeurs sont **brutes**, sans seuil ni interprétation algorithmique — con
 ## Différences vs C-SSRS clinique standard
 
 1. **Mode d'administration** : Hétéro-évaluation en clinique → Auto-évaluation dans l'app (entre séances)
-2. **Skip logic omise** : Le protocole standard prévoit de sauter aux comportements si items 1 ET 2 = Non. Omis dans PsyTool pour simplicité et complétude des données.
+2. **Skip logic omise** : Le protocole standard prévoit de sauter aux comportements si items 1 ET 2 = Non. Omis dans Kær pour simplicité et complétude des données.
 3. **Items d'intensité absents** : La version Screen n'inclut pas les items d'intensité (fréquence, durée, contrôlabilité, raison). Cohérent avec la version Screen standard.
 
 ## Implémentation technique

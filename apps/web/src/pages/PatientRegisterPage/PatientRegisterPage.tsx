@@ -64,7 +64,7 @@ export function PatientRegisterPage() {
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
             <p className="login-card__subtitle">Vérification de l'invitation…</p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export function PatientRegisterPage() {
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
           </div>
           <div className="patient-register__invalid">
             <div className="patient-register__invalid-icon"><TriangleAlert size={40} /></div>
@@ -96,12 +96,12 @@ export function PatientRegisterPage() {
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
           </div>
           <div className="patient-register__success">
             <div className="patient-register__success-icon"><CheckCircle size={48} /></div>
             <h2>Compte créé !</h2>
-            <p>Votre compte a bien été créé. Téléchargez l'application mobile PsyTool pour accéder à vos outils thérapeutiques.</p>
+            <p>Votre compte a bien été créé. Téléchargez l'application mobile Kær pour accéder à vos outils thérapeutiques.</p>
           </div>
         </div>
       </div>
@@ -113,7 +113,7 @@ export function PatientRegisterPage() {
       <div className="login-card">
         <div className="login-card__header">
           <div className="login-card__logo">🧠</div>
-          <h1 className="login-card__title">PsyTool</h1>
+          <h1 className="login-card__title">Kær</h1>
           <p className="login-card__subtitle">Créer votre compte patient</p>
         </div>
 

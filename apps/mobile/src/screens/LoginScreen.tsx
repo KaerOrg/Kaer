@@ -60,7 +60,7 @@ export default function LoginScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>PsyTool</Text>
+          <Text style={styles.logo}>Kær</Text>
           <Text style={styles.subtitle}>{t('auth.app_subtitle')}</Text>
         </View>
 

@@ -136,7 +136,7 @@
     "avatar_error": "Unable to update the photo. Please try again.",
     "notif_denied_title": "Permission denied",
     "notif_denied_message": "Allow notifications in your phone settings to enable reminders.",
-    "version": "PsyTool v1.0 · Data secured on your device",
+    "version": "Kær v1.0 · Data secured on your device",
     "section_language": "Language",
     "language_label": "App language"
   },
@@ -1424,7 +1424,7 @@
     "day_dim": "S",
     "onboarding": {
       "title": "Stay supported between your sessions",
-      "intro": "With your consent, PsyTool can send reminders to your phone.",
+      "intro": "With your consent, Kær can send reminders to your phone.",
       "benefit_exercises_title": "Your exercises at the right time",
       "benefit_exercises_text": "A discreet reminder at the times set with your care provider, so you don't forget your therapeutic exercises.",
       "benefit_appointments_title": "Your appointments",

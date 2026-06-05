@@ -14,9 +14,9 @@ Kessler RC, Adler L, Ament M, et al. *The World Health Organization Adult ADHD S
 - **Score total : 0 à 24** (somme des 6 items)
 - L'interprétation appartient exclusivement au praticien
 
-## Conformité MDR (règle d'or PsyTool)
+## Conformité MDR (règle d'or Kær)
 
-L'ASRS-6 possède des seuils de dépistage publiés (items 1–3 ≥ 2, items 4–6 ≥ 3, dépistage positif si ≥ 4 items positifs). **PsyTool n'implémente aucun de ces seuils.** Le code affiche uniquement le score brut (0–24). L'interprétation appartient exclusivement au praticien lors de la consultation.
+L'ASRS-6 possède des seuils de dépistage publiés (items 1–3 ≥ 2, items 4–6 ≥ 3, dépistage positif si ≥ 4 items positifs). **Kær n'implémente aucun de ces seuils.** Le code affiche uniquement le score brut (0–24). L'interprétation appartient exclusivement au praticien lors de la consultation.
 
 ## Clé de module
 

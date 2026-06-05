@@ -1,4 +1,4 @@
-# Moteur de définition de module — PsyTool
+# Moteur de définition de module — Kær
 
 Ce document décrit le circuit complet : base de données → service → moteur de rendu → composants React/React Native.
 

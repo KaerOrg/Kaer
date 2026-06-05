@@ -134,9 +134,9 @@ Deno.serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'PsyTool <onboarding@resend.dev>',
+          from: 'Kær <onboarding@resend.dev>',
           to: supportRecipients,
-          subject: `[Support PsyTool] ${reasonLabel}`,
+          subject: `[Support Kær] ${reasonLabel}`,
           html: `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;"><h2 style="font-size: 18px;">Nouvelle demande de support</h2><p><strong>Motif :</strong> ${reasonLabel}</p>${descriptionHtml}<p><strong>${origin}</strong></p><p><strong>Email de contact :</strong> ${userEmail ?? '—'}</p><p style="color:#888; font-size:12px;">Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action (ex. réinitialisation 2FA).</p></div>`,
         }),
       })

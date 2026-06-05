@@ -1,4 +1,4 @@
-# Documentation PsyTool
+# Documentation Kær
 
 Index général de la documentation du monorepo. Pour le contexte projet, voir [`CLAUDE.md`](../CLAUDE.md) à la racine.
 

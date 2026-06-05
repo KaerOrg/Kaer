@@ -52,7 +52,7 @@ export function LoginPage() {
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
             <p className="login-card__subtitle">{t('auth.mfa.challenge_subtitle')}</p>
           </div>
           <MfaChallengeForm />
@@ -67,7 +67,7 @@ export function LoginPage() {
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
           </div>
           <div className="login-card__confirm-email">
             <div className="login-card__confirm-icon">📧</div>
@@ -87,7 +87,7 @@ export function LoginPage() {
       <div className="login-card">
         <div className="login-card__header">
           <div className="login-card__logo"><BrainCircuit size={36} /></div>
-          <h1 className="login-card__title">PsyTool</h1>
+          <h1 className="login-card__title">Kær</h1>
           <p className="login-card__subtitle">
             {mode === 'login' ? t('auth.login_subtitle') : t('auth.register_subtitle')}
           </p>

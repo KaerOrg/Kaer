@@ -1,6 +1,6 @@
-# PsyTool — Contexte général
+# Kær — Contexte général
 
-## Qu'est-ce que PsyTool ?
+## Qu'est-ce que Kær ?
 
 Outil d'accompagnement thérapeutique en deux parties :
 - **Interface web praticien** — tableau de bord pour gérer les patients et débloquer des modules
@@ -27,7 +27,7 @@ Consultant ou thérapeute parmi les corps de métier suivants : IDE, IPA, psychi
 ## Structure du projet (monorepo npm workspaces)
 
 ```
-PsyTool/
+Kær/
 ├── apps/
 │   ├── web/          # Interface praticien (React + Vite)
 │   └── mobile/       # App patient (Expo + React Native)
@@ -202,9 +202,9 @@ Migration vers hébergement HDS (OVHcloud) requise avant mise en production comm
 
 ## RÈGLE D'OR — Statut Non-Dispositif Médical (MDR 2017/745)
 
-> **Cette règle s'applique à chaque ligne de code produite pour PsyTool, sans exception.**
+> **Cette règle s'applique à chaque ligne de code produite pour Kær, sans exception.**
 
-PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
+Kær est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
 
 **Principe fondamental : le code affiche, jamais il ne conclut.** L'interprétation appartient exclusivement au patient ou au soignant.
 

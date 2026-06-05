@@ -124,22 +124,22 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'PsyTool <onboarding@resend.dev>',
+        from: 'Kær <onboarding@resend.dev>',
         to: [recipientEmail],
-        subject: `[TEST] Invitation pour ${patient_email} — ${practitionerName} vous invite sur PsyTool`,
+        subject: `[TEST] Invitation pour ${patient_email} — ${practitionerName} vous invite sur Kær`,
         html: `
           <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;">
             <div style="text-align: center; padding: 32px 0 16px;">
-              <h1 style="margin: 8px 0 0; font-size: 24px; color: #4F46E5;">PsyTool</h1>
+              <h1 style="margin: 8px 0 0; font-size: 24px; color: #4F46E5;">Kær</h1>
             </div>
             <div style="background: #f8f9ff; border-radius: 12px; padding: 32px;">
               <h2 style="margin: 0 0 16px; font-size: 18px;">Vous avez été invité(e)</h2>
               <p style="margin: 0 0 16px; color: #444; line-height: 1.6;">
-                <strong>${practitionerName}</strong> vous invite à rejoindre PsyTool,
+                <strong>${practitionerName}</strong> vous invite à rejoindre Kær,
                 votre espace d'outils thérapeutiques personnels.
               </p>
               <p style="margin: 0 0 8px; color: #444; line-height: 1.6;">
-                Ouvrez l'app PsyTool sur votre téléphone, appuyez sur
+                Ouvrez l'app Kær sur votre téléphone, appuyez sur
                 <strong>« J'ai une invitation »</strong> et saisissez ce code :
               </p>
               <div style="background: #fff; border: 2px solid #4F46E5; border-radius: 8px;
@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
               </p>
             </div>
             <p style="text-align: center; font-size: 12px; color: #aaa; margin-top: 24px;">
-              PsyTool — Outil d'accompagnement thérapeutique
+              Kær — Outil d'accompagnement thérapeutique
             </p>
           </div>
         `,

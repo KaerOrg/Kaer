@@ -1,8 +1,8 @@
-# Architecture technique — PsyTool
+# Architecture technique — Kær
 
 ## Vue d'ensemble
 
-PsyTool est une application thérapeutique en deux parties communiquant via Supabase (backend as a service).
+Kær est une application thérapeutique en deux parties communiquant via Supabase (backend as a service).
 
 ```
 ┌─────────────────────────┐         ┌──────────────────────────┐
@@ -24,7 +24,7 @@ PsyTool est une application thérapeutique en deux parties communiquant via Supa
 ## Monorepo npm workspaces
 
 ```
-PsyTool/
+Kær/
 ├── apps/
 │   ├── web/          # Interface praticien
 │   └── mobile/       # App patient

@@ -20,7 +20,7 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 
 ## Conformité MDR 2017/745
 
-PsyTool est un Carnet de Bord Numérique — non-Dispositif Médical.
+Kær est un Carnet de Bord Numérique — non-Dispositif Médical.
 
 **Règle appliquée :** le code affiche, jamais il ne conclut.
 
