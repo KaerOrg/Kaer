@@ -8,6 +8,7 @@ import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
 import { MfaChallengeForm } from './MfaChallengeForm'
+import { SupportRequestModal } from '../../components/features/SupportRequestModal'
 import './LoginPage.css'
 
 export function LoginPage() {
@@ -15,6 +16,7 @@ export function LoginPage() {
   const { t, i18n } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [registered, setRegistered] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -163,8 +165,17 @@ export function LoginPage() {
               </button>
             </p>
           )}
+          <p>
+            <button type="button" className="login-card__link" onClick={() => setSupportOpen(true)}>
+              {t('support.contact_link')}
+            </button>
+          </p>
         </div>
       </div>
+
+      {supportOpen ? (
+        <SupportRequestModal requireEmail onClose={() => setSupportOpen(false)} />
+      ) : null}
     </div>
   )
 }

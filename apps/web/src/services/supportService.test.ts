@@ -21,6 +21,16 @@ describe('supportService.submitSupportRequest', () => {
     expect(result).toEqual({ ok: true })
   })
 
+  it("inclut l'email dans le body quand fourni (cas déconnecté)", async () => {
+    vi.mocked(supabase.functions.invoke).mockResolvedValue({ data: { success: true }, error: null } as never)
+
+    await submitSupportRequest('login_issue', 'dr@example.com')
+
+    expect(supabase.functions.invoke).toHaveBeenCalledWith('send-support-request', {
+      body: { reason: 'login_issue', email: 'dr@example.com' },
+    })
+  })
+
   it('renvoie ok:false si l’Edge Function échoue', async () => {
     vi.mocked(supabase.functions.invoke).mockResolvedValue({
       data: null,

@@ -6,12 +6,28 @@ const corsHeaders = {
 }
 
 // Motifs autorisés — liste fermée (le formulaire est borné, aucune saisie libre).
-const ALLOWED_REASONS = ['mfa_lost', 'login_issue', 'account_issue', 'other'] as const
+const ALLOWED_REASONS = ['mfa_lost', 'login_issue', 'account_issue', 'other']
 const REASON_LABELS: Record<string, string> = {
   mfa_lost: "Perte d'accès à l'application d'authentification (2FA)",
   login_issue: 'Problème de connexion',
   account_issue: 'Problème lié au compte',
   other: 'Autre demande',
+}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const RATE_LIMIT_PER_HOUR = 5
+
+async function sha256(input: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input))
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+function json(body: unknown, status: number) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
 }
 
 Deno.serve(async (req) => {
@@ -20,23 +36,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { reason } = await req.json()
+    const { reason, email } = await req.json()
 
     if (!ALLOWED_REASONS.includes(reason)) {
-      return new Response(
-        JSON.stringify({ error: 'invalid_reason' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Identité dérivée du JWT de l'appelant (valable en aal1, avant le challenge MFA).
-    const authHeader = req.headers.get('Authorization') ?? ''
-    const jwt = authHeader.replace('Bearer ', '')
-    if (!jwt) {
-      return new Response(
-        JSON.stringify({ error: 'unauthenticated' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return json({ error: 'invalid_reason' }, 400)
     }
 
     const supabase = createClient(
@@ -44,45 +47,66 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const { data: userData, error: userErr } = await supabase.auth.getUser(jwt)
-    const user = userData?.user
-    if (userErr || !user) {
-      return new Response(
-        JSON.stringify({ error: 'unauthenticated' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    // Identité dérivée du JWT si présent et valide (connecté, ou aal1 sur le challenge MFA).
+    let userId: string | null = null
+    let userEmail: string | null = null
+    let practitionerName = '(non renseigné)'
+
+    const jwt = (req.headers.get('Authorization') ?? '').replace('Bearer ', '')
+    if (jwt) {
+      const { data } = await supabase.auth.getUser(jwt)
+      if (data?.user) {
+        userId = data.user.id
+        userEmail = data.user.email ?? null
+        const { data: practitioner } = await supabase
+          .from('practitioners')
+          .select('name')
+          .eq('id', userId)
+          .maybeSingle()
+        practitionerName = practitioner?.name || practitionerName
+      }
     }
 
-    // Nom du praticien (facultatif, pour l'email)
-    const { data: practitioner } = await supabase
-      .from('practitioners')
-      .select('name')
-      .eq('id', user.id)
-      .maybeSingle()
+    // Anonyme (écran de login, non connecté) → email de contact obligatoire et valide.
+    if (!userId) {
+      if (typeof email !== 'string' || !EMAIL_RE.test(email.trim())) {
+        return json({ error: 'invalid_email' }, 400)
+      }
+      userEmail = email.trim().toLowerCase()
+    }
 
-    // 1) Enregistrer la demande (service_role → bypass RLS)
+    // Rate-limit par IP (hash, jamais l'IP en clair).
+    const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || 'unknown'
+    const ipHash = await sha256(ip)
+    const sinceIso = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const { count } = await supabase
+      .from('support_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('ip_hash', ipHash)
+      .gte('created_at', sinceIso)
+    if ((count ?? 0) >= RATE_LIMIT_PER_HOUR) {
+      return json({ error: 'rate_limited' }, 429)
+    }
+
+    // 1) Enregistrer la demande (service_role → bypass RLS).
     const { error: insertError } = await supabase.from('support_requests').insert({
-      practitioner_id: user.id,
-      email: user.email ?? null,
+      practitioner_id: userId,
+      email: userEmail,
       reason,
+      ip_hash: ipHash,
     })
     if (insertError) {
       console.error('Erreur insert support_requests:', insertError)
-      return new Response(
-        JSON.stringify({ error: 'insert_failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return json({ error: 'insert_failed' }, 500)
     }
 
-    // 2) Notifier le support par email (Resend). Best-effort : la demande est déjà
-    //    enregistrée ; un échec d'email ne doit pas invalider la demande.
-    const supportEmail =
-      Deno.env.get('SUPPORT_EMAIL') ?? Deno.env.get('DEV_EMAIL') ?? null
+    // 2) Notifier le support par email (Resend) — best-effort.
+    const supportEmail = Deno.env.get('SUPPORT_EMAIL') ?? Deno.env.get('DEV_EMAIL') ?? null
     const resendKey = Deno.env.get('RESEND_API_KEY')
 
     if (supportEmail && resendKey) {
       const reasonLabel = REASON_LABELS[reason] ?? reason
-      const practitionerName = practitioner?.name || '(nom non renseigné)'
+      const origin = userId ? `Praticien : ${practitionerName} (${userId})` : 'Demande non authentifiée (écran de login)'
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -93,19 +117,7 @@ Deno.serve(async (req) => {
           from: 'PsyTool <onboarding@resend.dev>',
           to: [supportEmail],
           subject: `[Support PsyTool] ${reasonLabel}`,
-          html: `
-            <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;">
-              <h2 style="font-size: 18px;">Nouvelle demande de support</h2>
-              <p><strong>Motif :</strong> ${reasonLabel}</p>
-              <p><strong>Praticien :</strong> ${practitionerName}</p>
-              <p><strong>Email du compte :</strong> ${user.email ?? '—'}</p>
-              <p><strong>ID praticien :</strong> ${user.id}</p>
-              <p style="color:#888; font-size:12px;">
-                Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action
-                (ex. réinitialisation 2FA).
-              </p>
-            </div>
-          `,
+          html: `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;"><h2 style="font-size: 18px;">Nouvelle demande de support</h2><p><strong>Motif :</strong> ${reasonLabel}</p><p><strong>${origin}</strong></p><p><strong>Email de contact :</strong> ${userEmail ?? '—'}</p><p style="color:#888; font-size:12px;">Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action (ex. réinitialisation 2FA).</p></div>`,
         }),
       })
       if (!emailResponse.ok) {
@@ -113,15 +125,9 @@ Deno.serve(async (req) => {
       }
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return json({ success: true }, 200)
   } catch (err) {
     console.error('Erreur inattendue:', err)
-    return new Response(
-      JSON.stringify({ error: 'server_error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return json({ error: 'server_error' }, 500)
   }
 })

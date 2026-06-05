@@ -11,12 +11,17 @@ export type SupportReason = (typeof SUPPORT_REASONS)[number]
 /**
  * Soumet une demande de support via l'Edge Function `send-support-request`, qui
  * enregistre la demande (table `support_requests`) et notifie le support par email.
- * L'identité du praticien est dérivée du JWT côté serveur (valable même en aal1,
- * avant le challenge MFA) — le client n'envoie que le motif.
+ *
+ * - **Connecté / aal1** : l'identité est dérivée du JWT côté serveur — `email` inutile.
+ * - **Déconnecté (écran de login)** : passer `email` (contact obligatoire côté serveur).
+ *   L'endpoint est public et protégé par un rate-limit par IP.
  */
-export async function submitSupportRequest(reason: SupportReason): Promise<{ ok: boolean }> {
-  const { error } = await supabase.functions.invoke('send-support-request', {
-    body: { reason },
-  })
+export async function submitSupportRequest(
+  reason: SupportReason,
+  email?: string
+): Promise<{ ok: boolean }> {
+  const body: { reason: SupportReason; email?: string } = { reason }
+  if (email) body.email = email
+  const { error } = await supabase.functions.invoke('send-support-request', { body })
   return { ok: !error }
 }

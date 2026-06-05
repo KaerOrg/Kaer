@@ -39,8 +39,22 @@ SupportRequestModal            1. valide le motif (liste fermée)
 - L'**identité** du praticien est dérivée du **JWT** côté serveur (jamais envoyée par
   le client). Fonctionne même en **aal1** (avant le challenge MFA) → couvre le cas
   « perte de code » sur l'écran de vérification.
+- **Cas déconnecté** (écran de login, mot de passe oublié / compte bloqué) : aucun JWT.
+  Le praticien fournit un **email de contact** (champ borné, validé). L'Edge Function
+  est **publique** (`verify_jwt = false`) ; le client poste `{ reason, email }`.
+- **Anti-abus** : l'endpoint public est protégé par un **rate-limit par IP** —
+  `sha256(IP)` stocké dans `support_requests.ip_hash` (jamais l'IP en clair), max
+  **5 demandes / heure / IP** (sinon `429`).
 - La notification email est **best-effort** : la demande est déjà enregistrée même si
   l'email échoue.
+
+## Points d'entrée (UI)
+
+| Endroit | Connecté ? | Email demandé ? |
+|---|---|---|
+| Écran de login (`LoginPage`) | Non | **Oui** (`requireEmail`) |
+| Challenge MFA (`MfaChallengeForm`, motif `mfa_lost`) | aal1 (JWT) | Non |
+| Profil (`ProfilePage`) | Oui (JWT) | Non |
 
 ## Schéma
 
@@ -48,13 +62,6 @@ SupportRequestModal            1. valide le motif (liste fermée)
 `email`, `reason` (CHECK liste fermée), `status` (défaut `open`), `created_at`.
 RLS activée, **aucune policy client** : écriture par l'Edge Function (`service_role`),
 lecture support/DPO (dashboard Supabase).
-
-## Points d'entrée (UI)
-
-| Endroit | Composant | Comportement |
-|---|---|---|
-| Challenge MFA (perte de code) | `MfaChallengeForm` → `SupportRequestModal` | motif pré-réglé `mfa_lost` |
-| Profil praticien | `ProfilePage` → `SupportRequestModal` | motif libre dans la liste fermée |
 
 ## Configuration (Edge Function `send-support-request`)
 

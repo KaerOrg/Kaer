@@ -1314,11 +1314,18 @@ create table if not exists public.support_requests (
   reason          text        not null check (reason in
                     ('mfa_lost', 'login_issue', 'account_issue', 'other')),
   status          text        not null default 'open',
+  -- Hash SHA-256 de l'IP appelante (jamais l'IP en clair) — sert au rate-limit
+  -- de l'endpoint public (demandes non authentifiées depuis l'écran de login).
+  ip_hash         text,
   created_at      timestamptz not null default now()
 );
 
 create index if not exists idx_support_requests_status
   on public.support_requests(status, created_at desc);
+
+-- Rate-limit : compter les demandes récentes par IP.
+create index if not exists idx_support_requests_ip_recent
+  on public.support_requests(ip_hash, created_at desc);
 
 alter table public.support_requests enable row level security;
 -- Aucune policy client : insertion par l'Edge Function (service_role), lecture support/DPO.
