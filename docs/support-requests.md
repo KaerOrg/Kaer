@@ -1,11 +1,12 @@
 # Demandes de support praticien — `support_requests`
 
-Permet à un praticien de **contacter le support depuis l'app**, via un **formulaire
-borné** (motif choisi dans une liste fermée, **aucune saisie libre**). Chaque demande
-est **enregistrée en base** et **notifiée au support par email** (Resend).
+Permet à un praticien **bloqué hors de son compte** de **contacter le support depuis
+l'app**, via un **formulaire borné** (motif dans une liste fermée ; saisie libre
+réservée au seul cas `other`). Chaque demande est **enregistrée en base** et
+**notifiée au support par email** (Resend).
 
 > Introduit avec le flow MFA (#26) pour le cas « perte d'accès à l'authentificateur »,
-> mais réutilisable pour tout motif de support.
+> étendu aux autres problèmes d'accès (mot de passe, compte bloqué).
 
 ## Principe : borné au maximum, saisie libre uniquement en dernier recours
 
@@ -70,7 +71,8 @@ SupportRequestModal            1. valide le motif (liste fermée)
 ## Schéma
 
 `public.support_requests` — `id`, `practitioner_id` (FK, `on delete set null`),
-`email`, `reason` (CHECK liste fermée), `status` (défaut `open`), `created_at`.
+`email`, `reason` (CHECK liste fermée), `description` (libre, motif `other` uniquement),
+`status` (défaut `open`), `ip_hash` (rate-limit), `created_at`.
 RLS activée, **aucune policy client** : écriture par l'Edge Function (`service_role`),
 lecture support/DPO (dashboard Supabase).
 
