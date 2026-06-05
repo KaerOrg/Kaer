@@ -5,11 +5,13 @@ import {
   completeMfaLogin,
   dismissMfaReminder as dismissMfaReminderService,
   fetchSessionPractitioner,
+  getMfaStatus,
   loginWithPassword,
   registerPractitioner,
   signOut,
   updateLanguagePreference,
   updatePractitionerProfile,
+  type MfaStatus,
 } from '../services/authService'
 
 interface AuthState {
@@ -19,11 +21,15 @@ interface AuthState {
   /** Connexion en attente d'un code MFA (login mot de passe OK, aal2 requis). */
   mfaRequired: boolean
   mfaFactorId: string | null
+  /** Statut MFA du praticien connecté (null = pas encore chargé). Source partagée carte ↔ bandeau. */
+  mfaStatus: MfaStatus | null
   login: (email: string, password: string) => Promise<void>
   /** Vérifie le code TOTP du challenge de login. Renvoie true si la connexion aboutit. */
   verifyMfa: (code: string) => Promise<boolean>
   /** Annule un challenge MFA en cours (déconnecte la demi-session aal1). */
   cancelMfa: () => Promise<void>
+  /** Recharge le statut MFA (après enrôlement/désactivation) — rend le bandeau réactif. */
+  refreshMfaStatus: () => Promise<void>
   register: (email: string, password: string, name: string, title: string) => Promise<void>
   updateProfile: (name: string, title: string, address: string, phone: string) => Promise<string | null>
   updateLanguagePreference: (lang: SupportedLang) => Promise<void>
@@ -41,6 +47,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
   mfaRequired: false,
   mfaFactorId: null,
+  mfaStatus: null,
 
   loadSession: async () => {
     set({ loading: true })
@@ -78,6 +85,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   cancelMfa: async () => {
     await signOut()
     set({ mfaRequired: false, mfaFactorId: null, practitioner: null, error: null })
+  },
+
+  refreshMfaStatus: async () => {
+    const status = await getMfaStatus()
+    set({ mfaStatus: status })
   },
 
   register: async (email, password, name, title) => {
@@ -121,7 +133,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     await signOut()
-    set({ practitioner: null })
+    set({ practitioner: null, mfaStatus: null })
   },
 
   clearError: () => set({ error: null }),
