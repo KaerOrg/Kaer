@@ -1,4 +1,4 @@
-# Coding Standards — PsyTool
+# Coding Standards — Kær
 
 ## Principes fondamentaux — non négociables
 

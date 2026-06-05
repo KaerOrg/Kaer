@@ -8,40 +8,120 @@ async function applyLanguagePreference(practitioner: Practitioner | null): Promi
   }
 }
 
+/** Charge le profil praticien de la session courante (et applique sa langue). */
+async function loadCurrentPractitioner(): Promise<Practitioner | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data } = await supabase.from('practitioners').select('*').eq('id', user.id).single()
+  await applyLanguagePreference(data)
+  return data ?? null
+}
+
+/**
+ * Détermine si un challenge MFA est requis pour la session courante.
+ * Une session fraîchement créée par mot de passe pour un compte ayant un facteur
+ * TOTP vérifié est au niveau `aal1` alors que `nextLevel` vaut `aal2` : tant que le
+ * code n'est pas saisi, le praticien NE doit PAS être considéré comme connecté.
+ */
+async function getMfaChallenge(): Promise<{ required: boolean; factorId: string | null }> {
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (!aal || aal.nextLevel !== 'aal2' || aal.currentLevel === 'aal2') {
+    return { required: false, factorId: null }
+  }
+  const { data: factors } = await supabase.auth.mfa.listFactors()
+  const verified = factors?.totp.find(f => f.status === 'verified') ?? null
+  return { required: verified !== null, factorId: verified?.id ?? null }
+}
+
 export async function fetchSessionPractitioner(): Promise<Practitioner | null> {
   const {
     data: { session },
   } = await supabase.auth.getSession()
   if (!session) return null
-  const { data } = await supabase
-    .from('practitioners')
-    .select('*')
-    .eq('id', session.user.id)
-    .single()
-  await applyLanguagePreference(data)
-  return data ?? null
+  // Session présente mais MFA non franchi (aal1 → aal2) : pas encore authentifié.
+  const mfa = await getMfaChallenge()
+  if (mfa.required) return null
+  return loadCurrentPractitioner()
 }
 
 export type LoginResult =
-  | { ok: true; practitioner: Practitioner | null }
-  | { ok: false; message: string }
+  | { status: 'success'; practitioner: Practitioner | null }
+  | { status: 'mfa_required'; factorId: string }
+  | { status: 'error'; message: string }
 
 export async function loginWithPassword(email: string, password: string): Promise<LoginResult> {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
-  if (error) return { ok: false, message: 'Email ou mot de passe incorrect.' }
+  if (error) return { status: 'error', message: 'Email ou mot de passe incorrect.' }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: true, practitioner: null }
+  const mfa = await getMfaChallenge()
+  if (mfa.required && mfa.factorId) {
+    return { status: 'mfa_required', factorId: mfa.factorId }
+  }
+  return { status: 'success', practitioner: await loadCurrentPractitioner() }
+}
 
-  const { data } = await supabase
-    .from('practitioners')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-  await applyLanguagePreference(data)
-  return { ok: true, practitioner: data ?? null }
+/**
+ * Finalise une connexion en attente de MFA : vérifie le code TOTP (promotion en
+ * aal2) puis charge le praticien. Appelé après `loginWithPassword` → `mfa_required`.
+ */
+export async function completeMfaLogin(factorId: string, code: string): Promise<LoginResult> {
+  const result = await verifyMfaCode(factorId, code)
+  if (!result.ok) return { status: 'error', message: result.message ?? 'code_invalid' }
+  return { status: 'success', practitioner: await loadCurrentPractitioner() }
+}
+
+// ============================================================
+// MFA (TOTP) — authentification forte praticien
+// ============================================================
+
+export interface MfaStatus {
+  enabled: boolean
+  factorId: string | null
+}
+
+export type MfaEnrollResult =
+  | { ok: true; factorId: string; qrCode: string; secret: string }
+  | { ok: false; message: string }
+
+/** Démarre l'enrôlement d'un facteur TOTP : renvoie le QR code et le secret à afficher. */
+export async function enrollMfaTotp(): Promise<MfaEnrollResult> {
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+  if (error || !data) return { ok: false, message: error?.message ?? 'enroll_failed' }
+  return { ok: true, factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret }
+}
+
+/**
+ * Vérifie un code TOTP pour un facteur donné (challenge + verify).
+ * Sert à la fois à valider l'enrôlement et à franchir le challenge au login.
+ */
+export async function verifyMfaCode(
+  factorId: string,
+  code: string
+): Promise<{ ok: boolean; message?: string }> {
+  const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId })
+  if (challengeError || !challenge) return { ok: false, message: challengeError?.message }
+  const { error: verifyError } = await supabase.auth.mfa.verify({
+    factorId,
+    challengeId: challenge.id,
+    code,
+  })
+  if (verifyError) return { ok: false, message: verifyError.message }
+  return { ok: true }
+}
+
+/** État MFA du praticien courant (facteur TOTP vérifié ou non). */
+export async function getMfaStatus(): Promise<MfaStatus> {
+  const { data } = await supabase.auth.mfa.listFactors()
+  const verified = data?.totp.find(f => f.status === 'verified') ?? null
+  return { enabled: verified !== null, factorId: verified?.id ?? null }
+}
+
+/** Désenrôle un facteur (désactivation MFA, ou nettoyage d'un enrôlement annulé). */
+export async function unenrollMfa(factorId: string): Promise<{ ok: boolean; message?: string }> {
+  const { error } = await supabase.auth.mfa.unenroll({ factorId })
+  return error ? { ok: false, message: error.message } : { ok: true }
 }
 
 export type RegisterResult =
@@ -112,6 +192,18 @@ export async function updatePractitionerProfile(
 
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
+}
+
+/** Mémorise que le praticien a fermé le bandeau de rappel d'activation du MFA. */
+export async function dismissMfaReminder(): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase
+    .from('practitioners')
+    .update({ mfa_reminder_dismissed: true } as never)
+    .eq('id', user.id)
 }
 
 export async function fetchProfessionalTitles(): Promise<ProfessionalTitle[]> {

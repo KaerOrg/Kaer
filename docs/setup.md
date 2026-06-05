@@ -11,8 +11,8 @@
 
 ```bash
 # Cloner le projet (si pas déjà fait)
-git clone <url-du-repo> PsyTool
-cd PsyTool
+git clone <url-du-repo> Kær
+cd Kær
 
 # Installer toutes les dépendances (web + mobile + shared)
 npm install

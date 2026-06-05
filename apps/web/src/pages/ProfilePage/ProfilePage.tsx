@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
+import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
@@ -175,6 +176,10 @@ export function ProfilePage() {
             </div>
           </form>
         </div>
+      </div>
+
+      <div className="profile-page__security">
+        <MfaSettingsCard />
       </div>
     </Layout>
   )

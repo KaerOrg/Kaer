@@ -4,7 +4,7 @@ const path = require('path')
 const config = getDefaultConfig(__dirname)
 
 // expo is hoisted to the monorepo root, so AppEntry.js resolves ../../App
-// relative to PsyTool/node_modules/expo/ instead of apps/mobile/.
+// relative to Kær/node_modules/expo/ instead of apps/mobile/.
 // Intercept and redirect to the correct App.tsx.
 const _resolve = config.resolver.resolveRequest
 config.resolver.resolveRequest = (context, moduleName, platform) => {

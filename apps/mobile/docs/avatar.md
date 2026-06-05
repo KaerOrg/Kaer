@@ -67,8 +67,8 @@ Vérification dans le dashboard Supabase : **Storage → avatars → Public buck
       [
         "expo-image-picker",
         {
-          "photosPermission": "PsyTool accède à vos photos pour personnaliser votre profil.",
-          "cameraPermission": "PsyTool accède à votre appareil photo pour prendre une photo de profil."
+          "photosPermission": "Kær accède à vos photos pour personnaliser votre profil.",
+          "cameraPermission": "Kær accède à votre appareil photo pour prendre une photo de profil."
         }
       ]
     ]

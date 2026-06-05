@@ -109,7 +109,7 @@ et alors avec doc design-system + test. Détail et arbre de décision :
 [`coding-standards.md`](coding-standards.md) § *Checklist obligatoire* et le skill
 [`pr-review`](../skills/pr-review/SKILL.md) Étape 4.
 
-## Application dans PsyTool
+## Application dans Kær
 
 Ce principe est déjà suivi pour :
 - `module_content_fields` — questions, options, instructions, fiches psyedu

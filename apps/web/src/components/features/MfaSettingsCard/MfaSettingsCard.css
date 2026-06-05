@@ -1,0 +1,63 @@
+.mfa-enroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mfa-enroll__intro {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mfa-enroll__step {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.mfa-enroll__qr {
+  display: block;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  /* Fond blanc fixe volontaire : un QR code doit rester scannable même en thème sombre. */
+  background: #ffffff;
+  padding: var(--spacing-sm);
+}
+
+.mfa-enroll__secret-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.mfa-enroll__secret {
+  display: block;
+  font-family: monospace;
+  font-size: 15px;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  user-select: all;
+}
+
+.mfa-enroll__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.mfa-enroll__loading,
+.mfa-enroll__error {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}

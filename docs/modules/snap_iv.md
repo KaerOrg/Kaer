@@ -1,4 +1,4 @@
-# SNAP-IV — Module PsyTool
+# SNAP-IV — Module Kær
 
 ## Description clinique
 
