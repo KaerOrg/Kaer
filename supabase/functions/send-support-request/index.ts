@@ -5,12 +5,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Motifs autorisés — liste fermée (le formulaire est borné, aucune saisie libre).
-const ALLOWED_REASONS = ['mfa_lost', 'login_issue', 'account_issue', 'other']
+// Motifs autorisés — liste fermée d'accès bloqué (formulaire borné au maximum).
+const ALLOWED_REASONS = ['mfa_lost', 'password_forgotten', 'account_locked', 'other']
+// Motifs fourre-tout exigeant une description libre (le motif seul ne suffit pas).
+const REASONS_REQUIRING_DESCRIPTION = new Set(['other'])
+const DESCRIPTION_MAX = 500
 const REASON_LABELS: Record<string, string> = {
   mfa_lost: "Perte d'accès à l'application d'authentification (2FA)",
-  login_issue: 'Problème de connexion',
-  account_issue: 'Problème lié au compte',
+  password_forgotten: 'Mot de passe oublié',
+  account_locked: 'Compte bloqué',
   other: 'Autre demande',
 }
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -36,10 +39,19 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { reason, email } = await req.json()
+    const { reason, email, description } = await req.json()
 
     if (!ALLOWED_REASONS.includes(reason)) {
       return json({ error: 'invalid_reason' }, 400)
+    }
+
+    // Description libre : obligatoire pour le motif fourre-tout, ignorée sinon.
+    let cleanDescription: string | null = null
+    if (REASONS_REQUIRING_DESCRIPTION.has(reason)) {
+      if (typeof description !== 'string' || description.trim().length === 0) {
+        return json({ error: 'description_required' }, 400)
+      }
+      cleanDescription = description.trim().slice(0, DESCRIPTION_MAX)
     }
 
     const supabase = createClient(
@@ -93,6 +105,7 @@ Deno.serve(async (req) => {
       practitioner_id: userId,
       email: userEmail,
       reason,
+      description: cleanDescription,
       ip_hash: ipHash,
     })
     if (insertError) {
@@ -107,6 +120,9 @@ Deno.serve(async (req) => {
     if (supportEmail && resendKey) {
       const reasonLabel = REASON_LABELS[reason] ?? reason
       const origin = userId ? `Praticien : ${practitionerName} (${userId})` : 'Demande non authentifiée (écran de login)'
+      const descriptionHtml = cleanDescription
+        ? `<p><strong>Description :</strong> ${cleanDescription}</p>`
+        : ''
       const emailResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -117,7 +133,7 @@ Deno.serve(async (req) => {
           from: 'PsyTool <onboarding@resend.dev>',
           to: [supportEmail],
           subject: `[Support PsyTool] ${reasonLabel}`,
-          html: `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;"><h2 style="font-size: 18px;">Nouvelle demande de support</h2><p><strong>Motif :</strong> ${reasonLabel}</p><p><strong>${origin}</strong></p><p><strong>Email de contact :</strong> ${userEmail ?? '—'}</p><p style="color:#888; font-size:12px;">Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action (ex. réinitialisation 2FA).</p></div>`,
+          html: `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;"><h2 style="font-size: 18px;">Nouvelle demande de support</h2><p><strong>Motif :</strong> ${reasonLabel}</p>${descriptionHtml}<p><strong>${origin}</strong></p><p><strong>Email de contact :</strong> ${userEmail ?? '—'}</p><p style="color:#888; font-size:12px;">Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action (ex. réinitialisation 2FA).</p></div>`,
         }),
       })
       if (!emailResponse.ok) {

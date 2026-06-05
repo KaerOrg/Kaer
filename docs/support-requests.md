@@ -7,21 +7,28 @@ est **enregistrée en base** et **notifiée au support par email** (Resend).
 > Introduit avec le flow MFA (#26) pour le cas « perte d'accès à l'authentificateur »,
 > mais réutilisable pour tout motif de support.
 
-## Pourquoi un formulaire borné (sans saisie libre)
+## Principe : borné au maximum, saisie libre uniquement en dernier recours
 
-- **Conformité MDR / RGPD** : aucun texte libre → aucune donnée clinique ni PII ne
-  transite vers le support par ce canal.
-- **Anti-abus** : liste fermée de motifs, validée côté serveur.
+Le formulaire ne sert qu'aux **problèmes d'accès au compte**. Règle de design :
+
+- **Motifs auto-suffisants** → le motif + l'email = contexte actionnable, **aucune
+  saisie libre** (anti-abus, pas de PII inutile).
+- **Motif fourre-tout `other`** → le motif seul ne dit rien d'actionnable, donc une
+  **description libre devient obligatoire** (≤ 500 caractères). C'est le seul champ
+  texte, réservé à ce cas.
+
+> Compromis assumé : un motif vague sans contexte est inexploitable par le support ;
+> on borne donc au maximum et on n'ouvre la saisie libre que pour `other`.
 
 Motifs (liste fermée, synchronisée entre `supportService.SUPPORT_REASONS`, le `CHECK`
 SQL et l'Edge Function) :
 
-| Code | Sens |
-|---|---|
-| `mfa_lost` | Perte d'accès à l'application d'authentification (2FA) |
-| `login_issue` | Problème de connexion |
-| `account_issue` | Problème lié au compte |
-| `other` | Autre demande |
+| Code | Sens | Description libre |
+|---|---|---|
+| `mfa_lost` | Perte d'accès à l'application d'authentification (2FA) | non |
+| `password_forgotten` | Mot de passe oublié | non |
+| `account_locked` | Compte bloqué | non |
+| `other` | Autre demande | **oui (obligatoire)** |
 
 ## Circuit
 
@@ -54,7 +61,11 @@ SupportRequestModal            1. valide le motif (liste fermée)
 |---|---|---|
 | Écran de login (`LoginPage`) | Non | **Oui** (`requireEmail`) |
 | Challenge MFA (`MfaChallengeForm`, motif `mfa_lost`) | aal1 (JWT) | Non |
-| Profil (`ProfilePage`) | Oui (JWT) | Non |
+
+
+> Pas d'entrée dans le profil : les motifs (accès bloqué, perte 2FA, connexion) n'ont
+> de sens que pour un praticien **qui ne peut pas accéder** à son compte. Un canal de
+> support « général » pour praticien connecté relèverait d'une autre feature (aide/FAQ).
 
 ## Schéma
 

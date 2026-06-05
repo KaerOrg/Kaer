@@ -5,7 +5,13 @@ import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
 import { SelectField } from '../../ui/SelectField/SelectField'
 import { useToast } from '../../../contexts/ToastContext'
-import { submitSupportRequest, SUPPORT_REASONS, type SupportReason } from '../../../services/supportService'
+import {
+  submitSupportRequest,
+  reasonRequiresDescription,
+  SUPPORT_REASONS,
+  SUPPORT_DESCRIPTION_MAX,
+  type SupportReason,
+} from '../../../services/supportService'
 import './SupportRequestModal.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -27,12 +33,16 @@ interface SupportRequestModalProps {
 export function SupportRequestModal({ onClose, presetReason, requireEmail = false }: SupportRequestModalProps) {
   const { t } = useTranslation()
   const toast = useToast()
-  // Contrôlés : motif et email pilotent l'UI (sélection, validation, désactivation).
-  const [reason, setReason] = useState<SupportReason>(presetReason ?? 'account_issue')
+  // Contrôlés : motif, email et description pilotent l'UI (validation, désactivation).
+  const [reason, setReason] = useState<SupportReason>(presetReason ?? 'password_forgotten')
   const [email, setEmail] = useState('')
+  const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const needsDescription = reasonRequiresDescription(reason)
   const emailValid = !requireEmail || EMAIL_RE.test(email.trim())
+  const descriptionValid = !needsDescription || description.trim().length > 0
+  const canSubmit = emailValid && descriptionValid
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const found = SUPPORT_REASONS.find(r => r === e.target.value)
@@ -41,7 +51,10 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
 
   const handleSubmit = async () => {
     setSubmitting(true)
-    const { ok } = await submitSupportRequest(reason, requireEmail ? email.trim() : undefined)
+    const { ok } = await submitSupportRequest(reason, {
+      email: requireEmail ? email.trim() : undefined,
+      description: needsDescription ? description.trim() : undefined,
+    })
     setSubmitting(false)
     if (ok) {
       toast.success(t('support.success'))
@@ -61,7 +74,7 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
           <Button variant="ghost" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button loading={submitting} disabled={!emailValid} onClick={() => void handleSubmit()}>
+          <Button loading={submitting} disabled={!canSubmit} onClick={() => void handleSubmit()}>
             {t('support.submit')}
           </Button>
         </>
@@ -87,6 +100,20 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
             </option>
           ))}
         </SelectField>
+        {needsDescription ? (
+          <label className="support-request__field">
+            <span className="support-request__label">{t('support.description_label')}</span>
+            <textarea
+              className="support-request__textarea"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder={t('support.description_placeholder')}
+              maxLength={SUPPORT_DESCRIPTION_MAX}
+              rows={4}
+              required
+            />
+          </label>
+        ) : null}
       </div>
     </Modal>
   )

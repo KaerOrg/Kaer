@@ -79,15 +79,17 @@
     "reason_label": "Motif de la demande",
     "email_label": "Votre adresse email",
     "email_placeholder": "vous@exemple.fr",
-    "contact_link": "Besoin d'aide ? Contacter le support",
+    "description_label": "Décrivez votre demande",
+    "description_placeholder": "Expliquez en quelques mots votre problème d'accès.",
+    "contact_link": "Besoin d'aide pour vous connecter ? Contacter le support",
     "submit": "Envoyer la demande",
     "success": "Votre demande a été transmise au support.",
     "error": "Impossible d'envoyer la demande. Réessayez.",
     "reason": {
       "mfa_lost": "J'ai perdu l'accès à mon application d'authentification (2FA)",
-      "login_issue": "Je n'arrive pas à me connecter",
-      "account_issue": "Problème lié à mon compte",
-      "other": "Autre demande"
+      "password_forgotten": "J'ai oublié mon mot de passe",
+      "account_locked": "Mon compte semble bloqué",
+      "other": "Autre demande (préciser)"
     }
   },
   "profile_modal": {

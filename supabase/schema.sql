@@ -1312,7 +1312,10 @@ create table if not exists public.support_requests (
   practitioner_id uuid        references public.practitioners(id) on delete set null,
   email           text,
   reason          text        not null check (reason in
-                    ('mfa_lost', 'login_issue', 'account_issue', 'other')),
+                    ('mfa_lost', 'password_forgotten', 'account_locked', 'other')),
+  -- Description libre — uniquement pour le motif fourre-tout `other` (les autres
+  -- motifs sont auto-suffisants). Limitée à 500 caractères côté client.
+  description     text,
   status          text        not null default 'open',
   -- Hash SHA-256 de l'IP appelante (jamais l'IP en clair) — sert au rate-limit
   -- de l'endpoint public (demandes non authentifiées depuis l'écran de login).

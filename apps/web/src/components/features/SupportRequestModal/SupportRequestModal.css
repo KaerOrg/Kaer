@@ -10,3 +10,31 @@
   font-size: 14px;
   line-height: 1.5;
 }
+
+.support-request__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.support-request__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.support-request__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  color: var(--color-text);
+  resize: vertical;
+}
+
+.support-request__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

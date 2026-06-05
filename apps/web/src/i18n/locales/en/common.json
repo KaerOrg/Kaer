@@ -79,15 +79,17 @@
     "reason_label": "Request reason",
     "email_label": "Your email address",
     "email_placeholder": "you@example.com",
-    "contact_link": "Need help? Contact support",
+    "description_label": "Describe your request",
+    "description_placeholder": "Briefly explain your access problem.",
+    "contact_link": "Need help signing in? Contact support",
     "submit": "Send request",
     "success": "Your request has been sent to support.",
     "error": "Could not send the request. Please try again.",
     "reason": {
       "mfa_lost": "I lost access to my authenticator app (2FA)",
-      "login_issue": "I can't sign in",
-      "account_issue": "Account-related issue",
-      "other": "Other request"
+      "password_forgotten": "I forgot my password",
+      "account_locked": "My account seems locked",
+      "other": "Other request (specify)"
     }
   },
   "profile_modal": {

@@ -168,7 +168,3 @@
 .profile-page__security {
   margin-top: 28px;
 }
-
-.profile-page__support {
-  margin-top: var(--spacing-md);
-}

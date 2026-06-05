@@ -5,7 +5,7 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { supabase } from '../lib/supabase'
-import { submitSupportRequest, SUPPORT_REASONS } from './supportService'
+import { submitSupportRequest, reasonRequiresDescription, SUPPORT_REASONS } from './supportService'
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -21,13 +21,13 @@ describe('supportService.submitSupportRequest', () => {
     expect(result).toEqual({ ok: true })
   })
 
-  it("inclut l'email dans le body quand fourni (cas déconnecté)", async () => {
+  it("inclut email et description dans le body quand fournis", async () => {
     vi.mocked(supabase.functions.invoke).mockResolvedValue({ data: { success: true }, error: null } as never)
 
-    await submitSupportRequest('login_issue', 'dr@example.com')
+    await submitSupportRequest('other', { email: 'dr@example.com', description: 'Mon souci' })
 
     expect(supabase.functions.invoke).toHaveBeenCalledWith('send-support-request', {
-      body: { reason: 'login_issue', email: 'dr@example.com' },
+      body: { reason: 'other', email: 'dr@example.com', description: 'Mon souci' },
     })
   })
 
@@ -43,6 +43,12 @@ describe('supportService.submitSupportRequest', () => {
   })
 
   it('expose une liste fermée de motifs (formulaire borné)', () => {
-    expect(SUPPORT_REASONS).toEqual(['mfa_lost', 'login_issue', 'account_issue', 'other'])
+    expect(SUPPORT_REASONS).toEqual(['mfa_lost', 'password_forgotten', 'account_locked', 'other'])
+  })
+
+  it('seul le motif « other » exige une description', () => {
+    expect(reasonRequiresDescription('other')).toBe(true)
+    expect(reasonRequiresDescription('mfa_lost')).toBe(false)
+    expect(reasonRequiresDescription('account_locked')).toBe(false)
   })
 })
