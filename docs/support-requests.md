@@ -78,11 +78,37 @@ lecture support/DPO (dashboard Supabase).
 
 ## Configuration (Edge Function `send-support-request`)
 
-| Variable | Rôle |
+| Secret | Rôle |
 |---|---|
-| `SUPPORT_EMAIL` | Destinataire des notifications (fallback `DEV_EMAIL`) |
+| `SUPPORT_EMAIL` | Destinataire(s) des notifications — **plusieurs adresses séparées par des virgules** (fallback `DEV_EMAIL`) |
 | `RESEND_API_KEY` | Clé Resend (déjà utilisée par `send-invitation`) |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Injectées par Supabase |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | Injectées automatiquement par Supabase |
+
+### Poser le secret `SUPPORT_EMAIL`
+
+> Il n'existe pas d'outil MCP pour les secrets — à faire via le dashboard ou la CLI.
+> Pris en compte immédiatement, **sans redéploiement**.
+
+- **Dashboard** : projet → *Project Settings → Edge Functions → Secrets* → *Add new secret*
+  → Name `SUPPORT_EMAIL`, Value `email1@x.fr,email2@y.fr`.
+- **CLI** :
+  ```bash
+  supabase secrets set SUPPORT_EMAIL="email1@x.fr,email2@y.fr" --project-ref <PROJECT_REF>
+  ```
+
+### ⚠️ Limitation Resend (bac à sable) — partagée avec `send-invitation`
+
+L'expéditeur est `onboarding@resend.dev` (sender **bac à sable** de Resend). Sans
+**domaine vérifié**, Resend ne livre qu'à **l'adresse du propriétaire du compte
+Resend** — les autres destinataires de `SUPPORT_EMAIL` ne recevront rien.
+
+Pour livrer à des adresses arbitraires (et débloquer aussi les invitations) :
+1. **Resend → Domains** : vérifier un domaine.
+2. Remplacer le `from` `onboarding@resend.dev` par une adresse de ce domaine
+   (ex. `support@mondomaine.fr`) dans `send-support-request` **et** `send-invitation`.
+
+Tant que ce n'est pas fait, la demande reste **enregistrée en base** (`support_requests`)
+même si l'email n'est pas distribué — aucune donnée perdue.
 
 ## Fichiers
 
