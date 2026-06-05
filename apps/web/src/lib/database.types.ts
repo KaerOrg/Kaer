@@ -45,13 +45,24 @@ export interface Database {
         Row: {
           id: string
           email: string
+          first_name: string
+          last_name: string
+          avatar_url: string | null
           created_at: string
         }
         Insert: {
           id: string
           email: string
+          first_name?: string
+          last_name?: string
+          avatar_url?: string | null
         }
-        Update: Record<string, never>
+        Update: {
+          email?: string
+          first_name?: string
+          last_name?: string
+          avatar_url?: string | null
+        }
         Relationships: []
       }
       practitioner_patients: {
@@ -82,7 +93,15 @@ export interface Database {
           patient_birth_date?: string | null
           patient_sex?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'practitioner_patients_patient_id_fkey'
+            columns: ['patient_id']
+            isOneToOne: false
+            referencedRelation: 'patients'
+            referencedColumns: ['id']
+          },
+        ]
       }
       invitations: {
         Row: {
@@ -466,7 +485,15 @@ export interface Database {
           notes?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'appointments_patient_rel_fkey'
+            columns: ['patient_id']
+            isOneToOne: false
+            referencedRelation: 'practitioner_patients'
+            referencedColumns: ['patient_id']
+          },
+        ]
       }
       practitioner_patient_notes: {
         Row: {
@@ -533,7 +560,20 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      // Journal d'audit — journalise un accès applicatif (lecture/export/effacement/purge).
+      // L'acteur est dérivé de auth.uid() côté base (SECURITY DEFINER) ; le client ne le passe pas.
+      log_data_access: {
+        Args: {
+          p_action: string
+          p_target_table: string
+          p_target_id?: string | null
+          p_patient_id?: string | null
+          p_metadata?: Record<string, string | number | boolean | null>
+        }
+        Returns: undefined
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }

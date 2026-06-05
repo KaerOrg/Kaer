@@ -20,6 +20,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
 | [`module-sources.md`](module-sources.md) | Onglet « Sources & recommandations » du panneau praticien (table `module_sources`) |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
+| [`audit-log.md`](audit-log.md) | Journal d'audit des accès aux données patient (RGPD/HDS) — table `access_audit_log`, triggers + RPC |
 | [`auth-mfa.md`](auth-mfa.md) | Authentification forte praticien (MFA TOTP) — flux, AAL, récupération, bandeau de rappel |
 | [`support-requests.md`](support-requests.md) | Demandes de support praticien (formulaire borné → table + email Resend) |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |

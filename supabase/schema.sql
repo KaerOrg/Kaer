@@ -1299,6 +1299,194 @@ create policy "patient_entries_practitioner_select"
 
 
 -- ============================================================
+-- TABLE : access_audit_log (Journal d'audit des accès — RGPD/HDS)
+-- ============================================================
+-- Trace QUI (actor_id = auth.uid()) a fait QUOI (action) sur QUELLE donnée
+-- (target_table / target_id / patient_id), QUAND (occurred_at).
+--
+-- ⚠️ Conformité MDR (RÈGLE D'OR) : ce journal ne stocke JAMAIS le contenu des
+-- lignes — aucune valeur clinique, aucun score, aucune note, aucune interprétation.
+-- Uniquement des métadonnées TECHNIQUES (acteur, action, table, id, patient, horodatage).
+--
+-- Accès : service_role uniquement (même modèle que notification_logs). AUCUNE policy
+-- client. Les seules écritures proviennent des fonctions SECURITY DEFINER de ce
+-- fichier (fn_audit_write via triggers, log_data_access via RPC), qui s'exécutent
+-- avec les droits du propriétaire et contournent donc la RLS.
+-- La consultation se fait via le dashboard Supabase (service_role) ou un futur écran DPO.
+
+create table if not exists public.access_audit_log (
+  id           uuid        primary key default gen_random_uuid(),
+  occurred_at  timestamptz not null default now(),
+  actor_id     uuid,                       -- auth.uid() de l'acteur ; null si service_role / système
+  actor_role   text        not null default 'unknown',
+  action       text        not null check (action in
+                 ('insert', 'update', 'delete', 'read', 'export', 'erase', 'purge')),
+  target_table text        not null,
+  target_id    uuid,                       -- id de la ligne ; null pour une lecture de liste / opération de masse
+  patient_id   uuid,                       -- patient concerné (filtrage) ; null si non rattachable
+  metadata     jsonb       not null default '{}'::jsonb
+);
+
+create index if not exists idx_access_audit_patient
+  on public.access_audit_log(patient_id, occurred_at desc);
+create index if not exists idx_access_audit_actor
+  on public.access_audit_log(actor_id, occurred_at desc);
+create index if not exists idx_access_audit_table
+  on public.access_audit_log(target_table, occurred_at desc);
+
+alter table public.access_audit_log enable row level security;
+-- Aucune policy client : lecture/écriture réservées au service_role et aux fonctions
+-- SECURITY DEFINER ci-dessous.
+
+
+-- Rôle de l'acteur courant, dérivé de auth.uid().
+-- Un appel sans utilisateur authentifié (service_role / cron / trigger système) → 'service'.
+create or replace function public.fn_current_actor_role()
+returns text
+language plpgsql
+stable
+security definer set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    return 'service';
+  end if;
+  if exists (select 1 from public.practitioners where id = v_uid) then
+    return 'practitioner';
+  end if;
+  if exists (select 1 from public.patients where id = v_uid) then
+    return 'patient';
+  end if;
+  return 'authenticated';
+end;
+$$;
+
+
+-- Trigger générique d'audit des ÉCRITURES (insert / update / delete).
+-- Attaché aux tables sensibles plus bas. N'enregistre QUE des métadonnées techniques
+-- (jamais to_jsonb(new) en base : on n'extrait que l'id et le patient_id).
+create or replace function public.fn_audit_write()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_rec     jsonb;
+  v_target  uuid;
+  v_patient uuid;
+begin
+  if (tg_op = 'DELETE') then
+    v_rec := to_jsonb(old);
+  else
+    v_rec := to_jsonb(new);
+  end if;
+
+  v_target  := nullif(v_rec ->> 'id', '')::uuid;
+  v_patient := nullif(v_rec ->> 'patient_id', '')::uuid;
+  -- La table patients n'a pas de colonne patient_id : son id EST le patient.
+  if v_patient is null and tg_table_name = 'patients' then
+    v_patient := v_target;
+  end if;
+
+  insert into public.access_audit_log
+    (actor_id, actor_role, action, target_table, target_id, patient_id)
+  values
+    (auth.uid(), public.fn_current_actor_role(), lower(tg_op),
+     tg_table_name, v_target, v_patient);
+
+  if (tg_op = 'DELETE') then
+    return old;
+  end if;
+  return new;
+end;
+$$;
+
+
+-- Attache fn_audit_write à chaque table sensible (idempotent + défensif).
+-- La garde `to_regclass` permet au MÊME schéma de fonctionner quel que soit l'état
+-- de la base : sur `main` les tables caseload_*/notification_events n'existent pas
+-- encore (branche tableau de bord) → elles sont ignorées ; sur une base où elles
+-- existent → elles sont couvertes automatiquement.
+-- ⚠️ Pour auditer une nouvelle table de données patient : ajouter son nom à v_sensitive.
+do $$
+declare
+  v_table     text;
+  v_sensitive text[] := array[
+    'patients',
+    'practitioner_patients',
+    'invitations',
+    'patient_modules',
+    'cssrs_screen_assessments',
+    'crisis_plan_configs',
+    'crisis_plan_coping_cards',
+    'practitioner_patient_notes',
+    'patient_push_tokens',
+    'notification_routines',
+    'appointments',
+    'patient_entries',
+    -- branche tableau de bord (présentes sur la base live, pas encore sur main) :
+    'notification_events',
+    'caseload_entries',
+    'caseload_notes',
+    'caseload_waits',
+    'caseload_actions'
+  ];
+begin
+  foreach v_table in array v_sensitive loop
+    if to_regclass('public.' || v_table) is null then
+      continue;  -- table absente de cette base → on saute
+    end if;
+    execute format('drop trigger if exists audit_write on public.%I', v_table);
+    execute format(
+      'create trigger audit_write after insert or update or delete on public.%I '
+      'for each row execute procedure public.fn_audit_write()', v_table);
+  end loop;
+end $$;
+
+
+-- RPC applicatif : journalise un accès NON observable par trigger
+-- (lecture, export, effacement, purge). L'acteur est dérivé de auth.uid() ICI —
+-- le client ne peut donc pas le forger. Les écritures passent par fn_audit_write.
+create or replace function public.log_data_access(
+  p_action       text,
+  p_target_table text,
+  p_target_id    uuid  default null,
+  p_patient_id   uuid  default null,
+  p_metadata     jsonb default '{}'::jsonb
+)
+returns void
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if p_action not in ('read', 'export', 'erase', 'purge') then
+    raise exception 'log_data_access: action non autorisée %', p_action;
+  end if;
+
+  insert into public.access_audit_log
+    (actor_id, actor_role, action, target_table, target_id, patient_id, metadata)
+  values
+    (auth.uid(), public.fn_current_actor_role(), p_action,
+     p_target_table, p_target_id, p_patient_id, coalesce(p_metadata, '{}'::jsonb));
+end;
+$$;
+
+-- Durcissement des droits (les default privileges Supabase accordent EXECUTE à
+-- anon/authenticated sur toute fonction de public → révocation explicite requise).
+-- fn_audit_write : appelée uniquement par les triggers (s'exécute en tant qu'owner).
+-- fn_current_actor_role : helper interne aux fonctions SECURITY DEFINER.
+-- Aucune des deux ne doit être appelable via l'API REST.
+revoke all on function public.fn_audit_write() from public, anon, authenticated;
+revoke all on function public.fn_current_actor_role() from public, anon, authenticated;
+
+-- log_data_access : RPC réservé aux utilisateurs authentifiés (web) + service_role (Edge Functions / purge #28).
+revoke all on function public.log_data_access(text, text, uuid, uuid, jsonb) from public, anon, authenticated;
+grant execute on function public.log_data_access(text, text, uuid, uuid, jsonb) to authenticated, service_role;
+
+
+-- ============================================================
 -- TABLE : support_requests (Demandes de support praticien)
 -- ============================================================
 -- Formulaire BORNÉ : le praticien choisit un motif dans une liste fermée
