@@ -1,6 +1,6 @@
-# PsyTool — Contexte général
+# Kær — Contexte général
 
-## Qu'est-ce que PsyTool ?
+## Qu'est-ce que Kær ?
 
 Outil d'accompagnement thérapeutique en deux parties :
 - **Interface web praticien** — tableau de bord pour gérer les patients et débloquer des modules
@@ -27,7 +27,7 @@ Consultant ou thérapeute parmi les corps de métier suivants : IDE, IPA, psychi
 ## Structure du projet (monorepo npm workspaces)
 
 ```
-PsyTool/
+Kær/
 ├── apps/
 │   ├── web/          # Interface praticien (React + Vite)
 │   └── mobile/       # App patient (Expo + React Native)
@@ -72,7 +72,7 @@ Row Level Security (RLS) activée sur toutes les tables.
 
 ## Règles métier fondamentales
 
-- **Aucune donnée clinique stockée** côté serveur (pas de diagnostic, pas de notes)
+- **Aucune donnée *interprétée* côté serveur** — pas de diagnostic, pas de notes de séance, aucune logique conclusive (`if score > seuil`). En revanche, les données d'exercices du patient (scores d'échelles, journaux, saisies) **sont bien stockées côté serveur** dans `patient_entries`, en `payload jsonb` opaque, **après consentement explicite du patient** (opt-in). Ce sont des **données de santé sensibles au sens RGPD Art. 9** → hébergement HDS requis avant commercialisation. Le serveur stocke et restitue brut, il ne conclut jamais (cf. Règle d'or MDR)
 - Auth par email/mot de passe uniquement
 - Un patient **ne peut pas s'inscrire seul** — il faut une invitation du praticien
 - Les données d'exercices sont **stockées en local** sur le téléphone du patient par défaut
@@ -192,6 +192,7 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module NSI — Sévérité des cauchemars (`nsi`) — 9 items scorés (0–45) + 2 items contextuels (% récurrents, thèmes), SQLite `nsi_entries`
 - [x] Module Effets indésirables du traitement (`medication_side_effects`) — refonte tracker multi-dimensions (pattern `mood_tracker` via composant générique partagé `DimensionTrackerView` mobile + `SliderDashboardLayout`/`slider_dashboard` web), effets suivis paramétrables par patient (12 fixes + personnalisés, config `patient_modules.config.tracked_effects` partagée web↔mobile), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries`, tests Jest + Vitest
 - [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
+- [x] MFA praticien (`feat/mfa-praticien`, ticket #26, épic conformité #29) — TOTP via Supabase Auth natif (zéro schéma MFA), opt-in par praticien. Gestion AAL (`aal1`→`aal2`) dans `authService`, enrôlement QR en 3 étapes claires (`MfaSettingsCard`/`MfaEnrollModal`), challenge au login (`MfaChallengeForm`). **Bandeau de rappel** `MfaReminderBanner` (primitive design system `Banner`, fermeture persistée `practitioners.mfa_reminder_dismissed`). **Contact support** depuis l'app (formulaire borné sans saisie libre → table `support_requests` + email Resend via Edge Function `send-support-request`) pour le cas perte de code. Enforcement obligatoire = ticket #33. Docs : [`docs/auth-mfa.md`](docs/auth-mfa.md), [`docs/support-requests.md`](docs/support-requests.md)
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -201,9 +202,9 @@ Migration vers hébergement HDS (OVHcloud) requise avant mise en production comm
 
 ## RÈGLE D'OR — Statut Non-Dispositif Médical (MDR 2017/745)
 
-> **Cette règle s'applique à chaque ligne de code produite pour PsyTool, sans exception.**
+> **Cette règle s'applique à chaque ligne de code produite pour Kær, sans exception.**
 
-PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
+Kær est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
 
 **Principe fondamental : le code affiche, jamais il ne conclut.** L'interprétation appartient exclusivement au patient ou au soignant.
 

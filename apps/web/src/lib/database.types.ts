@@ -14,6 +14,7 @@ export interface Database {
           phone: string | null
           avatar_url: string | null
           auto_confirm_appointments: boolean
+          mfa_reminder_dismissed: boolean
           created_at: string
         }
         Insert: {
@@ -26,6 +27,7 @@ export interface Database {
           phone?: string | null
           avatar_url?: string | null
           auto_confirm_appointments?: boolean
+          mfa_reminder_dismissed?: boolean
         }
         Update: {
           name?: string
@@ -35,6 +37,7 @@ export interface Database {
           phone?: string | null
           avatar_url?: string | null
           auto_confirm_appointments?: boolean
+          mfa_reminder_dismissed?: boolean
         }
         Relationships: []
       }
@@ -553,6 +556,7 @@ export interface Practitioner {
   address: string | null
   phone: string | null
   avatar_url: string | null
+  mfa_reminder_dismissed: boolean
 }
 
 export interface PatientSummary {

@@ -99,7 +99,7 @@ Deno.serve(async () => {
     for (const token of routineTokens) {
       messages.push({
         to: token,
-        title: 'PsyTool',
+        title: 'Kær',
         body: routine.practitioner_note ?? 'Vous avez un exercice à faire aujourd\'hui.',
         channelId: 'psytool-reminders',
       })

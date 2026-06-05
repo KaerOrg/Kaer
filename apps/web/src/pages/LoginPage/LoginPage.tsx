@@ -7,13 +7,16 @@ import { InputField } from '../../components/ui/InputField'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
+import { MfaChallengeForm } from './MfaChallengeForm'
+import { SupportRequestModal } from '../../components/features/SupportRequestModal'
 import './LoginPage.css'
 
 export function LoginPage() {
-  const { login, register, loading, error, clearError } = useAuthStore()
+  const { login, register, loading, error, clearError, mfaRequired } = useAuthStore()
   const { t, i18n } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [registered, setRegistered] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -43,13 +46,28 @@ export function LoginPage() {
     setMode(m => m === 'login' ? 'register' : 'login')
   }
 
+  if (mfaRequired) {
+    return (
+      <div className="login-page">
+        <div className="login-card">
+          <div className="login-card__header">
+            <div className="login-card__logo"><BrainCircuit size={36} /></div>
+            <h1 className="login-card__title">Kær</h1>
+            <p className="login-card__subtitle">{t('auth.mfa.challenge_subtitle')}</p>
+          </div>
+          <MfaChallengeForm />
+        </div>
+      </div>
+    )
+  }
+
   if (registered) {
     return (
       <div className="login-page">
         <div className="login-card">
           <div className="login-card__header">
             <div className="login-card__logo"><BrainCircuit size={36} /></div>
-            <h1 className="login-card__title">PsyTool</h1>
+            <h1 className="login-card__title">Kær</h1>
           </div>
           <div className="login-card__confirm-email">
             <div className="login-card__confirm-icon">📧</div>
@@ -69,7 +87,7 @@ export function LoginPage() {
       <div className="login-card">
         <div className="login-card__header">
           <div className="login-card__logo"><BrainCircuit size={36} /></div>
-          <h1 className="login-card__title">PsyTool</h1>
+          <h1 className="login-card__title">Kær</h1>
           <p className="login-card__subtitle">
             {mode === 'login' ? t('auth.login_subtitle') : t('auth.register_subtitle')}
           </p>
@@ -147,8 +165,17 @@ export function LoginPage() {
               </button>
             </p>
           )}
+          <p>
+            <button type="button" className="login-card__link" onClick={() => setSupportOpen(true)}>
+              {t('support.contact_link')}
+            </button>
+          </p>
         </div>
       </div>
+
+      {supportOpen ? (
+        <SupportRequestModal requireEmail onClose={() => setSupportOpen(false)} />
+      ) : null}
     </div>
   )
 }

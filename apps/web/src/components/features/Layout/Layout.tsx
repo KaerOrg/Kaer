@@ -3,6 +3,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { ProfileDropdown } from './ProfileDropdown'
 import { MainNav } from '../MainNav/MainNav'
 import { ActivityFeedPanel } from '../ActivityFeedPanel/ActivityFeedPanel'
+import { MfaReminderBanner } from '../MfaReminderBanner'
 import { getInitials } from './Layout.utils'
 import './Layout.css'
 import type { LayoutProps } from './Layout.types'
@@ -39,7 +40,10 @@ export function Layout({ children, sidebar }: LayoutProps) {
 
       <div className={`layout__body${sidebar ? ' layout__body--with-sidebar' : ''}`}>
         {sidebar && <aside className="layout__sidebar">{sidebar}</aside>}
-        <main className="layout__main">{children}</main>
+        <main className="layout__main">
+          <MfaReminderBanner />
+          {children}
+        </main>
       </div>
     </div>
   )

@@ -1,11 +1,11 @@
 ---
 name: sync-field-types-drive
-description: Synchronise l'inventaire des field_types PsyTool vers Google Sheets via le MCP google-docs. Interroge la base Supabase, scanne le code, met à jour uniquement les cellules qui ont changé. Triggers — "sync field types", "synchronise l'inventaire", "mets à jour le fichier field_types", "rafraîchis l'inventaire des field_types".
+description: Synchronise l'inventaire des field_types Kær vers Google Sheets via le MCP google-docs. Interroge la base Supabase, scanne le code, met à jour uniquement les cellules qui ont changé. Triggers — "sync field types", "synchronise l'inventaire", "mets à jour le fichier field_types", "rafraîchis l'inventaire des field_types".
 ---
 
 # Sync Field Types → Google Sheets (MCP google-docs)
 
-Ce skill synchronise l'inventaire des `field_type` PsyTool **directement dans le Google Sheet existant**, en mettant à jour uniquement les données qui ont changé — pas de recréation du fichier.
+Ce skill synchronise l'inventaire des `field_type` Kær **directement dans le Google Sheet existant**, en mettant à jour uniquement les données qui ont changé — pas de recréation du fichier.
 
 ## Google Sheet cible
 

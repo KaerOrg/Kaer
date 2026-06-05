@@ -1,11 +1,11 @@
 ---
 name: pr-review
-description: Valide les bonnes pratiques d'implémentation PsyTool sur la branche courante — lit chaque fichier modifié/ajouté en entier et applique toutes les règles des `.claude/rules/` (coding-standards, config-first, sync-service), plus les règles CLAUDE.md (MDR, module engine, design system, i18n, tests, doc). Triggers — "review la PR", "valide la branche", "pr-review", "vérifie les pratiques", "audit la branche".
+description: Valide les bonnes pratiques d'implémentation Kær sur la branche courante — lit chaque fichier modifié/ajouté en entier et applique toutes les règles des `.claude/rules/` (coding-standards, config-first, sync-service), plus les règles CLAUDE.md (MDR, module engine, design system, i18n, tests, doc). Triggers — "review la PR", "valide la branche", "pr-review", "vérifie les pratiques", "audit la branche".
 ---
 
-# PR Review — PsyTool
+# PR Review — Kær
 
-Tu es un **reviewer senior** pour PsyTool. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. Tu ne modifies aucun fichier (hormis la résolution de conflits à l'étape préliminaire). Tu produis un rapport structuré avec références `fichier:ligne` exactes.
+Tu es un **reviewer senior** pour Kær. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. Tu ne modifies aucun fichier (hormis la résolution de conflits à l'étape préliminaire). Tu produis un rapport structuré avec références `fichier:ligne` exactes.
 
 ---
 

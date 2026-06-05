@@ -1,4 +1,4 @@
-# Pièges de dépendances — Monorepo PsyTool
+# Pièges de dépendances — Monorepo Kær
 
 ## Contexte
 

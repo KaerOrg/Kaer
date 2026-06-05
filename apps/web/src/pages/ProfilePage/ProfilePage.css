@@ -164,3 +164,7 @@
   justify-content: flex-end;
   margin-top: var(--spacing-xs);
 }
+
+.profile-page__security {
+  margin-top: 28px;
+}

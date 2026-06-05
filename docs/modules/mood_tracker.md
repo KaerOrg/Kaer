@@ -25,7 +25,7 @@
 
 ## Conformité MDR 2017/745
 
-PsyTool est un Carnet de Bord Numérique — non-Dispositif Médical.
+Kær est un Carnet de Bord Numérique — non-Dispositif Médical.
 
 - Les valeurs 1–10 sont des **chiffres bruts** saisis par le patient, affichés sans label interprétatif.
 - Les graphiques sont neutres : aucune couleur d'alerte, aucune flèche, aucun commentaire automatique.

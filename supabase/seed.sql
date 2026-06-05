@@ -1,5 +1,5 @@
 -- ============================================================
--- PSYTOOL — Données de référence (seed) PostgreSQL / Supabase
+-- KÆR — Données de référence (seed) PostgreSQL / Supabase
 --
 -- Ce fichier contient UNIQUEMENT les données de seed du modèle :
 --   catégories, modules, champs de contenu, propriétés, layouts.

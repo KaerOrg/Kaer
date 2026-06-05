@@ -1,6 +1,6 @@
 # MainNav
 
-Barre de navigation principale de l'interface praticien. Rendu dans `Layout`, à droite du logo PsyTool.
+Barre de navigation principale de l'interface praticien. Rendu dans `Layout`, à droite du logo Kær.
 
 Chaque lien détecte automatiquement s'il est actif via `useLocation()` et applique la classe `.main-nav__link--active`.
 
