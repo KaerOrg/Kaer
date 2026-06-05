@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
+import { SupportRequestModal } from '../../components/features/SupportRequestModal'
 
 /**
  * Étape de saisie du code TOTP affichée après un login mot de passe réussi
@@ -15,6 +16,7 @@ export function MfaChallengeForm() {
   // Contrôlé : la valeur conditionne l'UI (sanitisation live + désactivation du bouton).
   const [code, setCode] = useState('')
   const [invalid, setInvalid] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,6 +56,14 @@ export function MfaChallengeForm() {
       <button type="button" className="login-card__link" onClick={() => void cancelMfa()}>
         {t('auth.mfa.cancel')}
       </button>
+
+      <button type="button" className="login-card__link" onClick={() => setSupportOpen(true)}>
+        {t('auth.mfa.lost_access_link')}
+      </button>
+
+      {supportOpen ? (
+        <SupportRequestModal presetReason="mfa_lost" onClose={() => setSupportOpen(false)} />
+      ) : null}
     </form>
   )
 }

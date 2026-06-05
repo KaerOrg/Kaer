@@ -194,6 +194,18 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut()
 }
 
+/** Mémorise que le praticien a fermé le bandeau de rappel d'activation du MFA. */
+export async function dismissMfaReminder(): Promise<void> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase
+    .from('practitioners')
+    .update({ mfa_reminder_dismissed: true } as never)
+    .eq('id', user.id)
+}
+
 export async function fetchProfessionalTitles(): Promise<ProfessionalTitle[]> {
   const { data } = await supabase
     .from('professional_titles')

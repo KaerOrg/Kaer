@@ -3,6 +3,7 @@ import type { SupportedLang } from '../i18n'
 import type { Practitioner } from '../lib/database.types'
 import {
   completeMfaLogin,
+  dismissMfaReminder as dismissMfaReminderService,
   fetchSessionPractitioner,
   loginWithPassword,
   registerPractitioner,
@@ -27,6 +28,8 @@ interface AuthState {
   updateProfile: (name: string, title: string, address: string, phone: string) => Promise<string | null>
   updateLanguagePreference: (lang: SupportedLang) => Promise<void>
   updateAvatar: (avatarUrl: string) => void
+  /** Masque définitivement le bandeau de rappel d'activation du MFA. */
+  dismissMfaReminder: () => Promise<void>
   logout: () => Promise<void>
   loadSession: () => Promise<void>
   clearError: () => void
@@ -105,6 +108,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set((state) => ({
       practitioner: state.practitioner ? { ...state.practitioner, avatar_url: avatarUrl } : null,
     }))
+  },
+
+  dismissMfaReminder: async () => {
+    set((state) => ({
+      practitioner: state.practitioner
+        ? { ...state.practitioner, mfa_reminder_dismissed: true }
+        : null,
+    }))
+    await dismissMfaReminderService()
   },
 
   logout: async () => {

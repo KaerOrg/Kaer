@@ -61,10 +61,30 @@
       "disable_confirm_text": "Votre compte ne sera plus protégé par un second facteur. Confirmer ?",
       "disable_confirm_button": "Désactiver",
       "enroll_title": "Activer l'authentification à deux facteurs",
-      "enroll_scan": "Scannez ce QR code avec votre application d'authentification.",
-      "enroll_secret_label": "Ou saisissez cette clé manuellement :",
-      "enroll_verify": "Saisissez ensuite le code à 6 chiffres généré par l'application.",
-      "confirm_button": "Confirmer"
+      "enroll_intro": "L'authentification à deux facteurs ajoute un code de sécurité à votre connexion. Suivez ces 3 étapes :",
+      "enroll_step1": "1. Installez une application d'authentification sur votre téléphone (par exemple Google Authenticator, Microsoft Authenticator ou Authy).",
+      "enroll_step2": "2. Dans l'application, ajoutez un compte en scannant ce QR code :",
+      "enroll_secret_label": "QR code impossible à scanner ? Saisissez plutôt cette clé dans l'application :",
+      "enroll_step3": "3. Saisissez ci-dessous le code à 6 chiffres affiché par l'application :",
+      "confirm_button": "Confirmer",
+      "banner_text": "Sécurisez votre compte : activez l'authentification à deux facteurs (2FA).",
+      "banner_action": "Activer",
+      "banner_dismiss": "Masquer ce rappel",
+      "lost_access_link": "Vous n'avez plus accès à votre application d'authentification ?"
+    }
+  },
+  "support": {
+    "title": "Contacter le support",
+    "intro": "Sélectionnez le motif de votre demande. Le support vous recontactera à l'adresse email de votre compte.",
+    "reason_label": "Motif de la demande",
+    "submit": "Envoyer la demande",
+    "success": "Votre demande a été transmise au support.",
+    "error": "Impossible d'envoyer la demande. Réessayez.",
+    "reason": {
+      "mfa_lost": "J'ai perdu l'accès à mon application d'authentification (2FA)",
+      "login_issue": "Je n'arrive pas à me connecter",
+      "account_issue": "Problème lié à mon compte",
+      "other": "Autre demande"
     }
   },
   "profile_modal": {

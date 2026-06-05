@@ -80,13 +80,17 @@ export function MfaEnrollModal({ onClose, onEnrolled }: MfaEnrollModalProps) {
         <p className="mfa-enroll__loading">{t('common.loading')}</p>
       ) : (
         <form onSubmit={handleVerify} className="mfa-enroll">
-          <p className="mfa-enroll__step">{t('auth.mfa.enroll_scan')}</p>
+          <p className="mfa-enroll__intro">{t('auth.mfa.enroll_intro')}</p>
+
+          <p className="mfa-enroll__step">{t('auth.mfa.enroll_step1')}</p>
+
+          <p className="mfa-enroll__step">{t('auth.mfa.enroll_step2')}</p>
           <img src={enroll.qrCode} alt="" className="mfa-enroll__qr" />
 
           <p className="mfa-enroll__secret-label">{t('auth.mfa.enroll_secret_label')}</p>
           <code className="mfa-enroll__secret">{enroll.secret}</code>
 
-          <p className="mfa-enroll__step">{t('auth.mfa.enroll_verify')}</p>
+          <p className="mfa-enroll__step">{t('auth.mfa.enroll_step3')}</p>
           <InputField
             label={t('auth.mfa.code_label')}
             type="text"

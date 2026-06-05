@@ -9,6 +9,7 @@ import { InputField } from '../../components/ui/InputField'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
 import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
+import { SupportRequestModal } from '../../components/features/SupportRequestModal'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
@@ -34,6 +35,7 @@ export function ProfilePage() {
   const [phone, setPhone] = useState(practitioner?.phone ?? '')
   const [saving, setSaving] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
@@ -180,7 +182,14 @@ export function ProfilePage() {
 
       <div className="profile-page__security">
         <MfaSettingsCard />
+        <div className="profile-page__support">
+          <Button variant="secondary" onClick={() => setSupportOpen(true)}>
+            {t('support.title')}
+          </Button>
+        </div>
       </div>
+
+      {supportOpen ? <SupportRequestModal onClose={() => setSupportOpen(false)} /> : null}
     </Layout>
   )
 }

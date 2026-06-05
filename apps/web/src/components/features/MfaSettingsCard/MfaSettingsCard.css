@@ -4,6 +4,13 @@
   gap: var(--spacing-sm);
 }
 
+.mfa-enroll__intro {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .mfa-enroll__step {
   margin: 0;
   color: var(--color-text);

@@ -78,7 +78,7 @@ Points spécifiques à PsyTool :
 
 ### 2.3 Règles métier — à vérifier pour chaque feature
 
-- **Aucune donnée clinique** stockée côté serveur (pas de diagnostic, pas de notes de séance)
+- **Aucune donnée *interprétée* côté serveur** (pas de diagnostic, pas de notes de séance, pas de `if score > seuil`). Les données d'exercices du patient sont en revanche **stockées sur le serveur** (`patient_entries`, payload jsonb opaque) après consentement explicite — données de santé sensibles RGPD Art. 9, HDS requis avant commercialisation
 - Un patient **ne peut pas s'inscrire seul** — le flux d'invitation doit être respecté
 - Les données d'exercices sont **stockées localement** sur le téléphone du patient par défaut
 - Le patient peut **choisir** de partager ses données avec son praticien
@@ -219,7 +219,7 @@ Après les phases 1–3, présenter à l'utilisateur :
 - [ ] `user_id` résolu via `auth.uid()` côté Supabase, jamais depuis le client
 - [ ] Lien praticien ↔ patient vérifié par RLS (via `practitioner_patients`)
 - [ ] Aucun secret / clé API dans le code ou AsyncStorage (→ expo-secure-store)
-- [ ] Aucune donnée clinique stockée côté serveur
+- [ ] Aucune donnée *interprétée* côté serveur (le stockage de données patient dans `patient_entries` après opt-in est autorisé ; l'interprétation ne l'est pas)
 - [ ] Inputs utilisateur validés avant écriture en base
 - [ ] Token d'invitation : usage unique et expiration vérifiés
 
