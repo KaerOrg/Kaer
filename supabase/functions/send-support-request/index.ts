@@ -114,10 +114,14 @@ Deno.serve(async (req) => {
     }
 
     // 2) Notifier le support par email (Resend) — best-effort.
-    const supportEmail = Deno.env.get('SUPPORT_EMAIL') ?? Deno.env.get('DEV_EMAIL') ?? null
+    // SUPPORT_EMAIL peut contenir plusieurs adresses séparées par des virgules.
+    const supportRecipients = (Deno.env.get('SUPPORT_EMAIL') ?? Deno.env.get('DEV_EMAIL') ?? '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
     const resendKey = Deno.env.get('RESEND_API_KEY')
 
-    if (supportEmail && resendKey) {
+    if (supportRecipients.length > 0 && resendKey) {
       const reasonLabel = REASON_LABELS[reason] ?? reason
       const origin = userId ? `Praticien : ${practitionerName} (${userId})` : 'Demande non authentifiée (écran de login)'
       const descriptionHtml = cleanDescription
@@ -131,7 +135,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           from: 'PsyTool <onboarding@resend.dev>',
-          to: [supportEmail],
+          to: supportRecipients,
           subject: `[Support PsyTool] ${reasonLabel}`,
           html: `<div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; color: #1a1a2e;"><h2 style="font-size: 18px;">Nouvelle demande de support</h2><p><strong>Motif :</strong> ${reasonLabel}</p>${descriptionHtml}<p><strong>${origin}</strong></p><p><strong>Email de contact :</strong> ${userEmail ?? '—'}</p><p style="color:#888; font-size:12px;">Demande enregistrée dans support_requests. Vérifiez l'identité avant toute action (ex. réinitialisation 2FA).</p></div>`,
         }),
