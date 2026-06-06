@@ -190,15 +190,76 @@ clinique. Voir [`audit-log.md`](audit-log.md).
    puis exécuter le `cron.schedule('purge-retention-cron', '0 2 * * *', …)` documenté
    en commentaire dans `schema.sql` (remplacer `<PROJECT_REF>` et `<SERVICE_ROLE_KEY>`).
 
-### Vérification manuelle (avant d'activer le cron)
+### Test à blanc (avant d'activer le cron)
 
-Compter ce qui *serait* purgé sans rien supprimer (exemple `patient_entries`) :
+Le principe : remplacer le `DELETE` par un `COUNT` — **mêmes conditions, zéro suppression**.
+
+**Option A — une fois le schéma déployé** (utilise `fn_inactive_patient_ids`), exemple `patient_entries` :
 
 ```sql
 select count(*)
 from public.patient_entries e
 where e.client_created_at < now() - interval '1825 days'
   and e.patient_id in (select public.fn_inactive_patient_ids(now() - interval '365 days'));
+```
+
+**Option B — requête autonome** (ne dépend pas du schéma déployé : la logique
+d'inactivité est inlinée). À coller dans le SQL Editor — **100 % lecture, ne supprime rien**.
+La colonne `a_purger` = ce que la vraie purge effacerait aujourd'hui.
+
+```sql
+-- Patients inactifs : pas de connexion NI de RDV depuis 365 jours
+with inactive as (
+  select p.id from public.patients p
+  where not exists (
+          select 1 from auth.users u
+          where u.id = p.id and u.last_sign_in_at >= now() - interval '365 days')
+    and not exists (
+          select 1 from public.appointments a
+          where a.patient_id = p.id and a.starts_at >= now() - interval '365 days')
+)
+-- Tables gatées (purge seulement si patient inactif)
+select 'patient_entries' as table_name,
+       count(*) filter (where client_created_at < now() - interval '1825 days'
+                          and patient_id in (select id from inactive)) as a_purger,
+       count(*) as total
+from public.patient_entries
+union all
+select 'practitioner_patient_notes',
+       count(*) filter (where updated_at < now() - interval '1825 days'
+                          and patient_id in (select id from inactive)),
+       count(*)
+from public.practitioner_patient_notes
+union all
+select 'appointments',
+       count(*) filter (where ends_at < now() - interval '1825 days'
+                          and patient_id in (select id from inactive)),
+       count(*)
+from public.appointments
+-- Tables non gatées (purge par simple ancienneté)
+union all
+select 'notification_logs',
+       count(*) filter (where sent_at < now() - interval '365 days'), count(*)
+from public.notification_logs
+union all
+select 'invitations',
+       count(*) filter (where expires_at < now() - interval '30 days'), count(*)
+from public.invitations
+union all
+select 'access_audit_log',
+       count(*) filter (where occurred_at < now() - interval '3650 days'), count(*)
+from public.access_audit_log
+order by table_name;
+```
+
+**Isoler un patient** (vérifier qu'il est bien protégé / éligible) :
+
+```sql
+select id from public.patients p
+where p.id = '<patient_id>'
+  and not exists (select 1 from auth.users u where u.id = p.id and u.last_sign_in_at >= now() - interval '365 days')
+  and not exists (select 1 from public.appointments a where a.patient_id = p.id and a.starts_at >= now() - interval '365 days');
+-- Ressort → inactif (purgeable). Ne ressort pas → actif (protégé).
 ```
 
 ---
