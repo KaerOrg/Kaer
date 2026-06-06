@@ -50,6 +50,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`moduleSourcesService.ts`](../apps/web/src/services/moduleSourcesService.ts) | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` — sources & recommandations d'un module ([doc](module-sources.md)) |
 | [`caseloadService.ts`](../apps/web/src/services/caseloadService.ts) | File active praticien : `fetchCaseload` (assemble dossiers + actions + attentes), `syncCaseloadWithPatients` (crée un dossier lié pour chaque patient app — auto, idempotent), CRUD `caseload_entries` (création, édition inline, statut), `caseload_actions` (coche `setActionDone`…), `caseload_waits` (attentes de retour) et `caseload_notes` (observations : `fetchCaseloadNotes`/`createCaseloadNote`) + ré-export des fonctions pures de [`caseloadLogic.ts`](../apps/web/src/lib/caseloadLogic.ts). Spec : [`spec/file-active.md`](spec/file-active.md) |
 | [`engagementService.ts`](../apps/web/src/services/engagementService.ts) | **Graphes d'évolution patient** (`PatientEvolutionTab`) : `fetchScaleEvolution` / `fetchMoodEvolution` / `fetchFearEvolution` / `fetchMedSideEffectsEvolution` / `fetchAvailableScales` — lit **`patient_entries.payload`** (filtré par RLS selon `patients.share_consent`). Affichage passif, zéro interprétation (MDR). |
+| [`patientDataRightsService.ts`](../apps/web/src/services/patientDataRightsService.ts) | **Droits patient RGPD** : `exportPatientData` (RPC `export_patient_data` → JSON brut) et `erasePatientData` (RPC `erase_patient_data` + Edge Function `delete-patient-account`). Voir [`rgpd-droits-patient.md`](rgpd-droits-patient.md). |
 
 > **Logique pure isolée** : `apps/web/src/lib/caseloadLogic.ts` ne dépend pas du client Supabase — alerte (`computeActionAlert`, `computeEntryAlert` = action ouverte la plus urgente), tri et liste « Aujourd'hui » y sont calculés (testables sans mock). Le service ne fait que l'accès aux données + ré-export. C'est le pattern à suivre pour toute logique métier dérivée (séparer le pur du réseau).
 
@@ -76,6 +77,7 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`activityRecordService.ts`](../apps/mobile/src/services/activityRecordService.ts) | `saveActivityRecord`, `deleteActivityRecord` — activation comportementale |
 | [`fearTrackerService.ts`](../apps/mobile/src/services/fearTrackerService.ts) | `saveFearEntry`, `deleteFearEntry`, `saveFearSituation`, `deleteFearSituation`, `createExposureHierarchy`, `deleteExposureHierarchy` |
 | [`breathingService.ts`](../apps/mobile/src/services/breathingService.ts) | `saveBreathingSession` — techniques de respiration |
+| [`patientDataRightsService.ts`](../apps/mobile/src/services/patientDataRightsService.ts) | **Droits patient RGPD (self-service)** : `exportMyData` (RPC → JSON partagé) et `eraseMyAccount` (RPC + Edge Function + `purgeAllLocalData` + `signOut`). Exception légitime à `syncHelpers` (suppression totale, pas une entrée). Voir [`rgpd-droits-patient.md`](rgpd-droits-patient.md). |
 
 Le [`store/authStore.ts`](../apps/mobile/src/store/authStore.ts) est un thin wrapper Zustand qui délègue à `authService.ts`.
 

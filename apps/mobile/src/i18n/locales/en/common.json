@@ -130,6 +130,17 @@
     "share_data_hint": "Your practitioner will be able to see everything you log in the app.",
     "share_data_error": "Could not update sharing. Please try again.",
     "privacy_disclaimer": "Sharing with your practitioner is on. You can turn it off at any time — your data will then stay only on your phone.",
+    "data_rights": {
+      "section": "My data",
+      "hint": "You can export a copy of your data, or permanently delete your account and all your data.",
+      "export_button": "Export my data",
+      "export_error": "Export failed. Please try again.",
+      "erase_button": "Delete my account and data",
+      "erase_title": "Delete everything?",
+      "erase_message": "Your account and all your data will be permanently erased, both on the server and on this phone. This cannot be undone.",
+      "erase_confirm": "Delete everything",
+      "erase_error": "Deletion failed. Please try again."
+    },
     "logout_button": "Sign out",
     "logout_title": "Sign out",
     "logout_message": "Are you sure you want to sign out?",

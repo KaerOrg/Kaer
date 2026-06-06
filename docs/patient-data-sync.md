@@ -258,3 +258,13 @@ Le 2026-06-04, cette table a été **supprimée** et le système consolidé :
 - **Pas d'alerte conditionnelle** — Supabase ne déclenche rien en fonction des valeurs reçues.
 - **Affichage passif** — la Phase 3 affiche des historiques de chiffres bruts, sans label interprétatif ni seuil coloré.
 - **Consentement** — la gate `isConsentEnabled` garantit que rien ne part sans accord explicite.
+
+---
+
+## Droits patient (export & effacement)
+
+L'export et l'effacement des données décrites ici (y compris `patient_entries` et le
+cache SQLite local) sont couverts par les droits RGPD — voir
+[`rgpd-droits-patient.md`](rgpd-droits-patient.md). L'effacement supprime le compte
+`auth.users` (cascade serveur) **et** purge le stockage local de l'appareil
+(`purgeAllLocalData`).

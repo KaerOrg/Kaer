@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { logger } from '@psytool/shared'
+import { purgeAllLocalData } from '../lib/database'
 
 export interface PatientProfile {
   id: string
@@ -29,6 +30,10 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
     .single()
 
   if (!profile) {
+    // Session présente mais profil absent → compte effacé côté serveur (RGPD art. 17,
+    // ex. effacement déclenché par le praticien). On purge le stockage local résiduel
+    // de l'appareil avant de fermer la session.
+    await purgeAllLocalData()
     await supabase.auth.signOut()
     return null
   }

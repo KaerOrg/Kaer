@@ -720,6 +720,18 @@ export interface Database {
         }
         Returns: undefined
       }
+      // Droits patient RGPD (#27) — export (art. 15/20). Renvoie un jsonb brut
+      // (miroir neutre des données saisies, aucune interprétation — conforme MDR).
+      export_patient_data: {
+        Args: { p_patient_id: string }
+        Returns: Record<string, unknown>
+      }
+      // Droits patient RGPD (#27) — effacement du non-cascadant (art. 17). La
+      // suppression du compte auth.users (cascade) passe par l'Edge Function.
+      erase_patient_data: {
+        Args: { p_patient_id: string }
+        Returns: { ok: boolean; invitations_deleted: number; caseload_entries_deleted: number }
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

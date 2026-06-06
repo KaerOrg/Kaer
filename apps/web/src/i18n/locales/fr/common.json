@@ -200,6 +200,21 @@
       "cssrs": "Évaluation structurée de l'idéation et des comportements suicidaires. Columbia University / NIMH — version « Depuis la dernière visite »."
     }
   },
+  "patient_rights": {
+    "title": "Données & RGPD",
+    "subtitle": "Droits du patient sur ses données",
+    "description": "Exportez l'ensemble des données de ce patient (droit d'accès) ou effacez définitivement son compte et ses données (droit à l'oubli).",
+    "export_button": "Exporter (JSON)",
+    "export_success": "Export généré. Le téléchargement a démarré.",
+    "export_error": "L'export a échoué. Réessayez.",
+    "erase_button": "Effacer le patient",
+    "erase_confirm_title": "Effacer définitivement ce patient ?",
+    "erase_confirm_warning": "Cette action supprime le compte du patient ainsi que toutes ses données, sur le serveur comme sur son appareil. Elle est irréversible.",
+    "erase_confirm_label": "Pour confirmer, saisissez le nom du patient : {{name}}",
+    "erase_confirm_button": "Effacer définitivement",
+    "erase_success": "Le patient et ses données ont été effacés.",
+    "erase_error": "L'effacement a échoué. Réessayez."
+  },
   "patient": {
     "back": "← Retour à mes patients",
     "teen_mode_label": "Mode ado",

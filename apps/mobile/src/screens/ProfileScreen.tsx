@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Pressable,
   TextInput,
+  Share,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
@@ -22,6 +23,7 @@ import { colors, spacing, radius } from '../theme'
 import { SUPPORTED } from '../i18n'
 import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
 import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../services/avatarService'
+import { exportMyData, eraseMyAccount } from '../services/patientDataRightsService'
 
 const AVATAR_SIZE = 84
 
@@ -104,6 +106,35 @@ export default function ProfileScreen() {
   const [savingProfile, setSavingProfile] = useState(false)
 
   const [avatarUploading, setAvatarUploading] = useState(false)
+  const [exportingData, setExportingData] = useState(false)
+
+  const handleExportData = useCallback(async () => {
+    if (!patient) return
+    setExportingData(true)
+    const result = await exportMyData(patient.id)
+    setExportingData(false)
+    if (!result.ok) {
+      showToast(t('profile.data_rights.export_error'), 'error')
+      return
+    }
+    await Share.share({ message: JSON.stringify(result.data, null, 2) })
+  }, [patient, showToast, t])
+
+  const handleEraseAccount = useCallback(() => {
+    showConfirm({
+      title: t('profile.data_rights.erase_title'),
+      message: t('profile.data_rights.erase_message'),
+      confirmLabel: t('profile.data_rights.erase_confirm'),
+      destructive: true,
+      onConfirm: async () => {
+        if (!patient) return
+        const result = await eraseMyAccount(patient.id)
+        // Succès → eraseMyAccount a déjà purgé le local et fermé la session
+        // (onAuthChange route vers l'écran de connexion). On ne signale que l'échec.
+        if (!result.ok) showToast(t('profile.data_rights.erase_error'), 'error')
+      },
+    })
+  }, [patient, showConfirm, showToast, t])
 
   const handleToggleConsent = useCallback(async (value: boolean) => {
     const ok = await setShareConsent(value)
@@ -272,6 +303,22 @@ export default function ProfileScreen() {
             </View>
           </View>
           <Text style={styles.disclaimer}>{t('profile.privacy_disclaimer')}</Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.data_rights.section')}</Text>
+          <Text style={styles.disclaimer}>{t('profile.data_rights.hint')}</Text>
+          <Button
+            label={t('profile.data_rights.export_button')}
+            onPress={handleExportData}
+            loading={exportingData}
+            variant="secondary"
+          />
+          <Button
+            label={t('profile.data_rights.erase_button')}
+            onPress={handleEraseAccount}
+            variant="danger"
+          />
         </View>
 
         <View style={styles.section}>
