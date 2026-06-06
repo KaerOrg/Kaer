@@ -28,6 +28,13 @@ output_tokens=$(echo "$input" | jq -r '.context_window.total_output_tokens // em
 # Rate limits
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+five_reset=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+
+# Format an epoch (seconds) into a short local time — macOS (date -r) or Linux (date -d @)
+fmt_reset() {
+  [ -z "$1" ] && return
+  date -r "$1" '+%Hh%M' 2>/dev/null || date -d "@$1" '+%Hh%M' 2>/dev/null
+}
 
 # Git repo
 repo=$(echo "$input" | jq -r '.workspace.repo | if . then .owner + "/" + .name else empty end')
@@ -124,13 +131,15 @@ line2=""
 rate_str=""
 if [ -n "$five_pct" ]; then
   rate_str="5h:$(printf '%.0f' "$five_pct")%"
+  five_reset_str=$(fmt_reset "$five_reset")
+  [ -n "$five_reset_str" ] && rate_str="${rate_str} reset ${five_reset_str}"
 fi
 if [ -n "$week_pct" ]; then
   [ -n "$rate_str" ] && rate_str="${rate_str} "
   rate_str="${rate_str}7d:$(printf '%.0f' "$week_pct")%"
 fi
 if [ -n "$rate_str" ]; then
-  line2="${line2}$(link "https://claude.ai/settings/usage" "${MAGENTA}limits:[${rate_str}]${RESET}")"
+  line2="${line2}${MAGENTA}limits:[${rate_str}]${RESET}"
 fi
 
 if [ -n "$vim_mode" ]; then
@@ -141,10 +150,9 @@ fi
 line3=""
 
 if [ -n "$repo" ] && [ -n "$branch" ]; then
-  branch_url="https://github.com/${repo}/tree/${branch}"
-  line3="${line3}$(link "$branch_url" "${BLUE}${repo}@${branch}${RESET}")"
+  line3="${line3}${BLUE}${repo}@${branch}${RESET}"
 elif [ -n "$repo" ]; then
-  line3="${line3}$(link "https://github.com/${repo}" "${BLUE}${repo}${RESET}")"
+  line3="${line3}${BLUE}${repo}${RESET}"
 elif [ -n "$branch" ]; then
   line3="${line3}${BLUE}${branch}${RESET}"
 fi
