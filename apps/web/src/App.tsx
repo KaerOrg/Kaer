@@ -13,6 +13,7 @@ const ModuleCatalogPage = lazy(() => import('./pages/ModuleCatalogPage').then(m 
 const ModulePreviewPage = lazy(() => import('./pages/ModulePreviewPage').then(m => ({ default: m.ModulePreviewPage })))
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
 const AgendaPage = lazy(() => import('./pages/AgendaPage').then(m => ({ default: m.AgendaPage })))
+const FileActivePage = lazy(() => import('./pages/FileActivePage').then(m => ({ default: m.FileActivePage })))
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -63,6 +64,7 @@ function App() {
                 <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
                 <Route path="/profil" element={<ProfilePage />} />
                 <Route path="/agenda" element={<AgendaPage />} />
+                <Route path="/file-active" element={<FileActivePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : (

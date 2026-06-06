@@ -153,16 +153,6 @@ export async function getAllRoutinesForPatient(
   }))
 }
 
-// ── Signal d'observance (action patient) ───────────────────────────────────
-
-export function logScaleSubmission(patientId: string, scaleId: string): void {
-  void supabase.from('patient_engagement_logs').insert({
-    patient_id: patientId,
-    event_type: 'SCALE_SUBMITTED',
-    metadata: { module_type: scaleId },
-  })
-}
-
 // ── Pause / reprise (action patient) ───────────────────────────────────────
 
 export async function pauseRoutine(
@@ -178,8 +168,8 @@ export async function pauseRoutine(
 
   if (error) return false
 
-  // Signal d'observance vers le praticien (non critique)
-  void supabase.from('patient_engagement_logs').insert({
+  // Événement de notification vers le flux d'activité praticien (non critique).
+  void supabase.from('notification_events').insert({
     patient_id: patientId,
     event_type: 'NOTIFICATION_PAUSED',
     metadata: { routine_id: routineId, module_type: moduleType },

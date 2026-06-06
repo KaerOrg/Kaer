@@ -67,13 +67,20 @@ create table if not exists public.practitioners (
 
 -- 2. Profils des patients (créé automatiquement à l'inscription)
 create table if not exists public.patients (
-  id          uuid        primary key references auth.users(id) on delete cascade,
-  email       text        not null,
-  first_name  text        not null default '',
-  last_name   text        not null default '',
-  avatar_url  text,
-  created_at  timestamptz not null default now()
+  id            uuid        primary key references auth.users(id) on delete cascade,
+  email         text        not null,
+  first_name    text        not null default '',
+  last_name     text        not null default '',
+  avatar_url    text,
+  -- Consentement de partage des saisies vers le praticien (opt-out, contrôlé par le patient).
+  -- Pilote la sync mobile (RemoteSyncService) ET la RLS de lecture praticien sur patient_entries.
+  share_consent boolean     not null default true,
+  created_at    timestamptz not null default now()
 );
+
+-- Idempotent : ajoute la colonne sur une base patients déjà existante.
+alter table public.patients
+  add column if not exists share_consent boolean not null default true;
 
 -- 3. Relation praticien ↔ patient
 create table if not exists public.practitioner_patients (
@@ -481,32 +488,42 @@ create policy "avatars_select_public" on storage.objects
 
 
 -- ============================================================
--- TABLE : patient_engagement_logs (Observance / Engagement)
+-- TABLE : notification_events (Événements de notification)
 -- ============================================================
--- Suivi anonymisé de l'activité patient (aucune donnée clinique).
-create table if not exists public.patient_engagement_logs (
-  id          uuid        default gen_random_uuid() primary key,
-  patient_id  uuid        references auth.users(id) on delete cascade,
+-- Concept distinct des saisies cliniques : journal des actions du patient sur
+-- ses rappels (ex. mise en pause). Alimente le flux d'activité praticien
+-- (ActivityFeedPanel). Pas de donnée clinique.
+create table if not exists public.notification_events (
+  id          uuid        primary key default gen_random_uuid(),
+  patient_id  uuid        not null references public.patients(id) on delete cascade,
   event_type  text        not null,
-  metadata    jsonb       default '{}'::jsonb,
-  created_at  timestamptz default now()
+  metadata    jsonb       not null default '{}'::jsonb,
+  created_at  timestamptz not null default now()
 );
 
-alter table public.patient_engagement_logs enable row level security;
+create index if not exists idx_notification_events_patient_date
+  on public.notification_events(patient_id, created_at desc);
 
-drop policy if exists "Patients can insert their own logs" on public.patient_engagement_logs;
-create policy "Patients can insert their own logs"
-  on public.patient_engagement_logs for insert
+alter table public.notification_events enable row level security;
+
+drop policy if exists "notification_events_patient_insert" on public.notification_events;
+create policy "notification_events_patient_insert"
+  on public.notification_events for insert
   with check (auth.uid() = patient_id);
 
-drop policy if exists "Practitioners can view logs of their patients" on public.patient_engagement_logs;
-create policy "Practitioners can view logs of their patients"
-  on public.patient_engagement_logs for select
+drop policy if exists "notification_events_patient_select" on public.notification_events;
+create policy "notification_events_patient_select"
+  on public.notification_events for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "notification_events_practitioner_select" on public.notification_events;
+create policy "notification_events_practitioner_select"
+  on public.notification_events for select
   using (
     exists (
-      select 1 from public.practitioner_patients
-      where practitioner_id = auth.uid()
-        and patient_id = public.patient_engagement_logs.patient_id
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.notification_events.patient_id
     )
   );
 
@@ -1203,6 +1220,151 @@ create policy "module_sources_authenticated_select" on public.module_sources
 
 
 -- ============================================================
+-- FILE ACTIVE — Tour de contrôle praticien
+-- ============================================================
+-- Outil d'organisation PRIVÉ du praticien (jamais visible du patient).
+-- Purement administratif : échéances, priorités, tâches saisies à la main.
+-- Aucune donnée clinique structurée — texte libre uniquement (cf. practitioner_patient_notes).
+--
+-- Conformité MDR 2017/745 : le code affiche, il n'interprète jamais.
+-- `priority` est TOUJOURS saisi manuellement, jamais dérivé d'une donnée clinique
+-- (score, symptôme). Le niveau d'alerte est calculé côté client à partir des dates
+-- saisies par le praticien — rien n'est stocké, rien n'est conclu.
+
+-- Un dossier de file active. patient_id relie OPTIONNELLEMENT une fiche patient de
+-- l'app ; un dossier peut exister sans (patient non-utilisateur de l'app).
+-- Le dossier porte le CONTEXTE (qui, statut, priorité, soins, attente de tiers).
+-- Les TÂCHES à faire vivent dans caseload_actions (un dossier → plusieurs actions).
+create table if not exists public.caseload_entries (
+  id               uuid        primary key default gen_random_uuid(),
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  patient_id       uuid        references public.patients(id) on delete set null,
+  display_name     text        not null,
+  status           text        not null default 'active' check (status in ('active', 'paused', 'archived')),
+  is_important     boolean     not null default false,
+  wake_date        date,
+  care_pathways    text[]      not null default '{}',
+  last_reviewed_at date,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  archived_at      timestamptz
+);
+
+-- Migration idempotente : retirer les colonnes promues vers caseload_actions
+-- (BDD ayant connu la première version mono-action de la file active).
+alter table public.caseload_entries drop column if exists next_action;
+alter table public.caseload_entries drop column if exists due_date;
+alter table public.caseload_entries drop column if exists recurrence_days;
+-- Priorité 3 niveaux remplacée par un drapeau « Important ».
+alter table public.caseload_entries add column if not exists is_important boolean not null default false;
+alter table public.caseload_entries drop column if exists priority;
+-- « En attente de retour » devient multiple (table caseload_waits).
+alter table public.caseload_entries drop column if exists waiting_on;
+alter table public.caseload_entries drop column if exists relance_date;
+
+create index if not exists idx_caseload_entries_practitioner
+  on public.caseload_entries(practitioner_id, status);
+
+drop trigger if exists caseload_entries_updated_at on public.caseload_entries;
+create trigger caseload_entries_updated_at
+  before update on public.caseload_entries
+  for each row execute procedure public.set_updated_at();
+
+alter table public.caseload_entries enable row level security;
+
+drop policy if exists "caseload_entries_own" on public.caseload_entries;
+create policy "caseload_entries_own" on public.caseload_entries
+  for all
+  using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Journal daté des notes administratives d'un dossier (append-only côté usage).
+create table if not exists public.caseload_notes (
+  id               uuid        primary key default gen_random_uuid(),
+  entry_id         uuid        not null references public.caseload_entries(id) on delete cascade,
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  body             text        not null,
+  is_pinned        boolean     not null default false,
+  created_at       timestamptz not null default now()
+);
+
+create index if not exists idx_caseload_notes_entry
+  on public.caseload_notes(entry_id, created_at desc);
+
+alter table public.caseload_notes enable row level security;
+
+drop policy if exists "caseload_notes_own" on public.caseload_notes;
+create policy "caseload_notes_own" on public.caseload_notes
+  for all
+  using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- « En attente de retour » : ce qu'on attend de l'extérieur (résultat de bilan,
+-- retour d'un professionnel, réponse de l'ASE…), plusieurs par dossier, chacune
+-- avec une date de relance optionnelle (boomerang vers « Aujourd'hui »).
+create table if not exists public.caseload_waits (
+  id               uuid        primary key default gen_random_uuid(),
+  entry_id         uuid        not null references public.caseload_entries(id) on delete cascade,
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  label            text        not null,
+  relance_date     date,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+create index if not exists idx_caseload_waits_entry
+  on public.caseload_waits(entry_id);
+
+drop trigger if exists caseload_waits_updated_at on public.caseload_waits;
+create trigger caseload_waits_updated_at
+  before update on public.caseload_waits
+  for each row execute procedure public.set_updated_at();
+
+alter table public.caseload_waits enable row level security;
+
+drop policy if exists "caseload_waits_own" on public.caseload_waits;
+create policy "caseload_waits_own" on public.caseload_waits
+  for all
+  using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- Tâches à faire d'un dossier. Chaque action a sa propre échéance et sa coche
+-- « fait ». L'alerte d'un dossier = celle de son action ouverte la plus urgente.
+create table if not exists public.caseload_actions (
+  id               uuid        primary key default gen_random_uuid(),
+  entry_id         uuid        not null references public.caseload_entries(id) on delete cascade,
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  label            text        not null,
+  due_date         date,
+  due_time         time,
+  is_done          boolean     not null default false,
+  done_at          timestamptz,
+  recurrence_days  int         check (recurrence_days is null or recurrence_days > 0),
+  sort_order       int         not null default 0,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+
+-- Migration idempotente : heure optionnelle ajoutée après coup.
+alter table public.caseload_actions add column if not exists due_time time;
+
+create index if not exists idx_caseload_actions_entry
+  on public.caseload_actions(entry_id, is_done, due_date);
+
+drop trigger if exists caseload_actions_updated_at on public.caseload_actions;
+create trigger caseload_actions_updated_at
+  before update on public.caseload_actions
+  for each row execute procedure public.set_updated_at();
+
+alter table public.caseload_actions enable row level security;
+
+drop policy if exists "caseload_actions_own" on public.caseload_actions;
+create policy "caseload_actions_own" on public.caseload_actions
+  for all
+  using (auth.uid() = practitioner_id)
+  with check (auth.uid() = practitioner_id);
+
+-- ============================================================
 -- TABLE : patient_entries (Données d'exercices patient — sync cloud)
 -- ============================================================
 -- Table générique recevant toutes les données d'exercices des patients.
@@ -1285,15 +1447,21 @@ create policy "patient_entries_patient_delete"
   on public.patient_entries for delete
   using (auth.uid() = patient_id);
 
--- Praticien : lecture seule sur les entrées de ses patients liés
+-- Praticien : lecture seule sur les entrées de ses patients liés,
+-- UNIQUEMENT si le patient a activé le partage (share_consent = true).
 drop policy if exists "patient_entries_practitioner_select" on public.patient_entries;
 create policy "patient_entries_practitioner_select"
   on public.patient_entries for select
   using (
     exists (
-      select 1 from public.practitioner_patients
-      where practitioner_id = auth.uid()
-        and patient_id = public.patient_entries.patient_id
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.patient_entries.patient_id
+    )
+    and exists (
+      select 1 from public.patients pat
+      where pat.id = public.patient_entries.patient_id
+        and pat.share_consent = true
     )
   );
 

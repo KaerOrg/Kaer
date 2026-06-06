@@ -28,7 +28,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 
 jest.mock('../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
 
-jest.mock('../../components/features/TimeRangeCharts', () => {
+jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
   const { Text } = require('react-native')
   return {

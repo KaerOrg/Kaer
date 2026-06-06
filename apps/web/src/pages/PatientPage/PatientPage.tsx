@@ -1,7 +1,12 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { LayoutDashboard, Package2, FileText, CalendarDays } from 'lucide-react'
+import { LayoutDashboard, Package2, FileText, CalendarDays, TrendingUp } from 'lucide-react'
+
+const GRAPHABLE_MODULE_TYPES = new Set([
+  'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
+  'mood_tracker', 'fear_thermometer', 'medication_side_effects',
+])
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
@@ -17,11 +22,14 @@ import { fetchPatientHeader, setTeenMode as updateTeenMode, saveGeneralNote } fr
 import { fetchNotes, type PractitionerNote } from '../../services/noteService'
 import { fetchPatientModules } from '../../services/moduleAssignmentService'
 import { fetchEnabledModules } from '../../services/practitionerSettingsService'
+import { fetchAppointmentsForPatient } from '../../services/appointmentService'
+import type { AppointmentWithPatient } from '../../lib/calendar.types'
 
 import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
 import { PatientNotesTab } from './tabs/PatientNotesTab'
 import { PatientRdvTab } from './tabs/PatientRdvTab'
+import { PatientEvolutionTab } from './tabs/PatientEvolutionTab'
 
 import './PatientPage.css'
 
@@ -64,13 +72,26 @@ export function PatientPage() {
   // ── Notes (lifted for badge + overview) ──────────────────────────────────
   const [notes, setNotes] = useState<PractitionerNote[]>([])
 
+  // ── Appointments (lifted for badge) ──────────────────────────────────────
+  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
+
   // ── General note (overview) ───────────────────────────────────────────────
   const [generalNote, setGeneralNote] = useState('')
   const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
 
   // ── UI ────────────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv' | 'evolution'>('overview')
+
+  // RDV « effectués » = rendez-vous passés et non annulés (statut factuel, sans action manuelle du praticien).
+  const appointmentsDoneCount = useMemo(() => {
+    const now = new Date().toISOString()
+    return appointments.filter(
+      a => a.starts_at <= now &&
+        a.status !== 'cancelled_by_patient' &&
+        a.status !== 'cancelled_by_practitioner',
+    ).length
+  }, [appointments])
 
   const reloadModules = useCallback(async () => {
     if (!id) return
@@ -93,17 +114,19 @@ export function PatientPage() {
     setPatientEnrolledAt(header.enrolledAt)
     setGeneralNote(header.generalNote ?? '')
 
-    const [mods, enabled, cats, cards, comingSoon, fetchedNotes] = await Promise.all([
+    const [mods, enabled, cats, cards, comingSoon, fetchedNotes, fetchedAppts] = await Promise.all([
       fetchPatientModules(id),
       fetchEnabledModules(practitioner.id),
       fetchModuleCategories(),
       fetchPsychoCards(),
       fetchComingSoonModuleIds(),
       fetchNotes(practitioner.id, id),
+      fetchAppointmentsForPatient(practitioner.id, id),
     ])
 
     setPageData({ modules: mods, categories: cats, enabledModules: enabled, psychoCards: cards, comingSoonIds: comingSoon })
     setNotes(fetchedNotes)
+    setAppointments(fetchedAppts)
     setLoading(false)
   }, [id, practitioner, navigate])
 
@@ -131,11 +154,14 @@ export function PatientPage() {
   const fullName = [patientFirstName, patientLastName].filter(Boolean).join(' ')
   const displayName = patientAlias ?? (fullName || patientEmail)
 
+  const hasEvolutionData = modules.some(m => GRAPHABLE_MODULE_TYPES.has(m.module_type))
+
   const PATIENT_TABS = [
-    { id: 'overview', label: t('patient.tab_overview'), icon: <LayoutDashboard size={16} /> },
-    { id: 'modules',  label: t('patient.tab_modules'),  icon: <Package2 size={16} />,       badge: modules.length || undefined },
-    { id: 'notes',    label: t('patient.tab_notes'),    icon: <FileText size={16} />,        badge: notes.length || undefined },
-    { id: 'rdv',      label: t('patient.tab_rdv'),      icon: <CalendarDays size={16} />,    badge: 3 },
+    { id: 'overview',   label: t('patient.tab_overview'),   icon: <LayoutDashboard size={16} /> },
+    { id: 'modules',    label: t('patient.tab_modules'),    icon: <Package2 size={16} />,       badge: modules.length || undefined },
+    { id: 'notes',      label: t('patient.tab_notes'),      icon: <FileText size={16} />,        badge: notes.length || undefined },
+    { id: 'rdv',        label: t('patient.tab_rdv'),        icon: <CalendarDays size={16} />,    badge: appointments.length || undefined },
+    ...(hasEvolutionData ? [{ id: 'evolution', label: t('patient.tab_evolution'), icon: <TrendingUp size={16} /> }] : []),
   ]
 
   const sidebar = (
@@ -187,6 +213,7 @@ export function PatientPage() {
                 modules={modules}
                 categories={categories}
                 notes={notes}
+                appointmentsDoneCount={appointmentsDoneCount}
                 patientEnrolledAt={patientEnrolledAt}
                 generalNote={generalNote}
                 generalNoteSaving={generalNoteSaving}
@@ -226,6 +253,10 @@ export function PatientPage() {
                 practitionerName={practitioner.name ?? undefined}
                 displayName={displayName}
               />
+            )}
+
+            {activeTab === 'evolution' && id && (
+              <PatientEvolutionTab patientId={id} />
             )}
           </>
         )}

@@ -93,7 +93,7 @@ const avatarStyles = StyleSheet.create({
 
 export default function ProfileScreen() {
   const { t } = useTranslation()
-  const { patient, logout, updateAvatar, updateProfile, language, setLanguage } = useAuthStore()
+  const { patient, logout, updateAvatar, updateProfile, language, setLanguage, shareConsent, setShareConsent } = useAuthStore()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
   const { showActionSheet } = useActionSheet()
@@ -103,8 +103,12 @@ export default function ProfileScreen() {
   const [phone, setPhone] = useState(patient?.phone ?? '')
   const [savingProfile, setSavingProfile] = useState(false)
 
-  const [shareData, setShareData] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
+
+  const handleToggleConsent = useCallback(async (value: boolean) => {
+    const ok = await setShareConsent(value)
+    if (!ok) showToast(t('profile.share_data_error'), 'error')
+  }, [setShareConsent, showToast, t])
 
   const handlePickSource = useCallback(async (source: AvatarSource) => {
     if (!patient) return
@@ -260,8 +264,8 @@ export default function ProfileScreen() {
                 <Text style={styles.rowHint}>{t('profile.share_data_hint')}</Text>
               </View>
               <Switch
-                value={shareData}
-                onValueChange={setShareData}
+                value={shareConsent}
+                onValueChange={handleToggleConsent}
                 trackColor={{ false: colors.border, true: colors.primary }}
                 thumbColor={colors.white}
               />

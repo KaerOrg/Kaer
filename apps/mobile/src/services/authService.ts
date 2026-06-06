@@ -13,6 +13,7 @@ export interface PatientProfile {
 export interface TeenContext {
   teenMode: boolean
   moduleColors: Record<string, string>
+  shareConsent: boolean
 }
 
 export async function getCurrentSessionPatient(): Promise<PatientProfile | null> {
@@ -64,19 +65,37 @@ export function onAuthChange(
 }
 
 export async function fetchTeenContext(patientId: string): Promise<TeenContext> {
-  const [{ data: ppData }, { data: modulesData }] = await Promise.all([
+  const [{ data: ppData }, { data: modulesData }, { data: patientData }] = await Promise.all([
     supabase
       .from('practitioner_patients')
       .select('teen_mode')
       .eq('patient_id', patientId)
       .single(),
     supabase.from('modules').select('id, color'),
+    supabase.from('patients').select('share_consent').eq('id', patientId).single(),
   ])
   const moduleColors: Record<string, string> = {}
   for (const m of modulesData ?? []) {
     if (m.color) moduleColors[m.id] = m.color
   }
-  return { teenMode: ppData?.teen_mode ?? false, moduleColors }
+  return {
+    teenMode: ppData?.teen_mode ?? false,
+    moduleColors,
+    shareConsent: patientData?.share_consent ?? true,
+  }
+}
+
+/**
+ * Met à jour le consentement de partage des saisies vers le praticien.
+ * Écrit `patients.share_consent` ; le pilotage de la sync mobile
+ * (`RemoteSyncService.setConsentEnabled`) reste à la charge de l'appelant (authStore).
+ */
+export async function setShareConsent(patientId: string, enabled: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from('patients')
+    .update({ share_consent: enabled })
+    .eq('id', patientId)
+  return !error
 }
 
 export async function signInWithPassword(email: string, password: string): Promise<void> {

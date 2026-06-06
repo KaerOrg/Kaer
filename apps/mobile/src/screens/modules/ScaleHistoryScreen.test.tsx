@@ -37,7 +37,7 @@ jest.mock('../../components/features/TeenAccent', () => ({
 
 const stableT = (key: string) => key.split('.').pop() ?? key
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: stableT }),
+  useTranslation: () => ({ t: stableT, i18n: { language: 'fr' } }),
 }))
 
 jest.mock('../../navigation/AppStack', () => ({}))

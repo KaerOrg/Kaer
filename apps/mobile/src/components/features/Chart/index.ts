@@ -1,7 +1,0 @@
-export { DesensitizationChart } from './DesensitizationChart'
-export type { DesensitizationChartProps } from './DesensitizationChart'
-export { SudsSparkline } from './SudsSparkline'
-export type { SudsSparklineProps } from './SudsSparkline'
-export { ChartLegend } from './ChartLegend'
-export type { ChartLegendProps } from './ChartLegend'
-export type { SudsPoint } from './sudsChartUtils'

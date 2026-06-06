@@ -44,8 +44,8 @@ import {
   buildXLabels,
   computeStreak,
   markerXFraction,
-} from '../TimeRangeCharts'
-import type { TimeRange, ChartMarker } from '../TimeRangeCharts'
+} from '../../ui/Chart/TimeRangeCharts'
+import type { TimeRange, ChartMarker } from '../../ui/Chart/TimeRangeCharts'
 import { PillSelector } from '../../ui/PillSelector'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>

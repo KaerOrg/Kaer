@@ -1,0 +1,201 @@
+import { useCallback, useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Bell, Eye, EyeOff } from 'lucide-react'
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
+import { SIDE_EFFECT_CATALOG, isCustomKey } from '../../../lib/sideEffectsCatalog'
+import type { ModuleType, PatientModule } from '../../../lib/database.types'
+import type { ModuleItem } from '../../../services/moduleCatalogService'
+import type { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
+import { SideEffectToggleRow } from './SideEffectToggleRow'
+import { CustomEffectRow } from './CustomEffectRow'
+
+const MODULE_TYPE: ModuleType = 'medication_side_effects'
+
+type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
+
+export interface MedicationSideEffectsCardProps {
+  modItem: ModuleItem
+  modIcon: ReactNode
+  mod: PatientModule | undefined
+  unlocked: boolean
+  unlockingModule: ModuleType | null
+  previewModule: ModuleType | null
+  medEffects: MedEffects
+  moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
+  onTogglePreview: (type: ModuleType) => void
+  onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
+  onUnlock: (type: ModuleType) => void
+  onRevoke: (moduleId: string) => void
+}
+
+/**
+ * Carte module « Effets indésirables du traitement » de l'armoire praticien.
+ * Extraite du `renderModuleCard` de PatientModulesTab pour pouvoir héberger des
+ * callbacks stables (useCallback) — un branchement de render ne peut pas appeler de hooks.
+ */
+export function MedicationSideEffectsCard({
+  modItem,
+  modIcon,
+  mod,
+  unlocked,
+  unlockingModule,
+  previewModule,
+  medEffects,
+  moduleToggle,
+  onTogglePreview,
+  onConfigureNotif,
+  onUnlock,
+  onRevoke,
+}: MedicationSideEffectsCardProps) {
+  const { t, i18n } = useTranslation()
+  const customRef = useRef<HTMLInputElement>(null)
+
+  const trackedKeys = new Set(medEffects.tracked.map(e => e.key))
+  const customs = medEffects.tracked.filter(e => isCustomKey(e.key) || e.custom)
+
+  const handleToggle = useCallback(() => {
+    if (unlocked && mod) {
+      medEffects.close()
+      onRevoke(mod.id)
+    } else {
+      onUnlock(MODULE_TYPE)
+    }
+  }, [unlocked, mod, medEffects, onRevoke, onUnlock])
+
+  const handleNotif = useCallback(() => {
+    if (!mod) return
+    onConfigureNotif({
+      patientModuleId: mod.id,
+      moduleLabel: t('modules.medication_side_effects.label'),
+      moduleIconName: modItem.icon,
+    })
+  }, [mod, onConfigureNotif, t, modItem.icon])
+
+  const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
+
+  const addCustom = useCallback(() => {
+    if (customRef.current) {
+      medEffects.addCustom(customRef.current.value)
+      customRef.current.value = ''
+    }
+  }, [medEffects])
+
+  const handleCustomKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') addCustom()
+    },
+    [addCustom]
+  )
+
+  const isWide = medEffects.open || previewModule === MODULE_TYPE
+
+  return (
+    <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
+      <Card
+        className="module-card-item"
+        header={{
+          icon: modIcon,
+          title: t('modules.medication_side_effects.label'),
+          subtitle: t('modules.medication_side_effects.description'),
+          right: moduleToggle(unlocked, unlockingModule === MODULE_TYPE, handleToggle),
+        }}
+        actions={unlocked && mod ? (
+          <>
+            <button
+              type="button"
+              className="module-card__notif-btn"
+              title={t('notifications.configure_button')}
+              onClick={handleNotif}
+            >
+              <Bell size={14} />
+            </button>
+            {!medEffects.open && (
+              <Button variant="ghost" size="sm" onClick={medEffects.openEditor}>
+                {t('modules.medication_side_effects.config_button')}
+              </Button>
+            )}
+            <button
+              className={`preview-toggle-btn ${previewModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+              onClick={handlePreviewToggle}
+              title={t('patient.patient_view')}
+            >
+              {previewModule === MODULE_TYPE ? <EyeOff size={14} /> : <Eye size={14} />}
+              {t('patient.preview_button')}
+            </button>
+          </>
+        ) : undefined}
+      >
+        {unlocked && mod && (
+          <div className="module-card__date">
+            {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+            {medEffects.tracked.length > 0 && (
+              <span className="psycho-observance-summary">
+                {' · '}{t('modules.medication_side_effects.config_tracked_count', { count: medEffects.tracked.length })}
+              </span>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {previewModule === MODULE_TYPE && (
+        <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />
+      )}
+
+      {medEffects.open && unlocked && mod && (
+        <div className="psycho-card-picker">
+          <p className="psycho-card-picker__label">{t('modules.medication_side_effects.config_title')}</p>
+          <p style={{ fontSize: 12, color: '#6B7280', marginTop: -8, marginBottom: 12 }}>
+            {t('modules.medication_side_effects.config_hint')}
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {SIDE_EFFECT_CATALOG.map(cat => (
+              <SideEffectToggleRow
+                key={cat.key}
+                item={cat}
+                checked={trackedKeys.has(cat.key)}
+                label={t(`modules.medication_side_effects.${cat.labelKey}`)}
+                onToggle={medEffects.toggleFixed}
+              />
+            ))}
+
+            {customs.length > 0 && (
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '12px 0 4px' }}>
+                {t('modules.medication_side_effects.config_custom_title')}
+              </p>
+            )}
+            {customs.map(e => (
+              <CustomEffectRow
+                key={e.key}
+                effect={e}
+                deleteLabel={t('common.delete')}
+                onRemove={medEffects.removeEffect}
+              />
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12 }}>
+            <input
+              ref={customRef}
+              type="text"
+              placeholder={t('modules.medication_side_effects.config_add_placeholder')}
+              style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13 }}
+              onKeyDown={handleCustomKeyDown}
+            />
+            <Button size="sm" variant="ghost" onClick={addCustom}>
+              {t('modules.medication_side_effects.config_add')}
+            </Button>
+          </div>
+
+          <div className="psycho-card-picker__actions" style={{ marginTop: 16 }}>
+            <Button size="sm" loading={medEffects.saving} onClick={medEffects.close}>
+              {t('common.done', { defaultValue: 'Terminé' })}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

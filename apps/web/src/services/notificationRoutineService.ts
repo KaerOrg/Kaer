@@ -71,7 +71,7 @@ export async function getActivityFeed(
   if (patientIds.length === 0) return []
 
   const { data, error } = await supabase
-    .from('patient_engagement_logs')
+    .from('notification_events')
     .select('*')
     .eq('event_type', 'NOTIFICATION_PAUSED')
     .in('patient_id', patientIds)

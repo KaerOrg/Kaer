@@ -1,0 +1,30 @@
+.file-active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.file-active__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.file-active__title {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.file-active__subtitle {
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.file-active__loading {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  padding: var(--spacing-lg) 0;
+}

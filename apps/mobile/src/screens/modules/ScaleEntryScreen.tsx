@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
 import { getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../lib/database'
 import { saveScaleEntry } from '../../services/scaleEntryService'
-import { logScaleSubmission } from '../../services/notificationService'
 import { useAuthStore } from '../../store/authStore'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
@@ -179,9 +178,6 @@ export default function ScaleEntryScreen() {
       subscale_scores: subscaleScores,
       created_at: entryDate.toISOString(),
     })
-    if (patient && !isEditing) {
-      logScaleSubmission(patient.id, scale_id)
-    }
     if (isMounted.current) setSaving(false)
     navigation.goBack()
   }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, t, totalItems, answeredCount, loadState, textInputValues])

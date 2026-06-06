@@ -20,7 +20,7 @@ import {
   createExposureHierarchy, deleteExposureHierarchy, saveFearSituation, deleteFearSituation,
 } from '../../../../../services/fearTrackerService'
 import { PipPicker } from '../../../../ui/PipPicker'
-import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../Chart'
+import { DesensitizationChart, ChartLegend, type SudsPoint } from '../../../../ui/Chart'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 
 type Mode =

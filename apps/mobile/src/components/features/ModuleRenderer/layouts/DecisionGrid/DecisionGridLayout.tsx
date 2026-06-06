@@ -4,10 +4,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors } from '../../../../../theme'
 import { useModuleT } from '../../../../../hooks/useModuleT'
-import { useAuthStore } from '../../../../../store/authStore'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
 import {
   generateId, getAllPlanItemsForModule, getModuleSetting, type PlanItem,
 } from '../../../../../lib/database'
@@ -48,7 +46,6 @@ interface QuadrantSpec {
 export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps) {
   const t = useModuleT()
   const { i18n } = useTranslation()
-  const patient = useAuthStore((s) => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 
@@ -59,7 +56,6 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
     const code = configField?.props[key]
     return code ? t(code) : ''
   }, [configField, t])
-  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const targetBehaviorKey = (configField?.props['target_behavior_key'] ?? 'target_behavior') as string
   const weightMin = parseInt(configField?.props['weight_min'] ?? '1', 10)
   const weightMax = parseInt(configField?.props['weight_max'] ?? '5', 10)
@@ -174,14 +170,11 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
     })
   }, [lbl, t, showConfirm])
 
-  // ── Save (target behavior + engagement signal) ────────────────────────────
+  // ── Save (target behavior) ────────────────────────────────────────────────
   const handleSave = useCallback(async () => {
     setSaving(true)
     try {
       await setModuleSetting(moduleId, targetBehaviorKey, targetBehavior.trim())
-      if (patient?.id && engagementEventType) {
-        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
-      }
       const savedMessage = lbl('saved_message')
       showToast(savedMessage || t('common.saved'), 'success')
     } catch {
@@ -189,7 +182,7 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
     } finally {
       setSaving(false)
     }
-  }, [moduleId, targetBehaviorKey, targetBehavior, patient, engagementEventType, lbl, t, showToast])
+  }, [moduleId, targetBehaviorKey, targetBehavior, lbl, t, showToast])
 
   if (loading) {
     return <View style={dgStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>

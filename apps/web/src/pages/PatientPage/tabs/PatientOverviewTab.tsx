@@ -10,6 +10,7 @@ type Props = {
   modules: PatientModule[]
   categories: ModuleCategory[]
   notes: PractitionerNote[]
+  appointmentsDoneCount: number
   patientEnrolledAt: string | null
   generalNote: string
   generalNoteSaving: boolean
@@ -23,6 +24,7 @@ export function PatientOverviewTab({
   modules,
   categories,
   notes,
+  appointmentsDoneCount,
   patientEnrolledAt,
   generalNote,
   generalNoteSaving,
@@ -52,7 +54,7 @@ export function PatientOverviewTab({
         </button>
         <div className="patient-overview__stat">
           <div className="patient-overview__stat-main">
-            <span className="patient-overview__stat-value">0</span>
+            <span className="patient-overview__stat-value">{appointmentsDoneCount}</span>
             <CalendarDays size={20} className="patient-overview__stat-icon" />
           </div>
           <span className="patient-overview__stat-label">{t('patient.overview_rdv_done')}</span>

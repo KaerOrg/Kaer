@@ -1,0 +1,57 @@
+.data-table-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.data-table__scroll {
+  overflow: auto;
+  max-height: 65vh;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body);
+}
+
+.data-table__th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+/* Bordure gauche transparente : un consommateur peut la colorer via `rowClassName`
+   pour mettre une ligne en avant (cf. dossier « important » de la file active). */
+.data-table__row {
+  border-left: 3px solid transparent;
+}
+
+.data-table__cell {
+  padding: 4px var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.data-table__row:hover .data-table__cell {
+  background: var(--color-bg);
+}
+
+/* Panneau dépliable d'une ligne — occupe toute la largeur. */
+.data-table__detail-row > td {
+  background: var(--color-bg);
+  padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}

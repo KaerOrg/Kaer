@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -376,6 +376,77 @@ fermeture sur `Échap` + clic sur l'overlay).
 | `icon` | `ReactNode` | — | Icône |
 | `className` | `string` | — | Classe additionnelle |
 
+### `Chip`
+
+`components/ui/Chip/`. Puce / token en pilule. Trois usages dans une seule primitive :
+affichage (icône + label coloré par `tone`), supprimable (`onRemove` → bouton ×, pour
+les tags éditables), sélectionnable (`selectable` → bouton-bascule, pour les filtres).
+Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
+
+```tsx
+<Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
+<Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
+<Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `label` | `string` | — | Texte (obligatoire) |
+| `tone` | `'neutral' \| 'info' \| 'warning'` | `'neutral'` | Couleur (ignoré si `selectable`) |
+| `icon` | `ReactNode` | — | Icône en tête |
+| `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
+| `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
+| `onClick` | `() => void` | — | Clic sur la puce sélectionnable |
+| `onRemove` | `() => void` | — | Affiche un bouton × de suppression |
+| `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
+| `title` | `string` | — | Tooltip natif |
+| `className` | `string` | — | Classe additionnelle |
+
+### `SegmentedControl<T>`
+
+`components/ui/SegmentedControl/`. Interrupteur de sélection : un groupe de segments
+dont **un seul** est actif (sélecteur de plage temporelle, filtre exclusif, choix unique
+parmi N options visibles). Générique sur le type de valeur `T extends string` — la valeur
+émise par `onChange` est typée. Accessibilité native : `role="radiogroup"` + segments
+`role="radio"` / `aria-checked`. Chaque segment est mémoïsé (callback figé) — zéro
+re-rendu inutile.
+
+> **Ne pas confondre avec `Tabs`** : `Tabs` change de **panneau de contenu** (onglets,
+> avec icônes/badges). `SegmentedControl` change une **valeur** (un filtre, une période)
+> sans notion de panneau. Pour un interrupteur on/off binaire → `Toggle`.
+
+Deux variantes visuelles :
+
+| Variante | Aspect | Usage de référence |
+|---|---|---|
+| `track` (défaut) | Piste segmentée (conteneur unique, segments à l'intérieur) | Sélecteur 3m/6m/1an de `PatientEvolutionTab` |
+| `pills` | Pastilles indépendantes côte à côte | Sélecteur 7J/1M/3M/1A de `SliderDashboardLayout` |
+
+```tsx
+const options = useMemo<readonly SegmentOption<TimeRange>[]>(
+  () => RANGES.map(r => ({ value: r, label: t(`evolution.range_${r}`) })),
+  [t],
+)
+<SegmentedControl options={options} value={range} onChange={setRange} ariaLabel={t('evolution.title')} />
+
+// Variante pastilles + accent dynamique (couleur du segment actif pilotée par le module)
+<SegmentedControl variant="pills" options={options} value={range} onChange={setRange} accentColor={accent} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `options` | `readonly SegmentOption<T>[]` | — | Liste `{ value, label }` (obligatoire). Mémoïser si dérivée de `t()`. |
+| `value` | `T` | — | Valeur sélectionnée (obligatoire) |
+| `onChange` | `(value: T) => void` | — | Appelé avec la valeur du segment cliqué |
+| `variant` | `'track' \| 'pills'` | `'track'` | Aspect visuel |
+| `accentColor` | `string` | `var(--color-primary)` (CSS) | Couleur du segment actif (valeur dynamique) |
+| `ariaLabel` | `string` | — | Libellé accessible du groupe |
+| `className` | `string` | — | Classe additionnelle |
+
+> **Conformité MDR** : `accentColor` est une couleur de **contexte** (accent du module),
+> jamais l'expression d'une valeur clinique. Ne jamais piloter cette couleur par un score
+> ou un seuil — ce serait du codage couleur interprétatif interdit.
+
 ### `Accordion`
 
 `components/ui/Accordion/`. Section repliable (titre cliquable + contenu).
@@ -441,6 +512,72 @@ Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 > `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast`, `Banner` ont une doc dédiée dans
 > [`docs/components/`](components/). `Tabs`, `ValueBar`, `Sparkline`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
+
+### `DataTable<T>`
+
+`components/ui/DataTable/`. **Table de données générique** — structure `table`,
+en-têtes collants, conteneur scrollable, dépliage par ligne, mise en avant et état
+vide. **Zéro connaissance métier** : colonnes, rendu des cellules, panneau de détail
+et classe de ligne sont injectés par l'appelant. C'est la brique de la matrice
+« Ma file active » (`features/CaseloadTable`), conçue pour être réutilisée par toute
+liste tabulaire praticien (dispensaire, suivi, etc.).
+
+```tsx
+const columns: DataTableColumn<Row>[] = [
+  { id: 'name', header: t('col.name'), cell: row => <NameCell row={row} /> },
+  {
+    id: 'actions',
+    header: t('col.actions'),
+    headerClassName: 'my-th--actions',   // largeur/alignement métier
+    cellClassName: 'my-cell--actions',
+    // ctx donne accès au dépliage de la ligne (chevron cliquable, etc.)
+    cell: (row, ctx) => <Summary row={row} expanded={ctx.expanded} onToggle={ctx.toggleExpanded} />,
+  },
+]
+
+<DataTable
+  columns={columns}
+  rows={visibleRows}
+  getRowId={row => row.id}
+  toolbar={<><AddForm /><Filters /></>}          // au-dessus de la table
+  renderDetail={row => <RowDetail row={row} />}   // panneau dépliable (optionnel)
+  rowClassName={row => (row.important ? 'my-row--flag' : undefined)}
+  emptyState={<EmptyState … />}                   // rendu si rows.length === 0
+  ariaLabel={t('section.title')}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`) |
+| `rows` | `readonly T[]` | Lignes **déjà filtrées** par l'appelant |
+| `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
+| `toolbar` | `ReactNode` | Zone libre au-dessus de la table (filtres, capture rapide) |
+| `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
+| `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
+| `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
+| `ariaLabel` | `string` | Libellé accessible de la `<table>` |
+
+Sous-composant exporté **`DataTableCell`** — le `<td>` générique (classe de base
+`data-table__cell` + `className` métier optionnelle). `DataTable` l'utilise en
+interne pour chaque cellule ; il est aussi réutilisable directement par tout layout
+tabulaire sur mesure qui ne passe pas par `columns`.
+
+```tsx
+<DataTableCell className="cell-name">{row.name}</DataTableCell>
+```
+
+**Règles d'usage :**
+- Le **filtrage et la distinction des états vides** (aucune donnée vs aucun résultat)
+  restent côté appelant : `DataTable` reçoit les lignes à afficher et un seul
+  `emptyState`. L'appelant choisit le bon message selon que le jeu non filtré est vide.
+- Les **largeurs/alignements de colonnes** passent par `headerClassName`/`cellClassName`
+  (classes métier dans le `.css` de la feature) — la base `.data-table__th/__cell`
+  vient du design system.
+- Le **dépliage** est piloté depuis une cellule via `ctx.toggleExpanded` (le chevron
+  vit dans la cellule métier de son choix, pas dans une colonne dédiée imposée).
+- Chaque ligne est **mémoïsée** : passer des `columns` (useMemo) et `renderDetail`
+  (useCallback) stables pour éviter les re-rendus inutiles à grande échelle.
 
 ---
 

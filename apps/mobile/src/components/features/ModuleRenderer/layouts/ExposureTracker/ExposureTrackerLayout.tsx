@@ -33,8 +33,6 @@ import {
 import {
   saveFearEntry, deleteFearEntry, saveFearSituation, deleteFearSituation,
 } from '../../../../../services/fearTrackerService'
-import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
-import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -72,7 +70,6 @@ export interface ExposureTrackerLayoutProps {
 
 export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutProps) {
   const t = useModuleT()
-  const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 
@@ -82,7 +79,6 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
     const code = configField?.props[key]
     return code ? t(code) : ''
   }, [configField, t])
-  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
   const sudsMin = parseInt(configField?.props['suds_min'] ?? '0', 10)
   const sudsMax = parseInt(configField?.props['suds_max'] ?? '100', 10)
   const sudsStep = parseInt(configField?.props['suds_step'] ?? '10', 10)
@@ -195,7 +191,6 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
 
     setSaving(true)
     try {
-      const isCreation = editingId == null
       const id = editingId ?? generateId()
       const customTrim = customStrategy.trim() || null
       const entry: Omit<FearEntry, 'created_at'> = {
@@ -210,9 +205,6 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
         notes: notes.trim() || null,
       }
       await saveFearEntry(entry)
-      if (patient?.id && engagementEventType && isCreation) {
-        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
-      }
       await reloadAll()
       setMode('list')
       setEditingId(null)
@@ -223,7 +215,7 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
     }
   }, [
     situationId, situations, situationFreeText, sudsBefore, selectedStrategies,
-    customStrategy, sudsAfter, notes, editingId, patient, engagementEventType,
+    customStrategy, sudsAfter, notes, editingId,
     reloadAll, lbl, t, showToast,
   ])
 

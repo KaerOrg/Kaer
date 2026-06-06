@@ -8,7 +8,7 @@ import { getInitials } from './Layout.utils'
 import './Layout.css'
 import type { LayoutProps } from './Layout.types'
 
-export function Layout({ children, sidebar }: LayoutProps) {
+export function Layout({ children, sidebar, wide = false }: LayoutProps) {
   const { practitioner, logout } = useAuthStore()
 
   const initials = getInitials(practitioner?.name || practitioner?.email || '?')
@@ -40,7 +40,7 @@ export function Layout({ children, sidebar }: LayoutProps) {
 
       <div className={`layout__body${sidebar ? ' layout__body--with-sidebar' : ''}`}>
         {sidebar && <aside className="layout__sidebar">{sidebar}</aside>}
-        <main className="layout__main">
+        <main className={`layout__main${wide ? ' layout__main--wide' : ''}`}>
           <MfaReminderBanner />
           {children}
         </main>

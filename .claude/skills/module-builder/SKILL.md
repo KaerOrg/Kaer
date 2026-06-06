@@ -73,6 +73,106 @@ Puis **lister** :
 
 ---
 
+## Cartographie de référence — schéma & services
+
+> Carte durable du modèle de données et de la couche services. Les **noms et rôles**
+> changent lentement ; le détail volatil (colonnes, signatures) reste dans les
+> sources de vérité citées. Cette section existe pour qu'un module ne se trompe
+> **jamais** sur l'endroit où sa donnée vit. Source de vérité DDL : `supabase/schema.sql`.
+
+### A. Schéma — où vit la donnée d'un module
+
+**1. Config de rendu (source de vérité du moteur générique) — Supabase**
+
+| Table | Rôle |
+|---|---|
+| `modules` | 1 ligne par module : `preview_kind`, catégorie, `sort_order` |
+| `module_content_fields` | Arbre des champs affichés (`field_type`, `text_code` = clé i18n, `section_id`, `parent_field_id`) |
+| `field_props` | Props clé/valeur attachées à un field (`widget_type`, `icon`, `min`, `max`…) |
+| `module_categories` | Catégories de l'armoire thérapeutique |
+| `module_sources` | Références scientifiques d'un module (bouton « i ») |
+| `psyedu_topics` / `psyedu_blocks` | Contenu des fiches psychoéducatives (`preview_kind='psyedu'`) |
+
+> Règle [`config-first`](../../rules/config-first.md) : tout ce qui décrit le comportement/contenu d'un
+> module va **en base**, jamais dans un tableau TypeScript statique.
+
+**2. Saisies patient — le chemin canonique (à respecter pour tout nouveau module)**
+
+```
+Patient saisit
+   ├─► SQLite local (table du module + générique scale_entries)   ← lecture immédiate, offline-first
+   └─► syncUpsert()/syncDelete() ─► sync_outbox (SQLite)
+                                        └─► RemoteSyncService.sync() ─► patient_entries (Supabase)
+```
+
+| Couche | Table(s) | Rôle |
+|---|---|---|
+| Local | tables SQLite par module + **`scale_entries`** (générique échelles & trackers multi-dimensions) | Source de vérité sur l'appareil, fonctionne hors-ligne |
+| File de sync | `sync_outbox` (SQLite) | Tampon idempotent drainé vers Supabase |
+| **Serveur** | **`patient_entries`** (Supabase) | **Source de vérité serveur UNIQUE des saisies cliniques** : lecture praticien + graphes d'évolution. Colonnes : `patient_id`, `local_id`, `module_id`, `entry_kind`, `payload` jsonb, `client_created_at` |
+
+> **Consentement = flag `patients.share_consent`** (opt-out, contrôlé par le patient). Il pilote
+> la sync (`RemoteSyncService.setConsentEnabled`) ET filtre la RLS de lecture praticien sur
+> `patient_entries`. Pas d'autre gate à coder dans un module.
+>
+> Les **événements de notification** (pause des rappels) vont dans `notification_events` (concept
+> distinct, pas une saisie). L'ancienne table `patient_engagement_logs` a été **supprimée** (2026-06-04) :
+> ne jamais la réintroduire — toute saisie clinique passe par `patient_entries` via `syncUpsert`.
+
+**Contrat de `payload` lu par les graphes web** (`apps/web/src/services/engagementService.ts`) :
+- Échelles : `payload.total_score` (+ `payload.subscale_scores` pour les sous-scores)
+- Trackers multi-dimensions (mood, effets indésirables) : `payload.subscale_scores.{dimension}`
+- Thermomètre de la peur : `payload.suds_before` / `payload.suds_after`
+
+Donc : un module dont le service écrit un `payload` cohérent avec ce contrat est **graphable
+sans toucher au web**. Un `entry_kind` nouveau s'ajoute à la fois dans `EntryKind`
+(`syncOutbox.ts`) **et** dans le `check` de `patient_entries` (`schema.sql`).
+
+**3. Relation praticien ↔ patient — Supabase**
+
+| Table | Rôle |
+|---|---|
+| `practitioners` / `patients` | Profils (liés à `auth.users`) |
+| `practitioner_patients` | Lien praticien↔patient (+ `teen_mode`) — pilote la RLS de lecture praticien |
+| `invitations` | Liens d'invitation (token unique, 48 h) |
+| `patient_modules` | Modules débloqués + `config` jsonb (paramètres praticien) |
+
+### B. Services — toute la logique métier (jamais dans un composant)
+
+**Partagé — `packages/shared/src/services/`**
+
+| Fichier | Rôle |
+|---|---|
+| `moduleFields.ts` | `fetchModuleFields(client, moduleId)` — lit `modules` + `module_content_fields` + `field_props` (hiérarchie parent/enfant). Utilisé par web ET mobile. |
+
+**Web — `apps/web/src/services/`** (lecture praticien)
+
+| Fichier | Rôle |
+|---|---|
+| `patientService` | Patients + modules, header patient, mode ado |
+| `moduleAssignmentService` | Déblocage/révocation de modules, config psyedu/RIM |
+| `moduleCatalogService` / `moduleService` | Armoire thérapeutique, `preview_kind`, cartes psyedu |
+| `moduleSourcesService` | Sources scientifiques (cache mémoire + `clearModuleSourcesCache`) |
+| `engagementService` | **Graphes d'évolution — lit `patient_entries.payload`** (échelles, mood, fear, effets indésirables) |
+| `caseloadService` | File active (dossiers/actions/attentes/observations) |
+| `appointmentService` / `cssrsService` / `authService` / `invitationService` | RDV, C-SSRS, session, invitations |
+
+**Mobile — `apps/mobile/src/services/`** (saisie patient)
+
+| Fichier | Rôle |
+|---|---|
+| `syncHelpers` | **`syncUpsert` / `syncDelete`** — dual-write SQLite + outbox (passage obligé) |
+| `sync/RemoteSyncService` | Singleton : draine `sync_outbox` → `patient_entries`, gate de consentement |
+| `scaleEntryService` | Échelles + trackers multi-dimensions (mood, effets indésirables) → `scale_entry` |
+| `sleepDiaryService` / `formEntryService` / `dailyEntryService` / `treeSelectionService` | Sommeil, formulaires (Beck/craving), saisies quotidiennes, sélecteurs (émotions) |
+| `planItemService` / `activityRecordService` / `fearTrackerService` / `breathingService` / `moodMarkerService` / `motivationalBalanceService` / `crisisPlanService` | Plans, activation, peur/exposition, respiration, repères, balance motiv., plan de crise |
+| `homeService` / `moduleService` / `psychoeducationService` / `notificationService` / `avatarService` | Accueil, config module patient, fiches lues, rappels, avatar |
+
+> Détail exhaustif (signatures, tests, cache) : [`docs/services.md`](../../../docs/services.md).
+> Pipeline de sync : [`docs/patient-data-sync.md`](../../../docs/patient-data-sync.md).
+
+---
+
 ## Phase 1 — Discovery
 
 ### 1.1 Définir l'intention métier

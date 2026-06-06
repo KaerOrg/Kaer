@@ -100,7 +100,7 @@ describe('SliderDashboardLayout — onglets Évolution & Vue d\'ensemble', () =>
     await user.click(screen.getByText('modules.mood_tracker.tab_charts'))
 
     expect(screen.getByText('modules.mood_tracker.chart_composite')).toBeTruthy()
-    expect(container.querySelectorAll('.mt-range__btn').length).toBe(4)
+    expect(container.querySelectorAll('.segmented--pills .segmented__btn').length).toBe(4)
     expect(container.querySelectorAll('.mt-chart-card').length).toBeGreaterThanOrEqual(sliderFields().length)
     expect(container.querySelector('.preview-panel__info')).toBeTruthy()
   })

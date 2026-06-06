@@ -262,6 +262,7 @@
     "crisis_btn_save": "Enregistrer la configuration",
     "crisis_error_save": "Erreur lors de l'enregistrement. Réessayez.",
     "cssrs_evaluations": "Évaluations",
+    "tab_evolution": "Évolution",
     "tab_overview": "Vue d'ensemble",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -299,7 +300,7 @@
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
   },
   "modules": {
-    "nav_link": "Modules",
+    "nav_link": "Bibliothèque",
     "title": "Bibliothèque de modules",
     "subtitle": "Activez les modules disponibles pour vos patients. Seuls les modules activés pourront être débloqués dans la fiche patient.",
     "save_success": "✓ Bibliothèque mise à jour",
@@ -1407,5 +1408,161 @@
     "send": "Envoyer",
     "error_duplicate": "{{label}} a déjà ce questionnaire.",
     "error_send": "Erreur lors de l'envoi. Réessayez."
+  },
+  "file_active": {
+    "nav_link": "File active",
+    "title": "Ma file active",
+    "subtitle": "Vos dossiers en un coup d'œil : priorités, échéances et ce qu'il ne faut pas oublier.",
+    "col": {
+      "patient": "Patient",
+      "status": "Statut",
+      "important": "Important",
+      "actions": "Actions",
+      "care_pathways": "Soins en cours",
+      "waiting": "En attente de retour",
+      "alert": "Alerte"
+    },
+    "status": {
+      "active": "Actif",
+      "paused": "En veille",
+      "archived": "Archivé"
+    },
+    "important": {
+      "toggle": "Épingler ce patient (important)"
+    },
+    "alert": {
+      "critical": "Critique",
+      "upcoming": "À venir",
+      "ok": "OK"
+    },
+    "due": {
+      "overdue_one": "en retard {{count}} j",
+      "overdue_other": "en retard {{count}} j",
+      "today": "aujourd'hui",
+      "upcoming_one": "dans {{count}} j",
+      "upcoming_other": "dans {{count}} j"
+    },
+    "section": {
+      "link": "Patient de l'app",
+      "actions": "Actions",
+      "waits": "En attente de retour",
+      "observation": "Observations"
+    },
+    "link": {
+      "label": "Lier à un patient de l'app",
+      "placeholder": "— Choisir un patient (par email) —",
+      "unlink": "Délier",
+      "linked_unknown": "Patient lié",
+      "no_patients": "Aucun patient de l'app à relier.",
+      "modules_hint": "Modules débloqués pour ce patient dans l'app"
+    },
+    "wait": {
+      "label_label": "Ce qu'on attend",
+      "relance_prefix": "relancer le",
+      "relance_label": "Date de relance",
+      "delete_label": "Supprimer l'attente",
+      "empty": "Rien en attente.",
+      "add_placeholder": "Ajouter une attente (bilan, retour pro, ASE…)…",
+      "add_label": "Nouvelle attente",
+      "add_relance_label": "Date de relance de la nouvelle attente",
+      "add_submit": "Ajouter l'attente"
+    },
+    "observation": {
+      "empty": "Aucune observation.",
+      "error": "Impossible d'enregistrer l'observation. Réessayez.",
+      "history_show": "Voir l'historique ({{count}})",
+      "history_hide": "Masquer l'historique",
+      "add_placeholder": "Nouvelle observation…",
+      "add_label": "Nouvelle observation",
+      "add_submit": "Enregistrer"
+    },
+    "care": {
+      "add_placeholder": "+ soin",
+      "add_label": "Ajouter un soin en cours",
+      "remove": "Retirer {{tag}}"
+    },
+    "action": {
+      "none": "Aucune action",
+      "empty": "Aucune action pour ce dossier.",
+      "done_label": "Marquer comme fait",
+      "label_label": "Libellé de l'action",
+      "due_label": "Échéance de l'action",
+      "time_label": "Heure (optionnel)",
+      "delete_label": "Supprimer l'action",
+      "add_placeholder": "Ajouter une action…",
+      "add_label": "Nouvelle action",
+      "add_due_label": "Échéance de la nouvelle action",
+      "add_submit": "Ajouter l'action"
+    },
+    "filters": {
+      "search_placeholder": "Rechercher un dossier…",
+      "status_label": "Statut",
+      "status_all": "Actifs et en veille",
+      "chips_label": "Filtres rapides",
+      "chip_important": "Important",
+      "chip_overdue": "En retard",
+      "chip_waiting": "En attente"
+    },
+    "add": {
+      "name_placeholder": "Nom du patient…",
+      "name_label": "Nom du patient",
+      "action_placeholder": "Première action (optionnel)…",
+      "action_label": "Première action",
+      "due_label": "Échéance",
+      "submit": "Ajouter"
+    },
+    "empty": {
+      "title": "Aucun dossier pour l'instant",
+      "description": "Ajoutez votre premier dossier ci-dessus pour commencer à suivre votre file active.",
+      "no_match_title": "Aucun dossier ne correspond",
+      "no_match_description": "Ajustez votre recherche ou vos filtres."
+    },
+    "error_create": "Impossible d'ajouter le dossier. Réessayez.",
+    "error_save": "Impossible d'enregistrer la modification. Réessayez.",
+    "archived": "Dossier archivé"
+  },
+  "evolution": {
+    "title": "Évolution clinique",
+    "empty_title": "Aucune donnée disponible",
+    "empty_desc": "Les courbes apparaîtront ici après que votre patient utilise ses modules.",
+    "not_enough_data": "Pas encore assez de saisies pour afficher une courbe.",
+    "n_sessions": "{{count}} saisie",
+    "n_sessions_plural": "{{count}} saisies",
+    "last_score": "Dernier score : {{score}}",
+    "range_3m": "3 mois",
+    "range_6m": "6 mois",
+    "range_1y": "1 an",
+    "scale_phq9": "PHQ-9 — Dépression",
+    "scale_gad7": "GAD-7 — Anxiété généralisée",
+    "scale_bsl23": "BSL-23 — Symptômes borderline",
+    "scale_epds": "EPDS — Dépression postnatale",
+    "scale_rcads": "RCADS — Anxiété & dépression (ado)",
+    "scale_asrs6": "ASRS v1.1 — TDAH dépistage",
+    "scale_snap_iv": "SNAP-IV — TDAH (enfant/ado)",
+    "scale_nsi": "NSI — Sévérité des cauchemars",
+    "mood_title": "Thermomètre de l'humeur",
+    "mood_detail": "Détailler",
+    "mood_humeur": "Humeur",
+    "mood_energie": "Énergie",
+    "mood_anxiete": "Anxiété",
+    "mood_plaisir": "Plaisir",
+    "mood_sommeil": "Sommeil",
+    "mood_alimentation": "Alimentation",
+    "fear_title": "Thermomètre de la peur (SUDS)",
+    "fear_before": "Avant exposition",
+    "fear_after": "Après exposition",
+    "med_effects_title": "Effets indésirables du traitement",
+    "med_effect_sedation": "Sédation",
+    "med_effect_bouche_seche": "Bouche sèche",
+    "med_effect_sommeil": "Qualité du sommeil",
+    "med_effect_nausees": "Nausées",
+    "med_effect_prise_de_poids": "Prise de poids",
+    "med_effect_akathisie": "Akathisie",
+    "med_effect_tremblements": "Tremblements",
+    "med_effect_constipation": "Constipation",
+    "med_effect_dysfonction_sexuelle": "Dysfonction sexuelle",
+    "med_effect_anxiete": "Anxiété",
+    "med_effect_cephalees": "Céphalées",
+    "med_effect_vertiges": "Vertiges"
   }
 }

@@ -24,8 +24,6 @@ import {
 } from '../../../../../lib/database'
 import { saveActivityRecord, deleteActivityRecord } from '../../../../../services/activityRecordService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
-import { logEvent, type EngagementEventType } from '../../../../../services/engagementService'
-import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -57,12 +55,10 @@ export interface ActivityLogLayoutProps {
 
 export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLayoutProps) {
   const t = useModuleT()
-  const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 
   const configField = fields.find(f => f.field_type === 'activity_log_config')
-  const engagementEventType = (configField?.props['engagement_event_type'] ?? '') as EngagementEventType | ''
 
   // ── Labels UI — lus depuis les props de activity_log_config
   const lbl = useCallback((key: string): string => {
@@ -164,7 +160,6 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     }
     setSaving(true)
     try {
-      const isCreation = editingId == null
       const id = editingId ?? generateId()
       await saveActivityRecord({
         id,
@@ -175,9 +170,6 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         done: done ? 1 : 0,
         notes: notes.trim() || null,
       })
-      if (patient?.id && engagementEventType && isCreation) {
-        await logEvent(patient.id, engagementEventType as EngagementEventType, {})
-      }
       await loadRecords()
       setMode('list')
       setEditingId(null)
@@ -186,7 +178,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     } finally {
       setSaving(false)
     }
-  }, [label, editingId, entryDate, pleasure, mastery, done, notes, patient, engagementEventType, loadRecords, lbl, t, showToast])
+  }, [label, editingId, entryDate, pleasure, mastery, done, notes, loadRecords, lbl, t, showToast])
 
   const handleDelete = useCallback(() => {
     if (!editingId) return

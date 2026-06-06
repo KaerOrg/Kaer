@@ -28,10 +28,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateNumeric: (str: string) => `num:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 const teenModeRef = { current: false }
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string }; teenMode: boolean }) => unknown) =>

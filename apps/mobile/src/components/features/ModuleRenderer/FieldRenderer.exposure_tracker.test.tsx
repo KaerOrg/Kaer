@@ -50,10 +50,6 @@ jest.mock('../../../lib/dateUtils', () => ({
   formatDateShortYear: (str: string) => `sy:${str}`,
 }))
 
-jest.mock('../../../services/engagementService', () => ({
-  logEvent: jest.fn().mockResolvedValue(undefined),
-}))
-
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
     selector({ patient: { id: 'patient-test-id' } }),
@@ -67,7 +63,6 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import * as engagementService from '../../../services/engagementService'
 import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '../../../services/moduleService'
 
@@ -209,7 +204,7 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
     expect(database.saveFearEntry).not.toHaveBeenCalled()
   })
 
-  it('enregistre une nouvelle entry en texte libre et émet le signal d\'engagement', async () => {
+  it('enregistre une nouvelle entry en texte libre', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('exposure-tracker-entry')
@@ -220,11 +215,6 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
         expect.objectContaining({ situation_label: 'Prendre l\'avion', situation_id: null }),
       )
     })
-    expect(engagementService.logEvent).toHaveBeenCalledWith(
-      'patient-test-id',
-      'SAVE_FEAR_ENTRY',
-      expect.any(Object),
-    )
   })
 
   it('enregistre avec une situation choisie dans le catalogue', async () => {
@@ -267,7 +257,7 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
     expect(database.getFearEntry).toHaveBeenCalledWith('entry-1')
   })
 
-  it('édite une entry sans émettre le signal d\'engagement', async () => {
+  it('édite une entry existante', async () => {
     ;(database.getAllFearEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
     ;(database.getFearEntry as jest.Mock).mockResolvedValue(MOCK_ENTRY)
     renderLayout()
@@ -277,7 +267,6 @@ describe('FieldRenderer — exposure_tracker (ExposureTrackerLayout)', () => {
     await waitFor(() => {
       expect(database.saveFearEntry).toHaveBeenCalled()
     })
-    expect(engagementService.logEvent).not.toHaveBeenCalled()
   })
 
   it('supprime une entry depuis la liste après confirmation', async () => {

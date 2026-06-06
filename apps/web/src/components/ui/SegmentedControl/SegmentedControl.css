@@ -1,0 +1,58 @@
+.segmented {
+  display: flex;
+}
+
+/* ── Variante "track" : conteneur segmenté, segments à l'intérieur ──────────── */
+.segmented--track {
+  gap: 2px;
+  padding: 3px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.segmented--track .segmented__btn {
+  padding: 5px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.segmented--track .segmented__btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+.segmented--track .segmented__btn--active,
+.segmented--track .segmented__btn--active:hover {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Variante "pills" : pastilles indépendantes ────────────────────────────── */
+.segmented--pills {
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.segmented--pills .segmented__btn {
+  padding: 5px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.segmented--pills .segmented__btn--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}

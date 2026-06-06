@@ -1,0 +1,622 @@
+/* Structure de table (scroll, en-têtes, lignes, dépliage) : design system DataTable
+   — voir components/ui/DataTable. Ce fichier ne porte que le métier « file active ». */
+
+/* ---- Capture rapide ---- */
+.caseload-add {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.caseload-add__name,
+.caseload-add__action {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  padding: var(--spacing-xs) 0;
+}
+
+.caseload-add__name:focus,
+.caseload-add__action:focus {
+  outline: none;
+  border-bottom-color: var(--color-primary);
+}
+
+.caseload-add__due:focus {
+  outline: none;
+}
+
+.caseload-add__due {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+/* ---- Filtres ---- */
+.caseload-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+}
+
+.caseload-filters__search {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Puces de filtre : design system Chip (chip--selectable) — voir components/ui/Chip. */
+.caseload-filters__chips {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* ---- Largeurs de colonnes (appliquées aux <th>/<td> du DataTable via *ClassName) ---- */
+.caseload-th--patient,
+.caseload-cell--name { min-width: 240px; }
+.caseload-th--status { min-width: 120px; }
+.caseload-th--important { width: 64px; text-align: center; }
+.caseload-th--actions,
+.caseload-cell--actions { min-width: 320px; }
+.caseload-th--care_pathways,
+.caseload-cell--care { min-width: 200px; }
+.caseload-th--waiting,
+.caseload-cell--waiting { min-width: 220px; }
+.caseload-th--alert { width: 120px; }
+
+/* Met en avant un dossier « important » : colore la bordure gauche neutre du DataTable. */
+.caseload-row--important { border-left-color: var(--color-warning); }
+
+/* ---- Étoile « Important » ---- */
+.caseload-cell--important { text-align: center; }
+
+.important-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-border);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+}
+
+.important-star:hover { color: var(--color-warning); }
+.important-star--on { color: var(--color-warning); }
+
+.caseload-cell--alert {
+  white-space: nowrap;
+}
+
+/* ---- Cellules éditables ---- */
+.caseload-input,
+.caseload-select {
+  width: 100%;
+  min-width: 90px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.caseload-input--name {
+  font-weight: 500;
+  width: 100%;
+}
+
+.caseload-input:hover,
+.caseload-select:hover {
+  border-color: var(--color-border);
+}
+
+.caseload-input:focus,
+.caseload-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.caseload-input--date {
+  min-width: 130px;
+  color: var(--color-text-muted);
+}
+
+.caseload-cell--due {
+  white-space: nowrap;
+}
+
+.caseload-due-label {
+  display: block;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  padding: 0 var(--spacing-sm);
+  margin-top: 2px;
+}
+
+.caseload-due-label--overdue { color: var(--color-danger); font-weight: 600; }
+.caseload-due-label--today   { color: var(--color-warning); font-weight: 600; }
+.caseload-due-label--upcoming { color: var(--color-text-muted); }
+.caseload-due-label--none    { color: var(--color-text-muted); }
+
+/* ---- Résumé d'actions (cellule repliée) ---- */
+.actions-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+.actions-summary:hover { background: var(--color-bg); }
+
+.actions-summary__chevron {
+  display: inline-flex;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.actions-summary__top {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.actions-summary__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-summary__due {
+  flex-shrink: 0;
+  font-size: var(--font-size-caption);
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+.actions-summary__due--overdue { color: var(--color-danger); font-weight: 600; }
+.actions-summary__due--today   { color: var(--color-warning); font-weight: 600; }
+.actions-summary__due--upcoming { color: var(--color-text-muted); }
+
+.actions-summary__empty {
+  flex: 1;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.actions-summary__more {
+  flex-shrink: 0;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: var(--radius-full, 999px);
+}
+
+/* ---- Soins en cours (chips) ---- */
+/* Tags = design system Chip (chip--removable) ; ne reste ici que le conteneur + l'input. */
+.care-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 140px;
+}
+
+.care-tag__input {
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-caption);
+  color: var(--color-text);
+  padding: 4px 0;
+  min-width: 70px;
+  flex: 1;
+}
+
+.care-tag__input:focus { outline: none; }
+
+/* ---- Modules débloqués du patient lié (auto, lecture seule) ---- */
+/* Puces = design system Chip (tone="info") ; ne reste ici que le conteneur. */
+.module-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+/* ---- Liaison à un patient de l'app ---- */
+.caseload-detail .input-field { max-width: 460px; }
+
+.patient-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+}
+
+.patient-link__icon { color: var(--color-primary); flex-shrink: 0; }
+
+.patient-link__label { flex: 1; min-width: 0; }
+
+.patient-link__unlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--font-size-caption);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.patient-link__unlink:hover { color: var(--color-danger); background: var(--color-danger-light); }
+
+.patient-link__none {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-caption);
+  margin: 0;
+}
+
+/* ---- Liste d'actions (ligne dépliée) ---- */
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 720px;
+}
+
+.action-list__empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-caption);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.action-item:hover { background: var(--color-surface); }
+
+.action-item__check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.action-item__label {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.action-item__label:hover { border-color: var(--color-border); }
+.action-item__label:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.action-item--done .action-item__label {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.action-item__due,
+.action-item__time {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.action-item__time { width: 96px; }
+
+.action-item__due-label {
+  font-size: var(--font-size-caption);
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.action-item__due-label--overdue { color: var(--color-danger); font-weight: 600; }
+.action-item__due-label--today   { color: var(--color-warning); font-weight: 600; }
+.action-item__due-label--upcoming { color: var(--color-text-muted); }
+
+.action-item__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.action-item__delete:hover { color: var(--color-danger); background: var(--color-danger-light); }
+
+.action-list__add {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-top: 1px dashed var(--color-border);
+}
+
+.action-list__add-label {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  padding: var(--spacing-xs) 0;
+}
+
+.action-list__add-label:focus { outline: none; }
+
+.action-list__add-due {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.action-list__add-btn,
+.wait-list__add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Panneau dépliable : sections ---- */
+.caseload-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  max-width: 760px;
+}
+
+.caseload-detail__title {
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--spacing-xs);
+}
+
+/* ---- En attente de retour : résumé (colonne) ---- */
+.wait-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.wait-summary__empty { color: var(--color-text-muted); }
+/* Puces d'attente = design system Chip (tone="warning"). */
+
+/* ---- En attente de retour : éditeur (panneau) ---- */
+.wait-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wait-list__empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--font-size-caption);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.wait-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.wait-item:hover { background: var(--color-surface); }
+
+.wait-item__label,
+.wait-list__add-label {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+}
+
+.wait-item__label:hover { border-color: var(--color-border); }
+.wait-item__label:focus,
+.wait-list__add-label:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.wait-item__relance-label {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.wait-item__relance,
+.wait-list__add-relance {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.wait-item__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.wait-item__delete:hover { color: var(--color-danger); background: var(--color-danger-light); }
+
+.wait-list__add {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-top: 1px dashed var(--color-border);
+}
+
+/* ---- Observations ---- */
+.observation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.observation__current {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+}
+
+.observation__text {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  white-space: pre-wrap;
+}
+
+.observation__date {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.observation__empty {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-caption);
+}
+
+.observation__history-toggle {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+  padding: 0;
+}
+
+.observation__history {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  border-left: 2px solid var(--color-border);
+}
+
+.observation__history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.observation__add {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+}
+
+.observation__input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.observation__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

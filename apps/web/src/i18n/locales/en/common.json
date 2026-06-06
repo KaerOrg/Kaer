@@ -262,6 +262,7 @@
     "crisis_btn_save": "Save configuration",
     "crisis_error_save": "Save error. Please try again.",
     "cssrs_evaluations": "Assessments",
+    "tab_evolution": "Evolution",
     "tab_overview": "Overview",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -313,7 +314,7 @@
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated"
   },
   "modules": {
-    "nav_link": "Modules",
+    "nav_link": "Library",
     "title": "Module Library",
     "subtitle": "Enable the modules available for your patients. Only enabled modules can be unlocked from a patient's profile.",
     "save_success": "✓ Library updated",
@@ -1303,5 +1304,161 @@
     "send": "Send",
     "error_duplicate": "{{label}} already has this questionnaire.",
     "error_send": "Send failed. Please try again."
+  },
+  "file_active": {
+    "nav_link": "Active caseload",
+    "title": "My active caseload",
+    "subtitle": "Your cases at a glance: priorities, deadlines and what not to forget.",
+    "col": {
+      "patient": "Patient",
+      "status": "Status",
+      "important": "Important",
+      "actions": "Actions",
+      "care_pathways": "Ongoing care",
+      "waiting": "Awaiting return",
+      "alert": "Alert"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "On hold",
+      "archived": "Archived"
+    },
+    "important": {
+      "toggle": "Pin this patient (important)"
+    },
+    "alert": {
+      "critical": "Critical",
+      "upcoming": "Upcoming",
+      "ok": "OK"
+    },
+    "due": {
+      "overdue_one": "{{count}}d overdue",
+      "overdue_other": "{{count}}d overdue",
+      "today": "today",
+      "upcoming_one": "in {{count}}d",
+      "upcoming_other": "in {{count}}d"
+    },
+    "section": {
+      "link": "App patient",
+      "actions": "Actions",
+      "waits": "Awaiting return",
+      "observation": "Observations"
+    },
+    "link": {
+      "label": "Link to an app patient",
+      "placeholder": "— Choose a patient (by email) —",
+      "unlink": "Unlink",
+      "linked_unknown": "Linked patient",
+      "no_patients": "No app patient to link.",
+      "modules_hint": "Modules unlocked for this patient in the app"
+    },
+    "wait": {
+      "label_label": "What we're waiting for",
+      "relance_prefix": "chase on",
+      "relance_label": "Chase date",
+      "delete_label": "Delete wait",
+      "empty": "Nothing pending.",
+      "add_placeholder": "Add a wait (assessment, pro feedback, social services…)…",
+      "add_label": "New wait",
+      "add_relance_label": "Chase date for the new wait",
+      "add_submit": "Add wait"
+    },
+    "observation": {
+      "empty": "No observation.",
+      "error": "Could not save the observation. Please try again.",
+      "history_show": "Show history ({{count}})",
+      "history_hide": "Hide history",
+      "add_placeholder": "New observation…",
+      "add_label": "New observation",
+      "add_submit": "Save"
+    },
+    "care": {
+      "add_placeholder": "+ care",
+      "add_label": "Add ongoing care",
+      "remove": "Remove {{tag}}"
+    },
+    "action": {
+      "none": "No action",
+      "empty": "No action for this case.",
+      "done_label": "Mark as done",
+      "label_label": "Action label",
+      "due_label": "Action due date",
+      "time_label": "Time (optional)",
+      "delete_label": "Delete action",
+      "add_placeholder": "Add an action…",
+      "add_label": "New action",
+      "add_due_label": "New action due date",
+      "add_submit": "Add action"
+    },
+    "filters": {
+      "search_placeholder": "Search a case…",
+      "status_label": "Status",
+      "status_all": "Active and on hold",
+      "chips_label": "Quick filters",
+      "chip_important": "Important",
+      "chip_overdue": "Overdue",
+      "chip_waiting": "Awaiting"
+    },
+    "add": {
+      "name_placeholder": "Patient name…",
+      "name_label": "Patient name",
+      "action_placeholder": "First action (optional)…",
+      "action_label": "First action",
+      "due_label": "Due date",
+      "submit": "Add"
+    },
+    "empty": {
+      "title": "No cases yet",
+      "description": "Add your first case above to start tracking your active caseload.",
+      "no_match_title": "No matching case",
+      "no_match_description": "Adjust your search or filters."
+    },
+    "error_create": "Could not add the case. Please try again.",
+    "error_save": "Could not save the change. Please try again.",
+    "archived": "Case archived"
+  },
+  "evolution": {
+    "title": "Clinical Evolution",
+    "empty_title": "No data available",
+    "empty_desc": "Charts will appear here once your patient starts using their modules.",
+    "not_enough_data": "Not enough entries yet to display a chart.",
+    "n_sessions": "{{count}} session",
+    "n_sessions_plural": "{{count}} sessions",
+    "last_score": "Last score: {{score}}",
+    "range_3m": "3 months",
+    "range_6m": "6 months",
+    "range_1y": "1 year",
+    "scale_phq9": "PHQ-9 — Depression",
+    "scale_gad7": "GAD-7 — Generalised Anxiety",
+    "scale_bsl23": "BSL-23 — Borderline Symptoms",
+    "scale_epds": "EPDS — Postnatal Depression",
+    "scale_rcads": "RCADS — Anxiety & Depression (youth)",
+    "scale_asrs6": "ASRS v1.1 — ADHD Screening",
+    "scale_snap_iv": "SNAP-IV — ADHD (child/teen)",
+    "scale_nsi": "NSI — Nightmare Severity",
+    "mood_title": "Mood Tracker",
+    "mood_detail": "Detail",
+    "mood_humeur": "Mood",
+    "mood_energie": "Energy",
+    "mood_anxiete": "Anxiety",
+    "mood_plaisir": "Enjoyment",
+    "mood_sommeil": "Sleep",
+    "mood_alimentation": "Diet",
+    "fear_title": "Fear Thermometer (SUDS)",
+    "fear_before": "Before exposure",
+    "fear_after": "After exposure",
+    "med_effects_title": "Medication Side Effects",
+    "med_effect_sedation": "Sedation",
+    "med_effect_bouche_seche": "Dry mouth",
+    "med_effect_sommeil": "Sleep quality",
+    "med_effect_nausees": "Nausea",
+    "med_effect_prise_de_poids": "Weight gain",
+    "med_effect_akathisie": "Akathisia",
+    "med_effect_tremblements": "Tremors",
+    "med_effect_constipation": "Constipation",
+    "med_effect_dysfonction_sexuelle": "Sexual dysfunction",
+    "med_effect_anxiete": "Anxiety",
+    "med_effect_cephalees": "Headaches",
+    "med_effect_vertiges": "Dizziness"
   }
 }

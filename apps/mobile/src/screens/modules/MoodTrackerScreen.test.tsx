@@ -34,7 +34,7 @@ jest.mock('../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
-jest.mock('../../components/features/TimeRangeCharts', () => {
+jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
   const { Text, Pressable } = require('react-native')
   return {
@@ -310,8 +310,8 @@ interface FakeEntry {
 }
 
 describe('chartUtils — buildCompositeData', () => {
-  const { buildCompositeData } = jest.requireActual<typeof import('../../components/features/TimeRangeCharts/chartUtils')>(
-    '../../components/features/TimeRangeCharts/chartUtils'
+  const { buildCompositeData } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const makeEntry = (date: string, scores: Record<string, number>): FakeEntry => ({
@@ -350,8 +350,8 @@ describe('chartUtils — buildCompositeData', () => {
 })
 
 describe('chartUtils — computeStreak', () => {
-  const { computeStreak } = jest.requireActual<typeof import('../../components/features/TimeRangeCharts/chartUtils')>(
-    '../../components/features/TimeRangeCharts/chartUtils'
+  const { computeStreak } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   it('retourne 0 sans entrée', () => {
@@ -362,8 +362,8 @@ describe('chartUtils — computeStreak', () => {
     // Utilise le même calcul de date que computeStreak (minuit local → UTC)
     const getDateStr = (daysAgo: number) => {
       const d = new Date()
-      d.setHours(0, 0, 0, 0)
-      d.setDate(d.getDate() - daysAgo)
+      d.setUTCHours(0, 0, 0, 0)
+      d.setUTCDate(d.getUTCDate() - daysAgo)
       return d.toISOString().slice(0, 10)
     }
     const entries: FakeEntry[] = [0, 1].map(offset => ({
@@ -379,8 +379,8 @@ describe('chartUtils — computeStreak', () => {
 })
 
 describe('chartUtils — markerXFraction', () => {
-  const { markerXFraction } = jest.requireActual<typeof import('../../components/features/TimeRangeCharts/chartUtils')>(
-    '../../components/features/TimeRangeCharts/chartUtils'
+  const { markerXFraction } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
+    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const dateNDaysAgo = (n: number) => {

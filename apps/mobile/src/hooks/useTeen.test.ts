@@ -20,6 +20,16 @@ function collectStringValues(node: unknown): string[] {
   return []
 }
 
+function collectStringEntries(node: unknown, prefix = ''): Array<[string, string]> {
+  if (typeof node === 'string') return [[prefix, node]]
+  if (node && typeof node === 'object') {
+    return Object.entries(node as Record<string, unknown>).flatMap(([k, v]) =>
+      collectStringEntries(v, prefix ? `${prefix}.${k}` : k)
+    )
+  }
+  return []
+}
+
 describe('fr/teen.json — locale ado française', () => {
   it('contient les surcharges de titres pour les modules principaux', () => {
     expect(frTeen.modules.crisis_plan.title).toBeTruthy()
@@ -52,10 +62,12 @@ describe('en/teen.json — locale ado anglaise', () => {
     expect(Object.keys(enTeen.modules ?? {}).length).toBeGreaterThan(0)
   })
 
-  it('les textes ado anglais sont distincts', () => {
-    const allValues = collectStringValues(enTeen.modules ?? {})
-    for (const val of allValues) {
+  it('les textes ado anglais sont non vides (hors description, vide par convention)', () => {
+    // La clé `description` des échelles est volontairement '' (cf. règle métier).
+    const entries = collectStringEntries(enTeen.modules ?? {})
+    for (const [key, val] of entries) {
       expect(typeof val).toBe('string')
+      if (key.endsWith('.description')) continue
       expect(val.length).toBeGreaterThan(0)
     }
   })

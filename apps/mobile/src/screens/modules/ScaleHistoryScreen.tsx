@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -13,6 +13,13 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { getAllScaleEntries, deleteScaleEntry, type ScaleEntry } from '../../lib/database'
+import {
+  buildTotalScoreChartData,
+  buildXLabels,
+  computeAvg,
+  type TimeRange,
+} from '../../components/ui/Chart/TimeRangeCharts/chartUtils'
+import { DimensionChart } from '../../components/ui/Chart/TimeRangeCharts/DimensionChart'
 import { formatDateLong } from '../../lib/dateUtils'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { AppStackParamList } from '../../navigation/AppStack'
@@ -30,7 +37,7 @@ export default function ScaleHistoryScreen() {
   const { params } = useRoute<RouteT>()
   const { scale_id } = params
   const { isTeenMode, teenColor } = useTeen()
-  const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const { showConfirm } = useConfirmDialog()
   const accentColor = teenColor(scale_id)
 
@@ -47,6 +54,16 @@ export default function ScaleHistoryScreen() {
 
   const [entries, setEntries] = useState<ScaleEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [range, setRange] = useState<TimeRange>('1A')
+
+  const chartColor = accentColor ?? colors.primary
+  const chartPoints = useMemo(() => buildTotalScoreChartData(entries, range), [entries, range])
+  const xLabels = useMemo(() => buildXLabels(range, i18n.language), [range, i18n.language])
+  const avgValue = computeAvg(chartPoints)
+  const yMax = useMemo(() => {
+    const maxEntry = Math.max(...entries.map(e => e.total_score), 10)
+    return Math.ceil(maxEntry / 5) * 5
+  }, [entries])
 
   useFocusEffect(
     useCallback(() => {
@@ -97,6 +114,37 @@ export default function ScaleHistoryScreen() {
           <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
           <Text style={styles.newBtnText}>{newBtnLabel}</Text>
         </Pressable>
+
+        {/* ── Graphe d'évolution ────────────────────────────────── */}
+        {entries.length >= 2 && (
+          <View style={styles.chartSection}>
+            <View style={styles.rangeRow}>
+              {(['7J', '1M', '3M', '6M', '1A'] as TimeRange[]).map(r => (
+                <Pressable
+                  key={r}
+                  style={[
+                    styles.rangeBtn,
+                    range === r && { backgroundColor: chartColor },
+                  ]}
+                  onPress={() => setRange(r)}
+                >
+                  <Text style={[styles.rangeBtnText, range === r && styles.rangeBtnTextActive]}>
+                    {r}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <DimensionChart
+              label={t('modules.scale_history.evolution_label')}
+              points={chartPoints}
+              color={chartColor}
+              avgLabel={t('modules.scale_history.avg', { value: avgValue })}
+              range={range}
+              xLabels={xLabels}
+              yMax={yMax}
+            />
+          </View>
+        )}
 
         {entries.length === 0 ? (
           <View style={styles.empty}>
@@ -226,4 +274,17 @@ const styles = StyleSheet.create({
     padding: spacing.sm, backgroundColor: '#F8FAFC', borderRadius: radius.sm,
   },
   noteText: { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
+  chartSection: {
+    backgroundColor: colors.card, borderRadius: radius.md, borderWidth: 1,
+    borderColor: colors.border, padding: spacing.md, marginBottom: spacing.md,
+  },
+  rangeRow: {
+    flexDirection: 'row', gap: 4, marginBottom: spacing.sm, justifyContent: 'flex-end',
+  },
+  rangeBtn: {
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.sm,
+    backgroundColor: '#F1F5F9',
+  },
+  rangeBtnText: { fontSize: 12, fontWeight: '500', color: colors.textMuted },
+  rangeBtnTextActive: { color: colors.white },
 })
