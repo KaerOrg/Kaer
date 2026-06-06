@@ -85,7 +85,7 @@ Prévus : `cognitive_distortions`, `therapeutic_commitment`.
 
 ## État d'avancement
 
-Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Features transverses livrées : système de RDV ([`docs/spec/calendar.md`](docs/spec/calendar.md)), Mes suivis / File active ([`docs/spec/file-active.md`](docs/spec/file-active.md)), conformité RGPD (journal d'audit #25, MFA praticien #26, droits patient export/effacement #27). Reste : notifications push, conservation/purge (#28), finitions file active.
+Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Features transverses livrées : système de RDV ([`docs/spec/calendar.md`](docs/spec/calendar.md)), Mes suivis / File active ([`docs/spec/file-active.md`](docs/spec/file-active.md)), conformité RGPD (journal d'audit #25, MFA praticien #26, droits patient export/effacement #27, conservation/purge automatique #28 — [`docs/retention-conservation.md`](docs/retention-conservation.md)). Reste : notifications push, finitions file active.
 
 ## Règles de développement
 
@@ -111,6 +111,7 @@ Index : [`docs/README.md`](docs/README.md)
 | `docs/audit-log.md` | Journal d'audit RGPD/HDS |
 | `docs/patient-data-sync.md` | Circuit sync données patient + consentement |
 | `docs/rgpd-droits-patient.md` | Export / effacement patient (art. 15/17/20) |
+| `docs/retention-conservation.md` | Conservation & purge automatique (art. 5.1.e) — `retention_config` + pg_cron |
 | `docs/auth-mfa.md` / `docs/support-requests.md` | MFA praticien TOTP + contact support |
 | `apps/web/docs/design-system.md` | CSS tokens, classes utilitaires, widgets web |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, primitifs, teen mode complet |

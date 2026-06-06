@@ -2197,3 +2197,46 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sleep_card.note',     'italic', 'true'),
   ('cbt_card.note',       'italic', 'true')
 on conflict (field_id, prop_key) do nothing;
+
+
+-- ============================================================
+-- SEED : retention_config (Politique de conservation RGPD #28)
+-- ============================================================
+-- Durées par défaut conservatrices — à valider et ajuster par le DPO.
+-- Modifiables sans redéploiement :
+--   UPDATE public.retention_config SET retention_days = X WHERE table_name = 'Y';
+--
+-- gate_on_inactivity = true → la donnée n'est purgée QUE si le patient est inactif
+-- (aucune connexion ET aucun rendez-vous depuis inactivity_days). Protège l'historique
+-- d'un patient encore suivi. Activé pour les données de santé rattachées à un patient.
+
+insert into public.retention_config
+  (table_name, date_column, retention_days, gate_on_inactivity, inactivity_days, is_enabled, description) values
+  ('notification_logs',
+   'sent_at', 365, false, 365, true,
+   'Logs techniques d''envoi push. Base légale : intérêt légitime (sécurité opérationnelle). 1 an.'),
+  ('notification_events',
+   'occurred_at', 365, false, 365, true,
+   'Événements de notifications (clics, livraisons). Base légale : intérêt légitime. 1 an.'),
+  ('invitations',
+   'expires_at', 30, false, 365, true,
+   'Invitations expirées (expires_at < now()). Nettoyage 30 jours après expiration.'),
+  ('appointments',
+   'ends_at', 1825, true, 365, true,
+   'Rendez-vous passés. Données de santé. Purgés seulement si patient inactif. 5 ans.'),
+  ('patient_entries',
+   'client_created_at', 1825, true, 365, true,
+   'Saisies patient. Données de santé art. 9 RGPD. Purgées seulement si patient inactif. 5 ans.'),
+  ('practitioner_patient_notes',
+   'updated_at', 1825, true, 365, true,
+   'Notes praticien. Données de santé. Purgées seulement si patient inactif. 5 ans.'),
+  ('access_audit_log',
+   'occurred_at', 3650, false, 365, true,
+   'Journal d''audit des accès RGPD/HDS. Conservation longue durée requise pour audits HDS. 10 ans.')
+on conflict (table_name) do update set
+  date_column        = excluded.date_column,
+  retention_days     = excluded.retention_days,
+  gate_on_inactivity = excluded.gate_on_inactivity,
+  inactivity_days    = excluded.inactivity_days,
+  description        = excluded.description,
+  updated_at         = now();
