@@ -104,8 +104,8 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 

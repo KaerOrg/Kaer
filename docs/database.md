@@ -95,20 +95,6 @@ Config spéciale pour `psychoeducation` :
 
 ---
 
-### `patient_engagement_logs` — Logs d'engagement
-
-Suivi anonymisé de l'activité patient — **aucune donnée clinique**.
-
-| Colonne | Type | Contrainte | Description |
-|---------|------|-----------|-------------|
-| `id` | uuid | PK, default gen_random_uuid() | – |
-| `patient_id` | uuid | FK → auth.users | – |
-| `event_type` | text | NOT NULL | Ex: `'READ_CARD'`, `'FILL_SLEEP_DIARY'`, `'UPDATE_DECISIONAL_BALANCE'` |
-| `metadata` | jsonb | default '{}' | Données contextuelles optionnelles ex: `{ "card_id": "card_sleep_01" }` |
-| `created_at` | timestamptz | default now() | – |
-
----
-
 ### `module_categories` — Catégories de modules
 
 Données de référence statiques — lecture seule côté app.
@@ -140,36 +126,52 @@ Une ligne par module. `preview_kind` pilote le moteur de rendu.
 |---------|------|-------------|
 | `id` | text PK | Clé du module (ex: `sleep_diary`) |
 | `category_id` | text FK → module_categories | – |
-| `preview_kind` | text | Layout : `steps`, `fields`, `grid2x2`, `cards`, `coming_soon` |
+| `preview_kind` | text | Layout cible (voir `docs/module-engine.md` pour la table complète) |
 | `sort_order` | int | Ordre dans la catégorie |
 | `is_invite_excluded` | boolean | Si true : exclu de la pré-sélection à l'invitation (config spéciale requise) |
+| `icon` | text nullable | Icône Lucide (web) |
+| `mobile_icon` | text nullable | Icône MaterialCommunityIcons (mobile) |
+| `color` | text nullable | Couleur accent hex |
 
-**Catalogue complet (22 modules) :**
+**Catalogue complet (35 modules) :**
 
 | `id` | Catégorie | `preview_kind` | `is_invite_excluded` |
 |------|-----------|---------------|----------------------|
-| `crisis_plan` | safety | `steps` | false |
+| `crisis_plan` | safety | `editable_steps` | false |
 | `therapeutic_commitment` | safety | `coming_soon` | false |
-| `distress_tolerance` | safety | `coming_soon` | false |
-| `medication_side_effects` | iatrogenic | `fields` | false |
-| `medication_adherence` | iatrogenic | `fields` | false |
+| `distress_tolerance` | safety | `tabbed` | false |
+| `medication_side_effects` | iatrogenic | `slider_dashboard` | false |
+| `medication_adherence` | iatrogenic | `daily_checkin` | false |
 | `psychoeducation` | iatrogenic | `cards` | **true** |
-| `sleep_diary` | lifestyle | `fields` | false |
-| `diet_weight_psycho` | lifestyle | `coming_soon` | false |
-| `chronobiology_tracker` | lifestyle | `coming_soon` | false |
-| `mood_tracker` | emotion | `fields` | false |
-| `emotion_wheel` | emotion | `coming_soon` | false |
-| `behavioral_activation` | emotion | `fields` | false |
-| `beck_columns` | cognitive | `steps` | false |
+| `sleep_diary` | lifestyle | `sleep_journal` | false |
+| `diet_weight_psycho` | lifestyle | `psyedu` | false |
+| `chronobiology_tracker` | lifestyle | `tabbed` | false |
+| `mood_tracker` | emotion | `slider_dashboard` | false |
+| `emotion_wheel` | emotion | `tree_selector` | false |
+| `behavioral_activation` | emotion | `activity_log` | false |
+| `beck_columns` | cognitive | `column_form` | false |
 | `cognitive_distortions` | cognitive | `coming_soon` | false |
-| `grounding` | cognitive | `coming_soon` | false |
-| `rim` | cognitive | `coming_soon` | **true** |
-| `fear_thermometer` | anxiety | `fields` | false |
-| `exposure_hierarchy` | anxiety | `coming_soon` | false |
+| `grounding` | cognitive | `guided_exercise` | false |
+| `rim` | cognitive | `patient_scenario` | **true** |
+| `fear_thermometer` | anxiety | `exposure_tracker` | false |
+| `exposure_hierarchy` | anxiety | `exposure_hierarchy` | false |
 | `breathing_techniques` | anxiety | `fields` | false |
-| `cognitive_saturation` | anxiety | `coming_soon` | false |
-| `craving_journal` | addiction | `coming_soon` | false |
-| `decisional_balance` | addiction | `grid2x2` | false |
+| `cognitive_saturation` | anxiety | `guided_exercise` | false |
+| `craving_journal` | addiction | `tabbed` | false |
+| `decisional_balance` | addiction | `decision_grid` | false |
+| `motivational_balance` | motivation | `tabbed` | false |
+| `phq9` | assessments | `questionnaire` | false |
+| `gad7` | assessments | `questionnaire` | false |
+| `bsl23` | assessments | `questionnaire` | false |
+| `snap_iv` | assessments | `questionnaire` | false |
+| `asrs6` | assessments | `questionnaire` | false |
+| `asrs18` | assessments | `questionnaire` | false |
+| `epds` | assessments | `questionnaire` | false |
+| `nsi` | assessments | `questionnaire` | false |
+| `rcads` | assessments | `questionnaire` | false |
+| `cssrs` | assessments | `coming_soon` | false |
+| `cape42` | assessments | `coming_soon` | false |
+| `audit` | assessments | `coming_soon` | false |
 
 ---
 
@@ -296,12 +298,6 @@ RLS activée sur toutes les tables. Résumé des policies :
 | modules_practitioner | ALL | `practitioner_id = auth.uid()` |
 | modules_patient | SELECT | `patient_id = auth.uid()` ET `revoked_at IS NULL` |
 | modules_patient_update | UPDATE | `patient_id = auth.uid()` ET `revoked_at IS NULL` |
-
-### `patient_engagement_logs`
-| Policy | Opérations | Condition |
-|--------|-----------|-----------|
-| Patients can insert their own logs | INSERT | `patient_id = auth.uid()` |
-| Practitioners can view logs of their patients | SELECT | Patient lié au praticien via `practitioner_patients` |
 
 ### `module_categories`, `modules`, `module_content_fields`, `field_props`
 | Policy | Opérations | Condition |

@@ -55,7 +55,7 @@ if [ -z "$pr_num" ]; then
     pr_num=$(echo "$pr_json" | jq -r '.number // empty')
     pr_state=$(echo "$pr_json" | jq -r '.reviewDecision // empty')
     pr_url=$(echo "$pr_json" | jq -r '.url // empty')
-    checks=$(echo "$pr_json" | jq -r '.statusCheckRollup // [] | map(.state // .conclusion) | map(ascii_upcase)')
+    checks=$(echo "$pr_json" | jq '.statusCheckRollup // [] | map(.state // .conclusion) | map(ascii_upcase)')
     total=$(echo "$checks" | jq 'length')
     if [ "$total" -gt 0 ]; then
       failing=$(echo "$checks" | jq '[.[] | select(. == "FAILURE" or . == "ERROR" or . == "TIMED_OUT")] | length')
