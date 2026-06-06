@@ -1194,17 +1194,19 @@
     "filter_label": "Filter by tag",
     "filter_clear": "Show all",
     "empty_filtered": "No notes for this tag.",
-    "tag_search_placeholder": "Search a tag…",
-    "mic_start": "Dictate a note",
-    "mic_stop": "Stop recording",
-    "mic_processing": "Transcribing…",
-    "mic_error_not_supported": "Your browser does not support audio recording.",
-    "mic_error_permission": "Microphone access denied. Check your browser permissions.",
-    "mic_error_too_large": "Recording too long. Please record shorter segments.",
-    "mic_error_network": "Network error during transcription. Check your connection.",
-    "mic_error_server": "Transcription error. Please try again.",
-    "mic_error_recorder": "Recording error. The recording has been stopped.",
-    "mic_error_disconnected": "Microphone disconnected. The recording has been stopped."
+    "tag_search_placeholder": "Search a tag…"
+  },
+  "speech": {
+    "start": "Dictate",
+    "stop": "Stop recording",
+    "processing": "Transcribing…",
+    "error_not_supported": "Your browser does not support audio recording.",
+    "error_permission": "Microphone access denied. Check your browser permissions.",
+    "error_too_large": "Recording too long. Please record shorter segments.",
+    "error_network": "Network error during transcription. Check your connection.",
+    "error_server": "Transcription error. Please try again.",
+    "error_recorder": "Recording error. The recording has been stopped.",
+    "error_disconnected": "Microphone disconnected. The recording has been stopped."
   },
   "agenda": {
     "nav_link": "Schedule",

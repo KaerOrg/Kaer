@@ -1,16 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-// ObservationBlock (monté au dépliage) charge ses notes et utilise le toast :
-// on neutralise le réseau et le contexte pour le test de la matrice.
-vi.mock('../../../services/caseloadService', () => ({
-  fetchCaseloadNotes: vi.fn().mockResolvedValue([]),
-  createCaseloadNote: vi.fn(),
-}))
-vi.mock('../../../contexts/ToastContext', () => ({
-  useToast: () => ({ error: vi.fn(), success: vi.fn(), info: vi.fn() }),
-}))
-
 import { CaseloadTable, type CaseloadTableProps } from './CaseloadTable'
 import type { CaseloadAction, CaseloadEntry, CaseloadRowData } from '../../../lib/caseload.types'
 
@@ -35,6 +25,8 @@ function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
 
 const defaultRow: CaseloadRowData = { entry: makeEntry(), actions: [makeAction()], waits: [] }
 const noop = () => {}
+const loadNotes = () => Promise.resolve([])
+const addNote = () => Promise.resolve(null)
 
 function renderTable(props: Partial<CaseloadTableProps> = {}) {
   return render(
@@ -52,6 +44,8 @@ function renderTable(props: Partial<CaseloadTableProps> = {}) {
       onAddWait={props.onAddWait ?? noop}
       onPatchWait={props.onPatchWait ?? noop}
       onDeleteWait={props.onDeleteWait ?? noop}
+      onLoadNotes={props.onLoadNotes ?? loadNotes}
+      onAddNote={props.onAddNote ?? addNote}
     />
   )
 }

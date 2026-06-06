@@ -17,12 +17,15 @@ import {
   updateCaseloadWait,
   deleteCaseloadWait,
   syncCaseloadWithPatients,
+  fetchCaseloadNotes,
+  createCaseloadNote,
 } from '../../services/caseloadService'
 import { fetchPatientsWithModules } from '../../services/patientService'
 import { fetchPendingInvitations } from '../../services/invitationService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
+  CaseloadNote,
   CaseloadRowData,
   CaseloadStatus,
   CaseloadWaitInput,
@@ -229,6 +232,24 @@ export function FileActivePage() {
     [toast, t]
   )
 
+  // Notes : chargées paresseusement quand une ligne est dépliée (le panneau de détail
+  // n'est monté qu'alors). L'orchestration — service, identité praticien, toast — vit
+  // ici, à la page ; `ObservationBlock` reste présentationnel (cf. ActionList/WaitList).
+  const handleLoadNotes = useCallback((entryId: string) => fetchCaseloadNotes(entryId), [])
+
+  const handleAddNote = useCallback(
+    async (entryId: string, body: string): Promise<CaseloadNote | null> => {
+      if (!practitioner) return null
+      const result = await createCaseloadNote(practitioner.id, entryId, body)
+      if (!result.ok || !result.note) {
+        toast.error(t('file_active.observation.error'))
+        return null
+      }
+      return result.note
+    },
+    [practitioner, toast, t]
+  )
+
   return (
     <Layout wide>
       <div className="file-active">
@@ -254,6 +275,8 @@ export function FileActivePage() {
             onAddWait={handleAddWait}
             onPatchWait={handlePatchWait}
             onDeleteWait={handleDeleteWait}
+            onLoadNotes={handleLoadNotes}
+            onAddNote={handleAddNote}
             creating={creating}
           />
         )}

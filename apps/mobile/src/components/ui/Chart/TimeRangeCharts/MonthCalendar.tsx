@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '../../../../theme'
-import type { ScaleEntry } from '../../../../lib/database'
+import type { ChartEntry } from '../chartTypes'
 
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -13,7 +13,7 @@ interface DayEntry {
 }
 
 interface Props {
-  entries: ScaleEntry[]
+  entries: ChartEntry[]
   dimensionKeys: readonly string[]
   accentColor: string
   locale: string

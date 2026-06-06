@@ -24,6 +24,30 @@
 - Primitif générique, réutilisable hors de tout contexte métier → `components/ui/NomComposant/`
 - Lié à un domaine spécifique (patients, modules, agenda…) → `components/features/NomComposant/`
 
+> **Un composant `ui/` ne connaît AUCUN métier — vérifier ses imports.** Au-delà de
+> la dépendance `features/`, un primitive ne doit importer **ni service, ni store,
+> ni contexte métier, ni type de persistance** (`lib/database`, row Supabase), ni
+> hardcoder une clé i18n de domaine (`scales.*`, `modules.*`). S'il le fait, ce n'est
+> pas un primitive : il va dans `features/`, ou la donnée métier entre par une prop /
+> un contrat générique local.
+>
+> **Cas rencontrés — tableau-de-bord-olivier (2026-06-06) :**
+> ```ts
+> // ❌ ui/Chart/.../chartUtils.ts importait le type de persistance ScaleEntry
+> import type { ScaleEntry } from '../../../../lib/database'
+> export function buildChartData(entries: ScaleEntry[], …) { … }
+> // ✅ contrat générique local au design system ; ScaleEntry le satisfait structurellement
+> import type { ChartEntry } from '../chartTypes'   // { created_at, total_score, subscale_scores }
+> export function buildChartData(entries: ChartEntry[], …) { … }
+> ```
+> ```ts
+> // ❌ ui/ScaleMetaBadges importait scaleService + hardcodait des clés scales.* → c'est du métier
+> // ✅ déplacé dans components/features/ScaleMetaBadges/ (connaît le domaine des échelles)
+> ```
+> → Test : « si je supprime tout le métier (services, stores, types BDD, clés i18n de
+> domaine), le composant `ui/` compile-t-il encore et reste-t-il utile ailleurs ? »
+> Si non, il est mal rangé.
+
 ---
 
 ## Un fichier = un composant — règle absolue
@@ -113,6 +137,20 @@ Un composant livré sans sa trace documentaire crée de la dette invisible — l
 
 **Rappel :** la session où `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` illustre exactement ce problème. Coût : bug de cohérence visuelle découvert à la revue, refactorisation supplémentaire.
 
+> **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :**
+> `CaseloadTable.css` figeait 25+ teintes de charte (en-tête teal, dégradé de
+> lignes, accents de section) en hexadécimal brut, parce qu'aucun token existant
+> ne correspondait.
+> ```css
+> /* ❌ Teinte de charte absente du jeu de tokens → figée en dur dans un CSS de feature */
+> .caseload-data-table .data-table__th { background: #D3ECED; color: #2C6E72; }
+> .caseload-detail__section--actions   { background: #EFF6FF; border-left-color: #3B82F6; }
+> ```
+> → « Pas de token adapté » n'autorise **pas** le hex en dur : on **ajoute la teinte
+> au jeu de tokens** (`--color-caseload-header`, `--color-section-actions`…) dans le
+> `:root`, puis on la référence. L'habillage reste centralisé et thématisable au
+> lieu d'être dispersé dans le CSS d'une feature.
+
 ## Architecture en couches — ne jamais mélanger
 
 - **UI** (`src/screens/`, `src/components/`) : affichage uniquement — zéro logique métier, zéro appel Supabase direct
@@ -175,6 +213,32 @@ function MyScreen() {
   }
 }
 ```
+
+> **Passer par un service ne suffit pas : une feuille ne possède pas son propre
+> cycle de données.** Un composant peut respecter « zéro Supabase dans un composant »
+> (il appelle un service) tout en **embarquant la logique métier** : fetch dans un
+> `useEffect`, mutation dans un handler, état de données local, `useAuthStore`/`useToast`
+> internes. Si ses **frères remontent leur état au parent par props**, c'est une
+> incohérence de couches : remonter aussi cette donnée à la page.
+>
+> **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :** dans `CaseloadTable`,
+> `ActionList`/`WaitList` reçoivent `actions`/`waits` + callbacks par props (état
+> possédé par `FileActivePage`), mais la feuille sœur `ObservationBlock` faisait son
+> propre `fetchCaseloadNotes` + `createCaseloadNote`, possédait son état `notes`, et
+> lisait `useAuthStore`/`useToast`.
+> ```tsx
+> // ❌ Feuille qui s'auto-alimente — logique métier dans le composant
+> function ObservationBlock({ entryId }: { entryId: string }) {
+>   const { practitioner } = useAuthStore()
+>   const [notes, setNotes] = useState<CaseloadNote[]>([])
+>   useEffect(() => { fetchCaseloadNotes(entryId).then(setNotes) }, [entryId])
+>   const handleAdd = async () => { await createCaseloadNote(practitioner.id, entryId, body) }
+> }
+> // ✅ Feuille présentationnelle — données + actions injectées par la page
+> function ObservationBlock({ notes, onAddNote }: ObservationBlockProps) { … }
+> ```
+> → Remonter la possession des notes à `FileActivePage` (slice `notesByEntry` ou
+> callbacks `onLoadNotes`/`onAddNote`), aligné sur le pattern des frères.
 
 ## Synchronisation distante (mobile) — toujours via syncHelpers
 

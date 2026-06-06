@@ -40,8 +40,14 @@ interface TooltipArgs {
   label?: string
 }
 
-function buildTooltipContent(seriesList: SeriesConfig[], locale: string) {
-  return function TooltipContent({ active, payload, label }: TooltipArgs) {
+interface TooltipContentProps extends TooltipArgs {
+  seriesList: SeriesConfig[]
+  locale: string
+}
+
+// Composant module-level (jamais créé pendant le render) : Recharts l'invoque via
+// la prop `content` à laquelle on passe une fonction de rendu stable (`renderTooltip`).
+function TooltipContent({ active, payload, label, seriesList, locale }: TooltipContentProps) {
     if (!active || !payload?.length) return null
     const date = label
       ? new Date(label).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -78,7 +84,6 @@ function buildTooltipContent(seriesList: SeriesConfig[], locale: string) {
         })}
       </div>
     )
-  }
 }
 
 export function LineChart({
@@ -105,7 +110,6 @@ export function LineChart({
   if (data.length < 2) return null
 
   const isSingleSeries = series.length === 1
-  const TooltipContent = buildTooltipContent(series, locale)
 
   const sharedAxisProps = {
     xAxis: (
@@ -131,7 +135,7 @@ export function LineChart({
     grid: (
       <CartesianGrid strokeDasharray="4 4" stroke="#F1F5F9" vertical={false} />
     ),
-    tooltip: <Tooltip content={<TooltipContent />} cursor={{ stroke: '#E2E8F0', strokeWidth: 1 }} />,
+    tooltip: <Tooltip content={<TooltipContent seriesList={series} locale={locale} />} cursor={{ stroke: '#E2E8F0', strokeWidth: 1 }} />,
   }
 
   if (isSingleSeries) {

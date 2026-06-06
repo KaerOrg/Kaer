@@ -1,10 +1,9 @@
 // Fonctions pures de construction de données pour les graphiques temporels.
 // Utilisées par MoodTrackerScreen et MedicationSideEffectsHistoryScreen.
 
-import type { ScaleEntry } from '../../../../lib/database'
-import type { DataPoint, XLabel } from '../chartTypes'
+import type { ChartEntry, DataPoint, XLabel } from '../chartTypes'
 
-export type { DataPoint, XLabel }
+export type { ChartEntry, DataPoint, XLabel }
 
 export type TimeRange = '7J' | '1M' | '3M' | '6M' | '1A'
 
@@ -82,7 +81,7 @@ export function buildXLabels(range: TimeRange, locale: string): XLabel[] {
 
 // ── Chart data builders ───────────────────────────────────────────────────────
 
-export function buildChartData(entries: ScaleEntry[], key: string, range: TimeRange): DataPoint[] {
+export function buildChartData(entries: ChartEntry[], key: string, range: TimeRange): DataPoint[] {
   const now = new Date()
 
   if (range === '7J') {
@@ -145,7 +144,7 @@ export function buildChartData(entries: ScaleEntry[], key: string, range: TimeRa
 
 // ── Total score chart data (pour ScaleHistoryScreen) ─────────────────────────
 
-export function buildTotalScoreChartData(entries: ScaleEntry[], range: TimeRange): DataPoint[] {
+export function buildTotalScoreChartData(entries: ChartEntry[], range: TimeRange): DataPoint[] {
   const now = new Date()
 
   if (range === '7J') {
@@ -208,7 +207,7 @@ export function computeAvg(points: DataPoint[]): string {
   return (valid.reduce((s, p) => s + p.value, 0) / valid.length).toFixed(1)
 }
 
-export function computeStreak(entries: ScaleEntry[]): number {
+export function computeStreak(entries: ChartEntry[]): number {
   if (entries.length === 0) return 0
   const datesWithEntry = new Set(entries.map(e => e.created_at.slice(0, 10)))
   let streak = 0
@@ -226,7 +225,7 @@ export function computeStreak(entries: ScaleEntry[]): number {
 // ── Composite (mean across all keys per slot) ─────────────────────────────────
 
 export function buildCompositeData(
-  entries: ScaleEntry[],
+  entries: ChartEntry[],
   keys: readonly string[],
   range: TimeRange,
 ): DataPoint[] {

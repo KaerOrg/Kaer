@@ -18,6 +18,7 @@ import { EMPTY_FILTER, type CaseloadFilterState, type LinkablePatient } from './
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
+  CaseloadNote,
   CaseloadRowData,
   CaseloadStatus,
   CaseloadWaitInput,
@@ -38,6 +39,8 @@ export interface CaseloadTableProps {
   onAddWait: (entryId: string, label: string, relance: string | null) => void
   onPatchWait: (entryId: string, waitId: string, patch: CaseloadWaitInput) => void
   onDeleteWait: (entryId: string, waitId: string) => void
+  onLoadNotes: (entryId: string) => Promise<readonly CaseloadNote[]>
+  onAddNote: (entryId: string, body: string) => Promise<CaseloadNote | null>
   creating?: boolean
 }
 
@@ -65,6 +68,8 @@ export function CaseloadTable({
   onAddWait,
   onPatchWait,
   onDeleteWait,
+  onLoadNotes,
+  onAddNote,
   creating,
 }: CaseloadTableProps) {
   const { t } = useTranslation()
@@ -139,7 +144,6 @@ export function CaseloadTable({
       <RowDetail
         row={row}
         today={today}
-        onPatch={onPatch}
         onAddAction={onAddAction}
         onToggleDone={onToggleDone}
         onPatchAction={onPatchAction}
@@ -147,9 +151,11 @@ export function CaseloadTable({
         onAddWait={onAddWait}
         onPatchWait={onPatchWait}
         onDeleteWait={onDeleteWait}
+        onLoadNotes={onLoadNotes}
+        onAddNote={onAddNote}
       />
     ),
-    [today, patients, onPatch, onAddAction, onToggleDone, onPatchAction, onDeleteAction, onAddWait, onPatchWait, onDeleteWait]
+    [today, onAddAction, onToggleDone, onPatchAction, onDeleteAction, onAddWait, onPatchWait, onDeleteWait, onLoadNotes, onAddNote]
   )
 
   const toolbar = (

@@ -5,6 +5,7 @@ import { WaitList } from './WaitList'
 import { ObservationBlock } from './ObservationBlock'
 import type {
   CaseloadActionInput,
+  CaseloadNote,
   CaseloadRowData,
   CaseloadWaitInput,
 } from '../../../lib/caseload.types'
@@ -19,6 +20,8 @@ export interface RowDetailProps {
   onAddWait: (entryId: string, label: string, relance: string | null) => void
   onPatchWait: (entryId: string, waitId: string, patch: CaseloadWaitInput) => void
   onDeleteWait: (entryId: string, waitId: string) => void
+  onLoadNotes: (entryId: string) => Promise<readonly CaseloadNote[]>
+  onAddNote: (entryId: string, body: string) => Promise<CaseloadNote | null>
 }
 
 /** Panneau dépliable d'un dossier : actions, attentes, observations. */
@@ -32,6 +35,8 @@ function RowDetailComponent({
   onAddWait,
   onPatchWait,
   onDeleteWait,
+  onLoadNotes,
+  onAddNote,
 }: RowDetailProps) {
   const { t } = useTranslation()
   const { entry, actions, waits } = row
@@ -65,7 +70,7 @@ function RowDetailComponent({
 
       <section className="caseload-detail__section caseload-detail__section--observation">
         <h4 className="caseload-detail__title">{t('file_active.section.observation')}</h4>
-        <ObservationBlock entryId={entry.id} />
+        <ObservationBlock entryId={entry.id} onLoadNotes={onLoadNotes} onAddNote={onAddNote} />
       </section>
     </div>
   )

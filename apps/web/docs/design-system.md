@@ -104,8 +104,8 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, SupportRequestModal, WeekGrid |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -584,12 +584,17 @@ tabulaire sur mesure qui ne passe pas par `columns`.
 
 ## Composant `ScaleMetaBadges`
 
-Fichier : `components/ui/ScaleMetaBadges/ScaleMetaBadges.tsx`
+Fichier : `components/features/ScaleMetaBadges/ScaleMetaBadges.tsx`
+
+> **Composant métier (`features/`), pas un primitive.** Il connaît le domaine des
+> échelles cliniques (import `scaleService`, clés i18n `scales.*`) — il n'a donc pas
+> sa place dans `ui/`. Documenté ici pour mémoire, mais ce n'est pas une brique du
+> design system.
 
 Affiche la description et les chips méta d'une échelle clinique : badge Auto/Hétéro, chip nosologique, chips d'âge colorés. À utiliser comme enfant du composant `Card`.
 
 ```tsx
-import { ScaleMetaBadges } from '../components/ui/ScaleMetaBadges/ScaleMetaBadges'
+import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMetaBadges'
 
 <Card header={{ ... }}>
   <ScaleMetaBadges
