@@ -273,6 +273,40 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36)
 }
 
+// ─── Effacement RGPD local (#27) ─────────────────────────────────────────────
+// Toutes les tables SQLite contenant des données patient, + la file de sync.
+// Doit rester synchronisée avec les CREATE TABLE de ce fichier (un nouveau module
+// = ajouter sa table ici, sinon l'effacement laisserait des données résiduelles).
+const PATIENT_DATA_TABLES = [
+  'activity_records', 'asrs18_entries', 'asrs6_entries', 'beck_thought_records',
+  'breathing_sessions', 'bsl23_entries', 'cognitive_saturation_sessions',
+  'crisis_anchors', 'crisis_plan_items', 'custom_dimensions', 'daily_entries',
+  'decisional_balance', 'em_balance_items', 'em_rulers', 'em_values',
+  'emotion_entries', 'exposure_hierarchies', 'fear_entries', 'fear_situations',
+  'form_entries', 'gad7_entries', 'medication_adherence_entries', 'module_settings',
+  'mood_entries', 'mood_markers', 'nsi_entries', 'phq9_entries', 'plan_items',
+  'scale_entries', 'side_effects_entries', 'sleep_diary_entries', 'snapiv_entries',
+  'sync_outbox', 'tree_selections',
+] as const
+
+/**
+ * Efface TOUTES les données patient stockées localement en SQLite (droit à l'oubli,
+ * RGPD art. 17). Vide chaque table connue dans une transaction. La table peut être
+ * absente sur une vieille installation → l'erreur est ignorée table par table.
+ * La purge du serveur passe ailleurs (RPC + Edge Function) — cette fonction ne
+ * touche que le stockage local de l'appareil.
+ */
+export async function purgeAllLocalData(): Promise<void> {
+  const database = getDb()
+  for (const table of PATIENT_DATA_TABLES) {
+    try {
+      await database.execAsync(`DELETE FROM ${table};`)
+    } catch {
+      /* table absente sur cette installation — rien à purger */
+    }
+  }
+}
+
 // ─── Table legacy decisional_balance ─────────────────────────────────────────
 // Conservée comme source de migration : les anciennes installations ont leurs
 // arguments stockés en JSON dans cette table monoligne. La migration au boot

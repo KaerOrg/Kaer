@@ -1,0 +1,130 @@
+# Droits patient RGPD — export & effacement
+
+Mise en œuvre des **droits patient** exigés par le RGPD : accès / portabilité
+(art. 15 & 20) → **export**, et droit à l'oubli (art. 17) → **effacement complet**.
+
+> Issu du ticket **#27** (`feat/rgpd-droits-patient`). Voir l'épic conformité **#29**
+> et le `Kaer_Guide_Conformite.pdf` §2 & §4. Position juridique : le **praticien est
+> responsable de traitement**, Kær **sous-traitant** — en pratique le praticien
+> déclenche souvent la demande au nom du patient, mais le patient peut aussi l'exercer
+> lui-même depuis l'app mobile.
+
+---
+
+## 1. ⚠️ Conformité MDR (RÈGLE D'OR)
+
+L'export est un **miroir neutre** des données saisies : valeurs **brutes** uniquement
+(`to_jsonb`), **aucun score labellisé, aucune interprétation, aucune couleur de
+gravité**. Le serveur restitue, il ne conclut jamais.
+
+---
+
+## 2. Architecture
+
+La RLS n'accorde au praticien qu'un `SELECT` (parfois rien) sur les tables patient —
+un `DELETE` direct serait bloqué. On suit donc le pattern de l'audit log (#25) :
+
+| Brique | Fichier | Rôle |
+|---|---|---|
+| RPC `export_patient_data` | `supabase/schema.sql` | Agrège toutes les tables du patient en un `jsonb`. `SECURITY DEFINER` + garde de propriété. |
+| RPC `erase_patient_data` | `supabase/schema.sql` | Trace l'effacement + supprime le **non-cascadant**. |
+| Helper `fn_can_access_patient` | `supabase/schema.sql` | Vérifie via `auth.uid()` : patient lui-même OU praticien lié. |
+| Edge Function `delete-patient-account` | `supabase/functions/delete-patient-account/` | `service_role` — supprime le compte `auth.users` (cascade). |
+| Service web | `apps/web/src/services/patientDataRightsService.ts` | `exportPatientData` / `erasePatientData`. |
+| UI web | `apps/web/src/components/features/PatientDataRights/` | Bloc « Données & RGPD » de la fiche patient. |
+| Service mobile | `apps/mobile/src/services/patientDataRightsService.ts` | `exportMyData` / `eraseMyAccount`. |
+| Purge locale | `apps/mobile/src/lib/database.ts` → `purgeAllLocalData()` | Vide toutes les tables SQLite patient. |
+| UI mobile | `apps/mobile/src/screens/ProfileScreen.tsx` | Section « Mes données ». |
+
+### Pourquoi un compte se supprime depuis une Edge Function
+
+Un RPC SQL ne peut pas supprimer une ligne `auth.users`. `patients.id` référence
+`auth.users(id) ON DELETE CASCADE`, et toutes les tables enfant cascadent depuis
+`patients`. Donc `auth.admin.deleteUser(patientId)` (service_role, depuis l'Edge
+Function) purge en cascade `patients` + ~20 tables enfant.
+
+### Ce qui cascade vs ce qui est supprimé explicitement
+
+| Donnée | Effacement |
+|---|---|
+| `patients` + ~20 tables enfant (`patient_entries`, `patient_modules`, `notification_*`, `crisis_plan_*`, `cssrs_*`, `appointments`, `practitioner_patient_notes`, `practitioner_patients`, …) | **Cascade** via `deleteUser` |
+| `invitations` (liées par email, pas de FK `patient_id`) | **Explicite** dans `erase_patient_data` |
+| `caseload_entries` (`patient_id ON DELETE SET NULL`) + ses enfants | **Explicite** dans `erase_patient_data` |
+| SQLite local de l'appareil patient | `purgeAllLocalData()` (mobile) |
+
+---
+
+## 3. Ordre d'appel (web et mobile)
+
+```
+1. RPC erase_patient_data(p_patient_id)
+     → trace 'erase' dans access_audit_log (AVANT toute suppression)
+     → delete invitations (par email) + caseload_entries
+     (la relation practitioner_patients existe encore → garde de propriété OK)
+2. Edge Function delete-patient-account { patient_id }
+     → re-vérifie la propriété via le JWT de l'appelant
+     → auth.admin.deleteUser(patient_id)  → cascade patients + enfants
+3. [mobile uniquement] purgeAllLocalData() + signOut()
+```
+
+L'ordre est important : le RPC s'exécute pendant que `practitioner_patients` existe
+encore (vérification de propriété par `auth.uid()`), avant que la cascade ne l'efface.
+
+### Robustesse mobile
+
+Si le compte est effacé côté serveur par le praticien, l'appareil du patient peut
+encore détenir un cache SQLite. Au prochain `getCurrentSessionPatient`
+(`apps/mobile/src/services/authService.ts`) : session présente mais profil absent →
+`purgeAllLocalData()` puis `signOut()`.
+
+---
+
+## 4. Sécurité & traçabilité
+
+- **Propriété vérifiée côté base** (`fn_can_access_patient`, dérivée de `auth.uid()`)
+  ET côté Edge Function (JWT). Un praticien ne peut exporter/effacer que **ses**
+  patients ; un patient ne peut agir que sur **lui-même**.
+- **Droits d'exécution** restreints (révocation explicite des default privileges
+  Supabase) : `export_patient_data` / `erase_patient_data` → `authenticated` +
+  `service_role` ; `fn_can_access_patient` → interne (aucun rôle client).
+- **Audit** : chaque export (`action='export'`) et effacement (`action='erase'`) est
+  journalisé dans `access_audit_log` via `log_data_access`. Le journal ne contient
+  jamais de contenu clinique (cf. [`audit-log.md`](audit-log.md)).
+- **Advisor Supabase** : `authenticated_security_definer_function_executable` (WARN)
+  sur `export_patient_data` / `erase_patient_data` est **attendu et intentionnel** —
+  ces RPC *doivent* être appelables par les utilisateurs authentifiés, la garde de
+  propriété étant interne (`fn_can_access_patient`). Même profil que `log_data_access`
+  (#25).
+
+---
+
+## 5. Format d'export
+
+JSON structuré (une clé par table), téléchargé tel quel :
+- **Web** : fichier `kaer-export-<patient_id>.json` (download navigateur).
+- **Mobile** : partage du JSON via l'API native `Share` (self-service patient).
+
+Un export PDF lisible est reporté (le JSON couvre l'accès art. 15 et la portabilité
+art. 20).
+
+---
+
+## 6. Tests
+
+| Test | Couvre |
+|---|---|
+| `apps/web/src/services/patientDataRightsService.test.ts` | export OK, RPC refusé, erase ordre RPC→Edge, Edge en échec |
+| `apps/mobile/src/services/patientDataRightsService.test.ts` | export OK/échec, erase ordre RPC→Edge→purge→signOut, arrêts en cas d'échec |
+| `apps/mobile/src/lib/purgeAllLocalData.test.ts` | toutes les tables vidées, table absente ignorée |
+
+---
+
+## 7. Limites connues / suites
+
+- **Rectification (art. 16)** : couverte par l'édition existante (profil patient,
+  notes praticien, config modules). Pas de surface dédiée supplémentaire.
+- **Information à la collecte (art. 14)** : mention RGPD claire au patient — partie
+  non-code de l'épic (CGU / politique de confidentialité, #29).
+- **Export PDF** lisible : non implémenté (JSON suffit pour art. 15/20).
+- La constante `PATIENT_DATA_TABLES` (mobile) doit être **étendue à chaque nouveau
+  module** ajoutant une table SQLite, sous peine de données locales résiduelles.

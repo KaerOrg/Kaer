@@ -1,0 +1,1 @@
+export { PatientDataRights } from './PatientDataRights'
