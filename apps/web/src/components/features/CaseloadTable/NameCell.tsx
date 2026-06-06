@@ -1,37 +1,59 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ChevronRight, ChevronDown } from 'lucide-react'
+import { EditableName } from './EditableName'
+import { formatBirthDate } from './caseloadFormat'
+import type { LinkablePatient } from './types'
 import type { CaseloadEntry, CaseloadEntryInput } from '../../../lib/caseload.types'
 
 export interface NameCellProps {
   entry: CaseloadEntry
+  patients: readonly LinkablePatient[]
+  expanded: boolean
+  onToggle: () => void
   onPatch: (id: string, patch: CaseloadEntryInput) => void
 }
 
-/** Nom affiché du dossier — input non contrôlé, renommage au blur. */
-function NameCellComponent({ entry, onPatch }: NameCellProps) {
+/**
+ * Cellule « Patient » : chevron de dépliage de la ligne, nom éditable de façon
+ * sécurisée (`EditableName`) et date de naissance du patient lié (lecture seule).
+ * Un clic sur le nom déplie aussi le détail.
+ */
+function NameCellComponent({ entry, patients, expanded, onToggle, onPatch }: NameCellProps) {
   const { t } = useTranslation()
 
+  const birthDate = entry.patient_id
+    ? patients.find(p => p.id === entry.patient_id)?.birthDate ?? null
+    : null
+
   const handleName = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const value = e.target.value.trim()
-      if (!value) {
-        e.target.value = entry.display_name
-        return
-      }
-      if (value !== entry.display_name) onPatch(entry.id, { display_name: value })
-    },
-    [entry.id, entry.display_name, onPatch]
+    (next: string) => onPatch(entry.id, { display_name: next }),
+    [entry.id, onPatch]
   )
 
   return (
-    <input
-      key={`name-${entry.display_name}`}
-      className="caseload-input caseload-input--name"
-      defaultValue={entry.display_name}
-      onBlur={handleName}
-      title={entry.display_name}
-      aria-label={t('file_active.col.patient')}
-    />
+    <div className="name-cell">
+      <button
+        type="button"
+        className="name-cell__toggle"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        aria-label={t('file_active.toggle_detail')}
+      >
+        {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+      </button>
+      <EditableName
+        value={entry.display_name}
+        onSave={handleName}
+        onActivate={onToggle}
+        ariaLabel={t('file_active.col.patient')}
+      />
+      {birthDate ? (
+        <span className="name-cell__dob" title={t('file_active.dob_label')}>
+          {formatBirthDate(birthDate)}
+        </span>
+      ) : null}
+    </div>
   )
 }
 

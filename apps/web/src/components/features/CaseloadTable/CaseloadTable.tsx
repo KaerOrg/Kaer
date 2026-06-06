@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList } from 'lucide-react'
+import { ClipboardList, Star } from 'lucide-react'
 import { DataTable, type DataTableColumn } from '../../ui/DataTable'
 import { EmptyState } from '../../ui/EmptyState'
-import { computeEntryAlert } from '../../../lib/caseloadLogic'
 import { AddEntryForm, type AddEntryFormProps } from './AddEntryForm'
 import { CaseloadFilters } from './CaseloadFilters'
 import { NameCell } from './NameCell'
@@ -11,7 +10,7 @@ import { StatusCell } from './StatusCell'
 import { ImportantCell } from './ImportantCell'
 import { ActionsSummaryCell } from './ActionsSummaryCell'
 import { CareCell } from './CareCell'
-import { AlertPill } from './AlertPill'
+import { AlertCell } from './AlertCell'
 import { WaitSummary } from './WaitSummary'
 import { RowDetail } from './RowDetail'
 import { selectCaseloadRows } from './filterCaseload'
@@ -19,6 +18,7 @@ import { EMPTY_FILTER, type CaseloadFilterState, type LinkablePatient } from './
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
+  CaseloadNote,
   CaseloadRowData,
   CaseloadStatus,
   CaseloadWaitInput,
@@ -39,6 +39,8 @@ export interface CaseloadTableProps {
   onAddWait: (entryId: string, label: string, relance: string | null) => void
   onPatchWait: (entryId: string, waitId: string, patch: CaseloadWaitInput) => void
   onDeleteWait: (entryId: string, waitId: string) => void
+  onLoadNotes: (entryId: string) => Promise<readonly CaseloadNote[]>
+  onAddNote: (entryId: string, body: string) => Promise<CaseloadNote | null>
   creating?: boolean
 }
 
@@ -66,6 +68,8 @@ export function CaseloadTable({
   onAddWait,
   onPatchWait,
   onDeleteWait,
+  onLoadNotes,
+  onAddNote,
   creating,
 }: CaseloadTableProps) {
   const { t } = useTranslation()
@@ -80,7 +84,15 @@ export function CaseloadTable({
         header: t('file_active.col.patient'),
         headerClassName: 'caseload-th--patient',
         cellClassName: 'caseload-cell--name',
-        cell: row => <NameCell entry={row.entry} onPatch={onPatch} />,
+        cell: (row, ctx) => (
+          <NameCell
+            entry={row.entry}
+            patients={patients}
+            expanded={ctx.expanded}
+            onToggle={ctx.toggleExpanded}
+            onPatch={onPatch}
+          />
+        ),
       },
       {
         id: 'status',
@@ -90,24 +102,10 @@ export function CaseloadTable({
       },
       {
         id: 'important',
-        header: t('file_active.col.important'),
+        header: <Star size={14} className="caseload-th__icon" aria-label={t('file_active.col.important')} />,
         headerClassName: 'caseload-th--important',
         cellClassName: 'caseload-cell--important',
         cell: row => <ImportantCell entry={row.entry} onPatch={onPatch} />,
-      },
-      {
-        id: 'actions',
-        header: t('file_active.col.actions'),
-        headerClassName: 'caseload-th--actions',
-        cellClassName: 'caseload-cell--actions',
-        cell: (row, ctx) => (
-          <ActionsSummaryCell
-            actions={row.actions}
-            today={today}
-            expanded={ctx.expanded}
-            onToggle={ctx.toggleExpanded}
-          />
-        ),
       },
       {
         id: 'care_pathways',
@@ -115,6 +113,13 @@ export function CaseloadTable({
         headerClassName: 'caseload-th--care_pathways',
         cellClassName: 'caseload-cell--care',
         cell: row => <CareCell entry={row.entry} patients={patients} onPatch={onPatch} />,
+      },
+      {
+        id: 'actions',
+        header: t('file_active.col.actions'),
+        headerClassName: 'caseload-th--actions',
+        cellClassName: 'caseload-cell--actions',
+        cell: row => <ActionsSummaryCell actions={row.actions} today={today} />,
       },
       {
         id: 'waiting',
@@ -128,7 +133,7 @@ export function CaseloadTable({
         header: t('file_active.col.alert'),
         headerClassName: 'caseload-th--alert',
         cellClassName: 'caseload-cell--alert',
-        cell: row => <AlertPill level={computeEntryAlert(row.actions, today)} />,
+        cell: row => <AlertCell actions={row.actions} today={today} />,
       },
     ],
     [t, today, patients, onPatch, onStatus]
@@ -139,8 +144,6 @@ export function CaseloadTable({
       <RowDetail
         row={row}
         today={today}
-        patients={patients}
-        onPatch={onPatch}
         onAddAction={onAddAction}
         onToggleDone={onToggleDone}
         onPatchAction={onPatchAction}
@@ -148,9 +151,11 @@ export function CaseloadTable({
         onAddWait={onAddWait}
         onPatchWait={onPatchWait}
         onDeleteWait={onDeleteWait}
+        onLoadNotes={onLoadNotes}
+        onAddNote={onAddNote}
       />
     ),
-    [today, patients, onPatch, onAddAction, onToggleDone, onPatchAction, onDeleteAction, onAddWait, onPatchWait, onDeleteWait]
+    [today, onAddAction, onToggleDone, onPatchAction, onDeleteAction, onAddWait, onPatchWait, onDeleteWait, onLoadNotes, onAddNote]
   )
 
   const toolbar = (
@@ -185,6 +190,7 @@ export function CaseloadTable({
       rowClassName={rowClassName}
       emptyState={emptyState}
       ariaLabel={t('file_active.title')}
+      className="caseload-data-table"
     />
   )
 }

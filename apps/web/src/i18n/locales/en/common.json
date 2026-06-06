@@ -1194,17 +1194,19 @@
     "filter_label": "Filter by tag",
     "filter_clear": "Show all",
     "empty_filtered": "No notes for this tag.",
-    "tag_search_placeholder": "Search a tag…",
-    "mic_start": "Dictate a note",
-    "mic_stop": "Stop recording",
-    "mic_processing": "Transcribing…",
-    "mic_error_not_supported": "Your browser does not support audio recording.",
-    "mic_error_permission": "Microphone access denied. Check your browser permissions.",
-    "mic_error_too_large": "Recording too long. Please record shorter segments.",
-    "mic_error_network": "Network error during transcription. Check your connection.",
-    "mic_error_server": "Transcription error. Please try again.",
-    "mic_error_recorder": "Recording error. The recording has been stopped.",
-    "mic_error_disconnected": "Microphone disconnected. The recording has been stopped."
+    "tag_search_placeholder": "Search a tag…"
+  },
+  "speech": {
+    "start": "Dictate",
+    "stop": "Stop recording",
+    "processing": "Transcribing…",
+    "error_not_supported": "Your browser does not support audio recording.",
+    "error_permission": "Microphone access denied. Check your browser permissions.",
+    "error_too_large": "Recording too long. Please record shorter segments.",
+    "error_network": "Network error during transcription. Check your connection.",
+    "error_server": "Transcription error. Please try again.",
+    "error_recorder": "Recording error. The recording has been stopped.",
+    "error_disconnected": "Microphone disconnected. The recording has been stopped."
   },
   "agenda": {
     "nav_link": "Schedule",
@@ -1306,8 +1308,8 @@
     "error_send": "Send failed. Please try again."
   },
   "file_active": {
-    "nav_link": "Active caseload",
-    "title": "My active caseload",
+    "nav_link": "My follow-ups",
+    "title": "My follow-ups",
     "subtitle": "Your cases at a glance: priorities, deadlines and what not to forget.",
     "col": {
       "patient": "Patient",
@@ -1316,7 +1318,7 @@
       "actions": "Actions",
       "care_pathways": "Ongoing care",
       "waiting": "Awaiting return",
-      "alert": "Alert"
+      "alert": "Deadline"
     },
     "status": {
       "active": "Active",
@@ -1327,9 +1329,16 @@
       "toggle": "Pin this patient (important)"
     },
     "alert": {
-      "critical": "Critical",
+      "critical": "Urgent",
       "upcoming": "Upcoming",
       "ok": "OK"
+    },
+    "alert_detail": {
+      "overdue_one": "{{count}}d late",
+      "overdue_other": "{{count}}d late",
+      "today": "today",
+      "upcoming_one": "{{count}}d",
+      "upcoming_other": "{{count}}d"
     },
     "due": {
       "overdue_one": "{{count}}d overdue",
@@ -1345,13 +1354,17 @@
       "observation": "Observations"
     },
     "link": {
-      "label": "Link to an app patient",
-      "placeholder": "— Choose a patient (by email) —",
-      "unlink": "Unlink",
+      "linked_prefix": "Linked to",
       "linked_unknown": "Linked patient",
-      "no_patients": "No app patient to link.",
+      "invited": "Invited — {{email}} (pending sign-up)",
+      "free": "Standalone case (not linked to the app)",
       "modules_hint": "Modules unlocked for this patient in the app"
     },
+    "name": {
+      "edit": "Edit name"
+    },
+    "toggle_detail": "Show / hide case details",
+    "dob_label": "Date of birth",
     "wait": {
       "label_label": "What we're waiting for",
       "relance_prefix": "chase on",
@@ -1384,6 +1397,7 @@
       "label_label": "Action label",
       "due_label": "Action due date",
       "time_label": "Time (optional)",
+      "urgent_toggle": "Mark this action as urgent",
       "delete_label": "Delete action",
       "add_placeholder": "Add an action…",
       "add_label": "New action",
@@ -1394,6 +1408,7 @@
       "search_placeholder": "Search a case…",
       "status_label": "Status",
       "status_all": "Active and on hold",
+      "status_archived": "Archived",
       "chips_label": "Quick filters",
       "chip_important": "Important",
       "chip_overdue": "Overdue",

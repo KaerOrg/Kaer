@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Trash2 } from 'lucide-react'
+import { Trash2, AlertTriangle } from 'lucide-react'
 import { describeDue } from './caseloadFormat'
 import type { CaseloadAction, CaseloadActionInput } from '../../../lib/caseload.types'
 
@@ -52,6 +52,11 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
 
   const handleDelete = useCallback(() => onDelete(action.id), [action.id, onDelete])
 
+  const toggleUrgent = useCallback(
+    () => onPatch(action.id, { is_urgent: !action.is_urgent }),
+    [action.id, action.is_urgent, onPatch]
+  )
+
   const dueText =
     due.kind === 'none'
       ? ''
@@ -91,6 +96,15 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
         aria-label={t('file_active.action.time_label')}
       />
       {dueLabel ? <span className={`action-item__due-label action-item__due-label--${due.kind}`}>{dueLabel}</span> : null}
+      <button
+        type="button"
+        className={`action-item__urgent ${action.is_urgent ? 'action-item__urgent--on' : ''}`}
+        onClick={toggleUrgent}
+        aria-pressed={action.is_urgent}
+        aria-label={t('file_active.action.urgent_toggle')}
+      >
+        <AlertTriangle size={14} />
+      </button>
       <button
         type="button"
         className="action-item__delete"

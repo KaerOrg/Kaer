@@ -20,6 +20,7 @@ function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
     status: 'active',
     is_important: false,
     wake_date: null,
+    invited_email: null,
     care_pathways: [],
     last_reviewed_at: null,
     created_at: '2026-06-01T10:00:00Z',
@@ -50,6 +51,7 @@ function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
     label: 'Renouvellement',
     due_date: null,
     due_time: null,
+    is_urgent: false,
     is_done: false,
     done_at: null,
     recurrence_days: null,
@@ -84,18 +86,30 @@ describe('computeAlertForDue', () => {
     expect(computeAlertForDue('2026-05-31', TODAY)).toBe('critical')
     expect(computeAlertForDue(TODAY, TODAY)).toBe('critical')
   })
-  it("distingue 'upcoming' et 'ok' selon la fenêtre de 7 jours", () => {
-    expect(computeAlertForDue('2026-06-09', TODAY)).toBe('upcoming')
+  it("renvoie 'critical' à moins de 3 jours (≤ 2 j)", () => {
+    expect(computeAlertForDue('2026-06-03', TODAY)).toBe('critical') // demain
+    expect(computeAlertForDue('2026-06-04', TODAY)).toBe('critical') // dans 2 j
+  })
+
+  it("distingue 'upcoming' (3–7 j) et 'ok' (> 7 j)", () => {
+    expect(computeAlertForDue('2026-06-05', TODAY)).toBe('upcoming') // dans 3 j
+    expect(computeAlertForDue('2026-06-09', TODAY)).toBe('upcoming') // dans 7 j
     expect(computeAlertForDue('2026-06-15', TODAY)).toBe('ok')
   })
 })
 
 describe('computeActionAlert', () => {
   it("renvoie 'ok' pour une action faite, quelle que soit son échéance", () => {
-    expect(computeActionAlert({ due_date: '2026-05-30', is_done: true }, TODAY)).toBe('ok')
+    expect(computeActionAlert({ due_date: '2026-05-30', is_done: true, is_urgent: false }, TODAY)).toBe('ok')
   })
   it("dérive de l'échéance pour une action ouverte", () => {
-    expect(computeActionAlert({ due_date: '2026-05-30', is_done: false }, TODAY)).toBe('critical')
+    expect(computeActionAlert({ due_date: '2026-05-30', is_done: false, is_urgent: false }, TODAY)).toBe('critical')
+  })
+  it("renvoie 'critical' pour une action urgente forcée, même sans échéance", () => {
+    expect(computeActionAlert({ due_date: null, is_done: false, is_urgent: true }, TODAY)).toBe('critical')
+  })
+  it("une action urgente mais faite reste 'ok'", () => {
+    expect(computeActionAlert({ due_date: null, is_done: true, is_urgent: true }, TODAY)).toBe('ok')
   })
 })
 

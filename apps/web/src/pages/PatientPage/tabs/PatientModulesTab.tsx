@@ -19,7 +19,7 @@ import {
   revokeModule as revokeModuleService,
 } from '../../../services/moduleAssignmentService'
 import { fetchScaleMeta, type ScaleMetaRow } from '../../../services/scaleService'
-import { ScaleMetaBadges } from '../../../components/ui/ScaleMetaBadges/ScaleMetaBadges'
+import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'

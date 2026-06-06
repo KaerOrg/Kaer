@@ -1,6 +1,5 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, ChevronDown } from 'lucide-react'
 import { selectTopAction } from '../../../lib/caseloadLogic'
 import { describeDue } from './caseloadFormat'
 import type { CaseloadAction } from '../../../lib/caseload.types'
@@ -8,15 +7,14 @@ import type { CaseloadAction } from '../../../lib/caseload.types'
 export interface ActionsSummaryCellProps {
   actions: readonly CaseloadAction[]
   today: string
-  expanded: boolean
-  onToggle: () => void
 }
 
 /**
- * Cellule « Actions » repliée : porte le chevron de dépliage de la ligne et
- * résume l'action ouverte la plus urgente (libellé + échéance + compteur).
+ * Cellule « Actions » repliée : résume l'action ouverte la plus urgente
+ * (libellé + échéance + compteur). Le dépliage de la ligne est porté par la
+ * cellule « Patient » (chevron + clic sur le nom).
  */
-function ActionsSummaryCellComponent({ actions, today, expanded, onToggle }: ActionsSummaryCellProps) {
+function ActionsSummaryCellComponent({ actions, today }: ActionsSummaryCellProps) {
   const { t } = useTranslation()
 
   const topAction = selectTopAction(actions, today)
@@ -32,10 +30,7 @@ function ActionsSummaryCellComponent({ actions, today, expanded, onToggle }: Act
   const topTime = topAction?.due_time ? topAction.due_time.slice(0, 5) : ''
 
   return (
-    <button type="button" className="actions-summary" onClick={onToggle} aria-expanded={expanded}>
-      <span className="actions-summary__chevron">
-        {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-      </span>
+    <div className="actions-summary">
       {topAction ? (
         <span className="actions-summary__top">
           <span className="actions-summary__label">{topAction.label}</span>
@@ -49,7 +44,7 @@ function ActionsSummaryCellComponent({ actions, today, expanded, onToggle }: Act
         <span className="actions-summary__empty">{t('file_active.action.none')}</span>
       )}
       {extraCount > 0 ? <span className="actions-summary__more">+{extraCount}</span> : null}
-    </button>
+    </div>
   )
 }
 

@@ -24,21 +24,29 @@ export function daysBetween(fromISODate: string, toISODate: string): number {
 
 const ALERT_RANK: Record<AlertLevel, number> = { critical: 0, upcoming: 1, ok: 2 }
 
+// Seuils (en jours) — réglables. « Urgent » dès qu'on est à moins de 3 jours.
+const URGENT_WITHIN_DAYS = 2 // en retard, aujourd'hui, demain ou après-demain
+const UPCOMING_WITHIN_DAYS = 7
+
 /** Niveau d'alerte d'une échéance, dérivé uniquement de la date. Jamais stocké. */
 export function computeAlertForDue(dueDate: string | null, today: string): AlertLevel {
   if (!dueDate) return 'ok'
   const daysUntilDue = daysBetween(today, dueDate)
-  if (daysUntilDue <= 0) return 'critical'
-  if (daysUntilDue <= 7) return 'upcoming'
+  if (daysUntilDue <= URGENT_WITHIN_DAYS) return 'critical'
+  if (daysUntilDue <= UPCOMING_WITHIN_DAYS) return 'upcoming'
   return 'ok'
 }
 
-/** Alerte d'une action : 'ok' si elle est faite, sinon dérivée de son échéance. */
+/**
+ * Alerte d'une action : 'ok' si faite ; 'critical' si marquée urgente à la main ;
+ * sinon dérivée de son échéance. L'urgence manuelle est saisie par le praticien.
+ */
 export function computeActionAlert(
-  action: Pick<CaseloadAction, 'due_date' | 'is_done'>,
+  action: Pick<CaseloadAction, 'due_date' | 'is_done' | 'is_urgent'>,
   today: string
 ): AlertLevel {
   if (action.is_done) return 'ok'
+  if (action.is_urgent) return 'critical'
   return computeAlertForDue(action.due_date, today)
 }
 

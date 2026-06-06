@@ -27,10 +27,10 @@ export {
 // ============================================================
 
 const ENTRY_COLUMNS =
-  'id, practitioner_id, patient_id, display_name, status, is_important, wake_date, care_pathways, last_reviewed_at, created_at, updated_at, archived_at'
+  'id, practitioner_id, patient_id, display_name, status, is_important, wake_date, invited_email, care_pathways, last_reviewed_at, created_at, updated_at, archived_at'
 
 const ACTION_COLUMNS =
-  'id, entry_id, practitioner_id, label, due_date, due_time, is_done, done_at, recurrence_days, sort_order, created_at, updated_at'
+  'id, entry_id, practitioner_id, label, due_date, due_time, is_urgent, is_done, done_at, recurrence_days, sort_order, created_at, updated_at'
 
 const WAIT_COLUMNS = 'id, entry_id, practitioner_id, label, relance_date, created_at, updated_at'
 
@@ -100,6 +100,73 @@ export async function createCaseloadEntry(
 
   if (error || !data) return { ok: false }
   return { ok: true, entry: data as CaseloadEntry }
+}
+
+interface ExistingEntryRef {
+  id: string
+  patient_id: string | null
+  invited_email: string | null
+}
+
+/**
+ * Synchronise la file active avec les patients de l'app — idempotent :
+ * - chaque patient **inscrit** sans dossier lié → dossier lié créé ;
+ * - une **invitation en attente** sans dossier → dossier « libre » créé (`invited_email`) ;
+ * - un patient qui s'inscrit alors qu'un dossier libre existait à son email → ce dossier
+ *   est **converti** en dossier lié (pas de doublon).
+ * Déduplication sur tous statuts (pour ne pas ressusciter un dossier archivé).
+ */
+export async function syncCaseloadWithPatients(
+  practitionerId: string,
+  registered: readonly { id: string; name: string; email: string }[],
+  pending: readonly { email: string; name: string }[]
+): Promise<{ created: number; linked: number }> {
+  if (registered.length === 0 && pending.length === 0) return { created: 0, linked: 0 }
+
+  const { data } = await supabase
+    .from('caseload_entries')
+    .select('id, patient_id, invited_email')
+    .eq('practitioner_id', practitionerId)
+  const entries = (data ?? []) as ExistingEntryRef[]
+
+  const linkedPatientIds = new Set(entries.filter(e => e.patient_id).map(e => e.patient_id))
+  const coveredInvitedEmails = new Set<string>()
+  const freeByEmail = new Map<string, string>()
+  for (const e of entries) {
+    if (!e.invited_email) continue
+    const email = e.invited_email.toLowerCase()
+    coveredInvitedEmails.add(email)
+    if (!e.patient_id) freeByEmail.set(email, e.id)
+  }
+
+  const inserts: { practitioner_id: string; display_name: string; patient_id?: string; invited_email?: string }[] = []
+  const conversions: { id: string; patient_id: string }[] = []
+
+  for (const p of registered) {
+    if (linkedPatientIds.has(p.id)) continue
+    const email = p.email?.toLowerCase()
+    const freeId = email ? freeByEmail.get(email) : undefined
+    if (freeId) {
+      conversions.push({ id: freeId, patient_id: p.id })
+      if (email) freeByEmail.delete(email)
+    } else {
+      inserts.push({ practitioner_id: practitionerId, patient_id: p.id, display_name: p.name })
+    }
+  }
+
+  const registeredEmails = new Set(registered.map(p => p.email?.toLowerCase()).filter(Boolean))
+  for (const inv of pending) {
+    const email = inv.email.toLowerCase()
+    if (registeredEmails.has(email) || coveredInvitedEmails.has(email)) continue
+    inserts.push({ practitioner_id: practitionerId, invited_email: inv.email, display_name: inv.name || inv.email })
+  }
+
+  if (inserts.length > 0) await supabase.from('caseload_entries').insert(inserts)
+  for (const c of conversions) {
+    await supabase.from('caseload_entries').update({ patient_id: c.patient_id, invited_email: null }).eq('id', c.id)
+  }
+
+  return { created: inserts.length, linked: conversions.length }
 }
 
 /** Crée un dossier et, si fournie, sa première action — renvoie la ligne assemblée. */

@@ -17,9 +17,10 @@ export function DataTable<T>({
   rowClassName,
   emptyState,
   ariaLabel,
+  className,
 }: DataTableProps<T>) {
   return (
-    <div className="data-table-wrap">
+    <div className={`data-table-wrap ${className ?? ''}`}>
       {toolbar}
 
       {rows.length === 0 ? (

@@ -12,7 +12,8 @@ function hasOverdueAction(row: CaseloadRowData, today: string): boolean {
 
 function matchesFilter(row: CaseloadRowData, filter: CaseloadFilterState, today: string, tokens: string[]): boolean {
   const { entry } = row
-  if (filter.status !== 'all' && entry.status !== filter.status) return false
+  // « Tous » = actifs + en veille (les archivés ne s'affichent que via le filtre dédié).
+  if (filter.status === 'all' ? entry.status === 'archived' : entry.status !== filter.status) return false
   if (filter.onlyImportant && !entry.is_important) return false
   if (filter.onlyOverdue && !hasOverdueAction(row, today)) return false
   if (filter.onlyWaiting && row.waits.length === 0) return false

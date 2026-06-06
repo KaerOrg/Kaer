@@ -20,6 +20,12 @@ export function describeDue(dueDate: string | null, today: string): DueDescripto
   return { kind: 'upcoming', days: diff }
 }
 
+/** `YYYY-MM-DD` → `DD/MM/YYYY` (formatage local, sans dérive de fuseau). */
+export function formatBirthDate(iso: string): string {
+  const [y, m, d] = iso.split('-')
+  return d && m && y ? `${d}/${m}/${y}` : iso
+}
+
 const ALERT_VARIANT: Record<AlertLevel, StatusBadgeVariant> = {
   critical: 'danger',
   upcoming: 'warning',

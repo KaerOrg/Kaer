@@ -8,7 +8,7 @@ const TODAY = '2026-06-02'
 function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
   return {
     id: 'e-1', practitioner_id: 'p-1', patient_id: null, display_name: 'Bernard Hugo',
-    status: 'active', is_important: false, wake_date: null,
+    status: 'active', is_important: false, wake_date: null, invited_email: null,
     care_pathways: [], last_reviewed_at: null, created_at: '2026-06-01T10:00:00Z',
     updated_at: '2026-06-01T10:00:00Z', archived_at: null, ...overrides,
   }
@@ -17,7 +17,7 @@ function makeEntry(overrides: Partial<CaseloadEntry> = {}): CaseloadEntry {
 function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
   return {
     id: 'a-1', entry_id: 'e-1', practitioner_id: 'p-1', label: 'Tâche', due_date: null,
-    due_time: null, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
+    due_time: null, is_urgent: false, is_done: false, done_at: null, recurrence_days: null, sort_order: 0,
     created_at: '2026-06-01T10:00:00Z', updated_at: '2026-06-01T10:00:00Z', ...overrides,
   }
 }
@@ -75,5 +75,11 @@ describe('selectCaseloadRows', () => {
   it('filtre par statut', () => {
     const rows = [row({ id: 'a', status: 'active' }), row({ id: 'p', status: 'paused' })]
     expect(selectCaseloadRows(rows, { ...EMPTY_FILTER, status: 'paused' }, TODAY).map(r => r.entry.id)).toEqual(['p'])
+  })
+
+  it('« Tous » exclut les archivés ; le filtre « archived » les retrouve', () => {
+    const rows = [row({ id: 'a', status: 'active' }), row({ id: 'z', status: 'archived' })]
+    expect(selectCaseloadRows(rows, EMPTY_FILTER, TODAY).map(r => r.entry.id)).toEqual(['a'])
+    expect(selectCaseloadRows(rows, { ...EMPTY_FILTER, status: 'archived' }, TODAY).map(r => r.entry.id)).toEqual(['z'])
   })
 })

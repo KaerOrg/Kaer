@@ -1,54 +1,57 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuthStore } from '../../../store/authStore'
-import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../ui/Button'
-import { fetchCaseloadNotes, createCaseloadNote } from '../../../services/caseloadService'
 import type { CaseloadNote } from '../../../lib/caseload.types'
 
 const DATE_OPTS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
 
+export interface ObservationBlockProps {
+  entryId: string
+  /** Charge les notes du dossier (paresseux : appelé au montage = au dépliage). */
+  onLoadNotes: (entryId: string) => Promise<readonly CaseloadNote[]>
+  /** Ajoute une note ; renvoie la note créée, ou `null` en cas d'échec. */
+  onAddNote: (entryId: string, body: string) => Promise<CaseloadNote | null>
+}
+
 /**
  * Observations d'un dossier : la plus récente est affichée, l'historique daté est
  * accessible en un clic. Rien n'est jamais écrasé (journal append-only).
- * Composant auto-suffisant : charge ses notes au montage (lazy, scalable).
+ *
+ * Composant **présentationnel** : l'orchestration des données (service, identité
+ * praticien, toast) appartient à la page (`FileActivePage`) et entre par les props
+ * `onLoadNotes` / `onAddNote`. Le chargement reste paresseux par ligne — le panneau
+ * de détail n'est monté qu'au dépliage, donc `onLoadNotes` n'est appelé qu'alors.
  */
-export function ObservationBlock({ entryId }: { entryId: string }) {
+export function ObservationBlock({ entryId, onLoadNotes, onAddNote }: ObservationBlockProps) {
   const { t, i18n } = useTranslation()
-  const { practitioner } = useAuthStore()
-  const toast = useToast()
-  const [notes, setNotes] = useState<CaseloadNote[]>([])
+  const [notes, setNotes] = useState<readonly CaseloadNote[]>([])
   const [showHistory, setShowHistory] = useState(false)
   const [saving, setSaving] = useState(false)
   const bodyRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     let active = true
-    fetchCaseloadNotes(entryId).then(rows => {
+    onLoadNotes(entryId).then(rows => {
       if (active) setNotes(rows)
     })
     return () => {
       active = false
     }
-  }, [entryId])
+  }, [entryId, onLoadNotes])
 
   const handleAdd = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       const body = bodyRef.current?.value.trim() ?? ''
-      if (!body || !practitioner) return
+      if (!body) return
       setSaving(true)
-      const result = await createCaseloadNote(practitioner.id, entryId, body)
+      const note = await onAddNote(entryId, body)
       setSaving(false)
-      if (!result.ok || !result.note) {
-        toast.error(t('file_active.observation.error'))
-        return
-      }
-      const note = result.note
+      if (!note) return
       setNotes(prev => [note, ...prev])
       if (bodyRef.current) bodyRef.current.value = ''
     },
-    [practitioner, entryId, toast, t]
+    [entryId, onAddNote]
   )
 
   const toggleHistory = useCallback(() => setShowHistory(v => !v), [])

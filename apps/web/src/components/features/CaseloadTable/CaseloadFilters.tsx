@@ -54,6 +54,7 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         <option value="all">{t('file_active.filters.status_all')}</option>
         <option value="active">{t('file_active.status.active')}</option>
         <option value="paused">{t('file_active.status.paused')}</option>
+        <option value="archived">{t('file_active.filters.status_archived')}</option>
       </SelectField>
 
       <div className="caseload-filters__chips" role="group" aria-label={t('file_active.filters.chips_label')}>

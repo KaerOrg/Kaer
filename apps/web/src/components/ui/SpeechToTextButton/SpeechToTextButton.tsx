@@ -13,13 +13,13 @@ export interface SpeechToTextButtonProps {
 }
 
 const ERROR_I18N: Record<RecorderErrorCode, string> = {
-  NOT_SUPPORTED: 'notes.mic_error_not_supported',
-  PERMISSION_DENIED: 'notes.mic_error_permission',
-  RECORDER_ERROR: 'notes.mic_error_recorder',
-  DISCONNECTED: 'notes.mic_error_disconnected',
-  TOO_LARGE: 'notes.mic_error_too_large',
-  NETWORK: 'notes.mic_error_network',
-  SERVER_ERROR: 'notes.mic_error_server',
+  NOT_SUPPORTED: 'speech.error_not_supported',
+  PERMISSION_DENIED: 'speech.error_permission',
+  RECORDER_ERROR: 'speech.error_recorder',
+  DISCONNECTED: 'speech.error_disconnected',
+  TOO_LARGE: 'speech.error_too_large',
+  NETWORK: 'speech.error_network',
+  SERVER_ERROR: 'speech.error_server',
 }
 
 export function SpeechToTextButton({
@@ -62,7 +62,7 @@ export function SpeechToTextButton({
 
   const isProcessing = state === 'processing'
   const isRecording = state === 'recording'
-  const ariaLabel = isRecording ? t('notes.mic_stop') : t('notes.mic_start')
+  const ariaLabel = isRecording ? t('speech.stop') : t('speech.start')
 
   return (
     <div className="stt-wrapper">
@@ -80,10 +80,10 @@ export function SpeechToTextButton({
             ? <MicOff size={16} className="stt-btn__icon" />
             : <Mic size={16} className="stt-btn__icon" />}
         {isProcessing
-          ? t('notes.mic_processing')
+          ? t('speech.processing')
           : isRecording
-            ? t('notes.mic_stop')
-            : t('notes.mic_start')}
+            ? t('speech.stop')
+            : t('speech.start')}
         {isRecording && <span className="stt-btn__dot" aria-hidden="true" />}
       </button>
       {errorMsg && <p className="stt-error">{errorMsg}</p>}

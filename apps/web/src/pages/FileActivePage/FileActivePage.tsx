@@ -16,11 +16,16 @@ import {
   createCaseloadWait,
   updateCaseloadWait,
   deleteCaseloadWait,
+  syncCaseloadWithPatients,
+  fetchCaseloadNotes,
+  createCaseloadNote,
 } from '../../services/caseloadService'
 import { fetchPatientsWithModules } from '../../services/patientService'
+import { fetchPendingInvitations } from '../../services/invitationService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
+  CaseloadNote,
   CaseloadRowData,
   CaseloadStatus,
   CaseloadWaitInput,
@@ -41,19 +46,30 @@ export function FileActivePage() {
 
   const loadRows = useCallback(async () => {
     if (!practitioner) return
-    const [caseloadRows, appPatients] = await Promise.all([
-      fetchCaseload(practitioner.id),
+    const [initialRows, appPatients, pendingInvites] = await Promise.all([
+      fetchCaseload(practitioner.id, { includeArchived: true }),
       fetchPatientsWithModules(practitioner.id),
+      fetchPendingInvitations(practitioner.id),
     ])
-    setRows(caseloadRows)
-    setPatients(
-      appPatients.map(p => ({
-        id: p.id,
-        name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
-        email: p.email,
-        moduleTypes: p.modules.map(m => m.module_type),
+    const linkable: LinkablePatient[] = appPatients.map(p => ({
+      id: p.id,
+      name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
+      email: p.email,
+      birthDate: p.patient_birth_date,
+      moduleTypes: p.modules.map(m => m.module_type),
+    }))
+    // Auto : patients inscrits → dossier lié ; invitations en attente → dossier libre
+    // (converti en lié à l'inscription). Idempotent.
+    const { created, linked } = await syncCaseloadWithPatients(
+      practitioner.id,
+      linkable.map(p => ({ id: p.id, name: p.name, email: p.email })),
+      pendingInvites.map(inv => ({
+        email: inv.patient_email,
+        name: [inv.patient_first_name, inv.patient_last_name].filter(Boolean).join(' ') || inv.patient_email,
       }))
     )
+    setRows(created + linked > 0 ? await fetchCaseload(practitioner.id, { includeArchived: true }) : initialRows)
+    setPatients(linkable)
     setLoading(false)
   }, [practitioner])
 
@@ -104,11 +120,9 @@ export function FileActivePage() {
         return
       }
       const entry = result.entry
-      setRows(prev =>
-        entry.status === 'archived'
-          ? prev.filter(r => r.entry.id !== id)
-          : prev.map(r => (r.entry.id === id ? { ...r, entry } : r))
-      )
+      // On garde le dossier en mémoire quel que soit le statut : le filtre « Tous »
+      // masque les archivés, mais le filtre « Archivés » les retrouve (et permet de désarchiver).
+      setRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
       if (entry.status === 'archived') toast.success(t('file_active.archived'))
     },
     [toast, t, loadRows]
@@ -218,6 +232,24 @@ export function FileActivePage() {
     [toast, t]
   )
 
+  // Notes : chargées paresseusement quand une ligne est dépliée (le panneau de détail
+  // n'est monté qu'alors). L'orchestration — service, identité praticien, toast — vit
+  // ici, à la page ; `ObservationBlock` reste présentationnel (cf. ActionList/WaitList).
+  const handleLoadNotes = useCallback((entryId: string) => fetchCaseloadNotes(entryId), [])
+
+  const handleAddNote = useCallback(
+    async (entryId: string, body: string): Promise<CaseloadNote | null> => {
+      if (!practitioner) return null
+      const result = await createCaseloadNote(practitioner.id, entryId, body)
+      if (!result.ok || !result.note) {
+        toast.error(t('file_active.observation.error'))
+        return null
+      }
+      return result.note
+    },
+    [practitioner, toast, t]
+  )
+
   return (
     <Layout wide>
       <div className="file-active">
@@ -243,6 +275,8 @@ export function FileActivePage() {
             onAddWait={handleAddWait}
             onPatchWait={handlePatchWait}
             onDeleteWait={handleDeleteWait}
+            onLoadNotes={handleLoadNotes}
+            onAddNote={handleAddNote}
             creating={creating}
           />
         )}

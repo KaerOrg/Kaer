@@ -1298,17 +1298,19 @@
     "filter_label": "Filtrer par tag",
     "filter_clear": "Tout afficher",
     "empty_filtered": "Aucune note pour ce tag.",
-    "tag_search_placeholder": "Rechercher un tag…",
-    "mic_start": "Dicter une note",
-    "mic_stop": "Arrêter l'enregistrement",
-    "mic_processing": "Transcription en cours…",
-    "mic_error_not_supported": "Votre navigateur ne supporte pas l'enregistrement audio.",
-    "mic_error_permission": "Accès au microphone refusé. Vérifiez les permissions de votre navigateur.",
-    "mic_error_too_large": "Enregistrement trop long. Veuillez enregistrer des segments plus courts.",
-    "mic_error_network": "Erreur réseau lors de la transcription. Vérifiez votre connexion.",
-    "mic_error_server": "Erreur lors de la transcription. Réessayez.",
-    "mic_error_recorder": "Erreur d'enregistrement. L'enregistrement a été arrêté.",
-    "mic_error_disconnected": "Microphone déconnecté. L'enregistrement a été arrêté."
+    "tag_search_placeholder": "Rechercher un tag…"
+  },
+  "speech": {
+    "start": "Dicter",
+    "stop": "Arrêter l'enregistrement",
+    "processing": "Transcription en cours…",
+    "error_not_supported": "Votre navigateur ne supporte pas l'enregistrement audio.",
+    "error_permission": "Accès au microphone refusé. Vérifiez les permissions de votre navigateur.",
+    "error_too_large": "Enregistrement trop long. Veuillez enregistrer des segments plus courts.",
+    "error_network": "Erreur réseau lors de la transcription. Vérifiez votre connexion.",
+    "error_server": "Erreur lors de la transcription. Réessayez.",
+    "error_recorder": "Erreur d'enregistrement. L'enregistrement a été arrêté.",
+    "error_disconnected": "Microphone déconnecté. L'enregistrement a été arrêté."
   },
   "agenda": {
     "nav_link": "Agenda",
@@ -1410,8 +1412,8 @@
     "error_send": "Erreur lors de l'envoi. Réessayez."
   },
   "file_active": {
-    "nav_link": "File active",
-    "title": "Ma file active",
+    "nav_link": "Mes suivis",
+    "title": "Mes suivis",
     "subtitle": "Vos dossiers en un coup d'œil : priorités, échéances et ce qu'il ne faut pas oublier.",
     "col": {
       "patient": "Patient",
@@ -1420,7 +1422,7 @@
       "actions": "Actions",
       "care_pathways": "Soins en cours",
       "waiting": "En attente de retour",
-      "alert": "Alerte"
+      "alert": "Délais"
     },
     "status": {
       "active": "Actif",
@@ -1431,9 +1433,16 @@
       "toggle": "Épingler ce patient (important)"
     },
     "alert": {
-      "critical": "Critique",
+      "critical": "Urgent",
       "upcoming": "À venir",
       "ok": "OK"
+    },
+    "alert_detail": {
+      "overdue_one": "retard {{count}} j",
+      "overdue_other": "retard {{count}} j",
+      "today": "auj.",
+      "upcoming_one": "{{count}} j",
+      "upcoming_other": "{{count}} j"
     },
     "due": {
       "overdue_one": "en retard {{count}} j",
@@ -1449,13 +1458,17 @@
       "observation": "Observations"
     },
     "link": {
-      "label": "Lier à un patient de l'app",
-      "placeholder": "— Choisir un patient (par email) —",
-      "unlink": "Délier",
+      "linked_prefix": "Lié à",
       "linked_unknown": "Patient lié",
-      "no_patients": "Aucun patient de l'app à relier.",
+      "invited": "Invité — {{email}} (en attente d'inscription)",
+      "free": "Dossier libre (non relié à l'app)",
       "modules_hint": "Modules débloqués pour ce patient dans l'app"
     },
+    "name": {
+      "edit": "Modifier le nom"
+    },
+    "toggle_detail": "Afficher / masquer le détail du dossier",
+    "dob_label": "Date de naissance",
     "wait": {
       "label_label": "Ce qu'on attend",
       "relance_prefix": "relancer le",
@@ -1488,6 +1501,7 @@
       "label_label": "Libellé de l'action",
       "due_label": "Échéance de l'action",
       "time_label": "Heure (optionnel)",
+      "urgent_toggle": "Marquer cette action comme urgente",
       "delete_label": "Supprimer l'action",
       "add_placeholder": "Ajouter une action…",
       "add_label": "Nouvelle action",
@@ -1498,6 +1512,7 @@
       "search_placeholder": "Rechercher un dossier…",
       "status_label": "Statut",
       "status_all": "Actifs et en veille",
+      "status_archived": "Archivés",
       "chips_label": "Filtres rapides",
       "chip_important": "Important",
       "chip_overdue": "En retard",

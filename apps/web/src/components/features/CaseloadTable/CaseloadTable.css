@@ -62,18 +62,68 @@
   gap: var(--spacing-xs);
 }
 
-/* ---- Largeurs de colonnes (appliquées aux <th>/<td> du DataTable via *ClassName) ---- */
+/* Icône d'en-tête (ex. étoile de la colonne « important »). */
+.caseload-th__icon { vertical-align: middle; }
+
+/* ---- Largeurs de colonnes ----
+   min-width = plancher de lisibilité ; la table est en `width:100%` donc les
+   colonnes s'élargissent pour remplir l'espace disponible sur grand écran.
+   Total des planchers volontairement < largeur utile d'un portable (~1180px)
+   pour que la table tienne SANS défilement horizontal. */
 .caseload-th--patient,
-.caseload-cell--name { min-width: 240px; }
-.caseload-th--status { min-width: 120px; }
-.caseload-th--important { width: 64px; text-align: center; }
+.caseload-cell--name { min-width: 190px; }
+.caseload-th--status { min-width: 84px; }
+.caseload-th--important { width: 36px; text-align: center; padding-left: 0; padding-right: 0; }
 .caseload-th--actions,
-.caseload-cell--actions { min-width: 320px; }
+.caseload-cell--actions { min-width: 280px; }
 .caseload-th--care_pathways,
-.caseload-cell--care { min-width: 200px; }
+.caseload-cell--care { min-width: 170px; }
 .caseload-th--waiting,
-.caseload-cell--waiting { min-width: 220px; }
-.caseload-th--alert { width: 120px; }
+.caseload-cell--waiting { min-width: 180px; }
+.caseload-th--alert { width: 92px; }
+
+/* ================================================================
+   Habillage « file active » — appliqué UNIQUEMENT à cette table via
+   la classe de scope `.caseload-data-table` (prop className du DataTable).
+   Ne déteint pas sur les autres tableaux du design system.
+   Couleurs : déclinaison du teal Kaer (charte produit).
+   ================================================================ */
+
+/* En-tête teal */
+.caseload-data-table .data-table__th {
+  background: #D3ECED;
+  color: #2C6E72;
+  border-bottom: 1px solid #B5DEE0;
+}
+
+.caseload-data-table .data-table__th .caseload-th__icon { color: #2C6E72; }
+
+/* Dégradé horizontal ultra léger (gauche → droite) sur les cellules de ligne */
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(1) { background: #FFFFFF; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(2) { background: #F9FCFD; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(3) { background: #F3FAFA; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(4) { background: #EEF7F8; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(5) { background: #E8F5F5; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(6) { background: #E2F2F3; }
+.caseload-data-table .data-table__row > .data-table__cell:nth-child(7) { background: #DCF0F1; }
+
+/* Survol : léger assombrissement PAR-DESSUS le dégradé (ne le remplace pas) */
+.caseload-data-table .data-table__row:hover > .data-table__cell {
+  box-shadow: inset 0 0 0 999px rgba(15, 23, 42, 0.025);
+}
+
+/* Séparateurs de colonnes légers */
+.caseload-data-table .data-table__th:not(:last-child),
+.caseload-data-table .data-table__cell:not(:last-child) {
+  border-right: 1px solid var(--color-border);
+}
+
+/* Puces « En attente de retour » : teinte violette de la charte d'origine
+   (le composant Chip partagé n'a pas de ton violet → override scopé ici). */
+.caseload-data-table .wait-summary .chip {
+  background: #EDE9FE;
+  color: #6D28D9;
+}
 
 /* Met en avant un dossier « important » : colore la bordure gauche neutre du DataTable. */
 .caseload-row--important { border-left-color: var(--color-warning); }
@@ -118,6 +168,104 @@
   width: 100%;
 }
 
+/* ---- Cellule nom : chevron (déplie le détail) + nom ---- */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.name-cell__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.name-cell__toggle:hover { color: var(--color-primary); }
+
+.name-cell__dob {
+  flex-shrink: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ---- Nom patient : lecture seule + crayon (édition sécurisée) ---- */
+.editable-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.editable-name__text {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editable-name__text--clickable { cursor: pointer; }
+.editable-name__text--clickable:hover { text-decoration: underline; }
+
+.editable-name__edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+
+.caseload-row:hover .editable-name__edit,
+.editable-name__edit:focus-visible { opacity: 1; }
+
+.editable-name__edit:hover { color: var(--color-primary); background: var(--color-bg); }
+
+.editable-name__input {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  border: 1px solid var(--color-primary);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-body);
+  color: var(--color-text);
+}
+
+.editable-name__input:focus { outline: none; }
+
+.editable-name__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.editable-name__btn:hover { background: var(--color-bg); }
+.editable-name__btn--save { color: var(--color-success); }
+
 .caseload-input:hover,
 .caseload-select:hover {
   border-color: var(--color-border);
@@ -158,21 +306,8 @@
   align-items: center;
   gap: var(--spacing-xs);
   width: 100%;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
   color: var(--color-text);
-}
-
-.actions-summary:hover { background: var(--color-bg); }
-
-.actions-summary__chevron {
-  display: inline-flex;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
 }
 
 .actions-summary__top {
@@ -286,6 +421,11 @@
   margin: 0;
 }
 
+.patient-link--free { color: var(--color-text-muted); font-style: italic; margin: 0; }
+.patient-link__icon--muted { color: var(--color-text-muted); }
+.patient-link--invited { color: #92400E; margin: 0; }
+.patient-link--invited .patient-link__icon { color: #92400E; }
+
 /* ---- Liste d'actions (ligne dépliée) ---- */
 .action-list {
   display: flex;
@@ -380,6 +520,22 @@
 
 .action-item__delete:hover { color: var(--color-danger); background: var(--color-danger-light); }
 
+.action-item__urgent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.action-item__urgent:hover { color: var(--color-danger); background: var(--color-danger-light); }
+.action-item__urgent--on { color: var(--color-danger); }
+
 .action-list__add {
   display: flex;
   align-items: center;
@@ -423,22 +579,48 @@
   border-radius: var(--radius-sm);
 }
 
-/* ---- Panneau dépliable : sections ---- */
+/* ---- Panneau dépliable : sections en cartes teintées (couleurs douces) ---- */
 .caseload-detail {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  max-width: 760px;
+  max-width: 820px;
+}
+
+.caseload-detail__section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .caseload-detail__title {
   font-size: var(--font-size-caption);
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--color-text-muted);
-  margin: 0 0 var(--spacing-xs);
+  margin: 0 0 var(--spacing-sm);
 }
+
+.caseload-detail__section--actions {
+  border-left-color: #3B82F6;
+  background: #EFF6FF;
+}
+.caseload-detail__section--actions .caseload-detail__title { color: #2563EB; }
+
+.caseload-detail__section--waits {
+  border-left-color: #8B5CF6;
+  background: #F5F3FF;
+}
+.caseload-detail__section--waits .caseload-detail__title { color: #6D28D9; }
+
+.caseload-detail__section--observation {
+  border-left-color: #22C55E;
+  background: #F0FDF4;
+}
+.caseload-detail__section--observation .caseload-detail__title { color: #16A34A; }
 
 /* ---- En attente de retour : résumé (colonne) ---- */
 .wait-summary {
