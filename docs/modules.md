@@ -11,19 +11,19 @@
 
 | Clé | Nom | `preview_kind` | Stockage | Doc |
 |-----|-----|---------------|----------|-----|
-| `sleep_diary` | Agenda du sommeil | `sleep_journal` | SQLite `sleep_diary_entries` | — |
+| `sleep_diary` | Agenda du sommeil | `sleep_journal` | SQLite `sleep_diary_entries` | [doc](modules/sleep_diary.md) |
 | `beck_columns` | Colonnes de Beck (TCC) | `column_form` | SQLite `form_entries` | [doc](modules/beck_columns.md) |
 | `fear_thermometer` | Thermomètre de la peur | `exposure_tracker` | SQLite `fear_situations` | [doc](modules/fear_thermometer.md) |
 | `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | `exposure_hierarchy` | SQLite `exposure_hierarchies` + `fear_situations` | — |
 | `emotion_wheel` | Roue des émotions | `tree_selector` | SQLite `emotion_entries` | [doc](modules/emotion_wheel.md) |
-| `crisis_plan` | Plan de crise (Safety Plan) | écran custom | SQLite `crisis_anchors` + Supabase config | — |
+| `crisis_plan` | Plan de crise (Safety Plan) | `editable_steps` | SQLite `crisis_anchors` + Supabase config | — |
 | `rim` | RIM — Retraitement par Imagerie Mentale | `patient_scenario` | Supabase `patient_modules.config` (lecture seule patient) | [doc](modules/rim.md) |
 | `cognitive_saturation` | Saturation cognitive (ACT) | `guided_exercise` | SQLite `cognitive_saturation_sessions` | [doc](modules/cognitive_saturation.md) |
 | `decisional_balance` | Balance décisionnelle | `decision_grid` | SQLite `plan_items` + Supabase signal | — |
 | `behavioral_activation` | Activation comportementale | `activity_log` | SQLite `activity_records` | [doc](modules/behavioral_activation.md) |
 | `grounding` | Ancrage 5-4-3-2-1 (DBT) | `guided_exercise` | Aucun (exercice sans persistance) | [doc](modules/grounding.md) |
-| `mood_tracker` | Thermomètre de l'humeur | écran custom | SQLite `scale_entries` + `mood_markers` | [doc](modules/mood_tracker.md) |
-| `motivational_balance` | Balance motivationnelle (EM) | écran custom | SQLite `em_rulers`, `em_balance_items`, `em_values` | — |
+| `mood_tracker` | Thermomètre de l'humeur | `slider_dashboard` | SQLite `scale_entries` + `mood_markers` | [doc](modules/mood_tracker.md) |
+| `motivational_balance` | Balance motivationnelle (EM) | `tabbed` | SQLite `em_rulers`, `em_balance_items`, `em_values` | [doc](modules/motivational_balance.md) |
 | `medication_adherence` | Observance médicamenteuse | `daily_checkin` | SQLite local | [doc](modules/medication_adherence.md) |
 | `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
 | `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
@@ -50,6 +50,7 @@ Pattern générique : `ScaleHistoryScreen` + `ScaleEntryScreen` + `SCALE_SCORING
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | 18 | 0–72 + 2 sous-scores | Parties A+B, bouton info PubMed | [doc](modules/asrs18.md) |
 | `epds` | EPDS — Dépression postnatale | 10 | 0–30 | — | [doc](modules/epds.md) |
 | `nsi` | NSI — Sévérité des cauchemars | 9 scorés + 2 contextuels | 0–45 | Items contextuels (% récurrents, thèmes) stockés dans `nsi_entries` | [doc](modules/nsi.md) |
+| `cssrs` | C-SSRS — Dépistage suicidaire | 6 idéation + 4 comportements | Arbre décisionnel | `no_toggle=true` : panel dédié `CSSRSScreenPanel` côté web praticien (pas de saisie patient). `cssrs_screen_assessments` Supabase. | [doc](modules/cssrs_screen.md) |
 
 ---
 
@@ -59,6 +60,8 @@ Pattern générique : `ScaleHistoryScreen` + `ScaleEntryScreen` + `SCALE_SCORING
 |-----|-----|--------|
 | `cognitive_distortions` | Distorsions cognitives | `preview_kind='coming_soon'` |
 | `therapeutic_commitment` | Engagement thérapeutique | `preview_kind='coming_soon'` |
+| `cape42` | CAPE-42 — Expériences psychotiques | `preview_kind='coming_soon'` |
+| `audit` | AUDIT — Consommation d'alcool | `preview_kind='coming_soon'` |
 
 ---
 
