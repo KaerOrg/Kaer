@@ -1858,3 +1858,160 @@ create index if not exists idx_support_requests_ip_recent
 
 alter table public.support_requests enable row level security;
 -- Aucune policy client : insertion par l'Edge Function (service_role), lecture support/DPO.
+
+
+-- ============================================================
+-- TABLE : retention_config (Politique de conservation RGPD — art. 5.1.e)
+-- ============================================================
+-- Une ligne par table soumise à une durée de conservation limitée.
+-- La purge est appliquée quotidiennement par l'Edge Function `purge-retention`
+-- (service_role), déclenchée via pg_cron.
+--
+-- Champs :
+--   table_name          — nom de la table publique cible
+--   date_column         — colonne horodatage pour le calcul d'ancienneté
+--   retention_days      — durée de conservation en jours (modifiable sans redéploiement)
+--   gate_on_inactivity  — si true, on ne purge une ligne QUE si le patient est inactif
+--                         (protège l'historique d'un patient encore suivi)
+--   inactivity_days     — fenêtre d'inactivité en jours (utilisée si gate_on_inactivity)
+--   is_enabled          — désactiver une règle sans la supprimer
+--   description         — justification métier / base légale
+--   updated_at          — horodatage de la dernière modification
+--
+-- ⚠️ MDR (RÈGLE D'OR) : condition de purge = dates uniquement
+-- (ancienneté de la donnée + inactivité du patient). Aucune valeur clinique
+-- n'entre dans le critère de sélection.
+--
+-- Patient « inactif » = ne s'est pas connecté ET n'a aucun rendez-vous depuis
+-- `inactivity_days` jours. Un patient encore actif conserve TOUT son historique,
+-- quel que soit l'âge des données. Voir fn_inactive_patient_ids ci-dessous.
+--
+-- Accès : service_role uniquement. Aucune policy client.
+
+create table if not exists public.retention_config (
+  table_name          text        primary key,
+  date_column         text        not null default 'created_at',
+  retention_days      int         not null check (retention_days >= 1),
+  gate_on_inactivity  boolean     not null default false,
+  inactivity_days     int         not null default 365 check (inactivity_days >= 1),
+  is_enabled          boolean     not null default true,
+  description         text,
+  updated_at          timestamptz not null default now()
+);
+
+-- Idempotent : ajoute les colonnes de gating sur une base où retention_config existe déjà.
+alter table public.retention_config
+  add column if not exists gate_on_inactivity boolean not null default false;
+alter table public.retention_config
+  add column if not exists inactivity_days int not null default 365;
+
+alter table public.retention_config enable row level security;
+-- Aucune policy client : lecture/écriture réservées au service_role (Edge Function purge-retention).
+
+
+-- ============================================================
+-- fn_inactive_patient_ids : patients éligibles à la purge de leurs données
+-- ============================================================
+-- Un patient est « inactif » s'il remplit LES DEUX conditions :
+--   1. dernière connexion (auth.users.last_sign_in_at) absente ou antérieure à la coupure
+--   2. aucun rendez-vous dont starts_at est postérieur ou égal à la coupure
+-- → un patient encore suivi (connexion récente OU rendez-vous récent/à venir) n'est
+--   JAMAIS retourné : son historique est intégralement conservé.
+--
+-- SECURITY DEFINER : accède à auth.users (réservé au propriétaire). Le service_role
+-- l'appelle via purge_retention_table. Révoquée pour anon/authenticated.
+create or replace function public.fn_inactive_patient_ids(p_cutoff timestamptz)
+returns setof uuid
+language sql
+stable
+security definer set search_path = public
+as $$
+  select p.id
+  from public.patients p
+  where not exists (
+          select 1 from auth.users u
+          where u.id = p.id
+            and u.last_sign_in_at is not null
+            and u.last_sign_in_at >= p_cutoff
+        )
+    and not exists (
+          select 1 from public.appointments a
+          where a.patient_id = p.id
+            and a.starts_at >= p_cutoff
+        );
+$$;
+
+
+-- ============================================================
+-- purge_retention_table : applique UNE règle de conservation
+-- ============================================================
+-- Supprime de `p_table` les lignes dont `p_date_column` dépasse la durée de
+-- conservation. Si `p_gate_inactivity`, restreint aux patients inactifs.
+-- Retourne le nombre de lignes supprimées.
+--
+-- ⚠️ MDR : critère 100 % temporel. Identifiants (table, colonne) issus de
+-- retention_config (table service_role only) → injectés via format(%I), jamais
+-- de saisie utilisateur. Valeurs passées en paramètres liés (USING).
+--
+-- SECURITY DEFINER : exécute la suppression de masse en contournant la RLS
+-- (seul moyen de purger des données patient). Réservée au service_role.
+create or replace function public.purge_retention_table(
+  p_table            text,
+  p_date_column      text,
+  p_retention_days   int,
+  p_gate_inactivity  boolean,
+  p_inactivity_days  int
+)
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_retention_cutoff  timestamptz := now() - make_interval(days => p_retention_days);
+  v_inactivity_cutoff timestamptz := now() - make_interval(days => p_inactivity_days);
+  v_deleted           integer;
+begin
+  if p_gate_inactivity then
+    execute format(
+      'delete from public.%I t where t.%I < $1 '
+      'and t.patient_id in (select id from public.fn_inactive_patient_ids($2))',
+      p_table, p_date_column
+    ) using v_retention_cutoff, v_inactivity_cutoff;
+  else
+    execute format(
+      'delete from public.%I t where t.%I < $1',
+      p_table, p_date_column
+    ) using v_retention_cutoff;
+  end if;
+
+  get diagnostics v_deleted = row_count;
+  return v_deleted;
+end;
+$$;
+
+-- Durcissement des droits : ces fonctions ne doivent jamais être appelables via l'API REST
+-- par un client. Seul le service_role (Edge Function purge-retention) y a accès.
+revoke all on function public.fn_inactive_patient_ids(timestamptz) from public, anon, authenticated;
+revoke all on function public.purge_retention_table(text, text, int, boolean, int) from public, anon, authenticated;
+grant execute on function public.purge_retention_table(text, text, int, boolean, int) to service_role;
+
+
+-- ============================================================
+-- pg_cron : déclenchement de l'Edge Function purge-retention
+-- ============================================================
+-- Prérequis : extension pg_cron activée dans le Dashboard Supabase
+--   > Database > Extensions > pg_cron (enable)
+-- Remplacer <PROJECT_REF> et <SERVICE_ROLE_KEY> par les valeurs du projet.
+-- À exécuter une seule fois manuellement dans le SQL Editor.
+--
+-- select cron.schedule(
+--   'purge-retention-cron',
+--   '0 2 * * *',
+--   $$
+--     select net.http_post(
+--       url := 'https://<PROJECT_REF>.supabase.co/functions/v1/purge-retention',
+--       headers := '{"Content-Type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}'::jsonb,
+--       body := '{}'::jsonb
+--     ) as request_id;
+--   $$
+-- );
