@@ -9,6 +9,10 @@ vi.mock('../lib/supabase', () => ({
       getUser: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
+      mfa: {
+        getAuthenticatorAssuranceLevel: vi.fn(),
+        listFactors: vi.fn(),
+      },
     },
     from: vi.fn(),
   },
@@ -37,14 +41,27 @@ function mockFrom(data: unknown, error: unknown = null) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // Par défaut : aucun MFA en attente (session aal1 sans facteur requis).
+  vi.mocked(supabase.auth.mfa.getAuthenticatorAssuranceLevel).mockResolvedValue({
+    data: { currentLevel: 'aal1', nextLevel: 'aal1', currentAuthenticationMethods: [] },
+    error: null,
+  } as never)
+  vi.mocked(supabase.auth.mfa.listFactors).mockResolvedValue({
+    data: { totp: [], all: [], phone: [] },
+    error: null,
+  } as never)
   // Reset store state
-  useAuthStore.setState({ practitioner: null, loading: true, error: null })
+  useAuthStore.setState({ practitioner: null, loading: true, error: null, mfaRequired: false, mfaFactorId: null })
 })
 
 describe('authStore — loadSession', () => {
   it('charge le praticien quand une session existe', async () => {
     vi.mocked(supabase.auth.getSession).mockResolvedValue({
       data: { session: { user: { id: 'p-1' } } },
+      error: null,
+    } as never)
+    vi.mocked(supabase.auth.getUser).mockResolvedValue({
+      data: { user: { id: 'p-1' } },
       error: null,
     } as never)
     mockFrom(mockPractitioner)

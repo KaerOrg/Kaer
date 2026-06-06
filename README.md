@@ -1,4 +1,4 @@
-# PsyTool
+# Kær
 
 Outil d'accompagnement thérapeutique en deux parties :
 - **Interface web praticien** — tableau de bord pour gérer les patients et débloquer des modules
@@ -24,8 +24,8 @@ Installe ces outils avant de commencer :
 ### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/<ton-compte>/PsyTool.git
-cd PsyTool
+git clone https://github.com/<ton-compte>/Kær.git
+cd Kær
 ```
 
 ### 2. Installer les dépendances
@@ -95,7 +95,7 @@ Ngrok génère une URL publique (ex: `https://abc123.ngrok-free.app`). Utilise c
 ## Structure du projet
 
 ```
-PsyTool/
+Kær/
 ├── apps/
 │   ├── web/                  # Interface praticien (React + Vite + TypeScript)
 │   │   ├── src/

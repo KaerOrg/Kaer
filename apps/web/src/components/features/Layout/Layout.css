@@ -75,6 +75,10 @@
   max-width: 1600px;
 }
 
+.layout__main > .banner {
+  margin-bottom: var(--spacing-lg);
+}
+
 /* ── Variante avec sidebar ───────────────────────────────────────────────── */
 
 /* Avec sidebar : le body est full-width, sidebar collée à gauche */

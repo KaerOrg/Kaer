@@ -1,5 +1,5 @@
 /**
- * Techniques de respiration validées pour PsyTool.
+ * Techniques de respiration validées pour Kær.
  *
  * Sources cliniques :
  *   - Cohérence cardiaque   : Lehrer & Gevirtz (2014), Applied Psychophysiology — Grade B

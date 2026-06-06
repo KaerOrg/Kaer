@@ -1,4 +1,4 @@
-# Audit qualité — Modules thérapeutiques PsyTool
+# Audit qualité — Modules thérapeutiques Kær
 
 > Branche : `consolidation-app-web-mobile` — Démarré le 2026-05-19  
 > Objectif : vérifier fonctionnement web + mobile, cohérence du contenu, et sourcing scientifique pour chaque module.
@@ -74,7 +74,7 @@
 | decisional_balance | Miller WR, Rollnick S (2012) — Motivational Interviewing (3rd ed.) |
 | behavioral_activation | Lewinsohn PM (1974) ; Martell CR, Dimidjian S, Herman-Dunn R (2010) |
 | grounding | Linehan MM (1993) — DBT Skills Training Manual |
-| mood_tracker | Pas de source de validation (outil propriétaire PsyTool) |
+| mood_tracker | Pas de source de validation (outil propriétaire Kær) |
 | rim | Schiefele AK, Schiefele U (2010) ; Hackmann A, Bennett-Levy J, Holmes EA (2011) |
 | cognitive_saturation | Hayes SC, Strosahl KD, Wilson KG (1999) — ACT (défusion cognitive) |
 | motivational_balance | Miller WR, Rollnick S (2012) |

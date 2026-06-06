@@ -104,8 +104,8 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, WeekGrid |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, EmptyState, InputField, Modal, ScaleMetaBadges, SearchInput, SegmentedControl, SelectField, Sparkline, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, NotificationRoutineModal, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -484,7 +484,32 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 | `action` | `{ label: string; onClick: () => void }` | Bouton d'action optionnel |
 | `className` | `string` | Classe additionnelle |
 
-> `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast` ont une doc dédiée dans
+### `Banner`
+
+`components/ui/Banner/`. Bandeau d'information transversal — variante sémantique,
+icône, action et fermeture optionnelles. **Sans logique métier** : pour un usage
+métier (ex. rappel MFA), l'envelopper dans un composant `features/`.
+
+```tsx
+<Banner variant="warning" icon={<ShieldAlert size={18} />}
+        action={{ label: t('auth.mfa.banner_action'), onClick: goActivate }}
+        onDismiss={dismiss} dismissLabel={t('auth.mfa.banner_dismiss')}>
+  {t('auth.mfa.banner_text')}
+</Banner>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `variant` | `'info' \| 'success' \| 'warning' \| 'danger'` | Couleur sémantique (défaut `info`) |
+| `icon` | `ReactNode` | Icône optionnelle à gauche |
+| `children` | `ReactNode` | Contenu textuel |
+| `action` | `{ label: string; onClick: () => void }` | Bouton-lien d'action optionnel |
+| `onDismiss` | `() => void` | Si fourni, affiche une croix de fermeture |
+| `dismissLabel` | `string` | Libellé accessible de la croix (avec `onDismiss`) |
+
+Doc dédiée : [`docs/components/banner.md`](components/banner.md).
+
+> `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast`, `Banner` ont une doc dédiée dans
 > [`docs/components/`](components/). `Tabs`, `ValueBar`, `Sparkline`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 

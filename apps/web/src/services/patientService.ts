@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { PatientSummary, PatientModule } from '../lib/database.types'
+import { logDataAccess } from './auditService'
 
 export interface PatientRelation {
   patient_id: string
@@ -104,6 +105,17 @@ export async function fetchPatientHeader(
     .single() as { data: RelationRow | null }
 
   if (!data) return null
+
+  // Audit RGPD/HDS : trace l'accès du praticien au dossier de ce patient.
+  // Best-effort — n'interrompt pas la lecture si la journalisation échoue.
+  void logDataAccess({
+    action: 'read',
+    targetTable: 'patients',
+    targetId: patientId,
+    patientId,
+    metadata: { scope: 'header' },
+  })
+
   const patient = Array.isArray(data.patients) ? data.patients[0] : data.patients
   return {
     email: patient?.email ?? '',

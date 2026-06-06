@@ -99,7 +99,7 @@ La protection des routes est gérée dans `App.tsx` via l'état du store auth.
 - Affiche le message d'erreur en rouge sous le champ
 
 ### Layout
-- Header avec logo "PsyTool"
+- Header avec logo "Kær"
 - Dropdown profil (avatar initiales): éditer le profil, se déconnecter
 - Modal d'édition: nom + titre professionnel
 

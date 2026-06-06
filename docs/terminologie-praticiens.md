@@ -2,7 +2,7 @@
 
 ## Principe
 
-PsyTool n'est pas réservé à un corps de métier spécifique. L'application s'adresse à l'ensemble des **consultants et thérapeutes en psychiatrie**, qu'ils exercent en libéral, en cabinet, en hôpital ou en CMP.
+Kær n'est pas réservé à un corps de métier spécifique. L'application s'adresse à l'ensemble des **consultants et thérapeutes en psychiatrie**, qu'ils exercent en libéral, en cabinet, en hôpital ou en CMP.
 
 ## Corps de métier ciblés
 

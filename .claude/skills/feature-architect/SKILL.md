@@ -3,7 +3,7 @@ name: feature-architect
 description: Senior architect skill invoked before implementing any new feature. Performs full codebase analysis, designs the implementation plan with scalability/security/typing in mind, scans available skills, identifies reuse opportunities, updates documentation, and drives test-first development. Triggers on requests like "implement X", "add feature X", "build X", "create X functionality".
 ---
 
-# Feature Architect — PsyTool
+# Feature Architect — Kær
 
 Tu es un **architecte logiciel expert**. Trois impératifs guident chaque décision :
 
@@ -20,7 +20,7 @@ Avant d'écrire la moindre ligne de code, exécute ce protocole dans l'ordre.
 ### 1.1 Scanner les skills disponibles
 Lister les skills installés pour identifier lesquels invoquer :
 - `~/.claude/skills/` (global) + `.claude/skills/` (local)
-- Pertinents pour PsyTool : `github-versioning`, `vercel-react-native-skills`, `react-native-expert`, `web-design-guidelines`, `vercel-react-best-practices`
+- Pertinents pour Kær : `github-versioning`, `vercel-react-native-skills`, `react-native-expert`, `web-design-guidelines`, `vercel-react-best-practices`
 
 **Invoquer `vercel-react-native-skills` systématiquement** pour toute feature touchant des écrans, listes, animations, navigation ou composants natifs de l'app mobile.
 
@@ -70,7 +70,7 @@ Les types partagés vivent dans `packages/shared/` — ne pas les dupliquer.
 
 > Appliquer `.claude/rules/coding-standards.md` en intégralité (layers, TypeScript strict, render, design system, React Native, React perf, sécurité, schéma).
 
-Points spécifiques à PsyTool :
+Points spécifiques à Kær :
 - Types partagés web+mobile → `packages/shared/src/index.ts`
 - Types spécifiques à une app → dans l'app elle-même
 - Étendre `ModuleConfig` dans `packages/shared/` pour tout nouveau module thérapeutique
@@ -78,7 +78,7 @@ Points spécifiques à PsyTool :
 
 ### 2.3 Règles métier — à vérifier pour chaque feature
 
-- **Aucune donnée clinique** stockée côté serveur (pas de diagnostic, pas de notes de séance)
+- **Aucune donnée *interprétée* côté serveur** (pas de diagnostic, pas de notes de séance, pas de `if score > seuil`). Les données d'exercices du patient sont en revanche **stockées sur le serveur** (`patient_entries`, payload jsonb opaque) après consentement explicite — données de santé sensibles RGPD Art. 9, HDS requis avant commercialisation
 - Un patient **ne peut pas s'inscrire seul** — le flux d'invitation doit être respecté
 - Les données d'exercices sont **stockées localement** sur le téléphone du patient par défaut
 - Le patient peut **choisir** de partager ses données avec son praticien
@@ -96,13 +96,13 @@ Concevoir pour 10× la charge actuelle :
 - Composants : extraire dès que partagé dans ≥2 écrans → `src/components/` ; si partagé web+mobile → `packages/shared/`
 - Services : fonctions pures, paramètres typés, sans side-effects — conçus pour être testables isolément
 
-### 2.6 Sécurité — compléments PsyTool
+### 2.6 Sécurité — compléments Kær
 
 En plus des règles de `coding-standards.md` :
 - Vérifier que le praticien est bien lié au patient avant toute opération (`practitioner_patients`)
 - Tokens d'invitation : usage unique, expiration 48h, vérifiés côté Supabase
 
-### 2.7 Design system PsyTool
+### 2.7 Design system Kær
 - Couleurs, spacing, radius, typography depuis `apps/mobile/src/theme/index.ts` — **ne pas hardcoder**
 - Primary : `#4F46E5` — utiliser `colors.primary`
 - Composants existants : `Button`, `InputField` (web et mobile)
@@ -219,7 +219,7 @@ Après les phases 1–3, présenter à l'utilisateur :
 - [ ] `user_id` résolu via `auth.uid()` côté Supabase, jamais depuis le client
 - [ ] Lien praticien ↔ patient vérifié par RLS (via `practitioner_patients`)
 - [ ] Aucun secret / clé API dans le code ou AsyncStorage (→ expo-secure-store)
-- [ ] Aucune donnée clinique stockée côté serveur
+- [ ] Aucune donnée *interprétée* côté serveur (le stockage de données patient dans `patient_entries` après opt-in est autorisé ; l'interprétation ne l'est pas)
 - [ ] Inputs utilisateur validés avant écriture en base
 - [ ] Token d'invitation : usage unique et expiration vérifiés
 

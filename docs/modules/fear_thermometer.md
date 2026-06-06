@@ -22,7 +22,7 @@ Le thermomètre de la peur (SUDs — Subjective Units of Distress) est un outil 
 
 ## Conformité MDR 2017/745
 
-PsyTool est un Carnet de Bord Numérique — non-Dispositif Médical.
+Kær est un Carnet de Bord Numérique — non-Dispositif Médical.
 
 - Les valeurs SUDs (0–100) sont des **chiffres bruts** saisis par le patient, affichés sans label interprétatif.
 - Les barres visuelles (avant/après) sont **proportionnelles uniquement** — aucune couleur d'alerte, aucun commentaire automatique.

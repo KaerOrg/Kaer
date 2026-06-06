@@ -1,6 +1,6 @@
-# PsyTool — Contexte général
+# Kær — Contexte général
 
-## Qu'est-ce que PsyTool ?
+## Qu'est-ce que Kær ?
 
 Outil d'accompagnement thérapeutique en deux parties :
 - **Interface web praticien** — tableau de bord pour gérer les patients et débloquer des modules
@@ -27,7 +27,7 @@ Consultant ou thérapeute parmi les corps de métier suivants : IDE, IPA, psychi
 ## Structure du projet (monorepo npm workspaces)
 
 ```
-PsyTool/
+Kær/
 ├── apps/
 │   ├── web/          # Interface praticien (React + Vite)
 │   └── mobile/       # App patient (Expo + React Native)
@@ -72,7 +72,7 @@ Row Level Security (RLS) activée sur toutes les tables.
 
 ## Règles métier fondamentales
 
-- **Aucune donnée clinique stockée** côté serveur (pas de diagnostic, pas de notes)
+- **Aucune donnée *interprétée* côté serveur** — pas de diagnostic, pas de notes de séance, aucune logique conclusive (`if score > seuil`). En revanche, les données d'exercices du patient (scores d'échelles, journaux, saisies) **sont bien stockées côté serveur** dans `patient_entries`, en `payload jsonb` opaque, **après consentement explicite du patient** (opt-in). Ce sont des **données de santé sensibles au sens RGPD Art. 9** → hébergement HDS requis avant commercialisation. Le serveur stocke et restitue brut, il ne conclut jamais (cf. Règle d'or MDR)
 - Auth par email/mot de passe uniquement
 - Un patient **ne peut pas s'inscrire seul** — il faut une invitation du praticien
 - Les données d'exercices sont **stockées en local** sur le téléphone du patient par défaut
@@ -193,6 +193,8 @@ Les échelles cliniques standard suivent le **pattern générique ModuleRenderer
 - [x] Module Effets indésirables du traitement (`medication_side_effects`) — refonte tracker multi-dimensions (pattern `mood_tracker` via composant générique partagé `DimensionTrackerView` mobile + `SliderDashboardLayout`/`slider_dashboard` web), effets suivis paramétrables par patient (12 fixes + personnalisés, config `patient_modules.config.tracked_effects` partagée web↔mobile), saisie 0–10 dynamique, repères = événements de traitement, SQLite `scale_entries`, tests Jest + Vitest
 - [x] Module Psychoéducation (`psychoeducation`) — cartes de savoir thérapeutique, statut lecture, IDs débloqués en Supabase
 - [~] Mes suivis (affichage UI ; ex-« File active », route `/file-active`) — Tour de contrôle praticien (web) — phases 0+1 livrées : 4 tables `caseload_entries` (contexte) + `caseload_actions` (tâches multiples, 1 dossier→N, chacune date + heure optionnelle + coche « fait » + forçage « urgent » manuel `is_urgent`) + `caseload_waits` (« En attente de retour » multiples, chacune avec date de relance optionnelle) + `caseload_notes` (Observations, journal daté append-only) — RLS praticien-only, trigger `updated_at`. Logique pure isolée `caseloadLogic.ts` (`computeActionAlert`/`computeEntryAlert`=action ouverte la plus urgente/`selectTopAction`/`buildTodayList`/`daysBetween` ; urgence = échéance < 3 j [`URGENT_WITHIN_DAYS=2`] OU forçage manuel `is_urgent` → 🟥 « Urgent » ; 3–7 j → 🟧 « À venir ». Colonne UI « Délais »). `caseloadService.ts` (CRUD entries/actions/waits/notes + `fetchCaseload` assemblé). Matrice éditable inline (`CaseloadTable` : 1 ligne/patient, panneau dépliable à 4 sections Patient app/Actions/En attente/Observations, drapeau ⭐ Important qui épingle en haut, « Soins en cours » + résumé attentes en chips, filtres/tri/pastilles d'alerte, capture rapide, gabarit `Layout wide` 1600px). **Liaison patient app AUTOMATIQUE** : `syncCaseloadWithPatients` (au chargement, idempotent, dédup tous statuts) — patient inscrit → dossier lié ; invitation en attente → dossier libre (`invited_email`) ; inscription d'un invité → conversion du dossier libre en lié (zéro doublon). Modules débloqués (`fetchPatientsWithModules`) en chips auto dans « Soins en cours » ; section liaison en lecture seule (statuts lié / invité / libre). **Édition du nom sécurisée** (`EditableName` : lecture seule + crayon + validation explicite). Route `/file-active` + entrée de menu. 59 tests Vitest. Spec : [`docs/spec/file-active.md`](docs/spec/file-active.md). Reste : phase 2 « Aujourd'hui » (buckets), phase 4 boucles (réveil/récurrence), phase 5 vue d'ensemble, phase 6 finitions
+- [~] Conformité RGPD/HDS (épic GitHub #29) — chantiers : journal d'audit #25, MFA praticien #26, droits patient (export/effacement) #27, conservation/purge #28. **#25 livré** : table `access_audit_log` (service_role only, RLS sans policy client), triggers `fn_audit_write` sur 12 tables sensibles + RPC `log_data_access` (acteur dérivé de `auth.uid()`, jamais de contenu clinique stocké), service web `auditService.ts` (best-effort), `fetchPatientHeader` instrumenté. Doc : [`docs/audit-log.md`](docs/audit-log.md). Items non-code (hébergement HDS, DPO, DPA, CGU, pentest) suivis dans #29
+- [x] MFA praticien (`feat/mfa-praticien`, ticket #26, épic conformité #29) — TOTP via Supabase Auth natif (zéro schéma MFA), opt-in par praticien. Gestion AAL (`aal1`→`aal2`) dans `authService`, enrôlement QR en 3 étapes claires (`MfaSettingsCard`/`MfaEnrollModal`), challenge au login (`MfaChallengeForm`). **Bandeau de rappel** `MfaReminderBanner` (primitive design system `Banner`, fermeture persistée `practitioners.mfa_reminder_dismissed`). **Contact support** depuis l'app (formulaire borné sans saisie libre → table `support_requests` + email Resend via Edge Function `send-support-request`) pour le cas perte de code. Enforcement obligatoire = ticket #33. Docs : [`docs/auth-mfa.md`](docs/auth-mfa.md), [`docs/support-requests.md`](docs/support-requests.md)
 - [ ] Notifications push
 
 ## Vision commerciale
@@ -202,9 +204,9 @@ Migration vers hébergement HDS (OVHcloud) requise avant mise en production comm
 
 ## RÈGLE D'OR — Statut Non-Dispositif Médical (MDR 2017/745)
 
-> **Cette règle s'applique à chaque ligne de code produite pour PsyTool, sans exception.**
+> **Cette règle s'applique à chaque ligne de code produite pour Kær, sans exception.**
 
-PsyTool est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
+Kær est et doit rester un **Carnet de Bord Numérique** — non-Dispositif Médical au sens du règlement européen MDR 2017/745.
 
 **Principe fondamental : le code affiche, jamais il ne conclut.** L'interprétation appartient exclusivement au patient ou au soignant.
 
@@ -248,6 +250,7 @@ Si une demande franchit cette ligne : opposer un veto immédiat, expliquer le ri
 - **Pas de SQL ni d'appel Supabase dans un composant** — toute opération de données passe par une fonction d'un service `apps/<app>/src/services/<domaine>Service.ts`. Seules exceptions : les clients d'infrastructure dans `src/lib/` (`supabase.ts`, `database.ts` SQLite). Détails et procédure : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) section *Accès aux données* + [`docs/services.md`](docs/services.md).
 - **Nouveau module = passer par le skill [`module-builder`](.claude/skills/module-builder/SKILL.md).** Il enforce la règle data-first (`modules` + `module_content_fields` + `field_props` → `FieldRenderer` web et mobile) : zéro page hardcodée, parité aperçu praticien web ≡ écran patient mobile garantie par construction, composants génériques réutilisés avant d'être créés, tests et documentation obligatoires. Lecture préalable indispensable : [`docs/module-engine.md`](docs/module-engine.md).
 - **Avant tout merge = passer par le skill [`pr-review`](.claude/skills/pr-review/SKILL.md).** Il lit chaque fichier modifié/ajouté en entier et applique toutes les rules du projet (coding-standards, config-first, MDR, design system, i18n, tests, doc). Produit un rapport avec violations bloquantes et points d'attention, avec références `fichier:ligne`.
+- **Demande de merge = procédure stricte [`.claude/rules/merge-procedure.md`](.claude/rules/merge-procedure.md).** Quand l'utilisateur demande un merge : (1) `git fetch origin` pour resynchroniser `main` distant, (2) `git merge origin/main`, (3) résoudre les conflits, (4) lancer les tests unitaires web **et** mobile, (5) compiler tsc web **et** mobile. Ne jamais conclure le merge tant que tests et compilation ne sont pas verts ; ne jamais pousser sans validation explicite.
 - **Pour les modules legacy à écran mobile dédié** (animation Reanimated, machine d'état multi-écrans interactive), garder l'ordre web-puis-mobile :
   1. **Web d'abord** — ajouter le `ModuleType` dans `database.types.ts` (`MODULE_LABELS`, `MODULE_DESCRIPTIONS`), l'intégrer dans la bonne catégorie de `PatientPage.tsx` (armoire thérapeutique). Le praticien doit pouvoir débloquer le module avant que le patient puisse y accéder.
   2. **Mobile ensuite** — créer l'écran dans `apps/mobile/src/screens/modules/`, câbler la navigation dans `AppStack.tsx`, ajouter l'entrée dans `MODULE_CONFIG` de `HomeScreen.tsx`.
@@ -371,6 +374,7 @@ Points d'entrée fréquents :
 | `docs/modules.md` | Liste et statut de tous les modules thérapeutiques |
 | `docs/module-engine.md` | Circuit complet : schéma SQL → service → FieldRenderer → widgets |
 | `docs/services.md` | Couche services web et mobile (responsabilités, conventions, patterns) |
+| `docs/audit-log.md` | Journal d'audit des accès (RGPD/HDS) — `access_audit_log`, triggers + RPC `log_data_access` |
 | `docs/architecture.md` / `docs/database.md` | Vue d'ensemble technique et schéma BDD |
 | `apps/web/docs/design-system.md` | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | `apps/mobile/docs/design-system.md` | StyleSheet patterns, composants primitifs, Teen mode complet |

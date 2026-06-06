@@ -152,7 +152,7 @@
     "avatar_error": "Impossible de mettre à jour la photo. Réessayez.",
     "notif_denied_title": "Permission refusée",
     "notif_denied_message": "Autorisez les notifications dans les paramètres de votre téléphone pour activer les rappels.",
-    "version": "PsyTool v1.0 · Données sécurisées sur votre appareil",
+    "version": "Kær v1.0 · Données sécurisées sur votre appareil",
     "section_language": "Langue",
     "language_label": "Langue de l'application"
   },
@@ -2205,7 +2205,7 @@
     "day_dim": "D",
     "onboarding": {
       "title": "Restez accompagné entre vos consultations",
-      "intro": "Avec votre accord, PsyTool peut vous envoyer des rappels sur votre téléphone.",
+      "intro": "Avec votre accord, Kær peut vous envoyer des rappels sur votre téléphone.",
       "benefit_exercises_title": "Vos exercices au bon moment",
       "benefit_exercises_text": "Un rappel discret aux horaires fixés avec votre soignant, pour ne pas oublier vos exercices thérapeutiques.",
       "benefit_appointments_title": "Vos rendez-vous",

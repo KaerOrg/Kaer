@@ -2,7 +2,7 @@
 
 > Source de vérité des règles d'architecture : voir [`.claude/rules/coding-standards.md`](../.claude/rules/coding-standards.md) section *Architecture en couches*.
 
-PsyTool sépare strictement la logique métier de l'affichage. **Les pages, écrans et composants ne contiennent jamais d'appel direct à Supabase, à SQLite ou à une API externe.** Tout passe par un service dédié, regroupé par domaine fonctionnel.
+Kær sépare strictement la logique métier de l'affichage. **Les pages, écrans et composants ne contiennent jamais d'appel direct à Supabase, à SQLite ou à une API externe.** Tout passe par un service dédié, regroupé par domaine fonctionnel.
 
 ## Pourquoi cette couche
 

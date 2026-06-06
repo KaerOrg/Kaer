@@ -21,9 +21,9 @@ Kessler RC, Adler L, Ament M, et al. *The World Health Organization Adult ADHD S
 - 18 items cotés sur une échelle de fréquence à 5 niveaux : Jamais (0) / Rarement (1) / Parfois (2) / Souvent (3) / Très souvent (4)
 - L'interprétation appartient exclusivement au praticien
 
-## Conformité MDR (règle d'or PsyTool)
+## Conformité MDR (règle d'or Kær)
 
-L'ASRS v1.1 possède des seuils de dépistage publiés. **PsyTool n'implémente aucun de ces seuils.** Le code affiche uniquement les scores bruts (Partie A, Partie B, total). L'interprétation appartient exclusivement au praticien lors de la consultation.
+L'ASRS v1.1 possède des seuils de dépistage publiés. **Kær n'implémente aucun de ces seuils.** Le code affiche uniquement les scores bruts (Partie A, Partie B, total). L'interprétation appartient exclusivement au praticien lors de la consultation.
 
 ## Clé de module
 
