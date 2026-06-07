@@ -162,13 +162,17 @@ export async function fetchPractitionerExceptions(
 export async function fetchBookedSlots(
   practitionerId: string,
   date: string,
+  excludeAppointmentId?: string,
 ): Promise<Pick<Appointment, 'starts_at' | 'ends_at' | 'status'>[]> {
-  const { data } = await supabase
+  const baseQuery = supabase
     .from('appointments')
     .select('starts_at, ends_at, status')
     .eq('practitioner_id', practitionerId)
     .gte('starts_at', `${date}T00:00:00`)
     .lte('starts_at', `${date}T23:59:59`)
+  const { data } = excludeAppointmentId
+    ? await baseQuery.neq('id', excludeAppointmentId)
+    : await baseQuery
   return (data ?? []) as Pick<Appointment, 'starts_at' | 'ends_at' | 'status'>[]
 }
 
@@ -205,6 +209,33 @@ export async function cancelAppointment(
     .update({ status: 'cancelled_by_patient', updated_at: new Date().toISOString() })
     .eq('id', appointmentId)
   return { ok: !error }
+}
+
+/** Reprogrammer un rendez-vous existant (patient). */
+export async function rescheduleAppointment(params: {
+  appointment_id: string
+  practitioner_id: string
+  starts_at: string
+  ends_at: string
+}): Promise<{ ok: boolean; error?: string }> {
+  const { data: practRow } = await supabase
+    .from('practitioners')
+    .select('auto_confirm_appointments')
+    .eq('id', params.practitioner_id)
+    .single()
+  const autoConfirm = (practRow as { auto_confirm_appointments: boolean } | null)
+    ?.auto_confirm_appointments ?? true
+
+  const { error } = await supabase
+    .from('appointments')
+    .update({
+      starts_at: new Date(params.starts_at).toISOString(),
+      ends_at: new Date(params.ends_at).toISOString(),
+      status: autoConfirm ? 'confirmed' : 'pending',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', params.appointment_id)
+  return { ok: !error, error: error?.message }
 }
 
 /** Praticien lié au patient courant (pour la réservation). */
