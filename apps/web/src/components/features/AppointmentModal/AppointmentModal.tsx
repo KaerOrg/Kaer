@@ -299,6 +299,7 @@ export function AppointmentModal({
       title={modalTitle}
       onClose={onClose}
       footer={footer}
+      maxWidth={isRescheduling ? 500 : undefined}
     >
       {/* ── Mode reprogrammation ───────────────────────────────── */}
       {mode === 'view' && isRescheduling && appointment && (
