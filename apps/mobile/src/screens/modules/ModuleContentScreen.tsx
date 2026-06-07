@@ -159,5 +159,5 @@ const styles = StyleSheet.create({
   comingSoonText:  { fontSize: 15, color: colors.textMuted },
   errorText:       { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg, textAlign: 'center', paddingHorizontal: spacing.xl },
   retryBtn:        { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, backgroundColor: colors.primary, borderRadius: 8 },
-  retryBtnText:    { color: '#fff', fontWeight: '600' },
+  retryBtnText:    { color: colors.white, fontWeight: '600' },
 })

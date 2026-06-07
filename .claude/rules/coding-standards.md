@@ -331,8 +331,29 @@ const noteRef = useRef<HTMLTextAreaElement>(null)
 - Glassmorphisme : `GlassCard` + `BlurView`
 - Boutons gradient : `PremiumButton`
 - Avatars : `PremiumAvatar`
-- Couleurs et spacing : `src/theme-redesign.ts` — **ne jamais hardcoder**
+- Couleurs et spacing : tokens du thème (`colors`, `spacing`, `radius`, `shadows` de `apps/mobile/src/theme/`) — **ne jamais hardcoder**
 - Animations complexes : `React Native Reanimated` uniquement (jamais `Animated` de base)
+
+**Couleurs — toujours via le thème :**
+```ts
+// ❌ Couleur en dur dans un StyleSheet — même si colors est importé à côté
+retryBtnText: { color: '#fff' }     // ← couleur blanche en dur
+
+// ✅ Token du thème partagé
+import { colors } from '../../theme'
+retryBtnText: { color: colors.white }   // colors.white = '#FFFFFF' dans @psytool/shared
+```
+`colors.white` existe dans `@psytool/shared/src/theme.ts`. Toujours l'importer au lieu d'écrire `'#fff'` ou `'#FFFFFF'`.
+
+**Shadows — toujours via les tokens `shadows.sm/md` :**
+```ts
+// ❌ Bloc shadow copié en dur
+{ shadowColor: '#000', shadowOffset: ..., shadowOpacity: 0.08, ... }
+
+// ✅ Token prêt à l'emploi
+import { shadows } from '../../theme'
+{ ...shadows.md }   // ou shadows.sm selon l'intensité souhaitée
+```
 
 ## React Native
 

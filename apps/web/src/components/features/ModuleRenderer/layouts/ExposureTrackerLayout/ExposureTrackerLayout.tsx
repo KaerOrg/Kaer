@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { ContentField } from '../../../../../services/moduleService'
 import { PREVIEW_STEPS } from './exposureMock'
 import { ExposureLadderView } from './ExposureLadderView'
@@ -27,7 +27,8 @@ type View =
 export function ExposureTrackerLayout({ fields, t }: Props) {
   const [view, setView] = useState<View>({ kind: 'ladder' })
 
-  const lbl = useMemo(() => (key: string) => t(`modules.fear_thermometer.${key}`), [t])
+  const moduleId = useMemo(() => fields[0]?.module_id ?? 'fear_thermometer', [fields])
+  const lbl = useCallback((key: string) => t(`modules.${moduleId}.${key}`), [t, moduleId])
 
   const strategies = useMemo(
     () => fields
