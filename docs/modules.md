@@ -1,130 +1,82 @@
-# Modules thérapeutiques — Documentation
+# Modules thérapeutiques
 
-## Liste des modules
-
-> Convention : un fichier de doc par module dans [`modules/`](modules/), nommé d'après la clé `ModuleType` (snake_case).
-
-### Modules thérapeutiques (interactifs)
-
-| Clé | Nom | Statut | Doc |
-|-----|-----|--------|-----|
-| `sleep_diary` | Agenda du sommeil | **Implémenté** — SQLite local, vue 14 nuits, bilan mensuel | — |
-| `beck_columns` | Colonnes de Beck (TCC) | **Implémenté** — SQLite local, 7 colonnes, tests | [doc](modules/beck_columns.md) |
-| `fear_thermometer` | Exposition graduée | **Implémenté** — parcours d'exposition unifié (échelle → expositions répétées prédiction/pic/résultat → courbe), aperçu web, SQLite ; a absorbé `exposure_hierarchy` | [doc](modules/fear_thermometer.md) |
-| `emotion_wheel` | Roue des émotions | **Implémenté** — taxonomie Plutchik, 3 niveaux, SQLite, 22 tests | [doc](modules/emotion_wheel.md) |
-| `crisis_plan` | Plan de crise | **Implémenté** — protocole Stanley & Brown (2012), 6 étapes, SQLite | — |
-| `rim` | RIM — Imagerie mentale | **Implémenté** — IRT Krakow & Zadra (2006), scénario praticien, tests | [doc](modules/rim.md) |
-| `cognitive_saturation` | Saturation cognitive | **Implémenté** — défusion ACT, timer 90s, tap counter, SQLite, 22 tests | [doc](modules/cognitive_saturation.md) |
-| `grounding` | Ancrage 5-4-3-2-1 | **Implémenté** — DBT Linehan (1993), 5 sens guidés, 17 tests | [doc](modules/grounding.md) |
-| `decisional_balance` | Balance décisionnelle | **Implémenté** — grille 2×2, jauge motivation, SQLite, signal Supabase | — |
-| `mood_tracker` | Thermomètre de l'humeur | **Implémenté** — humeur/énergie/anxiété/plaisir (1–10), SQLite, graphique | [doc](modules/mood_tracker.md) |
-| `medication_adherence` | Observance du traitement | **Implémenté** — SQLite, tests | [doc](modules/medication_adherence.md) |
-| `medication_side_effects` | Effets du traitement | **Implémenté** — SQLite, tests | [doc](modules/medication_side_effects.md) |
-| `behavioral_activation` | Activation comportementale | **Implémenté** — SQLite, tests | [doc](modules/behavioral_activation.md) |
-| `breathing_techniques` | Techniques de respiration | **Implémenté** — 6 techniques, timer guidé, tests | [doc](modules/breathing_techniques.md) |
-| `psychoeducation` | Psychoéducation | **Implémenté** — cartes thématiques, lecture, tests | [doc](modules/psychoeducation.md) |
-| `craving_journal` | Journal des envies | À construire | — |
-
-### Échelles cliniques (questionnaires)
-
-Pattern générique `ModuleRenderer` — voir [`module-engine.md`](module-engine.md).
-
-| Clé | Nom | Statut | Doc |
-|-----|-----|--------|-----|
-| `phq9` | PHQ-9 — Dépression | **Implémenté** — 9 items, score 0-27 | — |
-| `gad7` | GAD-7 — Anxiété généralisée | **Implémenté** — 7 items, score 0-21 | — |
-| `bsl23` | BSL-23 — Symptômes borderline | **Implémenté** — 23 items, score moyen 0-4 | — |
-| `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | **Implémenté** — 25 items, 6 sous-échelles | — |
-| `epds` | EPDS — Dépression post-natale | **Implémenté** | [doc](modules/epds.md) |
-| `nsi` | NSI — Inventaire neuropsychologique | **Implémenté** | [doc](modules/nsi.md) |
-| `cssrs` | C-SSRS — Dépistage suicidaire | **Implémenté** — écran custom (logique conditionnelle) | [doc](modules/cssrs_screen.md) |
-| `snap_iv` | SNAP-IV — TDAH enfant/ado (hétéro-éval) | **Implémenté** — 26 items, 3 sous-échelles | [doc](modules/snap_iv.md) |
-| `asrs6` | ASRS v1.1 Dépistage Rapide — TDAH adulte | **Implémenté** — 6 items Kessler (2005) | [doc](modules/asrs6.md) |
-| `asrs18` | ASRS v1.1 Bilan Complet — TDAH adulte | **Implémenté** — 18 items (Parties A+B) | [doc](modules/asrs18.md) |
-
-## Module Agenda du sommeil (`sleep_diary`)
-
-### Objectif
-Enregistrer les habitudes de sommeil nuit par nuit pour identifier des patterns et suivre les progrès thérapeutiques.
-
-### Données enregistrées (localement sur l'appareil)
-- Heure de coucher
-- Heure de réveil
-- Temps d'endormissement (minutes)
-- Nombre de réveils nocturnes
-- Qualité subjective (1–5 étoiles)
-- Notes libres
-
-### Stockage
-SQLite local (`sleep_diary_entries`) — voir `docs/mobile-app.md`. Aucune synchronisation serveur par défaut.
-
-### Écrans concernés
-- `SleepDiaryScreen` — vue liste sur 14 nuits
-- `SleepDiaryEntryScreen` — formulaire de saisie
-
-### Notifications
-Le patient peut activer un rappel quotidien (heure configurable dans ProfileScreen) via `expo-notifications`.
+> Source de vérité pour la liste et le statut de tous les modules.  
+> Un fichier de doc détaillé par module dans [`docs/modules/`](modules/) (nommé `<module_id>.md`).  
+> Pour le moteur de rendu (FieldRenderer, preview_kind, field_types) : [`docs/module-engine.md`](module-engine.md).  
+> Pour ajouter un nouveau module : skill `module-builder`.
 
 ---
 
-## Comment ajouter un nouveau module
+## Modules thérapeutiques interactifs
 
-> **Procédure canonique** — passer par le skill **`module-builder`** (`.claude/skills/module-builder/SKILL.md`). Il cadre le travail data-first (modèle DB → seed → `FieldRenderer` → tests → doc) et garantit la parité aperçu praticien web ≡ écran patient mobile. La séquence simplifiée ci-dessous reste valable pour les modules **legacy à écran dédié** (cas marginal : animation Reanimated, machine d'état multi-écrans interactive). Pour tout module nouveau, voir d'abord [`module-engine.md`](module-engine.md).
+| Clé | Nom | `preview_kind` | Stockage | Doc |
+|-----|-----|---------------|----------|-----|
+| `sleep_diary` | Agenda du sommeil | `sleep_journal` | SQLite `sleep_diary_entries` | [doc](modules/sleep_diary.md) |
+| `beck_columns` | Colonnes de Beck (TCC) | `column_form` | SQLite `form_entries` | [doc](modules/beck_columns.md) |
+| `fear_thermometer` | Exposition graduée | `exposure_tracker` | SQLite `fear_situations` / `fear_entries` | [doc](modules/fear_thermometer.md) |
+| `emotion_wheel` | Roue des émotions | `tree_selector` | SQLite `emotion_entries` | [doc](modules/emotion_wheel.md) |
+| `crisis_plan` | Plan de crise (Safety Plan) | `editable_steps` | SQLite `crisis_anchors` + Supabase config | — |
+| `rim` | RIM — Retraitement par Imagerie Mentale | `patient_scenario` | Supabase `patient_modules.config` (lecture seule patient) | [doc](modules/rim.md) |
+| `cognitive_saturation` | Saturation cognitive (ACT) | `guided_exercise` | SQLite `cognitive_saturation_sessions` | [doc](modules/cognitive_saturation.md) |
+| `decisional_balance` | Balance décisionnelle | `decision_grid` | SQLite `plan_items` + Supabase signal | — |
+| `behavioral_activation` | Activation comportementale | `activity_log` | SQLite `activity_records` | [doc](modules/behavioral_activation.md) |
+| `grounding` | Ancrage 5-4-3-2-1 (DBT) | `guided_exercise` | Aucun (exercice sans persistance) | [doc](modules/grounding.md) |
+| `mood_tracker` | Thermomètre de l'humeur | `slider_dashboard` | SQLite `scale_entries` + `mood_markers` | [doc](modules/mood_tracker.md) |
+| `motivational_balance` | Balance motivationnelle (EM) | `tabbed` | SQLite `em_rulers`, `em_balance_items`, `em_values` | [doc](modules/motivational_balance.md) |
+| `medication_adherence` | Observance médicamenteuse | `daily_checkin` | SQLite local | [doc](modules/medication_adherence.md) |
+| `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
+| `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
+| `psychoeducation` | Psychoéducation | `cards` | IDs lus Supabase, statut lecture Supabase | [doc](modules/psychoeducation.md) |
+| `diet_weight_psycho` | Alimentation et psychotropes | `psyedu` | Supabase `psyedu_topics`/`psyedu_blocks` | — |
+| `chronobiology_tracker` | Régularité chronobiologique | `tabbed` (Fiches + Journal + Mois) | SQLite `chrono_entries` ; fiches Supabase | — |
+| `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Fiches + En crise) | Supabase `psyedu_topics`/`psyedu_blocks` | — |
+| `craving_journal` | Journal de craving (TCC addictologie) | `tabbed` (Fiches + Journal) | SQLite `form_entries` ; fiches Supabase | — |
 
-### 1. Déclarer le type
+---
 
-Dans `packages/shared/src/index.ts`, ajouter la clé dans `ModuleType`:
-```ts
-export type ModuleType =
-  | 'sleep_diary'
-  | 'beck_columns'
-  | 'new_module'   // ← ajouter ici
-  // ...
-```
+## Échelles cliniques (questionnaires)
 
-### 2. Ajouter les labels côté web
+Pattern générique : `ScaleHistoryScreen` + `ScaleEntryScreen` + `SCALE_SCORING` (scaleScoring.ts) + `scale_entries` SQLite + `module_content_fields` Supabase (`preview_kind = 'questionnaire'`). Détail : [`module-engine.md`](module-engine.md).
 
-Dans `apps/web/src/lib/database.types.ts`:
-```ts
-export const MODULE_LABELS: Record<ModuleType, string> = {
-  // ...
-  new_module: 'Nom affiché',
-}
+| Clé | Nom | Items | Score | Particularités | Doc |
+|-----|-----|-------|-------|----------------|-----|
+| `phq9` | PHQ-9 — Dépression | 9 | 0–27 | — | — |
+| `gad7` | GAD-7 — Anxiété généralisée | 7 | 0–21 | — | — |
+| `bsl23` | BSL-23 — Symptômes borderline | 23 | 0–4 (moyen) | — | — |
+| `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | 25 | 6 sous-échelles | Ebesutani (2012) | — |
+| `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | 26 | 3 sous-échelles (I/HI/TOD) | Hétéro-évaluation (`scale_warning`) | [doc](modules/snap_iv.md) |
+| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | 6 | 0–24 | Kessler (2005), bouton info PubMed | [doc](modules/asrs6.md) |
+| `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | 18 | 0–72 + 2 sous-scores | Parties A+B, bouton info PubMed | [doc](modules/asrs18.md) |
+| `epds` | EPDS — Dépression postnatale | 10 | 0–30 | — | [doc](modules/epds.md) |
+| `nsi` | NSI — Sévérité des cauchemars | 9 scorés + 2 contextuels | 0–45 | Items contextuels (% récurrents, thèmes) stockés dans `nsi_entries` | [doc](modules/nsi.md) |
+| `cssrs` | C-SSRS — Dépistage suicidaire | 6 idéation + 4 comportements | Arbre décisionnel | `no_toggle=true` : panel dédié `CSSRSScreenPanel` côté web praticien (pas de saisie patient). `cssrs_screen_assessments` Supabase. | [doc](modules/cssrs_screen.md) |
 
-export const MODULE_DESCRIPTIONS: Record<ModuleType, string> = {
-  // ...
-  new_module: 'Description courte pour le praticien.',
-}
-```
+---
 
-### 3. Créer les écrans côté mobile
+## Modules prévus
 
-Dans `apps/mobile/src/screens/modules/`, créer:
-- `NewModuleScreen.tsx` — écran principal
-- `NewModuleEntryScreen.tsx` — formulaire si nécessaire
+| Clé | Nom | Statut |
+|-----|-----|--------|
+| `cognitive_distortions` | Distorsions cognitives | `preview_kind='coming_soon'` |
+| `therapeutic_commitment` | Engagement thérapeutique | `preview_kind='coming_soon'` |
+| `cape42` | CAPE-42 — Expériences psychotiques | `preview_kind='coming_soon'` |
+| `audit` | AUDIT — Consommation d'alcool | `preview_kind='coming_soon'` |
 
-### 4. Enregistrer le module dans la navigation
+---
 
-Dans `apps/mobile/src/navigation/AppStack.tsx`, ajouter les écrans au `Stack.Navigator`:
-```tsx
-<Stack.Screen name="NewModule" component={NewModuleScreen} />
-```
+## Ajouter un nouveau module
 
-### 5. Rendre le module cliquable dans HomeScreen
+Passer par le skill **`module-builder`** (`.claude/skills/module-builder/SKILL.md`). Il enforce la règle data-first (`modules` + `module_content_fields` + `field_props` → `FieldRenderer`) et garantit la parité web ≡ mobile.
 
-Dans `apps/mobile/src/screens/HomeScreen.tsx`, dans la fonction `handleModulePress`:
-```ts
-case 'new_module':
-  navigation.navigate('NewModule')
-  break
-```
+### Pattern échelle clinique générique (checklist)
 
-### 6. Créer la base locale si nécessaire
+1. Ajouter la config dans `SCALE_SCORING` (`scaleScoring.ts`)
+2. Ajouter les clés i18n dans `fr/en common.json` + `fr/en teen.json`
+3. Ajouter le module dans `modules` Supabase avec `preview_kind = 'questionnaire'`
+4. Insérer les `module_content_fields` (instructions, options, questions, footer) + `field_props`
+5. Ajouter l'entrée dans `GENERIC_SCALE_TYPES` (`HomeScreen.tsx`)
+6. Ajouter l'icône dans `MODULE_CONFIG` (`HomeScreen.tsx`)
 
-Si le module stocke des données localement, ajouter une table dans `apps/mobile/src/lib/database.ts` avec les fonctions CRUD correspondantes.
-
-### 7. Tester le flux complet
-1. Praticien débloque le module dans PatientPage (web)
-2. Patient voit le module dans HomeScreen (mobile)
-3. Patient accède au module et saisit des données
-4. Les données sont stockées localement
+Sous-scores → `computeSubscaleScores` + `CHIP_KEY_TO_SUBSCALE` dans `ScaleHistoryScreen.tsx`.  
+Hétéro-évaluation → champ `scale_warning` dans `module_content_fields`.  
+Logique conditionnelle (ex. C-SSRS) → écran custom dédié.

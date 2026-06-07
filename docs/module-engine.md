@@ -564,13 +564,11 @@ Seulement si le module ne peut pas être rendu par `FieldRenderer` (timer, anima
 
 ## Schéma `ClinicalScale` — Échelles et questionnaires d'évaluation
 
-### État actuel (transitoire)
+### Architecture — `module_content_fields` avec `field_type: 'scale_meta'`
 
-Fichier source temporaire : `apps/web/src/data/scales.ts`
+> **Migration terminée.** `apps/web/src/data/scales.ts` (tableau statique `CLINICAL_SCALES`) a été supprimé. Les métadonnées des échelles vivent désormais en base dans `module_content_fields` + `field_props`, alimentés par `supabase/seed/scale_meta_seed.sql`. Le service `scaleService.ts` expose `fetchScaleMeta()`.
 
-Les métadonnées des échelles sont actuellement définies statiquement dans `CLINICAL_SCALES` et rendues dans l'accordéon **"Échelles et questionnaires d'évaluation"** de `PatientModulesTab`. **Ce fichier est voué à disparaître** — voir section *Architecture cible* ci-dessous.
-
-### Architecture cible — `module_content_fields` avec `field_type: 'scale_meta'`
+### Pourquoi `module_content_fields` (ancien libellé conservé pour contexte)
 
 Les métadonnées des échelles cliniques **appartiennent à `module_content_fields`**, pas à un fichier TypeScript statique ni à des colonnes supplémentaires sur `modules`.
 
@@ -615,21 +613,7 @@ no_toggle = 'false' (défaut) → toggle standard unlock/revoke → crée/suppri
 no_toggle = 'true'           → bouton d'action custom → ouvre un panel dédié (ex. C-SSRS)
 ```
 
-### Implémentation après migration
-
-1. **Nouveau service** `fetchScaleMeta(moduleId)` dans `apps/web/src/services/scaleService.ts`
-   - Lit `module_content_fields` où `field_type = 'scale_meta'` et `module_id = moduleId`
-   - Joint `field_props` pour assembler `evaluationType`, `targetAges`, `validatedAgeRange`, `noToggle`, `reference`
-   - Appelle `t(field.text_code)` pour la description
-
-2. **Suppression de `CLINICAL_SCALES`** (`apps/web/src/data/scales.ts`)
-   - `PatientModulesTab` charge les métadonnées via `fetchScaleMeta` au lieu d'importer le tableau statique
-
-3. **`ScaleMetaBadges`** ne change pas — reçoit toujours les mêmes props, la source change
-
-4. **Seed SQL** : insérer un champ `scale_meta` par échelle dans `module_content_fields` + les `field_props` correspondants
-
-### Ajouter une nouvelle échelle (après migration)
+### Ajouter une nouvelle échelle
 
 1. `INSERT` dans `module_content_fields` : `field_type = 'scale_meta'`, `text_code = 'modules.<id>.description'`
 2. `INSERT` dans `field_props` : `evaluation_type`, `target_ages`, `validated_age_range`, `no_toggle`, `reference_label`, `reference_url`

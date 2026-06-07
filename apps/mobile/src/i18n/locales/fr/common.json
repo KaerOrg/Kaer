@@ -146,6 +146,17 @@
     "share_data_hint": "Votre praticien pourra voir tout ce que vous notez dans l'application.",
     "share_data_error": "Impossible de mettre à jour le partage. Réessayez.",
     "privacy_disclaimer": "Le partage avec votre praticien est activé. Vous pouvez le désactiver à tout moment : vos données resteront alors uniquement sur votre téléphone.",
+    "data_rights": {
+      "section": "Mes données",
+      "hint": "Vous pouvez exporter une copie de vos données, ou supprimer définitivement votre compte et toutes vos données.",
+      "export_button": "Exporter mes données",
+      "export_error": "L'export a échoué. Réessayez.",
+      "erase_button": "Supprimer mon compte et mes données",
+      "erase_title": "Tout supprimer ?",
+      "erase_message": "Votre compte et toutes vos données seront effacés définitivement, sur le serveur comme sur ce téléphone. Cette action est irréversible.",
+      "erase_confirm": "Tout supprimer",
+      "erase_error": "La suppression a échoué. Réessayez."
+    },
     "logout_button": "Se déconnecter",
     "logout_title": "Déconnexion",
     "logout_message": "Êtes-vous sûr(e) de vouloir vous déconnecter ?",

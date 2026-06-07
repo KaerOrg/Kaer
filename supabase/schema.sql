@@ -1663,6 +1663,168 @@ grant execute on function public.log_data_access(text, text, uuid, uuid, jsonb) 
 
 
 -- ============================================================
+-- DROITS PATIENT RGPD (#27) — export & effacement
+-- ============================================================
+-- Deux RPC SECURITY DEFINER. La RLS n'accorde au praticien qu'un SELECT (parfois
+-- rien) sur les tables patient — un export/delete direct serait bloqué. Ces fonctions
+-- s'exécutent en tant qu'owner MAIS vérifient la propriété via auth.uid() : l'appelant
+-- doit être le patient lui-même OU un praticien lié via practitioner_patients.
+-- Le compte auth.users (login) n'est PAS supprimé ici (un RPC SQL ne le peut pas) →
+-- c'est l'Edge Function `delete-patient-account` (service_role) qui le fait, et sa
+-- cascade ON DELETE purge alors patients + ~20 tables enfant.
+--
+-- ⚠️ MDR (RÈGLE D'OR) : export_patient_data renvoie les valeurs BRUTES (to_jsonb),
+-- jamais un score labellisé ni une interprétation. C'est un miroir neutre des saisies.
+
+-- Helper interne : l'appelant est-il habilité sur ce patient ?
+create or replace function public.fn_can_access_patient(p_patient_id uuid)
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select
+    auth.uid() = p_patient_id
+    or exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = p_patient_id
+    );
+$$;
+
+-- Droit d'accès / portabilité (RGPD art. 15 & 20) : agrège TOUTES les données du
+-- patient en un seul jsonb (une clé par table), valeurs brutes uniquement.
+create or replace function public.export_patient_data(p_patient_id uuid)
+returns jsonb
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_email  text;
+  v_result jsonb;
+begin
+  if not public.fn_can_access_patient(p_patient_id) then
+    raise exception 'export_patient_data: accès refusé';
+  end if;
+
+  select email into v_email from public.patients where id = p_patient_id;
+
+  v_result := jsonb_build_object(
+    'exported_at', now(),
+    'patient_id',  p_patient_id,
+    'patient',
+      (select to_jsonb(p) from public.patients p where p.id = p_patient_id),
+    'practitioner_patients',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.practitioner_patients t where t.patient_id = p_patient_id),
+    'patient_modules',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.patient_modules t where t.patient_id = p_patient_id),
+    'patient_entries',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.patient_entries t where t.patient_id = p_patient_id),
+    'notification_events',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.notification_events t where t.patient_id = p_patient_id),
+    'notification_routines',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.notification_routines t where t.patient_id = p_patient_id),
+    'notification_logs',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.notification_logs t where t.patient_id = p_patient_id),
+    'patient_push_tokens',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.patient_push_tokens t where t.patient_id = p_patient_id),
+    'cssrs_screen_assessments',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.cssrs_screen_assessments t where t.patient_id = p_patient_id),
+    'crisis_plan_configs',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.crisis_plan_configs t where t.patient_id = p_patient_id),
+    'crisis_plan_coping_cards',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.crisis_plan_coping_cards t where t.patient_id = p_patient_id),
+    'practitioner_patient_notes',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.practitioner_patient_notes t where t.patient_id = p_patient_id),
+    'appointments',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.appointments t where t.patient_id = p_patient_id),
+    'caseload_entries',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.caseload_entries t where t.patient_id = p_patient_id),
+    'caseload_notes',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.caseload_notes t
+        where t.entry_id in (select id from public.caseload_entries where patient_id = p_patient_id)),
+    'caseload_waits',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.caseload_waits t
+        where t.entry_id in (select id from public.caseload_entries where patient_id = p_patient_id)),
+    'caseload_actions',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.caseload_actions t
+        where t.entry_id in (select id from public.caseload_entries where patient_id = p_patient_id)),
+    'invitations',
+      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
+         from public.invitations t where v_email is not null and lower(t.patient_email) = lower(v_email))
+  );
+
+  perform public.log_data_access('export', 'patients', p_patient_id, p_patient_id,
+    jsonb_build_object('scope', 'full'));
+
+  return v_result;
+end;
+$$;
+
+-- Droit à l'oubli (RGPD art. 17) : supprime UNIQUEMENT ce qui ne cascade pas depuis
+-- patients (invitations liées par email + caseload_entries en ON DELETE SET NULL).
+-- Le reste part via la suppression du compte auth.users (Edge Function), qui cascade
+-- patients → toutes les tables enfant. Trace l'effacement AVANT toute suppression.
+create or replace function public.erase_patient_data(p_patient_id uuid)
+returns jsonb
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_email       text;
+  v_invitations int := 0;
+  v_caseload    int := 0;
+begin
+  if not public.fn_can_access_patient(p_patient_id) then
+    raise exception 'erase_patient_data: accès refusé';
+  end if;
+
+  select email into v_email from public.patients where id = p_patient_id;
+
+  perform public.log_data_access('erase', 'patients', p_patient_id, p_patient_id,
+    jsonb_build_object('scope', 'full'));
+
+  if v_email is not null then
+    delete from public.invitations where lower(patient_email) = lower(v_email);
+    get diagnostics v_invitations = row_count;
+  end if;
+
+  delete from public.caseload_entries where patient_id = p_patient_id;
+  get diagnostics v_caseload = row_count;
+
+  return jsonb_build_object(
+    'ok', true,
+    'invitations_deleted', v_invitations,
+    'caseload_entries_deleted', v_caseload
+  );
+end;
+$$;
+
+-- Droits : helper interne non exposé ; export/erase réservés aux authentifiés + service_role.
+revoke all on function public.fn_can_access_patient(uuid) from public, anon, authenticated;
+revoke all on function public.export_patient_data(uuid)   from public, anon;
+revoke all on function public.erase_patient_data(uuid)    from public, anon;
+grant execute on function public.export_patient_data(uuid) to authenticated, service_role;
+grant execute on function public.erase_patient_data(uuid)  to authenticated, service_role;
+
+
+-- ============================================================
 -- TABLE : support_requests (Demandes de support praticien)
 -- ============================================================
 -- Formulaire BORNÉ : le praticien choisit un motif dans une liste fermée
@@ -1696,3 +1858,160 @@ create index if not exists idx_support_requests_ip_recent
 
 alter table public.support_requests enable row level security;
 -- Aucune policy client : insertion par l'Edge Function (service_role), lecture support/DPO.
+
+
+-- ============================================================
+-- TABLE : retention_config (Politique de conservation RGPD — art. 5.1.e)
+-- ============================================================
+-- Une ligne par table soumise à une durée de conservation limitée.
+-- La purge est appliquée quotidiennement par l'Edge Function `purge-retention`
+-- (service_role), déclenchée via pg_cron.
+--
+-- Champs :
+--   table_name          — nom de la table publique cible
+--   date_column         — colonne horodatage pour le calcul d'ancienneté
+--   retention_days      — durée de conservation en jours (modifiable sans redéploiement)
+--   gate_on_inactivity  — si true, on ne purge une ligne QUE si le patient est inactif
+--                         (protège l'historique d'un patient encore suivi)
+--   inactivity_days     — fenêtre d'inactivité en jours (utilisée si gate_on_inactivity)
+--   is_enabled          — désactiver une règle sans la supprimer
+--   description         — justification métier / base légale
+--   updated_at          — horodatage de la dernière modification
+--
+-- ⚠️ MDR (RÈGLE D'OR) : condition de purge = dates uniquement
+-- (ancienneté de la donnée + inactivité du patient). Aucune valeur clinique
+-- n'entre dans le critère de sélection.
+--
+-- Patient « inactif » = ne s'est pas connecté ET n'a aucun rendez-vous depuis
+-- `inactivity_days` jours. Un patient encore actif conserve TOUT son historique,
+-- quel que soit l'âge des données. Voir fn_inactive_patient_ids ci-dessous.
+--
+-- Accès : service_role uniquement. Aucune policy client.
+
+create table if not exists public.retention_config (
+  table_name          text        primary key,
+  date_column         text        not null default 'created_at',
+  retention_days      int         not null check (retention_days >= 1),
+  gate_on_inactivity  boolean     not null default false,
+  inactivity_days     int         not null default 365 check (inactivity_days >= 1),
+  is_enabled          boolean     not null default true,
+  description         text,
+  updated_at          timestamptz not null default now()
+);
+
+-- Idempotent : ajoute les colonnes de gating sur une base où retention_config existe déjà.
+alter table public.retention_config
+  add column if not exists gate_on_inactivity boolean not null default false;
+alter table public.retention_config
+  add column if not exists inactivity_days int not null default 365;
+
+alter table public.retention_config enable row level security;
+-- Aucune policy client : lecture/écriture réservées au service_role (Edge Function purge-retention).
+
+
+-- ============================================================
+-- fn_inactive_patient_ids : patients éligibles à la purge de leurs données
+-- ============================================================
+-- Un patient est « inactif » s'il remplit LES DEUX conditions :
+--   1. dernière connexion (auth.users.last_sign_in_at) absente ou antérieure à la coupure
+--   2. aucun rendez-vous dont starts_at est postérieur ou égal à la coupure
+-- → un patient encore suivi (connexion récente OU rendez-vous récent/à venir) n'est
+--   JAMAIS retourné : son historique est intégralement conservé.
+--
+-- SECURITY DEFINER : accède à auth.users (réservé au propriétaire). Le service_role
+-- l'appelle via purge_retention_table. Révoquée pour anon/authenticated.
+create or replace function public.fn_inactive_patient_ids(p_cutoff timestamptz)
+returns setof uuid
+language sql
+stable
+security definer set search_path = public
+as $$
+  select p.id
+  from public.patients p
+  where not exists (
+          select 1 from auth.users u
+          where u.id = p.id
+            and u.last_sign_in_at is not null
+            and u.last_sign_in_at >= p_cutoff
+        )
+    and not exists (
+          select 1 from public.appointments a
+          where a.patient_id = p.id
+            and a.starts_at >= p_cutoff
+        );
+$$;
+
+
+-- ============================================================
+-- purge_retention_table : applique UNE règle de conservation
+-- ============================================================
+-- Supprime de `p_table` les lignes dont `p_date_column` dépasse la durée de
+-- conservation. Si `p_gate_inactivity`, restreint aux patients inactifs.
+-- Retourne le nombre de lignes supprimées.
+--
+-- ⚠️ MDR : critère 100 % temporel. Identifiants (table, colonne) issus de
+-- retention_config (table service_role only) → injectés via format(%I), jamais
+-- de saisie utilisateur. Valeurs passées en paramètres liés (USING).
+--
+-- SECURITY DEFINER : exécute la suppression de masse en contournant la RLS
+-- (seul moyen de purger des données patient). Réservée au service_role.
+create or replace function public.purge_retention_table(
+  p_table            text,
+  p_date_column      text,
+  p_retention_days   int,
+  p_gate_inactivity  boolean,
+  p_inactivity_days  int
+)
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_retention_cutoff  timestamptz := now() - make_interval(days => p_retention_days);
+  v_inactivity_cutoff timestamptz := now() - make_interval(days => p_inactivity_days);
+  v_deleted           integer;
+begin
+  if p_gate_inactivity then
+    execute format(
+      'delete from public.%I t where t.%I < $1 '
+      'and t.patient_id in (select id from public.fn_inactive_patient_ids($2))',
+      p_table, p_date_column
+    ) using v_retention_cutoff, v_inactivity_cutoff;
+  else
+    execute format(
+      'delete from public.%I t where t.%I < $1',
+      p_table, p_date_column
+    ) using v_retention_cutoff;
+  end if;
+
+  get diagnostics v_deleted = row_count;
+  return v_deleted;
+end;
+$$;
+
+-- Durcissement des droits : ces fonctions ne doivent jamais être appelables via l'API REST
+-- par un client. Seul le service_role (Edge Function purge-retention) y a accès.
+revoke all on function public.fn_inactive_patient_ids(timestamptz) from public, anon, authenticated;
+revoke all on function public.purge_retention_table(text, text, int, boolean, int) from public, anon, authenticated;
+grant execute on function public.purge_retention_table(text, text, int, boolean, int) to service_role;
+
+
+-- ============================================================
+-- pg_cron : déclenchement de l'Edge Function purge-retention
+-- ============================================================
+-- Prérequis : extension pg_cron activée dans le Dashboard Supabase
+--   > Database > Extensions > pg_cron (enable)
+-- Remplacer <PROJECT_REF> et <SERVICE_ROLE_KEY> par les valeurs du projet.
+-- À exécuter une seule fois manuellement dans le SQL Editor.
+--
+-- select cron.schedule(
+--   'purge-retention-cron',
+--   '0 2 * * *',
+--   $$
+--     select net.http_post(
+--       url := 'https://<PROJECT_REF>.supabase.co/functions/v1/purge-retention',
+--       headers := '{"Content-Type":"application/json","Authorization":"Bearer <SERVICE_ROLE_KEY>"}'::jsonb,
+--       body := '{}'::jsonb
+--     ) as request_id;
+--   $$
+-- );

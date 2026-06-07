@@ -37,7 +37,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PillSelector, PipPicker, SectionDateList, StatusBadge, Toast |
-| `components/features/` | Composants métier — Chart (domaine), DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent |
+| `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
 

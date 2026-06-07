@@ -200,6 +200,21 @@
       "cssrs": "Structured assessment of suicidal ideation and behaviour. Columbia University / NIMH — 'Since last visit' version."
     }
   },
+  "patient_rights": {
+    "title": "Data & GDPR",
+    "subtitle": "Patient rights over their data",
+    "description": "Export all of this patient's data (right of access) or permanently erase their account and data (right to be forgotten).",
+    "export_button": "Export (JSON)",
+    "export_success": "Export generated. Download has started.",
+    "export_error": "Export failed. Please try again.",
+    "erase_button": "Erase patient",
+    "erase_confirm_title": "Permanently erase this patient?",
+    "erase_confirm_warning": "This deletes the patient's account and all their data, both on the server and on their device. This cannot be undone.",
+    "erase_confirm_label": "To confirm, type the patient's name: {{name}}",
+    "erase_confirm_button": "Erase permanently",
+    "erase_success": "The patient and their data have been erased.",
+    "erase_error": "Erasure failed. Please try again."
+  },
   "patient": {
     "back": "← Back to my patients",
     "teen_mode_label": "Teen mode",

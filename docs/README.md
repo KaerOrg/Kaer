@@ -21,6 +21,8 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`module-sources.md`](module-sources.md) | Onglet « Sources & recommandations » du panneau praticien (table `module_sources`) |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`audit-log.md`](audit-log.md) | Journal d'audit des accès aux données patient (RGPD/HDS) — table `access_audit_log`, triggers + RPC |
+| [`rgpd-droits-patient.md`](rgpd-droits-patient.md) | Droits patient RGPD — export (art. 15/20) & effacement (art. 17) : RPC + Edge Function + purge locale |
+| [`retention-conservation.md`](retention-conservation.md) | Politique de conservation & purge automatique (RGPD art. 5.1.e) — table `retention_config` + Edge Function + pg_cron |
 | [`auth-mfa.md`](auth-mfa.md) | Authentification forte praticien (MFA TOTP) — flux, AAL, récupération, bandeau de rappel |
 | [`support-requests.md`](support-requests.md) | Demandes de support praticien (formulaire borné → table + email Resend) |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
@@ -28,6 +30,11 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`migration-engine-roadmap.md`](migration-engine-roadmap.md) | Roadmap moteur de migrations |
 | [`dependency-pitfalls.md`](dependency-pitfalls.md) | Pièges connus de dépendances |
 | [`spec/calendar.md`](spec/calendar.md) | Système de prise de rendez-vous (praticien web + patient mobile) |
+| [`spec/file-active.md`](spec/file-active.md) | File active praticien — spec fonctionnelle (tour de contrôle) |
+| [`spec/speech-to-text.md`](spec/speech-to-text.md) | Dictée vocale de notes praticien (SpeechRecorder + Edge Function) |
+| [`patient-data-sync.md`](patient-data-sync.md) | Circuit sync données patient : SQLite → Supabase via `RemoteSyncService` + gate consentement |
+| [`practitioner-notes.md`](practitioner-notes.md) | Notes praticien par patient (privées, Supabase, `practitioner_patient_notes`) |
+| [`module-diet-weight-psycho.md`](module-diet-weight-psycho.md) | Module `diet_weight_psycho` — fiches psyedu alimentation & psychotropes |
 
 ## Documentation par module thérapeutique
 
@@ -52,7 +59,10 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 - [`nsi.md`](modules/nsi.md) — NSI Inventaire neuropsychologique
 - [`psychoeducation.md`](modules/psychoeducation.md) — Cartes de psychoéducation
 - [`rim.md`](modules/rim.md) — RIM Imagerie mentale (IRT)
+- [`sleep_diary.md`](modules/sleep_diary.md) — Agenda du sommeil
 - [`snap_iv.md`](modules/snap_iv.md) — SNAP-IV Dépistage TDAH enfant/ado
+- [`motivational_balance.md`](modules/motivational_balance.md) — Balance motivationnelle (EM)
+- [`notification-routines.md`](modules/notification-routines.md) — Routines de notification patient
 
 ## Documentation par application
 
