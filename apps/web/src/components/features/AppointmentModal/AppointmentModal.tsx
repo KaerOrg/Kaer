@@ -302,28 +302,30 @@ export function AppointmentModal({
     >
       {/* ── Mode reprogrammation ───────────────────────────────── */}
       {mode === 'view' && isRescheduling && appointment && (
-        <div className="appt-datetime-row">
-          <div className="appt-field">
-            <label className="appt-label" htmlFor="appt-reschedule-start">{t('agenda.appointment.date_start')}</label>
-            <input
-              id="appt-reschedule-start"
-              ref={rescheduleStartRef}
-              type="datetime-local"
-              className="appt-input"
-              defaultValue={rescheduleDefaults.start}
-              autoComplete="off"
-            />
-          </div>
-          <div className="appt-field">
-            <label className="appt-label" htmlFor="appt-reschedule-end">{t('agenda.appointment.date_end')}</label>
-            <input
-              id="appt-reschedule-end"
-              ref={rescheduleEndRef}
-              type="datetime-local"
-              className="appt-input"
-              defaultValue={rescheduleDefaults.end}
-              autoComplete="off"
-            />
+        <div className="appt-reschedule-form">
+          <div className="appt-datetime-row">
+            <div className="appt-field">
+              <label className="appt-label" htmlFor="appt-reschedule-start">{t('agenda.appointment.date_start')}</label>
+              <input
+                id="appt-reschedule-start"
+                ref={rescheduleStartRef}
+                type="datetime-local"
+                className="appt-input"
+                defaultValue={rescheduleDefaults.start}
+                autoComplete="off"
+              />
+            </div>
+            <div className="appt-field">
+              <label className="appt-label" htmlFor="appt-reschedule-end">{t('agenda.appointment.date_end')}</label>
+              <input
+                id="appt-reschedule-end"
+                ref={rescheduleEndRef}
+                type="datetime-local"
+                className="appt-input"
+                defaultValue={rescheduleDefaults.end}
+                autoComplete="off"
+              />
+            </div>
           </div>
         </div>
       )}
