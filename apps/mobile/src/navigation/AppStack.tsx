@@ -37,7 +37,7 @@ export type AppStackParamList = {
   ModuleContent: { moduleType: string }
   MotivationalBalance: undefined
   MotivationalBalanceDetail: { topicId: string; topicKey: string }
-  BookAppointment: { practitionerId: string }
+  BookAppointment: { practitionerId: string; appointmentId?: string }
   CrisisPlan: { initialUrgency?: boolean }
   MedicationSideEffectsHistory: undefined
   MedicationSideEffectsEntry: {
@@ -95,7 +95,9 @@ export default function AppStack() {
       <Stack.Screen
         name="BookAppointment"
         component={BookAppointmentScreen}
-        options={{ title: 'Prendre un rendez-vous' }}
+        options={({ route }) => ({
+          title: route.params.appointmentId ? 'Reprogrammer' : 'Prendre un rendez-vous',
+        })}
       />
       <Stack.Screen
         name="Psychoeducation"

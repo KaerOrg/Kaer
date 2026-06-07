@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Calendar, FileText, ExternalLink } from 'lucide-react'
 import { Modal } from '../../ui/Modal'
@@ -24,7 +24,14 @@ interface AppointmentModalProps {
   onCreate: (patientId: string, startsAt: string, endsAt: string, notes: string) => Promise<{ ok: boolean; error?: string }>
   onUpdateStatus: (id: string, status: AppointmentStatus) => Promise<{ ok: boolean }>
   onUpdateNotes?: (id: string, notes: string) => Promise<{ ok: boolean }>
+  onReschedule?: (id: string, newStartsAt: string, newEndsAt: string) => Promise<{ ok: boolean; error?: string }>
   onNavigateToPatient?: (patientId: string) => void
+}
+
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function nextFullHour(): string {
@@ -95,12 +102,14 @@ export function AppointmentModal({
   onCreate,
   onUpdateStatus,
   onUpdateNotes,
+  onReschedule,
   onNavigateToPatient,
 }: AppointmentModalProps) {
   const { t } = useTranslation()
   const toast = useToast()
   const [saving, setSaving] = useState(false)
   const [savingNotes, setSavingNotes] = useState(false)
+  const [isRescheduling, setIsRescheduling] = useState(false)
 
   // Note éditable en mode view
   const [noteText, setNoteText] = useState(appointment?.notes ?? '')
@@ -118,10 +127,16 @@ export function AppointmentModal({
   const notesRef = useRef<HTMLTextAreaElement>(null)
   const startInputRef = useRef<HTMLInputElement>(null)
   const endInputRef = useRef<HTMLInputElement>(null)
+  const rescheduleStartRef = useRef<HTMLInputElement>(null)
+  const rescheduleEndRef = useRef<HTMLInputElement>(null)
 
   const filteredPatients = query.length === 0
     ? patients
     : patients.filter(p => p.label.toLowerCase().includes(query.toLowerCase()))
+
+  useEffect(() => {
+    setIsRescheduling(false)
+  }, [appointment?.id])
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -185,6 +200,28 @@ export function AppointmentModal({
     if (!result.ok) toast.error(t('agenda.appointment.error_update_status'))
   }
 
+  const rescheduleDefaults = useMemo(() => ({
+    start: appointment ? toDatetimeLocal(appointment.starts_at) : nextFullHour(),
+    end: appointment ? toDatetimeLocal(appointment.ends_at) : addMinutes(nextFullHour(), 50),
+  }), [appointment])
+
+  const handleRescheduleSave = useCallback(async () => {
+    if (!appointment || !onReschedule) return
+    const newStart = rescheduleStartRef.current?.value
+    const newEnd = rescheduleEndRef.current?.value
+    if (!newStart || !newEnd) { toast.error(t('agenda.appointment.error_no_date')); return }
+    if (newStart >= newEnd) { toast.error(t('agenda.appointment.error_date_order')); return }
+    setSaving(true)
+    const result = await onReschedule(appointment.id, newStart, newEnd)
+    setSaving(false)
+    if (result.ok) {
+      toast.success(t('agenda.appointment.reschedule_success'))
+      onClose()
+    } else {
+      toast.error(t('agenda.appointment.error_reschedule'))
+    }
+  }, [appointment, onReschedule, t, toast, onClose])
+
   const handleSaveNotes = useCallback(async () => {
     if (!appointment || !onUpdateNotes) return
     setSavingNotes(true)
@@ -209,6 +246,19 @@ export function AppointmentModal({
         {t('agenda.appointment.create_btn')}
       </Button>
     </>
+  ) : isRescheduling ? (
+    <div className="appt-footer-layout">
+      <div className="appt-footer-left">
+        <Button variant="ghost" size="sm" onClick={() => setIsRescheduling(false)}>
+          {t('agenda.appointment.reschedule_back')}
+        </Button>
+      </div>
+      <div className="appt-footer-right">
+        <Button variant="primary" size="sm" loading={saving} onClick={() => void handleRescheduleSave()}>
+          {t('agenda.appointment.reschedule_save')}
+        </Button>
+      </div>
+    </div>
   ) : (
     <div className="appt-footer-layout">
       <div className="appt-footer-left">
@@ -224,6 +274,11 @@ export function AppointmentModal({
             {t('common.save')}
           </Button>
         )}
+        {isActive && onReschedule && (
+          <Button variant="secondary" size="sm" onClick={() => setIsRescheduling(true)}>
+            {t('agenda.appointment.reschedule_btn')}
+          </Button>
+        )}
         {statusKey === 'pending' && (
           <Button variant="primary" size="sm" loading={saving} onClick={() => void handleStatus('confirmed')}>
             {t('agenda.appointment.confirm_btn')}
@@ -233,14 +288,51 @@ export function AppointmentModal({
     </div>
   )
 
+  const modalTitle = mode === 'create'
+    ? t('agenda.appointment.title_new')
+    : isRescheduling
+      ? t('agenda.appointment.reschedule_title')
+      : t('agenda.appointment.title_view')
+
   return (
     <Modal
-      title={mode === 'create' ? t('agenda.appointment.title_new') : t('agenda.appointment.title_view')}
+      title={modalTitle}
       onClose={onClose}
       footer={footer}
+      maxWidth={isRescheduling ? 500 : undefined}
     >
+      {/* ── Mode reprogrammation ───────────────────────────────── */}
+      {mode === 'view' && isRescheduling && appointment && (
+        <div className="appt-reschedule-form">
+          <div className="appt-datetime-row">
+            <div className="appt-field">
+              <label className="appt-label" htmlFor="appt-reschedule-start">{t('agenda.appointment.date_start')}</label>
+              <input
+                id="appt-reschedule-start"
+                ref={rescheduleStartRef}
+                type="datetime-local"
+                className="appt-input"
+                defaultValue={rescheduleDefaults.start}
+                autoComplete="off"
+              />
+            </div>
+            <div className="appt-field">
+              <label className="appt-label" htmlFor="appt-reschedule-end">{t('agenda.appointment.date_end')}</label>
+              <input
+                id="appt-reschedule-end"
+                ref={rescheduleEndRef}
+                type="datetime-local"
+                className="appt-input"
+                defaultValue={rescheduleDefaults.end}
+                autoComplete="off"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Mode visualisation ─────────────────────────────────── */}
-      {mode === 'view' && appointment && (
+      {mode === 'view' && !isRescheduling && appointment && (
         <>
           {/* Date card */}
           <div className="appt-date-card">

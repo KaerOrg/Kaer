@@ -1299,7 +1299,13 @@
       "practitioner_creates_hint": "The patient will receive a notification and must confirm this appointment.",
       "notes_saved": "Notes saved",
       "error_save_notes": "Error saving notes.",
-      "error_update_status": "Error updating status."
+      "error_update_status": "Error updating status.",
+      "reschedule_btn": "Reschedule",
+      "reschedule_title": "Reschedule appointment",
+      "reschedule_save": "Save new time slot",
+      "reschedule_back": "Back",
+      "reschedule_success": "Appointment rescheduled.",
+      "error_reschedule": "Error rescheduling appointment."
     },
     "filter_patient_label": "Search a patient…"
   },

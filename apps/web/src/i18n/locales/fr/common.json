@@ -1403,7 +1403,13 @@
       "practitioner_creates_hint": "Le patient recevra une notification et devra confirmer ce rendez-vous.",
       "notes_saved": "Notes enregistrées",
       "error_save_notes": "Erreur lors de l'enregistrement des notes.",
-      "error_update_status": "Erreur lors de la mise à jour du statut."
+      "error_update_status": "Erreur lors de la mise à jour du statut.",
+      "reschedule_btn": "Reprogrammer",
+      "reschedule_title": "Reprogrammer le rendez-vous",
+      "reschedule_save": "Enregistrer le nouveau créneau",
+      "reschedule_back": "Retour",
+      "reschedule_success": "Rendez-vous reprogrammé.",
+      "error_reschedule": "Erreur lors de la reprogrammation."
     },
     "filter_patient_label": "Rechercher un patient…"
   },
