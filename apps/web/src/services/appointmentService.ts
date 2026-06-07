@@ -318,6 +318,25 @@ export async function updateAppointmentNotes(
   return { ok: !error }
 }
 
+// ─── Reprogrammation ──────────────────────────────────────────────────────────
+
+export async function rescheduleAppointment(
+  appointmentId: string,
+  newStartsAt: string,
+  newEndsAt: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('appointments')
+    .update({
+      starts_at: new Date(newStartsAt).toISOString(),
+      ends_at: new Date(newEndsAt).toISOString(),
+      status: 'pending',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', appointmentId)
+  return { ok: !error, error: error?.message }
+}
+
 // ─── Paramètre auto-confirm ───────────────────────────────────────────────────
 
 export async function fetchAutoConfirmSetting(

@@ -1412,10 +1412,12 @@
     "section_upcoming": "Upcoming",
     "section_past": "Past",
     "book_success": "Your appointment has been booked.",
+    "reschedule_success": "Your appointment has been successfully rescheduled.",
     "appointment": {
       "new": "Book an appointment",
       "cancel_btn": "Cancel appointment",
       "cancel_confirm": "Are you sure you want to cancel this appointment?",
+      "reschedule_btn": "Reschedule",
       "status_pending": "Pending confirmation",
       "status_confirmed": "Confirmed",
       "status_cancelled": "Cancelled",

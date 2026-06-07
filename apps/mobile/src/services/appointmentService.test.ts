@@ -11,6 +11,7 @@ import {
   fetchPractitionerRules,
   bookAppointment,
   cancelAppointment,
+  rescheduleAppointment,
 } from './appointmentService'
 import type { AvailabilityRule, AvailabilityException, Appointment } from './appointmentService'
 
@@ -159,5 +160,49 @@ describe('cancelAppointment', () => {
     mockedFrom.mockReturnValue(makeChain({ data: null, error: null }) as never)
     const result = await cancelAppointment('a1')
     expect(result.ok).toBe(true)
+  })
+})
+
+// ─── rescheduleAppointment ────────────────────────────────────────────────────
+
+describe('rescheduleAppointment', () => {
+  const params = {
+    appointment_id: 'a1',
+    practitioner_id: 'p1',
+    starts_at: '2024-01-08T10:00:00',
+    ends_at: '2024-01-08T10:50:00',
+  }
+
+  it('retourne ok=true et statut confirmed quand auto_confirm=true', async () => {
+    mockedFrom
+      .mockReturnValueOnce(makeChain({ data: { auto_confirm_appointments: true } }) as never)
+      .mockReturnValueOnce(makeChain({ data: null, error: null }) as never)
+    const result = await rescheduleAppointment(params)
+    expect(result.ok).toBe(true)
+  })
+
+  it('retourne ok=true et statut pending quand auto_confirm=false', async () => {
+    mockedFrom
+      .mockReturnValueOnce(makeChain({ data: { auto_confirm_appointments: false } }) as never)
+      .mockReturnValueOnce(makeChain({ data: null, error: null }) as never)
+    const result = await rescheduleAppointment(params)
+    expect(result.ok).toBe(true)
+  })
+
+  it('utilise auto_confirm=true par défaut si praticien introuvable', async () => {
+    mockedFrom
+      .mockReturnValueOnce(makeChain({ data: null }) as never)
+      .mockReturnValueOnce(makeChain({ data: null, error: null }) as never)
+    const result = await rescheduleAppointment(params)
+    expect(result.ok).toBe(true)
+  })
+
+  it('retourne ok=false si Supabase renvoie une erreur', async () => {
+    mockedFrom
+      .mockReturnValueOnce(makeChain({ data: { auto_confirm_appointments: true } }) as never)
+      .mockReturnValueOnce(makeChain({ data: null, error: { message: 'slot_conflict' } }) as never)
+    const result = await rescheduleAppointment(params)
+    expect(result.ok).toBe(false)
+    expect(result.error).toBe('slot_conflict')
   })
 })
