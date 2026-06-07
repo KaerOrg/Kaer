@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
+import { View, Text, StyleSheet } from 'react-native'
 import Svg, { Path, Circle, Line, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg'
-import { colors } from '../../../theme'
+import { colors, spacing } from '../../../theme'
 import {
   type SudsPoint,
   type ChartPadding,
@@ -17,12 +18,16 @@ const GRID_VALUES = [0, 25, 50, 75, 100] as const
 export interface DesensitizationChartProps {
   /** Points triés chronologiquement (1 par séance). */
   points: readonly SudsPoint[]
-  /** Ligne de référence pointillée — typiquement le SUDs initial estimé. */
-  referenceScore: number
+  /** Ligne de référence pointillée (niveau estimé au départ). Omise → pas de ligne. */
+  referenceScore?: number
   /** Largeur disponible — passée par le parent (mesure du conteneur). */
   width: number
   /** Couleur d'accent — défaut: colors.primary. */
   accentColor?: string
+  /** Titre de l'axe vertical (ex. « Niveau d'angoisse (0–100) »). */
+  yAxisLabel?: string
+  /** Titre de l'axe horizontal (ex. « Séances (S1, S2, …) »). */
+  xAxisLabel?: string
 }
 
 // Graphique de désensibilisation (TCC exposure). Affiche l'évolution des
@@ -35,6 +40,8 @@ export function DesensitizationChart({
   referenceScore,
   width,
   accentColor = colors.primary,
+  yAxisLabel,
+  xAxisLabel,
 }: DesensitizationChartProps) {
   const xy = useMemo(
     () =>
@@ -47,7 +54,8 @@ export function DesensitizationChart({
   )
 
   const bottomY = sudsToY(0, CHART_H, PAD)
-  const refY = sudsToY(referenceScore, CHART_H, PAD)
+  const hasReference = referenceScore != null
+  const refY = sudsToY(referenceScore ?? 0, CHART_H, PAD)
 
   const refDashes = useMemo(() => {
     const plotW = width - PAD.left - PAD.right
@@ -55,7 +63,7 @@ export function DesensitizationChart({
     return Array.from({ length: count }, (_, i) => PAD.left + i * 10)
   }, [width])
 
-  return (
+  const svg = (
     <Svg width={width} height={CHART_H}>
       <Defs>
         <LinearGradient id="sudsAreaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -90,18 +98,20 @@ export function DesensitizationChart({
         )
       })}
 
-      {refDashes.map(x => (
-        <Line
-          key={x}
-          x1={x}
-          y1={refY}
-          x2={x + 5}
-          y2={refY}
-          stroke={accentColor}
-          strokeWidth={1.5}
-          strokeOpacity={0.4}
-        />
-      ))}
+      {hasReference
+        ? refDashes.map(x => (
+            <Line
+              key={x}
+              x1={x}
+              y1={refY}
+              x2={x + 5}
+              y2={refY}
+              stroke={accentColor}
+              strokeWidth={1.5}
+              strokeOpacity={0.4}
+            />
+          ))
+        : null}
 
       {xy.length >= 2 && <Path d={areaPath(xy, bottomY)} fill="url(#sudsAreaGrad)" />}
       {xy.length >= 2 && (
@@ -146,4 +156,30 @@ export function DesensitizationChart({
       ))}
     </Svg>
   )
+
+  return (
+    <View style={styles.wrap}>
+      {yAxisLabel ? <Text style={styles.yLabel}>{yAxisLabel}</Text> : null}
+      {svg}
+      {xAxisLabel ? <Text style={styles.xLabel}>{xAxisLabel}</Text> : null}
+    </View>
+  )
 }
+
+const styles = StyleSheet.create({
+  wrap: { alignItems: 'center' },
+  yLabel: {
+    alignSelf: 'flex-start',
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  xLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.textMuted,
+    marginTop: 2,
+  },
+})

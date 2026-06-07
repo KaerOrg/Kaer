@@ -186,7 +186,38 @@
       "strategy_exposure": "Stay in the situation",
       "strategy_distraction": "Think about something else",
       "strategy_contact": "Talk to someone",
-      "footer": "The SUDS scale measures your stress level — used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014."
+      "footer": "The SUDS scale measures your stress level — used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014.",
+      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider — it doesn't replace your care.",
+      "ladder_empty_title": "Your fear ladder",
+      "ladder_empty_text": "Add the situations that stress you out, from easiest to hardest.",
+      "step_done": "Step done",
+      "step_target": "Initial stress: {{value}}",
+      "step_sessions": "{{n}} expo(s)",
+      "add_step": "Add a situation",
+      "edit_step": "Edit situation",
+      "step_label": "The situation you dread",
+      "step_label_placeholder": "E.g. taking the subway when it's packed",
+      "step_target_label": "Initial stress level (0–100)",
+      "detail_no_sessions": "No exposure yet. Go for it when you feel ready.",
+      "detail_history_title": "My exposures",
+      "detail_do_exposure": "Do an exposure",
+      "exposure_section_before": "Before",
+      "exposure_section_during": "During",
+      "exposure_section_after": "After",
+      "expectation_label": "What I'm afraid of",
+      "expectation_placeholder": "What am I afraid will happen?",
+      "suds_anticipated": "Anticipated stress",
+      "suds_peak": "Peak stress",
+      "suds_peak_hint": "The highest level felt during",
+      "suds_final": "Final stress",
+      "outcome_label": "What happened",
+      "outcome_placeholder": "What actually happened?",
+      "step_target_hint": "How stressful is this situation before you start working on it? Used to order your ladder, from easiest to hardest.",
+      "chart_y_axis": "Stress level (0–100)",
+      "chart_x_axis": "Sessions (S1, S2, …)",
+      "chart_reference": "Initial stress",
+      "scale_hint": "0 = no stress · 100 = maximum stress",
+      "exposure_date": "Exposure date"
     },
     "decisional_balance": {
       "title": "The pros and cons",
@@ -818,17 +849,6 @@
     "cssrs": {
       "label": "C-SSRS — Suicide Risk",
       "description": "Suicide risk assessment questionnaire"
-    },
-    "exposure_hierarchy": {
-      "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
-      "info_btn": "What is this technique?",
-      "info_body": "The exposure hierarchy is a validated CBT technique. You list situations you avoid, rate them 0 to 100 by difficulty (SUDs score), then face them gradually starting with the easiest.",
-      "empty_text": "Create your first exposure hierarchy with your clinician.",
-      "suds_hint": "From 0 (no stress) to 100 (max stress). This number is personal — no right or wrong answer.",
-      "description_label": "Situation to face",
-      "description_hint": "Describe precisely the situation you avoid.",
-      "description_placeholder": "E.g. Taking the lift alone to the 5th floor",
-      "session_question_teen": "What is your anxiety level towards this situation right now?"
     }
   }
 }

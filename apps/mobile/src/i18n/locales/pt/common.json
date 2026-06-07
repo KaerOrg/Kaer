@@ -264,9 +264,9 @@
       "intro": "Reprocessamento através de imaginação mental."
     },
     "fear_thermometer": {
-      "label": "Termómetro do medo",
+      "label": "Exposição gradual",
       "description": "Meça o seu nível de angústia (0 a 100)",
-      "title": "Termómetro do medo",
+      "title": "Exposição gradual",
       "intro": "Avalie o seu nível de angústia numa escala de 0 a 100.",
       "tab_entries": "Registos",
       "tab_situations": "As minhas situações",
@@ -282,10 +282,6 @@
       "suds_before": "Antes",
       "suds_after": "Depois",
       "save": "Guardar"
-    },
-    "exposure_hierarchy": {
-      "label": "Hierarquia de exposição",
-      "description": "Construa os seus níveis de exposição gradual"
     },
     "breathing_techniques": {
       "label": "Técnicas de respiração",

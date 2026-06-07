@@ -814,8 +814,9 @@ values
     5
   ),
 
--- ── exposure_hierarchy ───────────────────────────────────────────────────────
--- Hiérarchie d'exposition — liste graduée de situations selon SUDs (TCC)
+-- ── fear_thermometer (sources exposition graduée) ────────────────────────────
+-- Exposition graduée — sources sur la thérapie d'exposition (TCC).
+-- Réaffectées depuis l'ancien module exposure_hierarchy (fusionné dans fear_thermometer).
 -- Sources vérifiées :
 --   PMID 29451967 — Carpenter et al. 2018 — méta-analyse 41 ECR placebo-contrôlés (vérifié PubMed, abstract lu)
 --   NICE NG116 (2018) — Thérapie d'exposition prolongée recommandée (prolonged exposure, Foa)
@@ -828,7 +829,7 @@ values
   --    PMID 29451967 — doi:10.1002/da.22728 (vérifié PubMed, abstract lu)
   (
     'aaaaaaaa-0001-0001-0001-000000000001',
-    'exposure_hierarchy',
+    'fear_thermometer',
     'Carpenter et al. — TCC pour les troubles anxieux : méta-analyse d''ECR placebo-contrôlés (Depress Anxiety, 2018)',
     'meta_analysis',
     'https://doi.org/10.1002/da.22728',
@@ -843,7 +844,7 @@ values
   --    Ce protocole utilise explicitement une hiérarchie d''exposition in vivo + narration imagée.
   (
     'aaaaaaaa-0001-0001-0001-000000000002',
-    'exposure_hierarchy',
+    'fear_thermometer',
     'NICE NG116 — PTSD : évaluation et gestion (2018)',
     'guideline',
     'https://www.nice.org.uk/guidance/ng116/chapter/Recommendations',
@@ -856,7 +857,7 @@ values
   --    PMID 26565122 — doi:10.1146/annurev-clinpsy-021815-093533 (vérifié PubMed, abstract lu)
   (
     'aaaaaaaa-0001-0001-0001-000000000003',
-    'exposure_hierarchy',
+    'fear_thermometer',
     'Foa & McLean — Efficacité de la thérapie d''exposition pour les troubles anxieux : mécanismes (Annu Rev Clin Psychol, 2016)',
     'systematic_review',
     'https://doi.org/10.1146/annurev-clinpsy-021815-093533',

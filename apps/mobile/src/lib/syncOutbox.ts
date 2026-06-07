@@ -14,7 +14,6 @@ export type EntryKind =
   | 'activity_record'
   | 'fear_entry'
   | 'fear_situation'
-  | 'exposure_hierarchy'
   | 'breathing_session'
   | 'cognitive_saturation_session'
   | 'crisis_anchor'

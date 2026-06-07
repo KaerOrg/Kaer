@@ -527,10 +527,13 @@ export interface FearEntry {
   date: string                      // ISO 8601
   situation_id: string | null       // FK → fear_situations.id (null si texte libre)
   situation_label: string           // libellé affiché (copié au moment de la saisie)
-  suds_before: number               // 0–100, brut
+  suds_before: number               // 0–100, brut — angoisse anticipée / au début
+  suds_peak: number | null          // 0–100, brut — pic d'angoisse PENDANT (nullable, hérité)
   strategies: string                // JSON stringifié : CopingStrategy[] + texte libre
   custom_strategy: string | null    // texte libre additionnel
-  suds_after: number | null         // 0–100, brut — nullable (remplissage différé OK)
+  suds_after: number | null         // 0–100, brut — angoisse finale, nullable (remplissage différé OK)
+  expectation_text: string | null   // « ce que je redoute » (texte libre, AVANT)
+  outcome_text: string | null       // « ce qui s'est passé » (texte libre, APRÈS)
   notes: string | null
   created_at: string
 }
@@ -604,13 +607,31 @@ export async function createFearThermometerTables(database: SQLite.SQLiteDatabas
       situation_id TEXT,
       situation_label TEXT NOT NULL DEFAULT '',
       suds_before INTEGER NOT NULL DEFAULT 50,
+      suds_peak INTEGER,
       strategies TEXT NOT NULL DEFAULT '{"selected":[],"custom":""}',
       custom_strategy TEXT,
       suds_after INTEGER,
+      expectation_text TEXT,
+      outcome_text TEXT,
       notes TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
+  // Idempotent migrations — colonnes enrichies (parcours d'exposition unifié).
+  // Anciennes BDDs créées avant la refonte : ajout sans perte de données.
+  const entryCols = await database.getAllAsync<{ name: string }>(
+    'PRAGMA table_info(fear_entries)'
+  )
+  const entryColNames = new Set(entryCols.map(c => c.name))
+  if (!entryColNames.has('suds_peak')) {
+    await database.execAsync('ALTER TABLE fear_entries ADD COLUMN suds_peak INTEGER')
+  }
+  if (!entryColNames.has('expectation_text')) {
+    await database.execAsync('ALTER TABLE fear_entries ADD COLUMN expectation_text TEXT')
+  }
+  if (!entryColNames.has('outcome_text')) {
+    await database.execAsync('ALTER TABLE fear_entries ADD COLUMN outcome_text TEXT')
+  }
 }
 
 // ── Situations ────────────────────────────────────────────────────────────────
@@ -704,17 +725,20 @@ export async function saveFearEntry(entry: Omit<FearEntry, 'created_at'>): Promi
   const database = getDb()
   await database.runAsync(
     `INSERT OR REPLACE INTO fear_entries
-      (id, date, situation_id, situation_label, suds_before, strategies, custom_strategy, suds_after, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, date, situation_id, situation_label, suds_before, suds_peak, strategies, custom_strategy, suds_after, expectation_text, outcome_text, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
       entry.date,
       entry.situation_id,
       entry.situation_label,
       entry.suds_before,
+      entry.suds_peak ?? null,
       entry.strategies,
       entry.custom_strategy,
       entry.suds_after ?? null,
+      entry.expectation_text ?? null,
+      entry.outcome_text ?? null,
       entry.notes,
     ]
   )

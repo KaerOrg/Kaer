@@ -3,15 +3,12 @@ import {
   deleteFearEntry as dbDeleteFearEntry,
   saveFearSituation as dbSaveFearSituation,
   deleteFearSituation as dbDeleteFearSituation,
-  createExposureHierarchy as dbCreateHierarchy,
-  deleteExposureHierarchy as dbDeleteHierarchy,
   type FearEntry,
   type FearSituation,
-  type ExposureHierarchy,
 } from '../lib/database'
 import { syncUpsert, syncDelete } from './syncHelpers'
 
-export type { FearEntry, FearSituation, ExposureHierarchy }
+export type { FearEntry, FearSituation }
 
 export async function saveFearEntry(entry: Omit<FearEntry, 'created_at'>): Promise<void> {
   await syncUpsert(() => dbSaveFearEntry(entry), {
@@ -23,9 +20,12 @@ export async function saveFearEntry(entry: Omit<FearEntry, 'created_at'>): Promi
       situation_id: entry.situation_id,
       situation_label: entry.situation_label,
       suds_before: entry.suds_before,
+      suds_peak: entry.suds_peak,
       strategies: entry.strategies,
       custom_strategy: entry.custom_strategy,
       suds_after: entry.suds_after,
+      expectation_text: entry.expectation_text,
+      outcome_text: entry.outcome_text,
       notes: entry.notes,
     },
   })
@@ -51,17 +51,4 @@ export async function saveFearSituation(situation: Omit<FearSituation, 'created_
 
 export async function deleteFearSituation(id: string): Promise<void> {
   await syncDelete(() => dbDeleteFearSituation(id), id, 'fear_thermometer', 'fear_situation')
-}
-
-export async function createExposureHierarchy(h: Omit<ExposureHierarchy, 'created_at'>): Promise<void> {
-  await syncUpsert(() => dbCreateHierarchy(h), {
-    local_id: h.id,
-    module_id: h.module_id,
-    entry_kind: 'exposure_hierarchy',
-    payload: { module_id: h.module_id, title: h.title },
-  })
-}
-
-export async function deleteExposureHierarchy(id: string): Promise<void> {
-  await syncDelete(() => dbDeleteHierarchy(id), id, 'exposure_hierarchy', 'exposure_hierarchy')
 }

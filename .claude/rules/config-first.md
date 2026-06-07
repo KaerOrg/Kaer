@@ -117,3 +117,21 @@ Ce principe est déjà suivi pour :
 - `scale_meta` fields — métadonnées des échelles cliniques (migré depuis `CLINICAL_SCALES` dans cette session)
 
 Références : [`docs/module-engine.md`](../../docs/module-engine.md) — section *Schéma ClinicalScale*.
+
+## Cas vécu — ExposureTrackerLayout web (2026-06-07, PR #39)
+
+Le layout web `exposure_tracker` hardcodait le `module_id` dans sa fonction `lbl` :
+
+```ts
+// ❌ Layout qui hardcode un module_id — brise la généricité du preview_kind
+const lbl = useMemo(() => (key: string) => t(`modules.fear_thermometer.${key}`), [t])
+
+// ✅ Dériver depuis les fields — le layout reste réutilisable par tout module
+const moduleId = useMemo(() => fields[0]?.module_id ?? 'fear_thermometer', [fields])
+const lbl = useCallback((key: string) => t(`modules.${moduleId}.${key}`), [t, moduleId])
+```
+
+Ce cas est **systématique** dans les layouts web qui reçoivent `fields: ContentField[]` :
+`ContentField.module_id` est disponible → toujours le dériver depuis les fields,
+jamais l'écrire en dur dans le layout. La version mobile passe `moduleId` en prop
+explicite — le web doit faire l'équivalent en le dérivant des fields.

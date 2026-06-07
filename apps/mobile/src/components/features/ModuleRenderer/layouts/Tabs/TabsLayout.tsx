@@ -7,12 +7,13 @@
 // Conformité MDR 2017/745 : pure navigation, zéro interprétation.
 
 import { useState, useMemo } from 'react'
+import type { ComponentType } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { colors } from '../../../../../theme'
 import type { ContentField, PreviewKind } from '../../../../../services/moduleService'
 import { useModuleT } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
-import { FieldRenderer } from '../../FieldRenderer'
+import type { FieldRendererProps } from '../../FieldRenderer/types'
 import { styles } from './styles'
 
 interface TabSpec {
@@ -31,6 +32,11 @@ export interface TabsLayoutProps {
 }
 
 export function TabsLayout({ fields, moduleId }: TabsLayoutProps) {
+  // Lazy require — casse le cycle circulaire :
+  // FieldRenderer/index → FieldRenderer.tsx → LayoutDispatcher → TabsLayout → FieldRenderer/index
+  // Le require() à l'intérieur du composant est évalué à l'exécution (après initialisation complète).
+  const { FieldRenderer } = require('../../FieldRenderer') as { FieldRenderer: ComponentType<FieldRendererProps> }
+
   const t = useModuleT()
 
   const tabs = useMemo<TabSpec[]>(() => {

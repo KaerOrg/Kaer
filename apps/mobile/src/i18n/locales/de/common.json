@@ -264,9 +264,9 @@
       "intro": "Verarbeitung durch mentale Imagination."
     },
     "fear_thermometer": {
-      "label": "Angstthermometer",
+      "label": "Graduierte Exposition",
       "description": "Messen Sie Ihr Belastungsniveau (0 bis 100)",
-      "title": "Angstthermometer",
+      "title": "Graduierte Exposition",
       "intro": "Bewerten Sie Ihr Belastungsniveau auf einer Skala von 0 bis 100.",
       "tab_entries": "Einträge",
       "tab_situations": "Meine Situationen",
@@ -282,10 +282,6 @@
       "suds_before": "Vorher",
       "suds_after": "Nachher",
       "save": "Speichern"
-    },
-    "exposure_hierarchy": {
-      "label": "Expositionshierarchie",
-      "description": "Stufenweise Expositionsschritte aufbauen"
     },
     "breathing_techniques": {
       "label": "Atemtechniken",

@@ -124,7 +124,6 @@ export type PreviewKind =
   | 'psyedu'
   | 'tabbed'
   | 'chrono_month'
-  | 'exposure_hierarchy'
   | 'slider_dashboard'
   | 'crisis_urgency'
 

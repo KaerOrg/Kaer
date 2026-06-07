@@ -13,8 +13,7 @@
 |-----|-----|---------------|----------|-----|
 | `sleep_diary` | Agenda du sommeil | `sleep_journal` | SQLite `sleep_diary_entries` | [doc](modules/sleep_diary.md) |
 | `beck_columns` | Colonnes de Beck (TCC) | `column_form` | SQLite `form_entries` | [doc](modules/beck_columns.md) |
-| `fear_thermometer` | Thermomètre de la peur | `exposure_tracker` | SQLite `fear_situations` | [doc](modules/fear_thermometer.md) |
-| `exposure_hierarchy` | Hiérarchie d'exposition (TCC) | `exposure_hierarchy` | SQLite `exposure_hierarchies` + `fear_situations` | — |
+| `fear_thermometer` | Exposition graduée | `exposure_tracker` | SQLite `fear_situations` / `fear_entries` | [doc](modules/fear_thermometer.md) |
 | `emotion_wheel` | Roue des émotions | `tree_selector` | SQLite `emotion_entries` | [doc](modules/emotion_wheel.md) |
 | `crisis_plan` | Plan de crise (Safety Plan) | `editable_steps` | SQLite `crisis_anchors` + Supabase config | — |
 | `rim` | RIM — Retraitement par Imagerie Mentale | `patient_scenario` | Supabase `patient_modules.config` (lecture seule patient) | [doc](modules/rim.md) |

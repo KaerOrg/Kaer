@@ -2,15 +2,11 @@ const mockSaveFearEntry = jest.fn().mockResolvedValue(undefined)
 const mockDeleteFearEntry = jest.fn().mockResolvedValue(undefined)
 const mockSaveFearSituation = jest.fn().mockResolvedValue(undefined)
 const mockDeleteFearSituation = jest.fn().mockResolvedValue(undefined)
-const mockCreateHierarchy = jest.fn().mockResolvedValue(undefined)
-const mockDeleteHierarchy = jest.fn().mockResolvedValue(undefined)
 jest.mock('../lib/database', () => ({
   saveFearEntry: (...a: unknown[]) => mockSaveFearEntry(...a),
   deleteFearEntry: (...a: unknown[]) => mockDeleteFearEntry(...a),
   saveFearSituation: (...a: unknown[]) => mockSaveFearSituation(...a),
   deleteFearSituation: (...a: unknown[]) => mockDeleteFearSituation(...a),
-  createExposureHierarchy: (...a: unknown[]) => mockCreateHierarchy(...a),
-  deleteExposureHierarchy: (...a: unknown[]) => mockDeleteHierarchy(...a),
 }))
 
 const mockEnqueue = jest.fn().mockResolvedValue(undefined)
@@ -21,7 +17,6 @@ jest.mock('./sync', () => ({
 import {
   saveFearEntry, deleteFearEntry,
   saveFearSituation, deleteFearSituation,
-  createExposureHierarchy, deleteExposureHierarchy,
 } from './fearTrackerService'
 
 beforeEach(() => jest.clearAllMocks())
@@ -32,9 +27,12 @@ const fearEntry = {
   situation_id: null,
   situation_label: 'Ascenseur',
   suds_before: 70,
+  suds_peak: 85,
   strategies: '{"selected":[]}',
   custom_strategy: null,
   suds_after: 40,
+  expectation_text: null,
+  outcome_text: null,
   notes: null,
 }
 
@@ -44,12 +42,6 @@ const situation = {
   hierarchy_id: null,
   target_suds: 60,
   is_done: 0,
-}
-
-const hierarchy = {
-  id: 'eh-1',
-  module_id: 'exposure_hierarchy',
-  title: 'Phobies sociales',
 }
 
 describe('fearTrackerService', () => {
@@ -89,25 +81,6 @@ describe('fearTrackerService', () => {
     expect(mockDeleteFearSituation).toHaveBeenCalledWith('fs-1')
     expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
       local_id: 'fs-1',
-      operation: 'delete',
-    }))
-  })
-
-  it('createExposureHierarchy : SQLite puis enqueue exposure_hierarchy', async () => {
-    await createExposureHierarchy(hierarchy)
-    expect(mockCreateHierarchy).toHaveBeenCalledWith(hierarchy)
-    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
-      local_id: 'eh-1',
-      entry_kind: 'exposure_hierarchy',
-      operation: 'upsert',
-    }))
-  })
-
-  it('deleteExposureHierarchy : SQLite puis enqueue delete', async () => {
-    await deleteExposureHierarchy('eh-1')
-    expect(mockDeleteHierarchy).toHaveBeenCalledWith('eh-1')
-    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
-      local_id: 'eh-1',
       operation: 'delete',
     }))
   })
