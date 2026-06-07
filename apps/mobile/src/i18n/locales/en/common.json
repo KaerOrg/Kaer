@@ -10,7 +10,7 @@
     },
     "chart_legend": {
       "sessions": "Sessions logged",
-      "initial_suds": "Initial SUDs"
+      "initial_suds": "Initial stress"
     },
     "months": {
       "january": "January",
@@ -812,7 +812,38 @@
       "strategy_exposure": "Stay in the situation (exposure)",
       "strategy_distraction": "Cognitive distraction",
       "strategy_contact": "Reach out to someone",
-      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
+      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
+      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider — it does not replace your therapy.",
+      "ladder_empty_title": "Your fear ladder",
+      "ladder_empty_text": "Add the situations that make you anxious, from the least to the most difficult.",
+      "step_done": "Step done",
+      "step_target": "Initial stress: {{value}}",
+      "step_sessions": "{{n}} exposure(s)",
+      "add_step": "Add a situation",
+      "edit_step": "Edit situation",
+      "step_label": "The feared situation",
+      "step_label_placeholder": "E.g. taking the subway at rush hour",
+      "step_target_label": "Initial stress level (0–100)",
+      "detail_no_sessions": "No exposure yet. Start one when you feel ready.",
+      "detail_history_title": "My exposures",
+      "detail_do_exposure": "Do an exposure",
+      "exposure_section_before": "Before",
+      "exposure_section_during": "During",
+      "exposure_section_after": "After",
+      "expectation_label": "What I'm afraid of",
+      "expectation_placeholder": "What am I afraid will happen?",
+      "suds_anticipated": "Anticipated stress",
+      "suds_peak": "Peak stress",
+      "suds_peak_hint": "The highest level felt during",
+      "suds_final": "Final stress",
+      "outcome_label": "What happened",
+      "outcome_placeholder": "What actually happened?",
+      "step_target_hint": "How stressful is this situation before you start working on it? Used to order your ladder, from easiest to hardest.",
+      "chart_y_axis": "Stress level (0–100)",
+      "chart_x_axis": "Sessions (S1, S2, …)",
+      "chart_reference": "Initial stress",
+      "scale_hint": "0 = no stress · 100 = maximum stress",
+      "exposure_date": "Exposure date"
     },
     "exposure_hierarchy": {
       "label": "Exposure hierarchy",

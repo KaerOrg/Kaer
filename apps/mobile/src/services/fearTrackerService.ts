@@ -23,9 +23,12 @@ export async function saveFearEntry(entry: Omit<FearEntry, 'created_at'>): Promi
       situation_id: entry.situation_id,
       situation_label: entry.situation_label,
       suds_before: entry.suds_before,
+      suds_peak: entry.suds_peak,
       strategies: entry.strategies,
       custom_strategy: entry.custom_strategy,
       suds_after: entry.suds_after,
+      expectation_text: entry.expectation_text,
+      outcome_text: entry.outcome_text,
       notes: entry.notes,
     },
   })

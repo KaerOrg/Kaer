@@ -29,7 +29,7 @@
     },
     "chart_legend": {
       "sessions": "Séances réalisées",
-      "initial_suds": "SUDs estimé au départ"
+      "initial_suds": "Niveau de stress initial"
     },
     "months": {
       "january": "Janvier",
@@ -972,7 +972,38 @@
       "strategy_exposure": "Rester dans la situation (exposition)",
       "strategy_distraction": "Distraction cognitive",
       "strategy_contact": "Contact avec un proche",
-      "footer": "Échelle SUDS (Subjective Units of Distress Scale) — mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014."
+      "footer": "Échelle SUDS (Subjective Units of Distress Scale) — mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "ladder_empty_title": "Votre échelle de la peur",
+      "ladder_empty_text": "Ajoutez les situations qui vous angoissent, de la moins à la plus difficile.",
+      "step_done": "Marche franchie",
+      "step_target": "Niveau de stress initial : {{value}}",
+      "step_sessions": "{{n}} exposition(s)",
+      "add_step": "Ajouter une situation",
+      "edit_step": "Modifier la situation",
+      "step_label": "La situation redoutée",
+      "step_label_placeholder": "Ex. : prendre le métro aux heures de pointe",
+      "step_target_label": "Niveau de stress initial (0–100)",
+      "detail_no_sessions": "Aucune exposition pour l'instant. Lancez-en une quand vous vous sentez prêt.",
+      "detail_history_title": "Mes expositions",
+      "detail_do_exposure": "Faire une exposition",
+      "exposure_section_before": "Avant",
+      "exposure_section_during": "Pendant",
+      "exposure_section_after": "Après",
+      "expectation_label": "Ce que je redoute",
+      "expectation_placeholder": "Qu'est-ce que je crains qu'il se passe ?",
+      "suds_anticipated": "Stress anticipé",
+      "suds_peak": "Pic de stress",
+      "suds_peak_hint": "Le niveau le plus haut ressenti pendant",
+      "suds_final": "Stress final",
+      "outcome_label": "Ce qui s'est passé",
+      "outcome_placeholder": "Qu'est-ce qui s'est réellement passé ?",
+      "step_target_hint": "À quel point cette situation vous stresse, avant de commencer à travailler dessus ? Sert à classer votre échelle, du plus facile au plus difficile.",
+      "chart_y_axis": "Niveau de stress (0–100)",
+      "chart_x_axis": "Séances (S1, S2, …)",
+      "chart_reference": "Niveau de stress initial",
+      "scale_hint": "0 = aucun stress · 100 = stress maximal",
+      "exposure_date": "Date de l'exposition"
     },
     "exposure_hierarchy": {
       "label": "Hiérarchie d'exposition",

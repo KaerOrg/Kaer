@@ -32,9 +32,12 @@ const fearEntry = {
   situation_id: null,
   situation_label: 'Ascenseur',
   suds_before: 70,
+  suds_peak: 85,
   strategies: '{"selected":[]}',
   custom_strategy: null,
   suds_after: 40,
+  expectation_text: null,
+  outcome_text: null,
   notes: null,
 }
 

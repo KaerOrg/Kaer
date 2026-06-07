@@ -258,4 +258,116 @@ export const etStyles = StyleSheet.create({
   panelItemLabel: { flex: 1, fontSize: 13, color: colors.text },
   infoBox:        { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: 12, marginHorizontal: spacing.md, marginBottom: 4, padding: 10, backgroundColor: colors.neutral, borderRadius: radius.sm },
   footerText:     { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
+
+  // ── Parcours unifié — échelle (ladder) ──────────────────────────────────
+  ladderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.card,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.md,
+  },
+  ladderCheckbox: {
+    width: 26, height: 26, borderRadius: radius.full,
+    borderWidth: 2, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ladderCheckboxDone: { borderColor: colors.primary, backgroundColor: colors.primary },
+  ladderRowText: { flex: 1, gap: 3 },
+  ladderRowTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  ladderRowMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  ladderMetaText: { fontSize: 12, color: colors.textMuted },
+  targetChip: {
+    paddingHorizontal: spacing.sm, paddingVertical: 2,
+    borderRadius: radius.full, backgroundColor: colors.primaryLight,
+  },
+  targetChipText: { fontSize: 11, fontWeight: '700', color: colors.primary },
+
+  // ── En-tête de niveau (detail / form) ───────────────────────────────────
+  headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: colors.text },
+
+  // ── Detail — courbe + historique ────────────────────────────────────────
+  chartCard: {
+    backgroundColor: colors.card,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  historyTitle: {
+    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+    marginTop: spacing.md, marginBottom: spacing.xs,
+  },
+  doExposureBtn: {
+    position: 'absolute',
+    bottom: spacing.xl,
+    left: spacing.lg,
+    right: spacing.lg,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.xs,
+    height: 56,
+    borderRadius: radius.full,
+    backgroundColor: colors.primary,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2, shadowRadius: 8, elevation: 6,
+  },
+  doExposureText: { color: colors.white, fontSize: 15, fontWeight: '700' },
+
+  // ── Step form ───────────────────────────────────────────────────────────
+  stepInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+    color: colors.text,
+    backgroundColor: colors.background,
+    minHeight: 56,
+    textAlignVertical: 'top',
+  },
+
+  // ── Exposure form — texte prédiction / résultat ─────────────────────────
+  predictInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    fontSize: 14,
+    color: colors.text,
+    backgroundColor: colors.background,
+    minHeight: 64,
+    textAlignVertical: 'top',
+  },
+
+  // ── Exposure form — sélecteur de date ───────────────────────────────────
+  dateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  dateValue: { fontSize: 15, fontWeight: '500', color: colors.text, textTransform: 'capitalize' },
+  dateConfirmBtn: {
+    alignSelf: 'flex-end',
+    backgroundColor: colors.primaryLight,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  dateConfirmText: { color: colors.primary, fontSize: 14, fontWeight: '700' },
 })

@@ -1,66 +1,38 @@
-// ─── Layout — exposition graduée (fear_thermometer…) ───────────────────────
+// ─── Layout `exposure_tracker` — Parcours d'exposition unifié ────────────────
 //
-// Pattern « SUDs avant/après + catalogue de situations + stratégies de coping ».
-// 3 modes internes : list | entry | situations.
-//   - list        : tab bar Saisies / Situations + liste des entries SUDs
-//                   avec barres avant/après, FAB Nouvelle saisie
-//   - entry       : formulaire (situation picker + SUDs avant + stratégies +
-//                   SUDs après optionnel + notes)
-//   - situations  : sous-mode du tab Situations — gestion du catalogue
-//                   (input + liste avec delete)
+// Refonte du Thermomètre de la peur, inspirée des outils de référence les plus
+// utilisés (Mayo Clinic Anxiety Coach, MindShift CBT, Exposure: Face Your Fears).
+// Un seul parcours : échelle de la peur → marches classées → expositions
+// répétées vécues comme une expérience (prédiction → pic → résultat) → courbe.
 //
-// Persistance dans les tables SQLite dédiées `fear_situations` et
-// `fear_entries` (existantes — aucune migration nécessaire).
+// Conformité MDR 2017/745 : le code affiche des valeurs brutes saisies par le
+// patient (SUDS, textes), une courbe neutre, des compteurs. Aucune
+// interprétation, aucun seuil, aucune conclusion, aucune couleur de gravité.
 //
-// Conformité MDR 2017/745 : SUDs 0–100 affichés bruts, sans label
-// interprétatif. Couleurs avant (rouge) / après (vert) = convention
-// d'affichage de l'ordre temporel saisi, pas un score clinique.
-//
-// L'événement d'engagement (ex. SAVE_FEAR_ENTRY) est émis uniquement à la
-// création d'une entry (jamais à l'édition).
+// Spec : docs/spec/exposure-journey.md
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
-  KeyboardAvoidingView, Platform,
-} from 'react-native'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import React, { useCallback, useMemo, useState } from 'react'
+import { View, ActivityIndicator } from 'react-native'
+import { useTranslation } from 'react-i18next'
 import { colors } from '../../../../../theme'
 import {
-  getAllFearEntries, getFearEntry, getAllFearSituations, generateId,
-  type FearEntry, type FearSituation,
+  generateId, type FearEntry, type FearSituation,
 } from '../../../../../lib/database'
 import {
   saveFearEntry, deleteFearEntry, saveFearSituation, deleteFearSituation,
 } from '../../../../../services/fearTrackerService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useTeen } from '../../../../../hooks/useTeen'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { PipPicker } from '../../../../ui/PipPicker'
 import type { ContentField } from '../../../../../services/moduleService'
-import { EntryListCard } from './EntryListCard'
+import type { ExposureConfig, ExposureDraft, ExposureMode } from './types'
+import { buildSudsSteps, serializeStrategies, deserializeStrategies, sortSteps } from './exposureLogic'
+import { useExposureData } from './useExposureData'
+import { LadderList } from './LadderList'
+import { StepFormView } from './StepFormView'
+import { StepDetail } from './StepDetail'
+import { ExposureForm, type StrategyOption } from './ExposureForm'
 import { etStyles } from './styles'
-
-function buildSudsSteps(min: number, max: number, step: number): number[] {
-  const out: number[] = []
-  for (let v = min; v <= max; v += step) out.push(v)
-  return out
-}
-
-function serializeStrategies(selectedKeys: string[], custom: string | null): string {
-  return JSON.stringify({ selected: selectedKeys, custom: custom ?? '' })
-}
-
-function deserializeStrategies(raw: string): { selected: string[]; custom: string } {
-  try {
-    const parsed = JSON.parse(raw)
-    const selected = Array.isArray(parsed.selected) ? parsed.selected.map(String) : []
-    const custom = typeof parsed.custom === 'string' ? parsed.custom : ''
-    return { selected, custom }
-  } catch {
-    return { selected: [], custom: '' }
-  }
-}
 
 export interface ExposureTrackerLayoutProps {
   fields: ContentField[]
@@ -68,222 +40,152 @@ export interface ExposureTrackerLayoutProps {
   moduleId: string
 }
 
-export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutProps) {
-  const t = useModuleT()
+export function ExposureTrackerLayout({ fields, moduleId }: ExposureTrackerLayoutProps) {
+  const { isTeenMode } = useTeen()
+  const { t } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
+  const { loading, situations, entries, reload } = useExposureData()
 
-  // ── Field resolution helpers ─────────────────────────────────────────────
+  const [mode, setMode] = useState<ExposureMode>({ kind: 'ladder' })
+  const [saving, setSaving] = useState(false)
+
+  // ── Résolution config / stratégies / libellés ────────────────────────────
   const configField = useMemo(() => fields.find(f => f.field_type === 'exposure_tracker_config'), [fields])
-  const lbl = useCallback((key: string): string => {
-    const code = configField?.props[key]
-    return code ? t(code) : ''
-  }, [configField, t])
-  const sudsMin = parseInt(configField?.props['suds_min'] ?? '0', 10)
-  const sudsMax = parseInt(configField?.props['suds_max'] ?? '100', 10)
-  const sudsStep = parseInt(configField?.props['suds_step'] ?? '10', 10)
-  const sudsDefaultBefore = parseInt(configField?.props['suds_default_before'] ?? '50', 10)
-  const beforeColor = configField?.props['suds_before_color'] ?? colors.danger
-  const afterColor = configField?.props['suds_after_color'] ?? colors.success
+
+  const config = useMemo<ExposureConfig>(() => ({
+    sudsMin: parseInt(configField?.props['suds_min'] ?? '0', 10),
+    sudsMax: parseInt(configField?.props['suds_max'] ?? '100', 10),
+    sudsStep: parseInt(configField?.props['suds_step'] ?? '10', 10),
+    sudsDefaultBefore: parseInt(configField?.props['suds_default_before'] ?? '50', 10),
+    beforeColor: configField?.props['suds_before_color'] ?? colors.danger,
+    peakColor: configField?.props['suds_peak_color'] ?? colors.primary,
+    afterColor: configField?.props['suds_after_color'] ?? colors.success,
+  }), [configField])
 
   const sudsSteps = useMemo(
-    () => buildSudsSteps(sudsMin, sudsMax, sudsStep),
-    [sudsMin, sudsMax, sudsStep]
+    () => buildSudsSteps(config.sudsMin, config.sudsMax, config.sudsStep),
+    [config.sudsMin, config.sudsMax, config.sudsStep],
   )
 
   const strategyFields = useMemo(
     () => fields
       .filter(f => f.field_type === 'exposure_tracker_strategy')
       .sort((a, b) => a.sort_order - b.sort_order),
-    [fields]
+    [fields],
+  )
+
+  const strategyOptions = useMemo<StrategyOption[]>(
+    () => strategyFields
+      .map(f => ({ id: f.id, label: f.text_code ? t(f.text_code) : '' }))
+      .filter(o => o.label.length > 0),
+    [strategyFields, t],
   )
 
   const strategyLabelByKey = useMemo(() => {
     const map = new Map<string, string>()
-    for (const f of strategyFields) {
-      const label = f.text_code ? t(f.text_code) : ''
-      if (label) map.set(f.id, label)
-    }
+    for (const o of strategyOptions) map.set(o.id, o.label)
     return map
-  }, [strategyFields, t])
+  }, [strategyOptions])
 
-  // ── State ────────────────────────────────────────────────────────────────
-  const [tab, setTab] = useState<'entries' | 'situations'>('entries')
-  const [mode, setMode] = useState<'list' | 'entry'>('list')
-  const [entries, setEntries] = useState<FearEntry[]>([])
-  const [situations, setSituations] = useState<FearSituation[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const lbl = useCallback(
+    (k: string, opts?: Record<string, string | number>) => t(`modules.${moduleId}.${k}`, opts),
+    [t, moduleId],
+  )
 
-  // Entry mode state
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [situationId, setSituationId] = useState<string | null>(null)
-  const [situationFreeText, setSituationFreeText] = useState('')
-  const [situationPickerMode, setSituationPickerMode] = useState<'catalogue' | 'free'>('catalogue')
-  const [sudsBefore, setSudsBefore] = useState<number>(sudsDefaultBefore)
-  const [selectedStrategies, setSelectedStrategies] = useState<string[]>([])
-  const [customStrategy, setCustomStrategy] = useState('')
-  const [sudsAfter, setSudsAfter] = useState<number | null>(null)
-  const [notes, setNotes] = useState('')
+  const sortedSteps = useMemo(() => sortSteps(situations), [situations])
 
-  // Situations panel state
-  const [newSituationLabel, setNewSituationLabel] = useState('')
-
-  // ── Loaders ──────────────────────────────────────────────────────────────
-  const reloadAll = useCallback(async () => {
-    const [e, s] = await Promise.all([getAllFearEntries(), getAllFearSituations()])
-    setEntries(e)
-    setSituations(s)
-    setLoading(false)
-  }, [])
-
-  useEffect(() => { reloadAll().catch(() => setLoading(false)) }, [reloadAll])
-
-  // ── Entry navigation ─────────────────────────────────────────────────────
-  const resetEntryForm = useCallback(() => {
-    setEditingId(null)
-    setSituationId(null)
-    setSituationFreeText('')
-    setSituationPickerMode(situations.length > 0 ? 'catalogue' : 'free')
-    setSudsBefore(sudsDefaultBefore)
-    setSelectedStrategies([])
-    setCustomStrategy('')
-    setSudsAfter(null)
-    setNotes('')
-  }, [situations.length, sudsDefaultBefore])
-
-  const handleNew = useCallback(() => {
-    resetEntryForm()
-    setMode('entry')
-  }, [resetEntryForm])
-
-  const handleEdit = useCallback(async (entryId: string) => {
-    const existing = await getFearEntry(entryId)
-    if (!existing) return
-    setEditingId(existing.id)
-    setSituationId(existing.situation_id)
-    setSituationFreeText(existing.situation_id ? '' : existing.situation_label)
-    setSituationPickerMode(existing.situation_id ? 'catalogue' : 'free')
-    setSudsBefore(existing.suds_before)
-    const { selected, custom } = deserializeStrategies(existing.strategies)
-    setSelectedStrategies(selected)
-    setCustomStrategy(custom)
-    setSudsAfter(existing.suds_after)
-    setNotes(existing.notes ?? '')
-    setMode('entry')
-  }, [])
-
-  const handleBackToList = useCallback(() => {
-    setMode('list')
-    setEditingId(null)
-  }, [])
-
-  // ── Save / delete entry ──────────────────────────────────────────────────
-  const handleSave = useCallback(async () => {
-    const resolvedLabel = situationId
-      ? (situations.find(s => s.id === situationId)?.label ?? null)
-      : situationFreeText.trim() || null
-
-    if (!resolvedLabel) {
-      showToast(lbl('situation_missing_msg') || t('common.error'), 'info')
-      return
-    }
-
-    setSaving(true)
-    try {
-      const id = editingId ?? generateId()
-      const customTrim = customStrategy.trim() || null
-      const entry: Omit<FearEntry, 'created_at'> = {
-        id,
-        date: new Date().toISOString().slice(0, 10),
-        situation_id: situationId,
-        situation_label: resolvedLabel,
-        suds_before: sudsBefore,
-        strategies: serializeStrategies(selectedStrategies, customTrim),
-        custom_strategy: customTrim,
-        suds_after: sudsAfter,
-        notes: notes.trim() || null,
-      }
-      await saveFearEntry(entry)
-      await reloadAll()
-      setMode('list')
-      setEditingId(null)
-    } catch {
-      showToast(t('common.save_error'), 'error')
-    } finally {
-      setSaving(false)
-    }
-  }, [
-    situationId, situations, situationFreeText, sudsBefore, selectedStrategies,
-    customStrategy, sudsAfter, notes, editingId,
-    reloadAll, lbl, t, showToast,
-  ])
-
-  const handleDeleteFromEntry = useCallback(() => {
-    if (!editingId) return
-    showConfirm({
-      title: lbl('delete_entry_title') || t('common.delete'),
-      message: t('common.irreversible'),
-      confirmLabel: t('common.delete'),
-      destructive: true,
-      onConfirm: async () => {
-        await deleteFearEntry(editingId)
-        await reloadAll()
-        setMode('list')
-        setEditingId(null)
-      },
-    })
-  }, [editingId, reloadAll, lbl, t, showConfirm])
-
-  const handleDeleteFromList = useCallback((entry: FearEntry) => {
-    showConfirm({
-      title: lbl('delete_entry_title') || t('common.delete'),
-      message: `"${entry.situation_label}"`,
-      confirmLabel: t('common.delete'),
-      destructive: true,
-      onConfirm: async () => {
-        await deleteFearEntry(entry.id)
-        await reloadAll()
-      },
-    })
-  }, [reloadAll, lbl, t, showConfirm])
-
-  // ── Situations panel ─────────────────────────────────────────────────────
-  const handleAddSituation = useCallback(async () => {
-    const trimmed = newSituationLabel.trim()
-    if (!trimmed) return
-    const s = {
-      id: generateId(),
-      label: trimmed,
-      hierarchy_id: null,
-      target_suds: null,
-      is_done: 0,
-    }
-    await saveFearSituation(s)
-    setSituations(prev => [...prev, { ...s, created_at: new Date().toISOString() }])
-    setNewSituationLabel('')
-  }, [newSituationLabel])
-
-  const handleDeleteSituation = useCallback((sit: FearSituation) => {
-    showConfirm({
-      title: lbl('situation_delete_title') || t('common.delete'),
-      message: `"${sit.label}"`,
-      confirmLabel: t('common.delete'),
-      destructive: true,
-      onConfirm: async () => {
-        await deleteFearSituation(sit.id)
-        setSituations(prev => prev.filter(p => p.id !== sit.id))
-      },
-    })
-  }, [lbl, t])
-
-  // ── Strategy chip resolution for cards ───────────────────────────────────
   const resolveStrategyLabels = useCallback((entry: FearEntry): string[] => {
     const { selected, custom } = deserializeStrategies(entry.strategies)
     const labels = selected.map(key => strategyLabelByKey.get(key) ?? key)
     if (custom.trim()) labels.push(custom.trim())
     return labels
   }, [strategyLabelByKey])
+
+  // ── Marches ───────────────────────────────────────────────────────────────
+  const handleToggleDone = useCallback(async (step: FearSituation) => {
+    await saveFearSituation({
+      id: step.id,
+      label: step.label,
+      hierarchy_id: step.hierarchy_id,
+      target_suds: step.target_suds,
+      is_done: step.is_done === 1 ? 0 : 1,
+    })
+    await reload()
+  }, [reload])
+
+  const handleSaveStep = useCallback(async (label: string, target: number) => {
+    const editingId = mode.kind === 'step_form' ? mode.stepId : null
+    const existing = editingId ? situations.find(s => s.id === editingId) : null
+    const id = editingId ?? generateId()
+    await saveFearSituation({
+      id,
+      label,
+      hierarchy_id: existing?.hierarchy_id ?? null,
+      target_suds: target,
+      is_done: existing?.is_done ?? 0,
+    })
+    await reload()
+    setMode({ kind: 'detail', stepId: id })
+  }, [mode, situations, reload])
+
+  const handleDeleteStep = useCallback((step: FearSituation) => {
+    showConfirm({
+      title: t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFearSituation(step.id)
+        await reload()
+        setMode({ kind: 'ladder' })
+      },
+    })
+  }, [reload, t, showConfirm])
+
+  // ── Expositions ─────────────────────────────────────────────────────────
+  const handleSaveExposure = useCallback(async (step: FearSituation, draft: ExposureDraft) => {
+    const editingId = mode.kind === 'exposure' ? mode.entryId : null
+    setSaving(true)
+    try {
+      const id = editingId ?? generateId()
+      const entry: Omit<FearEntry, 'created_at'> = {
+        id,
+        date: draft.date,
+        situation_id: step.id,
+        situation_label: step.label,
+        suds_before: draft.suds_before,
+        suds_peak: draft.suds_peak,
+        strategies: serializeStrategies(draft.selectedStrategies, draft.customStrategy),
+        custom_strategy: draft.customStrategy,
+        suds_after: draft.suds_after,
+        expectation_text: draft.expectation_text,
+        outcome_text: draft.outcome_text,
+        notes: draft.notes,
+      }
+      await saveFearEntry(entry)
+      await reload()
+      setMode({ kind: 'detail', stepId: step.id })
+    } catch {
+      showToast(t('common.save_error'), 'error')
+    } finally {
+      setSaving(false)
+    }
+  }, [mode, reload, t, showToast])
+
+  const handleDeleteExposure = useCallback((step: FearSituation, entry: FearEntry) => {
+    showConfirm({
+      title: t('common.delete'),
+      message: t('common.irreversible'),
+      confirmLabel: t('common.delete'),
+      destructive: true,
+      onConfirm: async () => {
+        await deleteFearEntry(entry.id)
+        await reload()
+        setMode({ kind: 'detail', stepId: step.id })
+      },
+    })
+  }, [reload, t, showConfirm])
 
   if (loading) {
     return (
@@ -293,411 +195,76 @@ export function ExposureTrackerLayout({ fields, footer }: ExposureTrackerLayoutP
     )
   }
 
-  // ── MODE ENTRY ───────────────────────────────────────────────────────────
-  if (mode === 'entry') {
-    const saveLabel = editingId
-      ? (lbl('update_label') || t('common.update'))
-      : (lbl('save_label') || t('common.save'))
-
+  // ── Rendu par mode ────────────────────────────────────────────────────────
+  if (mode.kind === 'step_form') {
+    const editing = mode.stepId ? situations.find(s => s.id === mode.stepId) : null
     return (
-      <KeyboardAvoidingView
-        style={etStyles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={88}
-        testID="exposure-tracker-entry"
-      >
-        <View style={etStyles.entryHeaderBar}>
-          <Pressable
-            onPress={handleBackToList}
-            style={etStyles.backBtn}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('back_label') || t('common.back')}
-            testID="entry-back-button"
-          >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-        <ScrollView
-          contentContainerStyle={etStyles.entryContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Situation */}
-          <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{lbl('section_trigger_title')}</Text>
-            <View style={etStyles.card}>
-              <View style={etStyles.toggle}>
-                {situations.length > 0 ? (
-                  <Pressable
-                    style={[etStyles.toggleBtn, situationPickerMode === 'catalogue' && etStyles.toggleBtnActive]}
-                    onPress={() => { setSituationPickerMode('catalogue'); setSituationFreeText('') }}
-                    testID="toggle-catalogue"
-                  >
-                    <Text style={[etStyles.toggleText, situationPickerMode === 'catalogue' && etStyles.toggleTextActive]}>
-                      {lbl('situation_mode_catalogue')}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                <Pressable
-                  style={[etStyles.toggleBtn, situationPickerMode === 'free' && etStyles.toggleBtnActive]}
-                  onPress={() => { setSituationPickerMode('free'); setSituationId(null) }}
-                  testID="toggle-free"
-                >
-                  <Text style={[etStyles.toggleText, situationPickerMode === 'free' && etStyles.toggleTextActive]}>
-                    {lbl('situation_mode_free')}
-                  </Text>
-                </Pressable>
-              </View>
-              {situationPickerMode === 'catalogue' ? (
-                situations.length === 0 ? (
-                  <Text style={etStyles.catalogueEmpty}>{lbl('situation_catalogue_empty')}</Text>
-                ) : (
-                  <View style={etStyles.catalogueList}>
-                    {situations.map(s => {
-                      const selected = situationId === s.id
-                      return (
-                        <Pressable
-                          key={s.id}
-                          style={[etStyles.catalogueItem, selected && etStyles.catalogueItemSelected]}
-                          onPress={() => setSituationId(s.id === situationId ? null : s.id)}
-                          accessibilityRole="radio"
-                          accessibilityState={{ checked: selected }}
-                          testID={`situation-${s.id}`}
-                        >
-                          <MaterialCommunityIcons
-                            name={selected ? 'radiobox-marked' : 'radiobox-blank'}
-                            size={16}
-                            color={selected ? colors.primary : colors.textMuted}
-                          />
-                          <Text
-                            style={[etStyles.catalogueItemLabel, selected && etStyles.catalogueItemLabelSelected]}
-                            numberOfLines={2}
-                          >
-                            {s.label}
-                          </Text>
-                        </Pressable>
-                      )
-                    })}
-                  </View>
-                )
-              ) : (
-                <TextInput
-                  style={etStyles.freeInput}
-                  placeholder={lbl('situation_free_placeholder')}
-                  placeholderTextColor={colors.textMuted}
-                  value={situationFreeText}
-                  onChangeText={(v) => { setSituationFreeText(v); setSituationId(null) }}
-                  multiline
-                  numberOfLines={2}
-                  testID="situation-free-input"
-                />
-              )}
-            </View>
-          </View>
-
-          {/* SUDs avant */}
-          <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{lbl('section_before_title')}</Text>
-            <View style={etStyles.card}>
-              <View style={etStyles.sudsHeader}>
-                <View style={etStyles.sudsHeaderLeft}>
-                  <Text style={etStyles.sudsHeaderLabel}>{lbl('suds_before_label')}</Text>
-                  {lbl('suds_before_hint') ? (
-                    <Text style={etStyles.sudsHeaderHint}>{lbl('suds_before_hint')}</Text>
-                  ) : null}
-                </View>
-                <View style={etStyles.sudsValueBox}>
-                  <Text style={[etStyles.sudsValueBig, { color: beforeColor }]}>{sudsBefore}</Text>
-                  <Text style={etStyles.sudsValueMax}>{`/${sudsMax}`}</Text>
-                </View>
-              </View>
-              <PipPicker
-                value={sudsBefore}
-                steps={sudsSteps}
-                color={beforeColor}
-                label={lbl('suds_before_label')}
-                variant="numbered"
-                showHeader={false}
-                onPress={(v) => setSudsBefore(v)}
-              />
-            </View>
-          </View>
-
-          {/* Stratégies */}
-          <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{lbl('section_strategies_title')}</Text>
-            <View style={etStyles.card}>
-              {lbl('strategies_hint') ? (
-                <Text style={etStyles.stratHint}>{lbl('strategies_hint')}</Text>
-              ) : null}
-              <View style={etStyles.chips}>
-                {strategyFields.map(s => {
-                  const text = s.text_code ? t(s.text_code) : ''
-                  if (!text) return null
-                  const active = selectedStrategies.includes(s.id)
-                  return (
-                    <Pressable
-                      key={s.id}
-                      style={[etStyles.chip, active && etStyles.chipActive]}
-                      onPress={() => {
-                        setSelectedStrategies(prev =>
-                          active ? prev.filter(k => k !== s.id) : [...prev, s.id]
-                        )
-                      }}
-                      accessibilityRole="checkbox"
-                      accessibilityState={{ checked: active }}
-                      accessibilityLabel={text}
-                      testID={`strategy-${s.id}`}
-                    >
-                      {active ? (
-                        <MaterialCommunityIcons name="check" size={13} color={colors.primary} />
-                      ) : null}
-                      <Text style={[etStyles.chipText, active && etStyles.chipTextActive]}>{text}</Text>
-                    </Pressable>
-                  )
-                })}
-              </View>
-              <TextInput
-                style={etStyles.customStratInput}
-                placeholder={lbl('strategy_custom_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                value={customStrategy}
-                onChangeText={setCustomStrategy}
-                testID="custom-strategy-input"
-              />
-            </View>
-          </View>
-
-          {/* SUDs après — optionnel */}
-          <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{lbl('section_after_title')}</Text>
-            <View style={etStyles.card}>
-              <View style={etStyles.sudsHeader}>
-                <View style={etStyles.sudsHeaderLeft}>
-                  <Text style={etStyles.sudsHeaderLabel}>{lbl('suds_after_label')}</Text>
-                  {lbl('suds_after_hint') ? (
-                    <Text style={etStyles.sudsHeaderHint}>{lbl('suds_after_hint')}</Text>
-                  ) : null}
-                </View>
-                <View style={etStyles.sudsValueBox}>
-                  {sudsAfter === null ? (
-                    <Text style={etStyles.sudsValueNull}>—</Text>
-                  ) : (
-                    <Text style={[etStyles.sudsValueBig, { color: afterColor }]}>{sudsAfter}</Text>
-                  )}
-                  <Text style={etStyles.sudsValueMax}>{`/${sudsMax}`}</Text>
-                </View>
-              </View>
-              <PipPicker
-                value={sudsAfter}
-                steps={sudsSteps}
-                color={afterColor}
-                label={lbl('suds_after_label')}
-                variant="numbered"
-                showHeader={false}
-                onPress={(v) => setSudsAfter(v)}
-              />
-              <Pressable
-                style={etStyles.skipBtn}
-                onPress={() => setSudsAfter(null)}
-                accessibilityRole="button"
-                accessibilityLabel={lbl('suds_skip_later')}
-                testID="suds-after-skip"
-              >
-                <Text style={[etStyles.skipText, sudsAfter === null && { color: afterColor, fontWeight: '700' }]}>
-                  {sudsAfter === null
-                    ? lbl('suds_skip_null')
-                    : lbl('suds_skip_later')}
-                </Text>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Notes */}
-          <View style={etStyles.section}>
-            <Text style={etStyles.sectionLabel}>{lbl('section_notes_title') || t('common.notes_optional')}</Text>
-            <View style={etStyles.card}>
-              <TextInput
-                style={etStyles.notesInput}
-                placeholder={lbl('notes_placeholder') || t('common.notes_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-                testID="notes-input"
-              />
-            </View>
-          </View>
-
-          <Pressable
-            style={[etStyles.saveBtn, saving && etStyles.btnDisabled]}
-            onPress={handleSave}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={saveLabel}
-            testID="save-button"
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.white} size="small" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={etStyles.saveBtnText}>{saveLabel}</Text>
-              </>
-            )}
-          </Pressable>
-          {editingId ? (
-            <Pressable
-              style={etStyles.deleteBtn}
-              onPress={handleDeleteFromEntry}
-              accessibilityRole="button"
-              accessibilityLabel={lbl('delete_label') || t('common.delete')}
-              testID="delete-button"
-            >
-              <Text style={etStyles.deleteBtnText}>{lbl('delete_label') || t('common.delete')}</Text>
-            </Pressable>
-          ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <StepFormView
+        initialLabel={editing?.label ?? ''}
+        initialTarget={editing?.target_suds ?? config.sudsDefaultBefore}
+        sudsSteps={sudsSteps}
+        isNew={editing == null}
+        lbl={lbl}
+        tCommon={t}
+        onBack={() => setMode(editing ? { kind: 'detail', stepId: editing.id } : { kind: 'ladder' })}
+        onSave={handleSaveStep}
+      />
     )
   }
 
-  // ── MODE LIST (avec tabs Saisies / Situations) ───────────────────────────
-  return (
-    <View style={etStyles.container} testID="exposure-tracker-list">
-      <View style={etStyles.tabBar}>
-        <Pressable
-          style={[etStyles.tab, tab === 'entries' && etStyles.tabActive]}
-          onPress={() => setTab('entries')}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: tab === 'entries' }}
-          testID="tab-entries"
-        >
-          <MaterialCommunityIcons
-            name="thermometer"
-            size={16}
-            color={tab === 'entries' ? colors.primary : colors.textMuted}
-          />
-          <Text style={[etStyles.tabText, tab === 'entries' && etStyles.tabTextActive]}>
-            {lbl('tab_entries_label')}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[etStyles.tab, tab === 'situations' && etStyles.tabActive]}
-          onPress={() => setTab('situations')}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: tab === 'situations' }}
-          testID="tab-situations"
-        >
-          <MaterialCommunityIcons
-            name="map-marker-multiple-outline"
-            size={16}
-            color={tab === 'situations' ? colors.primary : colors.textMuted}
-          />
-          <Text style={[etStyles.tabText, tab === 'situations' && etStyles.tabTextActive]}>
-            {lbl('tab_situations_label')}
-          </Text>
-        </Pressable>
-      </View>
+  if (mode.kind === 'detail') {
+    const step = situations.find(s => s.id === mode.stepId)
+    if (!step) return null
+    return (
+      <StepDetail
+        step={step}
+        entries={entries}
+        config={config}
+        lbl={lbl}
+        tCommon={t}
+        resolveStrategyLabels={resolveStrategyLabels}
+        onBack={() => setMode({ kind: 'ladder' })}
+        onEditStep={() => setMode({ kind: 'step_form', stepId: step.id })}
+        onDeleteStep={() => handleDeleteStep(step)}
+        onDoExposure={() => setMode({ kind: 'exposure', stepId: step.id, entryId: null })}
+        onEditExposure={(entryId) => setMode({ kind: 'exposure', stepId: step.id, entryId })}
+        onDeleteExposure={(entry) => handleDeleteExposure(step, entry)}
+      />
+    )
+  }
 
-      {tab === 'entries' ? (
-        <>
-          <ScrollView contentContainerStyle={etStyles.listContent}>
-            {entries.length === 0 ? (
-              <View style={etStyles.empty} testID="list-empty">
-                <MaterialCommunityIcons name="thermometer" size={52} color={colors.border} />
-                {lbl('empty_title') ? (
-                  <Text style={etStyles.emptyTitle}>{lbl('empty_title')}</Text>
-                ) : null}
-                {lbl('empty_text') ? (
-                  <Text style={etStyles.emptyText}>{lbl('empty_text')}</Text>
-                ) : null}
-              </View>
-            ) : (
-              entries.map(e => (
-                <EntryListCard
-                  key={e.id}
-                  entry={e}
-                  strategyLabels={resolveStrategyLabels(e)}
-                  beforeColor={beforeColor}
-                  afterColor={afterColor}
-                  beforeLabel={lbl('suds_before_label')}
-                  afterLabel={lbl('suds_after_label')}
-                  onEdit={() => handleEdit(e.id)}
-                  onDelete={() => handleDeleteFromList(e)}
-                />
-              ))
-            )}
-            {footer != null && (
-              <View style={etStyles.infoBox}>
-                <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
-                <Text style={etStyles.footerText}>{t(footer.text_code ?? '')}</Text>
-              </View>
-            )}
-          </ScrollView>
-          <Pressable
-            style={etStyles.fab}
-            onPress={handleNew}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('add_btn') || t('common.add')}
-            testID="fab-add-button"
-          >
-            <MaterialCommunityIcons name="thermometer-plus" size={22} color={colors.white} />
-            <Text style={etStyles.fabText}>{lbl('add_btn') || t('common.add')}</Text>
-          </Pressable>
-        </>
-      ) : (
-        <ScrollView contentContainerStyle={etStyles.panelContent}>
-          <View style={etStyles.panelCard}>
-            <Text style={etStyles.panelTitle}>{lbl('situations_panel_title')}</Text>
-            {lbl('situations_panel_hint') ? (
-              <Text style={etStyles.panelHint}>{lbl('situations_panel_hint')}</Text>
-            ) : null}
-            <View style={etStyles.panelAddRow}>
-              <TextInput
-                style={etStyles.panelInput}
-                placeholder={lbl('situation_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                value={newSituationLabel}
-                onChangeText={setNewSituationLabel}
-                returnKeyType="done"
-                onSubmitEditing={handleAddSituation}
-                testID="new-situation-input"
-              />
-              <Pressable
-                style={etStyles.panelAddBtn}
-                onPress={handleAddSituation}
-                accessibilityRole="button"
-                accessibilityLabel={t('common.add')}
-                testID="add-situation-btn"
-              >
-                <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
-              </Pressable>
-            </View>
-            {situations.length === 0 ? (
-              <Text style={etStyles.panelEmpty}>{lbl('situation_empty')}</Text>
-            ) : (
-              <View style={etStyles.panelList}>
-                {situations.map(s => (
-                  <View key={s.id} style={etStyles.panelItem} testID={`panel-situation-${s.id}`}>
-                    <MaterialCommunityIcons name="map-marker-outline" size={14} color={colors.primary} />
-                    <Text style={etStyles.panelItemLabel} numberOfLines={1}>{s.label}</Text>
-                    <Pressable
-                      onPress={() => handleDeleteSituation(s)}
-                      hitSlop={8}
-                      accessibilityLabel={`${t('common.delete')} ${s.label}`}
-                      testID={`delete-situation-${s.id}`}
-                    >
-                      <MaterialCommunityIcons name="close" size={14} color={colors.textMuted} />
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </ScrollView>
-      )}
-    </View>
+  if (mode.kind === 'exposure') {
+    const step = situations.find(s => s.id === mode.stepId)
+    if (!step) return null
+    const existing = mode.entryId ? entries.find(e => e.id === mode.entryId) ?? null : null
+    return (
+      <ExposureForm
+        step={step}
+        existing={existing}
+        config={config}
+        sudsSteps={sudsSteps}
+        strategyOptions={strategyOptions}
+        saving={saving}
+        lbl={lbl}
+        tCommon={t}
+        onBack={() => setMode({ kind: 'detail', stepId: step.id })}
+        onSave={(draft) => handleSaveExposure(step, draft)}
+        onDelete={() => { if (existing) handleDeleteExposure(step, existing) }}
+      />
+    )
+  }
+
+  return (
+    <LadderList
+      steps={sortedSteps}
+      entries={entries}
+      config={config}
+      moduleKey={moduleId}
+      isTeenMode={isTeenMode}
+      lbl={lbl}
+      onOpenStep={(id) => setMode({ kind: 'detail', stepId: id })}
+      onToggleDone={handleToggleDone}
+      onAddStep={() => setMode({ kind: 'step_form', stepId: null })}
+    />
   )
 }
