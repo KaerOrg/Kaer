@@ -863,13 +863,13 @@
       "empty_text": "Use the button above to start your first session."
     },
     "fear_thermometer": {
-      "label": "Fear Thermometer",
+      "label": "Graded Exposure",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
       "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry.",
-      "title": "Fear thermometer",
+      "title": "Graded exposure",
       "intro": "Rate your distress level on a scale from 0 to 100.",
       "tab_entries": "Entries",
       "tab_situations": "My situations",
@@ -948,13 +948,6 @@
       "preview_step_mall": "Going to a crowded mall",
       "preview_expectation": "I'll freeze and everyone will notice.",
       "preview_outcome": "It was uncomfortable at first, then it became more bearable."
-    },
-    "exposure_hierarchy": {
-      "label": "Exposure Hierarchy",
-      "description": "Graduated exposure step builder for phobias and OCD.",
-      "new_btn": "New hierarchy",
-      "empty_title": "No hierarchy yet",
-      "empty_text": "Use the button above to build your first exposure hierarchy."
     },
     "breathing_techniques": {
       "label": "Breathing Techniques",
@@ -1153,13 +1146,9 @@
       "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
     },
     "fear_thermometer": {
-      "label": "Fear Thermometer",
+      "label": "Graded Exposure",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
       "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0–100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
-    },
-    "exposure_hierarchy": {
-      "label": "Exposure Hierarchy",
-      "description": "Graduated exposure step builder for phobias and OCD."
     },
     "breathing_techniques": {
       "label": "Breathing Techniques",
@@ -1538,7 +1527,7 @@
     "mood_plaisir": "Enjoyment",
     "mood_sommeil": "Sleep",
     "mood_alimentation": "Diet",
-    "fear_title": "Fear Thermometer (SUDS)",
+    "fear_title": "Graded Exposure (SUDS)",
     "fear_before": "Before exposure",
     "fear_after": "After exposure",
     "med_effects_title": "Medication Side Effects",

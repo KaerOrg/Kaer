@@ -13,7 +13,6 @@ import { CrisisUrgencyLayout } from '../layouts/CrisisUrgency'
 import { DailyCheckinLayout } from '../layouts/DailyCheckin'
 import { DecisionGridLayout } from '../layouts/DecisionGrid'
 import { EditableStepsLayout } from '../layouts/EditableSteps'
-import { ExposureHierarchyLayout } from '../layouts/ExposureHierarchy'
 import { ExposureTrackerLayout } from '../layouts/ExposureTracker'
 import { FieldsLayout } from '../layouts/Fields'
 import { GuidedExerciseLayout } from '../layouts/GuidedExercise'
@@ -30,7 +29,7 @@ import type { FieldRendererProps } from './types'
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
 // avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
 
 export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
   if (preview_kind === 'coming_soon') return null
@@ -98,7 +97,6 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'psyedu') return <PsyEduLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'chrono_month') return <ChronoMonthLayout moduleId={moduleId ?? ''} />
-  if (preview_kind === 'exposure_hierarchy') return <ExposureHierarchyLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'crisis_urgency') return <CrisisUrgencyLayout fields={visibleFields} />
 
   return null

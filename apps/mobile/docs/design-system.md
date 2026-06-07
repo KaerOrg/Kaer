@@ -409,11 +409,10 @@ n'en crée un nouveau qu'en dernier recours.
 | `tabbed` | `Tabs/` | `TabsLayout` | Onglets génériques — rend récursivement `FieldRenderer` | — |
 | `crisis_urgency` | `CrisisUrgency/` | `CrisisUrgencyLayout` | Mode urgence 1-tap (gros boutons d'appel) | — |
 | `activity_log` | `ActivityLog/` | `ActivityLogLayout` | Journal d'activités (Plaisir / Maîtrise) | SQLite `activity_records` |
-| `exposure_tracker` | `ExposureTracker/` | `ExposureTrackerLayout` | Thermomètre de la peur (SUDS avant / après) | SQLite `fear_situations` |
+| `exposure_tracker` | `ExposureTracker/` | `ExposureTrackerLayout` | Exposition graduée (échelle → expositions → courbe) | SQLite `fear_situations` / `fear_entries` |
 | `decision_grid` | `DecisionGrid/` | `DecisionGridLayout` | Balance décisionnelle 2×2 + items pondérés | SQLite `plan_items` |
 | `psyedu` | `PsyEdu/` | `PsyEduLayout` | Fiches psychoéducatives | Supabase (`psyedu_topics` / `psyedu_blocks`) |
 | `chrono_month` | `ChronoMonth/` | `ChronoMonthLayout` | Grille calendrier chronobiologie | SQLite `chrono_entries` |
-| `exposure_hierarchy` | `ExposureHierarchy/` | `ExposureHierarchyLayout` | Hiérarchie d'exposition graduée | SQLite `exposure_hierarchies` |
 
 > `coming_soon` et tout `preview_kind` inconnu rendent `null`.
 

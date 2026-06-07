@@ -10,9 +10,9 @@ import './ModulePreviewPanel.css'
 const DEFAULT_ACCENT = '#6366F1'
 
 // Layouts dont le contenu vit dans une autre table que module_content_fields
-// (psyedu_topics/blocks, form_entries, exposure_hierarchies). Ils peuvent
-// rendre avec 0 fields — le fallback "coming soon" ne s'applique pas.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month', 'exposure_hierarchy'])
+// (psyedu_topics/blocks). Ils peuvent rendre avec 0 fields — le fallback
+// "coming soon" ne s'applique pas.
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
 
 type PanelTab = 'preview' | 'sources'
 

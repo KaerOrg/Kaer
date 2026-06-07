@@ -19,7 +19,6 @@ const HANDLED_PREVIEW_KINDS = new Set([
   'coming_soon',
   'psyedu',
   'chrono_month',
-  'exposure_hierarchy',
   'tabbed',
   'steps',
   'cards',
@@ -89,6 +88,6 @@ describe('seed.sql — cohérence preview_kind', () => {
 
   it('HANDLED_PREVIEW_KINDS contient au moins les layouts du seed actuel', () => {
     // Vérifie l'inverse : HANDLED_PREVIEW_KINDS ne doit pas être vide ou sous-dimensionné.
-    expect(HANDLED_PREVIEW_KINDS.size).toBeGreaterThanOrEqual(20)
+    expect(HANDLED_PREVIEW_KINDS.size).toBeGreaterThanOrEqual(19)
   })
 })

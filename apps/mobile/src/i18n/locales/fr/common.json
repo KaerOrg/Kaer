@@ -925,9 +925,9 @@
       "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
-      "label": "Thermomètre de la peur",
+      "label": "Exposition graduée",
       "description": "Mesurer votre niveau de détresse (0 à 100)",
-      "title": "Thermomètre de la peur",
+      "title": "Exposition graduée",
       "intro": "Évaluez votre niveau de détresse sur une échelle de 0 à 100.",
       "tab_entries": "Saisies",
       "tab_situations": "Mes situations",
@@ -1004,51 +1004,6 @@
       "chart_reference": "Niveau de stress initial",
       "scale_hint": "0 = aucun stress · 100 = stress maximal",
       "exposure_date": "Date de l'exposition"
-    },
-    "exposure_hierarchy": {
-      "label": "Hiérarchie d'exposition",
-      "description": "Construire vos paliers d'exposition graduelle",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
-      "info_btn": "À propos de cette technique",
-      "info_title": "Hiérarchie d'exposition",
-      "info_body": "La hiérarchie d'exposition est une technique TCC validée. Vous listez les situations que vous évitez, vous les notez de 0 à 100 selon leur niveau de difficulté (score SUDs), puis vous les affrontez progressivement en commençant par les plus faciles.",
-      "info_sources": "Références",
-      "untitled": "Hiérarchie sans titre",
-      "empty_title": "Aucune hiérarchie",
-      "empty_text": "Créez votre première hiérarchie d'exposition avec votre soignant.",
-      "add_hierarchy": "Nouvelle hiérarchie",
-      "new_hierarchy_title": "Nouvelle hiérarchie",
-      "new_hierarchy_placeholder": "Titre (ex. : Peur des ascenseurs)",
-      "delete_confirm": "Supprimer « {{title}} » et toutes ses situations ?",
-      "items_empty_title": "Aucune situation",
-      "items_empty_text": "Ajoutez une première situation à affronter.",
-      "add_item": "Ajouter une situation",
-      "delete_item_confirm": "Supprimer cette situation ?",
-      "toggle_done": "Marquer comme réalisé",
-      "suds_legend": "Score SUDs : 0 = aucune anxiété · 100 = anxiété maximale",
-      "suds_label": "Score SUDs — Niveau de difficulté",
-      "suds_hint": "De 0 (aucune anxiété) à 100 (anxiété maximale). Ce chiffre est personnel — il n'y a pas de bonne ou mauvaise réponse.",
-      "suds_low": "0",
-      "suds_high": "100",
-      "description_label": "Situation à affronter",
-      "description_hint": "Décrivez précisément la situation que vous évitez.",
-      "description_placeholder": "Ex. : Prendre l'ascenseur seul(e) jusqu'au 5ᵉ étage",
-      "description_required": "Veuillez décrire la situation avant de valider.",
-      "session_number": "Séance n°{{n}}",
-      "session_question": "Quel est votre niveau d'anxiété face à cette situation en ce moment ?",
-      "session_question_hint": "Donnez votre ressenti immédiat, de 0 (aucune anxiété) à 100 (anxiété maximale).",
-      "session_save": "Enregistrer cette séance",
-      "last_session_suds": "Séance précédente :",
-      "anchor_0": "Aucune ou très légère anxiété",
-      "anchor_50": "Anxiété modérée, perceptible",
-      "anchor_100": "Anxiété intense, difficile à supporter",
-      "history_no_sessions": "Aucune séance enregistrée.\nEnregistrez votre première séance pour visualiser votre progression.",
-      "history_add_session": "Enregistrer une séance",
-      "history_delete_session": "Supprimer cette séance ?",
-      "items_count": "situation",
-      "items_count_plural": "situations",
-      "sessions_count": "séance",
-      "sessions_count_plural": "séances"
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
@@ -1903,7 +1858,7 @@
       "description": "Technique de retraitement par l'imagerie mentale."
     },
     "fear_thermometer": {
-      "label": "Thermomètre de la peur",
+      "label": "Exposition graduée",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
       "field_1": {
         "label": "Situation déclenchante",
@@ -1926,10 +1881,6 @@
         "detail": "Contexte, observations, remarque"
       },
       "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
-    },
-    "exposure_hierarchy": {
-      "label": "Hiérarchie d'exposition",
-      "description": "Constructeur de paliers d'exposition graduelle pour phobies et TOC."
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",

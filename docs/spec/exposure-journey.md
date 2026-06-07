@@ -215,7 +215,23 @@ Libellés via `t('modules.fear_thermometer.*')` → **portage i18n** du bloc com
 `preview_expectation`, `preview_outcome`. 4 tests Vitest. `preview_kind` inchangé →
 zéro impact dispatcher/seed/type partagé.
 
+## 9quinquies. Consolidation (2026-06-07)
+
+- **Renommage affichage** : « Thermomètre de la peur » → **« Exposition graduée »**
+  (EN « Graded Exposure »), toutes locales. L'**identifiant interne reste
+  `fear_thermometer`** (aucune migration d'id).
+- **Retrait du module `exposure_hierarchy`** (fusionné dans le parcours unifié) :
+  - Base : suppression du module + `module_content_fields` + lignes `patient_modules`
+    (4 patients, qui possédaient déjà `fear_thermometer` → aucune perte d'accès) ;
+    sources `module_sources` **réaffectées** à `fear_thermometer`. Répercuté dans
+    `seed.sql` + `sources_seed.sql`.
+  - Code : `PreviewKind` (shared), dispatchers + layouts web/mobile supprimés,
+    `ModulePreviewPanel`, `ModuleContentScreen`, `syncOutbox` (EntryKind),
+    `fearTrackerService` (create/delete hierarchy), i18n (toutes locales), tests.
+  - Dormant (laissé, inoffensif) : helpers SQLite bas-niveau `exposure_hierarchies`
+    dans `lib/database.ts`.
+
 ## 10. Hors périmètre (suite)
 
-- Consolidation armoire praticien web (retrait/fusion de `exposure_hierarchy`).
 - Rappels programmés d'exposition.
+- Nettoyage optionnel des helpers SQLite `exposure_hierarchies` dormants.

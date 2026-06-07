@@ -581,10 +581,10 @@
       "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
-      "label": "Thermomètre de la peur",
+      "label": "Exposition graduée",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
       "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies.",
-      "title": "Thermomètre de la peur",
+      "title": "Exposition graduée",
       "intro": "Évaluez votre niveau de détresse sur une échelle de 0 à 100.",
       "tab_entries": "Saisies",
       "tab_situations": "Mes situations",
@@ -665,10 +665,6 @@
       "preview_step_mall": "Aller dans un centre commercial bondé",
       "preview_expectation": "Je vais perdre mes moyens et tout le monde va le remarquer.",
       "preview_outcome": "C'était inconfortable au début, puis c'est devenu plus supportable."
-    },
-    "exposure_hierarchy": {
-      "label": "Hiérarchie d'exposition",
-      "description": "Constructeur de paliers d'exposition graduelle pour phobies et TOC."
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
@@ -1259,13 +1255,9 @@
       "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
-      "label": "Thermomètre de la peur",
+      "label": "Exposition graduée",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
       "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
-    },
-    "exposure_hierarchy": {
-      "label": "Hiérarchie d'exposition",
-      "description": "Constructeur de paliers d'exposition graduelle pour phobies et TOC."
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
@@ -1644,7 +1636,7 @@
     "mood_plaisir": "Plaisir",
     "mood_sommeil": "Sommeil",
     "mood_alimentation": "Alimentation",
-    "fear_title": "Thermomètre de la peur (SUDS)",
+    "fear_title": "Exposition graduée (SUDS)",
     "fear_before": "Avant exposition",
     "fear_after": "Après exposition",
     "med_effects_title": "Effets indésirables du traitement",

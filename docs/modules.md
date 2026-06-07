@@ -10,7 +10,7 @@
 |-----|-----|--------|-----|
 | `sleep_diary` | Agenda du sommeil | **Implémenté** — SQLite local, vue 14 nuits, bilan mensuel | — |
 | `beck_columns` | Colonnes de Beck (TCC) | **Implémenté** — SQLite local, 7 colonnes, tests | [doc](modules/beck_columns.md) |
-| `fear_thermometer` | Thermomètre de la peur | **Implémenté** — SUDs 0–100, situations, SQLite, tests | [doc](modules/fear_thermometer.md) |
+| `fear_thermometer` | Exposition graduée | **Implémenté** — parcours d'exposition unifié (échelle → expositions répétées prédiction/pic/résultat → courbe), aperçu web, SQLite ; a absorbé `exposure_hierarchy` | [doc](modules/fear_thermometer.md) |
 | `emotion_wheel` | Roue des émotions | **Implémenté** — taxonomie Plutchik, 3 niveaux, SQLite, 22 tests | [doc](modules/emotion_wheel.md) |
 | `crisis_plan` | Plan de crise | **Implémenté** — protocole Stanley & Brown (2012), 6 étapes, SQLite | — |
 | `rim` | RIM — Imagerie mentale | **Implémenté** — IRT Krakow & Zadra (2006), scénario praticien, tests | [doc](modules/rim.md) |
@@ -23,7 +23,6 @@
 | `behavioral_activation` | Activation comportementale | **Implémenté** — SQLite, tests | [doc](modules/behavioral_activation.md) |
 | `breathing_techniques` | Techniques de respiration | **Implémenté** — 6 techniques, timer guidé, tests | [doc](modules/breathing_techniques.md) |
 | `psychoeducation` | Psychoéducation | **Implémenté** — cartes thématiques, lecture, tests | [doc](modules/psychoeducation.md) |
-| `exposure_hierarchy` | Hiérarchie d'exposition | À construire | — |
 | `craving_journal` | Journal des envies | À construire | — |
 
 ### Échelles cliniques (questionnaires)

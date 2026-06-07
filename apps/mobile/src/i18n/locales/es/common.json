@@ -264,9 +264,9 @@
       "intro": "Reprocesamiento mediante imaginería mental."
     },
     "fear_thermometer": {
-      "label": "Termómetro del miedo",
+      "label": "Exposición graduada",
       "description": "Mide tu nivel de angustia (0 a 100)",
-      "title": "Termómetro del miedo",
+      "title": "Exposición graduada",
       "intro": "Evalúa tu nivel de angustia en una escala de 0 a 100.",
       "tab_entries": "Registros",
       "tab_situations": "Mis situaciones",
@@ -282,10 +282,6 @@
       "suds_before": "Antes",
       "suds_after": "Después",
       "save": "Guardar"
-    },
-    "exposure_hierarchy": {
-      "label": "Jerarquía de exposición",
-      "description": "Construye tus niveles de exposición gradual"
     },
     "breathing_techniques": {
       "label": "Técnicas de respiración",

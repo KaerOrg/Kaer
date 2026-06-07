@@ -824,17 +824,6 @@
     "distress_tolerance": {
       "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique."
     },
-    "exposure_hierarchy": {
-      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
-      "info_btn": "C'est quoi cette technique ?",
-      "info_body": "La hiérarchie d'exposition est une technique TCC validée. Tu listes les situations que tu évites, tu les notes de 0 à 100 selon leur niveau de difficulté (score SUDs), puis tu les affrontes progressivement en commençant par les plus faciles.",
-      "empty_text": "Crée ta première hiérarchie d'exposition avec ton soignant.",
-      "suds_hint": "De 0 (aucun stress) à 100 (stress max). Ce chiffre est perso — il n'y a pas de bonne ou mauvaise réponse.",
-      "description_label": "Situation à affronter",
-      "description_hint": "Décris précisément la situation que tu évites.",
-      "description_placeholder": "Ex. : Prendre l'ascenseur seul(e) jusqu'au 5ᵉ étage",
-      "session_question_teen": "C'est quoi ton niveau d'anxiété face à cette situation en ce moment ?"
-    },
     "craving_journal": {
       "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
       "empty_text": "Appuie sur le bouton ci-dessus pour enregistrer ta première envie.",
