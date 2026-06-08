@@ -53,13 +53,14 @@ function isUpcoming(appt: Appointment): boolean {
 function AppointmentItem({
   appt,
   onCancel,
+  onReschedule,
 }: {
   appt: Appointment
   onCancel: (id: string) => void
+  onReschedule: (id: string) => void
 }) {
   const { t } = useTranslation()
-  const canCancel =
-    appt.status === 'pending' || appt.status === 'confirmed'
+  const canAct = appt.status === 'pending' || appt.status === 'confirmed'
   const statusColor = STATUS_COLORS[appt.status] ?? colors.textMuted
 
   return (
@@ -74,15 +75,25 @@ function AppointmentItem({
               .replace('cancelled_by_practitioner', 'cancelled')
           }`)}
         </Text>
-        {canCancel && (
-          <Pressable
-            style={styles.cancelBtn}
-            onPress={() => onCancel(appt.id)}
-          >
-            <Text style={styles.cancelBtnText}>
-              {t('agenda.appointment.cancel_btn')}
-            </Text>
-          </Pressable>
+        {canAct && (
+          <View style={styles.itemActions}>
+            <Pressable
+              style={styles.rescheduleBtn}
+              onPress={() => onReschedule(appt.id)}
+            >
+              <Text style={styles.rescheduleBtnText}>
+                {t('agenda.appointment.reschedule_btn')}
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.cancelBtn}
+              onPress={() => onCancel(appt.id)}
+            >
+              <Text style={styles.cancelBtnText}>
+                {t('agenda.appointment.cancel_btn')}
+              </Text>
+            </Pressable>
+          </View>
         )}
       </View>
     </View>
@@ -127,6 +138,11 @@ export default function AppointmentsScreen() {
     })
   }, [t, load, showConfirm])
 
+  const handleReschedule = useCallback((id: string) => {
+    if (!practitionerId) return
+    navigation.navigate('BookAppointment', { practitionerId, appointmentId: id })
+  }, [navigation, practitionerId])
+
   const upcoming = appointments.filter(isUpcoming)
   const past = appointments.filter(a => !isUpcoming(a))
 
@@ -153,7 +169,7 @@ export default function AppointmentsScreen() {
               <>
                 <Text style={styles.sectionTitle}>{t('agenda.section_upcoming')}</Text>
                 {upcoming.map(appt => (
-                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
+                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} onReschedule={handleReschedule} />
                 ))}
               </>
             )}
@@ -162,7 +178,7 @@ export default function AppointmentsScreen() {
               <>
                 <Text style={styles.sectionTitle}>{t('agenda.section_past')}</Text>
                 {past.map(appt => (
-                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} />
+                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} onReschedule={handleReschedule} />
                 ))}
               </>
             )}
@@ -246,9 +262,24 @@ const styles = StyleSheet.create({
     fontSize: fontSize.caption,
     color: colors.textMuted,
   },
-  cancelBtn: {
-    alignSelf: 'flex-start',
+  itemActions: {
+    flexDirection: 'row',
+    gap: 8,
     marginTop: 4,
+    flexWrap: 'wrap',
+  },
+  rescheduleBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  rescheduleBtnText: {
+    fontSize: 13,
+    color: colors.primary,
+  },
+  cancelBtn: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: radius.sm,

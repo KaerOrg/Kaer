@@ -53,7 +53,6 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('grounding',               'cognitive',   'coming_soon', 15, false),
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
-  ('exposure_hierarchy',      'anxiety',     'coming_soon', 18, false),
   ('breathing_techniques',    'anxiety',     'fields',      19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
@@ -82,7 +81,6 @@ update public.modules set
     when 'grounding'               then 'leaf'
     when 'rim'                     then 'waves'
     when 'fear_thermometer'        then 'thermometer'
-    when 'exposure_hierarchy'      then 'trending-up'
     when 'breathing_techniques'    then 'wind'
     when 'cognitive_saturation'    then 'refresh-cw'
     when 'craving_journal'         then 'bookmark'
@@ -108,7 +106,6 @@ update public.modules set
     when 'grounding'               then 'hand-heart-outline'
     when 'rim'                     then 'waves'
     when 'fear_thermometer'        then 'thermometer'
-    when 'exposure_hierarchy'      then 'stairs-up'
     when 'breathing_techniques'    then 'lungs'
     when 'cognitive_saturation'    then 'chat-processing-outline'
     when 'craving_journal'         then 'lightning-bolt-outline'
@@ -134,7 +131,6 @@ update public.modules set
     when 'grounding'               then '#10B981'
     when 'rim'                     then '#10B981'
     when 'fear_thermometer'        then '#F59E0B'
-    when 'exposure_hierarchy'      then '#F59E0B'
     when 'breathing_techniques'    then '#F59E0B'
     when 'cognitive_saturation'    then '#F59E0B'
     when 'craving_journal'         then '#EC4899'
@@ -1318,9 +1314,6 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('dt.label',           'distress_tolerance',     NULL, NULL, 'module_label',       'module.distress_tolerance.label', 0),
   ('dt.desc',            'distress_tolerance',     NULL, NULL, 'module_description', 'module.distress_tolerance.description', 1),
   ('dt.soon',            'distress_tolerance',     NULL, NULL, 'coming_soon',        NULL, 99),
-  ('eh.label',           'exposure_hierarchy',     NULL, NULL, 'module_label',       'module.exposure_hierarchy.label', 0),
-  ('eh.desc',            'exposure_hierarchy',     NULL, NULL, 'module_description', 'module.exposure_hierarchy.description', 1),
-  ('eh.soon',            'exposure_hierarchy',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('tc.label',           'therapeutic_commitment', NULL, NULL, 'module_label',       'module.therapeutic_commitment.label', 0),
   ('tc.desc',            'therapeutic_commitment', NULL, NULL, 'module_description', 'module.therapeutic_commitment.description', 1),
   ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99),
@@ -1848,7 +1841,6 @@ on conflict (field_id, prop_key) do nothing;
 --   - chronobiology_tracker    → preview_kind='tabbed'  (psyedu + column_form
 --                                                         + chrono_month)
 --   - craving_journal          → preview_kind='tabbed'  (psyedu + column_form)
---   - exposure_hierarchy       → preview_kind='exposure_hierarchy'
 --
 -- Pour le contenu psyedu (psyedu_topics + psyedu_blocks), exécuter aussi
 -- les sub-seeds : psyedu_seed.sql, chrono_seed.sql, craving_seed.sql,
@@ -1857,19 +1849,18 @@ on conflict (field_id, prop_key) do nothing;
 
 
 -- ────────────────────────────────────────────────────────────
--- UPDATE preview_kind sur les 5 modules
+-- UPDATE preview_kind sur les 4 modules
 -- ────────────────────────────────────────────────────────────
 
 update public.modules set preview_kind = 'psyedu'              where id = 'diet_weight_psycho';
 update public.modules set preview_kind = 'tabbed'              where id = 'distress_tolerance';
 update public.modules set preview_kind = 'tabbed'              where id = 'chronobiology_tracker';
 update public.modules set preview_kind = 'tabbed'              where id = 'craving_journal';
-update public.modules set preview_kind = 'exposure_hierarchy'  where id = 'exposure_hierarchy';
 
 
 -- ────────────────────────────────────────────────────────────
 -- 2) Reset des fields des modules tabbed (avant ré-insertion)
---    diet_weight_psycho et exposure_hierarchy n'ont pas de fields.
+--    diet_weight_psycho n'a pas de fields.
 -- ────────────────────────────────────────────────────────────
 
 delete from public.module_content_fields
@@ -2255,3 +2246,17 @@ on conflict (table_name) do update set
   inactivity_days    = excluded.inactivity_days,
   description        = excluded.description,
   updated_at         = now();
+
+
+-- ============================================================
+-- Rôle admin — gestion des utilisateurs / droits RGPD
+-- ============================================================
+-- Attribue le rôle admin (par email) aux comptes praticien habilités. Idempotent.
+-- Le défaut de la colonne est false ; cette liste est la SEULE source d'admins.
+-- Pour retirer un admin : passer is_admin = false ici, ou directement en base.
+update public.practitioners
+   set is_admin = true
+ where lower(email) in (
+   'guillaume.zarb@gmail.com',
+   'teil.olivier@gmail.com'
+ );

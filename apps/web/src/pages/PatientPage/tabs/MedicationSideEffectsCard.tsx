@@ -1,12 +1,13 @@
 import { useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell, Eye, EyeOff } from 'lucide-react'
+import { Bell, Eye, EyeOff, LineChart } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { SIDE_EFFECT_CATALOG, isCustomKey } from '../../../lib/sideEffectsCatalog'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '../../../services/moduleCatalogService'
+import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { SideEffectToggleRow } from './SideEffectToggleRow'
 import { CustomEffectRow } from './CustomEffectRow'
@@ -16,15 +17,18 @@ const MODULE_TYPE: ModuleType = 'medication_side_effects'
 type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
 
 export interface MedicationSideEffectsCardProps {
+  patientId: string
   modItem: ModuleItem
   modIcon: ReactNode
   mod: PatientModule | undefined
   unlocked: boolean
   unlockingModule: ModuleType | null
   previewModule: ModuleType | null
+  dataModule: ModuleType | null
   medEffects: MedEffects
   moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
   onTogglePreview: (type: ModuleType) => void
+  onToggleData: (type: ModuleType) => void
   onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
   onUnlock: (type: ModuleType) => void
   onRevoke: (moduleId: string) => void
@@ -36,15 +40,18 @@ export interface MedicationSideEffectsCardProps {
  * callbacks stables (useCallback) — un branchement de render ne peut pas appeler de hooks.
  */
 export function MedicationSideEffectsCard({
+  patientId,
   modItem,
   modIcon,
   mod,
   unlocked,
   unlockingModule,
   previewModule,
+  dataModule,
   medEffects,
   moduleToggle,
   onTogglePreview,
+  onToggleData,
   onConfigureNotif,
   onUnlock,
   onRevoke,
@@ -74,6 +81,7 @@ export function MedicationSideEffectsCard({
   }, [mod, onConfigureNotif, t, modItem.icon])
 
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
+  const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
 
   const addCustom = useCallback(() => {
     if (customRef.current) {
@@ -89,7 +97,7 @@ export function MedicationSideEffectsCard({
     [addCustom]
   )
 
-  const isWide = medEffects.open || previewModule === MODULE_TYPE
+  const isWide = medEffects.open || previewModule === MODULE_TYPE || dataModule === MODULE_TYPE
 
   return (
     <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
@@ -124,6 +132,15 @@ export function MedicationSideEffectsCard({
               {previewModule === MODULE_TYPE ? <EyeOff size={14} /> : <Eye size={14} />}
               {t('patient.preview_button')}
             </button>
+            <button
+              type="button"
+              className={`preview-toggle-btn ${dataModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+              onClick={handleDataToggle}
+              title={t('patient.data_button')}
+            >
+              <LineChart size={14} />
+              {t('patient.data_button')}
+            </button>
           </>
         ) : undefined}
       >
@@ -137,11 +154,9 @@ export function MedicationSideEffectsCard({
             )}
           </div>
         )}
+        {previewModule === MODULE_TYPE && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
+        {dataModule === MODULE_TYPE && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
       </Card>
-
-      {previewModule === MODULE_TYPE && (
-        <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />
-      )}
 
       {medEffects.open && unlocked && mod && (
         <div className="psycho-card-picker">

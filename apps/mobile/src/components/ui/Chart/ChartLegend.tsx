@@ -5,11 +5,15 @@ import { colors, spacing } from '../../../theme'
 
 export interface ChartLegendProps {
   accentColor?: string
+  /** Afficher l'item de la ligne de référence pointillée. Défaut: true. */
+  showReference?: boolean
+  /** Libellé de la référence (teen-aware). Défaut: clé i18n commune. */
+  referenceLabel?: string
 }
 
-// Légende pour DesensitizationChart : point = séance réalisée, dash = SUDs
-// initial estimé (ligne de référence pointillée).
-export function ChartLegend({ accentColor = colors.primary }: ChartLegendProps) {
+// Légende pour DesensitizationChart : point = séance réalisée, dash = niveau
+// estimé au départ (ligne de référence pointillée, optionnelle).
+export function ChartLegend({ accentColor = colors.primary, showReference = true, referenceLabel }: ChartLegendProps) {
   const { t } = useTranslation()
   return (
     <View style={styles.row}>
@@ -17,10 +21,12 @@ export function ChartLegend({ accentColor = colors.primary }: ChartLegendProps) 
         <View style={[styles.dot, { backgroundColor: accentColor }]} />
         <Text style={styles.label}>{t('common.chart_legend.sessions')}</Text>
       </View>
-      <View style={styles.item}>
-        <View style={[styles.dash, { borderColor: accentColor }]} />
-        <Text style={styles.label}>{t('common.chart_legend.initial_suds')}</Text>
-      </View>
+      {showReference ? (
+        <View style={styles.item}>
+          <View style={[styles.dash, { borderColor: accentColor }]} />
+          <Text style={styles.label}>{referenceLabel ?? t('common.chart_legend.initial_suds')}</Text>
+        </View>
+      ) : null}
     </View>
   )
 }

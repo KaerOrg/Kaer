@@ -8,6 +8,7 @@ import {
   createAppointment,
   updateAppointmentStatus,
   updateAppointmentNotes,
+  rescheduleAppointment,
   fetchAutoConfirmSetting,
 } from '../../../services/appointmentService'
 import type { PatientOption } from '../../../services/patientService'
@@ -83,6 +84,19 @@ export function PatientRdvTab({ patientId, practitionerId, practitionerName, dis
       if (result.ok) {
         const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
         setAppointments(updated)
+      }
+      return result
+    },
+    [practitionerId, patientId],
+  )
+
+  const handleReschedule = useCallback(
+    async (apptId: string, newStartsAt: string, newEndsAt: string) => {
+      const result = await rescheduleAppointment(apptId, newStartsAt, newEndsAt)
+      if (result.ok) {
+        const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
+        setAppointments(updated)
+        setModal(null)
       }
       return result
     },
@@ -178,6 +192,7 @@ export function PatientRdvTab({ patientId, practitionerId, practitionerName, dis
           onCreate={handleCreate}
           onUpdateStatus={handleUpdateStatus}
           onUpdateNotes={handleUpdateNotes}
+          onReschedule={handleReschedule}
         />
       )}
     </div>

@@ -48,6 +48,32 @@ on conflict (code) do nothing;
 
 
 -- ============================================================
+-- FONCTION : gen_public_ref (identifiant public opaque)
+-- ============================================================
+-- Génère un token court URL-safe (ex. « p_8Kf3aQ ») servant d'identifiant
+-- public dans les URLs praticien, à la place de la PK réelle. Ce token est
+-- de la défense en profondeur (il masque la PK dans l'historique/les logs) —
+-- ce n'est PAS un contrôle d'accès : la RLS reste la seule barrière.
+-- 62^8 combinaisons → collision négligeable, garantie par l'index unique.
+create or replace function public.gen_public_ref()
+returns text
+language plpgsql
+volatile
+as $$
+declare
+  alphabet constant text := '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  result   text := '';
+  i        int;
+begin
+  for i in 1..8 loop
+    result := result || substr(alphabet, 1 + floor(random() * 62)::int, 1);
+  end loop;
+  return 'p_' || result;
+end;
+$$;
+
+
+-- ============================================================
 -- TABLES — Domaine utilisateurs / patients / praticiens
 -- ============================================================
 
@@ -62,6 +88,10 @@ create table if not exists public.practitioners (
   phone                   text,
   avatar_url              text,
   mfa_reminder_dismissed  boolean     not null default false,
+  -- Rôle admin (gestion des utilisateurs, droits RGPD). Réservé aux praticiens —
+  -- un patient n'a pas de ligne ici, donc ne peut JAMAIS être admin. La barrière
+  -- d'accès reste la fonction fn_is_admin() (lue via auth.uid()), jamais le client.
+  is_admin                boolean     not null default false,
   created_at              timestamptz not null default now()
 );
 
@@ -94,6 +124,8 @@ create table if not exists public.practitioner_patients (
   patient_sex         text,
   teen_mode           boolean     not null default false,
   general_note        text,
+  -- Identifiant public opaque exposé dans l'URL praticien à la place de patient_id.
+  public_ref          text        not null unique default public.gen_public_ref(),
   created_at          timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
@@ -178,6 +210,17 @@ begin
   end if;
 end $$;
 
+-- practitioners.is_admin (rôle admin — gestion des utilisateurs / droits RGPD)
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioners' and column_name = 'is_admin'
+  ) then
+    alter table public.practitioners add column is_admin boolean not null default false;
+  end if;
+end $$;
+
 -- practitioners.address
 do $$
 begin
@@ -250,6 +293,24 @@ begin
     where table_schema = 'public' and table_name = 'invitations' and column_name = 'pre_selected_modules'
   ) then
     alter table public.invitations add column pre_selected_modules text[] not null default '{}';
+  end if;
+end $$;
+
+-- practitioner_patients.public_ref (identifiant public opaque dans l'URL)
+-- Ajout + backfill des lignes existantes + contrainte not null/unique en une passe.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'public_ref'
+  ) then
+    alter table public.practitioner_patients add column public_ref text;
+    update public.practitioner_patients set public_ref = public.gen_public_ref() where public_ref is null;
+    alter table public.practitioner_patients
+      alter column public_ref set not null,
+      alter column public_ref set default public.gen_public_ref();
+    create unique index if not exists practitioner_patients_public_ref_key
+      on public.practitioner_patients(public_ref);
   end if;
 end $$;
 
@@ -367,6 +428,30 @@ alter table public.patient_modules       enable row level security;
 drop policy if exists "practitioners_own" on public.practitioners;
 create policy "practitioners_own" on public.practitioners
   for all using (auth.uid() = id);
+
+-- is_admin EN LECTURE SEULE côté client. La policy ci-dessus autorise un praticien
+-- à mettre à jour SA ligne (profil) — sans garde, il pourrait forger un PATCH REST
+-- posant is_admin = true (escalade de privilège). Ce trigger rejette toute tentative
+-- de modifier is_admin depuis un appel authentifié : auth.uid() est non-null pour le
+-- client web, null pour le service_role / les migrations / le seed. Seul le serveur
+-- (re)attribue donc le rôle admin. Les updates qui ne touchent pas is_admin passent.
+create or replace function public.fn_guard_is_admin_write()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.is_admin is distinct from old.is_admin and auth.uid() is not null then
+    raise exception 'is_admin est en lecture seule (modifiable uniquement côté serveur)';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_guard_is_admin_write on public.practitioners;
+create trigger trg_guard_is_admin_write
+  before update on public.practitioners
+  for each row execute function public.fn_guard_is_admin_write();
 
 drop policy if exists "patients_own" on public.patients;
 create policy "patients_own" on public.patients
@@ -1667,8 +1752,11 @@ grant execute on function public.log_data_access(text, text, uuid, uuid, jsonb) 
 -- ============================================================
 -- Deux RPC SECURITY DEFINER. La RLS n'accorde au praticien qu'un SELECT (parfois
 -- rien) sur les tables patient — un export/delete direct serait bloqué. Ces fonctions
--- s'exécutent en tant qu'owner MAIS vérifient la propriété via auth.uid() : l'appelant
--- doit être le patient lui-même OU un praticien lié via practitioner_patients.
+-- s'exécutent en tant qu'owner MAIS re-vérifient l'habilitation via auth.uid() :
+--   • un praticien ADMIN (fn_is_admin) → n'importe quel patient (page de gestion
+--     des utilisateurs côté web) ;
+--   • le PATIENT lui-même (auth.uid() = patient_id) → self-service RGPD mobile.
+-- Le praticien NON-admin n'a plus accès (capacité retirée de la fiche patient).
 -- Le compte auth.users (login) n'est PAS supprimé ici (un RPC SQL ne le peut pas) →
 -- c'est l'Edge Function `delete-patient-account` (service_role) qui le fait, et sa
 -- cascade ON DELETE purge alors patients + ~20 tables enfant.
@@ -1676,20 +1764,22 @@ grant execute on function public.log_data_access(text, text, uuid, uuid, jsonb) 
 -- ⚠️ MDR (RÈGLE D'OR) : export_patient_data renvoie les valeurs BRUTES (to_jsonb),
 -- jamais un score labellisé ni une interprétation. C'est un miroir neutre des saisies.
 
--- Helper interne : l'appelant est-il habilité sur ce patient ?
-create or replace function public.fn_can_access_patient(p_patient_id uuid)
+-- Helper interne : l'appelant connecté est-il un praticien admin ?
+-- SOURCE DE VÉRITÉ du rôle admin — lue côté serveur via auth.uid(), JAMAIS depuis
+-- un payload client. Ne consulte que `practitioners` : un patient n'y a pas de
+-- ligne, donc fn_is_admin() est toujours false pour lui (un patient ne peut jamais
+-- être admin). C'est la barrière réelle de toute opération admin ; les gardes front
+-- (route, UI) ne sont que du confort et ne protègent rien seuls.
+create or replace function public.fn_is_admin()
 returns boolean
 language sql
 security definer set search_path = public
 stable
 as $$
-  select
-    auth.uid() = p_patient_id
-    or exists (
-      select 1 from public.practitioner_patients pp
-      where pp.practitioner_id = auth.uid()
-        and pp.patient_id = p_patient_id
-    );
+  select exists (
+    select 1 from public.practitioners p
+    where p.id = auth.uid() and p.is_admin
+  );
 $$;
 
 -- Droit d'accès / portabilité (RGPD art. 15 & 20) : agrège TOUTES les données du
@@ -1703,7 +1793,10 @@ declare
   v_email  text;
   v_result jsonb;
 begin
-  if not public.fn_can_access_patient(p_patient_id) then
+  -- Habilités : un praticien ADMIN (gestion des utilisateurs, n'importe quel patient)
+  -- OU le PATIENT lui-même (self-service RGPD mobile, art. 15/20 sur ses données).
+  -- Le praticien NON-admin n'a plus ce droit (capacité retirée de la fiche patient).
+  if not (public.fn_is_admin() or auth.uid() = p_patient_id) then
     raise exception 'export_patient_data: accès refusé';
   end if;
 
@@ -1791,7 +1884,9 @@ declare
   v_invitations int := 0;
   v_caseload    int := 0;
 begin
-  if not public.fn_can_access_patient(p_patient_id) then
+  -- Habilités : un praticien ADMIN (gestion des utilisateurs) OU le PATIENT lui-même
+  -- (droit à l'oubli self-service mobile, art. 17). Praticien non-admin exclu.
+  if not (public.fn_is_admin() or auth.uid() = p_patient_id) then
     raise exception 'erase_patient_data: accès refusé';
   end if;
 
@@ -1816,12 +1911,76 @@ begin
 end;
 $$;
 
--- Droits : helper interne non exposé ; export/erase réservés aux authentifiés + service_role.
-revoke all on function public.fn_can_access_patient(uuid) from public, anon, authenticated;
-revoke all on function public.export_patient_data(uuid)   from public, anon;
-revoke all on function public.erase_patient_data(uuid)    from public, anon;
+-- Liste admin de TOUS les utilisateurs — patients ET médecins (praticiens) — pour la
+-- page de gestion des utilisateurs. Admin-only via fn_is_admin() : un non-admin (ou un
+-- appel réseau forgé) → exception. Chaque ligne porte un discriminant `kind`
+-- ('patient' | 'practitioner') pour différencier les deux populations côté UI.
+-- `practitioner_names` = médecins liés (patients) / vide (médecins) ; `is_admin` =
+-- rôle (médecins) / false (patients). Consultation tracée (action 'read', target_id null).
+create or replace function public.admin_list_users()
+returns table (
+  user_id            uuid,
+  kind               text,
+  email              text,
+  display_name       text,
+  created_at         timestamptz,
+  practitioner_names text[],
+  is_admin           boolean
+)
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if not public.fn_is_admin() then
+    raise exception 'admin_list_users: accès refusé';
+  end if;
+
+  perform public.log_data_access('read', 'patients', null, null,
+    jsonb_build_object('scope', 'admin_all_users'));
+
+  return query
+    -- Patients : nom = prénom+nom sinon email ; médecins liés agrégés.
+    select
+      p.id,
+      'patient'::text,
+      p.email,
+      coalesce(nullif(trim(concat_ws(' ', nullif(p.first_name, ''), nullif(p.last_name, ''))), ''), p.email),
+      p.created_at,
+      coalesce(
+        array_agg(distinct pr.name) filter (where pr.name is not null and pr.name <> ''),
+        '{}'::text[]
+      ),
+      false
+    from public.patients p
+    left join public.practitioner_patients pp on pp.patient_id = p.id
+    left join public.practitioners pr on pr.id = pp.practitioner_id
+    group by p.id, p.email, p.first_name, p.last_name, p.created_at
+    union all
+    -- Médecins (praticiens) : nom = name sinon email ; is_admin porte le rôle.
+    select
+      pr.id,
+      'practitioner'::text,
+      pr.email,
+      coalesce(nullif(trim(pr.name), ''), pr.email),
+      pr.created_at,
+      '{}'::text[],
+      pr.is_admin
+    from public.practitioners pr
+    order by 5 desc;
+end;
+$$;
+
+-- Droits : fn_is_admin est un helper INTERNE (appelé par les RPC SECURITY DEFINER,
+-- en tant qu'owner) — aucun rôle client, pas d'exposition REST inutile. Le front
+-- n'en a pas besoin : il lit `practitioner.is_admin` (déjà chargé en session).
+-- export/erase/admin_list_users réservés aux authentifiés (re-gardés en interne) + service_role.
+revoke all on function public.fn_is_admin()             from public, anon, authenticated;
+revoke all on function public.export_patient_data(uuid) from public, anon;
+revoke all on function public.erase_patient_data(uuid)  from public, anon;
+revoke all on function public.admin_list_users()        from public, anon;
 grant execute on function public.export_patient_data(uuid) to authenticated, service_role;
 grant execute on function public.erase_patient_data(uuid)  to authenticated, service_role;
+grant execute on function public.admin_list_users()        to authenticated, service_role;
 
 
 -- ============================================================

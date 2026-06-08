@@ -1,0 +1,71 @@
+.admin-users {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-users__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.admin-users__title {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.admin-users__loading {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  padding: var(--spacing-lg) 0;
+}
+
+/* Colonne Type réduite à son contenu (badge) — pas d'étirement. */
+.admin-users__col-type {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin-users__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+}
+
+/* Champ de recherche borné — sinon width:100% remplit la ligne et fait passer
+   les autres filtres dessous. Largeur alignée sur celle du filtre praticien. */
+.admin-users__filters .search-input {
+  width: 260px;
+  flex: 0 0 auto;
+}
+
+/* Filtre praticien sans caption visible (l'option « Tous les praticiens » suffit) —
+   le nom accessible est porté par aria-label sur le select. */
+.admin-users__filters .input-field__label-row {
+  display: none;
+}
+
+/* Fond blanc sur la table (conteneur scrollable bordé). */
+.admin-users__table .data-table__scroll {
+  background: var(--color-surface);
+}
+
+.admin-users__name-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: 600;
+}
+
+.admin-users__name-toggle:hover {
+  color: var(--color-primary);
+}

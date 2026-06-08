@@ -43,6 +43,8 @@ export interface Appointment {
 export interface AppointmentWithPatient extends Appointment {
   patient_display_name: string
   patient_email: string
+  /** Identifiant public opaque de la relation, pour naviguer vers la fiche patient. */
+  patient_public_ref: string
 }
 
 export interface ComputedSlot {

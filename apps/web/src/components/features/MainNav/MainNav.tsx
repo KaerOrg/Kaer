@@ -1,15 +1,18 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Users, LayoutGrid, CalendarDays, ClipboardList } from 'lucide-react'
+import { Users, LayoutGrid, CalendarDays, ClipboardList, ShieldCheck } from 'lucide-react'
+import { useAuthStore } from '../../../store/authStore'
 import './MainNav.css'
 
 export function MainNav() {
   const { t } = useTranslation()
   const location = useLocation()
+  const isAdmin = useAuthStore(s => s.practitioner?.is_admin ?? false)
   const isPatientsActive = location.pathname === '/' || location.pathname.startsWith('/patient/')
   const isModulesActive = location.pathname === '/modules' || location.pathname.startsWith('/modules/')
   const isAgendaActive = location.pathname === '/agenda'
   const isFileActiveActive = location.pathname === '/file-active'
+  const isAdminActive = location.pathname.startsWith('/admin')
 
   return (
     <nav className="main-nav">
@@ -41,6 +44,15 @@ export function MainNav() {
         <LayoutGrid size={15} />
         {t('modules.nav_link')}
       </Link>
+      {isAdmin ? (
+        <Link
+          to="/admin/users"
+          className={`main-nav__link ${isAdminActive ? 'main-nav__link--active' : ''}`}
+        >
+          <ShieldCheck size={15} />
+          {t('admin_users.nav_link')}
+        </Link>
+      ) : null}
     </nav>
   )
 }

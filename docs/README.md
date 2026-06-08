@@ -32,6 +32,8 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`spec/calendar.md`](spec/calendar.md) | Système de prise de rendez-vous (praticien web + patient mobile) |
 | [`spec/file-active.md`](spec/file-active.md) | File active praticien — spec fonctionnelle (tour de contrôle) |
 | [`spec/speech-to-text.md`](spec/speech-to-text.md) | Dictée vocale de notes praticien (SpeechRecorder + Edge Function) |
+| [`spec/patient-public-ref.md`](spec/patient-public-ref.md) | Identifiant public opaque dans l'URL patient (`public_ref`) — masque la PK, défense en profondeur |
+| [`spec/admin-users.md`](spec/admin-users.md) | Page admin « Gestion des utilisateurs » — rôle `is_admin`, droits RGPD centralisés, sécurité front + base |
 | [`patient-data-sync.md`](patient-data-sync.md) | Circuit sync données patient : SQLite → Supabase via `RemoteSyncService` + gate consentement |
 | [`practitioner-notes.md`](practitioner-notes.md) | Notes praticien par patient (privées, Supabase, `practitioner_patient_notes`) |
 | [`module-diet-weight-psycho.md`](module-diet-weight-psycho.md) | Module `diet_weight_psycho` — fiches psyedu alimentation & psychotropes |

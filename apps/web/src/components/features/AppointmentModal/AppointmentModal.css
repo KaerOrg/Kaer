@@ -141,7 +141,15 @@
   border-color: var(--color-border);
 }
 
-/* ── Create form ────────────────────────────────────────────── */
+/* ── Create / reschedule form ───────────────────────────────── */
+.appt-reschedule-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 120px;
+  justify-content: center;
+}
+
 .appt-datetime-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -17,6 +17,7 @@ import {
   fetchPractitionerExceptions,
   fetchBookedSlots,
   bookAppointment,
+  rescheduleAppointment,
   computeAvailableSlots,
   type AvailabilityRule,
   type AvailabilityException,
@@ -26,6 +27,7 @@ import { colors, spacing, radius, fontSize } from '../theme'
 import type { AppStackParamList } from '../navigation/AppStack'
 
 type Route = RouteProp<AppStackParamList, 'BookAppointment'>
+type Nav = import('@react-navigation/native-stack').NativeStackNavigationProp<AppStackParamList>
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 const MONTH_LABELS = [
@@ -66,9 +68,10 @@ function formatTime(iso: string): string {
 
 export default function BookAppointmentScreen() {
   const { t } = useTranslation()
-  const navigation = useNavigation()
+  const navigation = useNavigation<Nav>()
   const route = useRoute<Route>()
-  const { practitionerId } = route.params
+  const { practitionerId, appointmentId } = route.params
+  const isRescheduleMode = appointmentId !== undefined
   const { patient } = useAuthStore()
 
   const today = useMemo(() => new Date(), [])
@@ -103,11 +106,11 @@ export default function BookAppointmentScreen() {
 
   const loadSlots = useCallback(async (date: string) => {
     setSlotsLoading(true)
-    const booked = await fetchBookedSlots(practitionerId, date)
+    const booked = await fetchBookedSlots(practitionerId, date, appointmentId)
     const computed = computeAvailableSlots(rules, exceptions, booked, date)
     setSlots(computed.filter(s => s.is_available))
     setSlotsLoading(false)
-  }, [practitionerId, rules, exceptions])
+  }, [practitionerId, appointmentId, rules, exceptions])
 
   const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date)
@@ -118,18 +121,29 @@ export default function BookAppointmentScreen() {
   const handleBook = useCallback(async (slot: ComputedSlot) => {
     if (!patient) return
     setBooking(true)
-    const result = await bookAppointment({
-      practitioner_id: practitionerId,
-      patient_id: patient.id,
-      starts_at: slot.starts_at,
-      ends_at: slot.ends_at,
-    })
+    const result = isRescheduleMode
+      ? await rescheduleAppointment({
+          appointment_id: appointmentId,
+          practitioner_id: practitionerId,
+          starts_at: slot.starts_at,
+          ends_at: slot.ends_at,
+        })
+      : await bookAppointment({
+          practitioner_id: practitionerId,
+          patient_id: patient.id,
+          starts_at: slot.starts_at,
+          ends_at: slot.ends_at,
+        })
     setBooking(false)
     if (result.ok) {
       setSuccess(true)
-      void loadSlots(selectedDate!)
+      if (isRescheduleMode) {
+        setTimeout(() => navigation.goBack(), 1500)
+      } else {
+        void loadSlots(selectedDate!)
+      }
     }
-  }, [patient, practitionerId, selectedDate, loadSlots])
+  }, [patient, practitionerId, appointmentId, isRescheduleMode, selectedDate, loadSlots, navigation])
 
   const calendarDays = useMemo(() => {
     const days: (number | null)[] = Array(firstDayOffset).fill(null)
@@ -228,7 +242,9 @@ export default function BookAppointmentScreen() {
 
             {success && (
               <View style={styles.successBanner}>
-                <Text style={styles.successText}>{t('agenda.book_success')}</Text>
+                <Text style={styles.successText}>
+                  {isRescheduleMode ? t('agenda.reschedule_success') : t('agenda.book_success')}
+                </Text>
               </View>
             )}
           </View>

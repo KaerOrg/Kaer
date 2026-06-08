@@ -67,7 +67,7 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: var(--spacing-lg);
 }
 
 .layout__main > .banner {

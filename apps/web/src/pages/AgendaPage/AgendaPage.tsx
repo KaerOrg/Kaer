@@ -18,6 +18,7 @@ import {
   createAppointment,
   updateAppointmentStatus,
   updateAppointmentNotes,
+  rescheduleAppointment,
   fetchAutoConfirmSetting,
   saveAutoConfirmSetting,
 } from '../../services/appointmentService'
@@ -201,6 +202,18 @@ export function AgendaPage() {
     [practitioner, weekStart, loadWeek],
   )
 
+  const handleReschedule = useCallback(
+    async (id: string, newStartsAt: string, newEndsAt: string) => {
+      const result = await rescheduleAppointment(id, newStartsAt, newEndsAt)
+      if (result.ok && practitioner) {
+        await loadWeek(practitioner.id, weekStart)
+        setModal({ type: 'none' })
+      }
+      return result
+    },
+    [practitioner, weekStart, loadWeek],
+  )
+
   const modalStartsAt = modal.type === 'create' ? modal.startsAt : null
   const modalEndsAt = modal.type === 'create' ? modal.endsAt : null
   const modalAppointment = modal.type === 'view' ? modal.appointment : null
@@ -298,7 +311,8 @@ export function AgendaPage() {
           onCreate={handleCreate}
           onUpdateStatus={handleUpdateStatus}
           onUpdateNotes={handleUpdateNotes}
-          onNavigateToPatient={patientId => navigate(`/patient/${patientId}`)}
+          onReschedule={handleReschedule}
+          onNavigateToPatient={publicRef => navigate(`/patient/${publicRef}`)}
         />
       )}
     </Layout>

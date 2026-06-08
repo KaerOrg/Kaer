@@ -46,6 +46,7 @@ Créé automatiquement par le trigger lors de l'acceptation d'une invitation.
 | `patient_birth_date` | date | nullable | Date de naissance copiée depuis l'invitation |
 | `patient_sex` | text | nullable | Sexe copié depuis l'invitation |
 | `teen_mode` | boolean | NOT NULL, default false | Mode adolescent activé par le praticien |
+| `public_ref` | text | NOT NULL, UNIQUE, default `gen_public_ref()` | Identifiant public opaque exposé dans l'URL (ex. `p_8Kf3aQ`) à la place de `patient_id` — défense en profondeur, voir [`spec/patient-public-ref.md`](spec/patient-public-ref.md) |
 | `created_at` | timestamptz | default now() | – |
 
 Contrainte d'unicité: `(practitioner_id, patient_id)`.

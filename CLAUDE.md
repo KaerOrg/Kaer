@@ -77,7 +77,7 @@ Si une demande franchit cette ligne : veto immédiat + alternative d'affichage p
 
 Liste complète avec statut et détails d'implémentation : [`docs/modules.md`](docs/modules.md).
 
-**30+ modules implémentés** : `sleep_diary`, `beck_columns`, `fear_thermometer`, `exposure_hierarchy`, `emotion_wheel`, `crisis_plan`, `rim`, `cognitive_saturation`, `decisional_balance`, `behavioral_activation`, `grounding`, `mood_tracker`, `motivational_balance`, `medication_adherence`, `breathing_techniques`, `phq9`, `gad7`, `bsl23`, `rcads`, `snap_iv`, `asrs6`, `asrs18`, `epds`, `nsi`, `medication_side_effects`, `psychoeducation`, `diet_weight_psycho`, `chronobiology_tracker`, `distress_tolerance`, `craving_journal`.
+**30+ modules implémentés** : `sleep_diary`, `beck_columns`, `fear_thermometer` (« Exposition graduée »), `emotion_wheel`, `crisis_plan`, `rim`, `cognitive_saturation`, `decisional_balance`, `behavioral_activation`, `grounding`, `mood_tracker`, `motivational_balance`, `medication_adherence`, `breathing_techniques`, `phq9`, `gad7`, `bsl23`, `rcads`, `snap_iv`, `asrs6`, `asrs18`, `epds`, `nsi`, `medication_side_effects`, `psychoeducation`, `diet_weight_psycho`, `chronobiology_tracker`, `distress_tolerance`, `craving_journal`.
 
 Prévus : `cognitive_distortions`, `therapeutic_commitment`.
 
@@ -97,6 +97,7 @@ Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Featu
 - **Ordre web-puis-mobile** pour tout nouveau module (praticien doit pouvoir le débloquer avant que le patient y accède).
 - **Synchronisation mobile** : toute écriture SQLite patient passe par `syncUpsert`/`syncDelete` de `syncHelpers.ts`. Détail : [`.claude/rules/sync-service.md`](.claude/rules/sync-service.md).
 - **Patterns clés** : mode ado (`useTeen`, `TeenAccent`, mock obligatoire dans les tests), bandeau disclaimer MDR (`DisclaimerBanner`), fiches psyedu (`PsyEduBlockRenderer` + seed SQL, zéro texte en dur), rendez-vous (`computeAvailableSlots` pure function, `jsDayToSchema()`). Docs dans `apps/*/docs/` et `docs/spec/`.
+- **Feature admin** : toute capacité admin est **verrouillée front ET base**. Rôle = `practitioners.is_admin` (lecture seule client, trigger `trg_guard_is_admin_write`) ; barrière réelle = `fn_is_admin()` re-vérifié dans chaque RPC/edge function (jamais un flag client). La garde de route React n'est que du confort UX. Modèle de référence : [`docs/spec/admin-users.md`](docs/spec/admin-users.md).
 
 ## Documentation technique
 

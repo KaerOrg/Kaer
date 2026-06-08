@@ -19,7 +19,6 @@ const ALL_MODULE_IDS = [
   'grounding',
   'rim',
   'fear_thermometer',
-  'exposure_hierarchy',
   'breathing_techniques',
   'cognitive_saturation',
   'craving_journal',

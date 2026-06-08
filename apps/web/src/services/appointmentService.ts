@@ -191,6 +191,7 @@ type PatientRelEntry = {
   patient_alias: string | null
   patient_first_name: string | null
   patient_last_name: string | null
+  public_ref: string
   patients: { email: string; first_name: string | null; last_name: string | null } | { email: string; first_name: string | null; last_name: string | null }[] | null
 }
 
@@ -229,6 +230,7 @@ function rowToAppointmentWithPatient(row: AppointmentRow): AppointmentWithPatien
     updated_at: row.updated_at,
     patient_display_name,
     patient_email: profile?.email ?? '',
+    patient_public_ref: rel?.public_ref ?? '',
   }
 }
 
@@ -241,7 +243,7 @@ export async function fetchAppointmentsForPatient(
     .select(`
       *,
       patient_rel:practitioner_patients!inner(
-        patient_alias, patient_first_name, patient_last_name,
+        patient_alias, patient_first_name, patient_last_name, public_ref,
         patients(email, first_name, last_name)
       )
     `)
@@ -261,7 +263,7 @@ export async function fetchAppointmentsForWeek(
     .select(`
       *,
       patient_rel:practitioner_patients!inner(
-        patient_alias, patient_first_name, patient_last_name,
+        patient_alias, patient_first_name, patient_last_name, public_ref,
         patients(email, first_name, last_name)
       )
     `)
@@ -316,6 +318,25 @@ export async function updateAppointmentNotes(
     .update({ notes: notes || null, updated_at: new Date().toISOString() })
     .eq('id', id)
   return { ok: !error }
+}
+
+// ─── Reprogrammation ──────────────────────────────────────────────────────────
+
+export async function rescheduleAppointment(
+  appointmentId: string,
+  newStartsAt: string,
+  newEndsAt: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('appointments')
+    .update({
+      starts_at: new Date(newStartsAt).toISOString(),
+      ends_at: new Date(newEndsAt).toISOString(),
+      status: 'pending',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', appointmentId)
+  return { ok: !error, error: error?.message }
 }
 
 // ─── Paramètre auto-confirm ───────────────────────────────────────────────────

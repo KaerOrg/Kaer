@@ -205,41 +205,43 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
           </div>
         </div>
 
-        <div className="patient-notes__tag-row">
-          {newNoteTags.map(tag => (
-            <span key={tag} className="patient-notes__tag">
-              {tag}
-              <button
-                className="patient-notes__tag-remove"
-                onClick={() => setNewNoteTags(prev => prev.filter(t => t !== tag))}
-                aria-label={`Retirer ${tag}`}
-              >×</button>
-            </span>
-          ))}
-          <input
-            className="patient-notes__tag-input"
-            value={newTagInput}
-            onChange={e => setNewTagInput(e.target.value)}
-            onKeyDown={handleNewTagKeyDown}
-            onBlur={addNewTag}
-            placeholder={t('notes.tag_placeholder')}
-          />
+        <div className="patient-notes__tag-actions-row">
+          <div className="patient-notes__tag-row">
+            {newNoteTags.map(tag => (
+              <span key={tag} className="patient-notes__tag">
+                {tag}
+                <button
+                  className="patient-notes__tag-remove"
+                  onClick={() => setNewNoteTags(prev => prev.filter(t => t !== tag))}
+                  aria-label={`Retirer ${tag}`}
+                >×</button>
+              </span>
+            ))}
+            <input
+              className="patient-notes__tag-input"
+              value={newTagInput}
+              onChange={e => setNewTagInput(e.target.value)}
+              onKeyDown={handleNewTagKeyDown}
+              onBlur={addNewTag}
+              placeholder={t('notes.tag_placeholder')}
+            />
+          </div>
+          <div className="patient-notes__form-actions">
+            <SpeechToTextButton
+              onTranscription={handleTranscription}
+              onTextChunk={handleTextChunk}
+              onRecordingChange={handleRecordingChange}
+              disabled={savingNote}
+            />
+            <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
+              {t('notes.save_button')}
+            </Button>
+          </div>
         </div>
 
         {noteError && !editingNoteId && (
           <p className="patient-notes__error">{noteError}</p>
         )}
-        <div className="patient-notes__form-actions">
-          <SpeechToTextButton
-            onTranscription={handleTranscription}
-            onTextChunk={handleTextChunk}
-            onRecordingChange={handleRecordingChange}
-            disabled={savingNote}
-          />
-          <Button size="sm" loading={savingNote} onClick={handleSaveNote}>
-            {t('notes.save_button')}
-          </Button>
-        </div>
       </div>
 
       {/* ── Filtre par tag ────────────────────────────────────── */}

@@ -19,13 +19,13 @@ import {
   type ModuleCategory,
 } from '../../services/moduleCatalogService'
 import { fetchPatientHeader, setTeenMode as updateTeenMode, saveGeneralNote } from '../../services/patientService'
+import { resolvePatientRef } from '../../services/patientRefService'
 import { fetchNotes, type PractitionerNote } from '../../services/noteService'
 import { fetchPatientModules } from '../../services/moduleAssignmentService'
 import { fetchEnabledModules } from '../../services/practitionerSettingsService'
 import { fetchAppointmentsForPatient } from '../../services/appointmentService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
 
-import { PatientDataRights } from '../../components/features/PatientDataRights'
 import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
 import { PatientNotesTab } from './tabs/PatientNotesTab'
@@ -51,11 +51,15 @@ const PAGE_DATA_INITIAL: PageData = {
 }
 
 export function PatientPage() {
-  const { id } = useParams<{ id: string }>()
+  // `ref` = identifiant public opaque exposé dans l'URL ; `id` = patient_id réel
+  // résolu une seule fois (toute la page travaille ensuite avec la vraie PK).
+  const { ref } = useParams<{ ref: string }>()
   const navigate = useNavigate()
   const { practitioner } = useAuthStore()
   const { t } = useTranslation()
   const toast = useToast()
+
+  const [id, setId] = useState<string | null>(null)
 
   // ── Patient identity ─────────────────────────────────────────────────────
   const [patientEmail, setPatientEmail] = useState('')
@@ -93,6 +97,20 @@ export function PatientPage() {
         a.status !== 'cancelled_by_practitioner',
     ).length
   }, [appointments])
+
+  // Résout le token public de l'URL vers le patient_id réel. Token absent ou
+  // non résolu (inexistant, ou relation d'un autre praticien filtrée par la RLS)
+  // → retour au dashboard.
+  useEffect(() => {
+    let active = true
+    if (!ref) { navigate('/'); return }
+    resolvePatientRef(ref).then(resolved => {
+      if (!active) return
+      if (!resolved) { navigate('/'); return }
+      setId(resolved)
+    })
+    return () => { active = false }
+  }, [ref, navigate])
 
   const reloadModules = useCallback(async () => {
     if (!id) return
@@ -222,14 +240,6 @@ export function PatientPage() {
                 onSaveGeneralNote={handleSaveGeneralNote}
                 onNavigateToNotes={() => setActiveTab('notes')}
                 onNavigateToModules={() => setActiveTab('modules')}
-              />
-            )}
-
-            {activeTab === 'overview' && id && (
-              <PatientDataRights
-                patientId={id}
-                displayName={displayName}
-                onErased={() => navigate('/')}
               />
             )}
 

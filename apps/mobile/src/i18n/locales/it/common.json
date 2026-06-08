@@ -264,9 +264,9 @@
       "intro": "Rielaborazione tramite immaginazione mentale."
     },
     "fear_thermometer": {
-      "label": "Termometro della paura",
+      "label": "Esposizione graduale",
       "description": "Misura il tuo livello di angoscia (da 0 a 100)",
-      "title": "Termometro della paura",
+      "title": "Esposizione graduale",
       "intro": "Valuta il tuo livello di angoscia su una scala da 0 a 100.",
       "tab_entries": "Inserimenti",
       "tab_situations": "Le mie situazioni",
@@ -282,10 +282,6 @@
       "suds_before": "Prima",
       "suds_after": "Dopo",
       "save": "Salva"
-    },
-    "exposure_hierarchy": {
-      "label": "Gerarchia di esposizione",
-      "description": "Costruisci i tuoi livelli di esposizione graduale"
     },
     "breathing_techniques": {
       "label": "Tecniche di respirazione",
