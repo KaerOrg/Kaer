@@ -14,6 +14,7 @@ const ModulePreviewPage = lazy(() => import('./pages/ModulePreviewPage').then(m 
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
 const AgendaPage = lazy(() => import('./pages/AgendaPage').then(m => ({ default: m.AgendaPage })))
 const FileActivePage = lazy(() => import('./pages/FileActivePage').then(m => ({ default: m.FileActivePage })))
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
 
 function App() {
   const { practitioner, loading, loadSession } = useAuthStore()
@@ -65,6 +66,12 @@ function App() {
                 <Route path="/profil" element={<ProfilePage />} />
                 <Route path="/agenda" element={<AgendaPage />} />
                 <Route path="/file-active" element={<FileActivePage />} />
+                {/* Gestion des utilisateurs — montée UNIQUEMENT pour un admin. Garde
+                    de confort (UX) : la barrière réelle est en base (RPC re-gardés
+                    fn_is_admin). Un non-admin tombe sur le catch-all → redirigé vers /. */}
+                {practitioner.is_admin ? (
+                  <Route path="/admin/users" element={<AdminUsersPage />} />
+                ) : null}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </>
             ) : (

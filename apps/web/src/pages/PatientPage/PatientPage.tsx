@@ -26,7 +26,6 @@ import { fetchEnabledModules } from '../../services/practitionerSettingsService'
 import { fetchAppointmentsForPatient } from '../../services/appointmentService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
 
-import { PatientDataRights } from '../../components/features/PatientDataRights'
 import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
 import { PatientNotesTab } from './tabs/PatientNotesTab'
@@ -241,14 +240,6 @@ export function PatientPage() {
                 onSaveGeneralNote={handleSaveGeneralNote}
                 onNavigateToNotes={() => setActiveTab('notes')}
                 onNavigateToModules={() => setActiveTab('modules')}
-              />
-            )}
-
-            {activeTab === 'overview' && id && (
-              <PatientDataRights
-                patientId={id}
-                displayName={displayName}
-                onErased={() => navigate('/')}
               />
             )}
 

@@ -215,6 +215,41 @@
     "erase_success": "Le patient et ses données ont été effacés.",
     "erase_error": "L'effacement a échoué. Réessayez."
   },
+  "admin_users": {
+    "nav_link": "Administration",
+    "title": "Gestion des utilisateurs",
+    "search_placeholder": "Rechercher par nom ou email…",
+    "error_load": "Le chargement des utilisateurs a échoué. Réessayez.",
+    "type_patient": "Patient",
+    "type_practitioner": "Médecin",
+    "role_admin": "Admin",
+    "role_practitioner": "Médecin",
+    "filter": {
+      "aria": "Filtrer par type d'utilisateur",
+      "all": "Tous",
+      "patients": "Patients",
+      "practitioners": "Médecins",
+      "by_practitioner": "Filtrer par praticien",
+      "all_practitioners": "Tous les praticiens"
+    },
+    "practitioner_detail": {
+      "title": "Compte médecin"
+    },
+    "col": {
+      "type": "Type",
+      "name": "Nom",
+      "email": "Email",
+      "practitioners": "Praticien(s)",
+      "created": "Inscrit le",
+      "no_practitioner": "—"
+    },
+    "empty": {
+      "title": "Aucun utilisateur",
+      "description": "Aucun utilisateur n'est encore enregistré.",
+      "no_match_title": "Aucun résultat",
+      "no_match_description": "Aucun utilisateur ne correspond à votre recherche."
+    }
+  },
   "patient": {
     "back": "← Retour à mes patients",
     "teen_mode_label": "Mode ado",

@@ -2231,3 +2231,17 @@ on conflict (table_name) do update set
   inactivity_days    = excluded.inactivity_days,
   description        = excluded.description,
   updated_at         = now();
+
+
+-- ============================================================
+-- Rôle admin — gestion des utilisateurs / droits RGPD
+-- ============================================================
+-- Attribue le rôle admin (par email) aux comptes praticien habilités. Idempotent.
+-- Le défaut de la colonne est false ; cette liste est la SEULE source d'admins.
+-- Pour retirer un admin : passer is_admin = false ici, ou directement en base.
+update public.practitioners
+   set is_admin = true
+ where lower(email) in (
+   'guillaume.zarb@gmail.com',
+   'teil.olivier@gmail.com'
+ );

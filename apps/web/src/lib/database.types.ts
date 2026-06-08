@@ -15,6 +15,7 @@ export interface Database {
           avatar_url: string | null
           auto_confirm_appointments: boolean
           mfa_reminder_dismissed: boolean
+          is_admin: boolean
           created_at: string
         }
         Insert: {
@@ -28,7 +29,11 @@ export interface Database {
           avatar_url?: string | null
           auto_confirm_appointments?: boolean
           mfa_reminder_dismissed?: boolean
+          is_admin?: boolean
         }
+        // is_admin VOLONTAIREMENT absent : la colonne est en lecture seule côté
+        // client (trigger trg_guard_is_admin_write). Le rôle admin ne s'attribue
+        // que côté serveur (seed / service_role) — jamais via un Update applicatif.
         Update: {
           name?: string
           professional_title?: string | null
@@ -735,6 +740,20 @@ export interface Database {
         Args: { p_patient_id: string }
         Returns: { ok: boolean; invitations_deleted: number; caseload_entries_deleted: number }
       }
+      // Liste admin de TOUS les utilisateurs — patients ET médecins (gestion des
+      // utilisateurs). Admin-only. `kind` discrimine les deux populations.
+      admin_list_users: {
+        Args: Record<string, never>
+        Returns: {
+          user_id: string
+          kind: 'patient' | 'practitioner'
+          email: string
+          display_name: string
+          created_at: string
+          practitioner_names: string[]
+          is_admin: boolean
+        }[]
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
@@ -759,6 +778,8 @@ export interface Practitioner {
   phone: string | null
   avatar_url: string | null
   mfa_reminder_dismissed: boolean
+  /** Rôle admin (gestion des utilisateurs). Lecture seule côté client. */
+  is_admin: boolean
 }
 
 export interface PatientSummary {

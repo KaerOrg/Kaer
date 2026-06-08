@@ -215,6 +215,41 @@
     "erase_success": "The patient and their data have been erased.",
     "erase_error": "Erasure failed. Please try again."
   },
+  "admin_users": {
+    "nav_link": "Administration",
+    "title": "User management",
+    "search_placeholder": "Search by name or email…",
+    "error_load": "Failed to load users. Please try again.",
+    "type_patient": "Patient",
+    "type_practitioner": "Practitioner",
+    "role_admin": "Admin",
+    "role_practitioner": "Practitioner",
+    "filter": {
+      "aria": "Filter by user type",
+      "all": "All",
+      "patients": "Patients",
+      "practitioners": "Practitioners",
+      "by_practitioner": "Filter by practitioner",
+      "all_practitioners": "All practitioners"
+    },
+    "practitioner_detail": {
+      "title": "Practitioner account"
+    },
+    "col": {
+      "type": "Type",
+      "name": "Name",
+      "email": "Email",
+      "practitioners": "Practitioner(s)",
+      "created": "Registered on",
+      "no_practitioner": "—"
+    },
+    "empty": {
+      "title": "No users",
+      "description": "No user has been registered yet.",
+      "no_match_title": "No results",
+      "no_match_description": "No user matches your search."
+    }
+  },
   "patient": {
     "back": "← Back to my patients",
     "teen_mode_label": "Teen mode",

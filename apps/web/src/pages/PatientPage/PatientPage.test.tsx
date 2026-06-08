@@ -52,7 +52,6 @@ vi.mock('../../services/appointmentService', () => ({
 vi.mock('../../components/features/Layout', () => ({
   Layout: ({ children }: { children: ReactNode }) => children,
 }))
-vi.mock('../../components/features/PatientDataRights', () => ({ PatientDataRights: () => null }))
 vi.mock('./tabs/PatientOverviewTab', () => ({ PatientOverviewTab: () => null }))
 vi.mock('./tabs/PatientModulesTab', () => ({ PatientModulesTab: () => null }))
 vi.mock('./tabs/PatientNotesTab', () => ({ PatientNotesTab: () => null }))

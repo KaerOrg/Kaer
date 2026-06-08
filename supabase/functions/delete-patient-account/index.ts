@@ -8,10 +8,11 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 // Le non-cascadant (invitations par email, caseload_entries en SET NULL) est nettoyé
 // EN AMONT par le RPC erase_patient_data, appelé par le client juste avant cette fonction.
 //
-// Sécurité : l'appelant est authentifié (JWT). On vérifie qu'il est habilité sur ce
-// patient — le patient lui-même OU un praticien lié via practitioner_patients — avant
-// toute suppression. Le service_role ne sert qu'à l'opération admin, jamais à élargir
-// les droits de l'appelant.
+// Sécurité : l'appelant est authentifié (JWT). Habilités à supprimer un compte :
+// un praticien ADMIN (practitioners.is_admin, page de gestion des utilisateurs) OU
+// le PATIENT lui-même (self-service RGPD mobile). Identité dérivée du JWT, jamais du
+// payload. Le service_role ne sert qu'à l'opération de suppression, jamais à élargir
+// les droits de l'appelant. Cohérent avec les RPC erase_patient_data / export_patient_data.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -52,16 +53,17 @@ Deno.serve(async (req) => {
       return json({ error: 'unauthenticated' }, 401)
     }
 
-    // Habilitation : le patient lui-même, ou un praticien lié à ce patient.
+    // Habilitation : le patient lui-même (self-service mobile) OU un praticien admin
+    // (gestion des utilisateurs). Le rôle admin est lu en base via l'id du JWT — un
+    // patient n'a pas de ligne practitioners, donc ne peut jamais devenir admin.
     let authorized = callerId === patientId
     if (!authorized) {
-      const { data: link } = await supabase
-        .from('practitioner_patients')
-        .select('id')
-        .eq('practitioner_id', callerId)
-        .eq('patient_id', patientId)
+      const { data: caller } = await supabase
+        .from('practitioners')
+        .select('is_admin')
+        .eq('id', callerId)
         .maybeSingle()
-      authorized = Boolean(link)
+      authorized = Boolean(caller?.is_admin)
     }
     if (!authorized) {
       return json({ error: 'forbidden' }, 403)
