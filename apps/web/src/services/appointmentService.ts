@@ -191,6 +191,7 @@ type PatientRelEntry = {
   patient_alias: string | null
   patient_first_name: string | null
   patient_last_name: string | null
+  public_ref: string
   patients: { email: string; first_name: string | null; last_name: string | null } | { email: string; first_name: string | null; last_name: string | null }[] | null
 }
 
@@ -229,6 +230,7 @@ function rowToAppointmentWithPatient(row: AppointmentRow): AppointmentWithPatien
     updated_at: row.updated_at,
     patient_display_name,
     patient_email: profile?.email ?? '',
+    patient_public_ref: rel?.public_ref ?? '',
   }
 }
 
@@ -241,7 +243,7 @@ export async function fetchAppointmentsForPatient(
     .select(`
       *,
       patient_rel:practitioner_patients!inner(
-        patient_alias, patient_first_name, patient_last_name,
+        patient_alias, patient_first_name, patient_last_name, public_ref,
         patients(email, first_name, last_name)
       )
     `)
@@ -261,7 +263,7 @@ export async function fetchAppointmentsForWeek(
     .select(`
       *,
       patient_rel:practitioner_patients!inner(
-        patient_alias, patient_first_name, patient_last_name,
+        patient_alias, patient_first_name, patient_last_name, public_ref,
         patients(email, first_name, last_name)
       )
     `)

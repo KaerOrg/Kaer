@@ -312,7 +312,7 @@ export function AgendaPage() {
           onUpdateStatus={handleUpdateStatus}
           onUpdateNotes={handleUpdateNotes}
           onReschedule={handleReschedule}
-          onNavigateToPatient={patientId => navigate(`/patient/${patientId}`)}
+          onNavigateToPatient={publicRef => navigate(`/patient/${publicRef}`)}
         />
       )}
     </Layout>

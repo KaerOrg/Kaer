@@ -351,7 +351,7 @@ export function AppointmentModal({
                 <button
                   type="button"
                   className="appt-participant appt-participant--link"
-                  onClick={() => { onNavigateToPatient(appointment.patient_id); onClose() }}
+                  onClick={() => { onNavigateToPatient(appointment.patient_public_ref); onClose() }}
                   title={t('agenda.appointment.view_patient_file')}
                 >
                   <Avatar name={appointment.patient_display_name} size={34} />
