@@ -267,6 +267,52 @@ export interface Database {
         }
         Relationships: []
       }
+      tag_dimensions: {
+        Row: {
+          id: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          sort_order?: number
+        }
+        Update: {
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          id: string
+          dimension_id: string
+          sort_order: number
+        }
+        Insert: {
+          id: string
+          dimension_id: string
+          sort_order?: number
+        }
+        Update: {
+          dimension_id?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      module_tags: {
+        Row: {
+          module_id: string
+          tag_id: string
+        }
+        Insert: {
+          module_id: string
+          tag_id: string
+        }
+        Update: {
+          module_id?: string
+          tag_id?: string
+        }
+        Relationships: []
+      }
       module_content_fields: {
         Row: {
           id: string

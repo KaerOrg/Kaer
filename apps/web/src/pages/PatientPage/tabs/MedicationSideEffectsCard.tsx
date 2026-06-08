@@ -18,6 +18,7 @@ type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
 
 export interface MedicationSideEffectsCardProps {
   patientId: string
+  tagChips: ReactNode
   modItem: ModuleItem
   modIcon: ReactNode
   mod: PatientModule | undefined
@@ -41,6 +42,7 @@ export interface MedicationSideEffectsCardProps {
  */
 export function MedicationSideEffectsCard({
   patientId,
+  tagChips,
   modItem,
   modIcon,
   mod,
@@ -144,6 +146,7 @@ export function MedicationSideEffectsCard({
           </>
         ) : undefined}
       >
+        {tagChips}
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}

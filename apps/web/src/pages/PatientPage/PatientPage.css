@@ -776,6 +776,20 @@
   gap: 8px;
 }
 
+/* Modale « Ajouter un module » : barre de filtres + recherche + grille */
+.wardrobe__add {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Vue active : barre de filtres (lentille) + grille des modules actifs */
+.wardrobe__active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .category-modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -821,11 +835,6 @@
   font-size: 11px;
   color: var(--color-text-secondary);
   margin-top: 6px;
-}
-
-.module-card__date--actions {
-  margin-top: 0;
-  margin-right: auto;
 }
 
 /* ── Panneaux aperçu / données intégrés dans le body de la card ──────────────── */

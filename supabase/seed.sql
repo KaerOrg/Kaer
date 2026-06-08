@@ -1038,6 +1038,157 @@ update public.modules set preview_kind = 'guided_exercise'   where id = 'groundi
 update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';
 
 
+-- ============================================================
+-- SEED : taxonomie des modules (tag_dimensions, tags, module_tags)
+-- ============================================================
+-- Filtres transverses de l'armoire thérapeutique. Source de vérité :
+-- docs/spec/module-taxonomy.md (§5 vocabulaire, §6 tagging). Libellés via i18n
+-- (tag_dimensions.<id>.label, tags.<id>.label) — zéro texte en base.
+-- MDR : métadonnée d'outil uniquement, jamais dérivée d'une donnée patient.
+
+insert into public.tag_dimensions (id, sort_order) values
+  ('indication', 1),
+  ('population', 2),
+  ('approach',   3)
+on conflict (id) do update set sort_order = excluded.sort_order;
+
+insert into public.tags (id, dimension_id, sort_order) values
+  -- Indication (problématique clinique)
+  ('anxiety',                'indication', 10),
+  ('ocd',                    'indication', 20),
+  ('depression',             'indication', 30),
+  ('bipolar',                'indication', 40),
+  ('trauma',                 'indication', 50),
+  ('psychological_distress', 'indication', 60),
+  ('emotion_dysregulation',  'indication', 70),
+  ('suicidal_crisis',        'indication', 80),
+  ('addiction',              'indication', 90),
+  ('sleep',                  'indication', 100),
+  ('adhd',                   'indication', 110),
+  ('eating_disorder',        'indication', 120),
+  ('perinatal',              'indication', 130),
+  ('psychosis',              'indication', 140),
+  -- Population (âge)
+  ('child',  'population', 10),
+  ('teen',   'population', 20),
+  ('adult',  'population', 30),
+  ('senior', 'population', 40),
+  -- Approche (modalité thérapeutique)
+  ('cbt',                       'approach', 10),
+  ('act',                       'approach', 20),
+  ('dbt',                       'approach', 30),
+  ('motivational_interviewing', 'approach', 40),
+  ('psychoeducation',           'approach', 50),
+  ('relaxation',                'approach', 60),
+  ('self_monitoring',           'approach', 70),
+  ('imagery',                   'approach', 80),
+  ('crisis_management',         'approach', 90)
+on conflict (id) do update set dimension_id = excluded.dimension_id, sort_order = excluded.sort_order;
+
+insert into public.module_tags (module_id, tag_id) values
+  -- ── Outils ──────────────────────────────────────────────────────────────
+  ('crisis_plan', 'suicidal_crisis'), ('crisis_plan', 'psychological_distress'),
+  ('crisis_plan', 'teen'), ('crisis_plan', 'adult'), ('crisis_plan', 'senior'),
+  ('crisis_plan', 'crisis_management'),
+
+  ('distress_tolerance', 'emotion_dysregulation'), ('distress_tolerance', 'suicidal_crisis'), ('distress_tolerance', 'addiction'),
+  ('distress_tolerance', 'teen'), ('distress_tolerance', 'adult'),
+  ('distress_tolerance', 'dbt'),
+
+  ('therapeutic_commitment', 'psychological_distress'),
+  ('therapeutic_commitment', 'teen'), ('therapeutic_commitment', 'adult'),
+  ('therapeutic_commitment', 'act'),
+
+  ('medication_side_effects', 'teen'), ('medication_side_effects', 'adult'), ('medication_side_effects', 'senior'),
+  ('medication_side_effects', 'self_monitoring'),
+
+  ('medication_adherence', 'teen'), ('medication_adherence', 'adult'), ('medication_adherence', 'senior'),
+  ('medication_adherence', 'self_monitoring'),
+
+  ('psychoeducation', 'psychological_distress'),
+  ('psychoeducation', 'child'), ('psychoeducation', 'teen'), ('psychoeducation', 'adult'), ('psychoeducation', 'senior'),
+  ('psychoeducation', 'psychoeducation'),
+
+  ('sleep_diary', 'sleep'), ('sleep_diary', 'depression'),
+  ('sleep_diary', 'teen'), ('sleep_diary', 'adult'), ('sleep_diary', 'senior'),
+  ('sleep_diary', 'cbt'), ('sleep_diary', 'self_monitoring'),
+
+  ('diet_weight_psycho', 'eating_disorder'),
+  ('diet_weight_psycho', 'teen'), ('diet_weight_psycho', 'adult'),
+  ('diet_weight_psycho', 'cbt'), ('diet_weight_psycho', 'self_monitoring'),
+
+  ('chronobiology_tracker', 'sleep'), ('chronobiology_tracker', 'bipolar'), ('chronobiology_tracker', 'depression'),
+  ('chronobiology_tracker', 'adult'),
+  ('chronobiology_tracker', 'self_monitoring'),
+
+  ('mood_tracker', 'depression'), ('mood_tracker', 'bipolar'), ('mood_tracker', 'psychological_distress'),
+  ('mood_tracker', 'teen'), ('mood_tracker', 'adult'), ('mood_tracker', 'senior'),
+  ('mood_tracker', 'self_monitoring'),
+
+  ('emotion_wheel', 'psychological_distress'), ('emotion_wheel', 'emotion_dysregulation'),
+  ('emotion_wheel', 'child'), ('emotion_wheel', 'teen'), ('emotion_wheel', 'adult'),
+  ('emotion_wheel', 'psychoeducation'),
+
+  ('behavioral_activation', 'depression'), ('behavioral_activation', 'anxiety'),
+  ('behavioral_activation', 'teen'), ('behavioral_activation', 'adult'), ('behavioral_activation', 'senior'),
+  ('behavioral_activation', 'cbt'),
+
+  ('beck_columns', 'depression'), ('beck_columns', 'anxiety'),
+  ('beck_columns', 'teen'), ('beck_columns', 'adult'),
+  ('beck_columns', 'cbt'),
+
+  ('cognitive_distortions', 'depression'), ('cognitive_distortions', 'anxiety'),
+  ('cognitive_distortions', 'teen'), ('cognitive_distortions', 'adult'),
+  ('cognitive_distortions', 'cbt'),
+
+  ('grounding', 'trauma'), ('grounding', 'anxiety'), ('grounding', 'emotion_dysregulation'),
+  ('grounding', 'child'), ('grounding', 'teen'), ('grounding', 'adult'),
+  ('grounding', 'relaxation'),
+
+  ('rim', 'trauma'), ('rim', 'sleep'),
+  ('rim', 'teen'), ('rim', 'adult'),
+  ('rim', 'imagery'),
+
+  ('fear_thermometer', 'anxiety'), ('fear_thermometer', 'ocd'), ('fear_thermometer', 'trauma'),
+  ('fear_thermometer', 'child'), ('fear_thermometer', 'teen'), ('fear_thermometer', 'adult'),
+  ('fear_thermometer', 'cbt'),
+
+  ('breathing_techniques', 'anxiety'),
+  ('breathing_techniques', 'child'), ('breathing_techniques', 'teen'), ('breathing_techniques', 'adult'), ('breathing_techniques', 'senior'),
+  ('breathing_techniques', 'relaxation'),
+
+  ('cognitive_saturation', 'anxiety'),
+  ('cognitive_saturation', 'teen'), ('cognitive_saturation', 'adult'),
+  ('cognitive_saturation', 'cbt'),
+
+  ('craving_journal', 'addiction'),
+  ('craving_journal', 'teen'), ('craving_journal', 'adult'),
+  ('craving_journal', 'self_monitoring'),
+
+  ('decisional_balance', 'addiction'),
+  ('decisional_balance', 'teen'), ('decisional_balance', 'adult'),
+  ('decisional_balance', 'motivational_interviewing'),
+
+  ('motivational_balance', 'addiction'), ('motivational_balance', 'psychological_distress'),
+  ('motivational_balance', 'teen'), ('motivational_balance', 'adult'),
+  ('motivational_balance', 'motivational_interviewing'),
+
+  -- ── Échelles & questionnaires ───────────────────────────────────────────
+  ('phq9', 'depression'), ('phq9', 'adult'), ('phq9', 'senior'),
+  ('gad7', 'anxiety'), ('gad7', 'adult'), ('gad7', 'senior'),
+  ('bsl23', 'emotion_dysregulation'), ('bsl23', 'adult'),
+  ('snap_iv', 'adhd'), ('snap_iv', 'child'), ('snap_iv', 'teen'),
+  ('asrs6', 'adhd'), ('asrs6', 'adult'),
+  ('asrs18', 'adhd'), ('asrs18', 'adult'),
+  ('epds', 'depression'), ('epds', 'perinatal'), ('epds', 'adult'),
+  ('nsi', 'sleep'), ('nsi', 'trauma'), ('nsi', 'adult'),
+  ('rcads', 'anxiety'), ('rcads', 'depression'), ('rcads', 'child'), ('rcads', 'teen'),
+  ('cape42', 'psychosis'), ('cape42', 'teen'), ('cape42', 'adult'),
+  ('audit', 'addiction'), ('audit', 'teen'), ('audit', 'adult'),
+  ('cssrs', 'suicidal_crisis'), ('cssrs', 'child'), ('cssrs', 'teen'), ('cssrs', 'adult'), ('cssrs', 'senior')
+on conflict (module_id, tag_id) do nothing;
+
+
 -- ── module_content_fields : crisis_plan (editable_steps) ─────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('crisis_plan.label', 'crisis_plan', NULL, NULL, 'module_label', 'module.crisis_plan.label', 0),
