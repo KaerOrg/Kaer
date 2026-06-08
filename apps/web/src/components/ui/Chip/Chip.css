@@ -15,6 +15,9 @@
 
 .chip__icon { flex-shrink: 0; display: inline-flex; }
 
+/* ---- Taille compacte (cartes denses) ---- */
+.chip--sm { padding: 1px 7px; font-size: calc(var(--font-size-caption) - 1px); gap: 3px; }
+
 /* ---- Supprimable (tag éditable) ---- */
 .chip--removable { padding: 2px 4px 2px 10px; }
 

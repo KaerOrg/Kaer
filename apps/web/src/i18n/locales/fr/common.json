@@ -368,6 +368,9 @@
     "enabled_count_other": "{{count}} modules activés",
     "search_placeholder": "Rechercher un module (nom, description)…",
     "empty_search": "Aucun module ne correspond à votre recherche.",
+    "filter_count": "{{shown}} sur {{total}} modules",
+    "filter_reset": "Réinitialiser les filtres",
+    "empty_filter": "Aucun module ne correspond à ces filtres.",
     "crisis_plan": {
       "label": "Plan de crise",
       "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
@@ -1011,6 +1014,40 @@
       "label": "Échelles et questionnaires d'évaluation",
       "subtitle": ""
     }
+  },
+  "tag_dimensions": {
+    "indication": { "label": "Indication" },
+    "population": { "label": "Public" },
+    "approach": { "label": "Approche" }
+  },
+  "tags": {
+    "anxiety": { "label": "Anxiété" },
+    "ocd": { "label": "TOC" },
+    "depression": { "label": "Dépression" },
+    "bipolar": { "label": "Bipolarité" },
+    "trauma": { "label": "Trauma / ESPT" },
+    "psychological_distress": { "label": "Souffrance psychique" },
+    "emotion_dysregulation": { "label": "Dysrégulation émotionnelle" },
+    "suicidal_crisis": { "label": "Crise suicidaire" },
+    "addiction": { "label": "Addiction" },
+    "sleep": { "label": "Sommeil" },
+    "adhd": { "label": "TDAH" },
+    "eating_disorder": { "label": "Troubles alimentaires" },
+    "perinatal": { "label": "Périnatalité" },
+    "psychosis": { "label": "Psychose" },
+    "child": { "label": "Enfant" },
+    "teen": { "label": "Ado" },
+    "adult": { "label": "Adulte" },
+    "senior": { "label": "Sujet âgé" },
+    "cbt": { "label": "TCC" },
+    "act": { "label": "ACT" },
+    "dbt": { "label": "DBT" },
+    "motivational_interviewing": { "label": "Entretien motivationnel" },
+    "psychoeducation": { "label": "Psychoéducation" },
+    "relaxation": { "label": "Relaxation & ancrage" },
+    "self_monitoring": { "label": "Auto-observation" },
+    "imagery": { "label": "Imagerie mentale" },
+    "crisis_management": { "label": "Planification de crise" }
   },
   "card": {
     "sleep_01": {

@@ -2,11 +2,15 @@ import type { ReactNode } from 'react'
 
 export type ChipTone = 'neutral' | 'info' | 'warning'
 
+export type ChipSize = 'sm' | 'md'
+
 export interface ChipProps {
   /** Texte de la puce (obligatoire). */
   label: string
   /** Couleur de fond/texte. Ignoré quand `selectable` (les filtres ont leur propre style). */
   tone?: ChipTone
+  /** Taille : `md` par défaut, `sm` pour les puces compactes (cartes denses). */
+  size?: ChipSize
   /** Icône en tête de puce. */
   icon?: ReactNode
   /** Rend la puce comme un bouton-bascule (filtres) — `aria-pressed` reflète `selected`. */

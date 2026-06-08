@@ -7,12 +7,17 @@ import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import type { ModuleType } from '../../lib/database.types'
-import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } from '../../services/moduleCatalogService'
+import { fetchModuleCategories, fetchComingSoonModuleIds, fetchModuleTaxonomy, type ModuleCategory, type ModuleTaxonomy } from '../../services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '../../services/practitionerSettingsService'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
 import { SearchInput } from '../../components/ui/SearchInput'
+import { ModuleFilterBar } from '../../components/features/ModuleFilterBar'
+import { ModuleTagChips } from '../../components/features/ModuleTagChips'
+import { filterCategoriesByTags } from '../../lib/moduleFilter'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
 import { LUCIDE_ICONS } from '../../lib/lucideIcons'
+
+const EMPTY_TAXONOMY: ModuleTaxonomy = { dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }
 import './ModuleCatalogPage.css'
 
 export function ModuleCatalogPage() {
@@ -28,11 +33,17 @@ export function ModuleCatalogPage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [taxonomy, setTaxonomy] = useState<ModuleTaxonomy>(EMPTY_TAXONOMY)
+  const [activeFilters, setActiveFilters] = useState<Map<string, Set<string>>>(new Map())
 
+  const totalCount = useMemo(() => categories.reduce((n, c) => n + c.modules.length, 0), [categories])
+
+  // Filtrage en deux temps : facettes (tags) puis recherche texte.
   const filteredCategories = useMemo(() => {
+    const byTags = filterCategoriesByTags(categories, taxonomy.tagsByModule, activeFilters)
     const tokens = tokenizeSearch(searchQuery)
-    if (tokens.length === 0) return categories
-    return categories
+    if (tokens.length === 0) return byTags
+    return byTags
       .map(cat => ({
         ...cat,
         modules: cat.modules.filter(mod => {
@@ -41,19 +52,35 @@ export function ModuleCatalogPage() {
         }),
       }))
       .filter(cat => cat.modules.length > 0)
-  }, [categories, searchQuery, t])
+  }, [categories, taxonomy, activeFilters, searchQuery, t])
+
+  const resultCount = useMemo(() => filteredCategories.reduce((n, c) => n + c.modules.length, 0), [filteredCategories])
+
+  const toggleTag = useCallback((dimensionId: string, tagId: string) => {
+    setActiveFilters(prev => {
+      const next = new Map(prev)
+      const selected = new Set(next.get(dimensionId))
+      if (selected.has(tagId)) { selected.delete(tagId) } else { selected.add(tagId) }
+      if (selected.size === 0) { next.delete(dimensionId) } else { next.set(dimensionId, selected) }
+      return next
+    })
+  }, [])
+
+  const resetFilters = useCallback(() => setActiveFilters(new Map()), [])
 
   const loadSettings = useCallback(async () => {
     if (!practitioner) return
-    const [cats, savedEnabled, comingSoon] = await Promise.all([
+    const [cats, savedEnabled, comingSoon, tax] = await Promise.all([
       fetchModuleCategories(),
       fetchEnabledModules(practitioner.id),
       fetchComingSoonModuleIds(),
+      fetchModuleTaxonomy(),
     ])
     setCategories(cats)
     const allModuleIds = cats.flatMap(c => c.modules).map(m => m.id)
     setEnabled(savedEnabled ?? new Set(allModuleIds))
     setComingSoonIds(comingSoon)
+    setTaxonomy(tax)
     setLoading(false)
   }, [practitioner])
 
@@ -145,10 +172,23 @@ export function ModuleCatalogPage() {
           </div>
         )}
 
+        {!loading && taxonomy.dimensions.length > 0 && (
+          <ModuleFilterBar
+            taxonomy={taxonomy}
+            activeFilters={activeFilters}
+            onToggleTag={toggleTag}
+            onReset={resetFilters}
+            resultCount={resultCount}
+            totalCount={totalCount}
+          />
+        )}
+
         {loading ? (
           <div className="catalog-page__loading">{t('common.loading')}</div>
         ) : filteredCategories.length === 0 ? (
-          <div className="catalog-page__empty">{t('modules.empty_search')}</div>
+          <div className="catalog-page__empty">
+            {searchQuery ? t('modules.empty_search') : t('modules.empty_filter')}
+          </div>
         ) : (
           <div className="catalog-sections">
             {filteredCategories.map(category => (
@@ -198,6 +238,7 @@ export function ModuleCatalogPage() {
                         {isComingSoon ? (
                           <span className="catalog-card__soon-badge">{t('patient.realtime_soon')}</span>
                         ) : null}
+                        <ModuleTagChips tagIds={taxonomy.tagsByModule.get(mod.id)} taxonomy={taxonomy} />
                       </Card>
                     )
                   })}

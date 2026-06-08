@@ -382,6 +382,9 @@
     "enabled_count_other": "{{count}} modules enabled",
     "search_placeholder": "Search a module (name, description)…",
     "empty_search": "No module matches your search.",
+    "filter_count": "{{shown}} of {{total}} modules",
+    "filter_reset": "Reset filters",
+    "empty_filter": "No module matches these filters.",
     "phq9": {
       "label": "PHQ-9",
       "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27.",
@@ -1076,6 +1079,40 @@
       "label": "Assessment Scales & Questionnaires",
       "subtitle": ""
     }
+  },
+  "tag_dimensions": {
+    "indication": { "label": "Indication" },
+    "population": { "label": "Audience" },
+    "approach": { "label": "Approach" }
+  },
+  "tags": {
+    "anxiety": { "label": "Anxiety" },
+    "ocd": { "label": "OCD" },
+    "depression": { "label": "Depression" },
+    "bipolar": { "label": "Bipolar disorder" },
+    "trauma": { "label": "Trauma / PTSD" },
+    "psychological_distress": { "label": "Psychological distress" },
+    "emotion_dysregulation": { "label": "Emotion dysregulation" },
+    "suicidal_crisis": { "label": "Suicidal crisis" },
+    "addiction": { "label": "Addiction" },
+    "sleep": { "label": "Sleep" },
+    "adhd": { "label": "ADHD" },
+    "eating_disorder": { "label": "Eating disorders" },
+    "perinatal": { "label": "Perinatal" },
+    "psychosis": { "label": "Psychosis" },
+    "child": { "label": "Child" },
+    "teen": { "label": "Teen" },
+    "adult": { "label": "Adult" },
+    "senior": { "label": "Older adult" },
+    "cbt": { "label": "CBT" },
+    "act": { "label": "ACT" },
+    "dbt": { "label": "DBT" },
+    "motivational_interviewing": { "label": "Motivational interviewing" },
+    "psychoeducation": { "label": "Psychoeducation" },
+    "relaxation": { "label": "Relaxation & grounding" },
+    "self_monitoring": { "label": "Self-monitoring" },
+    "imagery": { "label": "Mental imagery" },
+    "crisis_management": { "label": "Crisis planning" }
   },
   "module": {
     "crisis_plan": {
