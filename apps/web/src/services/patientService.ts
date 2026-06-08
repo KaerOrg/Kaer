@@ -9,6 +9,7 @@ export interface PatientRelation {
   patient_last_name: string | null
   patient_birth_date: string | null
   patient_sex: string | null
+  public_ref: string
   patients: { id: string; email: string; first_name: string | null; last_name: string | null } | { id: string; email: string; first_name: string | null; last_name: string | null }[] | null
 }
 
@@ -22,7 +23,7 @@ export async function fetchPatientsWithModules(practitionerId: string): Promise<
   const { data: relations } = await supabase
     .from('practitioner_patients')
     .select(
-      'patient_id, patient_alias, patient_first_name, patient_last_name, patient_birth_date, patient_sex, patients(id, email, first_name, last_name)'
+      'patient_id, patient_alias, patient_first_name, patient_last_name, patient_birth_date, patient_sex, public_ref, patients(id, email, first_name, last_name)'
     )
     .eq('practitioner_id', practitionerId) as { data: PatientRelation[] | null }
 
@@ -44,6 +45,7 @@ export async function fetchPatientsWithModules(practitionerId: string): Promise<
         patient_last_name: rel.patient_last_name ?? patient?.last_name ?? null,
         patient_birth_date: rel.patient_birth_date ?? null,
         patient_sex: rel.patient_sex ?? null,
+        public_ref: rel.public_ref,
         modules: (modules ?? []).filter(m => m.patient_id === rel.patient_id),
       }
     })

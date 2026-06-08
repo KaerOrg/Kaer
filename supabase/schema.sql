@@ -48,6 +48,32 @@ on conflict (code) do nothing;
 
 
 -- ============================================================
+-- FONCTION : gen_public_ref (identifiant public opaque)
+-- ============================================================
+-- Génère un token court URL-safe (ex. « p_8Kf3aQ ») servant d'identifiant
+-- public dans les URLs praticien, à la place de la PK réelle. Ce token est
+-- de la défense en profondeur (il masque la PK dans l'historique/les logs) —
+-- ce n'est PAS un contrôle d'accès : la RLS reste la seule barrière.
+-- 62^8 combinaisons → collision négligeable, garantie par l'index unique.
+create or replace function public.gen_public_ref()
+returns text
+language plpgsql
+volatile
+as $$
+declare
+  alphabet constant text := '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  result   text := '';
+  i        int;
+begin
+  for i in 1..8 loop
+    result := result || substr(alphabet, 1 + floor(random() * 62)::int, 1);
+  end loop;
+  return 'p_' || result;
+end;
+$$;
+
+
+-- ============================================================
 -- TABLES — Domaine utilisateurs / patients / praticiens
 -- ============================================================
 
@@ -94,6 +120,8 @@ create table if not exists public.practitioner_patients (
   patient_sex         text,
   teen_mode           boolean     not null default false,
   general_note        text,
+  -- Identifiant public opaque exposé dans l'URL praticien à la place de patient_id.
+  public_ref          text        not null unique default public.gen_public_ref(),
   created_at          timestamptz not null default now(),
   unique(practitioner_id, patient_id)
 );
@@ -250,6 +278,24 @@ begin
     where table_schema = 'public' and table_name = 'invitations' and column_name = 'pre_selected_modules'
   ) then
     alter table public.invitations add column pre_selected_modules text[] not null default '{}';
+  end if;
+end $$;
+
+-- practitioner_patients.public_ref (identifiant public opaque dans l'URL)
+-- Ajout + backfill des lignes existantes + contrainte not null/unique en une passe.
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patients' and column_name = 'public_ref'
+  ) then
+    alter table public.practitioner_patients add column public_ref text;
+    update public.practitioner_patients set public_ref = public.gen_public_ref() where public_ref is null;
+    alter table public.practitioner_patients
+      alter column public_ref set not null,
+      alter column public_ref set default public.gen_public_ref();
+    create unique index if not exists practitioner_patients_public_ref_key
+      on public.practitioner_patients(public_ref);
   end if;
 end $$;
 

@@ -373,7 +373,7 @@ export function DashboardPage() {
                     <button
                       key={patient.id}
                       className="patient-grid__item"
-                      onClick={() => navigate(`/patient/${patient.id}`)}
+                      onClick={() => navigate(`/patient/${patient.public_ref}`)}
                     >
                       <Card variant="default" className="patient-card">
                         <div className="patient-card__row">

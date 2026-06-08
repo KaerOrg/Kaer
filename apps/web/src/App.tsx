@@ -59,7 +59,7 @@ function App() {
             {practitioner ? (
               <>
                 <Route path="/" element={<DashboardPage />} />
-                <Route path="/patient/:id" element={<PatientPage />} />
+                <Route path="/patient/:ref" element={<PatientPage />} />
                 <Route path="/modules" element={<ModuleCatalogPage />} />
                 <Route path="/modules/preview/:moduleType" element={<ModulePreviewPage />} />
                 <Route path="/profil" element={<ProfilePage />} />

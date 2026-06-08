@@ -75,6 +75,7 @@ export interface Database {
           patient_last_name: string | null
           patient_birth_date: string | null
           patient_sex: string | null
+          public_ref: string
           created_at: string
         }
         Insert: {
@@ -85,6 +86,7 @@ export interface Database {
           patient_last_name?: string | null
           patient_birth_date?: string | null
           patient_sex?: string | null
+          public_ref?: string
         }
         Update: {
           patient_alias?: string | null
@@ -92,6 +94,7 @@ export interface Database {
           patient_last_name?: string | null
           patient_birth_date?: string | null
           patient_sex?: string | null
+          public_ref?: string
         }
         Relationships: [
           {
@@ -766,6 +769,8 @@ export interface PatientSummary {
   patient_last_name: string | null
   patient_birth_date: string | null
   patient_sex: string | null
+  /** Identifiant public opaque utilisé dans l'URL (à la place de `id`). */
+  public_ref: string
   modules: PatientModule[]
 }
 
