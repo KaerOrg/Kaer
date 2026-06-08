@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '../../../../../theme'
+import { colors, spacing, radius, shadows } from '../../../../../theme'
 
 export const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   introCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
     alignItems: 'center', gap: spacing.md,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    ...shadows.sm,
   },
   introIconCircle: {
     width: 72, height: 72, borderRadius: radius.full,
@@ -30,7 +30,7 @@ export const styles = StyleSheet.create({
   categoryCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
     flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderLeftWidth: 4,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    ...shadows.sm,
   },
   categoryIconCircle: {
     width: 44, height: 44, borderRadius: radius.full,
@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   activityCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
     gap: spacing.md, borderTopWidth: 4,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8, elevation: 4,
+    ...shadows.md,
   },
   activityHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   activityCategoryName: {
@@ -80,7 +80,7 @@ export const styles = StyleSheet.create({
   doneCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
     alignItems: 'center', gap: spacing.md,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+    ...shadows.sm,
   },
   doneTitle: { fontSize: 24, fontWeight: '700', color: colors.text, textAlign: 'center' },
   doneText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', lineHeight: 22 },

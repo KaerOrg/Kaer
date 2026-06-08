@@ -851,6 +851,7 @@
       "description": "Suicide risk assessment questionnaire"
     },
     "distress_tolerance": {
+      "disclaimer": "This module supports your therapy sessions. The techniques were introduced with your clinician — it does not replace your therapeutic follow-up.",
       "tab_fiches": "Understand",
       "tab_now": "Act in a crisis",
       "now": {
