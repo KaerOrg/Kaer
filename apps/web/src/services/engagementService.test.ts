@@ -11,6 +11,7 @@ import {
   fetchFearEvolution,
   fetchMedSideEffectsEvolution,
   fetchAvailableScales,
+  fetchModuleSummary,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -133,6 +134,46 @@ describe('engagementService.fetchMedSideEffectsEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('x') }) as never)
 
     expect(await fetchMedSideEffectsEvolution('p1')).toEqual({ effects: [], data: [] })
+  })
+})
+
+describe('engagementService.fetchModuleSummary', () => {
+  it('retourne la dernière saisie (data[0], tri desc) et le compte (happy path)', async () => {
+    const rows = [
+      { client_created_at: '2026-03-01', payload: { total_score: 9 } },
+      { client_created_at: '2026-02-01', payload: { total_score: 12 } },
+      { client_created_at: '2026-01-01', payload: { total_score: 15 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchModuleSummary('p1', 'phq9')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result).toEqual({
+      lastDate: '2026-03-01',
+      count: 3,
+      lastPayload: { total_score: 9 },
+    })
+  })
+
+  it('retourne un résumé vide quand aucune entrée', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: [], error: null }) as never)
+
+    expect(await fetchModuleSummary('p1', 'sleep_diary')).toEqual({
+      lastDate: null,
+      count: 0,
+      lastPayload: null,
+    })
+  })
+
+  it('retourne un résumé vide en cas d’erreur réseau', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect(await fetchModuleSummary('p1', 'phq9')).toEqual({
+      lastDate: null,
+      count: 0,
+      lastPayload: null,
+    })
   })
 })
 
