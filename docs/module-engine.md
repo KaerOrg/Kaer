@@ -55,6 +55,7 @@ Valeurs de `preview_kind` et leur layout :
 | `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18` |
 | `slider_dashboard` | Tableau de bord multi-dimensions — 3 onglets (Saisie / Évolution / Vue d'ensemble), courbes par dimension + composite, sélecteur 7J/1M/3M/1A, repères temporels, heatmap calendrier. Nommé par motif, réutilisable : `moduleId` dérivé des fields, accent lu en config (`accent_color`). Aperçu web `SliderDashboardLayout` ; écran patient mobile `DimensionTrackerView` | `mood_tracker`, `medication_side_effects` |
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
+| `crisis_companion` | Compagnon de crise « urge surfing » : machine à états accueil+catégories (un écran) → activité + délai → minuteur décompté → fin neutre. Aucune persistance. Nommé par motif, `moduleId` dérivé pour le chrome. Aperçu web = storyboard lecture seule | `distress_tolerance` (onglet « Agir en crise ») |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
 | `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
@@ -203,6 +204,17 @@ create table public.module_content_fields (
 | `exercise_done_text` | Texte écran fin | — |
 | `exercise_safety_title` | Titre section urgence | — |
 | `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
+
+**Layout `crisis_companion` (compagnon de crise — urge surfing)**
+
+Réutilise `exercise_intro` (accueil) et `exercise_config` (prop `durations`, ex. `"5,15"`).
+Deux field_types propres :
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `crisis_category` | En-tête d'une catégorie DBT (1 par `section_id`) | `icon` (lucide), `color` |
+| `crisis_activity` | Une activité d'apaisement, rattachée à une catégorie (`section_id`) | — |
+
 **Layout `patient_scenario` (RIM)**
 
 | `field_type` | Rendu | Props clés |
@@ -410,6 +422,7 @@ interface FieldRendererProps {
 'questionnaire'   → QuestionnaireLayout (mobile uniquement — ScaleEntryScreen pilote les réponses)
 'slider_dashboard'→ SliderDashboardLayout (aperçu web générique ; écran patient mobile = DimensionTrackerView)
 'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
+'crisis_companion'→ CrisisCompanionLayout (mobile = machine d'état + minuteur ; web = storyboard lecture seule)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
 'editable_steps'  → EditableStepsLayout (mobile uniquement — étapes éditables, Crisis Plan)
 ```

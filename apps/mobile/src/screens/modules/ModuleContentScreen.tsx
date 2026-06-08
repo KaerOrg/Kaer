@@ -12,7 +12,6 @@ import {
 } from '../../services/moduleService'
 import { FieldRenderer } from '../../components/features/ModuleRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'
-import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
 import { useTeen } from '../../hooks/useTeen'
 import { useAuthStore } from '../../store/authStore'
 import { colors, spacing } from '../../theme'
@@ -39,7 +38,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
 export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params
   const { t } = useTranslation()
-  const { isTeenMode, teenColor } = useTeen()
+  const { teenColor } = useTeen()
 
   useEffect(() => {
     navigation.setOptions({ title: t(`modules.${moduleType}.label`) })
@@ -109,13 +108,13 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     )
   }
 
-  // Layouts qui gèrent leur propre scroll / structure — rendu sans ScrollView externe
+  // Layouts qui gèrent leur propre scroll / structure — rendu sans ScrollView externe.
+  // Le bandeau disclaimer est rendu par FieldRenderer (field `disclaimer_banner`) — ne
+  // pas le dupliquer ici.
   if (result != null && SELF_MANAGED_LAYOUTS.has(result.preview_kind)) {
-    const hasDisclaimer = result.fields.some(f => f.field_type === 'disclaimer_banner')
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <TeenAccent color={accentColor} />
-        {hasDisclaimer && <DisclaimerBanner moduleKey={moduleType} isTeenMode={isTeenMode} />}
         <FieldRenderer
           preview_kind={result.preview_kind}
           fields={result.fields}

@@ -5,6 +5,7 @@ import {
   CardsLayout,
   ChronoMonthLayout,
   ColumnFormLayout,
+  CrisisCompanionLayout,
   DailyCheckinLayout,
   DecisionGridLayout,
   ExposureHierarchyLayout,
@@ -113,6 +114,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={contentFields} t={t} />
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={contentFields} t={t} />
   if (preview_kind === 'guided_exercise') return <GuidedExerciseLayout fields={contentFields} t={t} />
+  if (preview_kind === 'crisis_companion') return <CrisisCompanionLayout fields={contentFields} t={t} moduleId={moduleId ?? ''} />
   if (preview_kind === 'patient_scenario') return <PatientScenarioLayout fields={contentFields} footer={footer} t={t} />
 
   return <FallbackLayout fields={contentFields} footer={footer} t={t} />

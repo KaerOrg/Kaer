@@ -819,6 +819,48 @@
       "label": "C-SSRS — Suicide Risk",
       "description": "Suicide risk assessment questionnaire"
     },
+    "distress_tolerance": {
+      "tab_fiches": "Understand",
+      "tab_now": "Act in a crisis",
+      "now": {
+        "title": "Ride the wave",
+        "intro1": "A really strong urge or emotion is like a wave: it rises, hits a peak, then always comes back down.",
+        "intro2": "You don't have to fight it — just hold on until it passes. Pick an activity, and let the timer keep you company.",
+        "choose_activity": "Choose an activity",
+        "pick_category": "What do you want to do right now?",
+        "back": "Back",
+        "minutes": "min",
+        "start_timer": "Start",
+        "pick_another": "Another idea",
+        "timer_caption": "Stay with the wave. It will come back down.",
+        "hold": "I held on",
+        "stop": "Stop",
+        "done_title": "The wave has passed",
+        "done_text": "You held on. That's exactly what riding the wave means.",
+        "restart": "Start again",
+        "finish": "Done",
+        "cat": {
+          "tipp": "Calm the body",
+          "distraction": "Take my mind off it",
+          "sens": "Soothe my senses",
+          "improve": "Soften the moment"
+        },
+        "act": {
+          "tipp1": "Splash cold water on your face, or hold an ice cube in your hand.",
+          "tipp2": "Move hard for one minute: run up the stairs, jump on the spot.",
+          "tipp3": "Breathe slowly: in for 4 counts, out for 6 counts.",
+          "distraction1": "Count down from 100 in steps of 7 (100, 93, 86…).",
+          "distraction2": "Name ten things of the same colour around you.",
+          "distraction3": "Start something simple and concrete: tidy a drawer, fold laundry.",
+          "sens1": "Listen to a whole track that soothes you.",
+          "sens2": "Sip a warm drink slowly, feel its warmth.",
+          "sens3": "Wrap yourself in a soft blanket or piece of clothing.",
+          "improve1": "Picture in detail a place where you feel safe.",
+          "improve2": "Talk to yourself kindly, like to a friend going through this.",
+          "improve3": "Focus on this one moment: just this, nothing else."
+        }
+      }
+    },
     "exposure_hierarchy": {
       "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
       "info_btn": "What is this technique?",

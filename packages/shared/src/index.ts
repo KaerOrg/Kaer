@@ -127,6 +127,7 @@ export type PreviewKind =
   | 'exposure_hierarchy'
   | 'slider_dashboard'
   | 'crisis_urgency'
+  | 'crisis_companion'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

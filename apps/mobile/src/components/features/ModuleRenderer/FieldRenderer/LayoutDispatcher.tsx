@@ -9,6 +9,7 @@ import { ActivityLogLayout } from '../layouts/ActivityLog'
 import { CardsLayout } from '../layouts/Cards'
 import { ChronoMonthLayout } from '../layouts/ChronoMonth'
 import { ColumnFormLayout } from '../layouts/ColumnForm'
+import { CrisisCompanionLayout } from '../layouts/CrisisCompanion'
 import { CrisisUrgencyLayout } from '../layouts/CrisisUrgency'
 import { DailyCheckinLayout } from '../layouts/DailyCheckin'
 import { DecisionGridLayout } from '../layouts/DecisionGrid'
@@ -63,6 +64,18 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
         sections={sections}
         uiFields={unsectioned}
         footer={footer}
+        accentColor={accentColor}
+      />
+    )
+  }
+
+  if (preview_kind === 'crisis_companion') {
+    const { sections, unsectioned } = partitionBySection(contentFields)
+    return (
+      <CrisisCompanionLayout
+        sections={sections}
+        uiFields={unsectioned}
+        moduleId={moduleId ?? ''}
         accentColor={accentColor}
       />
     )

@@ -1877,7 +1877,7 @@ where module_id in ('distress_tolerance', 'chronobiology_tracker', 'craving_jour
 
 
 -- ────────────────────────────────────────────────────────────
--- 3) distress_tolerance — tabs : Fiches (psyedu) + En crise (cards)
+-- 3) distress_tolerance — tabs : Comprendre (psyedu) + Agir en crise (crisis_companion)
 -- ────────────────────────────────────────────────────────────
 
 insert into public.module_content_fields
@@ -1887,81 +1887,96 @@ values
   ('dt.disclaimer', 'distress_tolerance', null, null,
    'disclaimer_banner', null, 0),
 
-  -- tab Fiches → psyedu (lit psyedu_topics par module_key='distress_tolerance')
+  -- tab Comprendre → psyedu (lit psyedu_topics par module_key='distress_tolerance')
   ('dt.tab.fiches', 'distress_tolerance', null, null, 'tab',
-   'modules.distress_tolerance.tab_fiches', 10),
-
-  -- tab En crise → cards (sous-fields à compléter ultérieurement avec le
-  -- contenu détaillé TIPP / ACCEPTS / IMPROVE / etc.)
-  ('dt.tab.crisis', 'distress_tolerance', null, null, 'tab',
-   'modules.distress_tolerance.tab_crisis', 20);
+   'modules.distress_tolerance.tab_fiches', 10);
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('dt.tab.fiches', 'tab_key',          'fiches'),
   ('dt.tab.fiches', 'sub_preview_kind', 'psyedu'),
-  ('dt.tab.fiches', 'icon_name',        'BookOpen'),
-  ('dt.tab.crisis', 'tab_key',          'crisis'),
-  ('dt.tab.crisis', 'sub_preview_kind', 'cards'),
-  ('dt.tab.crisis', 'icon_name',        'Zap');
+  ('dt.tab.fiches', 'icon_name',        'BookOpen');
 
--- Cards de l'onglet "En crise" — 5 techniques DBT (TIPP, ACCEPTS,
--- self_soothing, IMPROVE, pros_cons). Chaque carte = une section_id avec
--- card_title + card_summary + 1-3 card_paragraph(s) en body.
--- Tous parent_field_id = 'dt.tab.crisis' (rendu via le sub-layout cards
--- de l'onglet "En crise").
+
+-- ────────────────────────────────────────────────────────────
+-- 3b) distress_tolerance — tab "Agir en crise" (crisis_companion)
+-- Compagnon de crise "urge surfing" (Marlatt 1985 / Linehan DBT / Bowen 2014) :
+-- machine à états accueil → choix de catégorie DBT → activité + délai →
+-- minuteur "vague" → fin. Aucune donnée saisie, aucun stockage (cf. grounding).
+-- Conformité MDR : minuteur fixe, zéro interprétation, message de fin neutre.
+-- ────────────────────────────────────────────────────────────
 
 insert into public.module_content_fields
   (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order)
 values
-  -- TIPP
-  ('dt.crisis.tipp.title',   'distress_tolerance', 'tipp', 'dt.tab.crisis', 'card_title',
-   'modules.distress_tolerance.crisis.tipp.title', 1),
-  ('dt.crisis.tipp.summary', 'distress_tolerance', 'tipp', 'dt.tab.crisis', 'card_summary',
-   'modules.distress_tolerance.crisis.tipp.summary', 2),
-  ('dt.crisis.tipp.body1',   'distress_tolerance', 'tipp', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.tipp.body1', 3),
-  ('dt.crisis.tipp.body2',   'distress_tolerance', 'tipp', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.tipp.body2', 4),
+  -- l'onglet lui-même
+  ('dt.tab.now', 'distress_tolerance', null, null, 'tab',
+   'modules.distress_tolerance.tab_now', 30),
 
-  -- ACCEPTS
-  ('dt.crisis.accepts.title',   'distress_tolerance', 'accepts', 'dt.tab.crisis', 'card_title',
-   'modules.distress_tolerance.crisis.accepts.title', 1),
-  ('dt.crisis.accepts.summary', 'distress_tolerance', 'accepts', 'dt.tab.crisis', 'card_summary',
-   'modules.distress_tolerance.crisis.accepts.summary', 2),
-  ('dt.crisis.accepts.body1',   'distress_tolerance', 'accepts', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.accepts.body1', 3),
-  ('dt.crisis.accepts.body2',   'distress_tolerance', 'accepts', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.accepts.body2', 4),
+  -- accueil : métaphore de la vague (paragraphes), hors section
+  ('dt.now.intro1', 'distress_tolerance', null, 'dt.tab.now', 'exercise_intro',
+   'modules.distress_tolerance.now.intro1', 1),
+  ('dt.now.intro2', 'distress_tolerance', null, 'dt.tab.now', 'exercise_intro',
+   'modules.distress_tolerance.now.intro2', 2),
 
-  -- Self-soothing
-  ('dt.crisis.soothing.title',   'distress_tolerance', 'soothing', 'dt.tab.crisis', 'card_title',
-   'modules.distress_tolerance.crisis.soothing.title', 1),
-  ('dt.crisis.soothing.summary', 'distress_tolerance', 'soothing', 'dt.tab.crisis', 'card_summary',
-   'modules.distress_tolerance.crisis.soothing.summary', 2),
-  ('dt.crisis.soothing.body1',   'distress_tolerance', 'soothing', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.soothing.body1', 3),
-  ('dt.crisis.soothing.body2',   'distress_tolerance', 'soothing', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.soothing.body2', 4),
+  -- config : durées du minuteur (en minutes), hors section
+  ('dt.now.config', 'distress_tolerance', null, 'dt.tab.now', 'exercise_config',
+   null, 3),
 
-  -- IMPROVE
-  ('dt.crisis.improve.title',   'distress_tolerance', 'improve', 'dt.tab.crisis', 'card_title',
-   'modules.distress_tolerance.crisis.improve.title', 1),
-  ('dt.crisis.improve.summary', 'distress_tolerance', 'improve', 'dt.tab.crisis', 'card_summary',
-   'modules.distress_tolerance.crisis.improve.summary', 2),
-  ('dt.crisis.improve.body1',   'distress_tolerance', 'improve', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.improve.body1', 3),
-  ('dt.crisis.improve.body2',   'distress_tolerance', 'improve', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.improve.body2', 4),
+  -- Catégorie TIPP (apaiser le corps)
+  ('dt.now.cat.tipp', 'distress_tolerance', 'tipp', 'dt.tab.now', 'crisis_category',
+   'modules.distress_tolerance.now.cat.tipp', 1),
+  ('dt.now.act.tipp1', 'distress_tolerance', 'tipp', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.tipp1', 2),
+  ('dt.now.act.tipp2', 'distress_tolerance', 'tipp', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.tipp2', 3),
+  ('dt.now.act.tipp3', 'distress_tolerance', 'tipp', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.tipp3', 4),
 
-  -- Pros & Cons
-  ('dt.crisis.proscons.title',   'distress_tolerance', 'proscons', 'dt.tab.crisis', 'card_title',
-   'modules.distress_tolerance.crisis.proscons.title', 1),
-  ('dt.crisis.proscons.summary', 'distress_tolerance', 'proscons', 'dt.tab.crisis', 'card_summary',
-   'modules.distress_tolerance.crisis.proscons.summary', 2),
-  ('dt.crisis.proscons.body1',   'distress_tolerance', 'proscons', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.proscons.body1', 3),
-  ('dt.crisis.proscons.body2',   'distress_tolerance', 'proscons', 'dt.tab.crisis', 'card_paragraph',
-   'modules.distress_tolerance.crisis.proscons.body2', 4);
+  -- Catégorie Distraction
+  ('dt.now.cat.distraction', 'distress_tolerance', 'distraction', 'dt.tab.now', 'crisis_category',
+   'modules.distress_tolerance.now.cat.distraction', 1),
+  ('dt.now.act.distraction1', 'distress_tolerance', 'distraction', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.distraction1', 2),
+  ('dt.now.act.distraction2', 'distress_tolerance', 'distraction', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.distraction2', 3),
+  ('dt.now.act.distraction3', 'distress_tolerance', 'distraction', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.distraction3', 4),
+
+  -- Catégorie Apaiser les sens
+  ('dt.now.cat.sens', 'distress_tolerance', 'sens', 'dt.tab.now', 'crisis_category',
+   'modules.distress_tolerance.now.cat.sens', 1),
+  ('dt.now.act.sens1', 'distress_tolerance', 'sens', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.sens1', 2),
+  ('dt.now.act.sens2', 'distress_tolerance', 'sens', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.sens2', 3),
+  ('dt.now.act.sens3', 'distress_tolerance', 'sens', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.sens3', 4),
+
+  -- Catégorie Adoucir l'instant
+  ('dt.now.cat.improve', 'distress_tolerance', 'improve', 'dt.tab.now', 'crisis_category',
+   'modules.distress_tolerance.now.cat.improve', 1),
+  ('dt.now.act.improve1', 'distress_tolerance', 'improve', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.improve1', 2),
+  ('dt.now.act.improve2', 'distress_tolerance', 'improve', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.improve2', 3),
+  ('dt.now.act.improve3', 'distress_tolerance', 'improve', 'dt.tab.now', 'crisis_activity',
+   'modules.distress_tolerance.now.act.improve3', 4);
+
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('dt.tab.now', 'tab_key',          'now'),
+  ('dt.tab.now', 'sub_preview_kind', 'crisis_companion'),
+  ('dt.tab.now', 'icon_name',        'Waves'),
+  -- durées proposées (minutes), parsées par le layout crisis_companion
+  ('dt.now.config', 'durations', '5,15'),
+  -- accents de catégorie (couleurs neutres, non interprétatives) + icônes (lucide)
+  ('dt.now.cat.tipp',        'icon',  'Wind'),
+  ('dt.now.cat.tipp',        'color', '#0EA5E9'),
+  ('dt.now.cat.distraction', 'icon',  'Brain'),
+  ('dt.now.cat.distraction', 'color', '#8B5CF6'),
+  ('dt.now.cat.sens',        'icon',  'Heart'),
+  ('dt.now.cat.sens',        'color', '#10B981'),
+  ('dt.now.cat.improve',     'icon',  'Sun'),
+  ('dt.now.cat.improve',     'color', '#F59E0B');
 
 
 -- ────────────────────────────────────────────────────────────
