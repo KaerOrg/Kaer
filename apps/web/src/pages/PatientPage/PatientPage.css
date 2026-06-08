@@ -248,8 +248,9 @@
 .patient-notes__form-actions {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--spacing-sm);
+  flex-shrink: 0;
 }
 
 .patient-notes__empty {
@@ -317,12 +318,19 @@
 
 /* ── Tags ─────────────────────────────────────────────────────────────────── */
 
+.patient-notes__tag-actions-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
 .patient-notes__tag-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   min-height: 32px;
+  flex: 1;
 }
 
 .patient-notes__tag-row--readonly {
@@ -731,6 +739,14 @@
   margin-bottom: 40px;
 }
 
+.wardrobe__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: 20px;
+}
+
 .wardrobe__title {
   font-size: 18px;
   font-weight: 700;
@@ -741,7 +757,15 @@
 .wardrobe__desc {
   font-size: 14px;
   color: var(--color-text-secondary);
-  margin-bottom: 20px;
+  margin: 0;
+}
+
+.wardrobe__empty {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--spacing-md);
+  text-align: center;
 }
 
 /* ── Accordéons de catégories ────────────────────────────────────────────── */
@@ -802,6 +826,17 @@
 .module-card__date--actions {
   margin-top: 0;
   margin-right: auto;
+}
+
+/* ── Panneaux aperçu / données intégrés dans le body de la card ──────────────── */
+/* Les panneaux (.preview-panel, .module-data-panel, .summary-panel) sont conçus
+   pour s'accoler sous une card ; intégrés ici dans le body, on les présente comme
+   des sous-panneaux autonomes : marge haute + coins entièrement arrondis. */
+.module-card-item .card__body > .preview-panel,
+.module-card-item .card__body > .module-data-panel,
+.module-card-item .card__body > .summary-panel {
+  margin-top: var(--spacing-sm);
+  border-radius: var(--radius-md);
 }
 
 .module-card__revoke {

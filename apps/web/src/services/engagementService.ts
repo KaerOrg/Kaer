@@ -16,6 +16,14 @@ export type FearPoint = { date: string; suds_before: number; suds_after: number 
 
 export type MedEffectPoint = { date: string; [key: string]: number | string }
 
+// Résumé brut d'un module pour la card praticien : date et payload de la
+// dernière saisie + nombre total d'entrées. Aucune interprétation (MDR).
+export type ModuleSummary = {
+  lastDate: string | null
+  count: number
+  lastPayload: Record<string, unknown> | null
+}
+
 // Modules d'échelles graphés par le praticien (lecture depuis patient_entries).
 const SCALE_MODULES = [
   'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
@@ -155,6 +163,32 @@ export async function fetchMedSideEffectsEvolution(patientId: string): Promise<{
   }
 
   return { effects: [...effectKeys], data: points }
+}
+
+// ── Résumé brut d'un module (toutes entrées confondues) ──────────────────────
+// Filtre par module_id seul : tous les entry_kind du module sont comptés.
+// Restitution neutre conforme MDR — date, compte et payload brut, sans jugement.
+
+export async function fetchModuleSummary(
+  patientId: string,
+  moduleType: string,
+): Promise<ModuleSummary> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('module_id', moduleType)
+    .order('client_created_at', { ascending: false })
+
+  if (error || !data || data.length === 0) {
+    return { lastDate: null, count: 0, lastPayload: null }
+  }
+
+  return {
+    lastDate: data[0].client_created_at,
+    count: data.length,
+    lastPayload: data[0].payload,
+  }
 }
 
 // ── Liste des échelles disponibles pour ce patient ───────────────────────────

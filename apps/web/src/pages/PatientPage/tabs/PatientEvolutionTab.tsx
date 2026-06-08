@@ -15,51 +15,23 @@ import {
   type FearPoint,
   type MedEffectPoint,
 } from '../../../services/engagementService'
+import {
+  type TimeRange,
+  RANGE_DAYS,
+  TIME_RANGES,
+  colorAt,
+  filterByRange,
+} from '../../../lib/chartConfig'
+import {
+  SCALE_CONFIG,
+  MOOD_DIMENSIONS,
+  DEFAULT_SCALE_COLOR,
+  FEAR_BEFORE_COLOR,
+  FEAR_AFTER_COLOR,
+} from './clinicalChartConfig'
 import './PatientEvolutionTab.css'
 
-export type TimeRange = '3m' | '6m' | '1y'
-const RANGE_DAYS: Record<TimeRange, number> = { '3m': 90, '6m': 180, '1y': 365 }
-const TIME_RANGES: readonly TimeRange[] = ['3m', '6m', '1y']
-
-const SCALE_CONFIG: Record<string, { color: string; yMax: number }> = {
-  phq9:    { color: '#6366F1', yMax: 27 },
-  gad7:    { color: '#F59E0B', yMax: 21 },
-  bsl23:   { color: '#EF4444', yMax: 4  },
-  epds:    { color: '#EC4899', yMax: 30 },
-  rcads:   { color: '#8B5CF6', yMax: 50 },
-  asrs6:   { color: '#3B82F6', yMax: 24 },
-  snap_iv: { color: '#0EA5E9', yMax: 78 },
-  nsi:     { color: '#64748B', yMax: 45 },
-}
-
-const MOOD_DIMENSIONS = [
-  { key: 'humeur',       color: '#10B981' },
-  { key: 'energie',      color: '#3B82F6' },
-  { key: 'anxiete',      color: '#EF4444' },
-  { key: 'plaisir',      color: '#F59E0B' },
-  { key: 'sommeil',      color: '#8B5CF6' },
-  { key: 'alimentation', color: '#EC4899' },
-] as const
-
-const MED_EFFECT_COLORS: Record<string, string> = {
-  sedation:             '#6366F1',
-  bouche_seche:         '#F59E0B',
-  sommeil:              '#8B5CF6',
-  nausees:              '#EF4444',
-  prise_de_poids:       '#EC4899',
-  akathisie:            '#0EA5E9',
-  tremblements:         '#64748B',
-  constipation:         '#10B981',
-  dysfonction_sexuelle: '#F97316',
-  anxiete:              '#DC2626',
-  cephalees:            '#7C3AED',
-  vertiges:             '#0891B2',
-}
-
-function filterByRange<T extends { date: string }>(points: T[], days: number): T[] {
-  const cutoff = Date.now() - days * 86_400_000
-  return points.filter(p => new Date(p.date).getTime() >= cutoff)
-}
+export type { TimeRange }
 
 type Props = { patientId: string }
 
@@ -141,7 +113,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
         {/* ── Échelles cliniques ──────────────────────────────── */}
         {scales.map(mt => {
           const points = filterByRange(scaleData[mt] ?? [], days)
-          const cfg = SCALE_CONFIG[mt] ?? { color: '#6366F1', yMax: 27 }
+          const cfg = SCALE_CONFIG[mt] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
           const chartData = points.map(p => ({ date: p.date, score: p.score }))
           const last = points.at(-1)?.score
           return (
@@ -231,12 +203,12 @@ export function PatientEvolutionTab({ patientId }: Props) {
             <h3 className="evolution__section-title">{t('evolution.med_effects_title')}</h3>
           </div>
         )}
-        {medData.length > 0 && medEffects.map(effect => {
+        {medData.length > 0 && medEffects.map((effect, i) => {
           const points = filterByRange(medData, days).filter(p => p[effect] != null)
           if (points.length < 2) return null
           const chartData = points.map(p => ({ date: p.date, [effect]: p[effect] }))
           const last = points.at(-1)?.[effect]
-          const color = MED_EFFECT_COLORS[effect] ?? '#64748B'
+          const color = colorAt(i)
           return (
             <EvolutionCard
               key={effect}
@@ -273,8 +245,8 @@ export function PatientEvolutionTab({ patientId }: Props) {
                 <LineChart
                   data={chartData}
                   series={[
-                    { key: 'suds_before', color: '#F59E0B', label: t('evolution.fear_before') },
-                    { key: 'suds_after',  color: '#10B981', label: t('evolution.fear_after') },
+                    { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
+                    { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
                   ]}
                   yDomain={[0, 100]}
                   showLegend

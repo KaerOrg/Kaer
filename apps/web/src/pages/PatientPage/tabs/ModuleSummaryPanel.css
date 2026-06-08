@@ -1,0 +1,82 @@
+/* ── Panneau de résumé des données patient (aperçu d'une card module) ──────── */
+/* Restitution neutre conforme MDR : chiffres bruts, aucune couleur de jugement.
+   Bordure haute primaire alignée sur .preview-panel pour la continuité visuelle. */
+
+.summary-panel {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-primary);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  margin-top: -1px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary-panel__message {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
+  margin: 0;
+}
+
+.summary-panel__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0;
+}
+
+.summary-panel__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-panel__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.summary-panel__value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
+.summary-panel__dimensions {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0 0;
+  margin: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.summary-panel__dimension {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-panel__dim-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.summary-panel__dim-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}

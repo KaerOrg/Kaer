@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, Eye, EyeOff, Bell } from 'lucide-react'
+import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
@@ -11,6 +11,7 @@ import { Modal } from '../../../components/ui/Modal'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
+import { ModuleDataPanel } from './ModuleDataPanel'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type PsychoCardInfo } from '../../../services/moduleService'
 import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
@@ -54,8 +55,10 @@ export function PatientModulesTab({
   const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
   const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
   const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
+  const [dataModule, setDataModule] = useState<ModuleType | null>(null)
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
 
   useEffect(() => {
     fetchScaleMeta().then(setScaleMeta)
@@ -66,11 +69,24 @@ export function PatientModulesTab({
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
 
+  // Aperçu et Données sont mutuellement exclusifs : ouvrir l'un ferme l'autre.
   const togglePreview = useCallback((type: ModuleType) => {
     setPreviewModule(prev => (prev === type ? null : type))
+    setDataModule(null)
+  }, [])
+
+  const toggleData = useCallback((type: ModuleType) => {
+    setDataModule(prev => (prev === type ? null : type))
+    setPreviewModule(null)
   }, [])
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
+
+  // « Activé » = déverrouillé pour ce patient, ou outil toujours disponible sans
+  // verrou (scale noToggle, ex. C-SSRS). L'armoire n'affiche que ces modules ;
+  // les autres (activables) vivent dans la modale « Ajouter un module ».
+  const isActivated = (type: ModuleType) =>
+    isUnlocked(type) || scaleMeta.find(s => s.id === type)?.noToggle === true
 
   const unlockModule = useCallback(async (moduleType: ModuleType) => {
     setUnlockingModule(moduleType)
@@ -178,11 +194,10 @@ export function PatientModulesTab({
                 )}
               </>
             )}
+            {previewModule === 'psychoeducation' && (
+              <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
+            )}
           </Card>
-
-          {previewModule === 'psychoeducation' && (
-            <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
-          )}
 
           {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
             <div className={`psycho-card-picker ${psycho.mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
@@ -267,6 +282,9 @@ export function PatientModulesTab({
                   <span className="psycho-observance-summary"> · {t('patient.crisis_configured')}</span>
                 )}
               </div>
+            )}
+            {previewModule === 'crisis_plan' && unlocked && (
+              <ModulePreviewPanel moduleType="crisis_plan" color={modItem.color} />
             )}
           </Card>
 
@@ -375,13 +393,6 @@ export function PatientModulesTab({
               </div>
             </div>
           )}
-
-          {previewModule === 'crisis_plan' && unlocked && (
-            <ModulePreviewPanel
-              moduleType="crisis_plan"
-              color={modItem.color}
-            />
-          )}
         </div>
       )
     }
@@ -393,12 +404,15 @@ export function PatientModulesTab({
           modItem={modItem}
           modIcon={modIcon}
           mod={mod}
+          patientId={patientId}
           unlocked={unlocked}
           unlockingModule={unlockingModule}
           previewModule={previewModule}
+          dataModule={dataModule}
           medEffects={medEffects}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
+          onToggleData={toggleData}
           onConfigureNotif={setNotifModal}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
@@ -503,7 +517,7 @@ export function PatientModulesTab({
           })
 
       return (
-        <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType || dataModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
             header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), subtitle: t(`scales.full_title.${moduleType}`), right }}
@@ -525,6 +539,17 @@ export function PatientModulesTab({
                     {t('patient.preview_button')}
                   </button>
                 )}
+                {unlocked && mod && (
+                  <button
+                    type="button"
+                    className={`preview-toggle-btn${dataModule === moduleType ? ' preview-toggle-btn--active' : ''}`}
+                    onClick={() => toggleData(moduleType)}
+                    title={t('patient.data_button')}
+                  >
+                    <LineChart size={14} />
+                    {t('patient.data_button')}
+                  </button>
+                )}
               </>
             }
           >
@@ -534,14 +559,15 @@ export function PatientModulesTab({
               category={scale.category}
               targetAges={scale.targetAges}
             />
+            {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} />}
+            {dataModule === moduleType && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
           </Card>
-          {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} />}
         </div>
       )
     }
 
     return (
-      <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+      <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType || dataModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
         <Card
           className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
           header={{
@@ -578,46 +604,85 @@ export function PatientModulesTab({
                 {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
               </button>
+              {unlocked && mod && (
+                <button
+                  type="button"
+                  className={`preview-toggle-btn ${dataModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                  onClick={() => toggleData(moduleType)}
+                  title={t('patient.data_button')}
+                >
+                  <LineChart size={14} />
+                  {t('patient.data_button')}
+                </button>
+              )}
             </>
           }
-        />
-
-        {previewModule === moduleType && (
-          <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />
-        )}
+        >
+          {(previewModule === moduleType || dataModule === moduleType) && (
+            <>
+              {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
+              {dataModule === moduleType && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
+            </>
+          )}
+        </Card>
       </div>
     )
   }
 
+  // Rend les catégories de modules filtrées par `includeModule`. Réutilisé par
+  // l'armoire (modules activés) et la modale d'ajout (modules activables).
+  const renderCategories = (includeModule: (type: ModuleType) => boolean, defaultOpen: boolean) =>
+    categories.map(category => {
+      const visibleModules = (enabledModules === null
+        ? category.modules
+        : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
+      ).filter(m => !comingSoonIds.has(m.id) && includeModule(m.id as ModuleType))
+      if (visibleModules.length === 0) return null
+      const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
+      const CatIcon = LUCIDE_ICONS[category.icon]
+      return (
+        <Accordion
+          key={category.id}
+          title={t(category.labelKey)}
+          icon={CatIcon ? <CatIcon size={16} /> : undefined}
+          badge={activeCount > 0 ? activeCount : undefined}
+          defaultOpen={defaultOpen}
+        >
+          <div className="category-modules-grid">
+            {visibleModules.map(renderModuleCard)}
+          </div>
+        </Accordion>
+      )
+    })
+
+  const hasActivatableModules = categories.some(category =>
+    (enabledModules === null
+      ? category.modules
+      : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
+    ).some(m => !comingSoonIds.has(m.id) && !isActivated(m.id as ModuleType))
+  )
+
+  const activatedCategories = renderCategories(isActivated, false)
+  const hasActivatedModules = activatedCategories.some(Boolean)
+
   return (
     <PatientViewProvider patientId={patientId}>
       <section className="therapeutic-wardrobe">
-        <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
-        <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
+        <div className="wardrobe__header">
+          <div>
+            <h2 className="wardrobe__title">{t('patient.wardrobe_title')}</h2>
+            <p className="wardrobe__desc">{t('patient.wardrobe_desc')}</p>
+          </div>
+          <Button size="sm" onClick={() => setShowAddModal(true)} disabled={!hasActivatableModules}>
+            <Plus size={16} />
+            {t('patient.add_module_button')}
+          </Button>
+        </div>
 
         <div className="category-list">
-          {categories.map(category => {
-            const visibleModules = (enabledModules === null
-              ? category.modules
-              : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
-            ).filter(m => !comingSoonIds.has(m.id))
-            if (visibleModules.length === 0) return null
-            const activeCount = visibleModules.filter(m => isUnlocked(m.id as ModuleType)).length
-            const CatIcon = LUCIDE_ICONS[category.icon]
-            return (
-              <Accordion
-                key={category.id}
-                title={t(category.labelKey)}
-                icon={CatIcon ? <CatIcon size={16} /> : undefined}
-                badge={activeCount > 0 ? activeCount : undefined}
-                defaultOpen={false}
-              >
-                <div className="category-modules-grid">
-                  {visibleModules.map(renderModuleCard)}
-                </div>
-              </Accordion>
-            )
-          })}
+          {hasActivatedModules
+            ? activatedCategories
+            : <p className="wardrobe__empty">{t('patient.wardrobe_empty')}</p>}
         </div>
       </section>
 
@@ -645,6 +710,19 @@ export function PatientModulesTab({
             patientId={patientId}
             practitionerId={practitionerId}
           />
+        </Modal>
+      )}
+
+      {showAddModal && (
+        <Modal
+          title={t('patient.add_module_title')}
+          icon={<Plus size={20} />}
+          onClose={() => setShowAddModal(false)}
+          maxWidth={920}
+        >
+          <div className="category-list">
+            {renderCategories(type => !isActivated(type), true)}
+          </div>
         </Modal>
       )}
     </PatientViewProvider>
