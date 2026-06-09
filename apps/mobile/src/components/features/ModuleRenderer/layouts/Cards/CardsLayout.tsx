@@ -10,7 +10,7 @@ import { View, Text, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { FieldText } from '../../fields'
 import { renderCardBodyFields } from './cardRendering'
 import { styles } from './styles'
@@ -21,7 +21,7 @@ export interface CardsLayoutProps {
 }
 
 export function CardsLayout({ sections }: CardsLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
   const handleToggle = useCallback((id: string) => {

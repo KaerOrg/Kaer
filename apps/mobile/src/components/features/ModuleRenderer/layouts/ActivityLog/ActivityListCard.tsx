@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { ActivityRecord } from '../../../../../lib/database'
 import { alStyles } from './styles'
 
@@ -15,7 +15,7 @@ export interface ActivityListCardProps {
 }
 
 export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }: ActivityListCardProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const isDone = record.done === 1
   const toggleAriaLabel = isDone
     ? (lbl('mark_undone_label') || t('common.undo'))

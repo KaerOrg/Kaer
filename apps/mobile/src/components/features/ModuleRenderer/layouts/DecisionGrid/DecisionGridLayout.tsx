@@ -3,7 +3,7 @@ import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, Keyboa
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import {
@@ -44,7 +44,7 @@ interface QuadrantSpec {
  *   - Target behavior: module_settings (single key/value pair per patient)
  */
 export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { i18n } = useTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()

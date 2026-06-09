@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 import { FieldWidget } from '../FieldWidget'
 
@@ -33,7 +33,7 @@ const ICON_MAP: Record<string, React.ComponentProps<typeof Ionicons>['name']> = 
 }
 
 export function FieldRow({ field }: FieldProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const iconName    = field.props['icon'] ?? ''
   const widgetType  = field.props['widget_type']
   const detailCode  = field.props['detail_code']

@@ -12,7 +12,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
 import { parseDurations, formatCountdown, nextActivityIndex, elapsedFraction } from './crisisLogic'
 import { styles } from './styles'
@@ -39,7 +39,7 @@ export interface CrisisCompanionLayoutProps {
 }
 
 export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColor }: CrisisCompanionLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const accent = accentColor ?? colors.primary
 
   const ui = useCallback((key: string): string => t(`modules.${moduleId}.now.${key}`), [t, moduleId])

@@ -1,10 +1,10 @@
 import React from 'react'
 import { Text } from 'react-native'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 
 export function InlineText({ field }: FieldProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const text = field.text_code ? t(field.text_code) : ''
   if (field.props['bold'] === 'true') {
     return <Text style={{ fontWeight: '700' }}>{text}</Text>

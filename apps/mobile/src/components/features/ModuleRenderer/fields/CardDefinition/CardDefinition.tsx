@@ -1,11 +1,11 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 
 export function CardDefinition({ field }: FieldProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const termCode = field.props['term_code']
   const term = termCode ? t(termCode) : ''
   const definition = field.text_code ? t(field.text_code) : ''
