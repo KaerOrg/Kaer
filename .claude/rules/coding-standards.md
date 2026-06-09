@@ -5,6 +5,16 @@
 - **Scalabilité d'abord** : chaque décision de design doit tenir à 10× la charge actuelle (patients, modules, praticiens).
 - **Composants réutilisables** : tout composant ou fonction utilisé (ou susceptible d'être utilisé) dans ≥2 contextes est extrait dans `src/components/` ou `packages/shared/`. Zéro duplication.
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
+- **Mocks synchronisés avec les exports** : tout renommage de fonction/hook exporté (`useModuleT` → `useModuleTranslation`) doit être répercuté dans **tous** les `jest.mock()`/`vi.mock()` qui le mentionnent. Un `grep` sur l'ancien nom avant de merger est obligatoire. Un mock périmé donne un faux sentiment de tests verts (la fonction mockée n'est jamais appelée, l'originale crashe en runtime).
+> **Cas rencontré — refonte-tolerance-detresse (2026-06-09) :**
+> Le renommage `useModuleT → useModuleTranslation` a cassé 5 suites de tests mobiles :
+> ```ts
+> // ❌ mock avec l'ancien nom → useModuleTranslation = undefined au runtime
+> jest.mock('hooks/useModuleT', () => ({ useModuleT: () => k => k }))
+> // ✅ mock avec le nouveau nom
+> jest.mock('hooks/useModuleT', () => ({ useModuleTranslation: () => k => k }))
+> ```
+> → Avant de commiter un renommage : `grep -r "useModuleT\b" apps/mobile --include="*.test.*"`
 - **Documentation inline ciblée** : uniquement pour la logique non-évidente (invariants, workarounds, race conditions). Le reste se documente dans CLAUDE.md et les fichiers `.md` de feature.
 
 ## Architecture des composants — `ui/` vs `features/`
