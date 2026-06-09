@@ -12,13 +12,24 @@ interface DayEntry {
   hasEntry: boolean
 }
 
+// Marqueur de jour générique : une couleur (et libellé optionnel) par date YYYY-MM-DD.
+// Contrat metier-free — le design system ne connaît ni statut médical ni i18n de domaine.
+export interface DayMarker {
+  color: string
+  label?: string
+}
+
 interface Props {
-  entries: ChartEntry[]
-  dimensionKeys: readonly string[]
   accentColor: string
   locale: string
   daysLabel: string      // ex. « jours saisis »
   legendLabel: string    // ex. « Saisie effectuée — intensité = opacité »
+  // Mode 1 (par défaut) : intensité dérivée d'un score moyen sur des dimensions.
+  entries?: ChartEntry[]
+  dimensionKeys?: readonly string[]
+  // Mode 2 : couleur explicite par jour (pastilles neutres fournies par l'appelant).
+  // Quand fourni, prime sur le mode score/opacité.
+  dayMarkers?: ReadonlyMap<string, DayMarker>
 }
 
 function buildMonthGrid(year: number, month: number): (string | null)[][] {
@@ -43,7 +54,7 @@ function scoreToOpacity(avg: number): number {
   return 0.25 + 0.75 * ((avg - 1) / 9)
 }
 
-export function MonthCalendar({ entries, dimensionKeys, accentColor, locale, daysLabel, legendLabel }: Props) {
+export function MonthCalendar({ entries = [], dimensionKeys = [], accentColor, locale, daysLabel, legendLabel, dayMarkers }: Props) {
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
@@ -61,6 +72,10 @@ export function MonthCalendar({ entries, dimensionKeys, accentColor, locale, day
     }
     return map
   }, [entries, dimensionKeys])
+
+  // Présence d'une saisie un jour donné, quel que soit le mode.
+  const hasEntryOn = (dateStr: string): boolean =>
+    dayMarkers ? dayMarkers.has(dateStr) : entryMap.has(dateStr)
 
   const grid = useMemo(() => buildMonthGrid(viewYear, viewMonth), [viewYear, viewMonth])
   const todayStr = today.toISOString().slice(0, 10)
@@ -84,7 +99,7 @@ export function MonthCalendar({ entries, dimensionKeys, accentColor, locale, day
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const daysWithEntry = Array.from({ length: daysInMonth }, (_, i) => {
     const d = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
-    return entryMap.has(d) ? 1 : 0
+    return hasEntryOn(d) ? 1 : 0
   }).reduce<number>((s, v) => s + v, 0)
 
   return (
@@ -131,19 +146,23 @@ export function MonthCalendar({ entries, dimensionKeys, accentColor, locale, day
             if (!dateStr) return <View key={di} style={styles.dayCell} />
 
             const entry = entryMap.get(dateStr)
+            const marker = dayMarkers?.get(dateStr)
+            const filled = dayMarkers ? marker != null : entry != null
+            const fillColor = marker ? marker.color : accentColor
+            const fillOpacity = dayMarkers ? 1 : (entry ? scoreToOpacity(entry.avg) : 1)
             const isToday = dateStr === todayStr
             const isFuture = dateStr > todayStr
 
             return (
               <View key={di} style={styles.dayCell}>
-                {entry ? (
-                  // Jour avec saisie : cercle plein coloré
+                {filled ? (
+                  // Jour avec saisie : cercle plein coloré (pastille neutre en mode dayMarkers)
                   <View
                     style={[
                       styles.dayFilled,
                       {
-                        backgroundColor: accentColor,
-                        opacity: scoreToOpacity(entry.avg),
+                        backgroundColor: fillColor,
+                        opacity: fillOpacity,
                       },
                       isToday && { borderWidth: 2, borderColor: colors.text },
                     ]}

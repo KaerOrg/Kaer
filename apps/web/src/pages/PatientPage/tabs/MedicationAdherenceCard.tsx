@@ -1,0 +1,171 @@
+import { useCallback, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Bell, Eye, EyeOff, LineChart, Trash2 } from 'lucide-react'
+import { Button } from '../../../components/ui/Button'
+import { Card } from '../../../components/ui/Card'
+import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
+import type { ModuleType, PatientModule } from '../../../lib/database.types'
+import type { ModuleItem } from '../../../services/moduleCatalogService'
+import { ModuleDataPanel } from './ModuleDataPanel'
+import type { useMedicationListEditor } from '../hooks/useMedicationListEditor'
+import { MedicationAddForm } from './MedicationAddForm'
+import {
+  MED_LIST_ROW, MED_LIST_MAIN, MED_LIST_NAME, MED_LIST_POSO, MED_KIND_BADGE, MED_REMOVE_BTN,
+} from './medicationListStyles'
+
+const MODULE_TYPE: ModuleType = 'medication_adherence'
+
+type MedList = ReturnType<typeof useMedicationListEditor>
+
+export interface MedicationAdherenceCardProps {
+  patientId: string
+  tagChips: ReactNode
+  modItem: ModuleItem
+  modIcon: ReactNode
+  mod: PatientModule | undefined
+  unlocked: boolean
+  unlockingModule: ModuleType | null
+  previewModule: ModuleType | null
+  dataModule: ModuleType | null
+  medList: MedList
+  moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
+  onTogglePreview: (type: ModuleType) => void
+  onToggleData: (type: ModuleType) => void
+  onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
+  onUnlock: (type: ModuleType) => void
+  onRevoke: (moduleId: string) => void
+}
+
+/**
+ * Carte module « Observance du traitement » de l'armoire praticien. Héberge
+ * l'éditeur de la liste de médicaments (co-éditée avec le patient). Extraite du
+ * render de PatientModulesTab pour héberger des callbacks stables (useCallback).
+ */
+export function MedicationAdherenceCard({
+  patientId, tagChips, modItem, modIcon, mod, unlocked, unlockingModule,
+  previewModule, dataModule, medList, moduleToggle,
+  onTogglePreview, onToggleData, onConfigureNotif, onUnlock, onRevoke,
+}: MedicationAdherenceCardProps) {
+  const { t, i18n } = useTranslation()
+
+  const handleToggle = useCallback(() => {
+    if (unlocked && mod) { medList.close(); onRevoke(mod.id) }
+    else onUnlock(MODULE_TYPE)
+  }, [unlocked, mod, medList, onRevoke, onUnlock])
+
+  const handleNotif = useCallback(() => {
+    if (!mod) return
+    onConfigureNotif({
+      patientModuleId: mod.id,
+      moduleLabel: t('modules.medication_adherence.label'),
+      moduleIconName: modItem.icon,
+    })
+  }, [mod, onConfigureNotif, t, modItem.icon])
+
+  const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
+  const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
+
+  const isWide = medList.open || previewModule === MODULE_TYPE || dataModule === MODULE_TYPE
+
+  return (
+    <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
+      <Card
+        className="module-card-item"
+        header={{
+          icon: modIcon,
+          title: t('modules.medication_adherence.label'),
+          subtitle: t('modules.medication_adherence.description'),
+          right: moduleToggle(unlocked, unlockingModule === MODULE_TYPE, handleToggle),
+        }}
+        actions={unlocked && mod ? (
+          <>
+            <button type="button" className="module-card__notif-btn" title={t('notifications.configure_button')} onClick={handleNotif}>
+              <Bell size={14} />
+            </button>
+            {!medList.open && (
+              <Button variant="ghost" size="sm" onClick={medList.openEditor}>
+                {t('modules.medication_adherence.config_button')}
+              </Button>
+            )}
+            <button
+              className={`preview-toggle-btn ${previewModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+              onClick={handlePreviewToggle}
+              title={t('patient.patient_view')}
+            >
+              {previewModule === MODULE_TYPE ? <EyeOff size={14} /> : <Eye size={14} />}
+              {t('patient.preview_button')}
+            </button>
+            <button
+              type="button"
+              className={`preview-toggle-btn ${dataModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+              onClick={handleDataToggle}
+              title={t('patient.data_button')}
+            >
+              <LineChart size={14} />
+              {t('patient.data_button')}
+            </button>
+          </>
+        ) : undefined}
+      >
+        {tagChips}
+        {unlocked && mod && (
+          <div className="module-card__date">
+            {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
+            {medList.medications.length > 0 && (
+              <span className="psycho-observance-summary">
+                {' · '}{t('modules.medication_adherence.config_count', { count: medList.medications.length })}
+              </span>
+            )}
+          </div>
+        )}
+        {previewModule === MODULE_TYPE && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
+        {dataModule === MODULE_TYPE && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
+      </Card>
+
+      {medList.open && unlocked && mod && (
+        <div className="psycho-card-picker">
+          <p className="psycho-card-picker__label">{t('modules.medication_adherence.config_title')}</p>
+          <p style={{ fontSize: 12, color: '#6B7280', marginTop: -8, marginBottom: 12 }}>
+            {t('modules.medication_adherence.config_hint')}
+          </p>
+
+          {medList.medications.length === 0 ? (
+            <p style={{ fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' }}>
+              {t('modules.medication_adherence.meds_empty')}
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {medList.medications.map(med => (
+                <div key={med.id} style={MED_LIST_ROW}>
+                  <div style={MED_LIST_MAIN}>
+                    <div style={MED_LIST_NAME}>{med.name}</div>
+                    {med.posology ? <div style={MED_LIST_POSO}>{med.posology}</div> : null}
+                  </div>
+                  <span style={MED_KIND_BADGE}>
+                    {t(`modules.medication_adherence.${med.kind === 'prn' ? 'kind_prn' : 'kind_maintenance'}`)}
+                  </span>
+                  <button
+                    type="button"
+                    style={MED_REMOVE_BTN}
+                    title={t('common.delete')}
+                    onClick={() => medList.removeMedication(med.id)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <MedicationAddForm onAdd={medList.addMedication} />
+
+          <div className="psycho-card-picker__actions" style={{ marginTop: 16 }}>
+            <Button size="sm" loading={medList.saving} onClick={medList.close}>
+              {t('common.done', { defaultValue: 'Terminé' })}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

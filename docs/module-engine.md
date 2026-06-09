@@ -50,7 +50,8 @@ Valeurs de `preview_kind` et leur layout :
 | `preview_kind` | Layout React | Modules exemples |
 |---|---|---|
 | `steps` | Liste ordonnée verticale de sections | `crisis_plan`, `beck_columns` |
-| `fields` | Grille de champs avec widget | `sleep_diary`, `medication_adherence` |
+| `fields` | Grille de champs avec widget | `sleep_diary` |
+| `medication_tracker` | Suivi d'observance — 3 onglets (Aujourd'hui : check global + détail par molécule + motif + notes ; Calendrier : mois passif + série « jours renseignés » ; Mes médicaments : liste fond/PRN co-éditée). Pastilles neutres, aucun taux ni alerte (MDR). Aperçu web `MedicationTrackerLayout` ; écran mobile `MedicationTracker/` ; éditeur liste praticien `MedicationAdherenceCard` | `medication_adherence` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
 | `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18` |
 | `slider_dashboard` | Tableau de bord multi-dimensions — 3 onglets (Saisie / Évolution / Vue d'ensemble), courbes par dimension + composite, sélecteur 7J/1M/3M/1A, repères temporels, heatmap calendrier. Nommé par motif, réutilisable : `moduleId` dérivé des fields, accent lu en config (`accent_color`). Aperçu web `SliderDashboardLayout` ; écran patient mobile `DimensionTrackerView` | `mood_tracker`, `medication_side_effects` |
@@ -227,6 +228,14 @@ create table public.module_content_fields (
 |---|---|---|
 | `daily_checkin_config` | Config checklist | — |
 | `daily_status_option` | Option de statut | `value`, `color`, `icon` |
+
+**Layout `medication_tracker`**
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `medication_tracker_config` | Libellés des 3 onglets + sections (streak, calendrier, liste molécules, pont effets) | clés i18n par libellé |
+| `daily_status_option` | Statut de prise (réutilisé) | `value`, `color`, `bg_color`, `icon` |
+| `medication_reason_option` | Motif de non-prise (chip) | `value`, `icon`, `links_module` (pont vers un autre module) |
 
 **Layout `sleep_journal`**
 

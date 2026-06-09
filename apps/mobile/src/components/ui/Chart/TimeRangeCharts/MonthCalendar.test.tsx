@@ -62,4 +62,18 @@ describe('MonthCalendar', () => {
     )
     expect(toJSON()).toBeTruthy()
   })
+
+  it('mode dayMarkers : compte les jours marqués indépendamment des scores', () => {
+    const markers = new Map([[iso(today), { color: '#10B981', label: 'Pris' }]])
+    render(
+      <MonthCalendar
+        dayMarkers={markers}
+        accentColor="#8B5CF6"
+        locale="fr-FR"
+        daysLabel="j."
+        legendLabel="legend"
+      />
+    )
+    expect(screen.getByText(/^1 \/ \d+ j\.$/)).toBeTruthy()
+  })
 })

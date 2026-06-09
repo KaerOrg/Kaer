@@ -30,8 +30,10 @@ import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
+import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
+import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 
 const EMPTY_TAXONOMY: ModuleTaxonomy = { dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }
 
@@ -101,6 +103,7 @@ export function PatientModulesTab({
   const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
+  const medList = useMedicationListEditor(modules, onReloadModules)
 
   // Aperçu et Données sont mutuellement exclusifs : ouvrir l'un ferme l'autre.
   const togglePreview = useCallback((type: ModuleType) => {
@@ -446,6 +449,30 @@ export function PatientModulesTab({
           previewModule={previewModule}
           dataModule={dataModule}
           medEffects={medEffects}
+          moduleToggle={moduleToggle}
+          onTogglePreview={togglePreview}
+          onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
+          onUnlock={unlockModule}
+          onRevoke={revokeModule}
+        />
+      )
+    }
+
+    if (moduleType === 'medication_adherence') {
+      return (
+        <MedicationAdherenceCard
+          key="medication_adherence"
+          tagChips={tagChips('medication_adherence')}
+          modItem={modItem}
+          modIcon={modIcon}
+          mod={mod}
+          patientId={patientId}
+          unlocked={unlocked}
+          unlockingModule={unlockingModule}
+          previewModule={previewModule}
+          dataModule={dataModule}
+          medList={medList}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}

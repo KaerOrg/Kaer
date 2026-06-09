@@ -42,7 +42,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`authService.ts`](../apps/web/src/services/authService.ts) | Session praticien, login, register, mise à jour profil/langue, logout |
 | [`patientService.ts`](../apps/web/src/services/patientService.ts) | Liste des patients (avec modules), header patient, options pour pickers, mode ado |
 | [`patientRefService.ts`](../apps/web/src/services/patientRefService.ts) | `resolvePatientRef` — résout l'identifiant public opaque de l'URL (`public_ref`) vers le `patient_id` réel. Défense en profondeur (masque la PK), la RLS reste la barrière. Voir [`spec/patient-public-ref.md`](spec/patient-public-ref.md). |
-| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, proposition d'échelle |
+| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, proposition d'échelle, effets suivis (`fetchTrackedEffects`/`updateTrackedEffects`), liste de médicaments (`fetchMedications`/`updateMedications`) |
 | [`invitationService.ts`](../apps/web/src/services/invitationService.ts) | Liste des invitations en attente, validation de token, envoi via edge function, signup patient |
 | [`practitionerSettingsService.ts`](../apps/web/src/services/practitionerSettingsService.ts) | `practitioner_module_settings` (modules activés par praticien) |
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
@@ -84,7 +84,9 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`moodMarkerService.ts`](../apps/mobile/src/services/moodMarkerService.ts) | `getAllMoodMarkers`, `saveMoodMarker`, `deleteMoodMarker` — repères temporels (Life Chart) du thermomètre de l'humeur |
 | [`sleepDiaryService.ts`](../apps/mobile/src/services/sleepDiaryService.ts) | `saveSleepEntry`, `deleteSleepEntry` — agenda du sommeil |
 | [`formEntryService.ts`](../apps/mobile/src/services/formEntryService.ts) | `saveFormEntry`, `deleteFormEntry` — formulaires multi-colonnes (Beck, craving) |
-| [`dailyEntryService.ts`](../apps/mobile/src/services/dailyEntryService.ts) | `saveDailyEntry`, `deleteDailyEntry` — saisies quotidiennes (observance) |
+| [`dailyEntryService.ts`](../apps/mobile/src/services/dailyEntryService.ts) | `saveDailyEntry`, `deleteDailyEntry` — saisies quotidiennes (statut global observance, + `reason`) |
+| [`medicationIntakeService.ts`](../apps/mobile/src/services/medicationIntakeService.ts) | `saveMedicationIntake`, `deleteMedicationIntake`, `getMedicationIntakes` — détail de prise par molécule (`medication_intakes`) + sync |
+| [`medicationListService.ts`](../apps/mobile/src/services/medicationListService.ts) | `fetchMedications`, `updateMedications` — liste de molécules co-éditée patient↔praticien (`patient_modules.config.medications`) |
 | [`treeSelectionService.ts`](../apps/mobile/src/services/treeSelectionService.ts) | `saveTreeSelection`, `deleteTreeSelection` — sélecteurs hiérarchiques (roue des émotions) |
 | [`planItemService.ts`](../apps/mobile/src/services/planItemService.ts) | `savePlanItem`, `deletePlanItem`, `setModuleSetting` — plans éditables + settings module |
 | [`activityRecordService.ts`](../apps/mobile/src/services/activityRecordService.ts) | `saveActivityRecord`, `deleteActivityRecord` — activation comportementale |

@@ -7,10 +7,12 @@ vi.mock('../lib/supabase', () => ({
 import { supabase } from '../lib/supabase'
 import {
   fetchPatientModules,
+  fetchMedications,
   revokeModule,
   unlockModule,
   unlockPsychoeducation,
   unlockRim,
+  updateMedications,
   updatePsychoeducationCards,
   updateRim,
 } from './moduleAssignmentService'
@@ -123,6 +125,35 @@ describe('moduleAssignmentService.updatePsychoeducationCards', () => {
     const cards = update.mock.calls[0][0].config.unlocked_cards
     expect(cards.find((c: { card_id: string }) => c.card_id === 'c1')).toEqual(existingCards[0])
     expect(cards.find((c: { card_id: string }) => c.card_id === 'c3').is_read).toBe(false)
+  })
+})
+
+describe('moduleAssignmentService.fetchMedications / updateMedications', () => {
+  const MED = { id: 'm1', name: 'Sertraline', posology: '50 mg matin', kind: 'maintenance' as const }
+
+  it('fetchMedications retourne la liste depuis config.medications', async () => {
+    vi.mocked(supabase.from).mockReturnValue(
+      makeChain({ data: { config: { medications: [MED] } }, error: null }) as never
+    )
+    expect(await fetchMedications('pm-1')).toEqual([MED])
+  })
+
+  it('fetchMedications retourne [] si config absente', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    expect(await fetchMedications('pm-1')).toEqual([])
+  })
+
+  it('updateMedications préserve le reste de la config et écrit medications', async () => {
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+    const select = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { config: { tracked_effects: ['x'] } } }) }),
+    })
+    vi.mocked(supabase.from).mockReturnValue({ select, update } as never)
+
+    const result = await updateMedications('pm-1', [MED])
+
+    expect(result).toEqual({ ok: true })
+    expect(update.mock.calls[0][0].config).toEqual({ tracked_effects: ['x'], medications: [MED] })
   })
 })
 
