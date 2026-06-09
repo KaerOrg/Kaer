@@ -799,6 +799,153 @@
   border-style: dashed;
 }
 
+/* ── Aperçu praticien « suivi d'observance » (medication_tracker) ─────────── */
+
+.mt-prev-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mt-prev {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.mt-prev-date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+}
+
+.mt-prev-date__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+}
+
+.mt-prev-date__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-transform: capitalize;
+}
+
+.mt-prev-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mt-prev-block__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.mt-prev-block__icon {
+  color: var(--color-text-muted);
+}
+
+.mt-prev-mol {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.mt-prev-mol__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mt-prev-mol__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.mt-prev-mol__poso {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.mt-prev-mol__kind {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.mt-prev-mol__kind--prn {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.mt-prev-mol__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.mt-prev-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mt-prev-dot__hollow {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+}
+
+.mt-prev-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 2px;
+}
+
+.mt-prev-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
 /* ── Questionnaire (PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS…) ─────────────────── */
 /* Sur mobile : intro + warning éventuel, puis chaque question dans sa carte
    avec les pills de réponse Likert sous la question (cf. LikertWidget mobile). */

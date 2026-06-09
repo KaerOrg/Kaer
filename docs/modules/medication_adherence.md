@@ -69,7 +69,7 @@ Les écritures patient (`daily_entries`, `medication_intakes`) passent par les s
 | Côté | Fichier |
 |---|---|
 | Mobile (patient) | `apps/mobile/.../layouts/MedicationTracker/` (orchestrateur + `TodayTab`, `CalendarTab`, `MedicationsTab`, `StreakBadge`, `MedicationEditorModal`, `streakUtils`) |
-| Web (aperçu praticien) | `apps/web/.../layouts/MedicationTrackerLayout/` (dépiction passive) |
+| Web (aperçu praticien) | `apps/web/.../layouts/MedicationTrackerLayout/` — aperçu **interactif** à 3 volets (`PreviewTodayPanel`, `PreviewCalendarPanel`, `PreviewMedsPanel`) reproduisant fidèlement l'écran patient, onglets cliquables. Passif (aucune saisie). |
 | Web (éditeur liste) | `apps/web/.../PatientPage/tabs/MedicationAdherenceCard.tsx` + `MedicationAddForm.tsx` + hook `useMedicationListEditor` |
 | Calendrier réutilisé | `ui/Chart/TimeRangeCharts/MonthCalendar` (prop générique `dayMarkers`) |
 

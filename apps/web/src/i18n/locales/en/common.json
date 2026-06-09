@@ -808,7 +808,13 @@
       "config_title": "Medication list",
       "config_hint": "Add the patient's medications (maintenance and as-needed). The patient can also edit them from the app.",
       "config_count": "{{count}} medication",
-      "config_count_plural": "{{count}} medications"
+      "config_count_plural": "{{count}} medications",
+      "preview_med1_name": "Sertraline",
+      "preview_med1_poso": "50 mg in the morning",
+      "preview_med2_name": "Quetiapine",
+      "preview_med2_poso": "300 mg at night",
+      "preview_med3_name": "Lorazepam",
+      "preview_med3_poso": "1 mg as needed"
     },
     "psychoeducation": {
       "label": "Psychoeducation",

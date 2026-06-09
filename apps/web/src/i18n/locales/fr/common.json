@@ -555,6 +555,12 @@
       "config_hint": "Ajoutez les molécules du patient (traitement de fond et si besoin). Le patient peut aussi les modifier depuis l'application.",
       "config_count": "{{count}} médicament",
       "config_count_plural": "{{count}} médicaments",
+      "preview_med1_name": "Sertraline",
+      "preview_med1_poso": "50 mg le matin",
+      "preview_med2_name": "Quétiapine",
+      "preview_med2_poso": "300 mg le soir",
+      "preview_med3_name": "Lorazépam",
+      "preview_med3_poso": "1 mg si besoin",
       "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
     },
     "psychoeducation": {
