@@ -76,4 +76,24 @@ describe('MonthCalendar', () => {
     )
     expect(screen.getByText(/^1 \/ \d+ j\.$/)).toBeTruthy()
   })
+
+  it('legendItems : affiche un libellé par statut', () => {
+    render(
+      <MonthCalendar
+        dayMarkers={new Map()}
+        accentColor="#8B5CF6"
+        locale="fr-FR"
+        daysLabel="j."
+        legendLabel="Jour renseigné"
+        legendItems={[
+          { color: '#10B981', label: 'Pris' },
+          { color: '#F59E0B', label: 'Partiellement' },
+          { color: '#6B7280', label: 'Non pris' },
+        ]}
+      />
+    )
+    expect(screen.getByText('Pris')).toBeTruthy()
+    expect(screen.getByText('Partiellement')).toBeTruthy()
+    expect(screen.getByText('Non pris')).toBeTruthy()
+  })
 })

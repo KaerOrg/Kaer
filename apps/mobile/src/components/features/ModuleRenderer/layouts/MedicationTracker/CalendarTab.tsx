@@ -9,6 +9,7 @@ interface Props {
   streakLabel: string
   daysLabel: string
   legendLabel: string
+  legendItems: ReadonlyArray<{ color: string; label: string }>
   locale: string
   accentColor: string
 }
@@ -17,7 +18,7 @@ interface Props {
 // jour renseigné (couleur du statut déclaré), + la série de jours renseignés.
 // Aucune tendance, aucune flèche, aucun taux (MDR 2017/745).
 export function CalendarTab({
-  dayMarkers, streakCount, streakLabel, daysLabel, legendLabel, locale, accentColor,
+  dayMarkers, streakCount, streakLabel, daysLabel, legendLabel, legendItems, locale, accentColor,
 }: Props) {
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -28,6 +29,7 @@ export function CalendarTab({
         locale={locale}
         daysLabel={daysLabel}
         legendLabel={legendLabel}
+        legendItems={legendItems}
       />
     </ScrollView>
   )

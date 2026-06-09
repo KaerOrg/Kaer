@@ -87,6 +87,9 @@ export function MedicationTrackerLayout({ fields, moduleId: moduleIdProp }: Medi
 
   const statusByValue = useMemo(() => new Map(statusOptions.map(s => [s.value, s])), [statusOptions])
 
+  // Légende du calendrier : une entrée par statut (couleur + libellé).
+  const legendItems = useMemo(() => statusOptions.map(s => ({ color: s.color, label: s.label })), [statusOptions])
+
   const kindLabel = useCallback(
     (kind: Medication['kind']) => lbl(kind === 'prn' ? 'med_kind_prn' : 'med_kind_maintenance'),
     [lbl],
@@ -303,6 +306,7 @@ export function MedicationTrackerLayout({ fields, moduleId: moduleIdProp }: Medi
           streakLabel={streakLabel}
           daysLabel={lbl('calendar_days_label')}
           legendLabel={lbl('calendar_legend_label')}
+          legendItems={legendItems}
           locale={i18n.language}
           accentColor={colors.primary}
         />
