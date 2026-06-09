@@ -13,7 +13,7 @@ import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { getAllPlanItemsForModule, generateId, type PlanItem } from '../../../../../lib/database'
 import { savePlanItem, deletePlanItem } from '../../../../../services/planItemService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { EditableItemsList } from '../shared'
 import { styles } from './styles'
@@ -28,7 +28,7 @@ export interface EditableStepsLayoutProps {
 }
 
 export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableStepsLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showConfirm } = useConfirmDialog()
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)

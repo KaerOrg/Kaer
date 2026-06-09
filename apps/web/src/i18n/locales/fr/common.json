@@ -413,7 +413,47 @@
     },
     "distress_tolerance": {
       "label": "Boîte à outils de tolérance à la détresse",
-      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
+      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë.",
+      "tab_fiches": "Comprendre",
+      "tab_now": "Agir en crise",
+      "now": {
+        "title": "Traverser la vague",
+        "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un sommet, puis redescend toujours.",
+        "intro2": "Le patient n'a rien à faire contre elle — juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
+        "choose_activity": "Choisir une activité",
+        "pick_category": "Que voulez-vous faire maintenant ?",
+        "back": "Retour",
+        "minutes": "min",
+        "start_timer": "Démarrer",
+        "pick_another": "Une autre idée",
+        "timer_caption": "Restez avec la vague. Elle va redescendre.",
+        "hold": "J'ai tenu",
+        "stop": "Arrêter",
+        "done_title": "La vague est passée",
+        "done_text": "Vous avez tenu. C'est exactement ça, surfer la vague.",
+        "restart": "Recommencer",
+        "finish": "Terminer",
+        "cat": {
+          "tipp": "Apaiser le corps",
+          "distraction": "Me distraire",
+          "sens": "Apaiser mes sens",
+          "improve": "Adoucir l'instant"
+        },
+        "act": {
+          "tipp1": "Passez de l'eau froide sur votre visage, ou tenez un glaçon dans votre main.",
+          "tipp2": "Bougez intensément une minute : montez les escaliers, sautez sur place.",
+          "tipp3": "Respirez lentement : inspirez sur 4 temps, expirez sur 6 temps.",
+          "distraction1": "Comptez à rebours à partir de 100, de 7 en 7 (100, 93, 86…).",
+          "distraction2": "Nommez dix objets d'une même couleur autour de vous.",
+          "distraction3": "Lancez une tâche simple et concrète : ranger un tiroir, plier du linge.",
+          "sens1": "Écoutez en entier un morceau de musique qui vous apaise.",
+          "sens2": "Buvez une boisson chaude à petites gorgées, sentez sa chaleur.",
+          "sens3": "Enveloppez-vous dans une couverture ou un vêtement doux.",
+          "improve1": "Imaginez en détail un lieu où vous vous sentez en sécurité.",
+          "improve2": "Parlez-vous avec douceur, comme à un ami qui traverserait ça.",
+          "improve3": "Concentrez-vous sur ce seul instant : juste ce moment, rien d'autre."
+        }
+      }
     },
     "medication_side_effects": {
       "label": "Suivi des effets indésirables du traitement",
@@ -1210,7 +1250,47 @@
     },
     "distress_tolerance": {
       "label": "Boîte à outils de tolérance à la détresse",
-      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë."
+      "description": "Cartes d'actions physiologiques d'urgence inspirées de la TCD pour casser une crise aiguë.",
+      "tab_fiches": "Comprendre",
+      "tab_now": "Agir en crise",
+      "now": {
+        "title": "Traverser la vague",
+        "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un sommet, puis redescend toujours.",
+        "intro2": "Le patient n'a rien à faire contre elle — juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
+        "choose_activity": "Choisir une activité",
+        "pick_category": "Que voulez-vous faire maintenant ?",
+        "back": "Retour",
+        "minutes": "min",
+        "start_timer": "Démarrer",
+        "pick_another": "Une autre idée",
+        "timer_caption": "Restez avec la vague. Elle va redescendre.",
+        "hold": "J'ai tenu",
+        "stop": "Arrêter",
+        "done_title": "La vague est passée",
+        "done_text": "Vous avez tenu. C'est exactement ça, surfer la vague.",
+        "restart": "Recommencer",
+        "finish": "Terminer",
+        "cat": {
+          "tipp": "Apaiser le corps",
+          "distraction": "Me distraire",
+          "sens": "Apaiser mes sens",
+          "improve": "Adoucir l'instant"
+        },
+        "act": {
+          "tipp1": "Passez de l'eau froide sur votre visage, ou tenez un glaçon dans votre main.",
+          "tipp2": "Bougez intensément une minute : montez les escaliers, sautez sur place.",
+          "tipp3": "Respirez lentement : inspirez sur 4 temps, expirez sur 6 temps.",
+          "distraction1": "Comptez à rebours à partir de 100, de 7 en 7 (100, 93, 86…).",
+          "distraction2": "Nommez dix objets d'une même couleur autour de vous.",
+          "distraction3": "Lancez une tâche simple et concrète : ranger un tiroir, plier du linge.",
+          "sens1": "Écoutez en entier un morceau de musique qui vous apaise.",
+          "sens2": "Buvez une boisson chaude à petites gorgées, sentez sa chaleur.",
+          "sens3": "Enveloppez-vous dans une couverture ou un vêtement doux.",
+          "improve1": "Imaginez en détail un lieu où vous vous sentez en sécurité.",
+          "improve2": "Parlez-vous avec douceur, comme à un ami qui traverserait ça.",
+          "improve3": "Concentrez-vous sur ce seul instant : juste ce moment, rien d'autre."
+        }
+      }
     },
     "medication_side_effects": {
       "label": "Suivi des effets indésirables du traitement",

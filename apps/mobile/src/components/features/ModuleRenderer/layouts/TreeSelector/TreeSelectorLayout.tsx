@@ -23,7 +23,7 @@ import {
 } from '../../../../../lib/database'
 import { saveTreeSelection, deleteTreeSelection } from '../../../../../services/treeSelectionService'
 import { formatDateTime } from '../../../../../lib/dateUtils'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { styles } from './styles'
 
@@ -79,7 +79,7 @@ export interface TreeSelectorLayoutProps {
 }
 
 export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showConfirm } = useConfirmDialog()
   // ── Résolution des champs DB-driven
   const configField = fields.find(f => f.field_type === 'tree_selector_config')

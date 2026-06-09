@@ -19,7 +19,7 @@ import {
 } from '../../../../../lib/database'
 import { saveDailyEntry, deleteDailyEntry } from '../../../../../services/dailyEntryService'
 import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { styles } from './styles'
@@ -36,7 +36,7 @@ function todayISO(): string {
 }
 
 export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 

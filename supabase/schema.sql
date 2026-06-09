@@ -938,20 +938,28 @@ create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
 
 
 -- ============================================================
--- TABLE : patient_push_tokens (Tokens Expo Push par device patient)
+-- TABLE : patient_push_tokens (Tokens push par device patient)
 -- ============================================================
 -- Un patient peut avoir plusieurs tokens (plusieurs devices).
+-- token_type = 'fcm'  → token FCM natif (Android builds locaux)
+-- token_type = 'expo' → token Expo Push Service (legacy / iOS)
 -- L'Edge Function send-notifications utilise le service_role pour lire.
 
 create table if not exists public.patient_push_tokens (
   id               uuid        primary key default gen_random_uuid(),
   patient_id       uuid        not null references public.patients(id) on delete cascade,
   expo_push_token  text        not null,
+  token_type       text        not null default 'expo' check (token_type in ('expo', 'fcm')),
   platform         text        not null check (platform in ('ios', 'android')),
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
   unique (expo_push_token)
 );
+
+-- Idempotent : ajouter token_type si la table existait déjà sans cette colonne
+alter table public.patient_push_tokens
+  add column if not exists token_type text not null default 'expo'
+    check (token_type in ('expo', 'fcm'));
 
 create index if not exists idx_push_tokens_patient
   on public.patient_push_tokens(patient_id);

@@ -366,6 +366,31 @@ Dans les fichiers `.css` co-localisés :
 - Styles inline dans le JSX (objet littéral non mémoïsé) → **violation**
 - `StyleSheet.create` avec valeurs numériques ou couleurs en dur sans import du thème → **violation**
 - Import du thème manquant quand des couleurs/spacing sont utilisés → **violation**
+- Blocs shadow codés en dur (`shadowColor: '#000', shadowOffset: ...`) au lieu de `...shadows.sm` / `...shadows.md` → **violation**
+
+#### RULE — Design system mobile : réutilisation des composants `ui/` (obligatoire pour tout layout/écran créé)
+*(source : coding-standards.md § "Le design system EST ta boîte à outils")*
+
+> **Cette RULE s'applique à tout fichier créé dans `layouts/`, `screens/`, ou `features/` — pas seulement aux nouveaux composants `ui/`.** Avant de statuer, lancer :
+> ```bash
+> ls apps/mobile/src/components/ui/
+> ```
+> Un rapport qui conclut « pas de duplication » sans avoir listé l'inventaire est invalide.
+
+Pour chaque élément visuel du fichier, appliquer le tableau suivant :
+
+| Tu vois dans le fichier… | Cherche d'abord… | Si présent sans justification… |
+|---|---|---|
+| `Pressable` + `Text` + `styles.xxxBtn` (bouton stylé) | `ui/Button` — variants : `primary`, `secondary`, `ghost`, `danger`, `iconLeft` | **violation bloquante** |
+| `View` + shadow + radius + padding (carte) | `ui/Card` — variants : `default`, `outlined`, `elevated` ; props : `onPress`, `accentColor` | **violation bloquante** |
+| `View` + `icon` + `Text` + `Text` (état vide) | `ui/EmptyState` | **violation bloquante** |
+| Champ texte + label | `ui/InputField`, `ui/SelectField` | **violation bloquante** |
+| Badge coloré | `ui/StatusBadge` | **violation bloquante** |
+| Onglets faits main | `ui/Tabs` | **violation bloquante** |
+| Bascule on/off | `ui/Toggle` | **violation bloquante** |
+| Accordéon / section repliable | `ui/Accordion` | **violation bloquante** |
+
+**Incident de référence :** `CrisisCompanionLayout` (PR #45, 2026-06-08) a écrit 4 `View`-cartes et 3 `Pressable`-boutons ad hoc au lieu d'utiliser `<Card>` et `<Button>` — refacto requise post-review.
 
 #### RULE — Internationalisation : zéro texte en dur (code ET données)
 *(source : coding-standards.md § "Internationalisation" — « aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données »)*

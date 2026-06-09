@@ -29,7 +29,7 @@
 | `psychoeducation` | Psychoéducation | `cards` | IDs lus Supabase, statut lecture Supabase | [doc](modules/psychoeducation.md) |
 | `diet_weight_psycho` | Alimentation et psychotropes | `psyedu` | Supabase `psyedu_topics`/`psyedu_blocks` | — |
 | `chronobiology_tracker` | Régularité chronobiologique | `tabbed` (Fiches + Journal + Mois) | SQLite `chrono_entries` ; fiches Supabase | — |
-| `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Fiches + En crise) | Supabase `psyedu_topics`/`psyedu_blocks` | — |
+| `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Comprendre `psyedu` + Agir en crise `crisis_companion`) | Supabase `psyedu_topics`/`psyedu_blocks` ; onglet « Agir en crise » sans stockage | [doc](modules/distress_tolerance.md) |
 | `craving_journal` | Journal de craving (TCC addictologie) | `tabbed` (Fiches + Journal) | SQLite `form_entries` ; fiches Supabase | — |
 
 ---

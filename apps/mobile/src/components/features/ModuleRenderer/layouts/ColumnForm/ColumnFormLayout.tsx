@@ -21,7 +21,7 @@ import {
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { PipPicker } from '../../../../ui/PipPicker'
@@ -52,7 +52,7 @@ export interface ColumnFormLayoutProps {
 }
 
 export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 

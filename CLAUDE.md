@@ -90,6 +90,7 @@ Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Featu
 ## Règles de développement
 
 - **Feature = doc + tests** avant d'être considérée terminée.
+- **Design system d'abord — toujours** : avant la première ligne de JSX ou de StyleSheet, ouvrir `src/components/ui/`. Un `Pressable + Text + styles.xxxBtn` quand `<Button>` existe, ou une `View` avec shadow/radius quand `<Card>` existe, est une violation bloquante — même si ça marche. Détail et catalogue complet : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md) § "Le design system EST ta boîte à outils".
 - **Feedback web** : toujours `useToast()` pour les opérations réseau — jamais d'état local. Doc : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Zéro SQL dans un composant** : toute opération passe par `apps/<app>/src/services/<domaine>Service.ts`. Détail : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md).
 - **Nouveau module** : passer par le skill `module-builder`. Lecture préalable : [`docs/module-engine.md`](docs/module-engine.md).

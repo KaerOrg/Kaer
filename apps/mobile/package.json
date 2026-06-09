@@ -6,7 +6,9 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "distribute": "bash scripts/distribute-android.sh",
+    "distribute:notes": "bash scripts/distribute-android.sh --release-notes"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

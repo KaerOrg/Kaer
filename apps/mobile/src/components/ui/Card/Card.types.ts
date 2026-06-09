@@ -18,4 +18,5 @@ export interface CardProps {
   /** Rend la carte pressable (navigation). */
   onPress?: () => void
   accessibilityLabel?: string
+  testID?: string
 }
