@@ -91,20 +91,36 @@ part dans un layout, un widget ou un helper dédié — jamais inline dans le ro
 
 ---
 
-## Checklist obligatoire avant tout nouveau CSS, composant UI, ou field_type
+## Le design system EST ta boîte à outils — pas ton filet de sécurité
 
-> **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, d'implémenter un nouveau composant dans une page, ou d'introduire un nouveau `field_type` dans `module_content_fields`.**
+> **Principe fondamental.** On ne construit pas de l'UI et on ne vérifie pas ensuite si le design system couvre le besoin. On OUVRE le design system en premier, on assemble avec ce qui existe, et on n'écrit du JSX ou du CSS sur mesure que pour ce qui n'y est pas.
+>
+> La question n'est pas « est-ce que ce composant duplique quelque chose ? » — elle est « avec quoi du design system est-ce que je construis ça ? »
+>
+> Chaque `Pressable`, `View`, `Text` ad hoc dans un layout est une dette potentielle. La première réaction devant un besoin UI doit être : **ouvrir `src/components/ui/` et assembler**, pas ouvrir un fichier vide et coder.
 
-**Étape 1 — Chercher dans le design system web :**
+## Checklist obligatoire — concevoir avec le design system, pas contre lui
+
+> **Cette checklist s'applique dès la première ligne de JSX ou de StyleSheet — pas uniquement quand on "crée un composant". Un layout qui assemble des `Pressable` + `View` + styles ad hoc sans avoir consulté `src/components/ui/` a violé cette règle avant même d'être relié.**
+
+**Étape 1 — Ouvrir l'inventaire (obligatoire, toujours en premier) :**
 ```
-apps/web/src/components/ui/   ← primitives (Card, Button, Toggle, StatusBadge, Accordion…)
-apps/web/docs/design-system.md  ← référence CSS custom properties, classes utilitaires
-```
-**Étape 2 — Chercher dans le design system mobile :**
-```
-apps/mobile/src/components/ui/
+apps/web/src/components/ui/      ← Button, Card, Toggle, StatusBadge, Accordion, Tabs…
+apps/web/docs/design-system.md   ← CSS custom properties, classes utilitaires
+apps/mobile/src/components/ui/   ← Button, Card, InputField, EmptyState, Toast…
 apps/mobile/docs/design-system.md
 ```
+
+**Étape 2 — Pour chaque élément visuel à implémenter, se poser la question :**
+
+> Un bouton ? → `ui/Button` (variants : primary, secondary, ghost, danger, iconLeft).
+> Une carte / conteneur avec ombre + radius ? → `ui/Card` (variants, accentColor, onPress).
+> Un champ de saisie ? → `ui/InputField`. Une liste déroulante ? → `ui/SelectField`.
+> Un badge coloré ? → `ui/StatusBadge`. Un état vide ? → `ui/EmptyState`.
+> Des onglets ? → `ui/Tabs`. Une bascule ? → `ui/Toggle`. Un accordéon ? → `ui/Accordion`.
+>
+> Si le composant existe → **l'utiliser directement**. S'il couvre le besoin à 90% → **ajouter la prop manquante**. Ne jamais écrire un `Pressable + Text + styles.xxxBtn` quand `Button` existe, ni un `View` avec shadow/radius quand `Card` existe.
+
 **Étape 3 — Pour tout `field_type` ou layout FieldRenderer — consulter l'inventaire complet :**
 ```
 docs/module-engine.md  ← section "Inventaire complet des field_types" (44+ types recensés)
@@ -129,13 +145,17 @@ Mettre à jour le document de référence correspondant **dans le même commit**
 Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
 
 **Anti-patterns bloquants — refuser d'écrire :**
-- Markup HTML qui duplique un composant existant (`Toggle`, `Card`, `Button`, `StatusBadge`…)
+- `Pressable + Text + StyleSheet` ad hoc quand `ui/Button` couvre le besoin
+- `View` avec shadow + radius + padding codés en dur quand `ui/Card` couvre le besoin
+- Tout markup qui reproduit visuellement un composant `ui/` existant
 - Style inline `style={{ ... }}` pour autre chose qu'un calcul dynamique ponctuel
 - Classe CSS définie dans le `.css` d'une page pour un pattern déjà présent dans un composant
 - Nouveau `field_type` introduit sans consultation de l'inventaire `docs/module-engine.md`
 - Couleur, taille, espacement hardcodés (#FFFFFF, 14px, 8px) — utiliser les tokens CSS (`var(--color-*)`, `var(--spacing-*)`, `var(--font-size-*)`)
 
-**Rappel :** la session où `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` illustre exactement ce problème. Coût : bug de cohérence visuelle découvert à la revue, refactorisation supplémentaire.
+**Incidents de référence :**
+- `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` → bug de cohérence visuelle, refacto en review.
+- `CrisisCompanionLayout` (PR #45, 2026-06-08) a écrit 4 styles de carte ad hoc + 3 styles de bouton ad hoc au lieu d'utiliser `<Card>` et `<Button>` → refacto requise post-review.
 
 > **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :**
 > `CaseloadTable.css` figeait 25+ teintes de charte (en-tête teal, dégradé de

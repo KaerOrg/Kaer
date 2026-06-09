@@ -9,12 +9,14 @@
 // Conformité MDR 2017/745 : minuteur fixe, zéro interprétation, fin neutre.
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
-import { colors } from '../../../../../theme'
+import { View, Text, ScrollView, StyleSheet } from 'react-native'
+import { colors, spacing } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
 import { parseDurations, formatCountdown, nextActivityIndex, elapsedFraction } from './crisisLogic'
+import { Button } from '../../../../../components/ui/Button'
+import { Card } from '../../../../../components/ui/Card'
 import { styles } from './styles'
 
 type Mode = 'home' | 'activity' | 'timer' | 'done'
@@ -87,8 +89,7 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
   const activeCategory = categories[catIndex]
   const currentActivity = activeCategory?.activities[actIndex] ?? ''
 
-  // Minuteur : décrément 1 s tant qu'on est en mode timer. L'intervalle est créé
-  // à l'entrée du mode et nettoyé à la sortie (deps = [mode]).
+  // Minuteur : décrément 1 s tant qu'on est en mode timer.
   useEffect(() => {
     if (mode !== 'timer') return
     const id = setInterval(() => setRemaining(r => (r <= 1 ? 0 : r - 1)), 1000)
@@ -125,7 +126,7 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
     const WaveIcon = resolvePsyEduIcon('Waves')
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.introCard}>
+        <Card style={styles.centeredCard}>
           <View style={[styles.introIconCircle, { backgroundColor: accent + '1A' }]}>
             <WaveIcon size={36} color={accent} />
           </View>
@@ -133,24 +134,23 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
           {introTexts.map(p => (
             <Text key={p.id} style={styles.introText}>{p.text}</Text>
           ))}
-        </View>
+        </Card>
 
         <Text style={styles.sectionLabel}>{ui('pick_category')}</Text>
         {categories.map((cat, index) => {
           const Icon = resolvePsyEduIcon(cat.icon)
           return (
-            <Pressable
+            <Card
               key={cat.key}
-              style={[styles.categoryCard, { borderLeftColor: cat.color }]}
               onPress={() => handlePickCategory(index)}
-              accessibilityRole="button"
+              style={StyleSheet.flatten([styles.categoryCardBase, { borderLeftColor: cat.color }])}
               testID={`crisis-category-${cat.key}`}
             >
               <View style={[styles.categoryIconCircle, { backgroundColor: cat.color + '1A' }]}>
                 <Icon size={22} color={cat.color} />
               </View>
               <Text style={styles.categoryLabel}>{cat.label}</Text>
-            </Pressable>
+            </Card>
           )
         })}
       </ScrollView>
@@ -162,7 +162,7 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
     const Icon = resolvePsyEduIcon(activeCategory.icon)
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={[styles.activityCard, { borderTopColor: activeCategory.color }]}>
+        <Card variant="elevated" accentColor={activeCategory.color} style={styles.activityCardBase}>
           <View style={styles.activityHead}>
             <View style={[styles.categoryIconCircle, { backgroundColor: activeCategory.color + '1A' }]}>
               <Icon size={20} color={activeCategory.color} />
@@ -171,28 +171,23 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
           </View>
           <Text style={styles.activityText}>{currentActivity}</Text>
           {activeCategory.activities.length > 1 ? (
-            <Pressable style={styles.linkBtn} onPress={handleAnotherActivity} accessibilityRole="button">
-              <Text style={styles.linkBtnText}>{ui('pick_another')}</Text>
-            </Pressable>
+            <Button variant="ghost" label={ui('pick_another')} onPress={handleAnotherActivity} />
           ) : null}
-        </View>
+        </Card>
 
         <View style={styles.durationRow}>
           {durations.map(min => (
-            <Pressable
+            <Button
               key={min}
-              style={[styles.durationBtn, { borderColor: accent }]}
+              variant="secondary"
+              label={`${min} ${ui('minutes')}`}
               onPress={() => handleStartTimer(min)}
-              accessibilityRole="button"
+              style={{ flex: 1, borderColor: accent }}
               testID={`crisis-duration-${min}`}
-            >
-              <Text style={[styles.durationBtnText, { color: accent }]}>{`${min} ${ui('minutes')}`}</Text>
-            </Pressable>
+            />
           ))}
         </View>
-        <Pressable style={styles.cancelBtn} onPress={handleHome} accessibilityRole="button">
-          <Text style={styles.cancelBtnText}>{ui('back')}</Text>
-        </Pressable>
+        <Button variant="ghost" label={ui('back')} onPress={handleHome} />
       </ScrollView>
     )
   }
@@ -211,12 +206,8 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
           <View style={[styles.progressFill, { width: fillWidth, backgroundColor: accent }]} />
         </View>
         <Text style={styles.timerCaption}>{ui('timer_caption')}</Text>
-        <Pressable style={[styles.primaryBtn, { backgroundColor: accent }]} onPress={handleHold} accessibilityRole="button">
-          <Text style={styles.primaryBtnText}>{ui('hold')}</Text>
-        </Pressable>
-        <Pressable style={styles.cancelBtn} onPress={handleStop} accessibilityRole="button">
-          <Text style={styles.cancelBtnText}>{ui('stop')}</Text>
-        </Pressable>
+        <Button variant="primary" label={ui('hold')} onPress={handleHold} style={{ backgroundColor: accent }} />
+        <Button variant="ghost" label={ui('stop')} onPress={handleStop} />
       </View>
     )
   }
@@ -225,16 +216,19 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
   const HeartIcon = resolvePsyEduIcon('Heart')
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.doneCard}>
+      <Card style={styles.centeredCard}>
         <View style={[styles.introIconCircle, { backgroundColor: colors.success + '1A' }]}>
           <HeartIcon size={36} color={colors.success} />
         </View>
         <Text style={styles.doneTitle}>{ui('done_title')}</Text>
         <Text style={styles.doneText}>{ui('done_text')}</Text>
-      </View>
-      <Pressable style={[styles.primaryBtn, { backgroundColor: accent }]} onPress={handleHome} accessibilityRole="button">
-        <Text style={styles.primaryBtnText}>{ui('finish')}</Text>
-      </Pressable>
+      </Card>
+      <Button
+        variant="primary"
+        label={ui('finish')}
+        onPress={handleHome}
+        style={{ backgroundColor: accent }}
+      />
     </ScrollView>
   )
 }

@@ -12,4 +12,5 @@ export interface ButtonProps {
   style?: ViewStyle
   /** Nœud affiché à gauche du label (ex. icône MaterialCommunityIcons). */
   iconLeft?: ReactNode
+  testID?: string
 }
