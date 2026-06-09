@@ -8,7 +8,11 @@ import { styles } from './styles'
 
 interface Props {
   todayLabel: string
-  todayValue: string
+  dateValue: string
+  isToday: boolean
+  canGoNext: boolean
+  onPrevDay: () => void
+  onNextDay: () => void
   alreadySaved: boolean
   alreadySavedLabel: string
   question: string
@@ -41,7 +45,8 @@ interface Props {
 // optionnel par molécule + motif de non-prise + notes. Tous les éléments sont des
 // faits déclarés par le patient ; aucune interprétation ni alerte (MDR 2017/745).
 export function TodayTab({
-  todayLabel, todayValue, alreadySaved, alreadySavedLabel, question,
+  todayLabel, dateValue, isToday, canGoNext, onPrevDay, onNextDay,
+  alreadySaved, alreadySavedLabel, question,
   statusOptions, selectedStatus, onSelectStatus,
   showReasons, reasonPrompt, reasonOptions, selectedReason, onSelectReason,
   showBridge, bridgeLabel, onOpenBridge,
@@ -53,10 +58,27 @@ export function TodayTab({
 
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-      {/* Date du jour */}
+      {/* Date — modifiable (chevrons) pour renseigner un jour oublié */}
       <View style={styles.dateHeader}>
-        <Text style={styles.dateLabel}>{todayLabel}</Text>
-        <Text style={styles.dateValue}>{todayValue}</Text>
+        <View style={styles.dateNavRow}>
+          <Pressable onPress={onPrevDay} hitSlop={10} style={styles.dateNavBtn} testID="prev-day" accessibilityLabel="prev-day">
+            <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
+          </Pressable>
+          <View style={styles.dateNavCenter}>
+            {isToday && todayLabel ? <Text style={styles.dateLabel}>{todayLabel}</Text> : null}
+            <Text style={styles.dateValue}>{dateValue}</Text>
+          </View>
+          <Pressable
+            onPress={onNextDay}
+            hitSlop={10}
+            disabled={!canGoNext}
+            style={[styles.dateNavBtn, !canGoNext && styles.dateNavBtnDisabled]}
+            testID="next-day"
+            accessibilityLabel="next-day"
+          >
+            <MaterialCommunityIcons name="chevron-right" size={26} color={canGoNext ? colors.primary : colors.border} />
+          </Pressable>
+        </View>
       </View>
 
       {alreadySaved && alreadySavedLabel ? (

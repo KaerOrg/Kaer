@@ -31,7 +31,7 @@ import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { TodayTab } from './TodayTab'
 import { CalendarTab } from './CalendarTab'
 import { MedicationsTab } from './MedicationsTab'
-import { computeLoggedStreak } from './streakUtils'
+import { computeLoggedStreak, shiftDate } from './streakUtils'
 import type { StatusMeta, ReasonMeta, IconName, IntakeState } from './types'
 import { styles } from './styles'
 
@@ -47,12 +47,15 @@ function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerLayoutProps) {
+export function MedicationTrackerLayout({ fields, moduleId: moduleIdProp }: MedicationTrackerLayoutProps) {
   const { isTeenMode } = useTeen()
   const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const { showToast } = useToast()
   const navigation = useNavigation<Nav>()
   const patientId = useAuthStore(s => s.patient?.id)
+
+  // moduleId dérivé des fields (règle config-first) — le prop du dispatcher peut être vide.
+  const moduleId = useMemo(() => fields[0]?.module_id ?? moduleIdProp, [fields, moduleIdProp])
 
   // ── Config DB-driven
   const configField = useMemo(() => fields.find(f => f.field_type === 'medication_tracker_config'), [fields])
@@ -90,7 +93,10 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
   )
 
   // ── State
-  const todayDate = useMemo(() => todayISO(), [])
+  const today = useMemo(() => todayISO(), [])
+  // Date en cours d'édition dans l'onglet « Aujourd'hui » — modifiable pour
+  // permettre de renseigner un jour oublié (jamais dans le futur).
+  const [selectedDate, setSelectedDate] = useState(() => todayISO())
   const [tab, setTab] = useState<Tab>('today')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -103,17 +109,17 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
   const [intakes, setIntakes] = useState<Map<string, IntakeState>>(new Map())
 
   const loadData = useCallback(async () => {
-    const [todayEntry, hist, intakeRows, meds] = await Promise.all([
-      getDailyEntry(moduleId, todayDate),
+    const [dayEntry, hist, intakeRows, meds] = await Promise.all([
+      getDailyEntry(moduleId, selectedDate),
       getAllDailyEntries(moduleId, 60),
-      getMedicationIntakes(moduleId, todayDate),
+      getMedicationIntakes(moduleId, selectedDate),
       patientId ? fetchMedications(patientId) : Promise.resolve<Medication[]>([]),
     ])
-    if (todayEntry) {
-      setExistingId(todayEntry.id)
-      setSelectedStatus(todayEntry.status)
-      setSelectedReason(todayEntry.reason)
-      setNotes(todayEntry.notes ?? '')
+    if (dayEntry) {
+      setExistingId(dayEntry.id)
+      setSelectedStatus(dayEntry.status)
+      setSelectedReason(dayEntry.reason)
+      setNotes(dayEntry.notes ?? '')
     } else {
       setExistingId(null)
       setSelectedStatus(null)
@@ -124,7 +130,7 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
     setMedications(meds)
     setIntakes(new Map(intakeRows.map((r: MedicationIntake) => [r.medication_id, { id: r.id, status: r.status, reason: r.reason }])))
     setLoading(false)
-  }, [moduleId, todayDate, patientId])
+  }, [moduleId, selectedDate, patientId])
 
   useEffect(() => { loadData().catch(() => setLoading(false)) }, [loadData])
 
@@ -137,8 +143,8 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
   )
 
   const streakCount = useMemo(
-    () => computeLoggedStreak(new Set(history.map(h => h.date)), todayDate),
-    [history, todayDate],
+    () => computeLoggedStreak(new Set(history.map(h => h.date)), today),
+    [history, today],
   )
   const streakLabel = t(
     `modules.${moduleId}.${streakCount > 1 ? 'streak_plural' : 'streak'}`,
@@ -157,6 +163,10 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
   }, [history, statusByValue])
 
   // ── Handlers
+  const canGoNextDay = selectedDate < today
+  const goPrevDay = useCallback(() => setSelectedDate(d => shiftDate(d, -1)), [])
+  const goNextDay = useCallback(() => setSelectedDate(d => (d < today ? shiftDate(d, 1) : d)), [today])
+
   const handleSelectStatus = useCallback((value: string) => {
     setSelectedStatus(value)
     if (value === statusOptions[0]?.value) setSelectedReason(null)
@@ -172,7 +182,7 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
       const entry: Omit<DailyEntry, 'created_at'> = {
         id: existingId ?? generateId(),
         module_id: moduleId,
-        date: todayDate,
+        date: selectedDate,
         status: selectedStatus,
         reason: showReasons ? selectedReason : null,
         notes: notes.trim() || null,
@@ -187,14 +197,14 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
     } finally {
       setSaving(false)
     }
-  }, [selectedStatus, existingId, moduleId, todayDate, showReasons, selectedReason, notes, loadData, lbl, t, showToast])
+  }, [selectedStatus, existingId, moduleId, selectedDate, showReasons, selectedReason, notes, loadData, lbl, t, showToast])
 
   const handleSetMoleculeStatus = useCallback(async (medicationId: string, status: string) => {
     const existing = intakes.get(medicationId)
     const intake: Omit<MedicationIntake, 'created_at'> = {
       id: existing?.id ?? generateId(),
       module_id: moduleId,
-      date: todayDate,
+      date: selectedDate,
       medication_id: medicationId,
       status,
       reason: existing?.reason ?? null,
@@ -206,7 +216,7 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
     } catch {
       showToast(t('common.save_error'), 'error')
     }
-  }, [intakes, moduleId, todayDate, showToast, t])
+  }, [intakes, moduleId, selectedDate, showToast, t])
 
   const handleSaveMeds = useCallback(async (next: Medication[]) => {
     if (!patientId) return
@@ -255,7 +265,11 @@ export function MedicationTrackerLayout({ fields, moduleId }: MedicationTrackerL
       {tab === 'today' ? (
         <TodayTab
           todayLabel={lbl('today_label')}
-          todayValue={formatDateFull(todayDate)}
+          dateValue={formatDateFull(selectedDate)}
+          isToday={selectedDate === today}
+          canGoNext={canGoNextDay}
+          onPrevDay={goPrevDay}
+          onNextDay={goNextDay}
           alreadySaved={existingId != null}
           alreadySavedLabel={lbl('already_saved_label')}
           question={lbl('question')}

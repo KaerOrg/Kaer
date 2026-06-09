@@ -28,7 +28,11 @@ export const styles = StyleSheet.create({
     fontSize: 13, fontWeight: '600', color: colors.primary,
     textTransform: 'uppercase', letterSpacing: 0.5,
   },
-  dateValue:        { fontSize: 18, fontWeight: '700', color: colors.text },
+  dateValue:        { fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
+  dateNavRow:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dateNavBtn:       { padding: spacing.xs },
+  dateNavBtnDisabled: { opacity: 0.35 },
+  dateNavCenter:    { flex: 1, alignItems: 'center', gap: 2 },
   // ── Badge "déjà saisi"
   savedBadge: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.xs,

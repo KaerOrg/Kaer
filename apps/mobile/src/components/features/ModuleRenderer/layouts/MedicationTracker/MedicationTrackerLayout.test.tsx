@@ -57,6 +57,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { MedicationTrackerLayout } from './MedicationTrackerLayout'
+import { shiftDate } from './streakUtils'
 import type { ContentField } from '../../../../../services/moduleService'
 
 function field(o: Partial<ContentField>): ContentField {
@@ -179,6 +180,19 @@ describe('MedicationTrackerLayout', () => {
       expect(mockSaveIntake).toHaveBeenCalledWith(expect.objectContaining({
         medication_id: 'med-a', status: 'taken', module_id: 'medication_adherence',
       }))
+    })
+  })
+
+  it('permet de renseigner un jour précédent via la navigation de date', async () => {
+    renderLayout()
+    await waitFor(() => expect(screen.getByTestId('prev-day')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('prev-day'))
+    const yesterday = shiftDate(TODAY, -1)
+    await waitFor(() => expect(mockGetDailyEntry).toHaveBeenCalledWith('medication_adherence', yesterday))
+    fireEvent.press(screen.getByTestId('status-taken'))
+    fireEvent.press(screen.getByTestId('save-button'))
+    await waitFor(() => {
+      expect(mockSaveDailyEntry).toHaveBeenCalledWith(expect.objectContaining({ date: yesterday, status: 'taken' }))
     })
   })
 
