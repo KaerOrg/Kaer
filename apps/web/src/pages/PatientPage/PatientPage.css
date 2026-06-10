@@ -865,10 +865,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  /* Épinglée à gauche (utilitaire notification) — les actions principales
-     restent groupées à droite, quel que soit leur nombre. Évite que la cloche
-     « flotte » contre le bord sur les cartes à 4 actions. */
-  margin-right: auto;
+  /* Rendue en dernier dans la rangée (coin droit) tout en restant groupée à
+     l'intérieur de la carte (.card__actions est en flex-end). Évite que la
+     cloche « flotte » au bord gauche / dans la gouttière. */
+  order: 99;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
