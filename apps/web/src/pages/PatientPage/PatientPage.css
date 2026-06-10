@@ -858,9 +858,13 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   color: var(--color-text-secondary);
-  padding: 4px 6px;
+  /* Aligné sur .preview-toggle-btn pour une rangée d'actions homogène
+     (même hauteur que « Aperçu » / « Données »). */
+  padding: 3px 7px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
