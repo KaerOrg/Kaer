@@ -388,7 +388,7 @@
     },
     "medication_adherence": {
       "label": "Observance du traitement",
-      "description": "Ai-je pris mon traitement cette semaine ?",
+      "description": "Ai-je pris mon traitement aujourd'hui ?",
       "title": "Observance du traitement",
       "intro": "Avez-vous pris votre traitement ?",
       "save": "Enregistrer",
@@ -1712,7 +1712,7 @@
     },
     "medication_adherence": {
       "label": "Module Observance",
-      "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
+      "description": "Auto-rapport quotidien d'observance du traitement médicamenteux.",
       "field_1": {
         "label": "Pris",
         "detail": "Traitement pris dans son intégralité"

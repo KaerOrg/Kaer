@@ -336,9 +336,9 @@
     },
     "medication_adherence": {
       "label": "Treatment adherence",
-      "description": "Did I take my medication this week?",
+      "description": "Did I take my medication today?",
       "title": "Treatment adherence",
-      "intro": "Did you take your medication this week?",
+      "intro": "Did you take your medication?",
       "save": "Save",
       "today_label": "Today",
       "section_today": "My treatment today",

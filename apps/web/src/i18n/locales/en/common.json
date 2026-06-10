@@ -765,7 +765,7 @@
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",
-      "description": "Weekly self-report on medication adherence.",
+      "description": "Daily self-report on medication adherence.",
       "new_btn": "New report",
       "empty_title": "No report yet",
       "empty_text": "Use the button above to complete your first report.",
@@ -1193,7 +1193,7 @@
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",
-      "description": "Weekly self-report on medication adherence.",
+      "description": "Daily self-report on medication adherence.",
       "field_1": {
         "label": "Taken",
         "detail": "Medication taken in full"

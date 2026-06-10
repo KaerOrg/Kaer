@@ -337,7 +337,7 @@
     },
     "medication_adherence": {
       "title": "Mes prises de traitement",
-      "intro": "T'as pris ton traitement cette semaine ?",
+      "intro": "T'as pris ton traitement ?",
       "save": "Valider",
       "tab_today": "Aujourd'hui",
       "tab_history": "Historique",

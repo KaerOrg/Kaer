@@ -336,7 +336,7 @@
     },
     "medication_adherence": {
       "title": "My medication log",
-      "intro": "Did you take your medication this week?",
+      "intro": "Did you take your medication?",
       "save": "Done",
       "tab_today": "Today",
       "tab_history": "History",
