@@ -865,11 +865,25 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  /* Rendue en dernier dans la rangée (coin droit) tout en restant groupée à
-     l'intérieur de la carte (.card__actions est en flex-end). Évite que la
-     cloche « flotte » au bord gauche / dans la gouttière. */
-  order: 99;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+/* Barre d'actions des cartes de module : en flux normal + retour à la ligne.
+   Évite tout débordement quand 4 actions (Configurer… + Aperçu + Données +
+   cloche) dépassent la largeur de la carte. Reste une barre pleine largeur
+   collée en bas grâce à margin-top:auto + marges latérales négatives. */
+.card.module-card-item:has(.card__actions:not(:empty)) {
+  padding-bottom: var(--spacing-md);
+}
+
+.module-card-item .card__actions {
+  position: static;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: auto;
+  margin-left: calc(-1 * var(--spacing-md));
+  margin-right: calc(-1 * var(--spacing-md));
+  margin-bottom: calc(-1 * var(--spacing-md));
 }
 
 .module-card__notif-btn:hover {
