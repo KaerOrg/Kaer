@@ -865,6 +865,10 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  /* Épinglée à gauche (utilitaire notification) — les actions principales
+     restent groupées à droite, quel que soit leur nombre. Évite que la cloche
+     « flotte » contre le bord sur les cartes à 4 actions. */
+  margin-right: auto;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
