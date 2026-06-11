@@ -5,7 +5,11 @@ import * as Linking from 'expo-linking'
 import { logger } from '@psytool/shared'
 import { useAuthStore } from '../store/authStore'
 import { initDatabase } from '../lib/database'
-import { setupAndroidChannel, shouldShowNotificationOnboarding } from '../services/notificationService'
+import {
+  configureForegroundNotifications,
+  setupAndroidChannel,
+  shouldShowNotificationOnboarding,
+} from '../services/notificationService'
 import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'
@@ -51,6 +55,9 @@ export default function Navigation() {
 
     const init = async () => {
       logger.log('[Boot] start')
+      // Enregistré en premier, avant toute arrivée de notification, pour que les
+      // notifications reçues app ouverte soient bien affichées (bannière + son).
+      configureForegroundNotifications()
       try {
         logger.log('[Boot] initDatabase...')
         await withTimeout(initDatabase(), 8000, 'initDatabase')

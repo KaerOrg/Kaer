@@ -1,6 +1,10 @@
 import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
+vi.mock('../../../store/authStore', () => ({
+  useAuthStore: (fn: (s: { practitioner: null }) => unknown) => fn({ practitioner: null }),
+}))
+
 vi.mock('react-router-dom', () => ({
   useLocation: vi.fn(),
   Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => (
