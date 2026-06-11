@@ -4,6 +4,10 @@
     "how": "Comment faire concrètement",
     "sources": "Pour aller plus loin"
   },
+  "theme": {
+    "treatment": "Mon traitement",
+    "lifestyle": "Hygiène de vie"
+  },
   "psyedu_sleep": {
     "sleep_chrono": {
       "title": "Le sommeil et la récupération",
@@ -156,6 +160,8 @@
         "tip3": "**Tension artérielle** et fréquence cardiaque",
         "tip4": "**Rythme régulier** : 3 repas à heures fixes aide à réguler l'appétit",
         "tip5": "**Hydratation** : 1,5 à 2 litres d'eau par jour (sauf avis médical contraire)",
+        "tip6": "**Le piège de la soif** : les traitements assèchent souvent la bouche, et on confond facilement la soif avec une envie de grignoter. Boire un verre d'eau et attendre 10 minutes avant de manger.",
+        "tip7": "**Bouger un peu après le repas** : une courte marche de 10 à 15 minutes après avoir mangé fait du bien.",
         "bq1": "Si vous remarquez des changements importants de votre appétit ou de votre poids depuis le début ou la modification de votre traitement, signalez-le à votre soignant à la prochaine consultation."
       },
       "sources": {
@@ -255,6 +261,29 @@
       },
       "sources": {
         "s1": "ANSM — RCP lithium, valproate, lamotrigine, carbamazépine",
+        "s2": "Gitlin M (2016) — Lithium side effects and toxicity — International Journal of Bipolar Disorders"
+      }
+    },
+    "lithium_safety": {
+      "title": "Lithium : sécurité au quotidien",
+      "summary": "Hydratation, sel et signes d'alerte",
+      "why": {
+        "p1": "Le lithium est un traitement thymorégulateur très efficace, mais il demande un **équilibre précis** dans le corps. Cet équilibre dépend directement de l'eau et du sel que vous consommez : le rein traite le lithium et le sodium de façon similaire.",
+        "p2": "Garder des apports en eau et en sel **réguliers** est donc essentiel pour que le taux de lithium reste stable. Un changement brutal peut le faire varier."
+      },
+      "how": {
+        "rules_intro": "Les 3 règles d'or de l'hydratation :",
+        "rule1": "**Boire régulièrement** : viser 1,5 à 2 litres d'eau par jour.",
+        "rule2": "**Ne pas changer brutalement ses habitudes de sel** : un régime sans sel soudain fait monter le taux de lithium ; un excès de sel le fait baisser. Garder une consommation stable.",
+        "rule3": "**Compenser les pertes** : en cas de forte chaleur, de sport intense, de diarrhée ou de vomissements, boire davantage.",
+        "avoid_intro": "Ce qu'il vaut mieux éviter :",
+        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) : ils augmentent le taux de lithium. Le paracétamol est généralement préféré — demandez conseil à votre médecin ou pharmacien.",
+        "avoid2": "Les régimes « détox » ou diurétiques.",
+        "alert": "**Signes d'alerte** : des tremblements importants des mains, une soif extrême, des nausées sévères, une diarrhée ou une confusion peuvent évoquer un surdosage. Dans ce cas, contactez rapidement votre médecin ou le 15.",
+        "bq1": "Ne modifiez jamais votre dose ni votre traitement sans en parler à votre médecin."
+      },
+      "sources": {
+        "s1": "ANSM — RCP lithium (Téralithe®)",
         "s2": "Gitlin M (2016) — Lithium side effects and toxicity — International Journal of Bipolar Disorders"
       }
     }

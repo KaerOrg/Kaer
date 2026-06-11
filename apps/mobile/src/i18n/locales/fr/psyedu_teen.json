@@ -225,6 +225,16 @@
       "how": {
         "bq1": "Ces informations sont générales. Ton médecin adapte le suivi à ta situation personnelle."
       }
+    },
+    "lithium_safety": {
+      "why": {
+        "p1": "Le lithium est un traitement très efficace, mais il demande un **équilibre précis** dans le corps. Cet équilibre dépend directement de l'eau et du sel que tu consommes : le rein traite le lithium et le sodium de façon similaire."
+      },
+      "how": {
+        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) augmentent le taux de lithium. Le paracétamol est généralement préféré — demande conseil à ton médecin ou pharmacien.",
+        "alert": "**Signes d'alerte** : des tremblements importants des mains, une soif extrême, des nausées sévères, une diarrhée ou une confusion peuvent évoquer un surdosage. Dans ce cas, contacte rapidement ton médecin ou le 15.",
+        "bq1": "Ne modifie jamais ta dose ni ton traitement sans en parler à ton médecin."
+      }
     }
   },
   "craving_journal": {

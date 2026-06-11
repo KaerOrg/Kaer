@@ -12,7 +12,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
 import type { ModuleType, PatientModule } from '../../lib/database.types'
-import { fetchPsychoCards, type PsychoCardInfo } from '../../services/moduleService'
+import { fetchLibraryTopics, fetchThemes, type LibraryTopic, type PsyEduTheme } from '../../services/psyeduService'
 import {
   fetchModuleCategories,
   fetchComingSoonModuleIds,
@@ -38,7 +38,8 @@ type PageData = {
   modules: PatientModule[]
   categories: ModuleCategory[]
   enabledModules: Set<ModuleType> | null
-  psychoCards: PsychoCardInfo[]
+  libraryTopics: LibraryTopic[]
+  themes: PsyEduTheme[]
   comingSoonIds: Set<string>
 }
 
@@ -46,7 +47,8 @@ const PAGE_DATA_INITIAL: PageData = {
   modules: [],
   categories: [],
   enabledModules: null,
-  psychoCards: [],
+  libraryTopics: [],
+  themes: [],
   comingSoonIds: new Set(),
 }
 
@@ -72,7 +74,7 @@ export function PatientPage() {
 
   // ── Page data ─────────────────────────────────────────────────────────────
   const [pageData, setPageData] = useState<PageData>(PAGE_DATA_INITIAL)
-  const { modules, categories, enabledModules, psychoCards, comingSoonIds } = pageData
+  const { modules, categories, enabledModules, libraryTopics, themes, comingSoonIds } = pageData
 
   // ── Notes (lifted for badge + overview) ──────────────────────────────────
   const [notes, setNotes] = useState<PractitionerNote[]>([])
@@ -133,17 +135,18 @@ export function PatientPage() {
     setPatientEnrolledAt(header.enrolledAt)
     setGeneralNote(header.generalNote ?? '')
 
-    const [mods, enabled, cats, cards, comingSoon, fetchedNotes, fetchedAppts] = await Promise.all([
+    const [mods, enabled, cats, topics, fetchedThemes, comingSoon, fetchedNotes, fetchedAppts] = await Promise.all([
       fetchPatientModules(id),
       fetchEnabledModules(practitioner.id),
       fetchModuleCategories(),
-      fetchPsychoCards(),
+      fetchLibraryTopics(),
+      fetchThemes(),
       fetchComingSoonModuleIds(),
       fetchNotes(practitioner.id, id),
       fetchAppointmentsForPatient(practitioner.id, id),
     ])
 
-    setPageData({ modules: mods, categories: cats, enabledModules: enabled, psychoCards: cards, comingSoonIds: comingSoon })
+    setPageData({ modules: mods, categories: cats, enabledModules: enabled, libraryTopics: topics, themes: fetchedThemes, comingSoonIds: comingSoon })
     setNotes(fetchedNotes)
     setAppointments(fetchedAppts)
     setLoading(false)
@@ -250,7 +253,8 @@ export function PatientPage() {
                 modules={modules}
                 categories={categories}
                 enabledModules={enabledModules}
-                psychoCards={psychoCards}
+                libraryTopics={libraryTopics}
+                themes={themes}
                 comingSoonIds={comingSoonIds}
                 onReloadModules={reloadModules}
               />
