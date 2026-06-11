@@ -9,7 +9,7 @@ import { View, Text, Pressable, Platform } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { styles } from './styles'
 
 const TIME_HHMM_RE = /^(\d{1,2}):(\d{2})$/
@@ -48,7 +48,7 @@ export const ColumnTimeField = memo(function ColumnTimeField({
   accent,
   onChange,
 }: ColumnTimeFieldProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const [showPicker, setShowPicker] = useState(false)
   const hasValue = value.length > 0
 

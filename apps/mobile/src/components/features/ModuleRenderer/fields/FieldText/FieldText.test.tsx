@@ -4,7 +4,7 @@ import { FieldText } from './FieldText'
 import type { ContentField } from '../../../../../services/moduleService'
 
 jest.mock('../../../../../hooks/useModuleT', () => ({
-  useModuleT: () => (key: string) => key,
+  useModuleTranslation: () => (key: string) => key,
 }))
 
 function field(field_type: string, text_code?: string, extra: Partial<ContentField> = {}): ContentField {

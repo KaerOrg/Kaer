@@ -26,7 +26,7 @@ import {
 } from '../../../../../lib/database'
 import { saveSleepEntry, deleteSleepEntry } from '../../../../../services/sleepDiaryService'
 import { formatDateFull, formatDateShort } from '../../../../../lib/dateUtils'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { styles } from './styles'
@@ -103,7 +103,7 @@ export interface SleepJournalLayoutProps {
 }
 
 export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 

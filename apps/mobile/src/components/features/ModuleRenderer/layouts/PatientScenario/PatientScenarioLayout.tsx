@@ -10,7 +10,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { ExerciseSafetySection } from '../shared'
 import { styles } from './styles'
 
@@ -24,7 +24,7 @@ export interface PatientScenarioLayoutProps {
 }
 
 export function PatientScenarioLayout({ fields, footer, patientConfig }: PatientScenarioLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const [showOriginal, setShowOriginal] = useState(false)
   const [activeSound, setActiveSound] = useState<string | null>(null)
 

@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { LikertWidget, type LikertOption } from '../../fields/widgets/LikertWidget'
 import { styles } from './styles'
 
@@ -28,7 +28,7 @@ export interface QuestionnaireLayoutProps {
 }
 
 export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues, onTextInput, accentColor }: QuestionnaireLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const instructions = fields
     .filter(f => f.field_type === 'scale_instruction')
     .sort((a, b) => a.sort_order - b.sort_order)

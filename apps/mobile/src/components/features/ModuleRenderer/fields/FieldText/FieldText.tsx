@@ -2,7 +2,7 @@
 import React from 'react'
 import { Text, View, StyleSheet } from 'react-native'
 import { colors } from '../../../../../theme'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 import { InlineText } from '../InlineText'
 
@@ -25,7 +25,7 @@ const CONFIG: Record<string, FieldConfig> = {
 }
 
 export function FieldText({ field }: FieldProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const cfg = CONFIG[field.field_type]
   if (!cfg) return null
 

@@ -665,6 +665,46 @@
     "distress_tolerance": {
       "label": "Distress Tolerance Toolkit",
       "description": "DBT-inspired emergency physiological action cards for breaking acute crises.",
+      "tab_fiches": "Understand",
+      "tab_now": "Act in a crisis",
+      "now": {
+        "title": "Ride the wave",
+        "intro1": "A very strong urge or emotion is like a wave: it rises, reaches a peak, and always comes back down.",
+        "intro2": "The patient doesn't have to fight it — just hold on until it passes. They pick an activity, and the timer keeps them company.",
+        "choose_activity": "Choose an activity",
+        "pick_category": "What would you like to do right now?",
+        "back": "Back",
+        "minutes": "min",
+        "start_timer": "Start",
+        "pick_another": "Another idea",
+        "timer_caption": "Stay with the wave. It will come back down.",
+        "hold": "I held on",
+        "stop": "Stop",
+        "done_title": "The wave has passed",
+        "done_text": "You held on. That's exactly what riding the wave means.",
+        "restart": "Start again",
+        "finish": "Done",
+        "cat": {
+          "tipp": "Calm the body",
+          "distraction": "Distract myself",
+          "sens": "Soothe my senses",
+          "improve": "Soften the moment"
+        },
+        "act": {
+          "tipp1": "Splash cold water on your face, or hold an ice cube in your hand.",
+          "tipp2": "Move intensely for one minute: climb the stairs, jump on the spot.",
+          "tipp3": "Breathe slowly: breathe in for 4 counts, out for 6 counts.",
+          "distraction1": "Count down from 100 in steps of 7 (100, 93, 86…).",
+          "distraction2": "Name ten objects of the same colour around you.",
+          "distraction3": "Start a simple, concrete task: tidy a drawer, fold laundry.",
+          "sens1": "Listen to a whole piece of music that soothes you.",
+          "sens2": "Sip a warm drink slowly, feel its warmth.",
+          "sens3": "Wrap yourself in a soft blanket or piece of clothing.",
+          "improve1": "Picture in detail a place where you feel safe.",
+          "improve2": "Speak to yourself gently, as you would to a friend going through this.",
+          "improve3": "Focus on this single moment: just this one, nothing else."
+        }
+      },
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to access the toolkit."
@@ -1138,7 +1178,47 @@
     },
     "distress_tolerance": {
       "label": "Distress Tolerance Toolkit",
-      "description": "DBT-inspired emergency physiological action cards for breaking acute crises."
+      "description": "DBT-inspired emergency physiological action cards for breaking acute crises.",
+      "tab_fiches": "Understand",
+      "tab_now": "Act in a crisis",
+      "now": {
+        "title": "Ride the wave",
+        "intro1": "A very strong urge or emotion is like a wave: it rises, reaches a peak, and always comes back down.",
+        "intro2": "The patient doesn't have to fight it — just hold on until it passes. They pick an activity, and the timer keeps them company.",
+        "choose_activity": "Choose an activity",
+        "pick_category": "What would you like to do right now?",
+        "back": "Back",
+        "minutes": "min",
+        "start_timer": "Start",
+        "pick_another": "Another idea",
+        "timer_caption": "Stay with the wave. It will come back down.",
+        "hold": "I held on",
+        "stop": "Stop",
+        "done_title": "The wave has passed",
+        "done_text": "You held on. That's exactly what riding the wave means.",
+        "restart": "Start again",
+        "finish": "Done",
+        "cat": {
+          "tipp": "Calm the body",
+          "distraction": "Distract myself",
+          "sens": "Soothe my senses",
+          "improve": "Soften the moment"
+        },
+        "act": {
+          "tipp1": "Splash cold water on your face, or hold an ice cube in your hand.",
+          "tipp2": "Move intensely for one minute: climb the stairs, jump on the spot.",
+          "tipp3": "Breathe slowly: breathe in for 4 counts, out for 6 counts.",
+          "distraction1": "Count down from 100 in steps of 7 (100, 93, 86…).",
+          "distraction2": "Name ten objects of the same colour around you.",
+          "distraction3": "Start a simple, concrete task: tidy a drawer, fold laundry.",
+          "sens1": "Listen to a whole piece of music that soothes you.",
+          "sens2": "Sip a warm drink slowly, feel its warmth.",
+          "sens3": "Wrap yourself in a soft blanket or piece of clothing.",
+          "improve1": "Picture in detail a place where you feel safe.",
+          "improve2": "Speak to yourself gently, as you would to a friend going through this.",
+          "improve3": "Focus on this single moment: just this one, nothing else."
+        }
+      }
     },
     "medication_side_effects": {
       "label": "Treatment side effects tracker",
