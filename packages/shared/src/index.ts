@@ -122,6 +122,7 @@ export type PreviewKind =
   | 'exposure_tracker'
   | 'decision_grid'
   | 'psyedu'
+  | 'psyedu_library'
   | 'tabbed'
   | 'chrono_month'
   | 'slider_dashboard'

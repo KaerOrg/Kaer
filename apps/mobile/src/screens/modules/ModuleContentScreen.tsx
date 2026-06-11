@@ -30,9 +30,13 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'decision_grid',
   'patient_scenario',
   'psyedu',
+  'psyedu_library',
   'tabbed',
   'chrono_month',
 ])
+
+// Layouts qui ont besoin de la config patient (patient_modules.config).
+const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library'])
 
 export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params
@@ -72,23 +76,23 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     setPatientConfig(await fetchPatientModuleConfig(patient.id, moduleType))
   }, [patient, moduleType])
 
+  const needsConfig = result != null && CONFIG_LAYOUTS.has(result.preview_kind)
+
   useEffect(() => {
-    if (result?.preview_kind === 'patient_scenario') {
+    if (needsConfig) {
       void loadPatientConfig()
     }
-  }, [result?.preview_kind, loadPatientConfig])
+  }, [needsConfig, loadPatientConfig])
 
   useFocusEffect(
     useCallback(() => {
-      if (result?.preview_kind === 'patient_scenario') {
+      if (needsConfig) {
         void loadPatientConfig()
       }
-    }, [result?.preview_kind, loadPatientConfig])
+    }, [needsConfig, loadPatientConfig])
   )
 
-  const isPatientScenario = result?.preview_kind === 'patient_scenario'
-
-  if (loading || (isPatientScenario && patientConfig === undefined)) {
+  if (loading || (needsConfig && patientConfig === undefined)) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={colors.primary} size="large" />

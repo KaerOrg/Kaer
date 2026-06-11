@@ -1,144 +1,64 @@
-# Module Psychoéducation
+# Module Psychoéducation — Bibliothèque de fiches
+
+> Refonte 2026-06 : voir [`docs/spec/refonte-psychoeducation.md`](../spec/refonte-psychoeducation.md).
+> Ce module n'utilise plus de cartes codées en dur — tout le contenu vit en base.
 
 ## Vue d'ensemble
 
-Le module **Psychoéducation** permet au praticien de partager des cartes de savoir thérapeutique avec ses patients. Chaque carte contient du contenu éducatif formaté en Markdown. Le patient peut les lire dans l'app et confirmer sa lecture.
+Le module **Psychoéducation** est une **bibliothèque de fiches** que le praticien
+débloque, fiche par fiche, pour chaque patient. Les fiches sont rangées par **thème**
+(🟣 *Mon traitement*, 🟢 *Hygiène de vie*, …) et le patient les consulte dans l'app
+mobile, où il peut confirmer sa lecture.
 
----
+C'est un cas particulier du moteur `psyedu` : même contenu (`psyedu_topics` +
+`psyedu_blocks`), mais affiché comme une bibliothèque **multi-thèmes / multi-modules**
+filtrée par les fiches débloquées du patient, au lieu de l'ensemble des fiches d'un
+seul module.
 
-## Architecture : Dictionnaire Local / Clés Distantes
+## Modèle de données
 
-Le contenu des cartes est **codé en dur dans le frontend mobile** (`constants/psychoeducationCards.ts`). Supabase ne stocke que :
-- les **IDs des cartes débloquées** par le praticien
-- le **statut de lecture** (`is_read`) pour chaque carte
+- `psyedu_topics` : la fiche (rattachée à un `theme_id`, porte des `psyedu_topic_tags`).
+- `psyedu_blocks` : le contenu structuré (sections why/how/sources, clés i18n `text_code`).
+- `psyedu_themes` : les thèmes de la bibliothèque (`treatment`, `lifestyle`, …).
+- `patient_modules.config.unlocked_topics` : `[{ topic_id, is_read, unlocked_at }]` —
+  les fiches débloquées pour ce patient + leur statut de lecture.
 
-**Avantages :**
-- Aucun coût d'infrastructure pour le texte
-- Fonctionne hors ligne (contenu toujours disponible)
-- Migration de contenu simple (mise à jour de l'app)
+Découplage fiche ↔ module : une fiche peut être réutilisée par un module interactif
+(onglet « Comprendre ») via `module_topics`, sans duplication.
 
-**Limite :** la modification d'un texte existant nécessite une nouvelle version de l'app.
+## Rendu
 
----
+`preview_kind = 'psyedu_library'`, routé par le `LayoutDispatcher` :
 
-## Structure des fichiers
-
-```
-apps/mobile/src/
-├── constants/
-│   └── psychoeducationCards.ts       # Dictionnaire des cartes (contenu Markdown)
-├── lib/
-│   └── psychoeducation.ts            # Utilitaire Supabase : markCardAsRead()
-└── screens/modules/
-    ├── PsychoeducationScreen.tsx      # Liste des cartes débloquées
-    ├── CardDetailScreen.tsx           # Détail d'une carte + bouton "J'ai lu et compris"
-    └── PsychoeducationScreen.test.tsx # Tests Jest + RNTL
-```
-
----
-
-## Format de la config Supabase
-
-La colonne `config` (JSONB) de la table `patient_modules` pour le module `psychoeducation` :
-
-```json
-{
-  "unlocked_cards": [
-    {
-      "card_id": "card_sleep_01",
-      "is_read": false,
-      "unlocked_at": "2024-06-01T10:00:00Z"
-    },
-    {
-      "card_id": "card_grounding_01",
-      "is_read": true,
-      "unlocked_at": "2024-06-02T14:30:00Z"
-    }
-  ]
-}
-```
-
----
-
-## Cartes disponibles (MVP)
-
-| ID | Titre | Icône |
+| App | Composant | Comportement |
 |---|---|---|
-| `card_sleep_01` | Règles d'hygiène du sommeil | `sleep` |
-| `card_grounding_01` | Technique d'ancrage 5-4-3-2-1 | `hand-heart` |
-| `card_cbt_01` | Identifier les distorsions cognitives | `head-cog-outline` |
+| Mobile patient | `layouts/PsyEduLibrary/PsyEduLibraryLayout` | Lit `config.unlocked_topics`, fiches groupées par thème, détail + « marquer comme lu » |
+| Web praticien (aperçu) | `layouts/PsyEduLibraryLayout` | Toutes les fiches à thème, groupées par thème (aperçu de ce que verrait un patient) |
 
-Pour ajouter une carte : ajouter une entrée dans `PSYCHOEDUCATION_CARDS` dans `constants/psychoeducationCards.ts`. Aucune migration SQL n'est nécessaire.
+Helpers i18n partagés : `layouts/PsyEdu/psyeduLocalize.ts` (`topicTitle`/`topicSummary`/`sortBlocks`).
 
----
+## Côté praticien (web)
 
-## Flux utilisateur
+Le praticien débloque/édite les fiches via `PsychoLibraryPicker`
+(`pages/PatientPage/tabs/PsychoLibraryPicker.tsx`) : sélection groupée par thème +
+recherche. Services : `unlockPsychoeducation` / `updatePsychoeducationTopics`
+(`moduleAssignmentService`), qui écrivent `config.unlocked_topics`.
 
-```
-HomeScreen → appui "Psychoéducation"
-  → PsychoeducationScreen (liste des cartes débloquées)
-      → appui sur une carte
-          → CardDetailScreen (contenu Markdown)
-              → appui "J'ai lu et compris"
-                  → loading → markCardAsRead(patientId, cardId) → Supabase UPDATE
-                  → succès : bouton vert "Lu et compris" (désactivé)
-                  → erreur : message rouge + bouton réactivé
-```
+## Côté patient (mobile)
 
----
+`markTopicRead(patientId, topicId)` (`psyeduService`) met à jour
+`config.unlocked_topics[].is_read` — écriture Supabase directe (RLS
+`modules_patient_update`), pas de stockage SQLite (hors périmètre `syncHelpers`).
 
-## Côté praticien (interface web)
+## Conformité MDR
 
-Pour débloquer des cartes pour un patient, le praticien crée ou met à jour la ligne `patient_modules` :
-
-```sql
-INSERT INTO patient_modules (patient_id, practitioner_id, module_type, config)
-VALUES (
-  '<patient_id>',
-  '<practitioner_id>',
-  'psychoeducation',
-  '{"unlocked_cards": [
-    {"card_id": "card_sleep_01", "is_read": false, "unlocked_at": "now()"},
-    {"card_id": "card_cbt_01",   "is_read": false, "unlocked_at": "now()"}
-  ]}'
-)
-ON CONFLICT (patient_id, module_type) DO UPDATE
-  SET config = EXCLUDED.config;
-```
-
----
-
-## Sécurité (RLS)
-
-| Opération | Acteur | Politique |
-|---|---|---|
-| SELECT | Patient | `modules_patient` — uniquement ses modules actifs |
-| SELECT | Praticien | `modules_practitioner` — tous ses patients |
-| INSERT / UPDATE / DELETE | Praticien | `modules_practitioner` |
-| UPDATE config (is_read) | Patient | `modules_patient_update` — ses modules actifs uniquement |
-
-> La politique `modules_patient_update` a été ajoutée spécifiquement pour ce module. Elle permet au patient de mettre à jour le champ `config` (et uniquement lui) — le praticien restant maître du déverrouillage et de la révocation.
-
----
+Affichage passif de savoir neutre, sourcé et daté. Statut lu/non-lu = fait d'usage.
+Personnalisation = **curation humaine du praticien**, jamais une recommandation
+automatique basée sur les données du patient. Liens fiche→outil statiques.
 
 ## Tests
 
 ```bash
-# Depuis la racine du monorepo
-cd apps/mobile && npx jest PsychoeducationScreen.test.tsx
-```
-
-**Couverture :**
-- `PsychoeducationScreen` : affichage des cartes débloquées, exclusion des cartes non débloquées, badges lu/non lu, compteur, état vide, erreur réseau, IDs inconnus
-- `CardDetailScreen` : rendu Markdown, bouton "J'ai lu et compris", état loading, succès (désactivation + coche verte), erreur Supabase, carte déjà lue
-
----
-
-## Dépendance ajoutée
-
-- **`react-native-markdown-display`** `^7.0.2` — rendu Markdown dans React Native
-
-Installation :
-```bash
-cd apps/mobile && npm install
+cd apps/mobile && npx jest PsyEduLibraryLayout
+cd apps/web    && npx vitest run src/services/psyeduService.test.ts
 ```

@@ -1,6 +1,6 @@
 # Refonte — Psychoéducation (bibliothèque thématique unifiée)
 
-> Branche : `refonte/psychoeducation`. Statut : **plan validé sur la direction, en attente de feu vert d'implémentation.**
+> Branche : `refonte/psychoeducation`. Statut : **Phases 0-3 implémentées, testées et appliquées en prod. Reste finitions Phase 4 + nettoyage Phase 5.**
 > Ce document est la source de vérité de la refonte. Mettre à jour au fil de l'avancement.
 
 > **Intégration (2026-06-11)** : branche réconciliée avec `feat/improve-module-organization`
@@ -151,10 +151,15 @@ alter table public.psyedu_topics add column reviewed_at date;   -- couche « pre
 - ⏳ **Filtre par tags** (chips) : reporté en finition (Phase 4) — thèmes + recherche couvrent déjà l'organisation/trouvabilité.
 - ⚠️ État transitoire (assumé sur la branche) : l'aperçu patient web (`ModulePreviewPanel`) et le rendu mobile lisent encore l'ancien modèle de cartes → corrigés en Phase 3. Le format `unlocked_topics` n'est lu côté patient qu'à partir de la Phase 3.
 
-### Phase 3 — Bibliothèque mobile patient
-- Nouvel écran bibliothèque : fiches débloquées **groupées par thème**, lecture via `PsyEduLayout`/`PsyEduBlockRenderer`.
-- **Suppression du legacy** : `PsychoeducationScreen`, `CardDetailScreen`, `psychoeducationCards.ts`, routes `AppStack` (`Psychoeducation`, `CardDetail`), override `MODULE_SCREEN_MAP`, `psychoeducationService` (ou réécriture sur `patient_topic_reads`).
-- Statut de lecture → `patient_topic_reads` (+ `syncUpsert` si stockage local, cf. règle sync-service).
+### Phase 3 — Bibliothèque mobile patient — ✅ FAITE (code + tests verts + appliquée prod)
+- ✅ Nouveau `preview_kind = 'psyedu_library'` (shared `PreviewKind`). Le module psychoeducation rend désormais via le moteur générique (`ModuleContentScreen` → `LayoutDispatcher`), plus d'écran dédié.
+- ✅ Layout mobile `PsyEduLibraryLayout` : lit `config.unlocked_topics`, fiches **groupées par thème**, détail via `PsyEduBlockRenderer`, **marquer comme lu** (`markTopicRead`). Helpers i18n extraits dans `PsyEdu/psyeduLocalize.ts` (réutilisés). Test dédié.
+- ✅ Service mobile : `fetchTopicsByIds`, `fetchThemes`, `markTopicRead`. `ModuleContentScreen` charge `patientConfig` pour les `CONFIG_LAYOUTS`.
+- ✅ Layout web `PsyEduLibraryLayout` (aperçu praticien : toutes les fiches groupées par thème).
+- ✅ **Suppression du legacy** : `PsychoeducationScreen`, `CardDetailScreen`, `psychoeducationCards.ts`, `psychoeducationService` (+ tests), routes `AppStack` (`Psychoeducation`/`CardDetail`), override `MODULE_SCREEN_MAP`. (`lib/psychoeducation.ts` n'existait pas — doc périmée.)
+- ✅ DB : `preview_kind` cards→psyedu_library (prod + `seed.sql`) ; **4 lignes patient migrées** `unlocked_cards`→`unlocked_topics` (`supabase/migration_psyedu_unlocked_topics.sql`, idempotent). Statut de lecture conservé dans `config.unlocked_topics[].is_read` (pas de table `patient_topic_reads` séparée — le format config suffit).
+- ✅ `previewKindCoverage.test.ts` mis à jour. Web 642 + mobile 729+4 tests verts, tsc ×2 verts.
+- ⏳ Reste (Phase 5) : cartes `module_content_fields` inertes + `CardsLayout` (web/mobile) désormais morts → à nettoyer.
 
 ### Phase 4 — Valeur ajoutée (littérature)
 - **Lien lecture↔outil bidirectionnel** : CTA neutre « Ouvrir l'outil » en pied de fiche (via `module_topics`) ; entrée « Comprendre » depuis le module. *Statique, jamais conditionnel aux données (MDR).*
