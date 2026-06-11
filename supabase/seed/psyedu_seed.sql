@@ -144,33 +144,22 @@ values
 insert into public.psyedu_blocks
   (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
-  ('00000001-0000-0000-0000-000000000004', 'why', 'heading',    'section.why',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000004', 'why', 'paragraph',  'diet_weight_psycho.general.why.p1',                                 null, null, 2),
-  ('00000001-0000-0000-0000-000000000004', 'why', 'bullet_list', null,
-    array[
-      'diet_weight_psycho.general.why.effect1',
-      'diet_weight_psycho.general.why.effect2',
-      'diet_weight_psycho.general.why.effect3',
-      'diet_weight_psycho.general.why.effect4'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000004', 'why', 'paragraph',  'diet_weight_psycho.general.why.p2',                                 null, null, 4),
+  ('00000001-0000-0000-0000-000000000004', 'why', 'heading',    'section.why',                              null, null, 1),
+  ('00000001-0000-0000-0000-000000000004', 'why', 'paragraph',  'diet_weight_psycho.general.why.p1',        null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000004', 'how', 'heading',    'section.how',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000004', 'how', 'paragraph',  'diet_weight_psycho.general.how.p1',                                 null, null, 2),
-  ('00000001-0000-0000-0000-000000000004', 'how', 'bullet_list', null,
+  ('00000001-0000-0000-0000-000000000004', 'how', 'action_list', null,
     array[
-      'diet_weight_psycho.general.how.tip1',
-      'diet_weight_psycho.general.how.tip2',
-      'diet_weight_psycho.general.how.tip3',
-      'diet_weight_psycho.general.how.tip4',
-      'diet_weight_psycho.general.how.tip5'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000004', 'how', 'blockquote', 'diet_weight_psycho.general.how.bq1',                                null, null, 4),
+      'diet_weight_psycho.general.how.action1',
+      'diet_weight_psycho.general.how.action2',
+      'diet_weight_psycho.general.how.action3',
+      'diet_weight_psycho.general.how.action4',
+      'diet_weight_psycho.general.how.action5'
+    ], null, 1),
+  ('00000001-0000-0000-0000-000000000004', 'how', 'tip',        'diet_weight_psycho.general.how.tip_weigh', null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000004', 'sources', 'heading',     'section.sources',                                              null, null, 1),
-  ('00000001-0000-0000-0000-000000000004', 'sources', 'source_link', 'diet_weight_psycho.general.sources.s1',                        null, 'https://www.has-sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000004', 'sources', 'source_link', 'diet_weight_psycho.general.sources.s2',                        null, 'https://ansm.sante.fr', 3),
-  ('00000001-0000-0000-0000-000000000004', 'sources', 'source_link', 'diet_weight_psycho.general.sources.s3',                        null, 'https://www.who.int/fr', 4);
+  ('00000001-0000-0000-0000-000000000004', 'sources', 'heading',     'section.sources',                       null, null, 1),
+  ('00000001-0000-0000-0000-000000000004', 'sources', 'source_link', 'diet_weight_psycho.general.sources.s1', null, 'https://doi.org/10.1177/13591053241227384', 2),
+  ('00000001-0000-0000-0000-000000000004', 'sources', 'source_link', 'diet_weight_psycho.general.sources.s2', null, 'https://doi.org/10.1001/jama.2023.19897', 3);
 
 -- ────────────────────────────────────────────────────────────
 -- BLOCS — antipsychotics (migré)
@@ -179,38 +168,24 @@ values
 insert into public.psyedu_blocks
   (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
+  -- Réécriture action-first (langage patient) — cf. docs/spec/refonte-psychoeducation.md §6
   ('00000001-0000-0000-0000-000000000005', 'why', 'heading',    'section.why',                                                       null, null, 1),
   ('00000001-0000-0000-0000-000000000005', 'why', 'paragraph',  'diet_weight_psycho.antipsychotics.why.p1',                          null, null, 2),
-  ('00000001-0000-0000-0000-000000000005', 'why', 'bullet_list', null,
-    array[
-      'diet_weight_psycho.antipsychotics.why.mech1',
-      'diet_weight_psycho.antipsychotics.why.mech2',
-      'diet_weight_psycho.antipsychotics.why.mech3'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000005', 'why', 'paragraph',  'diet_weight_psycho.antipsychotics.why.p2',                          null, null, 4),
-  ('00000001-0000-0000-0000-000000000005', 'why', 'blockquote', 'diet_weight_psycho.antipsychotics.why.bq1',                         null, null, 5),
 
-  ('00000001-0000-0000-0000-000000000005', 'how', 'heading',    'section.how',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000005', 'how', 'paragraph',  'diet_weight_psycho.antipsychotics.how.suivi_intro',                  null, null, 2),
-  ('00000001-0000-0000-0000-000000000005', 'how', 'bullet_list', null,
+  ('00000001-0000-0000-0000-000000000005', 'how', 'action_list', null,
     array[
-      'diet_weight_psycho.antipsychotics.how.suivi1',
-      'diet_weight_psycho.antipsychotics.how.suivi2',
-      'diet_weight_psycho.antipsychotics.how.suivi3',
-      'diet_weight_psycho.antipsychotics.how.suivi4'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000005', 'how', 'paragraph',  'diet_weight_psycho.antipsychotics.how.meals_intro',                  null, null, 4),
-  ('00000001-0000-0000-0000-000000000005', 'how', 'bullet_list', null,
-    array[
-      'diet_weight_psycho.antipsychotics.how.meal1',
-      'diet_weight_psycho.antipsychotics.how.meal2',
-      'diet_weight_psycho.antipsychotics.how.meal3'
-    ], null, 5),
+      'diet_weight_psycho.antipsychotics.how.action1',
+      'diet_weight_psycho.antipsychotics.how.action2',
+      'diet_weight_psycho.antipsychotics.how.action3',
+      'diet_weight_psycho.antipsychotics.how.action4',
+      'diet_weight_psycho.antipsychotics.how.action5'
+    ], null, 1),
+  ('00000001-0000-0000-0000-000000000005', 'how', 'tip',        'diet_weight_psycho.antipsychotics.how.tip_weigh',                   null, null, 2),
+  ('00000001-0000-0000-0000-000000000005', 'how', 'blockquote', 'diet_weight_psycho.antipsychotics.how.bq_safety',                   null, null, 3),
 
   ('00000001-0000-0000-0000-000000000005', 'sources', 'heading',     'section.sources',                                              null, null, 1),
   ('00000001-0000-0000-0000-000000000005', 'sources', 'source_link', 'diet_weight_psycho.antipsychotics.sources.s1',                  null, 'https://www.has-sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000005', 'sources', 'source_link', 'diet_weight_psycho.antipsychotics.sources.s2',                  null, null, 3),
-  ('00000001-0000-0000-0000-000000000005', 'sources', 'source_link', 'diet_weight_psycho.antipsychotics.sources.s3',                  null, null, 4);
+  ('00000001-0000-0000-0000-000000000005', 'sources', 'source_link', 'diet_weight_psycho.antipsychotics.sources.s2',                  null, 'https://www.bap.org.uk/articles/antipsychotic-medication-and-weight-gain/', 3);
 
 -- ────────────────────────────────────────────────────────────
 -- BLOCS — methylphenidate (migré)
@@ -219,35 +194,21 @@ values
 insert into public.psyedu_blocks
   (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
-  ('00000001-0000-0000-0000-000000000006', 'why', 'heading',    'section.why',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000006', 'why', 'paragraph',  'diet_weight_psycho.methylphenidate.why.p1',                         null, null, 2),
-  ('00000001-0000-0000-0000-000000000006', 'why', 'paragraph',  'diet_weight_psycho.methylphenidate.why.p2',                         null, null, 3),
-  ('00000001-0000-0000-0000-000000000006', 'why', 'bullet_list', null,
-    array[
-      'diet_weight_psycho.methylphenidate.why.cons1',
-      'diet_weight_psycho.methylphenidate.why.cons2',
-      'diet_weight_psycho.methylphenidate.why.cons3'
-    ], null, 4),
-  ('00000001-0000-0000-0000-000000000006', 'why', 'blockquote', 'diet_weight_psycho.methylphenidate.why.bq_child',                   null, null, 5),
+  ('00000001-0000-0000-0000-000000000006', 'why', 'heading',    'section.why',                                    null, null, 1),
+  ('00000001-0000-0000-0000-000000000006', 'why', 'paragraph',  'diet_weight_psycho.methylphenidate.why.p1',      null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000006', 'how', 'heading',    'section.how',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000006', 'how', 'paragraph',  'diet_weight_psycho.methylphenidate.how.breakfast_intro',             null, null, 2),
-  ('00000001-0000-0000-0000-000000000006', 'how', 'bullet_list', null,
+  ('00000001-0000-0000-0000-000000000006', 'how', 'action_list', null,
     array[
-      'diet_weight_psycho.methylphenidate.how.b1',
-      'diet_weight_psycho.methylphenidate.how.b2'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000006', 'how', 'paragraph',  'diet_weight_psycho.methylphenidate.how.lunch_intro',                 null, null, 4),
-  ('00000001-0000-0000-0000-000000000006', 'how', 'bullet_list', null,
-    array[
-      'diet_weight_psycho.methylphenidate.how.l1',
-      'diet_weight_psycho.methylphenidate.how.l2'
-    ], null, 5),
-  ('00000001-0000-0000-0000-000000000006', 'how', 'blockquote', 'diet_weight_psycho.methylphenidate.how.bq1',                        null, null, 6),
+      'diet_weight_psycho.methylphenidate.how.action1',
+      'diet_weight_psycho.methylphenidate.how.action2',
+      'diet_weight_psycho.methylphenidate.how.action3',
+      'diet_weight_psycho.methylphenidate.how.action4'
+    ], null, 1),
+  ('00000001-0000-0000-0000-000000000006', 'how', 'tip',        'diet_weight_psycho.methylphenidate.how.tip_weigh', null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000006', 'sources', 'heading',     'section.sources',                                              null, null, 1),
-  ('00000001-0000-0000-0000-000000000006', 'sources', 'source_link', 'diet_weight_psycho.methylphenidate.sources.s1',                 null, 'https://ansm.sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000006', 'sources', 'source_link', 'diet_weight_psycho.methylphenidate.sources.s2',                 null, null, 3);
+  ('00000001-0000-0000-0000-000000000006', 'sources', 'heading',     'section.sources',                              null, null, 1),
+  ('00000001-0000-0000-0000-000000000006', 'sources', 'source_link', 'diet_weight_psycho.methylphenidate.sources.s1', null, null, 2),
+  ('00000001-0000-0000-0000-000000000006', 'sources', 'source_link', 'diet_weight_psycho.methylphenidate.sources.s2', null, null, 3);
 
 -- ────────────────────────────────────────────────────────────
 -- BLOCS — antidepressants (migré)
@@ -256,20 +217,21 @@ values
 insert into public.psyedu_blocks
   (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
-  ('00000001-0000-0000-0000-000000000007', 'why', 'heading',    'section.why',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000007', 'why', 'paragraph',  'diet_weight_psycho.antidepressants.why.p1',                         null, null, 2),
-  ('00000001-0000-0000-0000-000000000007', 'why', 'paragraph',  'diet_weight_psycho.antidepressants.why.p2',                         null, null, 3),
-  ('00000001-0000-0000-0000-000000000007', 'why', 'paragraph',  'diet_weight_psycho.antidepressants.why.p3',                         null, null, 4),
-  ('00000001-0000-0000-0000-000000000007', 'why', 'paragraph',  'diet_weight_psycho.antidepressants.why.p4',                         null, null, 5),
-  ('00000001-0000-0000-0000-000000000007', 'why', 'blockquote', 'diet_weight_psycho.antidepressants.why.bq1',                        null, null, 6),
+  ('00000001-0000-0000-0000-000000000007', 'why', 'heading',    'section.why',                                   null, null, 1),
+  ('00000001-0000-0000-0000-000000000007', 'why', 'paragraph',  'diet_weight_psycho.antidepressants.why.p1',     null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000007', 'how', 'heading',    'section.how',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000007', 'how', 'paragraph',  'diet_weight_psycho.antidepressants.how.p1',                         null, null, 2),
-  ('00000001-0000-0000-0000-000000000007', 'how', 'blockquote', 'diet_weight_psycho.antidepressants.how.bq1',                        null, null, 3),
+  ('00000001-0000-0000-0000-000000000007', 'how', 'action_list', null,
+    array[
+      'diet_weight_psycho.antidepressants.how.action1',
+      'diet_weight_psycho.antidepressants.how.action2',
+      'diet_weight_psycho.antidepressants.how.action3',
+      'diet_weight_psycho.antidepressants.how.action4'
+    ], null, 1),
+  ('00000001-0000-0000-0000-000000000007', 'how', 'tip',        'diet_weight_psycho.antidepressants.how.tip',    null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000007', 'sources', 'heading',     'section.sources',                                              null, null, 1),
-  ('00000001-0000-0000-0000-000000000007', 'sources', 'source_link', 'diet_weight_psycho.antidepressants.sources.s1',                 null, 'https://ansm.sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000007', 'sources', 'source_link', 'diet_weight_psycho.antidepressants.sources.s2',                 null, null, 3);
+  ('00000001-0000-0000-0000-000000000007', 'sources', 'heading',     'section.sources',                            null, null, 1),
+  ('00000001-0000-0000-0000-000000000007', 'sources', 'source_link', 'diet_weight_psycho.antidepressants.sources.s1', null, null, 2),
+  ('00000001-0000-0000-0000-000000000007', 'sources', 'source_link', 'diet_weight_psycho.antidepressants.sources.s2', null, 'https://doi.org/10.1001/jama.2023.19897', 3);
 
 -- ────────────────────────────────────────────────────────────
 -- BLOCS — mood_stabilizers (migré)
@@ -278,26 +240,22 @@ values
 insert into public.psyedu_blocks
   (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
-  ('00000001-0000-0000-0000-000000000008', 'why', 'heading',    'section.why',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000008', 'why', 'paragraph',  'diet_weight_psycho.mood_stabilizers.why.p1',                        null, null, 2),
-  ('00000001-0000-0000-0000-000000000008', 'why', 'paragraph',  'diet_weight_psycho.mood_stabilizers.why.p2',                        null, null, 3),
-  ('00000001-0000-0000-0000-000000000008', 'why', 'paragraph',  'diet_weight_psycho.mood_stabilizers.why.p3',                        null, null, 4),
-  ('00000001-0000-0000-0000-000000000008', 'why', 'blockquote', 'diet_weight_psycho.mood_stabilizers.why.bq_lithium',                null, null, 5),
-  ('00000001-0000-0000-0000-000000000008', 'why', 'paragraph',  'diet_weight_psycho.mood_stabilizers.why.p4',                        null, null, 6),
+  ('00000001-0000-0000-0000-000000000008', 'why', 'heading',    'section.why',                                    null, null, 1),
+  ('00000001-0000-0000-0000-000000000008', 'why', 'paragraph',  'diet_weight_psycho.mood_stabilizers.why.p1',     null, null, 2),
 
-  ('00000001-0000-0000-0000-000000000008', 'how', 'heading',    'section.how',                                                       null, null, 1),
-  ('00000001-0000-0000-0000-000000000008', 'how', 'paragraph',  'diet_weight_psycho.mood_stabilizers.how.p1',                        null, null, 2),
-  ('00000001-0000-0000-0000-000000000008', 'how', 'bullet_list', null,
+  ('00000001-0000-0000-0000-000000000008', 'how', 'action_list', null,
     array[
-      'diet_weight_psycho.mood_stabilizers.how.tip1',
-      'diet_weight_psycho.mood_stabilizers.how.tip2',
-      'diet_weight_psycho.mood_stabilizers.how.tip3'
-    ], null, 3),
-  ('00000001-0000-0000-0000-000000000008', 'how', 'blockquote', 'diet_weight_psycho.mood_stabilizers.how.bq1',                       null, null, 4),
+      'diet_weight_psycho.mood_stabilizers.how.action1',
+      'diet_weight_psycho.mood_stabilizers.how.action2',
+      'diet_weight_psycho.mood_stabilizers.how.action3',
+      'diet_weight_psycho.mood_stabilizers.how.action4'
+    ], null, 1),
+  ('00000001-0000-0000-0000-000000000008', 'how', 'tip',        'diet_weight_psycho.mood_stabilizers.how.tip_weigh', null, null, 2),
+  ('00000001-0000-0000-0000-000000000008', 'how', 'blockquote', 'diet_weight_psycho.mood_stabilizers.how.bq_safety', null, null, 3),
 
-  ('00000001-0000-0000-0000-000000000008', 'sources', 'heading',     'section.sources',                                              null, null, 1),
-  ('00000001-0000-0000-0000-000000000008', 'sources', 'source_link', 'diet_weight_psycho.mood_stabilizers.sources.s1',                null, 'https://ansm.sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000008', 'sources', 'source_link', 'diet_weight_psycho.mood_stabilizers.sources.s2',                null, null, 3);
+  ('00000001-0000-0000-0000-000000000008', 'sources', 'heading',     'section.sources',                            null, null, 1),
+  ('00000001-0000-0000-0000-000000000008', 'sources', 'source_link', 'diet_weight_psycho.mood_stabilizers.sources.s1', null, 'https://doi.org/10.1001/jama.2023.18588', 2),
+  ('00000001-0000-0000-0000-000000000008', 'sources', 'source_link', 'diet_weight_psycho.mood_stabilizers.sources.s2', null, null, 3);
 
 
 -- ────────────────────────────────────────────────────────────

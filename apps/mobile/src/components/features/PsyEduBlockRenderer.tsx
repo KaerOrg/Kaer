@@ -2,7 +2,7 @@ import React, { useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import i18next from 'i18next'
-import { Lightbulb, ExternalLink } from 'lucide-react-native'
+import { Lightbulb, ExternalLink, CheckCircle2, Check } from 'lucide-react-native'
 import { useAuthStore } from '../../store/authStore'
 import { InlineText } from './InlineText'
 import { colors, spacing, radius } from '../../theme'
@@ -52,6 +52,24 @@ export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
                   <View key={i} style={styles.listItem}>
                     <View style={[styles.bulletDot, { backgroundColor: accent }]} />
                     <InlineText code={itemCode} style={styles.listText} />
+                  </View>
+                ))}
+              </View>
+            ) : null
+
+          case 'action_list':
+            return block.items_codes ? (
+              <View key={block.id} style={[styles.actionCard, { borderColor: accent, backgroundColor: accent + '0D' }]}>
+                <View style={styles.actionHeader}>
+                  <CheckCircle2 size={18} color={accent} />
+                  <Text style={[styles.actionTitle, { color: accent }]}>
+                    {resolveText(block.text_code ?? 'section.actions', isTeenMode)}
+                  </Text>
+                </View>
+                {block.items_codes.map((itemCode: string, i: number) => (
+                  <View key={i} style={styles.actionItem}>
+                    <Check size={15} color={accent} style={styles.actionCheck} />
+                    <InlineText code={itemCode} style={styles.actionText} />
                   </View>
                 ))}
               </View>
@@ -130,6 +148,38 @@ const styles = StyleSheet.create({
   },
   listText: {
     flex: 1,
+  },
+  actionCard: {
+    borderWidth: 1.5,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginVertical: spacing.sm,
+    gap: spacing.sm,
+  },
+  actionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  actionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    flex: 1,
+  },
+  actionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  actionCheck: {
+    marginTop: 2,
+    flexShrink: 0,
+  },
+  actionText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
   },
   tip: {
     borderRadius: radius.md,

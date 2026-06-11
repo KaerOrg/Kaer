@@ -175,6 +175,7 @@ export type PsyEduBlockType =
   | 'heading'
   | 'paragraph'
   | 'bullet_list'
+  | 'action_list'
   | 'tip'
   | 'blockquote'
   | 'source_link'

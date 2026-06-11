@@ -1,4 +1,7 @@
 {
+  "section": {
+    "actions": "Ce que tu peux faire"
+  },
   "distress_tolerance": {
     "intro": {
       "why": {
@@ -188,42 +191,18 @@
         "p3": "Associe l'activité à un moment fixe de ta journée pour créer une habitude. Après le café du matin ou avant le déjeuner sont de bons ancrages."
       }
     },
-    "general": {
-      "why": {
-        "p1": "Certains médicaments psychotropes peuvent modifier la façon dont ton corps régule l'appétit et le métabolisme. Ce n'est pas une fatalité — comprendre ces mécanismes t'aide à adapter tes habitudes en collaboration avec ton soignant.",
-        "p2": "Ces effets varient selon la molécule, la dose et la durée de traitement. Ils ne sont pas systématiques et peuvent évoluer avec le temps."
-      },
-      "how": {
-        "bq1": "Si tu remarques des changements importants de ton appétit ou de ton poids depuis le début ou la modification de ton traitement, signalez-le à ton soignant à la prochaine consultation."
-      }
-    },
     "antipsychotics": {
       "why": {
-        "bq1": "Ces informations sont indicatives. La tolérance individuelle varie. Ne modifie jamais ton traitement sans en parler à ton médecin."
-      }
-    },
-    "methylphenidate": {
-      "why": {
-        "bq_child": "Chez l'enfant et l'ado : une réduction des apports sur plusieurs mois peut ralentir la courbe de croissance. La surveillance du poids et de la taille est systématique dans le suivi pédiatrique."
+        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim de ton cerveau. La prise de poids n'est pas une fatalité — quelques habitudes simples aident à la limiter."
       },
       "how": {
-        "bq1": "Si la perte de poids est notable ou si tu stagnes sur ta courbe de croissance, signale-le à ton médecin dès que possible."
-      }
-    },
-    "antidepressants": {
-      "why": {
-        "bq1": "En cas de changement notable de l'appétit ou du poids, parles-en à ton médecin. Un accompagnement diététique spécialisé peut être envisagé."
-      },
-      "how": {
-        "bq1": "Ces effets s'atténuent souvent après les premières semaines. Informe ton médecin si ils persistent ou s'ils te gênent dans ton quotidien."
+        "tip_weigh": "Le réflexe : te peser une fois par semaine, le même jour, et noter le chiffre pour en parler à ton soignant.",
+        "bq_safety": "Ne change jamais ton traitement sans en parler à ton médecin."
       }
     },
     "mood_stabilizers": {
-      "why": {
-        "bq_lithium": "Ne pas commencer un régime sans sel strict sans en parler à ton médecin. En cas de fièvre, vomissements ou diarrhée prolongée : contacte ton médecin rapidement."
-      },
       "how": {
-        "bq1": "Ces informations sont générales. Ton médecin adapte le suivi à ta situation personnelle."
+        "bq_safety": "Ne change jamais ton traitement sans en parler à ton médecin."
       }
     },
     "lithium_safety": {

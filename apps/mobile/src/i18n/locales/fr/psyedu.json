@@ -2,6 +2,7 @@
   "section": {
     "why": "Pourquoi c'est important",
     "how": "Comment faire concrètement",
+    "actions": "Ce que je peux faire",
     "sources": "Pour aller plus loin"
   },
   "theme": {
@@ -145,124 +146,96 @@
     },
     "general": {
       "title": "Psychotropes et alimentation",
-      "summary": "Comprendre les effets des médicaments sur l'appétit et le poids",
+      "summary": "Pourquoi le poids ou l'appétit changent — et quoi faire",
       "why": {
-        "p1": "Certains médicaments psychotropes peuvent modifier la façon dont le corps régule l'appétit et le métabolisme. Ce n'est pas une fatalité — comprendre ces mécanismes aide à adapter ses habitudes en collaboration avec son soignant.",
-        "effect1": "Certains **augmentent l'appétit** — notamment les envies de sucre et de gras",
-        "effect2": "Certains **le diminuent** — rendant les repas moins appétissants",
-        "effect3": "Certains **modifient le goût** ou provoquent une sécheresse buccale",
-        "effect4": "Certains **ralentissent le métabolisme** de base",
-        "p2": "Ces effets varient selon la molécule, la dose et la durée de traitement. Ils ne sont pas systématiques et peuvent évoluer avec le temps."
+        "p1": "Certains médicaments pour la tête peuvent changer l'appétit, le goût ou l'envie de bouger. Ces effets varient d'une personne à l'autre et peuvent évoluer avec le temps. **Ce n'est pas un manque de volonté** — et quelques habitudes simples aident à garder l'équilibre."
       },
       "how": {
-        "p1": "Les recommandations de bonne pratique préconisent un suivi régulier des paramètres métaboliques chez les personnes sous psychotropes.",
-        "tip1": "**Pesée régulière** et mesure du tour de taille",
-        "tip2": "**Bilan sanguin** : glycémie à jeun, bilan lipidique",
-        "tip3": "**Tension artérielle** et fréquence cardiaque",
-        "tip4": "**Rythme régulier** : 3 repas à heures fixes aide à réguler l'appétit",
-        "tip5": "**Hydratation** : 1,5 à 2 litres d'eau par jour (sauf avis médical contraire)",
-        "tip6": "**Le piège de la soif** : les traitements assèchent souvent la bouche, et on confond facilement la soif avec une envie de grignoter. Boire un verre d'eau et attendre 10 minutes avant de manger.",
-        "tip7": "**Bouger un peu après le repas** : une courte marche de 10 à 15 minutes après avoir mangé fait du bien.",
-        "bq1": "Si vous remarquez des changements importants de votre appétit ou de votre poids depuis le début ou la modification de votre traitement, signalez-le à votre soignant à la prochaine consultation."
+        "action1": "Garder 3 repas à des heures régulières : ça évite de grignoter et stabilise l'appétit.",
+        "action2": "Remplir la moitié de l'assiette de légumes, à chaque repas.",
+        "action3": "Avoir toujours de l'eau à portée de main et boire dans la journée (environ 1,5 L).",
+        "action4": "Bouger un peu chaque jour : même 10 à 15 minutes de marche comptent.",
+        "action5": "Limiter les boissons sucrées et l'alcool, qui ajoutent des calories sans caler la faim.",
+        "tip_weigh": "Le réflexe : se peser une fois par semaine, le même jour, et noter le chiffre pour le suivre avec son soignant."
       },
       "sources": {
-        "s1": "HAS (2017) — Recommandations antipsychotiques et suivi métabolique",
-        "s2": "ANSM — Résumés des Caractéristiques du Produit (RCP) des médicaments psychotropes",
-        "s3": "OMS (2013–2030) — Plan d'action santé mentale"
+        "s1": "Mohanty et al. (2024) — Mode de vie et prise de poids sous psychotropes (méta-analyse)",
+        "s2": "JAMA (2023) — Prise en charge du surpoids : l'approche comportementale"
       }
     },
     "antipsychotics": {
       "title": "Antipsychotiques et poids",
-      "summary": "Mécanismes, surveillance et stratégies pratiques",
+      "summary": "Pourquoi le poids peut changer — et quoi faire au quotidien",
       "why": {
-        "p1": "Les antipsychotiques — en particulier les molécules de seconde génération — sont parmi les psychotropes les plus souvent associés à une modification du poids.",
-        "mech1": "Blocage des **récepteurs histaminiques H1** → augmentation de l'appétit, envies de glucides",
-        "mech2": "Blocage des **récepteurs sérotoninergiques 5-HT2C** → réduction du signal de satiété",
-        "mech3": "Blocage des **récepteurs muscariniques** → sécheresse buccale (selon les molécules)",
-        "p2": "Ces effets sont souvent plus marqués dans les premières semaines de traitement. Le profil de risque varie selon la molécule.",
-        "bq1": "Ces informations sont indicatives. La tolérance individuelle varie. Ne modifiez jamais votre traitement sans en parler à votre médecin."
+        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une sensation de faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim du cerveau. La prise de poids n'est pas une fatalité — quelques habitudes simples aident à la limiter."
       },
       "how": {
-        "suivi_intro": "Selon les recommandations de bonne pratique (HAS 2017), le suivi recommandé est :",
-        "suivi1": "Poids et IMC : à l'initiation, puis à 1 mois, 3 mois, 6 mois, puis annuellement",
-        "suivi2": "Tour de taille : initiation et suivi régulier",
-        "suivi3": "Glycémie à jeun : initiation, 3 mois, 1 an, puis annuellement",
-        "suivi4": "Bilan lipidique : initiation, 3 mois, 1 an, puis annuellement",
-        "meals_intro": "Stratégies pratiques aux repas :",
-        "meal1": "Mangez lentement — le signal de satiété prend 15 à 20 minutes",
-        "meal2": "Commencez par les légumes et les protéines avant les féculents",
-        "meal3": "Des assiettes plus petites permettent de réduire les portions sans frustration"
+        "action1": "Manger lentement et poser sa fourchette entre les bouchées : se sentir rassasié prend environ 20 minutes.",
+        "action2": "Commencer le repas par les légumes, puis les protéines (viande, poisson, œuf), puis les féculents.",
+        "action3": "Avant de grignoter, boire un grand verre d'eau et attendre 10 minutes : on confond souvent la soif et la faim.",
+        "action4": "Utiliser une assiette plus petite : des portions plus petites, sans frustration.",
+        "action5": "Bouger un peu après le repas : 10 à 15 minutes de marche.",
+        "tip_weigh": "Le réflexe : se peser une fois par semaine, le même jour, et noter le chiffre pour en parler à son soignant.",
+        "bq_safety": "Ne changez jamais votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "HAS (2017) — Recommandations de bonne pratique antipsychotiques",
-        "s2": "De Hert M. et al. (2011) — Metabolic and cardiovascular adverse effects — Nature Reviews Endocrinology",
-        "s3": "Werneke U. et al. (2003) — Weight gain and antipsychotics — International Clinical Psychopharmacology"
+        "s1": "HAS (2017) — Surveillance du poids et des paramètres métaboliques sous antipsychotiques",
+        "s2": "BAP / NHS — Antipsychotic medication and weight gain (conseils aux patients)"
       }
     },
     "methylphenidate": {
       "title": "Méthylphénidate et appétit",
-      "summary": "Garder un apport nutritionnel suffisant",
+      "summary": "Garder assez d'énergie dans la journée",
       "why": {
-        "p1": "Le méthylphénidate (Ritaline®, Concerta®, Medikinet®, Quasym®) est utilisé dans le traitement du TDAH. Son principal effet sur l'alimentation est une **réduction de l'appétit**, surtout en milieu de journée.",
-        "p2": "Le méthylphénidate augmente les niveaux de **dopamine** et de **noradrénaline** dans le cerveau. Ces neurotransmetteurs réduisent la sensation de faim — c'est un effet pharmacologique direct, pas un manque de volonté.",
-        "cons1": "Saut du repas du midi ou déjeuner très léger",
-        "cons2": "Perte de poids, surtout en début de traitement",
-        "cons3": "Regain d'appétit en soirée pouvant conduire à des repas tardifs plus importants",
-        "bq_child": "Chez l'enfant : une réduction des apports sur plusieurs mois peut ralentir la courbe de croissance. La surveillance du poids et de la taille est systématique dans le suivi pédiatrique."
+        "p1": "Le méthylphénidate (Ritaline®, Concerta®, Medikinet®, Quasym®) coupe souvent l'appétit, surtout le midi. C'est un effet connu du médicament. L'important : garder assez d'énergie sur la journée — surtout chez l'enfant et l'ado, pour ne pas freiner la croissance."
       },
       "how": {
-        "breakfast_intro": "Le **petit-déjeuner est essentiel** :",
-        "b1": "Prendre le méthylphénidate après un petit-déjeuner complet (protéines + glucides complexes)",
-        "b2": "Ce repas doit couvrir une part importante des besoins de la journée",
-        "lunch_intro": "Pour le **déjeuner**, même sans faim :",
-        "l1": "Essayer une collation nutritive : yaourt, fromage, oléagineux",
-        "l2": "Les aliments riches en protéines (œuf, fromage, jambon) nourrissent davantage pour un volume plus faible",
-        "bq1": "Si la perte de poids est notable ou si l'enfant stagne sur sa courbe de croissance, signalez-le à votre médecin dès que possible."
+        "action1": "Prendre un petit-déjeuner complet avant le médicament (œuf, pain complet, laitage) : c'est le moment où l'appétit est le plus présent.",
+        "action2": "Le midi, même sans faim : une petite collation nourrissante (yaourt, fromage, fruits secs, œuf).",
+        "action3": "Profiter du retour de l'appétit en fin de journée pour un vrai repas du soir.",
+        "action4": "Choisir des aliments riches pour un petit volume (oléagineux, avocat, fromage).",
+        "tip_weigh": "Le réflexe : surveiller le poids (et la taille chez l'enfant) et en parler au médecin s'il baisse."
       },
       "sources": {
-        "s1": "ANSM — RCP Ritaline®, Concerta®, Medikinet®, Quasym®",
-        "s2": "Rapport HAS (2014) — Réévaluation méthylphénidate chez l'enfant et l'adolescent"
+        "s1": "ANSM — Résumé des caractéristiques (RCP) Ritaline®, Concerta®, Medikinet®, Quasym®",
+        "s2": "HAS (2014) — Méthylphénidate chez l'enfant et l'adolescent"
       }
     },
     "antidepressants": {
-      "title": "ISRS et antidépresseurs",
-      "summary": "Des effets variables selon la molécule et la durée",
+      "title": "Antidépresseurs et appétit",
+      "summary": "Des effets variables, souvent passagers",
       "why": {
-        "p1": "Les antidépresseurs ont des profils très variés selon leur classe. Les effets sur l'alimentation peuvent évoluer au cours du traitement.",
-        "p2": "Les **ISRS** (fluoxétine, sertraline, escitalopram, paroxétine) provoquent souvent des nausées et une perte d'appétit en début de traitement. Ces effets sont généralement temporaires.",
-        "p3": "À long terme, la plupart des ISRS ont un effet neutre ou légèrement positif sur le poids. La paroxétine est plus souvent associée à une prise de poids modérée.",
-        "p4": "La **mirtazapine** (Norset®) bloque les récepteurs H1 → augmentation significative de l'appétit. La **venlafaxine** et la **duloxétine** ont un profil généralement neutre.",
-        "bq1": "En cas de changement notable de l'appétit ou du poids, parlez-en à votre médecin. Un accompagnement diététique spécialisé peut être envisagé."
+        "p1": "Les antidépresseurs agissent différemment selon la molécule. Au début, certains coupent un peu l'appétit ou donnent la nausée — c'est souvent passager. Sur la durée, la plupart changent peu le poids ; quelques-uns peuvent l'augmenter. En parler permet d'ajuster."
       },
       "how": {
-        "p1": "Prendre l'antidépresseur avec de la nourriture réduit les nausées en début de traitement. Si la perte d'appétit initiale est marquée, privilégiez les aliments denses en nutriments (œufs, avocat, noix).",
-        "bq1": "Ces effets s'atténuent souvent après les premières semaines. Informez votre médecin si ils persistent ou s'ils vous gênent dans votre quotidien."
+        "action1": "Si la nausée gêne au début : prendre le médicament avec un peu de nourriture.",
+        "action2": "Si l'appétit est coupé : des repas plus petits mais plus fréquents, riches en nutriments (œufs, avocat, noix).",
+        "action3": "Garder des repas réguliers et une activité physique douce pour stabiliser le poids.",
+        "action4": "Noter tout changement net d'appétit ou de poids pour en parler au médecin.",
+        "tip": "Le réflexe : ces effets s'atténuent souvent après quelques semaines — signaler s'ils persistent."
       },
       "sources": {
-        "s1": "ANSM — RCP ISRS (fluoxétine, sertraline, escitalopram, paroxétine, citalopram)",
-        "s2": "Fava M (2000) — Weight gain and antidepressants — Journal of Clinical Psychiatry"
+        "s1": "ANSM — Résumé des caractéristiques (RCP) des antidépresseurs (ISRS, IRSN…)",
+        "s2": "JAMA (2023) — Prise en charge du surpoids : l'approche comportementale"
       }
     },
     "mood_stabilizers": {
       "title": "Thymorégulateurs",
-      "summary": "Alimentation et hydratation selon la molécule",
+      "summary": "Le poids selon la molécule — et la régularité",
       "why": {
-        "p1": "Les thymorégulateurs (stabilisateurs de l'humeur) sont utilisés principalement dans les troubles bipolaires. Leurs effets sur l'alimentation varient selon la molécule.",
-        "p2": "Le **lithium** est particulièrement sensible à l'hydratation et aux apports en sel. Le rein traite le lithium et le sodium de façon similaire.",
-        "p3": "Si les apports en sel **diminuent fortement** (régime restrictif, canicule, vomissements) → le rein retient plus de lithium → risque de **surdosage**.",
-        "bq_lithium": "Ne pas commencer un régime sans sel strict sans en parler à votre médecin. En cas de fièvre, vomissements ou diarrhée prolongée : contactez votre médecin rapidement.",
-        "p4": "Le **valproate** (Dépakote®, Dépakine®) entraîne souvent une prise de poids modérée à importante. La **lamotrigine** (Lamictal®) a généralement un profil neutre sur le poids."
+        "p1": "Les thymorégulateurs stabilisent l'humeur. Leur effet sur le poids dépend de la molécule : le valproate (Dépakote®, Dépakine®) fait souvent prendre du poids ; la lamotrigine (Lamictal®) est plutôt neutre. Le lithium, lui, demande surtout de la régularité dans l'eau et le sel (voir la fiche dédiée)."
       },
       "how": {
-        "p1": "**Hydratation régulière** : 1,5 à 2 litres d'eau par jour minimum, davantage par forte chaleur ou effort physique.",
-        "tip1": "Maintenir des apports en sel réguliers — ne pas les réduire brutalement sans avis médical",
-        "tip2": "Signaler à votre médecin toute prise de poids rapide",
-        "tip3": "Maintenir une activité physique douce régulière pour limiter la prise de poids",
-        "bq1": "Ces informations sont générales. Votre médecin adapte le suivi à votre situation personnelle."
+        "action1": "Garder des repas réguliers avec beaucoup de légumes.",
+        "action2": "Boire de l'eau régulièrement dans la journée.",
+        "action3": "Bouger un peu chaque jour pour limiter la prise de poids.",
+        "action4": "Signaler une prise de poids rapide à son soignant.",
+        "tip_weigh": "Le réflexe : se peser une fois par semaine et noter le chiffre.",
+        "bq_safety": "Ne changez jamais votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "ANSM — RCP lithium, valproate, lamotrigine, carbamazépine",
-        "s2": "Gitlin M (2016) — Lithium side effects and toxicity — International Journal of Bipolar Disorders"
+        "s1": "Nierenberg et al. (2023) — Trouble bipolaire : diagnostic et traitement (revue JAMA)",
+        "s2": "ANSM — Résumé des caractéristiques (RCP) valproate, lamotrigine, lithium"
       }
     },
     "lithium_safety": {
@@ -284,8 +257,8 @@
         "bq1": "Ne modifiez jamais votre dose ni votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "ANSM — RCP lithium (Téralithe®)",
-        "s2": "Gitlin M (2016) — Lithium side effects and toxicity — International Journal of Bipolar Disorders"
+        "s1": "ANSM — Résumé des caractéristiques (RCP) lithium (Téralithe®)",
+        "s2": "Airainer & Seifert (2024) — Lithium dans le trouble bipolaire : analyse des études cliniques (revue)"
       }
     }
   },

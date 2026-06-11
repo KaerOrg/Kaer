@@ -2354,6 +2354,45 @@
 
 .psyedu-block__tip-icon { flex-shrink: 0; margin-top: 2px; }
 
+/* Carte « Ce que je peux faire » — l'action concrète, mise en avant */
+.psyedu-block--action {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.psyedu-block__action-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+
+.psyedu-block__action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.psyedu-block__action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.psyedu-block__action-item svg { flex-shrink: 0; margin-top: 2px; color: var(--color-primary); }
+
 .psyedu-block--quote {
   font-size: 13px;
   font-style: italic;

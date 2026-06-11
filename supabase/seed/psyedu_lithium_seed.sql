@@ -14,27 +14,21 @@ values ('00000001-0000-0000-0000-000000000011', 'diet_weight_psycho', 'treatment
 
 insert into public.psyedu_blocks (topic_id, section_key, block_type, text_code, items_codes, href, sort_order)
 values
-  -- why
+  -- why (court, langage patient)
   ('00000001-0000-0000-0000-000000000011', 'why', 'heading',   'section.why', null, null, 1),
   ('00000001-0000-0000-0000-000000000011', 'why', 'paragraph', 'diet_weight_psycho.lithium_safety.why.p1', null, null, 2),
-  ('00000001-0000-0000-0000-000000000011', 'why', 'paragraph', 'diet_weight_psycho.lithium_safety.why.p2', null, null, 3),
-  -- how
-  ('00000001-0000-0000-0000-000000000011', 'how', 'heading',     'section.how', null, null, 1),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'paragraph',   'diet_weight_psycho.lithium_safety.how.rules_intro', null, null, 2),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'bullet_list', null,
+  -- how (carte d'actions + signes d'alerte + sécurité)
+  ('00000001-0000-0000-0000-000000000011', 'how', 'action_list', null,
      array['diet_weight_psycho.lithium_safety.how.rule1',
            'diet_weight_psycho.lithium_safety.how.rule2',
-           'diet_weight_psycho.lithium_safety.how.rule3'], null, 3),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'paragraph',   'diet_weight_psycho.lithium_safety.how.avoid_intro', null, null, 4),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'bullet_list', null,
-     array['diet_weight_psycho.lithium_safety.how.avoid1',
-           'diet_weight_psycho.lithium_safety.how.avoid2'], null, 5),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'tip',        'diet_weight_psycho.lithium_safety.how.alert', null, null, 6),
-  ('00000001-0000-0000-0000-000000000011', 'how', 'blockquote', 'diet_weight_psycho.lithium_safety.how.bq1', null, null, 7),
+           'diet_weight_psycho.lithium_safety.how.rule3',
+           'diet_weight_psycho.lithium_safety.how.avoid1'], null, 1),
+  ('00000001-0000-0000-0000-000000000011', 'how', 'tip',        'diet_weight_psycho.lithium_safety.how.alert', null, null, 2),
+  ('00000001-0000-0000-0000-000000000011', 'how', 'blockquote', 'diet_weight_psycho.lithium_safety.how.bq1', null, null, 3),
   -- sources
   ('00000001-0000-0000-0000-000000000011', 'sources', 'heading',     'section.sources', null, null, 1),
-  ('00000001-0000-0000-0000-000000000011', 'sources', 'source_link', 'diet_weight_psycho.lithium_safety.sources.s1', null, 'https://ansm.sante.fr', 2),
-  ('00000001-0000-0000-0000-000000000011', 'sources', 'source_link', 'diet_weight_psycho.lithium_safety.sources.s2', null, null, 3);
+  ('00000001-0000-0000-0000-000000000011', 'sources', 'source_link', 'diet_weight_psycho.lithium_safety.sources.s1', null, null, 2),
+  ('00000001-0000-0000-0000-000000000011', 'sources', 'source_link', 'diet_weight_psycho.lithium_safety.sources.s2', null, 'https://doi.org/10.1007/s00210-024-03210-8', 3);
 
 -- Tags (mêmes axes que mood_stabilizers)
 insert into public.psyedu_topic_tags (topic_id, tag_id)

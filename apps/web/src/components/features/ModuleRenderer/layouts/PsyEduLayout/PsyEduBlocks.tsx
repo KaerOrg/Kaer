@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Lightbulb } from 'lucide-react'
+import { ExternalLink, Lightbulb, CheckCircle2, Check } from 'lucide-react'
 import { fetchBlocksByTopic, type PsyEduBlock } from '../../../../../services/psyeduService'
 
 interface Props {
@@ -132,6 +132,27 @@ export function PsyEduBlocks({ topicId, sectionOrder }: Props) {
                   </li>
                 ))}
               </ul>
+            ) : null
+            break
+
+          case 'action_list':
+            content = block.items_codes ? (
+              <div className="psyedu-block psyedu-block--action">
+                <div className="psyedu-block__action-title">
+                  <CheckCircle2 size={16} />
+                  {block.text_code
+                    ? t(block.text_code, { ns: 'psyedu', defaultValue: block.text_code })
+                    : t('section.actions', { ns: 'psyedu', defaultValue: 'Ce que je peux faire' })}
+                </div>
+                <ul className="psyedu-block__action-list">
+                  {block.items_codes.map((code, i) => (
+                    <li key={i} className="psyedu-block__action-item">
+                      <Check size={15} />
+                      <span>{renderInline(t(code, { ns: 'psyedu', defaultValue: code }))}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ) : null
             break
 
