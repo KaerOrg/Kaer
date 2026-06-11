@@ -6,7 +6,8 @@
   },
   "theme": {
     "treatment": "Mon traitement",
-    "lifestyle": "Hygiène de vie"
+    "lifestyle": "Hygiène de vie",
+    "understanding": "Mieux comprendre"
   },
   "psyedu_sleep": {
     "sleep_chrono": {

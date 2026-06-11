@@ -561,7 +561,7 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Bibliothèque de fiches à lire, classées par thème (mon traitement, hygiène de vie…)."
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -1363,7 +1363,7 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Bibliothèque de fiches à lire, classées par thème (mon traitement, hygiène de vie…)."
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",

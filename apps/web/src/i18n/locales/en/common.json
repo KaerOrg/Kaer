@@ -814,7 +814,7 @@
     },
     "psychoeducation": {
       "label": "Psychoeducation",
-      "description": "Therapeutic knowledge cards: sleep, grounding, distortions, drug interactions.",
+      "description": "A library of reading sheets, organised by theme (my treatment, lifestyle…).",
       "new_btn": "Browse cards",
       "empty_title": "No card yet",
       "empty_text": "Use the button above to browse the psychoeducation cards."
@@ -1254,7 +1254,7 @@
     },
     "psychoeducation": {
       "label": "Psychoeducation",
-      "description": "Therapeutic knowledge cards: sleep, grounding, distortions, drug interactions."
+      "description": "A library of reading sheets, organised by theme (my treatment, lifestyle…)."
     },
     "sleep_diary": {
       "label": "Sleep Diary",

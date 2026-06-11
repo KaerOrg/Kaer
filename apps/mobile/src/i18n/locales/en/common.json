@@ -398,7 +398,7 @@
     },
     "psychoeducation": {
       "label": "Psychoeducation",
-      "description": "Knowledge cards about your mental health",
+      "description": "A library of reading sheets, organised by theme (my treatment, lifestyle…).",
       "title": "Psychoeducation",
       "intro": "Browse your knowledge cards.",
       "cards_progress": "{{read}}/{{total}} cards read"

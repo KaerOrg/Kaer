@@ -14,6 +14,9 @@ update public.psyedu_topics set theme_id = 'treatment'
 -- 🟢 Hygiène de vie : sommeil, nutrition, activité
 update public.psyedu_topics set theme_id = 'lifestyle'
   where module_key in ('psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity');
+-- 🔵 Mieux comprendre : distorsions cognitives (et futurs concepts TCC)
+update public.psyedu_topics set theme_id = 'understanding'
+  where module_key = 'cognitive_distortions' and topic_key = 'cog_distortions_intro';
 
 -- ── 2. Tags des fiches (filtrage de la bibliothèque) ─────────────────────────
 insert into public.psyedu_topic_tags (topic_id, tag_id)
@@ -96,3 +99,11 @@ join (values
 ) as x(module_id, src_module_key, topic_key, sort_order)
   on t.module_key = x.src_module_key and t.topic_key = x.topic_key
 on conflict (module_id, topic_id) do nothing;
+
+-- ── 4. Tags de la fiche distorsions (thème « Mieux comprendre ») ──────────────
+insert into public.psyedu_topic_tags (topic_id, tag_id)
+select t.id, x.tag_id
+from public.psyedu_topics t
+join (values ('psychoeducation'),('cbt'),('depression'),('anxiety'),('teen'),('adult')) as x(tag_id) on true
+where t.module_key = 'cognitive_distortions' and t.topic_key = 'cog_distortions_intro'
+on conflict (topic_id, tag_id) do nothing;
