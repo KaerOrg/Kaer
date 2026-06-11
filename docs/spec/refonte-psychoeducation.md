@@ -3,6 +3,14 @@
 > Branche : `refonte/psychoeducation`. Statut : **plan validé sur la direction, en attente de feu vert d'implémentation.**
 > Ce document est la source de vérité de la refonte. Mettre à jour au fil de l'avancement.
 
+> **Intégration (2026-06-11)** : branche réconciliée avec `feat/improve-module-organization`
+> (réorganisation de l'armoire par facettes / taxonomie). Cette branche étant en retard
+> sur `main`, on a **cherry-pické son commit `75eb580`** par-dessus la refonte (plutôt
+> qu'un rebase qui rejouait 10 commits de main). Taxonomie plus dupliquée (version de
+> cette branche = canonique), `ModuleFilterBar` + `PsychoLibraryPicker` coexistent dans
+> `PatientModulesTab`, suite web 642 tests verts. Les tags serviront au filtre de la
+> bibliothèque (Phase 4).
+
 ---
 
 ## 1. Constat — l'état réel du code (et non celui des docs périmées)
