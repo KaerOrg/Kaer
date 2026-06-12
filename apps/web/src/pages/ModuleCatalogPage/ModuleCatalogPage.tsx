@@ -11,8 +11,12 @@ import { fetchModuleCategories, fetchComingSoonModuleIds, type ModuleCategory } 
 import { fetchEnabledModules, saveEnabledModules } from '../../services/practitionerSettingsService'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
 import { SearchInput } from '../../components/ui/SearchInput'
+import { ModuleFilterBar } from '../../components/features/ModuleFilterBar'
+import { ModuleTagChips } from '../../components/features/ModuleTagChips'
+import { filterCategoriesByTags } from '../../lib/moduleFilter'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
 import { LUCIDE_ICONS } from '../../lib/lucideIcons'
+import { useTagFilters } from '../../hooks/useTagFilters'
 import './ModuleCatalogPage.css'
 
 export function ModuleCatalogPage() {
@@ -28,11 +32,16 @@ export function ModuleCatalogPage() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 
+  const totalCount = useMemo(() => categories.reduce((n, c) => n + c.modules.length, 0), [categories])
+
+  // Filtrage en deux temps : facettes (tags) puis recherche texte.
   const filteredCategories = useMemo(() => {
+    const byTags = filterCategoriesByTags(categories, taxonomy.tagsByModule, activeFilters)
     const tokens = tokenizeSearch(searchQuery)
-    if (tokens.length === 0) return categories
-    return categories
+    if (tokens.length === 0) return byTags
+    return byTags
       .map(cat => ({
         ...cat,
         modules: cat.modules.filter(mod => {
@@ -41,7 +50,9 @@ export function ModuleCatalogPage() {
         }),
       }))
       .filter(cat => cat.modules.length > 0)
-  }, [categories, searchQuery, t])
+  }, [categories, taxonomy, activeFilters, searchQuery, t])
+
+  const resultCount = useMemo(() => filteredCategories.reduce((n, c) => n + c.modules.length, 0), [filteredCategories])
 
   const loadSettings = useCallback(async () => {
     if (!practitioner) return
@@ -145,10 +156,23 @@ export function ModuleCatalogPage() {
           </div>
         )}
 
+        {!loading && taxonomy.dimensions.length > 0 && (
+          <ModuleFilterBar
+            taxonomy={taxonomy}
+            activeFilters={activeFilters}
+            onToggleTag={toggleTag}
+            onReset={resetFilters}
+            resultCount={resultCount}
+            totalCount={totalCount}
+          />
+        )}
+
         {loading ? (
           <div className="catalog-page__loading">{t('common.loading')}</div>
         ) : filteredCategories.length === 0 ? (
-          <div className="catalog-page__empty">{t('modules.empty_search')}</div>
+          <div className="catalog-page__empty">
+            {searchQuery ? t('modules.empty_search') : t('modules.empty_filter')}
+          </div>
         ) : (
           <div className="catalog-sections">
             {filteredCategories.map(category => (
@@ -185,19 +209,21 @@ export function ModuleCatalogPage() {
                           ),
                         }}
                         actions={!isComingSoon ? (
-                          <button
-                            className="preview-toggle-btn"
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            icon={<Eye size={12} />}
                             onClick={() => navigate(`/modules/preview/${mod.id}`)}
                             title={t('patient.patient_view')}
                           >
-                            <Eye size={12} />
                             {t('patient.preview_button')}
-                          </button>
+                          </Button>
                         ) : undefined}
                       >
                         {isComingSoon ? (
                           <span className="catalog-card__soon-badge">{t('patient.realtime_soon')}</span>
                         ) : null}
+                        <ModuleTagChips tagIds={taxonomy.tagsByModule.get(mod.id)} taxonomy={taxonomy} />
                       </Card>
                     )
                   })}

@@ -47,25 +47,7 @@
   margin-top: 1px;
 }
 
-.cssrs-panel__new-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1E40AF;
-  background: #EFF6FF;
-  border: 1px solid #BFDBFE;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-}
-
-.cssrs-panel__new-btn:hover {
-  background: #DBEAFE;
-}
+/* Bouton « Nouvelle évaluation » via <Button variant="secondary" />. */
 
 .cssrs-panel__warning {
   display: flex;
@@ -298,26 +280,7 @@
   color: #94A3B8;
 }
 
-.cssrs-form__submit {
-  padding: 9px 20px;
-  background: #1E40AF;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.cssrs-form__submit:hover:not(:disabled) {
-  background: #1D4ED8;
-}
-
-.cssrs-form__submit:disabled {
-  background: #CBD5E1;
-  cursor: not-allowed;
-}
+/* Bouton « Enregistrer l'évaluation » via <Button variant="primary" loading />. */
 
 /* ── Items inactifs (arbre décisionnel) ──────────────────────────────────── */
 
@@ -603,21 +566,9 @@
   font-weight: 600;
 }
 
-.cssrs-panel__delete {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #CBD5E1;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  transition: color 0.12s;
-  flex-shrink: 0;
-}
-
-.cssrs-panel__delete:hover {
-  color: #EF4444;
-}
+/* Bouton supprimer via <Button variant="ghost" category="danger" /> — ne reste que
+   la contrainte de mise en page. */
+.cssrs-panel__delete { flex-shrink: 0; }
 
 .cssrs-panel__empty {
   padding: 16px;

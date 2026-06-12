@@ -813,6 +813,67 @@ end $$;
 
 
 -- ============================================================
+-- TABLE : tag_dimensions (Axes de filtrage transverse des modules)
+-- ============================================================
+-- Données de référence statiques : les axes croisables de l'armoire
+-- thérapeutique (indication, population, approche). Libellés via i18n
+-- (tag_dimensions.<id>.label) — zéro texte en base. Cf. docs/spec/module-taxonomy.md.
+
+create table if not exists public.tag_dimensions (
+  id          text primary key,            -- 'indication' | 'population' | 'approach'
+  sort_order  int  not null default 0
+);
+
+alter table public.tag_dimensions enable row level security;
+
+drop policy if exists "tag_dimensions_read" on public.tag_dimensions;
+create policy "tag_dimensions_read" on public.tag_dimensions
+  for select to authenticated using (true);
+
+
+-- ============================================================
+-- TABLE : tags (Valeurs de filtrage — 1 ligne = 1 tag)
+-- ============================================================
+-- Une ligne par valeur taggable (anxiety, teen, cbt…). Libellés via i18n
+-- (tags.<id>.label). Ajouter un tag = un INSERT, zéro redéploiement.
+
+create table if not exists public.tags (
+  id            text primary key,          -- 'anxiety', 'teen', 'cbt'
+  dimension_id  text not null references public.tag_dimensions(id),
+  sort_order    int  not null default 0
+);
+
+alter table public.tags enable row level security;
+
+drop policy if exists "tags_read" on public.tags;
+create policy "tags_read" on public.tags
+  for select to authenticated using (true);
+
+create index if not exists idx_tags_dimension on public.tags(dimension_id);
+
+
+-- ============================================================
+-- TABLE : module_tags (Liaison N↔N module ↔ tag)
+-- ============================================================
+-- Un module porte plusieurs tags ; un tag s'applique à plusieurs modules.
+-- MDR : métadonnée d'outil uniquement — aucune liaison vers une donnée patient.
+
+create table if not exists public.module_tags (
+  module_id  text not null references public.modules(id) on delete cascade,
+  tag_id     text not null references public.tags(id)    on delete cascade,
+  primary key (module_id, tag_id)
+);
+
+alter table public.module_tags enable row level security;
+
+drop policy if exists "module_tags_read" on public.module_tags;
+create policy "module_tags_read" on public.module_tags
+  for select to authenticated using (true);
+
+create index if not exists idx_module_tags_tag on public.module_tags(tag_id);
+
+
+-- ============================================================
 -- TABLE : module_content_fields (Champs de contenu — 1 ligne = 1 champ)
 -- ============================================================
 -- field_type → composant React (22 types).

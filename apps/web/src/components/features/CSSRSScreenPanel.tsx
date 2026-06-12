@@ -22,6 +22,7 @@ import {
   computeIdeationCount,
 } from '../../data/cssrs_screen'
 import type { IntensiteDimension, LikertOption } from '../../data/cssrs_screen'
+import { Button } from '../ui/Button'
 import './CSSRSScreenPanel.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -650,10 +651,14 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
             </span>
           </div>
         </div>
-        <button className="cssrs-panel__new-btn" onClick={handleToggleForm}>
-          {formOpen ? <ChevronUp size={15} /> : <Plus size={15} />}
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={formOpen ? <ChevronUp size={15} /> : <Plus size={15} />}
+          onClick={handleToggleForm}
+        >
           {formOpen ? 'Annuler' : 'Nouvelle évaluation'}
-        </button>
+        </Button>
       </div>
 
       {/* Avertissement */}
@@ -982,13 +987,15 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
             <span className="cssrs-form__progress">
               {totalAnswered} / {totalRequired} champs requis remplis
             </span>
-            <button
-              className="cssrs-form__submit"
+            <Button
+              variant="primary"
+              size="sm"
+              loading={saving}
+              disabled={!allAnswered}
               onClick={handleSubmit}
-              disabled={!allAnswered || saving}
             >
               {saving ? 'Enregistrement…' : 'Enregistrer l\'évaluation'}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -1038,14 +1045,17 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                     <span className="cssrs-panel__expand-icon">
                       {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                     </span>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      category="danger"
                       className="cssrs-panel__delete"
+                      icon={<Trash2 size={14} />}
                       onClick={e => { e.stopPropagation(); void handleDelete(a.id) }}
                       disabled={deletingId === a.id}
+                      aria-label="Supprimer"
                       title="Supprimer"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    />
                   </div>
                 </div>
 

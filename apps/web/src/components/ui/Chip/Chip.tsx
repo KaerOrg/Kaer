@@ -14,6 +14,7 @@ import type { ChipProps } from './Chip.types'
 export function Chip({
   label,
   tone = 'neutral',
+  size = 'md',
   icon,
   selectable = false,
   selected = false,
@@ -24,12 +25,13 @@ export function Chip({
   className = '',
 }: ChipProps) {
   const iconNode = icon ? <span className="chip__icon">{icon}</span> : null
+  const sizeClass = size === 'sm' ? 'chip--sm' : ''
 
   if (selectable) {
     return (
       <button
         type="button"
-        className={`chip chip--selectable ${selected ? 'chip--selected' : ''} ${className}`}
+        className={`chip chip--selectable ${sizeClass} ${selected ? 'chip--selected' : ''} ${className}`}
         aria-pressed={selected}
         onClick={onClick}
         title={title}
@@ -42,7 +44,7 @@ export function Chip({
 
   return (
     <span
-      className={`chip chip--${tone} ${onRemove ? 'chip--removable' : ''} ${className}`}
+      className={`chip chip--${tone} ${sizeClass} ${onRemove ? 'chip--removable' : ''} ${className}`}
       title={title}
     >
       {iconNode}

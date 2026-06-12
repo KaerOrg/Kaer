@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
+import { Button } from '../../ui/Button'
 import { WaitItem } from './WaitItem'
 import type { CaseloadWait, CaseloadWaitInput } from '../../../lib/caseload.types'
 
@@ -54,9 +55,7 @@ export function WaitList({ waits, onAdd, onPatch, onDelete }: WaitListProps) {
           className="wait-list__add-relance"
           aria-label={t('file_active.wait.add_relance_label')}
         />
-        <button type="submit" className="wait-list__add-btn" aria-label={t('file_active.wait.add_submit')}>
-          <Plus size={14} />
-        </button>
+        <Button type="submit" variant="outline" size="xs" icon={<Plus size={14} />} aria-label={t('file_active.wait.add_submit')} />
       </form>
     </div>
   )

@@ -18,13 +18,14 @@ type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
 
 export interface MedicationSideEffectsCardProps {
   patientId: string
+  tagChips: ReactNode
   modItem: ModuleItem
   modIcon: ReactNode
   mod: PatientModule | undefined
   unlocked: boolean
-  unlockingModule: ModuleType | null
-  previewModule: ModuleType | null
-  dataModule: ModuleType | null
+  loading: boolean
+  previewOpen: boolean
+  dataOpen: boolean
   medEffects: MedEffects
   moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
   onTogglePreview: (type: ModuleType) => void
@@ -41,13 +42,14 @@ export interface MedicationSideEffectsCardProps {
  */
 export function MedicationSideEffectsCard({
   patientId,
+  tagChips,
   modItem,
   modIcon,
   mod,
   unlocked,
-  unlockingModule,
-  previewModule,
-  dataModule,
+  loading,
+  previewOpen,
+  dataOpen,
   medEffects,
   moduleToggle,
   onTogglePreview,
@@ -97,7 +99,7 @@ export function MedicationSideEffectsCard({
     [addCustom]
   )
 
-  const isWide = medEffects.open || previewModule === MODULE_TYPE || dataModule === MODULE_TYPE
+  const isWide = medEffects.open || previewOpen || dataOpen
 
   return (
     <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
@@ -107,43 +109,47 @@ export function MedicationSideEffectsCard({
           icon: modIcon,
           title: t('modules.medication_side_effects.label'),
           subtitle: t('modules.medication_side_effects.description'),
-          right: moduleToggle(unlocked, unlockingModule === MODULE_TYPE, handleToggle),
+          right: moduleToggle(unlocked, loading, handleToggle),
         }}
         actions={unlocked && mod ? (
           <>
-            <button
-              type="button"
-              className="module-card__notif-btn"
+            <Button
+              variant="outline"
+              size="xs"
+              icon={<Bell size={14} />}
+              aria-label={t('notifications.configure_button')}
               title={t('notifications.configure_button')}
               onClick={handleNotif}
-            >
-              <Bell size={14} />
-            </button>
+            />
             {!medEffects.open && (
               <Button variant="ghost" size="sm" onClick={medEffects.openEditor}>
                 {t('modules.medication_side_effects.config_button')}
               </Button>
             )}
-            <button
-              className={`preview-toggle-btn ${previewModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+            <Button
+              variant="outline"
+              size="xs"
+              aria-pressed={previewOpen}
+              icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
               onClick={handlePreviewToggle}
               title={t('patient.patient_view')}
             >
-              {previewModule === MODULE_TYPE ? <EyeOff size={14} /> : <Eye size={14} />}
               {t('patient.preview_button')}
-            </button>
-            <button
-              type="button"
-              className={`preview-toggle-btn ${dataModule === MODULE_TYPE ? 'preview-toggle-btn--active' : ''}`}
+            </Button>
+            <Button
+              variant="outline"
+              size="xs"
+              aria-pressed={dataOpen}
+              icon={<LineChart size={14} />}
               onClick={handleDataToggle}
               title={t('patient.data_button')}
             >
-              <LineChart size={14} />
               {t('patient.data_button')}
-            </button>
+            </Button>
           </>
         ) : undefined}
       >
+        {tagChips}
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
@@ -154,8 +160,8 @@ export function MedicationSideEffectsCard({
             )}
           </div>
         )}
-        {previewModule === MODULE_TYPE && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
-        {dataModule === MODULE_TYPE && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
+        {previewOpen && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
+        {dataOpen && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
       </Card>
 
       {medEffects.open && unlocked && mod && (

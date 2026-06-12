@@ -776,6 +776,20 @@
   gap: 8px;
 }
 
+/* Modale « Ajouter un module » : barre de filtres + recherche + grille */
+.wardrobe__add {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Vue active : barre de filtres (lentille) + grille des modules actifs */
+.wardrobe__active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .category-modules-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -823,11 +837,6 @@
   margin-top: 6px;
 }
 
-.module-card__date--actions {
-  margin-top: 0;
-  margin-right: auto;
-}
-
 /* ── Panneaux aperçu / données intégrés dans le body de la card ──────────────── */
 /* Les panneaux (.preview-panel, .module-data-panel, .summary-panel) sont conçus
    pour s'accoler sous une card ; intégrés ici dans le body, on les présente comme
@@ -841,24 +850,6 @@
 
 .module-card__revoke {
   color: var(--color-danger) !important;
-}
-
-.module-card__notif-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  padding: 4px 6px;
-  display: inline-flex;
-  align-items: center;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-
-.module-card__notif-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-primary-light, #eef2ff);
-  border-color: var(--color-primary);
 }
 
 .psycho-observance-summary {
@@ -982,33 +973,6 @@
 }
 
 /* ── Bouton Aperçu ────────────────────────────────────────────────────────── */
-
-.preview-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 3px 8px;
-  cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-  white-space: nowrap;
-}
-
-.preview-toggle-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.preview-toggle-btn--active {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
 
 /* ── Panneau d'aperçu ─────────────────────────────────────────────────────── */
 

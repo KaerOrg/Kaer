@@ -5,6 +5,15 @@
 - **Scalabilité d'abord** : chaque décision de design doit tenir à 10× la charge actuelle (patients, modules, praticiens).
 - **Composants réutilisables** : tout composant ou fonction utilisé (ou susceptible d'être utilisé) dans ≥2 contextes est extrait dans `src/components/` ou `packages/shared/`. Zéro duplication.
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La logique pure extraite (`lib/moduleFilter.ts`) était testée exhaustivement, mais
+> donnait un **faux sentiment de couverture** : les composants qui la consomment
+> (`ModuleFilterBar`, `ModuleTagChips` — callbacks, rendu conditionnel) n'avaient
+> aucun `.test.tsx`, et la nouvelle fonction `fetchModuleTaxonomy()` n'a pas été
+> ajoutée au `moduleCatalogService.test.ts` **existant**.
+> → Tester le helper pur ne dispense ni du test de rendu/interaction des composants,
+> ni d'**étendre le test du service** quand on lui ajoute une fonction. Checklist :
+> chaque fichier source créé OU chaque export ajouté = son test dans le même commit.
 - **Mocks synchronisés avec les exports** : tout renommage de fonction/hook exporté (`useModuleT` → `useModuleTranslation`) doit être répercuté dans **tous** les `jest.mock()`/`vi.mock()` qui le mentionnent. Un `grep` sur l'ancien nom avant de merger est obligatoire. Un mock périmé donne un faux sentiment de tests verts (la fonction mockée n'est jamais appelée, l'originale crashe en runtime).
 > **Cas rencontré — refonte-tolerance-detresse (2026-06-09) :**
 > Le renommage `useModuleT → useModuleTranslation` a cassé 5 suites de tests mobiles :
@@ -153,6 +162,15 @@ Mettre à jour le document de référence correspondant **dans le même commit**
 | Nouveau composant UI primitif | Design system doc de l'app |
 
 Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
+
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La PR a fait le geste *parfait* côté code — étendre `ui/Chip` avec une prop
+> `size: 'sm' | 'md'` au lieu de dupliquer — mais a oublié la doc : ni la ligne
+> `size` dans la table des props `### Chip` du design-system, ni de section pour
+> les deux nouveaux composants `features/` (`ModuleFilterBar`, `ModuleTagChips`).
+> → La règle vaut aussi pour une **simple prop ajoutée** à un composant existant,
+> et pour les composants `features/` (pas seulement `ui/`) : table des props +
+> exemple d'usage dans `apps/<app>/docs/design-system.md`, **dans le même commit**.
 
 **Anti-patterns bloquants — refuser d'écrire :**
 - `Pressable + Text + StyleSheet` ad hoc quand `ui/Button` couvre le besoin
@@ -355,6 +373,53 @@ const noteRef = useRef<HTMLTextAreaElement>(null)
 // Au submit : noteRef.current?.value
 // Reset : if (noteRef.current) noteRef.current.value = ''
 ```
+
+## États mutuellement exclusifs — un seul `useState` discriminé, pas N states couplés
+
+> **Règle : quand plusieurs `useState` ne peuvent jamais être actifs en même temps,
+> ou décrivent les variantes d'une même chose, ils fusionnent en UN state à union
+> discriminée.** Plusieurs `useState` que chaque handler doit remettre à `null` « en
+> miroir » pour préserver une exclusivité sont un bug d'invariant en attente.
+
+Le test : *« deux de ces states peuvent-ils être non-nuls en même temps ? »*
+Si la réponse devrait toujours être « non », alors deux states séparés rendent cet
+état illégal **représentable** — donc atteignable. Un state unique le rend
+**irreprésentable**.
+
+```ts
+// ❌ Deux states couplés — l'exclusivité repose sur des setters synchronisés à la main
+const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
+const [dataModule, setDataModule]       = useState<ModuleType | null>(null)
+const togglePreview = (t: ModuleType) => { setPreviewModule(p => p === t ? null : t); setDataModule(null) }
+const toggleData    = (t: ModuleType) => { setDataModule(p => p === t ? null : t); setPreviewModule(null) }
+// → un oubli de `setDataModule(null)` quelque part = les deux panneaux ouverts à la fois
+
+// ✅ Un state discriminé — l'exclusivité est structurelle, illégale à violer
+const [activePanel, setActivePanel] = useState<
+  { kind: 'preview' | 'data'; module: ModuleType } | null
+>(null)
+const isPreviewOpen = (t: ModuleType) => activePanel?.kind === 'preview' && activePanel.module === t
+const togglePreview = (t: ModuleType) =>
+  setActivePanel(p => p?.kind === 'preview' && p.module === t ? null : { kind: 'preview', module: t })
+```
+
+Vaut aussi pour les **opérations concurrentes** d'un même groupe : `unlockingModule`
+(un type) + `revokingModuleId` (une row id) → une seule bascule à la fois →
+`{ op: 'unlock'; type } | { op: 'revoke'; id } | null`. Exposer des **helpers de
+lecture** (`isPreviewOpen(type)`, `isModuleBusy(type, id)`) plutôt que répéter la
+comparaison brute dans le JSX — un seul endroit à faire évoluer.
+
+Corollaire — **un enfant reçoit le booléen dérivé, pas le state brut.** Une feuille
+qui ne gère qu'un module ne reçoit pas `previewModule: ModuleType | null` pour le
+comparer elle-même à sa constante : elle reçoit `previewOpen: boolean`. La dérivation
+(`isPreviewOpen('x')`) reste chez le parent qui possède le state.
+
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> `PatientModulesTab` portait 4 states couplés deux à deux (`previewModule`/`dataModule`
+> exclusifs ; `unlockingModule`/`revokingModuleId` = une seule bascule). Fusionnés en
+> `activePanel` + `busyModule` discriminés, avec helpers `isPreviewOpen`/`isDataOpen`/
+> `isModuleBusy` ; la carte enfant `MedicationSideEffectsCard` est passée de 3 props
+> `ModuleType | null` à 3 booléens `loading`/`previewOpen`/`dataOpen`.
 
 ## Design system
 
