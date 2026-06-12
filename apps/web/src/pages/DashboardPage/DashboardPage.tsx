@@ -82,6 +82,8 @@ export function DashboardPage() {
     setInviteModules(new Set())
   }, [])
 
+  const openInviteForm = useCallback(() => setShowInviteForm(true), [])
+
   const toggleInviteModule = useCallback((moduleType: ModuleType) => {
     setInviteModules(prev => {
       const next = new Set(prev)
@@ -138,9 +140,10 @@ export function DashboardPage() {
     : t('dashboard.subtitle_other', { count: patients.length })
 
   const filteredPatients = useMemo(() => {
+    const list = patientsQuery.data ?? []
     const tokens = tokenizeSearch(searchQuery)
-    if (tokens.length === 0) return patients
-    return patients.filter(p => {
+    if (tokens.length === 0) return list
+    return list.filter(p => {
       const haystack = [
         p.patient_first_name,
         p.patient_last_name,
@@ -149,7 +152,7 @@ export function DashboardPage() {
       ].filter(Boolean).join(' ')
       return matchesAllTokens(haystack, tokens)
     })
-  }, [patients, searchQuery])
+  }, [patientsQuery.data, searchQuery])
 
   return (
     <Layout>
@@ -159,7 +162,7 @@ export function DashboardPage() {
             <h1 className="dashboard__title">{t('dashboard.title')}</h1>
             <p className="dashboard__subtitle">{patientSubtitle}</p>
           </div>
-          <Button onClick={() => setShowInviteForm(true)}>
+          <Button onClick={openInviteForm}>
             {t('dashboard.invite_button')}
           </Button>
         </div>
