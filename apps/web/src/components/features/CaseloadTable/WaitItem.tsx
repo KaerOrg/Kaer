@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
+import { Button } from '../../ui/Button'
 import type { CaseloadWait, CaseloadWaitInput } from '../../../lib/caseload.types'
 
 export interface WaitItemProps {
@@ -52,14 +53,16 @@ function WaitItemComponent({ wait, onPatch, onDelete }: WaitItemProps) {
         onBlur={handleRelanceBlur}
         aria-label={t('file_active.wait.relance_label')}
       />
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="xs"
+        category="danger"
         className="wait-item__delete"
+        icon={<Trash2 size={14} />}
         onClick={handleDelete}
         aria-label={t('file_active.wait.delete_label')}
-      >
-        <Trash2 size={14} />
-      </button>
+      />
     </div>
   )
 }

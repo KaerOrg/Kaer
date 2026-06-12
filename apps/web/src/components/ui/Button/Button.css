@@ -54,10 +54,55 @@
   color: var(--color-text);
 }
 
+/* Outline : transparent + bordure, accent primaire au survol. Supporte l'état
+   bascule via aria-pressed (fond primary-light quand actif). */
+.btn--outline {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+.btn--outline:hover:not(:disabled) {
+  background: var(--color-primary-light, #eef2ff);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.btn--outline[aria-pressed='true'] {
+  background: var(--color-primary-light, #eef2ff);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Catégories sémantiques — accent au survol / état actif, sur variantes transparentes.
+   Au repos le bouton reste neutre (ghost/outline) ; la couleur n'apparaît qu'à
+   l'interaction ou quand aria-pressed est actif (boutons bascule). */
+.btn--cat-danger.btn--ghost:hover:not(:disabled),
+.btn--cat-danger.btn--outline:hover:not(:disabled),
+.btn--cat-danger.btn--ghost[aria-pressed='true'],
+.btn--cat-danger.btn--outline[aria-pressed='true'] {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.btn--cat-success.btn--ghost:hover:not(:disabled),
+.btn--cat-success.btn--outline:hover:not(:disabled),
+.btn--cat-success.btn--ghost[aria-pressed='true'],
+.btn--cat-success.btn--outline[aria-pressed='true'] {
+  background: var(--color-success-light);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
 /* Sizes */
+.btn--xs { padding: 4px 8px; font-size: 12px; gap: 4px; }
 .btn--sm { padding: 6px 12px; font-size: 13px; }
 .btn--md { padding: 9px 18px; font-size: 14px; }
 .btn--lg { padding: 12px 24px; font-size: 15px; }
+
+/* Icône-seule : padding carré, l'horizontal s'aligne sur le vertical de la taille. */
+.btn--icon-only.btn--xs { padding: 4px; }
+.btn--icon-only.btn--sm { padding: 6px; }
+.btn--icon-only.btn--md { padding: 9px; }
+.btn--icon-only.btn--lg { padding: 12px; }
 
 /* Spinner */
 .btn__spinner {

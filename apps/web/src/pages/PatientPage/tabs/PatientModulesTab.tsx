@@ -196,14 +196,16 @@ export function PatientModulesTab({
             }}
             actions={
               <>
-                <button
-                  className={`preview-toggle-btn ${isPreviewOpen('psychoeducation') ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isPreviewOpen('psychoeducation')}
+                  icon={isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
                   onClick={() => togglePreview('psychoeducation')}
                   title={t('patient.patient_view')}
                 >
-                  {isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
-                </button>
+                </Button>
                 {unlocked && mod && psycho.mode !== 'edit' && (
                   <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
                     {t('patient.psycho_edit_cards')}
@@ -311,14 +313,16 @@ export function PatientModulesTab({
             }}
             actions={unlocked && mod && !crisis.open ? (
               <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  className={`preview-toggle-btn ${isPreviewOpen('crisis_plan') ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isPreviewOpen('crisis_plan')}
+                  icon={isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
                   onClick={() => togglePreview('crisis_plan')}
                   aria-label={isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
                 >
-                  {isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
                   {isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
-                </button>
+                </Button>
                 <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
                   {t('patient.crisis_configure')}
                 </Button>
@@ -577,26 +581,28 @@ export function PatientModulesTab({
             actions={
               <>
                 {scale.hasPreview && (
-                  <button
-                    type="button"
-                    className={`preview-toggle-btn${isPreviewOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isPreviewOpen(moduleType)}
+                    icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                     onClick={() => togglePreview(moduleType)}
                     title={t('patient.patient_view')}
                   >
-                    {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                     {t('patient.preview_button')}
-                  </button>
+                  </Button>
                 )}
                 {unlocked && mod && (
-                  <button
-                    type="button"
-                    className={`preview-toggle-btn${isDataOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isDataOpen(moduleType)}
+                    icon={<LineChart size={14} />}
                     onClick={() => toggleData(moduleType)}
                     title={t('patient.data_button')}
                   >
-                    <LineChart size={14} />
                     {t('patient.data_button')}
-                  </button>
+                  </Button>
                 )}
               </>
             }
@@ -635,33 +641,36 @@ export function PatientModulesTab({
           actions={
             <>
               {unlocked && mod && (
-                <button
-                  type="button"
-                  className="module-card__notif-btn"
+                <Button
+                  variant="outline"
+                  size="xs"
+                  icon={<Bell size={14} />}
+                  aria-label={t('notifications.configure_button')}
                   title={t('notifications.configure_button')}
                   onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
-                >
-                  <Bell size={14} />
-                </button>
+                />
               )}
-              <button
-                className={`preview-toggle-btn ${isPreviewOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
+              <Button
+                variant="outline"
+                size="xs"
+                aria-pressed={isPreviewOpen(moduleType)}
+                icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                 onClick={() => togglePreview(moduleType)}
                 title={t('patient.patient_view')}
               >
-                {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
-              </button>
+              </Button>
               {unlocked && mod && (
-                <button
-                  type="button"
-                  className={`preview-toggle-btn ${isDataOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isDataOpen(moduleType)}
+                  icon={<LineChart size={14} />}
                   onClick={() => toggleData(moduleType)}
                   title={t('patient.data_button')}
                 >
-                  <LineChart size={14} />
                   {t('patient.data_button')}
-                </button>
+                </Button>
               )}
             </>
           }

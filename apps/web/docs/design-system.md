@@ -275,14 +275,40 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
 <Button variant="primary" size="md" loading={saving} onClick={onSave}>
   {t('common.save')}
 </Button>
+
+{/* Icône + label */}
+<Button variant="primary" icon={<Plus size={16} />} onClick={onAdd}>
+  {t('patient.add_module_button')}
+</Button>
+
+{/* Icône-seule : pas de children → carré. aria-label OBLIGATOIRE. */}
+<Button variant="outline" size="xs" icon={<Bell size={14} />} aria-label={t('notifications.configure_button')} onClick={onNotif} />
+
+{/* Bouton bascule (toggle) : variante outline + aria-pressed pour l'état actif */}
+<Button variant="outline" size="xs" aria-pressed={open} icon={open ? <EyeOff size={14} /> : <Eye size={14} />} onClick={toggle}>
+  {t('patient.preview_button')}
+</Button>
 ```
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
-| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost'` | `'primary'` | Style visuel |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Taille |
-| `loading` | `boolean` | `false` | Affiche un spinner et désactive le bouton |
-| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-*`… |
+| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost' \| 'outline'` | `'primary'` | Style visuel. `outline` = transparent bordé, accent primaire au survol ; supporte l'état bascule via `aria-pressed` |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Taille. `xs` = compact (boutons d'action inline d'une carte / d'un tableau) |
+| `category` | `'neutral' \| 'danger' \| 'success'` | `'neutral'` | Accent sémantique appliqué **au survol et à l'état `aria-pressed`** (sur `ghost`/`outline`). `danger` → rouge (supprimer), `success` → vert (valider). Au repos le bouton reste neutre |
+| `loading` | `boolean` | `false` | Affiche un spinner (à la place de `icon`) et désactive le bouton |
+| `icon` | `ReactNode` | — | Icône optionnelle. **Avec** `children` → icône à gauche du label. **Sans** `children` → bouton icône-seule (carré `btn--icon-only`) → fournir `aria-label` |
+| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`… |
+
+> **Bouton-icône d'action** (supprimer, valider, basculer dans un tableau / une
+> liste) : `<Button variant="ghost" size="xs" icon={…} category="danger" aria-label={…} />`.
+> Ne **pas** écrire un `<button>` ad hoc avec son propre CSS rouge-au-survol — c'est
+> exactement ce que `category` couvre.
+
+> **Bouton icône-seule** : ne pas écrire un `<button>` ad hoc pour une icône cliquable
+> — passer `icon` sans `children`. L'exclusivité (icône-seule vs icône+label) est
+> dérivée de la présence de `children`, pas d'une prop booléenne.
+> **Bouton bascule** : `variant="outline"` + `aria-pressed={actif}` ; l'état actif
+> (fond `--color-primary-light`) est porté par le sélecteur `.btn--outline[aria-pressed='true']`.
 
 ### `Card`
 

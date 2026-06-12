@@ -216,16 +216,9 @@
 .editable-name__text--clickable { cursor: pointer; }
 .editable-name__text--clickable:hover { text-decoration: underline; }
 
+/* Bouton crayon via <Button variant="ghost" /> — ne reste que la révélation au
+   survol de la ligne (affordance contextuelle au tableau). */
 .editable-name__edit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
   opacity: 0;
   flex-shrink: 0;
   transition: opacity 0.12s;
@@ -233,8 +226,6 @@
 
 .caseload-row:hover .editable-name__edit,
 .editable-name__edit:focus-visible { opacity: 1; }
-
-.editable-name__edit:hover { color: var(--color-primary); background: var(--color-bg); }
 
 .editable-name__input {
   flex: 1;
@@ -250,21 +241,7 @@
 
 .editable-name__input:focus { outline: none; }
 
-.editable-name__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.editable-name__btn:hover { background: var(--color-bg); }
-.editable-name__btn--save { color: var(--color-success); }
+.editable-name__btn { flex-shrink: 0; }
 
 .caseload-input:hover,
 .caseload-select:hover {
@@ -505,36 +482,10 @@
 .action-item__due-label--today   { color: var(--color-warning); font-weight: 600; }
 .action-item__due-label--upcoming { color: var(--color-text-muted); }
 
-.action-item__delete {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.action-item__delete:hover { color: var(--color-danger); background: var(--color-danger-light); }
-
-.action-item__urgent {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.action-item__urgent:hover { color: var(--color-danger); background: var(--color-danger-light); }
-.action-item__urgent--on { color: var(--color-danger); }
+/* Boutons-icône via <Button variant="ghost" category="danger" /> — ne reste que
+   la contrainte de mise en page propre au tableau. */
+.action-item__delete,
+.action-item__urgent { flex-shrink: 0; }
 
 .action-list__add {
   display: flex;
@@ -564,19 +515,6 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
-}
-
-.action-list__add-btn,
-.wait-list__add-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  cursor: pointer;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
 }
 
 /* ---- Panneau dépliable : sections en cartes teintées (couleurs douces) ---- */
@@ -693,20 +631,7 @@
   flex-shrink: 0;
 }
 
-.wait-item__delete {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.wait-item__delete:hover { color: var(--color-danger); background: var(--color-danger-light); }
+.wait-item__delete { flex-shrink: 0; }
 
 .wait-list__add {
   display: flex;

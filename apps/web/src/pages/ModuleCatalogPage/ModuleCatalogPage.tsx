@@ -209,14 +209,15 @@ export function ModuleCatalogPage() {
                           ),
                         }}
                         actions={!isComingSoon ? (
-                          <button
-                            className="preview-toggle-btn"
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            icon={<Eye size={12} />}
                             onClick={() => navigate(`/modules/preview/${mod.id}`)}
                             title={t('patient.patient_view')}
                           >
-                            <Eye size={12} />
                             {t('patient.preview_button')}
-                          </button>
+                          </Button>
                         ) : undefined}
                       >
                         {isComingSoon ? (
