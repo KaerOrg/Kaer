@@ -61,10 +61,18 @@ export function PatientModulesTab({
   const { t, i18n } = useTranslation()
 
   const [scaleMeta, setScaleMeta] = useState<ScaleMetaRow[]>([])
-  const [unlockingModule, setUnlockingModule] = useState<ModuleType | null>(null)
-  const [revokingModuleId, setRevokingModuleId] = useState<string | null>(null)
-  const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
-  const [dataModule, setDataModule] = useState<ModuleType | null>(null)
+  // Opération de bascule en cours — une seule à la fois. `unlock` cible un type de
+  // module (la row n'existe pas encore), `revoke` une row déjà déverrouillée. Un
+  // state unique discriminé plutôt que deux states couplés (unlocking + revoking).
+  const [busyModule, setBusyModule] = useState<
+    { op: 'unlock'; type: ModuleType } | { op: 'revoke'; id: string } | null
+  >(null)
+  // Panneau ouvert sous une carte — aperçu OU données, jamais les deux. L'exclusivité
+  // est portée structurellement par ce state unique, plus par deux states à remettre
+  // à null en miroir à chaque bascule.
+  const [activePanel, setActivePanel] = useState<
+    { kind: 'preview' | 'data'; module: ModuleType } | null
+  >(null)
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -91,15 +99,34 @@ export function PatientModulesTab({
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
 
+  // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
+  const isPreviewOpen = useCallback(
+    (type: ModuleType) => activePanel?.kind === 'preview' && activePanel.module === type,
+    [activePanel],
+  )
+  const isDataOpen = useCallback(
+    (type: ModuleType) => activePanel?.kind === 'data' && activePanel.module === type,
+    [activePanel],
+  )
+  // Carte occupée : déverrouillage de ce type, ou révocation de cette row.
+  const isModuleBusy = useCallback(
+    (type: ModuleType, modId: string | undefined) =>
+      (busyModule?.op === 'unlock' && busyModule.type === type) ||
+      (busyModule?.op === 'revoke' && busyModule.id === modId),
+    [busyModule],
+  )
+
   // Aperçu et Données sont mutuellement exclusifs : ouvrir l'un ferme l'autre.
   const togglePreview = useCallback((type: ModuleType) => {
-    setPreviewModule(prev => (prev === type ? null : type))
-    setDataModule(null)
+    setActivePanel(prev =>
+      prev?.kind === 'preview' && prev.module === type ? null : { kind: 'preview', module: type },
+    )
   }, [])
 
   const toggleData = useCallback((type: ModuleType) => {
-    setDataModule(prev => (prev === type ? null : type))
-    setPreviewModule(null)
+    setActivePanel(prev =>
+      prev?.kind === 'data' && prev.module === type ? null : { kind: 'data', module: type },
+    )
   }, [])
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
@@ -111,17 +138,17 @@ export function PatientModulesTab({
     isUnlocked(type) || scaleMeta.find(s => s.id === type)?.noToggle === true
 
   const unlockModule = useCallback(async (moduleType: ModuleType) => {
-    setUnlockingModule(moduleType)
+    setBusyModule({ op: 'unlock', type: moduleType })
     const result = await unlockStandardModule(patientId, practitionerId, moduleType)
     if (result.ok) await onReloadModules()
-    setUnlockingModule(null)
+    setBusyModule(null)
   }, [patientId, practitionerId, onReloadModules])
 
   const revokeModule = useCallback(async (moduleId: string) => {
-    setRevokingModuleId(moduleId)
+    setBusyModule({ op: 'revoke', id: moduleId })
     await revokeModuleService(moduleId)
     await onReloadModules()
-    setRevokingModuleId(null)
+    setBusyModule(null)
   }, [onReloadModules])
 
   // ── Rendu d'une carte module ─────────────────────────────────────────────
@@ -158,7 +185,7 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' || previewModule === 'psychoeducation' ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' || isPreviewOpen('psychoeducation') ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -170,11 +197,11 @@ export function PatientModulesTab({
             actions={
               <>
                 <button
-                  className={`preview-toggle-btn ${previewModule === 'psychoeducation' ? 'preview-toggle-btn--active' : ''}`}
+                  className={`preview-toggle-btn ${isPreviewOpen('psychoeducation') ? 'preview-toggle-btn--active' : ''}`}
                   onClick={() => togglePreview('psychoeducation')}
                   title={t('patient.patient_view')}
                 >
-                  {previewModule === 'psychoeducation' ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
                 </button>
                 {unlocked && mod && psycho.mode !== 'edit' && (
@@ -217,7 +244,7 @@ export function PatientModulesTab({
                 )}
               </>
             )}
-            {previewModule === 'psychoeducation' && (
+            {isPreviewOpen('psychoeducation') && (
               <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
             )}
           </Card>
@@ -273,24 +300,24 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${(crisis.open || previewModule === 'crisis_plan') && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${(crisis.open || isPreviewOpen('crisis_plan')) && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
               icon: modIcon,
               title: t('modules.crisis_plan.label'),
               subtitle: t('modules.crisis_plan.description'),
-              right: moduleToggle(unlocked, unlockingModule === moduleType, handleCrisisToggle),
+              right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), handleCrisisToggle),
             }}
             actions={unlocked && mod && !crisis.open ? (
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
-                  className={`preview-toggle-btn ${previewModule === 'crisis_plan' ? 'preview-toggle-btn--active' : ''}`}
+                  className={`preview-toggle-btn ${isPreviewOpen('crisis_plan') ? 'preview-toggle-btn--active' : ''}`}
                   onClick={() => togglePreview('crisis_plan')}
-                  aria-label={previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                  aria-label={isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
                 >
-                  {previewModule === 'crisis_plan' ? <EyeOff size={14} /> : <Eye size={14} />}
-                  {previewModule === 'crisis_plan' ? t('patient.hide_preview') : t('patient.show_preview')}
+                  {isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
                 </button>
                 <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
                   {t('patient.crisis_configure')}
@@ -307,7 +334,7 @@ export function PatientModulesTab({
                 )}
               </div>
             )}
-            {previewModule === 'crisis_plan' && unlocked && (
+            {isPreviewOpen('crisis_plan') && unlocked && (
               <ModulePreviewPanel moduleType="crisis_plan" color={modItem.color} />
             )}
           </Card>
@@ -431,9 +458,9 @@ export function PatientModulesTab({
           mod={mod}
           patientId={patientId}
           unlocked={unlocked}
-          unlockingModule={unlockingModule}
-          previewModule={previewModule}
-          dataModule={dataModule}
+          loading={isModuleBusy('medication_side_effects', mod?.id)}
+          previewOpen={isPreviewOpen('medication_side_effects')}
+          dataOpen={isDataOpen('medication_side_effects')}
           medEffects={medEffects}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
@@ -537,13 +564,13 @@ export function PatientModulesTab({
             {t('patient.cssrs_evaluations')}
           </button>
         )
-        : moduleToggle(unlocked, unlockingModule === moduleType || revokingModuleId === (mod?.id ?? ''), () => {
+        : moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
             if (unlocked && mod) revokeModule(mod.id)
             else unlockModule(moduleType)
           })
 
       return (
-        <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType || dataModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
             header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), subtitle: t(`scales.full_title.${moduleType}`), right }}
@@ -552,18 +579,18 @@ export function PatientModulesTab({
                 {scale.hasPreview && (
                   <button
                     type="button"
-                    className={`preview-toggle-btn${previewModule === moduleType ? ' preview-toggle-btn--active' : ''}`}
+                    className={`preview-toggle-btn${isPreviewOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
                     onClick={() => togglePreview(moduleType)}
                     title={t('patient.patient_view')}
                   >
-                    {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                     {t('patient.preview_button')}
                   </button>
                 )}
                 {unlocked && mod && (
                   <button
                     type="button"
-                    className={`preview-toggle-btn${dataModule === moduleType ? ' preview-toggle-btn--active' : ''}`}
+                    className={`preview-toggle-btn${isDataOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
                     onClick={() => toggleData(moduleType)}
                     title={t('patient.data_button')}
                   >
@@ -585,22 +612,22 @@ export function PatientModulesTab({
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
               </div>
             )}
-            {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} />}
-            {dataModule === moduleType && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
+            {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} />}
+            {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
           </Card>
         </div>
       )
     }
 
     return (
-      <div key={moduleType} className={`module-card-wrapper-block ${previewModule === moduleType || dataModule === moduleType ? 'module-card-wrapper-block--wide' : ''}`}>
+      <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
         <Card
           className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
           header={{
             icon: modIcon,
             title: t(`modules.${moduleType}.label`),
             subtitle: t(`modules.${moduleType}.description`),
-            right: moduleToggle(unlocked, unlockingModule === moduleType || revokingModuleId === (mod?.id ?? ''), () => {
+            right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
               if (unlocked && mod) revokeModule(mod.id)
               else unlockModule(moduleType)
             }),
@@ -618,17 +645,17 @@ export function PatientModulesTab({
                 </button>
               )}
               <button
-                className={`preview-toggle-btn ${previewModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                className={`preview-toggle-btn ${isPreviewOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
                 onClick={() => togglePreview(moduleType)}
                 title={t('patient.patient_view')}
               >
-                {previewModule === moduleType ? <EyeOff size={14} /> : <Eye size={14} />}
+                {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
               </button>
               {unlocked && mod && (
                 <button
                   type="button"
-                  className={`preview-toggle-btn ${dataModule === moduleType ? 'preview-toggle-btn--active' : ''}`}
+                  className={`preview-toggle-btn ${isDataOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
                   onClick={() => toggleData(moduleType)}
                   title={t('patient.data_button')}
                 >
@@ -645,10 +672,10 @@ export function PatientModulesTab({
               {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
             </div>
           )}
-          {(previewModule === moduleType || dataModule === moduleType) && (
+          {(isPreviewOpen(moduleType) || isDataOpen(moduleType)) && (
             <>
-              {previewModule === moduleType && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
-              {dataModule === moduleType && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
+              {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
+              {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
             </>
           )}
         </Card>

@@ -374,6 +374,53 @@ const noteRef = useRef<HTMLTextAreaElement>(null)
 // Reset : if (noteRef.current) noteRef.current.value = ''
 ```
 
+## États mutuellement exclusifs — un seul `useState` discriminé, pas N states couplés
+
+> **Règle : quand plusieurs `useState` ne peuvent jamais être actifs en même temps,
+> ou décrivent les variantes d'une même chose, ils fusionnent en UN state à union
+> discriminée.** Plusieurs `useState` que chaque handler doit remettre à `null` « en
+> miroir » pour préserver une exclusivité sont un bug d'invariant en attente.
+
+Le test : *« deux de ces states peuvent-ils être non-nuls en même temps ? »*
+Si la réponse devrait toujours être « non », alors deux states séparés rendent cet
+état illégal **représentable** — donc atteignable. Un state unique le rend
+**irreprésentable**.
+
+```ts
+// ❌ Deux states couplés — l'exclusivité repose sur des setters synchronisés à la main
+const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
+const [dataModule, setDataModule]       = useState<ModuleType | null>(null)
+const togglePreview = (t: ModuleType) => { setPreviewModule(p => p === t ? null : t); setDataModule(null) }
+const toggleData    = (t: ModuleType) => { setDataModule(p => p === t ? null : t); setPreviewModule(null) }
+// → un oubli de `setDataModule(null)` quelque part = les deux panneaux ouverts à la fois
+
+// ✅ Un state discriminé — l'exclusivité est structurelle, illégale à violer
+const [activePanel, setActivePanel] = useState<
+  { kind: 'preview' | 'data'; module: ModuleType } | null
+>(null)
+const isPreviewOpen = (t: ModuleType) => activePanel?.kind === 'preview' && activePanel.module === t
+const togglePreview = (t: ModuleType) =>
+  setActivePanel(p => p?.kind === 'preview' && p.module === t ? null : { kind: 'preview', module: t })
+```
+
+Vaut aussi pour les **opérations concurrentes** d'un même groupe : `unlockingModule`
+(un type) + `revokingModuleId` (une row id) → une seule bascule à la fois →
+`{ op: 'unlock'; type } | { op: 'revoke'; id } | null`. Exposer des **helpers de
+lecture** (`isPreviewOpen(type)`, `isModuleBusy(type, id)`) plutôt que répéter la
+comparaison brute dans le JSX — un seul endroit à faire évoluer.
+
+Corollaire — **un enfant reçoit le booléen dérivé, pas le state brut.** Une feuille
+qui ne gère qu'un module ne reçoit pas `previewModule: ModuleType | null` pour le
+comparer elle-même à sa constante : elle reçoit `previewOpen: boolean`. La dérivation
+(`isPreviewOpen('x')`) reste chez le parent qui possède le state.
+
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> `PatientModulesTab` portait 4 states couplés deux à deux (`previewModule`/`dataModule`
+> exclusifs ; `unlockingModule`/`revokingModuleId` = une seule bascule). Fusionnés en
+> `activePanel` + `busyModule` discriminés, avec helpers `isPreviewOpen`/`isDataOpen`/
+> `isModuleBusy` ; la carte enfant `MedicationSideEffectsCard` est passée de 3 props
+> `ModuleType | null` à 3 booléens `loading`/`previewOpen`/`dataOpen`.
+
 ## Design system
 
 - Glassmorphisme : `GlassCard` + `BlurView`
