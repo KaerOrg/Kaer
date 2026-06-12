@@ -387,12 +387,14 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 <Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
 <Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
 <Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+<Chip size="sm" tone="info" label={t('tags.anxiety.label')} />
 ```
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `label` | `string` | — | Texte (obligatoire) |
 | `tone` | `'neutral' \| 'info' \| 'warning'` | `'neutral'` | Couleur (ignoré si `selectable`) |
+| `size` | `'sm' \| 'md'` | `'md'` | `sm` = compacte (cartes denses, ex. `ModuleTagChips`) |
 | `icon` | `ReactNode` | — | Icône en tête |
 | `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
 | `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
@@ -633,6 +635,74 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 | `.scale-meta__eval-badge--hetero` | Variante verte |
 | `.scale-meta__category-chip` | Chip nosologique gris |
 | `.scale-meta__age-chip` | Chip d'âge — couleur appliquée en inline via `AGE_BADGE_CONFIG` |
+
+---
+
+## Composants `ModuleFilterBar` et `ModuleTagChips`
+
+> **Composants métier (`features/`).** Ils connaissent la taxonomie des modules
+> (`ModuleTaxonomy` du `moduleCatalogService`, clés i18n `tags.*` /
+> `tag_dimensions.*`) — pas des primitives `ui/`. Tous deux **présentationnels** :
+> l'état des filtres est possédé par la page via le hook
+> [`useTagFilters`](../src/hooks/useTagFilters.ts) ; la logique de filtrage pure
+> est dans [`lib/moduleFilter.ts`](../src/lib/moduleFilter.ts).
+> Spec fonctionnelle : [`docs/spec/module-taxonomy.md`](../../../docs/spec/module-taxonomy.md).
+
+### `ModuleFilterBar`
+
+Fichier : `components/features/ModuleFilterBar/ModuleFilterBar.tsx`
+
+Barre de filtres à facettes de l'armoire thérapeutique : une rangée de puces
+sélectionnables (`Chip selectable`) par dimension (indication, public, approche) +
+compteur « N sur M modules » + bouton de réinitialisation (visible seulement si un
+filtre est actif). Utilisée par `ModuleCatalogPage` (armoire de config) et
+`PatientModulesTab` (vue active + modale d'ajout).
+
+```tsx
+const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
+
+<ModuleFilterBar
+  taxonomy={taxonomy}
+  activeFilters={activeFilters}
+  onToggleTag={toggleTag}
+  onReset={resetFilters}
+  resultCount={visibleCount}
+  totalCount={totalCount}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `taxonomy` | `ModuleTaxonomy` | Axes + tags chargés en base (`fetchModuleTaxonomy`) |
+| `activeFilters` | `ActiveTagFilters` | Sélection courante (`Map<dimension, Set<tag>>`) |
+| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche une puce |
+| `onReset` | `() => void` | Vide toute la sélection |
+| `resultCount` | `number` | Modules visibles après filtrage |
+| `totalCount` | `number` | Total de modules avant filtrage |
+
+`ModuleFilterChip` (fichier voisin) est la puce individuelle, mémoïsée (`React.memo`
++ callback figé) — zéro handler recréé par puce au re-rendu de la barre.
+
+### `ModuleTagChips`
+
+Fichier : `components/features/ModuleTagChips/ModuleTagChips.tsx`
+
+Puces de tags d'un module sur sa carte : une ligne par dimension (indication en
+`tone="info"`, public en `tone="neutral"`), via `Chip size="sm"`. L'approche n'est
+pas affichée sur les cartes (réservée aux filtres — `CARD_DIMENSIONS` dans
+`lib/moduleFilter.ts`). Rend `null` si le module ne porte aucun tag. À utiliser
+comme enfant de `Card`.
+
+```tsx
+<Card header={{ ... }}>
+  <ModuleTagChips tagIds={taxonomy.tagsByModule.get(mod.id)} taxonomy={taxonomy} />
+</Card>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `tagIds` | `ReadonlySet<string> \| undefined` | Tags portés par le module (`taxonomy.tagsByModule`) |
+| `taxonomy` | `Pick<ModuleTaxonomy, 'tagsByDimension'>` | Ordre et regroupement des tags par dimension |
 
 ---
 

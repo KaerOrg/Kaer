@@ -9,6 +9,7 @@ import {
   fetchComingSoonModuleIds,
   fetchInviteCategories,
   fetchModuleCategories,
+  fetchModuleTaxonomy,
 } from './moduleCatalogService'
 
 function makeChain(result: { data: unknown; error?: unknown } = { data: null, error: null }) {
@@ -112,5 +113,52 @@ describe('moduleCatalogService.fetchInviteCategories', () => {
     const result = await fetchInviteCategories()
 
     expect(result).toEqual([])
+  })
+})
+
+describe('moduleCatalogService.fetchModuleTaxonomy', () => {
+  it('groupe les tags par dimension et les liaisons par module', async () => {
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(makeChain({
+        data: [
+          { id: 'indication', sort_order: 1 },
+          { id: 'population', sort_order: 2 },
+        ],
+        error: null,
+      }) as never)
+      .mockReturnValueOnce(makeChain({
+        data: [
+          { id: 'anxiety', dimension_id: 'indication', sort_order: 10 },
+          { id: 'ocd',     dimension_id: 'indication', sort_order: 20 },
+          { id: 'teen',    dimension_id: 'population', sort_order: 20 },
+        ],
+        error: null,
+      }) as never)
+      .mockReturnValueOnce(makeChain({
+        data: [
+          { module_id: 'fear_thermometer', tag_id: 'anxiety' },
+          { module_id: 'fear_thermometer', tag_id: 'ocd' },
+          { module_id: 'grounding',        tag_id: 'anxiety' },
+        ],
+        error: null,
+      }) as never)
+
+    const result = await fetchModuleTaxonomy()
+
+    expect(result.dimensions.map(d => d.id)).toEqual(['indication', 'population'])
+    expect(result.tagsByDimension.get('indication')?.map(t => t.id)).toEqual(['anxiety', 'ocd'])
+    expect(result.tagsByDimension.get('population')?.map(t => t.id)).toEqual(['teen'])
+    expect(result.tagsByModule.get('fear_thermometer')).toEqual(new Set(['anxiety', 'ocd']))
+    expect(result.tagsByModule.get('grounding')).toEqual(new Set(['anxiety']))
+  })
+
+  it('renvoie des structures vides si les requêtes échouent (data null)', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'boom' } }) as never)
+
+    const result = await fetchModuleTaxonomy()
+
+    expect(result.dimensions).toEqual([])
+    expect(result.tagsByDimension.size).toBe(0)
+    expect(result.tagsByModule.size).toBe(0)
   })
 })

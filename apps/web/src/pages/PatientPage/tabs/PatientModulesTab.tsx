@@ -10,8 +10,8 @@ import { Modal } from '../../../components/ui/Modal'
 import { SearchInput } from '../../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
-import { fetchModuleTaxonomy, type ModuleTaxonomy } from '../../../services/moduleCatalogService'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
+import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
@@ -32,8 +32,6 @@ import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
-
-const EMPTY_TAXONOMY: ModuleTaxonomy = { dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -70,26 +68,17 @@ export function PatientModulesTab({
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [taxonomy, setTaxonomy] = useState<ModuleTaxonomy>(EMPTY_TAXONOMY)
-  const [activeFilters, setActiveFilters] = useState<Map<string, Set<string>>>(new Map())
   const [searchQuery, setSearchQuery] = useState('')
+  const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 
   useEffect(() => {
     fetchScaleMeta().then(setScaleMeta)
-    fetchModuleTaxonomy().then(setTaxonomy)
   }, [])
 
-  const toggleTag = useCallback((dimensionId: string, tagId: string) => {
-    setActiveFilters(prev => {
-      const next = new Map(prev)
-      const selected = new Set(next.get(dimensionId))
-      if (selected.has(tagId)) { selected.delete(tagId) } else { selected.add(tagId) }
-      if (selected.size === 0) { next.delete(dimensionId) } else { next.set(dimensionId, selected) }
-      return next
-    })
+  const closeAddModal = useCallback(() => {
+    setShowAddModal(false)
+    setSearchQuery('')
   }, [])
-
-  const resetFilters = useCallback(() => setActiveFilters(new Map()), [])
 
   // Puces de tags (indication + public) d'un module — réutilisé par toutes les cartes.
   const tagChips = useCallback(
@@ -779,7 +768,7 @@ export function PatientModulesTab({
         <Modal
           title={t('patient.add_module_title')}
           icon={<Plus size={20} />}
-          onClose={() => { setShowAddModal(false); setSearchQuery('') }}
+          onClose={closeAddModal}
           maxWidth={920}
         >
           <div className="wardrobe__add">
