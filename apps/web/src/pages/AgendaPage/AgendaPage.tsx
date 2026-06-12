@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Settings2, CalendarPlus } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button/Button'
@@ -10,19 +11,15 @@ import { AppointmentModal } from '../../components/features/AppointmentModal'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { useAuthStore } from '../../store/authStore'
 import {
-  fetchAvailabilityRules,
   saveAvailabilityRule,
   deleteAvailabilityRule,
-  fetchExceptions,
-  fetchAppointmentsForWeek,
   createAppointment,
   updateAppointmentStatus,
   updateAppointmentNotes,
   rescheduleAppointment,
-  fetchAutoConfirmSetting,
   saveAutoConfirmSetting,
 } from '../../services/appointmentService'
-import { fetchPatientOptions } from '../../services/patientService'
+import { agendaQueries } from '../../hooks/queries'
 import type {
   AvailabilityRule,
   AvailabilityException,
@@ -31,6 +28,11 @@ import type {
 } from '../../lib/calendar.types'
 import type { PatientOption } from '../../services/patientService'
 import './AgendaPage.css'
+
+const EMPTY_RULES: AvailabilityRule[] = []
+const EMPTY_EXCEPTIONS: AvailabilityException[] = []
+const EMPTY_APPTS: AppointmentWithPatient[] = []
+const EMPTY_PATIENTS: PatientOption[] = []
 
 function getMondayOfWeek(d: Date): Date {
   const copy = new Date(d)
@@ -75,13 +77,28 @@ export function AgendaPage() {
 
   const [weekStart, setWeekStart] = useState<Date>(() => getMondayOfWeek(new Date()))
   const [showEditor, setShowEditor] = useState(false)
+  const queryClient = useQueryClient()
 
-  const [rules, setRules] = useState<AvailabilityRule[]>([])
-  const [exceptions, setExceptions] = useState<AvailabilityException[]>([])
-  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
-  const [patients, setPatients] = useState<PatientOption[]>([])
-  const [autoConfirm, setAutoConfirm] = useState(true)
-  const [loading, setLoading] = useState(true)
+  const practitionerId = practitioner?.id
+  const { from, to } = useMemo(
+    () => ({ from: toDateString(weekStart), to: toDateString(addDays(weekStart, 6)) }),
+    [weekStart],
+  )
+
+  const rulesQuery = useQuery(agendaQueries.rules(practitionerId))
+  const exceptionsQuery = useQuery(agendaQueries.exceptions(practitionerId, from, to))
+  const appointmentsQuery = useQuery(agendaQueries.appointmentsForWeek(practitionerId, from, to))
+  const patientsQuery = useQuery(agendaQueries.patientOptions(practitionerId))
+  const autoConfirmQuery = useQuery(agendaQueries.autoConfirm(practitionerId))
+
+  const rules = rulesQuery.data ?? EMPTY_RULES
+  const exceptions = exceptionsQuery.data ?? EMPTY_EXCEPTIONS
+  const appointments = appointmentsQuery.data ?? EMPTY_APPTS
+  const patients = patientsQuery.data ?? EMPTY_PATIENTS
+  const autoConfirm = autoConfirmQuery.data ?? true
+  const loading =
+    rulesQuery.isLoading || exceptionsQuery.isLoading || appointmentsQuery.isLoading ||
+    patientsQuery.isLoading || autoConfirmQuery.isLoading
 
   const [modal, setModal] = useState<ModalState>({ type: 'none' })
   const [filterQuery, setFilterQuery] = useState<string>('')
@@ -94,32 +111,13 @@ export function AgendaPage() {
     )
   }, [appointments, filterQuery])
 
-  const loadWeek = useCallback(async (pId: string, monday: Date) => {
-    const from = toDateString(monday)
-    const to = toDateString(addDays(monday, 6))
-    const [r, exc, appts] = await Promise.all([
-      fetchAvailabilityRules(pId),
-      fetchExceptions(pId, from, to),
-      fetchAppointmentsForWeek(pId, from, to),
-    ])
-    setRules(r)
-    setExceptions(exc)
-    setAppointments(appts)
-  }, [])
-
-  useEffect(() => {
-    if (!practitioner) return
-    setLoading(true)
-    Promise.all([
-      loadWeek(practitioner.id, weekStart),
-      fetchPatientOptions(practitioner.id),
-      fetchAutoConfirmSetting(practitioner.id),
-    ]).then(([, opts, autoC]) => {
-      setPatients(opts)
-      setAutoConfirm(autoC)
-      setLoading(false)
+  // Recharge les RDV (et exceptions) de la semaine courante après une mutation.
+  const invalidateWeek = useCallback(() => {
+    if (!practitionerId) return Promise.resolve()
+    return queryClient.invalidateQueries({
+      queryKey: agendaQueries.appointmentsForWeek(practitionerId, from, to).queryKey,
     })
-  }, [practitioner, weekStart, loadWeek])
+  }, [queryClient, practitionerId, from, to])
 
   const goToToday = useCallback(() => setWeekStart(getMondayOfWeek(new Date())), [])
   const prevWeek = useCallback(() => setWeekStart(d => addDays(d, -7)), [])
@@ -128,25 +126,27 @@ export function AgendaPage() {
   const handleAddRule = useCallback(
     async (rule: Omit<AvailabilityRule, 'id' | 'created_at'>) => {
       const result = await saveAvailabilityRule(rule)
-      if (result.ok && practitioner) {
-        setRules(prev => [...prev, result.data!])
+      if (result.ok && practitionerId) {
+        await queryClient.invalidateQueries({ queryKey: agendaQueries.rules(practitionerId).queryKey })
       }
     },
-    [practitioner],
+    [practitionerId, queryClient],
   )
 
   const handleDeleteRule = useCallback(async (ruleId: string) => {
     await deleteAvailabilityRule(ruleId)
-    setRules(prev => prev.filter(r => r.id !== ruleId))
-  }, [])
+    if (practitionerId) {
+      await queryClient.invalidateQueries({ queryKey: agendaQueries.rules(practitionerId).queryKey })
+    }
+  }, [practitionerId, queryClient])
 
   const handleToggleAutoConfirm = useCallback(
     async (value: boolean) => {
-      if (!practitioner) return
-      await saveAutoConfirmSetting(practitioner.id, value)
-      setAutoConfirm(value)
+      if (!practitionerId) return
+      await saveAutoConfirmSetting(practitionerId, value)
+      queryClient.setQueryData(agendaQueries.autoConfirm(practitionerId).queryKey, value)
     },
-    [practitioner],
+    [practitionerId, queryClient],
   )
 
   const handleSlotClick = useCallback(
@@ -171,47 +171,47 @@ export function AgendaPage() {
         notes: notes || undefined,
       })
       if (result.ok) {
-        await loadWeek(practitioner.id, weekStart)
+        await invalidateWeek()
         setModal({ type: 'none' })
       }
       return result
     },
-    [practitioner, weekStart, loadWeek],
+    [practitioner, invalidateWeek],
   )
 
   const handleUpdateStatus = useCallback(
     async (id: string, status: AppointmentStatus) => {
       const result = await updateAppointmentStatus(id, status)
-      if (result.ok && practitioner) {
-        await loadWeek(practitioner.id, weekStart)
+      if (result.ok) {
+        await invalidateWeek()
         setModal({ type: 'none' })
       }
       return result
     },
-    [practitioner, weekStart, loadWeek],
+    [invalidateWeek],
   )
 
   const handleUpdateNotes = useCallback(
     async (id: string, notes: string) => {
       const result = await updateAppointmentNotes(id, notes)
-      if (result.ok && practitioner) {
-        await loadWeek(practitioner.id, weekStart)
+      if (result.ok) {
+        await invalidateWeek()
       }
       return result
     },
-    [practitioner, weekStart, loadWeek],
+    [invalidateWeek],
   )
 
   const handleReschedule = useCallback(
     async (id: string, newStartsAt: string, newEndsAt: string) => {
       const result = await rescheduleAppointment(id, newStartsAt, newEndsAt)
-      if (result.ok && practitioner) {
-        await loadWeek(practitioner.id, weekStart)
+      if (result.ok) {
+        await invalidateWeek()
         setModal({ type: 'none' })
       }
       return result
     },
-    [practitioner, weekStart, loadWeek],
+    [invalidateWeek],
   )
 
   const modalStartsAt = modal.type === 'create' ? modal.startsAt : null

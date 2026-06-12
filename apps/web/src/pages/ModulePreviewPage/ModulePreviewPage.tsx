@@ -1,22 +1,17 @@
-import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
 import { ModulePreviewPanel } from '../../components/features/ModulePreviewPanel'
-import { fetchModulePreviewKind, type PreviewKind } from '../../services/moduleService'
+import { catalogQueries } from '../../hooks/queries'
 import './ModulePreviewPage.css'
 
 export function ModulePreviewPage() {
   const { t } = useTranslation()
   const { moduleType } = useParams<{ moduleType: string }>()
   const navigate = useNavigate()
-  const [previewKind, setPreviewKind] = useState<PreviewKind | null>(null)
-
-  useEffect(() => {
-    if (!moduleType) return
-    fetchModulePreviewKind(moduleType).then(setPreviewKind)
-  }, [moduleType])
+  const previewKind = useQuery(catalogQueries.previewKind(moduleType)).data ?? null
 
   if (!moduleType) return null
 

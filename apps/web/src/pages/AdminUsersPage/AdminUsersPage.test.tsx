@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -39,10 +40,20 @@ function mockUsers() {
   vi.mocked(fetchAllUsers).mockResolvedValue({ ok: true, users: USERS as never })
 }
 
+// Rend la page enveloppée d'un QueryClient neuf (cache isolé, retry désactivé).
+function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AdminUsersPage />
+    </QueryClientProvider>,
+  )
+}
+
 describe('AdminUsersPage', () => {
   it('liste patients ET médecins', async () => {
     mockUsers()
-    render(<AdminUsersPage />)
+    renderPage()
     expect(await screen.findByText('ada@kaer.fr')).toBeInTheDocument()
     expect(screen.getByText('doc@kaer.fr')).toBeInTheDocument()
     // Badge de type présent pour les deux populations.
@@ -52,14 +63,14 @@ describe('AdminUsersPage', () => {
 
   it('affiche une erreur et notifie si le chargement échoue', async () => {
     vi.mocked(fetchAllUsers).mockResolvedValue({ ok: false, message: 'admin_list_users: accès refusé' })
-    render(<AdminUsersPage />)
+    renderPage()
     await waitFor(() => expect(mockToast.error).toHaveBeenCalled())
     expect(screen.queryByText('ada@kaer.fr')).not.toBeInTheDocument()
   })
 
   it('filtre par type « Médecins »', async () => {
     mockUsers()
-    render(<AdminUsersPage />)
+    renderPage()
     await screen.findByText('ada@kaer.fr')
 
     fireEvent.click(screen.getByText('Médecins'))
@@ -71,7 +82,7 @@ describe('AdminUsersPage', () => {
 
   it('recherche les patients par praticien', async () => {
     mockUsers()
-    render(<AdminUsersPage />)
+    renderPage()
     await screen.findByText('ada@kaer.fr')
 
     fireEvent.change(screen.getByLabelText('Filtrer par praticien'), { target: { value: 'Doc Gyneco' } })
@@ -85,7 +96,7 @@ describe('AdminUsersPage', () => {
 
   it('retire le patient de la liste après un effacement réussi', async () => {
     mockUsers()
-    render(<AdminUsersPage />)
+    renderPage()
     fireEvent.click(await screen.findByText('Ada Lovelace'))
     fireEvent.click(screen.getByTestId('erase-p1'))
 

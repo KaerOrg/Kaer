@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import {
   View,
   Text,
@@ -8,23 +8,23 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Plus, ChevronRight } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
-import {
-  fetchPatientAppointments,
-  cancelAppointment,
-  fetchPatientPractitioner,
-  type Appointment,
-} from '../services/appointmentService'
+import { type Appointment } from '../services/appointmentService'
+import { appointmentQueries, useCancelAppointment } from '../hooks/queries'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { colors, spacing, radius, fontSize } from '../theme'
 import type { AppStackParamList } from '../navigation/AppStack'
 import { EmptyState } from '../components/ui/EmptyState'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
+
+const EMPTY_APPTS: Appointment[] = []
 
 const STATUS_COLORS: Record<string, string> = {
   pending: colors.warning,
@@ -107,23 +107,19 @@ export default function AppointmentsScreen() {
   const { patient } = useAuthStore()
   const { showConfirm } = useConfirmDialog()
 
-  const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [practitionerId, setPractitionerId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const appointmentsQuery = useQuery(appointmentQueries.patientAppointments(patient?.id))
+  const practitionerQuery = useQuery(appointmentQueries.patientPractitioner(patient?.id))
+  const cancelMutation = useCancelAppointment(patient?.id)
 
-  const load = useCallback(async () => {
-    if (!patient) return
-    setLoading(true)
-    const [appts, pract] = await Promise.all([
-      fetchPatientAppointments(patient.id),
-      fetchPatientPractitioner(patient.id),
-    ])
-    setAppointments(appts)
-    setPractitionerId(pract?.id ?? null)
-    setLoading(false)
-  }, [patient])
+  const appointments = appointmentsQuery.data ?? EMPTY_APPTS
+  const practitionerId = practitionerQuery.data?.id ?? null
+  const loading = appointmentsQuery.isLoading || practitionerQuery.isLoading
 
-  useFocusEffect(useCallback(() => { load().catch(() => setLoading(false)) }, [load]))
+  const refetch = useCallback(() => {
+    appointmentsQuery.refetch()
+    practitionerQuery.refetch()
+  }, [appointmentsQuery, practitionerQuery])
+  useRefreshOnFocus(refetch)
 
   const handleCancel = useCallback((id: string) => {
     showConfirm({
@@ -131,12 +127,9 @@ export default function AppointmentsScreen() {
       message: t('agenda.appointment.cancel_confirm'),
       confirmLabel: t('common.delete'),
       destructive: true,
-      onConfirm: async () => {
-        await cancelAppointment(id)
-        void load()
-      },
+      onConfirm: () => cancelMutation.mutate(id),
     })
-  }, [t, load, showConfirm])
+  }, [t, cancelMutation, showConfirm])
 
   const handleReschedule = useCallback((id: string) => {
     if (!practitionerId) return

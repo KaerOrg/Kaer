@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -10,12 +10,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { useAuthStore } from '../store/authStore'
 import {
-  fetchPractitionerRules,
-  fetchPractitionerExceptions,
-  fetchBookedSlots,
   bookAppointment,
   rescheduleAppointment,
   computeAvailableSlots,
@@ -23,8 +21,13 @@ import {
   type AvailabilityException,
   type ComputedSlot,
 } from '../services/appointmentService'
+import { appointmentQueries } from '../hooks/queries'
 import { colors, spacing, radius, fontSize } from '../theme'
 import type { AppStackParamList } from '../navigation/AppStack'
+
+const EMPTY_RULES: AvailabilityRule[] = []
+const EMPTY_EXCEPTIONS: AvailabilityException[] = []
+const EMPTY_SLOTS: ComputedSlot[] = []
 
 type Route = RouteProp<AppStackParamList, 'BookAppointment'>
 type Nav = import('@react-navigation/native-stack').NativeStackNavigationProp<AppStackParamList>
@@ -73,15 +76,11 @@ export default function BookAppointmentScreen() {
   const { practitionerId, appointmentId } = route.params
   const isRescheduleMode = appointmentId !== undefined
   const { patient } = useAuthStore()
+  const queryClient = useQueryClient()
 
   const today = useMemo(() => new Date(), [])
   const [calendarDate, setCalendarDate] = useState<Date>(() => new Date(today.getFullYear(), today.getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [slots, setSlots] = useState<ComputedSlot[]>([])
-  const [rules, setRules] = useState<AvailabilityRule[]>([])
-  const [exceptions, setExceptions] = useState<AvailabilityException[]>([])
-  const [loading, setLoading] = useState(true)
-  const [slotsLoading, setSlotsLoading] = useState(false)
   const [booking, setBooking] = useState(false)
   const [success, setSuccess] = useState(false)
 
@@ -90,33 +89,34 @@ export default function BookAppointmentScreen() {
   const daysInMonth = getDaysInMonth(year, month)
   const firstDayOffset = getFirstDayOfMonth(year, month)
 
-  useEffect(() => {
-    setLoading(true)
-    const from = toDateString(new Date(year, month, 1))
-    const to = toDateString(new Date(year, month, daysInMonth))
-    Promise.all([
-      fetchPractitionerRules(practitionerId),
-      fetchPractitionerExceptions(practitionerId, from, to),
-    ]).then(([r, exc]) => {
-      setRules(r)
-      setExceptions(exc)
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [practitionerId, year, month, daysInMonth])
+  const { from, to } = useMemo(
+    () => ({
+      from: toDateString(new Date(year, month, 1)),
+      to: toDateString(new Date(year, month, daysInMonth)),
+    }),
+    [year, month, daysInMonth],
+  )
 
-  const loadSlots = useCallback(async (date: string) => {
-    setSlotsLoading(true)
-    const booked = await fetchBookedSlots(practitionerId, date, appointmentId)
-    const computed = computeAvailableSlots(rules, exceptions, booked, date)
-    setSlots(computed.filter(s => s.is_available))
-    setSlotsLoading(false)
-  }, [practitionerId, appointmentId, rules, exceptions])
+  const rulesQuery = useQuery(appointmentQueries.practitionerRules(practitionerId))
+  const exceptionsQuery = useQuery(appointmentQueries.practitionerExceptions(practitionerId, from, to))
+  const bookedSlotsQuery = useQuery(appointmentQueries.bookedSlots(practitionerId, selectedDate, appointmentId))
+
+  const rules = rulesQuery.data ?? EMPTY_RULES
+  const exceptions = exceptionsQuery.data ?? EMPTY_EXCEPTIONS
+  const loading = rulesQuery.isLoading || exceptionsQuery.isLoading
+  const slotsLoading = selectedDate != null && bookedSlotsQuery.isLoading
+
+  // Créneaux disponibles calculés côté client à partir des règles/exceptions/réservés.
+  const slots = useMemo(() => {
+    if (!selectedDate || !bookedSlotsQuery.data) return EMPTY_SLOTS
+    return computeAvailableSlots(rules, exceptions, bookedSlotsQuery.data, selectedDate)
+      .filter(s => s.is_available)
+  }, [rules, exceptions, bookedSlotsQuery.data, selectedDate])
 
   const handleDateSelect = useCallback((date: string) => {
     setSelectedDate(date)
     setSuccess(false)
-    void loadSlots(date)
-  }, [loadSlots])
+  }, [])
 
   const handleBook = useCallback(async (slot: ComputedSlot) => {
     if (!patient) return
@@ -139,11 +139,14 @@ export default function BookAppointmentScreen() {
       setSuccess(true)
       if (isRescheduleMode) {
         setTimeout(() => navigation.goBack(), 1500)
-      } else {
-        void loadSlots(selectedDate!)
+      } else if (selectedDate) {
+        // Le créneau réservé n'est plus disponible → recharge les créneaux du jour.
+        void queryClient.invalidateQueries({
+          queryKey: appointmentQueries.bookedSlots(practitionerId, selectedDate, appointmentId).queryKey,
+        })
       }
     }
-  }, [patient, practitionerId, appointmentId, isRescheduleMode, selectedDate, loadSlots, navigation])
+  }, [patient, practitionerId, appointmentId, isRescheduleMode, selectedDate, navigation, queryClient])
 
   const calendarDays = useMemo(() => {
     const days: (number | null)[] = Array(firstDayOffset).fill(null)
