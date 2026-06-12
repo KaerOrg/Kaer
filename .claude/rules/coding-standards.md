@@ -5,6 +5,15 @@
 - **Scalabilité d'abord** : chaque décision de design doit tenir à 10× la charge actuelle (patients, modules, praticiens).
 - **Composants réutilisables** : tout composant ou fonction utilisé (ou susceptible d'être utilisé) dans ≥2 contextes est extrait dans `src/components/` ou `packages/shared/`. Zéro duplication.
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La logique pure extraite (`lib/moduleFilter.ts`) était testée exhaustivement, mais
+> donnait un **faux sentiment de couverture** : les composants qui la consomment
+> (`ModuleFilterBar`, `ModuleTagChips` — callbacks, rendu conditionnel) n'avaient
+> aucun `.test.tsx`, et la nouvelle fonction `fetchModuleTaxonomy()` n'a pas été
+> ajoutée au `moduleCatalogService.test.ts` **existant**.
+> → Tester le helper pur ne dispense ni du test de rendu/interaction des composants,
+> ni d'**étendre le test du service** quand on lui ajoute une fonction. Checklist :
+> chaque fichier source créé OU chaque export ajouté = son test dans le même commit.
 - **Mocks synchronisés avec les exports** : tout renommage de fonction/hook exporté (`useModuleT` → `useModuleTranslation`) doit être répercuté dans **tous** les `jest.mock()`/`vi.mock()` qui le mentionnent. Un `grep` sur l'ancien nom avant de merger est obligatoire. Un mock périmé donne un faux sentiment de tests verts (la fonction mockée n'est jamais appelée, l'originale crashe en runtime).
 > **Cas rencontré — refonte-tolerance-detresse (2026-06-09) :**
 > Le renommage `useModuleT → useModuleTranslation` a cassé 5 suites de tests mobiles :
@@ -153,6 +162,15 @@ Mettre à jour le document de référence correspondant **dans le même commit**
 | Nouveau composant UI primitif | Design system doc de l'app |
 
 Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
+
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La PR a fait le geste *parfait* côté code — étendre `ui/Chip` avec une prop
+> `size: 'sm' | 'md'` au lieu de dupliquer — mais a oublié la doc : ni la ligne
+> `size` dans la table des props `### Chip` du design-system, ni de section pour
+> les deux nouveaux composants `features/` (`ModuleFilterBar`, `ModuleTagChips`).
+> → La règle vaut aussi pour une **simple prop ajoutée** à un composant existant,
+> et pour les composants `features/` (pas seulement `ui/`) : table des props +
+> exemple d'usage dans `apps/<app>/docs/design-system.md`, **dans le même commit**.
 
 **Anti-patterns bloquants — refuser d'écrire :**
 - `Pressable + Text + StyleSheet` ad hoc quand `ui/Button` couvre le besoin
