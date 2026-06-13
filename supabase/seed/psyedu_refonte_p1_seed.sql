@@ -1,109 +1,90 @@
 -- ============================================================
--- SEED — Refonte psychoéducation, PHASE 1a (enrichissement métadonnées)
--- Idempotent, additif (aucun DROP/DELETE). Référence par (module_key, topic_key)
--- pour être robuste aux UUID. Spec : docs/spec/refonte-psychoeducation.md
+-- SEED — Tags des fiches (psyedu_topic_tags) + liens fiche↔outil (module_topics)
+-- ============================================================
+-- Complète psyedu_seed.sql pour les 11 fiches de la bibliothèque.
+-- Idempotent (on conflict do nothing). Reflète la prod (Phase 5).
 --
--- NB : `reviewed_at` (date de revue clinique) volontairement NON renseigné ici —
--- c'est au clinicien de dater ses revues, pas au code d'affirmer une revue.
+-- ORDRE : APRÈS psyedu_seed.sql (topics) ET la taxonomie (tags table).
+-- Réf. par topic_id (UUID stables définis dans psyedu_seed.sql).
+-- Spec : docs/spec/refonte-psychoeducation.md
 -- ============================================================
 
--- ── 1. Rattachement à un thème ───────────────────────────────────────────────
--- 🟣 Mon traitement : toutes les fiches médicaments
-update public.psyedu_topics set theme_id = 'treatment'
-  where module_key = 'diet_weight_psycho';
--- 🟢 Hygiène de vie : sommeil, nutrition, activité
-update public.psyedu_topics set theme_id = 'lifestyle'
-  where module_key in ('psyedu_sleep', 'psyedu_nutrition', 'psyedu_activity');
--- 🔵 Mieux comprendre : distorsions cognitives (et futurs concepts TCC)
-update public.psyedu_topics set theme_id = 'understanding'
-  where module_key = 'cognitive_distortions' and topic_key = 'cog_distortions_intro';
-
--- ── 2. Tags des fiches (filtrage de la bibliothèque) ─────────────────────────
-insert into public.psyedu_topic_tags (topic_id, tag_id)
-select t.id, x.tag_id
-from public.psyedu_topics t
-join (values
-  -- treatment
-  ('diet_weight_psycho','general','psychoeducation'),
-  ('diet_weight_psycho','general','adult'),
-  ('diet_weight_psycho','general','teen'),
-  ('diet_weight_psycho','general','senior'),
-  ('diet_weight_psycho','antipsychotics','psychoeducation'),
-  ('diet_weight_psycho','antipsychotics','psychosis'),
-  ('diet_weight_psycho','antipsychotics','bipolar'),
-  ('diet_weight_psycho','antipsychotics','adult'),
-  ('diet_weight_psycho','antipsychotics','teen'),
-  ('diet_weight_psycho','methylphenidate','psychoeducation'),
-  ('diet_weight_psycho','methylphenidate','adhd'),
-  ('diet_weight_psycho','methylphenidate','child'),
-  ('diet_weight_psycho','methylphenidate','teen'),
-  ('diet_weight_psycho','methylphenidate','adult'),
-  ('diet_weight_psycho','antidepressants','psychoeducation'),
-  ('diet_weight_psycho','antidepressants','depression'),
-  ('diet_weight_psycho','antidepressants','anxiety'),
-  ('diet_weight_psycho','antidepressants','adult'),
-  ('diet_weight_psycho','antidepressants','teen'),
-  ('diet_weight_psycho','antidepressants','senior'),
-  ('diet_weight_psycho','mood_stabilizers','psychoeducation'),
-  ('diet_weight_psycho','mood_stabilizers','bipolar'),
-  ('diet_weight_psycho','mood_stabilizers','adult'),
-  ('diet_weight_psycho','mood_stabilizers','teen'),
-  ('diet_weight_psycho','mood_stabilizers','senior'),
-  -- lifestyle
-  ('psyedu_sleep','sleep_chrono','psychoeducation'),
-  ('psyedu_sleep','sleep_chrono','sleep'),
-  ('psyedu_sleep','sleep_chrono','adult'),
-  ('psyedu_sleep','sleep_chrono','teen'),
-  ('psyedu_sleep','sleep_chrono','senior'),
-  ('psyedu_sleep','sleep_hygiene_rules','psychoeducation'),
-  ('psyedu_sleep','sleep_hygiene_rules','sleep'),
-  ('psyedu_sleep','sleep_hygiene_rules','adult'),
-  ('psyedu_sleep','sleep_hygiene_rules','teen'),
-  ('psyedu_sleep','sleep_hygiene_rules','senior'),
-  ('psyedu_nutrition','nutrition_brain','psychoeducation'),
-  ('psyedu_nutrition','nutrition_brain','adult'),
-  ('psyedu_nutrition','nutrition_brain','teen'),
-  ('psyedu_nutrition','nutrition_brain','senior'),
-  ('psyedu_activity','gentle_activity','psychoeducation'),
-  ('psyedu_activity','gentle_activity','depression'),
-  ('psyedu_activity','gentle_activity','adult'),
-  ('psyedu_activity','gentle_activity','teen'),
-  ('psyedu_activity','gentle_activity','senior')
-) as x(module_key, topic_key, tag_id)
-  on t.module_key = x.module_key and t.topic_key = x.topic_key
+-- ── Tags des fiches (filtrage de la bibliothèque) ────────────────────────────
+insert into public.psyedu_topic_tags (topic_id, tag_id) values
+  ('00000001-0000-0000-0000-000000000010', 'adult'),
+  ('00000001-0000-0000-0000-000000000010', 'anxiety'),
+  ('00000001-0000-0000-0000-000000000010', 'cbt'),
+  ('00000001-0000-0000-0000-000000000010', 'depression'),
+  ('00000001-0000-0000-0000-000000000010', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000010', 'teen'),
+  ('00000001-0000-0000-0000-000000000004', 'adult'),
+  ('00000001-0000-0000-0000-000000000004', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000004', 'senior'),
+  ('00000001-0000-0000-0000-000000000004', 'teen'),
+  ('00000001-0000-0000-0000-000000000005', 'adult'),
+  ('00000001-0000-0000-0000-000000000005', 'bipolar'),
+  ('00000001-0000-0000-0000-000000000005', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000005', 'psychosis'),
+  ('00000001-0000-0000-0000-000000000005', 'teen'),
+  ('00000001-0000-0000-0000-000000000006', 'adhd'),
+  ('00000001-0000-0000-0000-000000000006', 'adult'),
+  ('00000001-0000-0000-0000-000000000006', 'child'),
+  ('00000001-0000-0000-0000-000000000006', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000006', 'teen'),
+  ('00000001-0000-0000-0000-000000000007', 'adult'),
+  ('00000001-0000-0000-0000-000000000007', 'anxiety'),
+  ('00000001-0000-0000-0000-000000000007', 'depression'),
+  ('00000001-0000-0000-0000-000000000007', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000007', 'senior'),
+  ('00000001-0000-0000-0000-000000000007', 'teen'),
+  ('00000001-0000-0000-0000-000000000008', 'adult'),
+  ('00000001-0000-0000-0000-000000000008', 'bipolar'),
+  ('00000001-0000-0000-0000-000000000008', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000008', 'senior'),
+  ('00000001-0000-0000-0000-000000000008', 'teen'),
+  ('00000001-0000-0000-0000-000000000011', 'adult'),
+  ('00000001-0000-0000-0000-000000000011', 'bipolar'),
+  ('00000001-0000-0000-0000-000000000011', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000011', 'senior'),
+  ('00000001-0000-0000-0000-000000000011', 'teen'),
+  ('00000001-0000-0000-0000-000000000003', 'adult'),
+  ('00000001-0000-0000-0000-000000000003', 'depression'),
+  ('00000001-0000-0000-0000-000000000003', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000003', 'senior'),
+  ('00000001-0000-0000-0000-000000000003', 'teen'),
+  ('00000001-0000-0000-0000-000000000002', 'adult'),
+  ('00000001-0000-0000-0000-000000000002', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000002', 'senior'),
+  ('00000001-0000-0000-0000-000000000002', 'teen'),
+  ('00000001-0000-0000-0000-000000000001', 'adult'),
+  ('00000001-0000-0000-0000-000000000001', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000001', 'senior'),
+  ('00000001-0000-0000-0000-000000000001', 'sleep'),
+  ('00000001-0000-0000-0000-000000000001', 'teen'),
+  ('00000001-0000-0000-0000-000000000009', 'adult'),
+  ('00000001-0000-0000-0000-000000000009', 'psychoeducation'),
+  ('00000001-0000-0000-0000-000000000009', 'senior'),
+  ('00000001-0000-0000-0000-000000000009', 'sleep'),
+  ('00000001-0000-0000-0000-000000000009', 'teen')
 on conflict (topic_id, tag_id) do nothing;
 
--- ── 3. Liens fiche ↔ outil (réutilisation par les modules interactifs) ────────
-insert into public.module_topics (module_id, topic_id, sort_order)
-select x.module_id, t.id, x.sort_order
-from public.psyedu_topics t
-join (values
-  -- fiches médicaments réutilisées par les modules de suivi du traitement
-  ('medication_adherence','diet_weight_psycho','general',0),
-  ('medication_adherence','diet_weight_psycho','antipsychotics',1),
-  ('medication_adherence','diet_weight_psycho','methylphenidate',2),
-  ('medication_adherence','diet_weight_psycho','antidepressants',3),
-  ('medication_adherence','diet_weight_psycho','mood_stabilizers',4),
-  ('medication_side_effects','diet_weight_psycho','general',0),
-  ('medication_side_effects','diet_weight_psycho','antipsychotics',1),
-  ('medication_side_effects','diet_weight_psycho','methylphenidate',2),
-  ('medication_side_effects','diet_weight_psycho','antidepressants',3),
-  ('medication_side_effects','diet_weight_psycho','mood_stabilizers',4),
-  -- fiches sommeil réutilisées par l'agenda du sommeil et la chronobiologie
-  ('sleep_diary','psyedu_sleep','sleep_chrono',0),
-  ('sleep_diary','psyedu_sleep','sleep_hygiene_rules',1),
-  ('chronobiology_tracker','psyedu_sleep','sleep_chrono',0),
-  ('chronobiology_tracker','psyedu_sleep','sleep_hygiene_rules',1),
-  -- fiche activité réutilisée par l'activation comportementale
-  ('behavioral_activation','psyedu_activity','gentle_activity',0)
-) as x(module_id, src_module_key, topic_key, sort_order)
-  on t.module_key = x.src_module_key and t.topic_key = x.topic_key
+-- ── Liens fiche ↔ outil (réutilisation par les modules interactifs) ──────────
+insert into public.module_topics (module_id, topic_id, sort_order) values
+  ('behavioral_activation', '00000001-0000-0000-0000-000000000003', 0),
+  ('chronobiology_tracker', '00000001-0000-0000-0000-000000000001', 0),
+  ('chronobiology_tracker', '00000001-0000-0000-0000-000000000009', 1),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000004', 0),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000005', 1),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000006', 2),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000007', 3),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000008', 4),
+  ('medication_adherence', '00000001-0000-0000-0000-000000000011', 5),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000004', 0),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000005', 1),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000006', 2),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000007', 3),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000008', 4),
+  ('medication_side_effects', '00000001-0000-0000-0000-000000000011', 5),
+  ('sleep_diary', '00000001-0000-0000-0000-000000000001', 0),
+  ('sleep_diary', '00000001-0000-0000-0000-000000000009', 1)
 on conflict (module_id, topic_id) do nothing;
-
--- ── 4. Tags de la fiche distorsions (thème « Mieux comprendre ») ──────────────
-insert into public.psyedu_topic_tags (topic_id, tag_id)
-select t.id, x.tag_id
-from public.psyedu_topics t
-join (values ('psychoeducation'),('cbt'),('depression'),('anxiety'),('teen'),('adult')) as x(tag_id) on true
-where t.module_key = 'cognitive_distortions' and t.topic_key = 'cog_distortions_intro'
-on conflict (topic_id, tag_id) do nothing;

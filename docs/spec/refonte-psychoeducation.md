@@ -1,6 +1,6 @@
 # Refonte — Psychoéducation (bibliothèque thématique unifiée)
 
-> Branche : `refonte/psychoeducation`. Statut : **Phases 0-3 implémentées, testées et appliquées en prod. Reste finitions Phase 4 + nettoyage Phase 5.**
+> Branche : `refonte/psychoeducation`. Statut : **Phases 0-3 livrées + contenu des 11 fiches réécrit (action-first, langage patient, sources DOI) + seeds consolidés (Phase 5). Reste : finitions Phase 4 (filtre tags biblio, parcours, « suggérer un thème ») + nettoyage résiduel.**
 > Ce document est la source de vérité de la refonte. Mettre à jour au fil de l'avancement.
 
 > **Intégration (2026-06-11)** : branche réconciliée avec `feat/improve-module-organization`
@@ -133,7 +133,7 @@ alter table public.psyedu_topics add column reviewed_at date;   -- couche « pre
   - tags des fiches (`psyedu_topic_tags`, 44) ;
   - liens fiche↔outil (`module_topics`, 15) : fiches médicaments↔`medication_adherence`/`medication_side_effects`, sommeil↔`sleep_diary`/`chronobiology_tracker`, activité↔`behavioral_activation`.
   - `reviewed_at` laissé NULL volontairement (date de revue = responsabilité clinicien).
-- ✅ **Phase 1b FAITE (validée clinicien + appliquée prod)** — `supabase/seed/psyedu_lithium_seed.sql` + i18n `fr/psyedu.json`/`fr/psyedu_teen.json` :
+- ✅ **Phase 1b FAITE (validée clinicien + appliquée prod)** — i18n `fr/psyedu.json`/`fr/psyedu_teen.json` (contenu lithium désormais consolidé dans `supabase/seed/psyedu_seed.sql`, cf. Phase 5) :
   | Carte legacy | Décision | Action |
   |---|---|---|
   | Hygiène du sommeil | redondante (`psyedu_sleep`) | 🗑️ à supprimer en Phase 3 |
@@ -171,8 +171,12 @@ alter table public.psyedu_topics add column reviewed_at date;   -- couche « pre
 - **Éditeur de fiche par le praticien (« créer ma propre fiche »)** : volontairement reporté à après stabilisation de l'app. C'est un *deuxième modèle de contenu* (texte libre monolingue vs clés i18n + variante ado) qui mérite d'être traité comme une feature à part entière, pas bolté sur la refonte. Garde-fous à prévoir le jour venu : classe de contenu séparée et stockage distinct (≠ `psyedu_blocks`), provenance étiquetée « Note de votre praticien » jamais mélangée aux fiches Kær sourcées, responsabilité du contenu portée par le praticien (CGU) — Kær = canal, pas éditeur. **Aucune anticipation dans le schéma pour l'instant** (pas de colonne spéculative).
 
 ### Phase 5 — Nettoyage, doc, parité, merge
-- Retirer `diet_weight_psycho` du référentiel modules / locales / docs ; retirer `module_key` de `psyedu_topics`.
-- Mettre à jour `docs/modules.md`, `docs/module-engine.md`, `psychoeducation.md`, design-system docs.
+- ✅ **Consolidation des seeds psyedu (2026-06-13)** — seeds régénérés depuis la prod (source de vérité), divergences éliminées :
+  - `psyedu_seed.sql` réécrit : 11 fiches avec les **bons `module_key`** (psyedu_sleep/nutrition/activity + diet_weight_psycho + cognitive_distortions), `theme_id` inclus, blocs action-first ; `sleep_hygiene_rules` et `lithium_safety` désormais **présents** ; `DELETE` couvre les 5 module_keys.
+  - `psyedu_refonte_p1_seed.sql` réécrit : tags des fiches + liens `module_topics` complets (idempotents).
+  - **Supprimés** (absorbés/obsolètes) : `psyedu_lithium_seed.sql`, `psyedu_migrate_module_keys.sql`.
+  - Ordre d'exécution documenté en tête de `psyedu_seed.sql` (themes → tags → topics/blocs → p1). Validé en transaction annulée (prod intacte).
+- ⏳ Reste : retirer `module_key` de `psyedu_topics` (le jour où la biblio ne lit plus par module_key) ; nettoyer cartes `module_content_fields` inertes + `CardsLayout` mort ; mettre à jour `docs/module-engine.md` + design-system docs.
 - Procédure `.claude/rules/merge-procedure.md` avant tout merge.
 
 ---
