@@ -242,6 +242,7 @@ export function PatientModulesTab({
               mode={psycho.mode}
               libraryTopics={libraryTopics}
               themes={themes}
+              taxonomy={taxonomy}
               selectedTopicIds={psycho.selectedTopicIds}
               saving={psycho.saving}
               error={psycho.error}

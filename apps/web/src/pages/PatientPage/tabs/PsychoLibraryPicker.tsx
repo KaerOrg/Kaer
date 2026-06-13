@@ -1,13 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
+import { SearchInput } from '../../../components/ui/SearchInput'
+import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
+import { moduleMatchesTagFilters, type ActiveTagFilters } from '../../../lib/moduleFilter'
+import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import type { LibraryTopic, PsyEduTheme } from '../../../services/psyeduService'
+import type { ModuleTaxonomy, Tag } from '../../../services/moduleCatalogService'
 
 type Props = {
   mode: 'unlock' | 'edit'
   libraryTopics: LibraryTopic[]
   themes: PsyEduTheme[]
+  taxonomy: ModuleTaxonomy
   selectedTopicIds: Set<string>
   saving: boolean
   error: string | null
@@ -20,6 +26,7 @@ export function PsychoLibraryPicker({
   mode,
   libraryTopics,
   themes,
+  taxonomy,
   selectedTopicIds,
   saving,
   error,
@@ -29,23 +36,52 @@ export function PsychoLibraryPicker({
 }: Props) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
+  const [activeFilters, setActiveFilters] = useState<ActiveTagFilters>(new Map())
+
+  // Taxonomie restreinte aux tags réellement portés par des fiches de la
+  // bibliothèque : la barre ne propose que des filtres utiles.
+  const filterTaxonomy = useMemo<ModuleTaxonomy>(() => {
+    const present = new Set<string>()
+    for (const topic of libraryTopics) for (const tag of topic.tags) present.add(tag)
+    const tagsByDimension = new Map<string, Tag[]>()
+    for (const [dim, tags] of taxonomy.tagsByDimension) {
+      tagsByDimension.set(dim, tags.filter(tag => present.has(tag.id)))
+    }
+    return { dimensions: taxonomy.dimensions, tagsByDimension, tagsByModule: taxonomy.tagsByModule }
+  }, [taxonomy, libraryTopics])
+
+  const hasFacets = useMemo(
+    () => filterTaxonomy.dimensions.some(d => (filterTaxonomy.tagsByDimension.get(d.id)?.length ?? 0) > 0),
+    [filterTaxonomy],
+  )
+
+  const onToggleTag = useCallback((dimensionId: string, tagId: string) => {
+    setActiveFilters(prev => {
+      const next = new Map([...prev].map(([k, v]) => [k, new Set(v)] as [string, Set<string>]))
+      const set = next.get(dimensionId) ?? new Set<string>()
+      if (set.has(tagId)) set.delete(tagId)
+      else set.add(tagId)
+      next.set(dimensionId, set)
+      return next
+    })
+  }, [])
+
+  const onResetFilters = useCallback(() => setActiveFilters(new Map()), [])
 
   const groups = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const tokens = tokenizeSearch(search)
+    const matches = (topic: LibraryTopic): boolean => {
+      if (!moduleMatchesTagFilters(new Set(topic.tags), activeFilters)) return false
+      if (tokens.length === 0) return true
+      const haystack = `${t(topic.titleKey, { ns: 'psyedu' })} ${t(topic.summaryKey, { ns: 'psyedu' })}`
+      return matchesAllTokens(haystack, tokens)
+    }
     return themes
-      .map(theme => {
-        const topics = libraryTopics
-          .filter(topic => topic.theme_id === theme.id)
-          .filter(topic => {
-            if (!query) return true
-            const title = t(topic.titleKey, { ns: 'psyedu' }).toLowerCase()
-            const summary = t(topic.summaryKey, { ns: 'psyedu' }).toLowerCase()
-            return title.includes(query) || summary.includes(query)
-          })
-        return { theme, topics }
-      })
+      .map(theme => ({ theme, topics: libraryTopics.filter(topic => topic.theme_id === theme.id && matches(topic)) }))
       .filter(group => group.topics.length > 0)
-  }, [themes, libraryTopics, search, t])
+  }, [themes, libraryTopics, search, activeFilters, t])
+
+  const resultCount = useMemo(() => groups.reduce((n, g) => n + g.topics.length, 0), [groups])
 
   return (
     <div className={`psycho-card-picker ${mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
@@ -53,12 +89,21 @@ export function PsychoLibraryPicker({
         {mode === 'unlock' ? t('patient.psycho_pick_unlock') : t('patient.psycho_pick_edit')}
       </p>
 
-      <input
-        type="search"
-        className="psycho-card-picker__search"
-        placeholder={t('patient.psycho_search_placeholder')}
+      {hasFacets ? (
+        <ModuleFilterBar
+          taxonomy={filterTaxonomy}
+          activeFilters={activeFilters}
+          onToggleTag={onToggleTag}
+          onReset={onResetFilters}
+          resultCount={resultCount}
+          totalCount={libraryTopics.length}
+        />
+      ) : null}
+
+      <SearchInput
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={setSearch}
+        placeholder={t('patient.psycho_search_placeholder')}
       />
 
       {groups.length === 0 ? (
