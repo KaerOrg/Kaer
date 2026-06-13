@@ -2,11 +2,11 @@
  * Techniques de respiration validées pour Kær.
  *
  * Sources cliniques :
- *   - Cohérence cardiaque   : Lehrer & Gevirtz (2014), Applied Psychophysiology — Grade B
- *   - Respiration diaphragmatique : HAS thérapies non médicamenteuses, Conrad et al. (2007) — Grade B
- *   - Respiration carrée    : VA/DoD PTSD Guidelines, gestion du stress aigu — Grade C / accord experts
- *   - 4-7-8                 : accord experts endormissement / crise anxieuse — Grade C
- *   - Pleine conscience     : MBSR Kabat-Zinn (1990), MBCT Segal et al. (2002) — Grade A rechute dépressive
+ *   - Cohérence cardiaque   : Lehrer & Gevirtz (2014), Applied Psychophysiology : Grade B
+ *   - Respiration diaphragmatique : HAS thérapies non médicamenteuses, Conrad et al. (2007) : Grade B
+ *   - Respiration carrée    : VA/DoD PTSD Guidelines, gestion du stress aigu : Grade C / accord experts
+ *   - 4-7-8                 : accord experts endormissement / crise anxieuse : Grade C
+ *   - Pleine conscience     : MBSR Kabat-Zinn (1990), MBCT Segal et al. (2002) : Grade A rechute dépressive
  *
  * Conformité MDR 2017/745 : guide à rythme fixe, pas de biofeedback, aucune interprétation algorithmique.
  */
@@ -37,7 +37,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     subtitle: '6 respirations par minute',
     description:
       'Régule le système nerveux autonome en synchronisant le rythme respiratoire avec la variabilité de la fréquence cardiaque (HRV). Recommandée pour l\'anxiété, le stress chronique et la dépression.',
-    evidence: 'Grade B — Lehrer & Gevirtz (2014)',
+    evidence: 'Grade B : Lehrer & Gevirtz (2014)',
     color: '#4F46E5',
     recommended_duration_min: 5,
     phases: [
@@ -51,7 +51,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     subtitle: 'Inspiration abdominale lente',
     description:
       'Active le système parasympathique. Base de la plupart des thérapies comportementales. Recommandée par la HAS dans les thérapies non médicamenteuses de l\'anxiété et de la douleur chronique.',
-    evidence: 'Grade B — HAS, Conrad et al. (2007)',
+    evidence: 'Grade B : HAS, Conrad et al. (2007)',
     color: '#059669',
     recommended_duration_min: 5,
     phases: [
@@ -62,10 +62,10 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     key: 'carree',
     name: 'Respiration carrée',
-    subtitle: 'Box Breathing — 4-4-4-4',
+    subtitle: 'Box Breathing : 4-4-4-4',
     description:
       'Technique symétrique utilisée dans la gestion du stress aigu et des symptômes de PTSD. Équilibre les phases d\'inspiration, rétention, expiration et pause. Incluse dans les guidelines VA/DoD.',
-    evidence: 'Grade C / accord experts — VA/DoD PTSD Guidelines',
+    evidence: 'Grade C / accord experts : VA/DoD PTSD Guidelines',
     color: '#D97706',
     recommended_duration_min: 4,
     phases: [
@@ -81,7 +81,7 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
     subtitle: 'Pour l\'endormissement et la crise anxieuse',
     description:
       'Inspiration courte, rétention prolongée, expiration longue. Particulièrement efficace pour faciliter l\'endormissement et couper une montée d\'anxiété aiguë. Accord d\'experts international.',
-    evidence: 'Grade C — accord experts international',
+    evidence: 'Grade C : accord experts international',
     color: '#9333EA',
     recommended_duration_min: 3,
     phases: [
@@ -93,10 +93,10 @@ export const BREATHING_TECHNIQUES: BreathingTechnique[] = [
   {
     key: 'pleine_conscience',
     name: 'Pleine conscience respiratoire',
-    subtitle: 'Mindfulness — MBSR / MBCT',
+    subtitle: 'Mindfulness : MBSR / MBCT',
     description:
       'Observer sa respiration sans la contrôler. Ancrage dans le moment présent, réduction des ruminations. Composante centrale du MBSR (Kabat-Zinn, 1990) et de la MBCT (Segal et al., 2002), recommandée par NICE pour la prévention des rechutes dépressives.',
-    evidence: 'Grade A rechute dépressive — NICE CG90, MBCT Segal et al. (2002)',
+    evidence: 'Grade A rechute dépressive : NICE CG90, MBCT Segal et al. (2002)',
     color: '#0EA5E9',
     recommended_duration_min: 10,
     phases: [

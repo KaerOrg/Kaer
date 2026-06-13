@@ -20,12 +20,12 @@
     "language": "Language"
   },
   "auth": {
-    "login_subtitle": "Sign in — Practitioner space",
+    "login_subtitle": "Sign in, Practitioner space",
     "register_subtitle": "Create your practitioner account",
     "full_name_label": "Your full name",
     "full_name_placeholder": "Dr. Marie Dupont",
     "professional_title_label": "Professional title",
-    "professional_title_placeholder": "— Select a profession —",
+    "professional_title_placeholder": "Select a profession",
     "email_label": "Email address",
     "email_placeholder": "you@example.com",
     "password_label": "Password",
@@ -98,7 +98,7 @@
     "email_label": "Email address",
     "full_name_label": "Full name",
     "title_label": "Professional title",
-    "title_placeholder": "— Select a profession —",
+    "title_placeholder": "Select a profession",
     "phone_label": "Phone",
     "address_label": "Address",
     "error_update": "Error updating profile.",
@@ -121,7 +121,7 @@
     "invite_last_name_placeholder": "Dupont",
     "invite_birth_date_label": "Date of birth",
     "invite_sex_label": "Sex",
-    "invite_sex_placeholder": "— Select —",
+    "invite_sex_placeholder": "Select",
     "invite_sex_m": "Male",
     "invite_sex_f": "Female",
     "invite_sex_o": "Other / Unspecified",
@@ -135,7 +135,7 @@
     "invite_step_info": "Information",
     "invite_step_modules": "Modules",
     "invite_next_button": "Next →",
-    "invite_module_intro": "Optional — these modules will be automatically unlocked when the patient registers.",
+    "invite_module_intro": "Optional, these modules will be automatically unlocked when the patient registers.",
     "invite_module_config_note": "Psychoeducation and RIM require configuration from the patient page and are not available here.",
     "send_invitation": "Send invitation",
     "pending_title": "Pending invitations ({{count}})",
@@ -180,9 +180,9 @@
       "cape42": "Community Assessment of Psychic Experiences",
       "audit": "Alcohol Use Disorders Identification Test",
       "nsi": "Nightmare Severity Index",
-      "asrs18": "Adult ADHD Self-Report Scale v1.1 — Full Assessment (18 items)",
-      "asrs6": "Adult ADHD Self-Report Scale v1.1 — Screener (6 items)",
-      "snap_iv": "Swanson, Nolan and Pelham Rating Scale – version IV",
+      "asrs18": "Adult ADHD Self-Report Scale v1.1, Full Assessment (18 items)",
+      "asrs6": "Adult ADHD Self-Report Scale v1.1, Screener (6 items)",
+      "snap_iv": "Swanson, Nolan and Pelham Rating Scale - version IV",
       "cssrs": "Columbia Suicide Severity Rating Scale"
     },
     "descriptions": {
@@ -193,11 +193,11 @@
       "bsl23": "Measures severity of borderline personality disorder symptoms. Longitudinal monitoring tool in DBT.",
       "cape42": "Assessment of subclinical positive, negative and depressive experiences in general and clinical populations.",
       "audit": "WHO 10-item screening for problematic alcohol use. Recommended for early detection in primary care.",
-      "nsi": "9-item multidimensional nightmare severity assessment (score 0–45). Measures wake frequency, emotional intensity and daytime impact.",
-      "asrs18": "Full ADHD self-report (18 items, Parts A+B, ASRS v1.1). Total score 0–72, Part A 0–24, Part B 0–48.",
-      "asrs6": "6-item ADHD screening (Part A, ASRS v1.1). Total score 0–24. WHO-validated for rapid detection.",
+      "nsi": "9-item multidimensional nightmare severity assessment (score 0 à 45). Measures wake frequency, emotional intensity and daytime impact.",
+      "asrs18": "Full ADHD self-report (18 items, Parts A+B, ASRS v1.1). Total score 0 à 72, Part A 0 à 24, Part B 0 à 48.",
+      "asrs6": "6-item ADHD screening (Part A, ASRS v1.1). Total score 0 à 24. WHO-validated for rapid detection.",
       "snap_iv": "26-item behavioural ADHD screening (18 DSM-IV + 8 ODD criteria). Clinician-rated by parent or teacher.",
-      "cssrs": "Structured assessment of suicidal ideation and behaviour. Columbia University / NIMH — 'Since last visit' version."
+      "cssrs": "Structured assessment of suicidal ideation and behaviour. Columbia University / NIMH, 'Since last visit' version."
     }
   },
   "patient_rights": {
@@ -241,7 +241,7 @@
       "email": "Email",
       "practitioners": "Practitioner(s)",
       "created": "Registered on",
-      "no_practitioner": "—"
+      "no_practitioner": ""
     },
     "empty": {
       "title": "No users",
@@ -258,7 +258,7 @@
     "dashboard_title": "Dashboard",
     "tools_active_one": "{{count}} active tool",
     "tools_active_other": "{{count}} active tools",
-    "empty_tools": "No tools unlocked — use the therapeutic wardrobe below.",
+    "empty_tools": "No tools unlocked, use the therapeutic wardrobe below.",
     "realtime_label": "Real-time data",
     "realtime_soon": "Coming soon",
     "active_badge": "Active",
@@ -271,7 +271,7 @@
     "preview_button": "Preview",
     "patient_view": "What your patient will see",
     "unlocked_on": "Unlocked on {{date}}",
-    "coming_soon": "Module under development — preview not available.",
+    "coming_soon": "Module under development, preview not available.",
     "data_button": "Data",
     "summary_empty": "No synced data",
     "summary_last_entry": "Last entry",
@@ -295,7 +295,7 @@
     "rim_write_unlock": "Write the alternative scenario for this patient:",
     "rim_write_edit": "Edit the alternative scenario:",
     "rim_alt_label": "Alternative scenario",
-    "rim_orig_label": "Original scenario (optional — reference)",
+    "rim_orig_label": "Original scenario (optional, reference)",
     "rim_alt_placeholder": "Describe the positive replacement scenario for the nightmare...",
     "rim_orig_placeholder": "Description of the original nightmare, for reference...",
     "rim_error_required": "The alternative scenario is required.",
@@ -369,7 +369,7 @@
     "cat_addiction_subtitle": "The often-forgotten module",
     "scale_read": "Read",
     "scale_unread": "Unread",
-    "cssrs_modal_title": "C-SSRS — Suicide Screening",
+    "cssrs_modal_title": "C-SSRS, Suicide Screening",
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated"
   },
   "modules": {
@@ -389,7 +389,7 @@
     "empty_filter": "No module matches these filters.",
     "phq9": {
       "label": "PHQ-9",
-      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27.",
+      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0 à 27.",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first PHQ-9.",
@@ -404,9 +404,9 @@
       "q3": "Trouble falling or staying asleep, or sleeping too much",
       "q4": "Feeling tired or having little energy",
       "q5": "Poor appetite or overeating",
-      "q6": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down",
+      "q6": "Feeling bad about yourself, or that you are a failure or have let yourself or your family down",
       "q7": "Trouble concentrating on things, such as reading the newspaper or watching television",
-      "q8": "Moving or speaking so slowly that other people could have noticed. Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual",
+      "q8": "Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",
       "q9": "Thoughts that you would be better off dead or of hurting yourself in some way",
       "score_label": "Total score",
       "score_max": "/ 27",
@@ -416,7 +416,7 @@
     },
     "gad7": {
       "label": "GAD-7",
-      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0–21.",
+      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0 à 21.",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first GAD-7.",
@@ -441,7 +441,7 @@
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "23-item borderline symptom scale. Average score 0–4.",
+      "description": "23-item borderline symptom scale. Average score 0 à 4.",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first BSL-23.",
@@ -488,13 +488,13 @@
     },
     "snap_iv": {
       "label": "SNAP-IV",
-      "description": "ADHD screening for children/adolescents — 26 items, 3 subscales.",
+      "description": "ADHD screening for children/adolescents, 26 items, 3 subscales.",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first SNAP-IV.",
-      "instructions_1": "Hetero-evaluation — to be filled in by a parent or teacher.",
+      "instructions_1": "Hetero-evaluation, to be filled in by a parent or teacher.",
       "instructions_2": "For each of the following behaviours, indicate how often you observe it in the child.",
-      "warning": "This questionnaire must be completed by a parent, guardian or teacher — not by the child.",
+      "warning": "This questionnaire must be completed by a parent, guardian or teacher, not by the child.",
       "opt_0": "Not at all",
       "opt_1": "Just a little",
       "opt_2": "Quite a bit",
@@ -538,8 +538,8 @@
       "submit": "Submit questionnaire"
     },
     "asrs6": {
-      "label": "ASRS v1.1 — Screener",
-      "description": "Adult ADHD rapid screening — 6-item Part A (Kessler et al., 2005).",
+      "label": "ASRS v1.1, Screener",
+      "description": "Adult ADHD rapid screening, 6-item Part A (Kessler et al., 2005).",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first ASRS-6.",
@@ -563,8 +563,8 @@
       "submit": "Submit questionnaire"
     },
     "asrs18": {
-      "label": "ASRS v1.1 — Full Assessment",
-      "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005).",
+      "label": "ASRS v1.1, Full Assessment",
+      "description": "Full adult ADHD assessment, 18 items Parts A+B (Kessler et al., 2005).",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first ASRS-18.",
@@ -604,16 +604,16 @@
       "submit": "Submit questionnaire"
     },
     "cape42": {
-      "label": "CAPE-42 — Psychotic Experiences",
+      "label": "CAPE-42, Psychotic Experiences",
       "description": "Community Assessment of Psychic Experiences (42 items)."
     },
     "audit": {
-      "label": "AUDIT — Alcohol Screening",
-      "description": "Alcohol Use Disorders Identification Test — WHO (10 items)."
+      "label": "AUDIT, Alcohol Screening",
+      "description": "Alcohol Use Disorders Identification Test, WHO (10 items)."
     },
     "cssrs": {
-      "label": "C-SSRS — Suicide Risk",
-      "description": "Columbia Suicide Severity Rating Scale — clinician-administered."
+      "label": "C-SSRS, Suicide Risk",
+      "description": "Columbia Suicide Severity Rating Scale, clinician-administered."
     },
     "crisis_plan": {
       "label": "Crisis Plan",
@@ -633,7 +633,7 @@
       "step_5_hint": "Which professionals or services can I contact?",
       "step_6_title": "Securing My Environment",
       "step_6_hint": "How can I make my surroundings safer?",
-      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention",
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15, SAMU | 3114, Suicide Prevention",
       "urgency_title": "I am in crisis",
       "urgency_subtitle": "Here are your emergency contacts and resources.",
       "urgency_close_contacts": "Trusted people to call",
@@ -645,16 +645,16 @@
       "anchors_preview_info": "The patient adds up to 3 photos and a personal phrase on their phone.",
       "coping_cards_title": "My coping cards",
       "coping_cards_subtitle": "Personalised strategies prepared with your practitioner.",
-      "coping_cards_empty": "No cards configured — add some in the editor above.",
+      "coping_cards_empty": "No cards configured, add some in the editor above.",
       "coping_card_thought": "Difficult thought",
       "coping_card_response": "What I can tell myself",
       "commitment_title": "My commitment",
       "commitment_phrase_default": "I commit to using this plan before any act of self-harm, and to calling my practitioner if I don't feel capable.",
       "commitment_not_configured": "No commitment phrase configured.",
-      "emergency_bar_label": "Emergency numbers — always accessible",
-      "emergency_samu": "15 — Emergency",
+      "emergency_bar_label": "Emergency numbers, always accessible",
+      "emergency_samu": "15, Emergency",
       "emergency_samu_label": "Medical emergency",
-      "emergency_3114": "3114 — Prevention",
+      "emergency_3114": "3114, Prevention",
       "emergency_3114_label": "National helpline"
     },
     "therapeutic_commitment": {
@@ -672,7 +672,7 @@
       "now": {
         "title": "Ride the wave",
         "intro1": "A very strong urge or emotion is like a wave: it rises, reaches a peak, and always comes back down.",
-        "intro2": "The patient doesn't have to fight it — just hold on until it passes. They pick an activity, and the timer keeps them company.",
+        "intro2": "The patient doesn't have to fight it, just hold on until it passes. They pick an activity, and the timer keeps them company.",
         "choose_activity": "Choose an activity",
         "pick_category": "What would you like to do right now?",
         "back": "Back",
@@ -718,7 +718,7 @@
       "empty_title": "No entry",
       "empty_text": "Save your first entry to view the tracking.",
       "events_section": "Treatment events",
-      "events_hint": "These milestones appear on the patient's chart (e.g. dose change, new medication). Neutral display — no interpretation.",
+      "events_hint": "These milestones appear on the patient's chart (e.g. dose change, new medication). Neutral display, no interpretation.",
       "event_add": "Add an event",
       "event_date_label": "Date",
       "event_label_placeholder": "E.g. Dose change, New medication…",
@@ -774,7 +774,7 @@
       "new_entry_btn": "New entry",
       "delete_entry_title": "Delete this entry?",
       "saved_message": "Today's entry has been saved.",
-      "already_saved": "Today's entry already saved — you can edit it.",
+      "already_saved": "Today's entry already saved, you can edit it.",
       "history_empty": "Tracking will appear after your first entries.",
       "entries_recent": "Recent entries",
       "score_label": "Avg",
@@ -822,7 +822,7 @@
     "sleep_diary": {
       "label": "Sleep Diary",
       "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
-      "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%.",
+      "footer": "CBT-I formula (Morin, 1993) : SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70 à 84% · < 70%.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first night."
@@ -836,7 +836,7 @@
     },
     "chronobiology_tracker": {
       "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal — essential for bipolar disorders.",
+      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -851,7 +851,7 @@
       "notes_label": "Free notes (optional)",
       "notes_placeholder": "Context, today's event, remark...",
       "history_title": "Last 30 days",
-      "already_saved": "Today's entry already saved — you can edit it.",
+      "already_saved": "Today's entry already saved, you can edit it.",
       "history_empty": "History will appear once you have at least 2 entries.",
       "delete_entry_title": "Delete this entry?",
       "saved_message": "Today's entry has been saved.",
@@ -922,7 +922,7 @@
     "emotion_wheel": {
       "label": "Emotion Wheel",
       "description": "Explore and precisely name emotions to address alexithymia.",
-      "footer": "Emotion wheel — affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
+      "footer": "Emotion wheel, affect labelling (Plutchik's model). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -957,9 +957,9 @@
       "empty_text": "Use the button above to start your first grounding session."
     },
     "rim": {
-      "label": "RIM – Mental Imagery Reprocessing",
+      "label": "RIM - Mental Imagery Reprocessing",
       "description": "Mental imagery reprocessing technique.",
-      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient.",
+      "footer": "Mental Imagery Reprocessing (RIM) : Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient.",
       "new_btn": "New session",
       "empty_title": "No session yet",
       "empty_text": "Use the button above to start your first session."
@@ -967,7 +967,7 @@
     "fear_thermometer": {
       "label": "Graded Exposure",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
-      "footer": "SUDS (Subjective Units of Distress Scale) — subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
+      "footer": "SUDS (Subjective Units of Distress Scale) : subjective distress measure used in CBT exposure therapy. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry.",
@@ -986,9 +986,9 @@
       "suds_after": "After",
       "save": "Save",
       "section_trigger": "Trigger situation",
-      "section_before": "Distress level — Before",
+      "section_before": "Distress level, Before",
       "section_strategies": "Strategies used",
-      "section_after": "Distress level — After (optional)",
+      "section_after": "Distress level, After (optional)",
       "section_notes": "Notes (optional)",
       "suds_hint_before": "0 = no distress  ·  100 = maximum imaginable distress",
       "suds_hint_after": "Fill in once the strategy is complete. You can come back later.",
@@ -1014,7 +1014,7 @@
       "strategy_exposure": "Stay in the situation (exposure)",
       "strategy_distraction": "Cognitive distraction",
       "strategy_contact": "Reach out to someone",
-      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider — it does not replace your therapy.",
+      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider, it does not replace your therapy.",
       "ladder_empty_title": "Your fear ladder",
       "ladder_empty_text": "Add the situations that make you anxious, from the least to the most difficult.",
       "step_done": "Step done",
@@ -1024,7 +1024,7 @@
       "edit_step": "Edit situation",
       "step_label": "The feared situation",
       "step_label_placeholder": "E.g. taking the subway at rush hour",
-      "step_target_label": "Initial stress level (0–100)",
+      "step_target_label": "Initial stress level (0 à 100)",
       "detail_no_sessions": "No exposure yet. Start one when you feel ready.",
       "detail_history_title": "My exposures",
       "detail_do_exposure": "Do an exposure",
@@ -1040,7 +1040,7 @@
       "outcome_label": "What happened",
       "outcome_placeholder": "What actually happened?",
       "step_target_hint": "How stressful is this situation before you start working on it? Used to order your ladder, from easiest to hardest.",
-      "chart_y_axis": "Stress level (0–100)",
+      "chart_y_axis": "Stress level (0 à 100)",
       "chart_x_axis": "Sessions (S1, S2, …)",
       "chart_reference": "Initial stress",
       "scale_hint": "0 = no stress · 100 = maximum stress",
@@ -1172,7 +1172,7 @@
       "step_5_hint": "Which professionals or services can I contact?",
       "step_6_title": "Securing My Environment",
       "step_6_hint": "How can I make my surroundings safer?",
-      "footer": "Permanent emergency buttons at the bottom of the screen: 15 — SAMU | 3114 — Suicide Prevention"
+      "footer": "Permanent emergency buttons at the bottom of the screen: 15, SAMU | 3114, Suicide Prevention"
     },
     "therapeutic_commitment": {
       "label": "Therapeutic Commitment",
@@ -1186,7 +1186,7 @@
       "now": {
         "title": "Ride the wave",
         "intro1": "A very strong urge or emotion is like a wave: it rises, reaches a peak, and always comes back down.",
-        "intro2": "The patient doesn't have to fight it — just hold on until it passes. They pick an activity, and the timer keeps them company.",
+        "intro2": "The patient doesn't have to fight it, just hold on until it passes. They pick an activity, and the timer keeps them company.",
         "choose_activity": "Choose an activity",
         "pick_category": "What would you like to do right now?",
         "back": "Back",
@@ -1225,7 +1225,7 @@
     "medication_side_effects": {
       "label": "Treatment side effects tracker",
       "description": "Daily self-assessment (0-3): drowsiness, restlessness, tremors, dry mouth.",
-      "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds — MDR 2017/745 compliance. Last 30 days of history available in the app."
+      "footer": "Scale inspired by the UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Mild · 2 = Moderate · 3 = Severe. Raw values as reported by the patient. No interpretive thresholds, MDR 2017/745 compliance. Last 30 days of history available in the app."
     },
     "medication_adherence": {
       "label": "Medication Adherence Module",
@@ -1250,7 +1250,7 @@
         "label": "History",
         "detail": "Raw list of the last 30 days (date, status, note)"
       },
-      "footer": "Data stored locally on the patient's phone. The patient self-reports their status each day — no algorithmic interpretation (MDR 2017/745 compliance). Last 30 days of history available in the app."
+      "footer": "Data stored locally on the patient's phone. The patient self-reports their status each day, no algorithmic interpretation (MDR 2017/745 compliance). Last 30 days of history available in the app."
     },
     "psychoeducation": {
       "label": "Psychoeducation",
@@ -1259,7 +1259,7 @@
     "sleep_diary": {
       "label": "Sleep Diary",
       "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
-      "footer": "CBT-I formula (Morin, 1993) — SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70–84% · < 70%."
+      "footer": "CBT-I formula (Morin, 1993) : SE (%) = Actual Sleep Time ÷ Time in Bed × 100. Actual sleep time = time in bed − sleep onset latency − total night wake duration. Reference thresholds: ≥ 85% · 70 à 84% · < 70%."
     },
     "diet_weight_psycho": {
       "label": "Diet & Weight Psychoeducation",
@@ -1267,7 +1267,7 @@
     },
     "chronobiology_tracker": {
       "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal — essential for bipolar disorders."
+      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders."
     },
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",
@@ -1281,7 +1281,7 @@
     "behavioral_activation": {
       "label": "Behavioral Activation Journal",
       "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
-      "footer": "The patient plans and rates activities on two dimensions (P and M). Data stored locally. No global score — raw P and M values are reviewed by the clinician during sessions to guide motivational interviewing."
+      "footer": "The patient plans and rates activities on two dimensions (P and M). Data stored locally. No global score, raw P and M values are reviewed by the clinician during sessions to guide motivational interviewing."
     },
     "beck_columns": {
       "label": "Beck Columns",
@@ -1292,11 +1292,11 @@
       },
       "step_2": {
         "title": "Emotion(s)",
-        "hint": "What emotion did I feel? How intense was it (0–100)?"
+        "hint": "What emotion did I feel? How intense was it (0 à 100)?"
       },
       "step_3": {
         "title": "Automatic Thought",
-        "hint": "What thought came to mind? How much did I believe it (0–100)?"
+        "hint": "What thought came to mind? How much did I believe it (0 à 100)?"
       },
       "step_4": {
         "title": "Rational Response",
@@ -1304,7 +1304,7 @@
       },
       "step_5": {
         "title": "Outcome",
-        "hint": "What emotion now? Intensity (0–100)? Belief in the alternative thought (0–100)?"
+        "hint": "What emotion now? Intensity (0 à 100)? Belief in the alternative thought (0 à 100)?"
       },
       "footer": "Each record is stored locally on the patient's device. History is accessible at any time."
     },
@@ -1317,43 +1317,43 @@
       "description": "5-4-3-2-1 exercise to return to the present during dissociation or severe rumination."
     },
     "rim": {
-      "label": "RIM – Mental Imagery Reprocessing",
+      "label": "RIM - Mental Imagery Reprocessing",
       "description": "Mental imagery reprocessing technique.",
-      "footer": "Mental Imagery Reprocessing (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
+      "footer": "Mental Imagery Reprocessing (RIM) : Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Alternative scenario configured by the clinician, read-only for the patient."
     },
     "fear_thermometer": {
       "label": "Graded Exposure",
       "description": "Measure and visualize your anxiety level (SUDs, 0-100).",
-      "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0–100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
+      "footer": "The patient measures their subjective distress level (SUDs, Wolpe 1969) before and after a coping strategy. Data stored locally. Raw 0 à 100 values are reviewed by the clinician to assess the effectiveness of exposures and strategies."
     },
     "breathing_techniques": {
       "label": "Breathing Techniques",
       "description": "Visual guide to box breathing and cardiac coherence with local counter.",
       "field_1": {
         "label": "Cardiac Coherence",
-        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inhale / 5s exhale · 5 min recommended"
+        "detail": "Lehrer & Gevirtz (2014) : Grade B · 5s inhale / 5s exhale · 5 min recommended"
       },
       "field_2": {
         "label": "Diaphragmatic Breathing",
-        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inhale / 7s exhale · 5 min recommended"
+        "detail": "HAS, Conrad et al. (2007) : Grade B · 4s inhale / 7s exhale · 5 min recommended"
       },
       "field_3": {
         "label": "Box Breathing",
-        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommended"
+        "detail": "VA/DoD Guidelines, Grade C · 4-4-4-4 · 4 min recommended"
       },
       "field_4": {
         "label": "4-7-8 Technique",
-        "detail": "Expert consensus — Grade C · 4s-7s-8s · sleep onset, anxiety crisis · 3 min"
+        "detail": "Expert consensus, Grade C · 4s-7s-8s · sleep onset, anxiety crisis · 3 min"
       },
       "field_5": {
         "label": "Mindful Breathing",
-        "detail": "MBCT Segal et al. (2002) — Grade A depressive relapse · 4-1-6-1 · 10 min recommended"
+        "detail": "MBCT Segal et al. (2002) : Grade A depressive relapse · 4-1-6-1 · 10 min recommended"
       },
       "field_6": {
         "label": "Session History",
-        "detail": "Technique used + actual duration — raw data, no interpretation"
+        "detail": "Technique used + actual duration, raw data, no interpretation"
       },
-      "footer": "Animated guide at a fixed pace — no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
+      "footer": "Animated guide at a fixed pace, no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
     },
     "cognitive_saturation": {
       "label": "Cognitive Saturation",
@@ -1370,27 +1370,27 @@
     },
     "phq9": {
       "label": "PHQ-9",
-      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0–27."
+      "description": "9-item depression questionnaire (Kroenke & Spitzer, 2001). Score 0 à 27."
     },
     "gad7": {
       "label": "GAD-7",
-      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0–21."
+      "description": "7-item generalized anxiety questionnaire (Spitzer et al., 2006). Score 0 à 21."
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "23-item borderline symptom scale. Average score 0–4."
+      "description": "23-item borderline symptom scale. Average score 0 à 4."
     },
     "snap_iv": {
       "label": "SNAP-IV",
-      "description": "ADHD screening for children/adolescents — 26 items, 3 subscales."
+      "description": "ADHD screening for children/adolescents, 26 items, 3 subscales."
     },
     "asrs6": {
-      "label": "ASRS v1.1 — Screener",
-      "description": "Adult ADHD rapid screening — 6-item Part A (Kessler et al., 2005)."
+      "label": "ASRS v1.1, Screener",
+      "description": "Adult ADHD rapid screening, 6-item Part A (Kessler et al., 2005)."
     },
     "asrs18": {
-      "label": "ASRS v1.1 — Full Assessment",
-      "description": "Full adult ADHD assessment — 18 items Parts A+B (Kessler et al., 2005)."
+      "label": "ASRS v1.1, Full Assessment",
+      "description": "Full adult ADHD assessment, 18 items Parts A+B (Kessler et al., 2005)."
     }
   },
   "notifications": {
@@ -1606,7 +1606,7 @@
     "link": {
       "linked_prefix": "Linked to",
       "linked_unknown": "Linked patient",
-      "invited": "Invited — {{email}} (pending sign-up)",
+      "invited": "Invited, {{email}} (pending sign-up)",
       "free": "Standalone case (not linked to the app)",
       "modules_hint": "Modules unlocked for this patient in the app"
     },
@@ -1693,14 +1693,14 @@
     "range_3m": "3 months",
     "range_6m": "6 months",
     "range_1y": "1 year",
-    "scale_phq9": "PHQ-9 — Depression",
-    "scale_gad7": "GAD-7 — Generalised Anxiety",
-    "scale_bsl23": "BSL-23 — Borderline Symptoms",
-    "scale_epds": "EPDS — Postnatal Depression",
-    "scale_rcads": "RCADS — Anxiety & Depression (youth)",
-    "scale_asrs6": "ASRS v1.1 — ADHD Screening",
-    "scale_snap_iv": "SNAP-IV — ADHD (child/teen)",
-    "scale_nsi": "NSI — Nightmare Severity",
+    "scale_phq9": "PHQ-9, Depression",
+    "scale_gad7": "GAD-7, Generalised Anxiety",
+    "scale_bsl23": "BSL-23, Borderline Symptoms",
+    "scale_epds": "EPDS, Postnatal Depression",
+    "scale_rcads": "RCADS, Anxiety & Depression (youth)",
+    "scale_asrs6": "ASRS v1.1, ADHD Screening",
+    "scale_snap_iv": "SNAP-IV, ADHD (child/teen)",
+    "scale_nsi": "NSI, Nightmare Severity",
     "mood_title": "Mood Tracker",
     "mood_detail": "Detail",
     "mood_humeur": "Mood",

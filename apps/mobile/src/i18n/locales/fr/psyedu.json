@@ -25,14 +25,14 @@
         "action1": "Se coucher et se lever à des heures régulières, week-end compris.",
         "action2": "Réserver le lit au sommeil : pas d’écran, pas de travail.",
         "action3": "Éviter la caféine après 14 h et l’alcool le soir.",
-        "action4": "Garder la chambre fraîche (16–18 °C), sombre et calme.",
+        "action4": "Garder la chambre fraîche (16 à 18 °C), sombre et calme.",
         "action5": "Un rituel calme avant le coucher : lecture, respiration lente.",
         "action6": "Sieste courte (20 minutes maximum) et avant 14 h.",
         "tip": "Pas endormi après 20 minutes ? Se lever, activité calme, revenir au lit quand la somnolence revient."
       },
       "sources": {
-        "s1": "HAS (2017) — Prise en charge des troubles du sommeil",
-        "s2": "Furukawa et al. (2024) — TCC de l’insomnie (revue JAMA Psychiatry)"
+        "s1": "HAS (2017) : Prise en charge des troubles du sommeil",
+        "s2": "Furukawa et al. (2024) : TCC de l’insomnie (revue JAMA Psychiatry)"
       }
     }
   },
@@ -64,8 +64,8 @@
         "tip": "Pas endormi après 20 minutes au lit ? Se lever, faire une activité calme, et revenir quand le sommeil vient."
       },
       "sources": {
-        "s1": "HAS / INSV — Sommeil : repères et bonnes pratiques",
-        "s2": "Furukawa et al. (2024) — TCC de l’insomnie (revue JAMA Psychiatry)"
+        "s1": "HAS / INSV, Sommeil : repères et bonnes pratiques",
+        "s2": "Furukawa et al. (2024) : TCC de l’insomnie (revue JAMA Psychiatry)"
       }
     },
     "nutrition_brain": {
@@ -83,15 +83,15 @@
         "tip": "Viser la variété, pas la perfection : un petit changement à la fois."
       },
       "sources": {
-        "s1": "Santé publique France — Manger Bouger (PNNS)",
-        "s2": "Firth et al. (2019) — Alimentation et symptômes de dépression (méta-analyse)"
+        "s1": "Santé publique France, Manger Bouger (PNNS)",
+        "s2": "Firth et al. (2019) : Alimentation et symptômes de dépression (méta-analyse)"
       }
     },
     "gentle_activity": {
       "title": "L'activité physique douce",
       "summary": "Endorphines, BDNF et micro-habitudes pour bouger sans se forcer",
       "why": {
-        "p1": "Bouger, même un peu, améliore l’humeur, le sommeil et l’énergie. L’effet est réel dès de petites quantités — pas besoin de sport intense."
+        "p1": "Bouger, même un peu, améliore l’humeur, le sommeil et l’énergie. L’effet est réel dès de petites quantités, pas besoin de sport intense."
       },
       "how": {
         "action1": "Commencer par 10 minutes de marche par jour, de préférence le matin à la lumière.",
@@ -102,15 +102,15 @@
         "tip": "5 minutes valent mieux que zéro : chaque petit effort compte."
       },
       "sources": {
-        "s1": "Noetel et al. (2024) — Exercice et dépression (revue BMJ)",
-        "s2": "Pearce et al. (2022) — Activité physique et risque de dépression (méta-analyse)"
+        "s1": "Noetel et al. (2024) : Exercice et dépression (revue BMJ)",
+        "s2": "Pearce et al. (2022) : Activité physique et risque de dépression (méta-analyse)"
       }
     },
     "general": {
       "title": "Psychotropes et alimentation",
-      "summary": "Pourquoi le poids ou l'appétit changent — et quoi faire",
+      "summary": "Pourquoi le poids ou l'appétit changent, et quoi faire",
       "why": {
-        "p1": "Certains médicaments pour la tête peuvent changer l'appétit, le goût ou l'envie de bouger. Ces effets varient d'une personne à l'autre et peuvent évoluer avec le temps. **Ce n'est pas un manque de volonté** — et quelques habitudes simples aident à garder l'équilibre."
+        "p1": "Certains médicaments pour la tête peuvent changer l'appétit, le goût ou l'envie de bouger. Ces effets varient d'une personne à l'autre et peuvent évoluer avec le temps. **Ce n'est pas un manque de volonté**, et quelques habitudes simples aident à garder l'équilibre."
       },
       "how": {
         "action1": "Garder 3 repas à des heures régulières : ça évite de grignoter et stabilise l'appétit.",
@@ -121,15 +121,15 @@
         "tip_weigh": "Le réflexe : se peser une fois par semaine, le même jour, et noter le chiffre pour le suivre avec son soignant."
       },
       "sources": {
-        "s1": "Mohanty et al. (2024) — Mode de vie et prise de poids sous psychotropes (méta-analyse)",
-        "s2": "JAMA (2023) — Prise en charge du surpoids : l'approche comportementale"
+        "s1": "Mohanty et al. (2024) : Mode de vie et prise de poids sous psychotropes (méta-analyse)",
+        "s2": "JAMA (2023) : Prise en charge du surpoids : l'approche comportementale"
       }
     },
     "antipsychotics": {
       "title": "Antipsychotiques et poids",
-      "summary": "Pourquoi le poids peut changer — et quoi faire au quotidien",
+      "summary": "Pourquoi le poids peut changer, et quoi faire au quotidien",
       "why": {
-        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une sensation de faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim du cerveau. La prise de poids n'est pas une fatalité — quelques habitudes simples aident à la limiter."
+        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une sensation de faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim du cerveau. La prise de poids n'est pas une fatalité, quelques habitudes simples aident à la limiter."
       },
       "how": {
         "action1": "Manger lentement et poser sa fourchette entre les bouchées : se sentir rassasié prend environ 20 minutes.",
@@ -141,15 +141,15 @@
         "bq_safety": "Ne changez jamais votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "HAS (2017) — Surveillance du poids et des paramètres métaboliques sous antipsychotiques",
-        "s2": "BAP / NHS — Antipsychotic medication and weight gain (conseils aux patients)"
+        "s1": "HAS (2017) : Surveillance du poids et des paramètres métaboliques sous antipsychotiques",
+        "s2": "BAP / NHS, Antipsychotic medication and weight gain (conseils aux patients)"
       }
     },
     "methylphenidate": {
       "title": "Méthylphénidate et appétit",
       "summary": "Garder assez d'énergie dans la journée",
       "why": {
-        "p1": "Le méthylphénidate (Ritaline®, Concerta®, Medikinet®, Quasym®) coupe souvent l'appétit, surtout le midi. C'est un effet connu du médicament. L'important : garder assez d'énergie sur la journée — surtout chez l'enfant et l'ado, pour ne pas freiner la croissance."
+        "p1": "Le méthylphénidate (Ritaline®, Concerta®, Medikinet®, Quasym®) coupe souvent l'appétit, surtout le midi. C'est un effet connu du médicament. L'important : garder assez d'énergie sur la journée, surtout chez l'enfant et l'ado, pour ne pas freiner la croissance."
       },
       "how": {
         "action1": "Prendre un petit-déjeuner complet avant le médicament (œuf, pain complet, laitage) : c'est le moment où l'appétit est le plus présent.",
@@ -159,31 +159,31 @@
         "tip_weigh": "Le réflexe : surveiller le poids (et la taille chez l'enfant) et en parler au médecin s'il baisse."
       },
       "sources": {
-        "s1": "ANSM — Résumé des caractéristiques (RCP) Ritaline®, Concerta®, Medikinet®, Quasym®",
-        "s2": "HAS (2014) — Méthylphénidate chez l'enfant et l'adolescent"
+        "s1": "ANSM, Résumé des caractéristiques (RCP) Ritaline®, Concerta®, Medikinet®, Quasym®",
+        "s2": "HAS (2014) : Méthylphénidate chez l'enfant et l'adolescent"
       }
     },
     "antidepressants": {
       "title": "Antidépresseurs et appétit",
       "summary": "Des effets variables, souvent passagers",
       "why": {
-        "p1": "Les antidépresseurs agissent différemment selon la molécule. Au début, certains coupent un peu l'appétit ou donnent la nausée — c'est souvent passager. Sur la durée, la plupart changent peu le poids ; quelques-uns peuvent l'augmenter. En parler permet d'ajuster."
+        "p1": "Les antidépresseurs agissent différemment selon la molécule. Au début, certains coupent un peu l'appétit ou donnent la nausée, c'est souvent passager. Sur la durée, la plupart changent peu le poids ; quelques-uns peuvent l'augmenter. En parler permet d'ajuster."
       },
       "how": {
         "action1": "Si la nausée gêne au début : prendre le médicament avec un peu de nourriture.",
         "action2": "Si l'appétit est coupé : des repas plus petits mais plus fréquents, riches en nutriments (œufs, avocat, noix).",
         "action3": "Garder des repas réguliers et une activité physique douce pour stabiliser le poids.",
         "action4": "Noter tout changement net d'appétit ou de poids pour en parler au médecin.",
-        "tip": "Le réflexe : ces effets s'atténuent souvent après quelques semaines — signaler s'ils persistent."
+        "tip": "Le réflexe : ces effets s'atténuent souvent après quelques semaines, signaler s'ils persistent."
       },
       "sources": {
-        "s1": "ANSM — Résumé des caractéristiques (RCP) des antidépresseurs (ISRS, IRSN…)",
-        "s2": "JAMA (2023) — Prise en charge du surpoids : l'approche comportementale"
+        "s1": "ANSM, Résumé des caractéristiques (RCP) des antidépresseurs (ISRS, IRSN…)",
+        "s2": "JAMA (2023) : Prise en charge du surpoids : l'approche comportementale"
       }
     },
     "mood_stabilizers": {
       "title": "Thymorégulateurs",
-      "summary": "Le poids selon la molécule — et la régularité",
+      "summary": "Le poids selon la molécule, et la régularité",
       "why": {
         "p1": "Les thymorégulateurs stabilisent l'humeur. Leur effet sur le poids dépend de la molécule : le valproate (Dépakote®, Dépakine®) fait souvent prendre du poids ; la lamotrigine (Lamictal®) est plutôt neutre. Le lithium, lui, demande surtout de la régularité dans l'eau et le sel (voir la fiche dédiée)."
       },
@@ -196,8 +196,8 @@
         "bq_safety": "Ne changez jamais votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "Nierenberg et al. (2023) — Trouble bipolaire : diagnostic et traitement (revue JAMA)",
-        "s2": "ANSM — Résumé des caractéristiques (RCP) valproate, lamotrigine, lithium"
+        "s1": "Nierenberg et al. (2023) : Trouble bipolaire : diagnostic et traitement (revue JAMA)",
+        "s2": "ANSM, Résumé des caractéristiques (RCP) valproate, lamotrigine, lithium"
       }
     },
     "lithium_safety": {
@@ -213,14 +213,14 @@
         "rule2": "**Ne pas changer brutalement ses habitudes de sel** : un régime sans sel soudain fait monter le taux de lithium ; un excès de sel le fait baisser. Garder une consommation stable.",
         "rule3": "**Compenser les pertes** : en cas de forte chaleur, de sport intense, de diarrhée ou de vomissements, boire davantage.",
         "avoid_intro": "Ce qu'il vaut mieux éviter :",
-        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) : ils augmentent le taux de lithium. Le paracétamol est généralement préféré — demandez conseil à votre médecin ou pharmacien.",
+        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) : ils augmentent le taux de lithium. Le paracétamol est généralement préféré, demandez conseil à votre médecin ou pharmacien.",
         "avoid2": "Les régimes « détox » ou diurétiques.",
         "alert": "**Signes d'alerte** : des tremblements importants des mains, une soif extrême, des nausées sévères, une diarrhée ou une confusion peuvent évoquer un surdosage. Dans ce cas, contactez rapidement votre médecin ou le 15.",
         "bq1": "Ne modifiez jamais votre dose ni votre traitement sans en parler à votre médecin."
       },
       "sources": {
-        "s1": "ANSM — Résumé des caractéristiques (RCP) lithium (Téralithe®)",
-        "s2": "Airainer & Seifert (2024) — Lithium dans le trouble bipolaire : analyse des études cliniques (revue)"
+        "s1": "ANSM, Résumé des caractéristiques (RCP) lithium (Téralithe®)",
+        "s2": "Airainer & Seifert (2024) : Lithium dans le trouble bipolaire : analyse des études cliniques (revue)"
       }
     }
   },
@@ -235,8 +235,8 @@
         "tip1": "La chronobiologie est une discipline scientifique reconnue. Ses applications en santé mentale font l'objet de recommandations dans plusieurs pays."
       },
       "how": {
-        "p1": "Chaque personne a un **chronotype** — une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le vôtre aide à mieux organiser vos journées en accord avec votre biologie.",
-        "p2": "L'horloge biologique peut être **resynchronisée** progressivement. Les ancres horaires régulières — heure de lever, repas, activités — envoient des signaux stables à votre cerveau.",
+        "p1": "Chaque personne a un **chronotype**, une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le vôtre aide à mieux organiser vos journées en accord avec votre biologie.",
+        "p2": "L'horloge biologique peut être **resynchronisée** progressivement. Les ancres horaires régulières, heure de lever, repas, activités, envoient des signaux stables à votre cerveau.",
         "item1": "Identifier vos zeitgebers personnels : lever, premier repas, activité principale, coucher",
         "item2": "Observer vos horaires habituels sans les juger",
         "item3": "En parler avec votre soignant pour adapter cet outil à votre situation"
@@ -250,10 +250,10 @@
       "title": "Pourquoi la régularité aide le cerveau",
       "summary": "Comment des horaires stables réduisent le stress et renforcent la résilience",
       "why": {
-        "p1": "Quand les horaires sont réguliers, les différentes horloges de l'organisme — cerveau, foie, cœur, intestin — restent **synchronisées entre elles**. Cette cohérence améliore la qualité du sommeil, la gestion du stress et la stabilité de l'humeur.",
+        "p1": "Quand les horaires sont réguliers, les différentes horloges de l'organisme, cerveau, foie, cœur, intestin, restent **synchronisées entre elles**. Cette cohérence améliore la qualité du sommeil, la gestion du stress et la stabilité de l'humeur.",
         "p2": "Le « **social jet lag** » désigne le décalage entre l'horloge biologique et l'horloge sociale. Il survient typiquement quand on se couche et lève beaucoup plus tard le week-end que la semaine.",
         "p3": "Un social jet lag chronique est associé à une fatigue persistante, des difficultés de concentration et une humeur plus instable.",
-        "tip1": "La thérapie IPSRT (Frank et al., 2005, Arch Gen Psychiatry) montre que structurer les rythmes quotidiens réduit significativement les rechutes chez les patients bipolaires — une des preuves scientifiques les mieux documentées dans ce domaine."
+        "tip1": "La thérapie IPSRT (Frank et al., 2005, Arch Gen Psychiatry) montre que structurer les rythmes quotidiens réduit significativement les rechutes chez les patients bipolaires, une des preuves scientifiques les mieux documentées dans ce domaine."
       },
       "how": {
         "p1": "L'objectif n'est pas la perfection mais la **cohérence**. Même deux ou trois ancrages réguliers par jour ont un effet mesurable sur la stabilité des rythmes.",
@@ -274,8 +274,8 @@
       "why": {
         "p1": "La lumière du matin est le **zeitgeber le plus puissant** pour l'horloge biologique. Des cellules spécialisées de la rétine transmettent directement le signal lumineux au noyau suprachiasmatique.",
         "p2": "L'exposition à la lumière au réveil déclenche la **réponse cortisolique matinale** : une montée naturelle de cortisol qui prépare le corps à l'éveil et à l'action.",
-        "p3": "En soirée, la lumière artificielle (surtout bleue) **retarde** l'horloge interne en bloquant la sécrétion de mélatonine — l'effet inverse de la lumière matinale.",
-        "tip1": "Un ciel couvert délivre encore 10 000 à 20 000 lux — bien plus que l'éclairage intérieur (300–500 lux). Quelques minutes dehors suffisent."
+        "p3": "En soirée, la lumière artificielle (surtout bleue) **retarde** l'horloge interne en bloquant la sécrétion de mélatonine, l'effet inverse de la lumière matinale.",
+        "tip1": "Un ciel couvert délivre encore 10 000 à 20 000 lux, bien plus que l'éclairage intérieur (300 à 500 lux). Quelques minutes dehors suffisent."
       },
       "how": {
         "p1": "**Objectif principal** : s'exposer à la lumière naturelle dans les 30 minutes après le réveil, si possible.",
@@ -288,14 +288,14 @@
       "sources": {
         "s1": "Leproult R. & Van Cauter E. (2010). Role of sleep and sleep loss in hormonal release and metabolism. Endocr Dev. PMID: 19955752",
         "s2": "Rosenthal N.E. et al. (1984). Seasonal affective disorder + light therapy. Arch Gen Psychiatry. PMID: 6581756",
-        "s3": "HAS — Prise en charge de l'insomnie en médecine générale (2006)."
+        "s3": "HAS, Prise en charge de l'insomnie en médecine générale (2006)."
       }
     },
     "meals_timing": {
       "title": "Les repas, horloges secondaires",
       "summary": "Les horaires des repas envoient des signaux de timing à tous les organes",
       "why": {
-        "p1": "Chaque organe — foie, intestin, pancréas, cœur — possède sa propre **horloge périphérique**. Ces horloges sont synchronisées à la fois par la lumière et par l'heure des repas.",
+        "p1": "Chaque organe, foie, intestin, pancréas, cœur, possède sa propre **horloge périphérique**. Ces horloges sont synchronisées à la fois par la lumière et par l'heure des repas.",
         "p2": "Manger à des heures régulières envoie des signaux de timing cohérents à l'ensemble du tube digestif et au foie. À l'inverse, des repas à heures très variables peuvent **désynchroniser** ces horloges périphériques.",
         "p3": "La **chrono-nutrition** étudie les interactions entre les horaires alimentaires et l'horloge biologique. Des repas régulièrement décalés (manger très tard le soir) peuvent perturber le sommeil et le métabolisme."
       },
@@ -315,8 +315,8 @@
       "title": "L'activité sociale comme régulateur",
       "summary": "Les contacts sociaux réguliers synchronisent l'horloge biologique",
       "why": {
-        "p1": "Les interactions sociales régulières agissent comme des **zeitgebers** : un repas à heure fixe avec des proches, un travail avec des horaires stables, une activité récurrente — ces événements envoient des signaux de timing au cerveau.",
-        "p2": "Des perturbations du rythme social — perte d'emploi, rupture sentimentale, isolement, voyage prolongé — peuvent déstabiliser l'horloge biologique et être des **déclencheurs de difficultés psychiques**.",
+        "p1": "Les interactions sociales régulières agissent comme des **zeitgebers** : un repas à heure fixe avec des proches, un travail avec des horaires stables, une activité récurrente, ces événements envoient des signaux de timing au cerveau.",
+        "p2": "Des perturbations du rythme social, perte d'emploi, rupture sentimentale, isolement, voyage prolongé, peuvent déstabiliser l'horloge biologique et être des **déclencheurs de difficultés psychiques**.",
         "p3": "C'est le fondement de l'IPSRT (Thérapie Interpersonnelle et des Rythmes Sociaux) : identifier ses « zeitgebers sociaux » personnels et les protéger autant que possible.",
         "tip1": "Votre soignant peut vous aider à identifier quels événements sociaux sont les plus importants pour votre équilibre et comment les préserver."
       },
@@ -334,12 +334,12 @@
     },
     "sleep_wake": {
       "title": "Lever et coucher : les deux piliers",
-      "summary": "L'heure de lever est l'ancre la plus puissante — comprendre pourquoi",
+      "summary": "L'heure de lever est l'ancre la plus puissante, comprendre pourquoi",
       "why": {
-        "p1": "Le **lever à heure fixe** est l'ancre circadienne la plus puissante — plus encore que l'heure de coucher. Il déclenche la réponse cortisolique matinale et synchronise l'ensemble des rythmes de la journée.",
+        "p1": "Le **lever à heure fixe** est l'ancre circadienne la plus puissante, plus encore que l'heure de coucher. Il déclenche la réponse cortisolique matinale et synchronise l'ensemble des rythmes de la journée.",
         "p2": "Plus la **pression de sommeil** (adénosine accumulée pendant l'éveil) est construite de manière prévisible, plus l'endormissement et la qualité du sommeil sont stables. Un lever régulier est le fondement de cette construction.",
         "p3": "Se lever à des horaires très variables décale progressivement l'horloge interne et peut rendre l'endormissement le soir plus difficile.",
-        "tip1": "Étude UK Biobank (Phillips et al., 2024, n > 79 000) : la régularité des horaires de sommeil est associée à une réduction de 38 % du risque de dépression — indépendamment de la durée de sommeil."
+        "tip1": "Étude UK Biobank (Phillips et al., 2024, n > 79 000) : la régularité des horaires de sommeil est associée à une réduction de 38 % du risque de dépression, indépendamment de la durée de sommeil."
       },
       "how": {
         "p1": "**Si vous ne pouvez maintenir qu'une seule ancre**, privilégiez l'heure de lever plutôt que l'heure de coucher.",
@@ -351,7 +351,7 @@
       },
       "sources": {
         "s1": "Li DR et al. (2025). Regular sleep patterns, not just duration, critical for mental health. Psychological Medicine. PMID: 40814280",
-        "s2": "HAS — Prise en charge de l'insomnie en médecine générale (2006). Recommandations professionnelles.",
+        "s2": "HAS, Prise en charge de l'insomnie en médecine générale (2006). Recommandations professionnelles.",
         "s3": "Borbély A.A. (1982). A two process model of sleep regulation. Hum Neurobiol. PMID: 7185792"
       }
     },
@@ -380,48 +380,48 @@
   "distress_tolerance": {
     "intro": {
       "title": "Qu'est-ce que la tolérance à la détresse ?",
-      "summary": "Traverser une crise sans l'aggraver — les principes fondamentaux de la DBT",
+      "summary": "Traverser une crise sans l'aggraver, les principes fondamentaux de la DBT",
       "why": {
-        "p1": "La **tolérance à la détresse** est une compétence issue de la DBT (Thérapie Dialectique Comportementale), développée par Marsha Linehan. Elle repose sur une idée centrale : toute émotion intense est temporaire — elle finira par passer, comme une vague.",
-        "p2": "En situation de crise, l'impulsion est d'**agir immédiatement** pour faire cesser la douleur — souvent au prix de conséquences durables. Ces techniques permettent de **survivre à la vague** sans l'aggraver.",
+        "p1": "La **tolérance à la détresse** est une compétence issue de la DBT (Thérapie Dialectique Comportementale), développée par Marsha Linehan. Elle repose sur une idée centrale : toute émotion intense est temporaire, elle finira par passer, comme une vague.",
+        "p2": "En situation de crise, l'impulsion est d'**agir immédiatement** pour faire cesser la douleur, souvent au prix de conséquences durables. Ces techniques permettent de **survivre à la vague** sans l'aggraver.",
         "p3": "Ce n'est pas une technique de résolution de problème. Elle ne règle rien. Elle permet de **traverser** un moment insupportable sans prendre de décision irréversible.",
-        "tip1": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique."
+        "tip1": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique."
       },
       "how": {
         "p1": "Ces techniques sont à **connaître avant la crise**, pas à découvrir pendant. C'est pourquoi votre soignant vous les a présentées en consultation.",
-        "p2": "En situation de détresse intense, le raisonnement est difficile. Votre cerveau a besoin de **routines déjà apprises** — pas de nouvelles informations à traiter.",
+        "p2": "En situation de détresse intense, le raisonnement est difficile. Votre cerveau a besoin de **routines déjà apprises**, pas de nouvelles informations à traiter.",
         "item1": "Reconnaître le signal : « je suis en crise »",
         "item2": "Choisir une technique que vous connaissez déjà",
-        "item3": "L'appliquer sans viser la guérison — juste traverser le moment"
+        "item3": "L'appliquer sans viser la guérison, juste traverser le moment"
       },
       "sources": {
-        "s1": "Linehan MM (1993) — Cognitive-Behavioral Treatment of Borderline Personality Disorder. Guilford Press.",
-        "s2": "Linehan MM (2015) — DBT Skills Training Manual, 2nd ed. Guilford Press."
+        "s1": "Linehan MM (1993) : Cognitive-Behavioral Treatment of Borderline Personality Disorder. Guilford Press.",
+        "s2": "Linehan MM (2015) : DBT Skills Training Manual, 2nd ed. Guilford Press."
       }
     },
     "tipp": {
-      "title": "TIPP — Régulation physique rapide",
+      "title": "TIPP, Régulation physique rapide",
       "summary": "Agir sur le corps pour calmer rapidement l'intensité émotionnelle",
       "why": {
         "p1": "En situation de crise aiguë, le système nerveux sympathique est activé : rythme cardiaque élevé, tension musculaire, hypervigilance. Ces techniques agissent **directement sur la physiologie** pour interrompre ce cycle.",
-        "p2": "**T — Température** : appliquer de l'eau froide sur le visage active le réflexe de plongée (*diving reflex*), qui ralentit mécaniquement la fréquence cardiaque.",
-        "p3": "**I — Exercice intense** : 30 secondes à 2 minutes d'effort physique intense permet au corps de décharger l'activation sympathique et favorise le retour à l'équilibre du système nerveux autonome.",
-        "p4": "**P — Respiration rythmée** : expirer plus lentement qu'on inspire active le système nerveux parasympathique.",
-        "p5": "**P — Relaxation progressive** : contracter puis relâcher les groupes musculaires réduit la tension physique résiduelle.",
+        "p2": "**T, Température** : appliquer de l'eau froide sur le visage active le réflexe de plongée (*diving reflex*), qui ralentit mécaniquement la fréquence cardiaque.",
+        "p3": "**I, Exercice intense** : 30 secondes à 2 minutes d'effort physique intense permet au corps de décharger l'activation sympathique et favorise le retour à l'équilibre du système nerveux autonome.",
+        "p4": "**P, Respiration rythmée** : expirer plus lentement qu'on inspire active le système nerveux parasympathique.",
+        "p5": "**P, Relaxation progressive** : contracter puis relâcher les groupes musculaires réduit la tension physique résiduelle.",
         "tip1": "Ces techniques sont documentées dans le DBT Skills Training Manual (Linehan, 2015). Elles sont destinées aux situations de détresse intense, en complément de votre suivi."
       },
       "how": {
-        "p1": "**T — Température** : immergez votre visage dans un saladier d'eau froide 30 secondes, ou tenez des glaçons dans les mains.",
-        "p2": "**I — Exercice intense** : courez sur place, faites des pompes ou des jumping jacks pendant 1 à 2 minutes.",
-        "p3": "**P — Respiration** : inspirez 4 secondes, expirez 6 secondes. L'expiration doit être plus longue que l'inspiration.",
-        "p4": "**P — Relaxation musculaire** : contractez un groupe musculaire (poings, épaules, jambes) 5 secondes, relâchez complètement 10 secondes.",
+        "p1": "**T, Température** : immergez votre visage dans un saladier d'eau froide 30 secondes, ou tenez des glaçons dans les mains.",
+        "p2": "**I, Exercice intense** : courez sur place, faites des pompes ou des jumping jacks pendant 1 à 2 minutes.",
+        "p3": "**P, Respiration** : inspirez 4 secondes, expirez 6 secondes. L'expiration doit être plus longue que l'inspiration.",
+        "p4": "**P, Relaxation musculaire** : contractez un groupe musculaire (poings, épaules, jambes) 5 secondes, relâchez complètement 10 secondes.",
         "item1": "Choisissez **une seule** de ces quatre techniques en priorité",
         "item2": "Appliquez-la pendant au moins 1 minute avant d'évaluer l'effet",
         "item3": "Vous pouvez combiner T + P (eau froide + respiration lente)"
       }
     },
     "accepts": {
-      "title": "ACCEPTS — Distraction structurée",
+      "title": "ACCEPTS, Distraction structurée",
       "summary": "Se distraire intentionnellement pour traverser une vague émotionnelle",
       "why": {
         "p1": "La distraction est souvent perçue comme un évitement. Dans le contexte de la tolérance à la détresse, elle a un **rôle stratégique** : elle permet au cerveau émotionnel de se désamorcer, sans fuir le problème définitivement.",
@@ -429,17 +429,17 @@
         "tip1": "Cette technique est utile pour les crises modérées. Pour les crises intenses avec impulsion de comportement à risque, préférez TIPP en premier."
       },
       "how": {
-        "p1": "**A — Activités** : faites une activité qui occupe entièrement votre attention (puzzle, dessin, jeu vidéo, sport).",
-        "p2": "**C — Contribution** : faites quelque chose pour quelqu'un d'autre (message à un ami, aide domestique). Cela déplace le focus de soi vers l'autre.",
-        "p3": "**C — Comparaisons** : pensez à des moments que vous avez traversés et qui semblaient insurmontables. Vous les avez vécus.",
-        "p4": "**E — Émotions contraires** : exposez-vous à quelque chose qui génère une émotion différente (film drôle, musique énergique).",
-        "p5": "**P — Repousser** (*Push away*) : imaginez mettre la situation dans une boîte et la refermer. Vous y reviendrez plus tard, pas maintenant.",
-        "p6": "**T — Pensées** : engagez votre esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
-        "p7": "**S — Sensations** : activez une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
+        "p1": "**A, Activités** : faites une activité qui occupe entièrement votre attention (puzzle, dessin, jeu vidéo, sport).",
+        "p2": "**C, Contribution** : faites quelque chose pour quelqu'un d'autre (message à un ami, aide domestique). Cela déplace le focus de soi vers l'autre.",
+        "p3": "**C, Comparaisons** : pensez à des moments que vous avez traversés et qui semblaient insurmontables. Vous les avez vécus.",
+        "p4": "**E, Émotions contraires** : exposez-vous à quelque chose qui génère une émotion différente (film drôle, musique énergique).",
+        "p5": "**P, Repousser** (*Push away*) : imaginez mettre la situation dans une boîte et la refermer. Vous y reviendrez plus tard, pas maintenant.",
+        "p6": "**T, Pensées** : engagez votre esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
+        "p7": "**S, Sensations** : activez une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
       }
     },
     "self_soothing": {
-      "title": "Self-soothing — Apaiser les 5 sens",
+      "title": "Self-soothing, Apaiser les 5 sens",
       "summary": "Activer délibérément le confort sensoriel pour réduire l'intensité émotionnelle",
       "why": {
         "p1": "Les 5 sens (vue, ouïe, odorat, goût, toucher) ont un accès direct au système nerveux autonome. Des stimuli sensoriels apaisants peuvent **réduire l'activation émotionnelle** de façon rapide et non pharmacologique.",
@@ -454,34 +454,34 @@
         "p5": "**Toucher** : couverture chaude, douche chaude, peluche, animal de compagnie, pâte à modeler.",
         "item1": "Préparez votre liste personnelle de ressources sensorielles avec votre soignant",
         "item2": "En crise, activez au moins **deux sens différents** simultanément",
-        "item3": "Accordez-vous au moins 5 minutes — l'effet n'est pas immédiat"
+        "item3": "Accordez-vous au moins 5 minutes, l'effet n'est pas immédiat"
       }
     },
     "improve": {
-      "title": "IMPROVE — Ressources intérieures",
+      "title": "IMPROVE, Ressources intérieures",
       "summary": "Mobiliser ses ressources psychologiques et créatives en situation de crise",
       "why": {
         "p1": "IMPROVE est un acronyme : **I**magery, **M**eaning, **P**rayer/spirituality, **R**elaxation, **O**ne thing at a time, **V**acation, **E**ncouragement.",
-        "p2": "Ces techniques mobilisent des **ressources internes** — sens, valeurs, créativité — plutôt que des actions externes. Elles sont particulièrement utiles quand le contexte ne peut pas être changé.",
+        "p2": "Ces techniques mobilisent des **ressources internes**, sens, valeurs, créativité, plutôt que des actions externes. Elles sont particulièrement utiles quand le contexte ne peut pas être changé.",
         "tip1": "Toutes les composantes d'IMPROVE ne s'appliquent pas à tout le monde. Identifiez avec votre soignant celles qui correspondent à vos propres ressources."
       },
       "how": {
-        "p1": "**I — Imagerie** : imaginez un lieu sûr et ressourçant. Visualisez-le en détail — lumière, sons, textures.",
-        "p2": "**M — Sens** (*Meaning*) : cherchez une signification, même minime, dans la situation difficile.",
-        "p3": "**P — Spiritualité** : si vous avez une pratique spirituelle ou religieuse, mobilisez-la (prière, méditation, lecture).",
-        "p4": "**R — Relaxation** : respiration lente, relaxation musculaire progressive, scan corporel.",
-        "p5": "**O — Une chose à la fois** : réduisez votre champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
-        "p6": "**V — Vacance** : accordez-vous une courte trêve mentale — pas de résolution, pas de décision pendant les prochaines minutes.",
-        "p7": "**E — Encouragement** : dites-vous quelque chose de bienveillant — ce que vous diriez à un ami dans la même situation."
+        "p1": "**I, Imagerie** : imaginez un lieu sûr et ressourçant. Visualisez-le en détail, lumière, sons, textures.",
+        "p2": "**M, Sens** (*Meaning*) : cherchez une signification, même minime, dans la situation difficile.",
+        "p3": "**P, Spiritualité** : si vous avez une pratique spirituelle ou religieuse, mobilisez-la (prière, méditation, lecture).",
+        "p4": "**R, Relaxation** : respiration lente, relaxation musculaire progressive, scan corporel.",
+        "p5": "**O, Une chose à la fois** : réduisez votre champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
+        "p6": "**V, Vacance** : accordez-vous une courte trêve mentale, pas de résolution, pas de décision pendant les prochaines minutes.",
+        "p7": "**E, Encouragement** : dites-vous quelque chose de bienveillant, ce que vous diriez à un ami dans la même situation."
       }
     },
     "pros_cons": {
-      "title": "Pros & cons — Avant d'agir",
+      "title": "Pros & cons, Avant d'agir",
       "summary": "Évaluer les conséquences d'une action impulsive avant de la réaliser",
       "why": {
-        "p1": "En situation de crise, l'impulsion de **faire quelque chose pour faire cesser la douleur** est intense. Cette technique ne supprime pas l'impulsion — elle crée un **espace de délibération** entre l'impulsion et l'action.",
+        "p1": "En situation de crise, l'impulsion de **faire quelque chose pour faire cesser la douleur** est intense. Cette technique ne supprime pas l'impulsion, elle crée un **espace de délibération** entre l'impulsion et l'action.",
         "p2": "Elle repose sur une comparaison : les conséquences de **céder à l'impulsion** versus les conséquences de **tolérer la détresse** sans agir.",
-        "p3": "Elle est plus efficace quand elle est préparée **avant la crise**, en consultation — parce qu'en pleine crise, la capacité à raisonner est réduite.",
+        "p3": "Elle est plus efficace quand elle est préparée **avant la crise**, en consultation, parce qu'en pleine crise, la capacité à raisonner est réduite.",
         "tip1": "Votre soignant peut vous aider à construire votre propre grille pros/cons personnalisée dans un moment calme."
       },
       "how": {
@@ -492,7 +492,7 @@
         "p5": "**Étape 5** : pesez les deux colonnes. Quelle décision correspond le mieux à vos valeurs à long terme ?",
         "item1": "Préparez cette grille en consultation, dans un moment calme",
         "item2": "En crise, avoir la liste déjà écrite est plus utile qu'essayer de la construire",
-        "item3": "L'objectif n'est pas de ne jamais souffrir — c'est de ne pas aggraver la situation"
+        "item3": "L'objectif n'est pas de ne jamais souffrir, c'est de ne pas aggraver la situation"
       }
     }
   },
@@ -501,9 +501,9 @@
       "title": "Qu'est-ce que le craving ?",
       "summary": "Neurobiologie, durée limitée et normalisation de l'envie compulsive",
       "why": {
-        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique — pas un manque de volonté.",
+        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique, pas un manque de volonté.",
         "p2": "Il est déclenché par le **circuit de la récompense** (dopamine). Ce circuit apprend à anticiper le plaisir : une odeur, une image, une émotion peuvent suffire à l'activer.",
-        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement — comme une vague qui monte et qui passe.",
+        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement, comme une vague qui monte et qui passe.",
         "tip1": "Ressentir un craving ne signifie pas que vous allez céder. Beaucoup de personnes ressentent des cravings forts sans y donner suite.",
         "p4": "Plus vous observez le craving sans agir dessus, plus le **circuit neuronal** associé s'affaiblit progressivement au fil du temps."
       },
@@ -511,36 +511,36 @@
         "intro": "Ces trois réflexes peuvent vous aider dans les premières minutes.",
         "item1": "Nommer ce qui se passe : « Je suis en train de ressentir un craving »",
         "item2": "Vérifier l'heure : noter mentalement quand il a commencé",
-        "item3": "Attendre 20 minutes avant toute décision — le pic est souvent passé"
+        "item3": "Attendre 20 minutes avant toute décision, le pic est souvent passé"
       },
-      "src1": "HAS (2015) — Mésusage de l'alcool : dépistage, diagnostic et traitement",
-      "src2": "OMS — Troubles liés à l'usage de substances"
+      "src1": "HAS (2015) : Mésusage de l'alcool : dépistage, diagnostic et traitement",
+      "src2": "OMS, Troubles liés à l'usage de substances"
     },
     "triggers_abc": {
       "title": "Reconnaître ses déclencheurs",
       "summary": "Le modèle A-B-C et l'acronyme HALT pour identifier ce qui précède l'envie",
       "why": {
-        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur** — une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
+        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur**, une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
         "p2": "Le modèle **A-B-C** (Beck, 1993) distingue : **A**ntécédent (la situation), **B**elief (la pensée automatique), **C**onséquence (l'envie, l'émotion, le comportement).",
         "tip1": "L'acronyme **HALT** résume les quatre états qui renforcent les cravings : **H**ungry (faim), **A**ngry (colère), **L**onely (solitude), **T**ired (fatigue). Ils abaissent la résistance à l'envie.",
-        "p3": "Connaître ses déclencheurs personnels permet de les anticiper — et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
+        "p3": "Connaître ses déclencheurs personnels permet de les anticiper, et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
       },
       "how": {
         "intro": "Le journal de craving est un outil pour identifier vos schémas personnels sur la durée.",
         "item1": "Après chaque craving, notez la situation : où étiez-vous, avec qui, que faisiez-vous ?",
-        "item2": "Notez l'émotion ressentie juste avant l'envie — même si elle paraît sans lien",
+        "item2": "Notez l'émotion ressentie juste avant l'envie, même si elle paraît sans lien",
         "item3": "Vérifiez HALT : aviez-vous faim, vous sentiez-vous seul(e), fatigué(e) ou en colère ?",
-        "item4": "Avec le temps, des schémas répétés apparaîtront — c'est une information utile pour votre soignant",
+        "item4": "Avec le temps, des schémas répétés apparaîtront, c'est une information utile pour votre soignant",
         "bq1": "Ces observations sont des données cliniques précieuses. Votre soignant peut vous aider à les analyser et à construire un plan de prévention personnalisé."
       },
-      "src1": "Beck AT, Wright FD, Newman CF, Liese BS (1993) — Cognitive Therapy of Substance Abuse. Guilford Press."
+      "src1": "Beck AT, Wright FD, Newman CF, Liese BS (1993) : Cognitive Therapy of Substance Abuse. Guilford Press."
     },
     "urge_surfing": {
       "title": "Surfer sur l'envie",
-      "summary": "Observer le craving comme une vague — sans agir, sans résister",
+      "summary": "Observer le craving comme une vague, sans agir, sans résister",
       "why": {
         "p1": "L'**urge surfing** est une technique de pleine conscience appliquée aux envies compulsives, développée par Gordon Marlatt (1985). Elle repose sur une observation : résister activement au craving l'amplifie souvent. Observer sans résister le laisse passer.",
-        "p2": "L'image de la **vague** est centrale : une vague monte, atteint un pic, puis redescend. Le craving suit le même schéma. L'objectif n'est pas de détruire la vague — c'est de la traverser debout.",
+        "p2": "L'image de la **vague** est centrale : une vague monte, atteint un pic, puis redescend. Le craving suit le même schéma. L'objectif n'est pas de détruire la vague, c'est de la traverser debout.",
         "tip1": "L'urge surfing ne supprime pas les envies. Il change votre relation à elles : de la lutte vers l'observation. Avec la pratique, la vague devient moins impressionnante.",
         "how": {}
       },
@@ -550,19 +550,19 @@
         "item2": "**Observer** : où ressentez-vous l'envie dans votre corps ? Gorge, poitrine, ventre ? Observez sans chercher à faire partir la sensation.",
         "item3": "**Respirer** : respirez lentement. Expiration plus longue que l'inspiration. Restez présent(e).",
         "item4": "**Attendre** : regardez l'envie monter, atteindre son pic, puis redescendre. Vous n'avez rien à faire.",
-        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal — persévérez."
+        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal, persévérez."
       },
-      "src1": "Marlatt GA & Gordon JR (1985) — Relapse Prevention. Guilford Press.",
-      "src2": "Bowen S, Chawla N & Marlatt GA (2011) — Mindfulness-Based Relapse Prevention. Guilford Press."
+      "src1": "Marlatt GA & Gordon JR (1985) : Relapse Prevention. Guilford Press.",
+      "src2": "Bowen S, Chawla N & Marlatt GA (2011) : Mindfulness-Based Relapse Prevention. Guilford Press."
     },
     "after_the_craving": {
       "title": "Après le craving, sans se juger",
       "summary": "Comprendre l'Abstinence Violation Effect et transformer un craquage en information",
       "why": {
-        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving — c'est le **cycle honte-rechute**.",
+        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving, c'est le **cycle honte-rechute**.",
         "p2": "Marlatt et Gordon ont nommé ce phénomène l'**Abstinence Violation Effect (AVE)** : la croyance que « j'ai craqué une fois, tout est fichu » aggrave souvent la situation bien plus que le craquage lui-même.",
-        "tip1": "Un craquage est une information clinique — pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
-        "bq1": "Votre soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster votre plan — c'est exactement à ça que sert le journal."
+        "tip1": "Un craquage est une information clinique, pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
+        "bq1": "Votre soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster votre plan, c'est exactement à ça que sert le journal."
       },
       "how": {
         "intro": "Après un craquage, ces trois questions permettent d'apprendre plutôt que de se juger.",
@@ -570,8 +570,8 @@
         "item2": "Quelle ressource était absente ou insuffisante ce jour-là ?",
         "item3": "Qu'est-ce qui pourrait être différent la prochaine fois ?"
       },
-      "src1": "Marlatt GA & Gordon JR (1985) — Relapse Prevention. Guilford Press.",
-      "src2": "HAS (2015) — Mésusage de l'alcool : dépistage, diagnostic et traitement"
+      "src1": "Marlatt GA & Gordon JR (1985) : Relapse Prevention. Guilford Press.",
+      "src2": "HAS (2015) : Mésusage de l'alcool : dépistage, diagnostic et traitement"
     }
   },
   "cognitive_distortions": {
@@ -579,19 +579,19 @@
       "title": "Les distorsions cognitives",
       "summary": "Reconnaître les 10 pièges de la pensée automatique",
       "why": {
-        "p1": "Les **distorsions cognitives** sont des façons automatiques et déformées d'interpréter la réalité. Elles sont présentes chez tout le monde — mais peuvent s'intensifier en période de stress ou de détresse.",
+        "p1": "Les **distorsions cognitives** sont des façons automatiques et déformées d'interpréter la réalité. Elles sont présentes chez tout le monde, mais peuvent s'intensifier en période de stress ou de détresse.",
         "p2": "Les reconnaître est la **première étape** pour modifier leur influence. Ce travail est au cœur de la **Thérapie Cognitive et Comportementale (TCC)**, développée par Aaron Beck.",
         "tip1": "Les 10 distorsions les plus courantes :",
-        "d1": "**Pensée tout-ou-rien** — voir les choses en noir ou blanc, sans nuance. *« Si je ne réussis pas parfaitement, je suis un raté. »*",
-        "d2": "**Surgénéralisation** — un échec devient une règle universelle. *« J'ai échoué une fois → j'échoue toujours. »*",
-        "d3": "**Filtre mental** — ne retenir que les aspects négatifs d'une situation.",
-        "d4": "**Disqualification du positif** — les expériences positives « ne comptent pas ».",
-        "d5": "**Lecture de pensée** — supposer savoir ce que les autres pensent. *« Il ne m'a pas répondu, il est énervé contre moi. »*",
-        "d6": "**Prédiction négative** — anticiper que les choses vont mal se passer.",
-        "d7": "**Catastrophisation** — exagérer l'importance d'un problème.",
-        "d8": "**Raisonnement émotionnel** — confondre une émotion avec une réalité. *« Je me sens incompétent(e), donc je le suis. »*",
-        "d9": "**Les « il faut / je dois »** — des règles rigides envers soi-même ou les autres.",
-        "d10": "**Étiquetage** — s'assigner une identité négative globale. *« J'ai fait une erreur → je suis nul(le). »*"
+        "d1": "**Pensée tout-ou-rien**, voir les choses en noir ou blanc, sans nuance. *« Si je ne réussis pas parfaitement, je suis un raté. »*",
+        "d2": "**Surgénéralisation**, un échec devient une règle universelle. *« J'ai échoué une fois → j'échoue toujours. »*",
+        "d3": "**Filtre mental**, ne retenir que les aspects négatifs d'une situation.",
+        "d4": "**Disqualification du positif**, les expériences positives « ne comptent pas ».",
+        "d5": "**Lecture de pensée**, supposer savoir ce que les autres pensent. *« Il ne m'a pas répondu, il est énervé contre moi. »*",
+        "d6": "**Prédiction négative**, anticiper que les choses vont mal se passer.",
+        "d7": "**Catastrophisation**, exagérer l'importance d'un problème.",
+        "d8": "**Raisonnement émotionnel**, confondre une émotion avec une réalité. *« Je me sens incompétent(e), donc je le suis. »*",
+        "d9": "**Les « il faut / je dois »**, des règles rigides envers soi-même ou les autres.",
+        "d10": "**Étiquetage**, s'assigner une identité négative globale. *« J'ai fait une erreur → je suis nul(le). »*"
       },
       "how": {
         "p1": "Quand vous ressentez une émotion intense, posez-vous ces trois questions :",
@@ -601,20 +601,20 @@
         "bq1": "Votre soignant peut vous accompagner dans ce travail, notamment avec les Colonnes de Beck."
       },
       "sources": {
-        "s1": "Beck AT (1979) — Cognitive Therapy of Depression — Guilford Press",
-        "s2": "Burns DD (1980) — Feeling Good: The New Mood Therapy — Harper Collins"
+        "s1": "Beck AT (1979) : Cognitive Therapy of Depression, Guilford Press",
+        "s2": "Burns DD (1980) : Feeling Good: The New Mood Therapy, Harper Collins"
       }
     }
   },
   "motivational_balance": {
     "ambivalence": {
       "title": "Comprendre l'ambivalence",
-      "summary": "Vouloir et ne pas vouloir — un état normal, pas un défaut",
+      "summary": "Vouloir et ne pas vouloir, un état normal, pas un défaut",
       "why": {
         "p1": "L'**ambivalence** est le fait de vouloir changer et de ne pas vouloir changer en même temps. C'est l'état le plus fréquent chez toute personne qui envisage un changement.",
-        "p2": "Ce n'est pas un manque de volonté, ni une faiblesse. C'est une réaction humaine normale face à toute décision qui implique un coût — même si ce changement est bénéfique.",
-        "tip1": "L'ambivalence est le carburant du travail motivationnel. Vous n'êtes pas bloqué(e) — vous êtes en train d'explorer.",
-        "bq1": "« Personne ne change en étant forcé. Mais tout le monde peut changer en étant entendu. » — Miller & Rollnick"
+        "p2": "Ce n'est pas un manque de volonté, ni une faiblesse. C'est une réaction humaine normale face à toute décision qui implique un coût, même si ce changement est bénéfique.",
+        "tip1": "L'ambivalence est le carburant du travail motivationnel. Vous n'êtes pas bloqué(e) : vous êtes en train d'explorer.",
+        "bq1": "« Personne ne change en étant forcé. Mais tout le monde peut changer en étant entendu. », Miller & Rollnick"
       },
       "how": {
         "intro": "Explorer son ambivalence, c'est nommer les deux côtés sans les juger.",
@@ -622,21 +622,21 @@
         "item2": "Identifier les raisons de rester (ce qui me retient, ce que je perdrais)",
         "item3": "Les tenir ensemble, sans chercher à résoudre trop vite"
       },
-      "src1": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed",
-      "src2": "HAS (2014) — Mésusage de substances, du repérage au traitement"
+      "src1": "Miller WR & Rollnick S (2013) : Motivational Interviewing, 3rd edition, PubMed",
+      "src2": "HAS (2014) : Mésusage de substances, du repérage au traitement"
     },
     "stages_of_change": {
       "title": "Les stades du changement",
       "summary": "La roue de Prochaska : comprendre où l'on en est",
       "why": {
-        "p1": "Le modèle transthéorique de **Prochaska & DiClemente** (1983) décrit le changement comme un processus en plusieurs stades — non comme une décision binaire.",
-        "p2": "Savoir à quel stade on se trouve permet d'adapter le travail en consultation. Il n'y a pas de « bon » stade — chaque position a une logique.",
-        "stage1": "**Pré-contemplation** — Je ne vois pas de problème à changer",
-        "stage2": "**Contemplation** — J'y pense, mais je ne suis pas décidé(e)",
-        "stage3": "**Préparation** — Je prévois de changer bientôt",
-        "stage4": "**Action** — J'ai commencé à agir",
-        "stage5": "**Maintien** — Je maintiens le changement dans la durée",
-        "stage6": "**Rechute** — J'ai repris l'ancienne habitude — c'est une étape normale du processus",
+        "p1": "Le modèle transthéorique de **Prochaska & DiClemente** (1983) décrit le changement comme un processus en plusieurs stades, non comme une décision binaire.",
+        "p2": "Savoir à quel stade on se trouve permet d'adapter le travail en consultation. Il n'y a pas de « bon » stade, chaque position a une logique.",
+        "stage1": "**Pré-contemplation**, Je ne vois pas de problème à changer",
+        "stage2": "**Contemplation**, J'y pense, mais je ne suis pas décidé(e)",
+        "stage3": "**Préparation**, Je prévois de changer bientôt",
+        "stage4": "**Action**, J'ai commencé à agir",
+        "stage5": "**Maintien**, Je maintiens le changement dans la durée",
+        "stage6": "**Rechute**, J'ai repris l'ancienne habitude, c'est une étape normale du processus",
         "tip1": "La rechute fait partie du modèle. La plupart des personnes passent plusieurs fois par la roue avant de stabiliser un changement."
       },
       "how": {
@@ -645,26 +645,26 @@
         "item2": "En préparation : définir un comportement cible concret et réaliste",
         "item3": "En maintien : identifier ce qui soutient le changement et le renforcer"
       },
-      "src1": "Prochaska JO & DiClemente CC (1983) — Transtheoretical Model — PubMed",
-      "src2": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed"
+      "src1": "Prochaska JO & DiClemente CC (1983) : Transtheoretical Model, PubMed",
+      "src2": "Miller WR & Rollnick S (2013) : Motivational Interviewing, 3rd edition, PubMed"
     },
     "values_and_change": {
       "title": "Mes valeurs, moteur du changement",
       "summary": "Relier le changement à ce qui compte vraiment pour soi",
       "why": {
-        "p1": "La **théorie de l'autodétermination** (Deci & Ryan, 2000) montre que les changements durables sont ancrés dans une motivation **autonome** — c'est-à-dire dans ce qui compte profondément pour la personne.",
+        "p1": "La **théorie de l'autodétermination** (Deci & Ryan, 2000) montre que les changements durables sont ancrés dans une motivation **autonome**, c'est-à-dire dans ce qui compte profondément pour la personne.",
         "p2": "Quand le changement est relié à ses valeurs (famille, santé, liberté…), il devient plus robuste et moins dépendant du regard des autres.",
-        "tip1": "Demandez-vous : « Pour quoi est-ce que je veux changer ? » — pas seulement « pourquoi ».",
-        "bq1": "« La motivation durable vient de l'intérieur — pas de la pression extérieure. » — Deci & Ryan"
+        "tip1": "Demandez-vous : « Pour quoi est-ce que je veux changer ? », pas seulement « pourquoi ».",
+        "bq1": "« La motivation durable vient de l'intérieur, pas de la pression extérieure. », Deci & Ryan"
       },
       "how": {
         "intro": "Identifier ses valeurs en lien avec le changement.",
         "item1": "Choisir 2 ou 3 valeurs qui comptent vraiment pour vous en ce moment",
         "item2": "Se demander comment le changement envisagé sert ces valeurs",
-        "item3": "Revenir à ces valeurs quand la motivation faiblit — c'est une ancre"
+        "item3": "Revenir à ces valeurs quand la motivation faiblit, c'est une ancre"
       },
-      "src1": "Deci EL & Ryan RM (2000) — Self-Determination Theory — PubMed",
-      "src2": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed"
+      "src1": "Deci EL & Ryan RM (2000) : Self-Determination Theory, PubMed",
+      "src2": "Miller WR & Rollnick S (2013) : Motivational Interviewing, 3rd edition, PubMed"
     },
     "change_talk": {
       "title": "Parler du changement",
@@ -674,19 +674,19 @@
         "p2": "Il existe deux types de discours-changement :",
         "item1": "**Préparatoire** : Désir (« Je voudrais… »), Capacité (« Je pourrais… »), Raisons (« Ce serait mieux si… »), Besoin (« Il faut que… »)",
         "item2": "**Mobilisateur** : Engagement (« Je vais… »), Activation (« Je suis prêt(e)… »), Premiers pas (« J'ai déjà commencé à… »)",
-        "item3": "Le discours de maintien (sustain talk) — « Mais d'un autre côté… » — est normal et coexiste avec le discours-changement",
+        "item3": "Le discours de maintien (sustain talk) : « Mais d'un autre côté… », est normal et coexiste avec le discours-changement",
         "item4": "Entendre du discours-changement chez soi, c'est déjà avancer",
-        "tip1": "Le rôle du soignant en EM est d'explorer et de renforcer le discours-changement — pas de convaincre."
+        "tip1": "Le rôle du soignant en EM est d'explorer et de renforcer le discours-changement, pas de convaincre."
       },
       "how": {
         "intro": "Reconnaître son propre discours-changement.",
         "item1": "Écouter ce que vous dites quand vous parlez du changement",
         "item2": "Repérer les phrases « je voudrais », « je pourrais », « j'ai besoin de »",
-        "item3": "Les noter — ils reflètent votre motivation réelle"
+        "item3": "Les noter, ils reflètent votre motivation réelle"
       },
-      "bq1": "« C'est la personne elle-même qui doit exprimer ses arguments pour le changement. » — Miller & Rollnick",
-      "src1": "Miller WR & Rollnick S (2013) — Motivational Interviewing, 3rd edition — PubMed",
-      "src2": "Amrhein PC et al. (2003) — The meaning of client language about change — PubMed"
+      "bq1": "« C'est la personne elle-même qui doit exprimer ses arguments pour le changement. », Miller & Rollnick",
+      "src1": "Miller WR & Rollnick S (2013) : Motivational Interviewing, 3rd edition, PubMed",
+      "src2": "Amrhein PC et al. (2003) : The meaning of client language about change, PubMed"
     }
   }
 }

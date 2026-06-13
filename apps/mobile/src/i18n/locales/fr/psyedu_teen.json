@@ -5,12 +5,12 @@
   "distress_tolerance": {
     "intro": {
       "why": {
-        "tip1": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique."
+        "tip1": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant, il ne remplace pas ton suivi thérapeutique."
       },
       "how": {
         "item1": "Reconnaître le signal : « je suis en crise »",
         "item2": "Choisir une technique que tu connais déjà",
-        "item3": "L'appliquer sans viser la guérison — juste traverser le moment"
+        "item3": "L'appliquer sans viser la guérison, juste traverser le moment"
       }
     },
     "tipp": {
@@ -18,10 +18,10 @@
         "tip1": "Ces techniques sont documentées dans le DBT Skills Training Manual (Linehan, 2015). Elles sont là pour t'aider en moment de crise, en complément de ton suivi."
       },
       "how": {
-        "p1": "**T — Température** : plonge ton visage dans un saladier d'eau froide 30 secondes, ou tiens des glaçons dans les mains.",
-        "p2": "**I — Exercice intense** : cours sur place, fais des pompes ou des jumping jacks pendant 1 à 2 minutes.",
-        "p3": "**P — Respiration** : inspire 4 secondes, expire 6 secondes. L'expiration doit être plus longue que l'inspiration.",
-        "p4": "**P — Relaxation musculaire** : contracte un groupe musculaire (poings, épaules, jambes) 5 secondes, relâche complètement 10 secondes.",
+        "p1": "**T, Température** : plonge ton visage dans un saladier d'eau froide 30 secondes, ou tiens des glaçons dans les mains.",
+        "p2": "**I, Exercice intense** : cours sur place, fais des pompes ou des jumping jacks pendant 1 à 2 minutes.",
+        "p3": "**P, Respiration** : inspire 4 secondes, expire 6 secondes. L'expiration doit être plus longue que l'inspiration.",
+        "p4": "**P, Relaxation musculaire** : contracte un groupe musculaire (poings, épaules, jambes) 5 secondes, relâche complètement 10 secondes.",
         "item1": "Choisis **une seule** de ces quatre techniques en priorité",
         "item2": "Applique-la pendant au moins 1 minute avant d'évaluer l'effet",
         "item3": "Tu peux combiner T + P (eau froide + respiration lente)"
@@ -32,13 +32,13 @@
         "tip1": "Cette technique est utile pour les crises modérées. Pour les crises intenses, préfère TIPP en premier."
       },
       "how": {
-        "p1": "**A — Activités** : fais une activité qui occupe entièrement ton attention (puzzle, dessin, jeu vidéo, sport).",
-        "p2": "**C — Contribution** : fais quelque chose pour quelqu'un d'autre (message à un ami, aide à la maison).",
-        "p3": "**C — Comparaisons** : pense à des moments difficiles que tu as traversés. Tu les as vécus.",
-        "p4": "**E — Émotions contraires** : expose-toi à quelque chose qui génère une émotion différente (film drôle, musique entraînante).",
-        "p5": "**P — Repousser** (*Push away*) : imagine mettre la situation dans une boîte et la refermer. Tu y reviendras plus tard.",
-        "p6": "**T — Pensées** : engage ton esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
-        "p7": "**S — Sensations** : active une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
+        "p1": "**A, Activités** : fais une activité qui occupe entièrement ton attention (puzzle, dessin, jeu vidéo, sport).",
+        "p2": "**C, Contribution** : fais quelque chose pour quelqu'un d'autre (message à un ami, aide à la maison).",
+        "p3": "**C, Comparaisons** : pense à des moments difficiles que tu as traversés. Tu les as vécus.",
+        "p4": "**E, Émotions contraires** : expose-toi à quelque chose qui génère une émotion différente (film drôle, musique entraînante).",
+        "p5": "**P, Repousser** (*Push away*) : imagine mettre la situation dans une boîte et la refermer. Tu y reviendras plus tard.",
+        "p6": "**T, Pensées** : engage ton esprit dans une tâche cognitive (compter, mémoriser, résoudre un problème).",
+        "p7": "**S, Sensations** : active une sensation physique intense mais non nocive (glaçons, eau chaude, effort)."
       }
     },
     "self_soothing": {
@@ -48,7 +48,7 @@
       "how": {
         "item1": "Prépare ta liste personnelle de ressources sensorielles avec ton soignant",
         "item2": "En crise, active au moins **deux sens différents** simultanément",
-        "item3": "Accorde-toi au moins 5 minutes — l'effet n'est pas immédiat"
+        "item3": "Accorde-toi au moins 5 minutes, l'effet n'est pas immédiat"
       }
     },
     "improve": {
@@ -56,11 +56,11 @@
         "tip1": "Toutes les composantes d'IMPROVE ne s'appliquent pas à tout le monde. Identifie avec ton soignant celles qui correspondent à tes ressources."
       },
       "how": {
-        "p1": "**I — Imagerie** : imagine un lieu sûr et ressourçant. Visualise-le en détail — lumière, sons, textures.",
-        "p2": "**M — Sens** (*Meaning*) : cherche une signification, même minime, dans la situation difficile.",
-        "p5": "**O — Une chose à la fois** : réduis ton champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
-        "p6": "**V — Vacance** : accorde-toi une courte trêve mentale — pas de résolution, pas de décision pendant les prochaines minutes.",
-        "p7": "**E — Encouragement** : dis-toi quelque chose de bienveillant — ce que tu dirais à un ami dans la même situation."
+        "p1": "**I, Imagerie** : imagine un lieu sûr et ressourçant. Visualise-le en détail, lumière, sons, textures.",
+        "p2": "**M, Sens** (*Meaning*) : cherche une signification, même minime, dans la situation difficile.",
+        "p5": "**O, Une chose à la fois** : réduis ton champ d'attention à la tâche ou la sensation immédiate. Pas d'hier, pas de demain.",
+        "p6": "**V, Vacance** : accorde-toi une courte trêve mentale, pas de résolution, pas de décision pendant les prochaines minutes.",
+        "p7": "**E, Encouragement** : dis-toi quelque chose de bienveillant, ce que tu dirais à un ami dans la même situation."
       }
     },
     "pros_cons": {
@@ -75,15 +75,15 @@
         "p5": "**Étape 5** : pèse les deux colonnes. Quelle décision correspond le mieux à tes valeurs à long terme ?",
         "item1": "Prépare cette grille en consultation, dans un moment calme",
         "item2": "En crise, avoir la liste déjà écrite est plus utile qu'essayer de la construire",
-        "item3": "L'objectif n'est pas de ne jamais souffrir — c'est de ne pas aggraver la situation"
+        "item3": "L'objectif n'est pas de ne jamais souffrir, c'est de ne pas aggraver la situation"
       }
     }
   },
   "chronobiology_tracker": {
     "what_is_chrono": {
       "how": {
-        "p1": "Chaque personne a un **chronotype** — une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le tien t'aide à mieux organiser tes journées en accord avec ta biologie.",
-        "p2": "Ton horloge biologique peut être **resynchronisée** progressivement. Des ancres horaires régulières — heure de lever, repas, activités — envoient des signaux stables à ton cerveau.",
+        "p1": "Chaque personne a un **chronotype**, une tendance naturelle à être du matin (« alouette ») ou du soir (« chouette »). Connaître le tien t'aide à mieux organiser tes journées en accord avec ta biologie.",
+        "p2": "Ton horloge biologique peut être **resynchronisée** progressivement. Des ancres horaires régulières, heure de lever, repas, activités, envoient des signaux stables à ton cerveau.",
         "item3": "En parler avec ton soignant pour adapter cet outil à ta situation"
       }
     },
@@ -133,7 +133,7 @@
   "diet_weight_psycho": {
     "antipsychotics": {
       "why": {
-        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim de ton cerveau. La prise de poids n'est pas une fatalité — quelques habitudes simples aident à la limiter."
+        "p1": "Certains traitements ouvrent l'appétit, surtout l'envie de sucré et de gras, et donnent une faim plus forte. **Ce n'est pas un manque de volonté** : le médicament agit sur les signaux de faim de ton cerveau. La prise de poids n'est pas une fatalité, quelques habitudes simples aident à la limiter."
       },
       "how": {
         "tip_weigh": "Le réflexe : te peser une fois par semaine, le même jour, et noter le chiffre pour en parler à ton soignant.",
@@ -150,7 +150,7 @@
         "p1": "Le lithium est un traitement très efficace, mais il demande un **équilibre précis** dans le corps. Cet équilibre dépend directement de l'eau et du sel que tu consommes : le rein traite le lithium et le sodium de façon similaire."
       },
       "how": {
-        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) augmentent le taux de lithium. Le paracétamol est généralement préféré — demande conseil à ton médecin ou pharmacien.",
+        "avoid1": "Les **anti-inflammatoires** (ibuprofène, Advil®, Nurofen®) augmentent le taux de lithium. Le paracétamol est généralement préféré, demande conseil à ton médecin ou pharmacien.",
         "alert": "**Signes d'alerte** : des tremblements importants des mains, une soif extrême, des nausées sévères, une diarrhée ou une confusion peuvent évoquer un surdosage. Dans ce cas, contacte rapidement ton médecin ou le 15.",
         "bq1": "Ne modifie jamais ta dose ni ton traitement sans en parler à ton médecin."
       }
@@ -159,29 +159,29 @@
   "craving_journal": {
     "what_is_craving": {
       "why": {
-        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique — pas un manque de volonté.",
+        "p1": "Le **craving** est une envie intense et soudaine de consommer une substance ou de réaliser un comportement. C'est un phénomène neurobiologique, pas un manque de volonté.",
         "p2": "Il est déclenché par le **circuit de la récompense** (dopamine). Ce circuit apprend à anticiper le plaisir : une odeur, une image, une émotion peuvent suffire à l'activer.",
-        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement — comme une vague qui monte et qui passe.",
+        "p3": "Le craving est **temporaire**. Sans y céder, son intensité atteint un pic en quelques minutes, puis redescend naturellement, comme une vague qui monte et qui passe.",
         "tip1": "Ressentir un craving ne signifie pas que tu vas céder. Beaucoup de personnes ressentent des cravings forts sans y donner suite.",
         "p4": "Plus tu observes le craving sans agir dessus, plus le **circuit neuronal** associé s'affaiblit progressivement au fil du temps."
       },
       "how": {
         "item1": "Nommer ce qui se passe : « Je suis en train de ressentir un craving »",
         "item2": "Vérifier l'heure : noter mentalement quand il a commencé",
-        "item3": "Attendre 20 minutes avant toute décision — le pic est souvent passé"
+        "item3": "Attendre 20 minutes avant toute décision, le pic est souvent passé"
       }
     },
     "triggers_abc": {
       "why": {
-        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur** — une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
+        "p1": "Avant chaque craving, il y a presque toujours un **déclencheur**, une situation, une émotion ou une pensée. Identifier ce déclencheur, c'est reprendre une part de contrôle.",
         "tip1": "L'acronyme **HALT** résume les quatre états qui renforcent les cravings : **H**ungry (faim), **A**ngry (colère), **L**onely (solitude), **T**ired (fatigue). Ils abaissent ta résistance à l'envie.",
-        "p3": "Connaître tes déclencheurs personnels te permet de les anticiper — et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
+        "p3": "Connaître tes déclencheurs personnels te permet de les anticiper, et parfois, d'éviter les situations à haut risque ou de les traverser avec des ressources préparées à l'avance."
       },
       "how": {
         "item1": "Après chaque craving, note la situation : où t'étais-tu, avec qui, que faisais-tu ?",
-        "item2": "Note l'émotion ressentie juste avant l'envie — même si elle te paraît sans lien",
+        "item2": "Note l'émotion ressentie juste avant l'envie, même si elle te paraît sans lien",
         "item3": "Vérifie HALT : avais-tu faim, te sentais-tu seul(e), fatigué(e) ou en colère ?",
-        "item4": "Avec le temps, des schémas répétés apparaîtront — c'est une info utile pour ton soignant",
+        "item4": "Avec le temps, des schémas répétés apparaîtront, c'est une info utile pour ton soignant",
         "bq1": "Ces observations sont des données précieuses. Ton soignant peut t'aider à les analyser et à construire un plan de prévention personnalisé."
       }
     },
@@ -195,15 +195,15 @@
         "item2": "**Observer** : où ressens-tu l'envie dans ton corps ? Gorge, poitrine, ventre ? Observe sans chercher à faire partir la sensation.",
         "item3": "**Respirer** : respire lentement. Expiration plus longue que l'inspiration. Reste présent(e).",
         "item4": "**Attendre** : regarde l'envie monter, atteindre son pic, puis redescendre. Tu n'as rien à faire.",
-        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal — persévère."
+        "bq1": "Cette technique demande de la pratique. Les premières fois, elle peut sembler inefficace. C'est normal, persévère."
       }
     },
     "after_the_craving": {
       "why": {
-        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving — c'est le **cycle honte-rechute**.",
+        "p1": "Céder à un craving provoque souvent une réaction de culpabilité intense. Cette culpabilité elle-même peut déclencher un nouveau craving, c'est le **cycle honte-rechute**.",
         "p2": "Marlatt et Gordon ont nommé ce phénomène l'**Abstinence Violation Effect (AVE)** : la croyance que « j'ai craqué une fois, tout est fichu » aggrave souvent la situation bien plus que le craquage lui-même.",
-        "tip1": "Un craquage est une information clinique — pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
-        "bq1": "Ton soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster ton plan — c'est exactement à ça que sert le journal."
+        "tip1": "Un craquage est une information clinique, pas une preuve d'échec. Il indique que quelque chose n'a pas fonctionné ce jour-là : une émotion non repérée, un déclencheur évité, une ressource manquante.",
+        "bq1": "Ton soignant est formé pour analyser les craquages sans jugement. En parler en consultation permet d'ajuster ton plan, c'est exactement à ça que sert le journal."
       },
       "how": {
         "item1": "Qu'est-ce qui s'est passé juste avant ? Quel était le déclencheur (HALT, situation, émotion) ?",
