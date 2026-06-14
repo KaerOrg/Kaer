@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Users } from 'lucide-react'
@@ -14,15 +14,10 @@ import { StepBreadcrumb } from '../../components/ui/StepBreadcrumb/StepBreadcrum
 import { Toggle } from '../../components/ui/Toggle/Toggle'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { SearchInput } from '../../components/ui/SearchInput'
+import { useQuery } from '@tanstack/react-query'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
-import type { PatientSummary, ModuleType } from '../../lib/database.types'
-import { fetchInviteCategories, type ModuleCategory } from '../../services/moduleCatalogService'
-import { fetchPatientsWithModules } from '../../services/patientService'
-import {
-  fetchPendingInvitations,
-  sendInvitation,
-  type PendingInvitation,
-} from '../../services/invitationService'
+import type { ModuleType } from '../../lib/database.types'
+import { dashboardQueries, useSendInvitation } from '../../hooks/queries'
 import './DashboardPage.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -32,9 +27,14 @@ export function DashboardPage() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
   const toast = useToast()
-  const [patients, setPatients] = useState<PatientSummary[]>([])
-  const [loadingPatients, setLoadingPatients] = useState(true)
-  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([])
+  const patientsQuery = useQuery(dashboardQueries.patients(practitioner?.id))
+  const pendingInvitationsQuery = useQuery(dashboardQueries.pendingInvitations(practitioner?.id))
+  const inviteCategoriesQuery = useQuery(dashboardQueries.inviteCategories())
+  const sendInvitationMutation = useSendInvitation()
+  const patients = patientsQuery.data ?? []
+  const loadingPatients = patientsQuery.isLoading
+  const pendingInvitations = pendingInvitationsQuery.data ?? []
+  const inviteCategories = inviteCategoriesQuery.data ?? []
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -48,8 +48,7 @@ export function DashboardPage() {
   const [inviteTeenMode, setInviteTeenMode] = useState(false)
   const [inviteStep, setInviteStep] = useState<1 | 2>(1)
   const [inviteModules, setInviteModules] = useState<Set<ModuleType>>(new Set())
-  const [inviteCategories, setInviteCategories] = useState<ModuleCategory[]>([])
-  const [inviteLoading, setInviteLoading] = useState(false)
+  const inviteLoading = sendInvitationMutation.isPending
 
   const { minBirthDate, maxBirthDate } = useMemo(() => {
     const today = new Date()
@@ -58,23 +57,6 @@ export function DashboardPage() {
       .toISOString().split('T')[0]
     return { minBirthDate: min, maxBirthDate: max }
   }, [])
-
-  const loadPatients = useCallback(async () => {
-    if (!practitioner) return
-    setPatients(await fetchPatientsWithModules(practitioner.id))
-    setLoadingPatients(false)
-  }, [practitioner])
-
-  const loadPendingInvitations = useCallback(async () => {
-    if (!practitioner) return
-    setPendingInvitations(await fetchPendingInvitations(practitioner.id))
-  }, [practitioner])
-
-  useEffect(() => {
-    loadPatients()
-    loadPendingInvitations()
-    fetchInviteCategories().then(cats => setInviteCategories(cats))
-  }, [loadPatients, loadPendingInvitations])
 
   const handleEmailBlur = useCallback((value: string) => {
     setInviteEmailError(value && !EMAIL_RE.test(value.trim()) ? t('dashboard.invite_email_error') : '')
@@ -100,6 +82,8 @@ export function DashboardPage() {
     setInviteModules(new Set())
   }, [])
 
+  const openInviteForm = useCallback(() => setShowInviteForm(true), [])
+
   const toggleInviteModule = useCallback((moduleType: ModuleType) => {
     setInviteModules(prev => {
       const next = new Set(prev)
@@ -120,9 +104,10 @@ export function DashboardPage() {
   const submitInvitation = useCallback(async () => {
     if (!practitioner) return
     if (inviteEmailError || inviteBirthDateError) return
-    setInviteLoading(true)
 
-    const result = await sendInvitation({
+    // La mutation résout avec un SendInvitationResult (erreurs métier non levées) ;
+    // son onSuccess invalide la liste des invitations en attente.
+    const result = await sendInvitationMutation.mutateAsync({
       practitionerId: practitioner.id,
       email: inviteEmail,
       firstName: inviteFirstName,
@@ -132,8 +117,6 @@ export function DashboardPage() {
       teenMode: inviteTeenMode,
       modules: [...inviteModules],
     })
-
-    setInviteLoading(false)
 
     if (!result.ok) {
       const message = result.errorCode
@@ -146,11 +129,10 @@ export function DashboardPage() {
     toast.success(t('dashboard.invite_success', { email: inviteEmail }))
     resetForm()
     setShowInviteForm(false)
-    loadPendingInvitations()
   }, [
     practitioner, inviteEmail, inviteEmailError, inviteFirstName, inviteLastName,
     inviteBirthDate, inviteBirthDateError, inviteSex, inviteTeenMode, inviteModules,
-    t, toast, resetForm, loadPendingInvitations,
+    t, toast, resetForm, sendInvitationMutation,
   ])
 
   const patientSubtitle = patients.length === 1
@@ -158,9 +140,10 @@ export function DashboardPage() {
     : t('dashboard.subtitle_other', { count: patients.length })
 
   const filteredPatients = useMemo(() => {
+    const list = patientsQuery.data ?? []
     const tokens = tokenizeSearch(searchQuery)
-    if (tokens.length === 0) return patients
-    return patients.filter(p => {
+    if (tokens.length === 0) return list
+    return list.filter(p => {
       const haystack = [
         p.patient_first_name,
         p.patient_last_name,
@@ -169,7 +152,7 @@ export function DashboardPage() {
       ].filter(Boolean).join(' ')
       return matchesAllTokens(haystack, tokens)
     })
-  }, [patients, searchQuery])
+  }, [patientsQuery.data, searchQuery])
 
   return (
     <Layout>
@@ -179,7 +162,7 @@ export function DashboardPage() {
             <h1 className="dashboard__title">{t('dashboard.title')}</h1>
             <p className="dashboard__subtitle">{patientSubtitle}</p>
           </div>
-          <Button onClick={() => setShowInviteForm(true)}>
+          <Button onClick={openInviteForm}>
             {t('dashboard.invite_button')}
           </Button>
         </div>

@@ -2,14 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
-import { useFocusEffect } from '@react-navigation/native'
+import { useQuery } from '@tanstack/react-query'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AppStackParamList } from '../../navigation/AppStack'
 import {
   fetchModuleFields,
-  fetchPatientModuleConfig,
   type ModuleFieldsResult,
 } from '../../services/moduleService'
+import { moduleQueries } from '../../hooks/queries'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import { FieldRenderer } from '../../components/features/ModuleRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
@@ -47,7 +48,6 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
-  const [patientConfig, setPatientConfig] = useState<Record<string, unknown> | null | undefined>(undefined)
 
   const loadFields = useCallback(() => {
     setLoading(true)
@@ -67,26 +67,21 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     loadFields()
   }, [loadFields])
 
-  const loadPatientConfig = useCallback(async () => {
-    if (!patient) return
-    setPatientConfig(await fetchPatientModuleConfig(patient.id, moduleType))
-  }, [patient, moduleType])
-
-  useEffect(() => {
-    if (result?.preview_kind === 'patient_scenario') {
-      void loadPatientConfig()
-    }
-  }, [result?.preview_kind, loadPatientConfig])
-
-  useFocusEffect(
-    useCallback(() => {
-      if (result?.preview_kind === 'patient_scenario') {
-        void loadPatientConfig()
-      }
-    }, [result?.preview_kind, loadPatientConfig])
-  )
-
   const isPatientScenario = result?.preview_kind === 'patient_scenario'
+
+  // Config patient : seulement pour le layout patient_scenario, rafraîchie au focus.
+  // (fetchModuleFields a son propre cache service ; seule cette config y échappe.)
+  const patientConfigQuery = useQuery({
+    ...moduleQueries.patientModuleConfig(patient?.id, moduleType),
+    enabled: isPatientScenario && patient != null,
+  })
+  const patientConfig: Record<string, unknown> | null | undefined =
+    isPatientScenario ? (patientConfigQuery.isSuccess ? patientConfigQuery.data : undefined) : undefined
+
+  const refetchPatientConfig = useCallback(() => {
+    if (isPatientScenario) void patientConfigQuery.refetch()
+  }, [isPatientScenario, patientConfigQuery])
+  useRefreshOnFocus(refetchPatientConfig)
 
   if (loading || (isPatientScenario && patientConfig === undefined)) {
     return (
