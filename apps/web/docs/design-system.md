@@ -411,6 +411,38 @@ lecture impérative). Un `className` passé est **fusionné** avec les classes d
 | `placeholder` | `string` | Placeholder (obligatoire) |
 | `ariaLabel` | `string` | Label accessibilité |
 
+### `MultiSelectAutocomplete`
+
+`components/ui/MultiSelectAutocomplete/`. Combobox multi-sélection à autocomplétion :
+champ de saisie + liste déroulante filtrée (insensible casse/accents via
+`lib/search`), options regroupables par section, navigation clavier (↑/↓, Entrée,
+Échap), fermeture au clic extérieur. **Présentationnel** : options, sélection et
+bascule pilotées par le parent ; il n'affiche pas les valeurs retenues (le parent
+rend ses propres `Chip onRemove`). Choisir cette primitive plutôt que `SelectField`
+dès qu'il faut filtrer en tapant ou sélectionner plusieurs valeurs — un `<select>`
+natif ne sait faire ni l'un ni l'autre proprement.
+
+```tsx
+<MultiSelectAutocomplete
+  options={[{ value: 'anxiety', label: 'Anxiété', group: 'indication' }]}
+  selectedValues={selected}
+  onToggle={handleToggle}
+  groupLabels={{ indication: 'Indication' }}
+  placeholder={t('modules.filter_select')}
+  emptyText={t('modules.filter_no_match')}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `options` | `readonly AutocompleteOption[]` | `{ value, label, group? }`, déjà triées |
+| `selectedValues` | `ReadonlySet<string>` | Valeurs cochées (affichées avec un ✓) |
+| `onToggle` | `(value: string) => void` | Bascule une option |
+| `placeholder` | `string` | Placeholder du champ |
+| `ariaLabel` | `string` | Label a11y de la combobox (défaut : `placeholder`) |
+| `groupLabels` | `Record<string, string>` | En-têtes de section : `group` id → libellé |
+| `emptyText` | `string` | Texte quand aucune option ne correspond |
+
 ### `StatusBadge`
 
 `components/ui/StatusBadge/`. Badge d'état coloré, lecture seule.
@@ -602,15 +634,40 @@ const columns: DataTableColumn<Row>[] = [
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`) |
-| `rows` | `readonly T[]` | Lignes **déjà filtrées** par l'appelant |
+| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`, `sortable`) |
+| `rows` | `readonly T[]` | Lignes **déjà filtrées/triées/paginées** par l'appelant — la table ne réordonne ni ne tronque jamais |
 | `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
 | `toolbar` | `ReactNode` | Zone libre au-dessus de la table (filtres, capture rapide) |
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
+| `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
+| `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |
+| `pagination` | `DataTablePaginationState` | Pagination **contrôlée** (cf. ci-dessous). Absente ⇒ aucune barre |
 | `className` | `string` | Classe posée sur le conteneur `.data-table-wrap` — permet de **scoper un habillage propre** (couleurs d'en-tête, dégradé de lignes) sans toucher au style générique. Ex. `CaseloadTable` passe `caseload-data-table` et stylise `.caseload-data-table .data-table__th` (en-tête teal). |
+
+**Tri (`sortable`)** — une colonne `{ …, sortable: true }` rend un bouton de tri dans son
+en-tête (reset visuel, indicateur chevron, `aria-sort`). La table **n'ordonne jamais**
+`rows` : elle émet `onSortChange(column)` et reflète le tri porté par `sort`. Le tri réel
+(mémoire ou serveur) appartient à l'appelant.
+
+**Pagination contrôlée (`pagination`)** — barre « intervalle + précédent/suivant », elle
+aussi server-friendly : la table ne tronque pas `rows`, elle délègue via `onPageChange`.
+
+| `DataTablePaginationState` | Type | Rôle |
+|---|---|---|
+| `page` | `number` | Index de page, **base 0** |
+| `pageSize` | `number` | Taille de page (borne le nombre de pages avec `total`) |
+| `total` | `number` | Total du jeu **filtré** (≠ `rows.length`, qui est la page courante) |
+| `onPageChange` | `(page: number) => void` | Changement de page (souvent un refetch) |
+| `labels` | `DataTablePaginationLabels` | i18n résolu par l'appelant : `previous`, `next` (aria), `range(from, to, total)` |
+
+> **Tri/pagination = contrôlés, jamais autonomes.** `DataTable` ne possède aucun état de
+> tri ni de page : il reflète ce qu'on lui passe et émet des événements. Cela permet une
+> pagination/tri **côté serveur** (ex. `AdminUsersTable` → RPC `admin_list_users`) sans
+> dupliquer de logique. Pour du tri/pagination purement client, l'appelant gère l'état
+> localement et trie/tronque `rows` avant de les passer.
 
 Sous-composant exporté **`DataTableCell`** — le `<td>` générique (classe de base
 `data-table__cell` + `className` métier optionnelle). `DataTable` l'utilise en
@@ -703,14 +760,24 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 
 Fichier : `components/features/ModuleFilterBar/ModuleFilterBar.tsx`
 
-Barre de filtres à facettes de l'armoire thérapeutique : une rangée de puces
-sélectionnables (`Chip selectable`) par dimension (indication, public, approche) +
-compteur « N sur M modules » + bouton de réinitialisation (visible seulement si un
-filtre est actif). Utilisée par `ModuleCatalogPage` (armoire de config) et
-`PatientModulesTab` (vue active + modale d'ajout).
+Panneau de filtres à facettes de l'armoire thérapeutique. Structure :
+1. une recherche par mot-clé optionnelle (`search`, rendue en tête du panneau) ;
+2. **une combobox d'autocomplétion par dimension** (indication, public, approche),
+   via `MultiSelectAutocomplete` — un axe sans tag est omis ;
+3. une zone de synthèse : les tags retenus en `Chip onRemove`, **regroupés sous le
+   titre de leur critère** (le libellé de la dimension est rappelé) ;
+4. un pied : compteur « N sur M modules » + bouton de réinitialisation (visible
+   seulement si un filtre est actif).
+
+Utilisée par `ModuleCatalogPage` (armoire de config), `PatientModulesTab` (vue
+active + modale d'ajout) et `PsychoLibraryPicker`.
 
 ```tsx
 const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
+const search = useMemo(
+  () => ({ value: query, onChange: setQuery, placeholder: t('modules.search_placeholder') }),
+  [query, t],
+)
 
 <ModuleFilterBar
   taxonomy={taxonomy}
@@ -719,6 +786,7 @@ const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
   onReset={resetFilters}
   resultCount={visibleCount}
   totalCount={totalCount}
+  search={search}
 />
 ```
 
@@ -726,13 +794,15 @@ const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 |---|---|---|
 | `taxonomy` | `ModuleTaxonomy` | Axes + tags chargés en base (`fetchModuleTaxonomy`) |
 | `activeFilters` | `ActiveTagFilters` | Sélection courante (`Map<dimension, Set<tag>>`) |
-| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche une puce |
+| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche un tag |
 | `onReset` | `() => void` | Vide toute la sélection |
 | `resultCount` | `number` | Modules visibles après filtrage |
 | `totalCount` | `number` | Total de modules avant filtrage |
+| `search` | `ModuleFilterSearch` (opt.) | `{ value, onChange, placeholder }` — recherche en tête du panneau ; omise = pas de recherche |
 
-`ModuleFilterChip` (fichier voisin) est la puce individuelle, mémoïsée (`React.memo`
-+ callback figé) — zéro handler recréé par puce au re-rendu de la barre.
+`DimensionFilter` (fichier voisin) est la combobox d'un seul axe, mémoïsée
+(`React.memo` + `onToggle` figé lié à sa dimension) — zéro handler recréé par axe
+au re-rendu du panneau.
 
 ### `ModuleTagChips`
 

@@ -248,6 +248,11 @@
       "description": "No user has been registered yet.",
       "no_match_title": "No results",
       "no_match_description": "No user matches your search."
+    },
+    "pagination": {
+      "previous": "Previous page",
+      "next": "Next page",
+      "range": "{{from}}-{{to}} of {{total}}"
     }
   },
   "patient": {
@@ -394,6 +399,9 @@
     "empty_search": "No module matches your search.",
     "filter_count": "{{shown}} of {{total}} modules",
     "filter_reset": "Reset filters",
+    "filter_select": "Select…",
+    "filter_no_match": "No matching filter.",
+    "filter_remove": "Remove filter {{tag}}",
     "empty_filter": "No module matches these filters.",
     "phq9": {
       "label": "PHQ-9",

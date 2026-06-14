@@ -22,8 +22,47 @@ export interface DataTableColumn<T> {
   readonly headerClassName?: string
   /** Classe optionnelle du `<td>`. */
   readonly cellClassName?: string
+  /**
+   * Colonne triable : l'en-tête devient cliquable et émet `onSortChange(id)`.
+   * Le tri lui-même est à la charge de l'appelant (souvent côté serveur) — la
+   * table ne réordonne jamais `rows`.
+   */
+  readonly sortable?: boolean
   /** Rendu de la cellule pour une ligne donnée. */
   readonly cell: (row: T, ctx: DataTableRowContext) => ReactNode
+}
+
+export type SortDirection = 'asc' | 'desc'
+
+/** Colonne de tri active + sens. `column` correspond à `DataTableColumn.id`. */
+export interface DataTableSort {
+  readonly column: string
+  readonly direction: SortDirection
+}
+
+/**
+ * État de pagination contrôlé. La table ne tronque jamais `rows` : elle affiche la
+ * page courante telle qu'injectée et délègue le changement de page via `onPageChange`
+ * (pagination typiquement côté serveur).
+ */
+export interface DataTablePaginationState {
+  /** Index de page, base 0. */
+  readonly page: number
+  readonly pageSize: number
+  /** Total du jeu (filtré) — borne le nombre de pages. */
+  readonly total: number
+  readonly onPageChange: (page: number) => void
+  /** Libellés (i18n résolu par l'appelant — un primitive ne connaît pas de clé). */
+  readonly labels: DataTablePaginationLabels
+}
+
+export interface DataTablePaginationLabels {
+  /** `aria-label` du bouton « page précédente ». */
+  readonly previous: string
+  /** `aria-label` du bouton « page suivante ». */
+  readonly next: string
+  /** Construit le libellé d'intervalle, ex. « 1–150 sur 412 ». */
+  readonly range: (from: number, to: number, total: number) => string
 }
 
 export interface DataTableProps<T> {
@@ -44,6 +83,15 @@ export interface DataTableProps<T> {
   readonly emptyState?: ReactNode
   /** Libellé accessible de la table. */
   readonly ariaLabel?: string
+  /** Tri actif (en-têtes triables). Sans lui, aucun indicateur n'est affiché. */
+  readonly sort?: DataTableSort
+  /**
+   * Clic sur un en-tête triable. Reçoit l'`id` de la colonne ; à l'appelant de
+   * basculer le sens (asc/desc) et de re-trier (souvent via un refetch serveur).
+   */
+  readonly onSortChange?: (column: string) => void
+  /** Pagination contrôlée. Absente → aucune barre de pagination. */
+  readonly pagination?: DataTablePaginationState
   /**
    * Classe additionnelle posée sur le conteneur `.data-table-wrap` — permet à un
    * consommateur de scoper son propre habillage (couleurs d'en-tête, dégradé de

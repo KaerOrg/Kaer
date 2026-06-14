@@ -1,10 +1,10 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, params?: Record<string, unknown>) =>
-      params ? `${key} ${params.shown}/${params.total}` : key,
+      params?.shown !== undefined ? `${key} ${params.shown}/${params.total}` : key,
   }),
 }))
 
@@ -15,7 +15,7 @@ const taxonomy: ModuleTaxonomy = {
   dimensions: [
     { id: 'indication', sort_order: 1 },
     { id: 'population', sort_order: 2 },
-    { id: 'approach', sort_order: 3 }, // sans tags → rangée omise
+    { id: 'approach', sort_order: 3 }, // sans tags → aucune option
   ],
   tagsByDimension: new Map([
     ['indication', [
@@ -45,39 +45,66 @@ function renderBar(activeFilters: ReadonlyMap<string, ReadonlySet<string>> = new
 
 beforeEach(() => vi.clearAllMocks())
 
-describe('ModuleFilterBar — rendu', () => {
-  it('affiche une rangée par dimension ayant des tags, dans l ordre', () => {
+describe('ModuleFilterBar — un filtre par axe', () => {
+  it('affiche une combobox par dimension ayant des tags (axe sans tag omis)', () => {
     renderBar()
+    const comboboxes = screen.getAllByRole('combobox')
+    expect(comboboxes).toHaveLength(2) // indication + population, approach omis
     expect(screen.getByText('tag_dimensions.indication.label')).toBeInTheDocument()
     expect(screen.getByText('tag_dimensions.population.label')).toBeInTheDocument()
-    // dimension sans tags → omise
     expect(screen.queryByText('tag_dimensions.approach.label')).not.toBeInTheDocument()
   })
 
-  it('affiche une puce par tag', () => {
+  it('chaque combobox ne propose que les tags de son axe', () => {
     renderBar()
-    expect(screen.getByText('tags.anxiety.label')).toBeInTheDocument()
-    expect(screen.getByText('tags.ocd.label')).toBeInTheDocument()
-    expect(screen.getByText('tags.teen.label')).toBeInTheDocument()
+    const indication = screen.getByLabelText('tag_dimensions.indication.label')
+    fireEvent.focus(indication)
+    expect(screen.getByRole('option', { name: 'tags.anxiety.label' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'tags.ocd.label' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: 'tags.teen.label' })).not.toBeInTheDocument()
   })
 
-  it('affiche le compteur résultats/total', () => {
+  it('sélectionner une option → onToggleTag(dimension, tag)', () => {
     renderBar()
-    expect(screen.getByText('modules.filter_count 4/12')).toBeInTheDocument()
+    fireEvent.focus(screen.getByLabelText('tag_dimensions.indication.label'))
+    fireEvent.pointerDown(screen.getByRole('option', { name: 'tags.ocd.label' }))
+    expect(onToggleTag).toHaveBeenCalledWith('indication', 'ocd')
   })
 
-  it('reflète la sélection via aria-pressed', () => {
+  it('reflète la sélection courante de l axe via aria-selected', () => {
     renderBar(new Map([['indication', new Set(['anxiety'])]]))
-    expect(screen.getByText('tags.anxiety.label')).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByText('tags.ocd.label')).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.focus(screen.getByLabelText('tag_dimensions.indication.label'))
+    expect(screen.getByRole('option', { name: 'tags.anxiety.label' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('option', { name: 'tags.ocd.label' })).toHaveAttribute('aria-selected', 'false')
   })
 })
 
-describe('ModuleFilterBar — interactions', () => {
-  it('clic sur une puce → onToggleTag(dimension, tag)', () => {
+describe('ModuleFilterBar — puces de sélection', () => {
+  it('résume la sélection en puces, regroupées sous le titre du critère', () => {
+    const { unmount } = renderBar()
+    expect(screen.queryByRole('button', { name: /filter_remove/ })).not.toBeInTheDocument()
+    unmount()
+
+    renderBar(new Map([['indication', new Set(['anxiety'])], ['population', new Set(['teen'])]]))
+    const selected = document.querySelector('.module-filter-bar__selected') as HTMLElement
+    // titre du critère rappelé dans la zone de synthèse
+    expect(within(selected).getByText('tag_dimensions.indication.label')).toBeInTheDocument()
+    expect(within(selected).getByText('tag_dimensions.population.label')).toBeInTheDocument()
+    expect(within(selected).getByText('tags.anxiety.label')).toBeInTheDocument()
+    expect(within(selected).getByText('tags.teen.label')).toBeInTheDocument()
+  })
+
+  it('retirer une puce → onToggleTag(dimension, tag)', () => {
+    renderBar(new Map([['indication', new Set(['anxiety'])]]))
+    fireEvent.click(screen.getByRole('button', { name: 'modules.filter_remove' }))
+    expect(onToggleTag).toHaveBeenCalledWith('indication', 'anxiety')
+  })
+})
+
+describe('ModuleFilterBar — pied', () => {
+  it('affiche le compteur résultats/total', () => {
     renderBar()
-    fireEvent.click(screen.getByText('tags.ocd.label'))
-    expect(onToggleTag).toHaveBeenCalledWith('indication', 'ocd')
+    expect(screen.getByText('modules.filter_count 4/12')).toBeInTheDocument()
   })
 
   it('le bouton reset n apparaît que si un filtre est actif, et déclenche onReset', () => {
@@ -86,8 +113,7 @@ describe('ModuleFilterBar — interactions', () => {
     unmount()
 
     renderBar(new Map([['population', new Set(['teen'])]]))
-    const reset = screen.getByText('modules.filter_reset')
-    fireEvent.click(reset)
+    fireEvent.click(screen.getByText('modules.filter_reset'))
     expect(onReset).toHaveBeenCalledTimes(1)
   })
 })

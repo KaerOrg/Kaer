@@ -84,6 +84,11 @@ export function PsychoLibraryPicker({
 
   const resultCount = useMemo(() => groups.reduce((n, g) => n + g.topics.length, 0), [groups])
 
+  const librarySearch = useMemo(
+    () => ({ value: search, onChange: setSearch, placeholder: t('patient.psycho_search_placeholder') }),
+    [search, t],
+  )
+
   return (
     <div className={`psycho-card-picker ${mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
       <p className="psycho-card-picker__label">
@@ -98,14 +103,15 @@ export function PsychoLibraryPicker({
           onReset={onResetFilters}
           resultCount={resultCount}
           totalCount={libraryTopics.length}
+          search={librarySearch}
         />
-      ) : null}
-
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        placeholder={t('patient.psycho_search_placeholder')}
-      />
+      ) : (
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder={t('patient.psycho_search_placeholder')}
+        />
+      )}
 
       {groups.length === 0 ? (
         <p className="psycho-card-picker__empty">{t('patient.psycho_search_empty')}</p>

@@ -8,7 +8,6 @@ import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { Modal } from '../../../components/ui/Modal'
-import { SearchInput } from '../../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
@@ -699,6 +698,11 @@ export function PatientModulesTab({
       matchesAllTokens(`${t(`modules.${m.id}.label`)} ${t(`modules.${m.id}.description`)}`, searchTokens)),
   )
 
+  const addModuleSearch = useMemo(
+    () => ({ value: searchQuery, onChange: setSearchQuery, placeholder: t('modules.search_placeholder') }),
+    [searchQuery, t],
+  )
+
   return (
     <PatientViewProvider patientId={patientId}>
       <section className="therapeutic-wardrobe">
@@ -781,13 +785,9 @@ export function PatientModulesTab({
                 onReset={resetFilters}
                 resultCount={candidateModules.length}
                 totalCount={activatableModules.length}
+                search={addModuleSearch}
               />
             )}
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={t('modules.search_placeholder')}
-            />
             {candidateModules.length > 0 ? (
               <div className="category-modules-grid">
                 {candidateModules.map(renderModuleCard)}

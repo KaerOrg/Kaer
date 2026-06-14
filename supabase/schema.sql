@@ -2039,7 +2039,18 @@ $$;
 -- ('patient' | 'practitioner') pour différencier les deux populations côté UI.
 -- `practitioner_names` = médecins liés (patients) / vide (médecins) ; `is_admin` =
 -- rôle (médecins) / false (patients). Consultation tracée (action 'read', target_id null).
-create or replace function public.admin_list_users()
+-- Ancienne signature sans argument — supprimée avant recréation de la version paginée.
+drop function if exists public.admin_list_users();
+
+create or replace function public.admin_list_users(
+  p_kind         text default null,   -- 'patient' | 'practitioner' | null (tous)
+  p_practitioner text default null,   -- nom d'un médecin → patients rattachés
+  p_search       text default null,   -- recherche ILIKE sur nom + email
+  p_sort         text default 'created_at',
+  p_dir          text default 'desc',
+  p_limit        int  default 150,
+  p_offset       int  default 0
+)
 returns table (
   user_id            uuid,
   kind               text,
@@ -2047,11 +2058,16 @@ returns table (
   display_name       text,
   created_at         timestamptz,
   practitioner_names text[],
-  is_admin           boolean
+  is_admin           boolean,
+  -- Total du jeu FILTRÉ (avant limit/offset) — alimente la pagination côté front.
+  total_count        bigint
 )
 language plpgsql
 security definer set search_path = public
 as $$
+declare
+  v_sort_col text;
+  v_dir      text;
 begin
   if not public.fn_is_admin() then
     raise exception 'admin_list_users: accès refusé';
@@ -2060,49 +2076,94 @@ begin
   perform public.log_data_access('read', 'patients', null, null,
     jsonb_build_object('scope', 'admin_all_users'));
 
+  -- Tri whitelisté : on ne réinjecte JAMAIS la valeur client brute dans l'ORDER BY.
+  -- 'practitioners' trie sur le 1er médecin (tableau agrégé trié alphabétiquement).
+  v_sort_col := case p_sort
+    when 'display_name'  then 'display_name'
+    when 'email'         then 'email'
+    when 'kind'          then 'kind'
+    when 'practitioners' then 'sort_practitioner'
+    else 'created_at'
+  end;
+  v_dir := case when lower(coalesce(p_dir, '')) = 'asc' then 'asc' else 'desc' end;
+
+  -- Tri dynamique (%I/%s whitelistés) ; filtres passés en paramètres ($1..$3).
+  return query execute format($q$
+    with base as (
+      -- Patients : nom = prénom+nom sinon email ; médecins liés agrégés (triés).
+      select
+        p.id as user_id, 'patient'::text as kind, p.email,
+        coalesce(nullif(trim(concat_ws(' ', nullif(p.first_name, ''), nullif(p.last_name, ''))), ''), p.email) as display_name,
+        p.created_at,
+        coalesce(
+          array_agg(distinct pr.name order by pr.name) filter (where pr.name is not null and pr.name <> ''),
+          '{}'::text[]
+        ) as practitioner_names,
+        false as is_admin
+      from public.patients p
+      left join public.practitioner_patients pp on pp.patient_id = p.id
+      left join public.practitioners pr on pr.id = pp.practitioner_id
+      group by p.id, p.email, p.first_name, p.last_name, p.created_at
+      union all
+      -- Médecins : nom = name sinon email ; is_admin porte le rôle.
+      select
+        pr.id, 'practitioner'::text, pr.email,
+        coalesce(nullif(trim(pr.name), ''), pr.email),
+        pr.created_at, '{}'::text[], pr.is_admin
+      from public.practitioners pr
+    ),
+    filtered as (
+      select b.*, lower(b.practitioner_names[1]) as sort_practitioner
+      from base b
+      where ($1 is null or b.kind = $1)
+        and ($2 is null or $2 = any(b.practitioner_names))
+        and ($3 is null or b.display_name ilike '%%' || $3 || '%%' or b.email ilike '%%' || $3 || '%%')
+    )
+    select
+      user_id, kind, email, display_name, created_at, practitioner_names, is_admin,
+      count(*) over() as total_count
+    from filtered
+    order by %I %s nulls last, display_name asc, user_id asc
+    limit %L offset %L
+  $q$, v_sort_col, v_dir, p_limit, p_offset)
+  using p_kind, p_practitioner, p_search;
+end;
+$$;
+
+-- Noms des médecins (pour le filtre « par praticien » de la table admin) — admin-only.
+-- Distinct des noms non vides, c.-à-d. exactement les valeurs comparables au tableau
+-- `practitioner_names` renvoyé par admin_list_users.
+create or replace function public.admin_list_practitioner_names()
+returns table (name text)
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if not public.fn_is_admin() then
+    raise exception 'admin_list_practitioner_names: accès refusé';
+  end if;
+
   return query
-    -- Patients : nom = prénom+nom sinon email ; médecins liés agrégés.
-    select
-      p.id,
-      'patient'::text,
-      p.email,
-      coalesce(nullif(trim(concat_ws(' ', nullif(p.first_name, ''), nullif(p.last_name, ''))), ''), p.email),
-      p.created_at,
-      coalesce(
-        array_agg(distinct pr.name) filter (where pr.name is not null and pr.name <> ''),
-        '{}'::text[]
-      ),
-      false
-    from public.patients p
-    left join public.practitioner_patients pp on pp.patient_id = p.id
-    left join public.practitioners pr on pr.id = pp.practitioner_id
-    group by p.id, p.email, p.first_name, p.last_name, p.created_at
-    union all
-    -- Médecins (praticiens) : nom = name sinon email ; is_admin porte le rôle.
-    select
-      pr.id,
-      'practitioner'::text,
-      pr.email,
-      coalesce(nullif(trim(pr.name), ''), pr.email),
-      pr.created_at,
-      '{}'::text[],
-      pr.is_admin
+    select distinct pr.name
     from public.practitioners pr
-    order by 5 desc;
+    where pr.name is not null and pr.name <> ''
+    order by pr.name;
 end;
 $$;
 
 -- Droits : fn_is_admin est un helper INTERNE (appelé par les RPC SECURITY DEFINER,
 -- en tant qu'owner) — aucun rôle client, pas d'exposition REST inutile. Le front
 -- n'en a pas besoin : il lit `practitioner.is_admin` (déjà chargé en session).
--- export/erase/admin_list_users réservés aux authentifiés (re-gardés en interne) + service_role.
+-- export/erase/admin_list_* réservés aux authentifiés (re-gardés en interne) + service_role.
 revoke all on function public.fn_is_admin()             from public, anon, authenticated;
 revoke all on function public.export_patient_data(uuid) from public, anon;
 revoke all on function public.erase_patient_data(uuid)  from public, anon;
-revoke all on function public.admin_list_users()        from public, anon;
+revoke all on function public.admin_list_users(text, text, text, text, text, int, int) from public, anon;
+revoke all on function public.admin_list_practitioner_names()                          from public, anon;
 grant execute on function public.export_patient_data(uuid) to authenticated, service_role;
 grant execute on function public.erase_patient_data(uuid)  to authenticated, service_role;
-grant execute on function public.admin_list_users()        to authenticated, service_role;
+grant execute on function public.admin_list_users(text, text, text, text, text, int, int) to authenticated, service_role;
+grant execute on function public.admin_list_practitioner_names()                          to authenticated, service_role;
 
 
 -- ============================================================

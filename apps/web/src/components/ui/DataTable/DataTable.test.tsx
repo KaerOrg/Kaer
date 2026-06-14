@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DataTable } from './DataTable'
-import type { DataTableColumn } from './DataTable.types'
+import type { DataTableColumn, DataTablePaginationState } from './DataTable.types'
 
 interface Person {
   id: string
@@ -144,5 +144,105 @@ describe('DataTable', () => {
   it('rend vide sans planter quand emptyState est absent', () => {
     const { container } = render(<DataTable columns={COLUMNS} rows={[]} getRowId={p => p.id} />)
     expect(container.querySelector('.data-table')).toBeNull()
+  })
+})
+
+describe('DataTable — tri', () => {
+  const SORTABLE: DataTableColumn<Person>[] = [
+    { id: 'name', header: 'Nom', sortable: true, cell: row => row.name },
+    { id: 'role', header: 'Rôle', cell: row => row.role },
+  ]
+
+  it('rend un bouton de tri sur une colonne sortable et émet onSortChange avec son id', () => {
+    const onSortChange = vi.fn()
+    render(
+      <DataTable columns={SORTABLE} rows={PEOPLE} getRowId={p => p.id} onSortChange={onSortChange} />
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Nom' }))
+    expect(onSortChange).toHaveBeenCalledWith('name')
+  })
+
+  it('reflète le tri actif via aria-sort et n\'altère pas l\'ordre des lignes', () => {
+    const { container } = render(
+      <DataTable
+        columns={SORTABLE}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        onSortChange={vi.fn()}
+        sort={{ column: 'name', direction: 'asc' }}
+      />
+    )
+    const sortedTh = container.querySelector('th[aria-sort="ascending"]')
+    expect(sortedTh?.textContent).toContain('Nom')
+    // La table ne réordonne jamais : l'ordre injecté est préservé.
+    const cells = Array.from(container.querySelectorAll('tbody .data-table__cell'))
+    expect(cells[0].textContent).toBe('Ada Lovelace')
+  })
+
+  it('ne rend ni bouton ni aria-sort sur une colonne non triable', () => {
+    const { container } = render(
+      <DataTable columns={SORTABLE} rows={PEOPLE} getRowId={p => p.id} onSortChange={vi.fn()} />
+    )
+    expect(screen.queryByRole('button', { name: 'Rôle' })).toBeNull()
+    expect(container.querySelector('th[aria-sort="none"]')?.textContent).toContain('Nom')
+  })
+})
+
+describe('DataTable — pagination', () => {
+  function pagination(overrides: Partial<DataTablePaginationState>): DataTablePaginationState {
+    return {
+      page: 0,
+      pageSize: 150,
+      total: 412,
+      onPageChange: vi.fn(),
+      labels: {
+        previous: 'Précédent',
+        next: 'Suivant',
+        range: (from, to, total) => `${from}-${to} sur ${total}`,
+      },
+      ...overrides,
+    }
+  }
+
+  it('affiche l\'intervalle et désactive « précédent » sur la première page', () => {
+    const onPageChange = vi.fn()
+    render(
+      <DataTable
+        columns={COLUMNS}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        pagination={pagination({ page: 0, onPageChange })}
+      />
+    )
+    expect(screen.getByText('1-150 sur 412')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Précédent' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Suivant' }))
+    expect(onPageChange).toHaveBeenCalledWith(1)
+  })
+
+  it('désactive « suivant » sur la dernière page', () => {
+    render(
+      <DataTable
+        columns={COLUMNS}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        pagination={pagination({ page: 2, total: 412 })}
+      />
+    )
+    // 412 / 150 → 3 pages (index 0..2) ; page 2 est la dernière.
+    expect(screen.getByText('301-412 sur 412')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Suivant' })).toBeDisabled()
+  })
+
+  it('n\'affiche pas de pagination quand le total est nul', () => {
+    render(
+      <DataTable
+        columns={COLUMNS}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        pagination={pagination({ total: 0 })}
+      />
+    )
+    expect(screen.queryByRole('button', { name: 'Suivant' })).toBeNull()
   })
 })

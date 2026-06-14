@@ -248,6 +248,11 @@
       "description": "Aucun utilisateur n'est encore enregistré.",
       "no_match_title": "Aucun résultat",
       "no_match_description": "Aucun utilisateur ne correspond à votre recherche."
+    },
+    "pagination": {
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "range": "{{from}}-{{to}} sur {{total}}"
     }
   },
   "patient": {
@@ -380,6 +385,9 @@
     "empty_search": "Aucun module ne correspond à votre recherche.",
     "filter_count": "{{shown}} sur {{total}} modules",
     "filter_reset": "Réinitialiser les filtres",
+    "filter_select": "Sélectionner…",
+    "filter_no_match": "Aucun filtre ne correspond.",
+    "filter_remove": "Retirer le filtre {{tag}}",
     "empty_filter": "Aucun module ne correspond à ces filtres.",
     "crisis_plan": {
       "label": "Plan de crise",
