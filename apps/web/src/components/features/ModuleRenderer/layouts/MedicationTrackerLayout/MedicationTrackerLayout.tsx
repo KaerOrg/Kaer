@@ -37,8 +37,8 @@ export function MedicationTrackerLayout({ fields, footer, t }: Props) {
     .map(f => ({
       value: f.props['value'] ?? '',
       label: f.text_code ? t(f.text_code) : (f.props['value'] ?? ''),
-      color: f.props['color'] ?? '#6B7280',
-      bgColor: f.props['bg_color'] ?? '#F3F4F6',
+      color: f.props['color'] ?? 'var(--color-text-muted)',
+      bgColor: f.props['bg_color'] ?? 'var(--color-bg)',
     })), [fields, t])
 
   const reasons = useMemo<PreviewReason[]>(() => fields

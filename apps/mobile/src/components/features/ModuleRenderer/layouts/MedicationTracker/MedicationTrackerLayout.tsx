@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import type { Medication } from '@psytool/shared'
 import { colors } from '../../../../../theme'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 import { getDailyEntry, getAllDailyEntries, generateId, type DailyEntry } from '../../../../../lib/database'
 import { saveDailyEntry } from '../../../../../services/dailyEntryService'
@@ -338,23 +339,13 @@ export function MedicationTrackerLayout({ fields, moduleId: moduleIdProp }: Medi
 
       {tab === 'today' ? (
         <View style={styles.footer}>
-          <Pressable
-            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          <Button
+            label={saveLabel}
             onPress={handleSave}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={saveLabel}
+            loading={saving}
+            iconLeft={<MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />}
             testID="save-button"
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.white} size="small" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={styles.saveBtnText}>{saveLabel}</Text>
-              </>
-            )}
-          </Pressable>
+          />
         </View>
       ) : null}
     </KeyboardAvoidingView>

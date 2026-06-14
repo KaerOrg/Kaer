@@ -806,9 +806,6 @@
     "medication_adherence": {
       "label": "Medication Adherence Module",
       "description": "Daily self-report on medication adherence.",
-      "new_btn": "New report",
-      "empty_title": "No report yet",
-      "empty_text": "Use the button above to complete your first report.",
       "intro": "Did you take your medication?",
       "save": "Save",
       "today_label": "Today",

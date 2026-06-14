@@ -600,8 +600,7 @@
       "preview_med2_name": "Quétiapine",
       "preview_med2_poso": "300 mg le soir",
       "preview_med3_name": "Lorazépam",
-      "preview_med3_poso": "1 mg si besoin",
-      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+      "preview_med3_poso": "1 mg si besoin"
     },
     "psychoeducation": {
       "label": "Psychoéducation",

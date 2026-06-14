@@ -4,7 +4,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '../../../../theme'
 import type { ChartEntry } from '../chartTypes'
 
-const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+// Initiales des jours (Lundi → Dimanche) dérivées de la locale active — jamais
+// figées en français : un patient en anglais voit M T W T F S S, etc.
+// 2024-01-01 est un lundi (référence de départ de la semaine ISO).
+function weekdayNarrowLabels(locale: string): string[] {
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'narrow' })
+  return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(Date.UTC(2024, 0, 1 + i))))
+}
 
 interface DayEntry {
   date: string
@@ -86,6 +92,7 @@ export function MonthCalendar({ entries = [], dimensionKeys = [], accentColor, l
   const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString(locale, {
     month: 'long', year: 'numeric',
   })
+  const weekdayLabels = useMemo(() => weekdayNarrowLabels(locale), [locale])
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11) }
@@ -137,7 +144,7 @@ export function MonthCalendar({ entries = [], dimensionKeys = [], accentColor, l
 
       {/* En-têtes jours de semaine */}
       <View style={styles.weekRow}>
-        {WEEKDAY_LABELS.map((d, i) => (
+        {weekdayLabels.map((d, i) => (
           <Text key={i} style={styles.weekday}>{d}</Text>
         ))}
       </View>
@@ -282,7 +289,7 @@ const styles = StyleSheet.create({
   dayNumFilled: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: colors.white,
   },
   dayEmpty: {
     width: CELL - 4,

@@ -3,15 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Bell, Eye, EyeOff, LineChart, Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Chip } from '../../../components/ui/Chip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '../../../services/moduleCatalogService'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { MedicationAddForm } from './MedicationAddForm'
-import {
-  MED_LIST_ROW, MED_LIST_MAIN, MED_LIST_NAME, MED_LIST_POSO, MED_KIND_BADGE, MED_REMOVE_BTN,
-} from './medicationListStyles'
 
 const MODULE_TYPE: ModuleType = 'medication_adherence'
 
@@ -125,28 +123,26 @@ export function MedicationAdherenceCard({
       {medList.open && unlocked && mod && (
         <div className="psycho-card-picker">
           <p className="psycho-card-picker__label">{t('modules.medication_adherence.config_title')}</p>
-          <p style={{ fontSize: 12, color: '#6B7280', marginTop: -8, marginBottom: 12 }}>
-            {t('modules.medication_adherence.config_hint')}
-          </p>
+          <p className="med-config-hint">{t('modules.medication_adherence.config_hint')}</p>
 
           {medList.medications.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#9CA3AF', fontStyle: 'italic' }}>
-              {t('modules.medication_adherence.meds_empty')}
-            </p>
+            <p className="med-empty">{t('modules.medication_adherence.meds_empty')}</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="med-list">
               {medList.medications.map(med => (
-                <div key={med.id} style={MED_LIST_ROW}>
-                  <div style={MED_LIST_MAIN}>
-                    <div style={MED_LIST_NAME}>{med.name}</div>
-                    {med.posology ? <div style={MED_LIST_POSO}>{med.posology}</div> : null}
+                <div key={med.id} className="med-row">
+                  <div className="med-row__main">
+                    <div className="med-row__name">{med.name}</div>
+                    {med.posology ? <div className="med-row__poso">{med.posology}</div> : null}
                   </div>
-                  <span style={MED_KIND_BADGE}>
-                    {t(`modules.medication_adherence.${med.kind === 'prn' ? 'kind_prn' : 'kind_maintenance'}`)}
-                  </span>
+                  <Chip
+                    label={t(`modules.medication_adherence.${med.kind === 'prn' ? 'kind_prn' : 'kind_maintenance'}`)}
+                    tone="neutral"
+                    size="sm"
+                  />
                   <button
                     type="button"
-                    style={MED_REMOVE_BTN}
+                    className="med-row__remove"
                     title={t('common.delete')}
                     onClick={() => medList.removeMedication(med.id)}
                   >
@@ -159,9 +155,9 @@ export function MedicationAdherenceCard({
 
           <MedicationAddForm onAdd={medList.addMedication} />
 
-          <div className="psycho-card-picker__actions" style={{ marginTop: 16 }}>
+          <div className="psycho-card-picker__actions med-actions">
             <Button size="sm" loading={medList.saving} onClick={medList.close}>
-              {t('common.done', { defaultValue: 'Terminé' })}
+              {t('common.done')}
             </Button>
           </div>
         </div>

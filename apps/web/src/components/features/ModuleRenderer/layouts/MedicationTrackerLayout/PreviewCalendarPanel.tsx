@@ -1,8 +1,15 @@
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Flame } from 'lucide-react'
 import { buildCalendarStatusByDay } from './previewExamples'
 import type { PreviewStatus } from './types'
 
-const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+// Initiales des jours (Lundi → Dimanche) dérivées de la locale active.
+// 2024-01-01 est un lundi (référence de départ de la semaine ISO).
+function weekdayNarrowLabels(locale: string): string[] {
+  const fmt = new Intl.DateTimeFormat(locale, { weekday: 'narrow' })
+  return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(Date.UTC(2024, 0, 1 + i))))
+}
 
 interface Props {
   moduleId: string
@@ -14,13 +21,15 @@ interface Props {
 // Volet « Calendrier » de l'aperçu : série de jours renseignés + mois passif où
 // chaque jour porte la pastille neutre de son statut + légende explicite (MDR).
 export function PreviewCalendarPanel({ moduleId, t, lbl, statuses }: Props) {
+  const { i18n } = useTranslation()
+  const weekdays = useMemo(() => weekdayNarrowLabels(i18n.language), [i18n.language])
   const today = new Date()
   const year = today.getFullYear(), month = today.getMonth(), todayDate = today.getDate()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const startDow = (new Date(year, month, 1).getDay() + 6) % 7
   const statusByDay = buildCalendarStatusByDay(todayDate, statuses.length)
   const filled = Object.keys(statusByDay).length
-  const monthLabel = new Date(year, month, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  const monthLabel = new Date(year, month, 1).toLocaleDateString(i18n.language, { month: 'long', year: 'numeric' })
   const streakLabel = t(`modules.${moduleId}.streak_plural`, { count: 5 })
 
   const cells: (number | null)[] = []
@@ -47,7 +56,7 @@ export function PreviewCalendarPanel({ moduleId, t, lbl, statuses }: Props) {
         </div>
 
         <div className="mt-cal__grid">
-          {WEEKDAYS.map((d, i) => <span key={i} className="mt-cal__wd">{d}</span>)}
+          {weekdays.map((d, i) => <span key={i} className="mt-cal__wd">{d}</span>)}
           {cells.map((d, i) => {
             if (d === null) return <span key={i} className="mt-cal__cell" />
             const idx = statusByDay[d]

@@ -137,13 +137,6 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
     padding: spacing.md,
   },
-  saveBtn: {
-    backgroundColor: colors.primary, borderRadius: radius.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, paddingVertical: spacing.sm + 2,
-  },
-  saveBtnDisabled:  { opacity: 0.6 },
-  saveBtnText:      { color: colors.white, fontSize: 16, fontWeight: '700' },
   // ── Modal éditeur médicament
   modalBackdrop:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalCard: {
@@ -165,14 +158,5 @@ export const styles = StyleSheet.create({
   kindBtnText:      { fontSize: 13, fontWeight: '600', color: colors.textMuted },
   kindBtnTextSelected: { color: colors.primary },
   modalActions:     { flexDirection: 'row', gap: spacing.sm },
-  modalCancel: {
-    flex: 1, alignItems: 'center', paddingVertical: spacing.sm + 2, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border,
-  },
-  modalCancelText:  { fontSize: 15, fontWeight: '600', color: colors.textMuted },
-  modalSave: {
-    flex: 1, alignItems: 'center', paddingVertical: spacing.sm + 2, borderRadius: radius.md,
-    backgroundColor: colors.primary,
-  },
-  modalSaveText:    { fontSize: 15, fontWeight: '700', color: colors.white },
+  modalAction:      { flex: 1 },
 })

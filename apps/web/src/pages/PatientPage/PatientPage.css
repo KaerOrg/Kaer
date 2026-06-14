@@ -988,6 +988,199 @@
   gap: 8px;
 }
 
+/* ── Éditeur de liste de médicaments (medication_adherence) ──────────────── */
+
+.med-config-hint {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  margin: -8px 0 12px;
+}
+
+.med-empty {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.med-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.med-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.med-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.med-row__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.med-row__poso {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.med-row__remove {
+  display: flex;
+  flex-shrink: 0;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.med-row__remove:hover {
+  color: var(--color-danger);
+}
+
+/* Formulaire d'ajout compact : ligne unique (nom + posologie + type + bouton).
+   Inputs natifs token-isés — le primitive InputField impose un label empilé qui
+   romprait cette disposition en ligne. */
+.med-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.med-add__input {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+}
+
+.med-add__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.med-actions {
+  margin-top: 16px;
+}
+
+/* ── Éditeurs de config module (champs partagés : crisis_plan, rim…) ──────── */
+
+.module-editor-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.module-editor-fields--tight {
+  gap: 12px;
+}
+
+.module-editor-field__label,
+.crisis-cards-title {
+  display: block;
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.crisis-cards-title {
+  margin-bottom: 8px;
+}
+
+.module-editor-field__required {
+  color: var(--color-danger);
+}
+
+.module-editor-field__textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.module-editor-field__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.crisis-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+}
+
+.crisis-card__meta {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.crisis-card__meta--spaced {
+  margin-top: 4px;
+}
+
+.crisis-card__text {
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.crisis-card__text--italic {
+  font-style: italic;
+}
+
+.crisis-card__text--strong {
+  font-weight: 500;
+}
+
+.crisis-card__delete {
+  align-self: flex-end;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-danger);
+}
+
+.crisis-card-draft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--color-primary);
+}
+
+.crisis-draft-actions {
+  display: flex;
+  gap: 8px;
+}
+
 /* ── Wrapper pour module-card + panneau aperçu (hors grille css) ─────────── */
 
 .module-card-wrapper-block {

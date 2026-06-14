@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Check, Pill, CheckCircle2 } from 'lucide-react'
 import { buildExampleMeds } from './previewExamples'
 import type { PreviewStatus, PreviewReason } from './types'
@@ -13,9 +14,10 @@ interface Props {
 // Volet « Aujourd'hui » de l'aperçu : check global (pastilles), motifs de non-prise,
 // détail par molécule, notes, bouton enregistrer. Purement passif (MDR 2017/745).
 export function PreviewTodayPanel({ moduleId, t, lbl, statuses, reasons }: Props) {
+  const { i18n } = useTranslation()
   const meds = buildExampleMeds(moduleId, t, lbl)
   const todayLabel = lbl('today_label')
-  const dateLabel = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+  const dateLabel = new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
     <div className="mt-prev">

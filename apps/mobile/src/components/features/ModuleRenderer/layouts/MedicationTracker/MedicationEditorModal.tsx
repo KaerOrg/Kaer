@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { Modal, View, Text, TextInput, Pressable } from 'react-native'
 import type { Medication, MedicationKind } from '@psytool/shared'
 import { colors } from '../../../../../theme'
+import { Button } from '../../../../ui/Button'
 import { styles } from './styles'
 
 // Absorbe le press sur la carte pour qu'il ne ferme pas la modale (backdrop).
@@ -93,17 +94,14 @@ export function MedicationEditorModal({ visible, initial, labels, onCancel, onSa
           </View>
 
           <View style={styles.modalActions}>
-            <Pressable style={styles.modalCancel} onPress={onCancel}>
-              <Text style={styles.modalCancelText}>{labels.cancel}</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.modalSave, !canSave && styles.saveBtnDisabled]}
+            <Button label={labels.cancel} onPress={onCancel} variant="secondary" style={styles.modalAction} />
+            <Button
+              label={labels.save}
               onPress={handleSave}
               disabled={!canSave}
+              style={styles.modalAction}
               testID="med-save-button"
-            >
-              <Text style={styles.modalSaveText}>{labels.save}</Text>
-            </Pressable>
+            />
           </View>
         </Pressable>
       </Pressable>
