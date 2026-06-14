@@ -1,17 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Layout } from '../../components/features/Layout'
 import { useToast } from '../../contexts/ToastContext'
 import { AdminUsersTable } from './AdminUsersTable'
-import { fetchAllUsers, type AdminUser } from '../../services/adminService'
+import { adminQueries } from '../../hooks/queries'
+import type { AdminUser } from '../../services/adminService'
 import './AdminUsersPage.css'
-
-type LoadState =
-  | { readonly status: 'loading' }
-  | { readonly status: 'ready'; readonly users: readonly AdminUser[] }
-  | { readonly status: 'error' }
-
-const INITIAL: LoadState = { status: 'loading' }
 
 /**
  * Gestion des utilisateurs (admin uniquement). Liste tous les utilisateurs — patients
@@ -22,30 +17,21 @@ const INITIAL: LoadState = { status: 'loading' }
 export function AdminUsersPage() {
   const { t } = useTranslation()
   const toast = useToast()
-  const [state, setState] = useState<LoadState>(INITIAL)
-
-  const load = useCallback(async () => {
-    const result = await fetchAllUsers()
-    if (!result.ok) {
-      setState({ status: 'error' })
-      toast.error(t('admin_users.error_load'))
-      return
-    }
-    setState({ status: 'ready', users: result.users })
-  }, [toast, t])
+  const queryClient = useQueryClient()
+  const usersQuery = useQuery(adminQueries.allUsers())
 
   useEffect(() => {
-    load()
-  }, [load])
+    if (usersQuery.isError) toast.error(t('admin_users.error_load'))
+  }, [usersQuery.isError, toast, t])
 
-  // Effacement réussi (patient) → retirer la ligne sans recharger toute la table.
+  // Effacement réussi (patient) → retirer la ligne du cache sans recharger toute
+  // la table (mise à jour optimiste de la donnée déjà en cache).
   const handleErased = useCallback((userId: string) => {
-    setState(prev =>
-      prev.status === 'ready'
-        ? { status: 'ready', users: prev.users.filter(u => u.user_id !== userId) }
-        : prev
+    queryClient.setQueryData<readonly AdminUser[]>(
+      adminQueries.allUsers().queryKey,
+      prev => (prev ? prev.filter(u => u.user_id !== userId) : prev),
     )
-  }, [])
+  }, [queryClient])
 
   return (
     <Layout wide>
@@ -54,14 +40,14 @@ export function AdminUsersPage() {
           <h1 className="admin-users__title">{t('admin_users.title')}</h1>
         </div>
 
-        {state.status === 'loading' ? (
+        {usersQuery.isPending ? (
           <div className="admin-users__loading">{t('common.loading')}</div>
         ) : null}
-        {state.status === 'error' ? (
+        {usersQuery.isError ? (
           <div className="admin-users__loading">{t('admin_users.error_load')}</div>
         ) : null}
-        {state.status === 'ready' ? (
-          <AdminUsersTable users={state.users} onErased={handleErased} />
+        {usersQuery.isSuccess ? (
+          <AdminUsersTable users={usersQuery.data} onErased={handleErased} />
         ) : null}
       </div>
     </Layout>

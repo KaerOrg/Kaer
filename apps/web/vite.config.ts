@@ -32,6 +32,14 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Valeurs factices : les services sont mockés au niveau de leur frontière,
+    // donc ce client n'émet jamais de requête réelle. Ces variables empêchent
+    // seulement supabase.ts de throw à l'import quand un barrel (hooks/queries)
+    // tire transitivement un service non mocké. Le throw reste actif en dev/prod.
+    env: {
+      VITE_SUPABASE_URL: 'http://localhost:54321',
+      VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import { render, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -62,6 +63,16 @@ import { PatientPage } from './PatientPage'
 import { resolvePatientRef } from '../../services/patientRefService'
 import { fetchPatientHeader } from '../../services/patientService'
 
+// Rend la page enveloppée d'un QueryClient neuf (cache isolé, retry désactivé).
+function renderPage() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <PatientPage />
+    </QueryClientProvider>,
+  )
+}
+
 const HEADER = {
   email: 'p@t.fr',
   alias: null,
@@ -82,7 +93,7 @@ describe('PatientPage — résolution du token public', () => {
   it('résout le token vers le patient_id réel et charge le dossier', async () => {
     vi.mocked(resolvePatientRef).mockResolvedValue('pat-1')
 
-    render(<PatientPage />)
+    renderPage()
 
     // Le token de l'URL est résolu, puis le header est chargé avec la VRAIE PK.
     await waitFor(() => {
@@ -95,7 +106,7 @@ describe('PatientPage — résolution du token public', () => {
   it('redirige vers / si le token est introuvable (ou relation d’un autre praticien)', async () => {
     vi.mocked(resolvePatientRef).mockResolvedValue(null)
 
-    render(<PatientPage />)
+    renderPage()
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'))
     expect(fetchPatientHeader).not.toHaveBeenCalled()
@@ -104,7 +115,7 @@ describe('PatientPage — résolution du token public', () => {
   it('redirige vers / sans requêter si le token est absent de l’URL', async () => {
     mockRef = undefined
 
-    render(<PatientPage />)
+    renderPage()
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'))
     expect(resolvePatientRef).not.toHaveBeenCalled()

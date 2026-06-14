@@ -2,6 +2,7 @@ import React from 'react'
 import { vi, beforeEach, describe, it, expect } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -77,11 +78,15 @@ beforeEach(() => {
 
 /** Rend la page et ouvre le formulaire d'invitation (étape 1). */
 async function openForm() {
+  // Client neuf par rendu (pas de cache partagé entre tests), retry désactivé.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
-    <ToastProvider>
-      <DashboardPage />
-      <ToastContainer />
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <DashboardPage />
+        <ToastContainer />
+      </ToastProvider>
+    </QueryClientProvider>
   )
   await userEvent.click(screen.getByRole('button', { name: /inviter un patient/i }))
 }
