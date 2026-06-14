@@ -113,36 +113,39 @@ export function MedicationSideEffectsCard({
         }}
         actions={unlocked && mod ? (
           <>
-            <button
-              type="button"
-              className="module-card__notif-btn"
+            <Button
+              variant="outline"
+              size="xs"
+              icon={<Bell size={14} />}
+              aria-label={t('notifications.configure_button')}
               title={t('notifications.configure_button')}
               onClick={handleNotif}
-            >
-              <Bell size={14} />
-            </button>
+            />
             {!medEffects.open && (
               <Button variant="ghost" size="sm" onClick={medEffects.openEditor}>
                 {t('modules.medication_side_effects.config_button')}
               </Button>
             )}
-            <button
-              className={`preview-toggle-btn ${previewOpen ? 'preview-toggle-btn--active' : ''}`}
+            <Button
+              variant="outline"
+              size="xs"
+              aria-pressed={previewOpen}
+              icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
               onClick={handlePreviewToggle}
               title={t('patient.patient_view')}
             >
-              {previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
               {t('patient.preview_button')}
-            </button>
-            <button
-              type="button"
-              className={`preview-toggle-btn ${dataOpen ? 'preview-toggle-btn--active' : ''}`}
+            </Button>
+            <Button
+              variant="outline"
+              size="xs"
+              aria-pressed={dataOpen}
+              icon={<LineChart size={14} />}
               onClick={handleDataToggle}
               title={t('patient.data_button')}
             >
-              <LineChart size={14} />
               {t('patient.data_button')}
-            </button>
+            </Button>
           </>
         ) : undefined}
       >

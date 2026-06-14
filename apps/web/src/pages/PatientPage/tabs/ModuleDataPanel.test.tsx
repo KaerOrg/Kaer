@@ -27,7 +27,10 @@ vi.mock('../../../services/engagementService', () => ({
 
 import { render, waitFor } from '@testing-library/react'
 import { describe, it, expect, beforeEach } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ModuleDataPanel } from './ModuleDataPanel'
+
+const makeClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -39,7 +42,7 @@ describe('ModuleDataPanel', () => {
       { date: '2026-01-01', score: 12 },
       { date: '2026-02-01', score: 8 },
     ])
-    const { container, getByTestId } = render(<ModuleDataPanel patientId="p1" moduleType="phq9" />)
+    const { container, getByTestId } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="phq9" /></QueryClientProvider>)
 
     await waitFor(() => expect(getByTestId('linechart')).toBeTruthy())
     expect(mockFetchScaleEvolution).toHaveBeenCalledWith('p1', 'phq9')
@@ -52,7 +55,7 @@ describe('ModuleDataPanel', () => {
       { date: '2026-01-01', humeur: 7, energie: 6, anxiete: 4, plaisir: 5, sommeil: 8, alimentation: 6 },
       { date: '2026-02-01', humeur: 6, energie: 5, anxiete: 5, plaisir: 4, sommeil: 7, alimentation: 5 },
     ])
-    const { getByTestId } = render(<ModuleDataPanel patientId="p1" moduleType="mood_tracker" />)
+    const { getByTestId } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="mood_tracker" /></QueryClientProvider>)
 
     await waitFor(() => expect(getByTestId('linechart')).toBeTruthy())
     expect(getByTestId('linechart').getAttribute('data-series')).toBe('6')
@@ -66,7 +69,7 @@ describe('ModuleDataPanel', () => {
         { date: '2026-02-01', sedation: 2, nausees: 2 },
       ],
     })
-    const { getByTestId } = render(<ModuleDataPanel patientId="p1" moduleType="medication_side_effects" />)
+    const { getByTestId } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="medication_side_effects" /></QueryClientProvider>)
 
     await waitFor(() => expect(getByTestId('linechart')).toBeTruthy())
     expect(getByTestId('linechart').getAttribute('data-series')).toBe('2')
@@ -78,7 +81,7 @@ describe('ModuleDataPanel', () => {
       count: 3,
       lastPayload: { total_score: 5 },
     })
-    const { container } = render(<ModuleDataPanel patientId="p1" moduleType="beck_columns" />)
+    const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="beck_columns" /></QueryClientProvider>)
 
     await waitFor(() => expect(container.querySelector('.summary-panel')).toBeTruthy())
     expect(mockFetchModuleSummary).toHaveBeenCalledWith('p1', 'beck_columns')
@@ -86,7 +89,7 @@ describe('ModuleDataPanel', () => {
 
   it('aucune donnée → message vide', async () => {
     mockFetchScaleEvolution.mockResolvedValue([])
-    const { container } = render(<ModuleDataPanel patientId="p1" moduleType="gad7" />)
+    const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="gad7" /></QueryClientProvider>)
 
     await waitFor(() =>
       expect(container.querySelector('.module-data-panel__message')?.textContent).toBe('patient.summary_empty')

@@ -42,7 +42,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`authService.ts`](../apps/web/src/services/authService.ts) | Session praticien, login, register, mise à jour profil/langue, logout |
 | [`patientService.ts`](../apps/web/src/services/patientService.ts) | Liste des patients (avec modules), header patient, options pour pickers, mode ado |
 | [`patientRefService.ts`](../apps/web/src/services/patientRefService.ts) | `resolvePatientRef` — résout l'identifiant public opaque de l'URL (`public_ref`) vers le `patient_id` réel. Défense en profondeur (masque la PK), la RLS reste la barrière. Voir [`spec/patient-public-ref.md`](spec/patient-public-ref.md). |
-| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, proposition d'échelle |
+| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, proposition d'échelle, effets suivis (`fetchTrackedEffects`/`updateTrackedEffects`), liste de médicaments (`fetchMedications`/`updateMedications`) |
 | [`invitationService.ts`](../apps/web/src/services/invitationService.ts) | Liste des invitations en attente, validation de token, envoi via edge function, signup patient |
 | [`practitionerSettingsService.ts`](../apps/web/src/services/practitionerSettingsService.ts) | `practitioner_module_settings` (modules activés par praticien) |
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
@@ -84,7 +84,9 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`moodMarkerService.ts`](../apps/mobile/src/services/moodMarkerService.ts) | `getAllMoodMarkers`, `saveMoodMarker`, `deleteMoodMarker` — repères temporels (Life Chart) du thermomètre de l'humeur |
 | [`sleepDiaryService.ts`](../apps/mobile/src/services/sleepDiaryService.ts) | `saveSleepEntry`, `deleteSleepEntry` — agenda du sommeil |
 | [`formEntryService.ts`](../apps/mobile/src/services/formEntryService.ts) | `saveFormEntry`, `deleteFormEntry` — formulaires multi-colonnes (Beck, craving) |
-| [`dailyEntryService.ts`](../apps/mobile/src/services/dailyEntryService.ts) | `saveDailyEntry`, `deleteDailyEntry` — saisies quotidiennes (observance) |
+| [`dailyEntryService.ts`](../apps/mobile/src/services/dailyEntryService.ts) | `saveDailyEntry`, `deleteDailyEntry` — saisies quotidiennes (statut global observance, + `reason`) |
+| [`medicationIntakeService.ts`](../apps/mobile/src/services/medicationIntakeService.ts) | `saveMedicationIntake`, `deleteMedicationIntake`, `getMedicationIntakes` — détail de prise par molécule (`medication_intakes`) + sync |
+| [`medicationListService.ts`](../apps/mobile/src/services/medicationListService.ts) | `fetchMedications`, `updateMedications` — liste de molécules co-éditée patient↔praticien (`patient_modules.config.medications`) |
 | [`treeSelectionService.ts`](../apps/mobile/src/services/treeSelectionService.ts) | `saveTreeSelection`, `deleteTreeSelection` — sélecteurs hiérarchiques (roue des émotions) |
 | [`planItemService.ts`](../apps/mobile/src/services/planItemService.ts) | `savePlanItem`, `deletePlanItem`, `setModuleSetting` — plans éditables + settings module |
 | [`activityRecordService.ts`](../apps/mobile/src/services/activityRecordService.ts) | `saveActivityRecord`, `deleteActivityRecord` — activation comportementale |
@@ -128,3 +130,88 @@ La table `sync_outbox` (SQLite) est gérée par `SyncOutboxStore` dans `src/lib/
 - Stores Zustand → dans `src/store/` ; ils consomment les services, ne les remplacent pas.
 - Types métier purs partagés entre web et mobile → dans `packages/shared`.
 - Constantes statiques (échelles, configs scoring) → dans `src/data/` (web) ou `src/constants/` (mobile).
+
+## Cache des lectures — TanStack Query (`src/hooks/queries/`)
+
+> Le client `supabase-js` **ne cache rien** : c'est un wrapper `fetch` sur PostgREST.
+> Sans couche de cache, chaque montage d'écran refait la requête réseau et deux
+> composants demandant la même donnée déclenchent deux appels. C'est
+> [TanStack Query](https://tanstack.com/query) (`@tanstack/react-query` v5) qui
+> apporte déduplication, cache mémoire et revalidation — sur les **deux apps**.
+
+**Périmètre.** TanStack Query couvre les **lectures réseau** (Supabase). Il ne
+remplace **pas** le stockage offline-first SQLite des saisies patient (services
+`scaleEntryService`, `sleepDiaryService`, etc. via `syncHelpers`) : celles-ci
+restent locales et ne passent pas par ce cache.
+
+**Où.** Le `QueryClient` est configuré dans `src/lib/queryClient.ts` (par app) et
+le `QueryClientProvider` enveloppe l'app (`main.tsx` web, `App.tsx` mobile). Les
+factories de query vivent dans `src/hooks/queries/<domaine>Queries.ts`, re-exportées
+par `src/hooks/queries/index.ts` (point d'import unique).
+
+**Forme — factories `queryOptions`, pas un hook par fonction.** Chaque domaine
+exporte UN objet `<domaine>Queries` de factories `queryOptions` : la clé et le
+`queryFn` sont déclarés une seule fois, et n'importe quel composant fait
+`useQuery(homeQueries.unlockedModules(id))`. **Pas de god-class** qui centralise
+tous les appels (couplage, pas de tree-shaking) : un fichier par domaine, ta règle
+« un fichier = une responsabilité » tient.
+
+**Règle d'or — le `queryFn` appelle un service, jamais Supabase.** La factory ne
+contient pas de SQL ni d'appel `supabase.*` : elle délègue au service fonctionnel.
+La règle « zéro Supabase dans un composant » reste intacte.
+
+```ts
+// src/hooks/queries/homeQueries.ts
+import { queryOptions } from '@tanstack/react-query'
+import { fetchUnlockedModules } from '../../services/homeService'
+
+export const homeQueries = {
+  unlockedModules: (patientId: string | undefined) =>
+    queryOptions({
+      queryKey: ['home', 'unlockedModules', patientId ?? ''],
+      queryFn: () => fetchUnlockedModules(patientId!),
+      enabled: patientId != null,   // pas de fetch tant que l'id n'est pas connu
+    }),
+}
+
+// composant : useQuery(homeQueries.unlockedModules(patient?.id))
+// invalidation : queryClient.invalidateQueries({ queryKey: homeQueries.unlockedModules(id).queryKey })
+```
+
+**Conventions.**
+- **Clés** : portées par la factory `queryOptions` → `xxxQueries.machin(id).queryKey`
+  réutilisable tel quel pour invalider (`invalidateQueries`) ou patcher
+  (`setQueryData`, typé via la clé brandée v5) exactement la donnée affichée.
+- **Mutations** : restent des hooks `useMutation` (besoin du `queryClient`), exportés
+  dans le même fichier de domaine ; `onSuccess` invalide ou patche les queries impactées.
+- **`enabled`** : désactiver la query tant qu'un paramètre requis est indéfini.
+- **État éditable amorcé du serveur** (note générale, Set de modules activés) : reste
+  un `useState` local, amorcé UNE FOIS via un effet gardé par un `ref` quand la query
+  réussit. Ne pas re-piloter un champ que l'utilisateur édite directement par la query.
+
+**Exceptions — quand ne PAS migrer vers TanStack Query :**
+- **`queryFn` doit être une lecture pure.** Un écran dont le « chargement » déclenche
+  une **écriture** (ex. `FileActivePage` → `syncCaseloadWithPatients` puis re-fetch
+  conditionnel) ne passe pas par une query : y forcer reviendrait à écrire dans un
+  `queryFn` (anti-pattern). Il garde son orchestration `useEffect` + `useState`.
+- **Service déjà doté d'un cache mémoire.** `psyeduService` (fiches psyedu) et
+  `moduleService.fetchModuleFields` (contenu de module, cœur du moteur générique)
+  maintiennent leur propre cache de session (`Map`, contenu quasi statique) :
+  ré-encapsuler dans TanStack doublerait le cache pour un gain marginal. Laissés tels
+  quels. (Le seul fetch non caché de `ModuleContentScreen`, `fetchPatientModuleConfig`,
+  est conditionnel et marginal.)
+- **Pas de lecture cacheable.** Un écran dont les données viennent du store
+  (`ProfileScreen` → `authStore`) et qui ne fait que des actions one-shot
+  (upload, export, effacement) n'a aucune query à migrer.
+
+Documenter le choix en commentaire à chaque exception.
+- **`isLoading` vs `isPending`** : afficher le spinner via `isLoading`
+  (`= isPending && isFetching`), faux quand la query est désactivée — `isPending`
+  seul resterait vrai et bloquerait l'écran.
+- **Focus mobile** : `useRefreshOnFocus(refetch)` (`src/hooks/`) rétablit le
+  rafraîchissement au retour sur un écran d'une stack React Navigation (qui ne se
+  démonte pas), sans casser la déduplication apportée par `staleTime`.
+- **Tests** : chaque hook se teste avec `renderHook` + un `QueryClientProvider`
+  enveloppant (client neuf, `retry: false`), service mocké. Tout écran qui rend un
+  composant utilisant un hook de query doit être enveloppé d'un `QueryClientProvider`
+  dans son test.

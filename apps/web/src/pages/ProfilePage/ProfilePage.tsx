@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Mail, Briefcase, UserCircle2, MapPin, Phone } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
@@ -10,8 +11,7 @@ import { SelectField } from '../../components/ui/SelectField/SelectField'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
 import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
-import { fetchProfessionalTitles } from '../../services/authService'
-import type { ProfessionalTitle } from '../../lib/database.types'
+import { referenceQueries } from '../../hooks/queries'
 import './ProfilePage.css'
 
 export function ProfilePage() {
@@ -21,11 +21,7 @@ export function ProfilePage() {
 
   const [name, setName] = useState(practitioner?.name ?? '')
   const [title, setTitle] = useState(practitioner?.professional_title ?? '')
-  const [professionalTitles, setProfessionalTitles] = useState<ProfessionalTitle[]>([])
-
-  useEffect(() => {
-    void fetchProfessionalTitles().then(setProfessionalTitles)
-  }, [])
+  const professionalTitles = useQuery(referenceQueries.professionalTitles()).data ?? []
 
   const titleLangKey = i18n.language.startsWith('fr') ? 'label_fr' : 'label_en'
   const titleMatch = professionalTitles.find(pt => pt.code === practitioner?.professional_title)

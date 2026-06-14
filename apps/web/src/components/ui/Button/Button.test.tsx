@@ -43,4 +43,41 @@ describe('Button', () => {
     await userEvent.click(screen.getByRole('button'))
     expect(onClick).not.toHaveBeenCalled()
   })
+
+  it('rend une icône à gauche du label quand icon + children', () => {
+    render(<Button icon={<svg data-testid="ic" />}>Ajouter</Button>)
+    const btn = screen.getByRole('button')
+    expect(btn).not.toHaveClass('btn--icon-only')
+    expect(screen.getByTestId('ic')).toBeInTheDocument()
+    expect(screen.getByText('Ajouter')).toBeInTheDocument()
+  })
+
+  it('passe en icône-seule (btn--icon-only) quand icon sans children', () => {
+    render(<Button icon={<svg data-testid="ic" />} aria-label="Notifier" />)
+    const btn = screen.getByRole('button', { name: 'Notifier' })
+    expect(btn).toHaveClass('btn--icon-only')
+    expect(screen.getByTestId('ic')).toBeInTheDocument()
+  })
+
+  it('masque l\'icône au profit du spinner quand loading', () => {
+    render(<Button icon={<svg data-testid="ic" />} loading aria-label="X" />)
+    const btn = screen.getByRole('button')
+    expect(btn.querySelector('.btn__spinner')).toBeTruthy()
+    expect(screen.queryByTestId('ic')).not.toBeInTheDocument()
+  })
+
+  it('expose l\'état bascule via aria-pressed (variante outline)', () => {
+    render(<Button variant="outline" aria-pressed>X</Button>)
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('applique la catégorie sémantique (btn--cat-*)', () => {
+    render(<Button variant="ghost" category="danger" icon={<svg />} aria-label="Supprimer" />)
+    expect(screen.getByRole('button')).toHaveClass('btn--cat-danger')
+  })
+
+  it('est neutre par défaut (btn--cat-neutral)', () => {
+    render(<Button>X</Button>)
+    expect(screen.getByRole('button')).toHaveClass('btn--cat-neutral')
+  })
 })

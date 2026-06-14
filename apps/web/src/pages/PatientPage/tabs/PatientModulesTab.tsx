@@ -30,8 +30,10 @@ import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
+import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
+import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -98,6 +100,7 @@ export function PatientModulesTab({
   const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
+  const medList = useMedicationListEditor(modules, onReloadModules)
 
   // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
   const isPreviewOpen = useCallback(
@@ -196,14 +199,16 @@ export function PatientModulesTab({
             }}
             actions={
               <>
-                <button
-                  className={`preview-toggle-btn ${isPreviewOpen('psychoeducation') ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isPreviewOpen('psychoeducation')}
+                  icon={isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
                   onClick={() => togglePreview('psychoeducation')}
                   title={t('patient.patient_view')}
                 >
-                  {isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
                   {t('patient.preview_button')}
-                </button>
+                </Button>
                 {unlocked && mod && psycho.mode !== 'edit' && (
                   <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
                     {t('patient.psycho_edit_cards')}
@@ -311,14 +316,16 @@ export function PatientModulesTab({
             }}
             actions={unlocked && mod && !crisis.open ? (
               <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  className={`preview-toggle-btn ${isPreviewOpen('crisis_plan') ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isPreviewOpen('crisis_plan')}
+                  icon={isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
                   onClick={() => togglePreview('crisis_plan')}
                   aria-label={isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
                 >
-                  {isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
                   {isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
-                </button>
+                </Button>
                 <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
                   {t('patient.crisis_configure')}
                 </Button>
@@ -342,45 +349,45 @@ export function PatientModulesTab({
           {crisis.open && unlocked && mod && (
             <div className="psycho-card-picker">
               <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div className="module-editor-fields">
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  <label className="module-editor-field__label">
                     {t('patient.crisis_msg_label')}
                   </label>
                   <textarea
                     rows={3}
+                    className="module-editor-field__textarea"
                     placeholder={t('patient.crisis_msg_placeholder')}
                     value={crisis.config.practitionerMessage}
                     onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  <label className="module-editor-field__label">
                     {t('patient.crisis_commitment_label')}
                   </label>
                   <textarea
                     rows={3}
+                    className="module-editor-field__textarea"
                     placeholder={t('patient.crisis_commitment_placeholder')}
                     value={crisis.config.commitmentPhrase}
                     onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+                  <p className="crisis-cards-title">
                     {t('patient.crisis_cards_title')}
                   </p>
                   {crisis.config.copingCards.map(card => (
-                    <div key={card.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #E5E7EB', borderLeft: '3px solid #4F46E5' }}>
-                      <div style={{ fontSize: 12, color: '#6B7280' }}>{t('patient.crisis_card_thought_label')}</div>
-                      <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
-                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
-                      <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
+                    <div key={card.id} className="crisis-card">
+                      <div className="crisis-card__meta">{t('patient.crisis_card_thought_label')}</div>
+                      <div className="crisis-card__text crisis-card__text--italic">{card.thought}</div>
+                      <div className="crisis-card__meta crisis-card__meta--spaced">{t('patient.crisis_card_response_label')}</div>
+                      <div className="crisis-card__text crisis-card__text--strong">{card.response}</div>
                       <button
                         type="button"
+                        className="crisis-card__delete"
                         onClick={() => crisis.removeCopingCard(card.id)}
-                        style={{ alignSelf: 'flex-end', fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       >
                         {t('patient.crisis_card_delete')}
                       </button>
@@ -388,32 +395,32 @@ export function PatientModulesTab({
                   ))}
                   {crisis.config.copingCards.length < 4 && (
                     crisis.cardDraft ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
+                      <div className="crisis-card-draft">
                         <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_thought_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          <label className="module-editor-field__label">
+                            {t('patient.crisis_card_thought_label')} <span className="module-editor-field__required">*</span>
                           </label>
                           <textarea
                             rows={2}
+                            className="module-editor-field__textarea"
                             placeholder={t('patient.crisis_card_thought_placeholder')}
                             value={crisis.cardDraft.thought}
                             onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                           />
                         </div>
                         <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_response_label')} <span style={{ color: '#DC2626' }}>*</span>
+                          <label className="module-editor-field__label">
+                            {t('patient.crisis_card_response_label')} <span className="module-editor-field__required">*</span>
                           </label>
                           <textarea
                             rows={2}
+                            className="module-editor-field__textarea"
                             placeholder={t('patient.crisis_card_response_placeholder')}
                             value={crisis.cardDraft.response}
                             onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                           />
                         </div>
-                        <div style={{ display: 'flex', gap: 8 }}>
+                        <div className="crisis-draft-actions">
                           <Button
                             size="sm"
                             onClick={crisis.addCopingCard}
@@ -472,6 +479,30 @@ export function PatientModulesTab({
       )
     }
 
+    if (moduleType === 'medication_adherence') {
+      return (
+        <MedicationAdherenceCard
+          key="medication_adherence"
+          tagChips={tagChips('medication_adherence')}
+          modItem={modItem}
+          modIcon={modIcon}
+          mod={mod}
+          patientId={patientId}
+          unlocked={unlocked}
+          unlockingModule={unlockingModule}
+          previewModule={previewModule}
+          dataModule={dataModule}
+          medList={medList}
+          moduleToggle={moduleToggle}
+          onTogglePreview={togglePreview}
+          onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
+          onUnlock={unlockModule}
+          onRevoke={revokeModule}
+        />
+      )
+    }
+
     if (moduleType === 'rim') {
       const handleRimToggle = () => {
         if (unlocked && mod) { rim.cancel(); revokeModule(mod.id) }
@@ -513,29 +544,29 @@ export function PatientModulesTab({
                   ? t('patient.rim_write_unlock')
                   : t('patient.rim_write_edit')}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="module-editor-fields module-editor-fields--tight">
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.rim_alt_label')} <span style={{ color: '#DC2626' }}>*</span>
+                  <label className="module-editor-field__label">
+                    {t('patient.rim_alt_label')} <span className="module-editor-field__required">*</span>
                   </label>
                   <textarea
                     rows={5}
+                    className="module-editor-field__textarea"
                     placeholder={t('patient.rim_alt_placeholder')}
                     value={rim.alternative}
                     onChange={e => rim.setAlternative(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
+                  <label className="module-editor-field__label">
                     {t('patient.rim_orig_label')}
                   </label>
                   <textarea
                     rows={3}
+                    className="module-editor-field__textarea"
                     placeholder={t('patient.rim_orig_placeholder')}
                     value={rim.original}
                     onChange={e => rim.setOriginal(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
@@ -577,26 +608,28 @@ export function PatientModulesTab({
             actions={
               <>
                 {scale.hasPreview && (
-                  <button
-                    type="button"
-                    className={`preview-toggle-btn${isPreviewOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isPreviewOpen(moduleType)}
+                    icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                     onClick={() => togglePreview(moduleType)}
                     title={t('patient.patient_view')}
                   >
-                    {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                     {t('patient.preview_button')}
-                  </button>
+                  </Button>
                 )}
                 {unlocked && mod && (
-                  <button
-                    type="button"
-                    className={`preview-toggle-btn${isDataOpen(moduleType) ? ' preview-toggle-btn--active' : ''}`}
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isDataOpen(moduleType)}
+                    icon={<LineChart size={14} />}
                     onClick={() => toggleData(moduleType)}
                     title={t('patient.data_button')}
                   >
-                    <LineChart size={14} />
                     {t('patient.data_button')}
-                  </button>
+                  </Button>
                 )}
               </>
             }
@@ -635,33 +668,36 @@ export function PatientModulesTab({
           actions={
             <>
               {unlocked && mod && (
-                <button
-                  type="button"
-                  className="module-card__notif-btn"
+                <Button
+                  variant="outline"
+                  size="xs"
+                  icon={<Bell size={14} />}
+                  aria-label={t('notifications.configure_button')}
                   title={t('notifications.configure_button')}
                   onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
-                >
-                  <Bell size={14} />
-                </button>
+                />
               )}
-              <button
-                className={`preview-toggle-btn ${isPreviewOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
+              <Button
+                variant="outline"
+                size="xs"
+                aria-pressed={isPreviewOpen(moduleType)}
+                icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                 onClick={() => togglePreview(moduleType)}
                 title={t('patient.patient_view')}
               >
-                {isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
                 {t('patient.preview_button')}
-              </button>
+              </Button>
               {unlocked && mod && (
-                <button
-                  type="button"
-                  className={`preview-toggle-btn ${isDataOpen(moduleType) ? 'preview-toggle-btn--active' : ''}`}
+                <Button
+                  variant="outline"
+                  size="xs"
+                  aria-pressed={isDataOpen(moduleType)}
+                  icon={<LineChart size={14} />}
                   onClick={() => toggleData(moduleType)}
                   title={t('patient.data_button')}
                 >
-                  <LineChart size={14} />
                   {t('patient.data_button')}
-                </button>
+                </Button>
               )}
             </>
           }

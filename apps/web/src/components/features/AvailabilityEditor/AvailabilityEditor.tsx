@@ -145,13 +145,15 @@ export function AvailabilityEditor({
                   </span>
                 )}
               </span>
-              <button
-                className="availability-editor__rule-delete"
+              <Button
+                variant="ghost"
+                size="xs"
+                category="danger"
+                icon={<Trash2 size={14} />}
                 onClick={() => onDeleteRule(rule.id)}
+                aria-label={t('agenda.editor.delete_rule')}
                 title={t('agenda.editor.delete_rule')}
-              >
-                <Trash2 size={14} />
-              </button>
+              />
             </div>
           ))}
         </div>

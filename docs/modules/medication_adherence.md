@@ -2,42 +2,51 @@
 
 ## Objectif clinique
 
-Permettre au patient de déclarer quotidiennement s'il a pris son traitement médicamenteux, et de noter tout élément contextuel utile (oubli, difficulté, remarque). Ces données brutes sont consultées par le praticien en consultation pour alimenter le dialogue thérapeutique.
+Permettre au patient de déclarer quotidiennement s'il a pris son traitement, à deux
+niveaux : un **check global du jour** (rapide) et un **détail optionnel par molécule**.
+Il peut renseigner la **liste de ses médicaments** (traitement de fond + si besoin), un
+**motif de non-prise**, consulter un **calendrier mensuel** de son suivi et une **série
+de jours renseignés**. Ces données brutes alimentent le dialogue thérapeutique en
+consultation.
 
-**Base de preuves :** L'auto-monitoring de l'observance est recommandé comme outil d'alliance thérapeutique dans le suivi des troubles psychiatriques chroniques (NICE CG178, grade B). L'IPA en psychiatrie peut assurer le suivi des traitements de fond dans le cadre d'un protocole de coopération (Art. L4301-1 CSP).
+**Base de preuves :** l'auto-monitoring de l'observance est recommandé comme outil
+d'alliance thérapeutique (NICE CG178, grade B). La granularité par médicament et la
+distinction du motif de non-prise (intentionnel vs non-intentionnel) sont les leviers
+identifiés dans la littérature mHealth (Kassianos 2017 ; Steinkamp 2019). La
+restitution visuelle (calendrier) soutient l'auto-conscience et la relation
+patient-praticien (Hamlin 2023).
 
 ---
 
 ## Conformité MDR 2017/745
 
-Ce module est un **carnet de bord numérique**. Il n'est pas un dispositif médical.
+Carnet de bord numérique — **pas un dispositif médical**. Le code affiche, jamais il ne conclut.
 
 | Règle | Application |
 |---|---|
-| Le code affiche, jamais il ne conclut | Les 3 statuts sont des faits déclarés par le patient — aucune interprétation |
-| Aucun calcul de taux affiché | L'historique est une liste brute, sans taux d'observance ni label |
-| Aucune alerte conditionnelle aux données | Pas de notification déclenchée par un statut "Non pris" |
-| Aucune comparaison à une norme | Aucune référence à une "observance cible" ou à un seuil |
+| Aucun taux d'observance | Ni pourcentage, ni « observance cible », ni seuil |
+| Aucune alerte conditionnelle aux données | Le rappel est un horaire fixe (`notification_routines`), jamais déclenché par un statut |
+| Aucune tendance interprétée | Le calendrier = pastilles **neutres** par jour (couleur du statut déclaré), jamais de flèche / dégradation |
+| Série = « jours renseignés » | Valorise l'acte de tenir le carnet, **pas** la prise ; un oubli renseigné ne casse pas la série |
+| Motifs = faits déclarés bruts | Aucune interprétation du motif par le code |
 
 ---
 
-## Fonctionnement (patient)
+## Fonctionnement (patient) — 3 onglets
 
-### Saisie du jour
+### Aujourd'hui
+- **Check global** : 3 statuts (Pris / Partiellement / Non pris) — pastilles neutres pilotées par la base.
+- **Motif** (chips) affiché dès que le statut n'est pas « Pris » : Oubli · Effet indésirable · Je me sentais mieux · Plus de stock · Autre. Le motif « Effet indésirable » propose un **pont** vers le module `medication_side_effects`.
+- **Détail par molécule** (repliable, optionnel) : pour chaque médicament de la liste, un statut compact.
+- **Notes** libres.
 
-Le patient voit la date du jour et choisit parmi 3 statuts :
+### Calendrier
+- Calendrier mensuel passif : une pastille par jour renseigné, colorée par le statut déclaré.
+- **Série de jours renseignés** (flamme) — gamification légère MDR-safe.
 
-| Statut | Valeur stockée | Description |
-|---|---|---|
-| Pris | `taken` | Traitement pris dans son intégralité |
-| Partiellement | `partial` | Traitement pris en partie |
-| Non pris | `missed` | Traitement non pris ce jour |
-
-Un champ texte optionnel permet d'ajouter une note (oubli, difficulté, remarque).
-
-### Historique
-
-Les 30 dernières entrées sont affichées en liste brute : date, statut, note. Aucun calcul, aucun graphique interprétatif.
+### Mes médicaments
+- Liste co-éditée **patient ↔ praticien** (le praticien l'édite aussi depuis l'app web).
+- Chaque molécule : nom + posologie + type (**traitement de fond** / **si besoin**).
 
 ---
 
@@ -45,59 +54,49 @@ Les 30 dernières entrées sont affichées en liste brute : date, statut, note. 
 
 ### Stockage
 
-Données stockées **localement** sur le téléphone via SQLite (`expo-sqlite`).
-
-**Table :** `medication_adherence_entries`
-
-| Colonne | Type | Description |
-|---|---|---|
-| `id` | TEXT PK | Identifiant unique |
-| `date` | TEXT UNIQUE | YYYY-MM-DD — une saisie par jour |
-| `status` | TEXT | `'taken'` \| `'partial'` \| `'missed'` |
-| `notes` | TEXT | Note libre optionnelle |
-| `created_at` | TEXT | Horodatage ISO 8601 |
-
-### Signal d'observance Supabase
-
-À chaque sauvegarde, un événement anonymisé est envoyé à `patient_engagement_logs` :
-
-```json
-{
-  "event_type": "SAVE_MEDICATION_ADHERENCE",
-  "metadata": {}
-}
-```
-
-**Aucune donnée clinique** n'est transmise au serveur. Le signal indique uniquement que le module a été utilisé, pour le suivi d'engagement praticien.
-
-### Fichiers
-
-| Fichier | Rôle |
+| Donnée | Emplacement |
 |---|---|
-| `apps/mobile/src/lib/database.ts` | Types, table SQLite, fonctions CRUD |
-| `apps/mobile/src/screens/modules/MedicationAdherenceScreen.tsx` | Écran mobile |
-| `apps/mobile/src/screens/modules/MedicationAdherenceScreen.test.tsx` | Tests Jest + RNTL |
-| `apps/mobile/src/navigation/AppStack.tsx` | Route `MedicationAdherence` |
-| `apps/web/src/lib/modulePreviewContent.ts` | Aperçu praticien (armoire thérapeutique) |
+| Statut global du jour | SQLite `daily_entries` (UPSERT par `(module_id, date)`) — colonne `reason` ajoutée |
+| Détail par molécule | SQLite `medication_intakes` (UPSERT par `(module_id, date, medication_id)`) |
+| Liste des médicaments | `patient_modules.config.medications` (jsonb) — co-éditée patient/praticien, en ligne |
+
+Les écritures patient (`daily_entries`, `medication_intakes`) passent par les services
++ `syncUpsert`/`syncDelete` (outbox → `patient_entries`). EntryKinds : `daily_entry`,
+`medication_intake`.
+
+### Rendu — `preview_kind = 'medication_tracker'`
+
+| Côté | Fichier |
+|---|---|
+| Mobile (patient) | `apps/mobile/.../layouts/MedicationTracker/` (orchestrateur + `TodayTab`, `CalendarTab`, `MedicationsTab`, `StreakBadge`, `MedicationEditorModal`, `streakUtils`) |
+| Web (aperçu praticien) | `apps/web/.../layouts/MedicationTrackerLayout/` — aperçu **interactif** à 3 volets (`PreviewTodayPanel`, `PreviewCalendarPanel`, `PreviewMedsPanel`) reproduisant fidèlement l'écran patient, onglets cliquables. Passif (aucune saisie). |
+| Web (éditeur liste) | `apps/web/.../PatientPage/tabs/MedicationAdherenceCard.tsx` + `MedicationAddForm.tsx` + hook `useMedicationListEditor` |
+| Calendrier réutilisé | `ui/Chart/TimeRangeCharts/MonthCalendar` (prop générique `dayMarkers`) |
+
+### Services
+
+| Service | Rôle |
+|---|---|
+| `apps/mobile/.../services/medicationIntakeService.ts` | CRUD détail par molécule + sync |
+| `apps/mobile/.../services/medicationListService.ts` | Lecture/écriture liste molécules (config) |
+| `apps/web/.../services/moduleAssignmentService.ts` | `fetchMedications` / `updateMedications` (praticien) |
+
+### Config DB-driven
+
+`module_content_fields` : `medication_tracker_config` (libellés) + `daily_status_option`
+(statuts) + `medication_reason_option` (motifs ; `links_module` = `medication_side_effects`
+pour le pont). Détail des props : `supabase/seed.sql` (bloc medication_adherence).
+
+### Rappel
+
+Horaire fixe via `notification_routines` (programmé par le praticien depuis la carte de
+l'armoire, ajustable/suspendable par le patient). **Jamais** conditionnel aux données.
 
 ---
 
 ## Lancer les tests
 
 ```bash
-cd apps/mobile
-npx jest MedicationAdherenceScreen.test.tsx
+cd apps/mobile && npx jest MedicationTrackerLayout streakUtils medicationIntakeService medicationListService
+cd apps/web    && npx vitest run useMedicationListEditor moduleAssignmentService
 ```
-
----
-
-## Checklist de livraison
-
-- [x] Web : `medication_adherence` présent dans `MODULE_LABELS`, `MODULE_DESCRIPTIONS`, `MODULE_CATEGORIES` (iatrogenic)
-- [x] Web : aperçu praticien dans `MODULE_PREVIEW`
-- [x] Mobile : `MedicationAdherenceScreen.tsx` créé
-- [x] Mobile : route `MedicationAdherence` dans `AppStack.tsx`
-- [x] Mobile : `available: true` + navigation dans `HomeScreen.tsx`
-- [x] Mobile : table SQLite dans `database.ts` + `initDatabase`
-- [x] Tests : 9 cas couverts (affichage, pré-remplissage, sauvegarde, historique, garde-fou sans statut)
-- [x] Conformité MDR : aucun seuil, aucune alerte, aucune interprétation algorithmique

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Check, X } from 'lucide-react'
+import { Button } from '../../ui/Button'
 
 export interface EditableNameProps {
   value: string
@@ -51,14 +52,15 @@ export function EditableName({ value, onSave, ariaLabel, onActivate }: EditableN
         >
           {value}
         </span>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="xs"
           className="editable-name__edit"
+          icon={<Pencil size={13} />}
           onClick={startEdit}
           aria-label={t('file_active.name.edit')}
-        >
-          <Pencil size={13} />
-        </button>
+        />
       </div>
     )
   }
@@ -73,24 +75,27 @@ export function EditableName({ value, onSave, ariaLabel, onActivate }: EditableN
         aria-label={ariaLabel}
         autoFocus
       />
-      <button
+      <Button
         type="button"
-        className="editable-name__btn editable-name__btn--save"
+        variant="ghost"
+        size="xs"
+        category="success"
+        className="editable-name__btn"
+        icon={<Check size={14} />}
         onMouseDown={e => e.preventDefault()}
         onClick={save}
         aria-label={t('common.save')}
-      >
-        <Check size={14} />
-      </button>
-      <button
+      />
+      <Button
         type="button"
+        variant="ghost"
+        size="xs"
         className="editable-name__btn"
+        icon={<X size={14} />}
         onMouseDown={e => e.preventDefault()}
         onClick={cancel}
         aria-label={t('common.cancel')}
-      >
-        <X size={14} />
-      </button>
+      />
     </div>
   )
 }

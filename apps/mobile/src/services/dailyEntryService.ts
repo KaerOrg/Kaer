@@ -16,6 +16,7 @@ export async function saveDailyEntry(entry: Omit<DailyEntry, 'created_at'>): Pro
       module_id: entry.module_id,
       date: entry.date,
       status: entry.status,
+      reason: entry.reason,
       notes: entry.notes,
     },
   })

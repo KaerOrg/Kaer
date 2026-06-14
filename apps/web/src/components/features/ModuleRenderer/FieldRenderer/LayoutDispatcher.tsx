@@ -12,6 +12,7 @@ import {
   FallbackLayout,
   FieldsLayout,
   GuidedExerciseLayout,
+  MedicationTrackerLayout,
   PatientScenarioLayout,
   PsyEduLayout,
   QuestionnaireLayout,
@@ -105,6 +106,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'questionnaire') return <QuestionnaireLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'slider_dashboard') return <SliderDashboardLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={contentFields} footer={footer} t={t} />
+  if (preview_kind === 'medication_tracker') return <MedicationTrackerLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={contentFields} t={t} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={contentFields} t={t} />
   if (preview_kind === 'decision_grid') return <DecisionGridLayout fields={contentFields} t={t} />

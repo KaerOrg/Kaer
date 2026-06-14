@@ -1,16 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '../../../components/ui/Button'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { AppointmentModal } from '../../../components/features/AppointmentModal'
 import {
-  fetchAppointmentsForPatient,
   createAppointment,
   updateAppointmentStatus,
   updateAppointmentNotes,
   rescheduleAppointment,
-  fetchAutoConfirmSetting,
 } from '../../../services/appointmentService'
+import { patientQueries, agendaQueries } from '../../../hooks/queries'
 import type { PatientOption } from '../../../services/patientService'
 import type { AppointmentWithPatient, AppointmentStatus } from '../../../lib/calendar.types'
 
@@ -21,24 +21,24 @@ type Props = {
   displayName: string
 }
 
+const EMPTY_APPTS: AppointmentWithPatient[] = []
+
 export function PatientRdvTab({ patientId, practitionerId, practitionerName, displayName }: Props) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
 
-  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
-  const [loaded, setLoaded] = useState(false)
+  // Réutilise la même query que le badge du parent (PatientPage) → déduplication.
+  const appointmentsQuery = useQuery(patientQueries.appointments(practitionerId, patientId))
+  const autoConfirmQuery = useQuery(agendaQueries.autoConfirm(practitionerId))
+  const appointments = appointmentsQuery.data ?? EMPTY_APPTS
+  const autoConfirm = autoConfirmQuery.data ?? true
+
   const [modal, setModal] = useState<{ type: 'create' | 'view'; appointment?: AppointmentWithPatient } | null>(null)
-  const [autoConfirm, setAutoConfirm] = useState(true)
 
-  useEffect(() => {
-    Promise.all([
-      fetchAppointmentsForPatient(practitionerId, patientId),
-      fetchAutoConfirmSetting(practitionerId),
-    ]).then(([appts, autoC]) => {
-      setAppointments(appts)
-      setAutoConfirm(autoC)
-      setLoaded(true)
-    })
-  }, [practitionerId, patientId])
+  const invalidateAppointments = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: patientQueries.appointments(practitionerId, patientId).queryKey }),
+    [queryClient, practitionerId, patientId],
+  )
 
   const patientOptions = useMemo<PatientOption[]>(
     () => [{ id: patientId, label: displayName }],
@@ -56,52 +56,50 @@ export function PatientRdvTab({ patientId, practitionerId, practitionerName, dis
         auto_confirm: autoConfirm,
       })
       if (result.ok) {
-        const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
-        setAppointments(updated)
+        await invalidateAppointments()
         setModal(null)
       }
       return result
     },
-    [practitionerId, patientId, autoConfirm],
+    [practitionerId, autoConfirm, invalidateAppointments],
   )
 
   const handleUpdateStatus = useCallback(
     async (apptId: string, status: AppointmentStatus) => {
       const result = await updateAppointmentStatus(apptId, status)
       if (result.ok) {
-        const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
-        setAppointments(updated)
+        await invalidateAppointments()
         setModal(null)
       }
       return result
     },
-    [practitionerId, patientId],
+    [invalidateAppointments],
   )
 
   const handleUpdateNotes = useCallback(
     async (apptId: string, notes: string) => {
       const result = await updateAppointmentNotes(apptId, notes)
       if (result.ok) {
-        const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
-        setAppointments(updated)
+        await invalidateAppointments()
       }
       return result
     },
-    [practitionerId, patientId],
+    [invalidateAppointments],
   )
 
   const handleReschedule = useCallback(
     async (apptId: string, newStartsAt: string, newEndsAt: string) => {
       const result = await rescheduleAppointment(apptId, newStartsAt, newEndsAt)
       if (result.ok) {
-        const updated = await fetchAppointmentsForPatient(practitionerId, patientId)
-        setAppointments(updated)
+        await invalidateAppointments()
         setModal(null)
       }
       return result
     },
-    [practitionerId, patientId],
+    [invalidateAppointments],
   )
+
+  if (!appointmentsQuery.isSuccess) return null
 
   const now = new Date().toISOString()
   const upcoming = appointments.filter(
@@ -114,8 +112,6 @@ export function PatientRdvTab({ patientId, practitionerId, practitionerName, dis
       a.status === 'cancelled_by_patient' ||
       a.status === 'cancelled_by_practitioner',
   )
-
-  if (!loaded) return null
 
   return (
     <div className="patient-rdv">

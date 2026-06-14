@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
+import { Button } from '../../ui/Button'
 import { ActionItem } from './ActionItem'
 import type { CaseloadAction, CaseloadActionInput } from '../../../lib/caseload.types'
 
@@ -64,9 +65,7 @@ export function ActionList({ actions, today, onAdd, onToggleDone, onPatchAction,
           className="action-list__add-due"
           aria-label={t('file_active.action.add_due_label')}
         />
-        <button type="submit" className="action-list__add-btn" aria-label={t('file_active.action.add_submit')}>
-          <Plus size={14} />
-        </button>
+        <Button type="submit" variant="outline" size="xs" icon={<Plus size={14} />} aria-label={t('file_active.action.add_submit')} />
       </form>
     </div>
   )

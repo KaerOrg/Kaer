@@ -17,6 +17,7 @@ import { EditableStepsLayout } from '../layouts/EditableSteps'
 import { ExposureTrackerLayout } from '../layouts/ExposureTracker'
 import { FieldsLayout } from '../layouts/Fields'
 import { GuidedExerciseLayout } from '../layouts/GuidedExercise'
+import { MedicationTrackerLayout } from '../layouts/MedicationTracker'
 import { PatientScenarioLayout } from '../layouts/PatientScenario'
 import { PsyEduLayout } from '../layouts/PsyEdu'
 import { QuestionnaireLayout } from '../layouts/Questionnaire'
@@ -101,6 +102,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   }
 
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'medication_tracker') return <MedicationTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={visibleFields} footer={footer} />

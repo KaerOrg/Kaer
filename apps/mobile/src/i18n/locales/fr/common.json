@@ -426,7 +426,7 @@
     },
     "medication_adherence": {
       "label": "Observance du traitement",
-      "description": "Ai-je pris mon traitement cette semaine ?",
+      "description": "Ai-je pris mon traitement aujourd'hui ?",
       "title": "Observance du traitement",
       "intro": "Avez-vous pris votre traitement ?",
       "save": "Enregistrer",
@@ -442,9 +442,30 @@
       "empty_history": "Aucune saisie pour l'instant.",
       "tab_today": "Aujourd'hui",
       "tab_history": "Historique",
+      "tab_calendar": "Calendrier",
+      "tab_meds": "Mes médicaments",
       "already_saved": "Traitement déjà saisi aujourd'hui",
       "saved_message": "Saisie enregistrée.",
-      "delete_entry_title": "Supprimer cette saisie ?"
+      "delete_entry_title": "Supprimer cette saisie ?",
+      "per_molecule": "Détailler par médicament",
+      "reason_prompt": "Motif (facultatif)",
+      "reason_forgot": "Oubli",
+      "reason_side_effect": "Effet indésirable",
+      "reason_felt_better": "Je me sentais mieux",
+      "reason_out_of_stock": "Plus de stock",
+      "reason_other": "Autre",
+      "side_effects_bridge": "Noter un effet indésirable",
+      "streak": "{{count}} jour de suivi",
+      "streak_plural": "{{count}} jours de suivi",
+      "calendar_days": "jours renseignés",
+      "calendar_legend": "Jour renseigné — couleur du statut déclaré",
+      "meds_title": "Mon traitement",
+      "meds_empty": "Aucun médicament renseigné pour l'instant.",
+      "meds_add": "Ajouter un médicament",
+      "med_name": "Nom du médicament",
+      "med_posology": "Posologie",
+      "kind_maintenance": "Traitement de fond",
+      "kind_prn": "Si besoin"
     },
     "psychoeducation": {
       "label": "Psychoéducation",
@@ -1729,7 +1750,7 @@
     },
     "medication_adherence": {
       "label": "Module Observance",
-      "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
+      "description": "Auto-rapport quotidien d'observance du traitement médicamenteux.",
       "field_1": {
         "label": "Pris",
         "detail": "Traitement pris dans son intégralité"
