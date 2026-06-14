@@ -1,20 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { LineChart } from '../../../components/ui/Chart'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { SegmentedControl } from '../../../components/ui/SegmentedControl'
 import type { SegmentOption } from '../../../components/ui/SegmentedControl'
-import {
-  fetchScaleEvolution,
-  fetchMoodEvolution,
-  fetchFearEvolution,
-  fetchMedSideEffectsEvolution,
-  fetchAvailableScales,
-  type ScorePoint,
-  type MoodPoint,
-  type FearPoint,
-  type MedEffectPoint,
+import type {
+  ScorePoint,
+  MoodPoint,
+  FearPoint,
+  MedEffectPoint,
 } from '../../../services/engagementService'
+import { engagementQueries } from '../../../hooks/queries'
 import {
   type TimeRange,
   RANGE_DAYS,
@@ -35,48 +32,33 @@ export type { TimeRange }
 
 type Props = { patientId: string }
 
+type EvolutionData = {
+  scales: string[]
+  scaleData: Record<string, ScorePoint[]>
+  moodData: MoodPoint[]
+  fearData: FearPoint[]
+  medEffects: string[]
+  medData: MedEffectPoint[]
+}
+
+const EMPTY_EVOLUTION: EvolutionData = {
+  scales: [],
+  scaleData: {},
+  moodData: [],
+  fearData: [],
+  medEffects: [],
+  medData: [],
+}
+
 export function PatientEvolutionTab({ patientId }: Props) {
   const { t, i18n } = useTranslation()
   const [range, setRange] = useState<TimeRange>('1y')
   const [moodExpanded, setMoodExpanded] = useState(false)
 
-  const [scales, setScales] = useState<string[]>([])
-  const [scaleData, setScaleData] = useState<Record<string, ScorePoint[]>>({})
-  const [moodData, setMoodData] = useState<MoodPoint[]>([])
-  const [fearData, setFearData] = useState<FearPoint[]>([])
-  const [medEffects, setMedEffects] = useState<string[]>([])
-  const [medData, setMedData] = useState<MedEffectPoint[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-
-    async function load() {
-      const available = await fetchAvailableScales(patientId)
-      const [scaleResults, mood, fear, med] = await Promise.all([
-        Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
-        fetchMoodEvolution(patientId),
-        fetchFearEvolution(patientId),
-        fetchMedSideEffectsEvolution(patientId),
-      ])
-      if (cancelled) return
-
-      const map: Record<string, ScorePoint[]> = {}
-      available.forEach((mt, i) => { map[mt] = scaleResults[i] })
-
-      setScales(available)
-      setScaleData(map)
-      setMoodData(mood)
-      setFearData(fear)
-      setMedEffects(med.effects)
-      setMedData(med.data)
-      setLoading(false)
-    }
-
-    load()
-    return () => { cancelled = true }
-  }, [patientId])
+  const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
+  const { scales, scaleData, moodData, fearData, medEffects, medData } =
+    evolutionQuery.data ?? EMPTY_EVOLUTION
+  const loading = evolutionQuery.isLoading
 
   const days = RANGE_DAYS[range]
   const hasData = scales.length > 0 || moodData.length > 0 || fearData.length > 0 || medData.length > 0

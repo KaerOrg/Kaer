@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import {
   View,
   Text,
@@ -9,13 +9,16 @@ import {
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList } from '../navigation/AppStack'
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/authStore'
-import { fetchUnlockedModules, fetchTodayRoutines, type UnlockedModule, type TodayRoutine } from '../services/homeService'
+import type { UnlockedModule, TodayRoutine } from '../services/homeService'
+import { homeQueries } from '../hooks/queries'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { TodaySchedule } from '../components/features/TodaySchedule'
 import { colors, spacing, radius } from '../theme'
 import { useTeen } from '../hooks/useTeen'
@@ -166,32 +169,21 @@ export default function HomeScreen() {
   const patient = useAuthStore((s) => s.patient)
   const { t } = useTranslation()
   const { isTeenMode, tg, teenColor } = useTeen()
-  const [modules, setModules] = useState<UnlockedModule[]>([])
-  const [todayRoutines, setTodayRoutines] = useState<TodayRoutine[]>([])
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
 
-  const fetchModules = async () => {
-    if (!patient) return
-    const [mods, routines] = await Promise.all([
-      fetchUnlockedModules(patient.id),
-      fetchTodayRoutines(patient.id),
-    ])
-    setModules(mods)
-    setTodayRoutines(routines)
-  }
+  const modulesQuery = useQuery(homeQueries.unlockedModules(patient?.id))
+  const routinesQuery = useQuery(homeQueries.todayRoutines(patient?.id))
+  const modules: UnlockedModule[] = modulesQuery.data ?? []
+  const todayRoutines: TodayRoutine[] = routinesQuery.data ?? []
+  const loading = modulesQuery.isLoading || routinesQuery.isLoading
+  const refreshing = modulesQuery.isRefetching || routinesQuery.isRefetching
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchModules().finally(() => setLoading(false))
-    }, [patient])
-  )
+  const handleRefresh = useCallback(() => {
+    modulesQuery.refetch()
+    routinesQuery.refetch()
+  }, [modulesQuery, routinesQuery])
 
-  const handleRefresh = async () => {
-    setRefreshing(true)
-    await fetchModules()
-    setRefreshing(false)
-  }
+  // Rafraîchit au retour sur l'écran (déblocage de module ailleurs, etc.).
+  useRefreshOnFocus(handleRefresh)
 
   const handleTodayRoutinePress = useCallback((routine: TodayRoutine) => {
     const customRoute = CUSTOM_ROUTES[routine.module_type]

@@ -30,6 +30,25 @@ export interface NotificationRoutine {
   updated_at: string
 }
 
+// ── Affichage au premier plan ────────────────────────────────────────────────
+
+/**
+ * Configure l'affichage des notifications reçues alors que l'app est ouverte
+ * au premier plan. Sans ce handler, expo-notifications n'affiche rien tant que
+ * l'app est visible — la notification n'apparaît que si l'app est en arrière-plan
+ * ou l'écran verrouillé. À appeler une seule fois, le plus tôt possible au boot.
+ */
+export function configureForegroundNotifications(): void {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  })
+}
+
 // ── Permissions & token ─────────────────────────────────────────────────────
 
 export async function requestNotificationPermission(): Promise<boolean> {

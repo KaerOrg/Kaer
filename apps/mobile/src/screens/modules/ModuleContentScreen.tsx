@@ -2,14 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, StyleSheet, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
-import { useFocusEffect } from '@react-navigation/native'
+import { useQuery } from '@tanstack/react-query'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { AppStackParamList } from '../../navigation/AppStack'
 import {
   fetchModuleFields,
-  fetchPatientModuleConfig,
   type ModuleFieldsResult,
 } from '../../services/moduleService'
+import { moduleQueries } from '../../hooks/queries'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
 import { FieldRenderer } from '../../components/features/ModuleRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
@@ -51,7 +52,6 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
-  const [patientConfig, setPatientConfig] = useState<Record<string, unknown> | null | undefined>(undefined)
 
   const loadFields = useCallback(() => {
     setLoading(true)
@@ -71,26 +71,21 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     loadFields()
   }, [loadFields])
 
-  const loadPatientConfig = useCallback(async () => {
-    if (!patient) return
-    setPatientConfig(await fetchPatientModuleConfig(patient.id, moduleType))
-  }, [patient, moduleType])
-
   const needsConfig = result != null && CONFIG_LAYOUTS.has(result.preview_kind)
 
-  useEffect(() => {
-    if (needsConfig) {
-      void loadPatientConfig()
-    }
-  }, [needsConfig, loadPatientConfig])
+  // Config patient : seulement pour les layouts de CONFIG_LAYOUTS, rafraîchie au focus.
+  // (fetchModuleFields a son propre cache service ; seule cette config y échappe.)
+  const patientConfigQuery = useQuery({
+    ...moduleQueries.patientModuleConfig(patient?.id, moduleType),
+    enabled: needsConfig && patient != null,
+  })
+  const patientConfig: Record<string, unknown> | null | undefined =
+    needsConfig ? (patientConfigQuery.isSuccess ? patientConfigQuery.data : undefined) : undefined
 
-  useFocusEffect(
-    useCallback(() => {
-      if (needsConfig) {
-        void loadPatientConfig()
-      }
-    }, [needsConfig, loadPatientConfig])
-  )
+  const refetchPatientConfig = useCallback(() => {
+    if (needsConfig) void patientConfigQuery.refetch()
+  }, [needsConfig, patientConfigQuery])
+  useRefreshOnFocus(refetchPatientConfig)
 
   if (loading || (needsConfig && patientConfig === undefined)) {
     return (

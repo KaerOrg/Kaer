@@ -1,4 +1,5 @@
 import {
+  configureForegroundNotifications,
   requestNotificationPermission,
   registerPushToken,
   registerPushTokenIfGranted,
@@ -58,6 +59,24 @@ const ROUTINE = {
 }
 
 beforeEach(() => jest.clearAllMocks())
+
+// ── Affichage au premier plan ─────────────────────────────────────────────────
+
+describe('configureForegroundNotifications', () => {
+  it('enregistre un handler qui affiche bannière, liste et son sans badge', async () => {
+    configureForegroundNotifications()
+    expect(Notifications.setNotificationHandler).toHaveBeenCalledTimes(1)
+
+    const arg = jest.mocked(Notifications.setNotificationHandler).mock.calls[0][0]
+    const behavior = await arg?.handleNotification({} as never)
+    expect(behavior).toEqual({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    })
+  })
+})
 
 // ── Permissions ─────────────────────────────────────────────────────────────
 

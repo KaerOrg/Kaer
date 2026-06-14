@@ -1,9 +1,8 @@
 # Armoire thérapeutique — Taxonomie & filtres des modules
 
-> **Statut : spec de conception (validée avec l'utilisateur, à implémenter).**
-> Décrit le *quoi* et le *pourquoi*. Public : praticien novice en informatique —
+> **Statut : implémentée** (branche `feat/improve-module-organization`, PR #46).
+> Décrit le *quoi* et le *pourquoi*. Public : praticien novice en informatique,
 > le document évite le jargon technique.
-> Branche de travail : `feat/improve-module-organization`.
 
 ## 1. En une phrase
 
@@ -175,10 +174,14 @@ Construit **une fois**, branché aux deux surfaces (armoire de config + débloca
 
 | Élément | Emplacement | Rôle |
 |---|---|---|
-| `useModuleFilter(modules, moduleTags, activeFilters)` | hook pur | renvoie la liste filtrée (ET entre axes, OU dans un axe). Testable, sans I/O. |
-| `ModuleFilterBar` | `components/features/` | menus déroulants par dimension + chips actifs + reset + compteur « 12 → 4 ». |
+| `lib/moduleFilter.ts` | fonctions pures | filtrage (ET entre axes, OU dans un axe), `selectCardTagRows`. Testé, sans I/O. |
+| `useTagFilters()` | `hooks/useTagFilters.ts` | charge la taxonomie + possède la sélection active (`toggleTag`, `resetFilters`). |
+| `ModuleFilterBar` | `components/features/` | une rangée de puces par dimension + reset + compteur « 12 → 4 ». |
 | `ModuleTagChips` | `components/features/` | présentation des tags d'un module sur sa carte. |
-| `fetchModuleTags()` | `services/moduleCatalogService.ts` | étend le service existant (lecture `tags` + `module_tags`). |
+| `fetchModuleTaxonomy()` | `services/moduleCatalogService.ts` | étend le service existant (lecture `tag_dimensions` + `tags` + `module_tags`). |
+
+Doc composants : [`apps/web/docs/design-system.md`](../../apps/web/docs/design-system.md)
+§ « Composants `ModuleFilterBar` et `ModuleTagChips` ».
 
 - **Pas de portage mobile** (décision validée) : voir §9bis. L'app patient reste
   inchangée.

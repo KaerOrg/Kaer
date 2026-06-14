@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Bell, X, BellOff } from 'lucide-react'
+import { Button } from '../../ui/Button'
 import { useTranslation } from 'react-i18next'
 import { getActivityFeed } from '../../../services/notificationRoutineService'
 import type { ActivityFeedEvent } from '../../../lib/database.types'
@@ -83,14 +84,14 @@ export function ActivityFeedPanel({ practitionerId }: Props) {
         <div className="activity-feed__panel">
           <div className="activity-feed__header">
             <span className="activity-feed__header-title">{t('notifications.activity_feed_title')}</span>
-            <button
+            <Button
               type="button"
-              className="activity-feed__close"
+              variant="ghost"
+              size="xs"
+              icon={<X size={16} />}
               onClick={() => setOpen(false)}
               aria-label={t('common.close')}
-            >
-              <X size={16} />
-            </button>
+            />
           </div>
 
           <div className="activity-feed__body">

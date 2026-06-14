@@ -1,30 +1,26 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { LayoutDashboard, Package2, FileText, CalendarDays, TrendingUp } from 'lucide-react'
 
-const GRAPHABLE_MODULE_TYPES = new Set([
-  'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
-  'mood_tracker', 'fear_thermometer', 'medication_side_effects',
-])
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
-import type { ModuleType, PatientModule } from '../../lib/database.types'
-import { fetchLibraryTopics, fetchThemes, type LibraryTopic, type PsyEduTheme } from '../../services/psyeduService'
-import {
-  fetchModuleCategories,
-  fetchComingSoonModuleIds,
-  type ModuleCategory,
-} from '../../services/moduleCatalogService'
-import { fetchPatientHeader, setTeenMode as updateTeenMode, saveGeneralNote } from '../../services/patientService'
-import { resolvePatientRef } from '../../services/patientRefService'
-import { fetchNotes, type PractitionerNote } from '../../services/noteService'
-import { fetchPatientModules } from '../../services/moduleAssignmentService'
-import { fetchEnabledModules } from '../../services/practitionerSettingsService'
-import { fetchAppointmentsForPatient } from '../../services/appointmentService'
+import type { PatientModule } from '../../lib/database.types'
+import type { PsychoCardInfo } from '../../services/moduleService'
+import type { ModuleCategory } from '../../services/moduleCatalogService'
+import type { PractitionerNote } from '../../services/noteService'
+import type { LibraryTopic, PsyEduTheme } from '../../services/psyeduService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
+import {
+  patientQueries,
+  catalogQueries,
+  psyeduQueries,
+  useSetTeenMode,
+  useSaveGeneralNote,
+} from '../../hooks/queries'
 
 import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
@@ -34,63 +30,130 @@ import { PatientEvolutionTab } from './tabs/PatientEvolutionTab'
 
 import './PatientPage.css'
 
-type PageData = {
-  modules: PatientModule[]
-  categories: ModuleCategory[]
-  enabledModules: Set<ModuleType> | null
-  libraryTopics: LibraryTopic[]
-  themes: PsyEduTheme[]
-  comingSoonIds: Set<string>
+const GRAPHABLE_MODULE_TYPES = new Set([
+  'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
+  'mood_tracker', 'fear_thermometer', 'medication_side_effects',
+])
+
+// Snapshot d'identité dérivé de fetchPatientHeader : ces champs sont écrits au même
+// instant et ne varient jamais l'un sans les autres → un seul objet.
+type PatientIdentity = {
+  email: string
+  alias: string | null
+  firstName: string | null
+  lastName: string | null
+  enrolledAt: string | null
+  teenMode: boolean
 }
 
-const PAGE_DATA_INITIAL: PageData = {
-  modules: [],
-  categories: [],
-  enabledModules: null,
-  libraryTopics: [],
-  themes: [],
-  comingSoonIds: new Set(),
+const PATIENT_IDENTITY_INITIAL: PatientIdentity = {
+  email: '',
+  alias: null,
+  firstName: null,
+  lastName: null,
+  enrolledAt: null,
+  teenMode: false,
 }
+
+// Fallbacks stables (références constantes) pour ne pas recréer un tableau/Set à
+// chaque rendu — préserve la mémoïsation des onglets enfants.
+const EMPTY_MODULES: PatientModule[] = []
+const EMPTY_CATEGORIES: ModuleCategory[] = []
+const EMPTY_CARDS: PsychoCardInfo[] = []
+const EMPTY_NOTES: PractitionerNote[] = []
+const EMPTY_APPTS: AppointmentWithPatient[] = []
+const EMPTY_IDS: Set<string> = new Set()
+const EMPTY_TOPICS: LibraryTopic[] = []
+const EMPTY_THEMES: PsyEduTheme[] = []
 
 export function PatientPage() {
-  // `ref` = identifiant public opaque exposé dans l'URL ; `id` = patient_id réel
-  // résolu une seule fois (toute la page travaille ensuite avec la vraie PK).
+  // `ref` = identifiant public opaque exposé dans l'URL ; `id` = patient_id réel.
   const { ref } = useParams<{ ref: string }>()
   const navigate = useNavigate()
   const { practitioner } = useAuthStore()
   const { t } = useTranslation()
   const toast = useToast()
+  const queryClient = useQueryClient()
 
-  const [id, setId] = useState<string | null>(null)
+  // ── Résolution du token public → patient_id réel ─────────────────────────
+  const resolveRefQuery = useQuery(patientQueries.resolveRef(ref))
+  const id = resolveRefQuery.data ?? null
 
-  // ── Patient identity ─────────────────────────────────────────────────────
-  const [patientEmail, setPatientEmail] = useState('')
-  const [patientAlias, setPatientAlias] = useState<string | null>(null)
-  const [patientFirstName, setPatientFirstName] = useState<string | null>(null)
-  const [patientLastName, setPatientLastName] = useState<string | null>(null)
-  const [patientEnrolledAt, setPatientEnrolledAt] = useState<string | null>(null)
-  const [teenMode, setTeenMode] = useState(false)
-  const [togglingTeen, setTogglingTeen] = useState(false)
+  // Token absent de l'URL → retour dashboard (la query reste désactivée).
+  useEffect(() => {
+    if (!ref) navigate('/')
+  }, [ref, navigate])
 
-  // ── Page data ─────────────────────────────────────────────────────────────
-  const [pageData, setPageData] = useState<PageData>(PAGE_DATA_INITIAL)
-  const { modules, categories, enabledModules, libraryTopics, themes, comingSoonIds } = pageData
+  // Token résolu mais introuvable (ou relation d'un autre praticien filtrée par
+  // la RLS) → retour dashboard.
+  useEffect(() => {
+    if (resolveRefQuery.isSuccess && resolveRefQuery.data == null) navigate('/')
+  }, [resolveRefQuery.isSuccess, resolveRefQuery.data, navigate])
 
-  // ── Notes (lifted for badge + overview) ──────────────────────────────────
-  const [notes, setNotes] = useState<PractitionerNote[]>([])
+  // ── Données du dossier (parallélisées automatiquement par TanStack) ───────
+  const headerQuery = useQuery(patientQueries.header(practitioner?.id, id))
+  const modulesQuery = useQuery(patientQueries.modules(id))
+  const notesQuery = useQuery(patientQueries.notes(practitioner?.id, id))
+  const appointmentsQuery = useQuery(patientQueries.appointments(practitioner?.id, id))
+  const categoriesQuery = useQuery(catalogQueries.categories())
+  const comingSoonQuery = useQuery(catalogQueries.comingSoonIds())
+  const enabledModulesQuery = useQuery(catalogQueries.enabledModules(practitioner?.id))
+  const psychoCardsQuery = useQuery(catalogQueries.psychoCards())
+  const libraryTopicsQuery = useQuery(psyeduQueries.libraryTopics())
+  const themesQuery = useQuery(psyeduQueries.themes())
 
-  // ── Appointments (lifted for badge) ──────────────────────────────────────
-  const [appointments, setAppointments] = useState<AppointmentWithPatient[]>([])
+  // Header introuvable → retour dashboard.
+  useEffect(() => {
+    if (headerQuery.isSuccess && headerQuery.data == null) navigate('/')
+  }, [headerQuery.isSuccess, headerQuery.data, navigate])
 
-  // ── General note (overview) ───────────────────────────────────────────────
+  const header = headerQuery.data ?? null
+  const identity: PatientIdentity = header
+    ? {
+        email: header.email,
+        alias: header.alias,
+        firstName: header.firstName,
+        lastName: header.lastName,
+        enrolledAt: header.enrolledAt,
+        teenMode: header.teenMode,
+      }
+    : PATIENT_IDENTITY_INITIAL
+
+  const modules = modulesQuery.data ?? EMPTY_MODULES
+  const categories = categoriesQuery.data ?? EMPTY_CATEGORIES
+  const enabledModules = enabledModulesQuery.data ?? null
+  const psychoCards = psychoCardsQuery.data ?? EMPTY_CARDS
+  const comingSoonIds = comingSoonQuery.data ?? EMPTY_IDS
+  const libraryTopics = libraryTopicsQuery.data ?? EMPTY_TOPICS
+  const themes = themesQuery.data ?? EMPTY_THEMES
+  const notes = notesQuery.data ?? EMPTY_NOTES
+  const appointments = appointmentsQuery.data ?? EMPTY_APPTS
+
+  // Note générale : éditable (textarea), amorcée UNE FOIS depuis le header.
   const [generalNote, setGeneralNote] = useState('')
-  const [generalNoteSaving, setGeneralNoteSaving] = useState(false)
+  const noteSeededRef = useRef(false)
+  useEffect(() => {
+    if (noteSeededRef.current || !headerQuery.isSuccess || !header) return
+    setGeneralNote(header.generalNote ?? '')
+    noteSeededRef.current = true
+  }, [headerQuery.isSuccess, header])
 
-  // ── UI ────────────────────────────────────────────────────────────────────
-  const [loading, setLoading] = useState(true)
+  const teenMutation = useSetTeenMode()
+  const generalNoteMutation = useSaveGeneralNote()
+  const togglingTeen = teenMutation.isPending
+  const generalNoteSaving = generalNoteMutation.isPending
+
   const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv' | 'evolution'>('overview')
 
-  // RDV « effectués » = rendez-vous passés et non annulés (statut factuel, sans action manuelle du praticien).
+  // Prêt = patient résolu ET toutes les données chargées.
+  const loading =
+    id == null ||
+    headerQuery.isLoading || modulesQuery.isLoading || notesQuery.isLoading ||
+    appointmentsQuery.isLoading || categoriesQuery.isLoading || comingSoonQuery.isLoading ||
+    enabledModulesQuery.isLoading || psychoCardsQuery.isLoading ||
+    libraryTopicsQuery.isLoading || themesQuery.isLoading
+
+  // RDV « effectués » = passés et non annulés (statut factuel, sans action manuelle).
   const appointmentsDoneCount = useMemo(() => {
     const now = new Date().toISOString()
     return appointments.filter(
@@ -100,81 +163,33 @@ export function PatientPage() {
     ).length
   }, [appointments])
 
-  // Résout le token public de l'URL vers le patient_id réel. Token absent ou
-  // non résolu (inexistant, ou relation d'un autre praticien filtrée par la RLS)
-  // → retour au dashboard.
-  useEffect(() => {
-    let active = true
-    if (!ref) { navigate('/'); return }
-    resolvePatientRef(ref).then(resolved => {
-      if (!active) return
-      if (!resolved) { navigate('/'); return }
-      setId(resolved)
+  const reloadModules = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: patientQueries.modules(id).queryKey })
+  }, [queryClient, id])
+
+  // Les notes sont possédées par la page (badge + overview) : la modification
+  // remontée par l'onglet met à jour le cache de la query.
+  const handleNotesChange = useCallback((next: PractitionerNote[]) => {
+    queryClient.setQueryData(patientQueries.notes(practitioner?.id, id).queryKey, next)
+  }, [queryClient, practitioner?.id, id])
+
+  const toggleTeenMode = useCallback(() => {
+    if (!id || !practitioner) return
+    teenMutation.mutate({ practitionerId: practitioner.id, patientId: id, value: !identity.teenMode })
+  }, [id, practitioner, identity.teenMode, teenMutation])
+
+  const handleSaveGeneralNote = useCallback(async () => {
+    if (!id || !practitioner) return
+    const { ok } = await generalNoteMutation.mutateAsync({
+      practitionerId: practitioner.id,
+      patientId: id,
+      note: generalNote,
     })
-    return () => { active = false }
-  }, [ref, navigate])
-
-  const reloadModules = useCallback(async () => {
-    if (!id) return
-    const mods = await fetchPatientModules(id)
-    setPageData(prev => ({ ...prev, modules: mods }))
-  }, [id])
-
-  const loadPatient = useCallback(async () => {
-    if (!id || !practitioner) return
-    setLoading(true)
-
-    const header = await fetchPatientHeader(practitioner.id, id)
-    if (!header) { navigate('/'); return }
-
-    setPatientEmail(header.email)
-    setPatientAlias(header.alias)
-    setPatientFirstName(header.firstName)
-    setPatientLastName(header.lastName)
-    setTeenMode(header.teenMode)
-    setPatientEnrolledAt(header.enrolledAt)
-    setGeneralNote(header.generalNote ?? '')
-
-    const [mods, enabled, cats, topics, fetchedThemes, comingSoon, fetchedNotes, fetchedAppts] = await Promise.all([
-      fetchPatientModules(id),
-      fetchEnabledModules(practitioner.id),
-      fetchModuleCategories(),
-      fetchLibraryTopics(),
-      fetchThemes(),
-      fetchComingSoonModuleIds(),
-      fetchNotes(practitioner.id, id),
-      fetchAppointmentsForPatient(practitioner.id, id),
-    ])
-
-    setPageData({ modules: mods, categories: cats, enabledModules: enabled, libraryTopics: topics, themes: fetchedThemes, comingSoonIds: comingSoon })
-    setNotes(fetchedNotes)
-    setAppointments(fetchedAppts)
-    setLoading(false)
-  }, [id, practitioner, navigate])
-
-  useEffect(() => {
-    loadPatient()
-  }, [loadPatient])
-
-  const toggleTeenMode = async () => {
-    if (!id || !practitioner) return
-    setTogglingTeen(true)
-    const next = !teenMode
-    const { ok } = await updateTeenMode(practitioner.id, id, next)
-    if (ok) setTeenMode(next)
-    setTogglingTeen(false)
-  }
-
-  const handleSaveGeneralNote = async () => {
-    if (!id || !practitioner) return
-    setGeneralNoteSaving(true)
-    const { ok } = await saveGeneralNote(practitioner.id, id, generalNote)
-    setGeneralNoteSaving(false)
     if (!ok) toast.error(t('notes.error_save'))
-  }
+  }, [id, practitioner, generalNote, generalNoteMutation, toast, t])
 
-  const fullName = [patientFirstName, patientLastName].filter(Boolean).join(' ')
-  const displayName = patientAlias ?? (fullName || patientEmail)
+  const fullName = [identity.firstName, identity.lastName].filter(Boolean).join(' ')
+  const displayName = identity.alias ?? (fullName || identity.email)
 
   const hasEvolutionData = modules.some(m => GRAPHABLE_MODULE_TYPES.has(m.module_type))
 
@@ -209,18 +224,18 @@ export function PatientPage() {
             </div>
             <div className="patient-page__header-info">
               <h1 className="patient-page__name">{displayName}</h1>
-              <p className="patient-page__email">{patientEmail}</p>
+              <p className="patient-page__email">{identity.email}</p>
             </div>
             <button
-              className={`teen-mode-toggle ${teenMode ? 'teen-mode-toggle--active' : ''}`}
+              className={`teen-mode-toggle ${identity.teenMode ? 'teen-mode-toggle--active' : ''}`}
               onClick={toggleTeenMode}
               disabled={togglingTeen}
-              title={teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
+              title={identity.teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
             >
               <span className="teen-mode-toggle__icon">🎨</span>
               <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
-              <span className={`teen-mode-toggle__pill ${teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
-                {teenMode ? 'ON' : 'OFF'}
+              <span className={`teen-mode-toggle__pill ${identity.teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
+                {identity.teenMode ? 'ON' : 'OFF'}
               </span>
             </button>
           </div>
@@ -236,7 +251,7 @@ export function PatientPage() {
                 categories={categories}
                 notes={notes}
                 appointmentsDoneCount={appointmentsDoneCount}
-                patientEnrolledAt={patientEnrolledAt}
+                patientEnrolledAt={identity.enrolledAt}
                 generalNote={generalNote}
                 generalNoteSaving={generalNoteSaving}
                 onGeneralNoteChange={setGeneralNote}
@@ -265,7 +280,7 @@ export function PatientPage() {
                 patientId={id}
                 practitionerId={practitioner.id}
                 initialNotes={notes}
-                onNotesChange={setNotes}
+                onNotesChange={handleNotesChange}
               />
             )}
 

@@ -71,19 +71,7 @@
   color: var(--color-text);
 }
 
-.activity-feed__close {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  padding: 2px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  transition: color 0.15s;
-}
-
-.activity-feed__close:hover { color: var(--color-text); }
+/* Bouton fermer via <Button variant="ghost" size="xs" />. */
 
 /* ── Body ──────────────────────────────────────────────────────────────────── */
 

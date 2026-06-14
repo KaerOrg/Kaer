@@ -275,14 +275,40 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
 <Button variant="primary" size="md" loading={saving} onClick={onSave}>
   {t('common.save')}
 </Button>
+
+{/* Icône + label */}
+<Button variant="primary" icon={<Plus size={16} />} onClick={onAdd}>
+  {t('patient.add_module_button')}
+</Button>
+
+{/* Icône-seule : pas de children → carré. aria-label OBLIGATOIRE. */}
+<Button variant="outline" size="xs" icon={<Bell size={14} />} aria-label={t('notifications.configure_button')} onClick={onNotif} />
+
+{/* Bouton bascule (toggle) : variante outline + aria-pressed pour l'état actif */}
+<Button variant="outline" size="xs" aria-pressed={open} icon={open ? <EyeOff size={14} /> : <Eye size={14} />} onClick={toggle}>
+  {t('patient.preview_button')}
+</Button>
 ```
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
-| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost'` | `'primary'` | Style visuel |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Taille |
-| `loading` | `boolean` | `false` | Affiche un spinner et désactive le bouton |
-| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-*`… |
+| `variant` | `'primary' \| 'secondary' \| 'danger' \| 'ghost' \| 'outline'` | `'primary'` | Style visuel. `outline` = transparent bordé, accent primaire au survol ; supporte l'état bascule via `aria-pressed` |
+| `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Taille. `xs` = compact (boutons d'action inline d'une carte / d'un tableau) |
+| `category` | `'neutral' \| 'danger' \| 'success'` | `'neutral'` | Accent sémantique appliqué **au survol et à l'état `aria-pressed`** (sur `ghost`/`outline`). `danger` → rouge (supprimer), `success` → vert (valider). Au repos le bouton reste neutre |
+| `loading` | `boolean` | `false` | Affiche un spinner (à la place de `icon`) et désactive le bouton |
+| `icon` | `ReactNode` | — | Icône optionnelle. **Avec** `children` → icône à gauche du label. **Sans** `children` → bouton icône-seule (carré `btn--icon-only`) → fournir `aria-label` |
+| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`… |
+
+> **Bouton-icône d'action** (supprimer, valider, basculer dans un tableau / une
+> liste) : `<Button variant="ghost" size="xs" icon={…} category="danger" aria-label={…} />`.
+> Ne **pas** écrire un `<button>` ad hoc avec son propre CSS rouge-au-survol — c'est
+> exactement ce que `category` couvre.
+
+> **Bouton icône-seule** : ne pas écrire un `<button>` ad hoc pour une icône cliquable
+> — passer `icon` sans `children`. L'exclusivité (icône-seule vs icône+label) est
+> dérivée de la présence de `children`, pas d'une prop booléenne.
+> **Bouton bascule** : `variant="outline"` + `aria-pressed={actif}` ; l'état actif
+> (fond `--color-primary-light`) est porté par le sélecteur `.btn--outline[aria-pressed='true']`.
 
 ### `Card`
 
@@ -387,12 +413,14 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 <Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
 <Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
 <Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+<Chip size="sm" tone="info" label={t('tags.anxiety.label')} />
 ```
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `label` | `string` | — | Texte (obligatoire) |
 | `tone` | `'neutral' \| 'info' \| 'warning'` | `'neutral'` | Couleur (ignoré si `selectable`) |
+| `size` | `'sm' \| 'md'` | `'md'` | `sm` = compacte (cartes denses, ex. `ModuleTagChips`) |
 | `icon` | `ReactNode` | — | Icône en tête |
 | `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
 | `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
@@ -633,6 +661,74 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 | `.scale-meta__eval-badge--hetero` | Variante verte |
 | `.scale-meta__category-chip` | Chip nosologique gris |
 | `.scale-meta__age-chip` | Chip d'âge — couleur appliquée en inline via `AGE_BADGE_CONFIG` |
+
+---
+
+## Composants `ModuleFilterBar` et `ModuleTagChips`
+
+> **Composants métier (`features/`).** Ils connaissent la taxonomie des modules
+> (`ModuleTaxonomy` du `moduleCatalogService`, clés i18n `tags.*` /
+> `tag_dimensions.*`) — pas des primitives `ui/`. Tous deux **présentationnels** :
+> l'état des filtres est possédé par la page via le hook
+> [`useTagFilters`](../src/hooks/useTagFilters.ts) ; la logique de filtrage pure
+> est dans [`lib/moduleFilter.ts`](../src/lib/moduleFilter.ts).
+> Spec fonctionnelle : [`docs/spec/module-taxonomy.md`](../../../docs/spec/module-taxonomy.md).
+
+### `ModuleFilterBar`
+
+Fichier : `components/features/ModuleFilterBar/ModuleFilterBar.tsx`
+
+Barre de filtres à facettes de l'armoire thérapeutique : une rangée de puces
+sélectionnables (`Chip selectable`) par dimension (indication, public, approche) +
+compteur « N sur M modules » + bouton de réinitialisation (visible seulement si un
+filtre est actif). Utilisée par `ModuleCatalogPage` (armoire de config) et
+`PatientModulesTab` (vue active + modale d'ajout).
+
+```tsx
+const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
+
+<ModuleFilterBar
+  taxonomy={taxonomy}
+  activeFilters={activeFilters}
+  onToggleTag={toggleTag}
+  onReset={resetFilters}
+  resultCount={visibleCount}
+  totalCount={totalCount}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `taxonomy` | `ModuleTaxonomy` | Axes + tags chargés en base (`fetchModuleTaxonomy`) |
+| `activeFilters` | `ActiveTagFilters` | Sélection courante (`Map<dimension, Set<tag>>`) |
+| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche une puce |
+| `onReset` | `() => void` | Vide toute la sélection |
+| `resultCount` | `number` | Modules visibles après filtrage |
+| `totalCount` | `number` | Total de modules avant filtrage |
+
+`ModuleFilterChip` (fichier voisin) est la puce individuelle, mémoïsée (`React.memo`
++ callback figé) — zéro handler recréé par puce au re-rendu de la barre.
+
+### `ModuleTagChips`
+
+Fichier : `components/features/ModuleTagChips/ModuleTagChips.tsx`
+
+Puces de tags d'un module sur sa carte : une ligne par dimension (indication en
+`tone="info"`, public en `tone="neutral"`), via `Chip size="sm"`. L'approche n'est
+pas affichée sur les cartes (réservée aux filtres — `CARD_DIMENSIONS` dans
+`lib/moduleFilter.ts`). Rend `null` si le module ne porte aucun tag. À utiliser
+comme enfant de `Card`.
+
+```tsx
+<Card header={{ ... }}>
+  <ModuleTagChips tagIds={taxonomy.tagsByModule.get(mod.id)} taxonomy={taxonomy} />
+</Card>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `tagIds` | `ReadonlySet<string> \| undefined` | Tags portés par le module (`taxonomy.tagsByModule`) |
+| `taxonomy` | `Pick<ModuleTaxonomy, 'tagsByDimension'>` | Ordre et regroupement des tags par dimension |
 
 ---
 

@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Eye } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import type { ModuleType } from '../../lib/database.types'
-import { fetchModuleCategories, fetchComingSoonModuleIds, fetchModuleTaxonomy, type ModuleCategory, type ModuleTaxonomy } from '../../services/moduleCatalogService'
-import { fetchEnabledModules, saveEnabledModules } from '../../services/practitionerSettingsService'
+import { catalogQueries, useSaveEnabledModules } from '../../hooks/queries'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../components/features/ModuleFilterBar'
@@ -16,25 +16,44 @@ import { ModuleTagChips } from '../../components/features/ModuleTagChips'
 import { filterCategoriesByTags } from '../../lib/moduleFilter'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
 import { LUCIDE_ICONS } from '../../lib/lucideIcons'
-
-const EMPTY_TAXONOMY: ModuleTaxonomy = { dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }
+import { useTagFilters } from '../../hooks/useTagFilters'
 import './ModuleCatalogPage.css'
+
+// Référence stable pour le fallback « aucun module coming-soon » (évite de
+// recréer un Set à chaque rendu).
+const EMPTY_IDS: ReadonlySet<string> = new Set()
 
 export function ModuleCatalogPage() {
   const { t } = useTranslation()
   const { practitioner } = useAuthStore()
   const navigate = useNavigate()
 
-  const [categories, setCategories] = useState<ModuleCategory[]>([])
+  const categoriesQuery = useQuery(catalogQueries.categories())
+  const comingSoonQuery = useQuery(catalogQueries.comingSoonIds())
+  const enabledModulesQuery = useQuery(catalogQueries.enabledModules(practitioner?.id))
+  const saveMutation = useSaveEnabledModules()
+
+  const categories = useMemo(() => categoriesQuery.data ?? [], [categoriesQuery.data])
+  const comingSoonIds = comingSoonQuery.data ?? EMPTY_IDS
+  const loading = !categoriesQuery.isSuccess || !comingSoonQuery.isSuccess || !enabledModulesQuery.isSuccess
+  const saving = saveMutation.isPending
+
+  // `enabled` est un état éditable (toggles) amorcé UNE FOIS depuis le serveur :
+  // valeur enregistrée, ou tous les modules par défaut si aucun réglage existant.
   const [enabled, setEnabled] = useState<Set<ModuleType>>(new Set())
-  const [comingSoonIds, setComingSoonIds] = useState<Set<string>>(new Set())
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const seededRef = useRef(false)
+  useEffect(() => {
+    if (seededRef.current) return
+    if (!enabledModulesQuery.isSuccess || !categoriesQuery.isSuccess) return
+    const allModuleIds = categories.flatMap(c => c.modules).map(m => m.id)
+    setEnabled(enabledModulesQuery.data ?? new Set(allModuleIds))
+    seededRef.current = true
+  }, [enabledModulesQuery.isSuccess, enabledModulesQuery.data, categoriesQuery.isSuccess, categories])
+
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [taxonomy, setTaxonomy] = useState<ModuleTaxonomy>(EMPTY_TAXONOMY)
-  const [activeFilters, setActiveFilters] = useState<Map<string, Set<string>>>(new Map())
+  const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 
   const totalCount = useMemo(() => categories.reduce((n, c) => n + c.modules.length, 0), [categories])
 
@@ -55,38 +74,6 @@ export function ModuleCatalogPage() {
   }, [categories, taxonomy, activeFilters, searchQuery, t])
 
   const resultCount = useMemo(() => filteredCategories.reduce((n, c) => n + c.modules.length, 0), [filteredCategories])
-
-  const toggleTag = useCallback((dimensionId: string, tagId: string) => {
-    setActiveFilters(prev => {
-      const next = new Map(prev)
-      const selected = new Set(next.get(dimensionId))
-      if (selected.has(tagId)) { selected.delete(tagId) } else { selected.add(tagId) }
-      if (selected.size === 0) { next.delete(dimensionId) } else { next.set(dimensionId, selected) }
-      return next
-    })
-  }, [])
-
-  const resetFilters = useCallback(() => setActiveFilters(new Map()), [])
-
-  const loadSettings = useCallback(async () => {
-    if (!practitioner) return
-    const [cats, savedEnabled, comingSoon, tax] = await Promise.all([
-      fetchModuleCategories(),
-      fetchEnabledModules(practitioner.id),
-      fetchComingSoonModuleIds(),
-      fetchModuleTaxonomy(),
-    ])
-    setCategories(cats)
-    const allModuleIds = cats.flatMap(c => c.modules).map(m => m.id)
-    setEnabled(savedEnabled ?? new Set(allModuleIds))
-    setComingSoonIds(comingSoon)
-    setTaxonomy(tax)
-    setLoading(false)
-  }, [practitioner])
-
-  useEffect(() => {
-    loadSettings()
-  }, [loadSettings])
 
   const toggleModule = useCallback((moduleType: ModuleType) => {
     setSaveSuccess(false)
@@ -109,19 +96,17 @@ export function ModuleCatalogPage() {
 
   const save = useCallback(async () => {
     if (!practitioner) return
-    setSaving(true)
     setSaveError(null)
     setSaveSuccess(false)
 
-    const { ok } = await saveEnabledModules(practitioner.id, enabled)
+    const { ok } = await saveMutation.mutateAsync({ practitionerId: practitioner.id, enabled })
 
     if (!ok) {
       setSaveError(t('modules.save_error'))
     } else {
       setSaveSuccess(true)
     }
-    setSaving(false)
-  }, [practitioner, enabled, t])
+  }, [practitioner, enabled, t, saveMutation])
 
   const enabledCount = enabled.size
 
@@ -225,14 +210,15 @@ export function ModuleCatalogPage() {
                           ),
                         }}
                         actions={!isComingSoon ? (
-                          <button
-                            className="preview-toggle-btn"
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            icon={<Eye size={12} />}
                             onClick={() => navigate(`/modules/preview/${mod.id}`)}
                             title={t('patient.patient_view')}
                           >
-                            <Eye size={12} />
                             {t('patient.preview_button')}
-                          </button>
+                          </Button>
                         ) : undefined}
                       >
                         {isComingSoon ? (
