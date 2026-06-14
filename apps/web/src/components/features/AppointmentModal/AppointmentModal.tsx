@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Calendar, FileText, ExternalLink } from 'lucide-react'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button/Button'
+import { InputField } from '../../ui/InputField'
 import { StatusBadge } from '../../ui/StatusBadge'
 import { useToast } from '../../../contexts/ToastContext'
 import type { StatusBadgeVariant } from '../../ui/StatusBadge/StatusBadge.types'
@@ -396,9 +397,10 @@ export function AppointmentModal({
               <FileText size={11} aria-hidden="true" style={{ display: 'inline', marginRight: 4, verticalAlign: 'middle' }} />
               {t('agenda.appointment.notes_label')}
             </label>
-            <textarea
+            <InputField
               id="appt-view-notes"
-              className="appt-textarea appt-textarea--view"
+              multiline
+              className="appt-textarea--view"
               value={noteText}
               onChange={e => setNoteText(e.target.value)}
               placeholder={t('agenda.appointment.notes_placeholder')}
@@ -492,10 +494,10 @@ export function AppointmentModal({
 
           <div className="appt-field">
             <label className="appt-label" htmlFor="appt-notes">{t('agenda.appointment.notes_label')}</label>
-            <textarea
+            <InputField
               id="appt-notes"
+              multiline
               ref={notesRef}
-              className="appt-textarea"
               placeholder={t('agenda.appointment.notes_placeholder')}
             />
           </div>

@@ -4,6 +4,7 @@ import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { Modal } from '../../../components/ui/Modal'
@@ -325,30 +326,22 @@ export function PatientModulesTab({
             <div className="psycho-card-picker">
               <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.crisis_msg_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.crisis_msg_placeholder')}
-                    value={crisis.config.practitionerMessage}
-                    onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.crisis_commitment_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.crisis_commitment_placeholder')}
-                    value={crisis.config.commitmentPhrase}
-                    onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
+                <InputField
+                  label={t('patient.crisis_msg_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.crisis_msg_placeholder')}
+                  value={crisis.config.practitionerMessage}
+                  onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
+                />
+                <InputField
+                  label={t('patient.crisis_commitment_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.crisis_commitment_placeholder')}
+                  value={crisis.config.commitmentPhrase}
+                  onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
+                />
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
                     {t('patient.crisis_cards_title')}
@@ -371,30 +364,24 @@ export function PatientModulesTab({
                   {crisis.config.copingCards.length < 4 && (
                     crisis.cardDraft ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
-                        <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_thought_label')} <span style={{ color: '#DC2626' }}>*</span>
-                          </label>
-                          <textarea
-                            rows={2}
-                            placeholder={t('patient.crisis_card_thought_placeholder')}
-                            value={crisis.cardDraft.thought}
-                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_response_label')} <span style={{ color: '#DC2626' }}>*</span>
-                          </label>
-                          <textarea
-                            rows={2}
-                            placeholder={t('patient.crisis_card_response_placeholder')}
-                            value={crisis.cardDraft.response}
-                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                          />
-                        </div>
+                        <InputField
+                          label={t('patient.crisis_card_thought_label')}
+                          multiline
+                          required
+                          rows={2}
+                          placeholder={t('patient.crisis_card_thought_placeholder')}
+                          value={crisis.cardDraft.thought}
+                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
+                        />
+                        <InputField
+                          label={t('patient.crisis_card_response_label')}
+                          multiline
+                          required
+                          rows={2}
+                          placeholder={t('patient.crisis_card_response_placeholder')}
+                          value={crisis.cardDraft.response}
+                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
+                        />
                         <div style={{ display: 'flex', gap: 8 }}>
                           <Button
                             size="sm"
@@ -496,30 +483,23 @@ export function PatientModulesTab({
                   : t('patient.rim_write_edit')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.rim_alt_label')} <span style={{ color: '#DC2626' }}>*</span>
-                  </label>
-                  <textarea
-                    rows={5}
-                    placeholder={t('patient.rim_alt_placeholder')}
-                    value={rim.alternative}
-                    onChange={e => rim.setAlternative(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.rim_orig_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.rim_orig_placeholder')}
-                    value={rim.original}
-                    onChange={e => rim.setOriginal(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
+                <InputField
+                  label={t('patient.rim_alt_label')}
+                  multiline
+                  required
+                  rows={5}
+                  placeholder={t('patient.rim_alt_placeholder')}
+                  value={rim.alternative}
+                  onChange={e => rim.setAlternative(e.target.value)}
+                />
+                <InputField
+                  label={t('patient.rim_orig_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.rim_orig_placeholder')}
+                  value={rim.original}
+                  onChange={e => rim.setOriginal(e.target.value)}
+                />
               </div>
               {rim.error && <p className="psycho-card-picker__error">{rim.error}</p>}
               <div className="psycho-card-picker__actions">

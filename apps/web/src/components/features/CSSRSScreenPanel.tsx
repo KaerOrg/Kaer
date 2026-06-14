@@ -23,6 +23,7 @@ import {
 } from '../../data/cssrs_screen'
 import type { IntensiteDimension, LikertOption } from '../../data/cssrs_screen'
 import { Button } from '../ui/Button'
+import { InputField } from '../ui/InputField'
 import './CSSRSScreenPanel.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -713,8 +714,9 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                       </span>
 
                       {active && val === 1 && (
-                        <textarea
-                          className="cssrs-form__textarea"
+                        <InputField
+                          multiline
+                          aria-label="Si oui, décrivez"
                           placeholder="Si oui, décrivez…"
                           value={desc}
                           onChange={e => setIdeationDescription(absIdx, e.target.value)}
@@ -802,8 +804,9 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                     <span className="cssrs-form__label">{item.label}</span>
                     <span className="cssrs-form__question">{item.question}</span>
                     {val === 1 && (
-                      <textarea
-                        className="cssrs-form__textarea"
+                      <InputField
+                        multiline
+                        aria-label="Si oui, décrivez"
                         placeholder="Si oui, décrivez…"
                         value={desc}
                         onChange={e => setBehaviorDescription(bIdx, e.target.value)}

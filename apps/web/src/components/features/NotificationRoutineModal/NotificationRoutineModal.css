@@ -155,19 +155,6 @@
   width: fit-content;
 }
 
-.nr-form__note {
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  font-size: 13px;
-  color: var(--color-text);
-  background: var(--color-surface);
-  resize: vertical;
-  font-family: inherit;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .nr-form__actions {
   display: flex;
   justify-content: flex-end;

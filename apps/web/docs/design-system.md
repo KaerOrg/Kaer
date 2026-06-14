@@ -363,6 +363,13 @@ fermeture sur `Échap` + clic sur l'overlay).
 `multiline` il étend `InputHTMLAttributes` ; avec `multiline` il étend
 `TextareaHTMLAttributes` (donc `rows`, `maxLength`, `resize`…).
 
+`label` est **optionnel** : sans lui, aucun `<label>` n'est rendu — fournir alors
+un `aria-label` (champ compact, recherche) ou un `<label htmlFor={id}>` externe
+associé via la prop `id`. La `ref` est transmise au `<input>`/`<textarea>`
+sous-jacent (React 19, ref-as-prop) pour les usages non contrôlés (`defaultValue` +
+lecture impérative). Un `className` passé est **fusionné** avec les classes de base
+(modificateur additif), il ne les écrase pas.
+
 ```tsx
 <InputField label={t('auth.email')} type="email" error={emailError} defaultValue="" />
 
@@ -374,13 +381,18 @@ fermeture sur `Échap` + clic sur l'overlay).
   value={text}
   onChange={e => setText(e.target.value)}
 />
+
+// Sans label : aria-label + ref non contrôlée
+<InputField multiline ref={noteRef} aria-label={t('notes.placeholder')} rows={3} />
 ```
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `label` | `string` | Libellé (obligatoire) |
+| `label` | `string?` | Libellé visible. Optionnel : sans lui, aucun `<label>` — fournir `aria-label` |
 | `error` | `string` | Message d'erreur inline (validation de champ) |
 | `multiline` | `boolean` | `true` → rend un `<textarea>` (redimensionnable vertical, min-height 80px) au lieu d'un `<input>` |
+| `ref` | `Ref<HTMLInputElement>` \| `Ref<HTMLTextAreaElement>` | Transmise au contrôle sous-jacent (selon `multiline`) — usages non contrôlés |
+| `className` | `string` | Classe additionnelle fusionnée avec `input-field__input` (modificateur) |
 | …natifs | `InputHTMLAttributes` \| `TextareaHTMLAttributes` | Selon `multiline` : `type`/`value`/`onChange`/`placeholder`… ou `rows`/`maxLength`… |
 
 ### `SearchInput`

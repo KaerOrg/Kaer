@@ -3,6 +3,7 @@ import { Bell, BellOff, Loader, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
+import { InputField } from '../../ui/InputField'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import {
   getRoutinesForPatientModule,
@@ -149,9 +150,10 @@ export function NotificationRoutineModal({
               />
 
               <div className="nr-form__label">{t('notifications.note_label')}</div>
-              <textarea
-                className="nr-form__note"
+              <InputField
+                multiline
                 ref={noteRef}
+                aria-label={t('notifications.note_label')}
                 placeholder={t('notifications.note_placeholder')}
                 rows={2}
               />

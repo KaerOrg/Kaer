@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Package2, FileText, CalendarDays, Clock } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
+import { InputField } from '../../../components/ui/InputField'
 import type { PatientModule } from '../../../lib/database.types'
 import type { ModuleCategory } from '../../../services/moduleCatalogService'
 import type { PractitionerNote } from '../../../services/noteService'
@@ -76,8 +77,9 @@ export function PatientOverviewTab({
         <div className="patient-overview__block-header">
           <h3 className="patient-overview__block-title">{t('patient.overview_add_note')}</h3>
         </div>
-        <textarea
-          className="patient-notes__textarea"
+        <InputField
+          multiline
+          aria-label={t('patient.overview_add_note')}
           placeholder={t('notes.placeholder')}
           rows={4}
           value={generalNote}

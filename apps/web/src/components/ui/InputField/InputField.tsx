@@ -6,35 +6,43 @@ const WHITESPACE_RE = /\s+/g
 
 export function InputField(props: InputFieldProps) {
   const { label, error, id, required } = props
-  const inputId = id ?? label.toLowerCase().replace(WHITESPACE_RE, '-')
+  // Sans `id` ni `label`, le champ s'appuie sur `aria-label` — pas d'`id` généré.
+  const inputId = id ?? (label ? label.toLowerCase().replace(WHITESPACE_RE, '-') : undefined)
   const controlClass = `input-field__input ${error ? 'input-field__input--error' : ''}`
 
   // Narrow sur `multiline` AVANT le rest spread : TypeScript corrèle alors l'union
   // discriminée et `rest` porte les attributs DOM corrects (input vs textarea).
   let control: ReactNode
   if (props.multiline) {
-    const { label: _label, error: _error, multiline: _multiline, id: _id, ...rest } = props
+    const { label: _label, error: _error, multiline: _multiline, id: _id, className, ...rest } = props
     control = (
       <textarea
         id={inputId}
-        className={`${controlClass} input-field__input--textarea`}
+        className={`${controlClass} input-field__input--textarea${className ? ` ${className}` : ''}`}
         required={required}
         {...rest}
       />
     )
   } else {
-    const { label: _label, error: _error, multiline: _multiline, id: _id, ...rest } = props
+    const { label: _label, error: _error, multiline: _multiline, id: _id, className, ...rest } = props
     control = (
-      <input id={inputId} className={controlClass} required={required} {...rest} />
+      <input
+        id={inputId}
+        className={`${controlClass}${className ? ` ${className}` : ''}`}
+        required={required}
+        {...rest}
+      />
     )
   }
 
   return (
     <div className="input-field">
-      <div className="input-field__label-row">
-        <label className="input-field__label" htmlFor={inputId}>{label}</label>
-        {required ? <span className="input-field__required" aria-hidden="true">*</span> : null}
-      </div>
+      {label ? (
+        <div className="input-field__label-row">
+          <label className="input-field__label" htmlFor={inputId}>{label}</label>
+          {required ? <span className="input-field__required" aria-hidden="true">*</span> : null}
+        </div>
+      ) : null}
       {control}
       {error ? <span className="input-field__error">{error}</span> : null}
     </div>

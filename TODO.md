@@ -55,31 +55,33 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
       `ui/Accordion`, `ui/Modal`, `ui/SearchInput`, `ui/Toast`, `ui/Toggle`,
       `ModulePreviewPage`, `PatientPage/tabs/PatientOverviewTab`.
 
-## 1bis. Migration des `<textarea>` bruts vers `InputField multiline`
+## 1bis. Migration des `<textarea>` bruts vers `InputField multiline` — ✅ livrée (2026-06-14)
 
-**Pourquoi.** `InputField` sait désormais rendre un `<textarea>` via la prop `multiline`
-(livré 2026-06-14). ~17 `<textarea>` bruts subsistent dans des features, chacun avec son
-label/markup/CSS dupliqué. Les unifier supprime la duplication (règle « design system
-d'abord ») et centralise le style.
+**Pourquoi.** `InputField` sait rendre un `<textarea>` via la prop `multiline`. ~17
+`<textarea>` bruts subsistaient dans des features, chacun avec son label/markup/CSS
+dupliqué. Les unifier a supprimé la duplication (règle « design system d'abord ») et
+centralisé le style.
 
-**Prérequis (à faire dans la branche dédiée `feat/inputfield-textarea`).** Beaucoup de
-ces textareas sont **sans label visible** (placeholder / `aria-label`), **ref-based**
-(non contrôlés) ou **stylés en compact**. Avant de migrer, étendre `InputField` :
-- rendre `label` **optionnel** (pas de `<label>` rendu si absent, s'appuyer sur `aria-label`) ;
-- ajouter `forwardRef` vers le `<textarea>` / `<input>` (usages non contrôlés) ;
-- **revue visuelle écran par écran** (le style `input-field__input` change l'apparence
-  des champs compacts actuels).
+**Prérequis livrés (branche `feat/inputfield-textarea`).** `InputField` étendu :
+- `label` rendu **optionnel** (pas de `<label>` si absent, s'appuie sur `aria-label`) ;
+- **ref-as-prop** (React 19) vers le `<textarea>` / `<input>` (usages non contrôlés) ;
+- `className` **fusionné** avec les classes de base (modificateur additif) ;
+- doc design-system + tests à jour.
+- ⚠️ **revue visuelle écran par écran à faire par l'humain** : le style `input-field__input`
+  (bordure accent gauche, 15px, min-height 80px) change l'apparence des anciens champs
+  compacts (CSSRS « si oui décrivez », notes, RIM/crise).
 
-**Suivi (≈17 occurrences, hors `TextareaWidget` qui est un widget de module) :**
+**Seul `<textarea>` restant : le primitive `InputField` lui-même** (sa place légitime) +
+`TextareaWidget` (widget de module). Aucun `<textarea>` brut en feature/page.
 
-- [ ] `src/components/features/CSSRSScreenPanel.tsx` — 2 (label-less ; placeholders FR en dur à passer i18n au passage)
-- [ ] `src/pages/PatientPage/tabs/PatientModulesTab.tsx` — 6 (crise + effets ; certains en style inline hex à nettoyer)
-- [ ] `src/pages/PatientPage/tabs/PatientNotesTab.tsx` — 2 (1 ref)
-- [ ] `src/components/features/AppointmentModal/AppointmentModal.tsx` — 2 (1 ref)
-- [ ] `src/components/features/NotificationRoutineModal/NotificationRoutineModal.tsx` — 1 (ref)
-- [ ] `src/components/features/SupportRequestModal/SupportRequestModal.tsx` — 1 (label + controlled, fit propre)
-- [ ] `src/components/features/CaseloadTable/ObservationBlock.tsx` — 1 (ref, aria-label)
-- [ ] `src/pages/PatientPage/tabs/PatientOverviewTab.tsx` — 1
+- [x] `src/components/features/CSSRSScreenPanel.tsx` — 2 (label-less ; placeholders FR conservés, fichier 100 % hardcodé, i18n hors périmètre)
+- [x] `src/pages/PatientPage/tabs/PatientModulesTab.tsx` — 6 (crise + RIM ; style inline hex supprimé)
+- [x] `src/pages/PatientPage/tabs/PatientNotesTab.tsx` — 2 (1 ref ; cadre d'enregistrement réorienté vers `.input-field__input`)
+- [x] `src/components/features/AppointmentModal/AppointmentModal.tsx` — 2 (1 ref ; labels à icône conservés via `id`)
+- [x] `src/components/features/NotificationRoutineModal/NotificationRoutineModal.tsx` — 1 (ref)
+- [x] `src/components/features/SupportRequestModal/SupportRequestModal.tsx` — 1 (label + controlled)
+- [x] `src/components/features/CaseloadTable/ObservationBlock.tsx` — 1 (ref, aria-label)
+- [x] `src/pages/PatientPage/tabs/PatientOverviewTab.tsx` — 1
 
 ## 2. `react-hooks/static-components` (préexistant)
 

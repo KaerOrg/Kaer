@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
+import { InputField } from '../../../components/ui/InputField'
 import { SpeechToTextButton } from '../../../components/ui/SpeechToTextButton'
 import {
   saveNote,
@@ -196,9 +197,10 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
                 <div className="patient-notes__skeleton-line" />
               </div>
             )}
-            <textarea
+            <InputField
+              multiline
               ref={newNoteRef}
-              className="patient-notes__textarea"
+              aria-label={t('notes.placeholder')}
               placeholder={t('notes.placeholder')}
               rows={3}
             />
@@ -291,8 +293,9 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
             <li key={note.id} className="patient-notes__item">
               {editingNoteId === note.id ? (
                 <div className="patient-notes__edit-form">
-                  <textarea
-                    className="patient-notes__textarea"
+                  <InputField
+                    multiline
+                    aria-label={t('notes.placeholder')}
                     value={editingContent}
                     onChange={e => setEditingContent(e.target.value)}
                     rows={3}
