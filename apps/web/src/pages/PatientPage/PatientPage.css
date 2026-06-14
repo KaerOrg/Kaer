@@ -936,10 +936,48 @@
   margin-top: 1px;
 }
 
+.psycho-card-picker__search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.psycho-card-picker__theme {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  margin: 12px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.psycho-card-picker__theme:first-child {
+  margin-top: 0;
+}
+
+.psycho-card-picker__empty {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 8px 0;
+}
+
 .psycho-card-picker__error {
   font-size: 13px;
   color: var(--color-danger);
   margin-bottom: 10px;
+}
+
+.psycho-card-picker__suggest {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
 }
 
 .psycho-card-picker__actions {

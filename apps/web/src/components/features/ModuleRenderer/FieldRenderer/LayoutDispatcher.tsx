@@ -14,6 +14,7 @@ import {
   GuidedExerciseLayout,
   PatientScenarioLayout,
   PsyEduLayout,
+  PsyEduLibraryLayout,
   QuestionnaireLayout,
   SleepJournalLayout,
   SliderDashboardLayout,
@@ -32,7 +33,7 @@ import type { FieldRendererProps } from './types'
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'psyedu_library', 'chrono_month'])
 
 /**
  * Seule responsabilité : router un `preview_kind` vers son layout.
@@ -52,6 +53,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   const contentFields = visibleFields.filter(f => f.field_type !== 'footer_note')
 
   if (preview_kind === 'psyedu') return <PsyEduLayout moduleId={moduleId ?? ''} />
+  if (preview_kind === 'psyedu_library') return <PsyEduLibraryLayout />
   if (preview_kind === 'chrono_month') return <ChronoMonthLayout />
 
   if (preview_kind === 'tabbed') {

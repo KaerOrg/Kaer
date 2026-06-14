@@ -39,8 +39,9 @@ vi.mock('../../services/moduleCatalogService', () => ({
   fetchModuleCategories: vi.fn(() => Promise.resolve([])),
   fetchComingSoonModuleIds: vi.fn(() => Promise.resolve(new Set())),
 }))
-vi.mock('../../services/moduleService', () => ({
-  fetchPsychoCards: vi.fn(() => Promise.resolve([])),
+vi.mock('../../services/psyeduService', () => ({
+  fetchLibraryTopics: vi.fn(() => Promise.resolve([])),
+  fetchThemes: vi.fn(() => Promise.resolve([])),
 }))
 vi.mock('../../services/noteService', () => ({
   fetchNotes: vi.fn(() => Promise.resolve([])),

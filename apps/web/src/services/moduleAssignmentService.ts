@@ -3,7 +3,7 @@ import type {
   Database,
   ModuleType,
   PatientModule,
-  PsychoeducationCardEntry,
+  PsychoeducationTopicEntry,
 } from '../lib/database.types'
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
 
@@ -40,11 +40,11 @@ export async function revokeModule(moduleId: string): Promise<void> {
 export async function unlockPsychoeducation(
   patientId: string,
   practitionerId: string,
-  cardIds: Iterable<string>
+  topicIds: Iterable<string>
 ): Promise<{ ok: boolean }> {
   const now = new Date().toISOString()
-  const cards: PsychoeducationCardEntry[] = [...cardIds].map(card_id => ({
-    card_id,
+  const topics: PsychoeducationTopicEntry[] = [...topicIds].map(topic_id => ({
+    topic_id,
     is_read: false,
     unlocked_at: now,
   }))
@@ -52,26 +52,26 @@ export async function unlockPsychoeducation(
     patient_id: patientId,
     practitioner_id: practitionerId,
     module_type: 'psychoeducation',
-    config: { unlocked_cards: cards } as Record<string, unknown>,
+    config: { unlocked_topics: topics } as Record<string, unknown>,
   }
   const { error } = await supabase.from('patient_modules').insert(insertRow)
   return { ok: !error }
 }
 
-export async function updatePsychoeducationCards(
+export async function updatePsychoeducationTopics(
   moduleId: string,
-  existing: PsychoeducationCardEntry[],
-  cardIds: Iterable<string>
+  existing: PsychoeducationTopicEntry[],
+  topicIds: Iterable<string>
 ): Promise<{ ok: boolean }> {
   const now = new Date().toISOString()
-  const existingById: Record<string, PsychoeducationCardEntry> = Object.fromEntries(
-    existing.map(c => [c.card_id, c])
+  const existingById: Record<string, PsychoeducationTopicEntry> = Object.fromEntries(
+    existing.map(e => [e.topic_id, e])
   )
-  const cards: PsychoeducationCardEntry[] = [...cardIds].map(card_id =>
-    existingById[card_id] ?? { card_id, is_read: false, unlocked_at: now }
+  const topics: PsychoeducationTopicEntry[] = [...topicIds].map(topic_id =>
+    existingById[topic_id] ?? { topic_id, is_read: false, unlocked_at: now }
   )
   const update: Database['public']['Tables']['patient_modules']['Update'] = {
-    config: { unlocked_cards: cards } as Record<string, unknown>,
+    config: { unlocked_topics: topics } as Record<string, unknown>,
   }
   const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
   return { ok: !error }

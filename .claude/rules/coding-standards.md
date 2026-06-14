@@ -533,6 +533,31 @@ import { shadows } from '../../theme'
 
 - Tout changement de schéma (table, colonne, trigger, RLS, index PostGIS) → répercuté dans `supabase/schema.sql` (source de vérité)
 
+## Ponctuation : pas de tiret long (U+2014 ni U+2013)
+
+> **Règle absolue, systématique, pour tout texte visible par l'utilisateur et toute rédaction de l'assistant.**
+
+Le tiret cadratin (U+2014) et le tiret demi-cadratin (U+2013) sont **bannis** des textes
+visibles (locales i18n, contenu psyedu, labels, messages, prose) et de toute rédaction de
+l'assistant (réponses, messages de commit, docs rédigées par l'IA). Ils signent une
+écriture automatique et nuisent à la lisibilité.
+
+Remplacer par la ponctuation la plus juste selon le contexte :
+
+- introduit une explication ou une définition : deux-points « : »
+- apposition, incise, énumération : virgule « , »
+- deux idées indépendantes : point « . » ou point-virgule « ; »
+- plage de valeurs : « à » (ex. « 16 à 18 °C »)
+- citation type « Source (année) [tiret] Titre » : deux-points (« Source (année) : Titre »)
+
+Exception : un tiret marqueur de **cellule vide** dans un tableau Markdown, ou
+**placeholder de valeur absente** en code (`value || '-'`), n'est pas de la prose ;
+utiliser un trait d'union simple `-`, jamais un tiret long, et ne pas le changer en virgule.
+
+Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide.
+
+---
+
 ## Internationalisation — zéro texte hardcodé
 
 **Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.**

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
@@ -18,7 +18,7 @@ import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPa
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
-import { type PsychoCardInfo } from '../../../services/moduleService'
+import { type LibraryTopic, type PsyEduTheme } from '../../../services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
 import {
   unlockModule as unlockStandardModule,
@@ -32,6 +32,7 @@ import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
+import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -43,7 +44,8 @@ type Props = {
   modules: PatientModule[]
   categories: ModuleCategory[]
   enabledModules: Set<ModuleType> | null
-  psychoCards: PsychoCardInfo[]
+  libraryTopics: LibraryTopic[]
+  themes: PsyEduTheme[]
   comingSoonIds: Set<string>
   onReloadModules: () => Promise<void>
 }
@@ -54,7 +56,8 @@ export function PatientModulesTab({
   modules,
   categories,
   enabledModules,
-  psychoCards,
+  libraryTopics,
+  themes,
   comingSoonIds,
   onReloadModules,
 }: Props) {
@@ -95,7 +98,8 @@ export function PatientModulesTab({
   )
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
-  const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
+  const allTopicIds = useMemo(() => libraryTopics.map(topic => topic.id), [libraryTopics])
+  const psycho = usePsychoEducationPicker(modules, allTopicIds, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
 
@@ -175,8 +179,8 @@ export function PatientModulesTab({
     const modIcon = ModIcon ? <ModIcon size={18} /> : undefined
 
     if (moduleType === 'psychoeducation') {
-      const cards = psycho.psychoModule ? psycho.getUnlockedCards(psycho.psychoModule) : []
-      const readCount = cards.filter(c => c.is_read).length
+      const topics = psycho.psychoModule ? psycho.getUnlockedTopics(psycho.psychoModule) : []
+      const readCount = topics.filter(tpc => tpc.is_read).length
 
       const handlePsychoToggle = () => {
         if (unlocked && mod) { psycho.cancel(); revokeModule(mod.id) }
@@ -221,21 +225,21 @@ export function PatientModulesTab({
                   {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
                   {' · '}
                   <span className="psycho-observance-summary">
-                    {cards.length === 1
-                      ? t('patient.psycho_read_count', { read: readCount, total: cards.length })
-                      : t('patient.psycho_read_count_plural', { read: readCount, total: cards.length })}
+                    {topics.length === 1
+                      ? t('patient.psycho_read_count', { read: readCount, total: topics.length })
+                      : t('patient.psycho_read_count_plural', { read: readCount, total: topics.length })}
                   </span>
                 </div>
-                {cards.length > 0 && (
+                {topics.length > 0 && (
                   <ul className="psycho-observance-list">
-                    {cards.map(card => {
-                      const meta = psychoCards.find(c => c.id === card.card_id)
+                    {topics.map(topic => {
+                      const meta = libraryTopics.find(lt => lt.id === topic.topic_id)
                       return (
-                        <li key={card.card_id} className="psycho-observance-item">
+                        <li key={topic.topic_id} className="psycho-observance-item">
                           <span className="psycho-observance-item__title">
-                            {meta ? t(meta.titleKey) : card.card_id}
+                            {meta ? t(meta.titleKey, { ns: 'psyedu' }) : topic.topic_id}
                           </span>
-                          {card.is_read
+                          {topic.is_read
                             ? <StatusBadge variant="success" label={t('patient.scale_read')} />
                             : <StatusBadge variant="neutral" label={t('patient.scale_unread')} />
                           }
@@ -252,44 +256,18 @@ export function PatientModulesTab({
           </Card>
 
           {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
-            <div className={`psycho-card-picker ${psycho.mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
-              <p className="psycho-card-picker__label">
-                {psycho.mode === 'unlock'
-                  ? t('patient.psycho_pick_unlock')
-                  : t('patient.psycho_pick_edit')}
-              </p>
-              <ul className="psycho-card-picker__list">
-                {psychoCards.map(card => (
-                  <li key={card.id} className="psycho-card-option">
-                    <label className="psycho-card-option__label">
-                      <input
-                        type="checkbox"
-                        className="psycho-card-option__checkbox"
-                        checked={psycho.selectedCardIds.has(card.id)}
-                        onChange={() => psycho.toggleCard(card.id)}
-                      />
-                      <div>
-                        <div className="psycho-card-option__title">{t(card.titleKey)}</div>
-                        <div className="psycho-card-option__desc">{t(card.summaryKey)}</div>
-                      </div>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              {psycho.error && <p className="psycho-card-picker__error">{psycho.error}</p>}
-              <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={psycho.saving} onClick={psycho.confirm}>
-                  {psycho.mode === 'unlock'
-                    ? (psycho.selectedCardIds.size === 1
-                        ? t('patient.psycho_unlock_btn', { count: psycho.selectedCardIds.size })
-                        : t('patient.psycho_unlock_btn_plural', { count: psycho.selectedCardIds.size }))
-                    : t('patient.psycho_save_btn')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={psycho.cancel}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </div>
+            <PsychoLibraryPicker
+              mode={psycho.mode}
+              libraryTopics={libraryTopics}
+              themes={themes}
+              taxonomy={taxonomy}
+              selectedTopicIds={psycho.selectedTopicIds}
+              saving={psycho.saving}
+              error={psycho.error}
+              onToggle={psycho.toggleTopic}
+              onConfirm={psycho.confirm}
+              onCancel={psycho.cancel}
+            />
           )}
         </div>
       )

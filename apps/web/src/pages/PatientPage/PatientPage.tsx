@@ -9,13 +9,14 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
 import type { PatientModule } from '../../lib/database.types'
-import type { PsychoCardInfo } from '../../services/moduleService'
 import type { ModuleCategory } from '../../services/moduleCatalogService'
 import type { PractitionerNote } from '../../services/noteService'
+import type { LibraryTopic, PsyEduTheme } from '../../services/psyeduService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
 import {
   patientQueries,
   catalogQueries,
+  psyeduQueries,
   useSetTeenMode,
   useSaveGeneralNote,
 } from '../../hooks/queries'
@@ -57,10 +58,11 @@ const PATIENT_IDENTITY_INITIAL: PatientIdentity = {
 // chaque rendu — préserve la mémoïsation des onglets enfants.
 const EMPTY_MODULES: PatientModule[] = []
 const EMPTY_CATEGORIES: ModuleCategory[] = []
-const EMPTY_CARDS: PsychoCardInfo[] = []
 const EMPTY_NOTES: PractitionerNote[] = []
 const EMPTY_APPTS: AppointmentWithPatient[] = []
 const EMPTY_IDS: Set<string> = new Set()
+const EMPTY_TOPICS: LibraryTopic[] = []
+const EMPTY_THEMES: PsyEduTheme[] = []
 
 export function PatientPage() {
   // `ref` = identifiant public opaque exposé dans l'URL ; `id` = patient_id réel.
@@ -94,7 +96,8 @@ export function PatientPage() {
   const categoriesQuery = useQuery(catalogQueries.categories())
   const comingSoonQuery = useQuery(catalogQueries.comingSoonIds())
   const enabledModulesQuery = useQuery(catalogQueries.enabledModules(practitioner?.id))
-  const psychoCardsQuery = useQuery(catalogQueries.psychoCards())
+  const libraryTopicsQuery = useQuery(psyeduQueries.libraryTopics())
+  const themesQuery = useQuery(psyeduQueries.themes())
 
   // Header introuvable → retour dashboard.
   useEffect(() => {
@@ -116,8 +119,9 @@ export function PatientPage() {
   const modules = modulesQuery.data ?? EMPTY_MODULES
   const categories = categoriesQuery.data ?? EMPTY_CATEGORIES
   const enabledModules = enabledModulesQuery.data ?? null
-  const psychoCards = psychoCardsQuery.data ?? EMPTY_CARDS
   const comingSoonIds = comingSoonQuery.data ?? EMPTY_IDS
+  const libraryTopics = libraryTopicsQuery.data ?? EMPTY_TOPICS
+  const themes = themesQuery.data ?? EMPTY_THEMES
   const notes = notesQuery.data ?? EMPTY_NOTES
   const appointments = appointmentsQuery.data ?? EMPTY_APPTS
 
@@ -142,7 +146,8 @@ export function PatientPage() {
     id == null ||
     headerQuery.isLoading || modulesQuery.isLoading || notesQuery.isLoading ||
     appointmentsQuery.isLoading || categoriesQuery.isLoading || comingSoonQuery.isLoading ||
-    enabledModulesQuery.isLoading || psychoCardsQuery.isLoading
+    enabledModulesQuery.isLoading ||
+    libraryTopicsQuery.isLoading || themesQuery.isLoading
 
   // RDV « effectués » = passés et non annulés (statut factuel, sans action manuelle).
   const appointmentsDoneCount = useMemo(() => {
@@ -259,7 +264,8 @@ export function PatientPage() {
                 modules={modules}
                 categories={categories}
                 enabledModules={enabledModules}
-                psychoCards={psychoCards}
+                libraryTopics={libraryTopics}
+                themes={themes}
                 comingSoonIds={comingSoonIds}
                 onReloadModules={reloadModules}
               />

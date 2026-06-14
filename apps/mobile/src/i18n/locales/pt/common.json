@@ -123,7 +123,7 @@
       "add_item": "Adicionar um elemento",
       "item_placeholder": "Introduza um elemento...",
       "delete_item_title": "Eliminar este elemento",
-      "emergency_samu": "112 — Emergência",
+      "emergency_samu": "112, Emergência",
       "emergency_samu_label": "Emergência médica",
       "emergency_3114": "SOS Voz Amiga",
       "emergency_3114_label": "Linha de apoio",
@@ -164,8 +164,8 @@
       "monthly_button": "Vista mensal",
       "list_header": "Últimas 14 noites",
       "incomplete": "Registo incompleto",
-      "empty_day": "Não registado — toque para inserir",
-      "quality_not_set": "– não registado",
+      "empty_day": "Não registado, toque para inserir",
+      "quality_not_set": "- não registado",
       "save": "Guardar"
     },
     "diet_weight_psycho": {
@@ -178,7 +178,7 @@
     },
     "mood_tracker": {
       "label": "Termómetro do humor",
-      "description": "Monitorização diária do humor, energia e ansiedade (1–10)",
+      "description": "Monitorização diária do humor, energia e ansiedade (1 à 10)",
       "title": "Termómetro do humor",
       "intro": "Registe o seu humor, energia e ansiedade do dia.",
       "tab_today": "Hoje",
@@ -186,7 +186,7 @@
       "notes_label": "Notas livres (opcional)",
       "notes_placeholder": "Contexto, evento do dia, observação...",
       "history_title": "Últimos 30 dias",
-      "already_saved": "Registo de hoje já guardado — pode modificá-lo.",
+      "already_saved": "Registo de hoje já guardado, pode modificá-lo.",
       "history_empty": "O histórico aparecerá quando tiver pelo menos 2 registos.",
       "delete_entry_title": "Eliminar este registo?",
       "saved_message": "O registo de hoje foi guardado.",
@@ -258,9 +258,9 @@
       "step_taste": "1 coisa que pode saborear"
     },
     "rim": {
-      "label": "RIM – Imaginação mental",
+      "label": "RIM - Imaginação mental",
       "description": "Reprocessamento por imaginação",
-      "title": "RIM – Imaginação mental",
+      "title": "RIM - Imaginação mental",
       "intro": "Reprocessamento através de imaginação mental."
     },
     "fear_thermometer": {
@@ -295,23 +295,23 @@
       "coherence_cardiaque_name": "Coerência cardíaca",
       "coherence_cardiaque_subtitle": "6 respirações por minuto",
       "coherence_cardiaque_description": "Regula o sistema nervoso autónomo sincronizando o ritmo respiratório com a variabilidade da frequência cardíaca.",
-      "coherence_cardiaque_evidence": "Grau B — Lehrer & Gevirtz (2014)",
+      "coherence_cardiaque_evidence": "Grau B, Lehrer & Gevirtz (2014)",
       "diaphragmatique_name": "Respiração diafragmática",
       "diaphragmatique_subtitle": "Respiração abdominal lenta",
       "diaphragmatique_description": "Ativa o sistema parassimpático. Base da maioria das terapias comportamentais.",
-      "diaphragmatique_evidence": "Grau B — Conrad et al. (2007)",
+      "diaphragmatique_evidence": "Grau B, Conrad et al. (2007)",
       "carree_name": "Respiração quadrada",
-      "carree_subtitle": "Box Breathing — 4-4-4-4",
+      "carree_subtitle": "Box Breathing, 4-4-4-4",
       "carree_description": "Técnica simétrica para gestão do stress agudo e sintomas de PTSD.",
-      "carree_evidence": "Grau C — VA/DoD PTSD Guidelines",
+      "carree_evidence": "Grau C, VA/DoD PTSD Guidelines",
       "quatre_sept_huit_name": "Técnica 4-7-8",
       "quatre_sept_huit_subtitle": "Para adormecer e ansiedade aguda",
       "quatre_sept_huit_description": "Inspiração curta, retenção prolongada, expiração longa.",
-      "quatre_sept_huit_evidence": "Grau C — consenso internacional",
+      "quatre_sept_huit_evidence": "Grau C, consenso internacional",
       "pleine_conscience_name": "Respiração mindful",
-      "pleine_conscience_subtitle": "Mindfulness — MBSR / MBCT",
+      "pleine_conscience_subtitle": "Mindfulness, MBSR / MBCT",
       "pleine_conscience_description": "Observar a respiração sem a controlar. Ancoragem no momento presente.",
-      "pleine_conscience_evidence": "Grau A — NICE CG90, MBCT Segal et al. (2002)"
+      "pleine_conscience_evidence": "Grau A, NICE CG90, MBCT Segal et al. (2002)"
     },
     "cognitive_saturation": {
       "label": "Saturação cognitiva",

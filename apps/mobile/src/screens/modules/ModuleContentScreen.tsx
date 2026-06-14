@@ -31,9 +31,13 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'decision_grid',
   'patient_scenario',
   'psyedu',
+  'psyedu_library',
   'tabbed',
   'chrono_month',
 ])
+
+// Layouts qui ont besoin de la config patient (patient_modules.config).
+const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library'])
 
 export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params
@@ -67,23 +71,23 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     loadFields()
   }, [loadFields])
 
-  const isPatientScenario = result?.preview_kind === 'patient_scenario'
+  const needsConfig = result != null && CONFIG_LAYOUTS.has(result.preview_kind)
 
-  // Config patient : seulement pour le layout patient_scenario, rafraîchie au focus.
+  // Config patient : seulement pour les layouts de CONFIG_LAYOUTS, rafraîchie au focus.
   // (fetchModuleFields a son propre cache service ; seule cette config y échappe.)
   const patientConfigQuery = useQuery({
     ...moduleQueries.patientModuleConfig(patient?.id, moduleType),
-    enabled: isPatientScenario && patient != null,
+    enabled: needsConfig && patient != null,
   })
   const patientConfig: Record<string, unknown> | null | undefined =
-    isPatientScenario ? (patientConfigQuery.isSuccess ? patientConfigQuery.data : undefined) : undefined
+    needsConfig ? (patientConfigQuery.isSuccess ? patientConfigQuery.data : undefined) : undefined
 
   const refetchPatientConfig = useCallback(() => {
-    if (isPatientScenario) void patientConfigQuery.refetch()
-  }, [isPatientScenario, patientConfigQuery])
+    if (needsConfig) void patientConfigQuery.refetch()
+  }, [needsConfig, patientConfigQuery])
   useRefreshOnFocus(refetchPatientConfig)
 
-  if (loading || (isPatientScenario && patientConfig === undefined)) {
+  if (loading || (needsConfig && patientConfig === undefined)) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={colors.primary} size="large" />

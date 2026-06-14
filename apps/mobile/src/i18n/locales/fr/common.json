@@ -58,8 +58,8 @@
     "reuse_last_values": "Reprendre les valeurs du {{date}}",
     "save_and_finish": "Enregistrer et terminer",
     "in_case_of_distress": "En cas de détresse",
-    "phone_3114": "3114 — Numéro national prévention suicide",
-    "phone_15": "15 — SAMU",
+    "phone_3114": "3114, Numéro national prévention suicide",
+    "phone_15": "15, SAMU",
     "coming_soon": "Bientôt",
     "saved": "Enregistré",
     "back": "Retour",
@@ -194,9 +194,9 @@
       "add_item": "Ajouter un élément",
       "item_placeholder": "Saisir un élément...",
       "delete_item_title": "Supprimer cet élément",
-      "emergency_samu": "15 — SAMU",
+      "emergency_samu": "15, SAMU",
       "emergency_samu_label": "Urgence médicale",
-      "emergency_3114": "3114 — Prévention",
+      "emergency_3114": "3114, Prévention",
       "emergency_3114_label": "Numéro national",
       "emergency_samu_a11y": "Appeler le 15 SAMU, urgence médicale",
       "emergency_3114_a11y": "Appeler le 3114, numéro national de prévention du suicide",
@@ -238,43 +238,43 @@
       "tab_fiches": "Comprendre",
       "tab_now": "Agir en crise",
       "crisis_hint": "Appuyez sur une technique pour afficher les étapes.",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "crisis": {
         "tipp": {
-          "title": "TIPP — Apaiser le corps",
+          "title": "TIPP, Apaiser le corps",
           "summary": "4 leviers physiologiques pour faire chuter l'activation : Température, Intensité, Paced breathing, Paired muscle relaxation.",
           "body1": "Température : passez de l'eau froide sur le visage (yeux ouverts), tenez un glaçon, ou plongez les mains 30 secondes dans de l'eau très froide. Le réflexe de plongée ralentit le rythme cardiaque.",
-          "body2": "Intensité : 1 à 3 minutes d'activité physique vigoureuse (jumping jacks, squats, course sur place). Puis Paced breathing : respiration ralentie 5s inspirez / 7s expirez. Terminez par une relaxation musculaire — contractez 5s puis relâchez chaque grand groupe musculaire."
+          "body2": "Intensité : 1 à 3 minutes d'activité physique vigoureuse (jumping jacks, squats, course sur place). Puis Paced breathing : respiration ralentie 5s inspirez / 7s expirez. Terminez par une relaxation musculaire, contractez 5s puis relâchez chaque grand groupe musculaire."
         },
         "accepts": {
-          "title": "ACCEPTS — Distraire l'esprit",
+          "title": "ACCEPTS, Distraire l'esprit",
           "summary": "7 leviers pour rediriger l'attention quand la détresse est trop intense pour être traitée frontalement.",
           "body1": "Activités (faire quelque chose qui mobilise l'attention), Contribuer (aider quelqu'un d'autre), Comparaisons (avec des moments où vous alliez moins bien, sans jugement), Émotions opposées (regarder une comédie si vous êtes triste).",
           "body2": "Push-away (mettez la pensée dans une boîte mentale, fermez-la, posez-la sur une étagère pour plus tard), Thoughts (comptez à rebours, listez des capitales), Sensations (mâchez un chewing-gum fort, douche froide, parfum intense)."
         },
         "soothing": {
-          "title": "Self-soothing — Réconforter par les 5 sens",
+          "title": "Self-soothing, Réconforter par les 5 sens",
           "summary": "Apaiser le système nerveux en stimulant doucement chacun des 5 sens, l'un après l'autre.",
           "body1": "Vue : regardez une photo qui vous est chère, observez la nature, allumez une bougie. Ouïe : musique calme, bruits blancs, podcast familier. Odorat : huile essentielle de lavande, café, peau d'orange.",
-          "body2": "Toucher : couverture lestée, bain chaud, animal de compagnie, peluche. Goût : tisane chaude, carré de chocolat noir, fruit savouré lentement. Choisissez 1 à 2 sens à la fois — l'objectif est la douceur, pas la stimulation."
+          "body2": "Toucher : couverture lestée, bain chaud, animal de compagnie, peluche. Goût : tisane chaude, carré de chocolat noir, fruit savouré lentement. Choisissez 1 à 2 sens à la fois, l'objectif est la douceur, pas la stimulation."
         },
         "improve": {
-          "title": "IMPROVE — Améliorer le moment",
+          "title": "IMPROVE, Améliorer le moment",
           "summary": "7 stratégies cognitives et imaginaires pour traverser la crise sans la fuir.",
-          "body1": "Imagery (visualisez un lieu sûr, un souvenir apaisant), Meaning (donnez un sens à l'épreuve — qu'est-ce que ça vous apprend ?), Prayer (méditation, prière laïque ou religieuse, sentiment de connexion), Relaxation (respiration, scan corporel).",
-          "body2": "One thing at a time (focalisez-vous sur une seule action, ici et maintenant), Vacation (offrez-vous 10 min de pause complète sans culpabilité), Encouragement (parlez-vous comme à un proche en détresse — \"je peux traverser ça, ce n'est qu'une vague\")."
+          "body1": "Imagery (visualisez un lieu sûr, un souvenir apaisant), Meaning (donnez un sens à l'épreuve, qu'est-ce que ça vous apprend ?), Prayer (méditation, prière laïque ou religieuse, sentiment de connexion), Relaxation (respiration, scan corporel).",
+          "body2": "One thing at a time (focalisez-vous sur une seule action, ici et maintenant), Vacation (offrez-vous 10 min de pause complète sans culpabilité), Encouragement (parlez-vous comme à un proche en détresse, \"je peux traverser ça, ce n'est qu'une vague\")."
         },
         "proscons": {
-          "title": "Pros & Cons — Peser avant d'agir",
+          "title": "Pros & Cons, Peser avant d'agir",
           "summary": "Avant de céder à une impulsion (consommer, s'isoler, agir contre soi), faites une grille rapide à 4 cases.",
           "body1": "Listez : Avantages d'agir maintenant (soulagement immédiat), Inconvénients d'agir (conséquences à 24h, 1 semaine, 1 mois), Avantages de tolérer la détresse, Inconvénients de tolérer.",
-          "body2": "Lisez votre grille à voix haute. La décision n'est pas \"souffrir ou ne pas souffrir\" — c'est \"souffrir maintenant\" vs \"souffrir plus tard\". Cette technique demande de l'entraînement à froid pour être disponible à chaud."
+          "body2": "Lisez votre grille à voix haute. La décision n'est pas \"souffrir ou ne pas souffrir\", c'est \"souffrir maintenant\" vs \"souffrir plus tard\". Cette technique demande de l'entraînement à froid pour être disponible à chaud."
         }
       },
       "now": {
         "title": "Traverser la vague",
         "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un sommet, puis redescend toujours.",
-        "intro2": "Vous n'avez rien à faire contre elle — juste à tenir le temps qu'elle passe. Choisissez une activité, et laissez le minuteur vous accompagner.",
+        "intro2": "Vous n'avez rien à faire contre elle, juste à tenir le temps qu'elle passe. Choisissez une activité, et laissez le minuteur vous accompagner.",
         "choose_activity": "Choisir une activité",
         "pick_category": "Que voulez-vous faire maintenant ?",
         "back": "Retour",
@@ -326,13 +326,13 @@
       "effect_akathisia_label": "Agitation, besoin de bouger (akathisie)",
       "effect_akathisia_detail": "Impossibilité de rester immobile, agitation intérieure",
       "effect_tremors_label": "Tremblements",
-      "effect_tremors_detail": "Mains, membres — peut survenir avec certains médicaments psychiatriques",
+      "effect_tremors_detail": "Mains, membres, peut survenir avec certains médicaments psychiatriques",
       "effect_dry_mouth_label": "Sécheresse buccale",
-      "effect_dry_mouth_detail": "Bouche sèche — peut survenir avec certains médicaments",
+      "effect_dry_mouth_detail": "Bouche sèche, peut survenir avec certains médicaments",
       "effect_sleep_label": "Troubles du sommeil",
-      "effect_sleep_detail": "Insomnie ou difficultés à dormir — peut survenir avec certains antidépresseurs ou régulateurs d'humeur",
+      "effect_sleep_detail": "Insomnie ou difficultés à dormir, peut survenir avec certains antidépresseurs ou régulateurs d'humeur",
       "effect_nausea_label": "Nausées / troubles digestifs",
-      "effect_nausea_detail": "Nausées, douleurs abdominales — peut survenir avec certains médicaments",
+      "effect_nausea_detail": "Nausées, douleurs abdominales, peut survenir avec certains médicaments",
       "scale_absent": "Absent",
       "scale_mild": "Léger",
       "scale_moderate": "Modéré",
@@ -401,7 +401,7 @@
       "new_entry_btn": "Nouvelle saisie",
       "delete_entry_title": "Supprimer cette saisie ?",
       "saved_message": "Votre saisie du jour a été sauvegardée.",
-      "already_saved": "Saisie du jour déjà enregistrée — vous pouvez la modifier.",
+      "already_saved": "Saisie du jour déjà enregistrée, vous pouvez la modifier.",
       "history_empty": "Le suivi s'affichera dès vos premières saisies.",
       "entries_recent": "Saisies récentes",
       "custom_title": "Effets personnalisés",
@@ -448,17 +448,17 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir sur votre santé mentale",
+      "description": "Bibliothèque de fiches à lire, classées par thème.",
       "title": "Psychoéducation",
-      "intro": "Consultez vos fiches de savoir.",
-      "empty_title": "Aucune carte disponible",
-      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
-      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
+      "intro": "Consultez vos fiches.",
+      "empty_title": "Aucune fiche disponible",
+      "empty_text": "Votre praticien n'a pas encore débloqué de fiches pour vous.",
+      "load_error": "Impossible de charger les fiches. Vérifiez votre connexion.",
       "mark_as_read": "J'ai lu et compris",
       "already_read": "Lu et compris",
       "read_error": "Une erreur est survenue. Veuillez réessayer.",
       "content_not_found": "Contenu introuvable.",
-      "cards_progress": "{{read}}/{{total}} cartes lues"
+      "cards_progress": "{{read}}/{{total}} fiches lues"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -468,8 +468,8 @@
       "monthly_button": "Vue mensuelle",
       "list_header": "Les 14 dernières nuits",
       "incomplete": "Saisie incomplète",
-      "empty_day": "Non renseigné — appuyer pour saisir",
-      "quality_not_set": "– non renseigné",
+      "empty_day": "Non renseigné, appuyer pour saisir",
+      "quality_not_set": "- non renseigné",
       "save": "Enregistrer",
       "section_schedule": "Horaires",
       "section_awakenings": "Réveils nocturnes",
@@ -514,7 +514,7 @@
       "back_btn": "Retour",
       "notes_label": "Notes (optionnel)",
       "notes_placeholder": "Contexte, rêves, remarques…",
-      "footer": "Agenda TCC-I — traitement de 1ère ligne pour l'insomnie chronique. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
+      "footer": "Agenda TCC-I, traitement de 1ère ligne pour l'insomnie chronique. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "psyedu_sleep": {
       "label": "Sommeil & récupération",
@@ -571,7 +571,7 @@
       "main_activity": "Activité principale",
       "last_meal": "Dernier repas",
       "bedtime": "Coucher",
-      "optional_hint": "Tous les ancrages sont facultatifs — saisissez ceux dont vous vous souvenez.",
+      "optional_hint": "Tous les ancrages sont facultatifs, saisissez ceux dont vous vous souvenez.",
       "save_entry": "Enregistrer les ancrages",
       "update_entry": "Mettre à jour",
       "view_month": "Vue mensuelle",
@@ -583,7 +583,7 @@
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur",
-      "description": "Suivi quotidien humeur, énergie et anxiété (1–10)",
+      "description": "Suivi quotidien humeur, énergie et anxiété (1 à 10)",
       "title": "Thermomètre de l'humeur",
       "intro": "Notez votre humeur, énergie et anxiété du jour.",
       "tab_today": "Aujourd'hui",
@@ -591,7 +591,7 @@
       "notes_label": "Notes libres (optionnel)",
       "notes_placeholder": "Contexte, événement du jour, remarque...",
       "history_title": "30 derniers jours",
-      "already_saved": "Saisie du jour déjà enregistrée — vous pouvez la modifier.",
+      "already_saved": "Saisie du jour déjà enregistrée, vous pouvez la modifier.",
       "history_empty": "L'historique s'affichera dès que vous aurez enregistré au moins 2 saisies.",
       "delete_entry_title": "Supprimer cette saisie ?",
       "saved_message": "Votre saisie du jour a été sauvegardée.",
@@ -681,7 +681,7 @@
       "step_notes_title": "Une note à ajouter ? (optionnel)",
       "step_notes_hint": "Contexte, situation, pensée associée… Ce champ est libre.",
       "notes_free_placeholder": "Note libre (facultatif)",
-      "footer": "Roue des émotions — labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
+      "footer": "Roue des émotions, labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012.",
       "node": {
         "joy": "Joie",
         "joy__serenity": "Sérénité",
@@ -908,8 +908,8 @@
       "stop_btn": "Arrêter",
       "done_text": "Vous avez traversé les 5 étapes. Prenez un moment pour observer comment vous vous sentez maintenant.",
       "safety_title": "En cas de détresse",
-      "safety_3114": "3114 — Numéro national prévention suicide",
-      "safety_15": "15 — SAMU",
+      "safety_3114": "3114, Numéro national prévention suicide",
+      "safety_15": "15, SAMU",
       "step_see_sense": "Voir",
       "step_see_instruction": "Repérez 5 choses que vous voyez autour de vous.",
       "step_see_tip": "Ex. une lampe, une fenêtre, un livre, une chaise, vos mains.",
@@ -937,15 +937,15 @@
       "learn_when_4": "Pour se recentrer avant un moment stressant",
       "learn_why_title": "Pourquoi ça marche ?",
       "learn_why_p1": "En mobilisant les cinq sens simultanément, vous obligez votre cerveau à traiter des informations concrètes et immédiates. Cette surcharge sensorielle interrompt le circuit des pensées automatiques.",
-      "learn_why_p2": "Cette technique mobilise le cortex préfrontal — la zone de la pensée rationnelle — et diminue l'activité de l'amygdale, responsable de la réponse de peur.",
+      "learn_why_p2": "Cette technique mobilise le cortex préfrontal, la zone de la pensée rationnelle, et diminue l'activité de l'amygdale, responsable de la réponse de peur.",
       "learn_practice_title": "Comment progresser ?",
       "learn_practice_p1": "La technique demande un peu de pratique pour devenir automatique. L'idéal est de s'entraîner **avant** les moments de crise, afin qu'elle soit disponible quand vous en avez vraiment besoin.",
-      "learn_ref": "Référence : Linehan MM (1993) — DBT Skills Training. Grade B — recommandé par la HAS et le NICE pour la gestion de l'anxiété et des états dissociatifs."
+      "learn_ref": "Référence : Linehan MM (1993) : DBT Skills Training. Grade B, recommandé par la HAS et le NICE pour la gestion de l'anxiété et des états dissociatifs."
     },
     "rim": {
-      "label": "RIM – Imagerie mentale",
+      "label": "RIM - Imagerie mentale",
       "description": "Retraitement par l'imagerie",
-      "title": "RIM – Imagerie mentale",
+      "title": "RIM - Imagerie mentale",
       "intro": "Consignes de pratique",
       "intro_teen": "Retraitement par l'imagerie mentale.",
       "empty_title": "Scénario non configuré",
@@ -969,9 +969,9 @@
       "sound_wind": "Vent doux",
       "sound_stream": "Ruisseau",
       "safety_title": "En cas de détresse",
-      "safety_3114": "3114 — Numéro national prévention suicide",
-      "safety_15": "15 — SAMU",
-      "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
+      "safety_3114": "3114, Numéro national prévention suicide",
+      "safety_15": "15, SAMU",
+      "footer": "Retraitement par l'imagerie mentale (RIM) : Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
       "label": "Exposition graduée",
@@ -993,9 +993,9 @@
       "suds_after": "Après",
       "save": "Enregistrer",
       "section_trigger": "Situation déclenchante",
-      "section_before": "Niveau de détresse — Avant",
+      "section_before": "Niveau de détresse, Avant",
       "section_strategies": "Stratégies mises en place",
-      "section_after": "Niveau de détresse — Après (optionnel)",
+      "section_after": "Niveau de détresse, Après (optionnel)",
       "section_notes": "Notes (optionnel)",
       "suds_hint_before": "0 = aucune détresse  ·  100 = détresse maximale imaginable",
       "suds_hint_after": "À renseigner une fois la stratégie terminée. Vous pouvez revenir plus tard.",
@@ -1021,8 +1021,8 @@
       "strategy_exposure": "Rester dans la situation (exposition)",
       "strategy_distraction": "Distraction cognitive",
       "strategy_contact": "Contact avec un proche",
-      "footer": "Échelle SUDS (Subjective Units of Distress Scale) — mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "footer": "Échelle SUDS (Subjective Units of Distress Scale) : mesure subjective de détresse utilisée en thérapie d'exposition TCC. Wolitzky-Taylor et al., Clin Psychol Rev 2008 · Craske et al., Behav Res Ther 2014.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "ladder_empty_title": "Votre échelle de la peur",
       "ladder_empty_text": "Ajoutez les situations qui vous angoissent, de la moins à la plus difficile.",
       "step_done": "Marche franchie",
@@ -1032,7 +1032,7 @@
       "edit_step": "Modifier la situation",
       "step_label": "La situation redoutée",
       "step_label_placeholder": "Ex. : prendre le métro aux heures de pointe",
-      "step_target_label": "Niveau de stress initial (0–100)",
+      "step_target_label": "Niveau de stress initial (0 à 100)",
       "detail_no_sessions": "Aucune exposition pour l'instant. Lancez-en une quand vous vous sentez prêt.",
       "detail_history_title": "Mes expositions",
       "detail_do_exposure": "Faire une exposition",
@@ -1048,7 +1048,7 @@
       "outcome_label": "Ce qui s'est passé",
       "outcome_placeholder": "Qu'est-ce qui s'est réellement passé ?",
       "step_target_hint": "À quel point cette situation vous stresse, avant de commencer à travailler dessus ? Sert à classer votre échelle, du plus facile au plus difficile.",
-      "chart_y_axis": "Niveau de stress (0–100)",
+      "chart_y_axis": "Niveau de stress (0 à 100)",
       "chart_x_axis": "Séances (S1, S2, …)",
       "chart_reference": "Niveau de stress initial",
       "scale_hint": "0 = aucun stress · 100 = stress maximal",
@@ -1066,23 +1066,23 @@
       "coherence_cardiaque_name": "Cohérence cardiaque",
       "coherence_cardiaque_subtitle": "6 respirations par minute",
       "coherence_cardiaque_description": "Régule le système nerveux autonome en synchronisant le rythme respiratoire avec la variabilité de la fréquence cardiaque (HRV). Recommandée pour l'anxiété, le stress chronique et la dépression.",
-      "coherence_cardiaque_evidence": "Grade B — Lehrer & Gevirtz (2014)",
+      "coherence_cardiaque_evidence": "Grade B, Lehrer & Gevirtz (2014)",
       "diaphragmatique_name": "Respiration diaphragmatique",
       "diaphragmatique_subtitle": "Inspiration abdominale lente",
       "diaphragmatique_description": "Active le système parasympathique. Base de la plupart des thérapies comportementales. Recommandée par la HAS dans les thérapies non médicamenteuses de l'anxiété et de la douleur chronique.",
-      "diaphragmatique_evidence": "Grade B — HAS, Conrad et al. (2007)",
+      "diaphragmatique_evidence": "Grade B, HAS, Conrad et al. (2007)",
       "carree_name": "Respiration carrée",
-      "carree_subtitle": "Box Breathing — 4-4-4-4",
+      "carree_subtitle": "Box Breathing, 4-4-4-4",
       "carree_description": "Technique symétrique utilisée dans la gestion du stress aigu et des symptômes de PTSD. Équilibre les phases d'inspiration, rétention, expiration et pause. Incluse dans les guidelines VA/DoD.",
-      "carree_evidence": "Grade C / accord experts — VA/DoD PTSD Guidelines",
+      "carree_evidence": "Grade C / accord experts, VA/DoD PTSD Guidelines",
       "quatre_sept_huit_name": "Technique 4-7-8",
       "quatre_sept_huit_subtitle": "Pour l'endormissement et la crise anxieuse",
       "quatre_sept_huit_description": "Inspiration courte, rétention prolongée, expiration longue. Particulièrement efficace pour faciliter l'endormissement et couper une montée d'anxiété aiguë. Accord d'experts international.",
-      "quatre_sept_huit_evidence": "Grade C — accord experts international",
+      "quatre_sept_huit_evidence": "Grade C, accord experts international",
       "pleine_conscience_name": "Pleine conscience respiratoire",
-      "pleine_conscience_subtitle": "Mindfulness — MBSR / MBCT",
+      "pleine_conscience_subtitle": "Mindfulness, MBSR / MBCT",
       "pleine_conscience_description": "Observer sa respiration sans la contrôler. Ancrage dans le moment présent, réduction des ruminations. Composante centrale du MBSR (Kabat-Zinn, 1990) et de la MBCT (Segal et al., 2002), recommandée par NICE pour la prévention des rechutes dépressives.",
-      "pleine_conscience_evidence": "Grade A rechute dépressive — NICE CG90, MBCT Segal et al. (2002)",
+      "pleine_conscience_evidence": "Grade A rechute dépressive, NICE CG90, MBCT Segal et al. (2002)",
       "intro_guide": "Choisissez une technique. Un guide animé vous accompagne, cycle par cycle.",
       "recent_sessions": "Sessions récentes",
       "cycle_label": "Cycle {{count}} · {{duration}}s par cycle",
@@ -1117,7 +1117,7 @@
       "input_hint": "Choisissez un mot court ou une pensée brève qui vous envahit. Exemples : « inutile », « danger », « je vais échouer ».",
       "input_placeholder": "Saisissez un mot ou une courte pensée…",
       "how_it_works": "Comment ça fonctionne",
-      "instructions": "1. Répétez votre mot à voix haute, aussi rapidement que possible.\n2. Appuyez sur le mot à chaque répétition pour comptabiliser.\n3. Continuez pendant {{seconds}} secondes.\n\nÀ force de répétitions, le mot perd son sens et sa charge émotionnelle — c'est l'effet de saturation sémantique.",
+      "instructions": "1. Répétez votre mot à voix haute, aussi rapidement que possible.\n2. Appuyez sur le mot à chaque répétition pour comptabiliser.\n3. Continuez pendant {{seconds}} secondes.\n\nÀ force de répétitions, le mot perd son sens et sa charge émotionnelle, c'est l'effet de saturation sémantique.",
       "tap_hint": "Appuyez à chaque répétition",
       "repetitions": "répétitions",
       "duration": "durée",
@@ -1129,7 +1129,7 @@
     "craving_journal": {
       "label": "Journal de craving",
       "description": "Intensité de l'envie, déclencheur, stratégie",
-      "disclaimer": "Ce module est un support à vos consultations. Il a été abordé avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à vos consultations. Il a été abordé avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "tab_fiches": "Fiches",
       "tab_journal": "Journal",
       "new_entry_btn": "Nouvelle saisie",
@@ -1171,9 +1171,9 @@
       "q3": "Difficultés à vous endormir ou à rester endormi(e), ou au contraire dormir trop",
       "q4": "Se sentir fatigué(e) ou manquer d'énergie",
       "q5": "Manque d'appétit ou au contraire manger trop",
-      "q6": "Vous sentir négatif(ve) par rapport à vous-même — avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
-      "q7": "Avoir du mal à vous concentrer — lire ou regarder la télévision par exemple",
-      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer — ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
+      "q6": "Vous sentir négatif(ve) par rapport à vous-même, avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
+      "q7": "Avoir du mal à vous concentrer, lire ou regarder la télévision par exemple",
+      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer, ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
       "q9": "Avoir des pensées comme quoi vous seriez mieux mort(e) ou que vous souhaiteriez vous faire du mal d'une façon ou d'une autre",
       "score_label": "Score total",
       "score_max": "/ 27",
@@ -1404,9 +1404,9 @@
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier SNAP-IV.",
-      "instructions_1": "Hétéro-évaluation — à remplir par un parent ou un enseignant.",
+      "instructions_1": "Hétéro-évaluation, à remplir par un parent ou un enseignant.",
       "instructions_2": "Pour chacun des comportements suivants, indiquez à quelle fréquence vous l'observez chez l'enfant.",
-      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant — pas par l'enfant lui-même.",
+      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant, pas par l'enfant lui-même.",
       "opt_0": "Pas du tout",
       "opt_1": "Un peu",
       "opt_2": "Assez souvent",
@@ -1450,7 +1450,7 @@
       "submit": "Valider le questionnaire"
     },
     "asrs6": {
-      "label": "ASRS v1.1 — Dépistage",
+      "label": "ASRS v1.1, Dépistage",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
@@ -1475,7 +1475,7 @@
       "submit": "Valider le questionnaire"
     },
     "asrs18": {
-      "label": "ASRS v1.1 — Bilan Complet",
+      "label": "ASRS v1.1, Bilan Complet",
       "description": "",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
@@ -1542,17 +1542,17 @@
     "motivational_balance": {
       "label": "Balance motivationnelle",
       "description": "Psychoéducation sur l'ambivalence et le changement",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "tab_guides": "Fiches",
       "tab_stage": "Stade",
       "tab_rulers": "Thermomètres",
       "tab_balance": "Balance",
       "info_title": "Sources scientifiques",
-      "info_miller": "Miller & Rollnick — Motivational Interviewing (3e éd., 2013)",
-      "info_prochaska": "Prochaska & DiClemente — Stages of Change (1983)",
-      "info_sdt": "Deci & Ryan — Self-Determination Theory (2000)",
-      "info_has": "HAS — Mésusage de substances (2014)",
-      "info_nice": "NICE — Behaviour change (PH49, 2014)",
+      "info_miller": "Miller & Rollnick, Motivational Interviewing (3e éd., 2013)",
+      "info_prochaska": "Prochaska & DiClemente, Stages of Change (1983)",
+      "info_sdt": "Deci & Ryan, Self-Determination Theory (2000)",
+      "info_has": "HAS, Mésusage de substances (2014)",
+      "info_nice": "NICE, Behaviour change (PH49, 2014)",
       "info_close": "Fermer",
       "stage_title": "Où j'en suis",
       "stage_subtitle": "Sélectionnez le stade qui vous correspond le mieux aujourd'hui.",
@@ -1567,7 +1567,7 @@
       "stage_5": "Maintien",
       "stage_5_desc": "Je maintiens le changement",
       "stage_6": "Rechute",
-      "stage_6_desc": "J'ai repris l'ancienne habitude — c'est normal",
+      "stage_6_desc": "J'ai repris l'ancienne habitude, c'est normal",
       "stage_history": "Historique des stades",
       "stage_no_history": "Aucun stade enregistré pour l'instant.",
       "rulers_title": "Mes thermomètres",
@@ -1592,7 +1592,7 @@
       "balance_behavior_label": "Ce que j'explore",
       "balance_behavior_placeholder": "Ex : Arrêter de fumer…",
       "balance_values_title": "Ce qui compte pour moi",
-      "balance_values_subtitle": "Choisissez jusqu'à 3 valeurs — elles ancreront votre balance.",
+      "balance_values_subtitle": "Choisissez jusqu'à 3 valeurs, elles ancreront votre balance.",
       "balance_values_save": "Valider mes valeurs",
       "balance_for": "Pour changer",
       "balance_against": "Contre changer",
@@ -1619,15 +1619,15 @@
       "values_growth": "Évolution personnelle"
     },
     "cape42": {
-      "label": "CAPE-42 — Expériences psychotiques",
+      "label": "CAPE-42, Expériences psychotiques",
       "description": ""
     },
     "audit": {
-      "label": "AUDIT — Dépistage alcool",
+      "label": "AUDIT, Dépistage alcool",
       "description": ""
     },
     "cssrs": {
-      "label": "C-SSRS — Risque suicidaire",
+      "label": "C-SSRS, Risque suicidaire",
       "description": ""
     }
   },
@@ -1659,7 +1659,7 @@
         "title": "Sécuriser mon environnement",
         "hint": "Comment rendre mon entourage plus sûr ?"
       },
-      "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide",
+      "footer": "Boutons d'urgence permanents en bas d'écran : 15, SAMU | 3114, Prévention du suicide",
       "anchors_title": "Mes raisons de tenir",
       "anchors_subtitle": "Des images et une phrase qui vous rappellent pourquoi la vie vaut la peine d'être vécue.",
       "practitioner_message_label": "Message de votre soignant",
@@ -1699,33 +1699,33 @@
       "description": "Jauges d'auto-évaluation (0-3) : sédation, akathisie, tremblements, sécheresse buccale.",
       "field_1": {
         "label": "Sédation",
-        "detail": "Somnolence, lenteur, difficultés de concentration — échelle 0–3"
+        "detail": "Somnolence, lenteur, difficultés de concentration, échelle 0 à 3"
       },
       "field_2": {
         "label": "Akathisie",
-        "detail": "Agitation intérieure, impossibilité de rester immobile — échelle 0–3"
+        "detail": "Agitation intérieure, impossibilité de rester immobile, échelle 0 à 3"
       },
       "field_3": {
         "label": "Tremblements",
-        "detail": "Mains, membres — lithium, valproate, antipsychotiques — échelle 0–3"
+        "detail": "Mains, membres, lithium, valproate, antipsychotiques, échelle 0 à 3"
       },
       "field_4": {
         "label": "Sécheresse buccale",
-        "detail": "Anticholinergiques, tricycliques — échelle 0–3"
+        "detail": "Anticholinergiques, tricycliques, échelle 0 à 3"
       },
       "field_5": {
         "label": "Troubles du sommeil",
-        "detail": "Insomnie ou hypersomnie — ISRS, IRSN, stabilisateurs — échelle 0–3"
+        "detail": "Insomnie ou hypersomnie, ISRS, IRSN, stabilisateurs, échelle 0 à 3"
       },
       "field_6": {
         "label": "Nausées / troubles digestifs",
-        "detail": "Lithium, valproate, ISRS — échelle 0–3"
+        "detail": "Lithium, valproate, ISRS, échelle 0 à 3"
       },
       "field_7": {
         "label": "Notes libres",
         "detail": "Contexte, remarque, moment de la journée"
       },
-      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
+      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif, conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
     },
     "medication_adherence": {
       "label": "Module Observance",
@@ -1750,11 +1750,11 @@
         "label": "Historique",
         "detail": "Liste brute des 30 derniers jours (date, statut, note)"
       },
-      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour, aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses.",
+      "description": "Bibliothèque de fiches à lire, classées par thème (mon traitement, hygiène de vie…).",
       "title": "Psychoéducation",
       "intro": "Consultez vos fiches de savoir.",
       "empty_title": "Aucune carte disponible",
@@ -1779,15 +1779,15 @@
       },
       "field_3": {
         "label": "Temps pour s'endormir",
-        "detail": "Curseur en minutes (0–120)"
+        "detail": "Curseur en minutes (0 à 120)"
       },
       "field_4": {
         "label": "Nombre de réveils nocturnes",
-        "detail": "Curseur (0–10)"
+        "detail": "Curseur (0 à 10)"
       },
       "field_5": {
         "label": "Durée totale des réveils",
-        "detail": "Curseur en minutes (0–120)"
+        "detail": "Curseur en minutes (0 à 120)"
       },
       "field_6": {
         "label": "Qualité du sommeil",
@@ -1801,7 +1801,7 @@
         "label": "Notes libres",
         "detail": "Champ texte optionnel"
       },
-      "footer": "Formule TCC-I (Morin, 1993) — SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70–84 % · < 70 %."
+      "footer": "Formule TCC-I (Morin, 1993) : SE (%) = Temps de sommeil effectif ÷ Temps passé au lit × 100. Le temps de sommeil effectif = durée au lit − latence d'endormissement − durée totale des réveils nocturnes. Seuils de référence clinique : ≥ 85 % · 70 à 84 % · < 70 %."
     },
     "diet_weight_psycho": {
       "label": "Psychoéducation diététique & poids",
@@ -1809,26 +1809,26 @@
     },
     "chronobiology_tracker": {
       "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires."
+      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
       "description": "Suivi quotidien de l'humeur et du niveau d'énergie sur une échelle visuelle.",
       "field_1": {
         "label": "Humeur",
-        "detail": "Échelle 1–10"
+        "detail": "Échelle 1 à 10"
       },
       "field_2": {
         "label": "Énergie",
-        "detail": "Échelle 1–10"
+        "detail": "Échelle 1 à 10"
       },
       "field_3": {
         "label": "Anxiété",
-        "detail": "Échelle 1–10"
+        "detail": "Échelle 1 à 10"
       },
       "field_4": {
         "label": "Plaisir",
-        "detail": "Échelle 1–10 — dimension anhédonique (SHAPS 1995)"
+        "detail": "Échelle 1 à 10, dimension anhédonique (SHAPS 1995)"
       },
       "field_5": {
         "label": "Notes libres",
@@ -1849,25 +1849,25 @@
       },
       "field_2": {
         "label": "Nom de l'activité",
-        "detail": "Texte libre — ex : Marche 20 min, Appel à un ami"
+        "detail": "Texte libre, ex : Marche 20 min, Appel à un ami"
       },
       "field_3": {
         "label": "Réalisée / Planifiée",
         "detail": "Le patient coche quand l'activité est accomplie"
       },
       "field_4": {
-        "label": "Plaisir (0–10)",
-        "detail": "Satisfaction retirée de l'activité — brut, sans interprétation"
+        "label": "Plaisir (0 à 10)",
+        "detail": "Satisfaction retirée de l'activité, brut, sans interprétation"
       },
       "field_5": {
-        "label": "Maîtrise (0–10)",
-        "detail": "Sentiment d'accomplissement — brut, sans interprétation"
+        "label": "Maîtrise (0 à 10)",
+        "detail": "Sentiment d'accomplissement, brut, sans interprétation"
       },
       "field_6": {
         "label": "Notes libres",
         "detail": "Contexte, ressenti, remarque"
       },
-      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -1878,11 +1878,11 @@
       },
       "step_2": {
         "title": "Émotion(s)",
-        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0–100) ?"
+        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0 à 100) ?"
       },
       "step_3": {
         "title": "Pensée automatique",
-        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0–100) ?"
+        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0 à 100) ?"
       },
       "step_4": {
         "title": "Réponse rationnelle",
@@ -1890,7 +1890,7 @@
       },
       "step_5": {
         "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0–100) ? Conviction en la pensée alternative (0–100) ?"
+        "hint": "Quelle émotion maintenant ? Intensité (0 à 100) ? Conviction en la pensée alternative (0 à 100) ?"
       },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
@@ -1903,7 +1903,7 @@
       "description": "Exercice 5-4-3-2-1 pour revenir au présent en cas de dissociation ou de rumination sévère."
     },
     "rim": {
-      "label": "RIM – Imagerie mentale",
+      "label": "RIM - Imagerie mentale",
       "description": "Technique de retraitement par l'imagerie mentale."
     },
     "fear_thermometer": {
@@ -1914,51 +1914,51 @@
         "detail": "Sélection dans le catalogue personnel ou texte libre"
       },
       "field_2": {
-        "label": "SUDs avant (0–100)",
-        "detail": "Niveau de détresse subjective avant la stratégie — chiffre brut, sans interprétation"
+        "label": "SUDs avant (0 à 100)",
+        "detail": "Niveau de détresse subjective avant la stratégie, chiffre brut, sans interprétation"
       },
       "field_3": {
         "label": "Stratégies utilisées",
         "detail": "Multi-sélection : Respiration lente, Ancrage 5-4-3-2-1, Exposition, etc. + texte libre"
       },
       "field_4": {
-        "label": "SUDs après (0–100)",
-        "detail": "Niveau de détresse après la stratégie — optionnel (remplissage différé possible)"
+        "label": "SUDs après (0 à 100)",
+        "detail": "Niveau de détresse après la stratégie, optionnel (remplissage différé possible)"
       },
       "field_5": {
         "label": "Notes libres",
         "detail": "Contexte, observations, remarque"
       },
-      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
+      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0 à 100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
       "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
       "field_1": {
         "label": "Cohérence cardiaque",
-        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
+        "detail": "Lehrer & Gevirtz (2014) : Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
       },
       "field_2": {
         "label": "Respiration diaphragmatique",
-        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
+        "detail": "HAS, Conrad et al. (2007) : Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
       },
       "field_3": {
         "label": "Respiration carrée",
-        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées"
+        "detail": "VA/DoD Guidelines, Grade C · 4-4-4-4 · 4 min recommandées"
       },
       "field_4": {
         "label": "Technique 4-7-8",
-        "detail": "Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
+        "detail": "Accord experts, Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
       },
       "field_5": {
         "label": "Pleine conscience respiratoire",
-        "detail": "MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
+        "detail": "MBCT Segal et al. (2002) : Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
       },
       "field_6": {
         "label": "Historique des sessions",
-        "detail": "Technique utilisée + durée effective — données brutes, sans interprétation"
+        "detail": "Technique utilisée + durée effective, données brutes, sans interprétation"
       },
-      "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+      "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
       "label": "Saturation cognitive",
@@ -2056,7 +2056,7 @@
       "li_a2_seg3": " : il perturbe les cycles du sommeil profond.",
       "li_alim_3": "Ne mangez pas de repas copieux dans les 2 heures précédant le coucher.",
       "h_sport": "5. Activité physique",
-      "p_sport_seg1": "L'activité physique régulière améliore le sommeil — mais évitez le sport intense dans les ",
+      "p_sport_seg1": "L'activité physique régulière améliore le sommeil, mais évitez le sport intense dans les ",
       "p_sport_seg2": "3 heures avant le coucher",
       "p_sport_seg3": ".",
       "h_lit": "6. Le lit = sommeil",
@@ -2102,7 +2102,7 @@
       "p_retenir_1": "Prenez à nouveau une grande inspiration. Si l'angoisse est toujours là, recommencez le cycle avec d'autres objets.",
       "h_retenir": "À retenir",
       "li_r1": "Prenez votre temps à chaque étape.",
-      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse — l'important est de ",
+      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse, l'important est de ",
       "li_r2_s2": "focaliser votre attention",
       "li_r2_s3": ".",
       "li_r3": "Cette technique demande un peu de pratique. Entraînez-vous avant les moments de crise.",

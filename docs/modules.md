@@ -26,8 +26,8 @@
 | `medication_adherence` | Observance médicamenteuse | `daily_checkin` | SQLite local | [doc](modules/medication_adherence.md) |
 | `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
 | `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
-| `psychoeducation` | Psychoéducation | `cards` | IDs lus Supabase, statut lecture Supabase | [doc](modules/psychoeducation.md) |
-| `diet_weight_psycho` | Alimentation et psychotropes | `psyedu` | Supabase `psyedu_topics`/`psyedu_blocks` | — |
+| `psychoeducation` | Psychoéducation (bibliothèque) | `psyedu_library` | Fiches `psyedu_topics` (par thème) débloquées via `patient_modules.config.unlocked_topics` | [doc](modules/psychoeducation.md) |
+| `diet_weight_psycho` | Alimentation et psychotropes | `psyedu` | Supabase `psyedu_topics`/`psyedu_blocks` (fiches reclassées par thème dans la bibliothèque) | — |
 | `chronobiology_tracker` | Régularité chronobiologique | `tabbed` (Fiches + Journal + Mois) | SQLite `chrono_entries` ; fiches Supabase | — |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Comprendre `psyedu` + Agir en crise `crisis_companion`) | Supabase `psyedu_topics`/`psyedu_blocks` ; onglet « Agir en crise » sans stockage | [doc](modules/distress_tolerance.md) |
 | `craving_journal` | Journal de craving (TCC addictologie) | `tabbed` (Fiches + Journal) | SQLite `form_entries` ; fiches Supabase | — |

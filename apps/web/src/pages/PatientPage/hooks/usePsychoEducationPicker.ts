@@ -3,21 +3,20 @@ import { useTranslation } from 'react-i18next'
 import { useToast } from '../../../contexts/ToastContext'
 import {
   unlockPsychoeducation,
-  updatePsychoeducationCards,
+  updatePsychoeducationTopics,
 } from '../../../services/moduleAssignmentService'
-import type { PatientModule, PsychoeducationCardEntry } from '../../../lib/database.types'
-import type { PsychoCardInfo } from '../../../services/moduleService'
+import type { PatientModule, PsychoeducationTopicEntry } from '../../../lib/database.types'
 
 type PickerMode = 'off' | 'unlock' | 'edit'
 
-function getUnlockedCards(mod: PatientModule): PsychoeducationCardEntry[] {
-  const config = mod.config as { unlocked_cards?: PsychoeducationCardEntry[] }
-  return config?.unlocked_cards ?? []
+function getUnlockedTopics(mod: PatientModule): PsychoeducationTopicEntry[] {
+  const config = mod.config as { unlocked_topics?: PsychoeducationTopicEntry[] }
+  return config?.unlocked_topics ?? []
 }
 
 export function usePsychoEducationPicker(
   modules: PatientModule[],
-  psychoCards: PsychoCardInfo[],
+  allTopicIds: string[],
   patientId: string,
   practitionerId: string,
   onReloadModules: () => Promise<void>,
@@ -26,7 +25,7 @@ export function usePsychoEducationPicker(
   const toast = useToast()
 
   const [mode, setMode] = useState<PickerMode>('off')
-  const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set())
+  const [selectedTopicIds, setSelectedTopicIds] = useState<Set<string>>(new Set())
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,9 +34,9 @@ export function usePsychoEducationPicker(
   const open = (openMode: 'unlock' | 'edit') => {
     setError(null)
     if (openMode === 'edit' && psychoModule) {
-      setSelectedCardIds(new Set(getUnlockedCards(psychoModule).map(c => c.card_id)))
+      setSelectedTopicIds(new Set(getUnlockedTopics(psychoModule).map(tpc => tpc.topic_id)))
     } else {
-      setSelectedCardIds(new Set(psychoCards.map(c => c.id)))
+      setSelectedTopicIds(new Set(allTopicIds))
     }
     setMode(openMode)
   }
@@ -47,16 +46,16 @@ export function usePsychoEducationPicker(
     setError(null)
   }
 
-  const toggleCard = (cardId: string) => {
-    setSelectedCardIds(prev => {
+  const toggleTopic = (topicId: string) => {
+    setSelectedTopicIds(prev => {
       const next = new Set(prev)
-      if (next.has(cardId)) { next.delete(cardId) } else { next.add(cardId) }
+      if (next.has(topicId)) { next.delete(topicId) } else { next.add(topicId) }
       return next
     })
   }
 
   const confirm = async () => {
-    if (selectedCardIds.size === 0) {
+    if (selectedTopicIds.size === 0) {
       setError(t('patient.psycho_pick_error'))
       return
     }
@@ -64,17 +63,17 @@ export function usePsychoEducationPicker(
     setError(null)
 
     if (mode === 'unlock') {
-      const { ok } = await unlockPsychoeducation(patientId, practitionerId, selectedCardIds)
+      const { ok } = await unlockPsychoeducation(patientId, practitionerId, selectedTopicIds)
       if (!ok) {
         toast.error(t('patient.psycho_error_unlock'))
         setSaving(false)
         return
       }
     } else if (mode === 'edit' && psychoModule) {
-      const { ok } = await updatePsychoeducationCards(
+      const { ok } = await updatePsychoeducationTopics(
         psychoModule.id,
-        getUnlockedCards(psychoModule),
-        selectedCardIds,
+        getUnlockedTopics(psychoModule),
+        selectedTopicIds,
       )
       if (!ok) {
         toast.error(t('patient.psycho_error_update'))
@@ -90,14 +89,14 @@ export function usePsychoEducationPicker(
 
   return {
     psychoModule,
-    getUnlockedCards,
+    getUnlockedTopics,
     mode,
-    selectedCardIds,
+    selectedTopicIds,
     saving,
     error,
     open,
     cancel,
-    toggleCard,
+    toggleTopic,
     confirm,
   }
 }

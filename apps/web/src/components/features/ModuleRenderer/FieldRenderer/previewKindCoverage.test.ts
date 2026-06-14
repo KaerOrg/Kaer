@@ -18,6 +18,7 @@ import { describe, it, expect } from 'vitest'
 const HANDLED_PREVIEW_KINDS = new Set([
   'coming_soon',
   'psyedu',
+  'psyedu_library',
   'chrono_month',
   'tabbed',
   'steps',

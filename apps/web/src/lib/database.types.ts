@@ -857,8 +857,10 @@ export interface PractitionerModuleSettings {
 }
 
 
-export interface PsychoeducationCardEntry {
-  card_id: string
+// Refonte : la psychoéducation débloque des fiches (psyedu_topics), plus des
+// cartes codées en dur. config.unlocked_topics : PsychoeducationTopicEntry[].
+export interface PsychoeducationTopicEntry {
+  topic_id: string
   is_read: boolean
   unlocked_at: string
 }

@@ -41,7 +41,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('distress_tolerance',      'safety',      'coming_soon', 3,  false),
   ('medication_side_effects', 'iatrogenic',  'fields',      4,  false),
   ('medication_adherence',    'iatrogenic',  'fields',      5,  false),
-  ('psychoeducation',         'iatrogenic',  'cards',       6,  true),
+  ('psychoeducation',         'iatrogenic',  'psyedu_library', 6,  true),
   ('sleep_diary',             'lifestyle',   'fields',      7,  false),
   ('diet_weight_psycho',      'lifestyle',   'coming_soon', 8,  false),
   ('chronobiology_tracker',   'lifestyle',   'coming_soon', 9,  false),

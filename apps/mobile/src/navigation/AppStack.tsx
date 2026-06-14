@@ -6,8 +6,6 @@ import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import AppointmentsScreen from '../screens/AppointmentsScreen'
 import BookAppointmentScreen from '../screens/BookAppointmentScreen'
-import PsychoeducationScreen from '../screens/modules/PsychoeducationScreen'
-import CardDetailScreen from '../screens/modules/CardDetailScreen'
 import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
 import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
@@ -28,8 +26,6 @@ function getTechniqueTitle(key: string): string {
 
 export type AppStackParamList = {
   Tabs: undefined
-  Psychoeducation: undefined
-  CardDetail: { cardId: string; isRead: boolean }
   BreathingTechniques: undefined
   BreathingExercise: { techniqueKey: string }
   ScaleHistory: { scale_id: string }
@@ -97,20 +93,6 @@ export default function AppStack() {
         component={BookAppointmentScreen}
         options={({ route }) => ({
           title: route.params.appointmentId ? 'Reprogrammer' : 'Prendre un rendez-vous',
-        })}
-      />
-      <Stack.Screen
-        name="Psychoeducation"
-        component={PsychoeducationScreen}
-        options={{ title: 'Psychoéducation' }}
-      />
-      <Stack.Screen
-        name="CardDetail"
-        component={CardDetailScreen}
-        options={({ route }) => ({
-          title: route.params.cardId
-            ? (require('../constants/psychoeducationCards').PSYCHOEDUCATION_CARDS[route.params.cardId]?.title ?? 'Carte')
-            : 'Carte',
         })}
       />
       <Stack.Screen

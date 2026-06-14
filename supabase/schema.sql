@@ -999,6 +999,59 @@ create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
 
 
 -- ============================================================
+-- REFONTE PSYCHOÉDUCATION — thèmes + découplage fiche ↔ module
+-- ============================================================
+-- Une fiche (psyedu_topics) n'est plus possédée par un module : elle appartient
+-- à un thème (psyedu_themes), porte des tags (psyedu_topic_tags) et peut être
+-- réutilisée par N modules via module_topics. Source unique de vérité par fiche.
+-- Les tables tag_dimensions / tags / module_tags sont définies plus haut
+-- (taxonomie des modules — branche feat/improve-module-organization).
+
+-- Thèmes de la bibliothèque (libellé via i18n : psyedu.theme.<id>)
+create table if not exists public.psyedu_themes (
+  id          text primary key,          -- 'treatment', 'lifestyle', …
+  icon_name   text not null,
+  sort_order  int  not null default 0
+);
+alter table public.psyedu_themes enable row level security;
+drop policy if exists "psyedu_themes_read" on public.psyedu_themes;
+create policy "psyedu_themes_read" on public.psyedu_themes
+  for select to authenticated using (true);
+
+-- Évolution des fiches : rattachement à un thème + date de dernière révision
+-- (couche « preuve »). module_key conservé (nullable) le temps de la transition.
+alter table public.psyedu_topics add column if not exists theme_id    text references public.psyedu_themes(id);
+alter table public.psyedu_topics add column if not exists reviewed_at date;
+alter table public.psyedu_topics alter column module_key drop not null;
+create index if not exists idx_psyedu_topics_theme on public.psyedu_topics(theme_id);
+
+-- Lien N:N module ↔ fiche (réutilisation ordonnée d'une fiche par un module)
+create table if not exists public.module_topics (
+  module_id   text not null references public.modules(id)       on delete cascade,
+  topic_id    uuid not null references public.psyedu_topics(id) on delete cascade,
+  sort_order  int  not null default 0,
+  primary key (module_id, topic_id)
+);
+alter table public.module_topics enable row level security;
+drop policy if exists "module_topics_read" on public.module_topics;
+create policy "module_topics_read" on public.module_topics
+  for select to authenticated using (true);
+create index if not exists idx_module_topics_topic on public.module_topics(topic_id);
+
+-- Tags d'une fiche (réutilise la taxonomie tags ci-dessus)
+create table if not exists public.psyedu_topic_tags (
+  topic_id  uuid not null references public.psyedu_topics(id) on delete cascade,
+  tag_id    text not null references public.tags(id)          on delete cascade,
+  primary key (topic_id, tag_id)
+);
+alter table public.psyedu_topic_tags enable row level security;
+drop policy if exists "psyedu_topic_tags_read" on public.psyedu_topic_tags;
+create policy "psyedu_topic_tags_read" on public.psyedu_topic_tags
+  for select to authenticated using (true);
+create index if not exists idx_psyedu_topic_tags_tag on public.psyedu_topic_tags(tag_id);
+
+
+-- ============================================================
 -- TABLE : patient_push_tokens (Tokens push par device patient)
 -- ============================================================
 -- Un patient peut avoir plusieurs tokens (plusieurs devices).
@@ -2086,6 +2139,34 @@ create index if not exists idx_support_requests_ip_recent
 
 alter table public.support_requests enable row level security;
 -- Aucune policy client : insertion par l'Edge Function (service_role), lecture support/DPO.
+
+
+-- ============================================================
+-- TABLE : theme_suggestions (Suggestions de fiches psychoéducation)
+-- ============================================================
+-- Le praticien suggère un thème de fiche manquant dans la bibliothèque. Écrite
+-- EXCLUSIVEMENT par l'Edge Function `send-theme-suggestion` (service_role), qui
+-- dérive l'identité depuis le JWT et notifie l'équipe éditoriale par email (Resend).
+-- Logistique éditoriale : zéro donnée patient, zéro interprétation (hors périmètre MDR).
+-- Aucune policy client (lecture équipe via dashboard).
+
+create table if not exists public.theme_suggestions (
+  id              uuid        primary key default gen_random_uuid(),
+  practitioner_id uuid        references public.practitioners(id) on delete set null,
+  suggestion      text        not null,
+  status          text        not null default 'new' check (status in ('new', 'reviewed', 'done', 'declined')),
+  -- Hash SHA-256 de l'IP appelante (jamais en clair) — rate-limit de l'endpoint.
+  ip_hash         text,
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists idx_theme_suggestions_status
+  on public.theme_suggestions(status, created_at desc);
+create index if not exists idx_theme_suggestions_ip_recent
+  on public.theme_suggestions(ip_hash, created_at desc);
+
+alter table public.theme_suggestions enable row level security;
+-- Aucune policy client : insertion par l'Edge Function (service_role), lecture équipe.
 
 
 -- ============================================================

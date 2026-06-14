@@ -39,4 +39,33 @@ describe('InputField', () => {
     render(<InputField label="Email" id="custom-id" />)
     expect(document.getElementById('custom-id')).toBeInTheDocument()
   })
+
+  it('rend un <input> par défaut (non multiline)', () => {
+    render(<InputField label="Nom" />)
+    expect(screen.getByRole('textbox').tagName).toBe('INPUT')
+  })
+
+  it('rend un <textarea> quand multiline', () => {
+    render(<InputField label="Note" multiline />)
+    expect(screen.getByRole('textbox').tagName).toBe('TEXTAREA')
+  })
+
+  it('forwarde les attributs textarea (rows, maxLength) en multiline', () => {
+    render(<InputField label="Note" multiline rows={4} maxLength={500} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toHaveAttribute('rows', '4')
+    expect(textarea).toHaveAttribute('maxlength', '500')
+  })
+
+  it('associe le label au textarea et accepte la saisie en multiline', async () => {
+    render(<InputField label="Note" multiline />)
+    const textarea = screen.getByLabelText('Note')
+    await userEvent.type(textarea, 'Bonjour')
+    expect(textarea).toHaveValue('Bonjour')
+  })
+
+  it("applique la classe d'erreur sur le textarea en multiline", () => {
+    render(<InputField label="Note" multiline error="Erreur" />)
+    expect(screen.getByRole('textbox')).toHaveClass('input-field__input--error')
+  })
 })

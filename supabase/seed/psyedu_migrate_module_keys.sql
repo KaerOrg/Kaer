@@ -1,3 +1,0 @@
--- Migration obsolète — les fiches sleep_chrono, nutrition_brain, gentle_activity
--- sont désormais directement sous module_key = 'diet_weight_psycho' dans psyedu_seed.sql.
--- Ce fichier ne doit plus être exécuté.

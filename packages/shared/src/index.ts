@@ -122,6 +122,7 @@ export type PreviewKind =
   | 'exposure_tracker'
   | 'decision_grid'
   | 'psyedu'
+  | 'psyedu_library'
   | 'tabbed'
   | 'chrono_month'
   | 'slider_dashboard'
@@ -148,19 +149,33 @@ export interface ModuleFieldsResult {
 
 // ─── Psychoéducation structurée (contenu en base — psyedu_topics + psyedu_blocks) ───────────
 
+// Thème de la bibliothèque psychoéducation (psyedu_themes).
+// Libellé via i18n : psyedu.theme.<id>.
+export interface PsyEduTheme {
+  readonly id: string
+  readonly icon_name: string
+  readonly sort_order: number
+}
+
 export interface PsyEduTopic {
   readonly id: string
-  readonly module_key: string
+  // Refonte : une fiche est découplée du module — elle appartient à un thème
+  // (theme_id) et peut être réutilisée par N modules via module_topics.
+  // module_key conservé (nullable) le temps de la transition.
+  readonly module_key: string | null
+  readonly theme_id: string | null
   readonly topic_key: string
   readonly icon_name: string
   readonly sort_order: number
   readonly is_active: boolean
+  readonly reviewed_at: string | null
 }
 
 export type PsyEduBlockType =
   | 'heading'
   | 'paragraph'
   | 'bullet_list'
+  | 'action_list'
   | 'tip'
   | 'blockquote'
   | 'source_link'

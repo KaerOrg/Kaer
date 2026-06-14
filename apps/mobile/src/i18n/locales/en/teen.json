@@ -2,12 +2,12 @@
   "global": {
     "greeting": "Hey!",
     "modulesTitle": "Your tools",
-    "noModules": "No tools unlocked yet — your care team is on it."
+    "noModules": "No tools unlocked yet, your care team is on it."
   },
   "home": {
     "title": "Your modules",
     "subheading": "Activated by your care team",
-    "empty_description": "No tools unlocked yet — your care team is on it.",
+    "empty_description": "No tools unlocked yet, your care team is on it.",
     "today_section": "Planned for today"
   },
   "modules": {
@@ -162,9 +162,9 @@
       "suds_before": "Before",
       "suds_after": "After",
       "section_trigger": "What's stressing you",
-      "section_before": "Stress level — Before",
+      "section_before": "Stress level, Before",
       "section_strategies": "What you did",
-      "section_after": "Stress level — After (optional)",
+      "section_after": "Stress level, After (optional)",
       "section_notes": "Notes (optional)",
       "suds_hint_before": "0 = chill  ·  100 = full panic",
       "suds_hint_after": "Fill in when it's done. You can come back later.",
@@ -186,8 +186,8 @@
       "strategy_exposure": "Stay in the situation",
       "strategy_distraction": "Think about something else",
       "strategy_contact": "Talk to someone",
-      "footer": "The SUDS scale measures your stress level — used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014.",
-      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider — it doesn't replace your care.",
+      "footer": "The SUDS scale measures your stress level, used in exposure therapy. Wolitzky-Taylor et al. 2008 · Craske et al. 2014.",
+      "disclaimer": "This module supports your appointments. The techniques shown were discussed with your care provider, it doesn't replace your care.",
       "ladder_empty_title": "Your fear ladder",
       "ladder_empty_text": "Add the situations that stress you out, from easiest to hardest.",
       "step_done": "Step done",
@@ -197,7 +197,7 @@
       "edit_step": "Edit situation",
       "step_label": "The situation you dread",
       "step_label_placeholder": "E.g. taking the subway when it's packed",
-      "step_target_label": "Initial stress level (0–100)",
+      "step_target_label": "Initial stress level (0 à 100)",
       "detail_no_sessions": "No exposure yet. Go for it when you feel ready.",
       "detail_history_title": "My exposures",
       "detail_do_exposure": "Do an exposure",
@@ -213,7 +213,7 @@
       "outcome_label": "What happened",
       "outcome_placeholder": "What actually happened?",
       "step_target_hint": "How stressful is this situation before you start working on it? Used to order your ladder, from easiest to hardest.",
-      "chart_y_axis": "Stress level (0–100)",
+      "chart_y_axis": "Stress level (0 à 100)",
       "chart_x_axis": "Sessions (S1, S2, …)",
       "chart_reference": "Initial stress",
       "scale_hint": "0 = no stress · 100 = maximum stress",
@@ -237,8 +237,8 @@
       "monthly_button": "Monthly view",
       "list_header": "My last 14 nights",
       "incomplete": "Incomplete entry",
-      "empty_day": "Not logged — tap to fill",
-      "quality_not_set": "– not set",
+      "empty_day": "Not logged, tap to fill",
+      "quality_not_set": "- not set",
       "section_schedule": "Schedule",
       "section_awakenings": "Awakenings during the night",
       "section_nightmares": "Nightmares",
@@ -281,7 +281,7 @@
       "back_btn": "Back",
       "notes_label": "Notes (optional)",
       "notes_placeholder": "Context, dreams, anything you want…",
-      "footer": "CBT-I night journal — evidence-based technique for insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
+      "footer": "CBT-I night journal, evidence-based technique for insomnia. Trauer et al., Ann Intern Med 2015 · NICE NG215 (2022)."
     },
     "medication_side_effects": {
       "label": "Treatment side effects tracker",
@@ -397,7 +397,7 @@
     },
     "breathing_techniques": {
       "title": "Breathing to calm down",
-      "intro": "Pick an exercise — it can really help you come down."
+      "intro": "Pick an exercise, it can really help you come down."
     },
     "rim": {
       "title": "Rewriting the nightmare",
@@ -413,7 +413,7 @@
       "hide_original": "Hide original nightmare",
       "protocol_step_1": "Get comfy somewhere quiet, ideally lying down.",
       "protocol_step_2": "Take a few slow, deep breaths before you start.",
-      "protocol_step_3": "Read your alternative scenario once or twice — take your time.",
+      "protocol_step_3": "Read your alternative scenario once or twice, take your time.",
       "protocol_step_4": "Close your eyes and picture the images from the scenario.",
       "protocol_step_5": "Practise every evening, ideally just before bed.",
       "sound_rain": "Gentle rain",
@@ -422,8 +422,8 @@
       "sound_wind": "Gentle wind",
       "sound_stream": "Stream",
       "safety_title": "Feeling really bad?",
-      "safety_3114": "3114 — National suicide prevention line",
-      "safety_15": "15 — Emergency services"
+      "safety_3114": "3114, National suicide prevention line",
+      "safety_15": "15, Emergency services"
     },
     "cognitive_saturation": {
       "title": "Stop the rumination",
@@ -449,7 +449,7 @@
       "step_notes_title": "Anything to add? (optional)",
       "step_notes_hint": "Context, situation, related thought… Free text.",
       "notes_free_placeholder": "Free note (optional)",
-      "footer": "Emotion wheel — putting words to your feelings actually helps. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
+      "footer": "Emotion wheel, putting words to your feelings actually helps. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
       "node": {
         "joy": "Joy",
         "joy__serenity": "Serenity",
@@ -578,7 +578,7 @@
       "q9": "Thoughts that you'd be better off dead or of hurting yourself",
       "score_label": "Total score",
       "score_max": "/ 27",
-      "footer": "Your score goes to your clinician — they interpret it.",
+      "footer": "Your score goes to your clinician, they interpret it.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Send my answers"
     },
@@ -623,7 +623,7 @@
       "q23": "Being afraid of the future",
       "score_label": "Mean score",
       "score_max": "/ 4",
-      "footer": "Your score goes to your clinician — they interpret it.",
+      "footer": "Your score goes to your clinician, they interpret it.",
       "progress": "{{answered}} / {{total}}",
       "submit": "Send my answers"
     },
@@ -646,14 +646,14 @@
       "q7": "Feeling afraid as if something awful might happen",
       "score_label": "Total score",
       "score_max": "/ 21",
-      "footer": "Your score goes to your clinician — they interpret it.",
+      "footer": "Your score goes to your clinician, they interpret it.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Send my answers"
     },
     "snap_iv": {
-      "instructions_1": "Adult evaluation — to be filled in by a parent or teacher.",
+      "instructions_1": "Adult evaluation, to be filled in by a parent or teacher.",
       "instructions_2": "For each of the following behaviours, indicate how often you observe it in the child.",
-      "warning": "This questionnaire must be completed by a parent, guardian or teacher — not by the child.",
+      "warning": "This questionnaire must be completed by a parent, guardian or teacher, not by the child.",
       "opt_0": "Not at all",
       "opt_1": "Just a little",
       "opt_2": "Quite a bit",
@@ -692,7 +692,7 @@
       "chip_i": "I",
       "chip_hi": "H/I",
       "chip_tod": "ODD",
-      "footer": "The score goes to the clinician — they interpret it.",
+      "footer": "The score goes to the clinician, they interpret it.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Submit questionnaire"
     },
@@ -712,7 +712,7 @@
       "q6": "How often do you feel like you're running on overdrive or can't slow down?",
       "score_label": "Total score",
       "score_max": "/ 24",
-      "footer": "Your score goes to your clinician — they interpret it.",
+      "footer": "Your score goes to your clinician, they interpret it.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Send my answers"
     },
@@ -748,7 +748,7 @@
       "score_max": "/ 72",
       "chip_a": "Part A",
       "chip_b": "Part B",
-      "footer": "Your score goes to your clinician — they interpret it.",
+      "footer": "Your score goes to your clinician, they interpret it.",
       "progress": "{{answered}} / {{total}} answers",
       "submit": "Send my answers"
     },
@@ -819,14 +819,14 @@
     "motivational_balance": {
       "label": "Motivational balance",
       "description": "Understanding your ambivalence and what drives change",
-      "disclaimer": "This module supports your consultations. It was introduced with your clinician — it doesn't replace your therapeutic follow-up.",
+      "disclaimer": "This module supports your consultations. It was introduced with your clinician, it doesn't replace your therapeutic follow-up.",
       "stage_subtitle": "Pick the stage that best describes you today.",
       "stage_1_desc": "I don't see a reason to change",
       "stage_2_desc": "I'm thinking about it, but haven't made up my mind",
       "stage_3_desc": "I'm planning to change soon",
       "stage_4_desc": "I've started to change",
       "stage_5_desc": "I'm keeping up the change",
-      "stage_6_desc": "I've gone back to the old habit — that's totally normal",
+      "stage_6_desc": "I've gone back to the old habit, that's totally normal",
       "rulers_importance_q": "How important is it for you to change?",
       "rulers_importance_why_label": "Why that score and not lower?",
       "rulers_importance_why_placeholder": "What motivates me to change…",
@@ -834,30 +834,30 @@
       "rulers_confidence_why_label": "What would make you more confident?",
       "rulers_confidence_why_placeholder": "What I'd need to believe in it…",
       "rulers_commitment_placeholder": "In one sentence, what I'm taking away from today…",
-      "balance_values_subtitle": "Choose up to 3 values — they'll anchor your balance.",
+      "balance_values_subtitle": "Choose up to 3 values, they'll anchor your balance.",
       "balance_item_placeholder": "Enter an argument…",
       "balance_commitment_placeholder": "In one sentence, what I'm taking away from today…"
     },
     "cape42": {
-      "label": "CAPE-42 — Psychotic Experiences",
+      "label": "CAPE-42, Psychotic Experiences",
       "description": "Self-assessment of unusual perceptions and beliefs"
     },
     "audit": {
-      "label": "AUDIT — Alcohol Use",
+      "label": "AUDIT, Alcohol Use",
       "description": "Alcohol use questionnaire"
     },
     "cssrs": {
-      "label": "C-SSRS — Suicide Risk",
+      "label": "C-SSRS, Suicide Risk",
       "description": "Suicide risk assessment questionnaire"
     },
     "distress_tolerance": {
-      "disclaimer": "This module supports your therapy sessions. The techniques were introduced with your clinician — it does not replace your therapeutic follow-up.",
+      "disclaimer": "This module supports your therapy sessions. The techniques were introduced with your clinician, it does not replace your therapeutic follow-up.",
       "tab_fiches": "Understand",
       "tab_now": "Act in a crisis",
       "now": {
         "title": "Ride the wave",
         "intro1": "A really strong urge or emotion is like a wave: it rises, hits a peak, then always comes back down.",
-        "intro2": "You don't have to fight it — just hold on until it passes. Pick an activity, and let the timer keep you company.",
+        "intro2": "You don't have to fight it, just hold on until it passes. Pick an activity, and let the timer keep you company.",
         "choose_activity": "Choose an activity",
         "pick_category": "What do you want to do right now?",
         "back": "Back",
@@ -894,11 +894,11 @@
       }
     },
     "exposure_hierarchy": {
-      "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician — it doesn't replace your follow-up.",
+      "disclaimer": "This module supports your appointments. The techniques were discussed with your clinician, it doesn't replace your follow-up.",
       "info_btn": "What is this technique?",
       "info_body": "The exposure hierarchy is a validated CBT technique. You list situations you avoid, rate them 0 to 100 by difficulty (SUDs score), then face them gradually starting with the easiest.",
       "empty_text": "Create your first exposure hierarchy with your clinician.",
-      "suds_hint": "From 0 (no stress) to 100 (max stress). This number is personal — no right or wrong answer.",
+      "suds_hint": "From 0 (no stress) to 100 (max stress). This number is personal, no right or wrong answer.",
       "description_label": "Situation to face",
       "description_hint": "Describe precisely the situation you avoid.",
       "description_placeholder": "E.g. Taking the lift alone to the 5th floor",

@@ -50,7 +50,7 @@ describe('BreathingTechniquesScreen', () => {
   it('affiche les sous-titres des techniques', async () => {
     render(<BreathingTechniquesScreen />)
     expect(await screen.findByText('6 respirations par minute')).toBeTruthy()
-    expect(screen.getByText('Box Breathing — 4-4-4-4')).toBeTruthy()
+    expect(screen.getByText('Box Breathing, 4-4-4-4')).toBeTruthy()
   })
 
   it('affiche les niveaux de preuve', async () => {
