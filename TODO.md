@@ -55,6 +55,32 @@ parasites et des boucles d'effets. Règle projet : `.claude/rules/coding-standar
       `ui/Accordion`, `ui/Modal`, `ui/SearchInput`, `ui/Toast`, `ui/Toggle`,
       `ModulePreviewPage`, `PatientPage/tabs/PatientOverviewTab`.
 
+## 1bis. Migration des `<textarea>` bruts vers `InputField multiline`
+
+**Pourquoi.** `InputField` sait désormais rendre un `<textarea>` via la prop `multiline`
+(livré 2026-06-14). ~17 `<textarea>` bruts subsistent dans des features, chacun avec son
+label/markup/CSS dupliqué. Les unifier supprime la duplication (règle « design system
+d'abord ») et centralise le style.
+
+**Prérequis (à faire dans la branche dédiée `feat/inputfield-textarea`).** Beaucoup de
+ces textareas sont **sans label visible** (placeholder / `aria-label`), **ref-based**
+(non contrôlés) ou **stylés en compact**. Avant de migrer, étendre `InputField` :
+- rendre `label` **optionnel** (pas de `<label>` rendu si absent, s'appuyer sur `aria-label`) ;
+- ajouter `forwardRef` vers le `<textarea>` / `<input>` (usages non contrôlés) ;
+- **revue visuelle écran par écran** (le style `input-field__input` change l'apparence
+  des champs compacts actuels).
+
+**Suivi (≈17 occurrences, hors `TextareaWidget` qui est un widget de module) :**
+
+- [ ] `src/components/features/CSSRSScreenPanel.tsx` — 2 (label-less ; placeholders FR en dur à passer i18n au passage)
+- [ ] `src/pages/PatientPage/tabs/PatientModulesTab.tsx` — 6 (crise + effets ; certains en style inline hex à nettoyer)
+- [ ] `src/pages/PatientPage/tabs/PatientNotesTab.tsx` — 2 (1 ref)
+- [ ] `src/components/features/AppointmentModal/AppointmentModal.tsx` — 2 (1 ref)
+- [ ] `src/components/features/NotificationRoutineModal/NotificationRoutineModal.tsx` — 1 (ref)
+- [ ] `src/components/features/SupportRequestModal/SupportRequestModal.tsx` — 1 (label + controlled, fit propre)
+- [ ] `src/components/features/CaseloadTable/ObservationBlock.tsx` — 1 (ref, aria-label)
+- [ ] `src/pages/PatientPage/tabs/PatientOverviewTab.tsx` — 1
+
 ## 2. `react-hooks/static-components` (préexistant)
 
 - [ ] `src/components/ui/Chart/LineChart/LineChart.tsx:134` — `error` :
