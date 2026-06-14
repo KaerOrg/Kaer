@@ -78,6 +78,7 @@ values
 -- DBT — Dialectical Behavior Therapy (Linehan)
 -- Sources niveau 1 (efficacité DBT) : PMID 16818865, PMID 25806661, PMID 35088687, NICE CG78 section 1.3.4.5
 -- Sources niveau 2 (mécanismes physiologiques fiches) : PMID 8677286, PMID 28088704, PMID 34912254
+-- Source compagnon de crise (urge surfing) : PMID 24647726 (Bowen 2014) + Marlatt & Gordon 1985 (livre)
 -- Correction contenu fiche TIPP : "brûle l'adrénaline" → "décharge l'activation sympathique" (psyedu.json)
 
 ,
@@ -176,6 +177,22 @@ values
     null,
     'L''immersion faciale froide (30 s) produit des réductions significatives des symptômes physiologiques ET cognitifs de panique chez des patients avec trouble panique — réduction de la fréquence cardiaque et des symptômes auto-rapportés, avec effets anxiolytiques démontrables. Conclut explicitement au potentiel pour applications cliniques — base directe de la technique T (température) de TIPP.',
     7
+  ),
+
+  -- 8. Bowen et al. 2014 — JAMA Psychiatry (ECR, n=286, MBRP vs RP vs TAU)
+  --    PMID 24647726 — doi:10.1001/jamapsychiatry.2013.4546 (vérifié PubMed, abstract lu — déjà sourcé pour craving_journal)
+  --    Base probante de l'« urge surfing » (surfer la vague), technique du compagnon de crise interactif.
+  --    Origine de l'urge surfing : Marlatt GA & Gordon JR (1985), Relapse Prevention, Guilford Press (livre,
+  --    non indexé PubMed) — repris par Linehan dans la DBT (tolérance à la détresse) et par l'ACT.
+  (
+    '22222222-0001-0001-0001-000000000008',
+    'distress_tolerance',
+    'Bowen et al. — Pleine conscience et urge surfing : efficacité du MBRP vs prévention de rechute standard et TAU (JAMA Psychiatry, 2014)',
+    'rct',
+    'https://doi.org/10.1001/jamapsychiatry.2013.4546',
+    null,
+    'ECR (n=286) : les pratiques de pleine conscience — dont l''urge surfing, qui consiste à observer une pulsion intense comme une vague qui monte, atteint un pic puis redescend, sans agir dessus — soutiennent de meilleurs résultats à long terme en renforçant la tolérance à l''envie impérieuse. Technique introduite par Marlatt (1985), intégrée à la tolérance à la détresse de la DBT — base du compagnon de crise « traverser la vague ».',
+    8
   )
 
 -- ── medication_side_effects ─────────────────────────────────────────────────

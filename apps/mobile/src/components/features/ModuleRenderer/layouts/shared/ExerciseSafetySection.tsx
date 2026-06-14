@@ -10,7 +10,7 @@ import { View, Text, Pressable, Linking, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { spacing, radius } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 
 export interface ExerciseSafetySectionProps {
   /** Fields du module — les `exercise_safety*` en sont extraits. */
@@ -18,7 +18,7 @@ export interface ExerciseSafetySectionProps {
 }
 
 export function ExerciseSafetySection({ fields }: ExerciseSafetySectionProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const titleField = fields.find(f => f.field_type === 'exercise_safety_title')
   const phoneFields = [...fields]
     .filter(f => f.field_type === 'exercise_safety')

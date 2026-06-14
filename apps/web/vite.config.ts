@@ -5,6 +5,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // En déploiement GitHub Pages : VITE_BASE='/Kaer/' (injecté par le workflow)
+  // Avec custom domain : VITE_BASE='/' ou laisser vide
+  base: process.env.VITE_BASE ?? '/',
   server: {
     host: true,
     port: 3000,

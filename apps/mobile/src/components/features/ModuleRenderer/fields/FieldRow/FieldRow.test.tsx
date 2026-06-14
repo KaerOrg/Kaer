@@ -6,7 +6,7 @@ import type { ContentField } from '../../../../../services/moduleService'
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 jest.mock('../../../../../hooks/useModuleT', () => ({
-  useModuleT: () => (key: string) => key,
+  useModuleTranslation: () => (key: string) => key,
 }))
 
 function field(props: Record<string, string> = {}, text_code: string | null = null): ContentField {

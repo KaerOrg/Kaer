@@ -3,7 +3,7 @@ import { View, Text, Pressable } from 'react-native'
 import { styles } from './Card.styles'
 import type { CardProps } from './Card.types'
 
-export const Card = React.memo(function Card({ header, actions, children, variant = 'default', state, style, accentColor, onPress, accessibilityLabel }: CardProps) {
+export const Card = React.memo(function Card({ header, actions, children, variant = 'default', state, style, accentColor, onPress, accessibilityLabel, testID }: CardProps) {
   const accentStyle = useMemo(
     () => accentColor ? { borderColor: accentColor, borderWidth: 2 } : null,
     [accentColor],
@@ -31,6 +31,7 @@ export const Card = React.memo(function Card({ header, actions, children, varian
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
+        testID={testID}
       >
         {inner}
       </Pressable>
@@ -38,7 +39,7 @@ export const Card = React.memo(function Card({ header, actions, children, varian
   }
 
   return (
-    <View style={[styles.base, styles[variant], state ? styles[state] : null, accentStyle, style]}>
+    <View style={[styles.base, styles[variant], state ? styles[state] : null, accentStyle, style]} testID={testID}>
       {inner}
     </View>
   )

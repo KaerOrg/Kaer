@@ -11,7 +11,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { ExerciseSafetySection } from '../shared'
 import { styles } from './styles'
 
@@ -27,7 +27,7 @@ export interface GuidedExerciseLayoutProps {
 }
 
 export function GuidedExerciseLayout({ sections, uiFields, footer, accentColor }: GuidedExerciseLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const [mode, setMode] = useState<'intro' | 'guided' | 'done'>('intro')
   const [currentStep, setCurrentStep] = useState(0)
 

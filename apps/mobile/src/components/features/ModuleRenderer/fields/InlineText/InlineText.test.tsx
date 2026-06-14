@@ -4,7 +4,7 @@ import { InlineText } from './InlineText'
 import type { ContentField } from '../../../../../services/moduleService'
 
 jest.mock('../../../../../hooks/useModuleT', () => ({
-  useModuleT: () => (key: string) => key,
+  useModuleTranslation: () => (key: string) => key,
 }))
 
 function field(field_type: string, text_code: string | null, props: Record<string, string> = {}): ContentField {

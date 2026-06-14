@@ -78,22 +78,7 @@
   white-space: nowrap;
 }
 
-.availability-editor__rule-delete {
-  background: none;
-  border: none;
-  padding: 4px;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  border-radius: var(--radius-sm, 6px);
-  transition: color 0.15s, background 0.15s;
-}
-
-.availability-editor__rule-delete:hover {
-  color: var(--color-danger, #ef4444);
-  background: var(--color-danger-light, #fee2e2);
-}
+/* Bouton de suppression de règle via <Button variant="ghost" category="danger" />. */
 
 .availability-editor__no-rules {
   font-size: 13px;

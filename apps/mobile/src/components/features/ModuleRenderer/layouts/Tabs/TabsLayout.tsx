@@ -11,7 +11,7 @@ import type { ComponentType } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { colors } from '../../../../../theme'
 import type { ContentField, PreviewKind } from '../../../../../services/moduleService'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
 import type { FieldRendererProps } from '../../FieldRenderer/types'
 import { styles } from './styles'
@@ -37,7 +37,7 @@ export function TabsLayout({ fields, moduleId }: TabsLayoutProps) {
   // Le require() à l'intérieur du composant est évalué à l'exécution (après initialisation complète).
   const { FieldRenderer } = require('../../FieldRenderer') as { FieldRenderer: ComponentType<FieldRendererProps> }
 
-  const t = useModuleT()
+  const t = useModuleTranslation()
 
   const tabs = useMemo<TabSpec[]>(() => {
     return fields

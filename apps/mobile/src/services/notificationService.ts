@@ -30,6 +30,25 @@ export interface NotificationRoutine {
   updated_at: string
 }
 
+// ── Affichage au premier plan ────────────────────────────────────────────────
+
+/**
+ * Configure l'affichage des notifications reçues alors que l'app est ouverte
+ * au premier plan. Sans ce handler, expo-notifications n'affiche rien tant que
+ * l'app est visible — la notification n'apparaît que si l'app est en arrière-plan
+ * ou l'écran verrouillé. À appeler une seule fois, le plus tôt possible au boot.
+ */
+export function configureForegroundNotifications(): void {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  })
+}
+
 // ── Permissions & token ─────────────────────────────────────────────────────
 
 export async function requestNotificationPermission(): Promise<boolean> {
@@ -49,7 +68,9 @@ export async function setupAndroidChannel(): Promise<void> {
 }
 
 /**
- * Enregistre le token Expo push du device courant en base Supabase.
+ * Enregistre le token push du device courant en base Supabase.
+ * Android (build local) : FCM natif via getDevicePushTokenAsync().
+ * iOS / fallback : Expo Push Token.
  * Retourne null si la permission est refusée ou si l'app tourne dans Expo Go.
  */
 export async function registerPushToken(patientId: string): Promise<string | null> {
@@ -59,19 +80,36 @@ export async function registerPushToken(patientId: string): Promise<string | nul
 
   await setupAndroidChannel()
 
+  const platform: NotificationPlatform = Platform.OS === 'android' ? 'android' : 'ios'
   let token: string
-  try {
-    const result = await Notifications.getExpoPushTokenAsync()
-    token = result.data
-  } catch {
-    // getExpoPushTokenAsync échoue dans Expo Go SDK 53+ — pas de dev build
-    return null
+  let tokenType: 'fcm' | 'expo'
+
+  if (Platform.OS === 'android') {
+    try {
+      const result = await Notifications.getDevicePushTokenAsync()
+      token = result.data
+      tokenType = 'fcm'
+    } catch {
+      return null
+    }
+  } else {
+    try {
+      const result = await Notifications.getExpoPushTokenAsync()
+      token = result.data
+      tokenType = 'expo'
+    } catch {
+      return null
+    }
   }
 
-  const platform: NotificationPlatform = Platform.OS === 'android' ? 'android' : 'ios'
-
   const { error } = await supabase.from('patient_push_tokens').upsert(
-    { patient_id: patientId, expo_push_token: token, platform, updated_at: new Date().toISOString() },
+    {
+      patient_id: patientId,
+      expo_push_token: token,
+      token_type: tokenType,
+      platform,
+      updated_at: new Date().toISOString(),
+    },
     { onConflict: 'expo_push_token' }
   )
 

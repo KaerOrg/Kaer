@@ -843,7 +843,47 @@
       "submit": "Envoyer mes réponses"
     },
     "distress_tolerance": {
-      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique."
+      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "tab_fiches": "Comprendre",
+      "tab_now": "Agir en crise",
+      "now": {
+        "title": "Surfer la vague",
+        "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un pic, puis elle redescend toujours.",
+        "intro2": "T'as rien à faire contre elle — juste à tenir le temps qu'elle passe. Choisis une activité, et laisse le minuteur t'accompagner.",
+        "choose_activity": "Choisir une activité",
+        "pick_category": "Tu veux faire quoi, là maintenant ?",
+        "back": "Retour",
+        "minutes": "min",
+        "start_timer": "Démarrer",
+        "pick_another": "Une autre idée",
+        "timer_caption": "Reste avec la vague. Elle va redescendre.",
+        "hold": "J'ai tenu",
+        "stop": "Arrêter",
+        "done_title": "La vague est passée",
+        "done_text": "T'as tenu. C'est exactement ça, surfer la vague.",
+        "restart": "Recommencer",
+        "finish": "Terminer",
+        "cat": {
+          "tipp": "Apaiser le corps",
+          "distraction": "Me changer les idées",
+          "sens": "Apaiser mes sens",
+          "improve": "Adoucir le moment"
+        },
+        "act": {
+          "tipp1": "Passe de l'eau froide sur ton visage, ou tiens un glaçon dans ta main.",
+          "tipp2": "Bouge à fond une minute : monte les escaliers, saute sur place.",
+          "tipp3": "Respire lentement : inspire sur 4 temps, expire sur 6 temps.",
+          "distraction1": "Compte à rebours depuis 100, de 7 en 7 (100, 93, 86…).",
+          "distraction2": "Nomme dix trucs de la même couleur autour de toi.",
+          "distraction3": "Lance un truc simple et concret : range un tiroir, plie du linge.",
+          "sens1": "Écoute en entier un son qui t'apaise.",
+          "sens2": "Bois une boisson chaude à petites gorgées, sens sa chaleur.",
+          "sens3": "Enroule-toi dans une couverture ou un vêtement tout doux.",
+          "improve1": "Imagine en détail un endroit où tu te sens en sécurité.",
+          "improve2": "Parle-toi doucement, comme à un pote qui traverserait ça.",
+          "improve3": "Concentre-toi sur ce seul instant : juste ce moment, rien d'autre."
+        }
+      }
     },
     "craving_journal": {
       "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",

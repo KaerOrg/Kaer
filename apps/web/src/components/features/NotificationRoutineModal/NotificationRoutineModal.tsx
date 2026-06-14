@@ -218,22 +218,24 @@ function RoutineRow({ routine, onToggle, onDelete, t }: RoutineRowProps) {
         ) : null}
       </div>
       <div className="nr-row__actions">
-        <button
+        <Button
           type="button"
-          className="nr-row__toggle"
+          variant="ghost"
+          size="xs"
+          icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
           onClick={onToggle}
+          aria-pressed={routine.is_active}
           title={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
-        >
-          {routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
-        </button>
-        <button
+        />
+        <Button
           type="button"
-          className="nr-row__delete"
+          variant="ghost"
+          size="xs"
+          category="danger"
+          icon={<X size={15} />}
           onClick={onDelete}
           title={t('common.delete')}
-        >
-          <X size={15} />
-        </button>
+        />
       </div>
     </div>
   )

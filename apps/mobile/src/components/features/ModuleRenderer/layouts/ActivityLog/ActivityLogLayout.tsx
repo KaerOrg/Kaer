@@ -24,7 +24,7 @@ import {
 } from '../../../../../lib/database'
 import { saveActivityRecord, deleteActivityRecord } from '../../../../../services/activityRecordService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
-import { useModuleT } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { PipPicker } from '../../../../ui/PipPicker'
@@ -54,7 +54,7 @@ export interface ActivityLogLayoutProps {
 }
 
 export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLayoutProps) {
-  const t = useModuleT()
+  const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
 

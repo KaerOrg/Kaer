@@ -5,6 +5,25 @@
 - **Scalabilité d'abord** : chaque décision de design doit tenir à 10× la charge actuelle (patients, modules, praticiens).
 - **Composants réutilisables** : tout composant ou fonction utilisé (ou susceptible d'être utilisé) dans ≥2 contextes est extrait dans `src/components/` ou `packages/shared/`. Zéro duplication.
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La logique pure extraite (`lib/moduleFilter.ts`) était testée exhaustivement, mais
+> donnait un **faux sentiment de couverture** : les composants qui la consomment
+> (`ModuleFilterBar`, `ModuleTagChips` — callbacks, rendu conditionnel) n'avaient
+> aucun `.test.tsx`, et la nouvelle fonction `fetchModuleTaxonomy()` n'a pas été
+> ajoutée au `moduleCatalogService.test.ts` **existant**.
+> → Tester le helper pur ne dispense ni du test de rendu/interaction des composants,
+> ni d'**étendre le test du service** quand on lui ajoute une fonction. Checklist :
+> chaque fichier source créé OU chaque export ajouté = son test dans le même commit.
+- **Mocks synchronisés avec les exports** : tout renommage de fonction/hook exporté (`useModuleT` → `useModuleTranslation`) doit être répercuté dans **tous** les `jest.mock()`/`vi.mock()` qui le mentionnent. Un `grep` sur l'ancien nom avant de merger est obligatoire. Un mock périmé donne un faux sentiment de tests verts (la fonction mockée n'est jamais appelée, l'originale crashe en runtime).
+> **Cas rencontré — refonte-tolerance-detresse (2026-06-09) :**
+> Le renommage `useModuleT → useModuleTranslation` a cassé 5 suites de tests mobiles :
+> ```ts
+> // ❌ mock avec l'ancien nom → useModuleTranslation = undefined au runtime
+> jest.mock('hooks/useModuleT', () => ({ useModuleT: () => k => k }))
+> // ✅ mock avec le nouveau nom
+> jest.mock('hooks/useModuleT', () => ({ useModuleTranslation: () => k => k }))
+> ```
+> → Avant de commiter un renommage : `grep -r "useModuleT\b" apps/mobile --include="*.test.*"`
 - **Documentation inline ciblée** : uniquement pour la logique non-évidente (invariants, workarounds, race conditions). Le reste se documente dans CLAUDE.md et les fichiers `.md` de feature.
 
 ## Architecture des composants — `ui/` vs `features/`
@@ -91,20 +110,36 @@ part dans un layout, un widget ou un helper dédié — jamais inline dans le ro
 
 ---
 
-## Checklist obligatoire avant tout nouveau CSS, composant UI, ou field_type
+## Le design system EST ta boîte à outils — pas ton filet de sécurité
 
-> **Cette checklist s'applique avant d'écrire la moindre ligne de CSS inline, de créer une classe CSS ad hoc, d'implémenter un nouveau composant dans une page, ou d'introduire un nouveau `field_type` dans `module_content_fields`.**
+> **Principe fondamental.** On ne construit pas de l'UI et on ne vérifie pas ensuite si le design system couvre le besoin. On OUVRE le design system en premier, on assemble avec ce qui existe, et on n'écrit du JSX ou du CSS sur mesure que pour ce qui n'y est pas.
+>
+> La question n'est pas « est-ce que ce composant duplique quelque chose ? » — elle est « avec quoi du design system est-ce que je construis ça ? »
+>
+> Chaque `Pressable`, `View`, `Text` ad hoc dans un layout est une dette potentielle. La première réaction devant un besoin UI doit être : **ouvrir `src/components/ui/` et assembler**, pas ouvrir un fichier vide et coder.
 
-**Étape 1 — Chercher dans le design system web :**
+## Checklist obligatoire — concevoir avec le design system, pas contre lui
+
+> **Cette checklist s'applique dès la première ligne de JSX ou de StyleSheet — pas uniquement quand on "crée un composant". Un layout qui assemble des `Pressable` + `View` + styles ad hoc sans avoir consulté `src/components/ui/` a violé cette règle avant même d'être relié.**
+
+**Étape 1 — Ouvrir l'inventaire (obligatoire, toujours en premier) :**
 ```
-apps/web/src/components/ui/   ← primitives (Card, Button, Toggle, StatusBadge, Accordion…)
-apps/web/docs/design-system.md  ← référence CSS custom properties, classes utilitaires
-```
-**Étape 2 — Chercher dans le design system mobile :**
-```
-apps/mobile/src/components/ui/
+apps/web/src/components/ui/      ← Button, Card, Toggle, StatusBadge, Accordion, Tabs…
+apps/web/docs/design-system.md   ← CSS custom properties, classes utilitaires
+apps/mobile/src/components/ui/   ← Button, Card, InputField, EmptyState, Toast…
 apps/mobile/docs/design-system.md
 ```
+
+**Étape 2 — Pour chaque élément visuel à implémenter, se poser la question :**
+
+> Un bouton ? → `ui/Button` (variants : primary, secondary, ghost, danger, iconLeft).
+> Une carte / conteneur avec ombre + radius ? → `ui/Card` (variants, accentColor, onPress).
+> Un champ de saisie ? → `ui/InputField`. Une liste déroulante ? → `ui/SelectField`.
+> Un badge coloré ? → `ui/StatusBadge`. Un état vide ? → `ui/EmptyState`.
+> Des onglets ? → `ui/Tabs`. Une bascule ? → `ui/Toggle`. Un accordéon ? → `ui/Accordion`.
+>
+> Si le composant existe → **l'utiliser directement**. S'il couvre le besoin à 90% → **ajouter la prop manquante**. Ne jamais écrire un `Pressable + Text + styles.xxxBtn` quand `Button` existe, ni un `View` avec shadow/radius quand `Card` existe.
+
 **Étape 3 — Pour tout `field_type` ou layout FieldRenderer — consulter l'inventaire complet :**
 ```
 docs/module-engine.md  ← section "Inventaire complet des field_types" (44+ types recensés)
@@ -128,14 +163,27 @@ Mettre à jour le document de référence correspondant **dans le même commit**
 
 Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
 
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> La PR a fait le geste *parfait* côté code — étendre `ui/Chip` avec une prop
+> `size: 'sm' | 'md'` au lieu de dupliquer — mais a oublié la doc : ni la ligne
+> `size` dans la table des props `### Chip` du design-system, ni de section pour
+> les deux nouveaux composants `features/` (`ModuleFilterBar`, `ModuleTagChips`).
+> → La règle vaut aussi pour une **simple prop ajoutée** à un composant existant,
+> et pour les composants `features/` (pas seulement `ui/`) : table des props +
+> exemple d'usage dans `apps/<app>/docs/design-system.md`, **dans le même commit**.
+
 **Anti-patterns bloquants — refuser d'écrire :**
-- Markup HTML qui duplique un composant existant (`Toggle`, `Card`, `Button`, `StatusBadge`…)
+- `Pressable + Text + StyleSheet` ad hoc quand `ui/Button` couvre le besoin
+- `View` avec shadow + radius + padding codés en dur quand `ui/Card` couvre le besoin
+- Tout markup qui reproduit visuellement un composant `ui/` existant
 - Style inline `style={{ ... }}` pour autre chose qu'un calcul dynamique ponctuel
 - Classe CSS définie dans le `.css` d'une page pour un pattern déjà présent dans un composant
 - Nouveau `field_type` introduit sans consultation de l'inventaire `docs/module-engine.md`
 - Couleur, taille, espacement hardcodés (#FFFFFF, 14px, 8px) — utiliser les tokens CSS (`var(--color-*)`, `var(--spacing-*)`, `var(--font-size-*)`)
 
-**Rappel :** la session où `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` illustre exactement ce problème. Coût : bug de cohérence visuelle découvert à la revue, refactorisation supplémentaire.
+**Incidents de référence :**
+- `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` → bug de cohérence visuelle, refacto en review.
+- `CrisisCompanionLayout` (PR #45, 2026-06-08) a écrit 4 styles de carte ad hoc + 3 styles de bouton ad hoc au lieu d'utiliser `<Card>` et `<Button>` → refacto requise post-review.
 
 > **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :**
 > `CaseloadTable.css` figeait 25+ teintes de charte (en-tête teal, dégradé de
@@ -325,6 +373,53 @@ const noteRef = useRef<HTMLTextAreaElement>(null)
 // Au submit : noteRef.current?.value
 // Reset : if (noteRef.current) noteRef.current.value = ''
 ```
+
+## États mutuellement exclusifs — un seul `useState` discriminé, pas N states couplés
+
+> **Règle : quand plusieurs `useState` ne peuvent jamais être actifs en même temps,
+> ou décrivent les variantes d'une même chose, ils fusionnent en UN state à union
+> discriminée.** Plusieurs `useState` que chaque handler doit remettre à `null` « en
+> miroir » pour préserver une exclusivité sont un bug d'invariant en attente.
+
+Le test : *« deux de ces states peuvent-ils être non-nuls en même temps ? »*
+Si la réponse devrait toujours être « non », alors deux states séparés rendent cet
+état illégal **représentable** — donc atteignable. Un state unique le rend
+**irreprésentable**.
+
+```ts
+// ❌ Deux states couplés — l'exclusivité repose sur des setters synchronisés à la main
+const [previewModule, setPreviewModule] = useState<ModuleType | null>(null)
+const [dataModule, setDataModule]       = useState<ModuleType | null>(null)
+const togglePreview = (t: ModuleType) => { setPreviewModule(p => p === t ? null : t); setDataModule(null) }
+const toggleData    = (t: ModuleType) => { setDataModule(p => p === t ? null : t); setPreviewModule(null) }
+// → un oubli de `setDataModule(null)` quelque part = les deux panneaux ouverts à la fois
+
+// ✅ Un state discriminé — l'exclusivité est structurelle, illégale à violer
+const [activePanel, setActivePanel] = useState<
+  { kind: 'preview' | 'data'; module: ModuleType } | null
+>(null)
+const isPreviewOpen = (t: ModuleType) => activePanel?.kind === 'preview' && activePanel.module === t
+const togglePreview = (t: ModuleType) =>
+  setActivePanel(p => p?.kind === 'preview' && p.module === t ? null : { kind: 'preview', module: t })
+```
+
+Vaut aussi pour les **opérations concurrentes** d'un même groupe : `unlockingModule`
+(un type) + `revokingModuleId` (une row id) → une seule bascule à la fois →
+`{ op: 'unlock'; type } | { op: 'revoke'; id } | null`. Exposer des **helpers de
+lecture** (`isPreviewOpen(type)`, `isModuleBusy(type, id)`) plutôt que répéter la
+comparaison brute dans le JSX — un seul endroit à faire évoluer.
+
+Corollaire — **un enfant reçoit le booléen dérivé, pas le state brut.** Une feuille
+qui ne gère qu'un module ne reçoit pas `previewModule: ModuleType | null` pour le
+comparer elle-même à sa constante : elle reçoit `previewOpen: boolean`. La dérivation
+(`isPreviewOpen('x')`) reste chez le parent qui possède le state.
+
+> **Cas rencontré — improve-module-organization (2026-06-12) :**
+> `PatientModulesTab` portait 4 states couplés deux à deux (`previewModule`/`dataModule`
+> exclusifs ; `unlockingModule`/`revokingModuleId` = une seule bascule). Fusionnés en
+> `activePanel` + `busyModule` discriminés, avec helpers `isPreviewOpen`/`isDataOpen`/
+> `isModuleBusy` ; la carte enfant `MedicationSideEffectsCard` est passée de 3 props
+> `ModuleType | null` à 3 booléens `loading`/`previewOpen`/`dataOpen`.
 
 ## Design system
 
