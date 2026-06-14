@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Bell, BellOff, Loader, X } from 'lucide-react'
+import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
@@ -176,13 +176,16 @@ export function NotificationRoutineModal({
               </div>
             </div>
           ) : (
-            <button
+            <Button
               type="button"
-              className="nr-add-btn"
+              variant="outline"
+              size="sm"
+              fullWidth
               onClick={() => setShowForm(true)}
+              icon={<Plus size={15} />}
             >
-              + {t('notifications.add_routine')}
-            </button>
+              {t('notifications.add_routine')}
+            </Button>
           )}
         </>
       )}

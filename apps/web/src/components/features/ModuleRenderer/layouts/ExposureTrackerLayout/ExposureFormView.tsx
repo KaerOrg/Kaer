@@ -1,4 +1,5 @@
 import { ArrowLeft, Calendar, Check } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { PreviewStep } from './exposureMock'
 import { SudsPickerPreview } from './SudsPickerPreview'
 
@@ -20,9 +21,7 @@ export function ExposureFormView({ step, lbl, strategies, onBack }: Props) {
   return (
     <div className="ej ej-form" data-testid="ej-form">
       <div className="ej-head">
-        <button type="button" className="ej-back" onClick={onBack} aria-label="back">
-          <ArrowLeft size={18} />
-        </button>
+        <Button type="button" variant="ghost" onClick={onBack} aria-label="back" icon={<ArrowLeft size={18} />} />
         <span className="ej-head__title">{lbl(step.labelKey)}</span>
       </div>
 
@@ -95,7 +94,7 @@ export function ExposureFormView({ step, lbl, strategies, onBack }: Props) {
         <div className="ej-textarea" data-placeholder={lbl('notes_placeholder')} />
       </section>
 
-      <button type="button" className="ej-save-btn" disabled>{lbl('save')}</button>
+      <Button type="button" variant="primary" fullWidth disabled>{lbl('save')}</Button>
     </div>
   )
 }

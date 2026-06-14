@@ -1555,7 +1555,8 @@
     "filter_label": "Filtrer par tag",
     "filter_clear": "Tout afficher",
     "empty_filtered": "Aucune note pour ce tag.",
-    "tag_search_placeholder": "Rechercher un tag…"
+    "tag_search_placeholder": "Rechercher un tag…",
+    "tag_remove": "Retirer {{tag}}"
   },
   "speech": {
     "start": "Dicter",

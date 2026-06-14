@@ -4,23 +4,9 @@
   padding: 0 24px 64px;
 }
 
+/* Espacement sous le bouton « retour » (habillage : ui/Button). */
 .preview-page__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #6B7280;
-  font-size: 13px;
-  font-weight: 500;
-  background: none;
-  border: none;
-  padding: 0;
   margin-bottom: 24px;
-  cursor: pointer;
-  transition: color 0.15s;
-}
-
-.preview-page__back:hover {
-  color: #111827;
 }
 
 .preview-page__meta {

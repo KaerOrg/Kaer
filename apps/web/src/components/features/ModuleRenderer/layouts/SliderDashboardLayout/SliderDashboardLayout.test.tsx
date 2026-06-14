@@ -73,7 +73,7 @@ describe('SliderDashboardLayout — onglet Saisie (défaut)', () => {
 
     expect(container.querySelector('.mt__instruction')?.textContent).toBe('modules.mood_tracker.instructions')
     expect(container.querySelectorAll('.mt-slider-card')).toHaveLength(3)
-    expect(container.querySelector('.mt__save-btn')?.textContent).toBe('common.save')
+    expect(container.querySelector('.btn--full')?.textContent).toBe('common.save')
   })
 
   it('trie les sliders par sort_order', () => {

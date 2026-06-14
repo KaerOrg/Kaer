@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Settings2, CalendarPlus } from 'lucide-react'
+import { Settings2, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button/Button'
 import { WeekGrid } from '../../components/features/WeekGrid'
@@ -248,15 +248,11 @@ export function AgendaPage() {
 
         {/* Week navigation */}
         <div className="agenda-page__week-nav">
-          <button className="agenda-page__nav-btn" onClick={prevWeek} title={t('agenda.prev_week')}>
-            ←
-          </button>
+          <Button variant="ghost" size="sm" onClick={prevWeek} title={t('agenda.prev_week')} aria-label={t('agenda.prev_week')} icon={<ChevronLeft size={18} />} />
           <span className="agenda-page__week-label">
             {formatWeekLabel(weekStart, t)}
           </span>
-          <button className="agenda-page__nav-btn" onClick={nextWeek} title={t('agenda.next_week')}>
-            →
-          </button>
+          <Button variant="ghost" size="sm" onClick={nextWeek} title={t('agenda.next_week')} aria-label={t('agenda.next_week')} icon={<ChevronRight size={18} />} />
           <Button variant="ghost" size="sm" onClick={goToToday}>
             {t('agenda.today')}
           </Button>

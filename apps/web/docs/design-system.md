@@ -296,6 +296,7 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Taille. `xs` = compact (boutons d'action inline d'une carte / d'un tableau) |
 | `category` | `'neutral' \| 'danger' \| 'success'` | `'neutral'` | Accent sémantique appliqué **au survol et à l'état `aria-pressed`** (sur `ghost`/`outline`). `danger` → rouge (supprimer), `success` → vert (valider). Au repos le bouton reste neutre |
 | `loading` | `boolean` | `false` | Affiche un spinner (à la place de `icon`) et désactive le bouton |
+| `fullWidth` | `boolean` | `false` | Occupe toute la largeur disponible (`width: 100%`, classe `btn--full`) — CTA pleine largeur (formulaires, layouts de preview) |
 | `icon` | `ReactNode` | — | Icône optionnelle. **Avec** `children` → icône à gauche du label. **Sans** `children` → bouton icône-seule (carré `btn--icon-only`) → fournir `aria-label` |
 | …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`… |
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '../../../components/ui/Button'
+import { Chip } from '../../../components/ui/Chip'
 import { InputField } from '../../../components/ui/InputField'
 import { SpeechToTextButton } from '../../../components/ui/SpeechToTextButton'
 import {
@@ -210,14 +211,12 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
         <div className="patient-notes__tag-actions-row">
           <div className="patient-notes__tag-row">
             {newNoteTags.map(tag => (
-              <span key={tag} className="patient-notes__tag">
-                {tag}
-                <button
-                  className="patient-notes__tag-remove"
-                  onClick={() => setNewNoteTags(prev => prev.filter(t => t !== tag))}
-                  aria-label={`Retirer ${tag}`}
-                >×</button>
-              </span>
+              <Chip
+                key={tag}
+                label={tag}
+                onRemove={() => setNewNoteTags(prev => prev.filter(t => t !== tag))}
+                removeLabel={t('notes.tag_remove', { tag })}
+              />
             ))}
             <input
               className="patient-notes__tag-input"
@@ -264,20 +263,20 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
               placeholder={t('notes.tag_search_placeholder')}
             />
           </div>
-          <button
-            className={`patient-notes__filter-chip ${activeTagFilter === null ? 'patient-notes__filter-chip--active' : ''}`}
+          <Chip
+            selectable
+            selected={activeTagFilter === null}
             onClick={() => setActiveTagFilter(null)}
-          >
-            {t('notes.filter_clear')}
-          </button>
+            label={t('notes.filter_clear')}
+          />
           {visibleTags.map(tag => (
-            <button
+            <Chip
               key={tag}
-              className={`patient-notes__filter-chip ${activeTagFilter === tag ? 'patient-notes__filter-chip--active' : ''}`}
+              selectable
+              selected={activeTagFilter === tag}
               onClick={() => setActiveTagFilter(prev => prev === tag ? null : tag)}
-            >
-              {tag}
-            </button>
+              label={tag}
+            />
           ))}
         </div>
       )}
@@ -303,14 +302,12 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
                   />
                   <div className="patient-notes__tag-row">
                     {editingTags.map(tag => (
-                      <span key={tag} className="patient-notes__tag">
-                        {tag}
-                        <button
-                          className="patient-notes__tag-remove"
-                          onClick={() => setEditingTags(prev => prev.filter(t => t !== tag))}
-                          aria-label={`Retirer ${tag}`}
-                        >×</button>
-                      </span>
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        onRemove={() => setEditingTags(prev => prev.filter(t => t !== tag))}
+                        removeLabel={t('notes.tag_remove', { tag })}
+                      />
                     ))}
                     <input
                       className="patient-notes__tag-input"
@@ -339,9 +336,7 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, onNot
                   {note.tags.length > 0 && (
                     <div className="patient-notes__tag-row patient-notes__tag-row--readonly">
                       {note.tags.map(tag => (
-                        <span key={tag} className="patient-notes__tag patient-notes__tag--readonly">
-                          {tag}
-                        </span>
+                        <Chip key={tag} size="sm" label={tag} />
                       ))}
                     </div>
                   )}

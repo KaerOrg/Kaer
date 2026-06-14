@@ -1,15 +1,8 @@
 import { memo, useCallback, useMemo, type CSSProperties } from 'react'
 import type { TrackedEffect } from '../../../lib/sideEffectsCatalog'
+import { Button } from '../../../components/ui/Button'
 import { MED_ROW_STYLE, medDotStyle } from './medCardStyles'
 
-const CUSTOM_DELETE_STYLE: CSSProperties = {
-  fontSize: 11,
-  color: '#DC2626',
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  padding: 0,
-}
 const CUSTOM_LABEL_STYLE: CSSProperties = { flex: 1, fontSize: 13, color: '#111827' }
 const DEFAULT_CUSTOM_COLOR = '#8B5CF6'
 
@@ -33,9 +26,9 @@ function CustomEffectRowComponent({ effect, deleteLabel, onRemove }: CustomEffec
     <div style={rowStyle}>
       <span style={medDotStyle(color)} />
       <span style={CUSTOM_LABEL_STYLE}>{effect.label}</span>
-      <button type="button" onClick={handleRemove} style={CUSTOM_DELETE_STYLE}>
+      <Button type="button" variant="ghost" category="danger" size="xs" onClick={handleRemove}>
         {deleteLabel}
-      </button>
+      </Button>
     </div>
   )
 }

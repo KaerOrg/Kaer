@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
+import { Button } from '../../components/ui/Button'
 import { ModulePreviewPanel } from '../../components/features/ModulePreviewPanel'
 import { catalogQueries } from '../../hooks/queries'
 import './ModulePreviewPage.css'
@@ -18,10 +19,9 @@ export function ModulePreviewPage() {
   return (
     <Layout>
       <div className="preview-page">
-        <button className="preview-page__back" onClick={() => navigate('/modules')}>
-          <ArrowLeft size={14} />
+        <Button variant="ghost" size="sm" className="preview-page__back" onClick={() => navigate('/modules')} icon={<ArrowLeft size={14} />}>
           {t('modules.nav_link')}
-        </button>
+        </Button>
 
         <div className="preview-page__meta">
           <h1 className="preview-page__title">{t(`modules.${moduleType}.label`)}</h1>

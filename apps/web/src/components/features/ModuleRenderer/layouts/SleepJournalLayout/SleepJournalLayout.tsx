@@ -1,4 +1,5 @@
 import { Calendar, ChevronRight, Clock, Ghost, Moon, Star, Sparkles } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -242,9 +243,9 @@ export function SleepJournalLayout({ fields, t }: Props) {
         )}
 
         {saveLabel && (
-          <button type="button" className="sj-save-btn" disabled>
+          <Button type="button" variant="primary" fullWidth disabled>
             {saveLabel}
-          </button>
+          </Button>
         )}
       </div>
     </div>

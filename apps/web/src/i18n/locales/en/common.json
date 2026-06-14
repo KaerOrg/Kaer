@@ -1446,7 +1446,8 @@
     "filter_label": "Filter by tag",
     "filter_clear": "Show all",
     "empty_filtered": "No notes for this tag.",
-    "tag_search_placeholder": "Search a tag…"
+    "tag_search_placeholder": "Search a tag…",
+    "tag_remove": "Remove {{tag}}"
   },
   "speech": {
     "start": "Dictate",

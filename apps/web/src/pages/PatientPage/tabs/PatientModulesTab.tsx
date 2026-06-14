@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
@@ -38,6 +38,10 @@ import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
 const ACTIVE_FILTER_THRESHOLD = 8
+
+// Alignement à droite du bouton « supprimer » d'une coping card (positionnement
+// de layout uniquement — l'habillage du bouton vient du design system).
+const CRISIS_CARD_DELETE_STYLE: CSSProperties = { alignSelf: 'flex-end' }
 
 type Props = {
   patientId: string
@@ -352,13 +356,16 @@ export function PatientModulesTab({
                       <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
                       <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        category="danger"
+                        size="xs"
                         onClick={() => crisis.removeCopingCard(card.id)}
-                        style={{ alignSelf: 'flex-end', fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        style={CRISIS_CARD_DELETE_STYLE}
                       >
                         {t('patient.crisis_card_delete')}
-                      </button>
+                      </Button>
                     </div>
                   ))}
                   {crisis.config.copingCards.length < 4 && (

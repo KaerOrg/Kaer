@@ -14,6 +14,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    */
   category?: ButtonCategory
   loading?: boolean
+  /** Occupe toute la largeur disponible (`width: 100%`) — CTA pleine largeur. */
+  fullWidth?: boolean
   /**
    * Icône optionnelle. Avec `children` → icône à gauche du label. Sans `children`
    * → bouton icône-seule (carré). Dans ce dernier cas, fournir `aria-label`.

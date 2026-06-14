@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Package2, FileText, CalendarDays, Clock } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
+import { Chip } from '../../../components/ui/Chip'
 import { InputField } from '../../../components/ui/InputField'
 import type { PatientModule } from '../../../lib/database.types'
 import type { ModuleCategory } from '../../../services/moduleCatalogService'
@@ -145,7 +146,7 @@ export function PatientOverviewTab({
                     {note.tags.length > 0 && (
                       <div className="patient-overview__note-tags">
                         {note.tags.map(tag => (
-                          <span key={tag} className="patient-notes__tag patient-notes__tag--readonly">{tag}</span>
+                          <Chip key={tag} size="sm" label={tag} />
                         ))}
                       </div>
                     )}
