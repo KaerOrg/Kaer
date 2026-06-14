@@ -2142,6 +2142,34 @@ alter table public.support_requests enable row level security;
 
 
 -- ============================================================
+-- TABLE : theme_suggestions (Suggestions de fiches psychoéducation)
+-- ============================================================
+-- Le praticien suggère un thème de fiche manquant dans la bibliothèque. Écrite
+-- EXCLUSIVEMENT par l'Edge Function `send-theme-suggestion` (service_role), qui
+-- dérive l'identité depuis le JWT et notifie l'équipe éditoriale par email (Resend).
+-- Logistique éditoriale : zéro donnée patient, zéro interprétation (hors périmètre MDR).
+-- Aucune policy client (lecture équipe via dashboard).
+
+create table if not exists public.theme_suggestions (
+  id              uuid        primary key default gen_random_uuid(),
+  practitioner_id uuid        references public.practitioners(id) on delete set null,
+  suggestion      text        not null,
+  status          text        not null default 'new' check (status in ('new', 'reviewed', 'done', 'declined')),
+  -- Hash SHA-256 de l'IP appelante (jamais en clair) — rate-limit de l'endpoint.
+  ip_hash         text,
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists idx_theme_suggestions_status
+  on public.theme_suggestions(status, created_at desc);
+create index if not exists idx_theme_suggestions_ip_recent
+  on public.theme_suggestions(ip_hash, created_at desc);
+
+alter table public.theme_suggestions enable row level security;
+-- Aucune policy client : insertion par l'Edge Function (service_role), lecture équipe.
+
+
+-- ============================================================
 -- TABLE : retention_config (Politique de conservation RGPD — art. 5.1.e)
 -- ============================================================
 -- Une ligne par table soumise à une durée de conservation limitée.
