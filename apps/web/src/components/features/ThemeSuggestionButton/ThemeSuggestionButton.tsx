@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Lightbulb } from 'lucide-react'
 import { Button } from '../../ui/Button'
+import { InputField } from '../../ui/InputField'
 import { Modal } from '../../ui/Modal'
 import { useToast } from '../../../contexts/ToastContext'
 import { submitThemeSuggestion, THEME_SUGGESTION_MAX } from '../../../services/themeSuggestionService'
@@ -55,8 +56,9 @@ export function ThemeSuggestionButton() {
           maxWidth={520}
         >
           <p className="theme-suggest__intro">{t('patient.psycho_suggest_intro')}</p>
-          <textarea
-            className="theme-suggest__textarea"
+          <InputField
+            multiline
+            label={t('patient.psycho_suggest_label')}
             rows={4}
             maxLength={THEME_SUGGESTION_MAX}
             placeholder={t('patient.psycho_suggest_placeholder')}

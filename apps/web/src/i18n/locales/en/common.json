@@ -291,6 +291,7 @@
     "psycho_suggest_button": "Suggest a topic",
     "psycho_suggest_title": "Suggest a sheet",
     "psycho_suggest_intro": "A topic missing from the library? Describe it: our team will create a sourced sheet as soon as possible.",
+    "psycho_suggest_label": "Your suggestion",
     "psycho_suggest_placeholder": "E.g. managing panic attacks",
     "psycho_suggest_submit": "Send suggestion",
     "psycho_suggest_success": "Thank you, your suggestion has been sent.",

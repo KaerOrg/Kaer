@@ -358,18 +358,30 @@ fermeture sur `Échap` + clic sur l'overlay).
 
 ### `InputField`
 
-`components/ui/InputField/`. Champ texte étiqueté avec message d'erreur. Étend
-`InputHTMLAttributes` (donc `value`/`defaultValue`, `type`, `placeholder`, `onChange`…).
+`components/ui/InputField/`. Champ texte étiqueté avec message d'erreur. Rend un
+`<input>` par défaut, ou un `<textarea>` si `multiline`. Union discriminée : sans
+`multiline` il étend `InputHTMLAttributes` ; avec `multiline` il étend
+`TextareaHTMLAttributes` (donc `rows`, `maxLength`, `resize`…).
 
 ```tsx
 <InputField label={t('auth.email')} type="email" error={emailError} defaultValue="" />
+
+<InputField
+  multiline
+  label={t('patient.psycho_suggest_label')}
+  rows={4}
+  maxLength={1000}
+  value={text}
+  onChange={e => setText(e.target.value)}
+/>
 ```
 
 | Prop | Type | Rôle |
 |---|---|---|
 | `label` | `string` | Libellé (obligatoire) |
 | `error` | `string` | Message d'erreur inline (validation de champ) |
-| …natifs | `InputHTMLAttributes` | `type`, `value`, `onChange`, `placeholder`… |
+| `multiline` | `boolean` | `true` → rend un `<textarea>` (redimensionnable vertical, min-height 80px) au lieu d'un `<input>` |
+| …natifs | `InputHTMLAttributes` \| `TextareaHTMLAttributes` | Selon `multiline` : `type`/`value`/`onChange`/`placeholder`… ou `rows`/`maxLength`… |
 
 ### `SearchInput`
 

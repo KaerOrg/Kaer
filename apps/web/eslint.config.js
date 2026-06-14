@@ -33,6 +33,10 @@ export default defineConfig([
       // déclaration inline ». En 'warn' le temps de résorber l'existant (voir TODO.md),
       // puis à passer en 'error'. ignoreRefs: les callbacks de ref sont un usage légitime.
       'react/jsx-no-bind': ['warn', { ignoreRefs: true }],
+      // ignoreRestSiblings : autorise le pattern « omettre des clés par rest spread »
+      // (const { a, b, ...rest } = props) pour forwarder proprement les attributs DOM
+      // restants — sans cast. Les clés omises (a, b) ne comptent pas comme inutilisées.
+      '@typescript-eslint/no-unused-vars': ['error', { ignoreRestSiblings: true }],
     },
   },
   {

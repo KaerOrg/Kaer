@@ -291,6 +291,7 @@
     "psycho_suggest_button": "Suggérer un thème",
     "psycho_suggest_title": "Suggérer une fiche",
     "psycho_suggest_intro": "Un thème manque dans la bibliothèque ? Décrivez-le : notre équipe créera une fiche sourcée dès que possible.",
+    "psycho_suggest_label": "Votre suggestion",
     "psycho_suggest_placeholder": "Ex. : gérer les attaques de panique",
     "psycho_suggest_submit": "Envoyer la suggestion",
     "psycho_suggest_success": "Merci, votre suggestion a bien été envoyée.",
