@@ -1,6 +1,6 @@
 # Refonte — Psychoéducation (bibliothèque thématique unifiée)
 
-> Branche : `refonte/psychoeducation`. Statut : **Phases 0-3 livrées + contenu des 11 fiches réécrit (action-first, langage patient, sources DOI) + seeds consolidés (Phase 5). Reste : finitions Phase 4 (filtre tags biblio, parcours, « suggérer un thème ») + nettoyage résiduel.**
+> Branche : `refonte/psychoeducation`. Statut : **Phases 0-3 livrées, contenu des 11 fiches réécrit (action-first, langage patient, sources DOI), seeds consolidés (Phase 5), Phase 4 = filtre par facettes + « suggérer un thème » livrés. Reste optionnel : parcours thématiques, lien fiche vers outil, nettoyage résiduel.**
 > Ce document est la source de vérité de la refonte. Mettre à jour au fil de l'avancement.
 
 > **Intégration (2026-06-11)** : branche réconciliée avec `feat/improve-module-organization`
@@ -162,10 +162,16 @@ alter table public.psyedu_topics add column reviewed_at date;   -- couche « pre
 - ⏳ Reste (Phase 5) : cartes `module_content_fields` inertes + `CardsLayout` (web/mobile) désormais morts → à nettoyer.
 
 ### Phase 4 — Valeur ajoutée (littérature)
-- **Lien lecture↔outil bidirectionnel** : CTA neutre « Ouvrir l'outil » en pied de fiche (via `module_topics`) ; entrée « Comprendre » depuis le module. *Statique, jamais conditionnel aux données (MDR).*
-- **Parcours thématiques** : séquence ordonnée de fiches assignable en bloc (réutilise `psyedu_themes` + ordre, ou table `psyedu_paths`). *Séquence fixe, pas de branchement sur saisies.*
-- **Bloc « L'essentiel »** (3 puces) en tête de fiche + variantes teen (`psyedu_teen.json`).
-- **« Suggérer un thème »** (décision produit 2026-06-11) : bouton dans la bibliothèque web praticien → réutilise l'infra existante `support_requests` + `supportService` (ajouter une catégorie `theme_suggestion`). Alimente la roadmap éditoriale Kær. Coût faible, préserve la qualité (Kær reste l'éditeur unique du contenu sourcé/validé).
+- ✅ **Filtre par facettes dans la bibliothèque** : le picker réutilise `ModuleFilterBar` + `moduleMatchesTagFilters` (indication, public, approche), restreint aux tags réellement portés par des fiches, plus recherche tokenisée.
+- ✅ **« Suggérer un thème »** (décision produit 2026-06-11) : bouton dans la bibliothèque, table dédiée `theme_suggestions` (service_role, hors MDR), Edge Function `send-theme-suggestion` (auth, rate-limit, insert, email Resend vers `SUPPORT_EMAIL`), service `themeSuggestionService` + composant `ThemeSuggestionButton`. NB : on n'a PAS réutilisé `support_requests` (endpoint sécurisé, motifs fermés), une table dédiée est plus propre.
+- ⏳ **Parcours thématiques** (pas encore fait, plus lourd, optionnel pour la v1) :
+  - Idée : un parcours = un ensemble **ordonné et nommé** de fiches que le praticien assigne en un geste, et que le patient suit dans l'ordre (progression « étape X sur Y »). Ex. « Je démarre sous lithium » = lithium_safety, mood_stabilizers, sleep_chrono.
+  - Données : table `psyedu_paths` (id, libellé i18n, thème, sort_order) + `psyedu_path_topics` (path_id, topic_id, sort_order) ; suivi de progression côté patient (réutiliser `unlocked_topics` ou un champ dédié).
+  - Web praticien : choisir/assigner un parcours (débloque les fiches du parcours d'un coup). Mobile patient : rendu progression + fiche suivante.
+  - Contenu : curation éditoriale des parcours types.
+  - MDR : séquence **fixe**, jamais déclenchée ni adaptée par les données du patient. Affichage passif. ✅
+- ⏳ **Lien lecture vers outil** : CTA neutre « Ouvrir l'outil » en pied de fiche (les liens existent déjà dans `module_topics`), et entrée « Comprendre » depuis un module. Statique, jamais conditionnel aux données.
+- ⏳ **Bloc « L'essentiel »** (3 puces) en tête de fiche, variantes teen.
 
 ### Hors périmètre — reporté (décision produit 2026-06-11)
 - **Éditeur de fiche par le praticien (« créer ma propre fiche »)** : volontairement reporté à après stabilisation de l'app. C'est un *deuxième modèle de contenu* (texte libre monolingue vs clés i18n + variante ado) qui mérite d'être traité comme une feature à part entière, pas bolté sur la refonte. Garde-fous à prévoir le jour venu : classe de contenu séparée et stockage distinct (≠ `psyedu_blocks`), provenance étiquetée « Note de votre praticien » jamais mélangée aux fiches Kær sourcées, responsabilité du contenu portée par le praticien (CGU) — Kær = canal, pas éditeur. **Aucune anticipation dans le schéma pour l'instant** (pas de colonne spéculative).
