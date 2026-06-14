@@ -400,8 +400,11 @@
       "label": "Psychoeducation",
       "description": "A library of reading sheets, organised by theme (my treatment, lifestyle…).",
       "title": "Psychoeducation",
-      "intro": "Browse your knowledge cards.",
-      "cards_progress": "{{read}}/{{total}} cards read"
+      "intro": "Browse your sheets.",
+      "empty_text": "Your practitioner has not unlocked any sheets for you yet.",
+      "mark_as_read": "I have read and understood",
+      "already_read": "Read and understood",
+      "cards_progress": "{{read}}/{{total}} sheets read"
     },
     "sleep_diary": {
       "label": "Sleep diary",

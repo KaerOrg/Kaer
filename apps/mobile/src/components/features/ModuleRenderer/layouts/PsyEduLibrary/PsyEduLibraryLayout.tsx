@@ -135,7 +135,7 @@ export function PsyEduLibraryLayout({ patientConfig }: Props) {
               {isRead ? (
                 <View style={styles.readDone} testID="psyedu-library-read-done">
                   <CheckCircle2 size={18} color={colors.success} />
-                  <Text style={styles.readDoneText}>{t('modules.psychoeducation.read_done')}</Text>
+                  <Text style={styles.readDoneText}>{t('modules.psychoeducation.already_read')}</Text>
                 </View>
               ) : (
                 <Pressable
@@ -144,7 +144,7 @@ export function PsyEduLibraryLayout({ patientConfig }: Props) {
                   testID="psyedu-library-mark-read"
                   accessibilityRole="button"
                 >
-                  <Text style={styles.readBtnText}>{t('modules.psychoeducation.mark_read')}</Text>
+                  <Text style={styles.readBtnText}>{t('modules.psychoeducation.mark_as_read')}</Text>
                 </Pressable>
               )}
             </>

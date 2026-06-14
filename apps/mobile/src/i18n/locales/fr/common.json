@@ -448,17 +448,17 @@
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir sur votre santé mentale",
+      "description": "Bibliothèque de fiches à lire, classées par thème.",
       "title": "Psychoéducation",
-      "intro": "Consultez vos fiches de savoir.",
-      "empty_title": "Aucune carte disponible",
-      "empty_text": "Votre praticien n'a pas encore débloqué de cartes pour vous.",
-      "load_error": "Impossible de charger les cartes. Vérifiez votre connexion.",
+      "intro": "Consultez vos fiches.",
+      "empty_title": "Aucune fiche disponible",
+      "empty_text": "Votre praticien n'a pas encore débloqué de fiches pour vous.",
+      "load_error": "Impossible de charger les fiches. Vérifiez votre connexion.",
       "mark_as_read": "J'ai lu et compris",
       "already_read": "Lu et compris",
       "read_error": "Une erreur est survenue. Veuillez réessayer.",
       "content_not_found": "Contenu introuvable.",
-      "cards_progress": "{{read}}/{{total}} cartes lues"
+      "cards_progress": "{{read}}/{{total}} fiches lues"
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
