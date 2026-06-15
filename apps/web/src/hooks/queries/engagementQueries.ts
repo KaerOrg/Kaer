@@ -4,17 +4,19 @@ import {
   fetchMoodEvolution,
   fetchFearEvolution,
   fetchMedSideEffectsEvolution,
+  fetchSleepEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
   type ScorePoint,
   type MoodPoint,
   type FearPoint,
   type MedEffectPoint,
+  type SleepPoint,
   type ModuleSummary,
 } from '../../services/engagementService'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'med'
+export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -25,6 +27,7 @@ export type ModuleDataResult =
   | { status: 'mood'; points: MoodPoint[] }
   | { status: 'fear'; points: FearPoint[] }
   | { status: 'med'; effects: string[]; points: MedEffectPoint[] }
+  | { status: 'sleep'; points: SleepPoint[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -35,11 +38,12 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med] = await Promise.all([
+        const [scaleResults, mood, fear, med, sleep] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
           fetchMedSideEffectsEvolution(patientId),
+          fetchSleepEvolution(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
         available.forEach((mt, i) => { scaleData[mt] = scaleResults[i] })
@@ -50,6 +54,7 @@ export const engagementQueries = {
           fearData: fear,
           medEffects: med.effects,
           medData: med.data,
+          sleepData: sleep,
         }
       },
     }),
@@ -75,6 +80,10 @@ export const engagementQueries = {
         if (kind === 'med') {
           const res = await fetchMedSideEffectsEvolution(patientId)
           return res.data.length === 0 ? { status: 'empty' } : { status: 'med', effects: res.effects, points: res.data }
+        }
+        if (kind === 'sleep') {
+          const points = await fetchSleepEvolution(patientId)
+          return points.length === 0 ? { status: 'empty' } : { status: 'sleep', points }
         }
         const summary = await fetchModuleSummary(patientId, moduleType)
         return summary.count === 0 ? { status: 'empty' } : { status: 'summary', summary }

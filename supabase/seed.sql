@@ -753,7 +753,29 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'quality_label_2',             'modules.sleep_diary.quality_bad'),
   ('sj.cfg', 'quality_label_3',             'modules.sleep_diary.quality_average'),
   ('sj.cfg', 'quality_label_4',             'modules.sleep_diary.quality_good'),
-  ('sj.cfg', 'quality_label_5',             'modules.sleep_diary.quality_excellent')
+  ('sj.cfg', 'quality_label_5',             'modules.sleep_diary.quality_excellent'),
+  -- Refonte Consensus Sleep Diary : horaires précis, siestes, aide au sommeil,
+  -- ressenti au réveil, stats enrichies, légende neutralisée (conformité MDR).
+  ('sj.cfg', 'nap_max_minutes',             '600'),
+  ('sj.cfg', 'section_naps_title',          'modules.sleep_diary.section_naps'),
+  ('sj.cfg', 'section_sleep_aid_title',     'modules.sleep_diary.section_sleep_aid'),
+  ('sj.cfg', 'section_restedness_title',    'modules.sleep_diary.section_restedness'),
+  ('sj.cfg', 'in_bed_label',                'modules.sleep_diary.in_bed_label'),
+  ('sj.cfg', 'out_of_bed_label',            'modules.sleep_diary.out_of_bed_label'),
+  ('sj.cfg', 'nap_label',                   'modules.sleep_diary.nap_label'),
+  ('sj.cfg', 'sleep_aid_label',             'modules.sleep_diary.sleep_aid_label'),
+  ('sj.cfg', 'restedness_label',            'modules.sleep_diary.restedness_label'),
+  ('sj.cfg', 'restedness_label_1',          'modules.sleep_diary.restedness_1'),
+  ('sj.cfg', 'restedness_label_2',          'modules.sleep_diary.restedness_2'),
+  ('sj.cfg', 'restedness_label_3',          'modules.sleep_diary.restedness_3'),
+  ('sj.cfg', 'restedness_label_4',          'modules.sleep_diary.restedness_4'),
+  ('sj.cfg', 'restedness_label_5',          'modules.sleep_diary.restedness_5'),
+  ('sj.cfg', 'time_in_bed_label',           'modules.sleep_diary.time_in_bed'),
+  ('sj.cfg', 'total_sleep_label',           'modules.sleep_diary.total_sleep'),
+  ('sj.cfg', 'stat_avg_efficiency_label',   'modules.sleep_diary.stat_avg_efficiency'),
+  ('sj.cfg', 'stat_avg_onset_label',        'modules.sleep_diary.stat_avg_onset'),
+  ('sj.cfg', 'legend_filled_label',         'modules.sleep_diary.legend_filled'),
+  ('sj.cfg', 'legend_nap_label',            'modules.sleep_diary.legend_nap')
 on conflict (field_id, prop_key) do nothing;
 
 

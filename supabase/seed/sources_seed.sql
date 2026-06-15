@@ -1493,41 +1493,115 @@ values
   )
 
 -- ── sleep_diary ───────────────────────────────────────────────────────────────
--- Agenda du sommeil (composant central de la TCC-I)
--- Source vérifiée : PMID 26054060 — Trauer et al. 2015 (vérifié PubMed, abstract lu)
+-- Agenda du sommeil (Consensus Sleep Diary, outil central de la TCC-I)
+-- Sources vérifiées via PubMed (PMID + abstract lu) / guidelines officielles :
+--   PMID 22294820 (Carney 2012, instrument) · PMID 27231885 (Maich 2016, validation)
+--   PMID 33164742 (Edinger 2021, AASM) · PMID 38016484 (Riemann 2023, Europe)
+--   NICE NG215 (2022) · PMID 26054060 (Trauer 2015) · PMID 37573859 (Kyle 2023, HABIT)
 
 ,
 
-  -- Trauer et al. 2015 — Ann Intern Med (revue systématique + méta-analyse, 20 ECR, n=1 162)
-  --    PMID 26054060 — doi:10.7326/M14-2841 (vérifié PubMed, abstract lu)
-  --    La TCC-I est le traitement de 1ère ligne de l''insomnie chronique
-  --    L''agenda du sommeil est le principal outil de monitoring, d''ajustement et de restriction du sommeil
+  -- Carney et al. 2012 — Sleep (consensus d''experts, instrument de référence)
+  --    PMID 22294820 — doi:10.5665/sleep.1642 (vérifié PubMed, abstract lu)
   (
-    '3f3f3f3f-0001-0001-0001-000000000001',
+    '3f3f3f3f-0003-0001-0001-000000000001',
     'sleep_diary',
-    'Trauer et al. — TCC pour l''insomnie chronique : revue systématique et méta-analyse (Ann Intern Med, 2015)',
-    'meta_analysis',
-    'https://doi.org/10.7326/M14-2841',
+    'Carney et al. : The Consensus Sleep Diary, standardiser l''auto-suivi prospectif du sommeil (Sleep, 2012)',
+    'expert_opinion',
+    'https://doi.org/10.5665/sleep.1642',
     null,
-    'Revue systématique de 20 ECR (n=1 162, 64 % de femmes, âge moyen 56 ans) : la TCC-I améliore significativement la latence d''endormissement (−19 min), l''éveil après endormissement (−26 min) et l''efficacité du sommeil (+9,91 %) — effets maintenus à long terme ; TCC-I recommandée comme 1ère ligne pour l''insomnie chronique, avec l''agenda du sommeil comme outil central',
+    'Consensus d''experts (panel de Pittsburgh) ayant standardisé l''agenda du sommeil de référence : items cœur (heure de mise au lit, heure d''essai de dormir, dernier réveil, sortie du lit, latence, réveils, durée des réveils, qualité) rédigés en langage accessible (niveau lecture primaire), pour harmoniser les études et la pratique. C''est l''instrument que ce module implémente.',
     1
+  )
+
+,
+
+  -- Maich, Lachowski & Carney 2016 — Behav Sleep Med (validation psychométrique du CSD)
+  --    PMID 27231885 — doi:10.1080/15402002.2016.1173556 (vérifié PubMed, abstract lu)
+  (
+    '3f3f3f3f-0004-0001-0001-000000000001',
+    'sleep_diary',
+    'Maich, Lachowski & Carney : propriétés psychométriques du Consensus Sleep Diary chez les insomniaques (Behav Sleep Med, 2016)',
+    'cohort_study',
+    'https://doi.org/10.1080/15402002.2016.1173556',
+    null,
+    'Étude de validation : les indices du Consensus Sleep Diary distinguent les bons dormeurs des patients insomniaques, corrèlent aux mesures objectives et à la sévérité de l''insomnie, et détectent l''amélioration après TCC-I. Taux de complétion de 99,8 % sur 14 jours : validité, utilité clinique et acceptabilité confirmées.',
+    2
+  )
+
+,
+
+  -- Edinger et al. 2021 — J Clin Sleep Med (guideline AASM, méthodologie GRADE)
+  --    PMID 33164742 — doi:10.5664/jcsm.8986 (vérifié PubMed, abstract lu)
+  (
+    '3f3f3f3f-0005-0001-0001-000000000001',
+    'sleep_diary',
+    'Edinger et al. : traitements comportementaux de l''insomnie chronique, guideline de l''American Academy of Sleep Medicine (J Clin Sleep Med, 2021)',
+    'guideline',
+    'https://doi.org/10.5664/jcsm.8986',
+    null,
+    'Guideline AASM (méthodologie GRADE) : recommandation FORTE de la TCC-I multicomposante en 1ère ligne de l''insomnie chronique de l''adulte. La restriction du sommeil et le contrôle du stimulus, qui reposent sur l''agenda du sommeil, sont recommandés comme thérapies à composante unique.',
+    3
+  )
+
+,
+
+  -- Riemann et al. 2023 — J Sleep Res (European Insomnia Guideline, mise à jour)
+  --    PMID 38016484 — doi:10.1111/jsr.14035 (vérifié PubMed, abstract lu)
+  (
+    '3f3f3f3f-0006-0001-0001-000000000001',
+    'sleep_diary',
+    'Riemann et al. : European Insomnia Guideline, mise à jour 2023 du diagnostic et du traitement de l''insomnie (J Sleep Res, 2023)',
+    'guideline',
+    'https://doi.org/10.1111/jsr.14035',
+    null,
+    'Guideline européenne 2023 : l''agenda du sommeil (avec l''entretien clinique et les questionnaires) est recommandé pour le diagnostic de l''insomnie (grade A) ; l''actigraphie n''est pas recommandée en routine. La TCC-I est le traitement de 1ère ligne de l''insomnie chronique à tout âge, en présentiel ou en format numérique (grade A).',
+    4
   )
 
 ,
 
   -- NICE NG215 (2022) — Insomnia in adults: diagnosis and management (guideline)
   --    https://www.nice.org.uk/guidance/ng215 (vérifié, guideline officielle)
-  --    Recommande la TCC-I comme traitement de 1ère ligne pour l''insomnie chronique
-  --    L''agenda du sommeil est explicitement requis comme outil de monitoring
   (
     '3f3f3f3f-0002-0001-0001-000000000001',
     'sleep_diary',
-    'NICE NG215 — Insomnie de l''adulte : diagnostic et prise en charge (guideline, 2022)',
+    'NICE NG215 : insomnie de l''adulte, diagnostic et prise en charge (guideline, 2022)',
     'guideline',
     'https://www.nice.org.uk/guidance/ng215',
     null,
-    'Recommandation clinique NICE 2022 : la TCC-I est le traitement de 1ère ligne pour l''insomnie chronique de l''adulte — agenda du sommeil et restriction du sommeil sont des composantes centrales du protocole (Recommendation 1.4). Le guide recommande l''utilisation d''un agenda du sommeil pour évaluer le profil de sommeil avant et pendant le traitement.',
-    2
+    'Recommandation clinique NICE 2022 : la TCC-I est le traitement de 1ère ligne pour l''insomnie chronique de l''adulte ; agenda du sommeil et restriction du sommeil sont des composantes centrales du protocole. Le guide recommande l''utilisation d''un agenda du sommeil pour évaluer le profil de sommeil avant et pendant le traitement.',
+    5
+  )
+
+,
+
+  -- Trauer et al. 2015 — Ann Intern Med (revue systématique + méta-analyse, 20 ECR, n=1 162)
+  --    PMID 26054060 — doi:10.7326/M14-2841 (vérifié PubMed, abstract lu)
+  (
+    '3f3f3f3f-0001-0001-0001-000000000001',
+    'sleep_diary',
+    'Trauer et al. : TCC pour l''insomnie chronique, revue systématique et méta-analyse (Ann Intern Med, 2015)',
+    'meta_analysis',
+    'https://doi.org/10.7326/M14-2841',
+    null,
+    'Revue systématique de 20 ECR (n=1 162, 64 % de femmes, âge moyen 56 ans) : la TCC-I améliore significativement la latence d''endormissement (-19 min), l''éveil après endormissement (-26 min) et l''efficacité du sommeil (+9,91 %), effets maintenus à long terme. TCC-I recommandée en 1ère ligne de l''insomnie chronique, avec l''agenda du sommeil comme outil central.',
+    6
+  )
+
+,
+
+  -- Kyle et al. 2023 — Lancet (essai HABIT, ECR pragmatique, n=642)
+  --    PMID 37573859 — doi:10.1016/S0140-6736(23)00683-9 (vérifié PubMed, abstract lu)
+  (
+    '3f3f3f3f-0007-0001-0001-000000000001',
+    'sleep_diary',
+    'Kyle et al. : restriction du sommeil délivrée par infirmier(ère) en soins primaires, essai HABIT randomisé contrôlé (Lancet, 2023)',
+    'rct',
+    'https://doi.org/10.1016/S0140-6736(23)00683-9',
+    null,
+    'ECR pragmatique (n=642, 35 cabinets de médecine générale) : 4 séances de restriction du sommeil basée sur l''agenda du sommeil, délivrées par infirmier(ère), réduisent la sévérité de l''insomnie à 6 mois (ISI -3,05 ; d=-0,74) vs hygiène du sommeil seule, avec un rapport coût-efficacité favorable. La restriction du sommeil est implémentable en 1ère ligne.',
+    7
   )
 
 -- ── cognitive_distortions ────────────────────────────────────────────────────
