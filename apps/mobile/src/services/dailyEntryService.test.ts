@@ -16,7 +16,7 @@ beforeEach(() => jest.clearAllMocks())
 
 describe('dailyEntryService', () => {
   it('saveDailyEntry : SQLite puis enqueue daily_entry', async () => {
-    const entry = { id: 'de-1', module_id: 'medication_adherence', date: '2025-01-01', status: 'taken', notes: null }
+    const entry = { id: 'de-1', module_id: 'medication_adherence', date: '2025-01-01', status: 'taken', reason: null, notes: null }
     await saveDailyEntry(entry)
     expect(mockSaveDb).toHaveBeenCalledWith(entry)
     expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({

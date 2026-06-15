@@ -254,6 +254,24 @@ Barres verticales — valeurs affichées au-dessus, étiquettes de date en-desso
 
 > **Règle : tout graphique temporel mobile utilise `LineChart` ou `BarChart` depuis `ui/Chart/`. Les charts spécifiques à un domaine (`DesensitizationChart`, `SudsSparkline`) restent dans `features/Chart/`.**
 
+#### `MonthCalendar` (`ui/Chart/TimeRangeCharts/`)
+
+Vue calendaire mensuelle passive — une pastille neutre par jour renseigné. Deux modes
+d'alimentation exclusifs : `entries` + `dimensionKeys` (moyenne de sous-scores) **ou**
+`dayMarkers` (couleur/libellé fournis explicitement par le module). Initiales des jours
+dérivées de la locale via `Intl` (jamais figées en français). Aucune tendance, aucune
+flèche, aucun taux (conforme MDR 2017/745).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `dayMarkers` | `ReadonlyMap<string, DayMarker>` | Pastille par date `YYYY-MM-DD` (`{ color, label? }`) — mode marqueurs explicites |
+| `entries` / `dimensionKeys` | `ChartEntry[]` / `string[]` | Mode dérivé : moyenne des sous-scores par jour |
+| `accentColor` | `string` | Couleur d'accent (jour courant, navigation) |
+| `locale` | `string` | Locale BCP-47 — libellé du mois + initiales des jours |
+| `daysLabel` | `string` | Libellé du compteur « jours renseignés » |
+| `legendLabel` | `string` | Titre de la légende (optionnel) |
+| `legendItems` | `ReadonlyArray<{ color; label }>` | Légende explicite : une entrée par statut (optionnel) |
+
 ---
 
 ### `PillSelector` (`src/components/ui/PillSelector/`)

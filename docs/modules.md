@@ -23,7 +23,7 @@
 | `grounding` | Ancrage 5-4-3-2-1 (DBT) | `guided_exercise` | Aucun (exercice sans persistance) | [doc](modules/grounding.md) |
 | `mood_tracker` | Thermomètre de l'humeur | `slider_dashboard` | SQLite `scale_entries` + `mood_markers` | [doc](modules/mood_tracker.md) |
 | `motivational_balance` | Balance motivationnelle (EM) | `tabbed` | SQLite `em_rulers`, `em_balance_items`, `em_values` | [doc](modules/motivational_balance.md) |
-| `medication_adherence` | Observance médicamenteuse | `daily_checkin` | SQLite local | [doc](modules/medication_adherence.md) |
+| `medication_adherence` | Observance médicamenteuse | `medication_tracker` | SQLite `daily_entries` + `medication_intakes` ; liste molécules dans `patient_modules.config.medications` | [doc](modules/medication_adherence.md) |
 | `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
 | `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
 | `psychoeducation` | Psychoéducation (bibliothèque) | `psyedu_library` | Fiches `psyedu_topics` (par thème) débloquées via `patient_modules.config.unlocked_topics` | [doc](modules/psychoeducation.md) |

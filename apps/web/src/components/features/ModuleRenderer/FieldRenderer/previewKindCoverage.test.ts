@@ -28,6 +28,7 @@ const HANDLED_PREVIEW_KINDS = new Set([
   'questionnaire',
   'slider_dashboard',
   'daily_checkin',
+  'medication_tracker',
   'sleep_journal',
   'activity_log',
   'decision_grid',

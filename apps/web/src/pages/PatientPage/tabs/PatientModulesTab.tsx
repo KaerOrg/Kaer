@@ -30,9 +30,11 @@ import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
+import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
+import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -106,6 +108,7 @@ export function PatientModulesTab({
   const psycho = usePsychoEducationPicker(modules, allTopicIds, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
+  const medList = useMedicationListEditor(modules, onReloadModules)
 
   // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
   const isPreviewOpen = useCallback(
@@ -346,7 +349,7 @@ export function PatientModulesTab({
                   onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
                 />
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+                  <p className="crisis-cards-title">
                     {t('patient.crisis_cards_title')}
                   </p>
                   {crisis.config.copingCards.map(card => (
@@ -437,6 +440,30 @@ export function PatientModulesTab({
           previewOpen={isPreviewOpen('medication_side_effects')}
           dataOpen={isDataOpen('medication_side_effects')}
           medEffects={medEffects}
+          moduleToggle={moduleToggle}
+          onTogglePreview={togglePreview}
+          onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
+          onUnlock={unlockModule}
+          onRevoke={revokeModule}
+        />
+      )
+    }
+
+    if (moduleType === 'medication_adherence') {
+      return (
+        <MedicationAdherenceCard
+          key="medication_adherence"
+          tagChips={tagChips('medication_adherence')}
+          modItem={modItem}
+          modIcon={modIcon}
+          mod={mod}
+          patientId={patientId}
+          unlocked={unlocked}
+          loading={isModuleBusy('medication_adherence', mod?.id)}
+          previewOpen={isPreviewOpen('medication_adherence')}
+          dataOpen={isDataOpen('medication_adherence')}
+          medList={medList}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
