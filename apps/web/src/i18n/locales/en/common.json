@@ -851,8 +851,8 @@
       "empty_text": "Use the button above to browse the cards."
     },
     "chronobiology_tracker": {
-      "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders.",
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry."
@@ -1282,8 +1282,8 @@
       "description": "Understanding and managing cravings and weight gain on antipsychotics."
     },
     "chronobiology_tracker": {
-      "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders."
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime."
     },
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",

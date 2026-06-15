@@ -589,8 +589,8 @@
       "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
     },
     "chronobiology_tracker": {
-      "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
+      "label": "Rythmes & régularité",
+      "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
@@ -1391,8 +1391,8 @@
       "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
     },
     "chronobiology_tracker": {
-      "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
+      "label": "Rythmes & régularité",
+      "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",

@@ -472,8 +472,8 @@
       "section_medication": "Medications & diet"
     },
     "chronobiology_tracker": {
-      "label": "Chronobiological regularity",
-      "description": "Wake-up, bedtime, first meal times"
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime"
     },
     "mood_tracker": {
       "label": "Mood thermometer",

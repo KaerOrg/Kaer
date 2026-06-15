@@ -1989,8 +1989,9 @@ on conflict (field_id, prop_key) do nothing;
 --
 --   - diet_weight_psycho       → preview_kind='psyedu'
 --   - distress_tolerance       → preview_kind='tabbed'  (psyedu + cards)
---   - chronobiology_tracker    → preview_kind='tabbed'  (psyedu + column_form
---                                                         + chrono_month)
+--   - chronobiology_tracker    → preview_kind='tabbed'  (column_form + chrono_month)
+--                                « Rythmes & régularité » : onglet Fiches retiré
+--                                (refonte 2026-06-15, cf. docs/spec/rythmes-regularite.md)
 --   - craving_journal          → preview_kind='tabbed'  (psyedu + column_form)
 --
 -- Pour le contenu psyedu (psyedu_topics + psyedu_blocks), exécuter aussi
@@ -2225,11 +2226,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
 insert into public.module_content_fields
   (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order)
 values
-  -- tab Fiches → psyedu
-  ('chrono.tab.fiches', 'chronobiology_tracker', null, null, 'tab',
-   'modules.chrono_bio.tab_fiches', 10),
-
-  -- tab Journal → column_form (5 column_time_field optionnels)
+  -- tab Journal → column_form (ancres horaires optionnelles, catalogue configurable par patient)
   ('chrono.tab.journal', 'chronobiology_tracker', null, null, 'tab',
    'modules.chrono_bio.tab_journal', 20),
 
@@ -2252,12 +2249,12 @@ values
   ('chrono.col.last',    'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
    'modules.chrono_bio.last_meal', 14),
   ('chrono.col.bed',     'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
-   'modules.chrono_bio.bedtime', 15);
+   'modules.chrono_bio.bedtime', 15),
+  -- ancre lumière / sortie extérieure (zeitgeber dominant, Dollish 2023)
+  ('chrono.col.light',   'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
+   'modules.chrono_bio.light', 16);
 
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('chrono.tab.fiches',  'tab_key',          'fiches'),
-  ('chrono.tab.fiches',  'sub_preview_kind', 'psyedu'),
-  ('chrono.tab.fiches',  'icon_name',        'BookOpen'),
   ('chrono.tab.journal', 'tab_key',          'journal'),
   ('chrono.tab.journal', 'sub_preview_kind', 'column_form'),
   ('chrono.tab.journal', 'icon_name',        'Clock'),
@@ -2281,7 +2278,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.col.last',    'key',              'last_meal'),
   ('chrono.col.last',    'optional',         '1'),
   ('chrono.col.bed',     'key',              'bedtime'),
-  ('chrono.col.bed',     'optional',         '1');
+  ('chrono.col.bed',     'optional',         '1'),
+  ('chrono.col.light',   'key',              'light'),
+  ('chrono.col.light',   'optional',         '1');
 
 -- Level prop pour tous les card_heading (migré depuis card_heading_2/3/4)
 insert into public.field_props (field_id, prop_key, prop_value) values

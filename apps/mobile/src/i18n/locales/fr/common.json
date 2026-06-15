@@ -544,17 +544,17 @@
       "section_medication": "Médicaments & alimentation"
     },
     "chronobiology_tracker": {
-      "label": "Régularité chronobiologique",
-      "description": "Heure de lever, coucher, premier repas",
+      "label": "Rythmes & régularité",
+      "description": "Régularité des rythmes de vie : lever, repas, activité, lumière, coucher",
       "rhythm_band_title": "Bande de rythme",
       "anchor_wake": "Lever",
       "anchor_first_meal": "1er repas",
       "anchor_main_activity": "Activité",
       "anchor_last_meal": "Dernier repas",
-      "anchor_bedtime": "Coucher"
+      "anchor_bedtime": "Coucher",
+      "anchor_light": "Lumière"
     },
     "chrono_bio": {
-      "tab_fiches": "Fiches",
       "tab_journal": "Journal",
       "today_label": "Aujourd'hui",
       "add_today": "Saisir mes ancrages du jour",
@@ -571,6 +571,7 @@
       "main_activity": "Activité principale",
       "last_meal": "Dernier repas",
       "bedtime": "Coucher",
+      "light": "Exposition à la lumière / sortie",
       "optional_hint": "Tous les ancrages sont facultatifs, saisissez ceux dont vous vous souvenez.",
       "save_entry": "Enregistrer les ancrages",
       "update_entry": "Mettre à jour",
@@ -1808,8 +1809,8 @@
       "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
     },
     "chronobiology_tracker": {
-      "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
+      "label": "Rythmes & régularité",
+      "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
