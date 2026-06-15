@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, Drawer, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -172,7 +172,10 @@ réécrire des `__tab`/`role="tab"` à la main.
 
 `variant` : `'horizontal'` (défaut) · `'vertical'` · `'compact'`. `accentColor`
 surcharge la couleur de l'onglet actif (défaut `var(--color-primary)`).
-Utilisé par `SliderDashboardLayout` et `DailyCheckinLayout`.
+`iconOnly` n'affiche que l'`icon` de chaque onglet ; le `label` devient alors le nom
+accessible (`aria-label`) et l'infobulle (`title`) — chaque onglet doit fournir un `icon`.
+Utilisé par `SliderDashboardLayout`, `DailyCheckinLayout`, et le détail de la file
+active (`RowDetail` : onglets verticaux icône seule).
 
 ### `ValueBar` — barre de valeur statique
 
@@ -355,6 +358,42 @@ fermeture sur `Échap` + clic sur l'overlay).
 | `footer` | `ReactNode` | — | Pied (actions) |
 | `noPadding` | `boolean` | `false` | Supprime le padding du body |
 | `maxWidth` | `number` | — | Largeur max en px |
+| `children` | `ReactNode` | — | Corps |
+
+### `Drawer`
+
+`components/ui/Drawer/`. Panneau latéral coulissant ancré à droite, pleine hauteur
+(`role="dialog"`, `aria-modal`, fermeture sur `Échap`, clic overlay ou croix). Même
+grammaire que `Modal` (titre, sous-titre, icône, footer) mais pour afficher le détail
+d'un élément sans quitter la vue d'ensemble (ex. détail d'un dossier dans la file active).
+**Redimensionnable par défaut** : poignée sur le bord gauche (glisser à la souris) ou
+flèches gauche/droite au clavier quand la poignée a le focus, bornée par `minWidth`/`maxWidth`.
+**Animé** à l'ouverture (glissement depuis la droite) et à la fermeture (glissement de
+sortie + fondu de l'overlay, puis démontage sur `animationend`) ; respecte
+`prefers-reduced-motion` (fermeture immédiate, sans animation).
+
+```tsx
+<Drawer title={entry.display_name} icon={<FolderOpen />} onClose={close}>
+  {detailContent}
+</Drawer>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `icon` | `ReactNode` | — | Icône en tête |
+| `onClose` | `() => void` | — | Appelé sur `Échap`, clic overlay, ou croix |
+| `titleAccessory` | `ReactNode` | — | Élément juste après le titre (ex. bouton favoris collé au nom) |
+| `headerActions` | `ReactNode` | — | Slot d'actions dans l'en-tête, avant la croix |
+| `footer` | `ReactNode` | — | Pied (actions) |
+| `noPadding` | `boolean` | `false` | Supprime le padding du body |
+| `width` | `number` | `460` | Largeur initiale en px |
+| `minWidth` | `number` | `360` | Largeur min au redimensionnement |
+| `maxWidth` | `number` | `900` | Largeur max au redimensionnement (bornée au viewport) |
+| `resizable` | `boolean` | `true` | Affiche la poignée de redimensionnement |
+| `storageKey` | `string` | — | Clé `localStorage` : mémorise et restaure la largeur redimensionnée |
+| `topOffset` | `number` | — | Décale le haut de l'overlay (px) pour laisser un header fixe cliquable au-dessus |
 | `children` | `ReactNode` | — | Corps |
 
 ### `InputField`

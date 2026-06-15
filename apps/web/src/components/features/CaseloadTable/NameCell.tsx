@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronRight, ChevronDown } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { EditableName } from './EditableName'
 import { formatBirthDate } from './caseloadFormat'
 import type { LinkablePatient } from './types'
@@ -35,12 +35,12 @@ function NameCellComponent({ entry, patients, expanded, onToggle, onPatch }: Nam
     <div className="name-cell">
       <button
         type="button"
-        className="name-cell__toggle"
+        className={`name-cell__toggle ${expanded ? 'name-cell__toggle--active' : ''}`}
         onClick={onToggle}
         aria-expanded={expanded}
         aria-label={t('file_active.toggle_detail')}
       >
-        {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        <Eye size={16} />
       </button>
       <EditableName
         value={entry.display_name}

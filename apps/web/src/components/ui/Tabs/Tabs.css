@@ -110,6 +110,34 @@
   font-weight: 600;
 }
 
+/* ── Mode icône seule (label en aria-label + title) ──────────────────────── */
+
+.tabs__item--icon-only {
+  position: relative;
+  justify-content: center;
+  gap: 0;
+}
+
+.tabs--vertical .tabs__item--icon-only {
+  padding: 10px 12px;
+}
+
+/* Badge en pastille d'angle : la largeur du bouton reste uniforme (icônes alignées). */
+.tabs__item--icon-only .tabs__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  margin-left: 0;
+}
+
+.tabs__item--icon-only .tabs__icon {
+  opacity: 0.85;
+}
+
 /* ── Icône (commun) ──────────────────────────────────────────────────────── */
 
 .tabs__icon {

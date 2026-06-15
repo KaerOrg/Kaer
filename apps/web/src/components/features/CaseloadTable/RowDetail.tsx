@@ -1,5 +1,7 @@
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ListChecks, Clock, FileText } from 'lucide-react'
+import { Tabs, type TabItem } from '../../ui/Tabs'
 import { ActionList } from './ActionList'
 import { WaitList } from './WaitList'
 import { ObservationBlock } from './ObservationBlock'
@@ -40,6 +42,7 @@ function RowDetailComponent({
 }: RowDetailProps) {
   const { t } = useTranslation()
   const { entry, actions, waits } = row
+  const [tab, setTab] = useState('actions')
 
   const handleAdd = useCallback((label: string, due: string | null) => onAddAction(entry.id, label, due), [entry.id, onAddAction])
   const handleToggle = useCallback((actionId: string, done: boolean) => onToggleDone(entry.id, actionId, done), [entry.id, onToggleDone])
@@ -49,29 +52,43 @@ function RowDetailComponent({
   const handlePatchWait = useCallback((waitId: string, patch: CaseloadWaitInput) => onPatchWait(entry.id, waitId, patch), [entry.id, onPatchWait])
   const handleDeleteWait = useCallback((waitId: string) => onDeleteWait(entry.id, waitId), [entry.id, onDeleteWait])
 
+  const tabs = useMemo<TabItem[]>(
+    () => [
+      { id: 'actions', label: t('file_active.section.actions'), icon: <ListChecks size={18} />, badge: actions.length || undefined },
+      { id: 'waits', label: t('file_active.section.waits'), icon: <Clock size={18} />, badge: waits.length || undefined },
+      { id: 'observation', label: t('file_active.section.observation'), icon: <FileText size={18} /> },
+    ],
+    [t, actions.length, waits.length]
+  )
+
+  const activeLabel = useMemo(() => tabs.find(tb => tb.id === tab)?.label ?? '', [tabs, tab])
+
   return (
-    <div className="caseload-detail">
-      <section className="caseload-detail__section caseload-detail__section--actions">
-        <h4 className="caseload-detail__title">{t('file_active.section.actions')}</h4>
-        <ActionList
-          actions={actions}
-          today={today}
-          onAdd={handleAdd}
-          onToggleDone={handleToggle}
-          onPatchAction={handlePatchAction}
-          onDeleteAction={handleDeleteAction}
-        />
-      </section>
+    <div className="caseload-detail caseload-detail--tabbed">
+      <Tabs tabs={tabs} activeTab={tab} onChange={setTab} variant="vertical" iconOnly />
 
-      <section className="caseload-detail__section caseload-detail__section--waits">
-        <h4 className="caseload-detail__title">{t('file_active.section.waits')}</h4>
-        <WaitList waits={waits} onAdd={handleAddWait} onPatch={handlePatchWait} onDelete={handleDeleteWait} />
-      </section>
+      <div className="caseload-detail__panel">
+        <h4 className="caseload-detail__panel-title">{activeLabel}</h4>
 
-      <section className="caseload-detail__section caseload-detail__section--observation">
-        <h4 className="caseload-detail__title">{t('file_active.section.observation')}</h4>
-        <ObservationBlock entryId={entry.id} onLoadNotes={onLoadNotes} onAddNote={onAddNote} />
-      </section>
+        {tab === 'actions' ? (
+          <ActionList
+            actions={actions}
+            today={today}
+            onAdd={handleAdd}
+            onToggleDone={handleToggle}
+            onPatchAction={handlePatchAction}
+            onDeleteAction={handleDeleteAction}
+          />
+        ) : null}
+
+        {tab === 'waits' ? (
+          <WaitList waits={waits} onAdd={handleAddWait} onPatch={handlePatchWait} onDelete={handleDeleteWait} />
+        ) : null}
+
+        {tab === 'observation' ? (
+          <ObservationBlock entryId={entry.id} onLoadNotes={onLoadNotes} onAddNote={onAddNote} />
+        ) : null}
+      </div>
     </div>
   )
 }

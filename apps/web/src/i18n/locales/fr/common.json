@@ -1772,7 +1772,6 @@
       "done_label": "Marquer comme fait",
       "label_label": "Libellé de l'action",
       "due_label": "Échéance de l'action",
-      "time_label": "Heure (optionnel)",
       "urgent_toggle": "Marquer cette action comme urgente",
       "delete_label": "Supprimer l'action",
       "add_placeholder": "Ajouter une action…",

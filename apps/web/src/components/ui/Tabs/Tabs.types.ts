@@ -21,4 +21,9 @@ export interface TabsProps {
   className?: string
   /** Couleur d'accent de l'onglet actif (texte + bordure). Défaut : var(--color-primary) via CSS. */
   accentColor?: string
+  /**
+   * N'affiche que l'icône de chaque onglet ; le `label` devient le nom accessible
+   * (`aria-label`) et l'infobulle (`title`). Chaque onglet doit alors fournir un `icon`.
+   */
+  iconOnly?: boolean
 }

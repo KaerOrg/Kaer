@@ -119,7 +119,8 @@ describe('CaseloadTable', () => {
     renderTable()
     expect(screen.queryByText('Aucune observation.')).toBeNull() // panneau fermé
     fireEvent.click(screen.getByText('Bernard Hugo'))
-    expect(await screen.findByText('Aucune observation.')).toBeInTheDocument() // panneau ouvert
+    fireEvent.click(await screen.findByRole('tab', { name: 'Observations' }))
+    expect(await screen.findByText('Aucune observation.')).toBeInTheDocument() // onglet Observations
   })
 
   it('déplie la ligne et force une action en urgent', async () => {
@@ -134,6 +135,7 @@ describe('CaseloadTable', () => {
     const onAddWait = vi.fn()
     renderTable({ onAddWait })
     fireEvent.click(screen.getByRole('button', { expanded: false }))
+    fireEvent.click(await screen.findByRole('tab', { name: 'En attente de retour' }))
     fireEvent.change(await screen.findByLabelText('Nouvelle attente'), { target: { value: 'Retour ASE' } })
     fireEvent.click(screen.getByLabelText("Ajouter l'attente"))
     expect(onAddWait).toHaveBeenCalledWith('e-1', 'Retour ASE', null)

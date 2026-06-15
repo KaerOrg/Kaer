@@ -1663,7 +1663,6 @@
       "done_label": "Mark as done",
       "label_label": "Action label",
       "due_label": "Action due date",
-      "time_label": "Time (optional)",
       "urgent_toggle": "Mark this action as urgent",
       "delete_label": "Delete action",
       "add_placeholder": "Add an action…",

@@ -49,6 +49,22 @@ describe('Tabs', () => {
     expect(container.querySelector('.tabs--compact')).toBeInTheDocument()
   })
 
+  it('en mode iconOnly, masque le label visible et le garde comme nom accessible', () => {
+    render(
+      <Tabs
+        tabs={[{ id: 'a', label: 'Actions', icon: <svg data-testid="ic" /> }]}
+        activeTab="a"
+        onChange={vi.fn()}
+        iconOnly
+      />,
+    )
+    // le label n'est plus un nœud texte visible, mais reste le nom accessible (aria-label + title)
+    const tab = screen.getByRole('tab', { name: 'Actions' })
+    expect(tab).toHaveAttribute('title', 'Actions')
+    expect(tab.querySelector('[data-testid="ic"]')).not.toBeNull()
+    expect(tab).not.toHaveTextContent('Actions')
+  })
+
   it('affiche le badge quand > 0, le masque sinon', () => {
     render(
       <Tabs

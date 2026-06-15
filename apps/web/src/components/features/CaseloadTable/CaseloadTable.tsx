@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, Star } from 'lucide-react'
-import { DataTable, type DataTableColumn } from '../../ui/DataTable'
+import { ClipboardList, Star, User } from 'lucide-react'
+import { DataTable, type DataTableColumn, type DataTableSort } from '../../ui/DataTable'
+import { Drawer } from '../../ui/Drawer'
 import { EmptyState } from '../../ui/EmptyState'
 import { AddEntryForm, type AddEntryFormProps } from './AddEntryForm'
 import { CaseloadFilters } from './CaseloadFilters'
@@ -14,6 +15,12 @@ import { AlertCell } from './AlertCell'
 import { WaitSummary } from './WaitSummary'
 import { RowDetail } from './RowDetail'
 import { selectCaseloadRows } from './filterCaseload'
+import {
+  sortCaseloadRows,
+  DEFAULT_SORT_DIRECTION,
+  type CaseloadSort,
+  type CaseloadSortColumn,
+} from './sortCaseloadRows'
 import { EMPTY_FILTER, type CaseloadFilterState, type LinkablePatient } from './types'
 import type {
   CaseloadActionInput,
@@ -74,8 +81,46 @@ export function CaseloadTable({
 }: CaseloadTableProps) {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<CaseloadFilterState>(EMPTY_FILTER)
+  // Tri choisi par le praticien (null = ordre par défaut « important + urgence »).
+  const [sort, setSort] = useState<CaseloadSort | null>(null)
+  // Dossier dont le détail est ouvert dans le panneau latéral (null = panneau fermé).
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  const visibleRows = useMemo(() => selectCaseloadRows(rows, filter, today), [rows, filter, today])
+  // Ordre par défaut (important épinglé + urgence) ; le tri utilisateur, s'il existe,
+  // prime et réordonne le jeu déjà filtré.
+  const visibleRows = useMemo(() => {
+    const filtered = selectCaseloadRows(rows, filter, today)
+    return sort ? sortCaseloadRows(filtered, sort, today) : filtered
+  }, [rows, filter, today, sort])
+
+  // Clic sur un en-tête triable : bascule asc/desc sur la même colonne, ou démarre
+  // une nouvelle colonne avec son sens initial le plus utile.
+  const handleSortChange = useCallback((column: string) => {
+    const col = column as CaseloadSortColumn
+    setSort(prev =>
+      prev?.column === col
+        ? { column: col, direction: prev.direction === 'asc' ? 'desc' : 'asc' }
+        : { column: col, direction: DEFAULT_SORT_DIRECTION[col] }
+    )
+  }, [])
+
+  const dataTableSort = useMemo<DataTableSort | undefined>(
+    () => (sort ? { column: sort.column, direction: sort.direction } : undefined),
+    [sort]
+  )
+
+  const toggleSelected = useCallback(
+    (id: string) => setSelectedId(prev => (prev === id ? null : id)),
+    []
+  )
+  const closePanel = useCallback(() => setSelectedId(null), [])
+
+  // Le détail suit la donnée vivante : on relit depuis `visibleRows` à chaque rendu.
+  // Si la ligne sort du filtre courant, le panneau se ferme de lui-même.
+  const selectedRow = useMemo(
+    () => (selectedId ? visibleRows.find(r => r.entry.id === selectedId) ?? null : null),
+    [visibleRows, selectedId]
+  )
 
   const columns = useMemo<DataTableColumn<CaseloadRowData>[]>(
     () => [
@@ -84,12 +129,13 @@ export function CaseloadTable({
         header: t('file_active.col.patient'),
         headerClassName: 'caseload-th--patient',
         cellClassName: 'caseload-cell--name',
-        cell: (row, ctx) => (
+        sortable: true,
+        cell: row => (
           <NameCell
             entry={row.entry}
             patients={patients}
-            expanded={ctx.expanded}
-            onToggle={ctx.toggleExpanded}
+            expanded={selectedId === row.entry.id}
+            onToggle={() => toggleSelected(row.entry.id)}
             onPatch={onPatch}
           />
         ),
@@ -98,6 +144,7 @@ export function CaseloadTable({
         id: 'status',
         header: t('file_active.col.status'),
         headerClassName: 'caseload-th--status',
+        sortable: true,
         cell: row => <StatusCell id={row.entry.id} status={row.entry.status} onStatus={onStatus} />,
       },
       {
@@ -105,6 +152,7 @@ export function CaseloadTable({
         header: <Star size={14} className="caseload-th__icon" aria-label={t('file_active.col.important')} />,
         headerClassName: 'caseload-th--important',
         cellClassName: 'caseload-cell--important',
+        sortable: true,
         cell: row => <ImportantCell entry={row.entry} onPatch={onPatch} />,
       },
       {
@@ -126,6 +174,7 @@ export function CaseloadTable({
         header: t('file_active.col.waiting'),
         headerClassName: 'caseload-th--waiting',
         cellClassName: 'caseload-cell--waiting',
+        sortable: true,
         cell: row => <WaitSummary waits={row.waits} />,
       },
       {
@@ -133,29 +182,11 @@ export function CaseloadTable({
         header: t('file_active.col.alert'),
         headerClassName: 'caseload-th--alert',
         cellClassName: 'caseload-cell--alert',
+        sortable: true,
         cell: row => <AlertCell actions={row.actions} today={today} />,
       },
     ],
-    [t, today, patients, onPatch, onStatus]
-  )
-
-  const renderDetail = useCallback(
-    (row: CaseloadRowData) => (
-      <RowDetail
-        row={row}
-        today={today}
-        onAddAction={onAddAction}
-        onToggleDone={onToggleDone}
-        onPatchAction={onPatchAction}
-        onDeleteAction={onDeleteAction}
-        onAddWait={onAddWait}
-        onPatchWait={onPatchWait}
-        onDeleteWait={onDeleteWait}
-        onLoadNotes={onLoadNotes}
-        onAddNote={onAddNote}
-      />
-    ),
-    [today, onAddAction, onToggleDone, onPatchAction, onDeleteAction, onAddWait, onPatchWait, onDeleteWait, onLoadNotes, onAddNote]
+    [t, today, patients, onPatch, onStatus, selectedId, toggleSelected]
   )
 
   const toolbar = (
@@ -181,16 +212,45 @@ export function CaseloadTable({
     )
 
   return (
-    <DataTable
-      columns={columns}
-      rows={visibleRows}
-      getRowId={getRowId}
-      toolbar={toolbar}
-      renderDetail={renderDetail}
-      rowClassName={rowClassName}
-      emptyState={emptyState}
-      ariaLabel={t('file_active.title')}
-      className="caseload-data-table"
-    />
+    <>
+      <DataTable
+        columns={columns}
+        rows={visibleRows}
+        getRowId={getRowId}
+        toolbar={toolbar}
+        rowClassName={rowClassName}
+        emptyState={emptyState}
+        ariaLabel={t('file_active.title')}
+        className="caseload-data-table"
+        sort={dataTableSort}
+        onSortChange={handleSortChange}
+      />
+
+      {selectedRow ? (
+        <Drawer
+          title={selectedRow.entry.display_name}
+          icon={<User size={18} />}
+          onClose={closePanel}
+          storageKey="caseload-drawer-width"
+          titleAccessory={<ImportantCell entry={selectedRow.entry} onPatch={onPatch} />}
+          topOffset={60}
+          noPadding
+        >
+          <RowDetail
+            row={selectedRow}
+            today={today}
+            onAddAction={onAddAction}
+            onToggleDone={onToggleDone}
+            onPatchAction={onPatchAction}
+            onDeleteAction={onDeleteAction}
+            onAddWait={onAddWait}
+            onPatchWait={onPatchWait}
+            onDeleteWait={onDeleteWait}
+            onLoadNotes={onLoadNotes}
+            onAddNote={onAddNote}
+          />
+        </Drawer>
+      ) : null}
+    </>
   )
 }
