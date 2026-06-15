@@ -1,4 +1,6 @@
 import { DataTableRow } from './DataTableRow'
+import { DataTableHeader } from './DataTableHeader'
+import { DataTablePagination } from './DataTablePagination'
 import type { DataTableProps } from './DataTable.types'
 import './DataTable.css'
 
@@ -18,6 +20,9 @@ export function DataTable<T>({
   emptyState,
   ariaLabel,
   className,
+  sort,
+  onSortChange,
+  pagination,
 }: DataTableProps<T>) {
   return (
     <div className={`data-table-wrap ${className ?? ''}`}>
@@ -26,30 +31,25 @@ export function DataTable<T>({
       {rows.length === 0 ? (
         emptyState ?? null
       ) : (
-        <div className="data-table__scroll">
-          <table className="data-table" aria-label={ariaLabel}>
-            <thead>
-              <tr>
-                {columns.map(col => (
-                  <th key={col.id} className={`data-table__th ${col.headerClassName ?? ''}`}>
-                    {col.header}
-                  </th>
+        <>
+          <div className="data-table__scroll">
+            <table className="data-table" aria-label={ariaLabel}>
+              <DataTableHeader columns={columns} sort={sort} onSortChange={onSortChange} />
+              <tbody>
+                {rows.map(row => (
+                  <DataTableRow
+                    key={getRowId(row)}
+                    row={row}
+                    columns={columns}
+                    renderDetail={renderDetail}
+                    rowClassName={rowClassName?.(row)}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(row => (
-                <DataTableRow
-                  key={getRowId(row)}
-                  row={row}
-                  columns={columns}
-                  renderDetail={renderDetail}
-                  rowClassName={rowClassName?.(row)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+          {pagination && pagination.total > 0 ? <DataTablePagination pagination={pagination} /> : null}
+        </>
       )}
     </div>
   )

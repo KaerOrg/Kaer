@@ -999,6 +999,59 @@ create policy "psyedu_blocks_authenticated_select" on public.psyedu_blocks
 
 
 -- ============================================================
+-- REFONTE PSYCHOÉDUCATION — thèmes + découplage fiche ↔ module
+-- ============================================================
+-- Une fiche (psyedu_topics) n'est plus possédée par un module : elle appartient
+-- à un thème (psyedu_themes), porte des tags (psyedu_topic_tags) et peut être
+-- réutilisée par N modules via module_topics. Source unique de vérité par fiche.
+-- Les tables tag_dimensions / tags / module_tags sont définies plus haut
+-- (taxonomie des modules — branche feat/improve-module-organization).
+
+-- Thèmes de la bibliothèque (libellé via i18n : psyedu.theme.<id>)
+create table if not exists public.psyedu_themes (
+  id          text primary key,          -- 'treatment', 'lifestyle', …
+  icon_name   text not null,
+  sort_order  int  not null default 0
+);
+alter table public.psyedu_themes enable row level security;
+drop policy if exists "psyedu_themes_read" on public.psyedu_themes;
+create policy "psyedu_themes_read" on public.psyedu_themes
+  for select to authenticated using (true);
+
+-- Évolution des fiches : rattachement à un thème + date de dernière révision
+-- (couche « preuve »). module_key conservé (nullable) le temps de la transition.
+alter table public.psyedu_topics add column if not exists theme_id    text references public.psyedu_themes(id);
+alter table public.psyedu_topics add column if not exists reviewed_at date;
+alter table public.psyedu_topics alter column module_key drop not null;
+create index if not exists idx_psyedu_topics_theme on public.psyedu_topics(theme_id);
+
+-- Lien N:N module ↔ fiche (réutilisation ordonnée d'une fiche par un module)
+create table if not exists public.module_topics (
+  module_id   text not null references public.modules(id)       on delete cascade,
+  topic_id    uuid not null references public.psyedu_topics(id) on delete cascade,
+  sort_order  int  not null default 0,
+  primary key (module_id, topic_id)
+);
+alter table public.module_topics enable row level security;
+drop policy if exists "module_topics_read" on public.module_topics;
+create policy "module_topics_read" on public.module_topics
+  for select to authenticated using (true);
+create index if not exists idx_module_topics_topic on public.module_topics(topic_id);
+
+-- Tags d'une fiche (réutilise la taxonomie tags ci-dessus)
+create table if not exists public.psyedu_topic_tags (
+  topic_id  uuid not null references public.psyedu_topics(id) on delete cascade,
+  tag_id    text not null references public.tags(id)          on delete cascade,
+  primary key (topic_id, tag_id)
+);
+alter table public.psyedu_topic_tags enable row level security;
+drop policy if exists "psyedu_topic_tags_read" on public.psyedu_topic_tags;
+create policy "psyedu_topic_tags_read" on public.psyedu_topic_tags
+  for select to authenticated using (true);
+create index if not exists idx_psyedu_topic_tags_tag on public.psyedu_topic_tags(tag_id);
+
+
+-- ============================================================
 -- TABLE : patient_push_tokens (Tokens push par device patient)
 -- ============================================================
 -- Un patient peut avoir plusieurs tokens (plusieurs devices).
@@ -1986,7 +2039,18 @@ $$;
 -- ('patient' | 'practitioner') pour différencier les deux populations côté UI.
 -- `practitioner_names` = médecins liés (patients) / vide (médecins) ; `is_admin` =
 -- rôle (médecins) / false (patients). Consultation tracée (action 'read', target_id null).
-create or replace function public.admin_list_users()
+-- Ancienne signature sans argument — supprimée avant recréation de la version paginée.
+drop function if exists public.admin_list_users();
+
+create or replace function public.admin_list_users(
+  p_kind         text default null,   -- 'patient' | 'practitioner' | null (tous)
+  p_practitioner text default null,   -- nom d'un médecin → patients rattachés
+  p_search       text default null,   -- recherche ILIKE sur nom + email
+  p_sort         text default 'created_at',
+  p_dir          text default 'desc',
+  p_limit        int  default 150,
+  p_offset       int  default 0
+)
 returns table (
   user_id            uuid,
   kind               text,
@@ -1994,11 +2058,16 @@ returns table (
   display_name       text,
   created_at         timestamptz,
   practitioner_names text[],
-  is_admin           boolean
+  is_admin           boolean,
+  -- Total du jeu FILTRÉ (avant limit/offset) — alimente la pagination côté front.
+  total_count        bigint
 )
 language plpgsql
 security definer set search_path = public
 as $$
+declare
+  v_sort_col text;
+  v_dir      text;
 begin
   if not public.fn_is_admin() then
     raise exception 'admin_list_users: accès refusé';
@@ -2007,49 +2076,94 @@ begin
   perform public.log_data_access('read', 'patients', null, null,
     jsonb_build_object('scope', 'admin_all_users'));
 
+  -- Tri whitelisté : on ne réinjecte JAMAIS la valeur client brute dans l'ORDER BY.
+  -- 'practitioners' trie sur le 1er médecin (tableau agrégé trié alphabétiquement).
+  v_sort_col := case p_sort
+    when 'display_name'  then 'display_name'
+    when 'email'         then 'email'
+    when 'kind'          then 'kind'
+    when 'practitioners' then 'sort_practitioner'
+    else 'created_at'
+  end;
+  v_dir := case when lower(coalesce(p_dir, '')) = 'asc' then 'asc' else 'desc' end;
+
+  -- Tri dynamique (%I/%s whitelistés) ; filtres passés en paramètres ($1..$3).
+  return query execute format($q$
+    with base as (
+      -- Patients : nom = prénom+nom sinon email ; médecins liés agrégés (triés).
+      select
+        p.id as user_id, 'patient'::text as kind, p.email,
+        coalesce(nullif(trim(concat_ws(' ', nullif(p.first_name, ''), nullif(p.last_name, ''))), ''), p.email) as display_name,
+        p.created_at,
+        coalesce(
+          array_agg(distinct pr.name order by pr.name) filter (where pr.name is not null and pr.name <> ''),
+          '{}'::text[]
+        ) as practitioner_names,
+        false as is_admin
+      from public.patients p
+      left join public.practitioner_patients pp on pp.patient_id = p.id
+      left join public.practitioners pr on pr.id = pp.practitioner_id
+      group by p.id, p.email, p.first_name, p.last_name, p.created_at
+      union all
+      -- Médecins : nom = name sinon email ; is_admin porte le rôle.
+      select
+        pr.id, 'practitioner'::text, pr.email,
+        coalesce(nullif(trim(pr.name), ''), pr.email),
+        pr.created_at, '{}'::text[], pr.is_admin
+      from public.practitioners pr
+    ),
+    filtered as (
+      select b.*, lower(b.practitioner_names[1]) as sort_practitioner
+      from base b
+      where ($1 is null or b.kind = $1)
+        and ($2 is null or $2 = any(b.practitioner_names))
+        and ($3 is null or b.display_name ilike '%%' || $3 || '%%' or b.email ilike '%%' || $3 || '%%')
+    )
+    select
+      user_id, kind, email, display_name, created_at, practitioner_names, is_admin,
+      count(*) over() as total_count
+    from filtered
+    order by %I %s nulls last, display_name asc, user_id asc
+    limit %L offset %L
+  $q$, v_sort_col, v_dir, p_limit, p_offset)
+  using p_kind, p_practitioner, p_search;
+end;
+$$;
+
+-- Noms des médecins (pour le filtre « par praticien » de la table admin) — admin-only.
+-- Distinct des noms non vides, c.-à-d. exactement les valeurs comparables au tableau
+-- `practitioner_names` renvoyé par admin_list_users.
+create or replace function public.admin_list_practitioner_names()
+returns table (name text)
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  if not public.fn_is_admin() then
+    raise exception 'admin_list_practitioner_names: accès refusé';
+  end if;
+
   return query
-    -- Patients : nom = prénom+nom sinon email ; médecins liés agrégés.
-    select
-      p.id,
-      'patient'::text,
-      p.email,
-      coalesce(nullif(trim(concat_ws(' ', nullif(p.first_name, ''), nullif(p.last_name, ''))), ''), p.email),
-      p.created_at,
-      coalesce(
-        array_agg(distinct pr.name) filter (where pr.name is not null and pr.name <> ''),
-        '{}'::text[]
-      ),
-      false
-    from public.patients p
-    left join public.practitioner_patients pp on pp.patient_id = p.id
-    left join public.practitioners pr on pr.id = pp.practitioner_id
-    group by p.id, p.email, p.first_name, p.last_name, p.created_at
-    union all
-    -- Médecins (praticiens) : nom = name sinon email ; is_admin porte le rôle.
-    select
-      pr.id,
-      'practitioner'::text,
-      pr.email,
-      coalesce(nullif(trim(pr.name), ''), pr.email),
-      pr.created_at,
-      '{}'::text[],
-      pr.is_admin
+    select distinct pr.name
     from public.practitioners pr
-    order by 5 desc;
+    where pr.name is not null and pr.name <> ''
+    order by pr.name;
 end;
 $$;
 
 -- Droits : fn_is_admin est un helper INTERNE (appelé par les RPC SECURITY DEFINER,
 -- en tant qu'owner) — aucun rôle client, pas d'exposition REST inutile. Le front
 -- n'en a pas besoin : il lit `practitioner.is_admin` (déjà chargé en session).
--- export/erase/admin_list_users réservés aux authentifiés (re-gardés en interne) + service_role.
+-- export/erase/admin_list_* réservés aux authentifiés (re-gardés en interne) + service_role.
 revoke all on function public.fn_is_admin()             from public, anon, authenticated;
 revoke all on function public.export_patient_data(uuid) from public, anon;
 revoke all on function public.erase_patient_data(uuid)  from public, anon;
-revoke all on function public.admin_list_users()        from public, anon;
+revoke all on function public.admin_list_users(text, text, text, text, text, int, int) from public, anon;
+revoke all on function public.admin_list_practitioner_names()                          from public, anon;
 grant execute on function public.export_patient_data(uuid) to authenticated, service_role;
 grant execute on function public.erase_patient_data(uuid)  to authenticated, service_role;
-grant execute on function public.admin_list_users()        to authenticated, service_role;
+grant execute on function public.admin_list_users(text, text, text, text, text, int, int) to authenticated, service_role;
+grant execute on function public.admin_list_practitioner_names()                          to authenticated, service_role;
 
 
 -- ============================================================
@@ -2086,6 +2200,34 @@ create index if not exists idx_support_requests_ip_recent
 
 alter table public.support_requests enable row level security;
 -- Aucune policy client : insertion par l'Edge Function (service_role), lecture support/DPO.
+
+
+-- ============================================================
+-- TABLE : theme_suggestions (Suggestions de fiches psychoéducation)
+-- ============================================================
+-- Le praticien suggère un thème de fiche manquant dans la bibliothèque. Écrite
+-- EXCLUSIVEMENT par l'Edge Function `send-theme-suggestion` (service_role), qui
+-- dérive l'identité depuis le JWT et notifie l'équipe éditoriale par email (Resend).
+-- Logistique éditoriale : zéro donnée patient, zéro interprétation (hors périmètre MDR).
+-- Aucune policy client (lecture équipe via dashboard).
+
+create table if not exists public.theme_suggestions (
+  id              uuid        primary key default gen_random_uuid(),
+  practitioner_id uuid        references public.practitioners(id) on delete set null,
+  suggestion      text        not null,
+  status          text        not null default 'new' check (status in ('new', 'reviewed', 'done', 'declined')),
+  -- Hash SHA-256 de l'IP appelante (jamais en clair) — rate-limit de l'endpoint.
+  ip_hash         text,
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists idx_theme_suggestions_status
+  on public.theme_suggestions(status, created_at desc);
+create index if not exists idx_theme_suggestions_ip_recent
+  on public.theme_suggestions(ip_hash, created_at desc);
+
+alter table public.theme_suggestions enable row level security;
+-- Aucune policy client : insertion par l'Edge Function (service_role), lecture équipe.
 
 
 -- ============================================================

@@ -20,12 +20,12 @@
     "language": "Langue"
   },
   "auth": {
-    "login_subtitle": "Connexion — Espace praticien",
+    "login_subtitle": "Connexion, Espace praticien",
     "register_subtitle": "Créer votre compte praticien",
     "full_name_label": "Votre nom complet",
     "full_name_placeholder": "Dr. Marie Dupont",
     "professional_title_label": "Titre professionnel",
-    "professional_title_placeholder": "— Sélectionner une profession —",
+    "professional_title_placeholder": "Sélectionner une profession",
     "email_label": "Adresse email",
     "email_placeholder": "vous@exemple.fr",
     "password_label": "Mot de passe",
@@ -98,7 +98,7 @@
     "email_label": "Adresse email",
     "full_name_label": "Nom complet",
     "title_label": "Titre professionnel",
-    "title_placeholder": "— Sélectionner une profession —",
+    "title_placeholder": "Sélectionner une profession",
     "phone_label": "Téléphone",
     "address_label": "Adresse",
     "error_update": "Erreur lors de la mise à jour.",
@@ -121,7 +121,7 @@
     "invite_last_name_placeholder": "Dupont",
     "invite_birth_date_label": "Date de naissance",
     "invite_sex_label": "Sexe",
-    "invite_sex_placeholder": "— Sélectionner —",
+    "invite_sex_placeholder": "Sélectionner",
     "invite_sex_m": "Homme",
     "invite_sex_f": "Femme",
     "invite_sex_o": "Autre / Non spécifié",
@@ -135,7 +135,7 @@
     "invite_step_info": "Informations",
     "invite_step_modules": "Modules",
     "invite_next_button": "Suivant →",
-    "invite_module_intro": "Optionnel — ces modules seront débloqués automatiquement à l'inscription du patient.",
+    "invite_module_intro": "Optionnel, ces modules seront débloqués automatiquement à l'inscription du patient.",
     "invite_module_config_note": "Psychoéducation et RIM nécessitent une configuration depuis la fiche patient et ne sont pas disponibles ici.",
     "send_invitation": "Envoyer l'invitation",
     "pending_title": "Invitations en attente ({{count}})",
@@ -180,9 +180,9 @@
       "cape42": "Community Assessment of Psychic Experiences",
       "audit": "Alcohol Use Disorders Identification Test",
       "nsi": "Nightmare Severity Index",
-      "asrs18": "Adult ADHD Self-Report Scale v1.1 — Bilan Complet (18 items)",
-      "asrs6": "Adult ADHD Self-Report Scale v1.1 — Dépistage (6 items)",
-      "snap_iv": "Swanson, Nolan and Pelham Rating Scale – version IV",
+      "asrs18": "Adult ADHD Self-Report Scale v1.1, Bilan Complet (18 items)",
+      "asrs6": "Adult ADHD Self-Report Scale v1.1, Dépistage (6 items)",
+      "snap_iv": "Swanson, Nolan and Pelham Rating Scale - version IV",
       "cssrs": "Columbia Suicide Severity Rating Scale"
     },
     "descriptions": {
@@ -193,11 +193,11 @@
       "bsl23": "Mesure de la sévérité des symptômes du trouble de personnalité borderline. Outil de suivi longitudinal en TCD.",
       "cape42": "Évaluation des expériences subcliniques positives, négatives et dépressives en population générale et clinique.",
       "audit": "Dépistage OMS de la consommation d'alcool problématique en 10 items. Recommandé par la HAS pour le repérage précoce.",
-      "nsi": "Évaluation multidimensionnelle de la sévérité des cauchemars en 9 items (score 0–45). Mesure la fréquence des réveils, l'intensité émotionnelle et l'impact diurne.",
-      "asrs18": "Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l'ASRS v1.1). Score total 0–72, Partie A 0–24, Partie B 0–48.",
-      "asrs6": "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0–24. Recommandé par l'OMS pour le repérage rapide.",
+      "nsi": "Évaluation multidimensionnelle de la sévérité des cauchemars en 9 items (score 0 à 45). Mesure la fréquence des réveils, l'intensité émotionnelle et l'impact diurne.",
+      "asrs18": "Auto-questionnaire de bilan complet du TDAH adulte en 18 items (Parties A + B de l'ASRS v1.1). Score total 0 à 72, Partie A 0 à 24, Partie B 0 à 48.",
+      "asrs6": "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0 à 24. Recommandé par l'OMS pour le repérage rapide.",
       "snap_iv": "Grille comportementale de dépistage du TDAH en 26 items (18 critères DSM-IV + 8 critères TOD). Hétéro-évaluation par le parent ou l'enseignant.",
-      "cssrs": "Évaluation structurée de l'idéation et des comportements suicidaires. Columbia University / NIMH — version « Depuis la dernière visite »."
+      "cssrs": "Évaluation structurée de l'idéation et des comportements suicidaires. Columbia University / NIMH, version « Depuis la dernière visite »."
     }
   },
   "patient_rights": {
@@ -241,13 +241,18 @@
       "email": "Email",
       "practitioners": "Praticien(s)",
       "created": "Inscrit le",
-      "no_practitioner": "—"
+      "no_practitioner": ""
     },
     "empty": {
       "title": "Aucun utilisateur",
       "description": "Aucun utilisateur n'est encore enregistré.",
       "no_match_title": "Aucun résultat",
       "no_match_description": "Aucun utilisateur ne correspond à votre recherche."
+    },
+    "pagination": {
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "range": "{{from}}-{{to}} sur {{total}}"
     }
   },
   "patient": {
@@ -258,7 +263,7 @@
     "dashboard_title": "Tableau de bord",
     "tools_active_one": "{{count}} outil actif",
     "tools_active_other": "{{count}} outils actifs",
-    "empty_tools": "Aucun outil débloqué — utilisez l'armoire thérapeutique ci-dessous.",
+    "empty_tools": "Aucun outil débloqué, utilisez l'armoire thérapeutique ci-dessous.",
     "realtime_label": "Données temps réel",
     "realtime_soon": "Bientôt disponible",
     "active_badge": "Actif",
@@ -271,21 +276,31 @@
     "preview_button": "Aperçu",
     "patient_view": "Ce que verra votre patient",
     "unlocked_on": "Débloqué le {{date}}",
-    "coming_soon": "Module en cours de développement — aperçu non disponible.",
+    "coming_soon": "Module en cours de développement, aperçu non disponible.",
     "data_button": "Données",
     "summary_empty": "Aucune donnée synchronisée",
     "summary_last_entry": "Dernière saisie",
     "summary_count": "Saisies enregistrées",
     "summary_total_score": "Dernier score total",
-    "psycho_read_count": "{{read}}/{{total}} carte lue",
-    "psycho_read_count_plural": "{{read}}/{{total}} cartes lues",
-    "psycho_pick_unlock": "Choisissez les cartes à débloquer pour ce patient :",
-    "psycho_pick_edit": "Modifier les cartes débloquées pour ce patient :",
-    "psycho_pick_error": "Sélectionnez au moins une carte.",
-    "psycho_unlock_btn": "Débloquer {{count}} carte",
-    "psycho_unlock_btn_plural": "Débloquer {{count}} cartes",
+    "psycho_read_count": "{{read}}/{{total}} fiche lue",
+    "psycho_read_count_plural": "{{read}}/{{total}} fiches lues",
+    "psycho_pick_unlock": "Choisissez les fiches à débloquer pour ce patient :",
+    "psycho_pick_edit": "Débloquez ou retirez des fiches pour ce patient :",
+    "psycho_pick_error": "Sélectionnez au moins une fiche.",
+    "psycho_unlock_btn": "Débloquer {{count}} fiche",
+    "psycho_unlock_btn_plural": "Débloquer {{count}} fiches",
     "psycho_save_btn": "Enregistrer les modifications",
-    "psycho_edit_cards": "Modifier les cartes",
+    "psycho_edit_cards": "Débloquer des fiches",
+    "psycho_search_placeholder": "Rechercher une fiche…",
+    "psycho_search_empty": "Aucune fiche ne correspond à votre recherche.",
+    "psycho_suggest_button": "Suggérer un thème",
+    "psycho_suggest_title": "Suggérer une fiche",
+    "psycho_suggest_intro": "Un thème manque dans la bibliothèque ? Décrivez-le : notre équipe créera une fiche sourcée dès que possible.",
+    "psycho_suggest_label": "Votre suggestion",
+    "psycho_suggest_placeholder": "Ex. : gérer les attaques de panique",
+    "psycho_suggest_submit": "Envoyer la suggestion",
+    "psycho_suggest_success": "Merci, votre suggestion a bien été envoyée.",
+    "psycho_suggest_error": "L'envoi a échoué. Réessayez.",
     "psycho_error_unlock": "Erreur lors du déverrouillage. Réessayez.",
     "psycho_error_update": "Erreur lors de la mise à jour. Réessayez.",
     "rim_edit_scenario": "Modifier le scénario",
@@ -293,7 +308,7 @@
     "rim_write_unlock": "Rédigez le scénario alternatif pour ce patient :",
     "rim_write_edit": "Modifier le scénario alternatif :",
     "rim_alt_label": "Scénario alternatif",
-    "rim_orig_label": "Scénario initial (optionnel — référence)",
+    "rim_orig_label": "Scénario initial (optionnel, référence)",
     "rim_alt_placeholder": "Décrivez ici le scénario positif de substitution au cauchemar...",
     "rim_orig_placeholder": "Description du cauchemar original, pour référence...",
     "rim_error_required": "Le scénario alternatif est obligatoire.",
@@ -353,7 +368,7 @@
     "sources_type_expert_opinion": "Avis d'experts",
     "scale_read": "Lu",
     "scale_unread": "Non lu",
-    "cssrs_modal_title": "C-SSRS — Dépistage suicidaire",
+    "cssrs_modal_title": "C-SSRS, Dépistage suicidaire",
     "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
   },
   "modules": {
@@ -370,6 +385,9 @@
     "empty_search": "Aucun module ne correspond à votre recherche.",
     "filter_count": "{{shown}} sur {{total}} modules",
     "filter_reset": "Réinitialiser les filtres",
+    "filter_select": "Sélectionner…",
+    "filter_no_match": "Aucun filtre ne correspond.",
+    "filter_remove": "Retirer le filtre {{tag}}",
     "empty_filter": "Aucun module ne correspond à ces filtres.",
     "crisis_plan": {
       "label": "Plan de crise",
@@ -386,7 +404,7 @@
       "step_5_hint": "Quels professionnels ou services puis-je contacter ?",
       "step_6_title": "Sécuriser mon environnement",
       "step_6_hint": "Comment rendre mon entourage plus sûr ?",
-      "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide",
+      "footer": "Boutons d'urgence permanents en bas d'écran : 15, SAMU | 3114, Prévention du suicide",
       "urgency_title": "Je suis en crise",
       "urgency_subtitle": "Voici vos contacts et ressources d'urgence.",
       "urgency_close_contacts": "Proches à appeler",
@@ -398,16 +416,16 @@
       "anchors_preview_info": "Le patient ajoute jusqu'à 3 photos et une phrase personnelle sur son téléphone.",
       "coping_cards_title": "Mes cartes de coping",
       "coping_cards_subtitle": "Stratégies personnalisées préparées avec votre soignant.",
-      "coping_cards_empty": "Aucune carte configurée — ajoutez-en dans l'éditeur ci-dessus.",
+      "coping_cards_empty": "Aucune carte configurée, ajoutez-en dans l'éditeur ci-dessus.",
       "coping_card_thought": "Pensée difficile",
       "coping_card_response": "Ce que je peux me dire",
       "commitment_title": "Mon engagement",
       "commitment_phrase_default": "Je m'engage à utiliser ce plan avant tout passage à l'acte, et à appeler mon soignant si je n'en sens pas capable.",
       "commitment_not_configured": "Aucune phrase d'engagement configurée.",
-      "emergency_bar_label": "Numéros d'urgence — toujours accessibles",
-      "emergency_samu": "15 — SAMU",
+      "emergency_bar_label": "Numéros d'urgence, toujours accessibles",
+      "emergency_samu": "15, SAMU",
       "emergency_samu_label": "Urgence médicale",
-      "emergency_3114": "3114 — Prévention",
+      "emergency_3114": "3114, Prévention",
       "emergency_3114_label": "Numéro national"
     },
     "therapeutic_commitment": {
@@ -422,7 +440,7 @@
       "now": {
         "title": "Traverser la vague",
         "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un sommet, puis redescend toujours.",
-        "intro2": "Le patient n'a rien à faire contre elle — juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
+        "intro2": "Le patient n'a rien à faire contre elle, juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
         "choose_activity": "Choisir une activité",
         "pick_category": "Que voulez-vous faire maintenant ?",
         "back": "Retour",
@@ -463,7 +481,7 @@
       "description": "Auto-évaluation quotidienne (0-3) : somnolence, agitation, tremblements, sécheresse buccale.",
       "footer": "Chiffres bruts saisis par le patient. À interpréter en consultation.",
       "events_section": "Événements du traitement",
-      "events_hint": "Ces jalons apparaissent sur le graphique du patient (ex. : changement de dose, début d'un nouveau médicament). Aucune interprétation — affichage neutre.",
+      "events_hint": "Ces jalons apparaissent sur le graphique du patient (ex. : changement de dose, début d'un nouveau médicament). Aucune interprétation, affichage neutre.",
       "event_add": "Ajouter un événement",
       "event_date_label": "Date",
       "event_label_placeholder": "Ex. : Changement de dose, Nouveau traitement…",
@@ -522,7 +540,7 @@
       "empty_text": "Enregistrez votre première saisie pour consulter le suivi.",
       "delete_entry_title": "Supprimer cette saisie ?",
       "saved_message": "Votre saisie du jour a été sauvegardée.",
-      "already_saved": "Saisie du jour déjà enregistrée — vous pouvez la modifier.",
+      "already_saved": "Saisie du jour déjà enregistrée, vous pouvez la modifier.",
       "history_empty": "Le suivi s'affichera dès vos premières saisies.",
       "entries_recent": "Saisies récentes",
       "score_label": "Moy.",
@@ -555,11 +573,11 @@
     "medication_adherence": {
       "label": "Module Observance",
       "description": "Auto-rapport hebdomadaire d'observance du traitement médicamenteux.",
-      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour, aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Bibliothèque de fiches à lire, classées par thème (mon traitement, hygiène de vie…)."
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -568,7 +586,7 @@
       "monthly_button": "Vue mensuelle",
       "list_header": "Les 14 dernières nuits",
       "incomplete": "Saisie incomplète",
-      "empty_day": "Non renseigné — appuyer pour saisir",
+      "empty_day": "Non renseigné, appuyer pour saisir",
       "section_schedule": "Horaires de la nuit",
       "section_awakenings": "Réveils nocturnes",
       "section_naps": "Siestes",
@@ -602,7 +620,7 @@
     },
     "chronobiology_tracker": {
       "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires."
+      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
@@ -614,7 +632,7 @@
       "notes_label": "Notes libres (optionnel)",
       "notes_placeholder": "Contexte, événement du jour, remarque...",
       "history_title": "30 derniers jours",
-      "already_saved": "Saisie du jour déjà enregistrée — vous pouvez la modifier.",
+      "already_saved": "Saisie du jour déjà enregistrée, vous pouvez la modifier.",
       "history_empty": "L'historique s'affichera dès que vous aurez enregistré au moins 2 saisies.",
       "delete_entry_title": "Supprimer cette saisie ?",
       "saved_message": "Votre saisie du jour a été sauvegardée.",
@@ -685,12 +703,12 @@
     "emotion_wheel": {
       "label": "Roue des émotions",
       "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie.",
-      "footer": "Roue des émotions — labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012."
+      "footer": "Roue des émotions, labellisation affective (modèle de Plutchik). Lieberman et al., Psychol Sci 2007 · Kircanski, Lieberman & Craske, Psychol Sci 2012."
     },
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
-      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -706,14 +724,14 @@
       "description": "Exercice 5-4-3-2-1 pour revenir au présent en cas de dissociation ou de rumination sévère."
     },
     "rim": {
-      "label": "RIM – Imagerie mentale",
+      "label": "RIM - Imagerie mentale",
       "description": "Technique de retraitement par l'imagerie mentale.",
-      "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
+      "footer": "Retraitement par l'imagerie mentale (RIM) : Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
       "label": "Exposition graduée",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
-      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies.",
+      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0 à 100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies.",
       "title": "Exposition graduée",
       "intro": "Évaluez votre niveau de détresse sur une échelle de 0 à 100.",
       "tab_entries": "Saisies",
@@ -731,9 +749,9 @@
       "suds_after": "Après",
       "save": "Enregistrer",
       "section_trigger": "Situation déclenchante",
-      "section_before": "Niveau de détresse — Avant",
+      "section_before": "Niveau de détresse, Avant",
       "section_strategies": "Stratégies mises en place",
-      "section_after": "Niveau de détresse — Après (optionnel)",
+      "section_after": "Niveau de détresse, Après (optionnel)",
       "section_notes": "Notes (optionnel)",
       "suds_hint_before": "0 = aucune détresse  ·  100 = détresse maximale imaginable",
       "suds_hint_after": "À renseigner une fois la stratégie terminée. Vous pouvez revenir plus tard.",
@@ -759,7 +777,7 @@
       "strategy_exposure": "Rester dans la situation (exposition)",
       "strategy_distraction": "Distraction cognitive",
       "strategy_contact": "Contact avec un proche",
-      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant — il ne remplace pas votre suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "ladder_empty_title": "Votre échelle de la peur",
       "ladder_empty_text": "Ajoutez les situations qui vous angoissent, de la moins à la plus difficile.",
       "step_done": "Marche franchie",
@@ -769,7 +787,7 @@
       "edit_step": "Modifier la situation",
       "step_label": "La situation redoutée",
       "step_label_placeholder": "Ex. : prendre le métro aux heures de pointe",
-      "step_target_label": "Niveau de stress initial (0–100)",
+      "step_target_label": "Niveau de stress initial (0 à 100)",
       "detail_no_sessions": "Aucune exposition pour l'instant. Lancez-en une quand vous vous sentez prêt.",
       "detail_history_title": "Mes expositions",
       "detail_do_exposure": "Faire une exposition",
@@ -785,7 +803,7 @@
       "outcome_label": "Ce qui s'est passé",
       "outcome_placeholder": "Qu'est-ce qui s'est réellement passé ?",
       "step_target_hint": "À quel point cette situation vous stresse, avant de commencer à travailler dessus ? Sert à classer votre échelle, du plus facile au plus difficile.",
-      "chart_y_axis": "Niveau de stress (0–100)",
+      "chart_y_axis": "Niveau de stress (0 à 100)",
       "chart_x_axis": "Séances (S1, S2, …)",
       "chart_reference": "Niveau de stress initial",
       "scale_hint": "0 = aucun stress · 100 = stress maximal",
@@ -799,7 +817,7 @@
     "breathing_techniques": {
       "label": "Techniques de respiration",
       "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
-      "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+      "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
       "label": "Saturation cognitive",
@@ -820,7 +838,7 @@
     },
     "phq9": {
       "label": "PHQ-9",
-      "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0–27.",
+      "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0 à 27.",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9.",
@@ -835,9 +853,9 @@
       "q3": "Difficultés à vous endormir ou à rester endormi(e), ou au contraire dormir trop",
       "q4": "Se sentir fatigué(e) ou manquer d'énergie",
       "q5": "Manque d'appétit ou au contraire manger trop",
-      "q6": "Vous sentir négatif(ve) par rapport à vous-même — avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
-      "q7": "Avoir du mal à vous concentrer — lire ou regarder la télévision par exemple",
-      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer — ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
+      "q6": "Vous sentir négatif(ve) par rapport à vous-même, avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
+      "q7": "Avoir du mal à vous concentrer, lire ou regarder la télévision par exemple",
+      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer, ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
       "q9": "Avoir des pensées comme quoi vous seriez mieux mort(e) ou que vous souhaiteriez vous faire du mal d'une façon ou d'une autre",
       "score_label": "Score total",
       "score_max": "/ 27",
@@ -847,7 +865,7 @@
     },
     "gad7": {
       "label": "GAD-7",
-      "description": "Questionnaire d'anxiété généralisée de 7 items (Spitzer et al., 2006). Score 0–21.",
+      "description": "Questionnaire d'anxiété généralisée de 7 items (Spitzer et al., 2006). Score 0 à 21.",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier GAD-7.",
@@ -872,7 +890,7 @@
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "Échelle de symptômes borderline de 23 items. Score moyen 0–4.",
+      "description": "Échelle de symptômes borderline de 23 items. Score moyen 0 à 4.",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier BSL-23.",
@@ -923,9 +941,9 @@
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier SNAP-IV.",
-      "instructions_1": "Hétéro-évaluation — à remplir par un parent ou un enseignant.",
+      "instructions_1": "Hétéro-évaluation, à remplir par un parent ou un enseignant.",
       "instructions_2": "Pour chacun des comportements suivants, indiquez à quelle fréquence vous l'observez chez l'enfant.",
-      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant — pas par l'enfant lui-même.",
+      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant, pas par l'enfant lui-même.",
       "opt_0": "Pas du tout",
       "opt_1": "Un peu",
       "opt_2": "Assez souvent",
@@ -969,8 +987,8 @@
       "submit": "Valider le questionnaire"
     },
     "asrs6": {
-      "label": "ASRS v1.1 — Dépistage",
-      "description": "Dépistage rapide du TDAH adulte — 6 items Partie A (Kessler et al., 2005).",
+      "label": "ASRS v1.1, Dépistage",
+      "description": "Dépistage rapide du TDAH adulte, 6 items Partie A (Kessler et al., 2005).",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1.",
@@ -994,8 +1012,8 @@
       "submit": "Valider le questionnaire"
     },
     "asrs18": {
-      "label": "ASRS v1.1 — Bilan Complet",
-      "description": "Bilan complet TDAH adulte — 18 items Parties A+B (Kessler et al., 2005).",
+      "label": "ASRS v1.1, Bilan Complet",
+      "description": "Bilan complet TDAH adulte, 18 items Parties A+B (Kessler et al., 2005).",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier ASRS v1.1 Bilan Complet.",
@@ -1035,16 +1053,16 @@
       "submit": "Valider le questionnaire"
     },
     "cape42": {
-      "label": "CAPE-42 — Expériences psychotiques",
+      "label": "CAPE-42, Expériences psychotiques",
       "description": "Évaluation des expériences psychotiques subcliniques (42 items)."
     },
     "audit": {
-      "label": "AUDIT — Dépistage alcool",
-      "description": "Alcohol Use Disorders Identification Test — OMS (10 items)."
+      "label": "AUDIT, Dépistage alcool",
+      "description": "Alcohol Use Disorders Identification Test, OMS (10 items)."
     },
     "cssrs": {
-      "label": "C-SSRS — Risque suicidaire",
-      "description": "Columbia Suicide Severity Rating Scale — hétéro-évaluation praticien."
+      "label": "C-SSRS, Risque suicidaire",
+      "description": "Columbia Suicide Severity Rating Scale, hétéro-évaluation praticien."
     }
   },
   "category": {
@@ -1147,7 +1165,7 @@
       "li_a2_seg3": " : il perturbe les cycles du sommeil profond.",
       "li_alim_3": "Ne mangez pas de repas copieux dans les 2 heures précédant le coucher.",
       "h_sport": "5. Activité physique",
-      "p_sport_seg1": "L'activité physique régulière améliore le sommeil — mais évitez le sport intense dans les ",
+      "p_sport_seg1": "L'activité physique régulière améliore le sommeil, mais évitez le sport intense dans les ",
       "p_sport_seg2": "3 heures avant le coucher",
       "p_sport_seg3": ".",
       "h_lit": "6. Le lit = sommeil",
@@ -1193,7 +1211,7 @@
       "p_retenir_1": "Prenez à nouveau une grande inspiration. Si l'angoisse est toujours là, recommencez le cycle avec d'autres objets.",
       "h_retenir": "À retenir",
       "li_r1": "Prenez votre temps à chaque étape.",
-      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse — l'important est de ",
+      "li_r2_s1": "Il n'y a pas de \"bonne\" réponse, l'important est de ",
       "li_r2_s2": "focaliser votre attention",
       "li_r2_s3": ".",
       "li_r3": "Cette technique demande un peu de pratique. Entraînez-vous avant les moments de crise.",
@@ -1309,7 +1327,7 @@
       "step_5_hint": "Quels professionnels ou services puis-je contacter ?",
       "step_6_title": "Sécuriser mon environnement",
       "step_6_hint": "Comment rendre mon entourage plus sûr ?",
-      "footer": "Boutons d'urgence permanents en bas d'écran : 15 — SAMU | 3114 — Prévention du suicide"
+      "footer": "Boutons d'urgence permanents en bas d'écran : 15, SAMU | 3114, Prévention du suicide"
     },
     "therapeutic_commitment": {
       "label": "Contrat d'engagement thérapeutique",
@@ -1323,7 +1341,7 @@
       "now": {
         "title": "Traverser la vague",
         "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un sommet, puis redescend toujours.",
-        "intro2": "Le patient n'a rien à faire contre elle — juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
+        "intro2": "Le patient n'a rien à faire contre elle, juste à tenir le temps qu'elle passe. Il choisit une activité, et le minuteur l'accompagne.",
         "choose_activity": "Choisir une activité",
         "pick_category": "Que voulez-vous faire maintenant ?",
         "back": "Retour",
@@ -1362,7 +1380,7 @@
     "medication_side_effects": {
       "label": "Suivi des effets indésirables du traitement",
       "description": "Auto-évaluation quotidienne (0-3) : somnolence, agitation, tremblements, sécheresse buccale.",
-      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif — conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
+      "footer": "Échelle inspirée de l'UKU Side Effect Rating Scale (Lingjaerde et al., 1987). 0 = Absent · 1 = Léger · 2 = Modéré · 3 = Sévère. Valeurs brutes déclarées par le patient. Aucun seuil interprétatif, conformité MDR 2017/745. Historique des 30 derniers jours consultable dans l'app."
     },
     "medication_adherence": {
       "label": "Module Observance",
@@ -1387,11 +1405,11 @@
         "label": "Historique",
         "detail": "Liste brute des 30 derniers jours (date, statut, note)"
       },
-      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour — aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
+      "footer": "Données stockées localement sur le téléphone du patient. Le patient déclare lui-même son statut chaque jour, aucune interprétation algorithmique (conformité MDR 2017/745). L'historique des 30 derniers jours est disponible dans l'app."
     },
     "psychoeducation": {
       "label": "Psychoéducation",
-      "description": "Cartes de savoir thérapeutique : sommeil, ancrage, distorsions, interactions médicamenteuses."
+      "description": "Bibliothèque de fiches à lire, classées par thème (mon traitement, hygiène de vie…)."
     },
     "sleep_diary": {
       "label": "Agenda du sommeil",
@@ -1400,7 +1418,7 @@
       "monthly_button": "Vue mensuelle",
       "list_header": "Les 14 dernières nuits",
       "incomplete": "Saisie incomplète",
-      "empty_day": "Non renseigné — appuyer pour saisir",
+      "empty_day": "Non renseigné, appuyer pour saisir",
       "section_schedule": "Horaires de la nuit",
       "section_awakenings": "Réveils nocturnes",
       "section_naps": "Siestes",
@@ -1434,7 +1452,7 @@
     },
     "chronobiology_tracker": {
       "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas — essentiel pour les troubles bipolaires."
+      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",
@@ -1448,7 +1466,7 @@
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
-      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global — les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -1459,11 +1477,11 @@
       },
       "step_2": {
         "title": "Émotion(s)",
-        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0–100) ?"
+        "hint": "Quelle émotion ai-je ressentie ? Quelle était son intensité (0 à 100) ?"
       },
       "step_3": {
         "title": "Pensée automatique",
-        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0–100) ?"
+        "hint": "Quelle pensée est passée dans ma tête ? À quel point y croyais-je (0 à 100) ?"
       },
       "step_4": {
         "title": "Réponse rationnelle",
@@ -1471,7 +1489,7 @@
       },
       "step_5": {
         "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0–100) ? Conviction en la pensée alternative (0–100) ?"
+        "hint": "Quelle émotion maintenant ? Intensité (0 à 100) ? Conviction en la pensée alternative (0 à 100) ?"
       },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
@@ -1484,43 +1502,43 @@
       "description": "Exercice 5-4-3-2-1 pour revenir au présent en cas de dissociation ou de rumination sévère."
     },
     "rim": {
-      "label": "RIM – Imagerie mentale",
+      "label": "RIM - Imagerie mentale",
       "description": "Technique de retraitement par l'imagerie mentale.",
-      "footer": "Retraitement par l'imagerie mentale (RIM) — Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
+      "footer": "Retraitement par l'imagerie mentale (RIM) : Krakow et al., JAMA 2001 · Schmid et al., Psychother Psychosom 2021. Scénario alternatif configuré par le praticien, lecture seule pour le patient."
     },
     "fear_thermometer": {
       "label": "Exposition graduée",
       "description": "Mesurer et visualiser son niveau d'anxiété (SUDs, 0-100).",
-      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0–100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
+      "footer": "Le patient mesure son niveau de détresse subjective (SUDs, Wolpe 1969) avant et après une stratégie de coping. Données stockées localement. Les valeurs brutes 0 à 100 sont lues par le praticien en consultation pour évaluer l'efficacité des expositions et des stratégies."
     },
     "breathing_techniques": {
       "label": "Techniques de respiration",
       "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
       "field_1": {
         "label": "Cohérence cardiaque",
-        "detail": "Lehrer & Gevirtz (2014) — Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
+        "detail": "Lehrer & Gevirtz (2014) : Grade B · 5s inspirez / 5s expirez · 5 min recommandées"
       },
       "field_2": {
         "label": "Respiration diaphragmatique",
-        "detail": "HAS, Conrad et al. (2007) — Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
+        "detail": "HAS, Conrad et al. (2007) : Grade B · 4s inspirez / 7s expirez · 5 min recommandées"
       },
       "field_3": {
         "label": "Respiration carrée",
-        "detail": "VA/DoD Guidelines — Grade C · 4-4-4-4 · 4 min recommandées"
+        "detail": "VA/DoD Guidelines, Grade C · 4-4-4-4 · 4 min recommandées"
       },
       "field_4": {
         "label": "Technique 4-7-8",
-        "detail": "Accord experts — Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
+        "detail": "Accord experts, Grade C · 4s-7s-8s · endormissement, crise anxieuse · 3 min"
       },
       "field_5": {
         "label": "Pleine conscience respiratoire",
-        "detail": "MBCT Segal et al. (2002) — Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
+        "detail": "MBCT Segal et al. (2002) : Grade A rechute dépressive · 4-1-6-1 · 10 min recommandées"
       },
       "field_6": {
         "label": "Historique des sessions",
-        "detail": "Technique utilisée + durée effective — données brutes, sans interprétation"
+        "detail": "Technique utilisée + durée effective, données brutes, sans interprétation"
       },
-      "footer": "Guide animé à rythme fixe — pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+      "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
       "label": "Saturation cognitive",
@@ -1537,27 +1555,27 @@
     },
     "phq9": {
       "label": "PHQ-9",
-      "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0–27."
+      "description": "Questionnaire de dépression de 9 items (Kroenke & Spitzer, 2001). Score 0 à 27."
     },
     "gad7": {
       "label": "GAD-7",
-      "description": "Questionnaire d'anxiété généralisée de 7 items (Spitzer et al., 2006). Score 0–21."
+      "description": "Questionnaire d'anxiété généralisée de 7 items (Spitzer et al., 2006). Score 0 à 21."
     },
     "bsl23": {
       "label": "BSL-23",
-      "description": "Échelle de symptômes borderline de 23 items. Score moyen 0–4."
+      "description": "Échelle de symptômes borderline de 23 items. Score moyen 0 à 4."
     },
     "snap_iv": {
       "label": "SNAP-IV",
       "description": "Dépistage du TDAH (enfant/ado)"
     },
     "asrs6": {
-      "label": "ASRS v1.1 — Dépistage",
-      "description": "Dépistage rapide du TDAH adulte — 6 items Partie A (Kessler et al., 2005)."
+      "label": "ASRS v1.1, Dépistage",
+      "description": "Dépistage rapide du TDAH adulte, 6 items Partie A (Kessler et al., 2005)."
     },
     "asrs18": {
-      "label": "ASRS v1.1 — Bilan Complet",
-      "description": "Bilan complet TDAH adulte — 18 items Parties A+B (Kessler et al., 2005)."
+      "label": "ASRS v1.1, Bilan Complet",
+      "description": "Bilan complet TDAH adulte, 18 items Parties A+B (Kessler et al., 2005)."
     }
   },
   "notifications": {
@@ -1605,7 +1623,8 @@
     "filter_label": "Filtrer par tag",
     "filter_clear": "Tout afficher",
     "empty_filtered": "Aucune note pour ce tag.",
-    "tag_search_placeholder": "Rechercher un tag…"
+    "tag_search_placeholder": "Rechercher un tag…",
+    "tag_remove": "Retirer {{tag}}"
   },
   "speech": {
     "start": "Dicter",
@@ -1773,7 +1792,7 @@
     "link": {
       "linked_prefix": "Lié à",
       "linked_unknown": "Patient lié",
-      "invited": "Invité — {{email}} (en attente d'inscription)",
+      "invited": "Invité, {{email}} (en attente d'inscription)",
       "free": "Dossier libre (non relié à l'app)",
       "modules_hint": "Modules débloqués pour ce patient dans l'app"
     },
@@ -1813,7 +1832,6 @@
       "done_label": "Marquer comme fait",
       "label_label": "Libellé de l'action",
       "due_label": "Échéance de l'action",
-      "time_label": "Heure (optionnel)",
       "urgent_toggle": "Marquer cette action comme urgente",
       "delete_label": "Supprimer l'action",
       "add_placeholder": "Ajouter une action…",
@@ -1863,14 +1881,14 @@
     "range_3m": "3 mois",
     "range_6m": "6 mois",
     "range_1y": "1 an",
-    "scale_phq9": "PHQ-9 — Dépression",
-    "scale_gad7": "GAD-7 — Anxiété généralisée",
-    "scale_bsl23": "BSL-23 — Symptômes borderline",
-    "scale_epds": "EPDS — Dépression postnatale",
-    "scale_rcads": "RCADS — Anxiété & dépression (ado)",
-    "scale_asrs6": "ASRS v1.1 — TDAH dépistage",
-    "scale_snap_iv": "SNAP-IV — TDAH (enfant/ado)",
-    "scale_nsi": "NSI — Sévérité des cauchemars",
+    "scale_phq9": "PHQ-9, Dépression",
+    "scale_gad7": "GAD-7, Anxiété généralisée",
+    "scale_bsl23": "BSL-23, Symptômes borderline",
+    "scale_epds": "EPDS, Dépression postnatale",
+    "scale_rcads": "RCADS, Anxiété & dépression (ado)",
+    "scale_asrs6": "ASRS v1.1, TDAH dépistage",
+    "scale_snap_iv": "SNAP-IV, TDAH (enfant/ado)",
+    "scale_nsi": "NSI, Sévérité des cauchemars",
     "mood_title": "Thermomètre de l'humeur",
     "mood_detail": "Détailler",
     "mood_humeur": "Humeur",

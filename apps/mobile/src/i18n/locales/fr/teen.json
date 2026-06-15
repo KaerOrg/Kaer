@@ -2,12 +2,12 @@
   "global": {
     "greeting": "Salut !",
     "modulesTitle": "Tes outils",
-    "noModules": "Pas encore d'outil débloqué — ton soignant s'en occupe."
+    "noModules": "Pas encore d'outil débloqué, ton soignant s'en occupe."
   },
   "home": {
     "title": "Tes modules",
     "subheading": "Activés par ton soignant",
-    "empty_description": "Pas encore d'outil débloqué — ton soignant s'en occupe.",
+    "empty_description": "Pas encore d'outil débloqué, ton soignant s'en occupe.",
     "today_section": "Prévu aujourd'hui"
   },
   "modules": {
@@ -162,9 +162,9 @@
       "suds_before": "Avant",
       "suds_after": "Après",
       "section_trigger": "Ce qui te stresse",
-      "section_before": "Niveau de stress — Avant",
+      "section_before": "Niveau de stress, Avant",
       "section_strategies": "Ce que tu as fait",
-      "section_after": "Niveau de stress — Après (facultatif)",
+      "section_after": "Niveau de stress, Après (facultatif)",
       "section_notes": "Notes (facultatif)",
       "suds_hint_before": "0 = trop relax  ·  100 = panique totale",
       "suds_hint_after": "À remplir quand c'est fini. Tu peux revenir plus tard.",
@@ -186,8 +186,8 @@
       "strategy_exposure": "Rester dans la situation",
       "strategy_distraction": "Penser à autre chose",
       "strategy_contact": "Parler à quelqu'un",
-      "footer": "L'échelle SUDS mesure ton niveau de stress — utilisée en thérapie d'exposition. Wolitzky-Taylor et al. 2008 · Craske et al. 2014.",
-      "disclaimer": "Ce module est un soutien à tes consultations. Les techniques présentées ont été vues avec ton soignant — il ne remplace pas ton suivi.",
+      "footer": "L'échelle SUDS mesure ton niveau de stress, utilisée en thérapie d'exposition. Wolitzky-Taylor et al. 2008 · Craske et al. 2014.",
+      "disclaimer": "Ce module est un soutien à tes consultations. Les techniques présentées ont été vues avec ton soignant, il ne remplace pas ton suivi.",
       "ladder_empty_title": "Ton échelle de la peur",
       "ladder_empty_text": "Ajoute les situations qui te stressent, de la plus facile à la plus dure.",
       "step_done": "Étape franchie",
@@ -197,7 +197,7 @@
       "edit_step": "Modifier la situation",
       "step_label": "La situation que tu redoutes",
       "step_label_placeholder": "Ex. : prendre le métro quand c'est blindé",
-      "step_target_label": "Niveau de stress initial (0–100)",
+      "step_target_label": "Niveau de stress initial (0 à 100)",
       "detail_no_sessions": "Aucune expo pour l'instant. Lance-toi quand tu te sens prêt.",
       "detail_history_title": "Mes expos",
       "detail_do_exposure": "Faire une expo",
@@ -213,7 +213,7 @@
       "outcome_label": "Ce qui s'est passé",
       "outcome_placeholder": "Qu'est-ce qui s'est vraiment passé ?",
       "step_target_hint": "À quel point cette situation te stresse, avant de commencer à bosser dessus ? Ça sert à classer ton échelle, du plus facile au plus dur.",
-      "chart_y_axis": "Niveau de stress (0–100)",
+      "chart_y_axis": "Niveau de stress (0 à 100)",
       "chart_x_axis": "Séances (S1, S2, …)",
       "chart_reference": "Niveau de stress initial",
       "scale_hint": "0 = aucun stress · 100 = stress maximal",
@@ -237,8 +237,8 @@
       "monthly_button": "Vue mensuelle",
       "list_header": "Mes 14 dernières nuits",
       "incomplete": "Saisie incomplète",
-      "empty_day": "Pas saisi — tape pour remplir",
-      "quality_not_set": "– pas renseigné",
+      "empty_day": "Pas saisi, tape pour remplir",
+      "quality_not_set": "- pas renseigné",
       "section_schedule": "Horaires de la nuit",
       "section_awakenings": "Réveils dans la nuit",
       "section_naps": "Siestes",
@@ -414,7 +414,7 @@
     },
     "breathing_techniques": {
       "title": "Respirer pour se calmer",
-      "intro": "Choisis un exercice — ça peut vraiment aider à redescendre."
+      "intro": "Choisis un exercice, ça peut vraiment aider à redescendre."
     },
     "rim": {
       "title": "Réécrire le cauchemar",
@@ -439,8 +439,8 @@
       "sound_wind": "Vent doux",
       "sound_stream": "Ruisseau",
       "safety_title": "En cas de détresse",
-      "safety_3114": "3114 — Numéro national prévention suicide",
-      "safety_15": "15 — SAMU"
+      "safety_3114": "3114, Numéro national prévention suicide",
+      "safety_15": "15, SAMU"
     },
     "cognitive_saturation": {
       "title": "Stop aux ruminations",
@@ -466,7 +466,7 @@
       "step_notes_title": "Une note à ajouter ? (facultatif)",
       "step_notes_hint": "Contexte, situation, pensée associée… Texte libre.",
       "notes_free_placeholder": "Note libre (facultatif)",
-      "footer": "Roue des émotions — mettre des mots sur tes ressentis aide vraiment. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
+      "footer": "Roue des émotions, mettre des mots sur tes ressentis aide vraiment. Lieberman et al., Psychol Sci 2007 · Kircanski et al., Psychol Sci 2012.",
       "node": {
         "joy": "Joie",
         "joy__serenity": "Sérénité",
@@ -594,8 +594,8 @@
       "q4": "Te sentir fatigué(e) ou manquer d'énergie",
       "q5": "Manque d'appétit ou au contraire manger trop",
       "q6": "Te sentir nul(le) ou avoir l'impression d'avoir déçu les gens autour de toi",
-      "q7": "Avoir du mal à te concentrer — lire ou regarder un truc par exemple",
-      "q8": "Bouger ou parler si lentement que les autres l'ont remarqué — ou au contraire être tellement agité(e) que tu bouges beaucoup plus que d'habitude",
+      "q7": "Avoir du mal à te concentrer, lire ou regarder un truc par exemple",
+      "q8": "Bouger ou parler si lentement que les autres l'ont remarqué, ou au contraire être tellement agité(e) que tu bouges beaucoup plus que d'habitude",
       "q9": "Avoir des pensées comme quoi tu serais mieux mort(e) ou que tu voudrais te faire du mal",
       "score_label": "Score total",
       "score_max": "/ 27",
@@ -672,9 +672,9 @@
       "submit": "Envoyer mes réponses"
     },
     "snap_iv": {
-      "instructions_1": "Évaluation par un adulte — à remplir par un parent ou un enseignant.",
+      "instructions_1": "Évaluation par un adulte, à remplir par un parent ou un enseignant.",
       "instructions_2": "Pour chacun des comportements suivants, indiquez à quelle fréquence vous l'observez chez l'enfant.",
-      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant — pas par l'enfant lui-même.",
+      "warning": "Ce questionnaire doit être rempli par un parent, un tuteur ou un enseignant, pas par l'enfant lui-même.",
       "opt_0": "Pas du tout",
       "opt_1": "Un peu",
       "opt_2": "Assez souvent",
@@ -838,13 +838,13 @@
       "submit": "Envoyer mes réponses"
     },
     "distress_tolerance": {
-      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à tes consultations. Les techniques présentées ont été abordées avec ton soignant, il ne remplace pas ton suivi thérapeutique.",
       "tab_fiches": "Comprendre",
       "tab_now": "Agir en crise",
       "now": {
         "title": "Surfer la vague",
         "intro1": "Une envie ou une émotion très forte, c'est comme une vague : elle monte, atteint un pic, puis elle redescend toujours.",
-        "intro2": "T'as rien à faire contre elle — juste à tenir le temps qu'elle passe. Choisis une activité, et laisse le minuteur t'accompagner.",
+        "intro2": "T'as rien à faire contre elle, juste à tenir le temps qu'elle passe. Choisis une activité, et laisse le minuteur t'accompagner.",
         "choose_activity": "Choisir une activité",
         "pick_category": "Tu veux faire quoi, là maintenant ?",
         "back": "Retour",
@@ -881,7 +881,7 @@
       }
     },
     "craving_journal": {
-      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant, il ne remplace pas ton suivi thérapeutique.",
       "empty_text": "Appuie sur le bouton ci-dessus pour enregistrer ta première envie.",
       "trigger_placeholder": "Où t'étais ? Que se passait-il ?",
       "emotion_placeholder": "Ex : ennui, stress, tristesse, solitude…",
@@ -892,14 +892,14 @@
     "motivational_balance": {
       "label": "Balance motivationnelle",
       "description": "Pour comprendre ton ambivalence et ce qui te pousse à changer",
-      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant — il ne remplace pas ton suivi thérapeutique.",
+      "disclaimer": "Ce module est un support à tes consultations. Il a été abordé avec ton soignant, il ne remplace pas ton suivi thérapeutique.",
       "stage_subtitle": "Sélectionne le stade qui te correspond le mieux aujourd'hui.",
       "stage_1_desc": "Je ne vois pas de raison de changer",
       "stage_2_desc": "J'y pense, mais je ne suis pas encore décidé(e)",
       "stage_3_desc": "Je prévois de changer bientôt",
       "stage_4_desc": "J'ai commencé à changer",
       "stage_5_desc": "Je maintiens le changement",
-      "stage_6_desc": "J'ai repris l'ancienne habitude — c'est tout à fait normal",
+      "stage_6_desc": "J'ai repris l'ancienne habitude, c'est tout à fait normal",
       "rulers_importance_q": "À quel point c'est important pour toi de changer ?",
       "rulers_importance_why_label": "Pourquoi ce score et pas moins ?",
       "rulers_importance_why_placeholder": "Ce qui me motive à vouloir changer…",
@@ -907,20 +907,20 @@
       "rulers_confidence_why_label": "Qu'est-ce qui te rendrait plus confiant(e) ?",
       "rulers_confidence_why_placeholder": "Ce dont j'aurais besoin pour y croire…",
       "rulers_commitment_placeholder": "En une phrase, ce que je retiens de cette séance…",
-      "balance_values_subtitle": "Choisis jusqu'à 3 valeurs — elles ancreront ta balance.",
+      "balance_values_subtitle": "Choisis jusqu'à 3 valeurs, elles ancreront ta balance.",
       "balance_item_placeholder": "Saisir un argument…",
       "balance_commitment_placeholder": "En une phrase, ce que je retiens aujourd'hui…"
     },
     "cape42": {
-      "label": "CAPE-42 — Expériences psychotiques",
+      "label": "CAPE-42, Expériences psychotiques",
       "description": ""
     },
     "audit": {
-      "label": "AUDIT — Consommation d'alcool",
+      "label": "AUDIT, Consommation d'alcool",
       "description": ""
     },
     "cssrs": {
-      "label": "C-SSRS — Risque suicidaire",
+      "label": "C-SSRS, Risque suicidaire",
       "description": ""
     }
   }

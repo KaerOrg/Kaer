@@ -787,9 +787,18 @@ export interface Database {
         Returns: { ok: boolean; invitations_deleted: number; caseload_entries_deleted: number }
       }
       // Liste admin de TOUS les utilisateurs — patients ET médecins (gestion des
-      // utilisateurs). Admin-only. `kind` discrimine les deux populations.
+      // utilisateurs). Admin-only. `kind` discrimine les deux populations. Tri,
+      // filtres et pagination côté serveur ; `total_count` = total du jeu filtré.
       admin_list_users: {
-        Args: Record<string, never>
+        Args: {
+          p_kind?: string | null
+          p_practitioner?: string | null
+          p_search?: string | null
+          p_sort?: string
+          p_dir?: string
+          p_limit?: number
+          p_offset?: number
+        }
         Returns: {
           user_id: string
           kind: 'patient' | 'practitioner'
@@ -798,7 +807,13 @@ export interface Database {
           created_at: string
           practitioner_names: string[]
           is_admin: boolean
+          total_count: number
         }[]
+      }
+      // Noms des médecins (filtre « par praticien » de la table admin). Admin-only.
+      admin_list_practitioner_names: {
+        Args: Record<string, never>
+        Returns: { name: string }[]
       }
     }
     Enums: Record<string, never>
@@ -857,8 +872,10 @@ export interface PractitionerModuleSettings {
 }
 
 
-export interface PsychoeducationCardEntry {
-  card_id: string
+// Refonte : la psychoéducation débloque des fiches (psyedu_topics), plus des
+// cartes codées en dur. config.unlocked_topics : PsychoeducationTopicEntry[].
+export interface PsychoeducationTopicEntry {
+  topic_id: string
   is_read: boolean
   unlocked_at: string
 }

@@ -1,4 +1,5 @@
 import { ArrowLeft, Pencil, Trash2, Thermometer } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import { peakSeries, type PreviewStep } from './exposureMock'
 import { DesensitizationChartPreview } from './DesensitizationChartPreview'
 import { SessionCardPreview } from './SessionCardPreview'
@@ -19,9 +20,7 @@ export function ExposureStepDetailView({ step, lbl, strategyLabel, onBack, onDoE
   return (
     <div className="ej" data-testid="ej-detail">
       <div className="ej-head">
-        <button type="button" className="ej-back" onClick={onBack} aria-label="back">
-          <ArrowLeft size={18} />
-        </button>
+        <Button type="button" variant="ghost" onClick={onBack} aria-label="back" icon={<ArrowLeft size={18} />} />
         <span className="ej-head__title">{lbl(step.labelKey)}</span>
         <Pencil size={16} className="ej-head__action" />
         <Trash2 size={16} className="ej-head__action" />
@@ -40,10 +39,9 @@ export function ExposureStepDetailView({ step, lbl, strategyLabel, onBack, onDoE
         <SessionCardPreview key={i} session={s} lbl={lbl} strategyLabel={strategyLabel} />
       ))}
 
-      <button type="button" className="ej-do-btn" onClick={onDoExposure}>
-        <Thermometer size={16} />
-        <span>{lbl('detail_do_exposure')}</span>
-      </button>
+      <Button type="button" variant="primary" fullWidth onClick={onDoExposure} icon={<Thermometer size={16} />}>
+        {lbl('detail_do_exposure')}
+      </Button>
     </div>
   )
 }

@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, Drawer, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -172,7 +172,10 @@ réécrire des `__tab`/`role="tab"` à la main.
 
 `variant` : `'horizontal'` (défaut) · `'vertical'` · `'compact'`. `accentColor`
 surcharge la couleur de l'onglet actif (défaut `var(--color-primary)`).
-Utilisé par `SliderDashboardLayout` et `DailyCheckinLayout`.
+`iconOnly` n'affiche que l'`icon` de chaque onglet ; le `label` devient alors le nom
+accessible (`aria-label`) et l'infobulle (`title`) — chaque onglet doit fournir un `icon`.
+Utilisé par `SliderDashboardLayout`, `DailyCheckinLayout`, et le détail de la file
+active (`RowDetail` : onglets verticaux icône seule).
 
 ### `ValueBar` — barre de valeur statique
 
@@ -296,6 +299,7 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
 | `size` | `'xs' \| 'sm' \| 'md' \| 'lg'` | `'md'` | Taille. `xs` = compact (boutons d'action inline d'une carte / d'un tableau) |
 | `category` | `'neutral' \| 'danger' \| 'success'` | `'neutral'` | Accent sémantique appliqué **au survol et à l'état `aria-pressed`** (sur `ghost`/`outline`). `danger` → rouge (supprimer), `success` → vert (valider). Au repos le bouton reste neutre |
 | `loading` | `boolean` | `false` | Affiche un spinner (à la place de `icon`) et désactive le bouton |
+| `fullWidth` | `boolean` | `false` | Occupe toute la largeur disponible (`width: 100%`, classe `btn--full`) — CTA pleine largeur (formulaires, layouts de preview) |
 | `icon` | `ReactNode` | — | Icône optionnelle. **Avec** `children` → icône à gauche du label. **Sans** `children` → bouton icône-seule (carré `btn--icon-only`) → fournir `aria-label` |
 | …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`… |
 
@@ -356,20 +360,80 @@ fermeture sur `Échap` + clic sur l'overlay).
 | `maxWidth` | `number` | — | Largeur max en px |
 | `children` | `ReactNode` | — | Corps |
 
+### `Drawer`
+
+`components/ui/Drawer/`. Panneau latéral coulissant ancré à droite, pleine hauteur
+(`role="dialog"`, `aria-modal`, fermeture sur `Échap`, clic overlay ou croix). Même
+grammaire que `Modal` (titre, sous-titre, icône, footer) mais pour afficher le détail
+d'un élément sans quitter la vue d'ensemble (ex. détail d'un dossier dans la file active).
+**Redimensionnable par défaut** : poignée sur le bord gauche (glisser à la souris) ou
+flèches gauche/droite au clavier quand la poignée a le focus, bornée par `minWidth`/`maxWidth`.
+**Animé** à l'ouverture (glissement depuis la droite) et à la fermeture (glissement de
+sortie + fondu de l'overlay, puis démontage sur `animationend`) ; respecte
+`prefers-reduced-motion` (fermeture immédiate, sans animation).
+
+```tsx
+<Drawer title={entry.display_name} icon={<FolderOpen />} onClose={close}>
+  {detailContent}
+</Drawer>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `title` | `string` | — | Titre (obligatoire) |
+| `subtitle` | `string` | — | Sous-titre |
+| `icon` | `ReactNode` | — | Icône en tête |
+| `onClose` | `() => void` | — | Appelé sur `Échap`, clic overlay, ou croix |
+| `titleAccessory` | `ReactNode` | — | Élément juste après le titre (ex. bouton favoris collé au nom) |
+| `headerActions` | `ReactNode` | — | Slot d'actions dans l'en-tête, avant la croix |
+| `footer` | `ReactNode` | — | Pied (actions) |
+| `noPadding` | `boolean` | `false` | Supprime le padding du body |
+| `width` | `number` | `460` | Largeur initiale en px |
+| `minWidth` | `number` | `360` | Largeur min au redimensionnement |
+| `maxWidth` | `number` | `900` | Largeur max au redimensionnement (bornée au viewport) |
+| `resizable` | `boolean` | `true` | Affiche la poignée de redimensionnement |
+| `storageKey` | `string` | — | Clé `localStorage` : mémorise et restaure la largeur redimensionnée |
+| `topOffset` | `number` | — | Décale le haut de l'overlay (px) pour laisser un header fixe cliquable au-dessus |
+| `children` | `ReactNode` | — | Corps |
+
 ### `InputField`
 
-`components/ui/InputField/`. Champ texte étiqueté avec message d'erreur. Étend
-`InputHTMLAttributes` (donc `value`/`defaultValue`, `type`, `placeholder`, `onChange`…).
+`components/ui/InputField/`. Champ texte étiqueté avec message d'erreur. Rend un
+`<input>` par défaut, ou un `<textarea>` si `multiline`. Union discriminée : sans
+`multiline` il étend `InputHTMLAttributes` ; avec `multiline` il étend
+`TextareaHTMLAttributes` (donc `rows`, `maxLength`, `resize`…).
+
+`label` est **optionnel** : sans lui, aucun `<label>` n'est rendu — fournir alors
+un `aria-label` (champ compact, recherche) ou un `<label htmlFor={id}>` externe
+associé via la prop `id`. La `ref` est transmise au `<input>`/`<textarea>`
+sous-jacent (React 19, ref-as-prop) pour les usages non contrôlés (`defaultValue` +
+lecture impérative). Un `className` passé est **fusionné** avec les classes de base
+(modificateur additif), il ne les écrase pas.
 
 ```tsx
 <InputField label={t('auth.email')} type="email" error={emailError} defaultValue="" />
+
+<InputField
+  multiline
+  label={t('patient.psycho_suggest_label')}
+  rows={4}
+  maxLength={1000}
+  value={text}
+  onChange={e => setText(e.target.value)}
+/>
+
+// Sans label : aria-label + ref non contrôlée
+<InputField multiline ref={noteRef} aria-label={t('notes.placeholder')} rows={3} />
 ```
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `label` | `string` | Libellé (obligatoire) |
+| `label` | `string?` | Libellé visible. Optionnel : sans lui, aucun `<label>` — fournir `aria-label` |
 | `error` | `string` | Message d'erreur inline (validation de champ) |
-| …natifs | `InputHTMLAttributes` | `type`, `value`, `onChange`, `placeholder`… |
+| `multiline` | `boolean` | `true` → rend un `<textarea>` (redimensionnable vertical, min-height 80px) au lieu d'un `<input>` |
+| `ref` | `Ref<HTMLInputElement>` \| `Ref<HTMLTextAreaElement>` | Transmise au contrôle sous-jacent (selon `multiline`) — usages non contrôlés |
+| `className` | `string` | Classe additionnelle fusionnée avec `input-field__input` (modificateur) |
+| …natifs | `InputHTMLAttributes` \| `TextareaHTMLAttributes` | Selon `multiline` : `type`/`value`/`onChange`/`placeholder`… ou `rows`/`maxLength`… |
 
 ### `SearchInput`
 
@@ -385,6 +449,38 @@ fermeture sur `Échap` + clic sur l'overlay).
 | `onChange` | `(value: string) => void` | Reçoit la nouvelle valeur (pas l'event) |
 | `placeholder` | `string` | Placeholder (obligatoire) |
 | `ariaLabel` | `string` | Label accessibilité |
+
+### `MultiSelectAutocomplete`
+
+`components/ui/MultiSelectAutocomplete/`. Combobox multi-sélection à autocomplétion :
+champ de saisie + liste déroulante filtrée (insensible casse/accents via
+`lib/search`), options regroupables par section, navigation clavier (↑/↓, Entrée,
+Échap), fermeture au clic extérieur. **Présentationnel** : options, sélection et
+bascule pilotées par le parent ; il n'affiche pas les valeurs retenues (le parent
+rend ses propres `Chip onRemove`). Choisir cette primitive plutôt que `SelectField`
+dès qu'il faut filtrer en tapant ou sélectionner plusieurs valeurs — un `<select>`
+natif ne sait faire ni l'un ni l'autre proprement.
+
+```tsx
+<MultiSelectAutocomplete
+  options={[{ value: 'anxiety', label: 'Anxiété', group: 'indication' }]}
+  selectedValues={selected}
+  onToggle={handleToggle}
+  groupLabels={{ indication: 'Indication' }}
+  placeholder={t('modules.filter_select')}
+  emptyText={t('modules.filter_no_match')}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `options` | `readonly AutocompleteOption[]` | `{ value, label, group? }`, déjà triées |
+| `selectedValues` | `ReadonlySet<string>` | Valeurs cochées (affichées avec un ✓) |
+| `onToggle` | `(value: string) => void` | Bascule une option |
+| `placeholder` | `string` | Placeholder du champ |
+| `ariaLabel` | `string` | Label a11y de la combobox (défaut : `placeholder`) |
+| `groupLabels` | `Record<string, string>` | En-têtes de section : `group` id → libellé |
+| `emptyText` | `string` | Texte quand aucune option ne correspond |
 
 ### `StatusBadge`
 
@@ -577,15 +673,40 @@ const columns: DataTableColumn<Row>[] = [
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`) |
-| `rows` | `readonly T[]` | Lignes **déjà filtrées** par l'appelant |
+| `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`, `sortable`) |
+| `rows` | `readonly T[]` | Lignes **déjà filtrées/triées/paginées** par l'appelant — la table ne réordonne ni ne tronque jamais |
 | `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
 | `toolbar` | `ReactNode` | Zone libre au-dessus de la table (filtres, capture rapide) |
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
+| `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
+| `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |
+| `pagination` | `DataTablePaginationState` | Pagination **contrôlée** (cf. ci-dessous). Absente ⇒ aucune barre |
 | `className` | `string` | Classe posée sur le conteneur `.data-table-wrap` — permet de **scoper un habillage propre** (couleurs d'en-tête, dégradé de lignes) sans toucher au style générique. Ex. `CaseloadTable` passe `caseload-data-table` et stylise `.caseload-data-table .data-table__th` (en-tête teal). |
+
+**Tri (`sortable`)** — une colonne `{ …, sortable: true }` rend un bouton de tri dans son
+en-tête (reset visuel, indicateur chevron, `aria-sort`). La table **n'ordonne jamais**
+`rows` : elle émet `onSortChange(column)` et reflète le tri porté par `sort`. Le tri réel
+(mémoire ou serveur) appartient à l'appelant.
+
+**Pagination contrôlée (`pagination`)** — barre « intervalle + précédent/suivant », elle
+aussi server-friendly : la table ne tronque pas `rows`, elle délègue via `onPageChange`.
+
+| `DataTablePaginationState` | Type | Rôle |
+|---|---|---|
+| `page` | `number` | Index de page, **base 0** |
+| `pageSize` | `number` | Taille de page (borne le nombre de pages avec `total`) |
+| `total` | `number` | Total du jeu **filtré** (≠ `rows.length`, qui est la page courante) |
+| `onPageChange` | `(page: number) => void` | Changement de page (souvent un refetch) |
+| `labels` | `DataTablePaginationLabels` | i18n résolu par l'appelant : `previous`, `next` (aria), `range(from, to, total)` |
+
+> **Tri/pagination = contrôlés, jamais autonomes.** `DataTable` ne possède aucun état de
+> tri ni de page : il reflète ce qu'on lui passe et émet des événements. Cela permet une
+> pagination/tri **côté serveur** (ex. `AdminUsersTable` → RPC `admin_list_users`) sans
+> dupliquer de logique. Pour du tri/pagination purement client, l'appelant gère l'état
+> localement et trie/tronque `rows` avant de les passer.
 
 Sous-composant exporté **`DataTableCell`** — le `<td>` générique (classe de base
 `data-table__cell` + `className` métier optionnelle). `DataTable` l'utilise en
@@ -678,14 +799,24 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 
 Fichier : `components/features/ModuleFilterBar/ModuleFilterBar.tsx`
 
-Barre de filtres à facettes de l'armoire thérapeutique : une rangée de puces
-sélectionnables (`Chip selectable`) par dimension (indication, public, approche) +
-compteur « N sur M modules » + bouton de réinitialisation (visible seulement si un
-filtre est actif). Utilisée par `ModuleCatalogPage` (armoire de config) et
-`PatientModulesTab` (vue active + modale d'ajout).
+Panneau de filtres à facettes de l'armoire thérapeutique. Structure :
+1. une recherche par mot-clé optionnelle (`search`, rendue en tête du panneau) ;
+2. **une combobox d'autocomplétion par dimension** (indication, public, approche),
+   via `MultiSelectAutocomplete` — un axe sans tag est omis ;
+3. une zone de synthèse : les tags retenus en `Chip onRemove`, **regroupés sous le
+   titre de leur critère** (le libellé de la dimension est rappelé) ;
+4. un pied : compteur « N sur M modules » + bouton de réinitialisation (visible
+   seulement si un filtre est actif).
+
+Utilisée par `ModuleCatalogPage` (armoire de config), `PatientModulesTab` (vue
+active + modale d'ajout) et `PsychoLibraryPicker`.
 
 ```tsx
 const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
+const search = useMemo(
+  () => ({ value: query, onChange: setQuery, placeholder: t('modules.search_placeholder') }),
+  [query, t],
+)
 
 <ModuleFilterBar
   taxonomy={taxonomy}
@@ -694,6 +825,7 @@ const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
   onReset={resetFilters}
   resultCount={visibleCount}
   totalCount={totalCount}
+  search={search}
 />
 ```
 
@@ -701,13 +833,15 @@ const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 |---|---|---|
 | `taxonomy` | `ModuleTaxonomy` | Axes + tags chargés en base (`fetchModuleTaxonomy`) |
 | `activeFilters` | `ActiveTagFilters` | Sélection courante (`Map<dimension, Set<tag>>`) |
-| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche une puce |
+| `onToggleTag` | `(dimensionId, tagId) => void` | Coche/décoche un tag |
 | `onReset` | `() => void` | Vide toute la sélection |
 | `resultCount` | `number` | Modules visibles après filtrage |
 | `totalCount` | `number` | Total de modules avant filtrage |
+| `search` | `ModuleFilterSearch` (opt.) | `{ value, onChange, placeholder }` — recherche en tête du panneau ; omise = pas de recherche |
 
-`ModuleFilterChip` (fichier voisin) est la puce individuelle, mémoïsée (`React.memo`
-+ callback figé) — zéro handler recréé par puce au re-rendu de la barre.
+`DimensionFilter` (fichier voisin) est la combobox d'un seul axe, mémoïsée
+(`React.memo` + `onToggle` figé lié à sa dimension) — zéro handler recréé par axe
+au re-rendu du panneau.
 
 ### `ModuleTagChips`
 

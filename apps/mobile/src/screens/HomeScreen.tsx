@@ -29,7 +29,6 @@ import { EmptyState } from '../components/ui/EmptyState'
 // Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.
 // Tout module absent de cette map ET autre preview_kind → ModuleContent (moteur générique).
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
-  psychoeducation:          'Psychoeducation',
   breathing_techniques:     'BreathingTechniques',
   crisis_plan:              'CrisisPlan',
   medication_side_effects:  'MedicationSideEffectsHistory',

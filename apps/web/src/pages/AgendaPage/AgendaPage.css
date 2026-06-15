@@ -48,22 +48,6 @@
   text-align: center;
 }
 
-.agenda-page__nav-btn {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 6px);
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  color: var(--color-text);
-  transition: background 0.15s;
-  font-family: inherit;
-}
-
-.agenda-page__nav-btn:hover {
-  background: var(--color-border);
-}
-
 /* Patient filter */
 .agenda-page__patient-filter {
   margin-left: auto;

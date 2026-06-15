@@ -188,28 +188,6 @@
   box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
-.appt-textarea {
-  padding: 9px 11px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
-  font-family: inherit;
-  background: var(--color-surface);
-  color: var(--color-text);
-  resize: vertical;
-  min-height: 72px;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  touch-action: manipulation;
-}
-
-.appt-textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
 /* ── Autocomplete ────────────────────────────────────────────── */
 .appt-autocomplete {
   position: relative;
@@ -300,8 +278,7 @@
 
 
 @media (prefers-reduced-motion: reduce) {
-  .appt-input,
-  .appt-textarea {
+  .appt-input {
     transition: none;
   }
 }

@@ -1,4 +1,5 @@
 import { ChevronRight, Heart, Info, PlayCircle, Shield } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 import { FieldText } from '../../fields'
 
@@ -79,10 +80,9 @@ export function GuidedExerciseLayout({ fields, t }: Props) {
       )}
 
       {startBtn && (
-        <button type="button" className="ge-start-btn" disabled>
-          <PlayCircle size={18} />
+        <Button type="button" variant="primary" fullWidth disabled icon={<PlayCircle size={18} />}>
           {startBtn}
-        </button>
+        </Button>
       )}
 
       {safetyTitle && (

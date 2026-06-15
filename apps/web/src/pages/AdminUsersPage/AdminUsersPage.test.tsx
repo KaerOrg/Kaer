@@ -12,9 +12,14 @@ vi.mock('../../components/features/Layout', () => ({
   Layout: ({ children }: { children: ReactNode }) => children,
 }))
 
-vi.mock('../../services/adminService', () => ({ fetchAllUsers: vi.fn() }))
+// Filtres / tri / pagination sont côté serveur : on mocke la couche service et on
+// vérifie les PARAMÈTRES envoyés (la page ne filtre/trie plus en mémoire).
+vi.mock('../../services/adminService', () => ({
+  fetchUsers: vi.fn(),
+  fetchPractitionerNames: vi.fn(),
+}))
 
-// Coquille PatientDataRights : expose `onErased` via un bouton pour tester le retrait.
+// Coquille PatientDataRights : expose `onErased` via un bouton pour tester le refetch.
 vi.mock('../../components/features/PatientDataRights', () => ({
   PatientDataRights: ({ patientId, onErased }: { patientId: string; displayName: string; onErased: () => void }) => (
     <button type="button" data-testid={`erase-${patientId}`} onClick={onErased}>
@@ -24,23 +29,25 @@ vi.mock('../../components/features/PatientDataRights', () => ({
 }))
 
 import { AdminUsersPage } from './AdminUsersPage'
-import { fetchAllUsers } from '../../services/adminService'
+import { fetchUsers, fetchPractitionerNames, type AdminUser } from '../../services/adminService'
 
-const USERS = [
+const USERS: readonly AdminUser[] = [
   { user_id: 'p1', kind: 'patient', email: 'ada@kaer.fr', display_name: 'Ada Lovelace', created_at: '2026-01-01T00:00:00Z', practitioner_names: ['Doc Gyneco'], is_admin: false },
-  { user_id: 'p2', kind: 'patient', email: 'alan@kaer.fr', display_name: 'Alan Turing', created_at: '2026-01-02T00:00:00Z', practitioner_names: ['Doc Gyneco'], is_admin: false },
-  { user_id: 'p3', kind: 'patient', email: 'marie@kaer.fr', display_name: 'Marie Curie', created_at: '2026-01-03T00:00:00Z', practitioner_names: ['Autre Doc'], is_admin: false },
   { user_id: 'd1', kind: 'practitioner', email: 'doc@kaer.fr', display_name: 'Doc Gyneco', created_at: '2026-01-04T00:00:00Z', practitioner_names: [], is_admin: true },
-  { user_id: 'd2', kind: 'practitioner', email: 'autre@kaer.fr', display_name: 'Autre Doc', created_at: '2026-01-05T00:00:00Z', practitioner_names: [], is_admin: false },
-] as const
+]
 
 beforeEach(() => vi.clearAllMocks())
 
-function mockUsers() {
-  vi.mocked(fetchAllUsers).mockResolvedValue({ ok: true, users: USERS as never })
+function mockUsers(total = USERS.length) {
+  vi.mocked(fetchUsers).mockResolvedValue({ ok: true, data: { users: USERS, total } })
+  vi.mocked(fetchPractitionerNames).mockResolvedValue(['Autre Doc', 'Doc Gyneco'])
 }
 
-// Rend la page enveloppée d'un QueryClient neuf (cache isolé, retry désactivé).
+function lastParams() {
+  const calls = vi.mocked(fetchUsers).mock.calls
+  return calls[calls.length - 1][0]
+}
+
 function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -51,56 +58,102 @@ function renderPage() {
 }
 
 describe('AdminUsersPage', () => {
-  it('liste patients ET médecins', async () => {
+  it('liste patients ET médecins renvoyés par le serveur', async () => {
     mockUsers()
     renderPage()
     expect(await screen.findByText('ada@kaer.fr')).toBeInTheDocument()
     expect(screen.getByText('doc@kaer.fr')).toBeInTheDocument()
-    // Badge de type présent pour les deux populations.
     expect(screen.getAllByText('Patient').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Médecin').length).toBeGreaterThan(0)
   })
 
+  it('charge par défaut trié par date décroissante, page 0, sans filtre', async () => {
+    mockUsers()
+    renderPage()
+    await screen.findByText('ada@kaer.fr')
+    expect(lastParams()).toMatchObject({
+      kind: null,
+      practitioner: null,
+      search: null,
+      sort: 'created_at',
+      dir: 'desc',
+      limit: 150,
+      offset: 0,
+    })
+  })
+
   it('affiche une erreur et notifie si le chargement échoue', async () => {
-    vi.mocked(fetchAllUsers).mockResolvedValue({ ok: false, message: 'admin_list_users: accès refusé' })
+    vi.mocked(fetchUsers).mockResolvedValue({ ok: false, message: 'admin_list_users: accès refusé' })
+    vi.mocked(fetchPractitionerNames).mockResolvedValue([])
     renderPage()
     await waitFor(() => expect(mockToast.error).toHaveBeenCalled())
     expect(screen.queryByText('ada@kaer.fr')).not.toBeInTheDocument()
   })
 
-  it('filtre par type « Médecins »', async () => {
+  it('le filtre « Médecins » envoie kind=practitioner au serveur', async () => {
     mockUsers()
     renderPage()
     await screen.findByText('ada@kaer.fr')
 
     fireEvent.click(screen.getByText('Médecins'))
 
-    expect(screen.queryByText('ada@kaer.fr')).not.toBeInTheDocument()
-    expect(screen.getByText('doc@kaer.fr')).toBeInTheDocument()
-    expect(screen.getByText('autre@kaer.fr')).toBeInTheDocument()
+    await waitFor(() => expect(lastParams()).toMatchObject({ kind: 'practitioner' }))
   })
 
-  it('recherche les patients par praticien', async () => {
+  it('n\'affiche le filtre praticien que lorsque « Patients » est sélectionné', async () => {
     mockUsers()
     renderPage()
     await screen.findByText('ada@kaer.fr')
 
-    fireEvent.change(screen.getByLabelText('Filtrer par praticien'), { target: { value: 'Doc Gyneco' } })
+    // Type « Tous » par défaut → pas de filtre praticien.
+    expect(screen.queryByLabelText('Filtrer par praticien')).not.toBeInTheDocument()
 
-    // Patients de Doc Gyneco visibles ; patient d'un autre médecin et médecins masqués.
-    expect(screen.getByText('ada@kaer.fr')).toBeInTheDocument()
-    expect(screen.getByText('alan@kaer.fr')).toBeInTheDocument()
-    expect(screen.queryByText('marie@kaer.fr')).not.toBeInTheDocument()
-    expect(screen.queryByText('doc@kaer.fr')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Patients'))
+    expect(await screen.findByLabelText('Filtrer par praticien')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Filtrer par praticien'), { target: { value: 'Doc Gyneco' } })
+    await waitFor(() => expect(lastParams()).toMatchObject({ kind: 'patient', practitioner: 'Doc Gyneco' }))
   })
 
-  it('retire le patient de la liste après un effacement réussi', async () => {
+  it('un clic sur l\'en-tête « Nom » trie côté serveur (display_name asc)', async () => {
     mockUsers()
     renderPage()
-    fireEvent.click(await screen.findByText('Ada Lovelace'))
+    await screen.findByText('ada@kaer.fr')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Nom' }))
+
+    await waitFor(() => expect(lastParams()).toMatchObject({ sort: 'display_name', dir: 'asc' }))
+  })
+
+  it('la page suivante envoie l\'offset correspondant', async () => {
+    mockUsers(300) // 2 pages de 150
+    renderPage()
+    await screen.findByText('ada@kaer.fr')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Page suivante' }))
+
+    await waitFor(() => expect(lastParams()).toMatchObject({ offset: 150 }))
+  })
+
+  it('recherche côté serveur après debounce', async () => {
+    mockUsers()
+    renderPage()
+    await screen.findByText('ada@kaer.fr')
+
+    fireEvent.change(screen.getByLabelText('Rechercher par nom ou email…'), { target: { value: 'ada' } })
+
+    await waitFor(() => expect(lastParams()).toMatchObject({ search: 'ada' }))
+  })
+
+  it('refetch après un effacement réussi', async () => {
+    mockUsers()
+    renderPage()
+    await screen.findByText('ada@kaer.fr')
+    const before = vi.mocked(fetchUsers).mock.calls.length
+
+    fireEvent.click(screen.getByText('Ada Lovelace'))
     fireEvent.click(screen.getByTestId('erase-p1'))
 
-    await waitFor(() => expect(screen.queryByText('ada@kaer.fr')).not.toBeInTheDocument())
-    expect(screen.getByText('alan@kaer.fr')).toBeInTheDocument()
+    await waitFor(() => expect(vi.mocked(fetchUsers).mock.calls.length).toBeGreaterThan(before))
   })
 })

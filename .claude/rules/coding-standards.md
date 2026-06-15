@@ -181,6 +181,51 @@ Un composant livré sans sa trace documentaire crée de la dette invisible — l
 - Nouveau `field_type` introduit sans consultation de l'inventaire `docs/module-engine.md`
 - Couleur, taille, espacement hardcodés (#FFFFFF, 14px, 8px) — utiliser les tokens CSS (`var(--color-*)`, `var(--spacing-*)`, `var(--font-size-*)`)
 
+### `<button>` natif (web) — quand c'est interdit, quand c'est légitime
+
+> **Règle : aucun `<button>` HTML natif dans une page, un écran, un layout ou un
+> composant `features/` dès qu'un primitive du design system couvre le besoin.**
+> Avant d'écrire `<button`, ouvrir `apps/web/src/components/ui/` : si le besoin est un
+> contrôle bouton, c'est `ui/Button` (variants `primary`/`secondary`/`danger`/`ghost`/
+> `outline`, tailles `xs`→`lg`, `category`, `loading`, `fullWidth`, `icon` / icône-seule).
+> Si c'est une puce/filtre/tag → `ui/Chip`. Un choix exclusif → `ui/SegmentedControl`.
+> Une bascule on/off → `ui/Toggle`. Un onglet → `ui/Tabs`.
+
+**Procédure devant un `<button>` existant ou à écrire :**
+
+1. **Contrôle bouton** (label, ou icône, action au clic, état `disabled`/`loading`) →
+   `ui/Button`. Inclut les CTA pleine largeur (`fullWidth`), les boutons « retour » /
+   navigation icône-seule (`variant="ghost"` + `icon`), les « + Ajouter » (`variant="outline"`).
+   Jamais de `<button className="xxx-btn">` + CSS `.xxx-btn` réinventant fond/bordure/radius.
+2. **Le primitive couvre à 90 %** → l'**étendre** (prop/variante), pas réécrire un `<button>`.
+   Ex. la prop `fullWidth` a été ajoutée à `Button` pour absorber les `*-save-btn` des
+   layouts de preview au lieu de garder un `width:100%` ad hoc.
+3. **Doublon d'un AUTRE primitive** (filtre, tag, choix exclusif, bascule) → migrer vers
+   `Chip` / `SegmentedControl` / `Toggle`, pas vers `Button`.
+
+**`<button>` natif légitime (ne PAS migrer) — uniquement ces cas :**
+
+- **Le primitive lui-même** : `ui/Button`, `ui/Chip`, `ui/Tabs`, `ui/SegmentedControl`,
+  `ui/Modal` (close), `ui/Banner`, `ui/Accordion`… un primitive ne se construit pas sur
+  un autre.
+- **Surface cliquable non bouton-shaped** : une carte, une ligne de liste/tableau, une
+  cellule, un item de menu, une vignette entière rendue cliquable. `Button` imposerait
+  son habillage (padding/fond/radius) — garder un `<button>` neutre (reset CSS) est correct.
+- **Wrapper d'interaction autour d'un primitive présentationnel** : ex. `<button>`
+  transparent (padding 0, sans fond) qui rend un `<Toggle>` cliquable. Ce n'est pas un
+  bouton visuel.
+
+> **Test décisif** : « ce `<button>` a-t-il un habillage de bouton (fond, bordure, radius,
+> padding de bouton) ? » Si oui → `ui/Button` (ou la variante à ajouter). Si non (reset
+> nu, surface large, wrapper) → natif légitime, mais le justifier en une ligne.
+
+**Cas particulier — pas de variante exacte** : si le besoin est un contrôle bouton mais
+qu'aucune variante ne correspond (ex. bouton « soft danger » persistant rouge clair),
+**ne pas dégrader en outline neutre ni inventer un CSS parallèle silencieusement** :
+soit ajouter la variante au design system (avec doc + test), soit laisser le `<button>`
+natif **avec un commentaire** expliquant l'absence de primitive — pour qu'une session
+ultérieure tranche, pas pour qu'elle re-réinvente.
+
 **Incidents de référence :**
 - `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` → bug de cohérence visuelle, refacto en review.
 - `CrisisCompanionLayout` (PR #45, 2026-06-08) a écrit 4 styles de carte ad hoc + 3 styles de bouton ad hoc au lieu d'utiliser `<Card>` et `<Button>` → refacto requise post-review.
@@ -532,6 +577,31 @@ import { shadows } from '../../theme'
 ## Schéma
 
 - Tout changement de schéma (table, colonne, trigger, RLS, index PostGIS) → répercuté dans `supabase/schema.sql` (source de vérité)
+
+## Ponctuation : pas de tiret long (U+2014 ni U+2013)
+
+> **Règle absolue, systématique, pour tout texte visible par l'utilisateur et toute rédaction de l'assistant.**
+
+Le tiret cadratin (U+2014) et le tiret demi-cadratin (U+2013) sont **bannis** des textes
+visibles (locales i18n, contenu psyedu, labels, messages, prose) et de toute rédaction de
+l'assistant (réponses, messages de commit, docs rédigées par l'IA). Ils signent une
+écriture automatique et nuisent à la lisibilité.
+
+Remplacer par la ponctuation la plus juste selon le contexte :
+
+- introduit une explication ou une définition : deux-points « : »
+- apposition, incise, énumération : virgule « , »
+- deux idées indépendantes : point « . » ou point-virgule « ; »
+- plage de valeurs : « à » (ex. « 16 à 18 °C »)
+- citation type « Source (année) [tiret] Titre » : deux-points (« Source (année) : Titre »)
+
+Exception : un tiret marqueur de **cellule vide** dans un tableau Markdown, ou
+**placeholder de valeur absente** en code (`value || '-'`), n'est pas de la prose ;
+utiliser un trait d'union simple `-`, jamais un tiret long, et ne pas le changer en virgule.
+
+Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide.
+
+---
 
 ## Internationalisation — zéro texte hardcodé
 

@@ -1284,20 +1284,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Save button */
-.sj-save-btn {
-  width: 100%;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.85;
-  cursor: not-allowed;
-}
-
 /* ── Activity log (behavioral_activation) ────────────────────────────────── */
 
 .al { display: flex; flex-direction: column; gap: 14px; }
@@ -1503,23 +1489,6 @@
 
 .al-pip__seg--on { background: var(--color-primary); }
 
-.al-save-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
 /* ── Decision grid (decisional_balance) ───────────────────────────────── */
 
 .dg { display: flex; flex-direction: column; gap: 14px; }
@@ -1671,19 +1640,6 @@
 .dg-gauge__label-text { font-size: 11px; color: var(--color-text-muted); }
 
 .dg-gauge__label-score { font-size: 16px; font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
-
-.dg-save-btn {
-  width: 100%;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
-  cursor: not-allowed;
-}
 
 /* ── Exposure tracker (fear_thermometer) ───────────────────────────────── */
 
@@ -2325,6 +2281,45 @@
 
 .psyedu-block__tip-icon { flex-shrink: 0; margin-top: 2px; }
 
+/* Carte « Ce que je peux faire » — l'action concrète, mise en avant */
+.psyedu-block--action {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.psyedu-block__action-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 10px;
+}
+
+.psyedu-block__action-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.psyedu-block__action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+}
+
+.psyedu-block__action-item svg { flex-shrink: 0; margin-top: 2px; color: var(--color-primary); }
+
 .psyedu-block--quote {
   font-size: 13px;
   font-style: italic;
@@ -2603,23 +2598,6 @@
   opacity: 0.85;
 }
 
-.cf-save-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
 /* ── Guided exercise (cognitive_saturation, grounding) ─────────────────── */
 
 .ge { display: flex; flex-direction: column; gap: 14px; }
@@ -2682,23 +2660,6 @@
 .ge-step__body { flex: 1; min-width: 0; }
 
 .ge-step__chevron { color: var(--color-text-muted); flex-shrink: 0; margin-top: 6px; }
-
-.ge-start-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
-  cursor: not-allowed;
-}
 
 .ge-safety {
   display: flex;
@@ -3017,20 +2978,6 @@
 
 /* ── Bouton save ─────────────────────────────────────────────────────────── */
 
-.mt__save-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  background: #F97316;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: not-allowed;
-  opacity: 0.55;
-  margin-top: 4px;
-}
-
 /* ── Historique ──────────────────────────────────────────────────────────── */
 
 .mt__history-title {
@@ -3234,21 +3181,6 @@
   color: var(--color-text-primary);
 }
 
-.mt-markers__add {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid #F97316;
-  background: none;
-  color: #F97316;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
 .mt-markers__list {
   display: flex;
   flex-direction: column;
@@ -3325,18 +3257,6 @@
   font-size: 14px;
   font-weight: 600;
   color: #F97316;
-}
-
-.mt-reminder__btn {
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: none;
-  font-size: 13px;
-  font-weight: 600;
-  color: #F97316;
-  cursor: not-allowed;
-  opacity: 0.8;
 }
 
 /* ── Calendrier mensuel ──────────────────────────────────────────────────── */
@@ -3640,17 +3560,6 @@
 
 /* En-tête de niveau (detail / form) */
 .ej-head { display: flex; align-items: center; gap: 10px; }
-.ej-back {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: var(--color-bg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-}
 .ej-head__title { flex: 1; font-size: 15px; font-weight: 700; color: var(--color-text); min-width: 0; }
 .ej-head__action { color: var(--color-text-muted); flex-shrink: 0; }
 
@@ -3702,22 +3611,6 @@
 .ej-suds__bar { flex: 1; height: 6px; background: var(--color-border); border-radius: 999px; overflow: hidden; }
 .ej-suds__fill { display: block; height: 100%; border-radius: 999px; }
 .ej-suds__val { font-size: 13px; font-weight: 700; min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
-
-.ej-do-btn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 13px;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: var(--shadow-md);
-}
 
 /* Formulaire d'exposition */
 .ej-form { gap: 16px; }
@@ -3812,17 +3705,4 @@
   border-radius: var(--radius-md);
   position: relative;
   box-shadow: var(--shadow-sm);
-}
-
-.ej-save-btn {
-  width: 100%;
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.9;
-  cursor: not-allowed;
 }

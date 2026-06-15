@@ -1,4 +1,5 @@
 import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -165,10 +166,9 @@ export function ColumnFormLayout({ fields, t }: Props) {
         })}
 
         {saveLabel && (
-          <button type="button" className="cf-save-btn" disabled>
-            <Save size={16} />
+          <Button type="button" variant="primary" fullWidth disabled icon={<Save size={16} />}>
             {saveLabel}
-          </button>
+          </Button>
         )}
       </div>
     </div>

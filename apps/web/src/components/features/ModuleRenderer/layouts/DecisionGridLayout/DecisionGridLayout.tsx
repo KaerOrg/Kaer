@@ -1,4 +1,5 @@
 import { AlertTriangle, Plus, ShieldCheck, Star, ThumbsDown, ThumbsUp, type LucideIcon } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -149,9 +150,9 @@ export function DecisionGridLayout({ fields, t }: Props) {
       )}
 
       {saveLabel && (
-        <button type="button" className="dg-save-btn" disabled>
+        <Button type="button" variant="primary" fullWidth disabled>
           {saveLabel}
-        </button>
+        </Button>
       )}
 
       {/* Référence inutilisée pour éviter le warning de variable non utilisée */}

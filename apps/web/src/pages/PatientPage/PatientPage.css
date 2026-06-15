@@ -129,27 +129,6 @@
   margin-bottom: 20px;
 }
 
-.patient-notes__textarea {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-family: inherit;
-  line-height: 1.5;
-  color: var(--color-text);
-  background: var(--color-surface, #fff);
-  resize: vertical;
-  transition: border-color 0.15s;
-  box-sizing: border-box;
-}
-
-.patient-notes__textarea:focus {
-  outline: none;
-  border-color: var(--color-primary);
-}
-
 /* ── Bordure lumineuse rotative pendant l'enregistrement ─────────────────── */
 
 @property --stt-angle {
@@ -193,7 +172,7 @@
   border-radius: calc(var(--radius-md) - 2px);
 }
 
-.patient-notes__textarea-frame--recording .patient-notes__textarea {
+.patient-notes__textarea-frame--recording .input-field__input {
   border-color: transparent;
   border-radius: calc(var(--radius-md) - 2px);
   width: 100%;
@@ -202,7 +181,7 @@
   position: relative;
 }
 
-.patient-notes__textarea-frame--recording .patient-notes__textarea::placeholder {
+.patient-notes__textarea-frame--recording .input-field__input::placeholder {
   color: transparent;
 }
 
@@ -337,41 +316,6 @@
   margin-bottom: 8px;
 }
 
-.patient-notes__tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.patient-notes__tag--readonly {
-  background: var(--color-neutral, #F3F4F6);
-  color: var(--color-text-secondary);
-}
-
-.patient-notes__tag-remove {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-primary);
-  font-size: 14px;
-  line-height: 1;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  opacity: 0.7;
-  transition: opacity 0.15s;
-}
-
-.patient-notes__tag-remove:hover {
-  opacity: 1;
-}
-
 .patient-notes__tag-input {
   border: none;
   outline: none;
@@ -421,30 +365,6 @@
 
 .patient-notes__filter-search::placeholder {
   color: var(--color-text-muted);
-}
-
-.patient-notes__filter-chip {
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.patient-notes__filter-chip:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.patient-notes__filter-chip--active {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  font-weight: 600;
 }
 
 /* ── Overview ─────────────────────────────────────────────────────────────── */
@@ -936,10 +856,48 @@
   margin-top: 1px;
 }
 
+.psycho-card-picker__search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.psycho-card-picker__theme {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+  margin: 12px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.psycho-card-picker__theme:first-child {
+  margin-top: 0;
+}
+
+.psycho-card-picker__empty {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 8px 0;
+}
+
 .psycho-card-picker__error {
   font-size: 13px;
   color: var(--color-danger);
   margin-bottom: 10px;
+}
+
+.psycho-card-picker__suggest {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
 }
 
 .psycho-card-picker__actions {

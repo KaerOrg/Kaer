@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { Modal } from '../../../components/ui/Modal'
-import { SearchInput } from '../../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
@@ -18,7 +18,7 @@ import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPa
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
-import { type PsychoCardInfo } from '../../../services/moduleService'
+import { type LibraryTopic, type PsyEduTheme } from '../../../services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
 import {
   unlockModule as unlockStandardModule,
@@ -32,10 +32,15 @@ import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
+import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
 const ACTIVE_FILTER_THRESHOLD = 8
+
+// Alignement à droite du bouton « supprimer » d'une coping card (positionnement
+// de layout uniquement — l'habillage du bouton vient du design system).
+const CRISIS_CARD_DELETE_STYLE: CSSProperties = { alignSelf: 'flex-end' }
 
 type Props = {
   patientId: string
@@ -43,7 +48,8 @@ type Props = {
   modules: PatientModule[]
   categories: ModuleCategory[]
   enabledModules: Set<ModuleType> | null
-  psychoCards: PsychoCardInfo[]
+  libraryTopics: LibraryTopic[]
+  themes: PsyEduTheme[]
   comingSoonIds: Set<string>
   onReloadModules: () => Promise<void>
 }
@@ -54,7 +60,8 @@ export function PatientModulesTab({
   modules,
   categories,
   enabledModules,
-  psychoCards,
+  libraryTopics,
+  themes,
   comingSoonIds,
   onReloadModules,
 }: Props) {
@@ -95,7 +102,8 @@ export function PatientModulesTab({
   )
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
-  const psycho = usePsychoEducationPicker(modules, psychoCards, patientId, practitionerId, onReloadModules)
+  const allTopicIds = useMemo(() => libraryTopics.map(topic => topic.id), [libraryTopics])
+  const psycho = usePsychoEducationPicker(modules, allTopicIds, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
 
@@ -175,8 +183,8 @@ export function PatientModulesTab({
     const modIcon = ModIcon ? <ModIcon size={18} /> : undefined
 
     if (moduleType === 'psychoeducation') {
-      const cards = psycho.psychoModule ? psycho.getUnlockedCards(psycho.psychoModule) : []
-      const readCount = cards.filter(c => c.is_read).length
+      const topics = psycho.psychoModule ? psycho.getUnlockedTopics(psycho.psychoModule) : []
+      const readCount = topics.filter(tpc => tpc.is_read).length
 
       const handlePsychoToggle = () => {
         if (unlocked && mod) { psycho.cancel(); revokeModule(mod.id) }
@@ -221,21 +229,21 @@ export function PatientModulesTab({
                   {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
                   {' · '}
                   <span className="psycho-observance-summary">
-                    {cards.length === 1
-                      ? t('patient.psycho_read_count', { read: readCount, total: cards.length })
-                      : t('patient.psycho_read_count_plural', { read: readCount, total: cards.length })}
+                    {topics.length === 1
+                      ? t('patient.psycho_read_count', { read: readCount, total: topics.length })
+                      : t('patient.psycho_read_count_plural', { read: readCount, total: topics.length })}
                   </span>
                 </div>
-                {cards.length > 0 && (
+                {topics.length > 0 && (
                   <ul className="psycho-observance-list">
-                    {cards.map(card => {
-                      const meta = psychoCards.find(c => c.id === card.card_id)
+                    {topics.map(topic => {
+                      const meta = libraryTopics.find(lt => lt.id === topic.topic_id)
                       return (
-                        <li key={card.card_id} className="psycho-observance-item">
+                        <li key={topic.topic_id} className="psycho-observance-item">
                           <span className="psycho-observance-item__title">
-                            {meta ? t(meta.titleKey) : card.card_id}
+                            {meta ? t(meta.titleKey, { ns: 'psyedu' }) : topic.topic_id}
                           </span>
-                          {card.is_read
+                          {topic.is_read
                             ? <StatusBadge variant="success" label={t('patient.scale_read')} />
                             : <StatusBadge variant="neutral" label={t('patient.scale_unread')} />
                           }
@@ -252,44 +260,18 @@ export function PatientModulesTab({
           </Card>
 
           {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
-            <div className={`psycho-card-picker ${psycho.mode === 'edit' ? 'psycho-card-picker--edit' : ''}`}>
-              <p className="psycho-card-picker__label">
-                {psycho.mode === 'unlock'
-                  ? t('patient.psycho_pick_unlock')
-                  : t('patient.psycho_pick_edit')}
-              </p>
-              <ul className="psycho-card-picker__list">
-                {psychoCards.map(card => (
-                  <li key={card.id} className="psycho-card-option">
-                    <label className="psycho-card-option__label">
-                      <input
-                        type="checkbox"
-                        className="psycho-card-option__checkbox"
-                        checked={psycho.selectedCardIds.has(card.id)}
-                        onChange={() => psycho.toggleCard(card.id)}
-                      />
-                      <div>
-                        <div className="psycho-card-option__title">{t(card.titleKey)}</div>
-                        <div className="psycho-card-option__desc">{t(card.summaryKey)}</div>
-                      </div>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              {psycho.error && <p className="psycho-card-picker__error">{psycho.error}</p>}
-              <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={psycho.saving} onClick={psycho.confirm}>
-                  {psycho.mode === 'unlock'
-                    ? (psycho.selectedCardIds.size === 1
-                        ? t('patient.psycho_unlock_btn', { count: psycho.selectedCardIds.size })
-                        : t('patient.psycho_unlock_btn_plural', { count: psycho.selectedCardIds.size }))
-                    : t('patient.psycho_save_btn')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={psycho.cancel}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </div>
+            <PsychoLibraryPicker
+              mode={psycho.mode}
+              libraryTopics={libraryTopics}
+              themes={themes}
+              taxonomy={taxonomy}
+              selectedTopicIds={psycho.selectedTopicIds}
+              saving={psycho.saving}
+              error={psycho.error}
+              onToggle={psycho.toggleTopic}
+              onConfirm={psycho.confirm}
+              onCancel={psycho.cancel}
+            />
           )}
         </div>
       )
@@ -347,30 +329,22 @@ export function PatientModulesTab({
             <div className="psycho-card-picker">
               <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.crisis_msg_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.crisis_msg_placeholder')}
-                    value={crisis.config.practitionerMessage}
-                    onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.crisis_commitment_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.crisis_commitment_placeholder')}
-                    value={crisis.config.commitmentPhrase}
-                    onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
+                <InputField
+                  label={t('patient.crisis_msg_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.crisis_msg_placeholder')}
+                  value={crisis.config.practitionerMessage}
+                  onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
+                />
+                <InputField
+                  label={t('patient.crisis_commitment_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.crisis_commitment_placeholder')}
+                  value={crisis.config.commitmentPhrase}
+                  onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
+                />
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
                     {t('patient.crisis_cards_title')}
@@ -381,42 +355,39 @@ export function PatientModulesTab({
                       <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
                       <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
                       <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        category="danger"
+                        size="xs"
                         onClick={() => crisis.removeCopingCard(card.id)}
-                        style={{ alignSelf: 'flex-end', fontSize: 11, color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        style={CRISIS_CARD_DELETE_STYLE}
                       >
                         {t('patient.crisis_card_delete')}
-                      </button>
+                      </Button>
                     </div>
                   ))}
                   {crisis.config.copingCards.length < 4 && (
                     crisis.cardDraft ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
-                        <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_thought_label')} <span style={{ color: '#DC2626' }}>*</span>
-                          </label>
-                          <textarea
-                            rows={2}
-                            placeholder={t('patient.crisis_card_thought_placeholder')}
-                            value={crisis.cardDraft.thought}
-                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                          />
-                        </div>
-                        <div>
-                          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                            {t('patient.crisis_card_response_label')} <span style={{ color: '#DC2626' }}>*</span>
-                          </label>
-                          <textarea
-                            rows={2}
-                            placeholder={t('patient.crisis_card_response_placeholder')}
-                            value={crisis.cardDraft.response}
-                            onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
-                            style={{ width: '100%', padding: '6px 8px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                          />
-                        </div>
+                        <InputField
+                          label={t('patient.crisis_card_thought_label')}
+                          multiline
+                          required
+                          rows={2}
+                          placeholder={t('patient.crisis_card_thought_placeholder')}
+                          value={crisis.cardDraft.thought}
+                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
+                        />
+                        <InputField
+                          label={t('patient.crisis_card_response_label')}
+                          multiline
+                          required
+                          rows={2}
+                          placeholder={t('patient.crisis_card_response_placeholder')}
+                          value={crisis.cardDraft.response}
+                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
+                        />
                         <div style={{ display: 'flex', gap: 8 }}>
                           <Button
                             size="sm"
@@ -518,30 +489,23 @@ export function PatientModulesTab({
                   : t('patient.rim_write_edit')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.rim_alt_label')} <span style={{ color: '#DC2626' }}>*</span>
-                  </label>
-                  <textarea
-                    rows={5}
-                    placeholder={t('patient.rim_alt_placeholder')}
-                    value={rim.alternative}
-                    onChange={e => rim.setAlternative(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>
-                    {t('patient.rim_orig_label')}
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder={t('patient.rim_orig_placeholder')}
-                    value={rim.original}
-                    onChange={e => rim.setOriginal(e.target.value)}
-                    style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
-                  />
-                </div>
+                <InputField
+                  label={t('patient.rim_alt_label')}
+                  multiline
+                  required
+                  rows={5}
+                  placeholder={t('patient.rim_alt_placeholder')}
+                  value={rim.alternative}
+                  onChange={e => rim.setAlternative(e.target.value)}
+                />
+                <InputField
+                  label={t('patient.rim_orig_label')}
+                  multiline
+                  rows={3}
+                  placeholder={t('patient.rim_orig_placeholder')}
+                  value={rim.original}
+                  onChange={e => rim.setOriginal(e.target.value)}
+                />
               </div>
               {rim.error && <p className="psycho-card-picker__error">{rim.error}</p>}
               <div className="psycho-card-picker__actions">
@@ -734,6 +698,11 @@ export function PatientModulesTab({
       matchesAllTokens(`${t(`modules.${m.id}.label`)} ${t(`modules.${m.id}.description`)}`, searchTokens)),
   )
 
+  const addModuleSearch = useMemo(
+    () => ({ value: searchQuery, onChange: setSearchQuery, placeholder: t('modules.search_placeholder') }),
+    [searchQuery, t],
+  )
+
   return (
     <PatientViewProvider patientId={patientId}>
       <section className="therapeutic-wardrobe">
@@ -816,13 +785,9 @@ export function PatientModulesTab({
                 onReset={resetFilters}
                 resultCount={candidateModules.length}
                 totalCount={activatableModules.length}
+                search={addModuleSearch}
               />
             )}
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={t('modules.search_placeholder')}
-            />
             {candidateModules.length > 0 ? (
               <div className="category-modules-grid">
                 {candidateModules.map(renderModuleCard)}

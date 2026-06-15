@@ -1,3 +1,4 @@
+import { createRef } from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { InputField } from './InputField'
@@ -38,5 +39,58 @@ describe('InputField', () => {
   it("utilise l'id fourni en prop", () => {
     render(<InputField label="Email" id="custom-id" />)
     expect(document.getElementById('custom-id')).toBeInTheDocument()
+  })
+
+  it('rend un <input> par défaut (non multiline)', () => {
+    render(<InputField label="Nom" />)
+    expect(screen.getByRole('textbox').tagName).toBe('INPUT')
+  })
+
+  it('rend un <textarea> quand multiline', () => {
+    render(<InputField label="Note" multiline />)
+    expect(screen.getByRole('textbox').tagName).toBe('TEXTAREA')
+  })
+
+  it('forwarde les attributs textarea (rows, maxLength) en multiline', () => {
+    render(<InputField label="Note" multiline rows={4} maxLength={500} />)
+    const textarea = screen.getByRole('textbox')
+    expect(textarea).toHaveAttribute('rows', '4')
+    expect(textarea).toHaveAttribute('maxlength', '500')
+  })
+
+  it('associe le label au textarea et accepte la saisie en multiline', async () => {
+    render(<InputField label="Note" multiline />)
+    const textarea = screen.getByLabelText('Note')
+    await userEvent.type(textarea, 'Bonjour')
+    expect(textarea).toHaveValue('Bonjour')
+  })
+
+  it("applique la classe d'erreur sur le textarea en multiline", () => {
+    render(<InputField label="Note" multiline error="Erreur" />)
+    expect(screen.getByRole('textbox')).toHaveClass('input-field__input--error')
+  })
+
+  it('ne rend aucun <label> quand label est absent', () => {
+    const { container } = render(<InputField aria-label="Recherche" />)
+    expect(container.querySelector('label')).toBeNull()
+    expect(screen.getByLabelText('Recherche')).toBeInTheDocument()
+  })
+
+  it('ne rend aucun <label> quand label est absent en multiline', () => {
+    const { container } = render(<InputField multiline aria-label="Note" />)
+    expect(container.querySelector('label')).toBeNull()
+    expect(screen.getByLabelText('Note').tagName).toBe('TEXTAREA')
+  })
+
+  it('transmet la ref au <input> sous-jacent', () => {
+    const ref = createRef<HTMLInputElement>()
+    render(<InputField label="Nom" ref={ref} />)
+    expect(ref.current).toBeInstanceOf(HTMLInputElement)
+  })
+
+  it('transmet la ref au <textarea> sous-jacent en multiline', () => {
+    const ref = createRef<HTMLTextAreaElement>()
+    render(<InputField label="Note" multiline ref={ref} />)
+    expect(ref.current).toBeInstanceOf(HTMLTextAreaElement)
   })
 })

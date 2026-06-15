@@ -123,9 +123,9 @@
       "add_item": "Añadir un elemento",
       "item_placeholder": "Introduce un elemento...",
       "delete_item_title": "Eliminar este elemento",
-      "emergency_samu": "112 — Emergencia",
+      "emergency_samu": "112, Emergencia",
       "emergency_samu_label": "Emergencia médica",
-      "emergency_3114": "024 — Prevención",
+      "emergency_3114": "024, Prevención",
       "emergency_3114_label": "Línea de atención",
       "emergency_samu_a11y": "Llamar al 112, emergencia médica",
       "emergency_3114_a11y": "Llamar al 024, línea de atención a conducta suicida"
@@ -164,8 +164,8 @@
       "monthly_button": "Vista mensual",
       "list_header": "Las últimas 14 noches",
       "incomplete": "Registro incompleto",
-      "empty_day": "Sin registrar — toca para añadir",
-      "quality_not_set": "– sin registrar",
+      "empty_day": "Sin registrar, toca para añadir",
+      "quality_not_set": "- sin registrar",
       "save": "Guardar"
     },
     "diet_weight_psycho": {
@@ -178,7 +178,7 @@
     },
     "mood_tracker": {
       "label": "Termómetro del estado de ánimo",
-      "description": "Seguimiento diario del estado de ánimo, energía y ansiedad (1–10)",
+      "description": "Seguimiento diario del estado de ánimo, energía y ansiedad (1 à 10)",
       "title": "Termómetro del estado de ánimo",
       "intro": "Registra tu estado de ánimo, energía y ansiedad de hoy.",
       "tab_today": "Hoy",
@@ -186,7 +186,7 @@
       "notes_label": "Notas libres (opcional)",
       "notes_placeholder": "Contexto, evento del día, observación...",
       "history_title": "Últimos 30 días",
-      "already_saved": "Registro de hoy ya guardado — puedes modificarlo.",
+      "already_saved": "Registro de hoy ya guardado, puedes modificarlo.",
       "history_empty": "El historial aparecerá cuando tengas al menos 2 registros.",
       "delete_entry_title": "¿Eliminar este registro?",
       "saved_message": "El registro de hoy ha sido guardado.",
@@ -258,9 +258,9 @@
       "step_taste": "1 cosa que puedes saborear"
     },
     "rim": {
-      "label": "RIM – Imaginería mental",
+      "label": "RIM - Imaginería mental",
       "description": "Reprocesamiento por imaginería",
-      "title": "RIM – Imaginería mental",
+      "title": "RIM - Imaginería mental",
       "intro": "Reprocesamiento mediante imaginería mental."
     },
     "fear_thermometer": {
@@ -295,23 +295,23 @@
       "coherence_cardiaque_name": "Coherencia cardiaca",
       "coherence_cardiaque_subtitle": "6 respiraciones por minuto",
       "coherence_cardiaque_description": "Regula el sistema nervioso autónomo sincronizando la respiración con la variabilidad de la frecuencia cardiaca.",
-      "coherence_cardiaque_evidence": "Grado B — Lehrer & Gevirtz (2014)",
+      "coherence_cardiaque_evidence": "Grado B, Lehrer & Gevirtz (2014)",
       "diaphragmatique_name": "Respiración diafragmática",
       "diaphragmatique_subtitle": "Respiración abdominal lenta",
       "diaphragmatique_description": "Activa el sistema parasimpático. Base de la mayoría de las terapias conductuales.",
-      "diaphragmatique_evidence": "Grado B — Conrad et al. (2007)",
+      "diaphragmatique_evidence": "Grado B, Conrad et al. (2007)",
       "carree_name": "Respiración cuadrada",
-      "carree_subtitle": "Box Breathing — 4-4-4-4",
+      "carree_subtitle": "Box Breathing, 4-4-4-4",
       "carree_description": "Técnica simétrica para el manejo del estrés agudo y síntomas de PTSD.",
-      "carree_evidence": "Grado C — VA/DoD PTSD Guidelines",
+      "carree_evidence": "Grado C, VA/DoD PTSD Guidelines",
       "quatre_sept_huit_name": "Técnica 4-7-8",
       "quatre_sept_huit_subtitle": "Para dormir y ansiedad aguda",
       "quatre_sept_huit_description": "Inspiración corta, retención prolongada, espiración larga. Eficaz para conciliar el sueño.",
-      "quatre_sept_huit_evidence": "Grado C — consenso internacional",
+      "quatre_sept_huit_evidence": "Grado C, consenso internacional",
       "pleine_conscience_name": "Respiración consciente",
-      "pleine_conscience_subtitle": "Mindfulness — MBSR / MBCT",
+      "pleine_conscience_subtitle": "Mindfulness, MBSR / MBCT",
       "pleine_conscience_description": "Observar la respiración sin controlarla. Anclaje en el momento presente, reducción de la rumia.",
-      "pleine_conscience_evidence": "Grado A — NICE CG90, MBCT Segal et al. (2002)"
+      "pleine_conscience_evidence": "Grado A, NICE CG90, MBCT Segal et al. (2002)"
     },
     "cognitive_saturation": {
       "label": "Saturación cognitiva",

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { Bell, BellOff, Loader, X } from 'lucide-react'
+import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
+import { InputField } from '../../ui/InputField'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import {
   getRoutinesForPatientModule,
@@ -149,9 +150,10 @@ export function NotificationRoutineModal({
               />
 
               <div className="nr-form__label">{t('notifications.note_label')}</div>
-              <textarea
-                className="nr-form__note"
+              <InputField
+                multiline
                 ref={noteRef}
+                aria-label={t('notifications.note_label')}
                 placeholder={t('notifications.note_placeholder')}
                 rows={2}
               />
@@ -174,13 +176,16 @@ export function NotificationRoutineModal({
               </div>
             </div>
           ) : (
-            <button
+            <Button
               type="button"
-              className="nr-add-btn"
+              variant="outline"
+              size="sm"
+              fullWidth
               onClick={() => setShowForm(true)}
+              icon={<Plus size={15} />}
             >
-              + {t('notifications.add_routine')}
-            </button>
+              {t('notifications.add_routine')}
+            </Button>
           )}
         </>
       )}

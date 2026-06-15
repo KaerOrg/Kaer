@@ -51,18 +51,22 @@ const TOPICS: PsyEduTopic[] = [
   {
     id: 'topic-1',
     module_key: 'craving_journal',
+    theme_id: null,
     topic_key: 'what_is_craving',
     icon_name: 'Brain',
     sort_order: 0,
     is_active: true,
+    reviewed_at: null,
   },
   {
     id: 'topic-2',
     module_key: 'craving_journal',
+    theme_id: null,
     topic_key: 'urge_surfing',
     icon_name: 'Waves',
     sort_order: 1,
     is_active: true,
+    reviewed_at: null,
   },
 ]
 

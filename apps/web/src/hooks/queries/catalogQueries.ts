@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import { fetchModuleCategories, fetchComingSoonModuleIds } from '../../services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '../../services/practitionerSettingsService'
-import { fetchPsychoCards, fetchModulePreviewKind } from '../../services/moduleService'
+import { fetchModulePreviewKind } from '../../services/moduleService'
 import type { ModuleType } from '../../lib/database.types'
 
 // Factories `queryOptions` du catalogue de modules + réglages praticien.
@@ -19,13 +19,6 @@ export const catalogQueries = {
     queryOptions({
       queryKey: ['catalog', 'comingSoonIds'],
       queryFn: fetchComingSoonModuleIds,
-      staleTime: 10 * 60_000,
-    }),
-
-  psychoCards: () =>
-    queryOptions({
-      queryKey: ['catalog', 'psychoCards'],
-      queryFn: fetchPsychoCards,
       staleTime: 10 * 60_000,
     }),
 

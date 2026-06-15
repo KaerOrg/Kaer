@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../ui/Button'
+import { InputField } from '../../ui/InputField'
 import type { CaseloadNote } from '../../../lib/caseload.types'
 
 const DATE_OPTS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
@@ -91,9 +92,9 @@ export function ObservationBlock({ entryId, onLoadNotes, onAddNote }: Observatio
       ) : null}
 
       <form className="observation__add" onSubmit={handleAdd}>
-        <textarea
+        <InputField
+          multiline
           ref={bodyRef}
-          className="observation__input"
           rows={2}
           placeholder={t('file_active.observation.add_placeholder')}
           aria-label={t('file_active.observation.add_label')}

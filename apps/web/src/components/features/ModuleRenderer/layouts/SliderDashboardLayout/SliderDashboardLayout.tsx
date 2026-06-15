@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { Info, Plus, Bell, Trash2, Flame } from 'lucide-react'
 import type { ContentField } from '../../../../../services/moduleService'
 import { FieldText } from '../../fields'
+import { Button } from '../../../../ui/Button'
 import { Tabs } from '../../../../ui/Tabs'
 import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
 import { SegmentedControl } from '../../../../ui/SegmentedControl'
@@ -142,7 +143,7 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
             </div>
           ) : null}
 
-          <button type="button" className="mt__save-btn" disabled>{t('common.save')}</button>
+          <Button type="button" variant="primary" fullWidth disabled>{t('common.save')}</Button>
 
           <div className="mt-reminder">
             <span className="mt-reminder__title">{t(`modules.${moduleId}.reminder_section`)}</span>
@@ -151,9 +152,9 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
               <span className="mt-reminder__time">
                 {t(`modules.${moduleId}.reminder_active`).replace('{{time}}', t(`modules.${moduleId}.reminder_preview_time`))}
               </span>
-              <button type="button" className="mt-reminder__btn" disabled>
+              <Button type="button" variant="secondary" size="sm" disabled>
                 {t(`modules.${moduleId}.reminder_adjust`)}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -181,9 +182,9 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
           <div className="mt-markers">
             <div className="mt-markers__header">
               <span className="mt-markers__title">{t(`modules.${moduleId}.markers_title`)}</span>
-              <button type="button" className="mt-markers__add" disabled>
-                <Plus size={13} /> {t(`modules.${moduleId}.markers_add`)}
-              </button>
+              <Button type="button" variant="outline" size="xs" disabled icon={<Plus size={13} />}>
+                {t(`modules.${moduleId}.markers_add`)}
+              </Button>
             </div>
             <div className="mt-markers__list">
               {markers

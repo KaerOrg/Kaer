@@ -189,7 +189,8 @@
   flex-shrink: 0;
 }
 
-.name-cell__toggle:hover { color: var(--color-primary); }
+.name-cell__toggle:hover,
+.name-cell__toggle--active { color: var(--color-primary); }
 
 .name-cell__dob {
   flex-shrink: 0;
@@ -421,7 +422,8 @@
 .action-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
 }
@@ -437,7 +439,7 @@
 }
 
 .action-item__label {
-  flex: 1;
+  flex: 1 1 140px;
   min-width: 0;
   border: 1px solid transparent;
   background: transparent;
@@ -459,8 +461,7 @@
   color: var(--color-text-muted);
 }
 
-.action-item__due,
-.action-item__time {
+.action-item__due {
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   border-radius: var(--radius-sm);
@@ -469,8 +470,6 @@
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
-
-.action-item__time { width: 96px; }
 
 .action-item__due-label {
   font-size: var(--font-size-caption);
@@ -490,14 +489,15 @@
 .action-list__add {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-sm);
   margin-top: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-top: 1px dashed var(--color-border);
 }
 
 .action-list__add-label {
-  flex: 1;
+  flex: 1 1 140px;
   min-width: 0;
   border: none;
   background: transparent;
@@ -517,7 +517,7 @@
   color: var(--color-text-muted);
 }
 
-/* ---- Panneau dépliable : sections en cartes teintées (couleurs douces) ---- */
+/* ---- Panneau de détail (file active) : onglets verticaux + contenu ---- */
 .caseload-detail {
   display: flex;
   flex-direction: column;
@@ -525,15 +525,29 @@
   max-width: 820px;
 }
 
-.caseload-detail__section {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+/* Variante onglets verticaux : rail d'icônes à gauche, panneau à droite.
+   Le Drawer est rendu en `noPadding` : on gère le padding ici, sans bord gauche
+   (le rail d'onglets affleure le bord du panneau). */
+.caseload-detail--tabbed {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 0;
 }
 
-.caseload-detail__title {
+/* Le rail ne fait que la hauteur de ses onglets (pas de colonne vide en dessous). */
+.caseload-detail--tabbed .tabs--vertical {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.caseload-detail__panel {
+  flex: 1;
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.caseload-detail__panel-title {
   font-size: var(--font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
@@ -541,24 +555,6 @@
   color: var(--color-text-muted);
   margin: 0 0 var(--spacing-sm);
 }
-
-.caseload-detail__section--actions {
-  border-left-color: #3B82F6;
-  background: #EFF6FF;
-}
-.caseload-detail__section--actions .caseload-detail__title { color: #2563EB; }
-
-.caseload-detail__section--waits {
-  border-left-color: #8B5CF6;
-  background: #F5F3FF;
-}
-.caseload-detail__section--waits .caseload-detail__title { color: #6D28D9; }
-
-.caseload-detail__section--observation {
-  border-left-color: #22C55E;
-  background: #F0FDF4;
-}
-.caseload-detail__section--observation .caseload-detail__title { color: #16A34A; }
 
 /* ---- En attente de retour : résumé (colonne) ---- */
 .wait-summary {
@@ -587,7 +583,8 @@
 .wait-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
 }
@@ -596,7 +593,7 @@
 
 .wait-item__label,
 .wait-list__add-label {
-  flex: 1;
+  flex: 1 1 140px;
   min-width: 0;
   border: 1px solid transparent;
   background: transparent;
@@ -636,7 +633,8 @@
 .wait-list__add {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs) var(--spacing-sm);
   margin-top: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   border-top: 1px dashed var(--color-border);
@@ -710,20 +708,8 @@
   gap: var(--spacing-sm);
 }
 
-.observation__input {
+/* Le champ multiligne (InputField) occupe l'espace restant face au bouton. */
+.observation__add .input-field {
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-sm);
-  font-size: var(--font-size-body);
-  color: var(--color-text);
-  font-family: inherit;
-  resize: vertical;
-}
-
-.observation__input:focus {
-  outline: none;
-  border-color: var(--color-primary);
 }

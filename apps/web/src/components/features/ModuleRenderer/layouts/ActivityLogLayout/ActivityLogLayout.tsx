@@ -1,4 +1,5 @@
 import { Calendar, Check, Circle, ListChecks, Plus } from 'lucide-react'
+import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -150,10 +151,9 @@ export function ActivityLogLayout({ fields, t }: Props) {
         )}
 
         {saveLabel && (
-          <button type="button" className="al-save-btn" disabled>
-            <Check size={16} />
+          <Button type="button" variant="primary" fullWidth disabled icon={<Check size={16} />}>
             {saveLabel}
-          </button>
+          </Button>
         )}
       </div>
     </div>

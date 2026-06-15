@@ -10,7 +10,6 @@ import { Card } from '../../components/ui/Card'
 import type { ModuleType } from '../../lib/database.types'
 import { catalogQueries, useSaveEnabledModules } from '../../hooks/queries'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
-import { SearchInput } from '../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../components/features/ModuleTagChips'
 import { filterCategoriesByTags } from '../../lib/moduleFilter'
@@ -74,6 +73,11 @@ export function ModuleCatalogPage() {
   }, [categories, taxonomy, activeFilters, searchQuery, t])
 
   const resultCount = useMemo(() => filteredCategories.reduce((n, c) => n + c.modules.length, 0), [filteredCategories])
+
+  const catalogSearch = useMemo(
+    () => ({ value: searchQuery, onChange: setSearchQuery, placeholder: t('modules.search_placeholder') }),
+    [searchQuery, t],
+  )
 
   const toggleModule = useCallback((moduleType: ModuleType) => {
     setSaveSuccess(false)
@@ -147,16 +151,6 @@ export function ModuleCatalogPage() {
           </div>
         )}
 
-        {!loading && (
-          <div className="catalog-page__search">
-            <SearchInput
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder={t('modules.search_placeholder')}
-            />
-          </div>
-        )}
-
         {!loading && taxonomy.dimensions.length > 0 && (
           <ModuleFilterBar
             taxonomy={taxonomy}
@@ -165,6 +159,7 @@ export function ModuleCatalogPage() {
             onReset={resetFilters}
             resultCount={resultCount}
             totalCount={totalCount}
+            search={catalogSearch}
           />
         )}
 

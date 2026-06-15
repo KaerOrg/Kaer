@@ -16,7 +16,6 @@ export interface ActionItemProps {
 function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }: ActionItemProps) {
   const { t } = useTranslation()
   const due = describeDue(action.due_date, today)
-  const time = action.due_time ? action.due_time.slice(0, 5) : ''
 
   const handleLabelBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>) => {
@@ -38,14 +37,6 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
     [action.id, action.due_date, onPatch]
   )
 
-  const handleTimeBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const value = e.target.value || null
-      if ((time || null) !== value) onPatch(action.id, { due_time: value })
-    },
-    [action.id, time, onPatch]
-  )
-
   const handleToggle = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => onToggleDone(action.id, e.target.checked),
     [action.id, onToggleDone]
@@ -62,7 +53,7 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
     due.kind === 'none'
       ? ''
       : t(`file_active.due.${due.kind}`, { count: due.kind === 'today' ? undefined : (due as { days: number }).days })
-  const dueLabel = dueText ? `${dueText}${time ? ` ${time}` : ''}` : ''
+  const dueLabel = dueText
 
   return (
     <div className={`action-item ${action.is_done ? 'action-item--done' : ''}`}>
@@ -87,14 +78,6 @@ function ActionItemComponent({ action, today, onToggleDone, onPatch, onDelete }:
         defaultValue={action.due_date ?? ''}
         onBlur={handleDueBlur}
         aria-label={t('file_active.action.due_label')}
-      />
-      <input
-        key={`time-${action.due_time ?? ''}`}
-        type="time"
-        className="action-item__time"
-        defaultValue={time}
-        onBlur={handleTimeBlur}
-        aria-label={t('file_active.action.time_label')}
       />
       {dueLabel ? <span className={`action-item__due-label action-item__due-label--${due.kind}`}>{dueLabel}</span> : null}
       <Button

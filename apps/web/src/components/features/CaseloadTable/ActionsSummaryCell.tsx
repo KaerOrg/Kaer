@@ -27,7 +27,6 @@ function ActionsSummaryCellComponent({ actions, today }: ActionsSummaryCellProps
       : t(`file_active.due.${topDue.kind}`, {
           count: topDue.kind === 'today' ? undefined : (topDue as { days: number }).days,
         })
-  const topTime = topAction?.due_time ? topAction.due_time.slice(0, 5) : ''
 
   return (
     <div className="actions-summary">
@@ -36,7 +35,7 @@ function ActionsSummaryCellComponent({ actions, today }: ActionsSummaryCellProps
           <span className="actions-summary__label">{topAction.label}</span>
           {topDueLabel ? (
             <span className={`actions-summary__due actions-summary__due--${topDue.kind}`}>
-              {topDueLabel}{topTime ? ` ${topTime}` : ''}
+              {topDueLabel}
             </span>
           ) : null}
         </span>

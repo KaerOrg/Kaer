@@ -1,7 +1,7 @@
 # Armoire thérapeutique — Taxonomie & filtres des modules
 
 > **Statut : implémentée** (branche `feat/improve-module-organization`, PR #46).
-> Décrit le *quoi* et le *pourquoi*. Public : praticien novice en informatique —
+> Décrit le *quoi* et le *pourquoi*. Public : praticien novice en informatique,
 > le document évite le jargon technique.
 
 ## 1. En une phrase

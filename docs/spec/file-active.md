@@ -59,12 +59,15 @@ Au survol : **✓ Fait · ⏰ Reporter (+1j / +1sem / date) · ✎ Note**.
 
 Le tableau complet, triable et filtrable. C'est ici qu'on saisit et qu'on a la vue large.
 Saisie **au clic dans la cellule** (édition inline, enregistrement automatique).
-**Une ligne par patient** : un clic sur le **nom du patient** (ou son chevron) **déplie** le détail ;
+**Une ligne par patient** : un clic sur le **nom du patient** (ou son chevron) **ouvre le détail dans
+un panneau latéral** (composant `Drawer` du design system) coulissant à droite, sans masquer la table ;
 la cellule « Actions » montre, en lecture seule, l'action la plus urgente + un badge « +N ». Le crayon
 à côté du nom reste réservé à l'édition du nom ; la **date de naissance** du patient lié s'affiche en
-petit à côté du nom. Le panneau déplié a 3 sections — **Actions** (cocher / ajouter / supprimer, chacune
-avec date + heure optionnelle), **En attente de retour** (étiquette + date de relance optionnelle),
-**Observations** (la plus récente + historique daté). Les **« Soins en cours »** et le résumé
+petit à côté du nom. Le panneau latéral (redimensionnable, largeur mémorisée) organise le détail en
+**3 onglets verticaux (icône seule)** — **Actions** (cocher / ajouter / supprimer, chacune avec échéance
+à la journée), **En attente de retour** (étiquette + date de relance optionnelle), **Observations**
+(la plus récente + historique daté) ; le libellé de l'onglet actif s'affiche en tête du panneau, et
+l'**⭐ Important** est épinglé à côté du nom dans l'en-tête. Les **« Soins en cours »** et le résumé
 **« En attente de retour »** s'affichent dans la ligne ; l'**⭐ Important** épingle le patient en haut.
 La liaison patient (lié / invité / libre) reste **automatique** (pas d'encart dédié) ; seuls les
 **modules débloqués** du patient lié remontent en chips dans « Soins en cours ».
@@ -142,7 +145,7 @@ caseload_actions (
   practitioner_id uuid FK practitioners,
   label           text,                          -- la tâche à faire
   due_date        date NULL,                     -- échéance propre à CETTE action (pilote la couleur)
-  due_time        time NULL,                     -- heure optionnelle (confort d'affichage, ne déclenche rien)
+  due_time        time NULL,                     -- colonne héritée, non exposée dans l'UI (échéance à la journée)
   is_urgent       boolean DEFAULT false,         -- urgence FORCÉE à la main (ex. signalement) → critique
   is_done         boolean DEFAULT false,         -- coche « fait »
   done_at         timestamptz NULL,
@@ -178,7 +181,7 @@ caseload_waits (
 
 ### Table `caseload_notes` (Observations — journal daté, append-only)
 
-Voir plus bas. L'**Observation** d'un dossier est rendue dans le **panneau dépliable** : la note la
+Voir plus bas. L'**Observation** d'un dossier est rendue dans le **panneau latéral** : la note la
 plus récente est l'observation actuelle, l'historique daté est accessible en un clic, rien n'est
 jamais écrasé.
 

@@ -17,10 +17,16 @@ centralisée, gardée, et auditée.
   Guillaume Zarb et Olivier Teil. Aucune UI d'attribution (volontaire).
 - **Page** `/admin/users` : table de TOUS les utilisateurs — **patients ET médecins**,
   chacun avec un **badge de type** (« Patient » / « Médecin », + « Admin » pour un
-  médecin admin). Trois filtres composables : recherche nom/email, type (segmenté),
-  et **par praticien** (liste → patients rattachés à ce médecin). Chaque ligne
-  dépliable expose : pour un patient le bloc `PatientDataRights` (export / effacement) ;
-  pour un médecin un panneau lecture seule (rôle). Aucune action RGPD sur un médecin.
+  médecin admin). Filtres composables : recherche nom/email, type (segmenté), et
+  **par praticien** (liste → patients rattachés à ce médecin) — ce dernier **n'apparaît
+  que lorsque le type « patient » est sélectionné**. Chaque ligne dépliable expose :
+  pour un patient le bloc `PatientDataRights` (export / effacement) ; pour un médecin un
+  panneau lecture seule (rôle). Aucune action RGPD sur un médecin.
+- **Filtres, tri et pagination côté serveur** : la liste n'est plus chargée en entier
+  puis filtrée en mémoire. Le RPC `admin_list_users` applique filtres + tri + pagination
+  (page de **150**) et renvoie `total_count`. Tri au clic sur n'importe quel en-tête
+  (défaut `created_at desc`). Le filtre « par praticien » a sa propre source de noms
+  (`admin_list_practitioner_names`), le front ne disposant plus de tous les users.
 - **Un patient ne peut jamais être admin** : `is_admin` vit sur `practitioners` ;
   un patient n'y a pas de ligne.
 
@@ -34,7 +40,7 @@ centralisée, gardée, et auditée.
 | Couche | Mécanisme |
 |---|---|
 | **Base — source de vérité** | `fn_is_admin()` (`SECURITY DEFINER`, `stable`) lit `is_admin` via `auth.uid()`. Jamais un flag client. |
-| **Base — barrière** | RPC `export_patient_data` / `erase_patient_data` gardés `fn_is_admin() OR auth.uid() = patient_id` ; `admin_list_users()` gardé `fn_is_admin()` ; edge function `delete-patient-account` re-vérifie admin OU self via le JWT. |
+| **Base — barrière** | RPC `export_patient_data` / `erase_patient_data` gardés `fn_is_admin() OR auth.uid() = patient_id` ; `admin_list_users(…)` et `admin_list_practitioner_names()` gardés `fn_is_admin()` ; edge function `delete-patient-account` re-vérifie admin OU self via le JWT. **Tri whitelisté** dans le RPC (jamais la valeur client brute dans l'`ORDER BY`) ; recherche via `ILIKE` paramétré. |
 | **Base — anti-escalade** | trigger `trg_guard_is_admin_write` : toute tentative de modifier `is_admin` depuis un appel authentifié (`auth.uid()` non-null) est rejetée. Seul le serveur (seed / service_role) l'attribue. |
 | **Front — UX** | route `/admin/users` montée seulement si `practitioner.is_admin` (App.tsx) ; lien de nav conditionnel (MainNav). Un non-admin tombe sur le catch-all → `/`. |
 
@@ -47,14 +53,19 @@ centralisée, gardée, et auditée.
 is_admin boolean not null default false   -- lecture seule côté client (trigger)
 
 -- fn_is_admin() : appelant admin ? (ne consulte que practitioners)
--- admin_list_users() : returns table(user_id, kind ('patient'|'practitioner'),
---                       email, display_name, created_at, practitioner_names[], is_admin)
+-- admin_list_users(p_kind, p_practitioner, p_search, p_sort, p_dir, p_limit, p_offset)
+--   returns table(user_id, kind ('patient'|'practitioner'), email, display_name,
+--                 created_at, practitioner_names[], is_admin, total_count bigint)
 --   patients : practitioner_names = médecins liés, is_admin = false
 --   médecins : practitioner_names = {}, is_admin = rôle
+--   total_count = count(*) over() sur le jeu FILTRÉ (avant limit/offset) → pagination
+--   tri dynamique whitelisté (p_sort ∈ display_name|email|kind|practitioners|created_at)
+--   'practitioners' trie sur le 1er médecin (array_agg trié alphabétiquement)
+-- admin_list_practitioner_names() : distinct des noms de médecins (filtre praticien)
 -- trg_guard_is_admin_write : before update on practitioners
 ```
 
-`admin_list_users()` trace chaque appel (`log_data_access('read', 'patients', …)`).
+`admin_list_users(…)` trace chaque appel (`log_data_access('read', 'patients', …)`).
 
 ---
 
@@ -62,16 +73,19 @@ is_admin boolean not null default false   -- lecture seule côté client (trigge
 
 ```
 Admin → /admin/users
-  AdminUsersPage.load() → adminService.fetchAllUsers() → RPC admin_list_users()
+  AdminUsersTable : état {kind, praticien, recherche (debounce 300ms), tri, page}
+    → adminService.fetchUsers(params) → RPC admin_list_users(…) (filtres+tri+pagination)
+    → adminService.fetchPractitionerNames() → RPC admin_list_practitioner_names() (select)
     (base : fn_is_admin() sinon exception → ok:false → toast)
-  Table (DataTable) : badge type + filtres (recherche nom/email, type segmenté,
-                      par praticien → patients rattachés), client-side
+    react-query : queryKey = params (refetch ciblé) + placeholderData (page fluide)
+  Table (DataTable) : badge type ; en-têtes triables ; barre de pagination (150/page) ;
+    filtre praticien visible seulement si type = patient. Tout filtre/tri/page → serveur.
   Ligne dépliée → AdminUserDetail :
     patient → PatientDataRights(patientId, displayName, onErased)
       Export  → exportPatientData → RPC export_patient_data (téléchargement JSON)
       Effacer → confirmation (re-saisie du nom) → erasePatientData
                 → RPC erase_patient_data + Edge delete-patient-account
-                → onErased → retrait de la ligne (sans recharger la table)
+                → onErased → invalidation de la query → refetch de la page courante
     médecin → panneau lecture seule (rôle ; aucune action RGPD)
 ```
 
@@ -81,15 +95,17 @@ Admin → /admin/users
 
 | Fichier | Rôle |
 |---|---|
-| `apps/web/src/pages/AdminUsersPage/AdminUsersPage.tsx` | Orchestration (fetch, état, `onErased`). |
-| `…/AdminUsersTable.tsx` | Câble `DataTable` : badge type, 3 filtres, `renderDetail`. |
+| `apps/web/src/pages/AdminUsersPage/AdminUsersPage.tsx` | Coquille de page (Layout + titre + `AdminUsersTable`). |
+| `…/AdminUsersTable.tsx` | **Conteneur** : état filtres/tri/page, queries, câble `DataTable` (tri + pagination), `renderDetail`, refetch après effacement. |
 | `…/AdminUserDetail.tsx` | Panneau dépliable, branché sur `kind` (mémoïsé) : patient → `PatientDataRights` ; médecin → `Card` lecture seule. |
-| `apps/web/src/services/adminService.ts` | `fetchAllUsers()` + types `AdminUser` / `AdminUserKind`. |
+| `apps/web/src/services/adminService.ts` | `fetchUsers(params)` (page + total) + `fetchPractitionerNames()` + types `AdminUser` / `AdminUserKind` / `AdminUsersQuery` / `AdminUserSortColumn`. |
+| `apps/web/src/hooks/queries/adminQueries.ts` | `users(params)` (queryKey paramétré + `placeholderData`) + `practitionerNames()`. |
+| `apps/web/src/hooks/useDebouncedValue.ts` | Debounce générique de la recherche (300 ms). |
 | `apps/web/src/components/features/MainNav/MainNav.tsx` | Lien admin conditionnel. |
 
-Aucun nouveau primitive de design system : réutilise `DataTable`, `SearchInput`,
-`SegmentedControl`, `SelectField`, `StatusBadge`, `EmptyState`, `Card`, `Button`,
-`Modal`, `InputField`.
+Aucun nouveau primitive de design system : réutilise `DataTable` (étendu : tri +
+pagination contrôlés), `SearchInput`, `SegmentedControl`, `SelectField`, `StatusBadge`,
+`EmptyState`, `Card`, `Button`, `Modal`, `InputField`.
 
 ---
 
@@ -104,5 +120,11 @@ Aucun nouveau primitive de design system : réutilise `DataTable`, `SearchInput`
   l'UI était contournée, les RPC `export/erase` échoueraient (un médecin n'est pas
   un patient et l'appelant admin agit, mais la cible n'a pas de données patient).
 - **Filtre par praticien actif** → seuls les patients rattachés au médecin choisi
-  s'affichent ; les lignes médecins sont masquées.
-- **Effacement réussi** → ligne retirée localement, pas de rechargement complet.
+  s'affichent ; n'est proposé que pour le type « patient » (réinitialisé en quittant
+  ce type). Côté serveur : les lignes médecins n'ont pas de `practitioner_names` donc
+  sont naturellement exclues.
+- **Effacement réussi** → invalidation de la query → refetch de la page courante
+  (la suppression décale la pagination : refetch plus juste qu'une retouche locale).
+- **Changement de filtre / tri / recherche** → retour page 0.
+- **Tri injecté hors whitelist** → le RPC retombe sur `created_at` (défaut), aucune
+  injection possible dans l'`ORDER BY`.

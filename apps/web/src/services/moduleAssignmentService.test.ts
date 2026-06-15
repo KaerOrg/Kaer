@@ -11,7 +11,7 @@ import {
   unlockModule,
   unlockPsychoeducation,
   unlockRim,
-  updatePsychoeducationCards,
+  updatePsychoeducationTopics,
   updateRim,
 } from './moduleAssignmentService'
 
@@ -94,35 +94,35 @@ describe('moduleAssignmentService.revokeModule', () => {
 })
 
 describe('moduleAssignmentService.unlockPsychoeducation', () => {
-  it("insère un module psychoeducation avec les cartes (is_read: false, unlocked_at: now)", async () => {
+  it("insère un module psychoeducation avec les fiches (is_read: false, unlocked_at: now)", async () => {
     const insert = vi.fn().mockResolvedValue({ error: null })
     vi.mocked(supabase.from).mockReturnValue({ insert } as never)
 
-    const result = await unlockPsychoeducation('pat-1', 'p-1', ['c1', 'c2'])
+    const result = await unlockPsychoeducation('pat-1', 'p-1', ['t1', 't2'])
 
     expect(result).toEqual({ ok: true })
     const inserted = insert.mock.calls[0][0]
     expect(inserted.module_type).toBe('psychoeducation')
-    expect(inserted.config.unlocked_cards).toHaveLength(2)
-    expect(inserted.config.unlocked_cards[0]).toMatchObject({ card_id: 'c1', is_read: false })
-    expect(inserted.config.unlocked_cards[0].unlocked_at).toEqual(expect.any(String))
+    expect(inserted.config.unlocked_topics).toHaveLength(2)
+    expect(inserted.config.unlocked_topics[0]).toMatchObject({ topic_id: 't1', is_read: false })
+    expect(inserted.config.unlocked_topics[0].unlocked_at).toEqual(expect.any(String))
   })
 })
 
-describe('moduleAssignmentService.updatePsychoeducationCards', () => {
-  it("conserve l'ancien is_read pour les cartes déjà présentes", async () => {
-    const existingCards = [
-      { card_id: 'c1', is_read: true,  unlocked_at: '2026-01-01' },
-      { card_id: 'c2', is_read: false, unlocked_at: '2026-01-02' },
+describe('moduleAssignmentService.updatePsychoeducationTopics', () => {
+  it("conserve l'ancien is_read pour les fiches déjà présentes", async () => {
+    const existingTopics = [
+      { topic_id: 't1', is_read: true,  unlocked_at: '2026-01-01' },
+      { topic_id: 't2', is_read: false, unlocked_at: '2026-01-02' },
     ]
     const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
     vi.mocked(supabase.from).mockReturnValue({ update } as never)
 
-    await updatePsychoeducationCards('pm-1', existingCards, ['c1', 'c2', 'c3'])
+    await updatePsychoeducationTopics('pm-1', existingTopics, ['t1', 't2', 't3'])
 
-    const cards = update.mock.calls[0][0].config.unlocked_cards
-    expect(cards.find((c: { card_id: string }) => c.card_id === 'c1')).toEqual(existingCards[0])
-    expect(cards.find((c: { card_id: string }) => c.card_id === 'c3').is_read).toBe(false)
+    const topics = update.mock.calls[0][0].config.unlocked_topics
+    expect(topics.find((tpc: { topic_id: string }) => tpc.topic_id === 't1')).toEqual(existingTopics[0])
+    expect(topics.find((tpc: { topic_id: string }) => tpc.topic_id === 't3').is_read).toBe(false)
   })
 })
 

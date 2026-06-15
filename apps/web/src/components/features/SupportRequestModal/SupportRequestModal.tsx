@@ -101,18 +101,16 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
           ))}
         </SelectField>
         {needsDescription ? (
-          <label className="support-request__field">
-            <span className="support-request__label">{t('support.description_label')}</span>
-            <textarea
-              className="support-request__textarea"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder={t('support.description_placeholder')}
-              maxLength={SUPPORT_DESCRIPTION_MAX}
-              rows={4}
-              required
-            />
-          </label>
+          <InputField
+            label={t('support.description_label')}
+            multiline
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder={t('support.description_placeholder')}
+            maxLength={SUPPORT_DESCRIPTION_MAX}
+            rows={4}
+            required
+          />
         ) : null}
       </div>
     </Modal>
