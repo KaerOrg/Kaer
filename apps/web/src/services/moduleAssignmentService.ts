@@ -143,6 +143,43 @@ export async function updateTrackedEffects(
   return { ok: !error }
 }
 
+// ── Rythmes & régularité : ancres suivies par patient ───────────────────────
+// Config partagée patient↔praticien (patient_modules.config.anchors). Le praticien
+// choisit le sous-ensemble d'ancres (clés du catalogue : wake_time, first_meal,
+// main_activity, last_meal, bedtime, light) suivi pour ce patient. Absence de config
+// = toutes les ancres suivies (défaut géré côté rendu).
+
+/** Lit les clés d'ancres suivies pour ce module patient. `[]` si non configuré. */
+export async function fetchTrackedAnchors(moduleId: string): Promise<string[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const cfg = (data?.config ?? {}) as Record<string, unknown>
+  const anchors = cfg['anchors']
+  if (!Array.isArray(anchors)) return []
+  return anchors.filter((a): a is string => typeof a === 'string')
+}
+
+/** Écrit la sélection d'ancres suivies, en préservant le reste de la config. */
+export async function updateTrackedAnchors(
+  moduleId: string,
+  anchors: string[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, anchors },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
 export interface SideEffectsEvent {
   date: string   // YYYY-MM-DD
   label: string
