@@ -2,38 +2,12 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SleepPoint } from '../../../services/engagementService'
 import { ModuleChart } from './ModuleChart'
+import { barGeometry, formatMinutes, avg } from './sleepGrid'
 import './SleepDataPanel.css'
 
 interface Props {
   points: SleepPoint[]
   locale: string
-}
-
-// Axe noon→noon (12:00 j → 12:00 j+1) : positionne une nuit de façon contiguë.
-// Retourne la position [0,1] d'un horaire HH:MM sur cet axe.
-function noonAxisPos(time: string): number {
-  const [h, m] = time.split(':').map(Number)
-  let mins = h * 60 + m - 12 * 60
-  if (mins < 0) mins += 24 * 60
-  return mins / (24 * 60)
-}
-
-function barGeometry(start: string, end: string): { left: number; width: number } {
-  const a = noonAxisPos(start)
-  let b = noonAxisPos(end)
-  if (b < a) b += 1
-  return { left: a * 100, width: Math.min(1 - a, b - a) * 100 }
-}
-
-function formatMinutes(min: number): string {
-  const h = Math.floor(min / 60)
-  const m = min % 60
-  return `${h}h${String(m).padStart(2, '0')}`
-}
-
-function avg(values: number[]): number | null {
-  if (values.length === 0) return null
-  return Math.round(values.reduce((a, b) => a + b, 0) / values.length)
 }
 
 // Repères horaires de l'axe noon→noon (toutes les 6 h).
@@ -48,7 +22,7 @@ const AXIS_TICKS = [
 /**
  * Panneau « Données » de l'agenda du sommeil pour le praticien : grille agenda
  * (barres 24h par nuit), courbes d'efficacité et de temps de sommeil, stats
- * moyennes. Présentationnel — points calculés en amont (engagementService).
+ * moyennes. Présentationnel : points calculés en amont (engagementService).
  * Côté praticien, le codage visuel des métriques est autorisé (analyse soignant).
  */
 export function SleepDataPanel({ points, locale }: Props) {
@@ -88,19 +62,19 @@ export function SleepDataPanel({ points, locale }: Props) {
       {/* Stats moyennes ───────────────────────────────────────────────── */}
       <div className="sleep-stats">
         <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgEfficiency != null ? `${stats.avgEfficiency} %` : '–'}</span>
+          <span className="sleep-stats__value">{stats.avgEfficiency != null ? `${stats.avgEfficiency} %` : '-'}</span>
           <span className="sleep-stats__label">{t('evolution.sleep_avg_efficiency')}</span>
         </div>
         <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgSleep != null ? formatMinutes(stats.avgSleep) : '–'}</span>
+          <span className="sleep-stats__value">{stats.avgSleep != null ? formatMinutes(stats.avgSleep) : '-'}</span>
           <span className="sleep-stats__label">{t('evolution.sleep_avg_duration')}</span>
         </div>
         <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgOnset != null ? formatMinutes(stats.avgOnset) : '–'}</span>
+          <span className="sleep-stats__value">{stats.avgOnset != null ? formatMinutes(stats.avgOnset) : '-'}</span>
           <span className="sleep-stats__label">{t('evolution.sleep_avg_onset')}</span>
         </div>
         <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgWaso != null ? formatMinutes(stats.avgWaso) : '–'}</span>
+          <span className="sleep-stats__value">{stats.avgWaso != null ? formatMinutes(stats.avgWaso) : '-'}</span>
           <span className="sleep-stats__label">{t('evolution.sleep_avg_waso')}</span>
         </div>
         <div className="sleep-stats__item">

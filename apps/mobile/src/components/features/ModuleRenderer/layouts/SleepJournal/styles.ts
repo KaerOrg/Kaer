@@ -53,8 +53,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  navBtn:            { padding: spacing.xs },
-  navBtnDisabled:    { opacity: 0.3 },
   monthTitle: {
     flex: 1, fontSize: 17, fontWeight: '700',
     color: colors.text, textAlign: 'center', textTransform: 'capitalize',
@@ -114,7 +112,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  backBtn:           { padding: spacing.xs },
   entryHeaderTitle:  { flex: 1, gap: 2 },
   entryContent:      { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   dateLabel: {
@@ -135,18 +132,6 @@ export const styles = StyleSheet.create({
   divider:           { height: 1, backgroundColor: colors.border },
   timeFieldGroup:    { gap: spacing.xs },
   fieldLabel:        { fontSize: 14, fontWeight: '600', color: colors.text },
-  timeBtn: {
-    backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border,
-    borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 4,
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-  },
-  timeValue:         { fontSize: 22, fontWeight: '700', color: colors.primary },
-  timeHint:          { fontSize: 13, color: colors.textMuted, marginLeft: spacing.xs },
-  confirmBtn: {
-    backgroundColor: colors.primaryLight, borderRadius: radius.md,
-    padding: spacing.sm, alignItems: 'center', marginTop: spacing.xs,
-  },
-  confirmBtnText:    { color: colors.primary, fontWeight: '600' },
   minutesRow:        { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   minutesInput: {
     width: 72, fontSize: 28, fontWeight: '700', color: colors.primary,

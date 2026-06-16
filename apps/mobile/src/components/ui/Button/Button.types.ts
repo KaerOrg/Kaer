@@ -4,13 +4,19 @@ import type { ViewStyle } from 'react-native'
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 export interface ButtonProps {
-  label: string
+  /**
+   * Libellé du bouton. Optionnel : sans libellé, le bouton est « icône seule »
+   * (rendu compact). Fournir alors `accessibilityLabel` et `iconLeft`.
+   */
+  label?: string
   onPress: () => void
   variant?: ButtonVariant
   loading?: boolean
   disabled?: boolean
   style?: ViewStyle
-  /** Nœud affiché à gauche du label (ex. icône MaterialCommunityIcons). */
+  /** Nœud affiché à gauche du label, ou seul contenu en mode icône seule. */
   iconLeft?: ReactNode
+  /** accessibilityLabel (obligatoire en mode icône seule, faute de texte). */
+  accessibilityLabel?: string
   testID?: string
 }

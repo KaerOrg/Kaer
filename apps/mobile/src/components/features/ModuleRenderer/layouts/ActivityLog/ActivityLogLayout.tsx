@@ -27,7 +27,7 @@ import { formatDateFull } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { PipPicker } from '../../../../ui/PipPicker'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '../../../../../services/moduleService'
 import { ActivityListCard } from './ActivityListCard'
 import { alStyles } from './styles'
@@ -365,7 +365,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
           <View style={alStyles.section}>
             <Text style={alStyles.sectionLabel}>{lbl('section_evaluation_title')}</Text>
             <View style={alStyles.card}>
-              <PipPicker
+              <RatingSelector
                 label={lbl('pleasure_label')}
                 sublabel={lbl('pleasure_sublabel')}
                 value={pleasure}
@@ -376,7 +376,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
                 onPress={setPleasure}
               />
               <View style={alStyles.cardDivider} />
-              <PipPicker
+              <RatingSelector
                 label={lbl('mastery_label')}
                 sublabel={lbl('mastery_sublabel')}
                 value={mastery}

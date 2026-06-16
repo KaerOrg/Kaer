@@ -5,24 +5,6 @@ import type { SleepEntry } from '../../../../../lib/database'
 
 export const WEEKDAYS_SHORT = ['L', 'M', 'M', 'J', 'V', 'S', 'D'] as const
 
-export function toHHMM(date: Date): string {
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-}
-
-export function fromHHMM(timeStr: string): Date {
-  const [h, m] = timeStr.split(':').map(Number)
-  const d = new Date()
-  d.setHours(h, m, 0, 0)
-  return d
-}
-
-/** Date HH:MM:00 d'aujourd'hui aux heures/minutes donnés (valeur par défaut d'un picker). */
-export function timeToday(hours: number, minutes: number): Date {
-  const d = new Date()
-  d.setHours(hours, minutes, 0, 0)
-  return d
-}
-
 export function yesterdayDateStr(): string {
   const d = new Date()
   d.setDate(d.getDate() - 1)

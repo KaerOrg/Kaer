@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
-import { PipPicker } from '../../../../ui/PipPicker'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import { etStyles } from './styles'
 
 export interface StepFormViewProps {
@@ -52,7 +52,7 @@ export function StepFormView({
           <Text style={etStyles.sectionLabel}>{lbl('step_target_label')}</Text>
           <Text style={etStyles.stratHint}>{lbl('step_target_hint')}</Text>
           <View style={etStyles.card}>
-            <PipPicker
+            <RatingSelector
               value={target}
               steps={sudsSteps}
               color={colors.primary}

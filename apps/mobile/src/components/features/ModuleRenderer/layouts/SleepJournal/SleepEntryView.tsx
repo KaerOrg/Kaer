@@ -4,7 +4,7 @@
 // Possède son propre état de formulaire ; remonte par `onClose` après save/delete/back.
 // Conforme MDR : aucune couleur de jugement (efficacité affichée en valeur brute).
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import {
   View, Text, Pressable, ScrollView, TextInput,
   KeyboardAvoidingView, Platform,
@@ -14,18 +14,20 @@ import { colors } from '../../../../../theme'
 import { Button } from '../../../../ui/Button'
 import { Card } from '../../../../ui/Card'
 import {
-  getSleepEntry, computeSleepEfficiency, generateId, type SleepEntry,
+  getSleepEntry, computeSleepEfficiency, generateId,
 } from '../../../../../lib/database'
 import { saveSleepEntry, deleteSleepEntry } from '../../../../../services/sleepDiaryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import type { Lbl, SleepConfig } from './types'
-import { toHHMM, fromHHMM, timeToday, minutesToHhmmHint } from './sleepHelpers'
-import { TimeField } from './TimeField'
+import { minutesToHhmmHint } from './sleepHelpers'
+import { RatingSelector } from '../../../../ui/RatingSelector'
+import { TimePickerField } from '../../../../ui/TimePickerField'
 import { MinutesField } from './MinutesField'
-import { StarRating } from './StarRating'
 import { styles } from './styles'
+
+const RESTEDNESS_STEPS = [1, 2, 3, 4, 5]
 
 interface Props {
   targetDate: string
@@ -41,10 +43,10 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
   const { showConfirm } = useConfirmDialog()
 
   const [existingId, setExistingId] = useState<string | null>(null)
-  const [inBedTime, setInBedTime] = useState<Date>(() => timeToday(22, 45))
-  const [bedtime, setBedtime] = useState<Date>(() => timeToday(23, 0))
-  const [wakeTime, setWakeTime] = useState<Date>(() => timeToday(7, 0))
-  const [outOfBedTime, setOutOfBedTime] = useState<Date>(() => timeToday(7, 15))
+  const [inBedTime, setInBedTime] = useState('22:45')
+  const [bedtime, setBedtime] = useState('23:00')
+  const [wakeTime, setWakeTime] = useState('07:00')
+  const [outOfBedTime, setOutOfBedTime] = useState('07:15')
   const [onsetMinutes, setOnsetMinutes] = useState(0)
   const [awakenings, setAwakenings] = useState(0)
   const [awakeningsDuration, setAwakeningsDuration] = useState(0)
@@ -55,10 +57,6 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
   const [restedness, setRestedness] = useState<number | null>(null)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
-  const [showInBedPicker, setShowInBedPicker] = useState(false)
-  const [showBedtimePicker, setShowBedtimePicker] = useState(false)
-  const [showWakePicker, setShowWakePicker] = useState(false)
-  const [showOutOfBedPicker, setShowOutOfBedPicker] = useState(false)
 
   // Charge l'entrée existante de la nuit ciblée (préremplissage du formulaire).
   useEffect(() => {
@@ -66,10 +64,10 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
     getSleepEntry(targetDate).then(entry => {
       if (cancelled || !entry) return
       setExistingId(entry.id)
-      if (entry.in_bed_time) setInBedTime(fromHHMM(entry.in_bed_time))
-      if (entry.bedtime) setBedtime(fromHHMM(entry.bedtime))
-      if (entry.wake_time) setWakeTime(fromHHMM(entry.wake_time))
-      if (entry.out_of_bed_time) setOutOfBedTime(fromHHMM(entry.out_of_bed_time))
+      if (entry.in_bed_time) setInBedTime(entry.in_bed_time)
+      if (entry.bedtime) setBedtime(entry.bedtime)
+      if (entry.wake_time) setWakeTime(entry.wake_time)
+      if (entry.out_of_bed_time) setOutOfBedTime(entry.out_of_bed_time)
       setOnsetMinutes(entry.sleep_onset_minutes ?? 0)
       setAwakenings(entry.awakenings ?? 0)
       setAwakeningsDuration(entry.awakenings_duration_minutes ?? 0)
@@ -93,10 +91,10 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
       await saveSleepEntry({
         id: existingId ?? generateId(),
         date: targetDate,
-        in_bed_time: toHHMM(inBedTime),
-        bedtime: toHHMM(bedtime),
-        wake_time: toHHMM(wakeTime),
-        out_of_bed_time: toHHMM(outOfBedTime),
+        in_bed_time: inBedTime,
+        bedtime,
+        wake_time: wakeTime,
+        out_of_bed_time: outOfBedTime,
         sleep_onset_minutes: onsetMinutes,
         awakenings,
         awakenings_duration_minutes: awakeningsDuration,
@@ -113,8 +111,7 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
     } finally {
       setSaving(false)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality, existingId, targetDate, inBedTime, bedtime, wakeTime, outOfBedTime, onsetMinutes, awakenings, awakeningsDuration, napMinutes, sleepAid, nightmares, restedness, notes, t, showToast, onClose])
+  }, [quality, existingId, targetDate, inBedTime, bedtime, wakeTime, outOfBedTime, onsetMinutes, awakenings, awakeningsDuration, napMinutes, sleepAid, nightmares, restedness, notes, lbl, t, showToast, onClose])
 
   const handleDelete = useCallback(() => {
     if (!existingId) return
@@ -128,17 +125,17 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         onClose()
       },
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingId, t, showConfirm, onClose])
+  }, [existingId, lbl, t, showConfirm, onClose])
 
   const liveSE = computeSleepEfficiency(
-    toHHMM(bedtime), toHHMM(wakeTime), onsetMinutes, awakeningsDuration,
-    toHHMM(inBedTime), toHHMM(outOfBedTime),
+    bedtime, wakeTime, onsetMinutes, awakeningsDuration,
+    inBedTime, outOfBedTime,
   )
 
   const onsetConv = minutesToHhmmHint(onsetMinutes)
   const awakDurConv = minutesToHhmmHint(awakeningsDuration)
   const napConv = minutesToHhmmHint(napMinutes)
+  const qualitySteps = useMemo(() => Array.from({ length: config.qualityMax }, (_, i) => i + 1), [config.qualityMax])
   const qualityLabels = [1, 2, 3, 4, 5].map(n => lbl(`quality_label_${n}`))
   const restednessLabels = [1, 2, 3, 4, 5].map(n => lbl(`restedness_label_${n}`))
   const saveLabel = existingId ? (lbl('update_label') || t('common.update')) : (lbl('save_label') || t('common.save'))
@@ -154,15 +151,13 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
       testID="sleep-journal-entry"
     >
       <View style={styles.entryHeaderBar} testID="entry-date-header">
-        <Pressable
+        <Button
+          variant="ghost"
           onPress={onClose}
-          style={styles.backBtn}
-          accessibilityRole="button"
           accessibilityLabel={lbl('back_label') || t('common.back')}
           testID="entry-back-button"
-        >
-          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-        </Pressable>
+          iconLeft={<MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />}
+        />
         <View style={styles.entryHeaderTitle}>
           <Text style={styles.dateLabel}>{lbl('date_label')}</Text>
           <Text style={styles.dateValue}>{formatDateFull(targetDate)}</Text>
@@ -173,28 +168,24 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{lbl('section_schedule_title')}</Text>
           <Card variant="elevated">
-            <TimeField
+            <TimePickerField
               label={lbl('in_bed_label')} value={inBedTime} icon="bed-outline" hint={tapModify}
-              show={showInBedPicker} onOpen={() => setShowInBedPicker(true)} onClose={() => setShowInBedPicker(false)}
-              onChange={setInBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="in-bed-btn"
+              onChange={setInBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="in-bed"
             />
             <View style={styles.divider} />
-            <TimeField
+            <TimePickerField
               label={lbl('bedtime_label')} value={bedtime} icon="clock-outline" hint={tapModify}
-              show={showBedtimePicker} onOpen={() => setShowBedtimePicker(true)} onClose={() => setShowBedtimePicker(false)}
-              onChange={setBedtime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="bedtime-btn"
+              onChange={setBedtime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="bedtime"
             />
             <View style={styles.divider} />
-            <TimeField
+            <TimePickerField
               label={lbl('wake_time_label')} value={wakeTime} icon="clock-outline" hint={tapModify}
-              show={showWakePicker} onOpen={() => setShowWakePicker(true)} onClose={() => setShowWakePicker(false)}
-              onChange={setWakeTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="wake-time-btn"
+              onChange={setWakeTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="wake-time"
             />
             <View style={styles.divider} />
-            <TimeField
+            <TimePickerField
               label={lbl('out_of_bed_label')} value={outOfBedTime} icon="bed-empty" hint={tapModify}
-              show={showOutOfBedPicker} onOpen={() => setShowOutOfBedPicker(true)} onClose={() => setShowOutOfBedPicker(false)}
-              onChange={setOutOfBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="out-of-bed-btn"
+              onChange={setOutOfBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="out-of-bed"
             />
             <View style={styles.divider} />
             <View style={styles.timeFieldGroup}>
@@ -289,7 +280,16 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
           <Text style={styles.sectionLabel}>{lbl('section_quality_title')}</Text>
           <Card variant="elevated">
             <Text style={styles.fieldLabel}>{lbl('quality_label')}</Text>
-            <StarRating count={config.qualityMax} value={quality} onSelect={setQuality} testIdPrefix="quality-star" />
+            <RatingSelector
+              variant="icon"
+              steps={qualitySteps}
+              value={quality}
+              color={colors.stars}
+              label={lbl('quality_label')}
+              showHeader={false}
+              onPress={setQuality}
+              testIdPrefix="quality-star"
+            />
             {quality !== null && qualityLabels[quality - 1] ? (
               <Text style={styles.qualityLabel}>{qualityLabels[quality - 1]}</Text>
             ) : null}
@@ -301,7 +301,18 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
           <Text style={styles.sectionLabel}>{lbl('section_restedness_title')}</Text>
           <Card variant="elevated">
             <Text style={styles.fieldLabel}>{lbl('restedness_label')}</Text>
-            <StarRating count={5} value={restedness} onSelect={setRestedness} icon="weather-sunny" testIdPrefix="restedness-star" />
+            <RatingSelector
+              variant="icon"
+              icon="weather-sunny"
+              iconSize={32}
+              steps={RESTEDNESS_STEPS}
+              value={restedness}
+              color={colors.stars}
+              label={lbl('restedness_label')}
+              showHeader={false}
+              onPress={setRestedness}
+              testIdPrefix="restedness-star"
+            />
             {restedness !== null && restednessLabels[restedness - 1] ? (
               <Text style={styles.qualityLabel}>{restednessLabels[restedness - 1]}</Text>
             ) : null}

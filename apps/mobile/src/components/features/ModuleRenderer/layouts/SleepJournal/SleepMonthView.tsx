@@ -2,12 +2,14 @@
 // nuit renseignée vs non, pas de gradient de qualité), stats moyennes brutes, légende.
 
 import { useMemo } from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../../../theme'
+import { Button } from '../../../../ui/Button'
 import { computeSleepEfficiency, type SleepEntry } from '../../../../../lib/database'
 import type { Lbl } from './types'
-import { WEEKDAYS_SHORT, daysInMonth, firstWeekday, toYearMonth, sleepMinutes, formatMinutes } from './sleepHelpers'
+import { daysInMonth, sleepMinutes, formatMinutes } from './sleepHelpers'
+import { SleepCalendar } from './SleepCalendar'
 import { styles } from './styles'
 
 interface Props {
@@ -30,13 +32,6 @@ export function SleepMonthView({ lbl, t, monthYear, monthNum, monthEntries, now,
   }, [monthEntries])
 
   const totalDays = daysInMonth(monthYear, monthNum)
-  const offset = firstWeekday(monthYear, monthNum)
-  const cells: (number | null)[] = [
-    ...Array(offset).fill(null),
-    ...Array.from({ length: totalDays }, (_, i) => i + 1),
-  ]
-  while (cells.length % 7 !== 0) cells.push(null)
-
   const isCurrentMonth = monthYear === now.getFullYear() && monthNum === now.getMonth() + 1
 
   const filledEntries = monthEntries.filter(e => e.quality !== null)
@@ -70,86 +65,55 @@ export function SleepMonthView({ lbl, t, monthYear, monthNum, monthEntries, now,
   return (
     <View style={styles.container} testID="sleep-journal-month">
       <View style={styles.monthNav}>
-        <Pressable
+        <Button
+          variant="ghost"
           onPress={onBack}
-          style={styles.backBtn}
-          accessibilityRole="button"
           accessibilityLabel={lbl('back_label') || t('common.back')}
           testID="month-back-button"
-        >
-          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-        </Pressable>
-        <Pressable onPress={onPrevMonth} style={styles.navBtn} accessibilityRole="button" testID="month-prev">
-          <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
-        </Pressable>
+          iconLeft={<MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />}
+        />
+        <Button
+          variant="ghost"
+          onPress={onPrevMonth}
+          accessibilityLabel={lbl('prev_month_label') || t('common.previous')}
+          testID="month-prev"
+          iconLeft={<MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />}
+        />
         <Text style={styles.monthTitle}>{monthLabel}</Text>
-        <Pressable
+        <Button
+          variant="ghost"
           onPress={onNextMonth}
-          style={[styles.navBtn, isCurrentMonth && styles.navBtnDisabled]}
-          accessibilityRole="button"
-          testID="month-next"
           disabled={isCurrentMonth}
-        >
-          <MaterialCommunityIcons name="chevron-right" size={26} color={isCurrentMonth ? colors.border : colors.primary} />
-        </Pressable>
+          accessibilityLabel={lbl('next_month_label') || t('common.next')}
+          testID="month-next"
+          iconLeft={<MaterialCommunityIcons name="chevron-right" size={26} color={isCurrentMonth ? colors.border : colors.primary} />}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.monthContent}>
-        <View style={styles.calendarCard}>
-          <View style={styles.calendarHeader}>
-            {WEEKDAYS_SHORT.map((d, i) => (
-              <Text key={i} style={styles.weekday}>{d}</Text>
-            ))}
-          </View>
-          {Array.from({ length: cells.length / 7 }, (_, rowIdx) => (
-            <View key={rowIdx} style={styles.calendarRow}>
-              {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
-                if (!day) return <View key={colIdx} style={styles.calendarCell} />
-                const dateStr = `${toYearMonth(monthYear, monthNum)}-${String(day).padStart(2, '0')}`
-                const entry = monthEntryByDate[dateStr]
-                const isFuture = isCurrentMonth && day > now.getDate()
-                const isToday = isCurrentMonth && day === now.getDate()
-                // Encodage neutre conforme MDR : nuit renseignée vs non, sans
-                // jugement de qualité (pas de gradient bon/mauvais).
-                const bg = entry
-                  ? colors.primary
-                  : isFuture ? 'transparent' : colors.border
-                const hasNightmare = entry?.nightmares === 1
-                return (
-                  <View key={colIdx} style={styles.calendarCell}>
-                    <View style={[styles.dayDot, { backgroundColor: bg }, isToday && styles.dayDotToday]}>
-                      <Text style={[styles.dayNum, entry ? styles.dayNumFilled : isFuture ? styles.dayNumFuture : null]}>
-                        {day}
-                      </Text>
-                      {hasNightmare ? (
-                        <View style={styles.nightmareBadge}>
-                          <MaterialCommunityIcons name="ghost" size={8} color={colors.white} />
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                )
-              })}
-            </View>
-          ))}
-        </View>
+        <SleepCalendar
+          monthYear={monthYear}
+          monthNum={monthNum}
+          monthEntryByDate={monthEntryByDate}
+          now={now}
+        />
 
         {monthSummaryTitle ? <Text style={styles.sectionTitle}>{monthSummaryTitle}</Text> : null}
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{avgSleep !== null ? formatMinutes(avgSleep) : '–'}</Text>
+            <Text style={styles.statValue}>{avgSleep !== null ? formatMinutes(avgSleep) : '-'}</Text>
             <Text style={styles.statLabel}>{lbl('stat_avg_duration_label')}</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{avgEfficiency !== null ? `${avgEfficiency} %` : '–'}</Text>
+            <Text style={styles.statValue}>{avgEfficiency !== null ? `${avgEfficiency} %` : '-'}</Text>
             <Text style={styles.statLabel}>{lbl('stat_avg_efficiency_label')}</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{avgOnset !== null ? formatMinutes(avgOnset) : '–'}</Text>
+            <Text style={styles.statValue}>{avgOnset !== null ? formatMinutes(avgOnset) : '-'}</Text>
             <Text style={styles.statLabel}>{lbl('stat_avg_onset_label')}</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{avgAwakenings !== null ? String(avgAwakenings) : '–'}</Text>
+            <Text style={styles.statValue}>{avgAwakenings !== null ? String(avgAwakenings) : '-'}</Text>
             <Text style={styles.statLabel}>{lbl('stat_avg_awakenings_label')}</Text>
           </View>
           <View style={styles.statCard}>
