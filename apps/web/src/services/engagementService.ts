@@ -165,6 +165,89 @@ export async function fetchMedSideEffectsEvolution(patientId: string): Promise<{
   return { effects: [...effectKeys], data: points }
 }
 
+// ── Évolution de l'agenda du sommeil (métriques cliniques calculées) ─────────
+// Point par nuit (payload.date). Conforme MDR : valeurs brutes / calculées pour
+// le praticien, aucune interprétation. Calculs alignés Consensus Sleep Diary.
+
+export type SleepPoint = {
+  date: string                       // nuit enregistrée (payload.date, YYYY-MM-DD)
+  efficiency: number | null          // SE % = TST / TPL
+  total_sleep_min: number | null     // TST en minutes
+  onset_min: number                  // latence (SOL)
+  waso_min: number                   // durée des réveils (WASO)
+  in_bed_time: string | null
+  bedtime: string | null
+  wake_time: string | null
+  out_of_bed_time: string | null
+  nightmares: boolean
+}
+
+function readStr(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value : null
+}
+
+// Minutes entre deux horaires HH:MM (gère le passage à minuit). null si invalide.
+function spanMinutes(start: string, end: string): number | null {
+  const [sH, sM] = start.split(':').map(Number)
+  const [eH, eM] = end.split(':').map(Number)
+  if ([sH, sM, eH, eM].some(n => Number.isNaN(n))) return null
+  const raw = eH * 60 + eM - (sH * 60 + sM)
+  return raw < 0 ? raw + 24 * 60 : raw
+}
+
+export async function fetchSleepEvolution(patientId: string): Promise<SleepPoint[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'sleep_diary_entry')
+    .eq('module_id', 'sleep_diary')
+    .order('client_created_at')
+
+  if (error || !data) return []
+  const points: SleepPoint[] = []
+  for (const row of data) {
+    const p = row.payload
+    const date = readStr(p.date)
+    if (date == null) continue
+    const bedtime = readStr(p.bedtime)
+    const wakeTime = readStr(p.wake_time)
+    const inBed = readStr(p.in_bed_time)
+    const outBed = readStr(p.out_of_bed_time)
+    const onset = toNumber(p.sleep_onset_minutes) ?? 0
+    const waso = toNumber(p.awakenings_duration_minutes) ?? 0
+
+    let totalSleep: number | null = null
+    let efficiency: number | null = null
+    if (bedtime && wakeTime) {
+      const sleepWindow = spanMinutes(bedtime, wakeTime)
+      if (sleepWindow != null && sleepWindow > 0) {
+        totalSleep = Math.max(0, sleepWindow - onset - waso)
+        const tib = inBed && outBed ? spanMinutes(inBed, outBed) : sleepWindow
+        if (tib != null && tib > 0) {
+          efficiency = Math.min(100, Math.round((totalSleep / tib) * 100))
+        }
+      }
+    }
+
+    points.push({
+      date,
+      efficiency,
+      total_sleep_min: totalSleep,
+      onset_min: onset,
+      waso_min: waso,
+      in_bed_time: inBed,
+      bedtime,
+      wake_time: wakeTime,
+      out_of_bed_time: outBed,
+      nightmares: toNumber(p.nightmares) === 1,
+    })
+  }
+  // Tri par nuit enregistrée (payload.date), pas par horodatage de saisie.
+  points.sort((a, b) => a.date.localeCompare(b.date))
+  return points
+}
+
 // ── Résumé brut d'un module (toutes entrées confondues) ──────────────────────
 // Filtre par module_id seul : tous les entry_kind du module sont comptés.
 // Restitution neutre conforme MDR — date, compte et payload brut, sans jugement.

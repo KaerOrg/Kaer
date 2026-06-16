@@ -1,4 +1,4 @@
-import { Calendar, ChevronRight, Clock, Ghost, Moon, Star, Sparkles } from 'lucide-react'
+import { Bed, BedDouble, Calendar, ChevronRight, Clock, Ghost, Moon, Pill, Star, Sun, Sparkles } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
 import type { ContentField } from '../../../../../services/moduleService'
 
@@ -34,13 +34,21 @@ export function SleepJournalLayout({ fields, t }: Props) {
   const sectionQuality = lbl('section_quality_title')
   const sectionNotes = lbl('section_notes_title')
 
+  const sectionNaps = lbl('section_naps_title')
+  const sectionSleepAid = lbl('section_sleep_aid_title')
+  const sectionRestedness = lbl('section_restedness_title')
+  const inBedLabel = lbl('in_bed_label')
+  const outOfBedLabel = lbl('out_of_bed_label')
   const bedtimeLabel = lbl('bedtime_label')
   const wakeTimeLabel = lbl('wake_time_label')
   const onsetLabel = lbl('onset_label')
   const awakeningsLabel = lbl('awakenings_label')
   const awakDurationLabel = lbl('awakenings_duration_label')
+  const napLabel = lbl('nap_label')
+  const sleepAidLabel = lbl('sleep_aid_label')
   const nightmaresLabel = lbl('nightmares_label')
   const qualityLabel = lbl('quality_label')
+  const restednessLabel = lbl('restedness_label')
   const notesPlaceholder = lbl('notes_placeholder')
   const minutesUnit = lbl('minutes_unit') || 'min'
   const efficiencyLabel = lbl('efficiency_label')
@@ -143,10 +151,18 @@ export function SleepJournalLayout({ fields, t }: Props) {
             <span className="sj-section__title">{sectionSchedule}</span>
             <div className="sj-section__card">
               <div className="sj-row">
+                <span className="sj-row__label">{inBedLabel}</span>
+                <div className="sj-time-btn">
+                  <BedDouble size={16} className="sj-time-btn__icon" />
+                  <span className="sj-time-btn__value">22:45</span>
+                </div>
+              </div>
+              <div className="sj-divider" />
+              <div className="sj-row">
                 <span className="sj-row__label">{bedtimeLabel}</span>
                 <div className="sj-time-btn">
                   <Clock size={16} className="sj-time-btn__icon" />
-                  <span className="sj-time-btn__value">22:30</span>
+                  <span className="sj-time-btn__value">23:00</span>
                 </div>
               </div>
               <div className="sj-divider" />
@@ -154,7 +170,15 @@ export function SleepJournalLayout({ fields, t }: Props) {
                 <span className="sj-row__label">{wakeTimeLabel}</span>
                 <div className="sj-time-btn">
                   <Clock size={16} className="sj-time-btn__icon" />
-                  <span className="sj-time-btn__value">06:45</span>
+                  <span className="sj-time-btn__value">07:00</span>
+                </div>
+              </div>
+              <div className="sj-divider" />
+              <div className="sj-row">
+                <span className="sj-row__label">{outOfBedLabel}</span>
+                <div className="sj-time-btn">
+                  <Bed size={16} className="sj-time-btn__icon" />
+                  <span className="sj-time-btn__value">07:15</span>
                 </div>
               </div>
               <div className="sj-divider" />
@@ -193,6 +217,34 @@ export function SleepJournalLayout({ fields, t }: Props) {
           </section>
         )}
 
+        {sectionNaps && (
+          <section className="sj-section">
+            <span className="sj-section__title">{sectionNaps}</span>
+            <div className="sj-section__card">
+              <div className="sj-row">
+                <span className="sj-row__label">{napLabel}</span>
+                <div className="sj-minutes">
+                  <span className="sj-minutes__input">0</span>
+                  <span className="sj-minutes__unit">{minutesUnit}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {sectionSleepAid && (
+          <section className="sj-section">
+            <span className="sj-section__title">{sectionSleepAid}</span>
+            <div className="sj-toggle-row">
+              <Pill size={20} className="sj-toggle-row__icon" />
+              <span className="sj-toggle-row__label">{sleepAidLabel}</span>
+              <span className="sj-switch">
+                <span className="sj-switch__thumb" />
+              </span>
+            </div>
+          </section>
+        )}
+
         {sectionNightmares && (
           <section className="sj-section">
             <span className="sj-section__title">{sectionNightmares}</span>
@@ -216,6 +268,25 @@ export function SleepJournalLayout({ fields, t }: Props) {
                   <Star
                     key={n}
                     size={32}
+                    className={n <= 4 ? 'sj-star sj-star--on' : 'sj-star sj-star--off'}
+                    fill={n <= 4 ? 'currentColor' : 'none'}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {sectionRestedness && (
+          <section className="sj-section">
+            <span className="sj-section__title">{sectionRestedness}</span>
+            <div className="sj-section__card sj-section__card--center">
+              {restednessLabel && <span className="sj-row__label sj-row__label--center">{restednessLabel}</span>}
+              <div className="sj-stars-big">
+                {[1, 2, 3, 4, 5].map(n => (
+                  <Sun
+                    key={n}
+                    size={28}
                     className={n <= 4 ? 'sj-star sj-star--on' : 'sj-star sj-star--off'}
                     fill={n <= 4 ? 'currentColor' : 'none'}
                   />

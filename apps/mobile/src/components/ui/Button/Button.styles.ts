@@ -16,6 +16,8 @@ export const styles = StyleSheet.create({
   danger:    { backgroundColor: '#FEE2E2', borderWidth: 1, borderColor: colors.danger },
   disabled:   { opacity: 0.5 },
   withIcon:   { flexDirection: 'row', gap: spacing.xs },
+  // Mode icône seule : annule le « chrome » CTA (hauteur min + padding large).
+  iconOnly:   { minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.xs },
   label:          { fontSize: 16, fontWeight: '600' },
   primaryLabel:   { color: colors.white },
   secondaryLabel: { color: colors.primary },

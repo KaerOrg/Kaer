@@ -24,7 +24,7 @@ import { formatDateFull } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { PipPicker } from '../../../../ui/PipPicker'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import { ColumnTimeField } from './ColumnTimeField'
 import { styles } from './styles'
 
@@ -244,7 +244,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
                       const numValue = typeof values[key] === 'number' ? (values[key] as number) : Math.round((min + max) / 2)
                       return (
                         <View key={child.id} testID={`slider-${key}`}>
-                          <PipPicker
+                          <RatingSelector
                             label={labelOrPlaceholder}
                             value={numValue}
                             color={sliderColor}

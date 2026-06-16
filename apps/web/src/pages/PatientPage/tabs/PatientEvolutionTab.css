@@ -22,6 +22,43 @@
 
 /* Sélecteur de période : composant ui/SegmentedControl (variante "track"). */
 
+.evolution__controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Badge « Archivé » : suivi dont le module n'est plus affecté au patient. */
+.evolution__archived-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.evolution-card__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.evolution-card--archived {
+  opacity: 0.85;
+}
+
+/* ── Section sommeil (grille + tableau fenêtre + courbes, composant partagé) ── */
+
+.evolution__sleep {
+  margin-bottom: 24px;
+}
+
 /* ── Cards grid ────────────────────────────────────────────────────────────── */
 
 .evolution__cards {

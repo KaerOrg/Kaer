@@ -15,12 +15,17 @@ import { saveSleepEntry, deleteSleepEntry } from './sleepDiaryService'
 const entry = {
   id: 'sl-1',
   date: '2025-01-01',
+  in_bed_time: '22:45',
   bedtime: '23:00',
   wake_time: '07:00',
+  out_of_bed_time: '07:15',
   sleep_onset_minutes: 15,
   awakenings: 1,
   awakenings_duration_minutes: 10,
   quality: 4,
+  restedness: 3,
+  nap_minutes: 0,
+  sleep_aid: 0,
   nightmares: 0,
   notes: null,
 }

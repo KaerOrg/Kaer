@@ -35,9 +35,9 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 4, paddingHorizontal: spacing.md,
     borderRadius: radius.md, marginBottom: spacing.xs, backgroundColor: colors.card,
   },
-  dayRowFilled:      { borderLeftWidth: 3, borderLeftColor: colors.success },
+  dayRowFilled:      { borderLeftWidth: 3, borderLeftColor: colors.primary },
   dot:               { width: 10, height: 10, borderRadius: 5 },
-  dotFilled:         { backgroundColor: colors.success },
+  dotFilled:         { backgroundColor: colors.primary },
   dotEmpty:          { backgroundColor: colors.border },
   dayInfo:           { flex: 1 },
   dayDate:           { fontSize: 15, fontWeight: '500', color: colors.textMuted },
@@ -53,8 +53,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  navBtn:            { padding: spacing.xs },
-  navBtnDisabled:    { opacity: 0.3 },
   monthTitle: {
     flex: 1, fontSize: 17, fontWeight: '700',
     color: colors.text, textAlign: 'center', textTransform: 'capitalize',
@@ -114,7 +112,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
     backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  backBtn:           { padding: spacing.xs },
   entryHeaderTitle:  { flex: 1, gap: 2 },
   entryContent:      { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   dateLabel: {
@@ -135,18 +132,6 @@ export const styles = StyleSheet.create({
   divider:           { height: 1, backgroundColor: colors.border },
   timeFieldGroup:    { gap: spacing.xs },
   fieldLabel:        { fontSize: 14, fontWeight: '600', color: colors.text },
-  timeBtn: {
-    backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border,
-    borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 4,
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-  },
-  timeValue:         { fontSize: 22, fontWeight: '700', color: colors.primary },
-  timeHint:          { fontSize: 13, color: colors.textMuted, marginLeft: spacing.xs },
-  confirmBtn: {
-    backgroundColor: colors.primaryLight, borderRadius: radius.md,
-    padding: spacing.sm, alignItems: 'center', marginTop: spacing.xs,
-  },
-  confirmBtnText:    { color: colors.primary, fontWeight: '600' },
   minutesRow:        { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   minutesInput: {
     width: 72, fontSize: 28, fontWeight: '700', color: colors.primary,
@@ -167,15 +152,15 @@ export const styles = StyleSheet.create({
   counterValue:      { fontSize: 28, fontWeight: '700', color: colors.text, minWidth: 40, textAlign: 'center' },
   toggleRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: spacing.md,
+    gap: spacing.md, paddingVertical: spacing.md,
   },
-  toggleLeft:        { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  toggleLabel:       { fontSize: 15, fontWeight: '500', color: colors.text },
+  toggleLeft:        { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  toggleLabel:       { flex: 1, fontSize: 15, fontWeight: '500', color: colors.text },
   switchTrack: {
     width: 48, height: 28, borderRadius: radius.full,
     backgroundColor: colors.border, padding: 2, justifyContent: 'center',
   },
-  switchTrackOn:     { backgroundColor: colors.danger },
+  switchTrackOn:     { backgroundColor: colors.primary },
   switchThumb: {
     width: 24, height: 24, borderRadius: radius.full,
     backgroundColor: colors.white, alignSelf: 'flex-start',
@@ -187,12 +172,12 @@ export const styles = StyleSheet.create({
     fontSize: 15, color: colors.text, minHeight: 90, lineHeight: 22,
   },
   seCard: {
-    borderWidth: 2, borderRadius: radius.lg, padding: spacing.md,
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md,
     backgroundColor: colors.card, gap: spacing.xs,
   },
   seRow:             { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   seTitle:           { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
-  seScore:           { fontSize: 24, fontWeight: '800' },
+  seScore:           { fontSize: 24, fontWeight: '800', color: colors.primary },
   saveBtn: {
     backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: spacing.md,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
