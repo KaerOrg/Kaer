@@ -36,7 +36,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PillSelector, PipPicker, SectionDateList, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PillSelector, RatingSelector, TimePickerField, SectionDateList, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -113,13 +113,28 @@ Taille de base : `paddingVertical: 12`, `paddingHorizontal: 24`, `borderRadius: 
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `label` | `string` | Texte du bouton (obligatoire) |
+| `label` | `string` | Texte du bouton. **Optionnel** : sans libellé, le bouton est « icône seule » (rendu compact, sans le chrome CTA) |
 | `onPress` | `() => void` | Callback (obligatoire) |
 | `variant` | `ButtonVariant` | Variante visuelle (défaut `'primary'`) |
 | `loading` | `boolean` | Affiche un spinner à la place du label |
 | `disabled` | `boolean` | Désactive le bouton |
 | `style` | `ViewStyle` | Style additionnel (ex. override `backgroundColor` pour couleur d'accent) |
-| `iconLeft` | `ReactNode` | Nœud affiché à gauche du label (ex. `<MaterialCommunityIcons name="plus" .../>`) |
+| `iconLeft` | `ReactNode` | Nœud affiché à gauche du label, ou seul contenu en mode icône seule |
+| `accessibilityLabel` | `string` | Libellé d'accessibilité — **obligatoire en mode icône seule** (pas de texte visible) |
+
+**Bouton icône seule** (retour, navigation, action à icône) : ne pas écrire un
+`Pressable + MaterialCommunityIcons` ad hoc — utiliser `Button` sans `label`, avec
+`variant="ghost"`, `iconLeft` et `accessibilityLabel`. Le mode icône seule annule le
+padding/hauteur CTA et ajoute un `hitSlop`.
+
+```tsx
+<Button
+  variant="ghost"
+  onPress={onBack}
+  accessibilityLabel={t('common.back')}
+  iconLeft={<MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />}
+/>
+```
 
 ### Divider (`src/components/Divider/`)
 
@@ -152,16 +167,71 @@ Base : `borderRadius: 10`, `padding: 16`, `gap: 8`
 
 ---
 
-### PipPicker (`src/components/PipPicker/`)
+### RatingSelector (`src/components/ui/RatingSelector/`)
 
-Sélecteur de valeur numérique à pips. Deux variantes visuelles :
+Sélecteur de note sur une échelle 1..N — **le contrôle de notation unique du design
+system** (remplace l'ancien `PipPicker` et l'ancien `StarRating`). Trois variantes
+visuelles pour un même besoin :
 
 | Variante | Rendu | Usage |
 |---|---|---|
 | `numbered` (défaut) | boutons carrés bordés avec le chiffre, seul le sélectionné est mis en évidence | `mood_tracker` (1–10), `fear_thermometer` (0–100 par 10) |
-| `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns` (0–100 par 10) |
+| `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns`, `activity_log` (plaisir/maîtrise) |
+| `icon` | rangée d'icônes remplies jusqu'à la valeur (`star` ou `weather-sunny`) | `sleep_diary` (qualité de nuit, ressenti au réveil) |
 
-Props clés : `value: number | null`, `steps: number[]`, `color: string`, `showHeader?: boolean` (défaut `true` — `false` si le parent gère son propre header), `showEndLabels?: boolean`.
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number \| null` | Valeur sélectionnée (`null` = aucune) |
+| `steps` | `number[]` | Valeurs disponibles, dans l'ordre d'affichage |
+| `color` | `string` | Couleur d'accent (pip/track/icône remplis) |
+| `label` | `string` | Libellé + base d'accessibilityLabel |
+| `sublabel?` | `string` | Sous-libellé optionnel |
+| `variant?` | `'numbered' \| 'track' \| 'icon'` | Habillage (défaut `numbered`) |
+| `icon?` | `'star' \| 'weather-sunny'` | Icône de la variante `icon` (défaut `star`) |
+| `iconSize?` | `number` | Taille des icônes (défaut 36) |
+| `showHeader?` | `boolean` | `false` si le parent gère son propre header (défaut `true`) |
+| `showEndLabels?` | `boolean` | Affiche min/max sous le track |
+| `testIdPrefix?` | `string` | Chaque pip expose `${testIdPrefix}-${valeur}` |
+| `onPress` | `(value: number) => void` | Sélection |
+
+```tsx
+// Notation par étoiles (agenda du sommeil)
+<RatingSelector variant="icon" icon="star" steps={[1,2,3,4,5]} value={quality}
+  color={colors.stars} label={lbl('quality_label')} showHeader={false}
+  testIdPrefix="quality-star" onPress={setQuality} />
+```
+
+---
+
+### TimePickerField (`src/components/ui/TimePickerField/`)
+
+Saisie d'une heure « HH:MM » — **le picker horaire unique du design system**. Bouton à
+icône + `DateTimePicker` natif (spinner iOS avec bouton de confirmation, picker natif
+Android). Possède son propre état d'ouverture. Valeur échangée en `string` `'HH:MM'`
+(`''` = non renseignée).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `string` | Heure `'HH:MM'` (`''` = vide) |
+| `onChange` | `(next: string) => void` | Émis avec la nouvelle heure (ou `''` à l'effacement) |
+| `label?` | `string` | Libellé au-dessus du bouton |
+| `icon?` | nom MCI | Icône du bouton (défaut `clock-outline`) |
+| `placeholder?` | `string` | Texte quand `value` est vide |
+| `confirmLabel` | `string` | Libellé de confirmation iOS |
+| `hint?` | `string` | Indice à droite de la valeur |
+| `clearable?` | `boolean` | Affiche une croix d'effacement si une valeur est posée |
+| `clearLabel?` | `string` | accessibilityLabel de la croix |
+| `accent?` | `string` | Couleur icône/valeur quand renseigné (défaut `colors.primary`) |
+| `defaultHour?` / `defaultMinute?` | `number` | Heure initiale du picker quand vide (défaut 9:00) |
+| `testID?` | `string` | Base : expose `${testID}`, `-button`, `-clear`, `-confirm` |
+
+Utilisé par `sleep_diary` (4 horaires CSD) et `column_form` (via l'adaptateur
+`ColumnTimeField`, qui mappe les `field_props` `key`/`optional`).
+
+```tsx
+<TimePickerField value={bedtime} onChange={setBedtime} label={lbl('bedtime_label')}
+  icon="clock-outline" confirmLabel={t('common.ok')} testID="bedtime" />
+```
 
 ---
 
@@ -446,10 +516,12 @@ n'en crée un nouveau qu'en dernier recours.
 
 | Composant | Dossier | Rôle |
 |---|---|---|
-| `ColumnTimeField` | `ColumnForm/` | Champ TimePicker « HH:MM » optionnel, mémoïsé |
+| `ColumnTimeField` | `ColumnForm/` | Adaptateur des `field_props` (`key`/`optional`) vers le primitive `ui/TimePickerField` |
 | `renderCardBodyFields` | `Cards/` | Rend le corps d'une carte (registry des `field_type` de carte) |
 | `ActivityListCard` | `ActivityLog/` | Carte d'une activité dans la liste |
 | `EntryListCard` | `ExposureTracker/` | Carte d'une saisie SUDS |
+| `SleepCalendar` | `SleepJournal/` | Grille calendrier mensuelle (encodage neutre MDR : nuit renseignée vs non, badge cauchemar) |
+| `MinutesField` | `SleepJournal/` | Saisie numérique bornée d'une durée en minutes + appoint « = XhYY » |
 
 ### Ajouter un nouveau layout
 

@@ -95,8 +95,9 @@ export function Drawer({
   })
   const draggingRef = useRef(false)
   // Dernière largeur connue, pour persister en fin d'interaction sans closure périmée.
+  // Synchronisé en effet (jamais pendant le render : on ne mute pas une ref au render).
   const widthRef = useRef(panelWidth)
-  widthRef.current = panelWidth
+  useEffect(() => { widthRef.current = panelWidth }, [panelWidth])
 
   const persist = useCallback(() => {
     if (storageKey) writeStoredWidth(storageKey, widthRef.current)
@@ -147,6 +148,8 @@ export function Drawer({
     }
   }, [resizable, minWidth, maxWidth, persist])
 
+  const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), [])
+
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     draggingRef.current = true
@@ -158,9 +161,11 @@ export function Drawer({
       const delta = e.key === 'ArrowLeft' ? KEYBOARD_STEP : e.key === 'ArrowRight' ? -KEYBOARD_STEP : 0
       if (delta === 0) return
       e.preventDefault()
-      const next = clamp(widthRef.current + delta, minWidth, maxWidth)
-      setPanelWidth(next)
-      if (storageKey) writeStoredWidth(storageKey, next)
+      setPanelWidth(prev => {
+        const next = clamp(prev + delta, minWidth, maxWidth)
+        if (storageKey) writeStoredWidth(storageKey, next)
+        return next
+      })
     },
     [minWidth, maxWidth, storageKey]
   )
@@ -177,7 +182,7 @@ export function Drawer({
         aria-labelledby="drawer-title"
         className={`drawer${closing ? ' drawer--closing' : ''}`}
         style={{ width: panelWidth }}
-        onClick={e => e.stopPropagation()}
+        onClick={stopPropagation}
         onAnimationEnd={handleAnimationEnd}
       >
         {resizable && (

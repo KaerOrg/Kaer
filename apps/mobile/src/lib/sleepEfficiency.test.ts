@@ -1,4 +1,4 @@
-import { computeSleepEfficiency, sleepEfficiencyLabel } from './database'
+import { computeSleepEfficiency, sleepEfficiencyLabel, minutesBetween } from './database'
 
 // ─── computeSleepEfficiency ───────────────────────────────────────────────────
 
@@ -45,6 +45,37 @@ describe('computeSleepEfficiency', () => {
   // Scénario 6 — Données invalides (horaires identiques) → null
   it('retourne null si TPL est nul ou négatif', () => {
     expect(computeSleepEfficiency('07:00', '07:00', 0, 0)).toBeNull()
+  })
+
+  // Scénario 7 — TPL précis Consensus Sleep Diary (mise au lit → sortie du lit)
+  // Essai de dormir 23h, dernier réveil 07h → fenêtre 480 min, TST = 480.
+  // Mise au lit 22h30, sortie du lit 07h30 → TPL = 540 min.
+  // SE = 480 / 540 ≈ 89 %
+  it('utilise le TPL précis (mise au lit → sortie du lit) quand fourni', () => {
+    expect(computeSleepEfficiency('23:00', '07:00', 0, 0, '22:30', '07:30')).toBe(89)
+  })
+
+  // Scénario 8 — Sans horaires CSD précis, le TPL retombe sur la fenêtre de sommeil
+  // (rétro-compatibilité de l'ancien modèle) → 100 %.
+  it('retombe sur la fenêtre de sommeil si les horaires précis manquent', () => {
+    expect(computeSleepEfficiency('23:00', '07:00', 0, 0)).toBe(100)
+    expect(computeSleepEfficiency('23:00', '07:00', 0, 0, null, null)).toBe(100)
+  })
+})
+
+// ─── minutesBetween ───────────────────────────────────────────────────────────
+
+describe('minutesBetween', () => {
+  it('calcule la durée entre deux horaires le même jour', () => {
+    expect(minutesBetween('22:30', '23:00')).toBe(30)
+  })
+
+  it('gère le passage à minuit', () => {
+    expect(minutesBetween('23:00', '07:00')).toBe(480)
+  })
+
+  it('retourne null si un horaire est mal formé', () => {
+    expect(minutesBetween('aa:bb', '07:00')).toBeNull()
   })
 })
 

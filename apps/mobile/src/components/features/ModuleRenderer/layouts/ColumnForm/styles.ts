@@ -62,31 +62,6 @@ export const styles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
-  // ── Champ horaire
-  timeContainer:    { gap: spacing.xs },
-  timeLabelRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    minHeight: 18,
-  },
-  timeLabel:        { fontSize: 13, fontWeight: '600', color: colors.text },
-  timeButton: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm, paddingVertical: spacing.sm,
-    backgroundColor: colors.background,
-  },
-  timeButtonEmpty:  { borderStyle: 'dashed' },
-  timeValue: {
-    fontSize: 16, fontWeight: '600', color: colors.text,
-    fontVariant: ['tabular-nums'],
-  },
-  timePlaceholder:  { fontSize: 14, color: colors.textMuted },
-  timeConfirm: {
-    alignSelf: 'flex-end', paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs, marginTop: spacing.xs,
-    borderRadius: radius.sm, backgroundColor: colors.primary,
-  },
-  timeConfirmText:  { color: colors.white, fontSize: 13, fontWeight: '600' },
   // ── Footer
   footer: {
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,

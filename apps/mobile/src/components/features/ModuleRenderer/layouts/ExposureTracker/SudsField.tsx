@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { PipPicker } from '../../../../ui/PipPicker'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import { etStyles } from './styles'
 
 export interface SudsFieldSkip {
@@ -41,7 +41,7 @@ export function SudsField({ label, hint, value, max, color, sudsSteps, onChange,
           <Text style={etStyles.sudsValueMax}>{`/${max}`}</Text>
         </View>
       </View>
-      <PipPicker
+      <RatingSelector
         value={value}
         steps={sudsSteps}
         color={color}

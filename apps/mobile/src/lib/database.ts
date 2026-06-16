@@ -29,12 +29,17 @@ export async function initDatabase(): Promise<void> {
       CREATE TABLE IF NOT EXISTS sleep_diary_entries (
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL UNIQUE,
+        in_bed_time TEXT,
         bedtime TEXT,
         wake_time TEXT,
+        out_of_bed_time TEXT,
         sleep_onset_minutes INTEGER DEFAULT 0,
         awakenings INTEGER DEFAULT 0,
         awakenings_duration_minutes INTEGER DEFAULT 0,
         quality INTEGER,
+        restedness INTEGER,
+        nap_minutes INTEGER DEFAULT 0,
+        sleep_aid INTEGER DEFAULT 0,
         nightmares INTEGER DEFAULT 0,
         notes TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -79,6 +84,13 @@ export async function initDatabase(): Promise<void> {
   const migrations = [
     `ALTER TABLE sleep_diary_entries ADD COLUMN nightmares INTEGER DEFAULT 0`,
     `ALTER TABLE sleep_diary_entries ADD COLUMN awakenings_duration_minutes INTEGER DEFAULT 0`,
+    // Refonte agenda du sommeil — alignement Consensus Sleep Diary (Carney 2012) :
+    // horaires CSD précis (mise au lit / sortie du lit) + items psychiatrie.
+    `ALTER TABLE sleep_diary_entries ADD COLUMN in_bed_time TEXT`,
+    `ALTER TABLE sleep_diary_entries ADD COLUMN out_of_bed_time TEXT`,
+    `ALTER TABLE sleep_diary_entries ADD COLUMN restedness INTEGER`,
+    `ALTER TABLE sleep_diary_entries ADD COLUMN nap_minutes INTEGER DEFAULT 0`,
+    `ALTER TABLE sleep_diary_entries ADD COLUMN sleep_aid INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
     `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
     // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
@@ -154,12 +166,17 @@ export async function deleteCrisisPlanItem(id: string): Promise<void> {
 export interface SleepEntry {
   id: string
   date: string                          // YYYY-MM-DD : la nuit enregistrée
-  bedtime: string | null                // HH:MM
-  wake_time: string | null              // HH:MM
-  sleep_onset_minutes: number           // temps pour s'endormir (minutes)
+  in_bed_time: string | null            // HH:MM — heure de mise au lit (CSD)
+  bedtime: string | null                // HH:MM — heure d'essai de dormir (lumières éteintes, CSD)
+  wake_time: string | null              // HH:MM — heure du dernier réveil (CSD)
+  out_of_bed_time: string | null        // HH:MM — heure de sortie du lit (CSD)
+  sleep_onset_minutes: number           // temps pour s'endormir (SOL, minutes)
   awakenings: number                    // nombre de réveils nocturnes
-  awakenings_duration_minutes: number   // durée totale des réveils (minutes)
-  quality: number | null                // 1 à 5
+  awakenings_duration_minutes: number   // durée totale des réveils (WASO, minutes)
+  quality: number | null                // qualité subjective 1 à 5
+  restedness: number | null             // ressenti au réveil 1 à 5 (CSD étendu)
+  nap_minutes: number                   // durée totale des siestes diurnes (minutes)
+  sleep_aid: number                     // aide au sommeil prise : 0 = non, 1 = oui
   nightmares: number                    // 0 = non, 1 = oui
   notes: string | null
   created_at: string
@@ -186,17 +203,24 @@ export async function saveSleepEntry(entry: Omit<SleepEntry, 'created_at'>): Pro
   const database = getDb()
   await database.runAsync(
     `INSERT OR REPLACE INTO sleep_diary_entries
-      (id, date, bedtime, wake_time, sleep_onset_minutes, awakenings, awakenings_duration_minutes, quality, nightmares, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, date, in_bed_time, bedtime, wake_time, out_of_bed_time, sleep_onset_minutes,
+       awakenings, awakenings_duration_minutes, quality, restedness, nap_minutes,
+       sleep_aid, nightmares, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
       entry.date,
+      entry.in_bed_time,
       entry.bedtime,
       entry.wake_time,
+      entry.out_of_bed_time,
       entry.sleep_onset_minutes,
       entry.awakenings,
       entry.awakenings_duration_minutes,
       entry.quality,
+      entry.restedness,
+      entry.nap_minutes,
+      entry.sleep_aid,
       entry.nightmares,
       entry.notes,
     ]
@@ -233,34 +257,47 @@ export function computeSleepDuration(
 }
 
 /**
- * Calcule l'Efficacité du Sommeil (SE) en pourcentage.
+ * Durée en minutes entre deux horaires HH:MM, en gérant le passage à minuit.
+ * Retourne une valeur dans [0, 1440[. `null` si un horaire est mal formé.
+ */
+export function minutesBetween(start: string, end: string): number | null {
+  const [sH, sM] = start.split(':').map(Number)
+  const [eH, eM] = end.split(':').map(Number)
+  if ([sH, sM, eH, eM].some(n => Number.isNaN(n))) return null
+  const raw = eH * 60 + eM - (sH * 60 + sM)
+  return raw < 0 ? raw + 24 * 60 : raw
+}
+
+/**
+ * Calcule l'Efficacité du Sommeil (SE) en pourcentage, aligné Consensus Sleep
+ * Diary (Carney 2012).
  *
- * Formule clinique (TCC-I) :
- *   Temps Passé au Lit (TPL) = heure de lever − heure de coucher
- *   Temps de Sommeil Total (TST) = TPL − temps d'endormissement − durée totale des réveils
+ *   Fenêtre de sommeil = dernier réveil (`wakeTime`) − essai de dormir (`bedtime`)
+ *   Temps de Sommeil Total (TST) = fenêtre − latence (SOL) − durée des réveils (WASO)
+ *   Temps Passé au Lit (TPL) = sortie du lit (`outOfBedTime`) − mise au lit (`inBedTime`)
+ *     si fournis, sinon la fenêtre de sommeil (rétro-compatibilité ancien modèle).
  *   SE (%) = (TST / TPL) × 100
  *
- * Seuils : ≥ 85 % = bon | ≥ 70 % = moyen | < 70 % = insuffisant
- *
+ * Seuils (interprétation praticien) : ≥ 85 % = bon | ≥ 70 % = moyen | < 70 % = insuffisant.
  * Retourne null si les données sont insuffisantes (horaires manquants ou TPL ≤ 0).
  */
 export function computeSleepEfficiency(
   bedtime: string,
   wakeTime: string,
   onsetMinutes = 0,
-  awakeningsDurationMinutes = 0
+  awakeningsDurationMinutes = 0,
+  inBedTime?: string | null,
+  outOfBedTime?: string | null,
 ): number | null {
-  const [bH, bM] = bedtime.split(':').map(Number)
-  const [wH, wM] = wakeTime.split(':').map(Number)
-  const rawDiff = wH * 60 + wM - (bH * 60 + bM)
-  // Horaires identiques = données invalides
-  if (rawDiff === 0) return null
-  // Passage minuit : lever avant coucher (ex: coucher 23h, lever 06h)
-  const tpl = rawDiff < 0 ? rawDiff + 24 * 60 : rawDiff
-  if (tpl <= 0) return null
+  const sleepWindow = minutesBetween(bedtime, wakeTime)
+  // Horaires identiques ou mal formés = données invalides
+  if (sleepWindow === null || sleepWindow === 0) return null
 
-  const tst = tpl - onsetMinutes - awakeningsDurationMinutes
-  const se = Math.round((Math.max(0, tst) / tpl) * 100)
+  const tib = inBedTime && outOfBedTime ? minutesBetween(inBedTime, outOfBedTime) : sleepWindow
+  if (tib === null || tib <= 0) return null
+
+  const tst = sleepWindow - onsetMinutes - awakeningsDurationMinutes
+  const se = Math.round((Math.max(0, tst) / tib) * 100)
   return Math.min(100, se)
 }
 

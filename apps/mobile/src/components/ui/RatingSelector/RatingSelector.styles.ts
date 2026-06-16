@@ -29,6 +29,9 @@ export const styles = StyleSheet.create({
   pipText:         { fontSize: 13, color: colors.textMuted },
   pipTextSelected: { color: colors.white, fontWeight: '700' },
 
+  // ── variant='icon' ─────────────────────────────────────────────────────────
+  icons: { flexDirection: 'row', gap: spacing.sm, alignItems: 'center', justifyContent: 'center' },
+
   // ── End labels ─────────────────────────────────────────────────────────────
   endLabels: { flexDirection: 'row', justifyContent: 'space-between' },
   endLabel:  { fontSize: 11, color: colors.textMuted },

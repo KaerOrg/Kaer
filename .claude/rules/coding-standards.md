@@ -1,29 +1,18 @@
 # Coding Standards — Kær
 
+> Ce fichier contient **les règles**. Les **cas vécus** qui les illustrent (incidents
+> réels rencontrés en review) vivent dans [`lessons.md`](lessons.md), repérés ici par
+> un pointeur 📌 sous chaque règle concernée. `lessons.md` est à **lire avant toute
+> `pr-review`**.
+
 ## Principes fondamentaux — non négociables
 
 - **Scalabilité d'abord** : chaque décision de design doit tenir à 10× la charge actuelle (patients, modules, praticiens).
 - **Composants réutilisables** : tout composant ou fonction utilisé (ou susceptible d'être utilisé) dans ≥2 contextes est extrait dans `src/components/` ou `packages/shared/`. Zéro duplication.
 - **Tests unitaires systématiques** : toute fonction de service, hook, et composant non-trivial est couvert avant livraison — happy path + cas d'erreur + edge cases.
-> **Cas rencontré — improve-module-organization (2026-06-12) :**
-> La logique pure extraite (`lib/moduleFilter.ts`) était testée exhaustivement, mais
-> donnait un **faux sentiment de couverture** : les composants qui la consomment
-> (`ModuleFilterBar`, `ModuleTagChips` — callbacks, rendu conditionnel) n'avaient
-> aucun `.test.tsx`, et la nouvelle fonction `fetchModuleTaxonomy()` n'a pas été
-> ajoutée au `moduleCatalogService.test.ts` **existant**.
-> → Tester le helper pur ne dispense ni du test de rendu/interaction des composants,
-> ni d'**étendre le test du service** quand on lui ajoute une fonction. Checklist :
-> chaque fichier source créé OU chaque export ajouté = son test dans le même commit.
+> 📌 Cas vécus : voir [lessons.md § Tests et couverture](lessons.md).
 - **Mocks synchronisés avec les exports** : tout renommage de fonction/hook exporté (`useModuleT` → `useModuleTranslation`) doit être répercuté dans **tous** les `jest.mock()`/`vi.mock()` qui le mentionnent. Un `grep` sur l'ancien nom avant de merger est obligatoire. Un mock périmé donne un faux sentiment de tests verts (la fonction mockée n'est jamais appelée, l'originale crashe en runtime).
-> **Cas rencontré — refonte-tolerance-detresse (2026-06-09) :**
-> Le renommage `useModuleT → useModuleTranslation` a cassé 5 suites de tests mobiles :
-> ```ts
-> // ❌ mock avec l'ancien nom → useModuleTranslation = undefined au runtime
-> jest.mock('hooks/useModuleT', () => ({ useModuleT: () => k => k }))
-> // ✅ mock avec le nouveau nom
-> jest.mock('hooks/useModuleT', () => ({ useModuleTranslation: () => k => k }))
-> ```
-> → Avant de commiter un renommage : `grep -r "useModuleT\b" apps/mobile --include="*.test.*"`
+> 📌 Cas vécu : voir [lessons.md § Mocks synchronisés](lessons.md).
 - **Documentation inline ciblée** : uniquement pour la logique non-évidente (invariants, workarounds, race conditions). Le reste se documente dans CLAUDE.md et les fichiers `.md` de feature.
 
 ## Architecture des composants — `ui/` vs `features/`
@@ -50,22 +39,7 @@
 > pas un primitive : il va dans `features/`, ou la donnée métier entre par une prop /
 > un contrat générique local.
 >
-> **Cas rencontrés — tableau-de-bord-olivier (2026-06-06) :**
-> ```ts
-> // ❌ ui/Chart/.../chartUtils.ts importait le type de persistance ScaleEntry
-> import type { ScaleEntry } from '../../../../lib/database'
-> export function buildChartData(entries: ScaleEntry[], …) { … }
-> // ✅ contrat générique local au design system ; ScaleEntry le satisfait structurellement
-> import type { ChartEntry } from '../chartTypes'   // { created_at, total_score, subscale_scores }
-> export function buildChartData(entries: ChartEntry[], …) { … }
-> ```
-> ```ts
-> // ❌ ui/ScaleMetaBadges importait scaleService + hardcodait des clés scales.* → c'est du métier
-> // ✅ déplacé dans components/features/ScaleMetaBadges/ (connaît le domaine des échelles)
-> ```
-> → Test : « si je supprime tout le métier (services, stores, types BDD, clés i18n de
-> domaine), le composant `ui/` compile-t-il encore et reste-t-il utile ailleurs ? »
-> Si non, il est mal rangé.
+> 📌 Cas vécus : voir [lessons.md § Architecture ui/ vs features/](lessons.md).
 
 ---
 
@@ -163,14 +137,7 @@ Mettre à jour le document de référence correspondant **dans le même commit**
 
 Un composant livré sans sa trace documentaire crée de la dette invisible — les sessions suivantes vont réimplémenter la même chose. C'est précisément ce biais systémique qui a motivé cette règle.
 
-> **Cas rencontré — improve-module-organization (2026-06-12) :**
-> La PR a fait le geste *parfait* côté code — étendre `ui/Chip` avec une prop
-> `size: 'sm' | 'md'` au lieu de dupliquer — mais a oublié la doc : ni la ligne
-> `size` dans la table des props `### Chip` du design-system, ni de section pour
-> les deux nouveaux composants `features/` (`ModuleFilterBar`, `ModuleTagChips`).
-> → La règle vaut aussi pour une **simple prop ajoutée** à un composant existant,
-> et pour les composants `features/` (pas seulement `ui/`) : table des props +
-> exemple d'usage dans `apps/<app>/docs/design-system.md`, **dans le même commit**.
+> 📌 Cas vécu : voir [lessons.md § Design system, documentation](lessons.md).
 
 **Anti-patterns bloquants — refuser d'écrire :**
 - `Pressable + Text + StyleSheet` ad hoc quand `ui/Button` couvre le besoin
@@ -230,19 +197,7 @@ ultérieure tranche, pas pour qu'elle re-réinvente.
 - `PatientPage` a réimplémenté `.module-toggle__track/thumb` au lieu de `<Toggle>` → bug de cohérence visuelle, refacto en review.
 - `CrisisCompanionLayout` (PR #45, 2026-06-08) a écrit 4 styles de carte ad hoc + 3 styles de bouton ad hoc au lieu d'utiliser `<Card>` et `<Button>` → refacto requise post-review.
 
-> **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :**
-> `CaseloadTable.css` figeait 25+ teintes de charte (en-tête teal, dégradé de
-> lignes, accents de section) en hexadécimal brut, parce qu'aucun token existant
-> ne correspondait.
-> ```css
-> /* ❌ Teinte de charte absente du jeu de tokens → figée en dur dans un CSS de feature */
-> .caseload-data-table .data-table__th { background: #D3ECED; color: #2C6E72; }
-> .caseload-detail__section--actions   { background: #EFF6FF; border-left-color: #3B82F6; }
-> ```
-> → « Pas de token adapté » n'autorise **pas** le hex en dur : on **ajoute la teinte
-> au jeu de tokens** (`--color-caseload-header`, `--color-section-actions`…) dans le
-> `:root`, puis on la référence. L'habillage reste centralisé et thématisable au
-> lieu d'être dispersé dans le CSS d'une feature.
+> 📌 Cas vécu : voir [lessons.md § Design system, tokens](lessons.md).
 
 ## Architecture en couches — ne jamais mélanger
 
@@ -314,24 +269,7 @@ function MyScreen() {
 > internes. Si ses **frères remontent leur état au parent par props**, c'est une
 > incohérence de couches : remonter aussi cette donnée à la page.
 >
-> **Cas rencontré — tableau-de-bord-olivier (2026-06-06) :** dans `CaseloadTable`,
-> `ActionList`/`WaitList` reçoivent `actions`/`waits` + callbacks par props (état
-> possédé par `FileActivePage`), mais la feuille sœur `ObservationBlock` faisait son
-> propre `fetchCaseloadNotes` + `createCaseloadNote`, possédait son état `notes`, et
-> lisait `useAuthStore`/`useToast`.
-> ```tsx
-> // ❌ Feuille qui s'auto-alimente — logique métier dans le composant
-> function ObservationBlock({ entryId }: { entryId: string }) {
->   const { practitioner } = useAuthStore()
->   const [notes, setNotes] = useState<CaseloadNote[]>([])
->   useEffect(() => { fetchCaseloadNotes(entryId).then(setNotes) }, [entryId])
->   const handleAdd = async () => { await createCaseloadNote(practitioner.id, entryId, body) }
-> }
-> // ✅ Feuille présentationnelle — données + actions injectées par la page
-> function ObservationBlock({ notes, onAddNote }: ObservationBlockProps) { … }
-> ```
-> → Remonter la possession des notes à `FileActivePage` (slice `notesByEntry` ou
-> callbacks `onLoadNotes`/`onAddNote`), aligné sur le pattern des frères.
+> 📌 Cas vécu : voir [lessons.md § Couches, feuille présentationnelle](lessons.md).
 
 ## Synchronisation distante (mobile) — toujours via syncHelpers
 
@@ -373,6 +311,10 @@ Ne jamais utiliser :
 - `as any`, `as unknown as X`
 
 Si le compilateur ou le linter signale une erreur, la corriger — jamais la supprimer.
+
+`// eslint-disable-next-line` est inclus dans l'interdiction de `// eslint-disable`.
+
+> 📌 Cas vécu : voir [lessons.md § Suppressions interdites](lessons.md).
 
 ## TypeScript strict
 
@@ -459,12 +401,7 @@ qui ne gère qu'un module ne reçoit pas `previewModule: ModuleType | null` pour
 comparer elle-même à sa constante : elle reçoit `previewOpen: boolean`. La dérivation
 (`isPreviewOpen('x')`) reste chez le parent qui possède le state.
 
-> **Cas rencontré — improve-module-organization (2026-06-12) :**
-> `PatientModulesTab` portait 4 states couplés deux à deux (`previewModule`/`dataModule`
-> exclusifs ; `unlockingModule`/`revokingModuleId` = une seule bascule). Fusionnés en
-> `activePanel` + `busyModule` discriminés, avec helpers `isPreviewOpen`/`isDataOpen`/
-> `isModuleBusy` ; la carte enfant `MedicationSideEffectsCard` est passée de 3 props
-> `ModuleType | null` à 3 booléens `loading`/`previewOpen`/`dataOpen`.
+> 📌 Cas vécu : voir [lessons.md § États mutuellement exclusifs](lessons.md).
 
 ## Une entité cohérente reste UN objet — on ne l'éclate jamais en N variables
 
@@ -501,11 +438,7 @@ opération, ex. `togglingTeen`) ou un champ **édité indépendamment** par l'UI
 (`generalNote`, qui est aussi un input) ne sont pas de l'« identité » → states séparés.
 Le critère reste le même qu'à l'inclusion : appartenance à l'entité, pas provenance.
 
-> **Cas rencontré — PatientPage (2026-06-12) :** l'identité patient était éclatée en 6
-> `useState` (`email`/`alias`/`firstName`/`lastName`/`enrolledAt`/`teenMode`).
-> Regroupée en un seul `identity: PatientIdentity`. `togglingTeen` (flag busy) et
-> `generalNote` (input éditable) laissés dehors car ils ne sont pas l'entité identité.
-> Les tests, qui assertaient sur le rendu et non sur les noms de states, sont restés verts.
+> 📌 Cas vécu : voir [lessons.md § Une entité cohérente reste UN objet](lessons.md).
 
 ## Design system
 
@@ -599,7 +532,9 @@ Exception : un tiret marqueur de **cellule vide** dans un tableau Markdown, ou
 **placeholder de valeur absente** en code (`value || '-'`), n'est pas de la prose ;
 utiliser un trait d'union simple `-`, jamais un tiret long, et ne pas le changer en virgule.
 
-Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide.
+> 📌 Cas vécu : voir [lessons.md § Ponctuation, tiret long](lessons.md).
+
+Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide. Étendre le `grep` aux `.tsx` pour attraper les placeholders `'–'` codés en dur : `grep -rnP "'[\x{2013}\x{2014}]'" apps/*/src`.
 
 ---
 
