@@ -232,9 +232,6 @@
       "by_practitioner": "Filtrer par praticien",
       "all_practitioners": "Tous les praticiens"
     },
-    "practitioner_detail": {
-      "title": "Compte médecin"
-    },
     "col": {
       "type": "Type",
       "name": "Nom",

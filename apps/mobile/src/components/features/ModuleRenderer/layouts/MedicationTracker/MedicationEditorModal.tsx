@@ -1,8 +1,10 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import { Modal, View, Text, TextInput, Pressable } from 'react-native'
 import type { Medication, MedicationKind } from '@psytool/shared'
 import { colors } from '../../../../../theme'
 import { Button } from '../../../../ui/Button'
+import { Radio } from '../../../../ui/Radio'
+import type { RadioOption } from '../../../../ui/Radio'
 import { styles } from './styles'
 
 // Absorbe le press sur la carte pour qu'il ne ferme pas la modale (backdrop).
@@ -45,6 +47,11 @@ export function MedicationEditorModal({ visible, initial, labels, onCancel, onSa
 
   const canSave = name.trim().length > 0
 
+  const kindOptions = useMemo<RadioOption[]>(() => [
+    { value: 'maintenance', label: labels.kindMaintenance },
+    { value: 'prn', label: labels.kindPrn },
+  ], [labels.kindMaintenance, labels.kindPrn])
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
       <Pressable style={styles.modalBackdrop} onPress={onCancel}>
@@ -70,28 +77,12 @@ export function MedicationEditorModal({ visible, initial, labels, onCancel, onSa
             testID="med-posology-input"
           />
 
-          <View style={styles.kindRow}>
-            <Pressable
-              style={[styles.kindBtn, kind === 'maintenance' && styles.kindBtnSelected]}
-              onPress={() => setKind('maintenance')}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: kind === 'maintenance' }}
-            >
-              <Text style={[styles.kindBtnText, kind === 'maintenance' && styles.kindBtnTextSelected]}>
-                {labels.kindMaintenance}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[styles.kindBtn, kind === 'prn' && styles.kindBtnSelected]}
-              onPress={() => setKind('prn')}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: kind === 'prn' }}
-            >
-              <Text style={[styles.kindBtnText, kind === 'prn' && styles.kindBtnTextSelected]}>
-                {labels.kindPrn}
-              </Text>
-            </Pressable>
-          </View>
+          <Radio
+            options={kindOptions}
+            value={kind}
+            onChange={v => setKind(v === 'prn' ? 'prn' : 'maintenance')}
+            variant="pills"
+          />
 
           <View style={styles.modalActions}>
             <Button label={labels.cancel} onPress={onCancel} variant="secondary" style={styles.modalAction} />

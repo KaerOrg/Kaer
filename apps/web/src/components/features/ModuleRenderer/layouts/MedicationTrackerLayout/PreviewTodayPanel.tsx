@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Pill, CheckCircle2 } from 'lucide-react'
 import { buildExampleMeds } from './previewExamples'
@@ -15,7 +16,7 @@ interface Props {
 // détail par molécule, notes, bouton enregistrer. Purement passif (MDR 2017/745).
 export function PreviewTodayPanel({ moduleId, t, lbl, statuses, reasons }: Props) {
   const { i18n } = useTranslation()
-  const meds = buildExampleMeds(moduleId, t, lbl)
+  const meds = useMemo(() => buildExampleMeds(moduleId, t, lbl), [moduleId, t, lbl])
   const todayLabel = lbl('today_label')
   const dateLabel = new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' })
 

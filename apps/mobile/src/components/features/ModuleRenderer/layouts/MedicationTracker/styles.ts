@@ -149,14 +149,6 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 2,
     fontSize: 15, color: colors.text,
   },
-  kindRow:          { flexDirection: 'row', gap: spacing.sm },
-  kindBtn: {
-    flex: 1, alignItems: 'center', paddingVertical: spacing.sm + 2, borderRadius: radius.md,
-    borderWidth: 1.5, borderColor: colors.border, backgroundColor: colors.card,
-  },
-  kindBtnSelected:  { borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  kindBtnText:      { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-  kindBtnTextSelected: { color: colors.primary },
   modalActions:     { flexDirection: 'row', gap: spacing.sm },
   modalAction:      { flex: 1 },
 })

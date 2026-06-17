@@ -36,7 +36,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, PillSelector, RatingSelector, TimePickerField, SectionDateList, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, Radio, RatingSelector, TimePickerField, SectionDateList, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -344,29 +344,41 @@ flèche, aucun taux (conforme MDR 2017/745).
 
 ---
 
-### `PillSelector` (`src/components/ui/PillSelector/`)
+### `Radio` (`src/components/ui/Radio/`)
 
-Sélecteur à pilules — une option active, fond coloré sur la sélection, couleur d'accent configurable. Réutilisable pour tout filtre de période, catégorie, ou mode.
+Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list` (radio classique, rangées rond + label, défaut) ou `pills` (pilules en ligne, fond coloré sur l'option active). Couleur d'accent configurable. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, etc.
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
-| `options` | `string[]` | — | Identifiants des options (obligatoire) |
-| `value` | `string` | — | Option sélectionnée (obligatoire) |
+| `options` | `RadioOption[]` | — | Options `{ value, label, sublabel? }` dans l'ordre d'affichage (obligatoire). `sublabel` n'est rendu qu'en variant `list` |
+| `value` | `string \| null` | — | Identifiant de l'option sélectionnée (`null` = aucune) (obligatoire) |
 | `onChange` | `(v: string) => void` | — | Callback de sélection (obligatoire) |
-| `labels` | `Record<string, string>` | — | Libellés par identifiant |
-| `color` | `string` | `colors.primary` | Couleur d'accentuation de la pilule active |
+| `variant` | `'list' \| 'pills'` | `'list'` | Habillage : radio classique ou pilules |
+| `color` | `string` | `colors.primary` | Couleur d'accentuation de l'option active |
+| `testID` | `string` | — | testID du conteneur |
 
 ```tsx
-<PillSelector
-  options={['7J', '1M', '6M', '1A']}
+// Radio classique (rond + label + sous-label)
+<Radio
+  options={[
+    { value: 'maintenance', label: 'Traitement de fond', sublabel: 'Pris en continu' },
+    { value: 'prn', label: 'Si besoin' },
+  ]}
+  value={kind}
+  onChange={v => setKind(v === 'prn' ? 'prn' : 'maintenance')}
+/>
+
+// Habillage pilules (filtre de période)
+<Radio
+  options={ranges.map(r => ({ value: r, label: rangeLabels[r] }))}
   value={timeRange}
-  onChange={v => setTimeRange(v as TimeRange)}
-  labels={{ '7J': '7 jours', '1M': '1 mois', '6M': '6 mois', '1A': '1 an' }}
+  onChange={onRangeChange}
+  variant="pills"
   color={accentColor}
 />
 ```
 
-> **Règle : tout sélecteur à choix exclusif rendu sous forme de pilules utilise `PillSelector`, jamais `Pressable + styles.btn` ad hoc.**
+> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`.**
 
 ### SectionDateList (`src/components/ui/SectionDateList/`)
 
@@ -431,7 +443,7 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 | `SliderWidget` | Track 4px fill/empty + thumb + valeur médiane | `"slider:min:max:unit"` |
 | `StarsWidget` | N icônes `star` / `star-outline` Ionicons | `"stars:N"` |
 | `BooleanWidget` | Deux pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
-| `RadioWidget` | Badge coloré avec icône (`ok`=vert, `partial`=ambre, `miss`=rouge) | `"radio:variant"` |
+| `RadioWidget` | Pastille de statut via `ui/StatusBadge` (`ok`→`success`, `partial`→`warning`, `miss`→`danger`) | `"radio:variant"` |
 | `DateWidget` | Chip `[📅 jj/mm/aaaa]` | `"date"` |
 | `TextWidget` | `View` vide h=32 avec bordure | `"text"` |
 | `CheckboxWidget` | `[□ Non accompli]` opacité 0.7 | `"checkbox"` |

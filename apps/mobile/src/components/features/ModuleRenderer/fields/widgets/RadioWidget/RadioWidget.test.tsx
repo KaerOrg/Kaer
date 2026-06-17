@@ -2,8 +2,6 @@ import React from 'react'
 import { render, screen } from '@testing-library/react-native'
 import { RadioWidget } from './RadioWidget'
 
-jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
-
 describe('RadioWidget', () => {
   it('affiche le label "Pris" pour la variante ok', () => {
     render(<RadioWidget variant="ok" />)

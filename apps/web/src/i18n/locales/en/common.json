@@ -232,9 +232,6 @@
       "by_practitioner": "Filter by practitioner",
       "all_practitioners": "All practitioners"
     },
-    "practitioner_detail": {
-      "title": "Practitioner account"
-    },
     "col": {
       "type": "Type",
       "name": "Name",
