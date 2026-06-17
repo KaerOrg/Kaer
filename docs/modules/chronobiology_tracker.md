@@ -57,11 +57,12 @@ Pièces livrées (web praticien) :
 - `tabs/ChronobiologyCard.tsx` + `tabs/AnchorToggleRow.tsx` : carte praticien + éditeur d'ancres,
   branchée dans `PatientModulesTab`.
 
-**Reste (Phase 3) :** le `column_form` mobile doit filtrer les ancres affichées selon
-`config.anchors` (défaut : toutes si non configuré). Architecture mappée : un mécanisme
-`CONFIG_LAYOUTS` + prop `patientConfig` existe déjà dans `ModuleContentScreen` (utilisé par
-`patient_scenario`/`psyedu_library`) ; il faut faire descendre `patientConfig` jusqu'au
-`column_form` à travers le layout `tabbed` (rayon d'impact sur layouts génériques → session dédiée).
+**Filtrage des ancres (Phase 3 — livré).** Le `column_form` mobile n'affiche que les ancres
+sélectionnées par le praticien (`config.anchors`) ; config vide/absente = toutes. Le flux de
+`patientConfig` : `ModuleContentScreen` (le `tabbed` rejoint `CONFIG_LAYOUTS` → fetch de
+`patient_modules.config`) → `LayoutDispatcher` → `TabsLayout` → `FieldRenderer` récursif →
+`ColumnFormLayout` (filtre les `column_time_field` par clé). No-op pour les autres modules
+`tabbed`/`column_form` (pas de `config.anchors`).
 
 ## Capture anti-friction (Phase 3 — livré)
 
