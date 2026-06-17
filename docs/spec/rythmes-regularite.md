@@ -93,7 +93,7 @@ L'auto-monitoring échoue par **abandon**, pas par manque de fonctionnalités (e
 | **1 — Modèle & contenu** | nettoyer le seed (retirer tab Fiches) ; **catalogue d'ancres (5 SRM + lumière) + sélection par patient** en base ; clés i18n fr/en/teen ; `docs/modules/chronobiology_tracker.md` | seed + locales + doc |
 | **2 — Web praticien** | ✅ **config des ancres suivies par patient** (service + hook + carte `ChronobiologyCard`) ; module déjà `tabbed`/débloquable. Reste : aperçu praticien avec visualisation de régularité → relève de Phase 4 | config ancres livrée |
 | **3 — Mobile patient** | ✅ **capture anti-friction** (bouton « comme d'habitude », opt-in config-first) ; ✅ **filtrage des ancres selon `config.anchors`** (prop-drill `patientConfig` via `tabbed → column_form`) ; saisie/offline-first + sync + historique + vue mensuelle **déjà existants**. Reste : dette i18n EN/teen du contenu `chrono_bio` ; vérif mode ado | boucle praticien→patient bouclée |
-| **4 — Restitution régularité** | visualisation neutre patient + indice calculé praticien ; tests ; doc | valeur clinique du module |
+| **4 — Restitution régularité** | ✅ **calcul** de l'indice (écart-type **circulaire** par ancre, en minutes, valeur brute — `lib/anchorRegularity.ts`, gère le passage par minuit, MDR-safe). Reste : fetch des entrées synchronisées + **panneau praticien** (chiffres bruts) + **visualisation neutre patient** | algorithme livré |
 | **5 — Finitions** | lien fiche psyedu ; rappels horaires fixes ; streak de saisie (engagement) ; polish ; parité web ≡ mobile | module livrable |
 
 ## 8. Horizons (hors MVP — nommés, pas planifiés)
@@ -110,7 +110,8 @@ L'auto-monitoring échoue par **abandon**, pas par manque de fonctionnalités (e
 
 ## 8 bis. Points ouverts (à trancher en Phase 4)
 
-- Méthode exacte de l'indice de régularité (formule + fenêtre temporelle).
+- ✅ Méthode de l'indice : **écart-type circulaire par ancre, en minutes** (`lib/anchorRegularity.ts`).
+  Reste à arrêter la **fenêtre temporelle** d'agrégation (ex. 14 / 30 derniers jours) au câblage.
 - Forme de la visualisation neutre patient (nuage de points vs bandes horaires).
 
 ## 9. Références
