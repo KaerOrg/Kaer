@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Save",
+    "prefill_from_last": "Same as usual",
     "validate": "Confirm",
     "cancel": "Cancel",
     "delete": "Delete",

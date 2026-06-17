@@ -92,7 +92,7 @@ L'auto-monitoring échoue par **abandon**, pas par manque de fonctionnalités (e
 | **0 — Cadrage** | ✅ fait (ce document) | décisions verrouillées |
 | **1 — Modèle & contenu** | nettoyer le seed (retirer tab Fiches) ; **catalogue d'ancres (5 SRM + lumière) + sélection par patient** en base ; clés i18n fr/en/teen ; `docs/modules/chronobiology_tracker.md` | seed + locales + doc |
 | **2 — Web praticien** | ✅ **config des ancres suivies par patient** (service + hook + carte `ChronobiologyCard`) ; module déjà `tabbed`/débloquable. Reste : aperçu praticien avec visualisation de régularité → relève de Phase 4 | config ancres livrée |
-| **3 — Mobile patient** | saisie quotidienne des ancres **avec capture anti-friction** (bouton « comme d'habitude », < 10 s, rétroactif) ; offline-first + sync ; historique neutre ; vue mensuelle ; mode ado | écran patient + tests |
+| **3 — Mobile patient** | ✅ **capture anti-friction** (bouton « comme d'habitude », opt-in config-first) ; saisie/offline-first + sync + historique + vue mensuelle **déjà existants** (`ColumnFormLayout`/`ChronoMonthLayout`). Reste : **filtrer les ancres selon `config.anchors`** (prop-drill `patientConfig` via `tabbed`, session dédiée) ; dette i18n EN/teen du contenu `chrono_bio` ; mode ado | anti-friction livrée |
 | **4 — Restitution régularité** | visualisation neutre patient + indice calculé praticien ; tests ; doc | valeur clinique du module |
 | **5 — Finitions** | lien fiche psyedu ; rappels horaires fixes ; streak de saisie (engagement) ; polish ; parité web ≡ mobile | module livrable |
 

@@ -62,6 +62,15 @@ export const styles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
+  // ── Capture anti-friction (« comme d'habitude »)
+  prefillBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.sm, alignSelf: 'flex-start',
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.primary,
+    backgroundColor: colors.background,
+  },
+  prefillBtnText:   { color: colors.primary, fontSize: 14, fontWeight: '600' },
   // ── Champ horaire
   timeContainer:    { gap: spacing.xs },
   timeLabelRow: {

@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Enregistrer",
+    "prefill_from_last": "Comme d'habitude",
     "validate": "Valider",
     "cancel": "Annuler",
     "delete": "Supprimer",

@@ -58,7 +58,18 @@ Pièces livrées (web praticien) :
   branchée dans `PatientModulesTab`.
 
 **Reste (Phase 3) :** le `column_form` mobile doit filtrer les ancres affichées selon
-`config.anchors` (défaut : toutes si non configuré).
+`config.anchors` (défaut : toutes si non configuré). Architecture mappée : un mécanisme
+`CONFIG_LAYOUTS` + prop `patientConfig` existe déjà dans `ModuleContentScreen` (utilisé par
+`patient_scenario`/`psyedu_library`) ; il faut faire descendre `patientConfig` jusqu'au
+`column_form` à travers le layout `tabbed` (rayon d'impact sur layouts génériques → session dédiée).
+
+## Capture anti-friction (Phase 3 — livré)
+
+Bouton **« comme d'habitude »** (mobile, `ColumnFormLayout`) : en nouvelle saisie, reprend les
+valeurs de la dernière entrée (le patient ajuste puis enregistre). Opt-in **config-first** via le
+prop `prefill_from_last` du `column_form_config` (libellé `common.prefill_from_last`, fr+en).
+Générique (tout module `column_form` peut l'activer), masqué en mode édition. Choix explicite
+(pas de préremplissage silencieux) → intentionnalité préservée, conforme MDR.
 
 ## Conformité MDR 2017/745
 

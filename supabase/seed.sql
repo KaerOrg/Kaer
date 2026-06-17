@@ -2265,6 +2265,8 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.cfg', 'new_btn_label', 'modules.chrono_bio.add_today'),
   ('chrono.cfg', 'empty_title',   'modules.chrono_bio.history_label'),
   ('chrono.cfg', 'empty_text',    'modules.chrono_bio.empty_history'),
+  -- capture anti-friction : bouton « comme d'habitude » (reprise de la dernière saisie)
+  ('chrono.cfg', 'prefill_from_last', 'common.prefill_from_last'),
   -- column header
   ('chrono.col.h',       'color',            '#3B82F6'),
   ('chrono.col.h',       'step_number',      '1'),

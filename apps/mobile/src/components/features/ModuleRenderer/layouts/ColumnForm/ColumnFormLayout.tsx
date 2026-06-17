@@ -127,6 +127,21 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     setMode('entry')
   }, [initialValuesForNew])
 
+  // Capture anti-friction : la dernière saisie sert de base au bouton « comme
+  // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
+  const lastEntry = useMemo<FormEntry | null>(() => {
+    if (entries.length === 0) return null
+    return entries.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
+  }, [entries])
+
+  const prefillLabel = lbl('prefill_from_last')
+  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null
+
+  const handlePrefillFromLast = useCallback(() => {
+    if (!lastEntry) return
+    setValues({ ...initialValuesForNew(), ...lastEntry.values })
+  }, [lastEntry, initialValuesForNew])
+
   const handleCancelEntry = useCallback(() => {
     setMode('list')
     setEditingId(null)
@@ -189,6 +204,17 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           contentContainerStyle={styles.entryContent}
           keyboardShouldPersistTaps="handled"
         >
+          {canPrefill ? (
+            <Pressable
+              style={styles.prefillBtn}
+              onPress={handlePrefillFromLast}
+              accessibilityRole="button"
+              testID="prefill-from-last"
+            >
+              <MaterialCommunityIcons name="history" size={18} color={colors.primary} />
+              <Text style={styles.prefillBtnText}>{prefillLabel}</Text>
+            </Pressable>
+          ) : null}
           {columns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
             const stepNumber = col.header.props['step_number'] ?? String(idx + 1)
