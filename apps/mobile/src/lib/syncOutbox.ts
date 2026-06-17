@@ -9,6 +9,7 @@ export type EntryKind =
   | 'sleep_diary_entry'
   | 'form_entry'
   | 'daily_entry'
+  | 'medication_intake'
   | 'tree_selection'
   | 'plan_item'
   | 'activity_record'

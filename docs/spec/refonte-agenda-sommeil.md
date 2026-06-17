@@ -80,8 +80,8 @@ Sync : payload `sleep_diary_entry` étendu avec les nouveaux champs (`syncUpsert
 ## 5. Mobile patient — refonte UI
 
 Découpage du layout monolithique en sous-composants (dossier `SleepJournal/`), chacun
-bâti sur le design system (`ui/Button`, `ui/Card`, `ui/InputField`, `ui/PipPicker`,
-`ui/PillSelector`, `ui/Divider`, `ui/SectionDateList`, `ui/Chart`) :
+bâti sur le design system (`ui/Button`, `ui/Card`, `ui/InputField`, `ui/RatingSelector`,
+`ui/Radio`, `ui/Divider`, `ui/SectionDateList`, `ui/Chart`) :
 
 - `SleepJournalLayout.tsx` — routeur de mode (liste / saisie / mois), état.
 - `SleepListView.tsx` — CTA « saisir ma nuit », historique N nuits, accès mois.

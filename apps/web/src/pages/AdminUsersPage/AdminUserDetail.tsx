@@ -1,7 +1,6 @@
 import { memo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Stethoscope, ShieldCheck } from 'lucide-react'
-import { Card } from '../../components/ui/Card'
+import { ShieldCheck } from 'lucide-react'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { PatientDataRights } from '../../components/features/PatientDataRights'
 import type { AdminUser } from '../../services/adminService'
@@ -13,9 +12,11 @@ interface AdminUserDetailProps {
 }
 
 /**
- * Panneau dépliable d'une ligne de la table admin. Le contenu dépend du type :
+ * Corps du panneau latéral (`Drawer`) d'une ligne de la table admin. L'en-tête
+ * (nom, email, icône de type) est porté par le `Drawer` ; ce composant n'injecte
+ * que le contenu, qui dépend du type :
  *   • patient → droits RGPD (export / effacement) via `PatientDataRights` réutilisé ;
- *   • médecin → panneau lecture seule (rôle). Aucune action RGPD patient n'a de sens.
+ *   • médecin → badge de rôle en lecture seule. Aucune action RGPD patient n'a de sens.
  */
 export const AdminUserDetail = memo(function AdminUserDetail({ user, onErased }: AdminUserDetailProps) {
   const { t } = useTranslation()
@@ -32,18 +33,10 @@ export const AdminUserDetail = memo(function AdminUserDetail({ user, onErased }:
   }
 
   return (
-    <Card
-      header={{
-        icon: <Stethoscope size={18} />,
-        title: t('admin_users.practitioner_detail.title'),
-        subtitle: user.email,
-      }}
-    >
-      <StatusBadge
-        variant={user.is_admin ? 'success' : 'neutral'}
-        icon={user.is_admin ? <ShieldCheck size={14} /> : undefined}
-        label={user.is_admin ? t('admin_users.role_admin') : t('admin_users.role_practitioner')}
-      />
-    </Card>
+    <StatusBadge
+      variant={user.is_admin ? 'success' : 'neutral'}
+      icon={user.is_admin ? <ShieldCheck size={14} /> : undefined}
+      label={user.is_admin ? t('admin_users.role_admin') : t('admin_users.role_practitioner')}
+    />
   )
 })

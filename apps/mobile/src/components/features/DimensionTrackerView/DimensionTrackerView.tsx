@@ -46,7 +46,8 @@ import {
   markerXFraction,
 } from '../../ui/Chart/TimeRangeCharts'
 import type { TimeRange, ChartMarker } from '../../ui/Chart/TimeRangeCharts'
-import { PillSelector } from '../../ui/PillSelector'
+import { Radio } from '../../ui/Radio'
+import type { RadioOption } from '../../ui/Radio'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Tab = 'entry' | 'charts' | 'month'
@@ -94,7 +95,7 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
   const [entries, setEntries] = useState<ScaleEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<TimeRange>('1M')
-  // PillSelector renvoie un string : on re-narrow vers TimeRange via les ranges
+  // Radio renvoie un string : on re-narrow vers TimeRange via les ranges
   // configurées (sans cast `as`, interdit par les standards de code).
   const onRangeChange = useCallback((v: string) => {
     const match = ranges.find(r => r === v)
@@ -152,13 +153,16 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
 
   const xLabels = useMemo(() => buildXLabels(timeRange, locale), [timeRange, locale])
 
-  const rangeLabels: Record<TimeRange, string> = {
-    '7J': t(`modules.${scaleId}.range_7j`),
-    '1M': t(`modules.${scaleId}.range_1m`),
-    '3M': t(`modules.${scaleId}.range_3m`),
-    '6M': t(`modules.${scaleId}.range_3m`), // fallback unused
-    '1A': t(`modules.${scaleId}.range_1a`),
-  }
+  const rangeOptions = useMemo<RadioOption[]>(() => {
+    const labels: Record<TimeRange, string> = {
+      '7J': t(`modules.${scaleId}.range_7j`),
+      '1M': t(`modules.${scaleId}.range_1m`),
+      '3M': t(`modules.${scaleId}.range_3m`),
+      '6M': t(`modules.${scaleId}.range_3m`), // fallback unused
+      '1A': t(`modules.${scaleId}.range_1a`),
+    }
+    return ranges.map(r => ({ value: r, label: labels[r] ?? r }))
+  }, [ranges, t, scaleId])
 
   const handleDelete = useCallback((id: string) => {
     Alert.alert(
@@ -478,11 +482,11 @@ export function DimensionTrackerView({ config }: { config: DimensionTrackerConfi
         {/* ── Onglet GRAPHIQUES ── */}
         {activeTab === 'charts' && (
           <View style={styles.section}>
-            <PillSelector
-              options={ranges}
+            <Radio
+              options={rangeOptions}
               value={timeRange}
               onChange={onRangeChange}
-              labels={rangeLabels}
+              variant="pills"
               color={accentColor}
             />
 

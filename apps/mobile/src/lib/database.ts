@@ -67,6 +67,7 @@ export async function initDatabase(): Promise<void> {
     () => createCustomDimensionsTable(database),
     () => createPlanItemsTable(database),
     () => createDailyEntriesTable(database),
+    () => createMedicationIntakesTable(database),
     () => createFormEntriesTable(database),
     () => createTreeSelectionsTable(database),
     () => createModuleSettingsTable(database),
@@ -94,6 +95,8 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
     // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
     `ALTER TABLE mood_markers ADD COLUMN scale_id TEXT NOT NULL DEFAULT 'mood_tracker'`,
+    // Motif déclaré sur la saisie quotidienne (medication_adherence : motif de non-prise)
+    `ALTER TABLE daily_entries ADD COLUMN reason TEXT`,
     // Copie des entrées des tables dédiées vers scale_entries
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'phq9',answers,score,NULL,created_at FROM phq9_entries`,
     `INSERT OR IGNORE INTO scale_entries (id,scale_id,answers,total_score,subscale_scores,created_at) SELECT id,'bsl23',answers,mean_score,NULL,created_at FROM bsl23_entries`,
@@ -320,7 +323,7 @@ const PATIENT_DATA_TABLES = [
   'crisis_anchors', 'crisis_plan_items', 'custom_dimensions', 'daily_entries',
   'decisional_balance', 'em_balance_items', 'em_rulers', 'em_values',
   'emotion_entries', 'exposure_hierarchies', 'fear_entries', 'fear_situations',
-  'form_entries', 'gad7_entries', 'medication_adherence_entries', 'module_settings',
+  'form_entries', 'gad7_entries', 'medication_adherence_entries', 'medication_intakes', 'module_settings',
   'mood_entries', 'mood_markers', 'nsi_entries', 'phq9_entries', 'plan_items',
   'scale_entries', 'side_effects_entries', 'sleep_diary_entries', 'snapiv_entries',
   'sync_outbox', 'tree_selections',
@@ -1507,6 +1510,7 @@ export async function createDailyEntriesTable(database: SQLite.SQLiteDatabase): 
       module_id  TEXT NOT NULL,
       date       TEXT NOT NULL,
       status     TEXT,
+      reason     TEXT,
       notes      TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(module_id, date)
@@ -1521,6 +1525,7 @@ export interface DailyEntry {
   module_id: string
   date: string
   status: string | null
+  reason: string | null   // motif déclaré (ex. non-prise : 'forgot' | 'side_effect' | …) — fait brut, jamais interprété
   notes: string | null
   created_at: string
 }
@@ -1544,18 +1549,77 @@ export async function getAllDailyEntries(moduleId: string, limit = 30): Promise<
 export async function saveDailyEntry(entry: Omit<DailyEntry, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT INTO daily_entries (id, module_id, date, status, notes)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO daily_entries (id, module_id, date, status, reason, notes)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(module_id, date) DO UPDATE SET
        status = excluded.status,
+       reason = excluded.reason,
        notes  = excluded.notes`,
-    [entry.id, entry.module_id, entry.date, entry.status, entry.notes]
+    [entry.id, entry.module_id, entry.date, entry.status, entry.reason, entry.notes]
   )
 }
 
 export async function deleteDailyEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM daily_entries WHERE id = ?', [id])
+}
+
+// ─── medication_intakes — détail optionnel par molécule (suivi hybride) ───────
+// Pattern : N lignes par (module_id, date) — une par molécule renseignée ce jour.
+// UPSERT sur (module_id, date, medication_id). Le `medication_id` référence une
+// entrée de patient_modules.config.medications (liste co-éditée patient↔praticien).
+// MDR : statut + motif sont des faits déclarés bruts, jamais interprétés.
+
+export interface MedicationIntake {
+  id: string
+  module_id: string
+  date: string
+  medication_id: string
+  status: string          // 'taken' | 'partial' | 'missed'
+  reason: string | null   // motif de non-prise déclaré, optionnel
+  created_at: string
+}
+
+export async function createMedicationIntakesTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS medication_intakes (
+      id            TEXT PRIMARY KEY,
+      module_id     TEXT NOT NULL,
+      date          TEXT NOT NULL,
+      medication_id TEXT NOT NULL,
+      status        TEXT NOT NULL,
+      reason        TEXT,
+      created_at    TEXT DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(module_id, date, medication_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_medication_intakes_module_date
+      ON medication_intakes(module_id, date);
+  `)
+}
+
+export async function getMedicationIntakes(moduleId: string, date: string): Promise<MedicationIntake[]> {
+  const database = getDb()
+  return database.getAllAsync<MedicationIntake>(
+    'SELECT * FROM medication_intakes WHERE module_id = ? AND date = ?',
+    [moduleId, date]
+  )
+}
+
+export async function saveMedicationIntake(entry: Omit<MedicationIntake, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO medication_intakes (id, module_id, date, medication_id, status, reason)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(module_id, date, medication_id) DO UPDATE SET
+       status = excluded.status,
+       reason = excluded.reason`,
+    [entry.id, entry.module_id, entry.date, entry.medication_id, entry.status, entry.reason]
+  )
+}
+
+export async function deleteMedicationIntake(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM medication_intakes WHERE id = ?', [id])
 }
 
 // ─── form_entries — table générique pour les formulaires multi-champs ────────

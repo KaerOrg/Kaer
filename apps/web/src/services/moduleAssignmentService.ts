@@ -6,6 +6,7 @@ import type {
   PsychoeducationTopicEntry,
 } from '../lib/database.types'
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
+import type { Medication } from '@psytool/shared'
 
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
   const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)
@@ -138,6 +139,39 @@ export async function updateTrackedEffects(
   const existingConfig = (current?.config ?? {}) as Record<string, unknown>
   const update: Database['public']['Tables']['patient_modules']['Update'] = {
     config: { ...existingConfig, tracked_effects: effects },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
+// ── medication_adherence — liste de molécules co-éditée patient↔praticien ──────
+
+// Liste des médicaments (traitement de fond + si-besoin) configurée pour ce patient,
+// dans patient_modules.config.medications. Éditable côté praticien (ici) ET patient (mobile).
+export async function fetchMedications(moduleId: string): Promise<Medication[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const cfg = (data?.config ?? {}) as Record<string, unknown>
+  const meds = cfg['medications']
+  if (!Array.isArray(meds)) return []
+  return meds as Medication[]
+}
+
+export async function updateMedications(
+  moduleId: string,
+  medications: Medication[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, medications },
   }
   const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
   return { ok: !error }
