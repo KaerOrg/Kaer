@@ -180,6 +180,38 @@ export async function updateTrackedAnchors(
   return { ok: !error }
 }
 
+export interface ChronoAnchor {
+  key: string        // wake_time, first_meal, main_activity, last_meal, bedtime, light
+  textCode: string   // clé i18n du libellé (ex. modules.chrono_bio.wake_time)
+}
+
+/**
+ * Catalogue des ancres « Rythmes & régularité », lu depuis la base (config-first) :
+ * les `column_time_field` du module, dans l'ordre, avec leur clé et leur libellé i18n.
+ */
+export async function fetchChronoAnchorCatalog(): Promise<ChronoAnchor[]> {
+  const { data: fields } = await supabase
+    .from('module_content_fields')
+    .select('id, text_code')
+    .eq('module_id', 'chronobiology_tracker')
+    .eq('field_type', 'column_time_field')
+    .order('sort_order')
+  if (!fields?.length) return []
+
+  const { data: props } = await supabase
+    .from('field_props')
+    .select('field_id, prop_value')
+    .in('field_id', fields.map(f => f.id))
+    .eq('prop_key', 'key')
+
+  const keyByField = new Map<string, string>()
+  for (const p of props ?? []) keyByField.set(p.field_id, p.prop_value)
+
+  return fields
+    .map(f => ({ key: keyByField.get(f.id) ?? '', textCode: f.text_code ?? '' }))
+    .filter(a => a.key !== '')
+}
+
 export interface SideEffectsEvent {
   date: string   // YYYY-MM-DD
   label: string

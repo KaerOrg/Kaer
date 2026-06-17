@@ -6,6 +6,7 @@ vi.mock('../lib/supabase', () => ({
 
 import { supabase } from '../lib/supabase'
 import {
+  fetchChronoAnchorCatalog,
   fetchPatientModules,
   fetchTrackedAnchors,
   revokeModule,
@@ -198,5 +199,38 @@ describe('moduleAssignmentService.updateTrackedAnchors', () => {
       .mockReturnValueOnce({ update } as never)
 
     expect(await updateTrackedAnchors('pm-1', ['light'])).toEqual({ ok: false })
+  })
+})
+
+describe('moduleAssignmentService.fetchChronoAnchorCatalog', () => {
+  it('retourne le catalogue trié avec clé + libellé i18n', async () => {
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(makeChain({
+        data: [
+          { id: 'chrono.col.wake', text_code: 'modules.chrono_bio.wake_time' },
+          { id: 'chrono.col.light', text_code: 'modules.chrono_bio.light' },
+        ],
+        error: null,
+      }) as never)
+      .mockReturnValueOnce(makeChain({
+        data: [
+          { field_id: 'chrono.col.wake', prop_value: 'wake_time' },
+          { field_id: 'chrono.col.light', prop_value: 'light' },
+        ],
+        error: null,
+      }) as never)
+
+    const result = await fetchChronoAnchorCatalog()
+
+    expect(result).toEqual([
+      { key: 'wake_time', textCode: 'modules.chrono_bio.wake_time' },
+      { key: 'light', textCode: 'modules.chrono_bio.light' },
+    ])
+  })
+
+  it('retourne [] si aucun champ d’ancre', async () => {
+    vi.mocked(supabase.from).mockReturnValueOnce(makeChain({ data: [], error: null }) as never)
+
+    expect(await fetchChronoAnchorCatalog()).toEqual([])
   })
 })

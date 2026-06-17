@@ -37,19 +37,28 @@ Défini en base (`module_content_fields`, champs `column_time_field` enfants de 
 Les 5 premières = Social Rhythm Metric-5 de l'IPSRT. `light` ajoutée à la refonte (zeitgeber
 dominant, Dollish 2023). Toutes **optionnelles** (`field_props optional = '1'`).
 
-## Configuration par patient (à implémenter — Phase 2 web)
+## Configuration par patient (Phase 2 web — implémenté)
 
-Le praticien choisira, **par patient**, le sous-ensemble d'ancres suivi (pertinence clinique +
-friction réduite). Modèle de stockage prévu, aligné sur `medication_side_effects`
-(`tracked_effects`) :
+Le praticien choisit, **par patient**, le sous-ensemble d'ancres suivi (pertinence clinique +
+friction réduite), aligné sur le pattern `medication_side_effects` (`tracked_effects`) :
 
 ```
 patient_modules.config = { "anchors": ["wake_time", "first_meal", "light", "bedtime"] }
 ```
 
-Le catalogue (ancres disponibles) vit en base (ci-dessus) ; la **sélection** vit dans
-`patient_modules.config.anchors`. Le `column_form` filtrera les ancres affichées selon cette
-sélection (défaut : toutes si non configuré).
+Le catalogue (ancres disponibles) vit en base ; la **sélection** vit dans
+`patient_modules.config.anchors`. **Config vide = toutes les ancres suivies** (défaut).
+Un garde-fou impose au moins une ancre suivie.
+
+Pièces livrées (web praticien) :
+- `moduleAssignmentService.ts` : `fetchChronoAnchorCatalog` (catalogue lu en base, config-first),
+  `fetchTrackedAnchors` / `updateTrackedAnchors` (sélection dans `patient_modules.config.anchors`).
+- `hooks/useChronoAnchorsEditor.ts` : état d'édition (catalogue + sélection, toggle, garde-fou).
+- `tabs/ChronobiologyCard.tsx` + `tabs/AnchorToggleRow.tsx` : carte praticien + éditeur d'ancres,
+  branchée dans `PatientModulesTab`.
+
+**Reste (Phase 3) :** le `column_form` mobile doit filtrer les ancres affichées selon
+`config.anchors` (défaut : toutes si non configuré).
 
 ## Conformité MDR 2017/745
 
@@ -79,13 +88,18 @@ conservé — contenu sourcé à ne pas perdre.
 
 ## Dette i18n à combler AVANT release (bloquant Phase 2/3)
 
-Le module étant resté `coming_soon`, son contenu n'est traduit qu'en **mobile fr**. À compléter :
+Le contenu complet `modules.chrono_bio.*` n'est traduit qu'en **mobile fr**. À compléter :
 
-- [ ] Namespace **contenu** `modules.chrono_bio.*` absent en **mobile en**, **web fr**, **web en**
-  → à créer (parité, cf. règle i18n CLAUDE.md). Inclure la clé `light`.
+- [ ] Contenu **journal/mois** `modules.chrono_bio.*` (tab_journal, add_today, view_month…) absent
+  en **mobile en**, **web fr/en** → à créer quand l'aperçu web (column_form) et l'écran mobile en
+  seront finalisés (Phase 3/4). Les 6 **libellés d'ancres** `modules.chrono_bio.<ancre>` sont déjà
+  présents en web fr/en (Phase 2).
 - [ ] Variantes **teen** (`modules.chrono_bio.*` + `modules.chronobiology_tracker.*`) absentes
   (mobile fr/en) → à créer.
 - [ ] Clés d'ancres `modules.chronobiology_tracker.anchor_*` absentes en mobile en.
 
 Fait en Phase 1 : renommage « Rythmes & régularité » (mobile fr/en, web fr/en), ajout de l'ancre
 `light` (seed + mobile fr), retrait du tab Fiches.
+
+Fait en Phase 2 (web praticien) : config des ancres par patient (service + hook + carte), libellés
+d'ancres `modules.chrono_bio.*` + clés `config_*` en web fr/en.

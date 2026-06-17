@@ -855,7 +855,21 @@
       "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
-      "empty_text": "Use the button above to log your first entry."
+      "empty_text": "Use the button above to log your first entry.",
+      "config_button": "Configure anchors",
+      "config_title": "Tracked anchors",
+      "config_hint": "Choose the daily time anchors this patient will track.",
+      "config_anchor_count": "{{count}} anchor tracked",
+      "config_anchor_count_plural": "{{count}} anchors tracked",
+      "config_min_anchor": "At least one anchor must remain tracked."
+    },
+    "chrono_bio": {
+      "wake_time": "Wake-up time",
+      "first_meal": "First meal",
+      "main_activity": "Main activity",
+      "last_meal": "Last meal",
+      "bedtime": "Bedtime",
+      "light": "Light exposure / going outside"
     },
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",
