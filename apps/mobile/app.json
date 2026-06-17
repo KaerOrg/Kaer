@@ -36,8 +36,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon.png",
-          "color": "#4F46E5",
+          "icon": "./assets/notification-icon.png",
+          "color": "#6dbfc3",
           "defaultChannel": "psytool-reminders"
         }
       ],
