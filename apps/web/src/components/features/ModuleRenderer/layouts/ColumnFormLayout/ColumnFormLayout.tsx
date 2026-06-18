@@ -7,10 +7,25 @@ interface Props {
   t: (key: string) => string
 }
 
-// Aperçu fidèle au mobile : reproduit le module beck_columns (preview_kind
-// 'column_form') — entête avec liste mock d'une entrée passée, puis aperçu
-// du formulaire d'entrée colonne-par-colonne (texte + slider). Source
-// mobile : ColumnFormLayout (FieldRenderer.tsx).
+// Exemple d'horaire par ancre — aperçu parlant, AUCUNE donnée patient réelle.
+const EXAMPLE_TIME: Record<string, string> = {
+  wake_time: '07:00',
+  first_meal: '08:00',
+  main_activity: '10:30',
+  last_meal: '19:30',
+  bedtime: '23:00',
+  light: '12:30',
+}
+
+function exampleTimeFor(child: ContentField): string {
+  const key = child.props['key']
+  return (key && EXAMPLE_TIME[key]) || child.props['preview_value'] || '08:00'
+}
+
+// Aperçu praticien du layout 'column_form'. Reproduit fidèlement le mobile :
+// une saisie passée (carte récap dérivée des champs réels du module) + le
+// formulaire de saisie colonne-par-colonne. Aucune donnée en dur propre à un
+// module : la carte d'exemple est construite à partir des `column_*_field`.
 export function ColumnFormLayout({ fields, t }: Props) {
   const configField = fields.find(f => f.field_type === 'column_form_config')
   const lbl = (key: string): string => {
@@ -20,10 +35,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
 
   const newBtn = lbl('new_btn_label')
   const saveLabel = lbl('save_label')
-  const emptyTitle = lbl('empty_title')
-  const emptyText = lbl('empty_text')
 
-  // Colonnes : header + ses enfants text/slider
   const headers = fields
     .filter(f => f.field_type === 'column_header')
     .sort((a, b) => a.sort_order - b.sort_order)
@@ -31,56 +43,55 @@ export function ColumnFormLayout({ fields, t }: Props) {
   const childrenByHeader = new Map<string, ContentField[]>()
   for (const f of fields) {
     if (
-      f.field_type === 'column_text_field' ||
-      f.field_type === 'column_slider_field' ||
-      f.field_type === 'column_time_field'
+      (f.field_type === 'column_text_field' ||
+        f.field_type === 'column_slider_field' ||
+        f.field_type === 'column_time_field') &&
+      f.parent_field_id
     ) {
-      if (!f.parent_field_id) continue
-      if (!childrenByHeader.has(f.parent_field_id)) childrenByHeader.set(f.parent_field_id, [])
-      childrenByHeader.get(f.parent_field_id)!.push(f)
+      const arr = childrenByHeader.get(f.parent_field_id) ?? []
+      arr.push(f)
+      childrenByHeader.set(f.parent_field_id, arr)
     }
   }
 
-  // Mock content pour rendre l'aperçu plus parlant — basé sur Beck
-  const mockTexts: Record<string, string> = {
-    beck_col1_text: 'Réunion d\'équipe ce matin',
-    beck_col2_text: 'Anxiété, frustration',
-    beck_col3_text: 'Je vais perdre mes mots, ils vont me juger',
-    beck_col4_text: 'J\'ai préparé ma présentation, j\'ai le droit de parler',
-    beck_col5_text: 'Anxiété diminue, je me sens plus en confiance',
+  // Carte « saisie passée » dérivée des champs : pastille (couleur de la colonne)
+  // + libellé + valeur d'exemple. Reflète la liste d'historique du mobile.
+  const recordRows: { id: string; color: string; label: string; value: string }[] = []
+  for (const h of headers) {
+    const color = h.props['color'] ?? '#6366F1'
+    for (const child of childrenByHeader.get(h.id) ?? []) {
+      const label = child.text_code ? t(child.text_code) : ''
+      if (!label) continue
+      let value = ''
+      if (child.field_type === 'column_time_field') value = exampleTimeFor(child)
+      else if (child.field_type === 'column_slider_field') value = '70%'
+      else value = child.props['preview_value'] ?? ''
+      recordRows.push({ id: child.id, color, label, value })
+    }
   }
 
   return (
     <div className="cf">
-      {/* État vide / intro ─────────────────────────────────────────────── */}
-      {(emptyTitle || emptyText) && (
-        <div className="cf-empty">
-          {emptyTitle && <span className="cf-empty__title">{emptyTitle}</span>}
-          {emptyText && <span className="cf-empty__text">{emptyText}</span>}
-        </div>
+      {recordRows.length > 0 && (
+        <article className="cf-record">
+          <header className="cf-record__head">
+            <span className="cf-record__date">{lbl('today_label') || "aujourd'hui"}</span>
+            <div className="cf-record__icons">
+              <Pencil size={14} />
+              <Trash2 size={14} />
+            </div>
+          </header>
+          <div className="cf-record__body">
+            {recordRows.map(r => (
+              <div key={r.id} className="cf-record__row">
+                <span className="cf-record__dot" style={{ background: r.color }} />
+                <span className="cf-record__label">{r.label}</span>
+                {r.value ? <span className="cf-record__val">{r.value}</span> : null}
+              </div>
+            ))}
+          </div>
+        </article>
       )}
-
-      {/* Liste mock d'une entrée ───────────────────────────────────────── */}
-      <article className="cf-entry-card">
-        <header className="cf-entry-card__head">
-          <span className="cf-entry-card__date">aujourd'hui · 09:30</span>
-          <div className="cf-entry-card__actions">
-            <Pencil size={14} className="cf-entry-card__action" />
-            <Trash2 size={14} className="cf-entry-card__action" />
-          </div>
-        </header>
-        <div className="cf-entry-card__body">
-          <div className="cf-entry-card__field">
-            <span className="cf-entry-card__field-label" style={{ color: '#0EA5E9' }}>Situation</span>
-            <span className="cf-entry-card__field-value">Réunion d'équipe ce matin</span>
-          </div>
-          <div className="cf-entry-card__field">
-            <span className="cf-entry-card__field-label" style={{ color: '#EF4444' }}>Pensée</span>
-            <span className="cf-entry-card__field-value">Je vais perdre mes mots…</span>
-            <span className="cf-entry-card__field-meta">Croyance 80%</span>
-          </div>
-        </div>
-      </article>
 
       {newBtn && (
         <div className="cf-new-btn">
@@ -89,7 +100,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
         </div>
       )}
 
-      {/* Mode entry — colonnes empilées ────────────────────────────────── */}
+      {/* Formulaire de saisie — colonnes empilées */}
       <div className="cf-entry">
         {headers.map((h, idx) => {
           const color = h.props['color'] ?? '#6366F1'
@@ -111,15 +122,9 @@ export function ColumnFormLayout({ fields, t }: Props) {
                 {children.map(child => {
                   if (child.field_type === 'column_text_field') {
                     const placeholder = child.text_code ? t(child.text_code) : ''
-                    const key = child.props['key']
-                    const mock = key ? mockTexts[`beck_${key}_text`] : undefined
                     return (
                       <div key={child.id} className="cf-text-input">
-                        {mock ? (
-                          <span className="cf-text-input__value">{mock}</span>
-                        ) : (
-                          <span className="cf-text-input__placeholder">{placeholder}</span>
-                        )}
+                        <span className="cf-text-input__placeholder">{placeholder}</span>
                       </div>
                     )
                   }
@@ -128,7 +133,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
                     const min = Number(child.props['min'] ?? 0)
                     const max = Number(child.props['max'] ?? 100)
                     const sliderColor = child.props['color'] ?? color
-                    const value = Math.round((min + max) * 0.7) // mock: 70%
+                    const value = Math.round((min + max) * 0.7)
                     const ratio = max > min ? (value - min) / (max - min) : 0.5
                     return (
                       <div key={child.id} className="cf-slider">
@@ -137,23 +142,19 @@ export function ColumnFormLayout({ fields, t }: Props) {
                           <span className="cf-slider__value" style={{ color: sliderColor }}>{value}%</span>
                         </div>
                         <div className="cf-slider__track">
-                          <div
-                            className="cf-slider__fill"
-                            style={{ width: `${ratio * 100}%`, background: sliderColor }}
-                          />
+                          <div className="cf-slider__fill" style={{ width: `${ratio * 100}%`, background: sliderColor }} />
                         </div>
                       </div>
                     )
                   }
                   if (child.field_type === 'column_time_field') {
                     const timeLabel = child.text_code ? t(child.text_code) : ''
-                    const mockValue = child.props['preview_value'] ?? '07:30'
                     return (
                       <div key={child.id} className="cf-time">
                         {timeLabel ? <span className="cf-time__label">{timeLabel}</span> : null}
                         <div className="cf-time__chip" style={{ borderColor: color }}>
                           <Clock size={14} style={{ color }} />
-                          <span className="cf-time__value">{mockValue}</span>
+                          <span className="cf-time__value">{exampleTimeFor(child)}</span>
                         </div>
                       </div>
                     )

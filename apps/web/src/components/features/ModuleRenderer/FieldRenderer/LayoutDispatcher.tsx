@@ -54,7 +54,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
 
   if (preview_kind === 'psyedu') return <PsyEduLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'psyedu_library') return <PsyEduLibraryLayout />
-  if (preview_kind === 'chrono_month') return <ChronoMonthLayout />
+  if (preview_kind === 'chrono_month') return <ChronoMonthLayout t={t} />
 
   if (preview_kind === 'tabbed') {
     return (
