@@ -71,6 +71,15 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   prefillBtnText:   { color: colors.primary, fontSize: 14, fontWeight: '600' },
+  // ── Date de la saisie (saisie rétroactive)
+  dateBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: spacing.sm, alignSelf: 'flex-start',
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.card,
+  },
+  dateBtnText:      { color: colors.text, fontSize: 14, fontWeight: '600' },
   // ── Champ horaire
   timeContainer:    { gap: spacing.xs },
   timeLabelRow: {

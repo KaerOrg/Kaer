@@ -2,6 +2,7 @@
   "common": {
     "save": "Enregistrer",
     "prefill_from_last": "Comme d'habitude",
+    "entry_date": "Date",
     "validate": "Valider",
     "cancel": "Annuler",
     "delete": "Supprimer",

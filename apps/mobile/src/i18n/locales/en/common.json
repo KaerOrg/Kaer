@@ -2,6 +2,7 @@
   "common": {
     "save": "Save",
     "prefill_from_last": "Same as usual",
+    "entry_date": "Date",
     "validate": "Confirm",
     "cancel": "Cancel",
     "delete": "Delete",

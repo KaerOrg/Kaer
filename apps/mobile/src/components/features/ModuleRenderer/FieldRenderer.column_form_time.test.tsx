@@ -241,3 +241,44 @@ describe('column_form — capture anti-friction « comme d\'habitude »', () => 
   })
 })
 
+const FIELDS_WITH_DATE: ContentField[] = [
+  makeField({ id: 'chrono.cfg', field_type: 'column_form_config', sort_order: 0, props: { editable_date: '1' } }),
+  COL_WAKE,
+]
+
+function renderWithDate() {
+  return render(
+    <FieldRenderer preview_kind="column_form" fields={FIELDS_WITH_DATE} moduleId="chronobiology_tracker" />
+  )
+}
+
+describe('column_form — date de saisie éditable (saisie rétroactive)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('affiche le bouton date quand editable_date est activé', async () => {
+    renderWithDate()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(await screen.findByTestId('entry-date')).toBeTruthy()
+  })
+
+  it('enregistre created_at (ISO) à la sauvegarde', async () => {
+    renderWithDate()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    await screen.findByTestId('entry-date')
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const call = (database.saveFormEntry as jest.Mock).mock.calls[0][0]
+    expect(typeof call.created_at).toBe('string')
+    expect(call.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('n\'affiche pas le bouton date sans editable_date', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('entry-date')).toBeNull()
+  })
+})
+

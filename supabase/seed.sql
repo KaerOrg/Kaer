@@ -2275,6 +2275,8 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.cfg', 'empty_text',    'modules.chrono_bio.empty_history'),
   -- capture anti-friction : bouton « comme d'habitude » (reprise de la dernière saisie)
   ('chrono.cfg', 'prefill_from_last', 'common.prefill_from_last'),
+  -- saisie rétroactive : le patient peut choisir la date de la saisie
+  ('chrono.cfg', 'editable_date', '1'),
   -- column header
   ('chrono.col.h',       'color',            '#3B82F6'),
   ('chrono.col.h',       'step_number',      '1'),

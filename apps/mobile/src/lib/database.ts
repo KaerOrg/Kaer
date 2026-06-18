@@ -1575,12 +1575,23 @@ export async function getFormEntry(id: string): Promise<FormEntry | null> {
   return { ...row, values: JSON.parse(row.values) as Record<string, string | number> }
 }
 
-export async function saveFormEntry(entry: Omit<FormEntry, 'created_at'>): Promise<void> {
+export async function saveFormEntry(
+  entry: Omit<FormEntry, 'created_at'> & { created_at?: string },
+): Promise<void> {
   const database = getDb()
-  await database.runAsync(
-    `INSERT OR REPLACE INTO form_entries (id, module_id, "values") VALUES (?, ?, ?)`,
-    [entry.id, entry.module_id, JSON.stringify(entry.values)]
-  )
+  // `created_at` fourni = saisie rétroactive (le patient choisit la date) ; sinon
+  // valeur par défaut SQLite (CURRENT_TIMESTAMP).
+  if (entry.created_at) {
+    await database.runAsync(
+      `INSERT OR REPLACE INTO form_entries (id, module_id, "values", created_at) VALUES (?, ?, ?, ?)`,
+      [entry.id, entry.module_id, JSON.stringify(entry.values), entry.created_at]
+    )
+  } else {
+    await database.runAsync(
+      `INSERT OR REPLACE INTO form_entries (id, module_id, "values") VALUES (?, ?, ?)`,
+      [entry.id, entry.module_id, JSON.stringify(entry.values)]
+    )
+  }
 }
 
 export async function deleteFormEntry(id: string): Promise<void> {

@@ -7,7 +7,9 @@ import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { FormEntry }
 
-export async function saveFormEntry(entry: Omit<FormEntry, 'created_at'>): Promise<void> {
+export async function saveFormEntry(
+  entry: Omit<FormEntry, 'created_at'> & { created_at?: string },
+): Promise<void> {
   await syncUpsert(() => dbSave(entry), {
     local_id: entry.id,
     module_id: entry.module_id,

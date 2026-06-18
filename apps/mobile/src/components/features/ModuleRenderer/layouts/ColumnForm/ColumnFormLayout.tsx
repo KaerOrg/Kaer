@@ -14,13 +14,14 @@ import {
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
-import { formatDateFull } from '../../../../../lib/dateUtils'
+import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -87,6 +88,10 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   const [editingId, setEditingId] = useState<string | null>(null)
   const [values, setValues] = useState<Record<string, string | number>>({})
   const [saving, setSaving] = useState(false)
+  // Date de la saisie (saisie rétroactive). Pilotée seulement si `editable_date` activé.
+  const [entryDate, setEntryDate] = useState<Date>(() => new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const editableDate = configField?.props['editable_date'] === '1'
 
   const loadEntries = useCallback(async () => {
     const data = await getAllFormEntries(moduleId)
@@ -117,6 +122,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   const handleNew = useCallback(() => {
     setEditingId(null)
     setValues(initialValuesForNew())
+    setEntryDate(new Date())
     setMode('entry')
   }, [initialValuesForNew])
 
@@ -124,6 +130,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     const merged = { ...initialValuesForNew(), ...entry.values }
     setEditingId(entry.id)
     setValues(merged)
+    setEntryDate(new Date(entry.created_at))
     setMode('entry')
   }, [initialValuesForNew])
 
@@ -141,6 +148,12 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     if (!lastEntry) return
     setValues({ ...initialValuesForNew(), ...lastEntry.values })
   }, [lastEntry, initialValuesForNew])
+
+  const handleOpenDatePicker = useCallback(() => setShowDatePicker(true), [])
+  const handleDatePicked = useCallback((_: unknown, picked?: Date) => {
+    if (Platform.OS === 'android') setShowDatePicker(false)
+    if (picked) setEntryDate(picked)
+  }, [])
 
   const handleCancelEntry = useCallback(() => {
     setMode('list')
@@ -175,7 +188,12 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     setSaving(true)
     try {
       const id = editingId ?? generateId()
-      await saveFormEntry({ id, module_id: moduleId, values })
+      await saveFormEntry({
+        id,
+        module_id: moduleId,
+        values,
+        ...(editableDate ? { created_at: entryDate.toISOString() } : {}),
+      })
       await loadEntries()
       setMode('list')
       setEditingId(null)
@@ -185,7 +203,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     } finally {
       setSaving(false)
     }
-  }, [editingId, values, moduleId, requiredKeysAny, loadEntries, lbl, t, showToast])
+  }, [editingId, values, moduleId, requiredKeysAny, editableDate, entryDate, loadEntries, lbl, t, showToast])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -204,6 +222,28 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           contentContainerStyle={styles.entryContent}
           keyboardShouldPersistTaps="handled"
         >
+          {editableDate ? (
+            <Pressable
+              style={styles.dateBtn}
+              onPress={handleOpenDatePicker}
+              accessibilityRole="button"
+              testID="entry-date"
+            >
+              <MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />
+              <Text style={styles.dateBtnText}>
+                {t('common.entry_date')} : {formatDateNumeric(entryDate.toISOString())}
+              </Text>
+            </Pressable>
+          ) : null}
+          {showDatePicker ? (
+            <DateTimePicker
+              value={entryDate}
+              mode="date"
+              maximumDate={new Date()}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDatePicked}
+            />
+          ) : null}
           {canPrefill ? (
             <Pressable
               style={styles.prefillBtn}

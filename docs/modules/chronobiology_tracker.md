@@ -58,6 +58,15 @@ prop `prefill_from_last` du `column_form_config` (libellé `common.prefill_from_
 Générique (tout module `column_form` peut l'activer), masqué en mode édition. Choix explicite
 (pas de préremplissage silencieux) → intentionnalité préservée, conforme MDR.
 
+## Saisie rétroactive — date éditable (livré)
+
+Opt-in **config-first** via le prop `editable_date` du `column_form_config` : un sélecteur de date
+apparaît en mode saisie (`ColumnFormLayout`), bornée à aujourd'hui (`maximumDate`). Permet au
+patient de dater une saisie d'un jour précédent (ex. il remplit le lendemain). Persistée dans
+`form_entries.created_at` (`saveFormEntry` accepte un `created_at` optionnel). Générique à tout
+module `column_form`. Feature patient (l'indice de régularité praticien reste basé sur les horaires,
+pas sur la date).
+
 ## Conformité MDR 2017/745
 
 > Le code affiche, jamais il ne conclut.
