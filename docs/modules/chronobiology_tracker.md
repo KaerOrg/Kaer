@@ -117,17 +117,16 @@ le praticien configure un **rappel d'horaire fixe** invitant le patient à saisi
 Rappel **non conditionnel aux données** (horaire fixe) → explicitement autorisé par la règle d'or
 MDR (≠ alerte déclenchée par un score).
 
-## Dette i18n à combler AVANT release (bloquant Phase 2/3)
+## i18n (soldé)
 
-Le contenu complet `modules.chrono_bio.*` n'est traduit qu'en **mobile fr**. À compléter :
-
-- [ ] Contenu **journal/mois** `modules.chrono_bio.*` (tab_journal, add_today, view_month…) absent
-  en **mobile en**, **web fr/en** → à créer quand l'aperçu web (column_form) et l'écran mobile en
-  seront finalisés (Phase 3/4). Les 6 **libellés d'ancres** `modules.chrono_bio.<ancre>` sont déjà
-  présents en web fr/en (Phase 2).
-- [ ] Variantes **teen** (`modules.chrono_bio.*` + `modules.chronobiology_tracker.*`) absentes
-  (mobile fr/en) → à créer.
-- [ ] Clés d'ancres `modules.chronobiology_tracker.anchor_*` absentes en mobile en.
+- [x] Contenu `modules.chrono_bio.*` + `modules.chronobiology_tracker.anchor_*` créés en
+  **mobile en** (parité avec mobile fr).
+- [x] Variantes **teen** ciblées (`modules.chrono_bio.*` + `chronobiology_tracker.description`)
+  en **mobile fr/en** (tutoiement ; i18next retombe sur `common` pour les clés neutres).
+- Web : seuls les libellés d'ancres + clés `config_*`/`regularity_*` sont nécessaires (présents
+  fr/en) — le web ne rend pas l'écran patient journal/mois, donc pas de contenu `chrono_bio` à
+  traduire côté web.
+- `de/es/it/pt` : best-effort (i18next fallback `en`), non requis.
 
 Fait en Phase 1 : renommage « Rythmes & régularité » (mobile fr/en, web fr/en), ajout de l'ancre
 `light` (seed + mobile fr), retrait du tab Fiches.

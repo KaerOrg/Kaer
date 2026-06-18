@@ -86,6 +86,20 @@
       "step_smell": "2 odeurs autour de toi",
       "step_taste": "1 goût dans ta bouche"
     },
+    "chronobiology_tracker": {
+      "description": "La régularité de tes journées : lever, repas, activité, lumière, coucher"
+    },
+    "chrono_bio": {
+      "add_today": "Noter mes repères du jour",
+      "empty_history": "Rien pour l'instant.",
+      "tap_to_add": "Appuie pour noter",
+      "no_anchor_title": "Aucun repère noté",
+      "no_anchor_msg": "Mets au moins un horaire avant d'enregistrer.",
+      "section_anchors": "Mes repères du jour",
+      "optional_hint": "Tous les repères sont au choix, mets ceux dont tu te souviens.",
+      "save_entry": "Enregistrer",
+      "today_label": "Aujourd'hui"
+    },
     "mood_tracker": {
       "title": "Comment tu vas ?",
       "intro": "Dis-moi comment tu te sens aujourd'hui.",

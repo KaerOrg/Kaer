@@ -86,6 +86,20 @@
       "step_smell": "2 smells around you",
       "step_taste": "1 taste in your mouth"
     },
+    "chronobiology_tracker": {
+      "description": "How regular your days are: wake-up, meals, activity, light, bedtime"
+    },
+    "chrono_bio": {
+      "add_today": "Log my anchors for today",
+      "empty_history": "Nothing yet.",
+      "tap_to_add": "Tap to log",
+      "no_anchor_title": "No anchor logged",
+      "no_anchor_msg": "Add at least one time before saving.",
+      "section_anchors": "My anchors for today",
+      "optional_hint": "All anchors are optional, add the ones you remember.",
+      "save_entry": "Save",
+      "today_label": "Today"
+    },
     "mood_tracker": {
       "title": "How are you doing?",
       "intro": "Tell me how you're feeling today.",
