@@ -49,15 +49,9 @@ export interface ColumnFormLayoutProps {
   footer?: ContentField
   /** Identifiant du module — clé de persistance des `form_entries`. */
   moduleId: string
-  /**
-   * Config patient (`patient_modules.config`). Si `config.anchors` est un tableau non
-   * vide de clés, seuls ces champs horaires (`column_time_field`) sont affichés
-   * (sélection praticien « Rythmes & régularité »). Absent/vide = tous les champs.
-   */
-  patientConfig?: Record<string, unknown> | null
 }
 
-export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: ColumnFormLayoutProps) {
+export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
   const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -74,13 +68,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     [requiredKeysProp]
   )
 
-  // ── Filtre d'ancres : sélection praticien (config.anchors). null = pas de filtre.
-  const anchorFilter = useMemo<Set<string> | null>(() => {
-    const a = patientConfig?.['anchors']
-    if (!Array.isArray(a) || a.length === 0) return null
-    return new Set(a.filter((x): x is string => typeof x === 'string'))
-  }, [patientConfig])
-
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)
   const columns = useMemo<ColumnSpec[]>(() => {
     const headers = fields
@@ -89,14 +76,9 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     return headers.map(h => ({
       sectionId: h.section_id!,
       header: h,
-      children: (h.children ?? [])
-        .slice()
-        // Seuls les champs horaires sont filtrables par la sélection d'ancres ;
-        // les autres widgets restent toujours affichés.
-        .filter(c => c.field_type !== 'column_time_field' || anchorFilter === null || anchorFilter.has(c.props['key'] ?? ''))
-        .sort((a, b) => a.sort_order - b.sort_order),
+      children: (h.children ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
     }))
-  }, [fields, anchorFilter])
+  }, [fields])
 
   // ── State
   const [mode, setMode] = useState<'list' | 'entry'>('list')

@@ -1,7 +1,15 @@
 # Spec — Module « Rythmes & régularité » (refonte de `chronobiology_tracker`)
 
-> Statut : **cadrage validé** (2026-06-15) — implémentation à venir sur la branche `refonte/chronobiologie`.
-> Ce document est la feuille de route. Il sera tenu à jour à chaque phase.
+> Statut : **5 phases livrées** sur la branche `refonte/chronobiologie`. Feuille de route, tenue à jour.
+>
+> **Révision design (2026-06-18), après test sur device :**
+> - **Config des ancres par patient RETIRÉE.** Les 6 ancres sont toujours toutes proposées, saisie
+>   optionnelle ; une ancre non remplie n'apparaît pas au bilan (le panneau de régularité n'affiche
+>   que les ancres saisies ≥ 2 fois). La config ajoutait une étape sans bénéfice. → Suppression de
+>   la carte d'édition, du hook, du service `*TrackedAnchors`/`*AnchorCatalog`, et du filtrage mobile.
+> - **Onglet Fiches RESTAURÉ** et onglets **réordonnés : Journal (1) · Vue mensuelle (2) · Fiches (3)**
+>   — on arrive sur l'action, pas sur la lecture. Les fiches restent aussi dans la bibliothèque
+>   Psychoéducation (thème `lifestyle`) ; le contenu vit une seule fois, l'onglet n'est qu'un accès.
 
 ## 1. Intention
 

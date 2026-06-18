@@ -37,9 +37,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
 ])
 
 // Layouts qui ont besoin de la config patient (patient_modules.config).
-// `tabbed` : pour « Rythmes & régularité », le sous-onglet column_form filtre les
-// ancres affichées selon config.anchors (no-op pour les autres modules tabbed).
-const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library', 'tabbed'])
+const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library'])
 
 export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params

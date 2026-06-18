@@ -102,7 +102,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   }
 
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} patientConfig={patientConfig ?? null} />
+  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={visibleFields} footer={footer} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={visibleFields} moduleId={moduleId ?? ''} />
@@ -110,7 +110,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'decision_grid') return <DecisionGridLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'psyedu') return <PsyEduLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'psyedu_library') return <PsyEduLibraryLayout patientConfig={patientConfig ?? null} />
-  if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} patientConfig={patientConfig ?? null} />
+  if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'chrono_month') return <ChronoMonthLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'crisis_urgency') return <CrisisUrgencyLayout fields={visibleFields} />
 

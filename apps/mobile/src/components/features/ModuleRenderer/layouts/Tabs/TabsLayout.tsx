@@ -29,11 +29,9 @@ export interface TabsLayoutProps {
   fields: ContentField[]
   /** Identifiant du module, propagé aux sous-layouts. */
   moduleId: string
-  /** Config patient, propagée aux sous-layouts qui en dépendent (ex. column_form). */
-  patientConfig?: Record<string, unknown> | null
 }
 
-export function TabsLayout({ fields, moduleId, patientConfig }: TabsLayoutProps) {
+export function TabsLayout({ fields, moduleId }: TabsLayoutProps) {
   // Lazy require — casse le cycle circulaire :
   // FieldRenderer/index → FieldRenderer.tsx → LayoutDispatcher → TabsLayout → FieldRenderer/index
   // Le require() à l'intérieur du composant est évalué à l'exécution (après initialisation complète).
@@ -95,7 +93,6 @@ export function TabsLayout({ fields, moduleId, patientConfig }: TabsLayoutProps)
           preview_kind={activeTab.subPreviewKind}
           fields={activeTab.children}
           moduleId={moduleId}
-          patientConfig={patientConfig ?? null}
         />
       </View>
     </View>

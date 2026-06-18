@@ -33,7 +33,6 @@ import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
 import { ChronobiologyCard } from './ChronobiologyCard'
-import { useChronoAnchorsEditor } from '../hooks/useChronoAnchorsEditor'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
@@ -108,7 +107,6 @@ export function PatientModulesTab({
   const psycho = usePsychoEducationPicker(modules, allTopicIds, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
-  const chronoAnchors = useChronoAnchorsEditor(modules, onReloadModules)
 
   // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
   const isPreviewOpen = useCallback(
@@ -463,7 +461,6 @@ export function PatientModulesTab({
           loading={isModuleBusy('chronobiology_tracker', mod?.id)}
           previewOpen={isPreviewOpen('chronobiology_tracker')}
           dataOpen={isDataOpen('chronobiology_tracker')}
-          anchors={chronoAnchors}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}

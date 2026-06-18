@@ -6,16 +6,13 @@ vi.mock('../lib/supabase', () => ({
 
 import { supabase } from '../lib/supabase'
 import {
-  fetchChronoAnchorCatalog,
   fetchPatientModules,
-  fetchTrackedAnchors,
   revokeModule,
   unlockModule,
   unlockPsychoeducation,
   unlockRim,
   updatePsychoeducationTopics,
   updateRim,
-  updateTrackedAnchors,
 } from './moduleAssignmentService'
 
 function makeChain(result: { data: unknown; error?: unknown } = { data: null, error: null }) {
@@ -150,87 +147,5 @@ describe('moduleAssignmentService.unlockRim / updateRim', () => {
       alternative_scenario: 'alt',
       original_scenario: 'orig',
     })
-  })
-})
-
-describe('moduleAssignmentService.fetchTrackedAnchors', () => {
-  it('retourne les clés d’ancres suivies', async () => {
-    vi.mocked(supabase.from).mockReturnValue(
-      makeChain({ data: { config: { anchors: ['wake_time', 'light'] } }, error: null }) as never,
-    )
-
-    const result = await fetchTrackedAnchors('pm-1')
-
-    expect(result).toEqual(['wake_time', 'light'])
-  })
-
-  it('retourne [] si aucune config d’ancres', async () => {
-    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: { config: {} }, error: null }) as never)
-
-    expect(await fetchTrackedAnchors('pm-1')).toEqual([])
-  })
-
-  it('filtre les valeurs non-string', async () => {
-    vi.mocked(supabase.from).mockReturnValue(
-      makeChain({ data: { config: { anchors: ['wake_time', 42, null] } }, error: null }) as never,
-    )
-
-    expect(await fetchTrackedAnchors('pm-1')).toEqual(['wake_time'])
-  })
-})
-
-describe('moduleAssignmentService.updateTrackedAnchors', () => {
-  it('écrit anchors en préservant le reste de la config', async () => {
-    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
-    vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({ data: { config: { foo: 'bar' } }, error: null }) as never)
-      .mockReturnValueOnce({ update } as never)
-
-    const result = await updateTrackedAnchors('pm-1', ['wake_time', 'bedtime'])
-
-    expect(update.mock.calls[0][0].config).toEqual({ foo: 'bar', anchors: ['wake_time', 'bedtime'] })
-    expect(result).toEqual({ ok: true })
-  })
-
-  it('propage l’échec Supabase (ok: false)', async () => {
-    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: { message: 'x' } }) })
-    vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({ data: { config: {} }, error: null }) as never)
-      .mockReturnValueOnce({ update } as never)
-
-    expect(await updateTrackedAnchors('pm-1', ['light'])).toEqual({ ok: false })
-  })
-})
-
-describe('moduleAssignmentService.fetchChronoAnchorCatalog', () => {
-  it('retourne le catalogue trié avec clé + libellé i18n', async () => {
-    vi.mocked(supabase.from)
-      .mockReturnValueOnce(makeChain({
-        data: [
-          { id: 'chrono.col.wake', text_code: 'modules.chrono_bio.wake_time' },
-          { id: 'chrono.col.light', text_code: 'modules.chrono_bio.light' },
-        ],
-        error: null,
-      }) as never)
-      .mockReturnValueOnce(makeChain({
-        data: [
-          { field_id: 'chrono.col.wake', prop_value: 'wake_time' },
-          { field_id: 'chrono.col.light', prop_value: 'light' },
-        ],
-        error: null,
-      }) as never)
-
-    const result = await fetchChronoAnchorCatalog()
-
-    expect(result).toEqual([
-      { key: 'wake_time', textCode: 'modules.chrono_bio.wake_time' },
-      { key: 'light', textCode: 'modules.chrono_bio.light' },
-    ])
-  })
-
-  it('retourne [] si aucun champ d’ancre', async () => {
-    vi.mocked(supabase.from).mockReturnValueOnce(makeChain({ data: [], error: null }) as never)
-
-    expect(await fetchChronoAnchorCatalog()).toEqual([])
   })
 })

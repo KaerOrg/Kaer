@@ -3,84 +3,64 @@ import { describe, it, expect, vi } from 'vitest'
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'fr' } }),
 }))
-vi.mock('../../../components/features/ModulePreviewPanel', () => ({ ModulePreviewPanel: () => null }))
-vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => null }))
+vi.mock('../../../components/features/ModulePreviewPanel', () => ({
+  ModulePreviewPanel: () => <div data-testid="preview-panel" />,
+}))
+vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => <div data-testid="data-panel" /> }))
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ChronobiologyCard, type ChronobiologyCardProps } from './ChronobiologyCard'
 import type { PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '../../../services/moduleCatalogService'
 
-const CATALOG = [
-  { key: 'wake_time', textCode: 'modules.chrono_bio.wake_time' },
-  { key: 'light', textCode: 'modules.chrono_bio.light' },
-]
-
-function makeAnchors(overrides: Partial<ChronobiologyCardProps['anchors']> = {}) {
-  return {
-    module: { id: 'pm1' } as unknown as PatientModule,
-    open: true,
-    catalog: CATALOG,
-    selected: ['wake_time'],
-    saving: false,
-    openEditor: vi.fn(),
-    close: vi.fn(),
-    toggle: vi.fn(),
-    isSelected: (k: string) => k === 'wake_time',
-    ...overrides,
-  }
-}
-
 function renderCard(props: Partial<ChronobiologyCardProps> = {}) {
-  const anchors = props.anchors ?? makeAnchors()
+  const onToggleData = vi.fn()
   const defaults: ChronobiologyCardProps = {
     patientId: 'pat1',
     tagChips: null,
-    modItem: { id: 'chronobiology_tracker', color: '#06B6D4' } as unknown as ModuleItem,
+    modItem: { id: 'chronobiology_tracker', color: '#06B6D4', icon: 'clock' } as unknown as ModuleItem,
     modIcon: null,
     mod: { id: 'pm1', unlocked_at: '2026-06-01' } as unknown as PatientModule,
     unlocked: true,
     loading: false,
     previewOpen: false,
     dataOpen: false,
-    anchors,
     moduleToggle: () => null,
     onTogglePreview: vi.fn(),
-    onToggleData: vi.fn(),
+    onToggleData,
     onConfigureNotif: vi.fn(),
     onUnlock: vi.fn(),
     onRevoke: vi.fn(),
     ...props,
   }
-  return { anchors, ...render(<ChronobiologyCard {...defaults} />) }
+  return { onToggleData, ...render(<ChronobiologyCard {...defaults} />) }
 }
 
 describe('ChronobiologyCard', () => {
-  it('affiche le titre et l’éditeur d’ancres quand débloqué et ouvert', () => {
+  it('affiche le titre du module', () => {
     renderCard()
     expect(screen.getByText('modules.chronobiology_tracker.label')).toBeTruthy()
-    // une case par ancre du catalogue
-    expect(screen.getAllByRole('checkbox')).toHaveLength(2)
-    expect(screen.getByText('modules.chrono_bio.wake_time')).toBeTruthy()
-    expect(screen.getByText('modules.chrono_bio.light')).toBeTruthy()
   })
 
-  it('coche les ancres sélectionnées (wake_time) et pas les autres (light)', () => {
+  it('n’affiche aucun éditeur de configuration d’ancres', () => {
     renderCard()
-    const boxes = screen.getAllByRole('checkbox') as HTMLInputElement[]
-    expect(boxes[0].checked).toBe(true)   // wake_time
-    expect(boxes[1].checked).toBe(false)  // light
-  })
-
-  it('bascule une ancre au clic via le hook', () => {
-    const { anchors } = renderCard()
-    const boxes = screen.getAllByRole('checkbox')
-    fireEvent.click(boxes[1])
-    expect(anchors.toggle).toHaveBeenCalledWith('light')
-  })
-
-  it('n’affiche pas l’éditeur si le module n’est pas débloqué', () => {
-    renderCard({ unlocked: false, mod: undefined })
+    expect(screen.queryByText('modules.chronobiology_tracker.config_button')).toBeNull()
     expect(screen.queryByRole('checkbox')).toBeNull()
+  })
+
+  it('rend le panneau aperçu quand previewOpen', () => {
+    renderCard({ previewOpen: true })
+    expect(screen.getByTestId('preview-panel')).toBeTruthy()
+  })
+
+  it('déclenche onToggleData au clic sur « Données »', () => {
+    const { onToggleData } = renderCard()
+    fireEvent.click(screen.getByText('patient.data_button'))
+    expect(onToggleData).toHaveBeenCalledWith('chronobiology_tracker')
+  })
+
+  it('n’affiche pas les actions si le module n’est pas débloqué', () => {
+    renderCard({ unlocked: false, mod: undefined })
+    expect(screen.queryByText('patient.data_button')).toBeNull()
   })
 })

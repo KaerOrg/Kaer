@@ -591,12 +591,6 @@
     "chronobiology_tracker": {
       "label": "Rythmes & régularité",
       "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher.",
-      "config_button": "Configurer les ancres",
-      "config_title": "Ancres suivies",
-      "config_hint": "Choisissez les repères horaires que ce patient suivra au quotidien.",
-      "config_anchor_count": "{{count}} ancre suivie",
-      "config_anchor_count_plural": "{{count}} ancres suivies",
-      "config_min_anchor": "Au moins une ancre doit rester suivie.",
       "regularity_title": "Régularité des horaires",
       "regularity_note": "Écart-type des horaires par ancre. Valeurs brutes, à interpréter en consultation.",
       "regularity_min": "min",

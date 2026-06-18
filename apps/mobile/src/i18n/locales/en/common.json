@@ -485,6 +485,7 @@
     },
     "chrono_bio": {
       "tab_journal": "Journal",
+      "tab_fiches": "Cards",
       "today_label": "Today",
       "add_today": "Log my anchors for today",
       "history_label": "History",

@@ -14,12 +14,13 @@ Base scientifique et décisions de cadrage : voir la spec.
 
 ## Structure (preview_kind `tabbed`)
 
-Deux onglets (l'ancien onglet **Fiches**/psyedu a été **retiré** — refonte 2026-06-15) :
+Trois onglets, dans cet ordre (on arrive directement sur l'action, pas sur la lecture) :
 
-| Onglet | `sub_preview_kind` | Contenu |
-|---|---|---|
-| Journal | `column_form` | Saisie des ancres horaires du jour (toutes optionnelles) |
-| Mois | `chrono_month` | Vue mensuelle / historique neutre |
+| Ordre | Onglet | `sub_preview_kind` | Contenu |
+|---|---|---|---|
+| 1 | Journal | `column_form` | Saisie des ancres horaires du jour (toutes optionnelles) |
+| 2 | Vue mensuelle | `chrono_month` | Vue mensuelle / historique neutre |
+| 3 | Fiches | `psyedu` | Lecture psychoéducative contextuelle (même contenu que la bibliothèque) |
 
 ## Catalogue d'ancres
 
@@ -37,32 +38,17 @@ Défini en base (`module_content_fields`, champs `column_time_field` enfants de 
 Les 5 premières = Social Rhythm Metric-5 de l'IPSRT. `light` ajoutée à la refonte (zeitgeber
 dominant, Dollish 2023). Toutes **optionnelles** (`field_props optional = '1'`).
 
-## Configuration par patient (Phase 2 web — implémenté)
+## Ancres : toutes suivies, aucune configuration
 
-Le praticien choisit, **par patient**, le sous-ensemble d'ancres suivi (pertinence clinique +
-friction réduite), aligné sur le pattern `medication_side_effects` (`tracked_effects`) :
+**Décision produit (2026-06-18) :** pas de configuration des ancres par patient. Les 6 ancres sont
+**toujours toutes proposées** ; la saisie est **optionnelle**. Une ancre que le patient ne remplit
+pas n'apparaît simplement pas à son bilan — le panneau de régularité praticien n'affiche que les
+ancres saisies au moins 2 fois. La sélection par patient (ex-`config.anchors`, carte praticien
+`ChronobiologyCard` + hook + filtrage mobile) a été **retirée** : elle ajoutait une étape sans
+bénéfice réel, la friction étant déjà couverte par l'optionalité + le bouton « comme d'habitude ».
 
-```
-patient_modules.config = { "anchors": ["wake_time", "first_meal", "light", "bedtime"] }
-```
-
-Le catalogue (ancres disponibles) vit en base ; la **sélection** vit dans
-`patient_modules.config.anchors`. **Config vide = toutes les ancres suivies** (défaut).
-Un garde-fou impose au moins une ancre suivie.
-
-Pièces livrées (web praticien) :
-- `moduleAssignmentService.ts` : `fetchChronoAnchorCatalog` (catalogue lu en base, config-first),
-  `fetchTrackedAnchors` / `updateTrackedAnchors` (sélection dans `patient_modules.config.anchors`).
-- `hooks/useChronoAnchorsEditor.ts` : état d'édition (catalogue + sélection, toggle, garde-fou).
-- `tabs/ChronobiologyCard.tsx` + `tabs/AnchorToggleRow.tsx` : carte praticien + éditeur d'ancres,
-  branchée dans `PatientModulesTab`.
-
-**Filtrage des ancres (Phase 3 — livré).** Le `column_form` mobile n'affiche que les ancres
-sélectionnées par le praticien (`config.anchors`) ; config vide/absente = toutes. Le flux de
-`patientConfig` : `ModuleContentScreen` (le `tabbed` rejoint `CONFIG_LAYOUTS` → fetch de
-`patient_modules.config`) → `LayoutDispatcher` → `TabsLayout` → `FieldRenderer` récursif →
-`ColumnFormLayout` (filtre les `column_time_field` par clé). No-op pour les autres modules
-`tabbed`/`column_form` (pas de `config.anchors`).
+La carte praticien `ChronobiologyCard` conserve : aperçu patient, panneau Données (régularité),
+bouton de rappel.
 
 ## Capture anti-friction (Phase 3 — livré)
 

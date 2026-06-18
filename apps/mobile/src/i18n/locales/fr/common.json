@@ -557,6 +557,7 @@
     },
     "chrono_bio": {
       "tab_journal": "Journal",
+      "tab_fiches": "Fiches",
       "today_label": "Aujourd'hui",
       "add_today": "Saisir mes ancrages du jour",
       "history_label": "Historique",

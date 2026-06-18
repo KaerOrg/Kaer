@@ -42,7 +42,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`authService.ts`](../apps/web/src/services/authService.ts) | Session praticien, login, register, mise à jour profil/langue, logout |
 | [`patientService.ts`](../apps/web/src/services/patientService.ts) | Liste des patients (avec modules), header patient, options pour pickers, mode ado |
 | [`patientRefService.ts`](../apps/web/src/services/patientRefService.ts) | `resolvePatientRef` — résout l'identifiant public opaque de l'URL (`public_ref`) vers le `patient_id` réel. Défense en profondeur (masque la PK), la RLS reste la barrière. Voir [`spec/patient-public-ref.md`](spec/patient-public-ref.md). |
-| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, effets indésirables/médicaments suivis, ancres « Rythmes & régularité » (`fetchTrackedAnchors`/`updateTrackedAnchors`), proposition d'échelle |
+| [`moduleAssignmentService.ts`](../apps/web/src/services/moduleAssignmentService.ts) | Déblocage/révocation de modules, configuration psychoéducation/RIM, effets indésirables/médicaments suivis, proposition d'échelle |
 | [`invitationService.ts`](../apps/web/src/services/invitationService.ts) | Liste des invitations en attente, validation de token, envoi via edge function, signup patient |
 | [`practitionerSettingsService.ts`](../apps/web/src/services/practitionerSettingsService.ts) | `practitioner_module_settings` (modules activés par praticien) |
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
