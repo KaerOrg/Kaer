@@ -102,12 +102,20 @@ Générique (tout module `column_form` peut l'activer), masqué en mode édition
 - **Vue patient** : restitution neutre **déjà** assurée par l'historique (`column_form`) et la vue
   mensuelle (`ChronoMonth`). Pas de viz de dispersion patient (serait interprétative → choix MDR).
 
-## Contenu psychoéducatif
+## Contenu psychoéducatif (Phase 5 — livré)
 
 `supabase/seed/chrono_seed.sql` contient 7 fiches psyedu sourcées (dont une sur l'ancre lumière).
-Elles ne sont **plus** branchées dans le tracker (onglet Fiches retiré) ; elles seront surfacées
-via le module **Psychoéducation** dédié et/ou un lien depuis le module (Phase 5). Le seed est
-conservé — contenu sourcé à ne pas perdre.
+L'onglet Fiches a été retiré du tracker (découplage fiche↔module) ; les fiches sont désormais
+rattachées au thème **`lifestyle`** (Hygiène de vie) → elles apparaissent dans la **bibliothèque
+Psychoéducation** aux côtés des fiches sommeil/alimentation/activité (`fetchLibraryTopics` ne
+retourne que les fiches avec `theme_id`). Titres/contenus i18n dans `psyedu.json`.
+
+## Rappels (Phase 5 — livré)
+
+`ChronobiologyCard` expose un bouton cloche (`onConfigureNotif` → `NotificationRoutineModal`) :
+le praticien configure un **rappel d'horaire fixe** invitant le patient à saisir ses ancres.
+Rappel **non conditionnel aux données** (horaire fixe) → explicitement autorisé par la règle d'or
+MDR (≠ alerte déclenchée par un score).
 
 ## Dette i18n à combler AVANT release (bloquant Phase 2/3)
 

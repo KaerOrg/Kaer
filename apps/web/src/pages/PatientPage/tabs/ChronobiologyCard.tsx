@@ -1,6 +1,6 @@
 import { useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, LineChart } from 'lucide-react'
+import { Bell, Eye, EyeOff, LineChart } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
@@ -28,6 +28,7 @@ export interface ChronobiologyCardProps {
   moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
   onTogglePreview: (type: ModuleType) => void
   onToggleData: (type: ModuleType) => void
+  onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
   onUnlock: (type: ModuleType) => void
   onRevoke: (moduleId: string) => void
 }
@@ -52,6 +53,7 @@ export function ChronobiologyCard({
   moduleToggle,
   onTogglePreview,
   onToggleData,
+  onConfigureNotif,
   onUnlock,
   onRevoke,
 }: ChronobiologyCardProps) {
@@ -65,6 +67,15 @@ export function ChronobiologyCard({
       onUnlock(MODULE_TYPE)
     }
   }, [unlocked, mod, anchors, onRevoke, onUnlock])
+
+  const handleNotif = useCallback(() => {
+    if (!mod) return
+    onConfigureNotif({
+      patientModuleId: mod.id,
+      moduleLabel: t('modules.chronobiology_tracker.label'),
+      moduleIconName: modItem.icon,
+    })
+  }, [mod, onConfigureNotif, t, modItem.icon])
 
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
   const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
@@ -83,6 +94,14 @@ export function ChronobiologyCard({
         }}
         actions={unlocked && mod ? (
           <>
+            <Button
+              variant="outline"
+              size="xs"
+              icon={<Bell size={14} />}
+              aria-label={t('notifications.configure_button')}
+              title={t('notifications.configure_button')}
+              onClick={handleNotif}
+            />
             {!anchors.open && (
               <Button variant="ghost" size="sm" onClick={anchors.openEditor}>
                 {t('modules.chronobiology_tracker.config_button')}

@@ -467,6 +467,7 @@ export function PatientModulesTab({
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
         />

@@ -12,15 +12,18 @@ where module_key = 'chronobiology_tracker';
 -- TOPICS (7 fiches)
 -- ────────────────────────────────────────────────────────────
 
-insert into public.psyedu_topics (id, module_key, topic_key, icon_name, sort_order)
+-- theme_id = 'lifestyle' : surface les fiches dans la bibliothèque Psychoéducation
+-- (Hygiène de vie). Le tracker n'embarque plus de fiches (onglet Fiches retiré) ;
+-- la psychoéducation vit dans son module, découplée — d'où le rattachement par thème.
+insert into public.psyedu_topics (id, module_key, theme_id, topic_key, icon_name, sort_order)
 values
-  ('00000002-0000-0000-0000-000000000001', 'chronobiology_tracker', 'what_is_chrono',  'Clock',         1),
-  ('00000002-0000-0000-0000-000000000002', 'chronobiology_tracker', 'why_regularity',  'Brain',         2),
-  ('00000002-0000-0000-0000-000000000003', 'chronobiology_tracker', 'light_anchor',    'Sun',           3),
-  ('00000002-0000-0000-0000-000000000004', 'chronobiology_tracker', 'meals_timing',    'Utensils',      4),
-  ('00000002-0000-0000-0000-000000000005', 'chronobiology_tracker', 'social_rhythm',   'Users',         5),
-  ('00000002-0000-0000-0000-000000000006', 'chronobiology_tracker', 'sleep_wake',      'Moon',          6),
-  ('00000002-0000-0000-0000-000000000007', 'chronobiology_tracker', 'disruptions',     'AlertTriangle', 7);
+  ('00000002-0000-0000-0000-000000000001', 'chronobiology_tracker', 'lifestyle', 'what_is_chrono',  'Clock',         1),
+  ('00000002-0000-0000-0000-000000000002', 'chronobiology_tracker', 'lifestyle', 'why_regularity',  'Brain',         2),
+  ('00000002-0000-0000-0000-000000000003', 'chronobiology_tracker', 'lifestyle', 'light_anchor',    'Sun',           3),
+  ('00000002-0000-0000-0000-000000000004', 'chronobiology_tracker', 'lifestyle', 'meals_timing',    'Utensils',      4),
+  ('00000002-0000-0000-0000-000000000005', 'chronobiology_tracker', 'lifestyle', 'social_rhythm',   'Users',         5),
+  ('00000002-0000-0000-0000-000000000006', 'chronobiology_tracker', 'lifestyle', 'sleep_wake',      'Moon',          6),
+  ('00000002-0000-0000-0000-000000000007', 'chronobiology_tracker', 'lifestyle', 'disruptions',     'AlertTriangle', 7);
 
 
 -- ────────────────────────────────────────────────────────────

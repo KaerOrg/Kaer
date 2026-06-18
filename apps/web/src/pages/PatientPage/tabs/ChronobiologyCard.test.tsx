@@ -47,6 +47,7 @@ function renderCard(props: Partial<ChronobiologyCardProps> = {}) {
     moduleToggle: () => null,
     onTogglePreview: vi.fn(),
     onToggleData: vi.fn(),
+    onConfigureNotif: vi.fn(),
     onUnlock: vi.fn(),
     onRevoke: vi.fn(),
     ...props,
