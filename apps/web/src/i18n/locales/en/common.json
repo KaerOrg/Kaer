@@ -861,7 +861,14 @@
       "config_hint": "Choose the daily time anchors this patient will track.",
       "config_anchor_count": "{{count}} anchor tracked",
       "config_anchor_count_plural": "{{count}} anchors tracked",
-      "config_min_anchor": "At least one anchor must remain tracked."
+      "config_min_anchor": "At least one anchor must remain tracked.",
+      "regularity_title": "Time regularity",
+      "regularity_note": "Standard deviation of each anchor's times. Raw values, to be interpreted in consultation.",
+      "regularity_min": "min",
+      "regularity_days": "{{count}} day",
+      "regularity_days_plural": "{{count}} days",
+      "regularity_total": "{{count}} entry in total",
+      "regularity_total_plural": "{{count}} entries in total"
     },
     "chrono_bio": {
       "wake_time": "Wake-up time",

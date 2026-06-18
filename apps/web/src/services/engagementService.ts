@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { computeAnchorRegularity, type AnchorRegularity } from '../lib/anchorRegularity'
 
 export type ScorePoint = { date: string; score: number }
 
@@ -188,6 +189,43 @@ export async function fetchModuleSummary(
     lastDate: data[0].client_created_at,
     count: data.length,
     lastPayload: data[0].payload,
+  }
+}
+
+// ── Régularité des rythmes « Rythmes & régularité » (vue praticien) ───────────
+// Écart-type circulaire par ancre sur les entrées synchronisées. Valeurs BRUTES,
+// aucune interprétation ni seuil (MDR 2017/745). Ordre canonique des ancres.
+
+const CHRONO_ANCHOR_KEYS = [
+  'wake_time', 'first_meal', 'main_activity', 'last_meal', 'bedtime', 'light',
+] as const
+
+export type ChronoRegularity = {
+  anchors: AnchorRegularity[]
+  entryCount: number
+}
+
+export async function fetchChronoRegularity(patientId: string): Promise<ChronoRegularity> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('payload')
+    .eq('patient_id', patientId)
+    .eq('module_id', 'chronobiology_tracker')
+    .eq('entry_kind', 'form_entry')
+
+  if (error || !data) return { anchors: [], entryCount: 0 }
+
+  const entries: { values: Record<string, unknown> }[] = []
+  for (const row of data) {
+    const payload = row.payload as { values?: Record<string, unknown> } | null
+    if (payload && typeof payload === 'object' && payload.values && typeof payload.values === 'object') {
+      entries.push({ values: payload.values })
+    }
+  }
+
+  return {
+    anchors: computeAnchorRegularity(entries, CHRONO_ANCHOR_KEYS),
+    entryCount: entries.length,
   }
 }
 

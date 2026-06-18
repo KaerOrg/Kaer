@@ -6,12 +6,14 @@ import {
   fetchMedSideEffectsEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
+  fetchChronoRegularity,
   type ScorePoint,
   type MoodPoint,
   type FearPoint,
   type MedEffectPoint,
   type ModuleSummary,
 } from '../../services/engagementService'
+import type { AnchorRegularity } from '../../lib/anchorRegularity'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
 export type ChartKind = 'scale' | 'mood' | 'fear' | 'med'
@@ -25,6 +27,7 @@ export type ModuleDataResult =
   | { status: 'mood'; points: MoodPoint[] }
   | { status: 'fear'; points: FearPoint[] }
   | { status: 'med'; effects: string[]; points: MedEffectPoint[] }
+  | { status: 'regularity'; anchors: AnchorRegularity[]; entryCount: number }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -75,6 +78,12 @@ export const engagementQueries = {
         if (kind === 'med') {
           const res = await fetchMedSideEffectsEvolution(patientId)
           return res.data.length === 0 ? { status: 'empty' } : { status: 'med', effects: res.effects, points: res.data }
+        }
+        if (moduleType === 'chronobiology_tracker') {
+          const reg = await fetchChronoRegularity(patientId)
+          return reg.entryCount === 0
+            ? { status: 'empty' }
+            : { status: 'regularity', anchors: reg.anchors, entryCount: reg.entryCount }
         }
         const summary = await fetchModuleSummary(patientId, moduleType)
         return summary.count === 0 ? { status: 'empty' } : { status: 'summary', summary }

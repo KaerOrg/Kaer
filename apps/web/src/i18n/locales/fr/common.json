@@ -596,7 +596,14 @@
       "config_hint": "Choisissez les repères horaires que ce patient suivra au quotidien.",
       "config_anchor_count": "{{count}} ancre suivie",
       "config_anchor_count_plural": "{{count}} ancres suivies",
-      "config_min_anchor": "Au moins une ancre doit rester suivie."
+      "config_min_anchor": "Au moins une ancre doit rester suivie.",
+      "regularity_title": "Régularité des horaires",
+      "regularity_note": "Écart-type des horaires par ancre. Valeurs brutes, à interpréter en consultation.",
+      "regularity_min": "min",
+      "regularity_days": "{{count}} jour",
+      "regularity_days_plural": "{{count}} jours",
+      "regularity_total": "{{count}} saisie au total",
+      "regularity_total_plural": "{{count}} saisies au total"
     },
     "chrono_bio": {
       "wake_time": "Heure de lever",

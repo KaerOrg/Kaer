@@ -13,6 +13,7 @@ import {
 } from './clinicalChartConfig'
 import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
+import { ChronoRegularityPanel } from './ChronoRegularityPanel'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -48,6 +49,11 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // Tableau résumé : ModuleSummaryPanel porte son propre cadre (chrome identique).
   if (state.status === 'summary') {
     return <ModuleSummaryPanel summary={state.summary} moduleType={moduleType} loading={false} />
+  }
+
+  // Régularité « Rythmes & régularité » : écarts-types bruts par ancre (MDR-safe).
+  if (state.status === 'regularity') {
+    return <ChronoRegularityPanel anchors={state.anchors} entryCount={state.entryCount} />
   }
 
   const locale = i18n.language

@@ -85,11 +85,22 @@ Générique (tout module `column_form` peut l'activer), masqué en mode édition
 
 ## Données
 
-- Saisie patient → SQLite local `chrono_entries` (offline-first) + `syncUpsert`/`syncDelete`
-  (`entry_kind` à ajouter à l'union `EntryKind` de `syncOutbox.ts` **avant** d'écrire le service —
-  Phase 3).
-- Indice de régularité = **calcul** côté service/web (algorithme, pas donnée), méthode à arrêter en
-  Phase 4.
+- Saisie patient → SQLite local `form_entries` via le `column_form` générique (offline-first) +
+  `syncUpsert`/`syncDelete` (`entry_kind = 'form_entry'`, payload `{ module_id, values }`). Déjà
+  câblé par `formEntryService` (mobile).
+- Côté web, le praticien lit les entrées synchronisées dans `patient_entries`.
+
+## Restitution de la régularité (Phase 4 — livré)
+
+- **Calcul** (`apps/web/src/lib/anchorRegularity.ts`) : écart-type **circulaire** par ancre, en
+  minutes, à partir des `payload.values`. Les statistiques circulaires gèrent le passage par minuit
+  (23:50 et 00:10 sont proches). **Valeur brute** — aucun seuil, label, couleur ni norme (MDR).
+- **Vue praticien** : `fetchChronoRegularity` (engagementService) → statut `regularity` dans
+  `engagementQueries.moduleData` → `ChronoRegularityPanel` (rendu dans le panneau « Données » de la
+  carte). Affiche l'écart-type brut par ancre + le nombre de jours, avec une note « valeurs brutes à
+  interpréter en consultation ».
+- **Vue patient** : restitution neutre **déjà** assurée par l'historique (`column_form`) et la vue
+  mensuelle (`ChronoMonth`). Pas de viz de dispersion patient (serait interprétative → choix MDR).
 
 ## Contenu psychoéducatif
 
