@@ -600,6 +600,10 @@
       "regularity_total_plural": "{{count}} saisies au total"
     },
     "chrono_bio": {
+      "add_today": "Noter mes repères du jour",
+      "history_label": "Historique",
+      "empty_history": "Aucune saisie pour l'instant.",
+      "section_anchors": "Mes repères du jour",
       "wake_time": "Heure de lever",
       "first_meal": "Premier repas",
       "main_activity": "Activité principale",

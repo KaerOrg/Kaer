@@ -865,6 +865,10 @@
       "regularity_total_plural": "{{count}} entries in total"
     },
     "chrono_bio": {
+      "add_today": "Log my markers for today",
+      "history_label": "History",
+      "empty_history": "No entry yet.",
+      "section_anchors": "My markers for today",
       "wake_time": "Wake-up time",
       "first_meal": "First meal",
       "main_activity": "Main activity",

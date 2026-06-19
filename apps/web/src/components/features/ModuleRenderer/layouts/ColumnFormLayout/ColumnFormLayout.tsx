@@ -7,7 +7,7 @@ interface Props {
   t: (key: string) => string
 }
 
-// Exemple d'horaire par ancre — aperçu parlant, AUCUNE donnée patient réelle.
+// Exemple d'horaire par repère — aperçu parlant, AUCUNE donnée patient réelle.
 const EXAMPLE_TIME: Record<string, string> = {
   wake_time: '07:00',
   first_meal: '08:00',
@@ -17,15 +17,37 @@ const EXAMPLE_TIME: Record<string, string> = {
   light: '12:30',
 }
 
+// Jours d'exemple (décalage en jours + variation d'horaire) pour montrer un
+// historique « rempli » de plusieurs jours dans l'aperçu praticien.
+const EXAMPLE_DAYS: readonly { dayOffset: number; shift: number }[] = [
+  { dayOffset: 0, shift: 0 },
+  { dayOffset: 1, shift: -12 },
+  { dayOffset: 2, shift: 18 },
+]
+
 function exampleTimeFor(child: ContentField): string {
   const key = child.props['key']
   return (key && EXAMPLE_TIME[key]) || child.props['preview_value'] || '08:00'
 }
 
+function shiftTime(hhmm: string, deltaMin: number): string {
+  const [h, m] = hhmm.split(':').map(n => parseInt(n, 10))
+  if (Number.isNaN(h) || Number.isNaN(m)) return hhmm
+  const total = (((h * 60 + m + deltaMin) % 1440) + 1440) % 1440
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+function dayLabel(offset: number): string {
+  const d = new Date(Date.now() - offset * 86_400_000)
+  return d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
+}
+
+interface RecordRow { id: string; color: string; label: string; value: string }
+
 // Aperçu praticien du layout 'column_form'. Reproduit fidèlement le mobile :
-// une saisie passée (carte récap dérivée des champs réels du module) + le
-// formulaire de saisie colonne-par-colonne. Aucune donnée en dur propre à un
-// module : la carte d'exemple est construite à partir des `column_*_field`.
+// un historique de saisies (cartes récap dérivées des champs réels du module,
+// plusieurs jours d'exemple) + le formulaire de saisie colonne-par-colonne.
+// Aucune donnée en dur propre à un module : tout dérive des `column_*_field`.
 export function ColumnFormLayout({ fields, t }: Props) {
   const configField = fields.find(f => f.field_type === 'column_form_config')
   const lbl = (key: string): string => {
@@ -54,44 +76,50 @@ export function ColumnFormLayout({ fields, t }: Props) {
     }
   }
 
-  // Carte « saisie passée » dérivée des champs : pastille (couleur de la colonne)
-  // + libellé + valeur d'exemple. Reflète la liste d'historique du mobile.
-  const recordRows: { id: string; color: string; label: string; value: string }[] = []
-  for (const h of headers) {
-    const color = h.props['color'] ?? '#6366F1'
-    for (const child of childrenByHeader.get(h.id) ?? []) {
-      const label = child.text_code ? t(child.text_code) : ''
-      if (!label) continue
-      let value = ''
-      if (child.field_type === 'column_time_field') value = exampleTimeFor(child)
-      else if (child.field_type === 'column_slider_field') value = '70%'
-      else value = child.props['preview_value'] ?? ''
-      recordRows.push({ id: child.id, color, label, value })
+  // Rangées d'une carte récap, pour un décalage horaire donné (jour d'exemple).
+  const buildRows = (shift: number): RecordRow[] => {
+    const rows: RecordRow[] = []
+    for (const h of headers) {
+      const color = h.props['color'] ?? '#6366F1'
+      for (const child of childrenByHeader.get(h.id) ?? []) {
+        const label = child.text_code ? t(child.text_code) : ''
+        if (!label) continue
+        let value = ''
+        if (child.field_type === 'column_time_field') value = shiftTime(exampleTimeFor(child), shift)
+        else if (child.field_type === 'column_slider_field') value = '70%'
+        else value = child.props['preview_value'] ?? ''
+        rows.push({ id: child.id, color, label, value })
+      }
     }
+    return rows
   }
+
+  const hasExamples = headers.some(h => (childrenByHeader.get(h.id) ?? []).length > 0)
 
   return (
     <div className="cf">
-      {recordRows.length > 0 && (
-        <article className="cf-record">
-          <header className="cf-record__head">
-            <span className="cf-record__date">{lbl('today_label') || "aujourd'hui"}</span>
-            <div className="cf-record__icons">
-              <Pencil size={14} />
-              <Trash2 size={14} />
-            </div>
-          </header>
-          <div className="cf-record__body">
-            {recordRows.map(r => (
-              <div key={r.id} className="cf-record__row">
-                <span className="cf-record__dot" style={{ background: r.color }} />
-                <span className="cf-record__label">{r.label}</span>
-                {r.value ? <span className="cf-record__val">{r.value}</span> : null}
+      {/* Historique : plusieurs jours d'exemple, comme côté mobile */}
+      {hasExamples &&
+        EXAMPLE_DAYS.map(({ dayOffset, shift }) => (
+          <article key={dayOffset} className="cf-record">
+            <header className="cf-record__head">
+              <span className="cf-record__date">{dayLabel(dayOffset)}</span>
+              <div className="cf-record__icons">
+                <Pencil size={14} />
+                <Trash2 size={14} />
               </div>
-            ))}
-          </div>
-        </article>
-      )}
+            </header>
+            <div className="cf-record__body">
+              {buildRows(shift).map(r => (
+                <div key={r.id} className="cf-record__row">
+                  <span className="cf-record__dot" style={{ background: r.color }} />
+                  <span className="cf-record__label">{r.label}</span>
+                  {r.value ? <span className="cf-record__val">{r.value}</span> : null}
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
 
       {newBtn && (
         <div className="cf-new-btn">
