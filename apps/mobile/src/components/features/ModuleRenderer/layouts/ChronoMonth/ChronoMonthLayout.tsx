@@ -9,19 +9,12 @@ import { getAllFormEntries, type FormEntry } from '../../../../../lib/database'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { CalendarGrid } from './CalendarGrid'
 import { RhythmBand } from './RhythmBand'
-import { AnchorLegend } from './AnchorLegend'
 import {
   buildEntriesByDate,
   DEFAULT_ANCHORS,
   type AnchorEntry,
   type AnchorSpec,
 } from './chronoMonthUtils'
-
-const MONTH_KEYS = [
-  'months.january', 'months.february', 'months.march', 'months.april',
-  'months.may', 'months.june', 'months.july', 'months.august',
-  'months.september', 'months.october', 'months.november', 'months.december',
-] as const
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -55,7 +48,7 @@ function formEntriesToAnchorEntries(entries: readonly FormEntry[]): AnchorEntry[
 // Au tap d'un jour, navigue vers ModuleContent du même module en mode entry
 // (responsabilité du layout column_form qui gère la création/édition).
 export function ChronoMonthLayout({ moduleId }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigation = useNavigation<Nav>()
 
   const now = useMemo(() => new Date(), [])
@@ -135,7 +128,13 @@ export function ChronoMonthLayout({ moduleId }: Props) {
             <ChevronLeft size={22} color={colors.primary} />
           </Pressable>
           <Text style={styles.monthTitle}>
-            {t(MONTH_KEYS[month - 1])} {year}
+            {(() => {
+              const raw = new Date(year, month - 1, 1).toLocaleDateString(i18n.language, {
+                month: 'long',
+                year: 'numeric',
+              })
+              return raw.charAt(0).toUpperCase() + raw.slice(1)
+            })()}
           </Text>
           <Pressable
             style={[styles.navBtn, isCurrentMonth && styles.navBtnDisabled]}
@@ -166,16 +165,7 @@ export function ChronoMonthLayout({ moduleId }: Props) {
           {t('modules.chronobiology_tracker.rhythm_band_title')}
         </Text>
 
-        <RhythmBand
-          year={year}
-          month={month}
-          entriesByDate={entriesByDate}
-          todayISO={todayISO}
-          anchors={anchors}
-          onDayPress={handleDayPress}
-        />
-
-        <AnchorLegend anchors={anchors} />
+        <RhythmBand entriesByDate={entriesByDate} anchors={anchors} />
       </ScrollView>
     </View>
   )

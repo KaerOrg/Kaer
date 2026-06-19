@@ -18,6 +18,7 @@ export const DEFAULT_ANCHORS: ReadonlyArray<AnchorSpec> = [
   { key: 'wake_time',     labelCode: 'modules.chronobiology_tracker.anchor_wake',     color: '#F59E0B' },
   { key: 'first_meal',    labelCode: 'modules.chronobiology_tracker.anchor_first_meal',    color: '#F97316' },
   { key: 'main_activity', labelCode: 'modules.chronobiology_tracker.anchor_main_activity', color: '#3B82F6' },
+  { key: 'light',         labelCode: 'modules.chronobiology_tracker.anchor_light',    color: '#14B8A6' },
   { key: 'last_meal',     labelCode: 'modules.chronobiology_tracker.anchor_last_meal',     color: '#EF4444' },
   { key: 'bedtime',       labelCode: 'modules.chronobiology_tracker.anchor_bedtime',  color: '#8B5CF6' },
 ]

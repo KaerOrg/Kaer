@@ -857,12 +857,19 @@
       "empty_title": "No entry yet",
       "empty_text": "Use the button above to log your first entry.",
       "regularity_title": "Time regularity",
-      "regularity_note": "Standard deviation of each anchor's times. Raw values, to be interpreted in consultation.",
+      "regularity_note": "Standard deviation of each marker's times. Raw values, to be interpreted in consultation.",
       "regularity_min": "min",
       "regularity_days": "{{count}} day",
       "regularity_days_plural": "{{count}} days",
       "regularity_total": "{{count}} entry in total",
-      "regularity_total_plural": "{{count}} entries in total"
+      "regularity_total_plural": "{{count}} entries in total",
+      "rhythm_band_title": "Rhythm band",
+      "anchor_wake": "Wake-up",
+      "anchor_first_meal": "1st meal",
+      "anchor_main_activity": "Activity",
+      "anchor_last_meal": "Last meal",
+      "anchor_bedtime": "Bedtime",
+      "anchor_light": "Light"
     },
     "chrono_bio": {
       "add_today": "Log my markers for today",

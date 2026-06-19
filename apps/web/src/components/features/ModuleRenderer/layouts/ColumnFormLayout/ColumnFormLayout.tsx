@@ -62,26 +62,24 @@ export function ColumnFormLayout({ fields, t }: Props) {
     .filter(f => f.field_type === 'column_header')
     .sort((a, b) => a.sort_order - b.sort_order)
 
-  const childrenByHeader = new Map<string, ContentField[]>()
-  for (const f of fields) {
-    if (
-      (f.field_type === 'column_text_field' ||
-        f.field_type === 'column_slider_field' ||
-        f.field_type === 'column_time_field') &&
-      f.parent_field_id
-    ) {
-      const arr = childrenByHeader.get(f.parent_field_id) ?? []
-      arr.push(f)
-      childrenByHeader.set(f.parent_field_id, arr)
-    }
-  }
+  // Les champs (texte/slider/horaire) sont IMBRIQUÉS sous leur column_header
+  // (`h.children`), comme côté mobile — pas à plat dans `fields`.
+  const headerChildren = (h: ContentField): ContentField[] =>
+    (h.children ?? [])
+      .filter(
+        c =>
+          c.field_type === 'column_text_field' ||
+          c.field_type === 'column_slider_field' ||
+          c.field_type === 'column_time_field',
+      )
+      .sort((a, b) => a.sort_order - b.sort_order)
 
   // Rangées d'une carte récap, pour un décalage horaire donné (jour d'exemple).
   const buildRows = (shift: number): RecordRow[] => {
     const rows: RecordRow[] = []
     for (const h of headers) {
       const color = h.props['color'] ?? '#6366F1'
-      for (const child of childrenByHeader.get(h.id) ?? []) {
+      for (const child of headerChildren(h)) {
         const label = child.text_code ? t(child.text_code) : ''
         if (!label) continue
         let value = ''
@@ -94,7 +92,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
     return rows
   }
 
-  const hasExamples = headers.some(h => (childrenByHeader.get(h.id) ?? []).length > 0)
+  const hasExamples = headers.some(h => headerChildren(h).length > 0)
 
   return (
     <div className="cf">
@@ -135,7 +133,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
           const stepNumber = h.props['step_number'] ?? String(idx + 1)
           const hintCode = h.props['hint_code']
           const headerLabel = h.text_code ? t(h.text_code) : ''
-          const children = childrenByHeader.get(h.id) ?? []
+          const children = headerChildren(h)
 
           return (
             <section key={h.id} className="cf-column">

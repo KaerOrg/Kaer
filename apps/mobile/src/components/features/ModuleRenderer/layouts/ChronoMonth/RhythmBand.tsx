@@ -1,115 +1,62 @@
 import React, { useMemo } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '../../../../../theme'
-import {
-  daysInMonth,
-  toISODate,
-  timeToFraction,
-  type AnchorEntry,
-  type AnchorSpec,
-} from './chronoMonthUtils'
-
-const BAND_HEIGHT = 144
-const DOT_D = 6
-const Y_TICKS: ReadonlyArray<{ label: string; frac: number }> = [
-  { label: '0h',  frac: 0    },
-  { label: '6h',  frac: 0.25 },
-  { label: '12h', frac: 0.5  },
-  { label: '18h', frac: 0.75 },
-  { label: '24h', frac: 1    },
-]
-const DAY_MARKERS = [1, 8, 15, 22, 29]
+import { View, Text, StyleSheet } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { colors, spacing } from '../../../../../theme'
+import { timeToFraction, type AnchorEntry, type AnchorSpec } from './chronoMonthUtils'
 
 interface Props {
-  year: number
-  month: number
   entriesByDate: ReadonlyMap<string, AnchorEntry>
-  todayISO: string
   anchors: readonly AnchorSpec[]
-  onDayPress: (iso: string) => void
 }
 
-// Bande de rythme mensuelle : 1 colonne par jour, 5 ancrages affichés
-// comme des points positionnés selon l'heure (axe Y 0-24h).
-// MDR : visualisation passive des horaires bruts saisis. Aucune analyse
-// de régularité, aucun seuil, aucune couleur d'alerte.
-export function RhythmBand({
-  year,
-  month,
-  entriesByDate,
-  todayISO,
-  anchors,
-  onDayPress,
-}: Props) {
-  const days = daysInMonth(year, month)
-  const dayRange = useMemo(
-    () => Array.from({ length: days }, (_, i) => i + 1),
-    [days]
-  )
+const AXIS = ['0h', '6h', '12h', '18h', '24h'] as const
+const GRID = [0.25, 0.5, 0.75] as const
+
+// Bande de rythme = un « strip plot » par repère. Chaque ligne = un repère ;
+// chaque point = un jour saisi, positionné selon l'heure (axe 0-24h). Points
+// groupés ⇒ rythme régulier ; dispersés ⇒ irrégulier. Lisible d'un coup d'œil.
+// MDR : horaires bruts uniquement, aucune analyse ni couleur d'alerte.
+export function RhythmBand({ entriesByDate, anchors }: Props) {
+  const { t } = useTranslation()
+
+  const rows = useMemo(() => {
+    return anchors.map(a => {
+      const fractions: number[] = []
+      for (const entry of entriesByDate.values()) {
+        const v = entry.anchors[a.key]
+        if (v) fractions.push(timeToFraction(v))
+      }
+      return { key: a.key, color: a.color, label: t(a.labelCode), fractions }
+    })
+  }, [entriesByDate, anchors, t])
 
   return (
     <View style={styles.wrapper} testID="chrono-rhythm-band">
-      <View style={[styles.yAxis, { height: BAND_HEIGHT }]}>
-        {Y_TICKS.map(({ label, frac }) => (
-          <Text
-            key={label}
-            style={[styles.yLabel, { top: Math.round(frac * (BAND_HEIGHT - 10)) }]}
-          >
-            {label}
-          </Text>
-        ))}
-      </View>
-
-      <View style={styles.bandColumn}>
-        <View style={[styles.band, { height: BAND_HEIGHT }]}>
-          {Y_TICKS.map(({ frac }) => (
-            <View
-              key={`gl${frac}`}
-              style={[styles.gridLine, { top: Math.round(frac * BAND_HEIGHT) }]}
-            />
-          ))}
-
-          <View style={[StyleSheet.absoluteFill, styles.columnsRow]}>
-            {dayRange.map(day => {
-              const iso = toISODate(year, month, day)
-              const isFuture = iso > todayISO
-              const isToday = iso === todayISO
-              const entry = entriesByDate.get(iso)
-
-              return (
-                <Pressable
-                  key={day}
-                  style={[styles.dayCol, isToday && styles.dayColToday]}
-                  onPress={isFuture ? undefined : () => onDayPress(iso)}
-                  disabled={isFuture}
-                >
-                  {day > 1 && day % 7 === 1 ? <View style={styles.weekSep} /> : null}
-                  {entry
-                    ? anchors.map(({ key, color }) => {
-                        const val = entry.anchors[key]
-                        if (!val) return null
-                        const topPx = Math.round(timeToFraction(val) * BAND_HEIGHT) - DOT_D / 2
-                        return (
-                          <View
-                            key={key}
-                            style={[styles.dot, { top: topPx, backgroundColor: color }]}
-                          />
-                        )
-                      })
-                    : null}
-                </Pressable>
-              )
-            })}
+      {rows.map(row => (
+        <View key={row.key} style={styles.row}>
+          <View style={styles.labelCell}>
+            <View style={[styles.labelDot, { backgroundColor: row.color }]} />
+            <Text style={styles.labelText} numberOfLines={1}>{row.label}</Text>
+          </View>
+          <View style={styles.track}>
+            {GRID.map(f => (
+              <View key={f} style={[styles.gridLine, { left: `${f * 100}%` }]} />
+            ))}
+            {row.fractions.map((f, i) => (
+              <View
+                key={i}
+                style={[styles.dot, { left: `${f * 100}%`, backgroundColor: row.color }]}
+              />
+            ))}
           </View>
         </View>
+      ))}
 
-        <View style={styles.dayMarkersRow}>
-          {dayRange.map(day => (
-            <View key={day} style={styles.dayMarkerCell}>
-              {DAY_MARKERS.includes(day) ? (
-                <Text style={styles.dayMarkerText}>{day}</Text>
-              ) : null}
-            </View>
+      <View style={styles.axisRow}>
+        <View style={styles.labelCell} />
+        <View style={styles.axisTrack}>
+          {AXIS.map(label => (
+            <Text key={label} style={styles.axisLabel}>{label}</Text>
           ))}
         </View>
       </View>
@@ -118,56 +65,36 @@ export function RhythmBand({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-  },
-  yAxis: { width: 28, position: 'relative' },
-  yLabel: {
-    position: 'absolute',
-    left: 0,
-    fontSize: 9,
-    color: colors.textMuted,
-    fontWeight: '600',
-  },
-  bandColumn: { flex: 1 },
-  band: {
+  wrapper: { marginHorizontal: spacing.lg, marginTop: spacing.xs, gap: 7 },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  labelCell: { width: 100, flexDirection: 'row', alignItems: 'center', gap: 5, paddingRight: 6 },
+  labelDot: { width: 8, height: 8, borderRadius: 4 },
+  labelText: { fontSize: 11, color: colors.text, flex: 1 },
+  track: {
+    flex: 1,
+    height: 16,
+    backgroundColor: colors.background,
+    borderRadius: 999,
     position: 'relative',
-    backgroundColor: colors.card,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    overflow: 'hidden',
   },
   gridLine: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    height: StyleSheet.hairlineWidth,
+    top: 3,
+    bottom: 3,
+    width: StyleSheet.hairlineWidth,
     backgroundColor: colors.border,
-  },
-  columnsRow: { flexDirection: 'row' },
-  dayCol: { flex: 1, position: 'relative' },
-  dayColToday: { backgroundColor: colors.primaryLight, opacity: 0.9 },
-  weekSep: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: colors.border,
-    opacity: 0.6,
   },
   dot: {
     position: 'absolute',
-    width: DOT_D,
-    height: DOT_D,
-    borderRadius: DOT_D / 2,
-    left: '50%',
-    marginLeft: -(DOT_D / 2),
+    top: '50%',
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    marginTop: -4.5,
+    marginLeft: -4.5,
+    opacity: 0.6,
   },
-  dayMarkersRow: { flexDirection: 'row', marginTop: 2, width: '100%' },
-  dayMarkerCell: { flex: 1, alignItems: 'center' },
-  dayMarkerText: { fontSize: 8, color: colors.textMuted },
+  axisRow: { flexDirection: 'row', marginTop: 2 },
+  axisTrack: { flex: 1, flexDirection: 'row', justifyContent: 'space-between' },
+  axisLabel: { fontSize: 9, color: colors.textMuted, fontWeight: '600' },
 })

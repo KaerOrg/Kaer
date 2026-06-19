@@ -592,12 +592,19 @@
       "label": "Rythmes & régularité",
       "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher.",
       "regularity_title": "Régularité des horaires",
-      "regularity_note": "Écart-type des horaires par ancre. Valeurs brutes, à interpréter en consultation.",
+      "regularity_note": "Écart-type des horaires par repère. Valeurs brutes, à interpréter en consultation.",
       "regularity_min": "min",
       "regularity_days": "{{count}} jour",
       "regularity_days_plural": "{{count}} jours",
       "regularity_total": "{{count}} saisie au total",
-      "regularity_total_plural": "{{count}} saisies au total"
+      "regularity_total_plural": "{{count}} saisies au total",
+      "rhythm_band_title": "Bande de rythme",
+      "anchor_wake": "Lever",
+      "anchor_first_meal": "1er repas",
+      "anchor_main_activity": "Activité",
+      "anchor_last_meal": "Dernier repas",
+      "anchor_bedtime": "Coucher",
+      "anchor_light": "Lumière"
     },
     "chrono_bio": {
       "add_today": "Noter mes repères du jour",
