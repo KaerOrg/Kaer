@@ -11,6 +11,8 @@ import type {
   FearPoint,
   MedEffectPoint,
 } from '../../../services/engagementService'
+import type { AnchorRegularity } from '../../../lib/anchorRegularity'
+import { ChronoRegularityPanel } from './ChronoRegularityPanel'
 import { engagementQueries } from '../../../hooks/queries'
 import {
   type TimeRange,
@@ -39,6 +41,8 @@ type EvolutionData = {
   fearData: FearPoint[]
   medEffects: string[]
   medData: MedEffectPoint[]
+  chronoAnchors: AnchorRegularity[]
+  chronoEntryCount: number
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -48,6 +52,8 @@ const EMPTY_EVOLUTION: EvolutionData = {
   fearData: [],
   medEffects: [],
   medData: [],
+  chronoAnchors: [],
+  chronoEntryCount: 0,
 }
 
 export function PatientEvolutionTab({ patientId }: Props) {
@@ -56,12 +62,17 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const [moodExpanded, setMoodExpanded] = useState(false)
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
-  const { scales, scaleData, moodData, fearData, medEffects, medData } =
+  const { scales, scaleData, moodData, fearData, medEffects, medData, chronoAnchors, chronoEntryCount } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading
 
   const days = RANGE_DAYS[range]
-  const hasData = scales.length > 0 || moodData.length > 0 || fearData.length > 0 || medData.length > 0
+  const hasData =
+    scales.length > 0 ||
+    moodData.length > 0 ||
+    fearData.length > 0 ||
+    medData.length > 0 ||
+    chronoEntryCount > 0
 
   const rangeOptions = useMemo<readonly SegmentOption<TimeRange>[]>(
     () => TIME_RANGES.map(r => ({ value: r, label: t(`evolution.range_${r}`) })),
@@ -240,6 +251,13 @@ export function PatientEvolutionTab({ patientId }: Props) {
             </EvolutionCard>
           )
         })()}
+
+        {/* ── Rythmes & régularité ────────────────────────────── */}
+        {chronoEntryCount > 0 && (
+          <div className="evolution-card evolution-card--wide">
+            <ChronoRegularityPanel anchors={chronoAnchors} entryCount={chronoEntryCount} />
+          </div>
+        )}
 
       </div>
     </div>

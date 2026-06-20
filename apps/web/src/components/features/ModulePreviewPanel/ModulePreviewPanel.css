@@ -2543,7 +2543,6 @@
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  opacity: 0.6;
 }
 
 .chrono-month__axis-row { display: flex; align-items: center; gap: 8px; }

@@ -38,11 +38,12 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med] = await Promise.all([
+        const [scaleResults, mood, fear, med, chrono] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
           fetchMedSideEffectsEvolution(patientId),
+          fetchChronoRegularity(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
         available.forEach((mt, i) => { scaleData[mt] = scaleResults[i] })
@@ -53,6 +54,8 @@ export const engagementQueries = {
           fearData: fear,
           medEffects: med.effects,
           medData: med.data,
+          chronoAnchors: chrono.anchors,
+          chronoEntryCount: chrono.entryCount,
         }
       },
     }),

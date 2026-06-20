@@ -92,7 +92,6 @@ const styles = StyleSheet.create({
     borderRadius: 4.5,
     marginTop: -4.5,
     marginLeft: -4.5,
-    opacity: 0.6,
   },
   axisRow: { flexDirection: 'row', marginTop: 2 },
   axisTrack: { flex: 1, flexDirection: 'row', justifyContent: 'space-between' },
