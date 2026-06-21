@@ -233,17 +233,17 @@ export function MedicationTrackerLayout({ fields, moduleId: moduleIdProp }: Medi
     navigation.navigate('MedicationSideEffectsHistory')
   }, [navigation])
 
+  const TABS = useMemo<Array<{ id: Tab; label: string }>>(() => [
+    { id: 'today', label: lbl('tab_today_label') },
+    { id: 'calendar', label: lbl('tab_calendar_label') },
+    { id: 'meds', label: lbl('tab_meds_label') },
+  ], [lbl])
+
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
   const saveLabel = existingId ? (lbl('update_label') || t('common.update')) : (lbl('save_label') || t('common.save'))
-
-  const TABS: Array<{ id: Tab; label: string }> = [
-    { id: 'today', label: lbl('tab_today_label') },
-    { id: 'calendar', label: lbl('tab_calendar_label') },
-    { id: 'meds', label: lbl('tab_meds_label') },
-  ]
 
   return (
     <KeyboardAvoidingView

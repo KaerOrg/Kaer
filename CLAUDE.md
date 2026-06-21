@@ -77,7 +77,7 @@ Si une demande franchit cette ligne : veto immédiat + alternative d'affichage p
 
 Liste complète avec statut et détails d'implémentation : [`docs/modules.md`](docs/modules.md).
 
-**30+ modules implémentés** : `sleep_diary`, `beck_columns`, `fear_thermometer` (« Exposition graduée »), `emotion_wheel`, `crisis_plan`, `rim`, `cognitive_saturation`, `decisional_balance`, `behavioral_activation`, `grounding`, `mood_tracker`, `motivational_balance`, `medication_adherence`, `breathing_techniques`, `phq9`, `gad7`, `bsl23`, `rcads`, `snap_iv`, `asrs6`, `asrs18`, `epds`, `nsi`, `medication_side_effects`, `psychoeducation`, `diet_weight_psycho`, `chronobiology_tracker`, `distress_tolerance`, `craving_journal`.
+**30+ modules implémentés** : `sleep_diary`, `beck_columns`, `fear_thermometer` (« Exposition graduée »), `emotion_wheel`, `crisis_plan`, `rim`, `cognitive_saturation`, `decisional_balance`, `behavioral_activation`, `grounding`, `mood_tracker`, `motivational_balance`, `medication_adherence`, `breathing_techniques`, `phq9`, `gad7`, `bsl23`, `rcads`, `snap_iv`, `asrs6`, `asrs18`, `epds`, `nsi`, `medication_side_effects`, `psychoeducation`, `chronobiology_tracker`, `distress_tolerance`, `craving_journal`.
 
 Prévus : `cognitive_distortions`, `therapeutic_commitment`.
 

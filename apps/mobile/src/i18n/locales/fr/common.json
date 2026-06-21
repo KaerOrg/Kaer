@@ -462,7 +462,7 @@
       "streak": "{{count}} jour de suivi",
       "streak_plural": "{{count}} jours de suivi",
       "calendar_days": "jours renseignés",
-      "calendar_legend": "Jour renseigné — couleur du statut déclaré",
+      "calendar_legend": "Jour renseigné : couleur du statut déclaré",
       "meds_title": "Mon traitement",
       "meds_empty": "Aucun médicament renseigné pour l'instant.",
       "meds_add": "Ajouter un médicament",

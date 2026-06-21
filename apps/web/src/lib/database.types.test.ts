@@ -9,7 +9,6 @@ const ALL_MODULE_IDS = [
   'medication_adherence',
   'psychoeducation',
   'sleep_diary',
-  'diet_weight_psycho',
   'chronobiology_tracker',
   'mood_tracker',
   'emotion_wheel',
@@ -36,7 +35,7 @@ const ALL_MODULE_IDS = [
 const CATEGORY_IDS = ['safety', 'iatrogenic', 'lifestyle', 'emotion', 'cognitive', 'anxiety', 'addiction', 'motivation']
 
 describe('i18n FR locale — modules', () => {
-  it('contient un label pour chacun des 29 modules', () => {
+  it('contient un label pour chacun des 27 modules', () => {
     for (const id of ALL_MODULE_IDS) {
       const entry = (frLocale.modules as Record<string, { label?: string }>)[id]
       expect(entry, `modules.${id} manquant dans la locale FR`).toBeDefined()
@@ -44,14 +43,14 @@ describe('i18n FR locale — modules', () => {
     }
   })
 
-  it('contient une description pour chacun des 29 modules', () => {
+  it('contient une description pour chacun des 27 modules', () => {
     for (const id of ALL_MODULE_IDS) {
       const entry = (frLocale.modules as Record<string, { description?: string }>)[id]
       expect(entry?.description, `modules.${id}.description manquant`).toBeTruthy()
     }
   })
 
-  it('couvre les 29 modules', () => {
+  it('couvre les 27 modules', () => {
     const modules = frLocale.modules as Record<string, unknown>
     for (const id of ALL_MODULE_IDS) {
       expect(id in modules, `modules.${id} manquant`).toBe(true)

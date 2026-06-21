@@ -14,7 +14,14 @@ import { renderHook, act, waitFor } from '@testing-library/react'
 import { useMedicationListEditor } from './useMedicationListEditor'
 import type { PatientModule } from '../../../lib/database.types'
 
-const modules = [{ id: 'pm1', module_type: 'medication_adherence' } as unknown as PatientModule]
+const modules: PatientModule[] = [{
+  id: 'pm1',
+  patient_id: 'pat-1',
+  practitioner_id: 'prac-1',
+  module_type: 'medication_adherence',
+  config: {},
+  unlocked_at: '2026-06-01T00:00:00Z',
+}]
 const onReload = vi.fn().mockResolvedValue(undefined)
 
 const MED = { id: 'm1', name: 'Sertraline', posology: '50 mg', kind: 'maintenance' as const }

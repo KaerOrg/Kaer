@@ -222,6 +222,22 @@ isolément.
 l'avertissement exhaustive-deps se corrige en listant la dépendance, jamais en la
 supprimant. Avant de commiter : `grep -rn "eslint-disable" apps/*/src --include="*.ts*"`.
 
+**refonte/psychotropes-et-alimentation (2026-06-22) — `as unknown as` pour un mock de test.**
+`useMedicationListEditor.test.ts` construit un objet `modules` partiel via un
+double-cast, en recopiant le pattern d'un test frère (`useMedicationEffectsEditor.test.ts`) :
+
+```ts
+// ❌ contourne le typage pour un mock partiel
+const modules = [{ id: 'pm1', module_type: 'medication_adherence' } as unknown as PatientModule]
+// ✅ factory typée locale, ou Partial explicite assemblé en objet complet
+function makePatientModule(over: Partial<PatientModule>): PatientModule { return { ...BASE, ...over } }
+const modules = [makePatientModule({ id: 'pm1', module_type: 'medication_adherence' })]
+```
+
+→ L'interdiction de `as unknown as X` **n'a pas d'exception « c'est un test »** : un
+mock partiel se construit avec une factory typée (ou `satisfies`), pas en cassant le
+typage. Le fait qu'un test frère le fasse déjà n'autorise pas à propager le motif.
+
 ---
 
 ## États mutuellement exclusifs
@@ -265,3 +281,19 @@ assertaient sur le rendu et non sur les noms de states, sont restés verts.
 
 → Le placeholder « valeur absente » reste un **trait d'union simple `-`** : même
 dispensé de la conversion en ponctuation, il ne doit jamais être un `–`/`—`.
+
+**refonte/psychotropes-et-alimentation (2026-06-22) — tiret long dans une valeur i18n visible.**
+Six clés `modules.medication_adherence.calendar_legend` (mobile fr/en common + teen,
+web fr/en common) écrites avec un cadratin U+2014 dans le texte rendu à l'écran :
+
+```json
+// ❌ apps/mobile/src/i18n/locales/fr/common.json — texte visible patient
+"calendar_legend": "Jour renseigné — couleur du statut déclaré"
+// ✅ deux-points : introduit l'explication
+"calendar_legend": "Jour renseigné : couleur du statut déclaré"
+```
+
+→ La règle ponctuation vaut **en priorité dans les locales** : une valeur de
+`common.json`/`teen.json` est du texte visible. Toute incise/définition au tiret long
+se remplace par deux-points (ou virgule selon le sens). Vérif systématique avant
+commit i18n : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide.

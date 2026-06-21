@@ -37,7 +37,6 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`spec/module-taxonomy.md`](spec/module-taxonomy.md) | Taxonomie & filtres par facettes de l'armoire (tags indication/public/approche, `tag_dimensions`/`tags`/`module_tags`) |
 | [`patient-data-sync.md`](patient-data-sync.md) | Circuit sync données patient : SQLite → Supabase via `RemoteSyncService` + gate consentement |
 | [`practitioner-notes.md`](practitioner-notes.md) | Notes praticien par patient (privées, Supabase, `practitioner_patient_notes`) |
-| [`module-diet-weight-psycho.md`](module-diet-weight-psycho.md) | Module `diet_weight_psycho` — fiches psyedu alimentation & psychotropes |
 
 ## Documentation par module thérapeutique
 

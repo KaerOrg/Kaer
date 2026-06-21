@@ -412,7 +412,7 @@
       "streak": "{{count}} day logged",
       "streak_plural": "{{count}} days logged",
       "calendar_days": "days logged",
-      "calendar_legend": "Logged day — colour of the declared status",
+      "calendar_legend": "Logged day: colour of the declared status",
       "meds_title": "My treatment",
       "meds_empty": "No medication added yet.",
       "meds_add": "Add a medication",

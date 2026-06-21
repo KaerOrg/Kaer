@@ -30,7 +30,6 @@ export type ModuleType =
   | 'psychoeducation'
   // Hygiène de Vie & Rythmes Biologiques
   | 'sleep_diary'
-  | 'diet_weight_psycho'
   | 'chronobiology_tracker'
   // Régulation Émotionnelle & Humeur
   | 'mood_tracker'
