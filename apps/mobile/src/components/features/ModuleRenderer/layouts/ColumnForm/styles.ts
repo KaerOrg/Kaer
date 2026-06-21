@@ -62,28 +62,14 @@ export const styles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
-  // ── Footer
+  // ── Actions de saisie (date rétroactive, « comme d'habitude ») — ui/Button
+  // compact aligné à gauche (le primitive porte fond/bordure/radius).
+  entryActionBtn: { alignSelf: 'flex-start', minHeight: 0, paddingVertical: spacing.sm },
+  // ── Footer (boutons = ui/Button ; ici uniquement le conteneur + le flex CTA)
   footer: {
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
     padding: spacing.md, flexDirection: 'row', gap: spacing.sm,
   },
-  saveBtn: {
-    flex: 1, backgroundColor: colors.primary, borderRadius: radius.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, paddingVertical: spacing.sm + 2,
-  },
-  saveBtnText:       { color: colors.white, fontSize: 16, fontWeight: '700' },
-  cancelBtn: {
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.sm + 2,
-    borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
-  },
-  cancelBtnText:     { color: colors.textMuted, fontSize: 14, fontWeight: '600' },
-  newBtn: {
-    flex: 1, backgroundColor: colors.primary, borderRadius: radius.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, paddingVertical: spacing.sm + 2,
-  },
-  newBtnText:        { color: colors.white, fontSize: 16, fontWeight: '700' },
-  btnDisabled:       { opacity: 0.6 },
+  // Le CTA principal (enregistrer / nouvelle saisie) occupe l'espace restant.
+  footerBtnFlex:     { flex: 1 },
 })

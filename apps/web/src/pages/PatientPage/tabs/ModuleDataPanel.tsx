@@ -14,6 +14,7 @@ import {
 import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
 import { SleepDataPanel } from './SleepDataPanel'
+import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -55,6 +56,11 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // Agenda du sommeil : panneau dédié (grille + courbes + stats), cadre propre.
   if (state.status === 'sleep') {
     return <SleepDataPanel points={state.points} locale={i18n.language} />
+  }
+
+  // « Rythmes & régularité » : rythmogramme mensuel (horaires bruts, MDR-safe).
+  if (state.status === 'rhythmogram') {
+    return <ChronoRhythmogramPanel entries={state.entries} />
   }
 
   const locale = i18n.language

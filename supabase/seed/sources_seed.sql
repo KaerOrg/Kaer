@@ -463,7 +463,7 @@ values
   )
 
 -- ── chronobiology_tracker ───────────────────────────────────────────────────
--- Régularité chronobiologique
+-- Rythmes & régularité
 -- Sources niveau 1 (efficacité de l'intervention) :
 --   PMID 16143731 (IPSRT ECR bipolaire), PMID 40814280 (régularité sommeil + dépression)
 --   PMID 16436934 (Wirz-Justice 2006 — chronothérapeutiques)

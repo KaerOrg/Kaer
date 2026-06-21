@@ -13,6 +13,7 @@ import {
   fetchSleepEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
+  fetchChronoEntries,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -232,5 +233,40 @@ describe('engagementService.fetchAvailableScales', () => {
     const result = await fetchAvailableScales('p1')
 
     expect(result.sort()).toEqual(['gad7', 'phq9'])
+  })
+})
+
+describe('engagementService.fetchChronoEntries', () => {
+  it('mappe chaque saisie en { date, values } (happy path)', async () => {
+    const rows = [
+      { client_created_at: '2026-06-01T07:00:00Z', payload: { values: { wake_time: '07:00', bedtime: '23:00' } } },
+      { client_created_at: '2026-06-02T07:30:00Z', payload: { values: { wake_time: '07:30', bedtime: '23:30' } } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchChronoEntries('p1')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result).toEqual([
+      { date: '2026-06-01', values: { wake_time: '07:00', bedtime: '23:00' } },
+      { date: '2026-06-02', values: { wake_time: '07:30', bedtime: '23:30' } },
+    ])
+  })
+
+  it('ignore les lignes sans values ou sans date', async () => {
+    const rows = [
+      { client_created_at: '2026-06-01T07:00:00Z', payload: null },
+      { client_created_at: null, payload: { values: { wake_time: '07:00' } } },
+      { client_created_at: '2026-06-03T07:00:00Z', payload: { foo: 1 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchChronoEntries('p1')).toEqual([])
+  })
+
+  it('retourne vide en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect(await fetchChronoEntries('p1')).toEqual([])
   })
 })

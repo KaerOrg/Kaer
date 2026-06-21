@@ -2651,54 +2651,64 @@
 .chrono-month {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 20px 16px;
+  gap: 10px;
+  padding: 14px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
-.chrono-month__icon-wrap {
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
-  color: var(--color-primary);
+.chrono-month__nav {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 2px;
+}
+
+.chrono-month__month { font-size: 14px; font-weight: 700; color: var(--color-text); text-transform: capitalize; }
+.chrono-month__nav-btn { color: var(--color-primary); }
+.chrono-month__nav-btn--disabled { color: var(--color-border); }
+
+.chrono-month__weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.chrono-month__weekday { text-align: center; font-size: 10px; font-weight: 600; color: var(--color-text-muted); }
+
+.chrono-month__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+
+.chrono-month__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.chrono-month__cell--empty { visibility: hidden; }
+
+.chrono-month__day { font-size: 12px; font-weight: 600; color: var(--color-text); }
+.chrono-month__cell--future .chrono-month__day { color: var(--color-text-muted); opacity: 0.5; }
+
+.chrono-month__day--today {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: 999px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.chrono-month__title { font-size: 14px; font-weight: 600; color: var(--color-text); }
-
-.chrono-month__hint {
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  text-align: center;
-  max-width: 320px;
-  line-height: 1.5;
-}
-
-.chrono-month__grid {
-  margin-top: 12px;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  width: 100%;
-}
-
-.chrono-month__cell {
-  aspect-ratio: 1;
-  border-radius: 4px;
-  background: var(--color-bg-secondary, #f4f4f5);
+.chrono-month__daydot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   border: 1px solid var(--color-border);
+  background: transparent;
 }
 
-.chrono-month__cell--filled {
-  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
-  border-color: var(--color-primary);
-}
+.chrono-month__daydot--filled { background: var(--color-primary); border-color: var(--color-primary); }
+
+.chrono-month__band-title { font-size: 13px; font-weight: 700; color: var(--color-text); margin-top: 6px; }
 
 /* ── Exposure Hierarchy (preview_kind='exposure_hierarchy') ────────────── */
 

@@ -1,6 +1,8 @@
 {
   "common": {
     "save": "Save",
+    "prefill_from_last": "Same as usual",
+    "entry_date": "Date",
     "validate": "Confirm",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -511,8 +513,46 @@
       "section_medication": "Medications & diet"
     },
     "chronobiology_tracker": {
-      "label": "Chronobiological regularity",
-      "description": "Wake-up, bedtime, first meal times"
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime",
+      "rhythm_band_title": "Rhythm band",
+      "anchor_wake": "Wake-up",
+      "anchor_first_meal": "1st meal",
+      "anchor_main_activity": "Activity",
+      "anchor_last_meal": "Last meal",
+      "anchor_bedtime": "Bedtime",
+      "anchor_light": "Light",
+      "axis_time": "Time",
+      "axis_day": "Day of month"
+    },
+    "chrono_bio": {
+      "tab_journal": "Journal",
+      "tab_fiches": "Cards",
+      "today_label": "Today",
+      "add_today": "Log my markers for today",
+      "history_label": "History",
+      "empty_history": "No entry yet.",
+      "tap_to_add": "Tap to log",
+      "no_anchor_title": "No marker logged",
+      "no_anchor_msg": "Enter at least one time before saving.",
+      "delete_entry": "Delete this entry",
+      "date_label": "Day of",
+      "section_anchors": "My markers for today",
+      "wake_time": "Wake-up time",
+      "first_meal": "First meal",
+      "main_activity": "Main activity",
+      "last_meal": "Last meal",
+      "bedtime": "Bedtime",
+      "light": "Light exposure / going outside",
+      "optional_hint": "All markers are optional, enter the ones you remember.",
+      "save_entry": "Save my markers",
+      "update_entry": "Update",
+      "view_month": "Monthly view",
+      "recent_days": "Last 14 days",
+      "no_entry_day": "No marker",
+      "legend_recorded": "Marker recorded",
+      "legend_empty_day": "No entry",
+      "rhythm_band_title": "Rhythm band"
     },
     "mood_tracker": {
       "label": "Mood thermometer",

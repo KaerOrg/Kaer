@@ -1,6 +1,8 @@
 {
   "common": {
     "save": "Enregistrer",
+    "prefill_from_last": "Comme d'habitude",
+    "entry_date": "Date",
     "validate": "Valider",
     "cancel": "Annuler",
     "delete": "Supprimer",
@@ -583,40 +585,44 @@
       "section_medication": "Médicaments & alimentation"
     },
     "chronobiology_tracker": {
-      "label": "Régularité chronobiologique",
-      "description": "Heure de lever, coucher, premier repas",
+      "label": "Rythmes & régularité",
+      "description": "Régularité des rythmes de vie : lever, repas, activité, lumière, coucher",
       "rhythm_band_title": "Bande de rythme",
       "anchor_wake": "Lever",
       "anchor_first_meal": "1er repas",
       "anchor_main_activity": "Activité",
       "anchor_last_meal": "Dernier repas",
-      "anchor_bedtime": "Coucher"
+      "anchor_bedtime": "Coucher",
+      "anchor_light": "Lumière",
+      "axis_time": "Heure",
+      "axis_day": "Jour du mois"
     },
     "chrono_bio": {
-      "tab_fiches": "Fiches",
       "tab_journal": "Journal",
+      "tab_fiches": "Fiches",
       "today_label": "Aujourd'hui",
-      "add_today": "Saisir mes ancrages du jour",
+      "add_today": "Noter mes repères du jour",
       "history_label": "Historique",
       "empty_history": "Aucune saisie pour l'instant.",
       "tap_to_add": "Appuyer pour saisir",
-      "no_anchor_title": "Aucun ancrage saisi",
+      "no_anchor_title": "Aucun repère saisi",
       "no_anchor_msg": "Renseignez au moins un horaire avant d'enregistrer.",
       "delete_entry": "Supprimer cette saisie",
       "date_label": "Journée du",
-      "section_anchors": "Mes ancrages du jour",
+      "section_anchors": "Mes repères du jour",
       "wake_time": "Heure de lever",
       "first_meal": "Premier repas",
       "main_activity": "Activité principale",
       "last_meal": "Dernier repas",
       "bedtime": "Coucher",
-      "optional_hint": "Tous les ancrages sont facultatifs, saisissez ceux dont vous vous souvenez.",
-      "save_entry": "Enregistrer les ancrages",
+      "light": "Exposition à la lumière / sortie",
+      "optional_hint": "Tous les repères sont facultatifs, saisissez ceux dont vous vous souvenez.",
+      "save_entry": "Enregistrer mes repères",
       "update_entry": "Mettre à jour",
       "view_month": "Vue mensuelle",
       "recent_days": "14 derniers jours",
-      "no_entry_day": "Aucun ancrage",
-      "legend_recorded": "Ancrage enregistré",
+      "no_entry_day": "Aucun repère",
+      "legend_recorded": "Repère enregistré",
       "legend_empty_day": "Aucune saisie",
       "rhythm_band_title": "Bande de rythme"
     },
@@ -1847,8 +1853,8 @@
       "description": "Comprendre et gérer les fringales et la prise de poids sous antipsychotiques."
     },
     "chronobiology_tracker": {
-      "label": "Traqueur de régularité chronobiologique",
-      "description": "Suivi des zeitgebers : heure de lever, coucher, premier repas, essentiel pour les troubles bipolaires."
+      "label": "Rythmes & régularité",
+      "description": "Suivi de la régularité des rythmes de vie : horaires de lever, repas, activité, exposition à la lumière et coucher."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur & énergie",

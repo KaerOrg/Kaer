@@ -922,11 +922,39 @@
       "empty_text": "Use the button above to browse the cards."
     },
     "chronobiology_tracker": {
-      "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders.",
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime.",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
-      "empty_text": "Use the button above to log your first entry."
+      "empty_text": "Use the button above to log your first entry.",
+      "regularity_title": "Time regularity",
+      "regularity_note": "Standard deviation of each marker's times. Raw values, to be interpreted in consultation.",
+      "regularity_min": "min",
+      "regularity_days": "{{count}} day",
+      "regularity_days_plural": "{{count}} days",
+      "regularity_total": "{{count}} entry in total",
+      "regularity_total_plural": "{{count}} entries in total",
+      "rhythm_band_title": "Rhythm band",
+      "anchor_wake": "Wake-up",
+      "anchor_first_meal": "1st meal",
+      "anchor_main_activity": "Activity",
+      "anchor_last_meal": "Last meal",
+      "anchor_bedtime": "Bedtime",
+      "anchor_light": "Light",
+      "axis_time": "Time",
+      "axis_day": "Day of month"
+    },
+    "chrono_bio": {
+      "add_today": "Log my markers for today",
+      "history_label": "History",
+      "empty_history": "No entry yet.",
+      "section_anchors": "My markers for today",
+      "wake_time": "Wake-up time",
+      "first_meal": "First meal",
+      "main_activity": "Main activity",
+      "last_meal": "Last meal",
+      "bedtime": "Bedtime",
+      "light": "Light exposure / going outside"
     },
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",
@@ -1353,8 +1381,8 @@
       "description": "Understanding and managing cravings and weight gain on antipsychotics."
     },
     "chronobiology_tracker": {
-      "label": "Chronobiology Regularity Tracker",
-      "description": "Track zeitgebers: wake time, bedtime, first meal, essential for bipolar disorders."
+      "label": "Rhythms & regularity",
+      "description": "Regularity of daily life rhythms: wake-up, meals, activity, light, bedtime."
     },
     "mood_tracker": {
       "label": "Mood & Energy Thermometer",

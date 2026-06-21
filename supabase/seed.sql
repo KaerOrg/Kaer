@@ -2036,8 +2036,9 @@ on conflict (field_id, prop_key) do nothing;
 -- ModuleRenderer data-driven :
 --
 --   - distress_tolerance       → preview_kind='tabbed'  (psyedu + cards)
---   - chronobiology_tracker    → preview_kind='tabbed'  (psyedu + column_form
---                                                         + chrono_month)
+--   - chronobiology_tracker    → preview_kind='tabbed'  (column_form + chrono_month + psyedu)
+--                                « Rythmes & régularité » : onglets Journal + Vue mensuelle + Fiches
+--                                (refonte 2026-06, cf. docs/spec/rythmes-regularite.md)
 --   - craving_journal          → preview_kind='tabbed'  (psyedu + column_form)
 --
 -- Pour le contenu psyedu (psyedu_topics + psyedu_blocks), exécuter aussi
@@ -2264,23 +2265,24 @@ insert into public.field_props (field_id, prop_key, prop_value) values
 
 
 -- ────────────────────────────────────────────────────────────
--- 5) chronobiology_tracker — tabs : Fiches + Journal + Mois
+-- 5) chronobiology_tracker — tabs : Journal + Vue mensuelle + Fiches
 -- ────────────────────────────────────────────────────────────
 
 insert into public.module_content_fields
   (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order)
 values
-  -- tab Fiches → psyedu
-  ('chrono.tab.fiches', 'chronobiology_tracker', null, null, 'tab',
-   'modules.chrono_bio.tab_fiches', 10),
-
-  -- tab Journal → column_form (5 column_time_field optionnels)
+  -- tab Journal → column_form (ancres horaires, toutes optionnelles). En 1er : on
+  -- arrive directement sur l'action (saisie), pas sur la lecture.
   ('chrono.tab.journal', 'chronobiology_tracker', null, null, 'tab',
-   'modules.chrono_bio.tab_journal', 20),
+   'modules.chrono_bio.tab_journal', 10),
 
-  -- tab Mois → chrono_month
+  -- tab Vue mensuelle → chrono_month
   ('chrono.tab.month', 'chronobiology_tracker', null, null, 'tab',
-   'modules.chrono_bio.view_month', 30),
+   'modules.chrono_bio.view_month', 20),
+
+  -- tab Fiches → psyedu (lecture contextuelle ; même contenu que la bibliothèque)
+  ('chrono.tab.fiches', 'chronobiology_tracker', null, null, 'tab',
+   'modules.chrono_bio.tab_fiches', 30),
 
   -- column_form config (enfant du tab.journal)
   ('chrono.cfg', 'chronobiology_tracker', null, 'chrono.tab.journal', 'column_form_config', null, 0),
@@ -2297,22 +2299,29 @@ values
   ('chrono.col.last',    'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
    'modules.chrono_bio.last_meal', 14),
   ('chrono.col.bed',     'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
-   'modules.chrono_bio.bedtime', 15);
+   'modules.chrono_bio.bedtime', 15),
+  -- ancre lumière / sortie extérieure (zeitgeber dominant, Dollish 2023)
+  ('chrono.col.light',   'chronobiology_tracker', 'chrono.anchors', 'chrono.col.h',       'column_time_field',
+   'modules.chrono_bio.light', 16);
 
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('chrono.tab.fiches',  'tab_key',          'fiches'),
-  ('chrono.tab.fiches',  'sub_preview_kind', 'psyedu'),
-  ('chrono.tab.fiches',  'icon_name',        'BookOpen'),
   ('chrono.tab.journal', 'tab_key',          'journal'),
   ('chrono.tab.journal', 'sub_preview_kind', 'column_form'),
   ('chrono.tab.journal', 'icon_name',        'Clock'),
   ('chrono.tab.month',   'tab_key',          'month'),
   ('chrono.tab.month',   'sub_preview_kind', 'chrono_month'),
   ('chrono.tab.month',   'icon_name',        'Sun'),
+  ('chrono.tab.fiches',  'tab_key',          'fiches'),
+  ('chrono.tab.fiches',  'sub_preview_kind', 'psyedu'),
+  ('chrono.tab.fiches',  'icon_name',        'BookOpen'),
   -- column_form config
   ('chrono.cfg', 'new_btn_label', 'modules.chrono_bio.add_today'),
   ('chrono.cfg', 'empty_title',   'modules.chrono_bio.history_label'),
   ('chrono.cfg', 'empty_text',    'modules.chrono_bio.empty_history'),
+  -- capture anti-friction : bouton « comme d'habitude » (reprise de la dernière saisie)
+  ('chrono.cfg', 'prefill_from_last', 'common.prefill_from_last'),
+  -- saisie rétroactive : le patient peut choisir la date de la saisie
+  ('chrono.cfg', 'editable_date', '1'),
   -- column header
   ('chrono.col.h',       'color',            '#3B82F6'),
   ('chrono.col.h',       'step_number',      '1'),
@@ -2326,7 +2335,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('chrono.col.last',    'key',              'last_meal'),
   ('chrono.col.last',    'optional',         '1'),
   ('chrono.col.bed',     'key',              'bedtime'),
-  ('chrono.col.bed',     'optional',         '1');
+  ('chrono.col.bed',     'optional',         '1'),
+  ('chrono.col.light',   'key',              'light'),
+  ('chrono.col.light',   'optional',         '1');
 
 -- Level prop pour tous les card_heading (migré depuis card_heading_2/3/4)
 insert into public.field_props (field_id, prop_key, prop_value) values

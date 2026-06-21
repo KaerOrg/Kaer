@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
+import { Button } from '../../../../ui/Button'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -8,20 +9,13 @@ import { colors, spacing } from '../../../../../theme'
 import { getAllFormEntries, type FormEntry } from '../../../../../lib/database'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { CalendarGrid } from './CalendarGrid'
-import { RhythmBand } from './RhythmBand'
-import { AnchorLegend } from './AnchorLegend'
+import { RhythmogramChart } from './RhythmogramChart'
 import {
   buildEntriesByDate,
   DEFAULT_ANCHORS,
   type AnchorEntry,
   type AnchorSpec,
 } from './chronoMonthUtils'
-
-const MONTH_KEYS = [
-  'months.january', 'months.february', 'months.march', 'months.april',
-  'months.may', 'months.june', 'months.july', 'months.august',
-  'months.september', 'months.october', 'months.november', 'months.december',
-] as const
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -55,7 +49,7 @@ function formEntriesToAnchorEntries(entries: readonly FormEntry[]): AnchorEntry[
 // Au tap d'un jour, navigue vers ModuleContent du même module en mode entry
 // (responsabilité du layout column_form qui gère la création/édition).
 export function ChronoMonthLayout({ moduleId }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigation = useNavigation<Nav>()
 
   const now = useMemo(() => new Date(), [])
@@ -83,6 +77,11 @@ export function ChronoMonthLayout({ moduleId }: Props) {
   useFocusEffect(load)
 
   const entriesByDate = useMemo(() => buildEntriesByDate(entries), [entries])
+  // Forme attendue par le rythmogramme partagé (date + map horaires bruts).
+  const rhythmEntries = useMemo(
+    () => entries.map(e => ({ date: e.date, values: e.anchors })),
+    [entries],
+  )
 
   const goToPrev = useCallback(() => {
     if (month === 1) {
@@ -126,29 +125,30 @@ export function ChronoMonthLayout({ moduleId }: Props) {
     <View style={styles.container} testID="chrono-month-layout">
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.navRow}>
-          <Pressable
-            style={styles.navBtn}
+          <Button
+            variant="ghost"
             onPress={goToPrev}
+            iconLeft={<ChevronLeft size={22} color={colors.primary} />}
             accessibilityLabel={t('common.prev_month')}
             testID="chrono-prev-month"
-          >
-            <ChevronLeft size={22} color={colors.primary} />
-          </Pressable>
+          />
           <Text style={styles.monthTitle}>
-            {t(MONTH_KEYS[month - 1])} {year}
+            {(() => {
+              const raw = new Date(year, month - 1, 1).toLocaleDateString(i18n.language, {
+                month: 'long',
+                year: 'numeric',
+              })
+              return raw.charAt(0).toUpperCase() + raw.slice(1)
+            })()}
           </Text>
-          <Pressable
-            style={[styles.navBtn, isCurrentMonth && styles.navBtnDisabled]}
+          <Button
+            variant="ghost"
             onPress={goToNext}
             disabled={isCurrentMonth}
+            iconLeft={<ChevronRight size={22} color={isCurrentMonth ? colors.border : colors.primary} />}
             accessibilityLabel={t('common.next_month')}
             testID="chrono-next-month"
-          >
-            <ChevronRight
-              size={22}
-              color={isCurrentMonth ? colors.border : colors.primary}
-            />
-          </Pressable>
+          />
         </View>
 
         <CalendarGrid
@@ -166,16 +166,7 @@ export function ChronoMonthLayout({ moduleId }: Props) {
           {t('modules.chronobiology_tracker.rhythm_band_title')}
         </Text>
 
-        <RhythmBand
-          year={year}
-          month={month}
-          entriesByDate={entriesByDate}
-          todayISO={todayISO}
-          anchors={anchors}
-          onDayPress={handleDayPress}
-        />
-
-        <AnchorLegend anchors={anchors} />
+        <RhythmogramChart entries={rhythmEntries} year={year} month={month} anchors={anchors} />
       </ScrollView>
     </View>
   )
@@ -198,8 +189,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
   },
-  navBtn: { padding: spacing.sm },
-  navBtnDisabled: { opacity: 0.3 },
   monthTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
   divider: {
     height: 1,

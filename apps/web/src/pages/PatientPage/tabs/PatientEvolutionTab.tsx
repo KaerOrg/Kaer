@@ -12,6 +12,8 @@ import type {
   MedEffectPoint,
   SleepPoint,
 } from '../../../services/engagementService'
+import type { RhythmEntry } from '@psytool/shared'
+import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
 import {
@@ -42,6 +44,7 @@ type EvolutionData = {
   medEffects: string[]
   medData: MedEffectPoint[]
   sleepData: SleepPoint[]
+  chronoEntries: RhythmEntry[]
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -52,6 +55,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   medEffects: [],
   medData: [],
   sleepData: [],
+  chronoEntries: [],
 }
 
 export function PatientEvolutionTab({ patientId }: Props) {
@@ -62,7 +66,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
   const modulesQuery = useQuery(patientQueries.modules(patientId))
-  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData } =
+  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
 
@@ -77,7 +81,13 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const isArchived = (moduleType: string) => !activeTypes.has(moduleType)
 
   const days = RANGE_DAYS[range]
-  const hasData = scales.length > 0 || moodData.length > 0 || fearData.length > 0 || medData.length > 0 || sleepData.length > 0
+  const hasData =
+    scales.length > 0 ||
+    moodData.length > 0 ||
+    fearData.length > 0 ||
+    medData.length > 0 ||
+    sleepData.length > 0 ||
+    chronoEntries.length > 0
 
   // Types de modules ayant des données ; au moins un est-il archivé ?
   const dataTypes = useMemo(() => {
@@ -306,6 +316,13 @@ export function PatientEvolutionTab({ patientId }: Props) {
             </EvolutionCard>
           )
         })()}
+
+        {/* ── Rythmes & régularité ────────────────────────────── */}
+        {chronoEntries.length > 0 && (
+          <div className="evolution-card evolution-card--wide">
+            <ChronoRhythmogramPanel entries={chronoEntries} />
+          </div>
+        )}
 
       </div>
     </div>

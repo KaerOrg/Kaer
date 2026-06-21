@@ -192,3 +192,93 @@ describe('FieldRenderer — column_form (column_time_field)', () => {
     expect(call.values.bedtime).toBe('')
   })
 })
+
+const FIELDS_WITH_PREFILL: ContentField[] = [
+  makeField({
+    id: 'chrono.cfg', field_type: 'column_form_config', sort_order: 0,
+    props: { prefill_from_last: 'common.prefill_from_last' },
+  }),
+  COL_WAKE, COL_BED,
+]
+
+function renderWithPrefill() {
+  return render(
+    <FieldRenderer preview_kind="column_form" fields={FIELDS_WITH_PREFILL} moduleId="chronobiology_tracker" />
+  )
+}
+
+describe('column_form — capture anti-friction « comme d\'habitude »', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('n\'affiche pas le bouton de préremplissage sans saisie précédente', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+    renderWithPrefill()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('prefill-from-last')).toBeNull()
+  })
+
+  it('préremplit depuis la dernière saisie et enregistre une nouvelle entrée', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderWithPrefill()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.press(await screen.findByTestId('prefill-from-last'))
+    // Les valeurs sont remplies → le bouton clear du champ horaire apparaît.
+    await waitFor(() => expect(screen.getByTestId('time-wake_time-clear')).toBeTruthy())
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const call = (database.saveFormEntry as jest.Mock).mock.calls[0][0]
+    expect(call.values.wake_time).toBe('07:30')
+    expect(call.values.bedtime).toBe('23:15')
+    expect(call.id).toBe('chrono-test-id-1') // nouvelle entrée, pas l'id de la précédente
+  })
+
+  it('masque le bouton en mode édition d\'une entrée existante', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderWithPrefill()
+    fireEvent.press(await screen.findByTestId(`edit-${MOCK_ENTRY.id}`))
+    await waitFor(() => expect(screen.getByTestId('save-entry')).toBeTruthy())
+    expect(screen.queryByTestId('prefill-from-last')).toBeNull()
+  })
+})
+
+const FIELDS_WITH_DATE: ContentField[] = [
+  makeField({ id: 'chrono.cfg', field_type: 'column_form_config', sort_order: 0, props: { editable_date: '1' } }),
+  COL_WAKE,
+]
+
+function renderWithDate() {
+  return render(
+    <FieldRenderer preview_kind="column_form" fields={FIELDS_WITH_DATE} moduleId="chronobiology_tracker" />
+  )
+}
+
+describe('column_form — date de saisie éditable (saisie rétroactive)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('affiche le bouton date quand editable_date est activé', async () => {
+    renderWithDate()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(await screen.findByTestId('entry-date')).toBeTruthy()
+  })
+
+  it('enregistre created_at (ISO) à la sauvegarde', async () => {
+    renderWithDate()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    await screen.findByTestId('entry-date')
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const call = (database.saveFormEntry as jest.Mock).mock.calls[0][0]
+    expect(typeof call.created_at).toBe('string')
+    expect(call.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('n\'affiche pas le bouton date sans editable_date', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('entry-date')).toBeNull()
+  })
+})
+
