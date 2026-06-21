@@ -482,7 +482,9 @@
       "anchor_main_activity": "Activity",
       "anchor_last_meal": "Last meal",
       "anchor_bedtime": "Bedtime",
-      "anchor_light": "Light"
+      "anchor_light": "Light",
+      "axis_time": "Time",
+      "axis_day": "Day of month"
     },
     "chrono_bio": {
       "tab_journal": "Journal",

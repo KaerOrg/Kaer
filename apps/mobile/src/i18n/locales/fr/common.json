@@ -554,7 +554,9 @@
       "anchor_main_activity": "Activité",
       "anchor_last_meal": "Dernier repas",
       "anchor_bedtime": "Coucher",
-      "anchor_light": "Lumière"
+      "anchor_light": "Lumière",
+      "axis_time": "Heure",
+      "axis_day": "Jour du mois"
     },
     "chrono_bio": {
       "tab_journal": "Journal",

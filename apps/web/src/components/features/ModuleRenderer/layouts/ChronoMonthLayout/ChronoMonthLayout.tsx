@@ -103,6 +103,8 @@ export function ChronoMonthLayout() {
         year={year}
         month={month1}
         locale={i18n.language}
+        xAxisLabel={t('modules.chronobiology_tracker.axis_day')}
+        yAxisLabel={t('modules.chronobiology_tracker.axis_time')}
       />
     </div>
   )

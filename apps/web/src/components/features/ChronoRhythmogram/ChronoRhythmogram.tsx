@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   ReferenceLine,
   Tooltip,
+  Label,
 } from 'recharts'
 import { minutesToHourLabel, minutesToClock } from '@psytool/shared'
 import type { RhythmogramAnchor } from '../../../lib/chronoAnchors'
@@ -20,7 +21,12 @@ interface Props {
   year: number
   month: number // 1-12
   locale: string
+  /** Titres d'axes (déjà traduits) — fournis par l'appelant pour rester générique. */
+  xAxisLabel?: string
+  yAxisLabel?: string
 }
+
+const AXIS_LABEL_STYLE = { fontSize: 11, fill: '#94A3B8' } as const
 
 interface TooltipEntry { dataKey?: string | number; value?: number; color?: string }
 interface TooltipContentProps {
@@ -72,14 +78,14 @@ function buildHourTicks(domain: [number, number]): number[] {
  * semaine qui dérape). Traits verticaux = débuts de semaine (repères).
  * Conforme MDR : horaires bruts tracés, aucune interprétation ni seuil.
  */
-export function ChronoRhythmogram({ data, anchors, yDomain, weekStarts, year, month, locale }: Props) {
+export function ChronoRhythmogram({ data, anchors, yDomain, weekStarts, year, month, locale, xAxisLabel, yAxisLabel }: Props) {
   const hourTicks = buildHourTicks(yDomain)
   const plotted = anchors.filter(a => a.count >= 1)
 
   return (
     <div className="rhythmogram">
-      <ResponsiveContainer width="100%" height={240}>
-        <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={248}>
+        <LineChart data={data} margin={{ top: 8, right: 12, left: 4, bottom: xAxisLabel ? 16 : 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
           {weekStarts.map(d => (
             <ReferenceLine key={d} x={d} stroke="#E2E8F0" strokeWidth={1} />
@@ -93,7 +99,11 @@ export function ChronoRhythmogram({ data, anchors, yDomain, weekStarts, year, mo
             axisLine={false}
             tickLine={false}
             dy={4}
-          />
+          >
+            {xAxisLabel != null && (
+              <Label value={xAxisLabel} position="insideBottom" offset={-6} style={AXIS_LABEL_STYLE} />
+            )}
+          </XAxis>
           <YAxis
             domain={yDomain}
             ticks={hourTicks}
@@ -101,9 +111,13 @@ export function ChronoRhythmogram({ data, anchors, yDomain, weekStarts, year, mo
             tick={{ fontSize: 11, fill: '#94A3B8' }}
             axisLine={false}
             tickLine={false}
-            width={36}
+            width={yAxisLabel ? 48 : 36}
             reversed
-          />
+          >
+            {yAxisLabel != null && (
+              <Label value={yAxisLabel} angle={-90} position="insideLeft" style={{ ...AXIS_LABEL_STYLE, textAnchor: 'middle' }} />
+            )}
+          </YAxis>
           <Tooltip
             content={<TooltipContent anchors={anchors} year={year} month={month} locale={locale} />}
             cursor={{ stroke: '#E2E8F0', strokeWidth: 1 }}

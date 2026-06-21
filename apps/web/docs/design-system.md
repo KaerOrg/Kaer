@@ -893,6 +893,7 @@ config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 | `weekStarts` | `number[]` | Jours (1-based) lundis → traits verticaux repères |
 | `year` / `month` | `number` | Mois affiché (month 1-12) — formatage des dates du tooltip |
 | `locale` | `string` | Locale i18n pour le formatage des dates |
+| `xAxisLabel` / `yAxisLabel` | `string?` | Titres d'axes déjà traduits (« Jour du mois » / « Heure ») — fournis par l'appelant pour garder le composant générique |
 
 ---
 

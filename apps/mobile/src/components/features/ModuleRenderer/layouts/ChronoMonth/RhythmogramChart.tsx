@@ -92,6 +92,7 @@ export function RhythmogramChart({ entries, year, month, anchors }: Props) {
 
   return (
     <View style={styles.wrapper} testID="chrono-rhythmogram">
+      <Text style={styles.axisTitleY}>{t('modules.chronobiology_tracker.axis_time')}</Text>
       <Svg width="100%" height={SVG_H} viewBox={`0 0 ${SVG_W} ${SVG_H}`} preserveAspectRatio="none">
         {/* Lignes d'heures + libellés (axe Y) */}
         {model.ticks.map(tk => (
@@ -141,6 +142,7 @@ export function RhythmogramChart({ entries, year, month, anchors }: Props) {
           )),
         )}
       </Svg>
+      <Text style={styles.axisTitleX}>{t('modules.chronobiology_tracker.axis_day')}</Text>
 
       {/* Légende : repère + écart-type brut (valeur neutre, MDR-safe) */}
       <View style={styles.legend}>
@@ -158,6 +160,8 @@ export function RhythmogramChart({ entries, year, month, anchors }: Props) {
 
 const styles = StyleSheet.create({
   wrapper: { marginHorizontal: spacing.lg, marginTop: spacing.xs },
+  axisTitleY: { fontSize: 10, color: colors.textMuted, fontWeight: '600', marginBottom: 1 },
+  axisTitleX: { fontSize: 10, color: colors.textMuted, fontWeight: '600', textAlign: 'center', marginTop: 1 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm, gap: 8 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 8 },
   legendDot: { width: 9, height: 9, borderRadius: 4.5 },

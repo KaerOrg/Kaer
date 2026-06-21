@@ -95,6 +95,8 @@ export function ChronoRhythmogramPanel({ entries }: Props) {
         year={year}
         month={month}
         locale={i18n.language}
+        xAxisLabel={t('modules.chronobiology_tracker.axis_day')}
+        yAxisLabel={t('modules.chronobiology_tracker.axis_time')}
       />
     </div>
   )
