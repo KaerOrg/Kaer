@@ -78,7 +78,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
   const buildRows = (shift: number): RecordRow[] => {
     const rows: RecordRow[] = []
     for (const h of headers) {
-      const color = h.props['color'] ?? '#6366F1'
+      const color = h.props['color'] ?? 'var(--color-primary)'
       for (const child of headerChildren(h)) {
         const label = child.text_code ? t(child.text_code) : ''
         if (!label) continue
@@ -129,7 +129,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
       {/* Formulaire de saisie — colonnes empilées */}
       <div className="cf-entry">
         {headers.map((h, idx) => {
-          const color = h.props['color'] ?? '#6366F1'
+          const color = h.props['color'] ?? 'var(--color-primary)'
           const stepNumber = h.props['step_number'] ?? String(idx + 1)
           const hintCode = h.props['hint_code']
           const headerLabel = h.text_code ? t(h.text_code) : ''

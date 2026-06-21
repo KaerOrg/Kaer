@@ -35,6 +35,20 @@ layout.
 à cas limites ni le test de rendu d'un composant à logique : un fichier source créé
 exige **son** test direct, même si « ça passe » via un test plus haut.
 
+**refonte/chronobiologie (2026-06-21) — le composant testé… est mocké.**
+`ChronoRhythmogram.tsx` (web) créé avec de la logique (`buildHourTicks`, tooltip
+`anchors.find`, filtre `count >= 1`) **sans `ChronoRhythmogram.test.tsx`**. Le seul
+consommateur testé (`ChronoRhythmogramPanel.test.tsx`) le **mocke entièrement** :
+```ts
+vi.mock('../../../components/features/ChronoRhythmogram', () => ({ ChronoRhythmogram: () => <div data-testid="rhythmogram" /> }))
+```
+→ couverture réelle = **zéro** (même pas indirecte). En parallèle, la fonction pure
+`chronoAnchors.buildRhythmogramAnchors` créée sans test (`grep` du nom sur les tests
+= vide).
+→ Réflexe review : pour chaque source créé, chercher **son** test direct ET vérifier
+que les tests des consommateurs ne le **mockent** pas (un mock du composant *prouve*
+qu'il n'est pas couvert là). `grep -rln "MonComposant\|maFonctionPure" apps/*/src | grep test`.
+
 ---
 
 ## Mocks synchronisés avec les exports
@@ -94,6 +108,25 @@ nouveaux composants `features/` (`ModuleFilterBar`, `ModuleTagChips`).
 pour les composants `features/` (pas seulement `ui/`) : table des props + exemple
 d'usage dans `apps/<app>/docs/design-system.md`, **dans le même commit**.
 
+**refonte/chronobiologie (2026-06-21) — « cohérent avec le legacy » n'est PAS une excuse.**
+Deux nouveaux boutons `dateBtn`/`prefillBtn` écrits en `Pressable + icône + Text +
+styles.xxxBtn` dans `ColumnFormLayout`, alors que `ui/Button` (mobile) couvre le
+besoin (`iconLeft` + `variant` + `label` + `accessibilityLabel`).
+```tsx
+// ❌ bouton ad hoc reproduisant ui/Button
+<Pressable style={styles.dateBtn} onPress={…}><Icon/><Text style={styles.dateBtnText}>…</Text></Pressable>
+// ✅ le primitive du design system
+<Button variant="secondary" iconLeft={<Icon/>} label={…} onPress={…} accessibilityLabel={…} />
+```
+La review l'avait d'abord déclassé en « point d'attention » au motif que le fichier
+contenait déjà des boutons ad hoc (`saveBtn`/`cancelBtn`/`newBtn`/`timeButton`).
+**Erreur** : c'est de la dette préexistante, pas une norme. Le fait qu'un fichier
+bypasse déjà le design system n'**autorise jamais** un nouveau bypass.
+→ **`Pressable + Text + styles.xxxBtn` quand `ui/Button` existe = violation
+bloquante, sans exception.** On ne bypass jamais le design system ; on étend le
+primitive ou on l'utilise. « Cohérent avec le code voisin » ne s'applique qu'au
+code **conforme** — jamais pour propager une violation.
+
 ---
 
 ## Design system : tokens (pas de valeur hardcodée)
@@ -141,6 +174,33 @@ function ObservationBlock({ notes, onAddNote }: ObservationBlockProps) { … }
 
 → Remonter la possession des notes à `FileActivePage` (slice `notesByEntry` ou
 callbacks `onLoadNotes`/`onAddNote`), aligné sur le pattern des frères.
+
+---
+
+## Parité web ≡ mobile : la donnée synchronisée doit porter le bon horodatage
+
+> Règle source : [coding-standards.md § Synchronisation distante](coding-standards.md#synchronisation-distante-mobile--toujours-via-synchelpers) + Étape 4 du skill (parité web ≡ mobile).
+
+**refonte/chronobiologie (2026-06-21) — la date rétroactive n'atteint jamais le serveur.**
+La feature « saisie rétroactive » laisse le patient dater une saisie dans le passé.
+Mobile écrit la date choisie dans SQLite (`saveFormEntry({ ..., created_at })`) → le
+rythmogramme **mobile** (lu depuis SQLite) est correct. Mais `syncHelpers.syncUpsert`
+**force** l'horodatage et **interdit** de le surcharger :
+```ts
+type UpsertParams = Omit<EnqueueParams, 'operation' | 'client_created_at'>
+// …
+enqueue({ ...params, operation: 'upsert', client_created_at: new Date().toISOString() })
+```
+Côté web, `fetchChronoEntries` date chaque saisie via `client_created_at` — son
+propre commentaire annonçait le contrat « ce champ porte le jour concerné », contrat
+**rompu** par `syncUpsert`. Résultat : la même saisie apparaît à **deux jours
+différents** sur mobile (patient) et web (praticien).
+→ Quand une saisie patient porte une **date métier** distincte de l'instant de sync
+(saisie rétroactive, antidatée), cette date doit voyager jusqu'à `patient_entries`
+(`client_created_at` surchargeable dans `syncUpsert`). Réflexe review : si le mobile
+lit la date depuis SQLite et le web depuis `client_created_at`, vérifier que les deux
+**convergent** — sinon parité rompue, même si « ça marche » sur chaque plateforme
+isolément.
 
 ---
 

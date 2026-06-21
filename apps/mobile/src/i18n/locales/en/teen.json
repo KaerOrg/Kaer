@@ -87,7 +87,10 @@
       "step_taste": "1 taste in your mouth"
     },
     "chronobiology_tracker": {
-      "description": "How regular your days are: wake-up, meals, activity, light, bedtime"
+      "description": "How regular your days are: wake-up, meals, activity, light, bedtime",
+      "anchor_light": "Light",
+      "axis_time": "Time",
+      "axis_day": "Day of month"
     },
     "chrono_bio": {
       "add_today": "Log my markers for today",
@@ -98,7 +101,8 @@
       "section_anchors": "My markers for today",
       "optional_hint": "All markers are optional, add the ones you remember.",
       "save_entry": "Save",
-      "today_label": "Today"
+      "today_label": "Today",
+      "light": "Light / going outside"
     },
     "mood_tracker": {
       "title": "How are you doing?",

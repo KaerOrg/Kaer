@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
@@ -41,25 +41,40 @@ export function ChronoRhythmogramPanel({ entries }: Props) {
   // Par défaut : le mois le plus récent renseigné.
   const [idx, setIdx] = useState(months.length - 1)
 
-  if (months.length === 0) {
+  // Tous les hooks s'exécutent inconditionnellement (Rules of Hooks) : le mois
+  // courant est nullable tant qu'aucune saisie n'existe, l'écran vide est géré
+  // par un return APRÈS les hooks.
+  const safeIdx = months.length === 0 ? 0 : Math.min(Math.max(idx, 0), months.length - 1)
+  const current = months[safeIdx] ?? null
+
+  const result = useMemo(
+    () => (current ? buildRhythmogram(entries, CHRONO_ANCHOR_KEYS, current.year, current.month) : null),
+    [entries, current],
+  )
+  const chartAnchors = useMemo(
+    () => (result ? buildRhythmogramAnchors(result.anchors, t) : []),
+    [result, t],
+  )
+
+  const monthLabel = useMemo(() => {
+    if (!current) return ''
+    const raw = new Date(current.year, current.month - 1, 1).toLocaleDateString(i18n.language, {
+      month: 'long',
+      year: 'numeric',
+    })
+    return raw.charAt(0).toUpperCase() + raw.slice(1)
+  }, [current, i18n.language])
+
+  const goPrev = useCallback(() => setIdx(safeIdx - 1), [safeIdx])
+  const goNext = useCallback(() => setIdx(safeIdx + 1), [safeIdx])
+
+  if (!current || !result) {
     return (
       <div className="module-data-panel">
         <p className="module-data-panel__message">{t('patient.summary_empty')}</p>
       </div>
     )
   }
-
-  const safeIdx = Math.min(Math.max(idx, 0), months.length - 1)
-  const { year, month } = months[safeIdx]
-
-  const result = buildRhythmogram(entries, CHRONO_ANCHOR_KEYS, year, month)
-  const chartAnchors = buildRhythmogramAnchors(result.anchors, t)
-
-  const monthLabelRaw = new Date(year, month - 1, 1).toLocaleDateString(i18n.language, {
-    month: 'long',
-    year: 'numeric',
-  })
-  const monthLabel = monthLabelRaw.charAt(0).toUpperCase() + monthLabelRaw.slice(1)
 
   return (
     <div className="module-data-panel">
@@ -72,7 +87,7 @@ export function ChronoRhythmogramPanel({ entries }: Props) {
             icon={<ChevronLeft size={18} />}
             aria-label={t('common.previous')}
             disabled={safeIdx === 0}
-            onClick={() => setIdx(safeIdx - 1)}
+            onClick={goPrev}
           />
           <span className="rhythmogram__month">{monthLabel}</span>
           <Button
@@ -81,7 +96,7 @@ export function ChronoRhythmogramPanel({ entries }: Props) {
             icon={<ChevronRight size={18} />}
             aria-label={t('common.next')}
             disabled={safeIdx === months.length - 1}
-            onClick={() => setIdx(safeIdx + 1)}
+            onClick={goNext}
           />
         </div>
       </div>
@@ -92,8 +107,8 @@ export function ChronoRhythmogramPanel({ entries }: Props) {
         anchors={chartAnchors}
         yDomain={result.yDomain}
         weekStarts={result.weekStarts}
-        year={year}
-        month={month}
+        year={current.year}
+        month={current.month}
         locale={i18n.language}
         xAxisLabel={t('modules.chronobiology_tracker.axis_day')}
         yAxisLabel={t('modules.chronobiology_tracker.axis_time')}

@@ -15,6 +15,9 @@ export async function saveFormEntry(
     module_id: entry.module_id,
     entry_kind: 'form_entry',
     payload: { module_id: entry.module_id, values: entry.values },
+    // Saisie rétroactive : la date choisie par le patient porte le jour concerné
+    // côté serveur (la vue praticien lit `client_created_at`). Sinon = instant sync.
+    ...(entry.created_at ? { client_created_at: entry.created_at } : {}),
   })
 }
 

@@ -26,6 +26,7 @@ import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { RatingSelector } from '../../../../ui/RatingSelector'
+import { Button } from '../../../../ui/Button'
 import { ColumnTimeField } from './ColumnTimeField'
 import { styles } from './styles'
 
@@ -223,17 +224,14 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           keyboardShouldPersistTaps="handled"
         >
           {editableDate ? (
-            <Pressable
-              style={styles.dateBtn}
+            <Button
+              variant="secondary"
+              style={styles.entryActionBtn}
               onPress={handleOpenDatePicker}
-              accessibilityRole="button"
+              iconLeft={<MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />}
+              label={`${t('common.entry_date')} : ${formatDateNumeric(entryDate.toISOString())}`}
               testID="entry-date"
-            >
-              <MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />
-              <Text style={styles.dateBtnText}>
-                {t('common.entry_date')} : {formatDateNumeric(entryDate.toISOString())}
-              </Text>
-            </Pressable>
+            />
           ) : null}
           {showDatePicker ? (
             <DateTimePicker
@@ -245,15 +243,14 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
             />
           ) : null}
           {canPrefill ? (
-            <Pressable
-              style={styles.prefillBtn}
+            <Button
+              variant="secondary"
+              style={styles.entryActionBtn}
               onPress={handlePrefillFromLast}
-              accessibilityRole="button"
+              iconLeft={<MaterialCommunityIcons name="history" size={18} color={colors.primary} />}
+              label={prefillLabel}
               testID="prefill-from-last"
-            >
-              <MaterialCommunityIcons name="history" size={18} color={colors.primary} />
-              <Text style={styles.prefillBtnText}>{prefillLabel}</Text>
-            </Pressable>
+            />
           ) : null}
           {columns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
