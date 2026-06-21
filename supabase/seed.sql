@@ -43,7 +43,6 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('medication_adherence',    'iatrogenic',  'fields',      5,  false),
   ('psychoeducation',         'iatrogenic',  'psyedu_library', 6,  true),
   ('sleep_diary',             'lifestyle',   'fields',      7,  false),
-  ('diet_weight_psycho',      'lifestyle',   'coming_soon', 8,  false),
   ('chronobiology_tracker',   'lifestyle',   'coming_soon', 9,  false),
   ('mood_tracker',            'emotion',     'fields',      10, false),
   ('emotion_wheel',           'emotion',     'coming_soon', 11, false),
@@ -71,7 +70,6 @@ update public.modules set
     when 'medication_adherence'    then 'clipboard-list'
     when 'psychoeducation'         then 'book-open'
     when 'sleep_diary'             then 'moon'
-    when 'diet_weight_psycho'      then 'apple'
     when 'chronobiology_tracker'   then 'clock'
     when 'mood_tracker'            then 'smile'
     when 'emotion_wheel'           then 'target'
@@ -96,7 +94,6 @@ update public.modules set
     when 'medication_adherence'    then 'calendar-check-outline'
     when 'psychoeducation'         then 'book-open-page-variant'
     when 'sleep_diary'             then 'weather-night'
-    when 'diet_weight_psycho'      then 'food-apple-outline'
     when 'chronobiology_tracker'   then 'clock-outline'
     when 'mood_tracker'            then 'emoticon-outline'
     when 'emotion_wheel'           then 'palette'
@@ -121,7 +118,6 @@ update public.modules set
     when 'medication_adherence'    then '#8B5CF6'
     when 'psychoeducation'         then '#8B5CF6'
     when 'sleep_diary'             then '#06B6D4'
-    when 'diet_weight_psycho'      then '#06B6D4'
     when 'chronobiology_tracker'   then '#06B6D4'
     when 'mood_tracker'            then '#F97316'
     when 'emotion_wheel'           then '#F97316'
@@ -1173,10 +1169,6 @@ insert into public.module_tags (module_id, tag_id) values
   ('sleep_diary', 'teen'), ('sleep_diary', 'adult'), ('sleep_diary', 'senior'),
   ('sleep_diary', 'cbt'), ('sleep_diary', 'self_monitoring'),
 
-  ('diet_weight_psycho', 'eating_disorder'),
-  ('diet_weight_psycho', 'teen'), ('diet_weight_psycho', 'adult'),
-  ('diet_weight_psycho', 'cbt'), ('diet_weight_psycho', 'self_monitoring'),
-
   ('chronobiology_tracker', 'sleep'), ('chronobiology_tracker', 'bipolar'), ('chronobiology_tracker', 'depression'),
   ('chronobiology_tracker', 'adult'),
   ('chronobiology_tracker', 'self_monitoring'),
@@ -1518,10 +1510,6 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('cj.label',           'craving_journal',        NULL, NULL, 'module_label',       'module.craving_journal.label', 0),
   ('cj.desc',            'craving_journal',        NULL, NULL, 'module_description', 'module.craving_journal.description', 1),
   ('cj.soon',            'craving_journal',        NULL, NULL, 'coming_soon',        NULL, 99),
-  ('dwp.label',          'diet_weight_psycho',     NULL, NULL, 'module_label',       'module.diet_weight_psycho.label', 0),
-  ('dwp.desc',           'diet_weight_psycho',     NULL, NULL, 'module_description', 'module.diet_weight_psycho.description', 1),
-  ('dwp.disclaimer',     'diet_weight_psycho',     NULL, NULL, 'disclaimer_banner',  NULL, 2),
-  ('dwp.soon',           'diet_weight_psycho',     NULL, NULL, 'coming_soon',        NULL, 99),
   ('dt.label',           'distress_tolerance',     NULL, NULL, 'module_label',       'module.distress_tolerance.label', 0),
   ('dt.desc',            'distress_tolerance',     NULL, NULL, 'module_description', 'module.distress_tolerance.description', 1),
   ('dt.soon',            'distress_tolerance',     NULL, NULL, 'coming_soon',        NULL, 99),
@@ -2044,10 +2032,9 @@ where exists (select 1 from public.module_content_fields where id = v.field_id)
 on conflict (field_id, prop_key) do nothing;
 
 -- ============================================================
--- 5 modules issus de la branche `remodeling-fiches-ETP`, migrés vers le
+-- Modules issus de la branche `remodeling-fiches-ETP`, migrés vers le
 -- ModuleRenderer data-driven :
 --
---   - diet_weight_psycho       → preview_kind='psyedu'
 --   - distress_tolerance       → preview_kind='tabbed'  (psyedu + cards)
 --   - chronobiology_tracker    → preview_kind='tabbed'  (psyedu + column_form
 --                                                         + chrono_month)
@@ -2063,7 +2050,6 @@ on conflict (field_id, prop_key) do nothing;
 -- UPDATE preview_kind sur les 4 modules
 -- ────────────────────────────────────────────────────────────
 
-update public.modules set preview_kind = 'psyedu'              where id = 'diet_weight_psycho';
 update public.modules set preview_kind = 'tabbed'              where id = 'distress_tolerance';
 update public.modules set preview_kind = 'tabbed'              where id = 'chronobiology_tracker';
 update public.modules set preview_kind = 'tabbed'              where id = 'craving_journal';
@@ -2071,7 +2057,6 @@ update public.modules set preview_kind = 'tabbed'              where id = 'cravi
 
 -- ────────────────────────────────────────────────────────────
 -- 2) Reset des fields des modules tabbed (avant ré-insertion)
---    diet_weight_psycho n'a pas de fields.
 -- ────────────────────────────────────────────────────────────
 
 delete from public.module_content_fields
