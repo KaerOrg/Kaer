@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { computeAnchorRegularity, type AnchorRegularity } from '../lib/anchorRegularity'
+import type { RhythmEntry } from '@psytool/shared'
 
 export type ScorePoint = { date: string; score: number }
 
@@ -192,41 +192,33 @@ export async function fetchModuleSummary(
   }
 }
 
-// ── Régularité des rythmes « Rythmes & régularité » (vue praticien) ───────────
-// Écart-type circulaire par ancre sur les entrées synchronisées. Valeurs BRUTES,
-// aucune interprétation ni seuil (MDR 2017/745). Ordre canonique des ancres.
+// ── Rythmes « Rythmes & régularité » (vue praticien) ──────────────────────────
+// Horaires bruts de chaque repère, datés, pour tracer le rythmogramme (heure du
+// repère jour par jour). Valeurs BRUTES, aucune interprétation ni seuil
+// (MDR 2017/745). La date d'une saisie = client_created_at (le patient peut la
+// dater rétroactivement → ce champ porte le jour concerné).
 
-const CHRONO_ANCHOR_KEYS = [
-  'wake_time', 'first_meal', 'main_activity', 'last_meal', 'bedtime', 'light',
-] as const
-
-export type ChronoRegularity = {
-  anchors: AnchorRegularity[]
-  entryCount: number
-}
-
-export async function fetchChronoRegularity(patientId: string): Promise<ChronoRegularity> {
+export async function fetchChronoEntries(patientId: string): Promise<RhythmEntry[]> {
   const { data, error } = await supabase
     .from('patient_entries')
-    .select('payload')
+    .select('payload, client_created_at')
     .eq('patient_id', patientId)
     .eq('module_id', 'chronobiology_tracker')
     .eq('entry_kind', 'form_entry')
+    .order('client_created_at', { ascending: true })
 
-  if (error || !data) return { anchors: [], entryCount: 0 }
+  if (error || !data) return []
 
-  const entries: { values: Record<string, unknown> }[] = []
+  const entries: RhythmEntry[] = []
   for (const row of data) {
-    const payload = row.payload as { values?: Record<string, unknown> } | null
-    if (payload && typeof payload === 'object' && payload.values && typeof payload.values === 'object') {
-      entries.push({ values: payload.values })
+    const date = typeof row.client_created_at === 'string' ? row.client_created_at.slice(0, 10) : null
+    const payload = row.payload as { values?: Record<string, string | null> } | null
+    if (date && payload && typeof payload === 'object' && payload.values && typeof payload.values === 'object') {
+      entries.push({ date, values: payload.values })
     }
   }
 
-  return {
-    anchors: computeAnchorRegularity(entries, CHRONO_ANCHOR_KEYS),
-    entryCount: entries.length,
-  }
+  return entries
 }
 
 // ── Liste des échelles disponibles pour ce patient ───────────────────────────

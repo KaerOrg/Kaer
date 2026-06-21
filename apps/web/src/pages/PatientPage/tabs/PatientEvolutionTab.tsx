@@ -11,8 +11,8 @@ import type {
   FearPoint,
   MedEffectPoint,
 } from '../../../services/engagementService'
-import type { AnchorRegularity } from '../../../lib/anchorRegularity'
-import { ChronoRegularityPanel } from './ChronoRegularityPanel'
+import type { RhythmEntry } from '@psytool/shared'
+import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import { engagementQueries } from '../../../hooks/queries'
 import {
   type TimeRange,
@@ -41,8 +41,7 @@ type EvolutionData = {
   fearData: FearPoint[]
   medEffects: string[]
   medData: MedEffectPoint[]
-  chronoAnchors: AnchorRegularity[]
-  chronoEntryCount: number
+  chronoEntries: RhythmEntry[]
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -52,8 +51,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   fearData: [],
   medEffects: [],
   medData: [],
-  chronoAnchors: [],
-  chronoEntryCount: 0,
+  chronoEntries: [],
 }
 
 export function PatientEvolutionTab({ patientId }: Props) {
@@ -62,7 +60,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const [moodExpanded, setMoodExpanded] = useState(false)
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
-  const { scales, scaleData, moodData, fearData, medEffects, medData, chronoAnchors, chronoEntryCount } =
+  const { scales, scaleData, moodData, fearData, medEffects, medData, chronoEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading
 
@@ -72,7 +70,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
     moodData.length > 0 ||
     fearData.length > 0 ||
     medData.length > 0 ||
-    chronoEntryCount > 0
+    chronoEntries.length > 0
 
   const rangeOptions = useMemo<readonly SegmentOption<TimeRange>[]>(
     () => TIME_RANGES.map(r => ({ value: r, label: t(`evolution.range_${r}`) })),
@@ -253,9 +251,9 @@ export function PatientEvolutionTab({ patientId }: Props) {
         })()}
 
         {/* ── Rythmes & régularité ────────────────────────────── */}
-        {chronoEntryCount > 0 && (
+        {chronoEntries.length > 0 && (
           <div className="evolution-card evolution-card--wide">
-            <ChronoRegularityPanel anchors={chronoAnchors} entryCount={chronoEntryCount} />
+            <ChronoRhythmogramPanel entries={chronoEntries} />
           </div>
         )}
 

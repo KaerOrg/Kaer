@@ -8,7 +8,7 @@ import { colors, spacing } from '../../../../../theme'
 import { getAllFormEntries, type FormEntry } from '../../../../../lib/database'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { CalendarGrid } from './CalendarGrid'
-import { RhythmBand } from './RhythmBand'
+import { RhythmogramChart } from './RhythmogramChart'
 import {
   buildEntriesByDate,
   DEFAULT_ANCHORS,
@@ -76,6 +76,11 @@ export function ChronoMonthLayout({ moduleId }: Props) {
   useFocusEffect(load)
 
   const entriesByDate = useMemo(() => buildEntriesByDate(entries), [entries])
+  // Forme attendue par le rythmogramme partagé (date + map horaires bruts).
+  const rhythmEntries = useMemo(
+    () => entries.map(e => ({ date: e.date, values: e.anchors })),
+    [entries],
+  )
 
   const goToPrev = useCallback(() => {
     if (month === 1) {
@@ -165,7 +170,7 @@ export function ChronoMonthLayout({ moduleId }: Props) {
           {t('modules.chronobiology_tracker.rhythm_band_title')}
         </Text>
 
-        <RhythmBand entriesByDate={entriesByDate} anchors={anchors} />
+        <RhythmogramChart entries={rhythmEntries} year={year} month={month} anchors={anchors} />
       </ScrollView>
     </View>
   )

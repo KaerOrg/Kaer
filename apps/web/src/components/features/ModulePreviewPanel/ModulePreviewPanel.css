@@ -2504,58 +2504,6 @@
 
 .chrono-month__band-title { font-size: 13px; font-weight: 700; color: var(--color-text); margin-top: 6px; }
 
-.chrono-month__band { display: flex; flex-direction: column; gap: 7px; }
-
-.chrono-month__band-row { display: flex; align-items: center; gap: 8px; }
-
-.chrono-month__band-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  width: 104px;
-  flex-shrink: 0;
-  font-size: 11px;
-  color: var(--color-text);
-}
-
-.chrono-month__band-label-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-.chrono-month__band-track {
-  position: relative;
-  flex: 1;
-  height: 16px;
-  background: var(--color-bg-secondary, #f4f4f5);
-  border-radius: 999px;
-}
-
-.chrono-month__band-grid {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  width: 1px;
-  background: var(--color-border);
-}
-
-.chrono-month__band-dot {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
-.chrono-month__axis-row { display: flex; align-items: center; gap: 8px; }
-
-.chrono-month__axis {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
 /* ── Exposure Hierarchy (preview_kind='exposure_hierarchy') ────────────── */
 
 .exposure-hierarchy { display: flex; flex-direction: column; gap: 12px; }

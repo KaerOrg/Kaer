@@ -6,6 +6,15 @@ export { colors, spacing, radius, fontSize } from './theme'
 
 export { fetchModuleFields } from './services/moduleFields'
 
+export {
+  buildRhythmogram,
+  parseTimeToMinutes,
+  circularSdMinutes,
+  minutesToHourLabel,
+  minutesToClock,
+} from './services/rhythmogram'
+export type { RhythmEntry, RhythmAnchorStat, RhythmogramResult } from './services/rhythmogram'
+
 export type UserRole = 'practitioner' | 'patient'
 
 export type ModuleType =

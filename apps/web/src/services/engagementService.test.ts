@@ -12,7 +12,7 @@ import {
   fetchMedSideEffectsEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
-  fetchChronoRegularity,
+  fetchChronoEntries,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -195,32 +195,37 @@ describe('engagementService.fetchAvailableScales', () => {
   })
 })
 
-describe('engagementService.fetchChronoRegularity', () => {
-  it('calcule l’écart-type par ancre depuis payload.values (happy path)', async () => {
+describe('engagementService.fetchChronoEntries', () => {
+  it('mappe chaque saisie en { date, values } (happy path)', async () => {
     const rows = [
-      { payload: { values: { wake_time: '07:00', bedtime: '23:00' } } },
-      { payload: { values: { wake_time: '07:30', bedtime: '23:30' } } },
+      { client_created_at: '2026-06-01T07:00:00Z', payload: { values: { wake_time: '07:00', bedtime: '23:00' } } },
+      { client_created_at: '2026-06-02T07:30:00Z', payload: { values: { wake_time: '07:30', bedtime: '23:30' } } },
     ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
-    const result = await fetchChronoRegularity('p1')
+    const result = await fetchChronoEntries('p1')
 
     expect(supabase.from).toHaveBeenCalledWith('patient_entries')
-    expect(result.entryCount).toBe(2)
-    expect(result.anchors.find(a => a.key === 'wake_time')?.sdMinutes).toBe(15) // SD{420,450}
-    expect(result.anchors.find(a => a.key === 'bedtime')?.sdMinutes).toBe(15)
+    expect(result).toEqual([
+      { date: '2026-06-01', values: { wake_time: '07:00', bedtime: '23:00' } },
+      { date: '2026-06-02', values: { wake_time: '07:30', bedtime: '23:30' } },
+    ])
   })
 
-  it('ignore les payloads sans values', async () => {
-    const rows = [{ payload: null }, { payload: { foo: 1 } }]
+  it('ignore les lignes sans values ou sans date', async () => {
+    const rows = [
+      { client_created_at: '2026-06-01T07:00:00Z', payload: null },
+      { client_created_at: null, payload: { values: { wake_time: '07:00' } } },
+      { client_created_at: '2026-06-03T07:00:00Z', payload: { foo: 1 } },
+    ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
-    expect(await fetchChronoRegularity('p1')).toEqual({ anchors: [], entryCount: 0 })
+    expect(await fetchChronoEntries('p1')).toEqual([])
   })
 
   it('retourne vide en cas d’erreur Supabase', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
-    expect(await fetchChronoRegularity('p1')).toEqual({ anchors: [], entryCount: 0 })
+    expect(await fetchChronoEntries('p1')).toEqual([])
   })
 })
