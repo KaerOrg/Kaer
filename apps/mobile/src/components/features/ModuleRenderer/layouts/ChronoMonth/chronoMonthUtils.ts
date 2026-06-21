@@ -1,6 +1,8 @@
 // Helpers purs pour le layout 'chrono_month'.
 // Aucune dépendance React — math + parsing date.
 
+import { CHRONO_ANCHORS, type ChronoAnchorSpec } from '@psytool/shared'
+
 export interface AnchorEntry {
   /** Date locale au format YYYY-MM-DD. */
   readonly date: string
@@ -8,20 +10,11 @@ export interface AnchorEntry {
   readonly anchors: Readonly<Record<string, string | null>>
 }
 
-export interface AnchorSpec {
-  readonly key: string
-  readonly labelCode: string
-  readonly color: string
-}
-
-export const DEFAULT_ANCHORS: ReadonlyArray<AnchorSpec> = [
-  { key: 'wake_time',     labelCode: 'modules.chronobiology_tracker.anchor_wake',     color: '#F59E0B' },
-  { key: 'first_meal',    labelCode: 'modules.chronobiology_tracker.anchor_first_meal',    color: '#F97316' },
-  { key: 'main_activity', labelCode: 'modules.chronobiology_tracker.anchor_main_activity', color: '#3B82F6' },
-  { key: 'light',         labelCode: 'modules.chronobiology_tracker.anchor_light',    color: '#14B8A6' },
-  { key: 'last_meal',     labelCode: 'modules.chronobiology_tracker.anchor_last_meal',     color: '#EF4444' },
-  { key: 'bedtime',       labelCode: 'modules.chronobiology_tracker.anchor_bedtime',  color: '#8B5CF6' },
-]
+// La liste des repères (ordre, couleur, clé i18n) vit dans `@psytool/shared` :
+// source UNIQUE web ≡ mobile (cf. CHRONO_ANCHORS). Ré-exportée ici pour les
+// consommateurs existants du layout chrono.
+export type AnchorSpec = ChronoAnchorSpec
+export const DEFAULT_ANCHORS: ReadonlyArray<AnchorSpec> = CHRONO_ANCHORS
 
 export function firstWeekday(year: number, month: number): number {
   // Lundi = 0, Dimanche = 6.

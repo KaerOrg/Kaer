@@ -1,27 +1,11 @@
-// Source de vérité web des repères chronobiologiques : ordre canonique, couleur
-// et clé i18n de libellé. Identiques au mobile (chronoMonthUtils.DEFAULT_ANCHORS)
-// pour garantir la cohérence web ≡ mobile des vues (aperçu, rythmogramme).
+// Repères chronobiologiques côté web : la source unique (ordre, couleur, clé i18n)
+// vit dans `@psytool/shared` (CHRONO_ANCHORS) pour garantir la parité web ≡ mobile.
+// Ce fichier n'ajoute que le helper de tracé web (fusion config + stats brutes).
 
-import type { RhythmAnchorStat } from '@psytool/shared'
+import { CHRONO_ANCHORS, type RhythmAnchorStat } from '@psytool/shared'
 
-export interface ChronoAnchorSpec {
-  key: string
-  /** Clé i18n du libellé court (légende, axes). */
-  labelCode: string
-  color: string
-}
-
-// Même ordre que le mobile (chronoMonthUtils.DEFAULT_ANCHORS) → légendes identiques.
-export const CHRONO_ANCHORS: readonly ChronoAnchorSpec[] = [
-  { key: 'wake_time', labelCode: 'modules.chronobiology_tracker.anchor_wake', color: '#F59E0B' },
-  { key: 'first_meal', labelCode: 'modules.chronobiology_tracker.anchor_first_meal', color: '#F97316' },
-  { key: 'main_activity', labelCode: 'modules.chronobiology_tracker.anchor_main_activity', color: '#3B82F6' },
-  { key: 'light', labelCode: 'modules.chronobiology_tracker.anchor_light', color: '#14B8A6' },
-  { key: 'last_meal', labelCode: 'modules.chronobiology_tracker.anchor_last_meal', color: '#EF4444' },
-  { key: 'bedtime', labelCode: 'modules.chronobiology_tracker.anchor_bedtime', color: '#8B5CF6' },
-]
-
-export const CHRONO_ANCHOR_KEYS: readonly string[] = CHRONO_ANCHORS.map(a => a.key)
+export { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS } from '@psytool/shared'
+export type { ChronoAnchorSpec } from '@psytool/shared'
 
 /** Un repère prêt pour le tracé : couleur, libellé résolu, écart-type, nb de jours. */
 export interface RhythmogramAnchor {

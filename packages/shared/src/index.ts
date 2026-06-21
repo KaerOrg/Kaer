@@ -14,6 +14,8 @@ export {
   minutesToClock,
 } from './services/rhythmogram'
 export type { RhythmEntry, RhythmAnchorStat, RhythmogramResult } from './services/rhythmogram'
+export { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS } from './services/chronoAnchors'
+export type { ChronoAnchorSpec } from './services/chronoAnchors'
 
 export type UserRole = 'practitioner' | 'patient'
 
