@@ -402,7 +402,7 @@
       "streak": "{{count}} day logged",
       "streak_plural": "{{count}} days logged",
       "calendar_days": "days filled",
-      "calendar_legend": "Filled day — colour of the status you picked",
+      "calendar_legend": "Filled day: colour of the status you picked",
       "meds_title": "My treatment",
       "meds_empty": "You haven't added any medication yet.",
       "meds_add": "Add a medication",

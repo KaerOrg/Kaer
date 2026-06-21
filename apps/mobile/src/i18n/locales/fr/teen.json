@@ -403,7 +403,7 @@
       "streak": "{{count}} jour de suivi",
       "streak_plural": "{{count}} jours de suivi",
       "calendar_days": "jours remplis",
-      "calendar_legend": "Jour rempli — couleur du statut que tu as choisi",
+      "calendar_legend": "Jour rempli : couleur du statut que tu as choisi",
       "meds_title": "Mon traitement",
       "meds_empty": "Tu n'as pas encore ajouté de médicament.",
       "meds_add": "Ajouter un médicament",

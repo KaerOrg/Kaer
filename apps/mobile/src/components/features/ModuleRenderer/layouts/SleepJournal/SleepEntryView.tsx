@@ -28,6 +28,7 @@ import { MinutesField } from './MinutesField'
 import { styles } from './styles'
 
 const RESTEDNESS_STEPS = [1, 2, 3, 4, 5]
+const RATING_STEPS = [1, 2, 3, 4, 5]
 
 interface Props {
   targetDate: string
@@ -127,6 +128,14 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
     })
   }, [existingId, lbl, t, showConfirm, onClose])
 
+  const toggleSleepAid = useCallback(() => setSleepAid(v => !v), [])
+  const toggleNightmares = useCallback(() => setNightmares(v => !v), [])
+  const decAwakenings = useCallback(() => setAwakenings(v => (v > 0 ? v - 1 : v)), [])
+  const incAwakenings = useCallback(
+    () => setAwakenings(v => (v < config.awakeningsMax ? v + 1 : v)),
+    [config.awakeningsMax],
+  )
+
   const liveSE = computeSleepEfficiency(
     bedtime, wakeTime, onsetMinutes, awakeningsDuration,
     inBedTime, outOfBedTime,
@@ -136,8 +145,8 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
   const awakDurConv = minutesToHhmmHint(awakeningsDuration)
   const napConv = minutesToHhmmHint(napMinutes)
   const qualitySteps = useMemo(() => Array.from({ length: config.qualityMax }, (_, i) => i + 1), [config.qualityMax])
-  const qualityLabels = [1, 2, 3, 4, 5].map(n => lbl(`quality_label_${n}`))
-  const restednessLabels = [1, 2, 3, 4, 5].map(n => lbl(`restedness_label_${n}`))
+  const qualityLabels = useMemo(() => RATING_STEPS.map(n => lbl(`quality_label_${n}`)), [lbl])
+  const restednessLabels = useMemo(() => RATING_STEPS.map(n => lbl(`restedness_label_${n}`)), [lbl])
   const saveLabel = existingId ? (lbl('update_label') || t('common.update')) : (lbl('save_label') || t('common.save'))
   const tapModify = lbl('tap_to_modify_hint')
   const minutesUnit = lbl('minutes_unit') || 'min'
@@ -207,7 +216,7 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
               <View style={styles.counterRow}>
                 <Pressable
                   style={[styles.counterBtn, awakenings <= 0 && styles.counterBtnDisabled]}
-                  onPress={() => awakenings > 0 && setAwakenings(awakenings - 1)}
+                  onPress={decAwakenings}
                   accessibilityRole="button" accessibilityLabel="-" testID="awakenings-minus"
                 >
                   <Text style={styles.counterBtnText}>−</Text>
@@ -215,7 +224,7 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
                 <Text style={styles.counterValue} testID="awakenings-value">{awakenings}</Text>
                 <Pressable
                   style={[styles.counterBtn, awakenings >= config.awakeningsMax && styles.counterBtnDisabled]}
-                  onPress={() => awakenings < config.awakeningsMax && setAwakenings(awakenings + 1)}
+                  onPress={incAwakenings}
                   accessibilityRole="button" accessibilityLabel="+" testID="awakenings-plus"
                 >
                   <Text style={styles.counterBtnText}>+</Text>
@@ -250,7 +259,7 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         {/* Aide au sommeil ───────────────────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{lbl('section_sleep_aid_title')}</Text>
-          <Card variant="elevated" style={styles.toggleRow} onPress={() => setSleepAid(!sleepAid)} testID="sleep-aid-toggle">
+          <Card variant="elevated" style={styles.toggleRow} onPress={toggleSleepAid} testID="sleep-aid-toggle">
             <View style={styles.toggleLeft}>
               <MaterialCommunityIcons name="pill" size={22} color={sleepAid ? colors.primary : colors.textMuted} />
               <Text style={styles.toggleLabel}>{lbl('sleep_aid_label')}</Text>
@@ -264,7 +273,7 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         {/* Cauchemars ────────────────────────────────────────────────────── */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{lbl('section_nightmares_title')}</Text>
-          <Card variant="elevated" style={styles.toggleRow} onPress={() => setNightmares(!nightmares)} testID="nightmares-toggle">
+          <Card variant="elevated" style={styles.toggleRow} onPress={toggleNightmares} testID="nightmares-toggle">
             <View style={styles.toggleLeft}>
               <MaterialCommunityIcons name="ghost" size={22} color={nightmares ? colors.primary : colors.textMuted} />
               <Text style={styles.toggleLabel}>{lbl('nightmares_label')}</Text>
