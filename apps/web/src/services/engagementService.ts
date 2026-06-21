@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import type { RhythmEntry } from '@psytool/shared'
 
 export type ScorePoint = { date: string; score: number }
 
@@ -272,6 +273,35 @@ export async function fetchModuleSummary(
     count: data.length,
     lastPayload: data[0].payload,
   }
+}
+
+// ── Rythmes « Rythmes & régularité » (vue praticien) ──────────────────────────
+// Horaires bruts de chaque repère, datés, pour tracer le rythmogramme (heure du
+// repère jour par jour). Valeurs BRUTES, aucune interprétation ni seuil
+// (MDR 2017/745). La date d'une saisie = client_created_at (le patient peut la
+// dater rétroactivement → ce champ porte le jour concerné).
+
+export async function fetchChronoEntries(patientId: string): Promise<RhythmEntry[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('payload, client_created_at')
+    .eq('patient_id', patientId)
+    .eq('module_id', 'chronobiology_tracker')
+    .eq('entry_kind', 'form_entry')
+    .order('client_created_at', { ascending: true })
+
+  if (error || !data) return []
+
+  const entries: RhythmEntry[] = []
+  for (const row of data) {
+    const date = typeof row.client_created_at === 'string' ? row.client_created_at.slice(0, 10) : null
+    const payload = row.payload as { values?: Record<string, string | null> } | null
+    if (date && payload && typeof payload === 'object' && payload.values && typeof payload.values === 'object') {
+      entries.push({ date, values: payload.values })
+    }
+  }
+
+  return entries
 }
 
 // ── Liste des échelles disponibles pour ce patient ───────────────────────────

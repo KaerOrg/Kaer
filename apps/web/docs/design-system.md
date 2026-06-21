@@ -866,6 +866,37 @@ comme enfant de `Card`.
 
 ---
 
+## Composant `ChronoRhythmogram`
+
+Fichier : `components/features/ChronoRhythmogram/ChronoRhythmogram.tsx`
+
+> **Composant métier (`features/`).** Graphe Recharts du « rythmogramme »
+> chronobiologique : l'heure de chaque repère (lever, repas, activité, lumière,
+> coucher) tracée jour par jour sur UN mois. Axe Y = heures d'horloge (inversé,
+> matin en haut) ; axe X = jours du mois avec traits verticaux aux débuts de
+> semaine (repères) ; une courbe colorée par repère ; tooltip = horaires précis ;
+> légende = libellé + écart-type brut. Conforme MDR : horaires bruts, aucune
+> interprétation ni seuil.
+
+Réutilisé par le panneau Données / onglet Évolution (via `ChronoRhythmogramPanel`,
+données patient réelles) **et** l'aperçu praticien (`layouts/ChronoMonthLayout`,
+données d'exemple) → cohérence web ≡ mobile (le mobile rend le même modèle en SVG).
+Les données viennent du helper partagé `buildRhythmogram` (`@psytool/shared`) ; la
+config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
+`lib/chronoAnchors.ts`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `data` | `Record<string, number \| null>[]` | Une ligne par jour (`buildRhythmogram().data`) |
+| `anchors` | `RhythmogramAnchor[]` | Repères à tracer (couleur, libellé, `sdMinutes`, `count`) — via `buildRhythmogramAnchors` |
+| `yDomain` | `[number, number]` | Bornes Y en minutes (`buildRhythmogram().yDomain`) |
+| `weekStarts` | `number[]` | Jours (1-based) lundis → traits verticaux repères |
+| `year` / `month` | `number` | Mois affiché (month 1-12) — formatage des dates du tooltip |
+| `locale` | `string` | Locale i18n pour le formatage des dates |
+| `xAxisLabel` / `yAxisLabel` | `string?` | Titres d'axes déjà traduits (« Jour du mois » / « Heure ») — fournis par l'appelant pour garder le composant générique |
+
+---
+
 ## Feedback utilisateur — Toasts
 
 Tout feedback d'opération réseau passe par le système de toast. Voir la doc complète : [`docs/components/toast.md`](components/toast.md).

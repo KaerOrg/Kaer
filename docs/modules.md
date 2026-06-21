@@ -28,7 +28,7 @@
 | `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
 | `psychoeducation` | Psychoéducation (bibliothèque) | `psyedu_library` | Fiches `psyedu_topics` (par thème) débloquées via `patient_modules.config.unlocked_topics` | [doc](modules/psychoeducation.md) |
 | `diet_weight_psycho` | Alimentation et psychotropes | `psyedu` | Supabase `psyedu_topics`/`psyedu_blocks` (fiches reclassées par thème dans la bibliothèque) | — |
-| `chronobiology_tracker` | Régularité chronobiologique | `tabbed` (Fiches + Journal + Mois) | SQLite `chrono_entries` ; fiches Supabase | — |
+| `chronobiology_tracker` | Rythmes & régularité | `tabbed` (Journal + Mois) | SQLite `chrono_entries` (offline-first) | [doc](modules/chronobiology_tracker.md) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Comprendre `psyedu` + Agir en crise `crisis_companion`) | Supabase `psyedu_topics`/`psyedu_blocks` ; onglet « Agir en crise » sans stockage | [doc](modules/distress_tolerance.md) |
 | `craving_journal` | Journal de craving (TCC addictologie) | `tabbed` (Fiches + Journal) | SQLite `form_entries` ; fiches Supabase | — |
 

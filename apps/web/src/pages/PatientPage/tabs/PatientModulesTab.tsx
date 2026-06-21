@@ -33,6 +33,7 @@ import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
+import { ChronobiologyCard } from './ChronobiologyCard'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 
@@ -464,6 +465,29 @@ export function PatientModulesTab({
           previewOpen={isPreviewOpen('medication_adherence')}
           dataOpen={isDataOpen('medication_adherence')}
           medList={medList}
+          moduleToggle={moduleToggle}
+          onTogglePreview={togglePreview}
+          onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
+          onUnlock={unlockModule}
+          onRevoke={revokeModule}
+        />
+      )
+    }
+
+    if (moduleType === 'chronobiology_tracker') {
+      return (
+        <ChronobiologyCard
+          key="chronobiology_tracker"
+          tagChips={tagChips('chronobiology_tracker')}
+          modItem={modItem}
+          modIcon={modIcon}
+          mod={mod}
+          patientId={patientId}
+          unlocked={unlocked}
+          loading={isModuleBusy('chronobiology_tracker', mod?.id)}
+          previewOpen={isPreviewOpen('chronobiology_tracker')}
+          dataOpen={isDataOpen('chronobiology_tracker')}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}

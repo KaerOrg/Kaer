@@ -9,22 +9,25 @@
 
 import { useState, useCallback, useEffect, useMemo, Fragment } from 'react'
 import {
-  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
+
+  View, Text, ScrollView, TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
-import { formatDateFull } from '../../../../../lib/dateUtils'
+import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { RatingSelector } from '../../../../ui/RatingSelector'
+import { Button } from '../../../../ui/Button'
 import { ColumnTimeField } from './ColumnTimeField'
 import { styles } from './styles'
 
@@ -87,6 +90,10 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   const [editingId, setEditingId] = useState<string | null>(null)
   const [values, setValues] = useState<Record<string, string | number>>({})
   const [saving, setSaving] = useState(false)
+  // Date de la saisie (saisie rétroactive). Pilotée seulement si `editable_date` activé.
+  const [entryDate, setEntryDate] = useState<Date>(() => new Date())
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const editableDate = configField?.props['editable_date'] === '1'
 
   const loadEntries = useCallback(async () => {
     const data = await getAllFormEntries(moduleId)
@@ -117,6 +124,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   const handleNew = useCallback(() => {
     setEditingId(null)
     setValues(initialValuesForNew())
+    setEntryDate(new Date())
     setMode('entry')
   }, [initialValuesForNew])
 
@@ -124,8 +132,30 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     const merged = { ...initialValuesForNew(), ...entry.values }
     setEditingId(entry.id)
     setValues(merged)
+    setEntryDate(new Date(entry.created_at))
     setMode('entry')
   }, [initialValuesForNew])
+
+  // Capture anti-friction : la dernière saisie sert de base au bouton « comme
+  // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
+  const lastEntry = useMemo<FormEntry | null>(() => {
+    if (entries.length === 0) return null
+    return entries.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
+  }, [entries])
+
+  const prefillLabel = lbl('prefill_from_last')
+  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null
+
+  const handlePrefillFromLast = useCallback(() => {
+    if (!lastEntry) return
+    setValues({ ...initialValuesForNew(), ...lastEntry.values })
+  }, [lastEntry, initialValuesForNew])
+
+  const handleOpenDatePicker = useCallback(() => setShowDatePicker(true), [])
+  const handleDatePicked = useCallback((_: unknown, picked?: Date) => {
+    if (Platform.OS === 'android') setShowDatePicker(false)
+    if (picked) setEntryDate(picked)
+  }, [])
 
   const handleCancelEntry = useCallback(() => {
     setMode('list')
@@ -160,7 +190,12 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     setSaving(true)
     try {
       const id = editingId ?? generateId()
-      await saveFormEntry({ id, module_id: moduleId, values })
+      await saveFormEntry({
+        id,
+        module_id: moduleId,
+        values,
+        ...(editableDate ? { created_at: entryDate.toISOString() } : {}),
+      })
       await loadEntries()
       setMode('list')
       setEditingId(null)
@@ -170,7 +205,7 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     } finally {
       setSaving(false)
     }
-  }, [editingId, values, moduleId, requiredKeysAny, loadEntries, lbl, t, showToast])
+  }, [editingId, values, moduleId, requiredKeysAny, editableDate, entryDate, loadEntries, lbl, t, showToast])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -189,6 +224,35 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           contentContainerStyle={styles.entryContent}
           keyboardShouldPersistTaps="handled"
         >
+          {editableDate ? (
+            <Button
+              variant="secondary"
+              style={styles.entryActionBtn}
+              onPress={handleOpenDatePicker}
+              iconLeft={<MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />}
+              label={`${t('common.entry_date')} : ${formatDateNumeric(entryDate.toISOString())}`}
+              testID="entry-date"
+            />
+          ) : null}
+          {showDatePicker ? (
+            <DateTimePicker
+              value={entryDate}
+              mode="date"
+              maximumDate={new Date()}
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              onChange={handleDatePicked}
+            />
+          ) : null}
+          {canPrefill ? (
+            <Button
+              variant="secondary"
+              style={styles.entryActionBtn}
+              onPress={handlePrefillFromLast}
+              iconLeft={<MaterialCommunityIcons name="history" size={18} color={colors.primary} />}
+              label={prefillLabel}
+              testID="prefill-from-last"
+            />
+          ) : null}
           {columns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
             const stepNumber = col.header.props['step_number'] ?? String(idx + 1)
@@ -279,31 +343,21 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           })}
         </ScrollView>
         <View style={styles.footer}>
-          <Pressable
-            style={styles.cancelBtn}
+          <Button
+            variant="ghost"
+            label={t('common.cancel')}
             onPress={handleCancelEntry}
-            accessibilityRole="button"
             testID="cancel-entry"
-          >
-            <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.saveBtn, saving && styles.btnDisabled]}
+          />
+          <Button
+            variant="primary"
+            style={styles.footerBtnFlex}
+            label={lbl('save_label') || t('common.save')}
+            loading={saving}
             onPress={handleSave}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('save_label') || t('common.save')}
+            iconLeft={<MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />}
             testID="save-entry"
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.white} size="small" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={styles.saveBtnText}>{lbl('save_label') || t('common.save')}</Text>
-              </>
-            )}
-          </Pressable>
+          />
         </View>
       </KeyboardAvoidingView>
     )
@@ -335,22 +389,20 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
                   <View style={styles.recordHeader}>
                     <Text style={styles.recordDate}>{dateLabel}</Text>
                     <View style={styles.recordActions}>
-                      <Pressable
+                      <Button
+                        variant="ghost"
                         onPress={() => handleEdit(entry)}
-                        hitSlop={8}
+                        iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
                         accessibilityLabel={t('common.modify')}
                         testID={`edit-${entry.id}`}
-                      >
-                        <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
-                      </Pressable>
-                      <Pressable
+                      />
+                      <Button
+                        variant="ghost"
                         onPress={() => handleDelete(entry)}
-                        hitSlop={8}
+                        iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
                         accessibilityLabel={t('common.delete')}
                         testID={`delete-${entry.id}`}
-                      >
-                        <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-                      </Pressable>
+                      />
                     </View>
                   </View>
                   {columns.map(col => {
@@ -413,16 +465,14 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
         )}
       </ScrollView>
       <View style={styles.footer}>
-        <Pressable
-          style={styles.newBtn}
+        <Button
+          variant="primary"
+          style={styles.footerBtnFlex}
+          label={lbl('new_btn_label') || t('common.add')}
           onPress={handleNew}
-          accessibilityRole="button"
-          accessibilityLabel={lbl('new_btn_label') || t('common.add')}
+          iconLeft={<MaterialCommunityIcons name="plus" size={22} color={colors.white} />}
           testID="new-entry"
-        >
-          <MaterialCommunityIcons name="plus" size={22} color={colors.white} />
-          <Text style={styles.newBtnText}>{lbl('new_btn_label') || t('common.add')}</Text>
-        </Pressable>
+        />
       </View>
     </View>
   )

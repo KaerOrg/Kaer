@@ -27,6 +27,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | Fichier | Domaine | Test |
 |---|---|---|
 | [`moduleFields.ts`](../packages/shared/src/services/moduleFields.ts) | `fetchModuleFields(client, moduleId)` — lecture du moteur générique (modules + module_content_fields + field_props avec hiérarchie parent/enfant) | [`moduleFields.test.ts`](../packages/shared/src/services/moduleFields.test.ts) — `npm run test:shared` |
+| [`rhythmogram.ts`](../packages/shared/src/services/rhythmogram.ts) | Helper PUR (pas de client) du « rythmogramme » chronobiologique : `buildRhythmogram(entries, anchorKeys, year, month)` → séries heure×jour d'un mois, écart-type circulaire par repère, repères de début de semaine. + `minutesToHourLabel` / `minutesToClock`. Partagé pour une visualisation identique web (Recharts) ≡ mobile (SVG). MDR : horaires bruts, aucune interprétation. | [`rhythmogram.test.ts`](../packages/shared/src/services/rhythmogram.test.ts) |
 
 **Règle pour ajouter un service partagé :**
 1. La fonction doit prendre `client: SupabaseClient` comme premier argument — pas d'import direct.
