@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
+import { Button } from '../../../../ui/Button'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -124,14 +125,13 @@ export function ChronoMonthLayout({ moduleId }: Props) {
     <View style={styles.container} testID="chrono-month-layout">
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.navRow}>
-          <Pressable
-            style={styles.navBtn}
+          <Button
+            variant="ghost"
             onPress={goToPrev}
+            iconLeft={<ChevronLeft size={22} color={colors.primary} />}
             accessibilityLabel={t('common.prev_month')}
             testID="chrono-prev-month"
-          >
-            <ChevronLeft size={22} color={colors.primary} />
-          </Pressable>
+          />
           <Text style={styles.monthTitle}>
             {(() => {
               const raw = new Date(year, month - 1, 1).toLocaleDateString(i18n.language, {
@@ -141,18 +141,14 @@ export function ChronoMonthLayout({ moduleId }: Props) {
               return raw.charAt(0).toUpperCase() + raw.slice(1)
             })()}
           </Text>
-          <Pressable
-            style={[styles.navBtn, isCurrentMonth && styles.navBtnDisabled]}
+          <Button
+            variant="ghost"
             onPress={goToNext}
             disabled={isCurrentMonth}
+            iconLeft={<ChevronRight size={22} color={isCurrentMonth ? colors.border : colors.primary} />}
             accessibilityLabel={t('common.next_month')}
             testID="chrono-next-month"
-          >
-            <ChevronRight
-              size={22}
-              color={isCurrentMonth ? colors.border : colors.primary}
-            />
-          </Pressable>
+          />
         </View>
 
         <CalendarGrid
@@ -193,8 +189,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.xs,
   },
-  navBtn: { padding: spacing.sm },
-  navBtnDisabled: { opacity: 0.3 },
   monthTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
   divider: {
     height: 1,

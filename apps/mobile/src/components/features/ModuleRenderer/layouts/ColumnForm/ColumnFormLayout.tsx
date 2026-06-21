@@ -9,7 +9,8 @@
 
 import { useState, useCallback, useEffect, useMemo, Fragment } from 'react'
 import {
-  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
+
+  View, Text, ScrollView, TextInput, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -342,31 +343,21 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           })}
         </ScrollView>
         <View style={styles.footer}>
-          <Pressable
-            style={styles.cancelBtn}
+          <Button
+            variant="ghost"
+            label={t('common.cancel')}
             onPress={handleCancelEntry}
-            accessibilityRole="button"
             testID="cancel-entry"
-          >
-            <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.saveBtn, saving && styles.btnDisabled]}
+          />
+          <Button
+            variant="primary"
+            style={styles.footerBtnFlex}
+            label={lbl('save_label') || t('common.save')}
+            loading={saving}
             onPress={handleSave}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('save_label') || t('common.save')}
+            iconLeft={<MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />}
             testID="save-entry"
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.white} size="small" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={styles.saveBtnText}>{lbl('save_label') || t('common.save')}</Text>
-              </>
-            )}
-          </Pressable>
+          />
         </View>
       </KeyboardAvoidingView>
     )
@@ -398,22 +389,20 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
                   <View style={styles.recordHeader}>
                     <Text style={styles.recordDate}>{dateLabel}</Text>
                     <View style={styles.recordActions}>
-                      <Pressable
+                      <Button
+                        variant="ghost"
                         onPress={() => handleEdit(entry)}
-                        hitSlop={8}
+                        iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
                         accessibilityLabel={t('common.modify')}
                         testID={`edit-${entry.id}`}
-                      >
-                        <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
-                      </Pressable>
-                      <Pressable
+                      />
+                      <Button
+                        variant="ghost"
                         onPress={() => handleDelete(entry)}
-                        hitSlop={8}
+                        iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
                         accessibilityLabel={t('common.delete')}
                         testID={`delete-${entry.id}`}
-                      >
-                        <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-                      </Pressable>
+                      />
                     </View>
                   </View>
                   {columns.map(col => {
@@ -476,16 +465,14 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
         )}
       </ScrollView>
       <View style={styles.footer}>
-        <Pressable
-          style={styles.newBtn}
+        <Button
+          variant="primary"
+          style={styles.footerBtnFlex}
+          label={lbl('new_btn_label') || t('common.add')}
           onPress={handleNew}
-          accessibilityRole="button"
-          accessibilityLabel={lbl('new_btn_label') || t('common.add')}
+          iconLeft={<MaterialCommunityIcons name="plus" size={22} color={colors.white} />}
           testID="new-entry"
-        >
-          <MaterialCommunityIcons name="plus" size={22} color={colors.white} />
-          <Text style={styles.newBtnText}>{lbl('new_btn_label') || t('common.add')}</Text>
-        </Pressable>
+        />
       </View>
     </View>
   )
