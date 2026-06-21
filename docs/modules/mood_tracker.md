@@ -80,8 +80,8 @@ Composants extraits, partagés avec `MedicationSideEffectsHistoryScreen` :
 | `MonthCalendar.tsx` | Grille calendrier mensuelle, cercles colorés (opacité ∝ score) + badge de complétude |
 
 > Les primitives `LineChart`/`BarChart` ne sont **pas** redéfinies ici : `DimensionChart`
-> consomme `components/ui/Chart`. Le sélecteur de période réutilise `components/ui/PillSelector`
-> (pas de `RangeSelector` dédié).
+> consomme `components/ui/Chart`. Le sélecteur de période réutilise `components/ui/Radio`
+> (variant `pills`, pas de `RangeSelector` dédié).
 
 ### Rappels
 - Infrastructure Supabase `notification_routines` existante — aucune table supplémentaire

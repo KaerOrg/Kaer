@@ -1,0 +1,159 @@
+/* ── Panneau « Données » de l'agenda du sommeil (vue praticien) ─────────────── */
+/* Stats + grille agenda (barres 24h) + courbes de tendance. Vue soignant :
+   le codage visuel des métriques est autorisé (analyse clinique). */
+
+.sleep-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.sleep-stats__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  background: var(--color-card, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.sleep-stats__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.sleep-stats__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ── Grille agenda du sommeil ─────────────────────────────────────────────── */
+
+.sleep-grid {
+  margin-bottom: 24px;
+}
+
+.sleep-grid__header {
+  margin-bottom: 12px;
+}
+
+.sleep-grid__axis {
+  position: relative;
+  height: 16px;
+  margin-left: 52px;
+}
+
+.sleep-grid__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sleep-grid__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sleep-grid__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sleep-grid__date {
+  width: 44px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.sleep-grid__track {
+  position: relative;
+  flex: 1;
+  height: 16px;
+  background: color-mix(in srgb, var(--color-border) 35%, transparent);
+  border-radius: var(--radius-sm, 4px);
+  overflow: hidden;
+}
+
+.sleep-grid__bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.sleep-grid__bar--inbed {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.sleep-grid__bar--asleep {
+  background: var(--color-primary);
+}
+
+.sleep-grid__nightmare {
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--color-text);
+  transform: translate(-50%, -50%);
+}
+
+.sleep-grid__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 12px;
+  margin-left: 52px;
+}
+
+.sleep-grid__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.sleep-grid__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.sleep-grid__swatch--inbed {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.sleep-grid__swatch--asleep {
+  background: var(--color-primary);
+}
+
+.sleep-grid__swatch--nightmare {
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--color-text);
+}
+
+.sleep-grid + .module-data-panel__chart,
+.module-data-panel__chart + .module-data-panel__chart {
+  margin-top: 20px;
+}

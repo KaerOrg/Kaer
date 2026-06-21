@@ -4,14 +4,18 @@ import { colors } from '../../../theme'
 import { styles } from './Button.styles'
 import type { ButtonProps } from './Button.types'
 
-export const Button = React.memo(function Button({ label, onPress, variant = 'primary', loading, disabled, style, iconLeft, testID }: ButtonProps) {
+export const Button = React.memo(function Button({ label, onPress, variant = 'primary', loading, disabled, style, iconLeft, accessibilityLabel, testID }: ButtonProps) {
   const isDisabled = disabled || loading
+  const iconOnly = label == null
 
   return (
     <Pressable
-      style={[styles.base, styles[variant], isDisabled ? styles.disabled : null, iconLeft ? styles.withIcon : null, style]}
+      style={[styles.base, styles[variant], iconOnly ? styles.iconOnly : null, isDisabled ? styles.disabled : null, iconLeft && !iconOnly ? styles.withIcon : null, style]}
       onPress={onPress}
       disabled={isDisabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      hitSlop={iconOnly ? 8 : undefined}
       testID={testID}
     >
       {loading ? (
@@ -19,7 +23,7 @@ export const Button = React.memo(function Button({ label, onPress, variant = 'pr
       ) : (
         <>
           {iconLeft}
-          <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text>
+          {label != null ? <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text> : null}
         </>
       )}
     </Pressable>

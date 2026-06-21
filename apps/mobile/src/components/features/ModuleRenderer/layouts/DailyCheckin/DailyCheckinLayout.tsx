@@ -96,6 +96,7 @@ export function DailyCheckinLayout({ fields, moduleId }: DailyCheckinLayoutProps
         module_id: moduleId,
         date: todayDate,
         status: selectedValue,
+        reason: null,
         notes: notes.trim() || null,
       }
       await saveDailyEntry(entry)

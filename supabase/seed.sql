@@ -362,37 +362,63 @@ on conflict (field_id, prop_key) do nothing;
 
 
 -- ============================================================
--- LAYOUT : medication_adherence → daily_checkin
--- preview_kind = 'daily_checkin' → DailyCheckinLayout
--- 1 saisie / jour, UPSERT sur (module_id, date) en local SQLite,
+-- LAYOUT : medication_adherence → medication_tracker
+-- preview_kind = 'medication_tracker' → MedicationTrackerLayout
+-- Check global / jour (daily_entries, UPSERT sur (module_id, date)) +
+-- détail optionnel par molécule (medication_intakes en local SQLite) +
+-- onglet calendrier mensuel passif + série « jours renseignés ».
+-- Liste des molécules co-éditée patient↔praticien : patient_modules.config.medications.
+-- Conformité MDR : pastilles neutres, aucun taux, aucune alerte conditionnelle.
 -- signal logEvent('SAVE_MEDICATION_ADHERENCE') côté Supabase.
 -- ============================================================
 
-update public.modules set preview_kind = 'daily_checkin' where id = 'medication_adherence';
+update public.modules set preview_kind = 'medication_tracker' where id = 'medication_adherence';
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('madh.cfg',         'medication_adherence', 'daily_checkin_config', null,                                          0),
-  ('madh.opt_taken',   'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_taken',  30),
-  ('madh.opt_partial', 'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_partial', 31),
-  ('madh.opt_missed',  'medication_adherence', 'daily_status_option',  'modules.medication_adherence.status_missed',  32)
+  ('madh.cfg',          'medication_adherence', 'medication_tracker_config', null,                                            0),
+  ('madh.opt_taken',    'medication_adherence', 'daily_status_option',       'modules.medication_adherence.status_taken',    30),
+  ('madh.opt_partial',  'medication_adherence', 'daily_status_option',       'modules.medication_adherence.status_partial',  31),
+  ('madh.opt_missed',   'medication_adherence', 'daily_status_option',       'modules.medication_adherence.status_missed',   32),
+  ('madh.rsn_forgot',   'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_forgot',   40),
+  ('madh.rsn_side',     'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_side_effect', 41),
+  ('madh.rsn_better',   'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_felt_better', 42),
+  ('madh.rsn_stock',    'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_out_of_stock', 43),
+  ('madh.rsn_other',    'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_other',    44)
 on conflict (id) do nothing;
+
+-- Re-exécution sur une base existante : aligner field_type si le module était en daily_checkin.
+update public.module_content_fields set field_type = 'medication_tracker_config' where id = 'madh.cfg';
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('madh.cfg', 'engagement_event_type', 'SAVE_MEDICATION_ADHERENCE'),
   ('madh.cfg', 'tab_today_label',       'modules.medication_adherence.tab_today'),
-  ('madh.cfg', 'tab_history_label',     'modules.medication_adherence.tab_history'),
+  ('madh.cfg', 'tab_calendar_label',    'modules.medication_adherence.tab_calendar'),
+  ('madh.cfg', 'tab_meds_label',        'modules.medication_adherence.tab_meds'),
   ('madh.cfg', 'today_label',           'modules.medication_adherence.today_label'),
   ('madh.cfg', 'already_saved_label',   'modules.medication_adherence.already_saved'),
   ('madh.cfg', 'question',              'modules.medication_adherence.intro'),
+  ('madh.cfg', 'per_molecule_label',    'modules.medication_adherence.per_molecule'),
+  ('madh.cfg', 'reason_prompt',         'modules.medication_adherence.reason_prompt'),
   ('madh.cfg', 'notes_label',           'common.notes_optional'),
   ('madh.cfg', 'notes_placeholder',     'modules.medication_adherence.notes_placeholder'),
   ('madh.cfg', 'save_label',            'modules.medication_adherence.save'),
   ('madh.cfg', 'update_label',          'common.update'),
+  ('madh.cfg', 'streak_label',          'modules.medication_adherence.streak'),
+  ('madh.cfg', 'calendar_days_label',   'modules.medication_adherence.calendar_days'),
+  ('madh.cfg', 'calendar_legend_label', 'modules.medication_adherence.calendar_legend'),
+  ('madh.cfg', 'meds_title',            'modules.medication_adherence.meds_title'),
+  ('madh.cfg', 'meds_empty',            'modules.medication_adherence.meds_empty'),
+  ('madh.cfg', 'meds_add_label',        'modules.medication_adherence.meds_add'),
+  ('madh.cfg', 'med_name_label',        'modules.medication_adherence.med_name'),
+  ('madh.cfg', 'med_posology_label',    'modules.medication_adherence.med_posology'),
+  ('madh.cfg', 'med_kind_maintenance',  'modules.medication_adherence.kind_maintenance'),
+  ('madh.cfg', 'med_kind_prn',          'modules.medication_adherence.kind_prn'),
   ('madh.cfg', 'history_empty_text',    'modules.medication_adherence.empty_history'),
   ('madh.cfg', 'status_missing_title',  'modules.medication_adherence.status_missing'),
   ('madh.cfg', 'status_missing_msg',    'modules.medication_adherence.status_missing_msg'),
   ('madh.cfg', 'delete_title',          'modules.medication_adherence.delete_entry_title'),
   ('madh.cfg', 'saved_message',         'modules.medication_adherence.saved_message'),
+  ('madh.cfg', 'side_effects_bridge_label', 'modules.medication_adherence.side_effects_bridge'),
   ('madh.opt_taken',    'value',    'taken'),
   ('madh.opt_taken',    'icon',     'check-circle-outline'),
   ('madh.opt_taken',    'color',    '#10B981'),
@@ -404,7 +430,19 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('madh.opt_missed',   'value',    'missed'),
   ('madh.opt_missed',   'icon',     'circle-outline'),
   ('madh.opt_missed',   'color',    '#6B7280'),
-  ('madh.opt_missed',   'bg_color', '#F3F4F6')
+  ('madh.opt_missed',   'bg_color', '#F3F4F6'),
+  -- Motifs de non-prise : faits déclarés bruts (MDR). 'side_effect' active le pont vers medication_side_effects.
+  ('madh.rsn_forgot',   'value',    'forgot'),
+  ('madh.rsn_forgot',   'icon',     'clock-alert-outline'),
+  ('madh.rsn_side',     'value',    'side_effect'),
+  ('madh.rsn_side',     'icon',     'pill-off'),
+  ('madh.rsn_side',     'links_module', 'medication_side_effects'),
+  ('madh.rsn_better',   'value',    'felt_better'),
+  ('madh.rsn_better',   'icon',     'emoticon-happy-outline'),
+  ('madh.rsn_stock',    'value',    'out_of_stock'),
+  ('madh.rsn_stock',    'icon',     'package-variant'),
+  ('madh.rsn_other',    'value',    'other'),
+  ('madh.rsn_other',    'icon',     'dots-horizontal')
 on conflict (field_id, prop_key) do nothing;
 
 
@@ -753,7 +791,29 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'quality_label_2',             'modules.sleep_diary.quality_bad'),
   ('sj.cfg', 'quality_label_3',             'modules.sleep_diary.quality_average'),
   ('sj.cfg', 'quality_label_4',             'modules.sleep_diary.quality_good'),
-  ('sj.cfg', 'quality_label_5',             'modules.sleep_diary.quality_excellent')
+  ('sj.cfg', 'quality_label_5',             'modules.sleep_diary.quality_excellent'),
+  -- Refonte Consensus Sleep Diary : horaires précis, siestes, aide au sommeil,
+  -- ressenti au réveil, stats enrichies, légende neutralisée (conformité MDR).
+  ('sj.cfg', 'nap_max_minutes',             '600'),
+  ('sj.cfg', 'section_naps_title',          'modules.sleep_diary.section_naps'),
+  ('sj.cfg', 'section_sleep_aid_title',     'modules.sleep_diary.section_sleep_aid'),
+  ('sj.cfg', 'section_restedness_title',    'modules.sleep_diary.section_restedness'),
+  ('sj.cfg', 'in_bed_label',                'modules.sleep_diary.in_bed_label'),
+  ('sj.cfg', 'out_of_bed_label',            'modules.sleep_diary.out_of_bed_label'),
+  ('sj.cfg', 'nap_label',                   'modules.sleep_diary.nap_label'),
+  ('sj.cfg', 'sleep_aid_label',             'modules.sleep_diary.sleep_aid_label'),
+  ('sj.cfg', 'restedness_label',            'modules.sleep_diary.restedness_label'),
+  ('sj.cfg', 'restedness_label_1',          'modules.sleep_diary.restedness_1'),
+  ('sj.cfg', 'restedness_label_2',          'modules.sleep_diary.restedness_2'),
+  ('sj.cfg', 'restedness_label_3',          'modules.sleep_diary.restedness_3'),
+  ('sj.cfg', 'restedness_label_4',          'modules.sleep_diary.restedness_4'),
+  ('sj.cfg', 'restedness_label_5',          'modules.sleep_diary.restedness_5'),
+  ('sj.cfg', 'time_in_bed_label',           'modules.sleep_diary.time_in_bed'),
+  ('sj.cfg', 'total_sleep_label',           'modules.sleep_diary.total_sleep'),
+  ('sj.cfg', 'stat_avg_efficiency_label',   'modules.sleep_diary.stat_avg_efficiency'),
+  ('sj.cfg', 'stat_avg_onset_label',        'modules.sleep_diary.stat_avg_onset'),
+  ('sj.cfg', 'legend_filled_label',         'modules.sleep_diary.legend_filled'),
+  ('sj.cfg', 'legend_nap_label',            'modules.sleep_diary.legend_nap')
 on conflict (field_id, prop_key) do nothing;
 
 

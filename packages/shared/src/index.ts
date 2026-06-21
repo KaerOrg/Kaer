@@ -80,6 +80,18 @@ export interface CrisisPlanCopingCard {
   response: string
 }
 
+// Observance médicamenteuse — une molécule du traitement du patient.
+// `kind` distingue le traitement de fond (pris en continu) du « si besoin » (PRN).
+// Donnée co-éditée patient↔praticien, stockée dans `patient_modules.config.medications`.
+export type MedicationKind = 'maintenance' | 'prn'
+
+export interface Medication {
+  readonly id: string
+  readonly name: string
+  readonly posology: string
+  readonly kind: MedicationKind
+}
+
 export interface ModuleConfig {
   // Agenda du sommeil
   sleepDiary?: {
@@ -99,6 +111,10 @@ export interface ModuleConfig {
     practitionerMessage?: string
     copingCards?: CrisisPlanCopingCard[]
     commitmentPhrase?: string
+  }
+  // Observance médicamenteuse — liste de molécules co-éditée patient↔praticien
+  medicationAdherence?: {
+    medications: Medication[]
   }
 }
 
@@ -124,6 +140,7 @@ export type PreviewKind =
   | 'patient_scenario'
   | 'timed_tap_exercise'
   | 'daily_checkin'
+  | 'medication_tracker'
   | 'column_form'
   | 'tree_selector'
   | 'sleep_journal'

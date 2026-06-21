@@ -1,36 +1,30 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { radius } from '../../../../../../theme'
+import { StatusBadge } from '../../../../../ui/StatusBadge'
+import type { StatusBadgeVariant } from '../../../../../ui/StatusBadge'
 
 type Variant = 'ok' | 'partial' | 'miss'
 
 interface Config {
   label: string
-  bg: string
-  fg: string
-  icon: React.ComponentProps<typeof Ionicons>['name']
+  variant: StatusBadgeVariant
+  icon: string
 }
 
+// Aperçu d'un champ radio (preview praticien) : pastille de statut rendue via le
+// primitive `ui/StatusBadge` — couleurs issues des tokens du thème, zéro hex en dur.
 const VARIANTS: Record<Variant, Config> = {
-  ok:      { label: 'Pris',     bg: '#D1FAE5', fg: '#059669', icon: 'checkmark-outline' },
-  partial: { label: 'Partiel',  bg: '#FEF3C7', fg: '#D97706', icon: 'remove-outline'    },
-  miss:    { label: 'Non pris', bg: '#FEE2E2', fg: '#DC2626', icon: 'close-outline'     },
+  ok:      { label: 'Pris',     variant: 'success', icon: '✓' },
+  partial: { label: 'Partiel',  variant: 'warning', icon: '◐' },
+  miss:    { label: 'Non pris', variant: 'danger',  icon: '✕' },
 }
 
 interface Props { variant: string }
 
-export function RadioWidget({ variant }: Props) {
-  const { label, bg, fg, icon } = VARIANTS[(variant as Variant)] ?? VARIANTS.ok
-  return (
-    <View style={[styles.badge, { backgroundColor: bg }]}>
-      <Ionicons name={icon} size={10} color={fg} />
-      <Text style={[styles.label, { color: fg }]}>{label}</Text>
-    </View>
-  )
+function isVariant(v: string): v is Variant {
+  return v in VARIANTS
 }
 
-const styles = StyleSheet.create({
-  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full },
-  label: { fontSize: 11, fontWeight: '600' },
-})
+export function RadioWidget({ variant }: Props) {
+  const { label, variant: tone, icon } = isVariant(variant) ? VARIANTS[variant] : VARIANTS.ok
+  return <StatusBadge variant={tone} label={label} icon={icon} />
+}

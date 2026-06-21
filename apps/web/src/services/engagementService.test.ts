@@ -10,6 +10,7 @@ import {
   fetchMoodEvolution,
   fetchFearEvolution,
   fetchMedSideEffectsEvolution,
+  fetchSleepEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
   fetchChronoEntries,
@@ -64,6 +65,46 @@ describe('engagementService.fetchScaleEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
     expect(await fetchScaleEvolution('p1', 'phq9')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchSleepEvolution', () => {
+  it('calcule efficacité et TST, trie par nuit (payload.date)', async () => {
+    const rows = [
+      { client_created_at: '2026-02-02T08:00:00Z', payload: {
+        date: '2026-02-01', in_bed_time: '22:30', bedtime: '23:00', wake_time: '07:00',
+        out_of_bed_time: '07:30', sleep_onset_minutes: 0, awakenings_duration_minutes: 0, nightmares: 0,
+      } },
+      { client_created_at: '2026-02-01T08:00:00Z', payload: {
+        date: '2026-01-31', bedtime: '23:00', wake_time: '07:00',
+        sleep_onset_minutes: 30, awakenings_duration_minutes: 30, nightmares: 1,
+      } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchSleepEvolution('p1')
+
+    // Trié par payload.date croissant : 01-31 puis 02-01
+    expect(result.map(p => p.date)).toEqual(['2026-01-31', '2026-02-01'])
+    // Nuit 02-01 : fenêtre 480, TPL 540 → SE = 89, TST 480
+    const night = result[1]
+    expect(night.efficiency).toBe(89)
+    expect(night.total_sleep_min).toBe(480)
+    // Nuit 01-31 : fallback fenêtre 480, TST = 480-60 = 420 → SE 88, cauchemar
+    expect(result[0].total_sleep_min).toBe(420)
+    expect(result[0].efficiency).toBe(88)
+    expect(result[0].nightmares).toBe(true)
+  })
+
+  it('ignore les entrées sans payload.date', async () => {
+    const rows = [{ client_created_at: '2026-02-01', payload: { bedtime: '23:00' } }]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+    expect(await fetchSleepEvolution('p1')).toEqual([])
+  })
+
+  it('retourne [] en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+    expect(await fetchSleepEvolution('p1')).toEqual([])
   })
 })
 

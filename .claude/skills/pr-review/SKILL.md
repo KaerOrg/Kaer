@@ -154,6 +154,7 @@ Construire deux listes :
 Ignorer : fichiers supprimés (`D`), `package-lock.json`, fichiers binaires, `*.snap`.
 
 Lire les rules de référence si elles ne sont pas en contexte :
+- `.claude/rules/lessons.md` — **obligatoire et à lire EN ENTIER avant toute review.** Journal des incidents réels déjà rencontrés ; chaque cas est un piège à rattraper en priorité. Ne jamais conclure une review sans avoir relu ce fichier.
 - `.claude/rules/coding-standards.md`
 - `.claude/rules/config-first.md`
 - `.claude/rules/sync-service.md`
@@ -999,59 +1000,67 @@ Afficher dans la conversation les URLs des deux commentaires postés, pour confi
 >
 > Objectif : chaque review améliore les règles du projet pour que la même erreur ne passe plus jamais. Les fichiers `.claude/rules/` et `CLAUDE.md` sont vivants — ils s'enrichissent à chaque PR.
 
-#### Principe
+#### Principe — règles vs cas vécus
 
-> **Priorité d'écriture : rules/docs avant le skill.** L'objectif est que les développeurs ne commettent plus l'erreur — pas seulement que Claude la détecte mieux. Enrichir `.claude/rules/` et `CLAUDE.md` aide tout le monde (devs, autres skills, onboarding) ; enrichir ce skill n'aide que la review. En cas de doute sur où écrire : **rules/docs en premier, skill en dernier recours.**
+> **Séparation stricte.** Les **règles** (le *quoi faire*) vivent dans
+> `.claude/rules/coding-standards.md`, `config-first.md`, `sync-service.md`, `CLAUDE.md`.
+> Les **cas vécus** (le *comment ça a dérapé*, code fautif daté) vivent **exclusivement
+> dans `.claude/rules/lessons.md`**. Ne JAMAIS réinsérer un bloc « Cas rencontré » inline
+> dans `coding-standards.md` : il va dans `lessons.md`, et la règle porte juste un
+> pointeur `📌 ... lessons.md`.
+
+> **Priorité d'écriture : rules/docs avant le skill.** L'objectif est que les développeurs ne commettent plus l'erreur — pas seulement que Claude la détecte mieux. Enrichir les rules + `lessons.md` aide tout le monde ; enrichir ce skill n'aide que la review. En cas de doute : **rules/lessons en premier, skill en dernier recours.**
 
 Pour chaque **violation bloquante** trouvée dans le rapport (les warnings sont ignorés — trop de bruit) :
 
-1. Identifier la règle correspondante dans `.claude/rules/coding-standards.md`, `.claude/rules/config-first.md`, ou `CLAUDE.md`.
-2. Lire la section concernée et vérifier : **la règle a-t-elle déjà un exemple concret illustrant exactement ce pattern ?**
-   - **Oui, l'exemple est déjà là** → rien à faire pour cette violation, passer à la suivante.
-   - **Non, la règle est présente mais sans exemple de ce cas précis** → ajouter un bloc `> **Cas rencontré :**` avec le code fautif extrait du fichier reviewé.
-   - **Le pattern n'est couvert par aucune règle existante** → ajouter une nouvelle entrée dans la section pertinente du fichier de règle (ou dans `CLAUDE.md` si transversal). N'enrichir le skill lui-même que si le pattern est propre au processus de review (ex. un nouveau type de fichier à analyser, une étape manquante) — jamais pour une règle métier ou de code.
+1. Identifier la règle correspondante (coding-standards / config-first / sync-service / CLAUDE.md) et la **section de `lessons.md`** qui lui correspond.
+2. Vérifier : **`lessons.md` contient-il déjà un cas illustrant exactement ce pattern ?**
+   - **Oui** → rien à faire pour cette violation, passer à la suivante.
+   - **Non, mais la règle existe** → ajouter une **entrée datée dans `lessons.md`** sous la section de la règle (format ci-dessous). Vérifier que `coding-standards.md` porte bien un pointeur `📌 ... lessons.md` sous cette règle ; l'ajouter sinon.
+   - **Le pattern n'est couvert par aucune règle** → ajouter la **règle** dans le fichier pertinent (coding-standards / config-first / `CLAUDE.md`), **+** une entrée illustrative dans `lessons.md` **+** le pointeur `📌`. N'enrichir le skill lui-même que pour un gap de *processus* de review (nouveau type de fichier, étape manquante) — jamais pour une règle de code.
 
-#### Format d'un enrichissement
+#### Format d'une entrée `lessons.md`
 
-Insérer directement dans le fichier de règle, juste après la rule concernée :
+Ajouter sous la section `## <Règle>` correspondante (la créer si absente, avec une ligne `> Règle source : [coding-standards.md § …](coding-standards.md)`) :
 
 ```markdown
-> **Cas rencontré — <branche> (<date>) :**
-> ```tsx
-> // ❌ Code fautif extrait de apps/mobile/src/screens/modules/FooScreen.tsx:42
-> supabase.from('modules').select('*')  // dans un composant
-> ```
-> → Déplacer dans un service : `moduleService.fetchModules()`.
+**<branche> (<date>) — <résumé en une ligne>.**
+<contexte bref : où, quoi>
+```tsx
+// ❌ Code fautif extrait de apps/mobile/src/screens/modules/FooScreen.tsx:42
+supabase.from('modules').select('*')  // dans un composant
+```
+→ <correction attendue : ex. déplacer dans `moduleService.fetchModules()`>.
 ```
 
-#### Mapping violation → fichier de règle
+#### Mapping violation → section `lessons.md` (+ règle source)
 
-| Catégorie de violation | Fichier à enrichir | Section |
+| Catégorie de violation | Section `lessons.md` | Règle source |
 |---|---|---|
-| React (hooks, effets, keys, async) | `coding-standards.md` | § "React performance" + RULE Vercel |
-| Accès données (Supabase/SQLite dans composant) | `coding-standards.md` | § "Accès aux données" |
-| TypeScript (`any`, `unknown`, suppressions) | `coding-standards.md` | § "Suppressions interdites" / "TypeScript strict" |
-| Render inline (objets, callbacks) | `coding-standards.md` | § "Render — zéro déclaration inline" |
-| i18n (texte en dur) | `coding-standards.md` | § "Internationalisation" |
-| Design system (duplication d'un primitive) | `coding-standards.md` | § "Checklist obligatoire" |
-| Config-first (données en TS statique) | `config-first.md` | § "L'erreur classique" |
-| Sync absent (dbSave sans syncUpsert, mobile) | `sync-service.md` | § "Pattern obligatoire" |
-| MDR 2017/745 | `CLAUDE.md` | § "RÈGLE D'OR — INTERDIT" |
-| Tests / documentation manquants | `CLAUDE.md` | § "Règles de développement" |
-| Mode Ado (useTeen/TeenAccent manquants) | `CLAUDE.md` | § "Pattern : Mode Ado" |
-| RLS / schema.sql | `coding-standards.md` | § "Sécurité" / "Schéma" |
+| React (hooks, effets, keys, async) | « React / render » (créer si besoin) | `coding-standards.md` § React performance |
+| Accès données (Supabase/SQLite dans composant) | « Couches : une feuille… » ou créer « Accès aux données » | `coding-standards.md` § Accès aux données |
+| TypeScript (`any`, `unknown`, suppressions) | « Suppressions interdites » | `coding-standards.md` § Suppressions / TS strict |
+| Render inline (objets, callbacks) | « React / render » | `coding-standards.md` § Render |
+| i18n (texte en dur) | créer « Internationalisation » | `coding-standards.md` § Internationalisation |
+| Design system (duplication d'un primitive) | « Design system : … » | `coding-standards.md` § Checklist obligatoire |
+| Config-first (données en TS statique) | créer « Config-first » | `config-first.md` |
+| Sync absent (dbSave sans syncUpsert) | créer « Synchronisation distante » | `sync-service.md` |
+| MDR 2017/745 | créer « MDR » | `CLAUDE.md` § RÈGLE D'OR |
+| Tests / documentation manquants | « Tests et couverture » | `CLAUDE.md` + coding-standards § Principes |
+| Mode Ado (useTeen/TeenAccent) | créer « Mode Ado » | `CLAUDE.md` § Mode Ado |
+| RLS / schema.sql | créer « Sécurité / Schéma » | `coding-standards.md` § Sécurité / Schéma |
 
 #### Après les enrichissements
 
-Afficher dans la conversation la liste des fichiers de règles modifiés et les enrichissements apportés, sous la forme :
+Afficher dans la conversation la liste des fichiers modifiés, sous la forme :
 
 ```
 📚 Documentation enrichie :
-- coding-standards.md — § "Accès aux données" : +1 exemple (FooScreen.tsx:42)
-- config-first.md — § "L'erreur classique" : +1 exemple (BarModule)
+- lessons.md — § "Couches : une feuille…" : +1 cas (FooScreen.tsx:42)
+- coding-standards.md — pointeur 📌 ajouté sous § "Accès aux données"
 ```
 
-Si aucune règle n'a nécessité d'enrichissement : `📚 Règles déjà à jour — aucun enrichissement nécessaire.`
+Si aucun cas nouveau : `📚 lessons.md déjà à jour — aucun cas à ajouter.`
 
 ### 6. Archiver le rapport
 

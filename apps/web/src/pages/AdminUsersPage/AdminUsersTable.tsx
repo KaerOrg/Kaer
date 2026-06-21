@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, Users } from 'lucide-react'
+import { ChevronDown, ChevronRight, Stethoscope, User, Users } from 'lucide-react'
 import {
   DataTable,
   type DataTableColumn,
   type DataTableSort,
   type DataTablePaginationState,
 } from '../../components/ui/DataTable'
+import { Drawer } from '../../components/ui/Drawer'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { SegmentedControl, type SegmentOption } from '../../components/ui/SegmentedControl'
 import { SelectField } from '../../components/ui/SelectField/SelectField'
@@ -46,6 +47,8 @@ export function AdminUsersTable() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<DataTableSort>(DEFAULT_SORT)
   const [page, setPage] = useState(0)
+  // Utilisateur dont le détail est ouvert dans le panneau latéral (null = fermé).
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS)
 
@@ -78,6 +81,12 @@ export function AdminUsersTable() {
   const handleErased = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
   }, [queryClient])
+
+  const toggleSelected = useCallback(
+    (id: string) => setSelectedId(prev => (prev === id ? null : id)),
+    []
+  )
+  const closePanel = useCallback(() => setSelectedId(null), [])
 
   const handleKindChange = useCallback((next: KindFilter) => {
     setKind(next)
@@ -115,17 +124,20 @@ export function AdminUsersTable() {
         header: t('admin_users.col.name'),
         sortable: true,
         cellClassName: 'admin-users__cell-name',
-        cell: (row, ctx) => (
-          <button
-            type="button"
-            className="admin-users__name-toggle"
-            onClick={ctx.toggleExpanded}
-            aria-expanded={ctx.expanded}
-          >
-            {ctx.expanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-            <span>{row.display_name}</span>
-          </button>
-        ),
+        cell: row => {
+          const open = selectedId === row.user_id
+          return (
+            <button
+              type="button"
+              className="admin-users__name-toggle"
+              onClick={() => toggleSelected(row.user_id)}
+              aria-expanded={open}
+            >
+              {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+              <span>{row.display_name}</span>
+            </button>
+          )
+        },
       },
       {
         id: 'kind',
@@ -166,12 +178,7 @@ export function AdminUsersTable() {
         cell: row => new Date(row.created_at).toLocaleDateString(i18n.language),
       },
     ],
-    [t, i18n.language]
-  )
-
-  const renderDetail = useCallback(
-    (row: AdminUser) => <AdminUserDetail user={row} onErased={handleErased} />,
-    [handleErased]
+    [t, i18n.language, selectedId, toggleSelected]
   )
 
   const showPractitionerFilter = kind === 'patient'
@@ -211,6 +218,13 @@ export function AdminUsersTable() {
   const users = usersQuery.data?.users ?? []
   const total = usersQuery.data?.total ?? 0
 
+  // Le détail suit la donnée vivante : on relit la ligne depuis la page courante.
+  // Si la ligne disparaît (effacement, changement de filtre), le panneau se ferme.
+  const selectedUser = useMemo(
+    () => (selectedId ? users.find(u => u.user_id === selectedId) ?? null : null),
+    [users, selectedId]
+  )
+
   const hasActiveFilter =
     kind !== 'all' || practitioner !== ALL_PRACTITIONERS || debouncedSearch.trim() !== ''
 
@@ -245,18 +259,32 @@ export function AdminUsersTable() {
   )
 
   return (
-    <DataTable
-      columns={columns}
-      rows={users}
-      getRowId={getRowId}
-      toolbar={toolbar}
-      renderDetail={renderDetail}
-      emptyState={emptyState}
-      ariaLabel={t('admin_users.title')}
-      className="admin-users__table"
-      sort={sort}
-      onSortChange={handleSortChange}
-      pagination={pagination}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        rows={users}
+        getRowId={getRowId}
+        toolbar={toolbar}
+        emptyState={emptyState}
+        ariaLabel={t('admin_users.title')}
+        className="admin-users__table"
+        sort={sort}
+        onSortChange={handleSortChange}
+        pagination={pagination}
+      />
+
+      {selectedUser ? (
+        <Drawer
+          title={selectedUser.display_name}
+          subtitle={selectedUser.email}
+          icon={selectedUser.kind === 'patient' ? <User size={18} /> : <Stethoscope size={18} />}
+          onClose={closePanel}
+          storageKey="admin-users-drawer-width"
+          topOffset={60}
+        >
+          <AdminUserDetail user={selectedUser} onErased={handleErased} />
+        </Drawer>
+      ) : null}
+    </>
   )
 }

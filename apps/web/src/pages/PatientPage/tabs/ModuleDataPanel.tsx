@@ -13,6 +13,7 @@ import {
 } from './clinicalChartConfig'
 import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
+import { SleepDataPanel } from './SleepDataPanel'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import './ModuleDataPanel.css'
 
@@ -22,6 +23,7 @@ function chartKind(moduleType: string): ChartKind | null {
   if (moduleType === 'mood_tracker') return 'mood'
   if (moduleType === 'fear_thermometer') return 'fear'
   if (moduleType === 'medication_side_effects') return 'med'
+  if (moduleType === 'sleep_diary') return 'sleep'
   if (moduleType in SCALE_CONFIG) return 'scale'
   return null
 }
@@ -49,6 +51,11 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // Tableau résumé : ModuleSummaryPanel porte son propre cadre (chrome identique).
   if (state.status === 'summary') {
     return <ModuleSummaryPanel summary={state.summary} moduleType={moduleType} loading={false} />
+  }
+
+  // Agenda du sommeil : panneau dédié (grille + courbes + stats), cadre propre.
+  if (state.status === 'sleep') {
+    return <SleepDataPanel points={state.points} locale={i18n.language} />
   }
 
   // « Rythmes & régularité » : rythmogramme mensuel (horaires bruts, MDR-safe).
