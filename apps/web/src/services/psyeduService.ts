@@ -145,8 +145,3 @@ export async function fetchBlocksByTopic(topicId: string): Promise<PsyEduBlock[]
   blocksCache.set(topicId, blocks)
   return blocks
 }
-
-export function clearPsyEduCache(): void {
-  topicsCache.clear()
-  blocksCache.clear()
-}

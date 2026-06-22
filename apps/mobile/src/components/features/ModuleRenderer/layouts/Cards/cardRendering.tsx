@@ -7,7 +7,7 @@
 
 import React, { ComponentType } from 'react'
 import { View } from 'react-native'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import type { ContentField } from '../../../../../services/moduleService'
 import { type FieldProps, CardDefinition, FieldListItem, FieldText } from '../../fields'
 import { styles } from './styles'

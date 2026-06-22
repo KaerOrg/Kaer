@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { Medication } from '@psytool/shared'
+import type { Medication } from '@kaer/shared'
 
 const MODULE = 'medication_adherence'
 

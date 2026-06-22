@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ContentField } from '../../services/moduleService'
 import { getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../lib/database'
 import { saveScaleEntry } from '../../services/scaleEntryService'
-import { useAuthStore } from '../../store/authStore'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../navigation/AppStack'
@@ -49,7 +48,6 @@ export default function ScaleEntryScreen() {
   const { showToast } = useToast()
   const accentColor = teenColor(scale_id)
 
-  const { patient } = useAuthStore()
   const config = SCALE_SCORING[scale_id]
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
   const [answers, setAnswers] = useState<(number | null)[]>([])

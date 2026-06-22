@@ -1,5 +1,5 @@
 {
-  "name": "psytool",
+  "name": "kaer",
   "private": true,
   "workspaces": [
     "apps/*",

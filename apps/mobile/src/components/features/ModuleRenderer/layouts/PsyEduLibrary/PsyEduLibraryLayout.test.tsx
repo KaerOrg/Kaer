@@ -50,7 +50,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { PsyEduLibraryLayout } from './PsyEduLibraryLayout'
 import * as psyeduService from '../../../../../services/psyeduService'
-import type { PsyEduTopic, PsyEduTheme } from '@psytool/shared'
+import type { PsyEduTopic, PsyEduTheme } from '@kaer/shared'
 
 jest.setTimeout(15000)
 

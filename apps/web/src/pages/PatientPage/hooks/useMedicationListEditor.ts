@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useToast } from '../../../contexts/ToastContext'
 import { fetchMedications, updateMedications } from '../../../services/moduleAssignmentService'
 import type { PatientModule } from '../../../lib/database.types'
-import type { Medication, MedicationKind } from '@psytool/shared'
+import type { Medication, MedicationKind } from '@kaer/shared'
 
 function genId(): string {
   return Math.random().toString(36).slice(2, 9) + Date.now().toString(36)

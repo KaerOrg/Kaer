@@ -32,7 +32,7 @@ retryBtnText: { color: '#fff', fontWeight: '600' },
 // ✅
 retryBtnText: { color: colors.white, fontWeight: '600' },
 ```
-`colors.white = '#FFFFFF'` existe dans `@psytool/shared`. `colors` est importé ligne 18.
+`colors.white = '#FFFFFF'` existe dans `@kaer/shared`. `colors` est importé ligne 18.
 
 ## Points d'attention
 

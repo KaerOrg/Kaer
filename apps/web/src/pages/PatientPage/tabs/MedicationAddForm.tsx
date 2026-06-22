@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { SegmentedControl } from '../../../components/ui/SegmentedControl'
 import type { SegmentOption } from '../../../components/ui/SegmentedControl/SegmentedControl.types'
-import type { MedicationKind } from '@psytool/shared'
+import type { MedicationKind } from '@kaer/shared'
 import type { MedicationDraft } from '../hooks/useMedicationListEditor'
 
 interface Props {

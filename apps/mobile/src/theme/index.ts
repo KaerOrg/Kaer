@@ -1,4 +1,4 @@
-import { colors, spacing, radius, fontSize } from '@psytool/shared'
+import { colors, spacing, radius, fontSize } from '@kaer/shared'
 
 export { colors, spacing, radius, fontSize }
 

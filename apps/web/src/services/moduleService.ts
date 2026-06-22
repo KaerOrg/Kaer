@@ -1,6 +1,6 @@
-import { fetchModuleFields as fetchModuleFieldsShared } from '@psytool/shared'
+import { fetchModuleFields as fetchModuleFieldsShared } from '@kaer/shared'
 import { supabase } from '../lib/supabase'
-import type { ContentField, ModuleFieldsResult, PreviewKind } from '@psytool/shared'
+import type { ContentField, ModuleFieldsResult, PreviewKind } from '@kaer/shared'
 
 export type { ContentField, ModuleFieldsResult, PreviewKind }
 

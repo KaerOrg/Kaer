@@ -1,11 +1,11 @@
 // Repères chronobiologiques côté web : la source unique (ordre, couleur, clé i18n)
-// vit dans `@psytool/shared` (CHRONO_ANCHORS) pour garantir la parité web ≡ mobile.
+// vit dans `@kaer/shared` (CHRONO_ANCHORS) pour garantir la parité web ≡ mobile.
 // Ce fichier n'ajoute que le helper de tracé web (fusion config + stats brutes).
 
-import { CHRONO_ANCHORS, type RhythmAnchorStat } from '@psytool/shared'
+import { CHRONO_ANCHORS, type RhythmAnchorStat } from '@kaer/shared'
 
-export { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS } from '@psytool/shared'
-export type { ChronoAnchorSpec } from '@psytool/shared'
+export { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS } from '@kaer/shared'
+export type { ChronoAnchorSpec } from '@kaer/shared'
 
 /** Un repère prêt pour le tracé : couleur, libellé résolu, écart-type, nb de jours. */
 export interface RhythmogramAnchor {

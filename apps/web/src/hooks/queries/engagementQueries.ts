@@ -15,7 +15,7 @@ import {
   type SleepPoint,
   type ModuleSummary,
 } from '../../services/engagementService'
-import type { RhythmEntry } from '@psytool/shared'
+import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
 export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep'

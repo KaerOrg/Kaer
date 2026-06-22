@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import type { ModuleSource } from '@psytool/shared'
+import type { ModuleSource } from '@kaer/shared'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

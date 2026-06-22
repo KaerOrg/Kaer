@@ -8,17 +8,17 @@
 Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 
 ```
---color-primary       #2563EB
+--color-primary       #6dbfc3
 --color-primary-light #EFF6FF
 --color-background    #F8F9FA
 --color-card          #FFFFFF
 --color-text          #111827
 --color-text-muted    #6B7280
 --color-border        #E5E7EB
---color-success       #10B981
---color-warning       #F59E0B
---color-danger        #EF4444
---color-stars         #F59E0B
+--color-success       #10B981   --color-success-light #ECFDF5
+--color-warning       #F59E0B   --color-warning-light #FFFBEB
+--color-danger        #EF4444   --color-danger-light  #FEE2E2
+--color-overlay       rgba(15, 23, 42, 0.45)   /* voile Modal / ActionSheet */
 
 --spacing-xs  4px     --spacing-sm  8px
 --spacing-md  16px    --spacing-lg  24px    --spacing-xl  32px
@@ -71,7 +71,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 | Widget | Classe CSS | Élément HTML | Notes |
 |---|---|---|---|
 | `TimeWidget` | `.fw-time` | `<input type="time">` | `defaultValue="22:00"` |
-| `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `ValueBar`, pas ce widget |
+| `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `RatingSelector variant="bar"`, pas ce widget |
 | `StarsWidget` | `.fw-stars` | `<span>` × N avec `.fw-star--on`/`.fw-star--off` | Spec `stars:count` |
 | `BooleanWidget` | `.fw-boolean` | `<span class="fw-boolean__opt">` × 2 | `.fw-boolean__opt--active` sur "Non" |
 | `RadioWidget` | `.fw-radio` + `fw-radio--ok/partial/miss` | `<span>` coloré | ok=vert, partial=ambre, miss=rouge |
@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Banner, Button, Card, Chart, Chip, DataTable, Drawer, EmptyState, InputField, Modal, SearchInput, SegmentedControl, SelectField, Sparkline, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, Toast, Toggle, ValueBar |
+| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, SegmentedControl, SelectField, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Toggle |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -154,10 +154,10 @@ Chaque dossier contient : `ComponentName.tsx` + `ComponentName.test.tsx` + `inde
 
 ---
 
-## Primitives d'aperçu module — `Tabs` (compact), `ValueBar`, `Sparkline`
+## Primitives d'aperçu module — `Tabs` (compact), `RatingSelector`
 
-Les layouts du `ModuleRenderer` reproduisent l'écran mobile du patient. Trois
-primitives partagées évitent de redéclarer onglets, sliders et mini-courbes dans
+Les layouts du `ModuleRenderer` reproduisent l'écran mobile du patient. Deux
+primitives partagées évitent de redéclarer onglets et sliders dans
 chaque layout :
 
 ### `Tabs` — variante `compact`
@@ -177,43 +177,140 @@ accessible (`aria-label`) et l'infobulle (`title`) — chaque onglet doit fourni
 Utilisé par `SliderDashboardLayout`, `DailyCheckinLayout`, et le détail de la file
 active (`RowDetail` : onglets verticaux icône seule).
 
-### `ValueBar` — barre de valeur statique
+### `RatingSelector` — sélecteur de note (pendant web 1-1 du mobile)
 
-`components/ui/ValueBar/`. Affiche une dimension : libellé + valeur + jauge colorée
-positionnée dans `[min, max]` + repères d'extrémité. Passif, sans saisie (MDR : affiche,
-n'interprète pas).
+`components/ui/RatingSelector/`. Pendant web exact du `RatingSelector` mobile : un
+même besoin (une note sur une échelle), quatre habillages via `variant`. Absorbe
+l'ancien `ValueBar` (devenu la variante `bar`). Présentationnel — aucune
+interprétation (MDR : affiche, ne conclut pas).
+
+| `variant` | Rendu | Échelle | Usage |
+|---|---|---|---|
+| `numbered` (défaut) | pastilles carrées chiffrées, seule la sélectionnée colorée | `steps[]` discret | SUDS (`ExposureTrackerLayout`) |
+| `track` | segments fins remplis jusqu'à la valeur | `steps[]` discret | `ActivityLogLayout`, `ColumnFormLayout` |
+| `icon` | rangée d'icônes (`star`/`sun`) remplies jusqu'à la valeur | `steps[]` discret | `SleepJournalLayout` (saisie + historique) |
+| `bar` | jauge continue (fill + thumb) | `[min, max]` continu | `SliderDashboardLayout`, récap exposition |
 
 ```tsx
-<ValueBar label="Humeur" value={7} min={1} max={10} color="#8B5CF6"
-          lowHint="Très basse" highHint="Très élevée" />
+// Discret, interactif (onChange ⇒ boutons radio ; absent ⇒ lecture seule)
+<RatingSelector variant="track" label="Plaisir" value={7} steps={[1,2,3,4,5,6,7,8,9,10]}
+                valueSuffix="/10" onChange={setValue} />
+
+// Icônes (étoiles / soleils), en lecture seule dans un historique
+<RatingSelector variant="icon" icon="star" iconSize={12} label="Qualité"
+                value={4} steps={[1,2,3,4,5]} showHeader={false} />
+
+// Jauge continue (ex-ValueBar) — repères low/mid/high
+<RatingSelector variant="bar" label="Humeur" value={7} min={1} max={10}
+                color="var(--color-primary)" lowHint="Très basse" highHint="Très élevée" />
+
+// Jauge continue compacte, label + jauge + valeur sur une ligne
+<RatingSelector variant="bar" layout="inline" label="Pic" value={60} min={0} max={100} />
 ```
 
-Props : `label`, `value`, `min?=1`, `max?=10`, `color?=var(--color-primary)`,
-`lowHint?`, `highHint?`.
+Props communes : `label` (requis, sert d'`aria-label`), `sublabel?`, `color?=var(--color-primary)`,
+`showHeader?=true`, `lowHint?`, `highHint?`, `valueSuffix?` (ex. `'%'`, `'/10'`), `className?`.
+Variantes discrètes : `steps: number[]`, `value: number | null`, `icon?='star'|'sun'`,
+`iconSize?=28`, `onChange?(v)` (absent ⇒ lecture seule), `testIdPrefix?`.
+Variante `bar` : `value`, `min?=1`, `max?=10`, `midHint?`, `layout?='stacked'|'inline'`.
 
-#### `ValueBar` (display) vs `SliderWidget` (input) — ne pas confondre
+#### `RatingSelector` (sélection/restitution) vs `SliderWidget` (input glissant)
 
-Les deux ressemblent visuellement à une « barre + valeur », mais jouent des rôles
-**opposés**. Ce ne sont pas des doublons : on a délibérément un composant par rôle
-(un fichier = une responsabilité).
+`RatingSelector variant="bar"` **affiche** une valeur (jauge non glissable) ;
+`SliderWidget` est un `<input type="range">` **glissant**. Ce ne sont pas des doublons.
 
-| | `ValueBar` | `SliderWidget` |
+| | `RatingSelector` | `SliderWidget` |
 |---|---|---|
-| Rôle | **Restitution** — on lit une valeur déjà saisie | **Saisie** — on glisse pour changer la valeur |
-| Dossier | `components/ui/ValueBar/` | `components/features/.../widgets/SliderWidget/` |
+| Rôle | sélection discrète OU restitution d'une valeur | saisie continue par glissement |
+| Dossier | `components/ui/RatingSelector/` | `components/features/.../widgets/SliderWidget/` |
 | Catégorie | Primitive design system (`ui/`) | Widget d'aperçu module (`fw-*`) |
-| Élément | `<div>` étiqueté (header dot+label+value, piste, hints) | `<input type="range">` + `<span>` valeur |
-| Interaction | Aucune — le `thumb` est purement décoratif | Glissable (`onChange` + state) |
-| Markup | Ligne de restitution complète (label + jauge + repères) | Range nu + chiffre |
-| Utilisé par | `SliderDashboardLayout` (onglet « Aujourd'hui », une barre/dimension) | `FieldWidget` via `widget_type="slider:min:max:unit"` |
+| Élément | pastilles / segments / icônes / jauge `<div>` | `<input type="range">` + `<span>` valeur |
+| Utilisé par | aperçus mobile-mock du `ModuleRenderer` | `FieldWidget` via `widget_type="slider:min:max:unit"` |
 
-> **Pourquoi pas un seul « slider readonly » ?** Un `<input type="range" disabled>`
-> s'annoncerait aux lecteurs d'écran comme un *contrôle désactivé* (faux : c'est une
-> donnée en lecture), hériterait du style natif à neutraliser, et n'offrirait pas le
-> header étiqueté + les hints de `ValueBar`. Surtout, fusionner les deux rouvrirait
-> la porte à « retirer le `disabled` pour gagner un input » — soit transformer un
-> affichage passif en saisie, ce qui touche la règle d'or non-DM (MDR 2017/745).
-> Règle : **pour saisir → `SliderWidget` ; pour afficher → `ValueBar`.**
+> **Pourquoi un `RatingSelector` web ?** Règle de parité 1-1 : chaque widget mobile a
+> son pendant web. Le mobile a un unique `RatingSelector` (4 variantes) ; le web le
+> reproduit à l'identique plutôt que de redessiner `mt-slider`/`cf-slider`/`al-pip`/
+> `ej-suds` à la main dans chaque layout. Pour une **saisie glissante** continue côté
+> field widget → `SliderWidget` ; pour **afficher ou sélectionner** une note → `RatingSelector`.
+
+### `TimePicker` — saisie d'une heure (pendant web 1-1 du mobile)
+
+`components/ui/TimePicker/`. Pendant web du `TimePicker` mobile : enrobe un
+`<input type="time">` natif (le navigateur fournit le picker) avec libellé, icône,
+indice et croix d'effacement optionnelle. `forwardRef` vers l'`<input>`.
+
+Supporte les **deux modes** :
+- **contrôlé** (`value` + `onChange`, parité mobile) ;
+- **non contrôlé** (`defaultValue` + `ref` lu au submit) — conforme à la règle
+  « input lu au submit → `useRef` ». C'est le mode des formulaires praticien.
+
+```tsx
+// Contrôlé
+<TimePicker label="Coucher" value={bedtime} onChange={setBedtime} clearable clearLabel="Effacer" />
+// Non contrôlé (lu au submit via ref)
+<TimePicker ref={startRef} defaultValue="09:00" step={300} />
+// Aperçu lecture seule (widget de preview)
+<TimePicker defaultValue="22:00" disabled />
+```
+
+Props : `label?`, `value?`, `defaultValue?`, `onChange?(next)`, `icon?` (défaut horloge),
+`clearable?`, `clearLabel?`, `accent?=var(--color-primary)`, `hint?`, `step?`, `disabled?`,
+`id?`, `className?`, `data-testid?`.
+Branché sur : `TimeWidget` (preview module), `NotificationRoutineModal`, `AvailabilityEditor`.
+
+### `Radio` — choix exclusif (pendant web 1-1 du mobile)
+
+`components/ui/Radio/`. Sélecteur mono-sélection, trois habillages via `variant` :
+`list` (rond + label + sous-label), `pills` (pilules en ligne), ou `cards` (grille de
+cartes : pastille `badge` + label + sous-label, pour les **échelles à libellés riches**).
+Boutons `role="radio"` dans un `role="radiogroup"`.
+
+```tsx
+<Radio variant="list" options={[{ value: 'a', label: 'Oui' }, { value: 'b', label: 'Non' }]}
+       value={answer} onChange={setAnswer} />
+
+// Variante cards : échelle de Likert (valeur en tête + label + détail)
+<Radio variant="cards" color="var(--color-danger)" value={String(level)} onChange={v => set(Number(v))}
+       options={[{ value: '0', label: '0', sublabel: 'Aucune lésion', badge: '0' }, /* … */]} />
+```
+
+Props : `options: {value, label, sublabel?, badge?}[]`, `value: string | null`, `onChange(value)`,
+`variant?='list'|'pills'|'cards'`, `color?=var(--color-primary)`, `className?`, `data-testid?`.
+Branché sur : `CSSRSScreenPanel` (`LikertScale` = `Radio variant="cards"`, accent danger pour la létalité).
+
+> **`Radio` vs `SegmentedControl`** : pour un choix exclusif **compact en barre segmentée**
+> → `SegmentedControl` (couvre déjà la variante « pills » dense). Pour une **liste verticale**
+> avec sous-libellés, ou des pilules d'option simples → `Radio`.
+
+### `ConfirmDialog` — confirmation modale (pendant web 1-1 du mobile)
+
+`components/ui/ConfirmDialog/`. Compose `ui/Modal` + deux `ui/Button`. **Remplace
+`window.confirm`** : cohérent avec le design system, stylable, testable. Variante danger
+pour les actions destructives.
+
+```tsx
+<ConfirmDialog open={pendingId !== null} title="Supprimer ?" message="Action irréversible."
+               confirmLabel="Supprimer" cancelLabel="Annuler" destructive
+               onConfirm={doDelete} onCancel={() => setPendingId(null)} />
+```
+
+Props : `open`, `title`, `message?`, `confirmLabel?='OK'`, `cancelLabel`, `destructive?`,
+`onConfirm(): void | Promise<void>`, `onCancel()`. Branché sur : `CSSRSScreenPanel`
+(suppression d'une évaluation).
+
+### `ActionSheet` — feuille d'actions (pendant web 1-1 du mobile)
+
+`components/ui/ActionSheet/`. Liste de choix en bas d'écran sur fond assombri + bouton
+d'annulation ; sélectionner une option ferme la feuille puis exécute son action. Existe
+pour la **parité 1-1** avec le mobile et les contextes responsive étroits ; sur desktop,
+préférer un menu / popover quand c'est plus adapté.
+
+```tsx
+<ActionSheet open={sheetOpen} title="Actions" cancelLabel="Annuler" onClose={() => setSheetOpen(false)}
+             options={[{ label: 'Modifier', onClick: edit }, { label: 'Supprimer', onClick: del, destructive: true }]} />
+```
+
+Props : `open`, `title?`, `options: {label, onClick, destructive?}[]`, `cancelLabel`, `onClose()`.
 
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
@@ -244,23 +341,10 @@ import { BarChart } from '../components/ui/Chart'
 <BarChart data={[2, null, 1, 3]} color="#EC4899" maxY={3} />
 ```
 
-> **Règle : tout graphique de séries temporelles web utilise `LineChart` ou `BarChart` depuis `ui/Chart/`. `Sparkline` reste pour les tendances compactes sans axe.**
+> **Règle : tout graphique de séries temporelles web utilise `LineChart` ou `BarChart` depuis `ui/Chart/`.**
 
 ---
 
-### `Sparkline` — mini-courbe
-
-`components/ui/Sparkline/`. Petit graphe linéaire SVG sans axe ni légende — une
-tendance brute. Passif (MDR).
-
-```tsx
-<Sparkline values={[6,7,6,5,7,8]} color="#8B5CF6" min={1} max={10} className="…" />
-```
-
-Props : `values` (≥2 points), `color?`, `min?=1`, `max?=10`, `width?=80`,
-`height?=24`, `className?`.
-
----
 
 ## Primitives génériques (`components/ui/`)
 
@@ -571,26 +655,6 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 > jamais l'expression d'une valeur clinique. Ne jamais piloter cette couleur par un score
 > ou un seuil — ce serait du codage couleur interprétatif interdit.
 
-### `Accordion`
-
-`components/ui/Accordion/`. Section repliable (titre cliquable + contenu).
-
-```tsx
-<Accordion title={t('crisis.coping')} icon={<HeartPulse />} badge={items.length} defaultOpen>
-  {items}
-</Accordion>
-```
-
-| Prop | Type | Défaut | Rôle |
-|---|---|---|---|
-| `title` | `string` | — | Titre (obligatoire) |
-| `icon` | `ReactNode` | — | Icône |
-| `subtitle` | `string` | — | Sous-titre |
-| `badge` | `number` | — | Compteur affiché à droite |
-| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
-| `children` | `ReactNode` | — | Contenu (obligatoire) |
-| `className` | `string` | — | Classe additionnelle |
-
 ### `EmptyState`
 
 `components/ui/EmptyState/`. État vide — icône + titre + description + action optionnelle.
@@ -634,7 +698,7 @@ métier (ex. rappel MFA), l'envelopper dans un composant `features/`.
 Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 
 > `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast`, `Banner` ont une doc dédiée dans
-> [`docs/components/`](components/). `Tabs`, `ValueBar`, `Sparkline`, `ScaleMetaBadges`
+> [`docs/components/`](components/). `Tabs`, `RatingSelector`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
 ### `DataTable<T>`
@@ -881,7 +945,7 @@ Fichier : `components/features/ChronoRhythmogram/ChronoRhythmogram.tsx`
 Réutilisé par le panneau Données / onglet Évolution (via `ChronoRhythmogramPanel`,
 données patient réelles) **et** l'aperçu praticien (`layouts/ChronoMonthLayout`,
 données d'exemple) → cohérence web ≡ mobile (le mobile rend le même modèle en SVG).
-Les données viennent du helper partagé `buildRhythmogram` (`@psytool/shared`) ; la
+Les données viennent du helper partagé `buildRhythmogram` (`@kaer/shared`) ; la
 config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 `lib/chronoAnchors.ts`.
 

@@ -12,7 +12,7 @@ import type {
   MedEffectPoint,
   SleepPoint,
 } from '../../../services/engagementService'
-import type { RhythmEntry } from '@psytool/shared'
+import type { RhythmEntry } from '@kaer/shared'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'

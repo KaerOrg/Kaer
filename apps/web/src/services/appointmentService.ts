@@ -163,28 +163,6 @@ export async function fetchExceptions(
   return (data ?? []) as AvailabilityException[]
 }
 
-export async function upsertException(
-  exception: Omit<AvailabilityException, 'id' | 'created_at'>,
-): Promise<{ ok: boolean; data?: AvailabilityException }> {
-  const { data, error } = await supabase
-    .from('availability_exceptions')
-    .upsert(exception, { onConflict: 'practitioner_id,exception_date' })
-    .select()
-    .single()
-  if (error) return { ok: false }
-  return { ok: true, data: data as AvailabilityException }
-}
-
-export async function deleteException(
-  exceptionId: string,
-): Promise<{ ok: boolean }> {
-  const { error } = await supabase
-    .from('availability_exceptions')
-    .delete()
-    .eq('id', exceptionId)
-  return { ok: !error }
-}
-
 // ─── Rendez-vous ──────────────────────────────────────────────────────────────
 
 type PatientRelEntry = {

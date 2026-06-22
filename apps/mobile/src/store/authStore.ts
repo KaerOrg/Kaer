@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import i18next, { initialLanguage } from '../i18n'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import {
   fetchTeenContext,
   getCurrentSessionPatient,

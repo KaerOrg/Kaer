@@ -12,25 +12,6 @@ export type ScaleCategory =
 
 export type TargetAge = 'perinatal' | 'enfant' | 'ado' | 'adulte' | 'senior'
 
-export const AGE_ORDER: readonly TargetAge[] = [
-  'perinatal',
-  'enfant',
-  'ado',
-  'adulte',
-  'senior',
-] as const
-
-export const SCALE_CATEGORIES: readonly ScaleCategory[] = [
-  'Humeur',
-  'Anxiété',
-  'Sommeil',
-  'Addictologie',
-  'Psychose',
-  'Personnalité',
-  'Neurodev',
-  'Trauma',
-] as const
-
 export const AGE_BADGE_CONFIG: Record<TargetAge, { bg: string; text: string }> = {
   perinatal: { bg: '#FBCFE8', text: '#9D174D' },
   enfant:    { bg: '#BFDBFE', text: '#1E40AF' },

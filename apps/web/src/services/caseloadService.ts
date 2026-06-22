@@ -354,9 +354,3 @@ export async function createCaseloadNote(
   if (error || !data) return { ok: false }
   return { ok: true, note: data as CaseloadNote }
 }
-
-/** Supprime une observation de l'historique. */
-export async function deleteCaseloadNote(noteId: string): Promise<{ ok: boolean }> {
-  const { error } = await supabase.from('caseload_notes').delete().eq('id', noteId)
-  return { ok: !error }
-}

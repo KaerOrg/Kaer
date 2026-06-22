@@ -24,6 +24,9 @@ import {
 import type { IntensiteDimension, LikertOption } from '../../data/cssrs_screen'
 import { Button } from '../ui/Button'
 import { InputField } from '../ui/InputField'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
+import { Radio } from '../ui/Radio'
+import type { RadioOption } from '../ui/Radio'
 import './CSSRSScreenPanel.css'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -109,26 +112,33 @@ interface LikertScaleProps {
   dimension: IntensiteDimension | { key: string; title: string; options: readonly LikertOption[] }
   value: number | null
   onChange: (v: number) => void
+  /** Couleur d'accent de l'option sélectionnée (défaut : primaire ; létalité : danger). */
+  accent?: string
 }
 
-function LikertScale({ dimension, value, onChange }: LikertScaleProps) {
+// Échelle de Likert = choix exclusif à libellés riches → primitive `Radio` (variante `cards`).
+function LikertScale({ dimension, value, onChange, accent }: LikertScaleProps) {
+  const options = useMemo<RadioOption[]>(
+    () => dimension.options.map(opt => ({
+      value: String(opt.value),
+      label: opt.label,
+      sublabel: opt.detail,
+      badge: String(opt.value),
+    })),
+    [dimension.options],
+  )
+  const handleChange = useCallback((v: string) => onChange(Number(v)), [onChange])
+
   return (
     <div className="cssrs-likert">
       <span className="cssrs-likert__title">{dimension.title}</span>
-      <div className="cssrs-likert__options">
-        {dimension.options.map(opt => (
-          <button
-            key={opt.value}
-            type="button"
-            className={`cssrs-likert__option${value === opt.value ? ' cssrs-likert__option--selected' : ''}`}
-            onClick={() => onChange(opt.value)}
-          >
-            <span className="cssrs-likert__option-value">{opt.value}</span>
-            <span className="cssrs-likert__option-label">{opt.label}</span>
-            <span className="cssrs-likert__option-detail">{opt.detail}</span>
-          </button>
-        ))}
-      </div>
+      <Radio
+        variant="cards"
+        options={options}
+        value={value === null ? null : String(value)}
+        onChange={handleChange}
+        color={accent}
+      />
     </div>
   )
 }
@@ -416,6 +426,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const toggleExpand = useCallback((id: string) => {
@@ -616,8 +627,13 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
 
   // ── Suppression ─────────────────────────────────────────────────────────────
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Supprimer cette évaluation ? Cette action est irréversible.')) return
+  const handleDelete = (id: string) => setPendingDeleteId(id)
+  const handleCancelDelete = useCallback(() => setPendingDeleteId(null), [])
+
+  const confirmDelete = async () => {
+    const id = pendingDeleteId
+    if (id == null) return
+    setPendingDeleteId(null)
     setDeletingId(id)
     await deleteCSSRSAssessment(id)
     setAssessments(prev => prev.filter(a => a.id !== id))
@@ -963,6 +979,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                 }}
                 value={formState.letaliteObservee}
                 onChange={setLetaliteObservee}
+                accent="var(--color-danger)"
               />
 
               {/* Létalité potentielle — uniquement si observée = 0 */}
@@ -975,6 +992,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                   }}
                   value={formState.letalitePotentielle}
                   onChange={setLetalitePotentielle}
+                  accent="var(--color-danger)"
                 />
               )}
             </div>
@@ -1054,7 +1072,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                       category="danger"
                       className="cssrs-panel__delete"
                       icon={<Trash2 size={14} />}
-                      onClick={e => { e.stopPropagation(); void handleDelete(a.id) }}
+                      onClick={e => { e.stopPropagation(); handleDelete(a.id) }}
                       disabled={deletingId === a.id}
                       aria-label="Supprimer"
                       title="Supprimer"
@@ -1073,6 +1091,17 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
       {!loading && assessments.length === 0 && !formOpen && (
         <p className="cssrs-panel__empty">Aucune évaluation pour ce patient.</p>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Supprimer cette évaluation ?"
+        message="Cette action est irréversible."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        destructive
+        onConfirm={confirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   )
 }

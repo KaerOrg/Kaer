@@ -1,5 +1,6 @@
 import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -160,17 +161,17 @@ export function ColumnFormLayout({ fields, t }: Props) {
                     const max = Number(child.props['max'] ?? 100)
                     const sliderColor = child.props['color'] ?? color
                     const value = Math.round((min + max) * 0.7)
-                    const ratio = max > min ? (value - min) / (max - min) : 0.5
                     return (
-                      <div key={child.id} className="cf-slider">
-                        <div className="cf-slider__head">
-                          <span className="cf-slider__label">{sliderLabel}</span>
-                          <span className="cf-slider__value" style={{ color: sliderColor }}>{value}%</span>
-                        </div>
-                        <div className="cf-slider__track">
-                          <div className="cf-slider__fill" style={{ width: `${ratio * 100}%`, background: sliderColor }} />
-                        </div>
-                      </div>
+                      <RatingSelector
+                        key={child.id}
+                        variant="bar"
+                        label={sliderLabel}
+                        value={value}
+                        min={min}
+                        max={max}
+                        valueSuffix="%"
+                        color={sliderColor}
+                      />
                     )
                   }
                   if (child.field_type === 'column_time_field') {

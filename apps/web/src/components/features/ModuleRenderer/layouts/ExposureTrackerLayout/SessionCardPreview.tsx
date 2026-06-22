@@ -1,4 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import { dateDaysAgo, type PreviewSession } from './exposureMock'
 
 interface Props {
@@ -28,13 +29,16 @@ export function SessionCardPreview({ session, lbl, strategyLabel }: Props) {
         </span>
       </header>
       {bars.map(b => (
-        <div key={b.label} className="ej-suds-row">
-          <span className="ej-suds__label">{b.label}</span>
-          <span className="ej-suds__bar">
-            <span className="ej-suds__fill" style={{ width: `${b.value}%`, background: b.color }} />
-          </span>
-          <span className="ej-suds__val" style={{ color: b.color }}>{b.value}</span>
-        </div>
+        <RatingSelector
+          key={b.label}
+          variant="bar"
+          layout="inline"
+          label={b.label}
+          value={b.value}
+          min={0}
+          max={100}
+          color={b.color}
+        />
       ))}
       {strategyLabel ? (
         <div className="ej-session-card__chips">

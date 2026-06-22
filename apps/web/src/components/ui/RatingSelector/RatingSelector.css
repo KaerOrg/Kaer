@@ -1,0 +1,163 @@
+.rating-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* ── En-tête ─────────────────────────────────────────────────────────────── */
+.rating-selector__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.rating-selector__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.rating-selector__titles {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.rating-selector__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.rating-selector__sublabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.rating-selector__value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Variante numbered : pastilles chiffrées ─────────────────────────────── */
+.rating-selector__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rating-selector__step {
+  width: 44px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.rating-selector__step-num {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.rating-selector__step--selected .rating-selector__step-num {
+  color: var(--color-surface);
+  font-weight: 700;
+}
+
+/* ── Variante track : segments ───────────────────────────────────────────── */
+.rating-selector__track {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
+.rating-selector__track-seg {
+  flex: 1;
+  height: 12px;
+  border-radius: var(--radius-full);
+  border: none;
+  padding: 0;
+  background: var(--color-border);
+}
+
+/* ── Variante icon : rangée d'icônes ─────────────────────────────────────── */
+.rating-selector__icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.rating-selector__icon {
+  border: none;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+}
+
+/* ── Variante bar : jauge continue (absorbe ValueBar) ────────────────────── */
+.rating-selector__bar-track {
+  position: relative;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.rating-selector--bar-inline .rating-selector__bar-track {
+  flex: 1;
+}
+
+.rating-selector__bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  opacity: 0.3;
+}
+
+.rating-selector__bar-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  border: 2.5px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.rating-selector--bar-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.rating-selector__inline-label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  min-width: 96px;
+}
+
+/* ── Repères d'extrémité ─────────────────────────────────────────────────── */
+.rating-selector__hints {
+  display: flex;
+  justify-content: space-between;
+}
+
+.rating-selector__hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.rating-selector__hint--mid {
+  font-weight: 600;
+}

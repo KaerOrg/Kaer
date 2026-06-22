@@ -47,7 +47,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`invitationService.ts`](../apps/web/src/services/invitationService.ts) | Liste des invitations en attente, validation de token, envoi via edge function, signup patient |
 | [`practitionerSettingsService.ts`](../apps/web/src/services/practitionerSettingsService.ts) | `practitioner_module_settings` (modules activés par praticien) |
 | [`cssrsService.ts`](../apps/web/src/services/cssrsService.ts) | CRUD des évaluations C-SSRS |
-| [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | `fetchPsychoCards`, `fetchModulePreviewKind` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
+| [`moduleService.ts`](../apps/web/src/services/moduleService.ts) | `fetchPsychoCards`, `fetchModulePreviewKind` (le `fetchModuleFields` partagé est ré-exporté depuis `@kaer/shared`) |
 | [`moduleCatalogService.ts`](../apps/web/src/services/moduleCatalogService.ts) | Catégories + modules pour l'armoire thérapeutique et le formulaire d'invitation ; `fetchModuleTaxonomy` (axes/tags/liaisons `tag_dimensions`+`tags`+`module_tags` pour les filtres par facettes — [`spec/module-taxonomy.md`](spec/module-taxonomy.md)) |
 | [`moduleSourcesService.ts`](../apps/web/src/services/moduleSourcesService.ts) | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` — sources & recommandations d'un module ([doc](module-sources.md)) |
 | [`caseloadService.ts`](../apps/web/src/services/caseloadService.ts) | File active praticien : `fetchCaseload` (assemble dossiers + actions + attentes), `syncCaseloadWithPatients` (crée un dossier lié pour chaque patient app — auto, idempotent), CRUD `caseload_entries` (création, édition inline, statut), `caseload_actions` (coche `setActionDone`…), `caseload_waits` (attentes de retour) et `caseload_notes` (observations : `fetchCaseloadNotes`/`createCaseloadNote`) + ré-export des fonctions pures de [`caseloadLogic.ts`](../apps/web/src/lib/caseloadLogic.ts). Spec : [`spec/file-active.md`](spec/file-active.md) |
@@ -76,7 +76,7 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 |---|---|
 | [`authService.ts`](../apps/mobile/src/services/authService.ts) | Session patient, login, inscription via token (multi-étapes), teen context, logout |
 | [`homeService.ts`](../apps/mobile/src/services/homeService.ts) | Liste des modules débloqués pour l'écran d'accueil, routines du jour, et `fetchModuleEvents(patientId, moduleType)` — événements praticien (`patient_modules.config.events`) |
-| [`moduleService.ts`](../apps/mobile/src/services/moduleService.ts) | `fetchPatientModuleConfig` (le `fetchModuleFields` partagé est ré-exporté depuis `@psytool/shared`) |
+| [`moduleService.ts`](../apps/mobile/src/services/moduleService.ts) | `fetchPatientModuleConfig` (le `fetchModuleFields` partagé est ré-exporté depuis `@kaer/shared`) |
 | [`notificationService.ts`](../apps/mobile/src/services/notificationService.ts) | Permissions et planification des rappels (stubs Expo Go SDK 53+), `getAllRoutinesForPatient`, `pauseRoutine`/`resumeRoutine` (la pause écrit un événement dans `notification_events`) |
 | [`avatarService.ts`](../apps/mobile/src/services/avatarService.ts) | Picker image, upload Supabase Storage, mise à jour `patients.avatar_url` |
 | [`psychoeducationService.ts`](../apps/mobile/src/services/psychoeducationService.ts) | `markCardAsRead` — réécriture du JSONB `unlocked_cards` |

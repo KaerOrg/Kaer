@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { ModuleSource } from '@psytool/shared'
+import type { ModuleSource } from '@kaer/shared'
 
 const cache = new Map<string, ModuleSource[]>()
 

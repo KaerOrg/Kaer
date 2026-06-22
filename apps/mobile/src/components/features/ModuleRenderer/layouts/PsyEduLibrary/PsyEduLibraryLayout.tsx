@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from
 import { ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react-native'
 import i18next from 'i18next'
 import { useTranslation } from 'react-i18next'
-import type { PsyEduTopic, PsyEduBlock, PsyEduTheme } from '@psytool/shared'
+import type { PsyEduTopic, PsyEduBlock, PsyEduTheme } from '@kaer/shared'
 import {
   fetchTopicsByIds,
   fetchThemes,

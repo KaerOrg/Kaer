@@ -1816,7 +1816,6 @@
   "file_active": {
     "nav_link": "Mes suivis",
     "title": "Mes suivis",
-    "subtitle": "Vos dossiers en un coup d'œil : priorités, échéances et ce qu'il ne faut pas oublier.",
     "col": {
       "patient": "Patient",
       "status": "Statut",

@@ -9,7 +9,7 @@ import {
   Tooltip,
   Label,
 } from 'recharts'
-import { minutesToHourLabel, minutesToClock } from '@psytool/shared'
+import { minutesToHourLabel, minutesToClock } from '@kaer/shared'
 import type { RhythmogramAnchor } from '../../../lib/chronoAnchors'
 import './ChronoRhythmogram.css'
 

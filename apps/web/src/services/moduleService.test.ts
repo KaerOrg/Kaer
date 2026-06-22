@@ -7,7 +7,7 @@ vi.mock('../lib/supabase', () => ({
 import { supabase } from '../lib/supabase'
 import { fetchModulePreviewKind } from './moduleService'
 
-// Note : fetchModuleFields est testé dans @psytool/shared (packages/shared/src/services/moduleFields.test.ts)
+// Note : fetchModuleFields est testé dans @kaer/shared (packages/shared/src/services/moduleFields.test.ts)
 // car la logique est partagée entre web et mobile via le service injecté.
 
 function makeChain(result: { data: unknown; error?: unknown } = { data: null, error: null }) {

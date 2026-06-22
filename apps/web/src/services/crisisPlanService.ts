@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { CrisisPlanCopingCard } from '@psytool/shared'
+import type { CrisisPlanCopingCard } from '@kaer/shared'
 
 export type { CrisisPlanCopingCard }
 

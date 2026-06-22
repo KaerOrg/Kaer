@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   type FieldProps,

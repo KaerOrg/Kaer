@@ -8,7 +8,7 @@ import {
   ScrollView,
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../navigation/AuthStack'
 import { useAuthStore } from '../store/authStore'

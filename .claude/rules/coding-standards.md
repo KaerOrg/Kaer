@@ -455,9 +455,9 @@ retryBtnText: { color: '#fff' }     // ← couleur blanche en dur
 
 // ✅ Token du thème partagé
 import { colors } from '../../theme'
-retryBtnText: { color: colors.white }   // colors.white = '#FFFFFF' dans @psytool/shared
+retryBtnText: { color: colors.white }   // colors.white = '#FFFFFF' dans @kaer/shared
 ```
-`colors.white` existe dans `@psytool/shared/src/theme.ts`. Toujours l'importer au lieu d'écrire `'#fff'` ou `'#FFFFFF'`.
+`colors.white` existe dans `@kaer/shared/src/theme.ts`. Toujours l'importer au lieu d'écrire `'#fff'` ou `'#FFFFFF'`.
 
 **Shadows — toujours via les tokens `shadows.sm/md` :**
 ```ts

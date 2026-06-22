@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import { purgeAllLocalData } from '../lib/database'
 
 export interface PatientProfile {

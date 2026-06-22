@@ -1204,14 +1204,6 @@
   margin-top: 2px;
 }
 
-.sj-history__star--on {
-  color: #F59E0B;
-}
-
-.sj-history__star--off {
-  color: var(--color-border);
-}
-
 .sj-history__chevron {
   color: var(--color-text-muted);
   flex-shrink: 0;
@@ -1424,20 +1416,6 @@
   background: white;
   border-radius: 50%;
   box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-}
-
-/* Stars — quality 5 grosses étoiles */
-.sj-stars-big {
-  display: flex;
-  gap: 8px;
-}
-
-.sj-star--on {
-  color: #F59E0B;
-}
-
-.sj-star--off {
-  color: var(--color-border);
 }
 
 /* Notes */
@@ -1673,27 +1651,6 @@
 }
 
 .al-divider { height: 1px; background: var(--color-border); margin: 4px -14px; }
-
-.al-pip { display: flex; flex-direction: column; gap: 6px; }
-
-.al-pip__head { display: flex; align-items: baseline; gap: 8px; }
-
-.al-pip__label { font-size: 13px; font-weight: 600; color: var(--color-text); flex: 1; }
-
-.al-pip__sublabel { font-size: 11px; color: var(--color-text-muted); }
-
-.al-pip__value { font-size: 13px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; }
-
-.al-pip__track { display: flex; gap: 3px; }
-
-.al-pip__seg {
-  flex: 1;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--color-border);
-}
-
-.al-pip__seg--on { background: var(--color-primary); }
 
 /* ── Decision grid (decisional_balance) ───────────────────────────────── */
 
@@ -2323,18 +2280,6 @@
 
 .cf-text-input__placeholder { color: var(--color-text-muted); font-style: italic; }
 .cf-text-input__value { color: var(--color-text); }
-
-.cf-slider { display: flex; flex-direction: column; gap: 4px; }
-
-.cf-slider__head { display: flex; align-items: baseline; gap: 8px; }
-
-.cf-slider__label { font-size: 12px; color: var(--color-text-secondary); flex: 1; }
-
-.cf-slider__value { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-
-.cf-slider__track { height: 6px; background: var(--color-border); border-radius: 999px; overflow: hidden; }
-
-.cf-slider__fill { height: 100%; border-radius: 999px; }
 
 .cf-time { display: flex; flex-direction: column; gap: 4px; }
 
@@ -3083,79 +3028,6 @@
   gap: 10px;
 }
 
-.mt-slider-card__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mt-slider-card__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.mt-slider-card__label {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.mt-slider-card__value {
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.mt-slider {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.mt-slider__track {
-  position: relative;
-  height: 6px;
-  background: var(--color-border);
-  border-radius: 3px;
-}
-
-.mt-slider__fill {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  border-radius: 3px;
-  opacity: 0.3;
-}
-
-.mt-slider__thumb {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2.5px solid white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-}
-
-.mt-slider__hints {
-  display: flex;
-  justify-content: space-between;
-}
-
-.mt-slider__hint {
-  font-size: 11px;
-  color: var(--color-text-muted, var(--color-text-secondary));
-}
-
-.mt-slider__hint--mid {
-  font-weight: 700;
-  text-align: center;
-}
-
 /* ── Notes ───────────────────────────────────────────────────────────────── */
 
 .mt-notes {
@@ -3822,12 +3694,6 @@
 .ej-session-card__actions { display: flex; gap: 8px; color: var(--color-text-muted); }
 .ej-session-card__chips { display: flex; flex-wrap: wrap; gap: 4px; }
 
-.ej-suds-row { display: flex; align-items: center; gap: 8px; }
-.ej-suds__label { font-size: 11px; font-weight: 600; color: var(--color-text-muted); min-width: 96px; }
-.ej-suds__bar { flex: 1; height: 6px; background: var(--color-border); border-radius: 999px; overflow: hidden; }
-.ej-suds__fill { display: block; height: 100%; border-radius: 999px; }
-.ej-suds__val { font-size: 13px; font-weight: 700; min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
-
 /* Formulaire d'exposition */
 .ej-form { gap: 16px; }
 .ej-section { display: flex; flex-direction: column; gap: 8px; }
@@ -3869,17 +3735,6 @@
 
 .ej-suds-picker { display: flex; flex-direction: column; gap: 10px; align-items: center; }
 .ej-suds-picker__big { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.ej-suds-picker__pips { display: grid; grid-template-columns: repeat(11, 1fr); gap: 3px; width: 100%; }
-.ej-pip {
-  text-align: center;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  padding: 4px 0;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-}
 
 .ej-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .ej-chip {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -46,7 +46,7 @@ import {
 
 // ─── Sous-composant : Section "Mes raisons de tenir" ─────────────────────────
 
-function AnchorsSection({ t, isTeenMode }: { t: (k: string) => string; isTeenMode: boolean }) {
+function AnchorsSection({ t }: { t: (k: string) => string; isTeenMode: boolean }) {
   const [anchors, setAnchors] = useState<CrisisAnchor[]>([])
   const [practitionerMessage, setPractitionerMessage] = useState('')
   const [anchorPhrase, setAnchorPhrase] = useState('')

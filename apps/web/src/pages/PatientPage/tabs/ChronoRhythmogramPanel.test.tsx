@@ -26,7 +26,7 @@ vi.mock('../../../components/features/ChronoRhythmogram', () => ({
 import { render, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
-import type { RhythmEntry } from '@psytool/shared'
+import type { RhythmEntry } from '@kaer/shared'
 
 const TWO_MONTHS: RhythmEntry[] = [
   { date: '2026-05-10', values: { wake_time: '07:00' } },
