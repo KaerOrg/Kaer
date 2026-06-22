@@ -4,7 +4,7 @@ jest.mock('react-i18next', () => ({
 
 import React from 'react'
 import { render, screen } from '@testing-library/react-native'
-import type { RhythmEntry } from '@psytool/shared'
+import type { RhythmEntry } from '@kaer/shared'
 import { RhythmogramChart } from './RhythmogramChart'
 import { DEFAULT_ANCHORS } from './chronoMonthUtils'
 

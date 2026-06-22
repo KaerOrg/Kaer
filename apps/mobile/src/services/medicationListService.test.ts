@@ -4,7 +4,7 @@ jest.mock('../lib/supabase', () => ({
 
 import { supabase } from '../lib/supabase'
 import { fetchMedications, updateMedications } from './medicationListService'
-import type { Medication } from '@psytool/shared'
+import type { Medication } from '@kaer/shared'
 
 // Chaîne Supabase factice : `.select().eq().eq().maybeSingle()` résout { data },
 // et `.update().eq().eq()` (thenable) résout { error }.

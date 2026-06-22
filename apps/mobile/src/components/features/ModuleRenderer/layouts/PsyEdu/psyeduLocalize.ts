@@ -1,5 +1,5 @@
 import i18next from 'i18next'
-import type { PsyEduTopic, PsyEduBlock } from '@psytool/shared'
+import type { PsyEduTopic, PsyEduBlock } from '@kaer/shared'
 
 const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }
 

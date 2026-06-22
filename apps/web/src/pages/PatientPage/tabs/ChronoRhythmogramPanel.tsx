@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { CHRONO_ANCHOR_KEYS, buildRhythmogramAnchors } from '../../../lib/chronoAnchors'
-import { buildRhythmogram, type RhythmEntry } from '@psytool/shared'
+import { buildRhythmogram, type RhythmEntry } from '@kaer/shared'
 import { ChronoRhythmogram } from '../../../components/features/ChronoRhythmogram'
 
 interface Props {

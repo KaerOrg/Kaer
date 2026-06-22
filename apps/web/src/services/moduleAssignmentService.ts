@@ -6,7 +6,7 @@ import type {
   PsychoeducationTopicEntry,
 } from '../lib/database.types'
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
-import type { Medication } from '@psytool/shared'
+import type { Medication } from '@kaer/shared'
 
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
   const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)

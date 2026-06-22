@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { buildRhythmogram, minutesToClock, type RhythmEntry } from '@psytool/shared'
+import { buildRhythmogram, minutesToClock, type RhythmEntry } from '@kaer/shared'
 import { CHRONO_ANCHOR_KEYS, buildRhythmogramAnchors } from '../../../../../lib/chronoAnchors'
 import { ChronoRhythmogram } from '../../../ChronoRhythmogram'
 

@@ -3,7 +3,7 @@ import { View, ActivityIndicator, ScrollView, Text, StyleSheet } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
-import type { PsyEduBlock } from '@psytool/shared'
+import type { PsyEduBlock } from '@kaer/shared'
 import { fetchBlocksByTopic } from '../../services/psyeduService'
 import { PsyEduBlockRenderer } from '../../components/features/PsyEduBlockRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'

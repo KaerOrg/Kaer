@@ -119,7 +119,7 @@ alter table public.psyedu_topics add column reviewed_at date;   -- couche « pre
 - ✅ Taxonomie + nouvelles tables dans `schema.sql` (source de vérité) : `tag_dimensions`, `tags`, `module_tags`, `psyedu_themes`, `module_topics`, `psyedu_topic_tags` + `alter psyedu_topics` (theme_id, reviewed_at, module_key nullable).
 - ✅ Seeds tracés : `supabase/seed/taxonomy_seed.sql` + `supabase/seed/psyedu_themes_seed.sql`.
 - ✅ Migration idempotente consolidée pour Studio : `supabase/migration_psyedu_refonte_p0.sql` (supersède l'ancien `migration_module_taxonomy.sql` untracked — supprimable).
-- ✅ Types `@psytool/shared` : `PsyEduTheme` ajouté, `PsyEduTopic` étendu (theme_id, reviewed_at, module_key nullable).
+- ✅ Types `@kaer/shared` : `PsyEduTheme` ajouté, `PsyEduTopic` étendu (theme_id, reviewed_at, module_key nullable).
 - ✅ tsc web + mobile verts, test `PsyEduLayout` vert.
 - ⏳ Reste : appliquer la migration sur Supabase (MCP) quand validé ; `database.types.ts` web (tables ajoutées au 1er usage en Phase 2).
 

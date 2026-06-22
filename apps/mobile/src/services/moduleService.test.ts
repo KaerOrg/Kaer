@@ -8,7 +8,7 @@ jest.mock('../lib/supabase', () => ({
 
 import { fetchPatientModuleConfig } from './moduleService'
 
-// Note : fetchModuleFields est testé dans @psytool/shared (packages/shared/src/services/moduleFields.test.ts)
+// Note : fetchModuleFields est testé dans @kaer/shared (packages/shared/src/services/moduleFields.test.ts)
 // car la logique est partagée entre web et mobile via le service injecté.
 
 interface ChainOpts {

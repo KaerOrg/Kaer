@@ -1,7 +1,7 @@
 // Helpers purs pour le layout 'chrono_month'.
 // Aucune dépendance React — math + parsing date.
 
-import { CHRONO_ANCHORS, type ChronoAnchorSpec } from '@psytool/shared'
+import { CHRONO_ANCHORS, type ChronoAnchorSpec } from '@kaer/shared'
 
 export interface AnchorEntry {
   /** Date locale au format YYYY-MM-DD. */
@@ -10,7 +10,7 @@ export interface AnchorEntry {
   readonly anchors: Readonly<Record<string, string | null>>
 }
 
-// La liste des repères (ordre, couleur, clé i18n) vit dans `@psytool/shared` :
+// La liste des repères (ordre, couleur, clé i18n) vit dans `@kaer/shared` :
 // source UNIQUE web ≡ mobile (cf. CHRONO_ANCHORS). Ré-exportée ici pour les
 // consommateurs existants du layout chrono.
 export type AnchorSpec = ChronoAnchorSpec

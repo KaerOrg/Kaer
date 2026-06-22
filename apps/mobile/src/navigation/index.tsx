@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { View, ActivityIndicator, StyleSheet } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
-import { logger } from '@psytool/shared'
+import { logger } from '@kaer/shared'
 import { useAuthStore } from '../store/authStore'
 import { initDatabase } from '../lib/database'
 import {

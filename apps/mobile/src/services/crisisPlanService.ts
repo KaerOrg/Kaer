@@ -11,7 +11,7 @@ import {
   type CrisisAnchor,
   type PlanItem,
 } from '../lib/database'
-import type { CrisisPlanCopingCard } from '@psytool/shared'
+import type { CrisisPlanCopingCard } from '@kaer/shared'
 import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { CrisisAnchor }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { RhythmAnchorStat } from '@psytool/shared'
+import type { RhythmAnchorStat } from '@kaer/shared'
 import { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS, buildRhythmogramAnchors } from './chronoAnchors'
 
 // `t` factice : renvoie la clé, suffit à vérifier la résolution du libellé.

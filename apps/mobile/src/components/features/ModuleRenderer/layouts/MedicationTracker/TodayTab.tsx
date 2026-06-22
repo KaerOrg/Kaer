@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { ScrollView, View, Text, Pressable, TextInput } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import type { Medication } from '@psytool/shared'
+import type { Medication } from '@kaer/shared'
 import { colors } from '../../../../../theme'
 import type { StatusMeta, ReasonMeta, IntakeState } from './types'
 import { styles } from './styles'

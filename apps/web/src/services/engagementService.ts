@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { RhythmEntry } from '@psytool/shared'
+import type { RhythmEntry } from '@kaer/shared'
 
 export type ScorePoint = { date: string; score: number }
 

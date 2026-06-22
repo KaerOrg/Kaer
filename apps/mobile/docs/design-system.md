@@ -4,10 +4,10 @@
 
 ## Barrel theme local
 
-`apps/mobile/src/theme/index.ts` re-exporte `@psytool/shared` et ajoute les objets propres à React Native :
+`apps/mobile/src/theme/index.ts` re-exporte `@kaer/shared` et ajoute les objets propres à React Native :
 
 ```ts
-import { colors, spacing, radius, fontSize } from '@psytool/shared'
+import { colors, spacing, radius, fontSize } from '@kaer/shared'
 
 export const typography = {
   h1:      { fontSize: 28, fontWeight: '700', color: colors.text },
@@ -26,7 +26,7 @@ export const shadows = {
 ```
 
 Import dans les composants : `import { colors, spacing, radius } from '../../theme'`  
-(chemin relatif depuis le fichier — jamais `@psytool/shared` directement dans le mobile)
+(chemin relatif depuis le fichier — jamais `@kaer/shared` directement dans le mobile)
 
 ---
 

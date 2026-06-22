@@ -5,7 +5,7 @@ import { Lightbulb, ExternalLink, CheckCircle2, Check } from 'lucide-react-nativ
 import { useAuthStore } from '../../store/authStore'
 import { InlineText } from './InlineText'
 import { colors, spacing, radius } from '../../theme'
-import type { PsyEduBlock } from '@psytool/shared'
+import type { PsyEduBlock } from '@kaer/shared'
 
 interface Props {
   blocks: readonly PsyEduBlock[]

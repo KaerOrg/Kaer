@@ -8,17 +8,17 @@
 Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 
 ```
---color-primary       #2563EB
+--color-primary       #6dbfc3
 --color-primary-light #EFF6FF
 --color-background    #F8F9FA
 --color-card          #FFFFFF
 --color-text          #111827
 --color-text-muted    #6B7280
 --color-border        #E5E7EB
---color-success       #10B981
---color-warning       #F59E0B
---color-danger        #EF4444
---color-stars         #F59E0B
+--color-success       #10B981   --color-success-light #ECFDF5
+--color-warning       #F59E0B   --color-warning-light #FFFBEB
+--color-danger        #EF4444   --color-danger-light  #FEE2E2
+--color-overlay       rgba(15, 23, 42, 0.45)   /* voile Modal / ActionSheet */
 
 --spacing-xs  4px     --spacing-sm  8px
 --spacing-md  16px    --spacing-lg  24px    --spacing-xl  32px
@@ -945,7 +945,7 @@ Fichier : `components/features/ChronoRhythmogram/ChronoRhythmogram.tsx`
 Réutilisé par le panneau Données / onglet Évolution (via `ChronoRhythmogramPanel`,
 données patient réelles) **et** l'aperçu praticien (`layouts/ChronoMonthLayout`,
 données d'exemple) → cohérence web ≡ mobile (le mobile rend le même modèle en SVG).
-Les données viennent du helper partagé `buildRhythmogram` (`@psytool/shared`) ; la
+Les données viennent du helper partagé `buildRhythmogram` (`@kaer/shared`) ; la
 config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 `lib/chronoAnchors.ts`.
 
