@@ -53,9 +53,9 @@ export function FileActivePage() {
     ])
     const linkable: LinkablePatient[] = appPatients.map(p => ({
       id: p.id,
+      publicRef: p.public_ref,
       name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
       email: p.email,
-      birthDate: p.patient_birth_date,
       moduleTypes: p.modules.map(m => m.module_type),
     }))
     // Auto : patients inscrits → dossier lié ; invitations en attente → dossier libre

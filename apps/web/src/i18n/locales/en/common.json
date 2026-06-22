@@ -1716,6 +1716,8 @@
       "link": "App patient",
       "actions": "Actions",
       "waits": "Awaiting return",
+      "soins": "Care",
+      "soins_empty": "No module unlocked for this patient",
       "observation": "Observations"
     },
     "link": {
@@ -1723,13 +1725,14 @@
       "linked_unknown": "Linked patient",
       "invited": "Invited, {{email}} (pending sign-up)",
       "free": "Standalone case (not linked to the app)",
-      "modules_hint": "Modules unlocked for this patient in the app"
+      "modules_hint": "Modules unlocked for this patient in the app",
+      "modules_more": "View the {{count}} other modules (opens details)"
     },
     "name": {
       "edit": "Edit name"
     },
     "toggle_detail": "Show / hide case details",
-    "dob_label": "Date of birth",
+    "open_patient": "Open patient record",
     "wait": {
       "label_label": "What we're waiting for",
       "relance_prefix": "chase on",

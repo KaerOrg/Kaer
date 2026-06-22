@@ -1,6 +1,31 @@
 /* Structure de table (scroll, en-têtes, lignes, dépliage) : design system DataTable
    — voir components/ui/DataTable. Ce fichier ne porte que le métier « file active ». */
 
+/* ---- Avatar patient dans l'en-tête du drawer ---- */
+.caseload-drawer__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full, 999px);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ---- Lien vers la fiche patient (en-tête du drawer, à côté de la croix) ---- */
+.caseload-drawer__patient-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.caseload-drawer__patient-link:hover {
+  background: var(--color-border);
+  color: var(--color-primary);
+}
+
 /* ---- Capture rapide ---- */
 .caseload-add {
   display: flex;
@@ -192,13 +217,6 @@
 .name-cell__toggle:hover,
 .name-cell__toggle--active { color: var(--color-primary); }
 
-.name-cell__dob {
-  flex-shrink: 0;
-  font-size: var(--font-size-caption);
-  color: var(--color-text-muted);
-  white-space: nowrap;
-}
-
 /* ---- Nom patient : lecture seule + crayon (édition sécurisée) ---- */
 .editable-name {
   display: flex;
@@ -319,16 +337,6 @@
   flex: 1;
   color: var(--color-text-muted);
   font-style: italic;
-}
-
-.actions-summary__more {
-  flex-shrink: 0;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  font-size: var(--font-size-caption);
-  font-weight: 600;
-  padding: 1px 7px;
-  border-radius: var(--radius-full, 999px);
 }
 
 /* ---- Soins en cours (chips) ---- */

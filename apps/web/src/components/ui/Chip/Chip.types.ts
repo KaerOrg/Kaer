@@ -17,7 +17,11 @@ export interface ChipProps {
   selectable?: boolean
   /** État sélectionné, uniquement avec `selectable`. */
   selected?: boolean
-  /** Clic sur la puce sélectionnable. */
+  /**
+   * Action au clic. Avec `selectable`, bascule le filtre. Sans `selectable` ni
+   * `onRemove`, rend la puce comme un bouton d'action (ex. « +N » qui ouvre un
+   * panneau) en conservant l'habillage du `tone`, sans `aria-pressed`.
+   */
   onClick?: () => void
   /** Affiche un bouton × de suppression (tags éditables). */
   onRemove?: () => void

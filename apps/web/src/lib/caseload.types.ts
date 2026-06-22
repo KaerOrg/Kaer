@@ -85,6 +85,8 @@ export interface CaseloadRowData {
   readonly entry: CaseloadEntry
   readonly actions: readonly CaseloadAction[]
   readonly waits: readonly CaseloadWait[]
+  /** Avatar du patient lié (`patients.avatar_url`) ; null si dossier non lié ou sans photo. */
+  readonly patient_avatar_url: string | null
 }
 
 /** Une note du journal daté d'un dossier. */

@@ -61,16 +61,19 @@ Le tableau complet, triable et filtrable. C'est ici qu'on saisit et qu'on a la v
 Saisie **au clic dans la cellule** (édition inline, enregistrement automatique).
 **Une ligne par patient** : un clic sur le **nom du patient** (ou son chevron) **ouvre le détail dans
 un panneau latéral** (composant `Drawer` du design system) coulissant à droite, sans masquer la table ;
-la cellule « Actions » montre, en lecture seule, l'action la plus urgente + un badge « +N ». Le crayon
-à côté du nom reste réservé à l'édition du nom ; la **date de naissance** du patient lié s'affiche en
-petit à côté du nom. Le panneau latéral (redimensionnable, largeur mémorisée) organise le détail en
-**3 onglets verticaux (icône seule)** — **Actions** (cocher / ajouter / supprimer, chacune avec échéance
-à la journée), **En attente de retour** (étiquette + date de relance optionnelle), **Observations**
-(la plus récente + historique daté) ; le libellé de l'onglet actif s'affiche en tête du panneau, et
-l'**⭐ Important** est épinglé à côté du nom dans l'en-tête. Les **« Soins en cours »** et le résumé
-**« En attente de retour »** s'affichent dans la ligne ; l'**⭐ Important** épingle le patient en haut.
-La liaison patient (lié / invité / libre) reste **automatique** (pas d'encart dédié) ; seuls les
-**modules débloqués** du patient lié remontent en chips dans « Soins en cours ».
+la cellule « Actions » montre, en lecture seule, l'action la plus urgente. Le crayon
+à côté du nom reste réservé à l'édition du nom. Le panneau latéral (redimensionnable, largeur mémorisée)
+organise le détail en **4 onglets verticaux (icône seule)** — **Actions** (cocher / ajouter / supprimer,
+chacune avec échéance à la journée), **En attente de retour** (étiquette + date de relance optionnelle),
+**Soins** (liste lecture seule des modules débloqués du patient lié), **Observations** (la plus récente +
+historique daté) ; le libellé de l'onglet actif s'affiche en tête du panneau. En en-tête du panneau :
+l'**avatar** du patient lié si disponible (sinon icône générique), l'**⭐ Important** épinglé à côté du
+nom, et un **lien vers la fiche patient** (à côté de la croix de fermeture, uniquement pour un dossier
+relié à un compte). Les **« Soins en cours »** et le résumé **« En attente de retour »** s'affichent dans
+la ligne ; l'**⭐ Important** épingle le patient en haut. La liaison patient (lié / invité / libre) reste
+**automatique** (pas d'encart dédié) ; les **modules débloqués** du patient lié remontent en chips dans
+« Soins en cours » (**3 au plus**, le surplus replié derrière un **« +N »** cliquable qui ouvre le drawer
+sur l'onglet **Soins**).
 
 **Édition du nom sécurisée.** Le nom du patient s'affiche en **lecture seule** ; l'édition demande
 un clic explicite sur le **crayon**, puis une **validation** (Entrée / ✓) — pas de modification

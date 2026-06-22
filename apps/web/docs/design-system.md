@@ -584,15 +584,18 @@ natif ne sait faire ni l'un ni l'autre proprement.
 
 ### `Chip`
 
-`components/ui/Chip/`. Puce / token en pilule. Trois usages dans une seule primitive :
+`components/ui/Chip/`. Puce / token en pilule. Quatre usages dans une seule primitive :
 affichage (icône + label coloré par `tone`), supprimable (`onRemove` → bouton ×, pour
-les tags éditables), sélectionnable (`selectable` → bouton-bascule, pour les filtres).
+les tags éditables), sélectionnable (`selectable` → bouton-bascule, pour les filtres), et
+action (`onClick` sans `selectable` ni `onRemove` → bouton d'action, ex. « +N » qui ouvre
+un panneau ; garde l'habillage du `tone`, sans `aria-pressed`).
 Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 
 ```tsx
 <Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
 <Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
 <Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+<Chip tone="info" label={`+${extra}`} onClick={openDrawer} title={t('...')} />
 <Chip size="sm" tone="info" label={t('tags.anxiety.label')} />
 ```
 
@@ -604,7 +607,7 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 | `icon` | `ReactNode` | — | Icône en tête |
 | `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
 | `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
-| `onClick` | `() => void` | — | Clic sur la puce sélectionnable |
+| `onClick` | `() => void` | — | Bascule si `selectable` ; sinon (hors `onRemove`) puce d'action (bouton, sans `aria-pressed`) |
 | `onRemove` | `() => void` | — | Affiche un bouton × de suppression |
 | `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
 | `title` | `string` | — | Tooltip natif |

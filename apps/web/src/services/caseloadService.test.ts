@@ -88,6 +88,28 @@ describe('fetchCaseload', () => {
     expect(rows.find(r => r.entry.id === 'e2')?.waits).toHaveLength(0)
   })
 
+  it('mappe l\'avatar du patient lié (embed) et null sinon', async () => {
+    vi.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === 'caseload_entries') {
+        return makeChain({
+          data: [
+            { ...makeEntry({ id: 'e1', patient_id: 'pat-1' }), patient: { avatar_url: 'https://x/a.png' } },
+            { ...makeEntry({ id: 'e2' }), patient: null },
+          ],
+          error: null,
+        }) as never
+      }
+      return makeChain({ data: [], error: null }) as never
+    })
+
+    const rows = await fetchCaseload('p-1')
+
+    expect(rows.find(r => r.entry.id === 'e1')?.patient_avatar_url).toBe('https://x/a.png')
+    expect(rows.find(r => r.entry.id === 'e2')?.patient_avatar_url).toBeNull()
+    // L'objet embed `patient` ne fuite pas dans l'entrée elle-même.
+    expect(rows.find(r => r.entry.id === 'e1')?.entry).not.toHaveProperty('patient')
+  })
+
   it('renvoie un tableau vide si la requête dossiers échoue', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'boom' } }) as never)
     expect(await fetchCaseload('p-1')).toEqual([])

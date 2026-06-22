@@ -18,8 +18,6 @@ function ActionsSummaryCellComponent({ actions, today }: ActionsSummaryCellProps
   const { t } = useTranslation()
 
   const topAction = selectTopAction(actions, today)
-  const openCount = actions.reduce((n, a) => (a.is_done ? n : n + 1), 0)
-  const extraCount = topAction ? openCount - 1 : 0
   const topDue = describeDue(topAction?.due_date ?? null, today)
   const topDueLabel =
     topDue.kind === 'none'
@@ -42,7 +40,6 @@ function ActionsSummaryCellComponent({ actions, today }: ActionsSummaryCellProps
       ) : (
         <span className="actions-summary__empty">{t('file_active.action.none')}</span>
       )}
-      {extraCount > 0 ? <span className="actions-summary__more">+{extraCount}</span> : null}
     </div>
   )
 }

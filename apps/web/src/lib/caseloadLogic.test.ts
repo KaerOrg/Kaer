@@ -67,7 +67,7 @@ function makeRow(
   actions: Partial<CaseloadAction>[],
   waits: Partial<CaseloadWait>[] = []
 ): CaseloadRowData {
-  return { entry: makeEntry(entry), actions: actions.map(makeAction), waits: waits.map(makeWait) }
+  return { entry: makeEntry(entry), actions: actions.map(makeAction), waits: waits.map(makeWait), patient_avatar_url: null }
 }
 
 describe('daysBetween', () => {

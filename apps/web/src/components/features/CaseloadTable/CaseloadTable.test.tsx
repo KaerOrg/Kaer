@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 
 import { CaseloadTable, type CaseloadTableProps } from './CaseloadTable'
 import type { CaseloadAction, CaseloadEntry, CaseloadRowData } from '../../../lib/caseload.types'
@@ -23,30 +24,32 @@ function makeAction(overrides: Partial<CaseloadAction> = {}): CaseloadAction {
   }
 }
 
-const defaultRow: CaseloadRowData = { entry: makeEntry(), actions: [makeAction()], waits: [] }
+const defaultRow: CaseloadRowData = { entry: makeEntry(), actions: [makeAction()], waits: [], patient_avatar_url: null }
 const noop = () => {}
 const loadNotes = () => Promise.resolve([])
 const addNote = () => Promise.resolve(null)
 
 function renderTable(props: Partial<CaseloadTableProps> = {}) {
   return render(
-    <CaseloadTable
-      rows={props.rows ?? [defaultRow]}
-      today={TODAY}
-      patients={props.patients ?? []}
-      onPatch={props.onPatch ?? noop}
-      onStatus={props.onStatus ?? noop}
-      onCreate={props.onCreate ?? noop}
-      onAddAction={props.onAddAction ?? noop}
-      onToggleDone={props.onToggleDone ?? noop}
-      onPatchAction={props.onPatchAction ?? noop}
-      onDeleteAction={props.onDeleteAction ?? noop}
-      onAddWait={props.onAddWait ?? noop}
-      onPatchWait={props.onPatchWait ?? noop}
-      onDeleteWait={props.onDeleteWait ?? noop}
-      onLoadNotes={props.onLoadNotes ?? loadNotes}
-      onAddNote={props.onAddNote ?? addNote}
-    />
+    <MemoryRouter>
+      <CaseloadTable
+        rows={props.rows ?? [defaultRow]}
+        today={TODAY}
+        patients={props.patients ?? []}
+        onPatch={props.onPatch ?? noop}
+        onStatus={props.onStatus ?? noop}
+        onCreate={props.onCreate ?? noop}
+        onAddAction={props.onAddAction ?? noop}
+        onToggleDone={props.onToggleDone ?? noop}
+        onPatchAction={props.onPatchAction ?? noop}
+        onDeleteAction={props.onDeleteAction ?? noop}
+        onAddWait={props.onAddWait ?? noop}
+        onPatchWait={props.onPatchWait ?? noop}
+        onDeleteWait={props.onDeleteWait ?? noop}
+        onLoadNotes={props.onLoadNotes ?? loadNotes}
+        onAddNote={props.onAddNote ?? addNote}
+      />
+    </MemoryRouter>
   )
 }
 
@@ -64,7 +67,7 @@ describe('CaseloadTable', () => {
   })
 
   it('affiche le délai sur la pastille « À venir »', () => {
-    const row: CaseloadRowData = { entry: makeEntry(), actions: [makeAction({ due_date: '2026-06-05' })], waits: [] }
+    const row: CaseloadRowData = { entry: makeEntry(), actions: [makeAction({ due_date: '2026-06-05' })], waits: [], patient_avatar_url: null }
     renderTable({ rows: [row] })
     expect(screen.getByText('À venir')).toBeInTheDocument()
     expect(screen.getByText('3 j')).toBeInTheDocument()
@@ -142,17 +145,32 @@ describe('CaseloadTable', () => {
   })
 
   it('affiche les modules débloqués du patient lié dans « Soins en cours »', () => {
-    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [] }
-    const patients = [{ id: 'pat-1', name: 'Léa Martin', email: 'lea@x.fr', birthDate: null, moduleTypes: ['phq9'] }]
+    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [], patient_avatar_url: null }
+    const patients = [{ id: 'pat-1', publicRef: 'ref-1', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: ['phq9'] }]
     const { container } = renderTable({ rows: [row], patients })
     // chip module visible dans la colonne Soins (sans dépliage)
     expect(container.querySelector('.module-chips .chip')).not.toBeNull()
   })
 
-  it('affiche la date de naissance à côté du nom (patient lié)', () => {
-    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [] }
-    const patients = [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr', birthDate: '1990-03-12', moduleTypes: [] }]
+  it('ouvre le drawer sur l\'onglet Soins via le « +N » et liste tous les modules', async () => {
+    const modules = ['phq9', 'gad7', 'sleep_diary', 'beck_columns']
+    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [], patient_avatar_url: null }
+    const patients = [{ id: 'pat-1', publicRef: 'ref-1', name: 'Léa', email: 'lea@x.fr', moduleTypes: modules }]
     renderTable({ rows: [row], patients })
-    expect(screen.getByText('12/03/1990')).toBeInTheDocument()
+    // colonne repliée : 3 chips + « +1 »
+    fireEvent.click(screen.getByRole('button', { name: '+1' }))
+    // drawer ouvert sur l'onglet Soins : les 4 modules sont listés (sans repli « +N »)
+    await screen.findByRole('tab', { name: 'Soins' })
+    const chips = document.querySelectorAll('.drawer__body .module-chips .chip')
+    expect(chips).toHaveLength(4)
+  })
+
+  it('affiche un lien vers la fiche patient dans l\'en-tête du drawer (patient lié)', async () => {
+    const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [], patient_avatar_url: null }
+    const patients = [{ id: 'pat-1', publicRef: 'ref-9', name: 'Léa', email: 'lea@x.fr', moduleTypes: [] }]
+    renderTable({ rows: [row], patients })
+    fireEvent.click(screen.getByText('Bernard Hugo'))
+    const link = await screen.findByRole('link', { name: 'Ouvrir la fiche patient' })
+    expect(link).toHaveAttribute('href', '/patient/ref-9')
   })
 })

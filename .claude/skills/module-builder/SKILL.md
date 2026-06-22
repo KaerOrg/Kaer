@@ -823,6 +823,37 @@ Ajouter une ligne dans le tableau « Modules thérapeutiques » avec statut, nom
 
 ---
 
+## Phase 8bis — Passe de simplification finale (skill `simplify`)
+
+> **Dernière action de la chaîne, exécutée systématiquement une fois le module
+> implémenté, les tests verts (Phase 6) et la documentation à jour (Phase 7).**
+> Aucun module n'est considéré comme terminé tant que cette passe n'a pas été lancée.
+
+Quand tout le module est en place et que `tsc --noEmit` + les trois suites de tests
+passent, **invoquer le skill `simplify`** (commande `/simplify`) sur **l'intégralité
+du scope du module** — c'est-à-dire tous les fichiers créés ou modifiés par la branche
+`feat/module-<module_id>` (services, widgets, layouts, écrans mobiles, seed, i18n,
+docs).
+
+`simplify` relit le diff de la branche pour traquer la réutilisation manquée, les
+simplifications, l'efficacité et les défauts d'altitude (abstraction spéculative, état
+superflu, prop morte, couche inutile), **puis applique directement les corrections**.
+C'est une passe **qualité uniquement** — elle ne cherche pas les bugs.
+
+Après la passe :
+
+1. **Re-vérifier que rien n'est cassé** : relancer `tsc --noEmit` (web + mobile +
+   shared) et les trois suites de tests. Les simplifications appliquées ne doivent
+   laisser aucune compilation ni aucun test en échec.
+2. **Réafficher la liste des fichiers retouchés** par `simplify`, pour que l'utilisateur
+   voie ce qui a été nettoyé au-delà de l'implémentation initiale.
+
+Si `simplify` ne trouve rien à nettoyer, le signaler explicitement (« scope déjà
+simple — aucune retouche »). La passe reste obligatoire même dans ce cas : elle fait
+partie de la définition de « terminé ».
+
+---
+
 ## Phase 8 — Format de sortie initial
 
 Avant d'écrire du code, produire ce récap et **attendre la confirmation utilisateur** :
@@ -914,3 +945,4 @@ Avant d'écrire du code, produire ce récap et **attendre la confirmation utilis
 15. **Veto nouveau field_type sans consultation de l'inventaire** — avant d'introduire un `field_type` qui n'apparaît pas dans `docs/module-engine.md`, vérifier que aucun des 44+ types existants ne couvre le besoin (par prop ou variante). Si un équivalent existe → l'utiliser ou l'étendre. Si aucun équivalent ne convient → justifier en 3 lignes dans le doc du module et mettre à jour l'inventaire.
 16. **Veto sync absent** — tout service mobile de module qui appelle `dbSave()` / `db.execAsync()` sans passer par `syncUpsert` / `syncDelete` (`syncHelpers.ts`) est refusé. Aucune exception pour les modules avec stockage SQLite patient. Un `EntryKind` absent de `syncOutbox.ts` plutôt que casté `as EntryKind` est également un veto.
 17. **Veto config TypeScript statique** — tout tableau ou objet TypeScript (`const MY_DATA = [...]`) qui encode des métadonnées de module (labels, descriptions, catégories, contenu éditorial) au lieu d'être lu depuis `module_content_fields` / `field_props` est refusé. Règle complète : [`.claude/rules/config-first.md`](../../.claude/rules/config-first.md).
+18. **Simplify avant clôture** — la tâche n'est pas terminée tant que la passe de simplification finale (Phase 8bis, skill `simplify`) n'a pas été exécutée sur tout le scope du module, et que `tsc --noEmit` + les trois suites de tests ne sont pas re-vérifiés verts après les corrections appliquées.

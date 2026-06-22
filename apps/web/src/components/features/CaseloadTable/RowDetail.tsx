@@ -1,9 +1,11 @@
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Clock, FileText } from 'lucide-react'
+import { ListChecks, Clock, FileText, Smartphone } from 'lucide-react'
 import { Tabs, type TabItem } from '../../ui/Tabs'
+import { EmptyState } from '../../ui/EmptyState'
 import { ActionList } from './ActionList'
 import { WaitList } from './WaitList'
+import { ModuleChips } from './ModuleChips'
 import { ObservationBlock } from './ObservationBlock'
 import type {
   CaseloadActionInput,
@@ -15,6 +17,10 @@ import type {
 export interface RowDetailProps {
   row: CaseloadRowData
   today: string
+  /** Modules débloqués du patient lié (lecture seule), affichés dans l'onglet « Soins ». */
+  moduleTypes: readonly string[]
+  /** Onglet ouvert à l'affichage (ex. « soins » quand on arrive via le « +N » de la colonne). */
+  initialTab?: string
   onAddAction: (entryId: string, label: string, due: string | null) => void
   onToggleDone: (entryId: string, actionId: string, done: boolean) => void
   onPatchAction: (entryId: string, actionId: string, patch: CaseloadActionInput) => void
@@ -30,6 +36,8 @@ export interface RowDetailProps {
 function RowDetailComponent({
   row,
   today,
+  moduleTypes,
+  initialTab = 'actions',
   onAddAction,
   onToggleDone,
   onPatchAction,
@@ -42,7 +50,11 @@ function RowDetailComponent({
 }: RowDetailProps) {
   const { t } = useTranslation()
   const { entry, actions, waits } = row
-  const [tab, setTab] = useState('actions')
+  const [tab, setTab] = useState(initialTab)
+
+  // Synchronise l'onglet quand l'ouverture cible explicitement une section (ex. « +N »
+  // de la colonne Soins → onglet « soins », même si le drawer était déjà ouvert).
+  useEffect(() => setTab(initialTab), [initialTab])
 
   const handleAdd = useCallback((label: string, due: string | null) => onAddAction(entry.id, label, due), [entry.id, onAddAction])
   const handleToggle = useCallback((actionId: string, done: boolean) => onToggleDone(entry.id, actionId, done), [entry.id, onToggleDone])
@@ -56,9 +68,10 @@ function RowDetailComponent({
     () => [
       { id: 'actions', label: t('file_active.section.actions'), icon: <ListChecks size={18} />, badge: actions.length || undefined },
       { id: 'waits', label: t('file_active.section.waits'), icon: <Clock size={18} />, badge: waits.length || undefined },
+      { id: 'soins', label: t('file_active.section.soins'), icon: <Smartphone size={18} />, badge: moduleTypes.length || undefined },
       { id: 'observation', label: t('file_active.section.observation'), icon: <FileText size={18} /> },
     ],
-    [t, actions.length, waits.length]
+    [t, actions.length, waits.length, moduleTypes.length]
   )
 
   const activeLabel = useMemo(() => tabs.find(tb => tb.id === tab)?.label ?? '', [tabs, tab])
@@ -83,6 +96,14 @@ function RowDetailComponent({
 
         {tab === 'waits' ? (
           <WaitList waits={waits} onAdd={handleAddWait} onPatch={handlePatchWait} onDelete={handleDeleteWait} />
+        ) : null}
+
+        {tab === 'soins' ? (
+          moduleTypes.length > 0 ? (
+            <ModuleChips moduleTypes={moduleTypes} />
+          ) : (
+            <EmptyState icon={<Smartphone size={28} />} title={t('file_active.section.soins_empty')} />
+          )
         ) : null}
 
         {tab === 'observation' ? (

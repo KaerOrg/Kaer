@@ -1856,6 +1856,8 @@
       "link": "Patient de l'app",
       "actions": "Actions",
       "waits": "En attente de retour",
+      "soins": "Soins",
+      "soins_empty": "Aucun module débloqué pour ce patient",
       "observation": "Observations"
     },
     "link": {
@@ -1863,13 +1865,14 @@
       "linked_unknown": "Patient lié",
       "invited": "Invité, {{email}} (en attente d'inscription)",
       "free": "Dossier libre (non relié à l'app)",
-      "modules_hint": "Modules débloqués pour ce patient dans l'app"
+      "modules_hint": "Modules débloqués pour ce patient dans l'app",
+      "modules_more": "Voir les {{count}} autres modules (ouvre le détail)"
     },
     "name": {
       "edit": "Modifier le nom"
     },
     "toggle_detail": "Afficher / masquer le détail du dossier",
-    "dob_label": "Date de naissance",
+    "open_patient": "Ouvrir la fiche patient",
     "wait": {
       "label_label": "Ce qu'on attend",
       "relance_prefix": "relancer le",

@@ -33,7 +33,7 @@ function row(
   actions: Partial<CaseloadAction>[] = [],
   waits: Partial<CaseloadWait>[] = []
 ): CaseloadRowData {
-  return { entry: makeEntry(entry), actions: actions.map(makeAction), waits: waits.map(makeWait) }
+  return { entry: makeEntry(entry), actions: actions.map(makeAction), waits: waits.map(makeWait), patient_avatar_url: null }
 }
 
 const ids = (rows: readonly CaseloadRowData[]) => rows.map(r => r.entry.id)

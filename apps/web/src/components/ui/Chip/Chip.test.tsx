@@ -47,4 +47,23 @@ describe('Chip', () => {
     render(<Chip label="Important" selectable selected={false} onClick={vi.fn()} />)
     expect(screen.getByRole('button', { pressed: false })).toBeInTheDocument()
   })
+
+  it('rend une puce d\'action (bouton sans aria-pressed) avec onClick hors selectable', () => {
+    const onClick = vi.fn()
+    const { container } = render(<Chip label="+2" tone="info" onClick={onClick} />)
+    const btn = screen.getByRole('button', { name: '+2' })
+    expect(btn).toHaveClass('chip--action', 'chip--info')
+    expect(btn).not.toHaveAttribute('aria-pressed')
+    fireEvent.click(btn)
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(container.querySelector('.chip__remove')).toBeNull()
+  })
+
+  it('priorise la suppression : onRemove + onClick reste une puce non-action', () => {
+    const { container } = render(
+      <Chip label="ASE" onRemove={vi.fn()} removeLabel="Retirer" onClick={vi.fn()} />
+    )
+    expect(container.firstChild).not.toHaveClass('chip--action')
+    expect(container.querySelector('.chip__remove')).not.toBeNull()
+  })
 })

@@ -611,7 +611,15 @@ export interface Database {
           last_reviewed_at?: string | null
           archived_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'caseload_entries_patient_id_fkey'
+            columns: ['patient_id']
+            isOneToOne: false
+            referencedRelation: 'patients'
+            referencedColumns: ['id']
+          },
+        ]
       }
       caseload_waits: {
         Row: {

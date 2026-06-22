@@ -5,7 +5,7 @@ description: Valide les bonnes pratiques d'implémentation Kær sur la branche c
 
 # PR Review — Kær
 
-Tu es un **reviewer senior** pour Kær. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. Tu ne modifies aucun fichier (hormis la résolution de conflits à l'étape préliminaire). Tu produis un rapport structuré avec références `fichier:ligne` exactes.
+Tu es un **reviewer senior** pour Kær. Tu lis chaque fichier modifié ou ajouté par la branche en entier, et tu appliques l'intégralité des règles du projet contre son contenu. La review elle-même ne modifie aucun fichier (hormis la résolution de conflits à l'étape préliminaire) : tu produis un rapport structuré avec références `fichier:ligne` exactes. Une fois le rapport posté et archivé, et seulement à ce moment, tu lances une passe de simplification finale (skill `simplify`, Étape ultime) qui, elle, applique un nettoyage qualité sur tout le scope analysé.
 
 ---
 
@@ -1114,3 +1114,38 @@ rules_enriched: N
 Le champ `rules_enriched` indique le nombre de fichiers de règles modifiés à l'étape 5 — c'est le signal clé pour mesurer si les enrichissements réduisent les violations au fil du temps.
 
 **d)** Confirmer en affichant le chemin du fichier archivé dans la conversation.
+
+---
+
+## Étape ultime — Passe de simplification (skill `simplify`)
+
+> **Dernière action de la chaîne, exécutée systématiquement après l'archivage du
+> rapport (Étape 6).** C'est la **seule étape où la review touche aux fichiers** : la
+> review elle-même reste en lecture seule (le rapport décrit, ne corrige pas) ; cette
+> passe finale, elle, **applique** un nettoyage qualité sur tout le scope analysé.
+
+Une fois le rapport produit, posté et archivé, **invoquer le skill `simplify`**
+(commande `/simplify`) sur **l'intégralité du périmètre de review** — tous les fichiers
+modifiés ou ajoutés par la branche (le même scope que celui calculé à l'Étape 0, diff
+`main...HEAD` + fichiers issus de la résolution de conflits).
+
+`simplify` relit le diff de la branche pour les opportunités de réutilisation, de
+simplification, d'efficacité et d'altitude (abstraction spéculative, état superflu,
+prop morte, couche inutile), **puis applique directement les corrections**. C'est une
+passe **qualité uniquement** — elle ne cherche pas les bugs (c'est le rôle de la review
+qui précède).
+
+Après la passe :
+
+1. **Vérifier que rien n'est cassé** : relancer les checks CI de l'Étape CI (les
+   commandes exactes du workflow GitHub Actions) — `tsc` et les suites de tests des
+   apps concernées doivent rester verts après les simplifications appliquées.
+2. **Afficher la liste des fichiers retouchés** par `simplify`, distincte du rapport
+   de review : elle indique ce qui a été nettoyé au-delà des constats du rapport.
+3. **Ne pas committer ni pousser** ces changements sans validation explicite de
+   l'utilisateur (règle transverse de la [procédure de merge](../../.claude/rules/merge-procedure.md)) :
+   les corrections restent dans l'arbre de travail pour relecture.
+
+Si `simplify` ne trouve rien à nettoyer, le signaler explicitement
+(« scope déjà simple — aucune retouche »). La passe reste obligatoire dans tous les
+cas : elle clôt la chaîne de review.

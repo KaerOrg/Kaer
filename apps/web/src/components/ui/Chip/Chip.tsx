@@ -42,6 +42,22 @@ export function Chip({
     )
   }
 
+  // Puce d'action : conserve l'habillage du `tone` mais déclenche une action au clic
+  // (ex. « +N » qui ouvre un panneau). Pas de `aria-pressed` : ce n'est pas une bascule.
+  if (onClick && !onRemove) {
+    return (
+      <button
+        type="button"
+        className={`chip chip--${tone} ${sizeClass} chip--action ${className}`}
+        onClick={onClick}
+        title={title}
+      >
+        {iconNode}
+        {label}
+      </button>
+    )
+  }
+
   return (
     <span
       className={`chip chip--${tone} ${sizeClass} ${onRemove ? 'chip--removable' : ''} ${className}`}

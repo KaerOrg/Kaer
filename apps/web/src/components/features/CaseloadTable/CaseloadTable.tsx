@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, Star, User } from 'lucide-react'
+import { ClipboardList, ExternalLink, Star, User } from 'lucide-react'
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../ui/DataTable'
 import { Drawer } from '../../ui/Drawer'
 import { EmptyState } from '../../ui/EmptyState'
@@ -54,6 +55,8 @@ export interface CaseloadTableProps {
 const getRowId = (row: CaseloadRowData) => row.entry.id
 const rowClassName = (row: CaseloadRowData) =>
   row.entry.is_important ? 'caseload-row--important' : undefined
+// Référence stable pour l'absence de modules (préserve le memo de RowDetail).
+const EMPTY_MODULES: readonly string[] = []
 
 /**
  * Matrice « Ma file active » — câble le `DataTable` générique du design system
@@ -85,6 +88,8 @@ export function CaseloadTable({
   const [sort, setSort] = useState<CaseloadSort | null>(null)
   // Dossier dont le détail est ouvert dans le panneau latéral (null = panneau fermé).
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Onglet ouvert à l'ouverture du panneau (selon le point d'entrée : chevron vs « +N »).
+  const [drawerTab, setDrawerTab] = useState('actions')
 
   // Ordre par défaut (important épinglé + urgence) ; le tri utilisateur, s'il existe,
   // prime et réordonne le jeu déjà filtré.
@@ -109,10 +114,15 @@ export function CaseloadTable({
     [sort]
   )
 
-  const toggleSelected = useCallback(
-    (id: string) => setSelectedId(prev => (prev === id ? null : id)),
-    []
-  )
+  const toggleSelected = useCallback((id: string) => {
+    setDrawerTab('actions')
+    setSelectedId(prev => (prev === id ? null : id))
+  }, [])
+  // Ouverture ciblée sur l'onglet « Soins » (depuis le « +N » de la colonne Soins).
+  const openModules = useCallback((id: string) => {
+    setDrawerTab('soins')
+    setSelectedId(id)
+  }, [])
   const closePanel = useCallback(() => setSelectedId(null), [])
 
   // Le détail suit la donnée vivante : on relit depuis `visibleRows` à chaque rendu.
@@ -121,6 +131,41 @@ export function CaseloadTable({
     () => (selectedId ? visibleRows.find(r => r.entry.id === selectedId) ?? null : null),
     [visibleRows, selectedId]
   )
+
+  // Avatar du patient lié si disponible, sinon icône générique en repli.
+  const drawerIcon = useMemo(
+    () =>
+      selectedRow?.patient_avatar_url ? (
+        <img src={selectedRow.patient_avatar_url} alt="" className="caseload-drawer__avatar" />
+      ) : (
+        <User size={18} />
+      ),
+    [selectedRow?.patient_avatar_url]
+  )
+
+  // Patient de l'app lié au dossier ouvert (une seule recherche, réutilisée ci-dessous).
+  const selectedPatient = useMemo(() => {
+    const patientId = selectedRow?.entry.patient_id
+    return patientId ? patients.find(p => p.id === patientId) ?? null : null
+  }, [selectedRow, patients])
+
+  // Modules débloqués du patient lié (onglet « Soins » du drawer).
+  const selectedModules = selectedPatient?.moduleTypes ?? EMPTY_MODULES
+
+  // Lien vers la fiche patient (uniquement pour un dossier relié à un compte patient).
+  const drawerHeaderActions = useMemo(() => {
+    if (!selectedPatient?.publicRef) return undefined
+    return (
+      <Link
+        to={`/patient/${selectedPatient.publicRef}`}
+        className="caseload-drawer__patient-link"
+        title={t('file_active.open_patient')}
+        aria-label={t('file_active.open_patient')}
+      >
+        <ExternalLink size={16} aria-hidden="true" />
+      </Link>
+    )
+  }, [selectedPatient, t])
 
   const columns = useMemo<DataTableColumn<CaseloadRowData>[]>(
     () => [
@@ -133,7 +178,6 @@ export function CaseloadTable({
         cell: row => (
           <NameCell
             entry={row.entry}
-            patients={patients}
             expanded={selectedId === row.entry.id}
             onToggle={() => toggleSelected(row.entry.id)}
             onPatch={onPatch}
@@ -160,7 +204,14 @@ export function CaseloadTable({
         header: t('file_active.col.care_pathways'),
         headerClassName: 'caseload-th--care_pathways',
         cellClassName: 'caseload-cell--care',
-        cell: row => <CareCell entry={row.entry} patients={patients} onPatch={onPatch} />,
+        cell: row => (
+          <CareCell
+            entry={row.entry}
+            patients={patients}
+            onPatch={onPatch}
+            onOpen={() => openModules(row.entry.id)}
+          />
+        ),
       },
       {
         id: 'actions',
@@ -186,7 +237,7 @@ export function CaseloadTable({
         cell: row => <AlertCell actions={row.actions} today={today} />,
       },
     ],
-    [t, today, patients, onPatch, onStatus, selectedId, toggleSelected]
+    [t, today, patients, onPatch, onStatus, selectedId, toggleSelected, openModules]
   )
 
   const toolbar = (
@@ -229,16 +280,19 @@ export function CaseloadTable({
       {selectedRow ? (
         <Drawer
           title={selectedRow.entry.display_name}
-          icon={<User size={18} />}
+          icon={drawerIcon}
           onClose={closePanel}
           storageKey="caseload-drawer-width"
           titleAccessory={<ImportantCell entry={selectedRow.entry} onPatch={onPatch} />}
+          headerActions={drawerHeaderActions}
           topOffset={60}
           noPadding
         >
           <RowDetail
             row={selectedRow}
             today={today}
+            moduleTypes={selectedModules}
+            initialTab={drawerTab}
             onAddAction={onAddAction}
             onToggleDone={onToggleDone}
             onPatchAction={onPatchAction}

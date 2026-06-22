@@ -29,6 +29,13 @@ export {
 const ENTRY_COLUMNS =
   'id, practitioner_id, patient_id, display_name, status, is_important, wake_date, invited_email, care_pathways, last_reviewed_at, created_at, updated_at, archived_at'
 
+// Sélection enrichie pour la matrice : embarque l'avatar du patient lié (lecture
+// seule, soumise à la RLS `patients_read_by_practitioner`). null si non lié.
+const ENTRY_SELECT_WITH_PATIENT = `${ENTRY_COLUMNS}, patient:patients(avatar_url)`
+
+/** Ligne brute de `caseload_entries` enrichie de l'avatar du patient lié (embed Supabase). */
+type CaseloadEntryRow = CaseloadEntry & { patient: { avatar_url: string | null } | null }
+
 const ACTION_COLUMNS =
   'id, entry_id, practitioner_id, label, due_date, due_time, is_urgent, is_done, done_at, recurrence_days, sort_order, created_at, updated_at'
 
@@ -53,7 +60,7 @@ export async function fetchCaseload(
 ): Promise<CaseloadRowData[]> {
   let entryQuery = supabase
     .from('caseload_entries')
-    .select(ENTRY_COLUMNS)
+    .select(ENTRY_SELECT_WITH_PATIENT)
     .eq('practitioner_id', practitionerId)
     .order('created_at', { ascending: true })
   if (!options.includeArchived) entryQuery = entryQuery.neq('status', 'archived')
@@ -77,10 +84,11 @@ export async function fetchCaseload(
   const actionsByEntry = groupByEntry((actionsRes.data ?? []) as CaseloadAction[])
   const waitsByEntry = groupByEntry((waitsRes.data ?? []) as CaseloadWait[])
 
-  return (entriesRes.data as CaseloadEntry[]).map(entry => ({
+  return (entriesRes.data as CaseloadEntryRow[]).map(({ patient, ...entry }) => ({
     entry,
     actions: actionsByEntry.get(entry.id) ?? [],
     waits: waitsByEntry.get(entry.id) ?? [],
+    patient_avatar_url: patient?.avatar_url ?? null,
   }))
 }
 
@@ -187,7 +195,8 @@ export async function createEntryWithFirstAction(
     if (actionResult.ok && actionResult.action) actions = [actionResult.action]
   }
 
-  return { ok: true, row: { entry: entryResult.entry, actions, waits: [] } }
+  // Dossier fraîchement créé : pas encore de patient lié, donc pas d'avatar.
+  return { ok: true, row: { entry: entryResult.entry, actions, waits: [], patient_avatar_url: null } }
 }
 
 /** Met à jour les champs éditables d'un dossier (édition inline). */

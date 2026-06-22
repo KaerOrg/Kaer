@@ -3,9 +3,10 @@ import type { CaseloadStatus } from '../../../lib/caseload.types'
 /** Un patient de l'app reliable à un dossier (avec ses modules débloqués). */
 export interface LinkablePatient {
   id: string
+  /** Identifiant public opaque (URL de la fiche patient : `/patient/:ref`). */
+  publicRef: string
   name: string
   email: string
-  birthDate: string | null
   moduleTypes: readonly string[]
 }
 
