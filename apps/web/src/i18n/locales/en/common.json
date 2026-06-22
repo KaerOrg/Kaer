@@ -1676,7 +1676,6 @@
   "file_active": {
     "nav_link": "My follow-ups",
     "title": "My follow-ups",
-    "subtitle": "Your cases at a glance: priorities, deadlines and what not to forget.",
     "col": {
       "patient": "Patient",
       "status": "Status",

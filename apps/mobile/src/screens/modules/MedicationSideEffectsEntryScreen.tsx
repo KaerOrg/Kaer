@@ -11,7 +11,6 @@ import { AppStackParamList } from '../../navigation/AppStack'
 import { colors, spacing, radius } from '../../theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
-import { useAuthStore } from '../../store/authStore'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'MedicationSideEffectsEntry'>
@@ -27,7 +26,6 @@ export default function MedicationSideEffectsEntryScreen() {
   const { isTeenMode, teenColor } = useTeen()
   const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
   const accentColor = teenColor(SCALE_ID) ?? '#8B5CF6'
-  const patient = useAuthStore(s => s.patient)
   const isMounted = useRef(true)
 
   const [values, setValues] = useState<Record<string, number | null>>(

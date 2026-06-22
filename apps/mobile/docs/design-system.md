@@ -36,7 +36,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Accordion, Button, Card, Chart, ConfirmDialog, ActionSheet, Divider, EmptyState, InputField, Radio, RatingSelector, TimePickerField, SectionDateList, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -136,12 +136,6 @@ padding/hauteur CTA et ajoute un `hitSlop`.
 />
 ```
 
-### Divider (`src/components/Divider/`)
-
-Séparateur horizontal — `height: 1, backgroundColor: colors.border`.
-
-Prop `inset?: number` pour retrait horizontal optionnel (ex. dans une liste de réglages avec bords).
-
 ### Card (`src/components/Card/`)
 
 | Variante | Fond | Bordure | Ombre |
@@ -203,7 +197,7 @@ visuelles pour un même besoin :
 
 ---
 
-### TimePickerField (`src/components/ui/TimePickerField/`)
+### TimePicker (`src/components/ui/TimePicker/`)
 
 Saisie d'une heure « HH:MM » — **le picker horaire unique du design system**. Bouton à
 icône + `DateTimePicker` natif (spinner iOS avec bouton de confirmation, picker natif
@@ -229,7 +223,7 @@ Utilisé par `sleep_diary` (4 horaires CSD) et `column_form` (via l'adaptateur
 `ColumnTimeField`, qui mappe les `field_props` `key`/`optional`).
 
 ```tsx
-<TimePickerField value={bedtime} onChange={setBedtime} label={lbl('bedtime_label')}
+<TimePicker value={bedtime} onChange={setBedtime} label={lbl('bedtime_label')}
   icon="clock-outline" confirmLabel={t('common.ok')} testID="bedtime" />
 ```
 
@@ -257,19 +251,6 @@ Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
 | `label` | `string` | — | Texte (obligatoire) |
 | `value` | `string \| number` | — | Valeur additionnelle |
 | `icon` | `string` | — | Nom d'icône `lucide-react-native` |
-| `style` | `ViewStyle` | — | Style additionnel |
-
-### Accordion (`src/components/ui/Accordion/`)
-
-Section repliable (titre cliquable + contenu).
-
-| Prop | Type | Défaut | Rôle |
-|---|---|---|---|
-| `title` | `string` | — | Titre (obligatoire) |
-| `subtitle` | `string` | — | Sous-titre |
-| `badge` | `number` | — | Compteur à droite |
-| `defaultOpen` | `boolean` | `false` | Ouvert au montage |
-| `children` | `ReactNode` | — | Contenu (obligatoire) |
 | `style` | `ViewStyle` | — | Style additionnel |
 
 ### EmptyState (`src/components/ui/EmptyState/`)
@@ -379,19 +360,6 @@ Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list`
 ```
 
 > **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`.**
-
-### SectionDateList (`src/components/ui/SectionDateList/`)
-
-`SectionList` générique groupé par date — réutilisé par les modules journal
-(activités, craving, etc.). Étend `SectionListProps` sauf `sections`/`renderSectionHeader`.
-
-| Prop | Type | Rôle |
-|---|---|---|
-| `sections` | `DateSection<T>[]` | `{ title: string; data: T[] }[]` |
-| `sectionHeaderStyle` | `object` | Style du header de section |
-| …natifs | `SectionListProps<T>` | `renderItem`, `keyExtractor`, `ListEmptyComponent`… |
-
-Helper de type `GroupByDateFn` exporté pour typer une fonction de groupement par `created_at`.
 
 ---
 
@@ -528,7 +496,7 @@ n'en crée un nouveau qu'en dernier recours.
 
 | Composant | Dossier | Rôle |
 |---|---|---|
-| `ColumnTimeField` | `ColumnForm/` | Adaptateur des `field_props` (`key`/`optional`) vers le primitive `ui/TimePickerField` |
+| `ColumnTimeField` | `ColumnForm/` | Adaptateur des `field_props` (`key`/`optional`) vers le primitive `ui/TimePicker` |
 | `renderCardBodyFields` | `Cards/` | Rend le corps d'une carte (registry des `field_type` de carte) |
 | `ActivityListCard` | `ActivityLog/` | Carte d'une activité dans la liste |
 | `EntryListCard` | `ExposureTracker/` | Carte d'une saisie SUDS |

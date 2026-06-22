@@ -3,8 +3,8 @@ import { View, Text, Pressable, Platform } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '../../../theme'
-import { styles } from './TimePickerField.styles'
-import type { TimePickerFieldProps } from './TimePickerField.types'
+import { styles } from './TimePicker.styles'
+import type { TimePickerProps } from './TimePicker.types'
 
 const TIME_HHMM_RE = /^(\d{1,2}):(\d{2})$/
 
@@ -22,7 +22,7 @@ function formatDateToHHMM(date: Date): string {
 
 // Saisie d'une heure « HH:MM » : bouton à icône + DateTimePicker natif (spinner iOS
 // avec confirmation, picker natif Android). Possède son propre état d'ouverture.
-export const TimePickerField = memo(function TimePickerField({
+export const TimePicker = memo(function TimePicker({
   value,
   onChange,
   label,
@@ -36,7 +36,7 @@ export const TimePickerField = memo(function TimePickerField({
   defaultHour = 9,
   defaultMinute = 0,
   testID,
-}: TimePickerFieldProps) {
+}: TimePickerProps) {
   const [showPicker, setShowPicker] = useState(false)
   const hasValue = value.length > 0
 

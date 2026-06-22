@@ -10,7 +10,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { View, Text, ScrollView, StyleSheet } from 'react-native'
-import { colors, spacing } from '../../../../../theme'
+import { colors } from '../../../../../theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'

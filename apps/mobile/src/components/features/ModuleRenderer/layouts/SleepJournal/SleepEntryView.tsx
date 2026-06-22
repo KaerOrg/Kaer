@@ -23,7 +23,7 @@ import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import type { Lbl, SleepConfig } from './types'
 import { minutesToHhmmHint } from './sleepHelpers'
 import { RatingSelector } from '../../../../ui/RatingSelector'
-import { TimePickerField } from '../../../../ui/TimePickerField'
+import { TimePicker } from '../../../../ui/TimePicker'
 import { MinutesField } from './MinutesField'
 import { styles } from './styles'
 
@@ -177,22 +177,22 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{lbl('section_schedule_title')}</Text>
           <Card variant="elevated">
-            <TimePickerField
+            <TimePicker
               label={lbl('in_bed_label')} value={inBedTime} icon="bed-outline" hint={tapModify}
               onChange={setInBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="in-bed"
             />
             <View style={styles.divider} />
-            <TimePickerField
+            <TimePicker
               label={lbl('bedtime_label')} value={bedtime} icon="clock-outline" hint={tapModify}
               onChange={setBedtime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="bedtime"
             />
             <View style={styles.divider} />
-            <TimePickerField
+            <TimePicker
               label={lbl('wake_time_label')} value={wakeTime} icon="clock-outline" hint={tapModify}
               onChange={setWakeTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="wake-time"
             />
             <View style={styles.divider} />
-            <TimePickerField
+            <TimePicker
               label={lbl('out_of_bed_label')} value={outOfBedTime} icon="bed-empty" hint={tapModify}
               onChange={setOutOfBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="out-of-bed"
             />

@@ -1,6 +1,9 @@
 import { Calendar, Check, Circle, ListChecks, Plus } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '../../../../../services/moduleService'
+
+const PIP_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 interface Props {
   fields: ContentField[]
@@ -169,20 +172,13 @@ interface PipScaleProps {
 function PipScale({ label, sublabel, value }: PipScaleProps) {
   if (!label) return null
   return (
-    <div className="al-pip">
-      <div className="al-pip__head">
-        <span className="al-pip__label">{label}</span>
-        {sublabel && <span className="al-pip__sublabel">{sublabel}</span>}
-        <span className="al-pip__value">{value}/10</span>
-      </div>
-      <div className="al-pip__track">
-        {Array.from({ length: 10 }, (_, i) => (
-          <span
-            key={i}
-            className={`al-pip__seg${i < value ? ' al-pip__seg--on' : ''}`}
-          />
-        ))}
-      </div>
-    </div>
+    <RatingSelector
+      variant="track"
+      label={label}
+      sublabel={sublabel}
+      value={value}
+      steps={PIP_STEPS}
+      valueSuffix="/10"
+    />
   )
 }

@@ -35,6 +35,7 @@ export function injectTheme(): void {
   root.setProperty('--radius-sm', `${radius.sm}px`)
   root.setProperty('--radius-md', `${radius.md}px`)
   root.setProperty('--radius-lg', `${radius.lg}px`)
+  root.setProperty('--radius-full', `${radius.full}px`)
 
   root.setProperty('--font-size-caption', `${fontSize.caption}px`)
   root.setProperty('--font-size-body', `${fontSize.body}px`)

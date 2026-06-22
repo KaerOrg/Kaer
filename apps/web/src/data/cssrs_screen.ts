@@ -113,12 +113,6 @@ export function isIdeationItemActive(absIndex: number, ideationValues: (0 | 1 | 
   return true
 }
 
-// Alias rétrocompatible (ancienne API, utilisée dans les tests existants)
-export function isAbsoluteItemActive(absIndex: number, answers: (0 | 1 | null)[]): boolean {
-  if (absIndex >= CSSRS_IDEATION_COUNT) return true
-  return isIdeationItemActive(absIndex, answers)
-}
-
 // ─── Calcul des scores ────────────────────────────────────────────────────────
 
 /** Niveau d'idéation maximal atteint (0–5). Valeur brute — conformité MDR 2017/745. */

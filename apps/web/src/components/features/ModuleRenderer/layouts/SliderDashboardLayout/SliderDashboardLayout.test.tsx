@@ -78,7 +78,7 @@ describe('SliderDashboardLayout — onglet Saisie (défaut)', () => {
 
   it('trie les sliders par sort_order', () => {
     const { container } = render(<SliderDashboardLayout fields={[...sliderFields()].reverse()} footer={undefined} t={t} />)
-    const labels = Array.from(container.querySelectorAll('.mt-slider-card__label')).map(n => n.textContent)
+    const labels = Array.from(container.querySelectorAll('.mt-slider-card .rating-selector__label')).map(n => n.textContent)
     expect(labels).toEqual([
       'modules.mood_tracker.dim_mood',
       'modules.mood_tracker.dim_energy',

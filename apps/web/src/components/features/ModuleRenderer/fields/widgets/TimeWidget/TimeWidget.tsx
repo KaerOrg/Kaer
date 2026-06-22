@@ -1,3 +1,5 @@
+import { TimePicker } from '../../../../../ui/TimePicker'
+
 export function TimeWidget() {
-  return <input type="time" className="fw-time" defaultValue="22:00" />
+  return <TimePicker defaultValue="22:00" className="fw-time" />
 }

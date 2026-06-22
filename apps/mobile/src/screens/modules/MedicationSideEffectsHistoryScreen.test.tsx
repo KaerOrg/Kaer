@@ -34,7 +34,6 @@ jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
   return {
     DimensionChart: ({ label }: { label: string }) => React.createElement(Text, { testID: 'dimension-chart' }, label),
     CompositeChart: () => React.createElement(Text, { testID: 'composite-chart' }, 'composite'),
-    RangeSelector: () => null,
     MonthCalendar: () => React.createElement(Text, { testID: 'month-calendar' }, 'calendar'),
     buildChartData: () => [],
     buildCompositeData: () => [],

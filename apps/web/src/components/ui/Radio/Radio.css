@@ -1,0 +1,119 @@
+/* ── Variante list ───────────────────────────────────────────────────────── */
+.radio--list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.radio__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border: none;
+  background: none;
+  padding: 6px 0;
+  text-align: left;
+}
+
+.radio__dot {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.radio__dot-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.radio__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.radio__label {
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+.radio__sublabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Variante pills ──────────────────────────────────────────────────────── */
+.radio--pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.radio__pill {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+
+.radio__pill--active {
+  color: var(--color-surface);
+  font-weight: 600;
+}
+
+/* ── Variante cards ──────────────────────────────────────────────────────── */
+.radio--cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.radio__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.radio__card-badge {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+.radio__card-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.radio__card-detail {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+
+.radio__card--active .radio__card-badge,
+.radio__card--active .radio__card-label {
+  color: var(--color-surface);
+}
+
+.radio__card--active .radio__card-detail {
+  color: var(--color-surface);
+  opacity: 0.85;
+}

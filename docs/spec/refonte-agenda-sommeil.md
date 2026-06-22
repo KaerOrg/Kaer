@@ -81,7 +81,7 @@ Sync : payload `sleep_diary_entry` étendu avec les nouveaux champs (`syncUpsert
 
 Découpage du layout monolithique en sous-composants (dossier `SleepJournal/`), chacun
 bâti sur le design system (`ui/Button`, `ui/Card`, `ui/InputField`, `ui/RatingSelector`,
-`ui/Radio`, `ui/Divider`, `ui/SectionDateList`, `ui/Chart`) :
+`ui/Radio`, `ui/Chart`) :
 
 - `SleepJournalLayout.tsx` — routeur de mode (liste / saisie / mois), état.
 - `SleepListView.tsx` — CTA « saisir ma nuit », historique N nuits, accès mois.

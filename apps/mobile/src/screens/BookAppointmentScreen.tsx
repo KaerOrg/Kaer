@@ -42,12 +42,6 @@ function toDateString(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
-function addDays(d: Date, n: number): Date {
-  const copy = new Date(d)
-  copy.setDate(copy.getDate() + n)
-  return copy
-}
-
 function addMonths(d: Date, n: number): Date {
   const copy = new Date(d)
   copy.setMonth(copy.getMonth() + n)

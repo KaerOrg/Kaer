@@ -255,7 +255,6 @@ export function FileActivePage() {
       <div className="file-active">
         <div className="file-active__header">
           <h1 className="file-active__title">{t('file_active.title')}</h1>
-          <p className="file-active__subtitle">{t('file_active.subtitle')}</p>
         </div>
 
         {loading ? (

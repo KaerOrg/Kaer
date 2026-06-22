@@ -30,7 +30,7 @@ import {
   saveEMValues,
   listEMValues,
 } from '../../services/motivationalBalanceService'
-import type { EMRuler, EMBalanceItem, EMValue } from '../../lib/database'
+import type { EMRuler, EMBalanceItem } from '../../lib/database'
 import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
@@ -693,7 +693,7 @@ interface BalanceItemRowProps {
 }
 
 const BalanceItemRow = React.memo(function BalanceItemRow({
-  item, accent, onWeightChange, onDelete,
+  item, onWeightChange, onDelete,
 }: BalanceItemRowProps) {
   return (
     <View style={s.balanceItem}>

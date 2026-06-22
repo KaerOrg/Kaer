@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
+import { TimePicker } from '../../ui/TimePicker'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import {
   getRoutinesForPatientModule,
@@ -142,12 +143,7 @@ export function NotificationRoutineModal({
               </div>
 
               <div className="nr-form__label">{t('notifications.time_label')}</div>
-              <input
-                type="time"
-                className="nr-form__time"
-                ref={timeRef}
-                defaultValue={DEFAULT_TIME}
-              />
+              <TimePicker ref={timeRef} defaultValue={DEFAULT_TIME} className="nr-form__time" />
 
               <div className="nr-form__label">{t('notifications.note_label')}</div>
               <InputField

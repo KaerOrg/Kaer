@@ -3,7 +3,7 @@ import type React from 'react'
 
 type MCIName = React.ComponentProps<typeof MaterialCommunityIcons>['name']
 
-export interface TimePickerFieldProps {
+export interface TimePickerProps {
   /** Heure courante "HH:MM" ('' = non renseignée). */
   value: string
   /** Émis avec la nouvelle heure "HH:MM" (ou '' lors d'un effacement). */

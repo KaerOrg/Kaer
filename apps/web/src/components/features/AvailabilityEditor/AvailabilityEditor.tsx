@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import { Toggle } from '../../ui/Toggle/Toggle'
 import { Button } from '../../ui/Button/Button'
+import { TimePicker } from '../../ui/TimePicker'
 import { timesOverlap } from '../../../services/appointmentService'
 import type { AvailabilityRule, DayOfWeek } from '../../../lib/calendar.types'
 import './AvailabilityEditor.css'
@@ -175,9 +176,9 @@ export function AvailabilityEditor({
 
           <div className="availability-editor__form-row">
             <label>{t('agenda.editor.from')}</label>
-            <input ref={startRef} type="time" step={300} defaultValue="09:00" />
+            <TimePicker ref={startRef} step={300} defaultValue="09:00" />
             <label>{t('agenda.editor.to')}</label>
-            <input ref={endRef} type="time" step={300} defaultValue="19:00" />
+            <TimePicker ref={endRef} step={300} defaultValue="19:00" />
           </div>
 
           <div className="availability-editor__form-row">

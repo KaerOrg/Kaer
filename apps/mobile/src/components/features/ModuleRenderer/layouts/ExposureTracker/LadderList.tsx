@@ -22,7 +22,7 @@ export interface LadderListProps {
 
 /** Échelle de la peur : marches classées du moins → plus angoissant. */
 export function LadderList({
-  steps, entries, config, moduleKey, isTeenMode, lbl, onOpenStep, onToggleDone, onAddStep,
+  steps, entries, moduleKey, isTeenMode, lbl, onOpenStep, onToggleDone, onAddStep,
 }: LadderListProps) {
   return (
     <View style={etStyles.container} testID="exposure-ladder">

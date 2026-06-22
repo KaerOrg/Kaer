@@ -7,6 +7,7 @@ import { Tabs } from '../../../../ui/Tabs'
 import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
 import { SegmentedControl } from '../../../../ui/SegmentedControl'
 import type { SegmentOption } from '../../../../ui/SegmentedControl'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import { CompositeChart } from './CompositeChart'
 import { DimensionChart } from './DimensionChart'
 import { MonthCalendar } from './MonthCalendar'
@@ -110,26 +111,19 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
             const midHint = field.props['mid_hint_code'] ? t(field.props['mid_hint_code']) : ''
             const highHint = field.props['high_hint_code'] ? t(field.props['high_hint_code']) : ''
             const mockVal = mockCurrent(field.id)
-            const span = max - min || 1
-            const thumbPct = ((mockVal - min) / span) * 100
             return (
               <div key={field.id} className="mt-slider-card">
-                <div className="mt-slider-card__header">
-                  <span className="mt-slider-card__dot" style={{ background: color }} />
-                  <span className="mt-slider-card__label" style={{ color }}>{t(field.text_code ?? '')}</span>
-                  <span className="mt-slider-card__value" style={{ color }}>{mockVal}</span>
-                </div>
-                <div className="mt-slider">
-                  <div className="mt-slider__track">
-                    <div className="mt-slider__fill" style={{ width: `${thumbPct}%`, background: color }} />
-                    <div className="mt-slider__thumb" style={{ left: `${thumbPct}%`, background: color }} />
-                  </div>
-                  <div className="mt-slider__hints">
-                    <span className="mt-slider__hint">{lowHint}</span>
-                    {midHint ? <span className="mt-slider__hint mt-slider__hint--mid" style={{ color }}>{midHint}</span> : null}
-                    <span className="mt-slider__hint">{highHint}</span>
-                  </div>
-                </div>
+                <RatingSelector
+                  variant="bar"
+                  label={t(field.text_code ?? '')}
+                  value={mockVal}
+                  min={min}
+                  max={max}
+                  color={color}
+                  lowHint={lowHint}
+                  midHint={midHint}
+                  highHint={highHint}
+                />
               </div>
             )
           })}

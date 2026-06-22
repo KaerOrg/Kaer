@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, Stethoscope, User, Users } from 'lucide-react'
+import { Eye, Stethoscope, User, Users } from 'lucide-react'
 import {
   DataTable,
   type DataTableColumn,
@@ -133,7 +133,7 @@ export function AdminUsersTable() {
               onClick={() => toggleSelected(row.user_id)}
               aria-expanded={open}
             >
-              {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+              <Eye size={15} />
               <span>{row.display_name}</span>
             </button>
           )

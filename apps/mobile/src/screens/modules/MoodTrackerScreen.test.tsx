@@ -36,21 +36,10 @@ jest.mock('../../components/features/TeenAccent', () => ({
 
 jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
-  const { Text, Pressable } = require('react-native')
+  const { Text } = require('react-native')
   return {
     DimensionChart: ({ label }: { label: string }) => React.createElement(Text, { testID: 'dimension-chart' }, label),
     CompositeChart: () => React.createElement(Text, { testID: 'composite-chart' }, 'composite'),
-    RangeSelector: ({ onChange }: { onChange: (r: string) => void }) =>
-      React.createElement(React.Fragment, null,
-        React.createElement(Pressable, { testID: 'range-7j', onPress: () => onChange('7J') },
-          React.createElement(Text, null, '7J')),
-        React.createElement(Pressable, { testID: 'range-1m', onPress: () => onChange('1M') },
-          React.createElement(Text, null, '1M')),
-        React.createElement(Pressable, { testID: 'range-3m', onPress: () => onChange('3M') },
-          React.createElement(Text, null, '3M')),
-        React.createElement(Pressable, { testID: 'range-1a', onPress: () => onChange('1A') },
-          React.createElement(Text, null, '1A')),
-      ),
     MonthCalendar: () => React.createElement(Text, { testID: 'month-calendar' }, 'calendar'),
     buildChartData: () => [],
     buildCompositeData: () => [],

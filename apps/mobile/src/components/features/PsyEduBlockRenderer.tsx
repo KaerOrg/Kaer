@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native'
-import { useTranslation } from 'react-i18next'
 import i18next from 'i18next'
 import { Lightbulb, ExternalLink, CheckCircle2, Check } from 'lucide-react-native'
 import { useAuthStore } from '../../store/authStore'
@@ -22,7 +21,6 @@ function resolveText(code: string, isTeenMode: boolean): string {
 
 export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
   const isTeenMode = useAuthStore((s) => s.teenMode)
-  const { t } = useTranslation()
   const accent = accentColor ?? colors.primary
 
   const openLink = useCallback((href: string) => {

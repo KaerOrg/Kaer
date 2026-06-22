@@ -142,7 +142,6 @@ export default function BreathingExerciseScreen() {
   const [totalSeconds, setTotalSeconds] = useState(0)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const startTimeRef = useRef<number>(0)
 
   const stop = useCallback(async (save: boolean) => {
     if (intervalRef.current) {

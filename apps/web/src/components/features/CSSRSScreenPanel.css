@@ -357,68 +357,7 @@
   color: #1E293B;
 }
 
-.cssrs-likert__options {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.cssrs-likert__option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 8px 10px;
-  border: 1.5px solid #E2E8F0;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-  transition: all 0.12s;
-  min-width: 80px;
-  flex: 1;
-  text-align: center;
-}
-
-.cssrs-likert__option:hover:not(.cssrs-likert__option--selected) {
-  border-color: #93C5FD;
-  background: #F0F9FF;
-}
-
-.cssrs-likert__option--selected {
-  border-color: #1E40AF;
-  background: #1E40AF;
-  color: #fff;
-}
-
-.cssrs-likert__option-value {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.cssrs-likert__option--selected .cssrs-likert__option-value {
-  color: #fff;
-}
-
-.cssrs-likert__option-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #334155;
-}
-
-.cssrs-likert__option--selected .cssrs-likert__option-label {
-  color: #BFDBFE;
-}
-
-.cssrs-likert__option-detail {
-  font-size: 10px;
-  color: #94A3B8;
-  line-height: 1.3;
-}
-
-.cssrs-likert__option--selected .cssrs-likert__option-detail {
-  color: #93C5FD;
-}
+/* Les options de l'échelle sont rendues par le primitive `Radio` (variante `cards`). */
 
 /* ── Section létalité ────────────────────────────────────────────────────── */
 
@@ -451,21 +390,6 @@
   font-size: 13px;
   color: #334155;
   flex-wrap: wrap;
-}
-
-.cssrs-letalite .cssrs-likert__option {
-  background: #fff;
-  border-color: #E2E8F0;
-}
-
-.cssrs-letalite .cssrs-likert__option:hover:not(.cssrs-likert__option--selected) {
-  border-color: #FDBA74;
-  background: #FFF7ED;
-}
-
-.cssrs-letalite .cssrs-likert__option--selected {
-  background: #EA580C;
-  border-color: #EA580C;
 }
 
 /* ── Historique ──────────────────────────────────────────────────────────── */

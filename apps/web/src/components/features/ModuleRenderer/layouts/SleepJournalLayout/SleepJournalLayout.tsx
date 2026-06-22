@@ -1,6 +1,9 @@
-import { Bed, BedDouble, Calendar, ChevronRight, Clock, Ghost, Moon, Pill, Star, Sun, Sparkles } from 'lucide-react'
+import { Bed, BedDouble, Calendar, ChevronRight, Clock, Ghost, Moon, Pill, Sparkles } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
+import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '../../../../../services/moduleService'
+
+const QUALITY_STEPS = [1, 2, 3, 4, 5]
 
 interface Props {
   fields: ContentField[]
@@ -87,12 +90,16 @@ export function SleepJournalLayout({ fields, t }: Props) {
             <span className="sj-history__meta">
               22:30 → 06:45 <strong>(7h45)</strong>
             </span>
-            <span className="sj-history__stars">
-              {[0, 1, 2, 3].map(i => (
-                <Star key={i} size={12} className="sj-history__star sj-history__star--on" fill="currentColor" />
-              ))}
-              <Star size={12} className="sj-history__star sj-history__star--off" />
-            </span>
+            <RatingSelector
+              variant="icon"
+              icon="star"
+              iconSize={12}
+              label={qualityLabel || sectionQuality}
+              value={4}
+              steps={QUALITY_STEPS}
+              showHeader={false}
+              className="sj-history__stars"
+            />
           </div>
           <ChevronRight size={14} className="sj-history__chevron" />
         </li>
@@ -103,13 +110,16 @@ export function SleepJournalLayout({ fields, t }: Props) {
             <span className="sj-history__meta">
               23:15 → 07:00 <strong>(7h15)</strong>
             </span>
-            <span className="sj-history__stars">
-              {[0, 1, 2].map(i => (
-                <Star key={i} size={12} className="sj-history__star sj-history__star--on" fill="currentColor" />
-              ))}
-              <Star size={12} className="sj-history__star sj-history__star--off" />
-              <Star size={12} className="sj-history__star sj-history__star--off" />
-            </span>
+            <RatingSelector
+              variant="icon"
+              icon="star"
+              iconSize={12}
+              label={qualityLabel || sectionQuality}
+              value={3}
+              steps={QUALITY_STEPS}
+              showHeader={false}
+              className="sj-history__stars"
+            />
           </div>
           <ChevronRight size={14} className="sj-history__chevron" />
         </li>
@@ -263,16 +273,15 @@ export function SleepJournalLayout({ fields, t }: Props) {
             <span className="sj-section__title">{sectionQuality}</span>
             <div className="sj-section__card sj-section__card--center">
               {qualityLabel && <span className="sj-row__label sj-row__label--center">{qualityLabel}</span>}
-              <div className="sj-stars-big">
-                {[1, 2, 3, 4, 5].map(n => (
-                  <Star
-                    key={n}
-                    size={32}
-                    className={n <= 4 ? 'sj-star sj-star--on' : 'sj-star sj-star--off'}
-                    fill={n <= 4 ? 'currentColor' : 'none'}
-                  />
-                ))}
-              </div>
+              <RatingSelector
+                variant="icon"
+                icon="star"
+                iconSize={32}
+                label={qualityLabel || sectionQuality}
+                value={4}
+                steps={QUALITY_STEPS}
+                showHeader={false}
+              />
             </div>
           </section>
         )}
@@ -282,16 +291,15 @@ export function SleepJournalLayout({ fields, t }: Props) {
             <span className="sj-section__title">{sectionRestedness}</span>
             <div className="sj-section__card sj-section__card--center">
               {restednessLabel && <span className="sj-row__label sj-row__label--center">{restednessLabel}</span>}
-              <div className="sj-stars-big">
-                {[1, 2, 3, 4, 5].map(n => (
-                  <Sun
-                    key={n}
-                    size={28}
-                    className={n <= 4 ? 'sj-star sj-star--on' : 'sj-star sj-star--off'}
-                    fill={n <= 4 ? 'currentColor' : 'none'}
-                  />
-                ))}
-              </div>
+              <RatingSelector
+                variant="icon"
+                icon="sun"
+                iconSize={28}
+                label={restednessLabel || sectionRestedness}
+                value={4}
+                steps={QUALITY_STEPS}
+                showHeader={false}
+              />
             </div>
           </section>
         )}
