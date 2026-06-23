@@ -1,11 +1,11 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import MedicationSideEffectsEntryScreen from './MedicationSideEffectsEntryScreen'
-import * as database from '../../lib/database'
+import * as database from '../../../lib/database'
 
 jest.setTimeout(15000)
 
@@ -24,23 +24,23 @@ jest.mock('@react-navigation/native', () => ({
 
 jest.mock('react-native-safe-area-context', () => ({ SafeAreaView: ({ children }: { children: React.ReactNode }) => children }))
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
-jest.mock('../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
+jest.mock('../../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key.split('.').pop() ?? key, i18n: { language: 'fr' } }),
 }))
-jest.mock('../../navigation/AppStack', () => ({}))
+jest.mock('../../../navigation/AppStack', () => ({}))
 jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8 },
 }))
-jest.mock('../../store/authStore', () => ({ useAuthStore: (sel: (s: unknown) => unknown) => sel({ patient: { id: 'patient-1' } }) }))
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../store/authStore', () => ({ useAuthStore: (sel: (s: unknown) => unknown) => sel({ patient: { id: 'patient-1' } }) }))
+jest.mock('../../../lib/database', () => ({
   saveScaleEntry: jest.fn().mockResolvedValue(undefined),
   getScaleEntryById: jest.fn().mockResolvedValue(null),
   generateId: () => 'new-id',
 }))
-jest.mock('../../services/notificationService', () => ({ logScaleSubmission: jest.fn() }))
+jest.mock('../../../services/notificationService', () => ({ logScaleSubmission: jest.fn() }))
 
 const mockSave = jest.mocked(database.saveScaleEntry)
 

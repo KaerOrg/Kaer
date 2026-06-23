@@ -41,4 +41,18 @@ describe('Radio', () => {
     render(<Radio options={OPTIONS} value={null} onChange={() => {}} />)
     expect(screen.queryByRole('radio', { selected: true })).toBeNull()
   })
+
+  it('readonly : rend les labels mais aucune option n\'a le rôle radio', () => {
+    render(<Radio options={OPTIONS} value="maintenance" variant="pills" readonly />)
+    expect(screen.getByText('Traitement de fond')).toBeTruthy()
+    expect(screen.getByText('Si besoin')).toBeTruthy()
+    expect(screen.queryByRole('radio')).toBeNull()
+  })
+
+  it('readonly : un appui sur une option n\'appelle pas onChange', () => {
+    const onChange = jest.fn()
+    render(<Radio options={OPTIONS} value="maintenance" variant="pills" readonly onChange={onChange} />)
+    fireEvent.press(screen.getByText('Si besoin'))
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })

@@ -3,29 +3,24 @@ import { describe, it, expect } from 'vitest'
 import { BooleanWidget } from './BooleanWidget'
 
 describe('BooleanWidget', () => {
-  it('rend deux options', () => {
+  it('rend deux pilules Non / Oui via ui/Radio', () => {
     const { container } = render(<BooleanWidget />)
-    expect(container.querySelectorAll('.fw-boolean__option').length).toBe(2)
+    const pills = container.querySelectorAll('.radio__pill')
+    expect(pills.length).toBe(2)
+    expect(pills[0].textContent).toBe('Non')
+    expect(pills[1].textContent).toBe('Oui')
   })
 
-  it('la première option est "Non"', () => {
+  it('« Non » est l\'option active', () => {
     const { container } = render(<BooleanWidget />)
-    expect(container.querySelectorAll('.fw-boolean__option')[0].textContent).toBe('Non')
+    const active = container.querySelectorAll('.radio__pill--active')
+    expect(active.length).toBe(1)
+    expect(active[0].textContent).toBe('Non')
   })
 
-  it('la seconde option est "Oui"', () => {
+  it('aperçu non interactif : aucun bouton ni rôle radio', () => {
     const { container } = render(<BooleanWidget />)
-    expect(container.querySelectorAll('.fw-boolean__option')[1].textContent).toBe('Oui')
-  })
-
-  it('aucune option n\'est active par défaut', () => {
-    const { container } = render(<BooleanWidget />)
-    expect(container.querySelectorAll('.fw-boolean__option--active').length).toBe(0)
-  })
-
-  it('les options sont des boutons interactifs', () => {
-    const { container } = render(<BooleanWidget />)
-    const buttons = container.querySelectorAll('button.fw-boolean__option')
-    expect(buttons.length).toBe(2)
+    expect(container.querySelectorAll('button').length).toBe(0)
+    expect(container.querySelector('[role="radiogroup"]')).toBeNull()
   })
 })

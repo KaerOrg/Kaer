@@ -15,22 +15,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { colors, spacing, radius } from '@theme'
-import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/features/TeenAccent'
-import { useAuthStore } from '../../store/authStore'
-import { useToast } from '../../contexts/ToastContext'
-import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
-import { FieldRenderer } from '../../components/features/ModuleRenderer/FieldRenderer'
+import { useTeen } from '../../../hooks/useTeen'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { useAuthStore } from '../../../store/authStore'
+import { useToast } from '../../../contexts/ToastContext'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
+import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
 import {
   generateId, getAllPlanItemsForModule, type PlanItem,
-} from '../../lib/database'
-import { savePlanItem, deletePlanItem } from '../../services/planItemService'
-import { fetchModuleFields, type ContentField } from '../../services/moduleService'
-import { EditableItemsList } from '../../components/features/ModuleRenderer/layouts/shared/EditableItemsList'
+} from '../../../lib/database'
+import { savePlanItem, deletePlanItem } from '../../../services/planItemService'
+import { fetchModuleFields, type ContentField } from '../../../services/moduleService'
+import { EditableItemsList } from '../../../components/features/ModuleRenderer/layouts/shared/EditableItemsList'
 import {
   fetchPractitionerConfig,
   getAnchors,
@@ -42,7 +42,7 @@ import {
   saveCommitment,
   type CrisisAnchor,
   type CrisisCommitment,
-} from '../../services/crisisPlanService'
+} from '../../../services/crisisPlanService'
 
 // ─── Sous-composant : Section "Mes raisons de tenir" ─────────────────────────
 

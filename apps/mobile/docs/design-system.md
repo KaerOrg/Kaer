@@ -368,14 +368,15 @@ flèche, aucun taux (conforme MDR 2017/745).
 
 ### `Radio` (`src/components/ui/Radio/`)
 
-Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list` (radio classique, rangées rond + label, défaut) ou `pills` (pilules en ligne, fond coloré sur l'option active). Couleur d'accent configurable. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, etc.
+Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list` (radio classique, rangées rond + label, défaut) ou `pills` (pilules en ligne, fond coloré sur l'option active). Couleur d'accent configurable. `readonly` rend le même visuel sans interaction (options en `View`, pas en `Pressable`) — pour un aperçu / affichage en lecture seule, jamais un composant « display-only » parallèle. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, aperçu de champ, etc.
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `options` | `RadioOption[]` | — | Options `{ value, label, sublabel? }` dans l'ordre d'affichage (obligatoire). `sublabel` n'est rendu qu'en variant `list` |
 | `value` | `string \| null` | — | Identifiant de l'option sélectionnée (`null` = aucune) (obligatoire) |
-| `onChange` | `(v: string) => void` | — | Callback de sélection (obligatoire) |
+| `onChange` | `(v: string) => void` | — | Callback de sélection. Optionnel : inutile (et ignoré) en `readonly` |
 | `variant` | `'list' \| 'pills'` | `'list'` | Habillage : radio classique ou pilules |
+| `readonly` | `boolean` | `false` | Lecture seule : même rendu, aucune interaction (options en `View`) |
 | `color` | `string` | `colors.primary` | Couleur d'accentuation de l'option active |
 | `testID` | `string` | — | testID du conteneur |
 
@@ -398,9 +399,17 @@ Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list`
   variant="pills"
   color={accentColor}
 />
+
+// Aperçu en lecture seule (preview, pas de saisie) — ex. BooleanWidget
+<Radio
+  variant="pills"
+  options={[{ value: 'non', label: 'Non' }, { value: 'oui', label: 'Oui' }]}
+  value="non"
+  readonly
+/>
 ```
 
-> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`.**
+> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`. Un aperçu / affichage en lecture seule reste un `Radio readonly`, jamais un composant « display-only » dupliquant l'habillage pilule.**
 
 ---
 
@@ -515,7 +524,7 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 | `TimeWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[⏱ 22:00]` | `"time"` |
 | `SliderWidget` | Track 4px fill/empty + thumb + valeur médiane | `"slider:min:max:unit"` |
 | `StarsWidget` | `ui/RatingSelector` (`variant="icon"`, `readonly`) — moitié des étoiles remplies | `"stars:N"` |
-| `BooleanWidget` | Deux pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
+| `BooleanWidget` | `ui/Radio` (`variant="pills"`, `readonly`) — pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
 | `RadioWidget` | Pastille de statut via `ui/StatusBadge` (`ok`→`success`, `partial`→`warning`, `miss`→`danger`) | `"radio:variant"` |
 | `DateWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[📅 jj/mm/aaaa]` | `"date"` |
 | `TextWidget` | `View` vide h=32 avec bordure | `"text"` |

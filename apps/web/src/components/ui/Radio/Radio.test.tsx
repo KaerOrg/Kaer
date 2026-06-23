@@ -45,6 +45,23 @@ describe('Radio', () => {
     })
   })
 
+  describe('lecture seule (sans onChange)', () => {
+    it('rend des pilules en span, sans bouton ni rôle radio', () => {
+      const { container } = render(<Radio variant="pills" options={OPTIONS} value="a" />)
+      const pills = container.querySelectorAll('.radio__pill')
+      expect(pills).toHaveLength(3)
+      expect(pills[0].tagName).toBe('SPAN')
+      expect(container.querySelectorAll('button')).toHaveLength(0)
+      expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument()
+      expect(screen.queryAllByRole('radio')).toHaveLength(0)
+    })
+
+    it('marque toujours l\'option active', () => {
+      const { container } = render(<Radio variant="pills" options={OPTIONS} value="a" />)
+      expect(container.querySelector('.radio__pill--active')?.textContent).toBe('Option A')
+    })
+  })
+
   describe('variante cards', () => {
     const CARDS = [
       { value: '0', label: 'Aucune', sublabel: 'détail 0', badge: '0' },

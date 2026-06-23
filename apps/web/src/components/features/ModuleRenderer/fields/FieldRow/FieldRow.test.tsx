@@ -54,7 +54,7 @@ describe('FieldRow', () => {
     const { container } = render(
       <ul><FieldRow field={field({ props: { widget_type: 'boolean' } })} t={t} /></ul>
     )
-    expect(container.querySelector('.fw-boolean')).toBeTruthy()
+    expect(container.querySelector('.radio--pills')).toBeTruthy()
   })
 
   it('avec widget_type=stars (stars_count=5) rend 5 étoiles', () => {

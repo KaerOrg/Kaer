@@ -4,7 +4,7 @@ import MotivationalBalanceScreen from './MotivationalBalanceScreen'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({
     isTeenMode: false,
     tt: () => '',
@@ -26,14 +26,14 @@ jest.mock('@react-navigation/native', () => {
   }
 })
 
-jest.mock('../../services/psyeduService', () => ({
+jest.mock('../../../services/psyeduService', () => ({
   fetchTopicsByModule: jest.fn().mockResolvedValue([
     { id: 't1', module_key: 'motivational_balance', topic_key: 'ambivalence', icon_name: 'Scale', sort_order: 1, is_active: true },
     { id: 't2', module_key: 'motivational_balance', topic_key: 'stages_of_change', icon_name: 'RotateCcw', sort_order: 2, is_active: true },
   ]),
 }))
 
-jest.mock('../../services/motivationalBalanceService', () => ({
+jest.mock('../../../services/motivationalBalanceService', () => ({
   saveEMRuler: jest.fn().mockResolvedValue(undefined),
   listEMRulers: jest.fn().mockResolvedValue([]),
   deleteEMRuler: jest.fn().mockResolvedValue(undefined),
@@ -44,7 +44,7 @@ jest.mock('../../services/motivationalBalanceService', () => ({
   listEMValues: jest.fn().mockResolvedValue([]),
 }))
 
-jest.mock('../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
+jest.mock('../../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap', () => ({
   resolvePsyEduIcon: () => () => null,
 }))
 
@@ -136,7 +136,7 @@ describe('MotivationalBalanceScreen', () => {
     const input = screen.getByTestId('balance-for-input')
     fireEvent.changeText(input, 'Je me sentirais mieux')
     fireEvent.press(screen.getByTestId('balance-for-add'))
-    const { saveEMBalanceItem } = require('../../services/motivationalBalanceService')
+    const { saveEMBalanceItem } = require('../../../services/motivationalBalanceService')
     await waitFor(() => {
       expect(saveEMBalanceItem).toHaveBeenCalledWith(
         expect.objectContaining({ side: 'for', text: 'Je me sentirais mieux' })

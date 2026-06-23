@@ -12,7 +12,7 @@ import { useNavigation, useFocusEffect, useRoute, type RouteProp } from '@react-
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { getAllScaleEntries, deleteScaleEntry, type ScaleEntry } from '../../lib/database'
+import { getAllScaleEntries, deleteScaleEntry, type ScaleEntry } from '../../../lib/database'
 import {
   buildTotalScoreChartData,
   buildXLabels,
@@ -20,13 +20,13 @@ import {
   type TimeRange,
 } from '@ui/Chart/TimeRangeCharts/chartUtils'
 import { DimensionChart } from '@ui/Chart/TimeRangeCharts/DimensionChart'
-import { formatDateLong } from '../../lib/dateUtils'
-import { SCALE_SCORING } from '../../lib/scaleScoring'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { formatDateLong } from '../../../lib/dateUtils'
+import { SCALE_SCORING } from '../../../lib/scaleScoring'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius, typography } from '@theme'
-import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/features/TeenAccent'
-import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
+import { useTeen } from '../../../hooks/useTeen'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleHistory'>

@@ -1,4 +1,4 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
@@ -20,7 +20,7 @@ jest.mock('@react-navigation/native', () => {
   }
 })
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllBreathingSessions: jest.fn().mockResolvedValue([]),
 }))
 
@@ -28,7 +28,7 @@ jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-const { getAllBreathingSessions } = jest.requireMock('../../lib/database')
+const { getAllBreathingSessions } = jest.requireMock('../../../lib/database')
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 

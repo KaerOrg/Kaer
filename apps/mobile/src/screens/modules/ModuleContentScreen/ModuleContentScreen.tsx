@@ -4,17 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import {
   fetchModuleFields,
   type ModuleFieldsResult,
-} from '../../services/moduleService'
-import { moduleQueries } from '../../hooks/queries'
-import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
-import { FieldRenderer } from '../../components/features/ModuleRenderer'
-import { TeenAccent } from '../../components/features/TeenAccent'
-import { useTeen } from '../../hooks/useTeen'
-import { useAuthStore } from '../../store/authStore'
+} from '../../../services/moduleService'
+import { moduleQueries } from '../../../hooks/queries'
+import { useRefreshOnFocus } from '../../../hooks/useRefreshOnFocus'
+import { FieldRenderer } from '../../../components/features/ModuleRenderer'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { useTeen } from '../../../hooks/useTeen'
+import { useAuthStore } from '../../../store/authStore'
 import { colors, spacing } from '@theme'
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ModuleContent'>

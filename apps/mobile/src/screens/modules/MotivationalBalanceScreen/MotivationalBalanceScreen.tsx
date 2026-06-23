@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next'
 import { Info, Plus, Trash2, X } from 'lucide-react-native'
 import type { PsyEduTopic } from '@kaer/shared'
 import { ChevronRight } from 'lucide-react-native'
-import { fetchTopicsByModule } from '../../services/psyeduService'
-import { resolvePsyEduIcon } from '../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap'
+import { fetchTopicsByModule } from '../../../services/psyeduService'
+import { resolvePsyEduIcon } from '../../../components/features/ModuleRenderer/layouts/PsyEdu/iconMap'
 import {
   saveEMRuler,
   listEMRulers,
@@ -29,14 +29,14 @@ import {
   deleteEMBalanceItem,
   saveEMValues,
   listEMValues,
-} from '../../services/motivationalBalanceService'
-import type { EMRuler, EMBalanceItem } from '../../lib/database'
-import { DisclaimerBanner } from '../../components/features/DisclaimerBanner'
-import { TeenAccent } from '../../components/features/TeenAccent'
-import { useTeen } from '../../hooks/useTeen'
-import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
+} from '../../../services/motivationalBalanceService'
+import type { EMRuler, EMBalanceItem } from '../../../lib/database'
+import { DisclaimerBanner } from '../../../components/features/DisclaimerBanner'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { useTeen } from '../../../hooks/useTeen'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 import { colors, spacing, radius } from '@theme'
-import type { AppStackParamList } from '../../navigation/AppStack'
+import type { AppStackParamList } from '../../../navigation/AppStack'
 import 'react-native-get-random-values'
 import { v4 as uuidv4 } from 'uuid'
 

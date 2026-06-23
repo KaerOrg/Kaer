@@ -4,11 +4,11 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { DimensionTrackerView, type DimensionTrackerConfig } from '../../components/features/DimensionTrackerView'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { DimensionTrackerView, type DimensionTrackerConfig } from '../../../components/features/DimensionTrackerView'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
-import { useTeen } from '../../hooks/useTeen'
-import { useAuthStore } from '../../store/authStore'
+import { useTeen } from '../../../hooks/useTeen'
+import { useAuthStore } from '../../../store/authStore'
 import {
   SIDE_EFFECT_CATALOG,
   SIDE_EFFECT_CATALOG_BY_KEY,
@@ -16,8 +16,8 @@ import {
   isCustomKey,
   makeCustomKey,
   type TrackedEffect,
-} from '../../lib/sideEffectsCatalog'
-import { fetchTrackedEffects, updateTrackedEffects } from '../../services/sideEffectsConfigService'
+} from '../../../lib/sideEffectsCatalog'
+import { fetchTrackedEffects, updateTrackedEffects } from '../../../services/sideEffectsConfigService'
 
 const SCALE_ID = 'medication_side_effects'
 const MODULE_COLOR = '#8B5CF6'
