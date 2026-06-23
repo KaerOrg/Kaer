@@ -1,16 +1,29 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Pressable, Text, ActivityIndicator } from 'react-native'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles } from './Button.styles'
 import type { ButtonProps } from './Button.types'
 
-export const Button = React.memo(function Button({ label, onPress, variant = 'primary', loading, disabled, style, iconLeft, accessibilityLabel, testID }: ButtonProps) {
+export const Button = React.memo(function Button({ label, onPress, variant = 'primary', size = 'md', loading, disabled, style, iconLeft, accessibilityLabel, testID }: ButtonProps) {
   const isDisabled = disabled || loading
   const iconOnly = label == null
 
+  const pressableStyle = useMemo(
+    () => [
+      styles.base,
+      styles[size],
+      styles[variant],
+      iconOnly ? styles.iconOnly : null,
+      isDisabled ? styles.disabled : null,
+      iconLeft && !iconOnly ? styles.withIcon : null,
+      style,
+    ],
+    [size, variant, iconOnly, isDisabled, iconLeft, style],
+  )
+
   return (
     <Pressable
-      style={[styles.base, styles[variant], iconOnly ? styles.iconOnly : null, isDisabled ? styles.disabled : null, iconLeft && !iconOnly ? styles.withIcon : null, style]}
+      style={pressableStyle}
       onPress={onPress}
       disabled={isDisabled}
       accessibilityRole="button"
@@ -23,7 +36,7 @@ export const Button = React.memo(function Button({ label, onPress, variant = 'pr
       ) : (
         <>
           {iconLeft}
-          {label != null ? <Text style={[styles.label, styles[`${variant}Label`]]}>{label}</Text> : null}
+          {label != null ? <Text style={[styles.label, size === 'sm' ? styles.labelSm : styles.labelMd, styles[`${variant}Label`]]}>{label}</Text> : null}
         </>
       )}
     </Pressable>

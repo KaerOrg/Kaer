@@ -1,9 +1,8 @@
 import React from 'react'
+import { Text } from 'react-native'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { Chip } from './Chip'
-import { colors } from '../../../theme'
-
-jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
+import { colors } from '@theme'
 
 describe('Chip', () => {
   it('affiche le label', () => {
@@ -11,14 +10,9 @@ describe('Chip', () => {
     expect(screen.getByText('jj/mm/aaaa')).toBeTruthy()
   })
 
-  it('rend l\'icône fournie', () => {
-    render(<Chip label="22:00" icon="time-outline" />)
-    expect(screen.UNSAFE_getByProps({ name: 'time-outline' })).toBeTruthy()
-  })
-
-  it('sans icône : aucun Ionicons rendu', () => {
-    render(<Chip label="Sans icône" />)
-    expect(screen.UNSAFE_queryAllByType('Ionicons' as never)).toHaveLength(0)
+  it('rend le nœud icône fourni', () => {
+    render(<Chip label="22:00" icon={<Text>⏱</Text>} />)
+    expect(screen.getByText('⏱')).toBeTruthy()
   })
 
   it('sans onPress : rendu statique, aucun crash au press', () => {

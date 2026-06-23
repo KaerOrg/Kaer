@@ -1,15 +1,15 @@
-import type { ComponentProps } from 'react'
-import type { Ionicons } from '@expo/vector-icons'
-
-export type IoniconName = ComponentProps<typeof Ionicons>['name']
+import type { ReactNode } from 'react'
 
 export type ChipSize = 'sm' | 'md'
 
 export interface ChipProps {
   /** Texte de la puce (obligatoire). */
   label: string
-  /** Icône Ionicons en tête de puce. */
-  icon?: IoniconName
+  /**
+   * Icône en tête de puce — nœud rendu tel quel (toute famille : Ionicons,
+   * MaterialCommunityIcons…). L'appelant en gère taille et couleur.
+   */
+  icon?: ReactNode
   /** État sélectionné — habille la puce avec `color` (bordure + texte + fond teinté). */
   selected?: boolean
   /**

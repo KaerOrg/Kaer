@@ -3,6 +3,8 @@ import type { ViewStyle } from 'react-native'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
+export type ButtonSize = 'sm' | 'md'
+
 export interface ButtonProps {
   /**
    * Libellé du bouton. Optionnel : sans libellé, le bouton est « icône seule »
@@ -11,6 +13,8 @@ export interface ButtonProps {
   label?: string
   onPress: () => void
   variant?: ButtonVariant
+  /** Taille : `md` (CTA, défaut) ou `sm` (compact, actions inline). */
+  size?: ButtonSize
   loading?: boolean
   disabled?: boolean
   style?: ViewStyle

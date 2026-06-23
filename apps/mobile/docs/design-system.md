@@ -25,8 +25,29 @@ export const shadows = {
 }
 ```
 
-Import dans les composants : `import { colors, spacing, radius } from '../../theme'`  
-(chemin relatif depuis le fichier — jamais `@kaer/shared` directement dans le mobile)
+Import dans les composants : `import { colors, spacing, radius } from '@theme'`
+(jamais `@kaer/shared` directement dans le mobile).
+
+---
+
+## Alias d'import
+
+Deux alias de chemin sont configurés pour éviter les imports relatifs profonds
+(`../../../../../ui/...`). Ils sont déclarés au même endroit dans la chaîne d'outils :
+
+| Alias | Cible | Exemple |
+|---|---|---|
+| `@ui/*` | `src/components/ui/*` | `import { Chip } from '@ui/Chip'` |
+| `@theme` | `src/theme` (barrel) | `import { colors, spacing } from '@theme'` |
+
+Trois points de configuration doivent rester synchronisés :
+
+- **`tsconfig.json`** → `compilerOptions.paths` (résolution TypeScript). Pas de `baseUrl`
+  (déprécié TS 7.0) : les chemins sont relatifs au dossier du `tsconfig`, préfixés `./`.
+- **Metro** lit nativement `compilerOptions.paths` (Expo SDK 54) — aucun plugin Babel requis.
+- **`package.json` → `jest.moduleNameMapper`** (résolution des tests).
+
+Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit.
 
 ---
 
@@ -109,13 +130,21 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `#FEE2E2` | `colors.danger` (1px) | `colors.danger` |
 
-Taille de base : `paddingVertical: 12`, `paddingHorizontal: 24`, `borderRadius: 10`, `minHeight: 50`
+| Taille | paddingV | paddingH | minHeight | label |
+|---|---|---|---|---|
+| `md` (défaut) | 12 | 24 | 50 | 16 |
+| `sm` | 8 | 16 | 36 | 14 |
+
+`borderRadius: 10` dans les deux cas. La taille ne porte **que** les dimensions ; la
+couleur reste pilotée par `variant`. `sm` sert aux actions inline compactes (ex. le
+« pont effets indésirables » de MedicationTracker) sans réécrire un `Pressable` ad hoc.
 
 | Prop | Type | Rôle |
 |---|---|---|
 | `label` | `string` | Texte du bouton. **Optionnel** : sans libellé, le bouton est « icône seule » (rendu compact, sans le chrome CTA) |
 | `onPress` | `() => void` | Callback (obligatoire) |
 | `variant` | `ButtonVariant` | Variante visuelle (défaut `'primary'`) |
+| `size` | `ButtonSize` | Taille `'sm'` ou `'md'` (défaut `'md'`) |
 | `loading` | `boolean` | Affiche un spinner à la place du label |
 | `disabled` | `boolean` | Désactive le bouton |
 | `style` | `ViewStyle` | Style additionnel (ex. override `backgroundColor` pour couleur d'accent) |
@@ -409,20 +438,30 @@ Pour un indicateur d'état sémantique **rempli** (fond coloré, label + valeur)
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `label` | `string` | — | Texte de la puce (obligatoire) |
-| `icon` | `IoniconName` | — | Icône Ionicons en tête de puce |
+| `icon` | `ReactNode` | — | Nœud icône rendu tel quel (toute famille : Ionicons, MaterialCommunityIcons…). L'appelant gère taille et couleur |
 | `selected` | `boolean` | `false` | Habille la puce avec `color` (bordure + texte + fond teinté) |
 | `color` | `string` | `colors.primary` | Couleur d'accent à l'état `selected` |
-| `size` | `'sm' \| 'md'` | `'md'` | `sm` pour les aperçus compacts (icône + valeur 12 px) |
+| `size` | `'sm' \| 'md'` | `'md'` | `sm` pour les aperçus compacts (valeur 12 px) |
 | `muted` | `boolean` | `false` | Opacité réduite — aperçus inertes, valeurs placeholder |
 | `onPress` | `() => void` | — | Rend la puce interactive. Absent → rendu statique |
 | `testID` | `string` | — | testID du conteneur |
 
 ```tsx
 // Aperçu statique compact (DateWidget / TimeWidget)
-<Chip label="jj/mm/aaaa" icon="calendar-outline" size="sm" muted />
+<Chip
+  label="jj/mm/aaaa"
+  size="sm"
+  muted
+  icon={<Ionicons name="calendar-outline" size={12} color={colors.textMuted} />}
+/>
 
-// Puce sélectionnable (filtre / motif)
-<Chip label={opt.label} selected={isSelected} onPress={() => toggle(opt.id)} />
+// Puce sélectionnable (motif MedicationTracker — icône MaterialCommunityIcons)
+<Chip
+  label={opt.label}
+  selected={isSelected}
+  onPress={() => toggle(opt.id)}
+  icon={<MaterialCommunityIcons name={opt.icon} size={15} color={isSelected ? colors.primary : colors.textMuted} />}
+/>
 ```
 
 > **Règle : toute puce (chip statique, sélectionnable, badge contour) passe par `Chip`, jamais un `View` + `Text` + `styles.chip` assemblés à la main.**

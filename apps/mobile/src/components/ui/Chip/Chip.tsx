@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles, SIZE } from './Chip.styles'
 import type { ChipProps } from './Chip.types'
 
@@ -29,7 +28,7 @@ export const Chip = React.memo(function Chip({
 
   const content = (
     <>
-      {icon ? <Ionicons name={icon} size={geom.iconSize} color={accent} /> : null}
+      {icon}
       <Text style={[styles.label, { fontSize: geom.fontSize, color: accent }]}>{label}</Text>
     </>
   )

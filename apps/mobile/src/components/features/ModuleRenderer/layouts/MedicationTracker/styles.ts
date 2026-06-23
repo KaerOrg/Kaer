@@ -66,24 +66,10 @@ export const styles = StyleSheet.create({
     fontSize: 13, fontWeight: '600', color: colors.textMuted,
     textTransform: 'uppercase', letterSpacing: 0.5,
   },
-  // ── Motifs (chips)
+  // ── Motifs (chips via ui/Chip)
   chipsRow:         { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  chip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: spacing.sm + 2, paddingVertical: spacing.xs + 1,
-    borderRadius: radius.full, borderWidth: 1.5, borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  chipSelected:     { borderColor: colors.primary, backgroundColor: colors.primaryLight },
-  chipText:         { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-  chipTextSelected: { color: colors.primary },
-  // ── Pont effets indésirables
-  bridgeBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
-    backgroundColor: colors.primaryLight, borderRadius: radius.md,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.sm, alignSelf: 'flex-start',
-  },
-  bridgeBtnText:    { fontSize: 13, fontWeight: '600', color: colors.primary },
+  // ── Pont effets indésirables (ui/Button variant=secondary size=sm)
+  bridgeBtnSelf:    { alignSelf: 'flex-start' },
   // ── Notes
   notesSection:     { gap: spacing.xs },
   notesInput: {
