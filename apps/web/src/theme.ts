@@ -20,6 +20,7 @@ export function injectTheme(): void {
   root.setProperty('--color-success-light', colors.successLight)
   root.setProperty('--color-warning', colors.warning)
   root.setProperty('--color-warning-light', colors.warningLight)
+  root.setProperty('--color-stars', colors.stars)
   root.setProperty('--color-bg', colors.background)
   root.setProperty('--color-surface', colors.card)
   root.setProperty('--color-card', colors.card)

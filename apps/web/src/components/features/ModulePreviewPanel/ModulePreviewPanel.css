@@ -313,24 +313,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Stars — taille 16px (vs 14px avant) */
-.fw-stars {
-  display: flex;
-  gap: 3px;
-}
-
-.fw-stars > svg {
-  width: 16px;
-  height: 16px;
-}
-
-.fw-star--on {
-  color: #F59E0B;
-}
-
-.fw-star--off {
-  color: var(--color-border);
-}
+/* Stars — rendus par ui/RatingSelector (variant icon, lecture seule) */
 
 /* Boolean — pills [Non] [Oui], plus larges, façon mobile */
 .fw-boolean {

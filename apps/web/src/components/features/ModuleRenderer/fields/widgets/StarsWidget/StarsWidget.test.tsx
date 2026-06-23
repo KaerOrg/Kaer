@@ -5,22 +5,24 @@ import { StarsWidget } from './StarsWidget'
 describe('StarsWidget', () => {
   it("rend le bon nombre d'étoiles SVG (5)", () => {
     const { container } = render(<StarsWidget spec="stars:5" />)
-    expect(container.querySelectorAll('.fw-stars svg').length).toBe(5)
+    expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
   })
 
   it("rend le bon nombre d'étoiles SVG (3)", () => {
     const { container } = render(<StarsWidget spec="stars:3" />)
-    expect(container.querySelectorAll('.fw-stars svg').length).toBe(3)
+    expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(3)
   })
 
-  it('toutes les étoiles sont éteintes par défaut', () => {
+  it('rendu lecture seule : aucun bouton interactif', () => {
     const { container } = render(<StarsWidget spec="stars:5" />)
-    expect(container.querySelectorAll('.fw-star--on').length).toBe(0)
-    expect(container.querySelectorAll('.fw-star--off').length).toBe(5)
+    expect(container.querySelectorAll('button').length).toBe(0)
+    expect(container.querySelectorAll('.rating-selector__icon').length).toBe(5)
   })
 
-  it('porte la classe fw-stars', () => {
+  it('stars:5 → la moitié (3) des étoiles sont remplies', () => {
     const { container } = render(<StarsWidget spec="stars:5" />)
-    expect(container.querySelector('.fw-stars')).toBeTruthy()
+    // ceil(5/2)=3 remplies (fill=currentColor), 2 vides (fill=none)
+    expect(container.querySelectorAll('.rating-selector__icon svg[fill="currentColor"]').length).toBe(3)
+    expect(container.querySelectorAll('.rating-selector__icon svg[fill="none"]').length).toBe(2)
   })
 })

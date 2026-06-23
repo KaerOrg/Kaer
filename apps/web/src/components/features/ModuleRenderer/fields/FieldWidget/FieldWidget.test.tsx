@@ -27,7 +27,7 @@ describe('FieldWidget', () => {
 
   it('stars:5 → 5 éléments svg', () => {
     const { container } = render(<FieldWidget widgetType="stars:5" />)
-    expect(container.querySelectorAll('.fw-stars svg').length).toBe(5)
+    expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
   })
 
   it('boolean → deux options Non / Oui', () => {

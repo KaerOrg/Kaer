@@ -17,6 +17,7 @@ Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 --color-border        #E5E7EB
 --color-success       #10B981   --color-success-light #ECFDF5
 --color-warning       #F59E0B   --color-warning-light #FFFBEB
+--color-stars         #F59E0B   /* icônes étoiles (RatingSelector variant icon) */
 --color-danger        #EF4444   --color-danger-light  #FEE2E2
 --color-overlay       rgba(15, 23, 42, 0.45)   /* voile Modal / ActionSheet */
 
@@ -72,7 +73,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 |---|---|---|---|
 | `TimeWidget` | `.fw-time` | `<input type="time">` | `defaultValue="22:00"` |
 | `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `RatingSelector variant="bar"`, pas ce widget |
-| `StarsWidget` | `.fw-stars` | `<span>` × N avec `.fw-star--on`/`.fw-star--off` | Spec `stars:count` |
+| `StarsWidget` | (aucune — délègue) | `RatingSelector variant="icon"` (lecture seule) | Spec `stars:count`. Adaptateur fin → primitive, moitié des étoiles remplies |
 | `BooleanWidget` | `.fw-boolean` | `<span class="fw-boolean__opt">` × 2 | `.fw-boolean__opt--active` sur "Non" |
 | `RadioWidget` | `.fw-radio` + `fw-radio--ok/partial/miss` | `<span>` coloré | ok=vert, partial=ambre, miss=rouge |
 | `DateWidget` | `.fw-date` | `<input type="date">` | Placeholder natif du navigateur |

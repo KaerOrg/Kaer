@@ -61,6 +61,6 @@ describe('FieldRow', () => {
     const { container } = render(
       <ul><FieldRow field={field({ props: { widget_type: 'stars:5' } })} t={t} /></ul>
     )
-    expect(container.querySelectorAll('.fw-stars svg').length).toBe(5)
+    expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
   })
 })

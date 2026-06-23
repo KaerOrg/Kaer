@@ -514,7 +514,7 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 |---|---|---|
 | `TimeWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[⏱ 22:00]` | `"time"` |
 | `SliderWidget` | Track 4px fill/empty + thumb + valeur médiane | `"slider:min:max:unit"` |
-| `StarsWidget` | N icônes `star` / `star-outline` Ionicons | `"stars:N"` |
+| `StarsWidget` | `ui/RatingSelector` (`variant="icon"`, `readonly`) — moitié des étoiles remplies | `"stars:N"` |
 | `BooleanWidget` | Deux pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
 | `RadioWidget` | Pastille de statut via `ui/StatusBadge` (`ok`→`success`, `partial`→`warning`, `miss`→`danger`) | `"radio:variant"` |
 | `DateWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[📅 jj/mm/aaaa]` | `"date"` |

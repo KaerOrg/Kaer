@@ -1,27 +1,26 @@
-import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { useMemo } from 'react'
+import { RatingSelector } from '../../../../../ui/RatingSelector'
 
 interface Props { spec: string }
 
+// Aperçu (lecture seule) d'un champ `stars:N` : rangée de N étoiles dont la
+// moitié (ceil) est remplie, rendue par RatingSelector (variant icon, sans
+// onChange → lecture seule). Aucun markup ad hoc — le primitive porte les icônes.
 export function StarsWidget({ spec }: Props) {
   const max = Number(spec.split(':')[1] ?? 5)
-  const [selected, setSelected] = useState(0)
-  const [hovered, setHovered] = useState(0)
-  const filled = hovered || selected
+  const filled = Math.ceil(max / 2)
+  const steps = useMemo(() => Array.from({ length: max }, (_, i) => i + 1), [max])
+
   return (
-    <div className="fw-stars">
-      {Array.from({ length: max }, (_, i) => (
-        <Star
-          key={i}
-          size={13}
-          className={i < filled ? 'fw-star--on' : 'fw-star--off'}
-          fill={i < filled ? 'currentColor' : 'none'}
-          style={{ cursor: 'pointer' }}
-          onClick={() => setSelected(i + 1)}
-          onMouseEnter={() => setHovered(i + 1)}
-          onMouseLeave={() => setHovered(0)}
-        />
-      ))}
-    </div>
+    <RatingSelector
+      variant="icon"
+      icon="star"
+      iconSize={16}
+      steps={steps}
+      value={filled}
+      color="var(--color-stars)"
+      label=""
+      showHeader={false}
+    />
   )
 }
