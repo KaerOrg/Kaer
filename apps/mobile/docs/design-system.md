@@ -36,7 +36,7 @@ Import dans les composants : `import { colors, spacing, radius } from '../../the
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -400,6 +400,35 @@ Case à cocher **générique** (contrôle binaire détaché de tout métier). In
 
 ---
 
+### `Chip` (`src/components/ui/Chip/`)
+
+Puce / token **générique** (pilule compacte contournée, icône + label, détachée de tout métier). Une seule primitive couvre la puce statique d'aperçu (`muted`), la puce sélectionnable (`selected` + `onPress`, pour les filtres / motifs de choix) et le badge léger contour. Interactive quand `onPress` est fourni (`Pressable`, `accessibilityRole="button"` + `accessibilityState.selected`), statique sinon (`View`). Tokens uniquement, zéro hex en dur.
+
+Pour un indicateur d'état sémantique **rempli** (fond coloré, label + valeur), préférer `StatusBadge`.
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `label` | `string` | — | Texte de la puce (obligatoire) |
+| `icon` | `IoniconName` | — | Icône Ionicons en tête de puce |
+| `selected` | `boolean` | `false` | Habille la puce avec `color` (bordure + texte + fond teinté) |
+| `color` | `string` | `colors.primary` | Couleur d'accent à l'état `selected` |
+| `size` | `'sm' \| 'md'` | `'md'` | `sm` pour les aperçus compacts (icône + valeur 12 px) |
+| `muted` | `boolean` | `false` | Opacité réduite — aperçus inertes, valeurs placeholder |
+| `onPress` | `() => void` | — | Rend la puce interactive. Absent → rendu statique |
+| `testID` | `string` | — | testID du conteneur |
+
+```tsx
+// Aperçu statique compact (DateWidget / TimeWidget)
+<Chip label="jj/mm/aaaa" icon="calendar-outline" size="sm" muted />
+
+// Puce sélectionnable (filtre / motif)
+<Chip label={opt.label} selected={isSelected} onPress={() => toggle(opt.id)} />
+```
+
+> **Règle : toute puce (chip statique, sélectionnable, badge contour) passe par `Chip`, jamais un `View` + `Text` + `styles.chip` assemblés à la main.**
+
+---
+
 ### ActionSheet / ConfirmDialog / Toast — feedback sans `Alert.alert`
 
 > **Règle d'or : zéro `Alert.alert`, zéro alerte OS.** Tout feedback ou confirmation
@@ -444,12 +473,12 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 
 | Widget | Aperçu visuel | Spec |
 |---|---|---|
-| `TimeWidget` | Chip `[⏱ 22:00]` avec bordure | `"time"` |
+| `TimeWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[⏱ 22:00]` | `"time"` |
 | `SliderWidget` | Track 4px fill/empty + thumb + valeur médiane | `"slider:min:max:unit"` |
 | `StarsWidget` | N icônes `star` / `star-outline` Ionicons | `"stars:N"` |
 | `BooleanWidget` | Deux pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
 | `RadioWidget` | Pastille de statut via `ui/StatusBadge` (`ok`→`success`, `partial`→`warning`, `miss`→`danger`) | `"radio:variant"` |
-| `DateWidget` | Chip `[📅 jj/mm/aaaa]` | `"date"` |
+| `DateWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[📅 jj/mm/aaaa]` | `"date"` |
 | `TextWidget` | `View` vide h=32 avec bordure | `"text"` |
 | `CheckboxWidget` | `ui/Checkbox` statique (`checked={false}`, label `Non accompli`) opacité 0.7 | `"checkbox"` |
 | `TextareaWidget` | `View` vide h=52 avec bordure, opacité 0.5 | `"textarea"` |
