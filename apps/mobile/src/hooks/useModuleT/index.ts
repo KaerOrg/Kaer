@@ -1,0 +1,1 @@
+export { useModuleTranslation } from './useModuleT'

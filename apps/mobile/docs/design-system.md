@@ -308,6 +308,56 @@ Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
 
 > **Règle : tout bloc `View + icon + Text + Text` en état vide doit utiliser `EmptyState`.**
 
+### ScreenLoader (`src/components/ui/ScreenLoader/`)
+
+État de chargement plein écran : un `ActivityIndicator` centré. Remplace le bloc
+`<View style={center}><ActivityIndicator size="large" /></View>` dupliqué dans les
+écrans de module (ScaleHistory, ScaleEntry, ModuleContent, MedicationSideEffectsEntry…).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `color` | `string` | Couleur du spinner (défaut `colors.primary`) |
+| `style` | `ViewStyle` | Style additionnel du conteneur centré (ex. padding) |
+| `testID` | `string` | testID du conteneur |
+
+> **Règle : tout écran qui rend un `ActivityIndicator` centré pendant un chargement
+> utilise `ScreenLoader` — jamais un `View + ActivityIndicator` ad hoc.**
+
+```tsx
+if (loading) return <ScreenLoader />
+```
+
+### SegmentedControl (`src/components/ui/SegmentedControl/`)
+
+Interrupteur à choix exclusif : un groupe de segments dont **un seul** est actif.
+Couvre les sélecteurs de plage temporelle (`7J/1M/3M/6M/1A`), filtres exclusifs et
+tout choix unique parmi N options côte à côte. Pendant mobile du `SegmentedControl`
+web. Générique sur `T extends string` ; segments mémoïsés (`SegmentButton`).
+
+> **À distinguer de `Radio`** : `Radio` est une **saisie de formulaire** (sémantique
+> radio, une réponse à une question) ; `SegmentedControl` **bascule une vue ou un
+> filtre** (sémantique tablist). Un sélecteur de plage de graphe = `SegmentedControl`,
+> pas `Radio`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `options` | `readonly SegmentOption<T>[]` | `{ value, label }` dans l'ordre d'affichage |
+| `value` | `T` | Valeur active |
+| `onChange` | `(value: T) => void` | Sélection d'un segment |
+| `variant` | `'track' \| 'pills'` | `track` (piste teintée, segments adjacents, défaut) / `pills` (pastilles bordées) |
+| `accentColor` | `string` | Fond du segment actif (défaut `colors.primary` — ex. couleur d'accent ado) |
+| `accessibilityLabel` | `string` | Libellé accessible du groupe |
+| `style` | `ViewStyle` | Style du conteneur (ex. `alignSelf`, marges) |
+| `testID` | `string` | testID du conteneur |
+
+```tsx
+const RANGE_OPTIONS: readonly SegmentOption<TimeRange>[] = [
+  { value: '7J', label: '7J' }, { value: '1M', label: '1M' }, { value: '1A', label: '1A' },
+]
+<SegmentedControl options={RANGE_OPTIONS} value={range} onChange={setRange}
+  accentColor={activeColor} style={styles.rangeRow} accessibilityLabel={t('…')} />
+```
+
 ---
 
 ### Groupe `ui/Chart/` — primitifs graphiques

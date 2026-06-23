@@ -16,6 +16,11 @@ export interface ScaleScoringConfig {
   readonly score_decimals: number
   /** i18n keys for subscale chips displayed in history (e.g. ['chip_i', 'chip_hi', 'chip_tod']) */
   readonly chips?: readonly string[]
+  /**
+   * Maps each chip i18n key (from `chips`) to the `subscale_scores` key it displays.
+   * Config-first : lives with the scoring config rather than hardcoded in the screen.
+   */
+  readonly chipSubscaleKeys?: Readonly<Record<string, string>>
   computeScore(answers: (number | null)[]): number
   computeSubscaleScores?(answers: (number | null)[]): Record<string, number>
 }
@@ -48,6 +53,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     items_count: 26,
     score_decimals: 0,
     chips: ['chip_i', 'chip_hi', 'chip_tod'],
+    chipSubscaleKeys: { chip_i: 'inattention', chip_hi: 'hyperactivite', chip_tod: 'tod' },
     computeScore: sum,
     computeSubscaleScores: (answers) => {
       const scores: Record<string, number> = { inattention: 0, hyperactivite: 0, tod: 0 }
@@ -68,6 +74,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     items_count: 18,
     score_decimals: 0,
     chips: ['chip_a', 'chip_b'],
+    chipSubscaleKeys: { chip_a: 'part_a', chip_b: 'part_b' },
     computeScore: sum,
     computeSubscaleScores: (answers) => {
       const scores: Record<string, number> = { part_a: 0, part_b: 0 }
@@ -82,6 +89,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     items_count: 25,
     score_decimals: 0,
     chips: ['chip_tag', 'chip_tp', 'chip_ts', 'chip_ps', 'chip_toc', 'chip_td'],
+    chipSubscaleKeys: { chip_tag: 'tag', chip_tp: 'tp', chip_ts: 'ts', chip_ps: 'ps', chip_toc: 'toc', chip_td: 'td' },
     computeScore: sum,
     computeSubscaleScores: (answers) => {
       const scores: Record<string, number> = { tag: 0, tp: 0, ts: 0, ps: 0, toc: 0, td: 0 }
@@ -96,6 +104,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     items_count: 9,
     score_decimals: 0,
     chips: ['chip_pct_recurrent'],
+    chipSubscaleKeys: { chip_pct_recurrent: 'pct_recurrent' },
     computeScore: sum,
   },
   mood_tracker: {
@@ -103,6 +112,7 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     items_count: 6,
     score_decimals: 0,
     chips: ['chip_mood', 'chip_energy', 'chip_anxiety', 'chip_pleasure', 'chip_sleep', 'chip_food'],
+    chipSubscaleKeys: { chip_mood: 'mood', chip_energy: 'energy', chip_anxiety: 'anxiety', chip_pleasure: 'pleasure' },
     computeScore: (answers) => {
       const valid = answers.filter((a): a is number => a != null && !isNaN(a))
       if (valid.length === 0) return 0
@@ -129,6 +139,10 @@ export const SCALE_SCORING: Readonly<Record<string, ScaleScoringConfig>> = {
     score_decimals: 0,
     chips: ['chip_sedation', 'chip_sleep', 'chip_akathisia', 'chip_tremors', 'chip_dry_mouth', 'chip_nausea',
       'chip_constipation', 'chip_weight', 'chip_appetite_loss', 'chip_dizziness', 'chip_headache', 'chip_sexual'],
+    chipSubscaleKeys: {
+      chip_sedation: 'sedation', chip_akathisia: 'akathisia', chip_tremors: 'tremors',
+      chip_dry_mouth: 'dry_mouth', chip_sleep: 'sleep', chip_nausea: 'nausea',
+    },
     computeScore: (answers) => {
       const valid = answers.filter(a => a != null && !isNaN(a))
       if (valid.length === 0) return 0

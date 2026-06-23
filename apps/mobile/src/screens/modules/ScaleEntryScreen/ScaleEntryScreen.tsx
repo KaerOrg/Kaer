@@ -1,28 +1,28 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Pressable,
-  ActivityIndicator,
   Platform,
+  type ViewStyle,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { useTranslation } from 'react-i18next'
 import { fetchModuleFields, type ContentField } from '../../../services/moduleService'
 import { getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../../lib/database'
 import { saveScaleEntry } from '../../../services/scaleEntryService'
-import { SCALE_SCORING } from '../../../lib/scaleScoring'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
-import { useTeen } from '../../../hooks/useTeen'
+import { Button } from '@ui/Button'
+import { ScreenLoader } from '@ui/ScreenLoader'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useToast } from '../../../contexts/ToastContext'
+import { useScaleScreen } from '../../../hooks/useScaleScreen'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleEntry'>
@@ -31,6 +31,8 @@ type LoadState =
   | { status: 'loading' }
   | { status: 'error'; message: string }
   | { status: 'ready'; fields: ContentField[] }
+
+const COPY_ICON = <MaterialCommunityIcons name="content-copy" size={14} color={colors.primary} />
 
 function formatEntryDate(d: Date, locale: string): string {
   return d.toLocaleDateString(locale, {
@@ -43,12 +45,9 @@ export default function ScaleEntryScreen() {
   const { params } = useRoute<RouteT>()
   const { scale_id, entry_id } = params
   const isEditing = entry_id != null
-  const { isTeenMode, teenColor } = useTeen()
-  const { t, i18n } = useTranslation(isTeenMode ? ['teen', 'common'] : 'common')
+  const { config, accentColor, activeColor, t, i18n } = useScaleScreen(scale_id)
   const { showToast } = useToast()
-  const accentColor = teenColor(scale_id)
 
-  const config = SCALE_SCORING[scale_id]
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
   const [answers, setAnswers] = useState<(number | null)[]>([])
   const [textInputValues, setTextInputValues] = useState<Record<string, string>>({})
@@ -129,6 +128,8 @@ export default function ScaleEntryScreen() {
     if (date) setEntryDate(date)
   }, [])
 
+  const toggleDatePicker = useCallback(() => setShowDatePicker(v => !v), [])
+
   const answeredCount = answers.filter(a => a !== null).length
   const totalItems = config?.items_count ?? answers.length
   const allAnswered = answeredCount === totalItems
@@ -178,28 +179,31 @@ export default function ScaleEntryScreen() {
     })
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, t, totalItems, answeredCount, loadState, textInputValues])
+  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast])
+
+  const reuseBtnLabel = useMemo(
+    () => (lastEntry != null
+      ? t('common.reuse_last_values', {
+          date: new Date(lastEntry.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        })
+      : ''),
+    [lastEntry, t],
+  )
+
+  const submitBtnStyle = useMemo<ViewStyle>(() => ({ backgroundColor: activeColor }), [activeColor])
 
   if (loadState.status === 'loading') {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color={colors.primary} size="large" />
-      </View>
-    )
+    return <ScreenLoader />
   }
 
   if (loadState.status === 'error') {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{loadState.message}</Text>
-        <Pressable style={styles.retryBtn} onPress={loadFields}>
-          <Text style={styles.retryText}>{t('common.back')}</Text>
-        </Pressable>
+        <Button label={t('common.back')} onPress={loadFields} />
       </View>
     )
   }
-
-  const activeColor = accentColor ?? colors.primary
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -208,7 +212,7 @@ export default function ScaleEntryScreen() {
         {/* Date row — toujours visible, permet de corriger la date */}
         <Pressable
           style={styles.dateRow}
-          onPress={() => setShowDatePicker(v => !v)}
+          onPress={toggleDatePicker}
           accessibilityRole="button"
         >
           <MaterialCommunityIcons name="calendar-edit" size={18} color={activeColor} />
@@ -230,17 +234,14 @@ export default function ScaleEntryScreen() {
         )}
 
         {!isEditing && lastEntry != null && !reuseApplied && (
-          <Pressable
-            style={[styles.reuseBtn, { borderColor: activeColor + '40', backgroundColor: activeColor + '08' }]}
+          <Button
+            variant="secondary"
+            size="sm"
+            label={reuseBtnLabel}
             onPress={handleReuseLastEntry}
-          >
-            <MaterialCommunityIcons name="content-copy" size={14} color={activeColor} />
-            <Text style={[styles.reuseBtnText, { color: activeColor }]}>
-              {t('common.reuse_last_values', {
-                date: new Date(lastEntry.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
-              })}
-            </Text>
-          </Pressable>
+            iconLeft={COPY_ICON}
+            style={styles.reuseBtn}
+          />
         )}
 
         <FieldRenderer
@@ -262,23 +263,13 @@ export default function ScaleEntryScreen() {
               total: totalItems,
             })}
           </Text>
-          <Pressable
-            style={[
-              styles.submitBtn,
-              { backgroundColor: activeColor },
-              !allAnswered && styles.submitBtnDisabled,
-            ]}
+          <Button
+            label={isEditing ? t('common.save_changes') : t(`modules.${scale_id}.submit`)}
             onPress={handleSubmit}
-            disabled={saving || !allAnswered}
-          >
-            <Text style={styles.submitBtnText}>
-              {saving
-                ? t('common.saving')
-                : isEditing
-                  ? t('common.save_changes')
-                  : t(`modules.${scale_id}.submit`)}
-            </Text>
-          </Pressable>
+            loading={saving}
+            disabled={!allAnswered}
+            style={submitBtnStyle}
+          />
         </View>
 
       </ScrollView>
@@ -304,16 +295,6 @@ const styles = StyleSheet.create({
   dateValue: { flex: 1, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   footer: { gap: spacing.sm, marginTop: 4 },
   progress: { textAlign: 'center', fontSize: 13, color: colors.textMuted },
-  submitBtn: {
-    borderRadius: radius.md,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  submitBtnDisabled: { backgroundColor: colors.border },
-  submitBtnText: { color: colors.white, fontWeight: '700', fontSize: 15 },
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: 16 },
-  retryBtn: { backgroundColor: colors.primary, borderRadius: radius.md, paddingHorizontal: 24, paddingVertical: 12 },
-  retryText: { color: colors.white, fontWeight: '600' },
-  reuseBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 12, borderRadius: radius.md, borderWidth: 1, alignSelf: 'flex-start' },
-  reuseBtnText: { fontSize: 13, fontWeight: '600' },
+  reuseBtn: { alignSelf: 'flex-start' },
 })
