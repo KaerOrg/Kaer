@@ -47,6 +47,76 @@ describe('RatingSelector — variant track', () => {
   })
 })
 
+const flexOf = (node: ReturnType<typeof screen.getByTestId>): number => {
+  const style = node.props.style
+  const arr = Array.isArray(style) ? style : [style]
+  for (const s of arr) {
+    if (s != null && typeof s === 'object' && 'flex' in s && typeof s.flex === 'number') return s.flex
+  }
+  throw new Error('flex introuvable dans le style')
+}
+
+describe('RatingSelector — variant track continuous (jauge)', () => {
+  it('affiche la valeur formatée avec unité', () => {
+    render(
+      <RatingSelector variant="track" continuous steps={[0, 120]} value={60} unit="min" color="#0AA" showHeader={false} />,
+    )
+    expect(screen.getByText('60 min')).toBeTruthy()
+  })
+
+  it('affiche la valeur sans unité', () => {
+    render(<RatingSelector variant="track" continuous steps={[0, 10]} value={5} color="#0AA" showHeader={false} />)
+    expect(screen.getByText('5')).toBeTruthy()
+  })
+
+  it('remplit la jauge au ratio (value-min)/(max-min)', () => {
+    render(<RatingSelector variant="track" continuous steps={[0, 100]} value={25} color="#0AA" showHeader={false} />)
+    expect(flexOf(screen.getByTestId('rating-gauge-fill'))).toBeCloseTo(0.25)
+    expect(flexOf(screen.getByTestId('rating-gauge-empty'))).toBeCloseTo(0.75)
+  })
+
+  it('borne le ratio à 1 quand la valeur dépasse le max', () => {
+    render(<RatingSelector variant="track" continuous steps={[0, 100]} value={150} color="#0AA" showHeader={false} />)
+    expect(flexOf(screen.getByTestId('rating-gauge-fill'))).toBe(1)
+    expect(flexOf(screen.getByTestId('rating-gauge-empty'))).toBe(0)
+  })
+
+  it('borne le ratio à 0 quand la valeur est sous le min', () => {
+    render(<RatingSelector variant="track" continuous steps={[0, 100]} value={-10} color="#0AA" showHeader={false} />)
+    expect(flexOf(screen.getByTestId('rating-gauge-fill'))).toBe(0)
+  })
+
+  it('retombe sur un ratio 0.5 quand min >= max (cas dégénéré)', () => {
+    render(<RatingSelector variant="track" continuous steps={[5, 5]} value={5} color="#0AA" showHeader={false} />)
+    expect(flexOf(screen.getByTestId('rating-gauge-fill'))).toBe(0.5)
+  })
+})
+
+describe('RatingSelector — readonly', () => {
+  it('ne déclenche pas onPress sur un pip en lecture seule', () => {
+    const onPress = jest.fn()
+    render(
+      <RatingSelector
+        label="Humeur"
+        steps={STEPS}
+        color="#000"
+        value={2}
+        readonly
+        testIdPrefix="ro"
+        onPress={onPress}
+      />,
+    )
+    fireEvent.press(screen.getByTestId('ro-3'))
+    expect(onPress).not.toHaveBeenCalled()
+  })
+
+  it('reflète toujours la sélection accessible en lecture seule', () => {
+    render(<RatingSelector label="Humeur" steps={STEPS} color="#000" value={2} readonly testIdPrefix="ro" />)
+    expect(screen.getByTestId('ro-2').props.accessibilityState).toEqual({ checked: true })
+    expect(screen.getByTestId('ro-3').props.accessibilityState).toEqual({ checked: false })
+  })
+})
+
 describe('RatingSelector — variant icon', () => {
   it('expose un testID par pip et appelle onPress avec la valeur', () => {
     const onPress = jest.fn()

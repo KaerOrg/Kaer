@@ -11,9 +11,26 @@ export interface RatingSelectorProps {
   /** Couleur d'accent (pip sélectionné / track ou icône remplis). */
   color: string
   /** Libellé du champ — sert aussi d'accessibilityLabel de base. */
-  label: string
+  label?: string
   /** Sous-libellé optionnel (ex. "0 = aucun effort"). */
   sublabel?: string
+  /**
+   * Lecture seule : aucune interaction (pips/icônes rendus en `View`, pas en
+   * `Pressable`). `onPress` devient inutile. Vaut pour toutes les variantes —
+   * un même composant sert l'affichage et la saisie, on ne duplique pas en
+   * « composant d'affichage » parallèle.
+   */
+  readonly?: boolean
+  /**
+   * Remplissage continu (variante `track` uniquement) : au lieu d'un pip par
+   * `step`, affiche une barre proportionnelle remplie au ratio
+   * `(value - min) / (max - min)`, où `min`/`max` sont le premier et le dernier
+   * `steps`. Pour une jauge continue, passer `steps={[min, max]}`. Implique un
+   * rendu non interactif.
+   */
+  continuous?: boolean
+  /** Unité affichée après la valeur en mode `continuous` (ex. "min"). */
+  unit?: string
   /**
    * 'numbered' (défaut) : boutons carrés avec le chiffre, seul le sélectionné
    *   est mis en évidence. Usage : mood_tracker, fear_thermometer.
@@ -37,5 +54,6 @@ export interface RatingSelectorProps {
   showEndLabels?: boolean
   /** Préfixe de testID : chaque pip expose `${testIdPrefix}-${valeur}`. */
   testIdPrefix?: string
-  onPress: (value: number) => void
+  /** Appelé au clic sur un pip. Optionnel : inutile en `readonly`/`continuous`. */
+  onPress?: (value: number) => void
 }

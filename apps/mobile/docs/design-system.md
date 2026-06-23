@@ -171,28 +171,40 @@ visuelles pour un même besoin :
 |---|---|---|
 | `numbered` (défaut) | boutons carrés bordés avec le chiffre, seul le sélectionné est mis en évidence | `mood_tracker` (1–10), `fear_thermometer` (0–100 par 10) |
 | `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns`, `activity_log` (plaisir/maîtrise) |
+| `track` + `continuous` | jauge **continue** proportionnelle (fill + thumb) + valeur formatée, au lieu de N pips | aperçu d'un champ `slider:min:max` (`SliderWidget`) |
 | `icon` | rangée d'icônes remplies jusqu'à la valeur (`star` ou `weather-sunny`) | `sleep_diary` (qualité de nuit, ressenti au réveil) |
+
+> **Affichage = un mode, pas un composant à part.** Pour un rendu en lecture seule,
+> passer `readonly` (toutes variantes) ou `continuous` (jauge) — on ne crée jamais de
+> primitive « display-only » parallèle (ex. pas de `ValueBar`).
 
 | Prop | Type | Rôle |
 |---|---|---|
 | `value` | `number \| null` | Valeur sélectionnée (`null` = aucune) |
-| `steps` | `number[]` | Valeurs disponibles, dans l'ordre d'affichage |
-| `color` | `string` | Couleur d'accent (pip/track/icône remplis) |
-| `label` | `string` | Libellé + base d'accessibilityLabel |
+| `steps` | `number[]` | Valeurs disponibles ; en `continuous`, `[min, max]` |
+| `color` | `string` | Couleur d'accent (pip/track/icône/jauge remplis) |
+| `label?` | `string` | Libellé + base d'accessibilityLabel (défaut `''`) |
 | `sublabel?` | `string` | Sous-libellé optionnel |
+| `readonly?` | `boolean` | Lecture seule : pips/icônes non interactifs (`View`, pas `Pressable`) |
+| `continuous?` | `boolean` | Variante `track` : jauge proportionnelle au ratio `(value-min)/(max-min)` |
+| `unit?` | `string` | Unité affichée après la valeur en `continuous` (ex. `"min"`) |
 | `variant?` | `'numbered' \| 'track' \| 'icon'` | Habillage (défaut `numbered`) |
 | `icon?` | `'star' \| 'weather-sunny'` | Icône de la variante `icon` (défaut `star`) |
 | `iconSize?` | `number` | Taille des icônes (défaut 36) |
 | `showHeader?` | `boolean` | `false` si le parent gère son propre header (défaut `true`) |
 | `showEndLabels?` | `boolean` | Affiche min/max sous le track |
 | `testIdPrefix?` | `string` | Chaque pip expose `${testIdPrefix}-${valeur}` |
-| `onPress` | `(value: number) => void` | Sélection |
+| `onPress?` | `(value: number) => void` | Sélection (inutile en `readonly`/`continuous`) |
 
 ```tsx
 // Notation par étoiles (agenda du sommeil)
 <RatingSelector variant="icon" icon="star" steps={[1,2,3,4,5]} value={quality}
   color={colors.stars} label={lbl('quality_label')} showHeader={false}
   testIdPrefix="quality-star" onPress={setQuality} />
+
+// Jauge continue en lecture seule (aperçu d'un champ slider 0–120 min)
+<RatingSelector variant="track" continuous steps={[0, 120]} value={60}
+  unit="min" color={colors.primary} showHeader={false} />
 ```
 
 ---

@@ -14,6 +14,14 @@ export const styles = StyleSheet.create({
   track:    { flexDirection: 'row', gap: 4, alignItems: 'center' },
   trackPip: { flex: 1, height: 12, borderRadius: radius.full, backgroundColor: colors.border },
 
+  // ── variant='track' + continuous (jauge proportionnelle, affichage) ─────────
+  gauge:      { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  gaugeTrack: { flex: 1, height: 4, flexDirection: 'row', borderRadius: radius.full, backgroundColor: colors.border, overflow: 'visible' },
+  gaugeFill:  { height: 4, borderRadius: radius.full, opacity: 0.5, position: 'relative' },
+  gaugeEmpty: { height: 4, borderRadius: radius.full, backgroundColor: colors.border },
+  gaugeThumb: { position: 'absolute', width: 12, height: 12, borderRadius: 6, opacity: 0.6, top: -4, right: -6 },
+  gaugeValue: { fontSize: 11, fontWeight: '600', minWidth: 32, textAlign: 'right' },
+
   // ── variant='numbered' ─────────────────────────────────────────────────────
   pips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   numberedPip: {
