@@ -147,7 +147,7 @@ export function CaseloadTable({
       ) : (
         <User size={18} />
       ),
-    [selectedRow?.patient_avatar_url]
+    [selectedRow]
   )
 
   // Patient de l'app lié au dossier ouvert (une seule recherche, réutilisée ci-dessous).
