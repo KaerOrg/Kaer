@@ -33,4 +33,16 @@ describe('Button', () => {
     fireEvent.press(screen.getByTestId('activity-indicator') ?? screen.root)
     expect(onPress).not.toHaveBeenCalled()
   })
+
+  it('size="sm" : label en taille compacte (14)', () => {
+    render(<Button label="Compact" onPress={() => {}} size="sm" testID="btn" />)
+    const styleArray = screen.getByText('Compact').props.style.flat()
+    expect(styleArray).toContainEqual({ fontSize: 14 })
+  })
+
+  it('size par défaut (md) : label en taille standard (16)', () => {
+    render(<Button label="Standard" onPress={() => {}} />)
+    const styleArray = screen.getByText('Standard').props.style.flat()
+    expect(styleArray).toContainEqual({ fontSize: 16 })
+  })
 })

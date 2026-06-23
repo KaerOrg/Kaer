@@ -2,7 +2,9 @@ import { useState, useCallback } from 'react'
 import { ScrollView, View, Text, Pressable, TextInput } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import type { Medication } from '@kaer/shared'
-import { colors } from '../../../../../theme'
+import { Button } from '@ui/Button'
+import { Chip } from '@ui/Chip'
+import { colors } from '@theme'
 import type { StatusMeta, ReasonMeta, IntakeState } from './types'
 import { styles } from './styles'
 
@@ -120,29 +122,33 @@ export function TodayTab({
             {reasonOptions.map(opt => {
               const selected = selectedReason === opt.value
               return (
-                <Pressable
+                <Chip
                   key={opt.value}
-                  style={[styles.chip, selected && styles.chipSelected]}
+                  label={opt.label}
+                  selected={selected}
                   onPress={() => onSelectReason(selected ? null : opt.value)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: selected }}
+                  icon={
+                    <MaterialCommunityIcons
+                      name={opt.icon}
+                      size={15}
+                      color={selected ? colors.primary : colors.textMuted}
+                    />
+                  }
                   testID={`reason-${opt.value}`}
-                >
-                  <MaterialCommunityIcons
-                    name={opt.icon}
-                    size={15}
-                    color={selected ? colors.primary : colors.textMuted}
-                  />
-                  <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{opt.label}</Text>
-                </Pressable>
+                />
               )
             })}
           </View>
           {showBridge ? (
-            <Pressable style={styles.bridgeBtn} onPress={onOpenBridge} testID="side-effects-bridge">
-              <MaterialCommunityIcons name="arrow-right-circle-outline" size={16} color={colors.primary} />
-              <Text style={styles.bridgeBtnText}>{bridgeLabel}</Text>
-            </Pressable>
+            <Button
+              variant="secondary"
+              size="sm"
+              label={bridgeLabel}
+              onPress={onOpenBridge}
+              iconLeft={<MaterialCommunityIcons name="arrow-right-circle-outline" size={16} color={colors.primary} />}
+              style={styles.bridgeBtnSelf}
+              testID="side-effects-bridge"
+            />
           ) : null}
         </View>
       ) : null}

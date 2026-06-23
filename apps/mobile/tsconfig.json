@@ -4,6 +4,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@ui/*": ["./src/components/ui/*"],
+      "@theme": ["./src/theme"]
+    }
   }
 }

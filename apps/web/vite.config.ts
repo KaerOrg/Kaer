@@ -1,4 +1,5 @@
 /// <reference types="vitest" />
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -15,6 +16,9 @@ export default defineConfig({
   },
   resolve: {
     dedupe: ['react', 'react-dom'],
+    alias: {
+      '@ui': fileURLToPath(new URL('./src/components/ui', import.meta.url)),
+    },
   },
   build: {
     rollupOptions: {
