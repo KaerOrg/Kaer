@@ -1,18 +1,16 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { colors, spacing } from '../../../../../../theme'
+import { View, StyleSheet } from 'react-native'
+import { Checkbox } from '../../../../../ui/Checkbox'
 
+/** Aperçu en lecture seule d'un champ case à cocher (rendu statique, sans `onChange`). */
 export function CheckboxWidget() {
   return (
-    <View style={styles.row}>
-      <Ionicons name="square-outline" size={16} color={colors.border} />
-      <Text style={styles.label}>Non accompli</Text>
+    <View style={styles.wrap}>
+      <Checkbox checked={false} label="Non accompli" />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  row:   { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, opacity: 0.7 },
-  label: { fontSize: 12, color: colors.textMuted },
+  wrap: { opacity: 0.7 },
 })
