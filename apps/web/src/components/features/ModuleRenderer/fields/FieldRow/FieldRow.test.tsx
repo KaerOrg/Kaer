@@ -57,9 +57,9 @@ describe('FieldRow', () => {
     expect(container.querySelector('.fw-boolean')).toBeTruthy()
   })
 
-  it('avec widget_type=stars:5 rend 5 étoiles', () => {
+  it('avec widget_type=stars (stars_count=5) rend 5 étoiles', () => {
     const { container } = render(
-      <ul><FieldRow field={field({ props: { widget_type: 'stars:5' } })} t={t} /></ul>
+      <ul><FieldRow field={field({ props: { widget_type: 'stars', stars_count: '5' } })} t={t} /></ul>
     )
     expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
   })

@@ -56,7 +56,7 @@ export function FieldRow({ field }: FieldProps) {
       </View>
       <View style={styles.control}>
         {widgetType
-          ? <FieldWidget widgetType={widgetType} detailText={detailText} />
+          ? <FieldWidget props={field.props} detailText={detailText} />
           : detailText
             ? <Text style={styles.detail}>{detailText}</Text>
             : null

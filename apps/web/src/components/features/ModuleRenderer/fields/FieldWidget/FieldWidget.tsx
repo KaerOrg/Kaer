@@ -4,20 +4,30 @@ import {
 } from '../widgets'
 
 interface Props {
-  widgetType: string
+  // Props atomiques du champ : `widget_type` porte le *kind* (slider, stars…) ;
+  // les paramètres sont des props frères (slider_min, slider_max, slider_unit,
+  // stars_count, radio_variant). Plus aucun packing `kind:param:param`.
+  props: Record<string, string>
   detailText?: string
 }
 
-export function FieldWidget({ widgetType, detailText }: Props) {
-  if (widgetType === 'time') return <TimeWidget />
-  if (widgetType.startsWith('slider:')) return <SliderWidget spec={widgetType} />
-  if (widgetType.startsWith('stars:')) return <StarsWidget spec={widgetType} />
-  if (widgetType === 'boolean') return <BooleanWidget />
-  if (widgetType.startsWith('radio:')) return <RadioWidget variant={widgetType.split(':')[1] ?? 'ok'} />
-  if (widgetType === 'date') return <DateWidget />
-  if (widgetType === 'text') return <TextWidget />
-  if (widgetType === 'checkbox') return <CheckboxWidget />
-  if (widgetType === 'textarea') return <TextareaWidget />
-  if (widgetType === 'info') return <InfoWidget text={detailText} />
+export function FieldWidget({ props, detailText }: Props) {
+  const kind = props['widget_type']
+  if (kind === 'time') return <TimeWidget />
+  if (kind === 'slider') return (
+    <SliderWidget
+      min={Number(props['slider_min'] ?? 0)}
+      max={Number(props['slider_max'] ?? 10)}
+      unit={props['slider_unit']}
+    />
+  )
+  if (kind === 'stars') return <StarsWidget count={Number(props['stars_count'] ?? 5)} />
+  if (kind === 'boolean') return <BooleanWidget />
+  if (kind === 'radio') return <RadioWidget variant={props['radio_variant'] ?? 'ok'} />
+  if (kind === 'date') return <DateWidget />
+  if (kind === 'text') return <TextWidget />
+  if (kind === 'checkbox') return <CheckboxWidget />
+  if (kind === 'textarea') return <TextareaWidget />
+  if (kind === 'info') return <InfoWidget text={detailText} />
   return null
 }

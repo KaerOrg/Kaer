@@ -1,3 +1,4 @@
+import { collectIndexed } from '@kaer/shared'
 import { supabase } from '../lib/supabase'
 
 export type ScaleCategory =
@@ -70,7 +71,7 @@ export async function fetchScaleMeta(): Promise<ScaleMetaRow[]> {
       id: field.module_id,
       evaluationType: (p.evaluation_type ?? 'auto') as 'auto' | 'hetero',
       category: (p.category ?? 'Humeur') as ScaleCategory,
-      targetAges: JSON.parse(p.target_ages ?? '[]') as TargetAge[],
+      targetAges: collectIndexed(p, 'target_age') as TargetAge[],
       validatedAgeRange: p.validated_age_range ?? '',
       noToggle: p.no_toggle === 'true',
       hasPreview: p.has_preview === 'true',

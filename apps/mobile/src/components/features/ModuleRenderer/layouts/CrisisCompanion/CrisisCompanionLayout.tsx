@@ -11,6 +11,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { View, Text, ScrollView, StyleSheet } from 'react-native'
 import { colors } from '@theme'
+import { collectIndexed } from '@kaer/shared'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
@@ -57,7 +58,7 @@ export function CrisisCompanionLayout({ sections, uiFields, moduleId, accentColo
 
   const durations = useMemo(() => {
     const configField = uiFields.find(f => f.field_type === 'exercise_config')
-    return parseDurations(configField?.props['durations'])
+    return parseDurations(collectIndexed(configField?.props ?? {}, 'duration'))
   }, [uiFields])
 
   const categories = useMemo<CategoryVM[]>(() => {

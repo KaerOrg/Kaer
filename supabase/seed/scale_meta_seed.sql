@@ -41,7 +41,8 @@ values
   -- PHQ-9
   ('phq9.scale_meta', 'evaluation_type',   'auto'),
   ('phq9.scale_meta', 'category',          'Humeur'),
-  ('phq9.scale_meta', 'target_ages',       '["adulte","senior"]'),
+  ('phq9.scale_meta', 'target_age_1',      'adulte'),
+  ('phq9.scale_meta', 'target_age_2',      'senior'),
   ('phq9.scale_meta', 'validated_age_range','18+ ans'),
   ('phq9.scale_meta', 'has_preview',       'true'),
   ('phq9.scale_meta', 'icon_name',         'clipboard-list'),
@@ -51,7 +52,8 @@ values
   -- GAD-7
   ('gad7.scale_meta', 'evaluation_type',   'auto'),
   ('gad7.scale_meta', 'category',          'Anxiété'),
-  ('gad7.scale_meta', 'target_ages',       '["adulte","senior"]'),
+  ('gad7.scale_meta', 'target_age_1',      'adulte'),
+  ('gad7.scale_meta', 'target_age_2',      'senior'),
   ('gad7.scale_meta', 'validated_age_range','18+ ans'),
   ('gad7.scale_meta', 'has_preview',       'true'),
   ('gad7.scale_meta', 'icon_name',         'clipboard-list'),
@@ -61,7 +63,7 @@ values
   -- EPDS
   ('epds.scale_meta', 'evaluation_type',   'auto'),
   ('epds.scale_meta', 'category',          'Humeur'),
-  ('epds.scale_meta', 'target_ages',       '["perinatal"]'),
+  ('epds.scale_meta', 'target_age_1',      'perinatal'),
   ('epds.scale_meta', 'validated_age_range','18+ ans (post-partum)'),
   ('epds.scale_meta', 'has_preview',       'true'),
   ('epds.scale_meta', 'icon_name',         'activity'),
@@ -71,7 +73,8 @@ values
   -- RCADS
   ('rcads.scale_meta', 'evaluation_type',   'auto'),
   ('rcads.scale_meta', 'category',          'Anxiété'),
-  ('rcads.scale_meta', 'target_ages',       '["enfant","ado"]'),
+  ('rcads.scale_meta', 'target_age_1',      'enfant'),
+  ('rcads.scale_meta', 'target_age_2',      'ado'),
   ('rcads.scale_meta', 'validated_age_range','8 - 18 ans'),
   ('rcads.scale_meta', 'has_preview',       'true'),
   ('rcads.scale_meta', 'icon_name',         'clipboard-list'),
@@ -81,7 +84,7 @@ values
   -- BSL-23
   ('bsl23.scale_meta', 'evaluation_type',   'auto'),
   ('bsl23.scale_meta', 'category',          'Personnalité'),
-  ('bsl23.scale_meta', 'target_ages',       '["adulte"]'),
+  ('bsl23.scale_meta', 'target_age_1',      'adulte'),
   ('bsl23.scale_meta', 'validated_age_range','18+ ans'),
   ('bsl23.scale_meta', 'has_preview',       'true'),
   ('bsl23.scale_meta', 'icon_name',         'clipboard-list'),
@@ -91,7 +94,7 @@ values
   -- CAPE-42
   ('cape42.scale_meta', 'evaluation_type',   'auto'),
   ('cape42.scale_meta', 'category',          'Psychose'),
-  ('cape42.scale_meta', 'target_ages',       '["adulte"]'),
+  ('cape42.scale_meta', 'target_age_1',      'adulte'),
   ('cape42.scale_meta', 'validated_age_range','15+ ans'),
   ('cape42.scale_meta', 'has_preview',       'false'),
   ('cape42.scale_meta', 'icon_name',         'brain'),
@@ -101,7 +104,7 @@ values
   -- AUDIT
   ('audit.scale_meta', 'evaluation_type',   'auto'),
   ('audit.scale_meta', 'category',          'Addictologie'),
-  ('audit.scale_meta', 'target_ages',       '["adulte"]'),
+  ('audit.scale_meta', 'target_age_1',      'adulte'),
   ('audit.scale_meta', 'validated_age_range','18+ ans'),
   ('audit.scale_meta', 'has_preview',       'false'),
   ('audit.scale_meta', 'icon_name',         'clipboard-list'),
@@ -111,7 +114,7 @@ values
   -- NSI
   ('nsi.scale_meta', 'evaluation_type',   'auto'),
   ('nsi.scale_meta', 'category',          'Sommeil'),
-  ('nsi.scale_meta', 'target_ages',       '["adulte"]'),
+  ('nsi.scale_meta', 'target_age_1',      'adulte'),
   ('nsi.scale_meta', 'validated_age_range','18+ ans'),
   ('nsi.scale_meta', 'has_preview',       'true'),
   ('nsi.scale_meta', 'icon_name',         'moon'),
@@ -121,7 +124,7 @@ values
   -- ASRS v1.1 Bilan Complet
   ('asrs18.scale_meta', 'evaluation_type',   'auto'),
   ('asrs18.scale_meta', 'category',          'Neurodev'),
-  ('asrs18.scale_meta', 'target_ages',       '["adulte"]'),
+  ('asrs18.scale_meta', 'target_age_1',      'adulte'),
   ('asrs18.scale_meta', 'validated_age_range','18+ ans'),
   ('asrs18.scale_meta', 'has_preview',       'true'),
   ('asrs18.scale_meta', 'icon_name',         'zap'),
@@ -131,7 +134,7 @@ values
   -- ASRS v1.1 Dépistage
   ('asrs6.scale_meta', 'evaluation_type',   'auto'),
   ('asrs6.scale_meta', 'category',          'Neurodev'),
-  ('asrs6.scale_meta', 'target_ages',       '["adulte"]'),
+  ('asrs6.scale_meta', 'target_age_1',      'adulte'),
   ('asrs6.scale_meta', 'validated_age_range','18+ ans'),
   ('asrs6.scale_meta', 'has_preview',       'true'),
   ('asrs6.scale_meta', 'icon_name',         'zap'),
@@ -141,7 +144,8 @@ values
   -- SNAP-IV
   ('snap_iv.scale_meta', 'evaluation_type',   'hetero'),
   ('snap_iv.scale_meta', 'category',          'Neurodev'),
-  ('snap_iv.scale_meta', 'target_ages',       '["enfant","ado"]'),
+  ('snap_iv.scale_meta', 'target_age_1',      'enfant'),
+  ('snap_iv.scale_meta', 'target_age_2',      'ado'),
   ('snap_iv.scale_meta', 'validated_age_range','6 – 18 ans'),
   ('snap_iv.scale_meta', 'has_preview',       'true'),
   ('snap_iv.scale_meta', 'icon_name',         'zap'),
@@ -151,7 +155,8 @@ values
   -- C-SSRS
   ('cssrs.scale_meta', 'evaluation_type',   'hetero'),
   ('cssrs.scale_meta', 'category',          'Humeur'),
-  ('cssrs.scale_meta', 'target_ages',       '["ado","adulte"]'),
+  ('cssrs.scale_meta', 'target_age_1',      'ado'),
+  ('cssrs.scale_meta', 'target_age_2',      'adulte'),
   ('cssrs.scale_meta', 'validated_age_range','≥ 12 ans'),
   ('cssrs.scale_meta', 'no_toggle',         'true'),
   ('cssrs.scale_meta', 'has_preview',       'false'),
