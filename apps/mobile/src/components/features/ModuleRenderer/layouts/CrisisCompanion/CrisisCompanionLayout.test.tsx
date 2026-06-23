@@ -30,7 +30,7 @@ function field(overrides: Partial<ContentField>): ContentField {
 
 const UI_FIELDS: ContentField[] = [
   field({ id: 'dt.now.intro1', field_type: 'exercise_intro', text_code: 'modules.distress_tolerance.now.intro1', sort_order: 1 }),
-  field({ id: 'dt.now.config', field_type: 'exercise_config', props: { durations: '5,15' }, sort_order: 3 }),
+  field({ id: 'dt.now.config', field_type: 'exercise_config', props: { duration_1: '5', duration_2: '15' }, sort_order: 3 }),
 ]
 
 const SECTIONS = new Map<string, ContentField[]>([

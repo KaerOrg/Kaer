@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { Waves, Wind, Brain, Heart, Sun, Clock } from 'lucide-react'
+import { collectIndexed } from '@kaer/shared'
 import type { ContentField } from '../../../../../services/moduleService'
 import { parseDurations } from './crisisLogic'
 
@@ -42,7 +43,7 @@ export function CrisisCompanionLayout({ fields, t, moduleId }: Props) {
 
   const intros = fields.filter(f => f.field_type === 'exercise_intro')
   const configField = fields.find(f => f.field_type === 'exercise_config')
-  const durations = parseDurations(configField?.props['durations'])
+  const durations = parseDurations(collectIndexed(configField?.props ?? {}, 'duration'))
 
   const sections = new Map<string, ContentField[]>()
   for (const f of fields) {

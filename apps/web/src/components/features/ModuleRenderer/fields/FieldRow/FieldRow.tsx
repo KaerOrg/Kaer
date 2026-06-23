@@ -54,7 +54,7 @@ export function FieldRow({ field, t }: FieldProps) {
       </div>
       <div className="preview-field__control">
         {widgetType
-          ? <FieldWidget widgetType={widgetType} detailText={detailText} />
+          ? <FieldWidget props={field.props} detailText={detailText} />
           : detailText && <span className="preview-field__detail">{detailText}</span>
         }
       </div>

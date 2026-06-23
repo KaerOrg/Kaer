@@ -1,11 +1,8 @@
 import { useState } from 'react'
 
-interface Props { spec: string }
+interface Props { min: number; max: number; unit?: string }
 
-export function SliderWidget({ spec }: Props) {
-  const [, rawMin, rawMax, unit] = spec.split(':')
-  const min = Number(rawMin ?? 0)
-  const max = Number(rawMax ?? 10)
+export function SliderWidget({ min, max, unit }: Props) {
   const mid = Math.round((min + max) / 2)
   const [value, setValue] = useState(mid)
   return (

@@ -98,7 +98,7 @@ const COL3 = makeField({
 const MOCK_FIELDS: ContentField[] = [
   makeField({
     id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
-    props: { engagement_event_type: 'SAVE_BECK_THOUGHT_RECORD', required_keys_any: 'situation,automatic_thought' },
+    props: { engagement_event_type: 'SAVE_BECK_THOUGHT_RECORD', required_key_1: 'situation', required_key_2: 'automatic_thought' },
   }),
   makeField({ id: 'beck.new_btn',     field_type: 'column_form_new_btn_label',    sort_order: 1, text_code: 'modules.beck_columns.new_thought' }),
   makeField({ id: 'beck.save_label',  field_type: 'column_form_save_label',       sort_order: 2, text_code: 'modules.beck_columns.save' }),

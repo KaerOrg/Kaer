@@ -8,13 +8,13 @@
 export const DEFAULT_DURATIONS: readonly number[] = [5, 15]
 
 /**
- * Parse la prop `durations` (ex. "5,15") en minutes positives.
+ * Parse les durées issues des clés indexées `duration_1`, `duration_2`, …
+ * (collectées via `collectIndexed`) en minutes positives.
  * Retourne {@link DEFAULT_DURATIONS} si rien d'exploitable.
  */
-export function parseDurations(raw: string | undefined): number[] {
-  if (!raw) return [...DEFAULT_DURATIONS]
+export function parseDurations(raw: readonly string[] | undefined): number[] {
+  if (!raw || raw.length === 0) return [...DEFAULT_DURATIONS]
   const parsed = raw
-    .split(',')
     .map(part => Number.parseInt(part.trim(), 10))
     .filter(n => Number.isFinite(n) && n > 0)
   return parsed.length > 0 ? parsed : [...DEFAULT_DURATIONS]

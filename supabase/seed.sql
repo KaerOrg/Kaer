@@ -481,7 +481,8 @@ on conflict (id) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
-  ('beck.cfg', 'required_keys_any',     'situation,automatic_thought'),
+  ('beck.cfg', 'required_key_1',        'situation'),
+  ('beck.cfg', 'required_key_2',        'automatic_thought'),
   ('beck.cfg', 'new_btn_label',         'modules.beck_columns.new_thought'),
   ('beck.cfg', 'save_label',            'modules.beck_columns.save'),
   ('beck.cfg', 'empty_title',           'modules.beck_columns.empty_title'),
@@ -1983,51 +1984,83 @@ on conflict (field_id, prop_key) do nothing;
 -- (Plusieurs de ces parents ont d'ailleurs été supprimés plus haut par les
 -- migrations de layout — sleep_journal, activity_log, exposure_tracker.)
 
+-- Convention `field_props` : `prop_value` atomique. `widget_type` ne porte que
+-- le *kind* (slider, stars, radio…) ; les paramètres sont des props frères
+-- atomiques (slider_min, slider_max, slider_unit, stars_count, radio_variant).
+-- Voir docs/module-engine.md § « Convention field_props : prop_value atomique ».
 insert into public.field_props (field_id, prop_key, prop_value)
-select v.field_id, 'widget_type', v.widget
+select v.field_id, v.prop_key, v.prop_value
 from (values
   -- sleep_diary
-  ('sleep.field_1', 'time'),
-  ('sleep.field_2', 'time'),
-  ('sleep.field_3', 'slider:0:120:min'),
-  ('sleep.field_4', 'slider:0:10'),
-  ('sleep.field_5', 'slider:0:120:min'),
-  ('sleep.field_6', 'stars:5'),
-  ('sleep.field_7', 'boolean'),
-  ('sleep.field_8', 'textarea'),
+  ('sleep.field_1', 'widget_type', 'time'),
+  ('sleep.field_2', 'widget_type', 'time'),
+  ('sleep.field_3', 'widget_type', 'slider'),
+  ('sleep.field_3', 'slider_min',  '0'),
+  ('sleep.field_3', 'slider_max',  '120'),
+  ('sleep.field_3', 'slider_unit', 'min'),
+  ('sleep.field_4', 'widget_type', 'slider'),
+  ('sleep.field_4', 'slider_min',  '0'),
+  ('sleep.field_4', 'slider_max',  '10'),
+  ('sleep.field_5', 'widget_type', 'slider'),
+  ('sleep.field_5', 'slider_min',  '0'),
+  ('sleep.field_5', 'slider_max',  '120'),
+  ('sleep.field_5', 'slider_unit', 'min'),
+  ('sleep.field_6', 'widget_type', 'stars'),
+  ('sleep.field_6', 'stars_count', '5'),
+  ('sleep.field_7', 'widget_type', 'boolean'),
+  ('sleep.field_8', 'widget_type', 'textarea'),
   -- mood_tracker
-  ('mood.field_1', 'slider:1:10'),
-  ('mood.field_2', 'slider:1:10'),
-  ('mood.field_3', 'slider:1:10'),
-  ('mood.field_4', 'slider:1:10'),
-  ('mood.field_5', 'textarea'),
+  ('mood.field_1', 'widget_type', 'slider'),
+  ('mood.field_1', 'slider_min',  '1'),
+  ('mood.field_1', 'slider_max',  '10'),
+  ('mood.field_2', 'widget_type', 'slider'),
+  ('mood.field_2', 'slider_min',  '1'),
+  ('mood.field_2', 'slider_max',  '10'),
+  ('mood.field_3', 'widget_type', 'slider'),
+  ('mood.field_3', 'slider_min',  '1'),
+  ('mood.field_3', 'slider_max',  '10'),
+  ('mood.field_4', 'widget_type', 'slider'),
+  ('mood.field_4', 'slider_min',  '1'),
+  ('mood.field_4', 'slider_max',  '10'),
+  ('mood.field_5', 'widget_type', 'textarea'),
   -- medication_adherence
-  ('madh.field_1', 'radio:ok'),
-  ('madh.field_2', 'radio:partial'),
-  ('madh.field_3', 'radio:miss'),
-  ('madh.field_4', 'textarea'),
-  ('madh.field_5', 'info'),
+  ('madh.field_1', 'widget_type',   'radio'),
+  ('madh.field_1', 'radio_variant', 'ok'),
+  ('madh.field_2', 'widget_type',   'radio'),
+  ('madh.field_2', 'radio_variant', 'partial'),
+  ('madh.field_3', 'widget_type',   'radio'),
+  ('madh.field_3', 'radio_variant', 'miss'),
+  ('madh.field_4', 'widget_type', 'textarea'),
+  ('madh.field_5', 'widget_type', 'info'),
   -- behavioral_activation
-  ('ba.field_1', 'date'),
-  ('ba.field_2', 'text'),
-  ('ba.field_3', 'checkbox'),
-  ('ba.field_4', 'slider:0:10'),
-  ('ba.field_5', 'slider:0:10'),
-  ('ba.field_6', 'textarea'),
+  ('ba.field_1', 'widget_type', 'date'),
+  ('ba.field_2', 'widget_type', 'text'),
+  ('ba.field_3', 'widget_type', 'checkbox'),
+  ('ba.field_4', 'widget_type', 'slider'),
+  ('ba.field_4', 'slider_min',  '0'),
+  ('ba.field_4', 'slider_max',  '10'),
+  ('ba.field_5', 'widget_type', 'slider'),
+  ('ba.field_5', 'slider_min',  '0'),
+  ('ba.field_5', 'slider_max',  '10'),
+  ('ba.field_6', 'widget_type', 'textarea'),
   -- fear_thermometer
-  ('ft.field_1', 'text'),
-  ('ft.field_2', 'slider:0:10'),
-  ('ft.field_3', 'text'),
-  ('ft.field_4', 'slider:0:10'),
-  ('ft.field_5', 'textarea'),
+  ('ft.field_1', 'widget_type', 'text'),
+  ('ft.field_2', 'widget_type', 'slider'),
+  ('ft.field_2', 'slider_min',  '0'),
+  ('ft.field_2', 'slider_max',  '10'),
+  ('ft.field_3', 'widget_type', 'text'),
+  ('ft.field_4', 'widget_type', 'slider'),
+  ('ft.field_4', 'slider_min',  '0'),
+  ('ft.field_4', 'slider_max',  '10'),
+  ('ft.field_5', 'widget_type', 'textarea'),
   -- breathing_techniques
-  ('bt.field_1', 'info'),
-  ('bt.field_2', 'info'),
-  ('bt.field_3', 'info'),
-  ('bt.field_4', 'info'),
-  ('bt.field_5', 'info'),
-  ('bt.field_6', 'text')
-) as v(field_id, widget)
+  ('bt.field_1', 'widget_type', 'info'),
+  ('bt.field_2', 'widget_type', 'info'),
+  ('bt.field_3', 'widget_type', 'info'),
+  ('bt.field_4', 'widget_type', 'info'),
+  ('bt.field_5', 'widget_type', 'info'),
+  ('bt.field_6', 'widget_type', 'text')
+) as v(field_id, prop_key, prop_value)
 where exists (select 1 from public.module_content_fields where id = v.field_id)
 on conflict (field_id, prop_key) do nothing;
 
@@ -2154,8 +2187,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('dt.tab.now', 'tab_key',          'now'),
   ('dt.tab.now', 'sub_preview_kind', 'crisis_companion'),
   ('dt.tab.now', 'icon_name',        'Waves'),
-  -- durées proposées (minutes), parsées par le layout crisis_companion
-  ('dt.now.config', 'durations', '5,15'),
+  -- durées proposées (minutes), clés indexées atomiques lues par crisis_companion
+  ('dt.now.config', 'duration_1', '5'),
+  ('dt.now.config', 'duration_2', '15'),
   -- accents de catégorie (couleurs neutres, non interprétatives) + icônes (lucide)
   ('dt.now.cat.tipp',        'icon',  'Wind'),
   ('dt.now.cat.tipp',        'color', '#0EA5E9'),

@@ -295,7 +295,10 @@ create table public.field_props (
 
 | `prop_key` | Valeur exemple | Utilisé par |
 |---|---|---|
-| `widget_type` | `"slider:0:120:min"` | `FieldRow` → `FieldWidget` |
+| `widget_type` | `"slider"` (kind seul) | `FieldRow` → `FieldWidget` |
+| `slider_min` / `slider_max` / `slider_unit` | `"0"` / `"120"` / `"min"` | `FieldWidget` → `SliderWidget` |
+| `stars_count` | `"5"` | `FieldWidget` → `StarsWidget` (optionnel, défaut 5) |
+| `radio_variant` | `"ok"` | `FieldWidget` → `RadioWidget` (`ok` \| `partial` \| `miss`) |
 | `icon` | `"moon"` | `FieldRow`, `scale_slider_question`, `exercise_safety`, `ambient_sound` |
 | `detail_code` | `"sleep.field_1.detail"` | `FieldRow` — texte descriptif sous le label |
 | `color` | `"#4F46E5"` | `StepsLayout` (badge), `Grid2x2Layout` (bordure), `scale_slider_question` (accent) |
@@ -313,20 +316,58 @@ create table public.field_props (
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 
-**Format `widget_type` :**
+**`widget_type` = le *kind* seul ; les paramètres sont des props frères atomiques :**
 
 ```
-"time"              → TimeWidget
-"slider:0:120:min"  → SliderWidget  (min, max, unité)
-"stars:5"           → StarsWidget   (nombre d'étoiles)
-"boolean"           → BooleanWidget
-"radio:ok"          → RadioWidget   (variante: ok | partial | miss)
-"date"              → DateWidget
-"text"              → TextWidget
-"checkbox"          → CheckboxWidget
-"textarea"          → TextareaWidget
-"info"              → InfoWidget    (texte via detail_code)
+"time"       → TimeWidget
+"slider"     → SliderWidget   (+ slider_min, slider_max, slider_unit?)
+"stars"      → StarsWidget    (+ stars_count? — défaut 5)
+"boolean"    → BooleanWidget
+"radio"      → RadioWidget    (+ radio_variant : ok | partial | miss)
+"date"       → DateWidget
+"text"       → TextWidget
+"checkbox"   → CheckboxWidget
+"textarea"   → TextareaWidget
+"info"       → InfoWidget     (texte via detail_code)
 ```
+
+`FieldRow` passe l'intégralité de `field.props` à `FieldWidget`, qui lit le kind
+(`widget_type`) puis décompose les props frères vers le widget concerné. Aucun
+`split(':')` : les paramètres sont déjà atomiques en base.
+
+---
+
+### Convention `field_props` : prop_value atomique
+
+> **Règle absolue.** `field_props` a une PK `(field_id, prop_key)` : **une entrée =
+> une valeur atomique**. Une `prop_value` ne ré-encode JAMAIS une structure dans une
+> string (CSV, JSON, `kind:param:param`) que le code devrait re-parser. La structure
+> cachée dans du texte est non requêtable, non validable en base, et contraire à
+> `config-first`.
+
+**Arbre de décision :**
+
+| Besoin | ❌ Packé (interdit) | ✅ Atomique |
+|---|---|---|
+| Attributs nommés distincts | `widget_type='slider:0:120:min'` | `widget_type='slider'` + `slider_min='0'` + `slider_max='120'` + `slider_unit='min'` |
+| Idem (étoiles, radio) | `'stars:5'`, `'radio:ok'` | `widget_type='stars'`+`stars_count='5'` ; `widget_type='radio'`+`radio_variant='ok'` |
+| Liste de valeurs | `durations='5,15'` | `duration_1='5'`, `duration_2='15'` |
+| Liste (clés requises) | `required_keys_any='a,b'` | `required_key_1='a'`, `required_key_2='b'` |
+| Liste (JSON) | `target_ages='["adulte","senior"]'` | `target_age_1='adulte'`, `target_age_2='senior'` |
+
+**Lecture des listes côté code** : helper partagé `collectIndexed(props, base)`
+(`@kaer/shared`) : collecte `base_1`, `base_2`, … triés par index numérique. Web et
+mobile l'utilisent à l'identique (parité stricte) ; plus aucun `split(',')`/`JSON.parse`.
+
+**Allowlist : valeurs atomiques contenant `:`/`,`/`-` LÉGITIMEMENT** (ce ne sont pas
+des packings, ne pas les éclater) : `reference_url` (une URL), `reference_label` (une
+citation), `validated_age_range` (libellé « 8 - 18 ans »), clés i18n (`modules.x.y`),
+couleurs hex (`#F59E0B`), booléens/nombres simples.
+
+**Garde-fou** : `apps/web/src/test/fieldPropsAtomic.guard.test.ts` scanne tous les
+seeds et échoue si une `prop_value` packée réapparaît (clé legacy, `widget_type` avec
+`:`, tableau JSON). Migration des bases existantes :
+`supabase/migration_atomic_field_props.sql` (idempotente).
 
 ---
 
@@ -534,7 +575,10 @@ Layout vertical :
 
 ### `FieldWidget`
 
-Dispatcher pur — aucun état, aucun style propre. Prend `widgetType: string` et retourne le composant widget correspondant.
+Dispatcher pur — aucun état, aucun style propre. Prend `props: Record<string, string>`
+(les `field_props` du champ), lit le kind (`widget_type`) et décompose les props
+frères atomiques (`slider_min`/`slider_max`/`slider_unit`, `stars_count`,
+`radio_variant`) vers le composant widget correspondant.
 
 ### Widgets (`fields/widgets/`)
 
@@ -620,7 +664,7 @@ Les attributs structurés sont stockés dans **`field_props`** (une ligne par at
 | `prop_key` | `prop_value` (type text) | Rôle |
 |---|---|---|
 | `evaluation_type` | `'auto'` ou `'hetero'` | Badge Auto / Hétéro dans `ScaleMetaBadges` |
-| `target_ages` | JSON array (`'["ado","adulte"]'`) | Chips de population colorés via `AGE_BADGE_CONFIG` |
+| `target_age_1`, `target_age_2`, … | `'ado'`, `'adulte'` (clés indexées atomiques) | Chips de population colorés via `AGE_BADGE_CONFIG` ; lus par `collectIndexed(props, 'target_age')` |
 | `validated_age_range` | `'≥ 18 ans'` | Plage d'âge validée en texte libre |
 | `no_toggle` | `'true'` ou `'false'` | Si `'true'` : remplace le toggle par un bouton d'action custom (ex. C-SSRS) |
 | `reference_label` | `'Kroenke et al., 2001'` | Label de la référence bibliographique |
@@ -638,7 +682,7 @@ no_toggle = 'true'           → bouton d'action custom → ouvre un panel dédi
 ### Ajouter une nouvelle échelle
 
 1. `INSERT` dans `module_content_fields` : `field_type = 'scale_meta'`, `text_code = 'modules.<id>.description'`
-2. `INSERT` dans `field_props` : `evaluation_type`, `target_ages`, `validated_age_range`, `no_toggle`, `reference_label`, `reference_url`
+2. `INSERT` dans `field_props` : `evaluation_type`, `target_age_1`/`target_age_2`/… (une ligne par âge, jamais de tableau JSON packé), `validated_age_range`, `no_toggle`, `reference_label`, `reference_url`
 3. Ajouter les clés i18n `modules.<id>.label`, `modules.<id>.full_title`, `modules.<id>.description` dans `fr/common.json` et `en/common.json`
 4. Ajouter la config scoring dans `SCALE_SCORING` (`apps/mobile/src/lib/scaleScoring.ts`)
 5. Ajouter les clés `modules.<id>.*` (questions, options) dans `fr/teen.json` et `en/teen.json`

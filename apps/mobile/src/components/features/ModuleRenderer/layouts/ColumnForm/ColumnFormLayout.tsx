@@ -17,6 +17,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
+import { collectIndexed } from '@kaer/shared'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
@@ -65,10 +66,9 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     const code = configField?.props[key]
     return code ? t(code) : ''
   }
-  const requiredKeysProp = configField?.props['required_keys_any'] ?? ''
   const requiredKeysAny = useMemo(
-    () => requiredKeysProp.split(',').map(k => k.trim()).filter(Boolean),
-    [requiredKeysProp]
+    () => collectIndexed(configField?.props ?? {}, 'required_key'),
+    [configField]
   )
 
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)

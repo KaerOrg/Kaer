@@ -297,3 +297,40 @@ web fr/en common) écrites avec un cadratin U+2014 dans le texte rendu à l'écr
 `common.json`/`teen.json` est du texte visible. Toute incise/définition au tiret long
 se remplace par deux-points (ou virgule selon le sens). Vérif systématique avant
 commit i18n : `grep -rlP "\x{2014}|\x{2013}" apps/*/src/i18n/locales` doit être vide.
+
+---
+
+## field_props : prop_value atomique
+
+> Règle source : [config-first.md § Jamais de valeur packée dans `field_props.prop_value`](config-first.md).
+
+**assainir-field-props (2026-06-23, issue #70) — la structure cachée dans une string.**
+Plusieurs `field_props` ré-encodaient une structure dans une seule `prop_value`, que
+le code re-parsait ensuite : `widget_type='slider:0:120:min'` / `'stars:5'` /
+`'radio:ok'` (lus par `spec.split(':')`), `durations='5,15'` et
+`required_keys_any='situation,automatic_thought'` (lus par `split(',')`),
+`target_ages='["adulte","senior"]'` (lu par `JSON.parse`). La table a pourtant une PK
+`(field_id, prop_key)` : une `prop_value` doit être **une donnée atomique**. Le
+packing est révélé par l'issue #58 (le `stars:5` masquait un paramètre).
+```sql
+-- ❌ structure packée dans une string opaque, non requêtable, re-parsée côté code
+('sleep.field_3', 'widget_type', 'slider:0:120:min')
+('dt.now.config', 'durations',   '5,15')
+('phq9.scale_meta', 'target_ages', '["adulte","senior"]')
+-- ✅ atomique : attribut nommé → prop frère ; liste → clés indexées
+('sleep.field_3', 'widget_type', 'slider'), ('sleep.field_3', 'slider_min', '0'),
+('sleep.field_3', 'slider_max', '120'),    ('sleep.field_3', 'slider_unit', 'min')
+('dt.now.config', 'duration_1', '5'), ('dt.now.config', 'duration_2', '15')
+('phq9.scale_meta', 'target_age_1', 'adulte'), ('phq9.scale_meta', 'target_age_2', 'senior')
+```
+Correctif : `widget_type` ne porte plus que le *kind* (params en props frères) ; les
+listes passent en clés indexées lues par le helper partagé `collectIndexed(props, base)`
+(`@kaer/shared`, parité web ≡ mobile) ; plus aucun `split(':')`/`split(',')`/`JSON.parse`
+sur ces props. Garde-fou : `apps/web/src/test/fieldPropsAtomic.guard.test.ts` scanne
+les seeds et échoue sur toute valeur packée (clé legacy, `widget_type` avec `:`,
+tableau JSON) hors allowlist (`reference_url`, `reference_label`,
+`validated_age_range`, clés i18n, couleurs hex).
+→ Réflexe review sur tout `field_props` : « cette `prop_value` contient-elle plus
+d'une donnée ? » Si oui → props frères (attribut nommé) ou clés indexées (liste),
+jamais `:`/CSV/JSON. Mettre la config en base ne suffit pas si la base re-cache une
+structure dans du texte.

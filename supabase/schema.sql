@@ -905,6 +905,20 @@ create index if not exists idx_mcf_section  on public.module_content_fields(modu
 -- TABLE : field_props (Propriétés des composants React)
 -- ============================================================
 -- PK composite (field_id, prop_key) : un seul prop_value par prop par champ.
+--
+-- CONVENTION — prop_value ATOMIQUE (une entrée = une valeur).
+--   Une `prop_value` ne ré-encode JAMAIS une structure dans une string :
+--     - attribut nommé distinct → prop frère dédié
+--       (ex. widget_type='slider' + slider_min/slider_max/slider_unit ;
+--        widget_type='stars' + stars_count ; widget_type='radio' + radio_variant)
+--     - liste → clés indexées atomiques `base_1`, `base_2`, …
+--       (ex. duration_1/duration_2 ; required_key_1/required_key_2 ;
+--        target_age_1/target_age_2). Lecture côté code : collectIndexed().
+--   Interdit : packer en CSV/JSON/`kind:param:param` (ex. 'slider:0:120:min',
+--   '5,15', '["adulte","senior"]').
+--   Allowlist (valeurs atomiques contenant `:`/`,`/`-` légitimement, NON packées) :
+--   reference_url, reference_label, validated_age_range, clés i18n, couleurs hex.
+--   Cf. docs/module-engine.md § « Convention field_props : prop_value atomique ».
 
 create table if not exists public.field_props (
   field_id   text not null references public.module_content_fields(id) on delete cascade,

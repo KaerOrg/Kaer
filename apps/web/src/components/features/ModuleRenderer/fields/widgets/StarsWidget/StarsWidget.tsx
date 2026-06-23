@@ -1,15 +1,14 @@
 import { useMemo } from 'react'
 import { RatingSelector } from '../../../../../ui/RatingSelector'
 
-interface Props { spec: string }
+interface Props { count: number }
 
-// Aperçu (lecture seule) d'un champ `stars:N` : rangée de N étoiles dont la
+// Aperçu (lecture seule) d'un champ étoiles : rangée de `count` étoiles dont la
 // moitié (ceil) est remplie, rendue par RatingSelector (variant icon, sans
 // onChange → lecture seule). Aucun markup ad hoc — le primitive porte les icônes.
-export function StarsWidget({ spec }: Props) {
-  const max = Number(spec.split(':')[1] ?? 5)
-  const filled = Math.ceil(max / 2)
-  const steps = useMemo(() => Array.from({ length: max }, (_, i) => i + 1), [max])
+export function StarsWidget({ count }: Props) {
+  const filled = Math.ceil(count / 2)
+  const steps = useMemo(() => Array.from({ length: count }, (_, i) => i + 1), [count])
 
   return (
     <RatingSelector

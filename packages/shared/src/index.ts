@@ -6,6 +6,8 @@ export { colors, spacing, radius, fontSize } from './theme'
 
 export { fetchModuleFields } from './services/moduleFields'
 
+export { collectIndexed } from './services/fieldProps'
+
 export {
   buildRhythmogram,
   parseTimeToMinutes,

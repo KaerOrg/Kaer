@@ -14,6 +14,47 @@ Exemples de données qui restent dans le code :
 - Constantes de présentation partagées par tous les modules (couleurs des chips d'âge, tokens CSS)
 - Logique de scoring côté mobile (algorithme, pas données)
 
+## Jamais de valeur packée dans `field_props.prop_value`
+
+`field_props` est notre table de config EAV : PK `(field_id, prop_key)`, donc **une
+entrée = une valeur atomique**. Mettre la config en base ne suffit pas : il faut
+qu'elle y soit *requêtable et validable*. Ré-encoder une structure (plusieurs
+attributs ou une liste) dans une seule `prop_value` que le code re-parse
+(`split(':')`, `split(',')`, `JSON.parse`) recrée le problème de `config-first` à
+l'intérieur même de la base : la structure redevient du texte opaque.
+
+**Arbre de décision devant un attribut multi-valué :**
+
+1. **Attribut nommé distinct** (un paramètre qui a un nom) → **prop frère dédié**.
+   `widget_type` ne porte que le *kind* ; les paramètres sont des props sœurs.
+   ```
+   ❌ ('f', 'widget_type', 'slider:0:120:min')
+   ✅ ('f', 'widget_type', 'slider') + slider_min='0' + slider_max='120' + slider_unit='min'
+   ❌ 'stars:5'  → ✅ widget_type='stars' + stars_count='5'
+   ❌ 'radio:ok' → ✅ widget_type='radio' + radio_variant='ok'
+   ```
+2. **Liste homogène** (durées, clés requises, âges cibles) → **clés indexées**
+   `base_1`, `base_2`, … (convention déjà en place : `quality_label_1..5`, etc.).
+   Lecture côté code via le helper partagé `collectIndexed(props, base)` (`@kaer/shared`).
+   ```
+   ❌ ('cfg', 'durations', '5,15')              → ✅ duration_1='5', duration_2='15'
+   ❌ ('cfg', 'required_keys_any', 'a,b')        → ✅ required_key_1='a', required_key_2='b'
+   ❌ ('m', 'target_ages', '["adulte","senior"]') → ✅ target_age_1='adulte', target_age_2='senior'
+   ```
+3. **Jamais** `:` / CSV / JSON pour empiler plusieurs données dans une `prop_value`.
+
+**Allowlist** (valeurs atomiques qui contiennent `:`/`,`/`-` mais ne sont **pas** un
+packing, ne pas les éclater) : `reference_url`, `reference_label`,
+`validated_age_range` (« 8 - 18 ans »), clés i18n (`modules.x.y`), couleurs hex,
+booléens/nombres simples.
+
+**Garde-fou** : `apps/web/src/test/fieldPropsAtomic.guard.test.ts` échoue si une
+valeur packée réapparaît dans un seed. Réflexe avant de commiter un nouveau
+`field_props` : « cette `prop_value` contient-elle plus d'une donnée ? » Si oui →
+props frères ou clés indexées. Détail : [`docs/module-engine.md`](../../docs/module-engine.md)
+§ « Convention `field_props` : prop_value atomique ». Cas vécu :
+[`lessons.md`](lessons.md) § « field_props : prop_value atomique ».
+
 ## L'erreur classique
 
 Créer un tableau TypeScript `CLINICAL_SCALES` parce que c'est "plus rapide" :

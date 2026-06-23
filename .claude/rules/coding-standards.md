@@ -510,6 +510,8 @@ import { shadows } from '../../theme'
 ## Schéma
 
 - Tout changement de schéma (table, colonne, trigger, RLS, index PostGIS) → répercuté dans `supabase/schema.sql` (source de vérité)
+- **`field_props.prop_value` est atomique** (PK `(field_id, prop_key)`) : jamais de valeur packée (CSV, JSON, `kind:param:param`). Attribut nommé → prop frère ; liste → clés indexées `base_1`/`base_2` lues par `collectIndexed`. Règle et arbre de décision : [`config-first.md`](config-first.md) § « Jamais de valeur packée dans `field_props.prop_value` ».
+> 📌 Cas vécu : voir [lessons.md § field_props : prop_value atomique](lessons.md).
 
 ## Ponctuation : pas de tiret long (U+2014 ni U+2013)
 

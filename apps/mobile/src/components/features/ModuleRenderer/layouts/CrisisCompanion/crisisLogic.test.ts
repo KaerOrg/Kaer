@@ -7,18 +7,18 @@ import {
 } from './crisisLogic'
 
 describe('crisisLogic — parseDurations', () => {
-  it('parse une liste valide', () => {
-    expect(parseDurations('5,15')).toEqual([5, 15])
+  it('parse les valeurs indexées valides', () => {
+    expect(parseDurations(['5', '15'])).toEqual([5, 15])
   })
 
   it('ignore les espaces et les valeurs non numériques ou négatives', () => {
-    expect(parseDurations(' 3 , x, -2, 10 ')).toEqual([3, 10])
+    expect(parseDurations([' 3 ', 'x', '-2', '10 '])).toEqual([3, 10])
   })
 
   it('retombe sur les durées par défaut si vide ou invalide', () => {
     expect(parseDurations(undefined)).toEqual([...DEFAULT_DURATIONS])
-    expect(parseDurations('')).toEqual([...DEFAULT_DURATIONS])
-    expect(parseDurations('abc')).toEqual([...DEFAULT_DURATIONS])
+    expect(parseDurations([])).toEqual([...DEFAULT_DURATIONS])
+    expect(parseDurations(['abc'])).toEqual([...DEFAULT_DURATIONS])
   })
 })
 
