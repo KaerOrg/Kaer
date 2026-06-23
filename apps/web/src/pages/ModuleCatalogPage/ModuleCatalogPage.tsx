@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/authStore'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { Tooltip } from '../../components/ui/Tooltip'
 import type { ModuleType } from '../../lib/database.types'
 import { catalogQueries, useSaveEnabledModules } from '../../hooks/queries'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
@@ -205,15 +206,16 @@ export function ModuleCatalogPage() {
                           ),
                         }}
                         actions={!isComingSoon ? (
-                          <Button
-                            variant="outline"
-                            size="xs"
-                            icon={<Eye size={12} />}
-                            onClick={() => navigate(`/modules/preview/${mod.id}`)}
-                            title={t('patient.patient_view')}
-                          >
-                            {t('patient.preview_button')}
-                          </Button>
+                          <Tooltip label={t('patient.patient_view')}>
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              icon={<Eye size={12} />}
+                              onClick={() => navigate(`/modules/preview/${mod.id}`)}
+                            >
+                              {t('patient.preview_button')}
+                            </Button>
+                          </Tooltip>
                         ) : undefined}
                       >
                         {isComingSoon ? (

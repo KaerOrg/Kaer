@@ -106,7 +106,7 @@ describe('MedicationAdherenceCard', () => {
     setup({ medList })
     expect(screen.getByText('Sertraline')).toBeTruthy()
     expect(screen.getByText('50 mg')).toBeTruthy()
-    fireEvent.click(screen.getByTitle('common.delete'))
+    fireEvent.click(screen.getByLabelText('common.delete'))
     expect(medList.removeMedication).toHaveBeenCalledWith('m1')
   })
 })

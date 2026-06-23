@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Settings2, CalendarPlus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button/Button'
+import { Tooltip } from '../../components/ui/Tooltip'
 import { WeekGrid } from '../../components/features/WeekGrid'
 import { AvailabilityEditor } from '../../components/features/AvailabilityEditor'
 import { AppointmentModal } from '../../components/features/AppointmentModal'
@@ -248,11 +249,15 @@ export function AgendaPage() {
 
         {/* Week navigation */}
         <div className="agenda-page__week-nav">
-          <Button variant="ghost" size="sm" onClick={prevWeek} title={t('agenda.prev_week')} aria-label={t('agenda.prev_week')} icon={<ChevronLeft size={18} />} />
+          <Tooltip label={t('agenda.prev_week')}>
+            <Button variant="ghost" size="sm" onClick={prevWeek} aria-label={t('agenda.prev_week')} icon={<ChevronLeft size={18} />} />
+          </Tooltip>
           <span className="agenda-page__week-label">
             {formatWeekLabel(weekStart, t)}
           </span>
-          <Button variant="ghost" size="sm" onClick={nextWeek} title={t('agenda.next_week')} aria-label={t('agenda.next_week')} icon={<ChevronRight size={18} />} />
+          <Tooltip label={t('agenda.next_week')}>
+            <Button variant="ghost" size="sm" onClick={nextWeek} aria-label={t('agenda.next_week')} icon={<ChevronRight size={18} />} />
+          </Tooltip>
           <Button variant="ghost" size="sm" onClick={goToToday}>
             {t('agenda.today')}
           </Button>

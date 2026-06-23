@@ -23,6 +23,7 @@ import {
 } from '../../data/cssrs_screen'
 import type { IntensiteDimension, LikertOption } from '../../data/cssrs_screen'
 import { Button } from '../ui/Button'
+import { Tooltip } from '../ui/Tooltip'
 import { InputField } from '../ui/InputField'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { Radio } from '../ui/Radio'
@@ -1066,17 +1067,18 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
                     <span className="cssrs-panel__expand-icon">
                       {isExpanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="xs"
-                      category="danger"
-                      className="cssrs-panel__delete"
-                      icon={<Trash2 size={14} />}
-                      onClick={e => { e.stopPropagation(); handleDelete(a.id) }}
-                      disabled={deletingId === a.id}
-                      aria-label="Supprimer"
-                      title="Supprimer"
-                    />
+                    <Tooltip label="Supprimer">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        category="danger"
+                        className="cssrs-panel__delete"
+                        icon={<Trash2 size={14} />}
+                        onClick={e => { e.stopPropagation(); handleDelete(a.id) }}
+                        disabled={deletingId === a.id}
+                        aria-label="Supprimer"
+                      />
+                    </Tooltip>
                   </div>
                 </div>
 

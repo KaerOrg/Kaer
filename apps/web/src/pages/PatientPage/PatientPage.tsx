@@ -8,6 +8,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
+import { Tooltip } from '../../components/ui/Tooltip'
 import type { PatientModule } from '../../lib/database.types'
 import type { ModuleCategory } from '../../services/moduleCatalogService'
 import type { PractitionerNote } from '../../services/noteService'
@@ -222,18 +223,19 @@ export function PatientPage() {
               <h1 className="patient-page__name">{displayName}</h1>
               <p className="patient-page__email">{identity.email}</p>
             </div>
-            <button
-              className={`teen-mode-toggle ${identity.teenMode ? 'teen-mode-toggle--active' : ''}`}
-              onClick={toggleTeenMode}
-              disabled={togglingTeen}
-              title={identity.teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}
-            >
-              <span className="teen-mode-toggle__icon">🎨</span>
-              <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
-              <span className={`teen-mode-toggle__pill ${identity.teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
-                {identity.teenMode ? 'ON' : 'OFF'}
-              </span>
-            </button>
+            <Tooltip label={identity.teenMode ? t('patient.teen_mode_disable') : t('patient.teen_mode_enable')}>
+              <button
+                className={`teen-mode-toggle ${identity.teenMode ? 'teen-mode-toggle--active' : ''}`}
+                onClick={toggleTeenMode}
+                disabled={togglingTeen}
+              >
+                <span className="teen-mode-toggle__icon">🎨</span>
+                <span className="teen-mode-toggle__label">{t('patient.teen_mode_label')}</span>
+                <span className={`teen-mode-toggle__pill ${identity.teenMode ? 'teen-mode-toggle__pill--on' : ''}`}>
+                  {identity.teenMode ? 'ON' : 'OFF'}
+                </span>
+              </button>
+            </Tooltip>
           </div>
         )}
 

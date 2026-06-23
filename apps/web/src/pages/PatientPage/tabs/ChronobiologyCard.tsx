@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Bell, Eye, EyeOff, LineChart } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Tooltip } from '../../../components/ui/Tooltip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '../../../services/moduleCatalogService'
@@ -84,34 +85,37 @@ export function ChronobiologyCard({
         }}
         actions={unlocked && mod ? (
           <>
-            <Button
-              variant="outline"
-              size="xs"
-              icon={<Bell size={14} />}
-              aria-label={t('notifications.configure_button')}
-              title={t('notifications.configure_button')}
-              onClick={handleNotif}
-            />
-            <Button
-              variant="outline"
-              size="xs"
-              aria-pressed={previewOpen}
-              icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
-              onClick={handlePreviewToggle}
-              title={t('patient.patient_view')}
-            >
-              {t('patient.preview_button')}
-            </Button>
-            <Button
-              variant="outline"
-              size="xs"
-              aria-pressed={dataOpen}
-              icon={<LineChart size={14} />}
-              onClick={handleDataToggle}
-              title={t('patient.data_button')}
-            >
-              {t('patient.data_button')}
-            </Button>
+            <Tooltip label={t('notifications.configure_button')}>
+              <Button
+                variant="outline"
+                size="xs"
+                icon={<Bell size={14} />}
+                aria-label={t('notifications.configure_button')}
+                onClick={handleNotif}
+              />
+            </Tooltip>
+            <Tooltip label={t('patient.patient_view')}>
+              <Button
+                variant="outline"
+                size="xs"
+                aria-pressed={previewOpen}
+                icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
+                onClick={handlePreviewToggle}
+              >
+                {t('patient.preview_button')}
+              </Button>
+            </Tooltip>
+            <Tooltip label={t('patient.data_button')}>
+              <Button
+                variant="outline"
+                size="xs"
+                aria-pressed={dataOpen}
+                icon={<LineChart size={14} />}
+                onClick={handleDataToggle}
+              >
+                {t('patient.data_button')}
+              </Button>
+            </Tooltip>
           </>
         ) : undefined}
       >

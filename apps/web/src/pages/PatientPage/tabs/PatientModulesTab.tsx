@@ -4,6 +4,7 @@ import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Tooltip } from '../../../components/ui/Tooltip'
 import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -208,16 +209,17 @@ export function PatientModulesTab({
             }}
             actions={
               <>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  aria-pressed={isPreviewOpen('psychoeducation')}
-                  icon={isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
-                  onClick={() => togglePreview('psychoeducation')}
-                  title={t('patient.patient_view')}
-                >
-                  {t('patient.preview_button')}
-                </Button>
+                <Tooltip label={t('patient.patient_view')}>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isPreviewOpen('psychoeducation')}
+                    icon={isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
+                    onClick={() => togglePreview('psychoeducation')}
+                  >
+                    {t('patient.preview_button')}
+                  </Button>
+                </Tooltip>
                 {unlocked && mod && psycho.mode !== 'edit' && (
                   <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
                     {t('patient.psycho_edit_cards')}
@@ -596,28 +598,30 @@ export function PatientModulesTab({
             actions={
               <>
                 {scale.hasPreview && (
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    aria-pressed={isPreviewOpen(moduleType)}
-                    icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
-                    onClick={() => togglePreview(moduleType)}
-                    title={t('patient.patient_view')}
-                  >
-                    {t('patient.preview_button')}
-                  </Button>
+                  <Tooltip label={t('patient.patient_view')}>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      aria-pressed={isPreviewOpen(moduleType)}
+                      icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
+                      onClick={() => togglePreview(moduleType)}
+                    >
+                      {t('patient.preview_button')}
+                    </Button>
+                  </Tooltip>
                 )}
                 {unlocked && mod && (
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    aria-pressed={isDataOpen(moduleType)}
-                    icon={<LineChart size={14} />}
-                    onClick={() => toggleData(moduleType)}
-                    title={t('patient.data_button')}
-                  >
-                    {t('patient.data_button')}
-                  </Button>
+                  <Tooltip label={t('patient.data_button')}>
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      aria-pressed={isDataOpen(moduleType)}
+                      icon={<LineChart size={14} />}
+                      onClick={() => toggleData(moduleType)}
+                    >
+                      {t('patient.data_button')}
+                    </Button>
+                  </Tooltip>
                 )}
               </>
             }
@@ -656,36 +660,39 @@ export function PatientModulesTab({
           actions={
             <>
               {unlocked && mod && (
-                <Button
-                  variant="outline"
-                  size="xs"
-                  icon={<Bell size={14} />}
-                  aria-label={t('notifications.configure_button')}
-                  title={t('notifications.configure_button')}
-                  onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
-                />
+                <Tooltip label={t('notifications.configure_button')}>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    icon={<Bell size={14} />}
+                    aria-label={t('notifications.configure_button')}
+                    onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
+                  />
+                </Tooltip>
               )}
-              <Button
-                variant="outline"
-                size="xs"
-                aria-pressed={isPreviewOpen(moduleType)}
-                icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
-                onClick={() => togglePreview(moduleType)}
-                title={t('patient.patient_view')}
-              >
-                {t('patient.preview_button')}
-              </Button>
-              {unlocked && mod && (
+              <Tooltip label={t('patient.patient_view')}>
                 <Button
                   variant="outline"
                   size="xs"
-                  aria-pressed={isDataOpen(moduleType)}
-                  icon={<LineChart size={14} />}
-                  onClick={() => toggleData(moduleType)}
-                  title={t('patient.data_button')}
+                  aria-pressed={isPreviewOpen(moduleType)}
+                  icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
+                  onClick={() => togglePreview(moduleType)}
                 >
-                  {t('patient.data_button')}
+                  {t('patient.preview_button')}
                 </Button>
+              </Tooltip>
+              {unlocked && mod && (
+                <Tooltip label={t('patient.data_button')}>
+                  <Button
+                    variant="outline"
+                    size="xs"
+                    aria-pressed={isDataOpen(moduleType)}
+                    icon={<LineChart size={14} />}
+                    onClick={() => toggleData(moduleType)}
+                  >
+                    {t('patient.data_button')}
+                  </Button>
+                </Tooltip>
               )}
             </>
           }

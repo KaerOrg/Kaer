@@ -3,6 +3,7 @@ import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
+import { Tooltip } from '../../ui/Tooltip'
 import { InputField } from '../../ui/InputField'
 import { TimePicker } from '../../ui/TimePicker'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
@@ -219,24 +220,28 @@ function RoutineRow({ routine, onToggle, onDelete, t }: RoutineRowProps) {
         ) : null}
       </div>
       <div className="nr-row__actions">
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
-          onClick={onToggle}
-          aria-pressed={routine.is_active}
-          title={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          category="danger"
-          icon={<X size={15} />}
-          onClick={onDelete}
-          title={t('common.delete')}
-        />
+        <Tooltip label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
+            onClick={onToggle}
+            aria-pressed={routine.is_active}
+            aria-label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
+          />
+        </Tooltip>
+        <Tooltip label={t('common.delete')}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            category="danger"
+            icon={<X size={15} />}
+            onClick={onDelete}
+            aria-label={t('common.delete')}
+          />
+        </Tooltip>
       </div>
     </div>
   )

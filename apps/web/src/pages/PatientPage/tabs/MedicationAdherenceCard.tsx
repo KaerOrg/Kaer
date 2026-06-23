@@ -4,6 +4,7 @@ import { Bell, Eye, EyeOff, LineChart, Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { Chip } from '../../../components/ui/Chip'
+import { Tooltip } from '../../../components/ui/Tooltip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '../../../services/moduleCatalogService'
@@ -77,31 +78,35 @@ export function MedicationAdherenceCard({
         }}
         actions={unlocked && mod ? (
           <>
-            <button type="button" className="module-card__notif-btn" title={t('notifications.configure_button')} onClick={handleNotif}>
-              <Bell size={14} />
-            </button>
+            <Tooltip label={t('notifications.configure_button')}>
+              <button type="button" className="module-card__notif-btn" aria-label={t('notifications.configure_button')} onClick={handleNotif}>
+                <Bell size={14} />
+              </button>
+            </Tooltip>
             {!medList.open && (
               <Button variant="ghost" size="sm" onClick={medList.openEditor}>
                 {t('modules.medication_adherence.config_button')}
               </Button>
             )}
-            <button
-              className={`preview-toggle-btn ${previewOpen ? 'preview-toggle-btn--active' : ''}`}
-              onClick={handlePreviewToggle}
-              title={t('patient.patient_view')}
-            >
-              {previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
-              {t('patient.preview_button')}
-            </button>
-            <button
-              type="button"
-              className={`preview-toggle-btn ${dataOpen ? 'preview-toggle-btn--active' : ''}`}
-              onClick={handleDataToggle}
-              title={t('patient.data_button')}
-            >
-              <LineChart size={14} />
-              {t('patient.data_button')}
-            </button>
+            <Tooltip label={t('patient.patient_view')}>
+              <button
+                className={`preview-toggle-btn ${previewOpen ? 'preview-toggle-btn--active' : ''}`}
+                onClick={handlePreviewToggle}
+              >
+                {previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
+                {t('patient.preview_button')}
+              </button>
+            </Tooltip>
+            <Tooltip label={t('patient.data_button')}>
+              <button
+                type="button"
+                className={`preview-toggle-btn ${dataOpen ? 'preview-toggle-btn--active' : ''}`}
+                onClick={handleDataToggle}
+              >
+                <LineChart size={14} />
+                {t('patient.data_button')}
+              </button>
+            </Tooltip>
           </>
         ) : undefined}
       >
@@ -140,14 +145,16 @@ export function MedicationAdherenceCard({
                     tone="neutral"
                     size="sm"
                   />
-                  <button
-                    type="button"
-                    className="med-row__remove"
-                    title={t('common.delete')}
-                    onClick={() => medList.removeMedication(med.id)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  <Tooltip label={t('common.delete')}>
+                    <button
+                      type="button"
+                      className="med-row__remove"
+                      aria-label={t('common.delete')}
+                      onClick={() => medList.removeMedication(med.id)}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </Tooltip>
                 </div>
               ))}
             </div>

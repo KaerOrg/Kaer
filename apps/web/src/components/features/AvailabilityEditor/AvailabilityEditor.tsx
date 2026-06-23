@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import { Toggle } from '../../ui/Toggle/Toggle'
 import { Button } from '../../ui/Button/Button'
+import { Tooltip } from '../../ui/Tooltip'
 import { TimePicker } from '../../ui/TimePicker'
 import { timesOverlap } from '../../../services/appointmentService'
 import type { AvailabilityRule, DayOfWeek } from '../../../lib/calendar.types'
@@ -146,15 +147,16 @@ export function AvailabilityEditor({
                   </span>
                 )}
               </span>
-              <Button
-                variant="ghost"
-                size="xs"
-                category="danger"
-                icon={<Trash2 size={14} />}
-                onClick={() => onDeleteRule(rule.id)}
-                aria-label={t('agenda.editor.delete_rule')}
-                title={t('agenda.editor.delete_rule')}
-              />
+              <Tooltip label={t('agenda.editor.delete_rule')}>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  category="danger"
+                  icon={<Trash2 size={14} />}
+                  onClick={() => onDeleteRule(rule.id)}
+                  aria-label={t('agenda.editor.delete_rule')}
+                />
+              </Tooltip>
             </div>
           ))}
         </div>

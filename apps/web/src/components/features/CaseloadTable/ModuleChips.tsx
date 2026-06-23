@@ -63,12 +63,9 @@ export function ModuleChips({ moduleTypes, iconByModule, iconOnly = false, colum
         )
       })}
       {capped ? (
-        <Chip
-          tone="info"
-          label={`+${extraCount}`}
-          onClick={onOverflowClick}
-          title={t('file_active.link.modules_more', { count: extraCount })}
-        />
+        <Tooltip label={t('file_active.link.modules_more', { count: extraCount })}>
+          <Chip tone="info" label={`+${extraCount}`} onClick={onOverflowClick} title="" />
+        </Tooltip>
       ) : null}
     </div>
   )

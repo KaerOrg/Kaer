@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ClipboardList, ExternalLink, Plus, Star, User } from 'lucide-react'
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../ui/DataTable'
 import { Button } from '../../ui/Button'
+import { Tooltip } from '../../ui/Tooltip'
 import { Drawer } from '../../ui/Drawer'
 import { EmptyState } from '../../ui/EmptyState'
 import { AddEntryForm } from './AddEntryForm'
@@ -162,14 +163,15 @@ export function CaseloadTable({
   const drawerHeaderActions = useMemo(() => {
     if (!selectedPatient?.publicRef) return undefined
     return (
-      <Link
-        to={`/patient/${selectedPatient.publicRef}`}
-        className="caseload-drawer__patient-link"
-        title={t('file_active.open_patient')}
-        aria-label={t('file_active.open_patient')}
-      >
-        <ExternalLink size={16} aria-hidden="true" />
-      </Link>
+      <Tooltip label={t('file_active.open_patient')}>
+        <Link
+          to={`/patient/${selectedPatient.publicRef}`}
+          className="caseload-drawer__patient-link"
+          aria-label={t('file_active.open_patient')}
+        >
+          <ExternalLink size={16} aria-hidden="true" />
+        </Link>
+      </Tooltip>
     )
   }, [selectedPatient, t])
 
