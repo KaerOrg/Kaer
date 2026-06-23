@@ -2,9 +2,9 @@
 // Les couleurs par module sont désormais stockées en BDD (modules.color),
 // chargées dans authStore.moduleColors au login, et exposées via useTeen.teenColor().
 
-import { TEEN_DEFAULT_COLOR } from '../theme/teen'
-import frTeen from '../i18n/locales/fr/teen.json'
-import enTeen from '../i18n/locales/en/teen.json'
+import { TEEN_DEFAULT_COLOR } from '../../theme/teen'
+import frTeen from '../../i18n/locales/fr/teen.json'
+import enTeen from '../../i18n/locales/en/teen.json'
 
 describe('TEEN_DEFAULT_COLOR', () => {
   it('est un hex valide (#RRGGBB)', () => {

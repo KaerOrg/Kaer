@@ -43,9 +43,12 @@ jest.mock('react-i18next', () => ({
 jest.mock('../../../navigation/AppStack', () => ({}))
 
 jest.mock('@theme', () => ({
-  colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
-  spacing: { sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 4, md: 8 },
+  colors: {
+    primary: '#000', primaryLight: '#eef', danger: '#f00', neutral: '#f3f4f6',
+    background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111',
+  },
+  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+  radius: { sm: 6, md: 8 },
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 
@@ -61,6 +64,7 @@ jest.mock('../../../lib/scaleScoring', () => ({
       score_decimals: 0,
       items_count: 26,
       chips: ['chip_i', 'chip_hi', 'chip_tod'],
+      chipSubscaleKeys: { chip_i: 'inattention', chip_hi: 'hyperactivite', chip_tod: 'tod' },
     },
   },
 }))

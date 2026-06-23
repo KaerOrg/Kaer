@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useTeen } from './useTeen'
+import { useTeen } from '../useTeen'
 
 export function useModuleTranslation(): (key: string) => string {
   const { isTeenMode } = useTeen()

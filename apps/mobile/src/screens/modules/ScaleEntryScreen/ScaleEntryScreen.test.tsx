@@ -45,9 +45,12 @@ jest.mock('../../../services/notificationService', () => ({
 }))
 
 jest.mock('@theme', () => ({
-  colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999' },
-  spacing: { sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 4, md: 8 },
+  colors: {
+    primary: '#000', primaryLight: '#eef', danger: '#f00', neutral: '#f3f4f6',
+    background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999',
+  },
+  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+  radius: { sm: 6, md: 8 },
   typography: {},
 }))
 
