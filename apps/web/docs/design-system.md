@@ -74,7 +74,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 | `TimeWidget` | `.fw-time` | `<input type="time">` | `defaultValue="22:00"` |
 | `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `RatingSelector variant="bar"`, pas ce widget |
 | `StarsWidget` | (aucune — délègue) | `RatingSelector variant="icon"` (lecture seule) | Spec `stars:count`. Adaptateur fin → primitive, moitié des étoiles remplies |
-| `BooleanWidget` | `.fw-boolean` | `<span class="fw-boolean__opt">` × 2 | `.fw-boolean__opt--active` sur "Non" |
+| `BooleanWidget` | (aucune — délègue) | `Radio variant="pills"` (lecture seule) | Pilules `[Non] [Oui]`, "Non" actif. Adaptateur fin → primitive, zéro style pill ad hoc |
 | `RadioWidget` | `.fw-radio` + `fw-radio--ok/partial/miss` | `<span>` coloré | ok=vert, partial=ambre, miss=rouge |
 | `DateWidget` | `.fw-date` | `<input type="date">` | Placeholder natif du navigateur |
 | `TextWidget` | `.fw-text` | `<div>` vide | Hauteur fixe, fond card |
@@ -264,7 +264,9 @@ Branché sur : `TimeWidget` (preview module), `NotificationRoutineModal`, `Avail
 `components/ui/Radio/`. Sélecteur mono-sélection, trois habillages via `variant` :
 `list` (rond + label + sous-label), `pills` (pilules en ligne), ou `cards` (grille de
 cartes : pastille `badge` + label + sous-label, pour les **échelles à libellés riches**).
-Boutons `role="radio"` dans un `role="radiogroup"`.
+Boutons `role="radio"` dans un `role="radiogroup"`. `onChange` absent → rendu non
+interactif (options en `<span>`, sans `role`), pour un aperçu / affichage en lecture
+seule — jamais un composant « display-only » parallèle.
 
 ```tsx
 <Radio variant="list" options={[{ value: 'a', label: 'Oui' }, { value: 'b', label: 'Non' }]}
@@ -273,11 +275,16 @@ Boutons `role="radio"` dans un `role="radiogroup"`.
 // Variante cards : échelle de Likert (valeur en tête + label + détail)
 <Radio variant="cards" color="var(--color-danger)" value={String(level)} onChange={v => set(Number(v))}
        options={[{ value: '0', label: '0', sublabel: 'Aucune lésion', badge: '0' }, /* … */]} />
+
+// Aperçu en lecture seule (sans onChange) — ex. BooleanWidget
+<Radio variant="pills" value="non"
+       options={[{ value: 'non', label: 'Non' }, { value: 'oui', label: 'Oui' }]} />
 ```
 
-Props : `options: {value, label, sublabel?, badge?}[]`, `value: string | null`, `onChange(value)`,
-`variant?='list'|'pills'|'cards'`, `color?=var(--color-primary)`, `className?`, `data-testid?`.
-Branché sur : `CSSRSScreenPanel` (`LikertScale` = `Radio variant="cards"`, accent danger pour la létalité).
+Props : `options: {value, label, sublabel?, badge?}[]`, `value: string | null`, `onChange?(value)`
+(absent → lecture seule), `variant?='list'|'pills'|'cards'`, `color?=var(--color-primary)`,
+`className?`, `data-testid?`.
+Branché sur : `CSSRSScreenPanel` (`LikertScale` = `Radio variant="cards"`, accent danger pour la létalité) ; `BooleanWidget` (aperçu pills lecture seule).
 
 > **`Radio` vs `SegmentedControl`** : pour un choix exclusif **compact en barre segmentée**
 > → `SegmentedControl` (couvre déjà la variante « pills » dense). Pour une **liste verticale**

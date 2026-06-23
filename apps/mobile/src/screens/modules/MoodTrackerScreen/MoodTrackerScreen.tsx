@@ -1,4 +1,4 @@
-import { DimensionTrackerView, type DimensionTrackerConfig } from '../../components/features/DimensionTrackerView'
+import { DimensionTrackerView, type DimensionTrackerConfig } from '../../../components/features/DimensionTrackerView'
 
 // Thermomètre de l'humeur — coquille du tracker générique multi-dimensions
 // (cf. DimensionTrackerView). 6 dimensions 1–10 avec repère « Normal » central

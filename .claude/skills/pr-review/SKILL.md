@@ -324,6 +324,29 @@ Si un `useState('')` ou `useState<string>` est couplé à un `<input>` ou `<Text
 
 Si la valeur est uniquement lue au submit → **point d'attention** : préférer `useRef`.
 
+#### RULE — Imports : alias `@ui` / `@theme`, jamais de relatif profond
+*(source : coding-standards.md § "Imports — alias `@ui` / `@theme`")*
+
+Pour chaque fichier `.tsx` / `.ts` créé ou modifié, inspecter les lignes `import` :
+
+- Import d'un primitive du design system par **chemin relatif** remontant vers
+  `components/ui/` (`from '../../ui/X'`, `from '../../../../../ui/X'`, etc.) →
+  **violation** : doit passer par `@ui/X`.
+- Import du thème mobile par relatif (`from '../../theme'`, `from '../theme'`) →
+  **violation** : doit passer par `@theme`.
+
+```bash
+# Doit rester vide sur les fichiers du diff (hors sous-fichiers internes à ui/ lui-même)
+grep -rnE "from '(\.\./)+(components/)?ui/" apps/*/src --include="*.tsx" --include="*.ts"
+grep -rnE "from '(\.\./)+theme'" apps/mobile/src --include="*.tsx" --include="*.ts"
+```
+
+**Exception légitime** (ne pas signaler) : un fichier **interne au dossier d'un
+primitive** (`components/ui/Radio/Radio.tsx` important `./Radio.types`) — l'import
+local d'un sous-fichier du même composant est correct. La règle ne vise que les
+imports **inter-dossiers** vers `ui/` ou `theme/` depuis `features/`, `screens/`,
+`layouts/`, `widgets/`, etc.
+
 #### RULE — Architecture composants : `ui/` vs `features/`
 *(source : coding-standards.md § "Architecture des composants")*
 

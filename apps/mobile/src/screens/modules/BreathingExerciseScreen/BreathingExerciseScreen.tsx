@@ -8,13 +8,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { getTechnique, getCycleDuration, type BreathingPhase } from '../../constants/breathingTechniques'
-import { generateId } from '../../lib/database'
-import { saveBreathingSession } from '../../services/breathingService'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { getTechnique, getCycleDuration, type BreathingPhase } from '../../../constants/breathingTechniques'
+import { generateId } from '../../../lib/database'
+import { saveBreathingSession } from '../../../services/breathingService'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
-import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 type RouteType = RouteProp<AppStackParamList, 'BreathingExercise'>
 

@@ -11,13 +11,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { BREATHING_TECHNIQUES, getTechnique, type BreathingTechnique } from '../../constants/breathingTechniques'
-import { getAllBreathingSessions, type BreathingSession } from '../../lib/database'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { BREATHING_TECHNIQUES, getTechnique, type BreathingTechnique } from '../../../constants/breathingTechniques'
+import { getAllBreathingSessions, type BreathingSession } from '../../../lib/database'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
-import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/features/TeenAccent'
+import { useTeen } from '../../../hooks/useTeen'
+import { TeenAccent } from '../../../components/features/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 

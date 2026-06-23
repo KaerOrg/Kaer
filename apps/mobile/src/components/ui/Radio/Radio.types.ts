@@ -12,13 +12,20 @@ export interface RadioProps {
   options: readonly RadioOption[]
   /** Identifiant de l'option sélectionnée (`null` = aucune). */
   value: string | null
-  onChange: (value: string) => void
+  /** Sélection. Optionnel : inutile (et ignoré) en `readonly`. */
+  onChange?: (value: string) => void
   /**
    * Habillage :
    * - `list` (défaut) : radio classique, rangées rond + label (+ sous-label) ;
    * - `pills` : pilules en ligne, remplissage couleur sur l'option active.
    */
   variant?: 'list' | 'pills'
+  /**
+   * Lecture seule : même rendu, aucune interaction (options rendues en `View`,
+   * pas en `Pressable`). Un même primitive sert l'affichage et la saisie, on ne
+   * duplique pas en composant « display-only ». Cf. `RatingSelector`.
+   */
+  readonly?: boolean
   /** Couleur d'accentuation de l'option active. Défaut : `colors.primary`. */
   color?: string
   testID?: string

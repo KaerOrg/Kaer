@@ -1,12 +1,12 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import MedicationSideEffectsHistoryScreen from './MedicationSideEffectsHistoryScreen'
-import * as database from '../../lib/database'
-import * as configService from '../../services/sideEffectsConfigService'
+import * as database from '../../../lib/database'
+import * as configService from '../../../services/sideEffectsConfigService'
 
 jest.setTimeout(15000)
 
@@ -26,7 +26,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
+jest.mock('../../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
 
 jest.mock('@ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
@@ -47,7 +47,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key.split('.').pop() ?? key, i18n: { language: 'fr' } }),
 }))
 
-jest.mock('../../navigation/AppStack', () => ({}))
+jest.mock('../../../navigation/AppStack', () => ({}))
 
 jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
@@ -56,11 +56,11 @@ jest.mock('@theme', () => ({
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 
-jest.mock('../../store/authStore', () => ({
+jest.mock('../../../store/authStore', () => ({
   useAuthStore: (sel: (s: unknown) => unknown) => sel({ patient: { id: 'patient-1' } }),
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
   getAllTimelineMarkers: jest.fn().mockResolvedValue([]),
@@ -68,17 +68,17 @@ jest.mock('../../lib/database', () => ({
   deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../services/notificationService', () => ({
+jest.mock('../../../services/notificationService', () => ({
   getAllRoutinesForPatient: jest.fn().mockResolvedValue([]),
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
-jest.mock('../../services/sideEffectsConfigService', () => ({
+jest.mock('../../../services/sideEffectsConfigService', () => ({
   fetchTrackedEffects: jest.fn().mockResolvedValue([]),
   updateTrackedEffects: jest.fn().mockResolvedValue({ ok: true }),
 }))
 
-jest.mock('../../lib/dateUtils', () => ({ formatDateLong: (d: string) => d }))
+jest.mock('../../../lib/dateUtils', () => ({ formatDateLong: (d: string) => d }))
 
 const mockFetchTracked = jest.mocked(configService.fetchTrackedEffects)
 const mockGetEntries = jest.mocked(database.getAllScaleEntries)

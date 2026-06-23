@@ -1,4 +1,4 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
@@ -6,9 +6,9 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { Alert, ActivityIndicator } from 'react-native'
 import MoodTrackerScreen from './MoodTrackerScreen'
-import * as database from '../../lib/database'
-import * as notificationService from '../../services/notificationService'
-import type { ScaleEntry } from '../../lib/database'
+import * as database from '../../../lib/database'
+import * as notificationService from '../../../services/notificationService'
+import type { ScaleEntry } from '../../../lib/database'
 
 jest.setTimeout(15000)
 
@@ -30,7 +30,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../components/features/TeenAccent', () => ({
+jest.mock('../../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
@@ -53,7 +53,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key.split('.').pop() ?? key, i18n: { language: 'fr' } }),
 }))
 
-jest.mock('../../navigation/AppStack', () => ({}))
+jest.mock('../../../navigation/AppStack', () => ({}))
 
 jest.mock('@theme', () => ({
   colors: {
@@ -71,11 +71,11 @@ jest.mock('@theme', () => ({
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 
-jest.mock('../../store/authStore', () => ({
+jest.mock('../../../store/authStore', () => ({
   useAuthStore: (sel: (s: { patient: { id: string } }) => unknown) => sel({ patient: { id: 'patient-1' } }),
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
   getAllTimelineMarkers: jest.fn().mockResolvedValue([]),
@@ -83,22 +83,22 @@ jest.mock('../../lib/database', () => ({
   deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../services/notificationService', () => ({
+jest.mock('../../../services/notificationService', () => ({
   getAllRoutinesForPatient: jest.fn().mockResolvedValue([]),
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
-jest.mock('../../services/moodMarkerService', () => ({
+jest.mock('../../../services/moodMarkerService', () => ({
   saveMoodMarker: jest.fn().mockResolvedValue(undefined),
   deleteMoodMarker: jest.fn().mockResolvedValue(undefined),
   getAllMoodMarkers: jest.fn().mockResolvedValue([]),
 }))
 
-jest.mock('../../services/scaleEntryService', () => ({
+jest.mock('../../../services/scaleEntryService', () => ({
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../lib/dateUtils', () => ({
+jest.mock('../../../lib/dateUtils', () => ({
   formatDateLong: (d: string) => d,
 }))
 

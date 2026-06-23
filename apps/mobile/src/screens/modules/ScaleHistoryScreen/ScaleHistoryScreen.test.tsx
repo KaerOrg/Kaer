@@ -1,12 +1,12 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ScaleHistoryScreen from './ScaleHistoryScreen'
-import * as database from '../../lib/database'
-import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
+import * as database from '../../../lib/database'
+import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
 
@@ -31,7 +31,7 @@ jest.mock('react-native-safe-area-context', () => ({
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../components/features/TeenAccent', () => ({
+jest.mock('../../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
@@ -40,7 +40,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: stableT, i18n: { language: 'fr' } }),
 }))
 
-jest.mock('../../navigation/AppStack', () => ({}))
+jest.mock('../../../navigation/AppStack', () => ({}))
 
 jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
@@ -49,12 +49,12 @@ jest.mock('@theme', () => ({
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../lib/scaleScoring', () => ({
+jest.mock('../../../lib/scaleScoring', () => ({
   SCALE_SCORING: {
     phq9: { score_decimals: 0, items_count: 9 },
     snap_iv: {

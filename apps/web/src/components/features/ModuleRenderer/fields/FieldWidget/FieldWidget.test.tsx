@@ -39,9 +39,9 @@ describe('FieldWidget', () => {
     expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
   })
 
-  it('boolean → deux options Non / Oui', () => {
+  it('boolean → deux pilules Non / Oui', () => {
     const { container } = render(<FieldWidget props={{ widget_type: 'boolean' }} />)
-    const options = container.querySelectorAll('.fw-boolean__option')
+    const options = container.querySelectorAll('.radio__pill')
     expect(options.length).toBe(2)
     expect(options[0].textContent).toBe('Non')
     expect(options[1].textContent).toBe('Oui')

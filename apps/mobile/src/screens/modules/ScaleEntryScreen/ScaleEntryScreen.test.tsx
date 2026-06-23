@@ -1,12 +1,12 @@
-jest.mock('../../hooks/useTeen', () => ({
+jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: (_m: string, k: string) => k, tg: () => '', teenColor: () => undefined }),
 }))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ScaleEntryScreen from './ScaleEntryScreen'
-import * as database from '../../lib/database'
-import * as moduleService from '../../services/moduleService'
+import * as database from '../../../lib/database'
+import * as moduleService from '../../../services/moduleService'
 
 jest.setTimeout(15000)
 
@@ -27,7 +27,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 // Prevent AppStack from importing all 30+ screen components (OOM)
-jest.mock('../../navigation/AppStack', () => ({}))
+jest.mock('../../../navigation/AppStack', () => ({}))
 
 jest.mock('@react-native-community/datetimepicker', () => {
   const React = require('react')
@@ -35,12 +35,12 @@ jest.mock('@react-native-community/datetimepicker', () => {
   return { __esModule: true, default: () => React.createElement(View, null) }
 })
 
-jest.mock('../../store/authStore', () => ({
+jest.mock('../../../store/authStore', () => ({
   useAuthStore: (sel?: (s: { patient: null }) => unknown) =>
     sel ? sel({ patient: null }) : { patient: null },
 }))
 
-jest.mock('../../services/notificationService', () => ({
+jest.mock('../../../services/notificationService', () => ({
   logScaleSubmission: jest.fn(),
 }))
 
@@ -51,7 +51,7 @@ jest.mock('@theme', () => ({
   typography: {},
 }))
 
-jest.mock('../../components/features/ModuleRenderer/FieldRenderer', () => {
+jest.mock('../../../components/features/ModuleRenderer/FieldRenderer', () => {
   const React = require('react')
   const { View, TouchableOpacity, Text } = require('react-native')
   return {
@@ -76,18 +76,18 @@ jest.mock('../../components/features/ModuleRenderer/FieldRenderer', () => {
   }
 })
 
-jest.mock('../../services/moduleService', () => ({
+jest.mock('../../../services/moduleService', () => ({
   fetchModuleFields: jest.fn(),
 }))
 
-jest.mock('../../lib/database', () => ({
+jest.mock('../../../lib/database', () => ({
   saveScaleEntry: jest.fn().mockResolvedValue(undefined),
   getScaleEntryById: jest.fn().mockResolvedValue(null),
   getLatestScaleEntry: jest.fn().mockResolvedValue(null),
   generateId: jest.fn().mockReturnValue('test-id'),
 }))
 
-jest.mock('../../lib/scaleScoring', () => ({
+jest.mock('../../../lib/scaleScoring', () => ({
   SCALE_SCORING: {
     phq9: {
       score_decimals: 0,

@@ -5,12 +5,12 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { getScaleEntryById, generateId } from '../../lib/database'
-import { saveScaleEntry } from '../../services/scaleEntryService'
-import { AppStackParamList } from '../../navigation/AppStack'
+import { getScaleEntryById, generateId } from '../../../lib/database'
+import { saveScaleEntry } from '../../../services/scaleEntryService'
+import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
-import { useTeen } from '../../hooks/useTeen'
-import { TeenAccent } from '../../components/features/TeenAccent'
+import { useTeen } from '../../../hooks/useTeen'
+import { TeenAccent } from '../../../components/features/TeenAccent'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'MedicationSideEffectsEntry'>

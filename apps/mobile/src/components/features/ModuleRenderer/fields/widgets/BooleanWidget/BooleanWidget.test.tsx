@@ -8,4 +8,9 @@ describe('BooleanWidget', () => {
     expect(screen.getByText('Non')).toBeTruthy()
     expect(screen.getByText('Oui')).toBeTruthy()
   })
+
+  it('aperçu non interactif : aucune option avec le rôle radio', () => {
+    render(<BooleanWidget />)
+    expect(screen.queryByRole('radio')).toBeNull()
+  })
 })

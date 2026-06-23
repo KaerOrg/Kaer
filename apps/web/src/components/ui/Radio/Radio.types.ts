@@ -14,7 +14,8 @@ export interface RadioProps {
   options: readonly RadioOption[]
   /** Identifiant de l'option sélectionnée (`null` = aucune). */
   value: string | null
-  onChange: (value: string) => void
+  /** Sélection. Absent → rendu non interactif (lecture seule / aperçu). */
+  onChange?: (value: string) => void
   /**
    * Habillage :
    * - `list` (défaut) : rangées rond + label (+ sous-label) ;

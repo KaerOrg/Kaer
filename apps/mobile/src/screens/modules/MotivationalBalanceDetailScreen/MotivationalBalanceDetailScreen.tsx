@@ -4,12 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
 import type { PsyEduBlock } from '@kaer/shared'
-import { fetchBlocksByTopic } from '../../services/psyeduService'
-import { PsyEduBlockRenderer } from '../../components/features/PsyEduBlockRenderer'
-import { TeenAccent } from '../../components/features/TeenAccent'
-import { useTeen } from '../../hooks/useTeen'
+import { fetchBlocksByTopic } from '../../../services/psyeduService'
+import { PsyEduBlockRenderer } from '../../../components/features/PsyEduBlockRenderer'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { useTeen } from '../../../hooks/useTeen'
 import { colors, spacing } from '@theme'
-import type { AppStackParamList } from '../../navigation/AppStack'
+import type { AppStackParamList } from '../../../navigation/AppStack'
 
 const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }
 
