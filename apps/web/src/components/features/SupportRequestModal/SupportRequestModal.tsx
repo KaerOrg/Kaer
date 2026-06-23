@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
-import { SelectField } from '../../ui/SelectField/SelectField'
+import { Dropdown } from '../../ui/Dropdown/Dropdown'
 import { useToast } from '../../../contexts/ToastContext'
 import {
   submitSupportRequest,
@@ -93,13 +93,13 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
             required
           />
         ) : null}
-        <SelectField label={t('support.reason_label')} value={reason} onChange={handleChange}>
+        <Dropdown label={t('support.reason_label')} value={reason} onChange={handleChange}>
           {SUPPORT_REASONS.map(r => (
             <option key={r} value={r}>
               {t(`support.reason.${r}`)}
             </option>
           ))}
-        </SelectField>
+        </Dropdown>
         {needsDescription ? (
           <InputField
             label={t('support.description_label')}

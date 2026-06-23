@@ -14,7 +14,8 @@ export function DataTable<T>({
   columns,
   rows,
   getRowId,
-  toolbar,
+  actionBar,
+  filters,
   renderDetail,
   rowClassName,
   emptyState,
@@ -26,7 +27,12 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div className={`data-table-wrap ${className ?? ''}`}>
-      {toolbar}
+      {actionBar || filters ? (
+        <div className="data-table__controls">
+          {filters ? <div className="data-table__filters">{filters}</div> : null}
+          {actionBar ? <div className="data-table__actionbar">{actionBar}</div> : null}
+        </div>
+      ) : null}
 
       {rows.length === 0 ? (
         emptyState ?? null

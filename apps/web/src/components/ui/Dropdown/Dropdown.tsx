@@ -1,13 +1,16 @@
 import type { SelectHTMLAttributes, ReactNode } from 'react'
 import '../InputField/InputField.css'
 
-interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+interface DropdownProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string
   children: ReactNode
   error?: string
+  /** Variante compacte (barres de filtres) : contrôle moins haut que le défaut. */
+  compact?: boolean
 }
 
-export function SelectField({ label, children, error, id, ...props }: SelectFieldProps) {
+/** Liste déroulante du design system : `<select>` natif habillé (label + erreur). */
+export function Dropdown({ label, children, error, id, compact = false, ...props }: DropdownProps) {
   const selectId = id ?? label.toLowerCase().replace(/\s+/g, '-')
 
   return (
@@ -17,7 +20,7 @@ export function SelectField({ label, children, error, id, ...props }: SelectFiel
       </div>
       <select
         id={selectId}
-        className={`input-field__input ${error ? 'input-field__input--error' : ''}`}
+        className={`input-field__input ${compact ? 'input-field__input--sm' : ''} ${error ? 'input-field__input--error' : ''}`}
         {...props}
       >
         {children}

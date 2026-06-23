@@ -163,7 +163,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--color-border);
+  color: var(--color-text-muted);
   padding: var(--spacing-xs);
   border-radius: var(--radius-sm);
 }
@@ -339,28 +339,6 @@
   font-style: italic;
 }
 
-/* ---- Soins en cours (chips) ---- */
-/* Tags = design system Chip (chip--removable) ; ne reste ici que le conteneur + l'input. */
-.care-tags {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-xs);
-  min-width: 140px;
-}
-
-.care-tag__input {
-  border: none;
-  background: transparent;
-  font-size: var(--font-size-caption);
-  color: var(--color-text);
-  padding: 4px 0;
-  min-width: 70px;
-  flex: 1;
-}
-
-.care-tag__input:focus { outline: none; }
-
 /* ---- Modules débloqués du patient lié (auto, lecture seule) ---- */
 /* Puces = design system Chip (tone="info") ; ne reste ici que le conteneur. */
 .module-chips {
@@ -369,6 +347,17 @@
   gap: var(--spacing-xs);
   margin-top: var(--spacing-xs);
 }
+
+/* Variante colonne (drawer) : une puce par ligne. */
+.module-chips--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Puces de soin : icône ET libellé en teal foncé (mix 35 % noir), même couleur. */
+.module-chips .chip,
+.module-chips .chip__icon,
+.module-chips .chip--action { color: color-mix(in srgb, var(--color-primary), black 35%); }
 
 /* ---- Liaison à un patient de l'app ---- */
 .caseload-detail .input-field { max-width: 460px; }

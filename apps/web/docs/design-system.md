@@ -104,7 +104,7 @@ Tous les inputs sont `disabled` ou `readOnly`.
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, SegmentedControl, SelectField, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Toggle |
+| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -541,7 +541,7 @@ champ de saisie + liste déroulante filtrée (insensible casse/accents via
 `lib/search`), options regroupables par section, navigation clavier (↑/↓, Entrée,
 Échap), fermeture au clic extérieur. **Présentationnel** : options, sélection et
 bascule pilotées par le parent ; il n'affiche pas les valeurs retenues (le parent
-rend ses propres `Chip onRemove`). Choisir cette primitive plutôt que `SelectField`
+rend ses propres `Chip onRemove`). Choisir cette primitive plutôt que `Dropdown`
 dès qu'il faut filtrer en tapant ou sélectionner plusieurs valeurs — un `<select>`
 natif ne sait faire ni l'un ni l'autre proprement.
 
@@ -593,7 +593,7 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 
 ```tsx
 <Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
-<Chip label={tag} onRemove={handleRemove} removeLabel={t('file_active.care.remove', { tag })} />
+<Chip tone="info" iconOnly icon={<Brain size={14} />} label={t('modules.phq9.label')} />
 <Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
 <Chip tone="info" label={`+${extra}`} onClick={openDrawer} title={t('...')} />
 <Chip size="sm" tone="info" label={t('tags.anxiety.label')} />
@@ -605,13 +605,38 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 | `tone` | `'neutral' \| 'info' \| 'warning'` | `'neutral'` | Couleur (ignoré si `selectable`) |
 | `size` | `'sm' \| 'md'` | `'md'` | `sm` = compacte (cartes denses, ex. `ModuleTagChips`) |
 | `icon` | `ReactNode` | — | Icône en tête |
+| `iconOnly` | `boolean` | `false` | Icône seule : `label` non affiché, sert d'`aria-label` + tooltip (`icon` obligatoire) |
 | `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
 | `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
 | `onClick` | `() => void` | — | Bascule si `selectable` ; sinon (hors `onRemove`) puce d'action (bouton, sans `aria-pressed`) |
 | `onRemove` | `() => void` | — | Affiche un bouton × de suppression |
 | `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
-| `title` | `string` | — | Tooltip natif |
+| `title` | `string` | — | Tooltip **natif** (~1 s, non configurable). Pour une infobulle rapide sur une puce `iconOnly`, l'envelopper dans `Tooltip` et neutraliser le natif avec `title=""` |
 | `className` | `string` | — | Classe additionnelle |
+
+### `Tooltip`
+
+`components/ui/Tooltip/`. Infobulle légère rendue en **portail** (`document.body`) :
+elle échappe ainsi au `overflow: auto` des conteneurs scrollables (ex. la matrice
+« Ma file active ») qui couperaient un tooltip CSS classique. Apparaît après un court
+délai (~120 ms) au survol **ou au focus** du déclencheur, là où l'attribut `title`
+natif attend ~1 s sans réglage possible. L'accessibilité reste portée par le
+déclencheur lui-même (`aria-label`) : ce composant n'est qu'une aide visuelle rapide.
+
+Cas d'usage de référence : les puces icône seule des modules (`ModuleChips` en colonne
+dense). On enveloppe le `Chip iconOnly` et on neutralise son `title` natif (`title=""`)
+pour éviter le doublon lent.
+
+```tsx
+<Tooltip label={t('modules.phq9.label')}>
+  <Chip tone="info" iconOnly icon={<Brain size={16} />} label={t('modules.phq9.label')} title="" />
+</Tooltip>
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `label` | `string` | — | Texte de l'infobulle (obligatoire) |
+| `children` | `ReactNode` | — | Déclencheur survolé / focalisé |
 
 ### `SegmentedControl<T>`
 
@@ -700,7 +725,7 @@ métier (ex. rappel MFA), l'envelopper dans un composant `features/`.
 
 Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 
-> `Toggle`, `SelectField`, `StepBreadcrumb`, `Toast`, `Banner` ont une doc dédiée dans
+> `Toggle`, `Dropdown`, `StepBreadcrumb`, `Toast`, `Banner` ont une doc dédiée dans
 > [`docs/components/`](components/). `Tabs`, `RatingSelector`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
@@ -730,7 +755,8 @@ const columns: DataTableColumn<Row>[] = [
   columns={columns}
   rows={visibleRows}
   getRowId={row => row.id}
-  toolbar={<><AddForm /><Filters /></>}          // au-dessus de la table
+  filters={<Filters />}                           // contrôles de filtrage, intégrés à la table
+  actionBar={<Button>Ajouter</Button>}            // boutons primaires (sous les filtres, alignés à gauche)
   renderDetail={row => <RowDetail row={row} />}   // panneau dépliable (optionnel)
   rowClassName={row => (row.important ? 'my-row--flag' : undefined)}
   emptyState={<EmptyState … />}                   // rendu si rows.length === 0
@@ -743,7 +769,8 @@ const columns: DataTableColumn<Row>[] = [
 | `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`, `sortable`) |
 | `rows` | `readonly T[]` | Lignes **déjà filtrées/triées/paginées** par l'appelant — la table ne réordonne ni ne tronque jamais |
 | `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
-| `toolbar` | `ReactNode` | Zone libre au-dessus de la table (filtres, capture rapide) |
+| `filters` | `ReactNode` | Contrôles de filtrage (recherche, segments, dropdowns…), partie intégrante de la table |
+| `actionBar` | `ReactNode` | Barre d'actions de la table (boutons primaires, ex. « Ajouter »). Rendue **sous** les filtres, alignée à gauche |
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |

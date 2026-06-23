@@ -1823,7 +1823,7 @@
       "actions": "Actions",
       "care_pathways": "Soins en cours",
       "waiting": "En attente de retour",
-      "alert": "Délais"
+      "alert": "Échéances"
     },
     "status": {
       "active": "Actif",
@@ -1893,11 +1893,6 @@
       "add_label": "Nouvelle observation",
       "add_submit": "Enregistrer"
     },
-    "care": {
-      "add_placeholder": "+ soin",
-      "add_label": "Ajouter un soin en cours",
-      "remove": "Retirer {{tag}}"
-    },
     "action": {
       "none": "Aucune action",
       "empty": "Aucune action pour ce dossier.",
@@ -1922,12 +1917,12 @@
       "chip_waiting": "En attente"
     },
     "add": {
-      "name_placeholder": "Nom du patient…",
-      "name_label": "Nom du patient",
-      "action_placeholder": "Première action (optionnel)…",
-      "action_label": "Première action",
-      "due_label": "Échéance",
-      "submit": "Ajouter"
+      "button": "Ajouter un patient",
+      "modal_title": "Ajouter un patient",
+      "patient_label": "Patient",
+      "patient_placeholder": "Choisir un patient à suivre…",
+      "none_available": "Tous vos patients sont déjà dans la file",
+      "confirm": "Ajouter"
     },
     "empty": {
       "title": "Aucun dossier pour l'instant",

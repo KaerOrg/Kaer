@@ -12,9 +12,12 @@
   pointer-events: none;
 }
 
+/* Le Dropdown des filtres (variante `compact` = `.input-field__input--sm`) est la
+   référence de hauteur : padding 7px, font-size 14px. Le SearchInput reprend ces mêmes
+   métriques (left à 34px pour loger l'icône) pour une hauteur identique. */
 .search-input__input {
   width: 100%;
-  padding: 9px 14px 9px 36px;
+  padding: 7px 12px 7px 34px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   font-size: 14px;

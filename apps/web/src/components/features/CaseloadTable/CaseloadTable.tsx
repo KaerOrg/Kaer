@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ClipboardList, ExternalLink, Star, User } from 'lucide-react'
+import { ClipboardList, ExternalLink, Plus, Star, User } from 'lucide-react'
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../ui/DataTable'
+import { Button } from '../../ui/Button'
 import { Drawer } from '../../ui/Drawer'
 import { EmptyState } from '../../ui/EmptyState'
-import { AddEntryForm, type AddEntryFormProps } from './AddEntryForm'
+import { AddEntryForm } from './AddEntryForm'
 import { CaseloadFilters } from './CaseloadFilters'
 import { NameCell } from './NameCell'
 import { StatusCell } from './StatusCell'
@@ -37,9 +38,11 @@ export interface CaseloadTableProps {
   rows: readonly CaseloadRowData[]
   today: string
   patients: readonly LinkablePatient[]
+  /** Map module_id → nom d'icône lucide (catalogue des modules). */
+  iconByModule: Record<string, string>
   onPatch: (id: string, patch: CaseloadEntryInput) => void
   onStatus: (id: string, status: CaseloadStatus) => void
-  onCreate: AddEntryFormProps['onCreate']
+  onAddPatient: (patientId: string) => void
   onAddAction: (entryId: string, label: string, due: string | null) => void
   onToggleDone: (entryId: string, actionId: string, done: boolean) => void
   onPatchAction: (entryId: string, actionId: string, patch: CaseloadActionInput) => void
@@ -68,9 +71,10 @@ export function CaseloadTable({
   rows,
   today,
   patients,
+  iconByModule,
   onPatch,
   onStatus,
-  onCreate,
+  onAddPatient,
   onAddAction,
   onToggleDone,
   onPatchAction,
@@ -90,6 +94,8 @@ export function CaseloadTable({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   // Onglet ouvert à l'ouverture du panneau (selon le point d'entrée : chevron vs « +N »).
   const [drawerTab, setDrawerTab] = useState('actions')
+  // Modale d'ajout d'un patient à la file.
+  const [addOpen, setAddOpen] = useState(false)
 
   // Ordre par défaut (important épinglé + urgence) ; le tri utilisateur, s'il existe,
   // prime et réordonne le jeu déjà filtré.
@@ -193,10 +199,9 @@ export function CaseloadTable({
       },
       {
         id: 'important',
-        header: <Star size={14} className="caseload-th__icon" aria-label={t('file_active.col.important')} />,
+        header: <Star size={18} className="caseload-th__icon" aria-label={t('file_active.col.important')} />,
         headerClassName: 'caseload-th--important',
         cellClassName: 'caseload-cell--important',
-        sortable: true,
         cell: row => <ImportantCell entry={row.entry} onPatch={onPatch} />,
       },
       {
@@ -208,8 +213,8 @@ export function CaseloadTable({
           <CareCell
             entry={row.entry}
             patients={patients}
-            onPatch={onPatch}
-            onOpen={() => openModules(row.entry.id)}
+            iconByModule={iconByModule}
+            onOpen={openModules}
           />
         ),
       },
@@ -237,15 +242,32 @@ export function CaseloadTable({
         cell: row => <AlertCell actions={row.actions} today={today} />,
       },
     ],
-    [t, today, patients, onPatch, onStatus, selectedId, toggleSelected, openModules]
+    [t, today, patients, iconByModule, onPatch, onStatus, selectedId, toggleSelected, openModules]
   )
 
-  const toolbar = (
-    <>
-      <AddEntryForm onCreate={onCreate} loading={creating} />
-      <CaseloadFilters value={filter} onChange={setFilter} />
-    </>
+  // Patients de l'app pas encore présents dans la file (proposés à l'ajout).
+  const availablePatients = useMemo(() => {
+    const present = new Set(rows.map(r => r.entry.patient_id))
+    return patients.filter(p => !present.has(p.id))
+  }, [rows, patients])
+
+  const openAdd = useCallback(() => setAddOpen(true), [])
+  const closeAdd = useCallback(() => setAddOpen(false), [])
+  const handleAdd = useCallback(
+    (patientId: string) => {
+      onAddPatient(patientId)
+      setAddOpen(false)
+    },
+    [onAddPatient]
   )
+
+  const actionBar = (
+    <Button variant="primary" size="sm" onClick={openAdd}>
+      <Plus size={15} />
+      {t('file_active.add.button')}
+    </Button>
+  )
+  const filters = <CaseloadFilters value={filter} onChange={setFilter} />
 
   const emptyState =
     rows.length === 0 ? (
@@ -268,7 +290,8 @@ export function CaseloadTable({
         columns={columns}
         rows={visibleRows}
         getRowId={getRowId}
-        toolbar={toolbar}
+        actionBar={actionBar}
+        filters={filters}
         rowClassName={rowClassName}
         emptyState={emptyState}
         ariaLabel={t('file_active.title')}
@@ -292,6 +315,7 @@ export function CaseloadTable({
             row={selectedRow}
             today={today}
             moduleTypes={selectedModules}
+            iconByModule={iconByModule}
             initialTab={drawerTab}
             onAddAction={onAddAction}
             onToggleDone={onToggleDone}
@@ -305,6 +329,14 @@ export function CaseloadTable({
           />
         </Drawer>
       ) : null}
+
+      <AddEntryForm
+        open={addOpen}
+        patients={availablePatients}
+        onAdd={handleAdd}
+        onClose={closeAdd}
+        loading={creating}
+      />
     </>
   )
 }

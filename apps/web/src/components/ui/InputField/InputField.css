@@ -1,7 +1,6 @@
 .input-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
 }
 
 .input-field__label-row {
@@ -11,11 +10,9 @@
 }
 
 .input-field__label {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .input-field__input {
@@ -35,6 +32,12 @@
   min-height: 80px;
   font-family: inherit;
   line-height: 1.5;
+}
+
+/* Variante compacte (barres de filtres) : contrôle moins haut que le défaut. */
+.input-field__input--sm {
+  padding: 7px 12px;
+  font-size: 14px;
 }
 
 .input-field__input:required {

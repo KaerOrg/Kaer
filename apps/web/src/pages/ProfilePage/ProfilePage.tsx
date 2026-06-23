@@ -7,7 +7,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
-import { SelectField } from '../../components/ui/SelectField/SelectField'
+import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
 import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
@@ -138,7 +138,7 @@ export function ProfilePage() {
                 placeholder="Dr. Marie Dupont"
                 required
               />
-              <SelectField
+              <Dropdown
                 label={t('profile_modal.title_label')}
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -149,7 +149,7 @@ export function ProfilePage() {
                     {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
                   </option>
                 ))}
-              </SelectField>
+              </Dropdown>
             </div>
             <div className="profile-page__form-row">
               <InputField

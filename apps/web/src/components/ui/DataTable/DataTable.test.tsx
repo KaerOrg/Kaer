@@ -40,10 +40,17 @@ describe('DataTable', () => {
     expect(screen.queryByText('Nom')).not.toBeInTheDocument()
   })
 
-  it('rend la barre d\'outils au-dessus de la table', () => {
+  it('rend la barre d\'actions et les filtres au-dessus de la table', () => {
     render(
-      <DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} toolbar={<div>Filtres</div>} />
+      <DataTable
+        columns={COLUMNS}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        actionBar={<button>Ajouter</button>}
+        filters={<div>Filtres</div>}
+      />
     )
+    expect(screen.getByRole('button', { name: 'Ajouter' })).toBeInTheDocument()
     expect(screen.getByText('Filtres')).toBeInTheDocument()
   })
 

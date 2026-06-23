@@ -8,7 +8,6 @@ import { supabase } from '../lib/supabase'
 import {
   fetchCaseload,
   createCaseloadEntry,
-  createEntryWithFirstAction,
   updateCaseloadEntry,
   setCaseloadStatus,
   createCaseloadAction,
@@ -19,7 +18,6 @@ import {
   deleteCaseloadWait,
   createCaseloadNote,
   fetchCaseloadNotes,
-  syncCaseloadWithPatients,
 } from './caseloadService'
 import type { CaseloadAction, CaseloadEntry, CaseloadNote, CaseloadWait } from '../lib/caseload.types'
 
@@ -130,27 +128,6 @@ describe('createCaseloadEntry', () => {
   })
 })
 
-describe('createEntryWithFirstAction', () => {
-  it('crée le dossier et sa première action', async () => {
-    vi.mocked(supabase.from).mockImplementation((table: string) => {
-      if (table === 'caseload_entries') return makeChain({ data: makeEntry({ id: 'e9' }), error: null }) as never
-      return makeChain({ data: makeAction({ id: 'a9', entry_id: 'e9', label: 'Appeler' }), error: null }) as never
-    })
-    const result = await createEntryWithFirstAction('p-1', { displayName: 'Léa M.', actionLabel: 'Appeler', actionDue: '2026-06-05' })
-    expect(result.ok).toBe(true)
-    expect(result.row?.actions).toHaveLength(1)
-    expect(result.row?.actions[0].label).toBe('Appeler')
-  })
-
-  it('crée un dossier sans action si aucun libellé fourni', async () => {
-    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: makeEntry(), error: null }) as never)
-    const result = await createEntryWithFirstAction('p-1', { displayName: 'Léa M.' })
-    expect(result.ok).toBe(true)
-    expect(result.row?.actions).toEqual([])
-    expect(supabase.from).toHaveBeenCalledTimes(1)
-  })
-})
-
 describe('updateCaseloadEntry', () => {
   it('renvoie ok:false en cas d\'erreur', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'x' } }) as never)
@@ -258,61 +235,5 @@ describe('fetchCaseloadNotes', () => {
   it('renvoie un tableau vide en cas d\'erreur', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'x' } }) as never)
     expect(await fetchCaseloadNotes('e-1')).toEqual([])
-  })
-})
-
-describe('syncCaseloadWithPatients', () => {
-  type Thenable = { then: (r: (v: unknown) => unknown) => unknown }
-  const resolved = (): Thenable => ({ then: r => Promise.resolve({ error: null }).then(r) })
-
-  it('ne touche pas la base sans inscrit ni invitation', async () => {
-    expect(await syncCaseloadWithPatients('p-1', [], [])).toEqual({ created: 0, linked: 0 })
-    expect(supabase.from).not.toHaveBeenCalled()
-  })
-
-  it('crée un dossier lié pour un inscrit, libre pour une invitation', async () => {
-    const insert = vi.fn().mockReturnValue(resolved())
-    const chain = makeChain({ data: [], error: null })
-    chain.insert = insert
-    vi.mocked(supabase.from).mockReturnValue(chain as never)
-
-    const result = await syncCaseloadWithPatients(
-      'p-1',
-      [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }],
-      [{ email: 'tom@x.fr', name: 'Tom' }]
-    )
-
-    expect(result).toEqual({ created: 2, linked: 0 })
-    expect(insert).toHaveBeenCalledWith([
-      expect.objectContaining({ patient_id: 'pat-1', display_name: 'Léa' }),
-      expect.objectContaining({ invited_email: 'tom@x.fr', display_name: 'Tom' }),
-    ])
-  })
-
-  it('convertit un dossier libre en lié quand l\'invité s\'inscrit', async () => {
-    const insert = vi.fn()
-    const update = vi.fn().mockReturnValue({ eq: () => resolved() })
-    const chain = makeChain({ data: [{ id: 'free-1', patient_id: null, invited_email: 'lea@x.fr' }], error: null })
-    chain.insert = insert
-    chain.update = update
-    vi.mocked(supabase.from).mockReturnValue(chain as never)
-
-    const result = await syncCaseloadWithPatients('p-1', [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }], [])
-
-    expect(result).toEqual({ created: 0, linked: 1 })
-    expect(insert).not.toHaveBeenCalled()
-    expect(update).toHaveBeenCalledWith({ patient_id: 'pat-1', invited_email: null })
-  })
-
-  it('ne recrée rien si tout est déjà couvert', async () => {
-    const insert = vi.fn()
-    const chain = makeChain({ data: [{ id: 'e1', patient_id: 'pat-1', invited_email: null }], error: null })
-    chain.insert = insert
-    vi.mocked(supabase.from).mockReturnValue(chain as never)
-
-    const result = await syncCaseloadWithPatients('p-1', [{ id: 'pat-1', name: 'Léa', email: 'lea@x.fr' }], [])
-
-    expect(result).toEqual({ created: 0, linked: 0 })
-    expect(insert).not.toHaveBeenCalled()
   })
 })

@@ -6,7 +6,7 @@ import { Layout } from '../../components/features/Layout'
 import { CaseloadTable } from '../../components/features/CaseloadTable'
 import {
   fetchCaseload,
-  createEntryWithFirstAction,
+  createCaseloadEntry,
   updateCaseloadEntry,
   setCaseloadStatus,
   createCaseloadAction,
@@ -16,12 +16,11 @@ import {
   createCaseloadWait,
   updateCaseloadWait,
   deleteCaseloadWait,
-  syncCaseloadWithPatients,
   fetchCaseloadNotes,
   createCaseloadNote,
 } from '../../services/caseloadService'
 import { fetchPatientsWithModules } from '../../services/patientService'
-import { fetchPendingInvitations } from '../../services/invitationService'
+import { fetchModuleCategories } from '../../services/moduleCatalogService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
@@ -39,6 +38,7 @@ export function FileActivePage() {
   const toast = useToast()
   const [rows, setRows] = useState<CaseloadRowData[]>([])
   const [patients, setPatients] = useState<LinkablePatient[]>([])
+  const [iconByModule, setIconByModule] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
 
@@ -46,10 +46,10 @@ export function FileActivePage() {
 
   const loadRows = useCallback(async () => {
     if (!practitioner) return
-    const [initialRows, appPatients, pendingInvites] = await Promise.all([
+    const [caseloadRows, appPatients, categories] = await Promise.all([
       fetchCaseload(practitioner.id, { includeArchived: true }),
       fetchPatientsWithModules(practitioner.id),
-      fetchPendingInvitations(practitioner.id),
+      fetchModuleCategories(),
     ])
     const linkable: LinkablePatient[] = appPatients.map(p => ({
       id: p.id,
@@ -58,18 +58,12 @@ export function FileActivePage() {
       email: p.email,
       moduleTypes: p.modules.map(m => m.module_type),
     }))
-    // Auto : patients inscrits → dossier lié ; invitations en attente → dossier libre
-    // (converti en lié à l'inscription). Idempotent.
-    const { created, linked } = await syncCaseloadWithPatients(
-      practitioner.id,
-      linkable.map(p => ({ id: p.id, name: p.name, email: p.email })),
-      pendingInvites.map(inv => ({
-        email: inv.patient_email,
-        name: [inv.patient_first_name, inv.patient_last_name].filter(Boolean).join(' ') || inv.patient_email,
-      }))
-    )
-    setRows(created + linked > 0 ? await fetchCaseload(practitioner.id, { includeArchived: true }) : initialRows)
+    // Map module_id → icône lucide pour afficher la vraie icône de chaque soin (module).
+    const icons: Record<string, string> = {}
+    for (const cat of categories) for (const mod of cat.modules) icons[mod.id] = mod.icon
+    setRows(caseloadRows)
     setPatients(linkable)
+    setIconByModule(icons)
     setLoading(false)
   }, [practitioner])
 
@@ -77,24 +71,28 @@ export function FileActivePage() {
     loadRows()
   }, [loadRows])
 
-  const handleCreate = useCallback(
-    async (input: { display_name: string; action_label: string | null; action_due: string | null }) => {
+  // Ajout d'un patient existant à la file (dossier lié). Pas de saisie libre :
+  // « Mes suivis » ne contient que de vrais patients de l'app.
+  const handleAddPatient = useCallback(
+    async (patientId: string) => {
       if (!practitioner) return
+      const patient = patients.find(p => p.id === patientId)
+      if (!patient) return
       setCreating(true)
-      const result = await createEntryWithFirstAction(practitioner.id, {
-        displayName: input.display_name,
-        actionLabel: input.action_label ?? undefined,
-        actionDue: input.action_due,
+      const result = await createCaseloadEntry(practitioner.id, {
+        display_name: patient.name,
+        patient_id: patientId,
       })
-      setCreating(false)
-      if (!result.ok || !result.row) {
+      if (!result.ok) {
+        setCreating(false)
         toast.error(t('file_active.error_create'))
         return
       }
-      const created = result.row
-      setRows(prev => [...prev, created])
+      // Relecture : récupère l'avatar (jointure) et l'ordre serveur du nouveau dossier.
+      await loadRows()
+      setCreating(false)
     },
-    [practitioner, toast, t]
+    [practitioner, patients, toast, t, loadRows]
   )
 
   const handlePatch = useCallback(
@@ -264,9 +262,10 @@ export function FileActivePage() {
             rows={rows}
             today={today}
             patients={patients}
+            iconByModule={iconByModule}
             onPatch={handlePatch}
             onStatus={handleStatus}
-            onCreate={handleCreate}
+            onAddPatient={handleAddPatient}
             onAddAction={handleAddAction}
             onToggleDone={handleToggleDone}
             onPatchAction={handlePatchAction}

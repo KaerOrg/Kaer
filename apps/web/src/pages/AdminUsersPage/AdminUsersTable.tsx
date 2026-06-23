@@ -11,7 +11,7 @@ import {
 import { Drawer } from '../../components/ui/Drawer'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { SegmentedControl, type SegmentOption } from '../../components/ui/SegmentedControl'
-import { SelectField } from '../../components/ui/SelectField/SelectField'
+import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { useToast } from '../../contexts/ToastContext'
@@ -183,7 +183,7 @@ export function AdminUsersTable() {
 
   const showPractitionerFilter = kind === 'patient'
 
-  const toolbar = (
+  const filters = (
     <div className="admin-users__filters">
       <SearchInput
         value={search}
@@ -198,7 +198,7 @@ export function AdminUsersTable() {
         ariaLabel={t('admin_users.filter.aria')}
       />
       {showPractitionerFilter ? (
-        <SelectField
+        <Dropdown
           label={t('admin_users.filter.by_practitioner')}
           aria-label={t('admin_users.filter.by_practitioner')}
           value={practitioner}
@@ -210,7 +210,7 @@ export function AdminUsersTable() {
               {name}
             </option>
           ))}
-        </SelectField>
+        </Dropdown>
       ) : null}
     </div>
   )
@@ -264,7 +264,7 @@ export function AdminUsersTable() {
         columns={columns}
         rows={users}
         getRowId={getRowId}
-        toolbar={toolbar}
+        filters={filters}
         emptyState={emptyState}
         ariaLabel={t('admin_users.title')}
         className="admin-users__table"

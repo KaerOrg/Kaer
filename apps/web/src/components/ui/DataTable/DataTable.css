@@ -4,6 +4,27 @@
   gap: var(--spacing-md);
 }
 
+/* En-tête de table : barre d'actions (boutons primaires) puis filtres. */
+.data-table__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.data-table__actionbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.data-table__filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
 .data-table__scroll {
   overflow: auto;
   max-height: 65vh;

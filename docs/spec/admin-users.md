@@ -104,7 +104,7 @@ Admin → /admin/users
 | `apps/web/src/components/features/MainNav/MainNav.tsx` | Lien admin conditionnel. |
 
 Aucun nouveau primitive de design system : réutilise `DataTable` (étendu : tri +
-pagination contrôlés), `SearchInput`, `SegmentedControl`, `SelectField`, `StatusBadge`,
+pagination contrôlés), `SearchInput`, `Dropdown`, `SegmentedControl`, `StatusBadge`,
 `EmptyState`, `Card`, `Button`, `Modal`, `InputField`.
 
 ---

@@ -15,6 +15,10 @@
 
 .chip__icon { flex-shrink: 0; display: inline-flex; }
 
+/* ---- Icône seule (label en tooltip) : pastille compacte quasi carrée ---- */
+.chip--icon-only { padding: 4px; gap: 0; }
+.chip--sm.chip--icon-only { padding: 3px; }
+
 /* ---- Taille compacte (cartes denses) ---- */
 .chip--sm { padding: 1px 7px; font-size: calc(var(--font-size-caption) - 1px); gap: 3px; }
 
@@ -39,6 +43,7 @@
 .chip--action {
   font: inherit;
   cursor: pointer;
+  border: none;
   appearance: none;
   -webkit-appearance: none;
   transition: filter 0.15s;

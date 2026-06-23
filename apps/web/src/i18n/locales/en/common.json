@@ -1683,7 +1683,7 @@
       "actions": "Actions",
       "care_pathways": "Ongoing care",
       "waiting": "Awaiting return",
-      "alert": "Deadline"
+      "alert": "Deadlines"
     },
     "status": {
       "active": "Active",
@@ -1753,11 +1753,6 @@
       "add_label": "New observation",
       "add_submit": "Save"
     },
-    "care": {
-      "add_placeholder": "+ care",
-      "add_label": "Add ongoing care",
-      "remove": "Remove {{tag}}"
-    },
     "action": {
       "none": "No action",
       "empty": "No action for this case.",
@@ -1782,12 +1777,12 @@
       "chip_waiting": "Awaiting"
     },
     "add": {
-      "name_placeholder": "Patient name…",
-      "name_label": "Patient name",
-      "action_placeholder": "First action (optional)…",
-      "action_label": "First action",
-      "due_label": "Due date",
-      "submit": "Add"
+      "button": "Add a patient",
+      "modal_title": "Add a patient",
+      "patient_label": "Patient",
+      "patient_placeholder": "Choose a patient to follow…",
+      "none_available": "All your patients are already in the list",
+      "confirm": "Add"
     },
     "empty": {
       "title": "No cases yet",

@@ -19,6 +19,8 @@ export interface RowDetailProps {
   today: string
   /** Modules débloqués du patient lié (lecture seule), affichés dans l'onglet « Soins ». */
   moduleTypes: readonly string[]
+  /** Map module_id → nom d'icône lucide (catalogue des modules). */
+  iconByModule: Record<string, string>
   /** Onglet ouvert à l'affichage (ex. « soins » quand on arrive via le « +N » de la colonne). */
   initialTab?: string
   onAddAction: (entryId: string, label: string, due: string | null) => void
@@ -37,6 +39,7 @@ function RowDetailComponent({
   row,
   today,
   moduleTypes,
+  iconByModule,
   initialTab = 'actions',
   onAddAction,
   onToggleDone,
@@ -100,7 +103,7 @@ function RowDetailComponent({
 
         {tab === 'soins' ? (
           moduleTypes.length > 0 ? (
-            <ModuleChips moduleTypes={moduleTypes} />
+            <ModuleChips column moduleTypes={moduleTypes} iconByModule={iconByModule} />
           ) : (
             <EmptyState icon={<Smartphone size={28} />} title={t('file_active.section.soins_empty')} />
           )

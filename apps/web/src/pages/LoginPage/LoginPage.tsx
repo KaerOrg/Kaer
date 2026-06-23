@@ -4,7 +4,7 @@ import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
-import { SelectField } from '../../components/ui/SelectField/SelectField'
+import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
 import { MfaChallengeForm } from './MfaChallengeForm'
@@ -104,7 +104,7 @@ export function LoginPage() {
                 placeholder={t('auth.full_name_placeholder')}
                 required
               />
-              <SelectField
+              <Dropdown
                 label={t('auth.professional_title_label')}
                 value={title}
                 onChange={e => setTitle(e.target.value)}
@@ -115,7 +115,7 @@ export function LoginPage() {
                     {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
                   </option>
                 ))}
-              </SelectField>
+              </Dropdown>
             </>
           )}
 

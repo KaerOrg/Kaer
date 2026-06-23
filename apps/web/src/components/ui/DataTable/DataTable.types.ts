@@ -70,8 +70,10 @@ export interface DataTableProps<T> {
   readonly rows: readonly T[]
   /** Identité stable d'une ligne — clé React et conservation de l'état de dépliage. */
   readonly getRowId: (row: T) => string
-  /** Zone libre au-dessus de la table (filtres, capture rapide…). */
-  readonly toolbar?: ReactNode
+  /** Barre d'actions de la table (boutons primaires, ex. « Ajouter »). Rendue sous les filtres, alignée à gauche. */
+  readonly actionBar?: ReactNode
+  /** Contrôles de filtrage de la table (recherche, segments, dropdowns…), partie intégrante de la table. */
+  readonly filters?: ReactNode
   /**
    * Rendu du panneau dépliable d'une ligne. Si absent, aucune ligne n'est
    * dépliable et le contexte `expanded` reste toujours `false`.

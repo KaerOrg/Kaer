@@ -12,7 +12,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { StepBreadcrumb } from '../../components/ui/StepBreadcrumb/StepBreadcrumb'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
-import { SelectField } from '../../components/ui/SelectField/SelectField'
+import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { useQuery } from '@tanstack/react-query'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
@@ -220,7 +220,7 @@ export function DashboardPage() {
                     max={maxBirthDate}
                     error={inviteBirthDateError}
                   />
-                  <SelectField
+                  <Dropdown
                     label={t('dashboard.invite_sex_label')}
                     id="invite-sex"
                     value={inviteSex}
@@ -230,7 +230,7 @@ export function DashboardPage() {
                     <option value="M">{t('dashboard.invite_sex_m')}</option>
                     <option value="F">{t('dashboard.invite_sex_f')}</option>
                     <option value="O">{t('dashboard.invite_sex_o')}</option>
-                  </SelectField>
+                  </Dropdown>
                 </div>
                 <Toggle
                   checked={inviteTeenMode}

@@ -78,7 +78,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 | [`components/module-renderer.md`](../apps/web/docs/components/module-renderer.md) | Rendu générique des modules (FieldText CONFIG) |
 | [`components/banner.md`](../apps/web/docs/components/banner.md) | Bandeau d'information transversal (variantes, action, fermeture) |
 | [`components/main-nav.md`](../apps/web/docs/components/main-nav.md) | Navigation principale |
-| [`components/select-field.md`](../apps/web/docs/components/select-field.md) | Champ de sélection |
+| [`components/dropdown.md`](../apps/web/docs/components/dropdown.md) | Liste déroulante |
 | [`components/step-breadcrumb.md`](../apps/web/docs/components/step-breadcrumb.md) | Fil d'Ariane d'étapes |
 | [`components/toggle.md`](../apps/web/docs/components/toggle.md) | Composant toggle |
 

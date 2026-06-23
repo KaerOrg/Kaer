@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SearchInput } from '../../ui/SearchInput'
-import { SelectField } from '../../ui/SelectField/SelectField'
+import { Dropdown } from '../../ui/Dropdown/Dropdown'
 import { Chip } from '../../ui/Chip'
 import type { CaseloadFilterState } from './types'
 
@@ -45,7 +45,8 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         />
       </div>
 
-      <SelectField
+      <Dropdown
+        compact
         label={t('file_active.filters.status_label')}
         id="caseload-status-filter"
         value={value.status}
@@ -55,7 +56,7 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         <option value="active">{t('file_active.status.active')}</option>
         <option value="paused">{t('file_active.status.paused')}</option>
         <option value="archived">{t('file_active.filters.status_archived')}</option>
-      </SelectField>
+      </Dropdown>
 
       <div className="caseload-filters__chips" role="group" aria-label={t('file_active.filters.chips_label')}>
         <Chip

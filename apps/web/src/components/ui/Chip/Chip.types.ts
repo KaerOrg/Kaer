@@ -13,6 +13,11 @@ export interface ChipProps {
   size?: ChipSize
   /** Icône en tête de puce. */
   icon?: ReactNode
+  /**
+   * Puce icône seule : le `label` n'est pas affiché, il sert de nom accessible
+   * (`aria-label`) et de tooltip (`title`). L'`icon` est alors obligatoire.
+   */
+  iconOnly?: boolean
   /** Rend la puce comme un bouton-bascule (filtres) — `aria-pressed` reflète `selected`. */
   selectable?: boolean
   /** État sélectionné, uniquement avec `selectable`. */

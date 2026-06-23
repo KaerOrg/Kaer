@@ -36,9 +36,10 @@ function renderTable(props: Partial<CaseloadTableProps> = {}) {
         rows={props.rows ?? [defaultRow]}
         today={TODAY}
         patients={props.patients ?? []}
+        iconByModule={props.iconByModule ?? {}}
         onPatch={props.onPatch ?? noop}
         onStatus={props.onStatus ?? noop}
-        onCreate={props.onCreate ?? noop}
+        onAddPatient={props.onAddPatient ?? noop}
         onAddAction={props.onAddAction ?? noop}
         onToggleDone={props.onToggleDone ?? noop}
         onPatchAction={props.onPatchAction ?? noop}
@@ -85,12 +86,17 @@ describe('CaseloadTable', () => {
     expect(onPatch).toHaveBeenCalledWith('e-1', { display_name: 'Bernard H.' })
   })
 
-  it('appelle onCreate à la capture rapide', () => {
-    const onCreate = vi.fn()
-    renderTable({ onCreate })
-    fireEvent.change(screen.getByLabelText('Nom du patient'), { target: { value: 'Léa Martin' } })
-    fireEvent.click(screen.getByRole('button', { name: /Ajouter/ }))
-    expect(onCreate).toHaveBeenCalledWith({ display_name: 'Léa Martin', action_label: null, action_due: null })
+  it('ajoute un patient via la modale (dropdown des patients existants)', async () => {
+    const onAddPatient = vi.fn()
+    const patients = [{ id: 'pat-9', publicRef: 'ref-9', name: 'Léa Martin', email: 'lea@x.fr', moduleTypes: [] }]
+    renderTable({ onAddPatient, patients })
+    // La modale est fermée tant qu'on n'a pas cliqué « Ajouter un patient ».
+    expect(screen.queryByText('Choisir un patient à suivre…')).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Ajouter un patient' }))
+    // Sélection du patient puis confirmation dans la modale.
+    fireEvent.change(await screen.findByLabelText('Patient'), { target: { value: 'pat-9' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }))
+    expect(onAddPatient).toHaveBeenCalledWith('pat-9')
   })
 
   it('épingle un patient via l\'étoile Important', () => {
@@ -153,16 +159,16 @@ describe('CaseloadTable', () => {
   })
 
   it('ouvre le drawer sur l\'onglet Soins via le « +N » et liste tous les modules', async () => {
-    const modules = ['phq9', 'gad7', 'sleep_diary', 'beck_columns']
+    const modules = ['phq9', 'gad7', 'sleep_diary', 'beck_columns', 'mood_tracker', 'emotion_wheel', 'grounding']
     const row: CaseloadRowData = { entry: makeEntry({ patient_id: 'pat-1' }), actions: [], waits: [], patient_avatar_url: null }
     const patients = [{ id: 'pat-1', publicRef: 'ref-1', name: 'Léa', email: 'lea@x.fr', moduleTypes: modules }]
     renderTable({ rows: [row], patients })
-    // colonne repliée : 3 chips + « +1 »
+    // colonne repliée : 6 chips + « +1 »
     fireEvent.click(screen.getByRole('button', { name: '+1' }))
-    // drawer ouvert sur l'onglet Soins : les 4 modules sont listés (sans repli « +N »)
+    // drawer ouvert sur l'onglet Soins : les 7 modules sont listés (sans repli « +N »)
     await screen.findByRole('tab', { name: 'Soins' })
     const chips = document.querySelectorAll('.drawer__body .module-chips .chip')
-    expect(chips).toHaveLength(4)
+    expect(chips).toHaveLength(7)
   })
 
   it('affiche un lien vers la fiche patient dans l\'en-tête du drawer (patient lié)', async () => {

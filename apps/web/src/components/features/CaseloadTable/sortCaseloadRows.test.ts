@@ -58,15 +58,6 @@ describe('sortCaseloadRows', () => {
     expect(ids(sortCaseloadRows(rows, { column: 'status', direction: 'asc' }, TODAY))).toEqual(['act', 'pause', 'arch'])
   })
 
-  it('trie par important : desc épingle les importants en tête', () => {
-    const rows = [
-      row({ id: 'plain', is_important: false }),
-      row({ id: 'vip', is_important: true }),
-    ]
-    expect(ids(sortCaseloadRows(rows, { column: 'important', direction: 'desc' }, TODAY))).toEqual(['vip', 'plain'])
-    expect(ids(sortCaseloadRows(rows, { column: 'important', direction: 'asc' }, TODAY))).toEqual(['plain', 'vip'])
-  })
-
   it('trie par nombre d\'attentes de retour', () => {
     const rows = [
       row({ id: 'none' }, [], []),
@@ -103,7 +94,7 @@ describe('sortCaseloadRows', () => {
 
   it('expose un sens initial par défaut utile pour chaque colonne', () => {
     expect(DEFAULT_SORT_DIRECTION).toEqual({
-      patient: 'asc', status: 'asc', important: 'desc', waiting: 'desc', alert: 'asc',
+      patient: 'asc', status: 'asc', waiting: 'desc', alert: 'asc',
     })
   })
 })

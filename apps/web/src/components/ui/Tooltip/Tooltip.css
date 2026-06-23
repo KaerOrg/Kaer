@@ -1,0 +1,20 @@
+/* Conteneur du déclencheur : ne change pas le flux, juste un point d'ancrage hover/focus. */
+.tooltip-trigger {
+  display: inline-flex;
+}
+
+/* Bulle flottante (portail) positionnée au-dessus du déclencheur, centrée horizontalement. */
+.tooltip {
+  position: fixed;
+  z-index: 1100;
+  transform: translate(-50%, calc(-100% - 6px));
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  /* Fond ardoise adouci (le `--color-text` brut est trop dur). */
+  background: color-mix(in srgb, var(--color-text), white 18%);
+  color: var(--color-surface);
+  font-size: var(--font-size-caption);
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}

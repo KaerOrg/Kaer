@@ -4,10 +4,12 @@ import type { ChipProps } from './Chip.types'
 
 /**
  * Puce / token du design system : étiquette compacte en forme de pilule.
- * Trois usages couverts par une seule primitive :
+ * Usages couverts par une seule primitive :
  *  - affichage simple (icône + label, coloré par `tone`) ;
+ *  - icône seule (`iconOnly` → label en aria-label + tooltip) ;
  *  - supprimable (`onRemove` → bouton ×), pour les tags éditables ;
- *  - sélectionnable (`selectable` → bouton-bascule), pour les filtres.
+ *  - sélectionnable (`selectable` → bouton-bascule), pour les filtres ;
+ *  - action (`onClick` seul → bouton, ex. « +N »).
  *
  * Pour un indicateur d'état sémantique (label + valeur), préférer `StatusBadge`.
  */
@@ -16,6 +18,7 @@ export function Chip({
   tone = 'neutral',
   size = 'md',
   icon,
+  iconOnly = false,
   selectable = false,
   selected = false,
   onClick,
@@ -55,6 +58,20 @@ export function Chip({
         {iconNode}
         {label}
       </button>
+    )
+  }
+
+  // Puce icône seule : le `label` n'est pas rendu visiblement, il sert de nom
+  // accessible (`aria-label`) et de tooltip (`title`) — l'icône est obligatoire.
+  if (iconOnly) {
+    return (
+      <span
+        className={`chip chip--${tone} ${sizeClass} chip--icon-only ${className}`}
+        title={title ?? label}
+        aria-label={label}
+      >
+        {iconNode}
+      </span>
     )
   }
 

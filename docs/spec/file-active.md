@@ -14,7 +14,7 @@ Ce n'est pas un tableur amélioré — c'est un filet de sécurité qui vide la 
 
 | Décision | Choix retenu |
 |---|---|
-| **Périmètre** | Dossiers **libres** : n'importe quel patient peut être suivi, même s'il n'utilise pas l'app. Lien **optionnel** vers une fiche patient de l'app quand elle existe. |
+| **Périmètre** | **Uniquement de vrais patients de l'app** : chaque dossier est relié à un compte patient (`patient_id` non nul). Pas de dossier « libre » saisi à la main. On ajoute un patient au suivi via une **dropdown des patients existants** (modale). Chaque dossier a donc toujours une **fiche patient** accessible. |
 | **Placement** | La page devient le **nouvel accueil** du web praticien (vue « Aujourd'hui » par défaut). L'accès aux fiches patients reste à un clic. |
 | **Périmètre v1** | On construit **un seul moteur** (données + matrice). La vue « Aujourd'hui » est une *vue intelligente* de ce moteur, livrée en priorité car c'est le bénéfice quotidien. |
 
@@ -70,27 +70,31 @@ historique daté) ; le libellé de l'onglet actif s'affiche en tête du panneau.
 l'**avatar** du patient lié si disponible (sinon icône générique), l'**⭐ Important** épinglé à côté du
 nom, et un **lien vers la fiche patient** (à côté de la croix de fermeture, uniquement pour un dossier
 relié à un compte). Les **« Soins en cours »** et le résumé **« En attente de retour »** s'affichent dans
-la ligne ; l'**⭐ Important** épingle le patient en haut. La liaison patient (lié / invité / libre) reste
-**automatique** (pas d'encart dédié) ; les **modules débloqués** du patient lié remontent en chips dans
-« Soins en cours » (**3 au plus**, le surplus replié derrière un **« +N »** cliquable qui ouvre le drawer
-sur l'onglet **Soins**).
+la ligne ; l'**⭐ Important** épingle le patient en haut. Chaque dossier étant relié à un compte,
+le **lien vers la fiche patient** est toujours présent. Les **modules débloqués** du patient remontent
+en chips **icône seule** (titre en tooltip) dans « Soins en cours » (**6 au plus**, le surplus replié
+derrière un **« +N »** cliquable qui ouvre le drawer sur l'onglet **Soins** ; dans le drawer, les chips
+affichent **icône + titre**).
+
+**Ajout d'un patient — dropdown (modale).** La table embarque, via le `DataTable` du design system, une
+**barre d'actions** (`actionBar`) avec un bouton **« Ajouter un patient »** et une zone **filtres**
+(`filters`) intégrée. Le bouton ouvre une **modale** contenant une **dropdown** (`ui/Dropdown`) des
+**patients existants pas encore dans la file** ; en choisir un crée un **dossier lié**. Pas de saisie
+libre : « Mes suivis » ne contient que de vrais patients de l'app.
 
 **Édition du nom sécurisée.** Le nom du patient s'affiche en **lecture seule** ; l'édition demande
 un clic explicite sur le **crayon**, puis une **validation** (Entrée / ✓) — pas de modification
 accidentelle (composant `EditableName`). Les autres champs (actions, attentes, soins, observations)
 restent éditables au clic, car ce sont des contenus à faible risque.
 
-**Liaison patient (app) — automatique.** Au chargement, `syncCaseloadWithPatients` (idempotent) :
-- **patient inscrit** (`practitioner_patients`) sans dossier lié → **dossier lié** créé ;
-- **invitation en attente** (`invitations`, non acceptée) sans dossier → **dossier libre** créé, marqué
-  `invited_email` (statut « Invité — en attente d'inscription ») ;
-- patient qui **s'inscrit** alors qu'un dossier libre existait à son email → ce dossier est **converti**
-  en dossier lié (`patient_id` posé, `invited_email` effacé) — **pas de doublon**.
-
-Déduplication sur **tous statuts** (un dossier archivé ne réapparaît pas). Une fois lié, les **modules
-débloqués** du patient (`patient_modules`, via `fetchPatientsWithModules`) s'affichent **automatiquement**
-en chips lecture seule dans « Soins en cours », à côté des étiquettes manuelles (coexistence ; les modules
-ne sont jamais édités ici). Les dossiers saisis à la main pour des patients hors app restent **libres**.
+**Liaison patient (app) — curated, choisie par le praticien.** La file est **curated** : le praticien
+ajoute lui-même les patients qu'il suit via la dropdown (pas d'auto-peuplement de tous les patients).
+`fetchCaseload` ne renvoie que les **dossiers liés** (`patient_id` non nul) ; un dossier sans compte
+n'existe pas. La colonne **« Soins en cours » = les modules débloqués** du patient (`patient_modules`,
+via `fetchPatientsWithModules`), en **chips lecture seule** : les soins correspondent aux **modules de
+l'app** (pas de saisie libre). Chaque chip porte la **vraie icône lucide** du module (catalogue
+`fetchModuleCategories` → map `module_id → icon`) et les chips sont **triées par titre de module**. Pour
+« ajouter un soin », on débloque un module depuis la fiche patient.
 
 ```
 ┌─┬───────────────┬──────────────────────┬───────────────┬──────────┐
@@ -104,8 +108,12 @@ Filtres en **chips** au-dessus : `Important` `En retard` `En attente`.
 Recherche par nom. En-tête figé au scroll. Lignes compactes.
 
 **Ordre des colonnes** : Patient · Statut · ⭐ (étoile, colonne étroite sans titre) · Soins en cours ·
-Actions · En attente de retour · Délais. Soins et Actions sont voisins, comme Actions et En attente —
+Actions · En attente de retour · Échéances. Soins et Actions sont voisins, comme Actions et En attente :
 regroupement logique. Dégradé horizontal très léger (déclinaison du teal Kaer) pour délimiter les colonnes.
+
+La colonne **« Échéances »** affiche une pastille calculée sur la `due_date` de l'action ouverte la plus
+urgente (« En retard · N j », échéance du jour, « À venir · N j »). Quand aucune action n'est urgente ni
+proche (niveau `ok`), la cellule reste **vide** (pas de pastille « OK »).
 
 **Archivage / désarchivage** : le `select` Statut d'une ligne permet d'archiver (→ `archived`, masqué du
 filtre « Actifs et en veille »). Le filtre Statut **« Archivés »** les retrouve ; il suffit de repasser le
@@ -125,13 +133,13 @@ Dossiers actifs · Urgences du jour · À venir ≤ 15 j · En attente d'un tier
 caseload_entries (
   id              uuid PK,
   practitioner_id uuid FK practitioners,        -- propriétaire
-  patient_id      uuid FK patients NULL,         -- lien app OPTIONNEL
-  display_name    text,                          -- nom OU initiales saisis librement
+  patient_id      uuid FK patients NULL,         -- lien app (la file ne lit que les dossiers où il est NON NUL)
+  display_name    text,                          -- nom du patient (repris du compte à l'ajout)
   status          text CHECK (active|paused|archived) DEFAULT 'active',
   is_important    boolean DEFAULT false,         -- ⭐ patient épinglé en haut (MANUEL)
   wake_date       date NULL,                     -- « revoir le » (réveil d'un dossier en veille)
-  invited_email   text NULL,                     -- dossier libre issu d'une invitation en attente (conversion auto à l'inscription)
-  care_pathways   text[] DEFAULT '{}',           -- « Soins en cours » : étiquettes HOP, psychothérapie, ETP…
+  invited_email   text NULL,                     -- LEGACY (ancien flux « dossier libre » d'invitation, plus utilisé)
+  care_pathways   text[] DEFAULT '{}',           -- LEGACY (ancien champ libre « Soins en cours », plus édité ; colonne = modules)
   last_reviewed_at date NULL,                     -- « Revu le » — MANUEL (dernier contact réel)
   updated_at      timestamptz,                    -- « Modifié le » — AUTO (trigger)
   created_at      timestamptz,
@@ -209,7 +217,7 @@ caseload_notes (
 - **`updated_at`** est posé automatiquement par un trigger à chaque modification de ligne.
 - **`last_reviewed_at`** est saisi à la main — c'est le sens clinique (« je l'ai vu le… »), distinct de la traçabilité technique.
 - **`display_name`** : nom complet OU initiales, au choix du praticien (regards par-dessus l'épaule).
-- **`care_pathways`** : étiquettes libres en v1 ; un catalogue partagé pourra venir plus tard (règle *config-first*).
+- **`care_pathways`** : LEGACY. Ancien champ d'étiquettes libres, **plus utilisé** — la colonne « Soins en cours » affiche désormais les **modules débloqués** du patient (les soins = modules de l'app).
 
 ## 6. Calcul de l'alerte (dérivé, jamais stocké — MDR-safe)
 
@@ -218,7 +226,7 @@ Fonctions pures (`caseloadLogic.ts`) : `computeActionAlert(action, today)` pour 
 Résultat : `'critical' | 'upcoming' | 'ok'`.
 **Aucune valeur n'est stockée** : tout se recalcule à l'affichage à partir de dates que *le praticien a saisies*.
 
-> Colonne affichée **« Délais »** (libellé UI). La feature est nommée **« Mes suivis »** côté praticien
+> Colonne affichée **« Échéances »** (libellé UI). La feature est nommée **« Mes suivis »** côté praticien
 > (route `/file-active`, tables `caseload_*` inchangées).
 
 | Niveau (`AlertLevel`) | Pastille | Condition (administrative, sur les dates) |

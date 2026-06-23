@@ -59,6 +59,15 @@ describe('Chip', () => {
     expect(container.querySelector('.chip__remove')).toBeNull()
   })
 
+  it('rend une puce icône seule : label en aria-label + tooltip, sans texte visible', () => {
+    render(<Chip label="PHQ-9" iconOnly icon={<span data-testid="ic">★</span>} />)
+    const chip = screen.getByLabelText('PHQ-9')
+    expect(chip).toHaveClass('chip--icon-only')
+    expect(chip).toHaveAttribute('title', 'PHQ-9')
+    expect(chip).not.toHaveTextContent('PHQ-9')
+    expect(screen.getByTestId('ic')).toBeInTheDocument()
+  })
+
   it('priorise la suppression : onRemove + onClick reste une puce non-action', () => {
     const { container } = render(
       <Chip label="ASE" onRemove={vi.fn()} removeLabel="Retirer" onClick={vi.fn()} />

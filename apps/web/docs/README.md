@@ -16,6 +16,6 @@ Documentation spécifique à `apps/web` (React + Vite). Pour la doc transversale
 |---|---|
 | [`components/module-renderer.md`](components/module-renderer.md) | Rendu générique des modules (FieldText CONFIG, extensions field_type/preview_kind) |
 | [`components/main-nav.md`](components/main-nav.md) | Navigation principale |
-| [`components/select-field.md`](components/select-field.md) | Champ de sélection |
+| [`components/dropdown.md`](components/dropdown.md) | Liste déroulante |
 | [`components/step-breadcrumb.md`](components/step-breadcrumb.md) | Fil d'Ariane d'étapes |
 | [`components/toggle.md`](components/toggle.md) | Composant toggle |

@@ -1,20 +1,20 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { SelectField } from './SelectField'
+import { Dropdown } from './Dropdown'
 
 function renderSexField(overrides = {}) {
   return render(
-    <SelectField label="Sexe" value="" onChange={() => {}} {...overrides}>
+    <Dropdown label="Sexe" value="" onChange={() => {}} {...overrides}>
       <option value="">—</option>
       <option value="M">Homme</option>
       <option value="F">Femme</option>
-    </SelectField>,
+    </Dropdown>,
   )
 }
 
 // ── Rendu de base ─────────────────────────────────────────────────────────────
 
-describe('SelectField — rendu de base', () => {
+describe('Dropdown — rendu de base', () => {
   it('affiche le label', () => {
     renderSexField()
     expect(screen.getByText('Sexe')).toBeInTheDocument()
@@ -39,7 +39,7 @@ describe('SelectField — rendu de base', () => {
 
 // ── Interaction ───────────────────────────────────────────────────────────────
 
-describe('SelectField — interaction', () => {
+describe('Dropdown — interaction', () => {
   it('appelle onChange à la sélection', async () => {
     const onChange = vi.fn()
     renderSexField({ onChange })
@@ -50,7 +50,7 @@ describe('SelectField — interaction', () => {
 
 // ── Erreur ────────────────────────────────────────────────────────────────────
 
-describe('SelectField — état erreur', () => {
+describe('Dropdown — état erreur', () => {
   it('affiche le message d\'erreur', () => {
     renderSexField({ error: 'Champ requis' })
     expect(screen.getByText('Champ requis')).toBeInTheDocument()
@@ -72,9 +72,23 @@ describe('SelectField — état erreur', () => {
   })
 })
 
+// ── Variante compacte ─────────────────────────────────────────────────────────
+
+describe('Dropdown — variante compacte', () => {
+  it('applique la classe compacte avec compact', () => {
+    renderSexField({ compact: true })
+    expect(screen.getByLabelText('Sexe')).toHaveClass('input-field__input--sm')
+  })
+
+  it('n\'applique pas la classe compacte par défaut', () => {
+    renderSexField()
+    expect(screen.getByLabelText('Sexe')).not.toHaveClass('input-field__input--sm')
+  })
+})
+
 // ── ID personnalisé ───────────────────────────────────────────────────────────
 
-describe('SelectField — id personnalisé', () => {
+describe('Dropdown — id personnalisé', () => {
   it('utilise l\'id fourni', () => {
     renderSexField({ id: 'custom-id' })
     expect(document.getElementById('custom-id')).toBeInTheDocument()

@@ -19,18 +19,20 @@ export interface AlertCellProps {
 function AlertCellComponent({ actions, today }: AlertCellProps) {
   const { t } = useTranslation()
   const level = computeEntryAlert(actions, today)
+
+  // Aucune échéance urgente ni proche → colonne vide (pas de pastille « OK » parasite).
+  if (level === 'ok') return null
+
   const due = describeDue(selectTopAction(actions, today)?.due_date ?? null, today)
 
   const detail =
-    level === 'ok'
-      ? undefined
-      : due.kind === 'overdue'
-        ? t('file_active.alert_detail.overdue', { count: due.days })
-        : due.kind === 'today'
-          ? t('file_active.alert_detail.today')
-          : due.kind === 'upcoming'
-            ? t('file_active.alert_detail.upcoming', { count: due.days })
-            : undefined
+    due.kind === 'overdue'
+      ? t('file_active.alert_detail.overdue', { count: due.days })
+      : due.kind === 'today'
+        ? t('file_active.alert_detail.today')
+        : due.kind === 'upcoming'
+          ? t('file_active.alert_detail.upcoming', { count: due.days })
+          : undefined
 
   return <AlertPill level={level} detail={detail} />
 }
