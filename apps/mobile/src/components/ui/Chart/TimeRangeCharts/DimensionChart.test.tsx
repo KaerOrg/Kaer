@@ -11,7 +11,7 @@ jest.mock('react-native-svg', () => {
   }
 })
 
-jest.mock('../../../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: { card: '#fff', border: '#ccc', text: '#111', textMuted: '#999' },
   spacing: { xs: 4, sm: 8 },
   radius: { md: 8 },

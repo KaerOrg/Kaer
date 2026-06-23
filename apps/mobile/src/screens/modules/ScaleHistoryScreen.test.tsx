@@ -42,7 +42,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../navigation/AppStack', () => ({}))
 
-jest.mock('../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
   spacing: { sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8 },

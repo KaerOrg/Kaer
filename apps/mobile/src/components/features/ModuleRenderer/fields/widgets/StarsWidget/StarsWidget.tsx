@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../../../../theme'
+import { colors } from '@theme'
 
 interface Props { spec: string }
 

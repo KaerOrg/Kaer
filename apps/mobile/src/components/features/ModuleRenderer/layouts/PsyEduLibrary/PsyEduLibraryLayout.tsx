@@ -12,7 +12,7 @@ import {
 } from '../../../../../services/psyeduService'
 import { PsyEduBlockRenderer } from '../../../PsyEduBlockRenderer'
 import { useAuthStore } from '../../../../../store/authStore'
-import { colors, spacing, radius } from '../../../../../theme'
+import { colors, spacing, radius } from '@theme'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
 import { topicTitle, topicSummary, sortBlocks } from '../PsyEdu/psyeduLocalize'
 

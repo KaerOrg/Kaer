@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors, spacing, radius } from '../../../../theme'
+import { colors, spacing, radius } from '@theme'
 import type { ChartEntry } from '../chartTypes'
 
 // Initiales des jours (Lundi → Dimanche) dérivées de la locale active — jamais

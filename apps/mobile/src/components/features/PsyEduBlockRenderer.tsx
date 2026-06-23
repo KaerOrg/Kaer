@@ -4,7 +4,7 @@ import i18next from 'i18next'
 import { Lightbulb, ExternalLink, CheckCircle2, Check } from 'lucide-react-native'
 import { useAuthStore } from '../../store/authStore'
 import { InlineText } from './InlineText'
-import { colors, spacing, radius } from '../../theme'
+import { colors, spacing, radius } from '@theme'
 import type { PsyEduBlock } from '@kaer/shared'
 
 interface Props {

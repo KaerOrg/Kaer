@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles } from './Checkbox.styles'
 import type { CheckboxProps } from './Checkbox.types'
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors, spacing } from '../../../../../theme'
+import { colors, spacing } from '@theme'
 
 export interface WeightPickerProps {
   value: number

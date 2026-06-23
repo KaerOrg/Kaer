@@ -1,6 +1,6 @@
 import React from 'react'
 import Svg, { Polyline, Circle, Line, Text as SvgText } from 'react-native-svg'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import type { DataPoint, XLabel } from './chartTypes'
 
 const SVG_W = 280

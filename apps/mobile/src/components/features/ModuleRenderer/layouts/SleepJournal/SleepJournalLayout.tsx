@@ -11,7 +11,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import {
   getAllSleepEntries, getSleepEntriesForMonth, type SleepEntry,
 } from '../../../../../lib/database'

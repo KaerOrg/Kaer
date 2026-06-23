@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ConfirmDialog, { type ConfirmDialogConfig } from '../components/ui/ConfirmDialog'
+import ConfirmDialog, { type ConfirmDialogConfig } from '@ui/ConfirmDialog'
 
 interface ConfirmDialogState extends ConfirmDialogConfig {
   visible: boolean

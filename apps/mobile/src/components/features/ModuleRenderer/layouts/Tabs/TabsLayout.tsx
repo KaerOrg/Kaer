@@ -9,7 +9,7 @@
 import { useState, useMemo } from 'react'
 import type { ComponentType } from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField, PreviewKind } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'

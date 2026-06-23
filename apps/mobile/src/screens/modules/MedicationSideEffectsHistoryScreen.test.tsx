@@ -28,7 +28,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 
 jest.mock('../../components/features/TeenAccent', () => ({ TeenAccent: () => null }))
 
-jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
+jest.mock('@ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
   const { Text } = require('react-native')
   return {
@@ -49,7 +49,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../navigation/AppStack', () => ({}))
 
-jest.mock('../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8, full: 999 },

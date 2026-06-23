@@ -15,7 +15,7 @@ import { FieldRenderer } from '../../components/features/ModuleRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
 import { useAuthStore } from '../../store/authStore'
-import { colors, spacing } from '../../theme'
+import { colors, spacing } from '@theme'
 
 type Props = NativeStackScreenProps<AppStackParamList, 'ModuleContent'>
 

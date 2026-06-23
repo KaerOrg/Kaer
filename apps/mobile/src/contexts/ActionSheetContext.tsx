@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import ActionSheet, { type ActionSheetConfig } from '../components/ui/ActionSheet'
+import ActionSheet, { type ActionSheetConfig } from '@ui/ActionSheet'
 
 interface ActionSheetState extends ActionSheetConfig {
   visible: boolean

@@ -12,7 +12,7 @@ import { getTechnique, getCycleDuration, type BreathingPhase } from '../../const
 import { generateId } from '../../lib/database'
 import { saveBreathingSession } from '../../services/breathingService'
 import { AppStackParamList } from '../../navigation/AppStack'
-import { colors, spacing, radius } from '../../theme'
+import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
 import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'
 

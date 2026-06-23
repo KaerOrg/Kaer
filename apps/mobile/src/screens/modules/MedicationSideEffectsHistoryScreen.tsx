@@ -6,7 +6,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { DimensionTrackerView, type DimensionTrackerConfig } from '../../components/features/DimensionTrackerView'
 import { AppStackParamList } from '../../navigation/AppStack'
-import { colors, spacing, radius } from '../../theme'
+import { colors, spacing, radius } from '@theme'
 import { useTeen } from '../../hooks/useTeen'
 import { useAuthStore } from '../../store/authStore'
 import {

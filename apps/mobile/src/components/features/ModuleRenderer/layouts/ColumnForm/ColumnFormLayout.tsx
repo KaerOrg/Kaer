@@ -16,7 +16,7 @@ import {
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,

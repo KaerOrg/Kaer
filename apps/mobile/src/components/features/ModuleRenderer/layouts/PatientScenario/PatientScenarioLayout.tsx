@@ -8,7 +8,7 @@
 import { useState, type ComponentProps } from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { ExerciseSafetySection } from '../shared'

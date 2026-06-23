@@ -8,7 +8,7 @@
 import type { ComponentProps } from 'react'
 import { View, Text, Pressable, Linking, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { spacing, radius } from '../../../../../theme'
+import { spacing, radius } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 

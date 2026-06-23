@@ -6,7 +6,7 @@ import type { PsyEduTopic, PsyEduBlock } from '@kaer/shared'
 import { fetchTopicsByModule, fetchBlocksByTopic } from '../../../../../services/psyeduService'
 import { PsyEduBlockRenderer } from '../../../PsyEduBlockRenderer'
 import { useAuthStore } from '../../../../../store/authStore'
-import { colors, spacing, radius } from '../../../../../theme'
+import { colors, spacing, radius } from '@theme'
 import { resolvePsyEduIcon } from './iconMap'
 import { topicTitle, topicSummary, sortBlocks } from './psyeduLocalize'
 

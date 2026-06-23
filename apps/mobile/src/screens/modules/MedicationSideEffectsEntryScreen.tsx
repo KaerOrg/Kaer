@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { getScaleEntryById, generateId } from '../../lib/database'
 import { saveScaleEntry } from '../../services/scaleEntryService'
 import { AppStackParamList } from '../../navigation/AppStack'
-import { colors, spacing, radius } from '../../theme'
+import { colors, spacing, radius } from '@theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
 

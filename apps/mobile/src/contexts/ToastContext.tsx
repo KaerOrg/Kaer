@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react'
-import Toast, { type ToastVariant } from '../components/ui/Toast'
+import Toast, { type ToastVariant } from '@ui/Toast'
 
 interface ToastState {
   message: string

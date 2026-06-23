@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { dgStyles } from './styles'
 
 export interface MotivationGaugeProps {

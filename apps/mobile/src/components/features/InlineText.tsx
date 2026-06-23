@@ -3,7 +3,7 @@ import { Text, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import i18next from 'i18next'
 import { useAuthStore } from '../../store/authStore'
-import { colors } from '../../theme'
+import { colors } from '@theme'
 
 interface InlineTextProps {
   code: string

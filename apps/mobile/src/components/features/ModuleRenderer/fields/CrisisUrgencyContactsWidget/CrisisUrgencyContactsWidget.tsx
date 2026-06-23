@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { colors, spacing, radius } from '../../../../../theme'
+import { colors, spacing, radius } from '@theme'
 import { getUrgencyItems } from '../../../../../services/crisisPlanService'
 import type { PlanItem } from '../../../../../lib/database'
 

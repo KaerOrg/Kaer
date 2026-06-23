@@ -2,7 +2,7 @@ import { memo, useState, useCallback } from 'react'
 import { View, Text, Pressable, Platform } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles } from './TimePicker.styles'
 import type { TimePickerProps } from './TimePicker.types'
 

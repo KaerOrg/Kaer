@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { colors, spacing } from '../../../theme'
+import { colors, spacing } from '@theme'
 
 export interface ChartLegendProps {
   accentColor?: string

@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { FearEntry, FearSituation } from '../../../../../lib/database'
 import { DisclaimerBanner } from '../../../DisclaimerBanner'
 import type { ExposureConfig } from './types'

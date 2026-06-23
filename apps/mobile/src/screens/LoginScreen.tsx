@@ -12,9 +12,9 @@ import { logger } from '@kaer/shared'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../navigation/AuthStack'
 import { useAuthStore } from '../store/authStore'
-import InputField from '../components/ui/InputField'
-import Button from '../components/ui/Button'
-import { colors, spacing } from '../theme'
+import InputField from '@ui/InputField'
+import Button from '@ui/Button'
+import { colors, spacing } from '@theme'
 
 type Props = {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'Login'>

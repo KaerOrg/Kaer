@@ -18,7 +18,7 @@ import {
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import {
   getAllActivityRecords, getActivityRecord, generateId, type ActivityRecord,
 } from '../../../../../lib/database'

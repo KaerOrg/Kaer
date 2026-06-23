@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Animated, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { colors, spacing, radius } from '../../../theme'
+import { colors, spacing, radius } from '@theme'
 
 export type ToastVariant = 'success' | 'error' | 'info'
 

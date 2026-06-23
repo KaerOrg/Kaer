@@ -26,7 +26,7 @@ import {
 } from '../../../lib/database'
 import { formatDateLong } from '../../../lib/dateUtils'
 import { AppStackParamList } from '../../../navigation/AppStack'
-import { colors, spacing, radius, typography } from '../../../theme'
+import { colors, spacing, radius, typography } from '@theme'
 import { useTeen } from '../../../hooks/useTeen'
 import { TeenAccent } from '../TeenAccent'
 import { useAuthStore } from '../../../store/authStore'

@@ -15,7 +15,7 @@ import {
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
   getAllTreeSelections, generateId,

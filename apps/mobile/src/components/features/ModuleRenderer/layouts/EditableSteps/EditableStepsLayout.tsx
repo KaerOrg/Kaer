@@ -9,7 +9,7 @@
 import { useState, useCallback, useEffect, useMemo, type ComponentProps } from 'react'
 import { View, Text, Pressable, ScrollView, Linking, ActivityIndicator } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { getAllPlanItemsForModule, generateId, type PlanItem } from '../../../../../lib/database'
 import { savePlanItem, deletePlanItem } from '../../../../../services/planItemService'

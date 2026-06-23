@@ -16,8 +16,8 @@ import {
   registerPushToken,
   markNotificationOnboardingSeen,
 } from '../services/notificationService'
-import Button from '../components/ui/Button'
-import { colors, spacing, radius, fontSize } from '../theme'
+import Button from '@ui/Button'
+import { colors, spacing, radius, fontSize } from '@theme'
 
 interface NotificationPermissionScreenProps {
   onDone: () => void

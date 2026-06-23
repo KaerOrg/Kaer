@@ -18,9 +18,9 @@ import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
 import { type Appointment } from '../services/appointmentService'
 import { appointmentQueries, useCancelAppointment } from '../hooks/queries'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { colors, spacing, radius, fontSize } from '../theme'
+import { colors, spacing, radius, fontSize } from '@theme'
 import type { AppStackParamList } from '../navigation/AppStack'
-import { EmptyState } from '../components/ui/EmptyState'
+import { EmptyState } from '@ui/EmptyState'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import Svg, { Polyline, Circle, Line, Text as SvgText } from 'react-native-svg'
 import { useTranslation } from 'react-i18next'
 import { buildRhythmogram, minutesToHourLabel, type RhythmEntry } from '@kaer/shared'
-import { colors, spacing } from '../../../../../theme'
+import { colors, spacing } from '@theme'
 import type { AnchorSpec } from './chronoMonthUtils'
 
 interface Props {

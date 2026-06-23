@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { Info } from 'lucide-react-native'
 import { useTranslation } from 'react-i18next'
-import { colors, spacing, radius } from '../../theme'
+import { colors, spacing, radius } from '@theme'
 
 interface DisclaimerBannerProps {
   moduleKey: string

@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, radius } from '../../../theme'
+import { colors, radius } from '@theme'
 
 const VARIANT_COLORS = {
   neutral: { bg: colors.neutral,       text: colors.textMuted   },

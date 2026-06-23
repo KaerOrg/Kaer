@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import Svg, { Path, Circle } from 'react-native-svg'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import {
   type SudsPoint,
   type ChartPadding,

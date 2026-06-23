@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react-native'
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
-jest.mock('../../../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: { card: '#fff', border: '#ccc', text: '#111', textMuted: '#999' },
   spacing: { sm: 8 },
   radius: { full: 999 },

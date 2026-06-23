@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { colors, radius, spacing } from '../../../../../theme'
+import { colors, radius, spacing } from '@theme'
 import { WeightPicker } from './WeightPicker'
 
 export interface EditableItem {

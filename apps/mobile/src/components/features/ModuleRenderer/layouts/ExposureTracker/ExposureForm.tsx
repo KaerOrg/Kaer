@@ -5,7 +5,7 @@ import {
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { FearEntry, FearSituation } from '../../../../../lib/database'
 import type { ExposureConfig, ExposureDraft } from './types'
 import { deserializeStrategies } from './exposureLogic'

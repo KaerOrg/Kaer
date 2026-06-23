@@ -14,7 +14,7 @@ import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'
 import NotificationPermissionScreen from '../screens/NotificationPermissionScreen'
-import { colors } from '../theme'
+import { colors } from '@theme'
 
 // Schéma de deep link : psytool://invite?token=xxx
 const linking = {

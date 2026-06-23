@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { formatDateShortYear } from '../../../../../lib/dateUtils'
 import type { FearEntry } from '../../../../../lib/database'
 import type { ExposureConfig } from './types'

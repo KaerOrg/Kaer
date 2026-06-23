@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import Svg, { Path, Circle, Line, Text as SvgText, Defs, LinearGradient, Stop } from 'react-native-svg'
-import { colors, spacing } from '../../../theme'
+import { colors, spacing } from '@theme'
 import {
   type SudsPoint,
   type ChartPadding,

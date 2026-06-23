@@ -18,7 +18,7 @@ import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
 import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
 import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
 import { getTechnique } from '../constants/breathingTechniques'
-import { colors } from '../theme'
+import { colors } from '@theme'
 
 function getTechniqueTitle(key: string): string {
   return getTechnique(key)?.name ?? 'Exercice de respiration'

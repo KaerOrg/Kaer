@@ -8,7 +8,7 @@ import { fetchBlocksByTopic } from '../../services/psyeduService'
 import { PsyEduBlockRenderer } from '../../components/features/PsyEduBlockRenderer'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useTeen } from '../../hooks/useTeen'
-import { colors, spacing } from '../../theme'
+import { colors, spacing } from '@theme'
 import type { AppStackParamList } from '../../navigation/AppStack'
 
 const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }

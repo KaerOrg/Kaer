@@ -44,7 +44,7 @@ jest.mock('../../services/notificationService', () => ({
   logScaleSubmission: jest.fn(),
 }))
 
-jest.mock('../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999' },
   spacing: { sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8 },

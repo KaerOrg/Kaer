@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { colors, radius, spacing } from '../../../theme'
+import { colors, radius, spacing } from '@theme'
 
 export interface ActionSheetOption {
   label: string

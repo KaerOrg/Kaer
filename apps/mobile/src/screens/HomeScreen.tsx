@@ -20,10 +20,10 @@ import type { UnlockedModule, TodayRoutine } from '../services/homeService'
 import { homeQueries } from '../hooks/queries'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { TodaySchedule } from '../components/features/TodaySchedule'
-import { colors, spacing, radius } from '../theme'
+import { colors, spacing, radius } from '@theme'
 import { useTeen } from '../hooks/useTeen'
-import { Card } from '../components/ui/Card'
-import { EmptyState } from '../components/ui/EmptyState'
+import { Card } from '@ui/Card'
+import { EmptyState } from '@ui/EmptyState'
 
 // Modules avec un écran dédié (interaction custom non couverte par le moteur générique).
 // Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.

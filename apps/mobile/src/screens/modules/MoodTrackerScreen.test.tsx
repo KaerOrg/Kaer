@@ -34,7 +34,7 @@ jest.mock('../../components/features/TeenAccent', () => ({
   TeenAccent: () => null,
 }))
 
-jest.mock('../../components/ui/Chart/TimeRangeCharts', () => {
+jest.mock('@ui/Chart/TimeRangeCharts', () => {
   const React = require('react')
   const { Text } = require('react-native')
   return {
@@ -55,7 +55,7 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../navigation/AppStack', () => ({}))
 
-jest.mock('../../theme', () => ({
+jest.mock('@theme', () => ({
   colors: {
     primary: '#000',
     background: '#fff',
@@ -299,8 +299,8 @@ interface FakeEntry {
 }
 
 describe('chartUtils — buildCompositeData', () => {
-  const { buildCompositeData } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
-    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
+  const { buildCompositeData } = jest.requireActual<typeof import('@ui/Chart/TimeRangeCharts/chartUtils')>(
+    '@ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const makeEntry = (date: string, scores: Record<string, number>): FakeEntry => ({
@@ -339,8 +339,8 @@ describe('chartUtils — buildCompositeData', () => {
 })
 
 describe('chartUtils — computeStreak', () => {
-  const { computeStreak } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
-    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
+  const { computeStreak } = jest.requireActual<typeof import('@ui/Chart/TimeRangeCharts/chartUtils')>(
+    '@ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   it('retourne 0 sans entrée', () => {
@@ -368,8 +368,8 @@ describe('chartUtils — computeStreak', () => {
 })
 
 describe('chartUtils — markerXFraction', () => {
-  const { markerXFraction } = jest.requireActual<typeof import('../../components/ui/Chart/TimeRangeCharts/chartUtils')>(
-    '../../components/ui/Chart/TimeRangeCharts/chartUtils'
+  const { markerXFraction } = jest.requireActual<typeof import('@ui/Chart/TimeRangeCharts/chartUtils')>(
+    '@ui/Chart/TimeRangeCharts/chartUtils'
   )
 
   const dateNDaysAgo = (n: number) => {

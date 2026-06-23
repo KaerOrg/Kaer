@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { View, Text, TextInput } from 'react-native'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles } from './InputField.styles'
 import type { InputFieldProps } from './InputField.types'
 

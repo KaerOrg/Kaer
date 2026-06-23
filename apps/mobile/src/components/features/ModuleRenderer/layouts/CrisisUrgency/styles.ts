@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { spacing, radius } from '../../../../../theme'
+import { spacing, radius } from '@theme'
 
 export const styles = StyleSheet.create({
   scroll:       { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },

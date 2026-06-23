@@ -4,7 +4,7 @@
 
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { View, Text } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { SleepEntry } from '../../../../../lib/database'
 import { WEEKDAYS_SHORT, daysInMonth, firstWeekday, toYearMonth } from './sleepHelpers'
 import { styles } from './styles'

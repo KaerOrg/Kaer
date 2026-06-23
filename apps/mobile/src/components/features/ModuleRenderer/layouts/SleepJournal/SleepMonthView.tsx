@@ -4,7 +4,7 @@
 import { useMemo } from 'react'
 import { View, Text, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { Button } from '../../../../ui/Button'
 import { computeSleepEfficiency, type SleepEntry } from '../../../../../lib/database'
 import type { Lbl } from './types'

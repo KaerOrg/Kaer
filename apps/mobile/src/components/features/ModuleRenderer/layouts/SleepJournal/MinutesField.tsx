@@ -2,7 +2,7 @@
 // + conversion « = XhYY » d'appoint.
 
 import { View, Text, TextInput } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { styles } from './styles'
 
 export interface MinutesFieldProps {

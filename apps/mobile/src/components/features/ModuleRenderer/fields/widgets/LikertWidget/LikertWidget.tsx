@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { colors, radius } from '../../../../../../theme'
+import { colors, radius } from '@theme'
 
 export interface LikertOption {
   value: number

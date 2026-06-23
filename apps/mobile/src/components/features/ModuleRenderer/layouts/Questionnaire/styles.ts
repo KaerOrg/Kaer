@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '../../../../../theme'
+import { colors, spacing, radius } from '@theme'
 
 export const styles = StyleSheet.create({
   questionnaireContainer: { gap: spacing.md },

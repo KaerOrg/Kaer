@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { FieldProps } from '../types'
 import { InlineText } from '../InlineText'

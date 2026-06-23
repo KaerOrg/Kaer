@@ -14,7 +14,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import {
   generateId, type FearEntry, type FearSituation,
 } from '../../../../../lib/database'

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import type { TodayRoutine } from '../../../services/homeService'
 import { Card } from '../../ui/Card'
-import { colors, spacing, radius } from '../../../theme'
+import { colors, spacing, radius } from '@theme'
 
 interface TodayScheduleProps {
   routines: TodayRoutine[]

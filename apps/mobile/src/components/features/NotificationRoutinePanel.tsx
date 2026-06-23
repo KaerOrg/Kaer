@@ -10,7 +10,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { colors, spacing, radius, fontSize } from '../../theme'
+import { colors, spacing, radius, fontSize } from '@theme'
 import {
   getRoutinesForModule,
   getAllRoutinesForPatient,

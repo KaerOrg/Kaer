@@ -22,7 +22,7 @@ import {
   type ComputedSlot,
 } from '../services/appointmentService'
 import { appointmentQueries } from '../hooks/queries'
-import { colors, spacing, radius, fontSize } from '../theme'
+import { colors, spacing, radius, fontSize } from '@theme'
 import type { AppStackParamList } from '../navigation/AppStack'
 
 const EMPTY_RULES: AvailabilityRule[] = []

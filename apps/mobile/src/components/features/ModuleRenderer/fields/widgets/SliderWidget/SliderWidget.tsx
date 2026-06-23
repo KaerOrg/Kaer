@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { RatingSelector } from '../../../../../ui/RatingSelector'
-import { colors } from '../../../../../../theme'
+import { colors } from '@theme'
 
 interface Props { spec: string }
 

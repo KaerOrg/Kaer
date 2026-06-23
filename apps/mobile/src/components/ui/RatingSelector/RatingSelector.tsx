@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../theme'
+import { colors } from '@theme'
 import { styles } from './RatingSelector.styles'
 import { ContinuousGauge } from './ContinuousGauge'
 import type { RatingSelectorProps } from './RatingSelector.types'

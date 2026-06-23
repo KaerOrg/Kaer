@@ -8,7 +8,7 @@
 import { useState, useCallback } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { FieldText } from '../../fields'

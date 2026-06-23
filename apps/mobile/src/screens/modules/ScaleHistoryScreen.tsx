@@ -18,12 +18,12 @@ import {
   buildXLabels,
   computeAvg,
   type TimeRange,
-} from '../../components/ui/Chart/TimeRangeCharts/chartUtils'
-import { DimensionChart } from '../../components/ui/Chart/TimeRangeCharts/DimensionChart'
+} from '@ui/Chart/TimeRangeCharts/chartUtils'
+import { DimensionChart } from '@ui/Chart/TimeRangeCharts/DimensionChart'
 import { formatDateLong } from '../../lib/dateUtils'
 import { SCALE_SCORING } from '../../lib/scaleScoring'
 import { AppStackParamList } from '../../navigation/AppStack'
-import { colors, spacing, radius, typography } from '../../theme'
+import { colors, spacing, radius, typography } from '@theme'
 import { useTeen } from '../../hooks/useTeen'
 import { TeenAccent } from '../../components/features/TeenAccent'
 import { useConfirmDialog } from '../../contexts/ConfirmDialogContext'

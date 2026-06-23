@@ -4,7 +4,7 @@
 import { ScrollView, View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { computeSleepDuration, type SleepEntry } from '../../../../../lib/database'
 import { formatDateShort } from '../../../../../lib/dateUtils'
 import type { ContentField } from '../../../../../services/moduleService'

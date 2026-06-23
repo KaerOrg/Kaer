@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
-import { colors, radius } from '../../../../../../theme'
+import { colors, radius } from '@theme'
 
 export function TextWidget() {
   return <View style={styles.field} />

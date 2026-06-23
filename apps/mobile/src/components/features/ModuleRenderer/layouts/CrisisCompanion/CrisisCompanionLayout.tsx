@@ -10,13 +10,13 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { View, Text, ScrollView, StyleSheet } from 'react-native'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { resolvePsyEduIcon } from '../PsyEdu/iconMap'
 import { parseDurations, formatCountdown, nextActivityIndex, elapsedFraction } from './crisisLogic'
-import { Button } from '../../../../../components/ui/Button'
-import { Card } from '../../../../../components/ui/Card'
+import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import { styles } from './styles'
 
 type Mode = 'home' | 'activity' | 'timer' | 'done'

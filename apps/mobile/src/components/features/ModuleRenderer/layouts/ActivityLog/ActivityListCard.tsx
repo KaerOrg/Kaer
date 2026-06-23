@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '../../../../../theme'
+import { colors } from '@theme'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { ActivityRecord } from '../../../../../lib/database'
 import { alStyles } from './styles'
