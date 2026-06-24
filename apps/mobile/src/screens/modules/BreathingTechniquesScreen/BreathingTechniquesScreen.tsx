@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   View,
   Text,
@@ -11,8 +11,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { BREATHING_TECHNIQUES, getTechnique, type BreathingTechnique } from '../../../constants/breathingTechniques'
-import { getAllBreathingSessions, type BreathingSession } from '../../../lib/database'
+import {
+  fetchBreathingTechniques,
+  fetchBreathingSessions,
+  getCycleDuration,
+  type BreathingTechnique,
+  type BreathingSession,
+} from '../../../services/breathingService'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
@@ -31,7 +36,7 @@ interface TechniqueCardProps {
 
 function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps) {
   const { t } = useTranslation()
-  const cycleDuration = technique.phases.reduce((acc, p) => acc + p.seconds, 0)
+  const cycleDuration = getCycleDuration(technique)
   const name = t(`modules.breathing_techniques.${technique.key}_name`)
   const subtitle = t(`modules.breathing_techniques.${technique.key}_subtitle`)
   const description = t(`modules.breathing_techniques.${technique.key}_description`)
@@ -91,12 +96,14 @@ export default function BreathingTechniquesScreen() {
   const { tt, teenColor } = useTeen()
   const navigation = useNavigation<Nav>()
   const [sessions, setSessions] = useState<BreathingSession[]>([])
+  const [techniques, setTechniques] = useState<BreathingTechnique[]>([])
   const [loading, setLoading] = useState(true)
 
   useFocusEffect(
     useCallback(() => {
-      getAllBreathingSessions(200)
-        .then((data) => {
+      Promise.all([fetchBreathingTechniques(), fetchBreathingSessions()])
+        .then(([techs, data]) => {
+          setTechniques(techs)
           setSessions(data)
           setLoading(false)
         })
@@ -107,6 +114,12 @@ export default function BreathingTechniquesScreen() {
   // Compte le nombre de sessions par technique
   const countForTechnique = (key: string) =>
     sessions.filter((s) => s.technique_key === key).length
+
+  // Lookup O(1) technique par clé pour l'historique
+  const techniqueByKey = useMemo(
+    () => new Map(techniques.map((tech) => [tech.key, tech])),
+    [techniques]
+  )
 
   if (loading) {
     return (
@@ -124,7 +137,7 @@ export default function BreathingTechniquesScreen() {
           {tt('breathing_techniques', 'intro') || t('modules.breathing_techniques.intro_guide')}
         </Text>
 
-        {BREATHING_TECHNIQUES.map((technique) => (
+        {techniques.map((technique) => (
           <TechniqueCard
             key={technique.key}
             technique={technique}
@@ -140,7 +153,7 @@ export default function BreathingTechniquesScreen() {
           <View style={styles.historySection}>
             <Text style={styles.historyTitle}>{t('modules.breathing_techniques.recent_sessions')}</Text>
             {sessions.slice(0, 10).map((s) => {
-              const tech = getTechnique(s.technique_key)
+              const tech = techniqueByKey.get(s.technique_key)
               const mins = Math.floor(s.duration_seconds / 60)
               const secs = s.duration_seconds % 60
               const dateLabel = new Date(s.date + 'T00:00:00').toLocaleDateString('fr-FR', {

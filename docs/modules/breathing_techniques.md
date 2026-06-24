@@ -50,8 +50,26 @@ Proposer au patient un guide animé pour 5 techniques de respiration validées, 
 | `duration_seconds` | INTEGER | Durée effective de la session |
 | `created_at` | TEXT | Horodatage ISO 8601 |
 
-**Constantes :** `apps/mobile/src/constants/breathingTechniques.ts`
-— Définit les 5 techniques, leurs phases, couleurs, durées recommandées et références cliniques.
+### Configuration des techniques (config-first, issue #69)
+
+La définition des 5 techniques (couleur, durée recommandée, séquence de phases) vit
+**en base**, plus dans un tableau TypeScript. Source de vérité : `supabase/seed.sql`.
+
+- **`module_content_fields`** : 1 field `breathing_technique` par technique
+  (`bt.tech.<key>`), chaque phase = un field enfant `breathing_phase`
+  (`parent_field_id`), ordonnée par `sort_order`.
+- **`field_props`** (atomiques) :
+  - technique → `technique_key`, `color` (hex), `recommended_duration_min`
+  - phase → `phase_type` (`inhale`|`hold_in`|`exhale`|`hold_out`), `phase_seconds`
+- **Lecture mobile** : `breathingService.fetchBreathingTechniques()` appelle
+  `fetchModuleFields('breathing_techniques')` (cache mémoire) et mappe les fields
+  en `BreathingTechnique[]`.
+
+Les libellés (nom, sous-titre, description, niveau de preuve, label de phase) restent
+en i18n bundlé : `modules.breathing_techniques.<key>_name` / `_subtitle` /
+`_description` / `_evidence` et `modules.breathing_techniques.phase_<type>`, déclinés
+`fr`/`en` en `common` et `teen`. Les sources cliniques et la note MDR sont conservées
+en commentaire d'en-tête du bloc seed.
 
 ### Signal d'observance Supabase
 
@@ -64,11 +82,12 @@ Proposer au patient un guide animé pour 5 techniques de respiration validées, 
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/src/constants/breathingTechniques.ts` | Définition des 5 techniques |
+| `supabase/seed.sql` | Config des techniques (`breathing_technique`/`breathing_phase` + `field_props`) |
+| `apps/mobile/src/services/breathingService.ts` | Lecture config (`fetchBreathingTechniques`) + sessions + sync |
 | `apps/mobile/src/lib/database.ts` | Table + CRUD `breathing_sessions` |
-| `apps/mobile/src/screens/modules/BreathingTechniquesScreen.tsx` | Écran liste |
-| `apps/mobile/src/screens/modules/BreathingExerciseScreen.tsx` | Guide animé |
-| `apps/mobile/src/screens/modules/BreathingTechniquesScreen.test.tsx` | Tests Jest + RNTL (9 cas) |
+| `apps/mobile/src/screens/modules/BreathingTechniquesScreen/` | Écran liste + test |
+| `apps/mobile/src/screens/modules/BreathingExerciseScreen/` | Guide animé + test |
+| `apps/mobile/src/services/breathingService.test.ts` | Tests service (save, fetch, parsing) |
 | `apps/mobile/src/navigation/AppStack.tsx` | Routes `BreathingTechniques` + `BreathingExercise` |
 | `apps/web/src/lib/modulePreviewContent.ts` | Aperçu praticien |
 
@@ -86,11 +105,13 @@ npx jest BreathingTechniquesScreen.test.tsx
 ## Checklist de livraison
 
 - [x] Web : aperçu praticien dans `MODULE_PREVIEW`
-- [x] Mobile : constantes des 5 techniques dans `breathingTechniques.ts`
-- [x] Mobile : `BreathingTechniquesScreen.tsx` — liste + historique
-- [x] Mobile : `BreathingExerciseScreen.tsx` — guide animé avec cercle, phases, compteurs
+- [x] Config-first : 5 techniques en base (`module_content_fields` / `field_props`)
+- [x] Mobile : `breathingService.fetchBreathingTechniques()` lit la config depuis la base
+- [x] Mobile : `BreathingTechniquesScreen` — liste + historique
+- [x] Mobile : `BreathingExerciseScreen` — guide animé avec cercle, phases, compteurs
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : routes `BreathingTechniques` + `BreathingExercise` dans `AppStack.tsx`
 - [x] Mobile : `available: true` + navigation dans `HomeScreen.tsx`
-- [x] Tests : 9 cas couverts
+- [x] i18n : clés `fr`/`en` en `common` + `teen`
+- [x] Tests : service + 2 écrans
 - [x] Conformité MDR : rythme fixe, pas de biofeedback, aucune interprétation
