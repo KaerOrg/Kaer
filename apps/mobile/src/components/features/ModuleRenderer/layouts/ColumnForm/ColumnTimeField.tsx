@@ -7,7 +7,7 @@
 
 import { memo } from 'react'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
-import { TimePicker } from '../../../../ui/TimePicker'
+import { TimePicker } from '@ui/TimePicker'
 
 export interface ColumnTimeFieldProps {
   fieldKey: string

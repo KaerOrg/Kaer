@@ -11,8 +11,8 @@ import {
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
-import { Button } from '../../../../ui/Button'
-import { Card } from '../../../../ui/Card'
+import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import {
   getSleepEntry, computeSleepEfficiency, generateId,
 } from '../../../../../lib/database'
@@ -22,8 +22,8 @@ import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import type { Lbl, SleepConfig } from './types'
 import { minutesToHhmmHint } from './sleepHelpers'
-import { RatingSelector } from '../../../../ui/RatingSelector'
-import { TimePicker } from '../../../../ui/TimePicker'
+import { RatingSelector } from '@ui/RatingSelector'
+import { TimePicker } from '@ui/TimePicker'
 import { MinutesField } from './MinutesField'
 import { styles } from './styles'
 

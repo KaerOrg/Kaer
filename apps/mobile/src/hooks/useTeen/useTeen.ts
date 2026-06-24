@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
-import { TEEN_DEFAULT_COLOR } from '../../theme/teen'
+import { TEEN_DEFAULT_COLOR } from '@theme'
 
 interface UseTeenReturn {
   isTeenMode: boolean

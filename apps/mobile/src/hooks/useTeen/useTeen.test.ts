@@ -2,7 +2,7 @@
 // Les couleurs par module sont désormais stockées en BDD (modules.color),
 // chargées dans authStore.moduleColors au login, et exposées via useTeen.teenColor().
 
-import { TEEN_DEFAULT_COLOR } from '../../theme/teen'
+import { TEEN_DEFAULT_COLOR } from '@theme'
 import frTeen from '../../i18n/locales/fr/teen.json'
 import enTeen from '../../i18n/locales/en/teen.json'
 

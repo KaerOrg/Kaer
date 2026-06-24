@@ -1,6 +1,7 @@
 import { colors, spacing, radius, fontSize } from '@kaer/shared'
 
 export { colors, spacing, radius, fontSize }
+export { TEEN_DEFAULT_COLOR } from './teen'
 
 export const typography = {
   h1: { fontSize: fontSize.h1, fontWeight: '700' as const, color: colors.text },

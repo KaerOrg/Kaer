@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
-import { Checkbox } from '../../../../../ui/Checkbox'
+import { Checkbox } from '@ui/Checkbox'
 
 /** Aperçu en lecture seule d'un champ case à cocher (rendu statique, sans `onChange`). */
 export function CheckboxWidget() {

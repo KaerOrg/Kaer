@@ -4,7 +4,7 @@
 // saisies par le patient. Aucune interprétation, aucun seuil, aucune conclusion.
 
 import type { FearEntry, FearSituation } from '../../../../../lib/database'
-import type { SudsPoint } from '../../../../ui/Chart'
+import type { SudsPoint } from '@ui/Chart'
 
 /** Marches classées du moins → plus angoissant (SUDS cible croissant). */
 export function sortSteps(situations: readonly FearSituation[]): FearSituation[] {

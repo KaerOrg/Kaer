@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import type { TodayRoutine } from '../../../services/homeService'
-import { Card } from '../../ui/Card'
+import { Card } from '@ui/Card'
 import { colors, spacing, radius } from '@theme'
 
 interface TodayScheduleProps {
