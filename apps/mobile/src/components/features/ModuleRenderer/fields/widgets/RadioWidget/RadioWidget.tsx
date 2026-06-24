@@ -1,6 +1,6 @@
 import React from 'react'
-import { StatusBadge } from '../../../../../ui/StatusBadge'
-import type { StatusBadgeVariant } from '../../../../../ui/StatusBadge'
+import { StatusBadge } from '@ui/StatusBadge'
+import type { StatusBadgeVariant } from '@ui/StatusBadge'
 
 type Variant = 'ok' | 'partial' | 'miss'
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
-import { RatingSelector } from '../../../../ui/RatingSelector'
+import { RatingSelector } from '@ui/RatingSelector'
 import { etStyles } from './styles'
 
 export interface StepFormViewProps {

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
-import { Button } from '../../../../ui/Button'
+import { Button } from '@ui/Button'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'

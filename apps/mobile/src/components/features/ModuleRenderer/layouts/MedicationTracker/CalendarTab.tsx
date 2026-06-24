@@ -1,5 +1,5 @@
 import { ScrollView } from 'react-native'
-import { MonthCalendar, type DayMarker } from '../../../../ui/Chart/TimeRangeCharts'
+import { MonthCalendar, type DayMarker } from '@ui/Chart/TimeRangeCharts'
 import { StreakBadge } from './StreakBadge'
 import { styles } from './styles'
 

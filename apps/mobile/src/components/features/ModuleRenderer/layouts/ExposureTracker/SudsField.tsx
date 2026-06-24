@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, Pressable } from 'react-native'
-import { RatingSelector } from '../../../../ui/RatingSelector'
+import { RatingSelector } from '@ui/RatingSelector'
 import { etStyles } from './styles'
 
 export interface SudsFieldSkip {

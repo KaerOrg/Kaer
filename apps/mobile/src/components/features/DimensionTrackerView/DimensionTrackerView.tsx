@@ -44,10 +44,10 @@ import {
   buildXLabels,
   computeStreak,
   markerXFraction,
-} from '../../ui/Chart/TimeRangeCharts'
-import type { TimeRange, ChartMarker } from '../../ui/Chart/TimeRangeCharts'
-import { Radio } from '../../ui/Radio'
-import type { RadioOption } from '../../ui/Radio'
+} from '@ui/Chart/TimeRangeCharts'
+import type { TimeRange, ChartMarker } from '@ui/Chart/TimeRangeCharts'
+import { Radio } from '@ui/Radio'
+import type { RadioOption } from '@ui/Radio'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type Tab = 'entry' | 'charts' | 'month'

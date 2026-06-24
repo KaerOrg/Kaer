@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { RatingSelector } from '../../../../../ui/RatingSelector'
+import { RatingSelector } from '@ui/RatingSelector'
 import { colors } from '@theme'
 
 interface Props { count: number }

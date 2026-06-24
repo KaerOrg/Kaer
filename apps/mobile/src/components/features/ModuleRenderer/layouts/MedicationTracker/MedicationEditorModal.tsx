@@ -2,9 +2,9 @@ import { useState, useRef, useCallback, useMemo } from 'react'
 import { Modal, View, Text, TextInput, Pressable } from 'react-native'
 import type { Medication, MedicationKind } from '@kaer/shared'
 import { colors } from '@theme'
-import { Button } from '../../../../ui/Button'
-import { Radio } from '../../../../ui/Radio'
-import type { RadioOption } from '../../../../ui/Radio'
+import { Button } from '@ui/Button'
+import { Radio } from '@ui/Radio'
+import type { RadioOption } from '@ui/Radio'
 import { styles } from './styles'
 
 // Absorbe le press sur la carte pour qu'il ne ferme pas la modale (backdrop).
