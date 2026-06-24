@@ -30,7 +30,6 @@ import { EmptyState } from '@ui/EmptyState'
 // Tout module absent de cette map ET autre preview_kind → ModuleContent (moteur générique).
 const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   breathing_techniques:     'BreathingTechniques',
-  crisis_plan:              'CrisisPlan',
   medication_side_effects:  'MedicationSideEffectsHistory',
   mood_tracker:             'MoodTracker',
   motivational_balance:     'MotivationalBalance',
@@ -242,7 +241,7 @@ export default function HomeScreen() {
         {modules.some(m => m.module_type === 'crisis_plan') && (
           <Pressable
             style={styles.urgencyBtn}
-            onPress={() => navigation.navigate('CrisisPlan', { initialUrgency: true })}
+            onPress={() => navigation.navigate('CrisisUrgency')}
             accessibilityRole="button"
           >
             <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />

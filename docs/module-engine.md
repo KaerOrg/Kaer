@@ -158,9 +158,10 @@ create table public.module_content_fields (
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
 | `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Bouton coloré non-cliquable (aperçu web), actif sur mobile |
-| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | Affiche le message praticien (Supabase `crisis_plan_configs`), 3 emplacements photos, champ phrase. Lit `patientId` via `PatientViewContext` (web) |
-| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Liste les cartes praticien (Supabase `crisis_plan_coping_cards`). Lit `patientId` via `PatientViewContext` (web) |
-| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | Affiche la phrase d'engagement configurée par le praticien (`crisis_plan_configs.commitment_phrase`). Lit `patientId` via `PatientViewContext` (web) |
+| `crisis_urgency_entry` | Bandeau d'accès mode urgence | `text_code`, `tone` | **Mobile** : bandeau rouge en tête qui navigue vers l'écran `CrisisUrgency`. **Web** : aperçu statique (rendu via `DisclaimerBanner`, le praticien n'a pas de mode urgence) |
+| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem, phrase SQLite, message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
+| `crisis_coping_cards_preview` | Widget "Cartes de coping" | — | Cartes praticien (Supabase `crisis_plan_coping_cards`), lecture seule sur les deux plateformes |
+| `crisis_commitment_preview` | Widget "Engagement thérapeutique" | — | **Mobile** : signature nom/date (SQLite). **Web** : aperçu de la phrase d'engagement (`crisis_plan_configs.commitment_phrase`) |
 | `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
 
 **Layout `cards`**

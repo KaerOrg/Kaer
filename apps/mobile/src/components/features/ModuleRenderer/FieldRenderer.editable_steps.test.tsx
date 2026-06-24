@@ -14,6 +14,18 @@ jest.mock('../../../lib/database', () => ({
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
+// Widgets hors-section, stubbés : ils ont leurs propres tests. Ici on vérifie
+// seulement que le layout les dispatche au bon endroit selon leur field_type.
+function mockStubWidget(testID: string) {
+  const R = require('react')
+  const { Text } = require('react-native')
+  return () => R.createElement(Text, { testID }, testID)
+}
+jest.mock('./fields/CrisisUrgencyEntry', () => ({ CrisisUrgencyEntry: mockStubWidget('urgency-entry-stub') }))
+jest.mock('./fields/CrisisAnchorsWidget', () => ({ CrisisAnchorsWidget: mockStubWidget('anchors-stub') }))
+jest.mock('./fields/CrisisCopingCardsWidget', () => ({ CrisisCopingCardsWidget: mockStubWidget('coping-stub') }))
+jest.mock('./fields/CrisisCommitmentWidget', () => ({ CrisisCommitmentWidget: mockStubWidget('commitment-stub') }))
+
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { Linking } from 'react-native'
@@ -172,6 +184,23 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
       expect(database.savePlanItem).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'existing-1', text: 'Mon signe modifié' })
       )
+    })
+  })
+
+  it('dispatche les fields hors-section : bandeau urgence en tête, widgets après les étapes', async () => {
+    const fields: ContentField[] = [
+      makeField({ id: 'urgency', field_type: 'crisis_urgency_entry', text_code: 'modules.crisis_plan.urgency_title', section_id: null, sort_order: 5 }),
+      ...MOCK_FIELDS,
+      makeField({ id: 'anchors', field_type: 'crisis_anchors_preview', section_id: null, sort_order: 70 }),
+      makeField({ id: 'coping', field_type: 'crisis_coping_cards_preview', section_id: null, sort_order: 80 }),
+      makeField({ id: 'commitment', field_type: 'crisis_commitment_preview', section_id: null, sort_order: 90 }),
+    ]
+    render(<FieldRenderer preview_kind="editable_steps" fields={fields} moduleId="crisis_plan" />)
+    await waitFor(() => {
+      expect(screen.getByTestId('urgency-entry-stub')).toBeTruthy()
+      expect(screen.getByTestId('anchors-stub')).toBeTruthy()
+      expect(screen.getByTestId('coping-stub')).toBeTruthy()
+      expect(screen.getByTestId('commitment-stub')).toBeTruthy()
     })
   })
 })
