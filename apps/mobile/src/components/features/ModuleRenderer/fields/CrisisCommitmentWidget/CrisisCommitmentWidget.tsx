@@ -10,6 +10,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import { InputField } from '@ui/InputField'
 import { formatDateLong } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
@@ -62,7 +63,7 @@ export function CrisisCommitmentWidget() {
   const showForm = !commitment || signing
 
   return (
-    <View style={[styles.section, styles.commitmentSection]}>
+    <Card accentColor={colors.primaryLight} style={styles.card}>
       <View style={styles.sectionHeader}>
         <MaterialCommunityIcons name="handshake-outline" size={20} color={colors.primary} />
         <Text style={styles.sectionTitle}>{t('modules.crisis_plan.commitment_title')}</Text>
@@ -99,13 +100,12 @@ export function CrisisCommitmentWidget() {
           </Pressable>
         </View>
       )}
-    </View>
+    </Card>
   )
 }
 
 const styles = StyleSheet.create({
-  section:           { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
-  commitmentSection: { borderWidth: 1.5, borderColor: colors.primaryLight },
+  card:              { borderRadius: radius.lg },
   sectionHeader:     { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   sectionTitle:      { fontSize: 16, fontWeight: '600', color: colors.text, flex: 1 },
 

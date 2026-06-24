@@ -24,6 +24,9 @@ import { styles } from './styles'
 
 // Widgets rendus pour les fields hors-section (après les étapes), dispatchés par
 // `field_type`. Parité avec le LayoutDispatcher web (editable_steps).
+// NB : `editable_steps` n'est aujourd'hui utilisé que par crisis_plan (il hardcode
+// déjà les clés `modules.crisis_plan.*`). Si un second module l'adopte un jour, ce
+// dispatch devra être généralisé (config-driven via field_props plutôt que cette map).
 const SECTION_WIDGETS: Record<string, ComponentType> = {
   crisis_anchors_preview: CrisisAnchorsWidget,
   crisis_coping_cards_preview: CrisisCopingCardsWidget,
@@ -107,16 +110,23 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
     })
   }, [t, showConfirm])
 
-  const emergencyFields = uiFields
-    .filter(f => f.field_type === 'exercise_safety')
-    .sort((a, b) => a.sort_order - b.sort_order)
-
-  // Bandeau d'entrée urgence (rendu en tête) et widgets de section (rendus après
-  // les étapes, triés par sort_order) — parité avec le LayoutDispatcher web.
-  const hasUrgencyEntry = uiFields.some(f => f.field_type === 'crisis_urgency_entry')
-  const sectionWidgetFields = uiFields
-    .filter(f => SECTION_WIDGETS[f.field_type] != null)
-    .sort((a, b) => a.sort_order - b.sort_order)
+  // Partition unique des fields hors-section : bandeau d'entrée urgence (en tête),
+  // widgets de section (après les étapes, triés par sort_order) et boutons d'appel
+  // (barre fixe en bas). Parité avec le LayoutDispatcher web.
+  const { emergencyFields, hasUrgencyEntry, sectionWidgetFields } = useMemo(() => {
+    const emergency: ContentField[] = []
+    const sectionWidgets: ContentField[] = []
+    let urgency = false
+    for (const f of uiFields) {
+      if (f.field_type === 'exercise_safety') emergency.push(f)
+      else if (f.field_type === 'crisis_urgency_entry') urgency = true
+      else if (SECTION_WIDGETS[f.field_type] != null) sectionWidgets.push(f)
+    }
+    const bySortOrder = (a: ContentField, b: ContentField) => a.sort_order - b.sort_order
+    emergency.sort(bySortOrder)
+    sectionWidgets.sort(bySortOrder)
+    return { emergencyFields: emergency, hasUrgencyEntry: urgency, sectionWidgetFields: sectionWidgets }
+  }, [uiFields])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>

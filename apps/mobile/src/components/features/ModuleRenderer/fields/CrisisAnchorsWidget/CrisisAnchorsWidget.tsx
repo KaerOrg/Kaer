@@ -11,6 +11,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import { InputField } from '@ui/InputField'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
@@ -82,7 +83,7 @@ export function CrisisAnchorsWidget() {
   const startEditing = useCallback(() => setEditingPhrase(true), [])
 
   return (
-    <View style={styles.section}>
+    <Card style={styles.card}>
       <View style={styles.sectionHeader}>
         <MaterialCommunityIcons name="heart-outline" size={20} color={colors.danger} />
         <Text style={styles.sectionTitle}>{t('modules.crisis_plan.anchors_title')}</Text>
@@ -158,12 +159,12 @@ export function CrisisAnchorsWidget() {
           </Pressable>
         </View>
       )}
-    </View>
+    </Card>
   )
 }
 
 const styles = StyleSheet.create({
-  section:          { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
+  card:             { borderRadius: radius.lg },
   sectionHeader:    { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   sectionTitle:     { fontSize: 16, fontWeight: '600', color: colors.text, flex: 1 },
   sectionSubtitle:  { fontSize: 13, color: colors.textMuted, lineHeight: 18 },

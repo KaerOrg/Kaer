@@ -92,6 +92,8 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
         {sorted.map(f => {
           if (f.field_type === 'footer_note') return <FieldText key={f.id} field={f} t={t} />
           if (f.field_type === 'exercise_safety') return <ExerciseSafetyField key={f.id} field={f} />
+          // Le praticien n'a pas de mode urgence (réservé au patient mobile) : on rend
+          // l'entrée urgence en bandeau danger statique, via DisclaimerBanner (tone danger).
           if (f.field_type === 'crisis_urgency_entry') return <DisclaimerBanner key={f.id} field={f} moduleId={moduleId} />
           if (f.field_type === 'crisis_anchors_preview') return <CrisisAnchorsWidget key={f.id} />
           if (f.field_type === 'crisis_coping_cards_preview') return <CrisisCopingCardsWidget key={f.id} />

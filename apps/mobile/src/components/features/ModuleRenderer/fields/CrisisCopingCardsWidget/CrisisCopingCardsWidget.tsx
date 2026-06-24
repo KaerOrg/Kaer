@@ -10,6 +10,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
+import { Card } from '@ui/Card'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
 import { fetchPractitionerConfig } from '../../../../../services/crisisPlanService'
@@ -31,7 +32,7 @@ export function CrisisCopingCardsWidget() {
   }, [patient]))
 
   return (
-    <View style={styles.section}>
+    <Card style={styles.card}>
       <View style={styles.sectionHeader}>
         <MaterialCommunityIcons name="card-text-outline" size={20} color={colors.primary} />
         <Text style={styles.sectionTitle}>{t('modules.crisis_plan.coping_cards_title')}</Text>
@@ -57,12 +58,12 @@ export function CrisisCopingCardsWidget() {
           ))}
         </>
       )}
-    </View>
+    </Card>
   )
 }
 
 const styles = StyleSheet.create({
-  section:         { backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm },
+  card:            { borderRadius: radius.lg },
   sectionHeader:   { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   sectionTitle:    { fontSize: 16, fontWeight: '600', color: colors.text, flex: 1 },
   sectionSubtitle: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
