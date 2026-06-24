@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Mail, Briefcase, UserCircle2, MapPin, Phone } from 'lucide-react'
@@ -7,7 +7,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
-import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
 import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
 import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
@@ -21,11 +21,19 @@ export function ProfilePage() {
 
   const [name, setName] = useState(practitioner?.name ?? '')
   const [title, setTitle] = useState(practitioner?.professional_title ?? '')
-  const professionalTitles = useQuery(referenceQueries.professionalTitles()).data ?? []
+  const professionalTitlesQuery = useQuery(referenceQueries.professionalTitles())
+  const professionalTitles = useMemo(
+    () => professionalTitlesQuery.data ?? [],
+    [professionalTitlesQuery.data]
+  )
 
   const titleLangKey = i18n.language.startsWith('fr') ? 'label_fr' : 'label_en'
   const titleMatch = professionalTitles.find(pt => pt.code === practitioner?.professional_title)
   const titleLabel = titleMatch ? titleMatch[titleLangKey] : practitioner?.professional_title
+  const titleOptions = useMemo<DropdownOption[]>(
+    () => professionalTitles.map(pt => ({ value: pt.code, label: pt[titleLangKey] })),
+    [professionalTitles, titleLangKey]
+  )
   const [address, setAddress] = useState(practitioner?.address ?? '')
   const [phone, setPhone] = useState(practitioner?.phone ?? '')
   const [saving, setSaving] = useState(false)
@@ -139,17 +147,14 @@ export function ProfilePage() {
                 required
               />
               <Dropdown
+                clearable
+                clearLabel={t('common.clear_selection')}
                 label={t('profile_modal.title_label')}
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-              >
-                <option value="">{t('profile_modal.title_placeholder')}</option>
-                {professionalTitles.map(pt => (
-                  <option key={pt.code} value={pt.code}>
-                    {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
-                  </option>
-                ))}
-              </Dropdown>
+                onChange={setTitle}
+                options={titleOptions}
+                placeholder={t('profile_modal.title_placeholder')}
+              />
             </div>
             <div className="profile-page__form-row">
               <InputField

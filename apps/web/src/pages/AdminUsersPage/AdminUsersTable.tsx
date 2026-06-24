@@ -11,7 +11,7 @@ import {
 import { Drawer } from '../../components/ui/Drawer'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { SegmentedControl, type SegmentOption } from '../../components/ui/SegmentedControl'
-import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { useToast } from '../../contexts/ToastContext'
@@ -94,8 +94,8 @@ export function AdminUsersTable() {
     setPage(0)
   }, [])
 
-  const handlePractitionerChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setPractitioner(e.target.value)
+  const handlePractitionerChange = useCallback((value: string) => {
+    setPractitioner(value)
     setPage(0)
   }, [])
 
@@ -115,6 +115,14 @@ export function AdminUsersTable() {
       { value: 'practitioner', label: t('admin_users.filter.practitioners') },
     ],
     [t]
+  )
+
+  const practitionerOptions = useMemo<DropdownOption[]>(
+    () => [
+      { value: ALL_PRACTITIONERS, label: t('admin_users.filter.all_practitioners') },
+      ...(namesQuery.data ?? []).map(name => ({ value: name, label: name })),
+    ],
+    [t, namesQuery.data]
   )
 
   const columns = useMemo<DataTableColumn<AdminUser>[]>(
@@ -200,17 +208,10 @@ export function AdminUsersTable() {
       {showPractitionerFilter ? (
         <Dropdown
           label={t('admin_users.filter.by_practitioner')}
-          aria-label={t('admin_users.filter.by_practitioner')}
           value={practitioner}
           onChange={handlePractitionerChange}
-        >
-          <option value={ALL_PRACTITIONERS}>{t('admin_users.filter.all_practitioners')}</option>
-          {(namesQuery.data ?? []).map(name => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </Dropdown>
+          options={practitionerOptions}
+        />
       ) : null}
     </div>
   )

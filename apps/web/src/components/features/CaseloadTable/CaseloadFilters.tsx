@@ -1,7 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SearchInput } from '../../ui/SearchInput'
-import { Dropdown } from '../../ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../ui/Dropdown'
 import { Chip } from '../../ui/Chip'
 import type { CaseloadFilterState } from './types'
 
@@ -30,9 +30,17 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
     [value, onChange]
   )
   const handleStatus = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) =>
-      onChange({ ...value, status: e.target.value as CaseloadFilterState['status'] }),
+    (status: string) => onChange({ ...value, status: status as CaseloadFilterState['status'] }),
     [value, onChange]
+  )
+  const statusOptions = useMemo<DropdownOption[]>(
+    () => [
+      { value: 'all', label: t('file_active.filters.status_all') },
+      { value: 'active', label: t('file_active.status.active') },
+      { value: 'paused', label: t('file_active.status.paused') },
+      { value: 'archived', label: t('file_active.filters.status_archived') },
+    ],
+    [t]
   )
 
   return (
@@ -51,12 +59,8 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
         id="caseload-status-filter"
         value={value.status}
         onChange={handleStatus}
-      >
-        <option value="all">{t('file_active.filters.status_all')}</option>
-        <option value="active">{t('file_active.status.active')}</option>
-        <option value="paused">{t('file_active.status.paused')}</option>
-        <option value="archived">{t('file_active.filters.status_archived')}</option>
-      </Dropdown>
+        options={statusOptions}
+      />
 
       <div className="caseload-filters__chips" role="group" aria-label={t('file_active.filters.chips_label')}>
         <Chip
