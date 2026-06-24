@@ -1,13 +1,15 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, Pressable, type StyleProp, type ViewStyle } from 'react-native'
 import { colors } from '@theme'
 import { styles } from './Radio.styles'
-import type { RadioProps } from './Radio.types'
+import type { RadioOption, RadioProps } from './Radio.types'
 
 /**
- * Sélecteur à choix exclusif (radio). Deux habillages via `variant` :
+ * Sélecteur à choix exclusif (radio). Trois habillages via `variant` :
  * - `list` (défaut) : rangées rond + label (+ sous-label optionnel) ;
- * - `pills` : pilules en ligne, remplissage couleur sur l'option active.
+ * - `pills` : pilules en ligne, remplissage couleur sur l'option active ;
+ * - `grid` : colonnes de largeur égale, label centré multiligne, remplissage
+ *   couleur sur l'option active (échelle Likert d'un questionnaire clinique).
  *
  * `readonly` rend le même visuel sans interaction (options en `View`, pas en
  * `Pressable`) — pour un aperçu / affichage. Tout sélecteur mono-sélection passe
@@ -19,27 +21,58 @@ export const Radio = React.memo(function Radio({
 }: RadioProps) {
   const interactive = !readonly
 
+  // Enrobe le contenu d'une option dans un `Pressable` (saisie) ou une `View`
+  // (lecture seule) : logique partagée par les trois habillages.
+  const renderOption = (
+    opt: RadioOption,
+    active: boolean,
+    optStyle: StyleProp<ViewStyle>,
+    content: React.ReactNode,
+  ) =>
+    interactive ? (
+      <Pressable
+        key={opt.value}
+        style={optStyle}
+        onPress={() => onChange?.(opt.value)}
+        accessibilityRole="radio"
+        accessibilityState={{ selected: active }}
+      >
+        {content}
+      </Pressable>
+    ) : (
+      <View key={opt.value} style={optStyle} accessibilityState={{ selected: active }}>
+        {content}
+      </View>
+    )
+
   if (variant === 'pills') {
     return (
       <View style={styles.pillsRow} testID={testID}>
         {options.map(opt => {
           const active = value === opt.value
-          const pillStyle = [styles.pill, active && { backgroundColor: color, borderColor: color }]
-          const pillLabel = <Text style={[styles.pillLabel, active && styles.pillLabelActive]}>{opt.label}</Text>
-          return interactive ? (
-            <Pressable
-              key={opt.value}
-              style={pillStyle}
-              onPress={() => onChange?.(opt.value)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-            >
-              {pillLabel}
-            </Pressable>
-          ) : (
-            <View key={opt.value} style={pillStyle} accessibilityState={{ selected: active }}>
-              {pillLabel}
-            </View>
+          return renderOption(
+            opt,
+            active,
+            [styles.pill, active && { backgroundColor: color, borderColor: color }],
+            <Text style={[styles.pillLabel, active && styles.pillLabelActive]}>{opt.label}</Text>,
+          )
+        })}
+      </View>
+    )
+  }
+
+  if (variant === 'grid') {
+    return (
+      <View style={styles.gridRow} testID={testID}>
+        {options.map(opt => {
+          const active = value === opt.value
+          return renderOption(
+            opt,
+            active,
+            [styles.gridOption, active && { backgroundColor: color, borderColor: color }],
+            <Text style={[styles.gridLabel, active && styles.gridLabelActive]} numberOfLines={2}>
+              {opt.label}
+            </Text>,
           )
         })}
       </View>
@@ -50,7 +83,10 @@ export const Radio = React.memo(function Radio({
     <View style={styles.list} testID={testID}>
       {options.map(opt => {
         const active = value === opt.value
-        const rowContent = (
+        return renderOption(
+          opt,
+          active,
+          styles.row,
           <>
             <View style={[styles.dot, active && { borderColor: color }]}>
               {active ? <View style={[styles.dotInner, { backgroundColor: color }]} /> : null}
@@ -59,22 +95,7 @@ export const Radio = React.memo(function Radio({
               <Text style={styles.label}>{opt.label}</Text>
               {opt.sublabel ? <Text style={styles.sublabel}>{opt.sublabel}</Text> : null}
             </View>
-          </>
-        )
-        return interactive ? (
-          <Pressable
-            key={opt.value}
-            style={styles.row}
-            onPress={() => onChange?.(opt.value)}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: active }}
-          >
-            {rowContent}
-          </Pressable>
-        ) : (
-          <View key={opt.value} style={styles.row} accessibilityState={{ selected: active }}>
-            {rowContent}
-          </View>
+          </>,
         )
       })}
     </View>
