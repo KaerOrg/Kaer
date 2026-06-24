@@ -785,7 +785,7 @@ const columns: DataTableColumn<Row>[] = [
 | `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`, `sortable`) |
 | `rows` | `readonly T[]` | Lignes **déjà filtrées/triées/paginées** par l'appelant — la table ne réordonne ni ne tronque jamais |
 | `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
-| `filters` | `ReactNode` | Contrôles de filtrage (recherche, segments, dropdowns…), partie intégrante de la table |
+| `filters` | `ReactNode` | Contrôles de filtrage (recherche, segments, dropdowns…). Rendus dans un **panel encadré** (`.data-table__filters` : bordure + radius + fond léger + padding, 100 % tokens). Le cadre n'apparaît **que si** `filters` est fourni (pas de panel vide) |
 | `actionBar` | `ReactNode` | Barre d'actions de la table (boutons primaires, ex. « Ajouter »). Rendue **sous** les filtres, alignée à gauche |
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
