@@ -54,6 +54,20 @@ describe('DataTable', () => {
     expect(screen.getByText('Filtres')).toBeInTheDocument()
   })
 
+  it('encadre les filtres dans un panel quand des filtres sont fournis', () => {
+    const { container } = render(
+      <DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} filters={<div>Filtres</div>} />
+    )
+    expect(container.querySelector('.data-table__filters')).not.toBeNull()
+  })
+
+  it('ne rend aucun panel de filtres quand aucun filtre n\'est fourni', () => {
+    const { container } = render(
+      <DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} actionBar={<button>Ajouter</button>} />
+    )
+    expect(container.querySelector('.data-table__filters')).toBeNull()
+  })
+
   it('déplie une ligne via le contexte fourni à la cellule', () => {
     const columns: DataTableColumn<Person>[] = [
       {
