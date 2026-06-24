@@ -37,6 +37,28 @@ describe('Radio', () => {
     expect(onChange).toHaveBeenCalledWith('prn')
   })
 
+  it('variant grid : rend une option par valeur et remonte le clic', () => {
+    const onChange = jest.fn()
+    render(<Radio options={OPTIONS} value="maintenance" onChange={onChange} variant="grid" />)
+    expect(screen.getByText('Traitement de fond')).toBeTruthy()
+    fireEvent.press(screen.getByText('Si besoin'))
+    expect(onChange).toHaveBeenCalledWith('prn')
+  })
+
+  it('variant grid : expose l\'état sélectionné via accessibilityState', () => {
+    render(<Radio options={OPTIONS} value="prn" onChange={() => {}} variant="grid" />)
+    expect(screen.getByRole('radio', { selected: true })).toBeTruthy()
+  })
+
+  it('variant grid + readonly : labels rendus, aucune option n\'a le rôle radio', () => {
+    const onChange = jest.fn()
+    render(<Radio options={OPTIONS} value="maintenance" variant="grid" readonly onChange={onChange} />)
+    expect(screen.getByText('Traitement de fond')).toBeTruthy()
+    expect(screen.queryByRole('radio')).toBeNull()
+    fireEvent.press(screen.getByText('Si besoin'))
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('value null : aucune option sélectionnée, aucun crash', () => {
     render(<Radio options={OPTIONS} value={null} onChange={() => {}} />)
     expect(screen.queryByRole('radio', { selected: true })).toBeNull()
