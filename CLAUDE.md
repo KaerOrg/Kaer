@@ -94,6 +94,7 @@ Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Featu
 - **Feedback web** : toujours `useToast()` pour les opérations réseau — jamais d'état local. Doc : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Zéro SQL dans un composant** : toute opération passe par `apps/<app>/src/services/<domaine>Service.ts`. Détail : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md).
 - **Nouveau module** : passer par le skill `module-builder`. Lecture préalable : [`docs/module-engine.md`](docs/module-engine.md).
+- **Résoudre un ticket GitHub** : passer par le skill `ticket-resolve` (analyse → porte « déjà fait ? » → branche → implémentation → tests/doc → `pr-review` → `simplify` → merge `main`/conflits → CI → PR `Closes #N` → clôture du ticket).
 - **Avant tout merge** : skill `pr-review` puis procédure [`.claude/rules/merge-procedure.md`](.claude/rules/merge-procedure.md) (fetch → merge → conflits → tests → tsc, les deux apps).
 - **Ordre web-puis-mobile** pour tout nouveau module (praticien doit pouvoir le débloquer avant que le patient y accède).
 - **Synchronisation mobile** : toute écriture SQLite patient passe par `syncUpsert`/`syncDelete` de `syncHelpers.ts`. Détail : [`.claude/rules/sync-service.md`](.claude/rules/sync-service.md).
