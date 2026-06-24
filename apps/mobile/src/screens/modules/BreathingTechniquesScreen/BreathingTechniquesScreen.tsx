@@ -4,17 +4,14 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import {
   fetchBreathingTechniques,
   fetchBreathingSessions,
-  getCycleDuration,
   type BreathingTechnique,
   type BreathingSession,
 } from '../../../services/breathingService'
@@ -23,73 +20,9 @@ import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
 import { useTeen } from '../../../hooks/useTeen'
 import { TeenAccent } from '../../../components/features/TeenAccent'
+import { TechniqueCard } from './TechniqueCard'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
-
-// ─── Carte d'une technique ────────────────────────────────────────────────────
-
-interface TechniqueCardProps {
-  technique: BreathingTechnique
-  sessionCount: number
-  onPress: () => void
-}
-
-function TechniqueCard({ technique, sessionCount, onPress }: TechniqueCardProps) {
-  const { t } = useTranslation()
-  const cycleDuration = getCycleDuration(technique)
-  const name = t(`modules.breathing_techniques.${technique.key}_name`)
-  const subtitle = t(`modules.breathing_techniques.${technique.key}_subtitle`)
-  const description = t(`modules.breathing_techniques.${technique.key}_description`)
-  const evidence = t(`modules.breathing_techniques.${technique.key}_evidence`)
-
-  return (
-    <TouchableOpacity
-      style={[styles.card, { borderLeftColor: technique.color }]}
-      onPress={onPress}
-      activeOpacity={0.75}
-      accessibilityRole="button"
-      accessibilityLabel={name}
-    >
-      <View style={styles.cardHeader}>
-        <View style={styles.cardText}>
-          <Text style={styles.cardName}>{name}</Text>
-          <Text style={styles.cardSubtitle}>{subtitle}</Text>
-        </View>
-        <View style={[styles.durationBadge, { backgroundColor: technique.color + '1A' }]}>
-          <Text style={[styles.durationText, { color: technique.color }]}>
-            {cycleDuration}s / cycle
-          </Text>
-        </View>
-      </View>
-
-      <Text style={styles.cardDesc} numberOfLines={2}>{description}</Text>
-
-      <View style={styles.cardFooter}>
-        <Text style={styles.evidenceText}>{evidence}</Text>
-        {sessionCount > 0 && (
-          <View style={styles.sessionBadge}>
-            <MaterialCommunityIcons name="history" size={12} color={colors.textMuted} />
-            <Text style={styles.sessionCount}>
-              {t('modules.breathing_techniques.session_count', { count: sessionCount })}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* Visualisation des phases */}
-      <View style={styles.phases}>
-        {technique.phases.map((phase, i) => (
-          <View key={i} style={styles.phaseItem}>
-            <View style={[styles.phaseBar, { backgroundColor: technique.color, flex: phase.seconds }]} />
-            <Text style={styles.phaseLabel}>{phase.seconds}s</Text>
-          </View>
-        ))}
-      </View>
-    </TouchableOpacity>
-  )
-}
-
-// ─── Écran principal ──────────────────────────────────────────────────────────
 
 export default function BreathingTechniquesScreen() {
   const { t } = useTranslation()
@@ -111,9 +44,18 @@ export default function BreathingTechniquesScreen() {
     }, [])
   )
 
-  // Compte le nombre de sessions par technique
-  const countForTechnique = (key: string) =>
-    sessions.filter((s) => s.technique_key === key).length
+  // Callback stable : la carte reçoit la clé et le rappelle, pas de lambda par carte.
+  const handleOpen = useCallback(
+    (techniqueKey: string) => navigation.navigate('BreathingExercise', { techniqueKey }),
+    [navigation]
+  )
+
+  // Nombre de sessions par technique (lookup O(1), recalculé quand les sessions changent).
+  const sessionCountByKey = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const s of sessions) counts.set(s.technique_key, (counts.get(s.technique_key) ?? 0) + 1)
+    return counts
+  }, [sessions])
 
   // Lookup O(1) technique par clé pour l'historique
   const techniqueByKey = useMemo(
@@ -141,15 +83,13 @@ export default function BreathingTechniquesScreen() {
           <TechniqueCard
             key={technique.key}
             technique={technique}
-            sessionCount={countForTechnique(technique.key)}
-            onPress={() =>
-              navigation.navigate('BreathingExercise', { techniqueKey: technique.key })
-            }
+            sessionCount={sessionCountByKey.get(technique.key) ?? 0}
+            onOpen={handleOpen}
           />
         ))}
 
         {/* Historique récent */}
-        {sessions.length > 0 && (
+        {sessions.length > 0 ? (
           <View style={styles.historySection}>
             <Text style={styles.historyTitle}>{t('modules.breathing_techniques.recent_sessions')}</Text>
             {sessions.slice(0, 10).map((s) => {
@@ -171,7 +111,7 @@ export default function BreathingTechniquesScreen() {
               )
             })}
           </View>
-        )}
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   )
@@ -183,39 +123,6 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
 
   intro: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },
-
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  cardText: { flex: 1 },
-  cardName: { fontSize: 16, fontWeight: '700', color: colors.text },
-  cardSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  durationBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-    borderRadius: radius.full,
-  },
-  durationText: { fontSize: 11, fontWeight: '700' },
-  cardDesc: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  evidenceText: { fontSize: 11, color: colors.textMuted, fontStyle: 'italic', flex: 1 },
-  sessionBadge: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  sessionCount: { fontSize: 11, color: colors.textMuted },
-
-  phases: { flexDirection: 'row', gap: 3, height: 6, marginTop: spacing.xs },
-  phaseItem: { flex: 1, gap: 2 },
-  phaseBar: { height: 6, borderRadius: radius.full },
-  phaseLabel: { fontSize: 9, color: colors.textMuted, textAlign: 'center' },
 
   historySection: { gap: spacing.sm, marginTop: spacing.sm },
   historyTitle: {
