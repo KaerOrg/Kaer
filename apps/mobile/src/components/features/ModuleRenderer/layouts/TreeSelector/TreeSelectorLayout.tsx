@@ -1,12 +1,16 @@
 // ─── Layout `tree_selector` — sélecteur d'arbre guidé (emotion_wheel…) ──────
 //
-// Pattern « sélection hiérarchique guidée » : un arbre de noeuds modélisé
-// via parent_field_id, navigation niveau par niveau, intensité brute
-// optionnelle (1–N), notes libres optionnelles. 4 modes internes :
-// history | selection | intensity | notes. Persistance dans la table SQLite
-// générique `tree_selections`.
-// Conformité MDR 2017/745 : aucun seuil interprétatif, juste affichage des
-// déclarations brutes du patient.
+// Pattern « sélection hiérarchique guidée » : un arbre de noeuds modélisé via
+// parent_field_id, navigation niveau par niveau. Étapes optionnelles pilotées
+// par la config : intensité brute (1–N), tag de contexte (chips), notes libres.
+// Profondeur libre : si `enable_early_validate`, le patient peut valider à
+// n'importe quel niveau sans descendre jusqu'à une feuille.
+//
+// 5 modes internes : history | selection | intensity | context | notes.
+// Persistance dans la table SQLite générique `tree_selections`.
+// Conformité MDR 2017/745 : aucun seuil interprétatif, aucune couleur de
+// gravité — les couleurs/emojis codent l'identité de famille. Affichage brut
+// des déclarations du patient.
 
 import { useState, useCallback, useEffect, useMemo, type ComponentProps } from 'react'
 import {
@@ -15,6 +19,7 @@ import {
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
+import { collectIndexed } from '@kaer/shared'
 import { colors } from '@theme'
 import type { ContentField } from '../../../../../services/moduleService'
 import {
@@ -25,15 +30,28 @@ import { saveTreeSelection, deleteTreeSelection } from '../../../../../services/
 import { formatDateTime } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
+import { Chip } from '../../../../ui/Chip/Chip'
+import { TreeSelectorHeader } from './TreeSelectorHeader'
 import { styles } from './styles'
+
+type McIcon = ComponentProps<typeof MaterialCommunityIcons>['name']
 
 interface TreeNode {
   id: string
   text_code: string | null
   color?: string
   icon?: string
+  emoji?: string
   children: TreeNode[]
 }
+
+interface ContextOption {
+  /** Clé i18n du libellé (stockée telle quelle dans l'entrée). */
+  code: string
+  icon: McIcon
+}
+
+type Mode = 'history' | 'selection' | 'intensity' | 'context' | 'notes'
 
 const DEFAULT_INTENSITY_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
 
@@ -43,6 +61,7 @@ function buildTreeNodes(fields: ContentField[]): TreeNode[] {
     text_code: f.text_code,
     color: f.props['color'],
     icon: f.props['icon'],
+    emoji: f.props['emoji'],
     children: (f.children ?? [])
       .filter(c => c.field_type === 'tree_node')
       .slice()
@@ -81,27 +100,39 @@ export interface TreeSelectorLayoutProps {
 export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLayoutProps) {
   const t = useModuleTranslation()
   const { showConfirm } = useConfirmDialog()
-  // ── Résolution des champs DB-driven
+
+  // ── Config DB-driven
   const configField = fields.find(f => f.field_type === 'tree_selector_config')
-  const lbl = (key: string): string => {
-    const code = configField?.props[key]
+  const props = useMemo(() => configField?.props ?? {}, [configField])
+  const lbl = useCallback((key: string): string => {
+    const code = props[key]
     return code ? t(code) : ''
-  }
-  const enableIntensity = (configField?.props['enable_intensity'] ?? '0') === '1'
-  const enableNotes = (configField?.props['enable_notes'] ?? '0') === '1'
-  const intensityMin = parseInt(configField?.props['intensity_min'] ?? '1', 10)
-  const intensityMax = parseInt(configField?.props['intensity_max'] ?? '10', 10)
+  }, [props, t])
+
+  const enableIntensity = (props['enable_intensity'] ?? '0') === '1'
+  const enableNotes = (props['enable_notes'] ?? '0') === '1'
+  const enableContext = (props['enable_context'] ?? '0') === '1'
+  const enableEarlyValidate = (props['enable_early_validate'] ?? '0') === '1'
+  const intensityMin = parseInt(props['intensity_min'] ?? '1', 10)
+  const intensityMax = parseInt(props['intensity_max'] ?? '10', 10)
   const intensityValues = useMemo(
     () => intensityValuesFor(intensityMin, intensityMax),
     [intensityMin, intensityMax]
   )
+  const contextOptions = useMemo<ContextOption[]>(() => {
+    const codes = collectIndexed(props, 'context_opt')
+    const icons = collectIndexed(props, 'context_icon')
+    return codes.map((code, i) => ({ code, icon: (icons[i] ?? 'tag-outline') as McIcon }))
+  }, [props])
 
   const nodes = useMemo(() => buildTreeNodes(fields), [fields])
+  const midIntensity = Math.round((intensityMin + intensityMax) / 2)
 
   // ── State
-  const [mode, setMode] = useState<'history' | 'selection' | 'intensity' | 'notes'>('history')
+  const [mode, setMode] = useState<Mode>('history')
   const [path, setPath] = useState<TreeNode[]>([])
-  const [intensity, setIntensity] = useState<number>(Math.round((intensityMin + intensityMax) / 2))
+  const [intensity, setIntensity] = useState<number>(midIntensity)
+  const [context, setContext] = useState<string[]>([])
   const [notes, setNotes] = useState('')
   const [entries, setEntries] = useState<TreeSelection[]>([])
   const [loading, setLoading] = useState(true)
@@ -123,13 +154,11 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     return colors.primary
   }, [path])
 
-  // ── Noeuds visibles à l'étape courante : enfants du dernier sélectionné, ou racine
   const currentNodes = useMemo(() => {
     if (path.length === 0) return nodes
     return path[path.length - 1].children
   }, [nodes, path])
 
-  // ── Titres d'étape par niveau (le titre du niveau 2 est le label parent)
   const level = path.length + 1 // 1 quand path vide
   const stepTitle = useMemo(() => {
     if (level === 2 && path.length >= 1) {
@@ -139,51 +168,18 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   }, [level, path, lbl, t])
   const stepHint = lbl(`step_${level}_hint`)
 
-  // ── Navigation
-  const handleStartNew = useCallback(() => {
+  // ── Persistance
+  const resetDraft = useCallback(() => {
     setPath([])
-    setIntensity(Math.round((intensityMin + intensityMax) / 2))
+    setIntensity(midIntensity)
+    setContext([])
     setNotes('')
-    setMode('selection')
-  }, [intensityMin, intensityMax])
-
-  const handleSelectNode = useCallback((node: TreeNode) => {
-    const newPath = [...path, node]
-    if (node.children.length > 0) {
-      setPath(newPath)
-      return
-    }
-    // Feuille atteinte
-    setPath(newPath)
-    if (enableIntensity) {
-      setMode('intensity')
-    } else if (enableNotes) {
-      setMode('notes')
-    } else {
-      // Auto-save quand pas d'étapes supplémentaires
-      void persistEntry(newPath, null, '')
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, enableIntensity, enableNotes])
-
-  const handleBack = useCallback(() => {
-    if (mode === 'notes' && enableIntensity) { setMode('intensity'); return }
-    if (mode === 'notes' || mode === 'intensity') { setMode('selection'); return }
-    if (path.length > 0) {
-      setPath(prev => prev.slice(0, -1))
-      return
-    }
-    setMode('history')
-  }, [mode, path, enableIntensity])
-
-  const handleCancel = useCallback(() => {
-    setPath([])
-    setMode('history')
-  }, [])
+  }, [midIntensity])
 
   const persistEntry = useCallback(async (
     finalPath: TreeNode[],
     finalIntensity: number | null,
+    finalContext: string[],
     finalNotes: string,
   ) => {
     if (finalPath.length === 0) return
@@ -200,31 +196,86 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
           text_code: n.text_code ?? undefined,
           color: n.color,
           icon: n.icon,
+          emoji: n.emoji,
         })),
         intensity: finalIntensity,
         notes: finalNotes.trim() || null,
+        context: finalContext,
       })
       await loadEntries()
-      setPath([])
-      setIntensity(Math.round((intensityMin + intensityMax) / 2))
-      setNotes('')
+      resetDraft()
       setMode('history')
     } finally {
       setSaving(false)
     }
-  }, [moduleId, loadEntries, intensityMin, intensityMax])
+  }, [moduleId, loadEntries, resetDraft])
 
-  const handleConfirmIntensity = useCallback(() => {
-    if (enableNotes) {
-      setMode('notes')
+  // ── Enchaînement des étapes optionnelles après une sélection validée
+  const proceedFrom = useCallback((finalPath: TreeNode[]) => {
+    setPath(finalPath)
+    if (enableIntensity) { setMode('intensity'); return }
+    if (enableContext) { setMode('context'); return }
+    if (enableNotes) { setMode('notes'); return }
+    void persistEntry(finalPath, null, [], '')
+  }, [enableIntensity, enableContext, enableNotes, persistEntry])
+
+  // ── Navigation
+  const handleStartNew = useCallback(() => {
+    resetDraft()
+    setMode('selection')
+  }, [resetDraft])
+
+  const handleSelectNode = useCallback((node: TreeNode) => {
+    const newPath = [...path, node]
+    if (node.children.length > 0) {
+      setPath(newPath)
       return
     }
-    void persistEntry(path, intensity, '')
-  }, [enableNotes, persistEntry, path, intensity])
+    proceedFrom(newPath)
+  }, [path, proceedFrom])
+
+  const handleValidateHere = useCallback(() => {
+    proceedFrom(path)
+  }, [path, proceedFrom])
+
+  const handleBack = useCallback(() => {
+    if (mode === 'notes') {
+      if (enableContext) { setMode('context'); return }
+      if (enableIntensity) { setMode('intensity'); return }
+      setMode('selection'); return
+    }
+    if (mode === 'context') {
+      if (enableIntensity) { setMode('intensity'); return }
+      setMode('selection'); return
+    }
+    if (mode === 'intensity') { setMode('selection'); return }
+    if (path.length > 0) { setPath(prev => prev.slice(0, -1)); return }
+    setMode('history')
+  }, [mode, path, enableContext, enableIntensity])
+
+  const handleCancel = useCallback(() => {
+    resetDraft()
+    setMode('history')
+  }, [resetDraft])
+
+  const handleConfirmIntensity = useCallback(() => {
+    if (enableContext) { setMode('context'); return }
+    if (enableNotes) { setMode('notes'); return }
+    void persistEntry(path, intensity, context, '')
+  }, [enableContext, enableNotes, persistEntry, path, intensity, context])
+
+  const handleConfirmContext = useCallback(() => {
+    if (enableNotes) { setMode('notes'); return }
+    void persistEntry(path, enableIntensity ? intensity : null, context, '')
+  }, [enableNotes, persistEntry, path, enableIntensity, intensity, context])
 
   const handleSaveFinal = useCallback(() => {
-    void persistEntry(path, enableIntensity ? intensity : null, notes)
-  }, [persistEntry, path, enableIntensity, intensity, notes])
+    void persistEntry(path, enableIntensity ? intensity : null, context, notes)
+  }, [persistEntry, path, enableIntensity, intensity, context, notes])
+
+  const toggleContext = useCallback((code: string) => {
+    setContext(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code])
+  }, [])
 
   const handleDelete = useCallback((entry: TreeSelection) => {
     showConfirm({
@@ -237,8 +288,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
         setEntries(prev => prev.filter(e => e.id !== entry.id))
       },
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t, showConfirm])
+  }, [t, showConfirm, lbl])
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -287,7 +337,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
               {entries.map(entry => {
                 const rootNode = entry.path[0]
                 const cardColor = rootNode?.color ?? colors.primary
-                const cardIcon = (rootNode?.icon ?? 'palette-outline') as ComponentProps<typeof MaterialCommunityIcons>['name']
+                const rootEmoji = rootNode?.emoji
+                const cardIcon = (rootNode?.icon ?? 'palette-outline') as McIcon
                 const labels = entry.path.map(n => resolvePathLabel(n, t)).filter(Boolean)
                 return (
                   <View
@@ -297,7 +348,11 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
                   >
                     <View style={styles.entryHeader}>
                       <View style={[styles.entryIcon, { backgroundColor: cardColor + '1A' }]}>
-                        <MaterialCommunityIcons name={cardIcon} size={20} color={cardColor} />
+                        {rootEmoji ? (
+                          <Text style={styles.entryEmoji}>{rootEmoji}</Text>
+                        ) : (
+                          <MaterialCommunityIcons name={cardIcon} size={20} color={cardColor} />
+                        )}
                       </View>
                       <View style={styles.entryLabels}>
                         {labels[0] ? (
@@ -328,6 +383,13 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
                         </Pressable>
                       </View>
                     </View>
+                    {entry.context.length > 0 ? (
+                      <View style={styles.entryChips} testID={`chips-${entry.id}`}>
+                        {entry.context.map(code => (
+                          <Chip key={code} label={t(code)} size="sm" muted />
+                        ))}
+                      </View>
+                    ) : null}
                     {entry.notes ? (
                       <Text style={styles.entryNotes} numberOfLines={2}>{entry.notes}</Text>
                     ) : null}
@@ -349,34 +411,29 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     )
   }
 
+  // Fil d'Ariane + progression (modes de saisie)
+  const breadcrumb = path.map(n => (n.text_code ? t(n.text_code) : '')).filter(Boolean).join(' › ')
+  const progress = level / Math.max(level, 3)
+
+  // Teinte douce de la famille choisie, irrigue tout l'écran de saisie
+  const tintStyle = path.length > 0 ? { backgroundColor: accentColor + '08' } : null
+
   // ── Mode sélection (navigation dans l'arbre) ───────────────────────────────
   if (mode === 'selection') {
-    const breadcrumb = path.map(n => (n.text_code ? t(n.text_code) : '')).filter(Boolean).join(' › ')
+    const showValidate = enableEarlyValidate && path.length > 0 && currentNodes.length > 0
+    const validateLabel = lbl('validate_here_btn') || t('common.validate')
+    const lastLabel = path.length > 0 && path[path.length - 1].text_code
+      ? t(path[path.length - 1].text_code!)
+      : ''
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={handleBack}
-            style={styles.backBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}
-            testID="back-button"
-          >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-          </Pressable>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, {
-                width: `${(level / Math.max(level, 3)) * 100}%`,
-                backgroundColor: accentColor,
-              }]} />
-            </View>
-            {breadcrumb ? (
-              <Text style={styles.progressLabel} numberOfLines={1}>{breadcrumb}</Text>
-            ) : null}
-          </View>
-        </View>
-
+      <View style={[styles.container, tintStyle]}>
+        <TreeSelectorHeader
+          onBack={handleBack}
+          showProgress
+          accentColor={accentColor}
+          breadcrumb={breadcrumb}
+          progress={progress}
+        />
         <ScrollView contentContainerStyle={styles.selectionContent}>
           {stepTitle ? <Text style={styles.stepTitle}>{stepTitle}</Text> : null}
           {stepHint ? <Text style={styles.stepHint}>{stepHint}</Text> : null}
@@ -385,19 +442,30 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
             <View style={styles.gridContainer} testID="level-1-grid">
               {currentNodes.map(node => {
                 const nodeColor = node.color ?? colors.primary
-                const nodeIcon = (node.icon ?? 'circle-outline') as ComponentProps<typeof MaterialCommunityIcons>['name']
                 const label = node.text_code ? t(node.text_code) : ''
                 return (
                   <Pressable
                     key={node.id}
-                    style={[styles.primaryCard, { borderColor: nodeColor }]}
+                    style={({ pressed }) => [
+                      styles.primaryCard,
+                      { borderColor: nodeColor, backgroundColor: nodeColor + '12' },
+                      pressed && styles.cardPressed,
+                    ]}
                     onPress={() => handleSelectNode(node)}
                     accessibilityRole="button"
                     accessibilityLabel={label}
                     testID={`node-${node.id}`}
                   >
-                    <View style={[styles.primaryIconCircle, { backgroundColor: nodeColor + '1A' }]}>
-                      <MaterialCommunityIcons name={nodeIcon} size={28} color={nodeColor} />
+                    <View style={[styles.primaryIconCircle, { backgroundColor: nodeColor + '22' }]}>
+                      {node.emoji ? (
+                        <Text style={styles.primaryEmoji}>{node.emoji}</Text>
+                      ) : (
+                        <MaterialCommunityIcons
+                          name={(node.icon ?? 'circle-outline') as McIcon}
+                          size={26}
+                          color={nodeColor}
+                        />
+                      )}
                     </View>
                     <Text style={[styles.primaryLabel, { color: nodeColor }]}>{label}</Text>
                   </Pressable>
@@ -412,7 +480,11 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
                 return (
                   <Pressable
                     key={node.id}
-                    style={[styles.optionCard, { borderLeftColor: nodeColor }]}
+                    style={({ pressed }) => [
+                      styles.optionCard,
+                      { borderLeftColor: nodeColor },
+                      pressed && styles.cardPressed,
+                    ]}
                     onPress={() => handleSelectNode(node)}
                     accessibilityRole="button"
                     accessibilityLabel={label}
@@ -425,6 +497,21 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
               })}
             </View>
           )}
+
+          {showValidate ? (
+            <Pressable
+              style={[styles.validateHereBtn, { borderColor: accentColor }]}
+              onPress={handleValidateHere}
+              accessibilityRole="button"
+              accessibilityLabel={validateLabel}
+              testID="validate-here"
+            >
+              <MaterialCommunityIcons name="check" size={18} color={accentColor} />
+              <Text style={[styles.validateHereText, { color: accentColor }]}>
+                {lastLabel ? `${validateLabel} : ${lastLabel}` : validateLabel}
+              </Text>
+            </Pressable>
+          ) : null}
 
           {level === 1 && footer != null && (
             <View style={styles.infoBox}>
@@ -443,18 +530,14 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     const intensityHint = lbl('intensity_hint')
     const continueLabel = lbl('continue_btn') || t('common.continue')
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={handleBack}
-            style={styles.backBtn}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.back')}
-            testID="back-button"
-          >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-          </Pressable>
-        </View>
+      <View style={[styles.container, tintStyle]}>
+        <TreeSelectorHeader
+          onBack={handleBack}
+          showProgress={false}
+          accentColor={accentColor}
+          breadcrumb={breadcrumb}
+          progress={progress}
+        />
         <ScrollView contentContainerStyle={styles.selectionContent}>
           {intensityTitle ? <Text style={styles.stepTitle}>{intensityTitle}</Text> : null}
           {intensityHint ? <Text style={styles.stepHint}>{intensityHint}</Text> : null}
@@ -506,6 +589,62 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     )
   }
 
+  // ── Mode contexte (chips multi-choix, facultatif) ──────────────────────────
+  if (mode === 'context') {
+    const contextTitle = lbl('context_title')
+    const contextHint = lbl('context_hint')
+    const continueLabel = lbl('continue_btn') || t('common.continue')
+    return (
+      <View style={[styles.container, tintStyle]}>
+        <TreeSelectorHeader
+          onBack={handleBack}
+          showProgress={false}
+          accentColor={accentColor}
+          breadcrumb={breadcrumb}
+          progress={progress}
+        />
+        <ScrollView contentContainerStyle={styles.selectionContent}>
+          {contextTitle ? <Text style={styles.stepTitle}>{contextTitle}</Text> : null}
+          {contextHint ? <Text style={styles.stepHint}>{contextHint}</Text> : null}
+
+          <View style={styles.chipsWrap} testID="context-chips">
+            {contextOptions.map(opt => {
+              const isActive = context.includes(opt.code)
+              return (
+                <Chip
+                  key={opt.code}
+                  label={t(opt.code)}
+                  selected={isActive}
+                  color={accentColor}
+                  onPress={() => toggleContext(opt.code)}
+                  testID={`context-${opt.code}`}
+                  icon={
+                    <MaterialCommunityIcons
+                      name={opt.icon}
+                      size={16}
+                      color={isActive ? accentColor : colors.textMuted}
+                    />
+                  }
+                />
+              )
+            })}
+          </View>
+
+          <Pressable
+            style={[styles.continueBtn, { backgroundColor: accentColor }]}
+            onPress={handleConfirmContext}
+            accessibilityRole="button"
+            accessibilityLabel={continueLabel}
+            testID="continue-context"
+          >
+            <Text style={styles.continueBtnText}>{continueLabel}</Text>
+            <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
+          </Pressable>
+        </ScrollView>
+      </View>
+    )
+  }
+
   // ── Mode notes ─────────────────────────────────────────────────────────────
   const notesTitle = lbl('notes_title')
   const notesHint = lbl('notes_hint')
@@ -515,21 +654,17 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, tintStyle]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={88}
     >
-      <View style={styles.header}>
-        <Pressable
-          onPress={handleBack}
-          style={styles.backBtn}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
-          testID="back-button"
-        >
-          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-        </Pressable>
-      </View>
+      <TreeSelectorHeader
+        onBack={handleBack}
+        showProgress={false}
+        accentColor={accentColor}
+        breadcrumb={breadcrumb}
+        progress={progress}
+      />
       <ScrollView contentContainerStyle={styles.selectionContent} keyboardShouldPersistTaps="handled">
         {notesTitle ? <Text style={styles.stepTitle}>{notesTitle}</Text> : null}
         {notesHint ? <Text style={styles.stepHint}>{notesHint}</Text> : null}

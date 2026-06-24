@@ -19,6 +19,7 @@ export async function saveTreeSelection(entry: Omit<TreeSelection, 'created_at'>
       path: entry.path,
       intensity: entry.intensity,
       notes: entry.notes,
+      context: entry.context,
     },
   })
 }
