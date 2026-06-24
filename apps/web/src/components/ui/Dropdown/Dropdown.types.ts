@@ -30,6 +30,10 @@ interface DropdownBaseProps {
   groupLabels?: Readonly<Record<string, string>>
   /** Variante compacte (barres de filtres) : champ moins haut. Défaut `false`. */
   compact?: boolean
+  /** Affiche un bouton « × » pour vider la valeur (mode `single` avec valeur non vide). Défaut `false`. */
+  clearable?: boolean
+  /** Libellé d'accessibilité du bouton de vidage (à fournir quand `clearable`). */
+  clearLabel?: string
   /** Désactive entièrement le champ. */
   disabled?: boolean
   /** Id HTML du champ (auto-généré depuis `label` si absent). */

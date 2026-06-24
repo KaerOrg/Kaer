@@ -65,6 +65,48 @@ describe('Dropdown — mode single', () => {
   })
 })
 
+// ── Bouton de vidage (clearable) ────────────────────────────────────────────
+
+describe('Dropdown — clearable', () => {
+  it('aucun bouton de vidage sans clearable', () => {
+    render(<Dropdown label="L" value="ocd" onChange={vi.fn()} options={options} />)
+    expect(screen.queryByRole('button', { name: 'Vider' })).not.toBeInTheDocument()
+  })
+
+  it('aucun bouton de vidage si la valeur est vide', () => {
+    render(<Dropdown label="L" value="" onChange={vi.fn()} options={options} clearable clearLabel="Vider" />)
+    expect(screen.queryByRole('button', { name: 'Vider' })).not.toBeInTheDocument()
+  })
+
+  it('affiche le bouton quand clearable et valeur non vide', () => {
+    render(<Dropdown label="L" value="ocd" onChange={vi.fn()} options={options} clearable clearLabel="Vider" />)
+    expect(screen.getByRole('button', { name: 'Vider' })).toBeInTheDocument()
+  })
+
+  it('vide la valeur via onChange(\'\') sans ouvrir la liste', () => {
+    const onChange = vi.fn()
+    render(<Dropdown label="L" value="ocd" onChange={onChange} options={options} clearable clearLabel="Vider" />)
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Vider' }))
+    expect(onChange).toHaveBeenCalledWith('')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('pas de bouton de vidage en mode multiple', () => {
+    render(
+      <Dropdown
+        mode="multiple"
+        ariaLabel="F"
+        options={options}
+        selectedValues={new Set(['ocd'])}
+        onToggle={vi.fn()}
+        clearable
+        clearLabel="Vider"
+      />,
+    )
+    expect(screen.queryByRole('button', { name: 'Vider' })).not.toBeInTheDocument()
+  })
+})
+
 // ── Autocomplétion ──────────────────────────────────────────────────────────
 
 describe('Dropdown — autocomplétion', () => {

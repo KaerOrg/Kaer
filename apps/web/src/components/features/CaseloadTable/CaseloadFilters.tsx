@@ -55,7 +55,6 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
 
       <Dropdown
         compact
-        searchable={false}
         label={t('file_active.filters.status_label')}
         id="caseload-status-filter"
         value={value.status}

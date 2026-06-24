@@ -42,8 +42,14 @@ Les props sont une **union discriminée** sur `mode` : le mode `single` exige
 | `searchable`  | `boolean`                              | `true` | Active le filtre à la frappe ; `false` → champ en lecture seule    |
 | `groupLabels` | `Record<string, string>`               | —      | En-têtes de section : `group` id → libellé affiché                 |
 | `compact`     | `boolean`                              | `false`| Variante compacte (barres de filtres) : champ moins haut           |
+| `clearable`   | `boolean`                              | `false`| Affiche un bouton « × » pour vider la valeur (mode `single`, valeur non vide) |
+| `clearLabel`  | `string`                               | —      | Libellé a11y du bouton « × » (à fournir quand `clearable`)         |
 | `disabled`    | `boolean`                              | `false`| Désactive entièrement le champ                                     |
 | `id`          | `string`                               | auto   | Id HTML du champ                                                   |
+
+> `clearable` ne s'applique qu'au mode `single`. Pour un filtre dont l'état « aucun »
+> est une vraie option (`all`, `''`), proposer cette option dans `options` plutôt que
+> `clearable`.
 
 ### Mode `single` (défaut)
 

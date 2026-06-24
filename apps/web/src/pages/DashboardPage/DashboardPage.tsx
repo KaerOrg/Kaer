@@ -230,7 +230,8 @@ export function DashboardPage() {
                     error={inviteBirthDateError}
                   />
                   <Dropdown
-                    searchable={false}
+                    clearable
+                    clearLabel={t('common.clear_selection')}
                     label={t('dashboard.invite_sex_label')}
                     id="invite-sex"
                     value={inviteSex}

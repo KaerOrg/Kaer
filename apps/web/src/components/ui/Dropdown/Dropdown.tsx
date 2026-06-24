@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown, X } from 'lucide-react'
 import { filterOptions, groupSections } from './dropdownFilter'
 import type { DropdownProps } from './Dropdown.types'
 import '../InputField/InputField.css'
@@ -26,6 +26,8 @@ export function Dropdown(props: DropdownProps) {
     searchable = true,
     groupLabels,
     compact = false,
+    clearable = false,
+    clearLabel,
     disabled = false,
     id,
   } = props
@@ -130,6 +132,20 @@ export function Dropdown(props: DropdownProps) {
     setOpen(prev => (searchable ? true : !prev))
   }, [disabled, searchable])
 
+  // Bouton « × » : single, clearable, non désactivé et une valeur à vider.
+  const showClear = !isMultiple && clearable && !disabled && props.value !== ''
+
+  const handleClear = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      // Empêche le clic d'ouvrir/fermer la liste ou de voler le focus au champ.
+      event.preventDefault()
+      event.stopPropagation()
+      if (!isMultiple) props.onChange('')
+      setQuery('')
+    },
+    [isMultiple, props],
+  )
+
   // Texte affiché : la saisie quand on filtre (liste ouverte + recherchable), sinon le
   // libellé retenu en single (rien en multiple, où les chips vivent chez le parent).
   const inputValue = searchable && open ? query : isMultiple ? '' : selectedLabel
@@ -144,6 +160,7 @@ export function Dropdown(props: DropdownProps) {
     'dropdown__input',
     compact ? 'dropdown__input--sm' : '',
     error ? 'dropdown__input--error' : '',
+    showClear ? 'dropdown__input--clearable' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -178,6 +195,16 @@ export function Dropdown(props: DropdownProps) {
             onClick={handleClick}
             onKeyDown={handleKeyDown}
           />
+          {showClear ? (
+            <button
+              type="button"
+              className="dropdown__clear"
+              onPointerDown={handleClear}
+              aria-label={clearLabel}
+            >
+              <X size={15} aria-hidden="true" />
+            </button>
+          ) : null}
           <ChevronDown
             size={16}
             className={`dropdown__chevron${open ? ' dropdown__chevron--open' : ''}`}

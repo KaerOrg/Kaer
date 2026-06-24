@@ -114,6 +114,8 @@ export function LoginPage() {
                 required
               />
               <Dropdown
+                clearable
+                clearLabel={t('common.clear_selection')}
                 label={t('auth.professional_title_label')}
                 value={title}
                 onChange={setTitle}

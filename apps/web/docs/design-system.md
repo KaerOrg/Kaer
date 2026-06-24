@@ -579,7 +579,8 @@ fermeture au clic extérieur, a11y combobox/listbox. Remplace l'ancien `<select>
 Props (union discriminée sur `mode`) : `single` → `value` + `onChange(value)` ;
 `multiple` → `selectedValues` + `onToggle(value)`. Communes : `options`, `label`,
 `ariaLabel`, `error`, `placeholder`, `emptyText`, `searchable`, `groupLabels`,
-`compact`, `disabled`, `id`. Doc dédiée : [`docs/components/dropdown.md`](components/dropdown.md).
+`compact`, `clearable` + `clearLabel` (bouton « × » en single), `disabled`, `id`.
+Doc dédiée : [`docs/components/dropdown.md`](components/dropdown.md).
 
 ### `StatusBadge`
 

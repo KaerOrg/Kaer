@@ -147,6 +147,8 @@ export function ProfilePage() {
                 required
               />
               <Dropdown
+                clearable
+                clearLabel={t('common.clear_selection')}
                 label={t('profile_modal.title_label')}
                 value={title}
                 onChange={setTitle}

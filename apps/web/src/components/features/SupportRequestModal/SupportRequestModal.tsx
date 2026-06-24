@@ -99,7 +99,6 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
           />
         ) : null}
         <Dropdown
-          searchable={false}
           label={t('support.reason_label')}
           value={reason}
           onChange={handleChange}

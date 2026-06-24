@@ -32,6 +32,11 @@
   font-size: 14px;
 }
 
+/* Place pour le bouton « × » en plus du chevron. */
+.dropdown__input--clearable {
+  padding-right: 56px;
+}
+
 .dropdown__input:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -51,6 +56,26 @@
   background: var(--color-bg);
   color: var(--color-text-muted);
   cursor: not-allowed;
+}
+
+.dropdown__clear {
+  position: absolute;
+  right: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full, 999px);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.dropdown__clear:hover {
+  color: var(--color-text);
+  background: var(--color-primary-light, #EFF6FF);
 }
 
 .dropdown__chevron {
