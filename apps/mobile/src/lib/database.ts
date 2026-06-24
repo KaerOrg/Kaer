@@ -880,7 +880,7 @@ export async function deleteActivityRecord(id: string): Promise<void> {
 export interface BreathingSession {
   id: string
   date: string              // YYYY-MM-DD
-  technique_key: string     // clé dans BREATHING_TECHNIQUES (ex: 'coherence_cardiaque')
+  technique_key: string     // field_props.technique_key d'une technique (ex: 'coherence_cardiaque')
   duration_seconds: number  // durée effective de la session
   created_at: string
 }

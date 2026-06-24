@@ -4,11 +4,17 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { getTechnique, getCycleDuration, type BreathingPhase } from '../../../constants/breathingTechniques'
+import {
+  fetchBreathingTechniques,
+  getCycleDuration,
+  type BreathingPhase,
+  type BreathingTechnique,
+} from '../../../services/breathingService'
 import { generateId } from '../../../lib/database'
 import { saveBreathingSession } from '../../../services/breathingService'
 import { AppStackParamList } from '../../../navigation/AppStack'
@@ -133,7 +139,29 @@ export default function BreathingExerciseScreen() {
   const route = useRoute<RouteType>()
   const { showConfirm } = useConfirmDialog()
 
-  const technique = getTechnique(route.params.techniqueKey)
+  // Config chargée depuis la base (config-first) : trois états exclusifs.
+  const [techState, setTechState] = useState<
+    | { status: 'loading' }
+    | { status: 'ready'; technique: BreathingTechnique }
+    | { status: 'not_found' }
+  >({ status: 'loading' })
+  const technique = techState.status === 'ready' ? techState.technique : null
+
+  useEffect(() => {
+    let active = true
+    fetchBreathingTechniques()
+      .then((techs) => {
+        if (!active) return
+        const found = techs.find((tch) => tch.key === route.params.techniqueKey)
+        setTechState(found ? { status: 'ready', technique: found } : { status: 'not_found' })
+      })
+      .catch(() => {
+        if (active) setTechState({ status: 'not_found' })
+      })
+    return () => {
+      active = false
+    }
+  }, [route.params.techniqueKey])
 
   const [running, setRunning] = useState(false)
   const [phaseIndex, setPhaseIndex] = useState(0)
@@ -207,7 +235,15 @@ export default function BreathingExerciseScreen() {
     }
   }, [])
 
-  if (!technique) {
+  if (techState.status === 'loading') {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    )
+  }
+
+  if (techState.status === 'not_found' || !technique) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{t('modules.breathing_techniques.technique_not_found')}</Text>

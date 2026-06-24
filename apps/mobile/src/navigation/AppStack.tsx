@@ -17,11 +17,13 @@ import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
 import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
 import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
-import { getTechnique } from '../constants/breathingTechniques'
+import i18next from 'i18next'
 import { colors } from '@theme'
 
+// Le nom d'une technique est une clé i18n dérivée de sa clé (route.params),
+// indépendante de la config en base : on le résout directement pour le titre.
 function getTechniqueTitle(key: string): string {
-  return getTechnique(key)?.name ?? 'Exercice de respiration'
+  return i18next.t(`modules.breathing_techniques.${key}_name`)
 }
 
 export type AppStackParamList = {

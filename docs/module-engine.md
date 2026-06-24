@@ -263,6 +263,15 @@ Deux field_types propres :
 | `tree_selector_config` | Config sélecteur arborescent | `max_depth` |
 | `tree_node` | Nœud de l'arbre | `depth`, `parent_id`, `icon` |
 
+**Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
+`breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le
+preview praticien reste en `field_row`)
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `breathing_technique` | Une technique de respiration (parent) | `technique_key`, `color`, `recommended_duration_min` |
+| `breathing_phase` | Une phase d'un cycle (field enfant, ordonné par `sort_order`) | `phase_type` (`inhale`/`hold_in`/`exhale`/`hold_out`), `phase_seconds` |
+
 **Props `questionnaire` :**
 
 | `prop_key` | Utilisé par | Description |
