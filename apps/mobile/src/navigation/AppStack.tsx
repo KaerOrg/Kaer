@@ -14,7 +14,7 @@ import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideE
 import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
-import CrisisPlanScreen from '../screens/modules/CrisisPlanScreen'
+import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
 import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
 import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
 import { getTechnique } from '../constants/breathingTechniques'
@@ -34,7 +34,7 @@ export type AppStackParamList = {
   MotivationalBalance: undefined
   MotivationalBalanceDetail: { topicId: string; topicKey: string }
   BookAppointment: { practitionerId: string; appointmentId?: string }
-  CrisisPlan: { initialUrgency?: boolean }
+  CrisisUrgency: undefined
   MedicationSideEffectsHistory: undefined
   MedicationSideEffectsEntry: {
     effects: { key: string; label: string; color: string }[]
@@ -123,9 +123,9 @@ export default function AppStack() {
         options={{ title: '' }}
       />
       <Stack.Screen
-        name="CrisisPlan"
-        component={CrisisPlanScreen}
-        options={{ title: 'Plan de crise' }}
+        name="CrisisUrgency"
+        component={CrisisUrgencyScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="MotivationalBalance"

@@ -6,7 +6,7 @@
 // La saisie des items est déléguée au composant partagé `EditableItemsList`.
 // Conformité MDR 2017/745 : journal libre du patient, zéro interprétation.
 
-import { useState, useCallback, useEffect, useMemo, type ComponentProps } from 'react'
+import { useState, useCallback, useEffect, useMemo, type ComponentProps, type ComponentType } from 'react'
 import { View, Text, Pressable, ScrollView, Linking, ActivityIndicator } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
@@ -16,7 +16,19 @@ import { savePlanItem, deletePlanItem } from '../../../../../services/planItemSe
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { EditableItemsList } from '../shared'
+import { CrisisUrgencyEntry } from '../../fields/CrisisUrgencyEntry'
+import { CrisisAnchorsWidget } from '../../fields/CrisisAnchorsWidget'
+import { CrisisCopingCardsWidget } from '../../fields/CrisisCopingCardsWidget'
+import { CrisisCommitmentWidget } from '../../fields/CrisisCommitmentWidget'
 import { styles } from './styles'
+
+// Widgets rendus pour les fields hors-section (après les étapes), dispatchés par
+// `field_type`. Parité avec le LayoutDispatcher web (editable_steps).
+const SECTION_WIDGETS: Record<string, ComponentType> = {
+  crisis_anchors_preview: CrisisAnchorsWidget,
+  crisis_coping_cards_preview: CrisisCopingCardsWidget,
+  crisis_commitment_preview: CrisisCommitmentWidget,
+}
 
 export interface EditableStepsLayoutProps {
   /** Étapes regroupées par `section_id`. */
@@ -99,6 +111,13 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
     .filter(f => f.field_type === 'exercise_safety')
     .sort((a, b) => a.sort_order - b.sort_order)
 
+  // Bandeau d'entrée urgence (rendu en tête) et widgets de section (rendus après
+  // les étapes, triés par sort_order) — parité avec le LayoutDispatcher web.
+  const hasUrgencyEntry = uiFields.some(f => f.field_type === 'crisis_urgency_entry')
+  const sectionWidgetFields = uiFields
+    .filter(f => SECTION_WIDGETS[f.field_type] != null)
+    .sort((a, b) => a.sort_order - b.sort_order)
+
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
@@ -106,6 +125,7 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        {hasUrgencyEntry && <CrisisUrgencyEntry />}
         {[...sections.entries()].map(([sectionId, fields], idx) => {
           const titleField = fields.find(f => f.field_type === 'step_title')
           const hintField = fields.find(f => f.field_type === 'step_hint')
@@ -164,6 +184,11 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
               )}
             </View>
           )
+        })}
+
+        {sectionWidgetFields.map(f => {
+          const Widget = SECTION_WIDGETS[f.field_type]
+          return <Widget key={f.id} />
         })}
       </ScrollView>
 

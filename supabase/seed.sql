@@ -1258,8 +1258,8 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.step_5.hint', 'crisis_plan', 'step_5', NULL, 'step_hint', 'modules.crisis_plan.step_5_hint', 51),
   ('crisis_plan.step_6.title', 'crisis_plan', 'step_6', NULL, 'step_title', 'modules.crisis_plan.step_6_title', 60),
   ('crisis_plan.step_6.hint', 'crisis_plan', 'step_6', NULL, 'step_hint', 'modules.crisis_plan.step_6_hint', 61),
-  -- Bannière urgence — disclaimer_banner avec tone=danger (sort_order 5 = avant les étapes)
-  ('crisis_plan.urgency_banner', 'crisis_plan', NULL, NULL, 'disclaimer_banner', 'modules.crisis_plan.urgency_title', 5),
+  -- Bannière urgence — crisis_urgency_entry (sort_order 5 = avant les étapes) : ouvre le mode urgence sur mobile, aperçu statique sur web
+  ('crisis_plan.urgency_banner', 'crisis_plan', NULL, NULL, 'crisis_urgency_entry', 'modules.crisis_plan.urgency_title', 5),
   -- Sections VHB-EF (sort_order 70-90 : après les étapes, avant le footer)
   ('crisis_plan.anchors', 'crisis_plan', NULL, NULL, 'crisis_anchors_preview', 'modules.crisis_plan.anchors_title', 70),
   ('crisis_plan.coping_cards', 'crisis_plan', NULL, NULL, 'crisis_coping_cards_preview', 'modules.crisis_plan.coping_cards_title', 80),
@@ -1705,7 +1705,7 @@ on conflict (field_id, prop_key) do nothing;
 
 -- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF
 insert into public.field_props (field_id, prop_key, prop_value) values
-  -- Bannière urgence (disclaimer_banner étendu : text_code + tone)
+  -- Bannière urgence (crisis_urgency_entry : tone danger pour l'aperçu web)
   ('crisis_plan.urgency_banner', 'text_code', 'modules.crisis_plan.urgency_title'),
   ('crisis_plan.urgency_banner', 'tone', 'danger'),
   -- Boutons urgence

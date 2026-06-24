@@ -584,6 +584,23 @@ Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version w
 
 Chemin : `src/components/features/ModuleRenderer/fields/widgets/<Widget>/<Widget>.tsx`
 
+### Widgets de field interactifs (plan de crise)
+
+Contrairement aux `FieldWidget` ci-dessus (aperçus lecture seule), ces widgets sont
+des composants **interactifs** dispatchés par `field_type` dans le layout
+`editable_steps` (parité avec le `LayoutDispatcher` web). Chemin :
+`src/components/features/ModuleRenderer/fields/<Widget>/<Widget>.tsx`. Toute écriture
+passe par `crisisPlanService` (jamais Supabase/SQLite direct), avec `@ui/Button` et
+`@ui/InputField` pour les contrôles.
+
+| Widget | `field_type` | Rôle | Persistance |
+|---|---|---|---|
+| `CrisisUrgencyEntry` | `crisis_urgency_entry` | Bandeau rouge en tête → navigue vers l'écran `CrisisUrgency` | — (navigation) |
+| `CrisisAnchorsWidget` | `crisis_anchors_preview` | Photos d'ancrage + phrase + message praticien | FileSystem + SQLite + Supabase |
+| `CrisisCopingCardsWidget` | `crisis_coping_cards_preview` | Cartes de coping praticien (lecture seule) | Supabase |
+| `CrisisCommitmentWidget` | `crisis_commitment_preview` | Signature de l'engagement (nom + date) | SQLite |
+| `CrisisUrgencyContactsWidget` | `crisis_urgency_contacts` | Contacts de confiance (step4/step5), rendu dans `crisis_urgency` | SQLite |
+
 ---
 
 ## Layouts du ModuleRenderer
