@@ -12,7 +12,7 @@ export interface BreathCircleProps {
 }
 
 // ─── Cercle animé ─────────────────────────────────────────────────────────────
-// Animation pure JS — pas de bibliothèque d'animation requise.
+// Animation pure JS : pas de bibliothèque d'animation requise.
 // Le cercle scale entre 0.55 (expiration/pause) et 1.0 (inspiration complète).
 
 /** Cercle de respiration : grossit à l'inspiration, rétrécit à l'expiration, stable en rétention. */

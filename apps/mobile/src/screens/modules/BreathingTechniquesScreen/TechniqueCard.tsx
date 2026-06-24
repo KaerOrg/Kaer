@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import React, { useCallback, useMemo } from 'react'
+import { View, Text, StyleSheet, type ViewStyle } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
-import { colors, spacing, radius, shadows } from '@theme'
+import { Card } from '@ui/Card'
+import { colors, spacing, radius } from '@theme'
 import { getCycleDuration, type BreathingTechnique } from '../../../services/breathingService'
 
 export interface TechniqueCardProps {
@@ -21,6 +22,11 @@ export const TechniqueCard = React.memo(function TechniqueCard({
 }: TechniqueCardProps) {
   const { t } = useTranslation()
   const handlePress = useCallback(() => onOpen(technique.key), [onOpen, technique.key])
+  // Bande d'accent colorée à gauche, propre à la technique (ui/Card fournit fond/radius/ombre).
+  const accentStyle = useMemo<ViewStyle>(
+    () => ({ borderLeftWidth: 4, borderLeftColor: technique.color }),
+    [technique.color]
+  )
 
   const cycleDuration = getCycleDuration(technique)
   const name = t(`modules.breathing_techniques.${technique.key}_name`)
@@ -29,13 +35,7 @@ export const TechniqueCard = React.memo(function TechniqueCard({
   const evidence = t(`modules.breathing_techniques.${technique.key}_evidence`)
 
   return (
-    <TouchableOpacity
-      style={[styles.card, { borderLeftColor: technique.color }]}
-      onPress={handlePress}
-      activeOpacity={0.75}
-      accessibilityRole="button"
-      accessibilityLabel={name}
-    >
+    <Card variant="elevated" onPress={handlePress} accessibilityLabel={name} style={accentStyle}>
       <View style={styles.cardHeader}>
         <View style={styles.cardText}>
           <Text style={styles.cardName}>{name}</Text>
@@ -71,19 +71,11 @@ export const TechniqueCard = React.memo(function TechniqueCard({
           </View>
         ))}
       </View>
-    </TouchableOpacity>
+    </Card>
   )
 })
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderLeftWidth: 4,
-    ...shadows.sm,
-  },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   cardText: { flex: 1 },
   cardName: { fontSize: 16, fontWeight: '700', color: colors.text },

@@ -82,7 +82,7 @@ export default function BreathingExerciseScreen() {
           duration_seconds: totalSeconds,
         })
       } catch {
-        // Échec silencieux — la session n'est pas critique
+        // Échec silencieux : la session n'est pas critique
       }
     }
   }, [totalSeconds, technique])
