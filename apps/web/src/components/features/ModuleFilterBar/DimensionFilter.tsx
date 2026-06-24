@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MultiSelectAutocomplete, type AutocompleteOption } from '../../ui/MultiSelectAutocomplete'
+import { Dropdown, type DropdownOption } from '../../ui/Dropdown'
 import type { Tag } from '../../../services/moduleCatalogService'
 
 interface DimensionFilterProps {
@@ -31,7 +31,7 @@ function DimensionFilterBase({
   emptyText,
 }: DimensionFilterProps) {
   const { t } = useTranslation()
-  const options = useMemo<AutocompleteOption[]>(
+  const options = useMemo<DropdownOption[]>(
     () => tags.map(tag => ({ value: tag.id, label: t(`tags.${tag.id}.label`) })),
     [tags, t],
   )
@@ -44,7 +44,8 @@ function DimensionFilterBase({
   return (
     <label className="dimension-filter">
       <span className="dimension-filter__label">{label}</span>
-      <MultiSelectAutocomplete
+      <Dropdown
+        mode="multiple"
         options={options}
         selectedValues={selected}
         onToggle={handleToggle}

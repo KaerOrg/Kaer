@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
-import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
 import { fetchProfessionalTitles } from '../../services/authService'
 import type { ProfessionalTitle } from '../../lib/database.types'
 import { MfaChallengeForm } from './MfaChallengeForm'
@@ -27,6 +27,15 @@ export function LoginPage() {
   useEffect(() => {
     void fetchProfessionalTitles().then(setProfessionalTitles)
   }, [])
+
+  const titleOptions = useMemo<DropdownOption[]>(
+    () =>
+      professionalTitles.map(pt => ({
+        value: pt.code,
+        label: i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en,
+      })),
+    [professionalTitles, i18n.language]
+  )
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -107,15 +116,10 @@ export function LoginPage() {
               <Dropdown
                 label={t('auth.professional_title_label')}
                 value={title}
-                onChange={e => setTitle(e.target.value)}
-              >
-                <option value="">{t('auth.professional_title_placeholder')}</option>
-                {professionalTitles.map(pt => (
-                  <option key={pt.code} value={pt.code}>
-                    {i18n.language.startsWith('fr') ? pt.label_fr : pt.label_en}
-                  </option>
-                ))}
-              </Dropdown>
+                onChange={setTitle}
+                options={titleOptions}
+                placeholder={t('auth.professional_title_placeholder')}
+              />
             </>
           )}
 

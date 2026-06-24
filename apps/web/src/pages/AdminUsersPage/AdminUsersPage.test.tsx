@@ -111,7 +111,8 @@ describe('AdminUsersPage', () => {
     fireEvent.click(screen.getByText('Patients'))
     expect(await screen.findByLabelText('Filtrer par praticien')).toBeInTheDocument()
 
-    fireEvent.change(screen.getByLabelText('Filtrer par praticien'), { target: { value: 'Doc Gyneco' } })
+    fireEvent.focus(screen.getByLabelText('Filtrer par praticien'))
+    fireEvent.pointerDown(await screen.findByRole('option', { name: 'Doc Gyneco' }))
     await waitFor(() => expect(lastParams()).toMatchObject({ kind: 'patient', practitioner: 'Doc Gyneco' }))
   })
 

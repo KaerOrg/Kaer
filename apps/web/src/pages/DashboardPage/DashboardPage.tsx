@@ -12,7 +12,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { StepBreadcrumb } from '../../components/ui/StepBreadcrumb/StepBreadcrumb'
 import { Toggle } from '../../components/ui/Toggle/Toggle'
-import { Dropdown } from '../../components/ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
 import { SearchInput } from '../../components/ui/SearchInput'
 import { useQuery } from '@tanstack/react-query'
 import { matchesAllTokens, tokenizeSearch } from '../../lib/search'
@@ -49,6 +49,15 @@ export function DashboardPage() {
   const [inviteStep, setInviteStep] = useState<1 | 2>(1)
   const [inviteModules, setInviteModules] = useState<Set<ModuleType>>(new Set())
   const inviteLoading = sendInvitationMutation.isPending
+
+  const sexOptions = useMemo<DropdownOption[]>(
+    () => [
+      { value: 'M', label: t('dashboard.invite_sex_m') },
+      { value: 'F', label: t('dashboard.invite_sex_f') },
+      { value: 'O', label: t('dashboard.invite_sex_o') },
+    ],
+    [t]
+  )
 
   const { minBirthDate, maxBirthDate } = useMemo(() => {
     const today = new Date()
@@ -221,16 +230,14 @@ export function DashboardPage() {
                     error={inviteBirthDateError}
                   />
                   <Dropdown
+                    searchable={false}
                     label={t('dashboard.invite_sex_label')}
                     id="invite-sex"
                     value={inviteSex}
-                    onChange={e => setInviteSex(e.target.value)}
-                  >
-                    <option value="">{t('dashboard.invite_sex_placeholder')}</option>
-                    <option value="M">{t('dashboard.invite_sex_m')}</option>
-                    <option value="F">{t('dashboard.invite_sex_f')}</option>
-                    <option value="O">{t('dashboard.invite_sex_o')}</option>
-                  </Dropdown>
+                    onChange={setInviteSex}
+                    options={sexOptions}
+                    placeholder={t('dashboard.invite_sex_placeholder')}
+                  />
                 </div>
                 <Toggle
                   checked={inviteTeenMode}

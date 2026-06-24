@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
-import { Dropdown } from '../../ui/Dropdown/Dropdown'
+import { Dropdown, type DropdownOption } from '../../ui/Dropdown'
 import { useToast } from '../../../contexts/ToastContext'
 import {
   submitSupportRequest,
@@ -44,10 +44,15 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
   const descriptionValid = !needsDescription || description.trim().length > 0
   const canSubmit = emailValid && descriptionValid
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const found = SUPPORT_REASONS.find(r => r === e.target.value)
+  const handleChange = (value: string) => {
+    const found = SUPPORT_REASONS.find(r => r === value)
     if (found) setReason(found)
   }
+
+  const reasonOptions = useMemo<DropdownOption[]>(
+    () => SUPPORT_REASONS.map(r => ({ value: r, label: t(`support.reason.${r}`) })),
+    [t]
+  )
 
   const handleSubmit = async () => {
     setSubmitting(true)
@@ -93,13 +98,13 @@ export function SupportRequestModal({ onClose, presetReason, requireEmail = fals
             required
           />
         ) : null}
-        <Dropdown label={t('support.reason_label')} value={reason} onChange={handleChange}>
-          {SUPPORT_REASONS.map(r => (
-            <option key={r} value={r}>
-              {t(`support.reason.${r}`)}
-            </option>
-          ))}
-        </Dropdown>
+        <Dropdown
+          searchable={false}
+          label={t('support.reason_label')}
+          value={reason}
+          onChange={handleChange}
+          options={reasonOptions}
+        />
         {needsDescription ? (
           <InputField
             label={t('support.description_label')}

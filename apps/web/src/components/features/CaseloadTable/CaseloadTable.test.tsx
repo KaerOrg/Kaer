@@ -93,8 +93,9 @@ describe('CaseloadTable', () => {
     // La modale est fermée tant qu'on n'a pas cliqué « Ajouter un patient ».
     expect(screen.queryByText('Choisir un patient à suivre…')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter un patient' }))
-    // Sélection du patient puis confirmation dans la modale.
-    fireEvent.change(await screen.findByLabelText('Patient'), { target: { value: 'pat-9' } })
+    // Sélection du patient dans la combobox puis confirmation dans la modale.
+    fireEvent.focus(await screen.findByLabelText('Patient'))
+    fireEvent.pointerDown(screen.getByRole('option', { name: 'Léa Martin' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }))
     expect(onAddPatient).toHaveBeenCalledWith('pat-9')
   })
