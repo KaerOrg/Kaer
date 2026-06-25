@@ -1559,6 +1559,45 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('bt.footer', 'breathing_techniques', NULL, NULL, 'footer_note', 'module.breathing_techniques.footer', 99)
 on conflict (id) do nothing;
 
+-- ── module_content_fields : breathing_techniques (config des 5 techniques) ────
+-- Config-first (issue #69) : la définition des techniques (couleur, durée
+-- recommandée, séquence de phases) vit désormais en base, plus dans un tableau
+-- TypeScript mobile. Lue par breathingService.fetchBreathingTechniques().
+-- Chaque technique est un field `breathing_technique` ; ses phases sont des
+-- fields enfants `breathing_phase` (parent_field_id), ordonnées par sort_order.
+-- Les libellés (nom, sous-titre, description, niveau de preuve, label de phase)
+-- restent en i18n bundlé : clés modules.breathing_techniques.<key>_name, etc.
+--
+-- Sources cliniques (grades de preuve) :
+--   Cohérence cardiaque         : Lehrer & Gevirtz (2014), Applied Psychophysiology : Grade B
+--   Respiration diaphragmatique : HAS thérapies non médicamenteuses, Conrad et al. (2007) : Grade B
+--   Respiration carrée          : VA/DoD PTSD Guidelines, gestion du stress aigu : Grade C / accord experts
+--   Technique 4-7-8             : accord experts endormissement / crise anxieuse : Grade C
+--   Pleine conscience           : MBSR Kabat-Zinn (1990), MBCT Segal et al. (2002) : Grade A rechute dépressive
+-- Conformité MDR 2017/745 : guide à rythme fixe, pas de biofeedback, aucune interprétation algorithmique.
+insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
+  ('bt.tech.coherence_cardiaque',          'breathing_techniques', NULL, NULL,                            'breathing_technique', NULL, 100),
+  ('bt.tech.coherence_cardiaque.phase_1',  'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque',  'breathing_phase',     NULL, 1),
+  ('bt.tech.coherence_cardiaque.phase_2',  'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque',  'breathing_phase',     NULL, 2),
+  ('bt.tech.diaphragmatique',              'breathing_techniques', NULL, NULL,                            'breathing_technique', NULL, 110),
+  ('bt.tech.diaphragmatique.phase_1',      'breathing_techniques', NULL, 'bt.tech.diaphragmatique',      'breathing_phase',     NULL, 1),
+  ('bt.tech.diaphragmatique.phase_2',      'breathing_techniques', NULL, 'bt.tech.diaphragmatique',      'breathing_phase',     NULL, 2),
+  ('bt.tech.carree',                       'breathing_techniques', NULL, NULL,                            'breathing_technique', NULL, 120),
+  ('bt.tech.carree.phase_1',               'breathing_techniques', NULL, 'bt.tech.carree',               'breathing_phase',     NULL, 1),
+  ('bt.tech.carree.phase_2',               'breathing_techniques', NULL, 'bt.tech.carree',               'breathing_phase',     NULL, 2),
+  ('bt.tech.carree.phase_3',               'breathing_techniques', NULL, 'bt.tech.carree',               'breathing_phase',     NULL, 3),
+  ('bt.tech.carree.phase_4',               'breathing_techniques', NULL, 'bt.tech.carree',               'breathing_phase',     NULL, 4),
+  ('bt.tech.quatre_sept_huit',             'breathing_techniques', NULL, NULL,                            'breathing_technique', NULL, 130),
+  ('bt.tech.quatre_sept_huit.phase_1',     'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',     'breathing_phase',     NULL, 1),
+  ('bt.tech.quatre_sept_huit.phase_2',     'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',     'breathing_phase',     NULL, 2),
+  ('bt.tech.quatre_sept_huit.phase_3',     'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',     'breathing_phase',     NULL, 3),
+  ('bt.tech.pleine_conscience',            'breathing_techniques', NULL, NULL,                            'breathing_technique', NULL, 140),
+  ('bt.tech.pleine_conscience.phase_1',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 1),
+  ('bt.tech.pleine_conscience.phase_2',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 2),
+  ('bt.tech.pleine_conscience.phase_3',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 3),
+  ('bt.tech.pleine_conscience.phase_4',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 4)
+on conflict (id) do nothing;
+
 -- ── module_content_fields : modules "coming_soon" (placeholders) ─────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('chro.label',         'chronobiology_tracker',  NULL, NULL, 'module_label',       'module.chronobiology_tracker.label', 0),
@@ -1763,6 +1802,57 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.field_5', 'icon', 'circle'),
   ('bt.field_6', 'detail_code', 'module.breathing_techniques.field_6.detail'),
   ('bt.field_6', 'icon', 'calendar')
+on conflict (field_id, prop_key) do nothing;
+
+-- breathing_techniques : config atomique des techniques (issue #69)
+-- technique : technique_key + color (hex) + recommended_duration_min
+-- phase     : phase_type (inhale|hold_in|exhale|hold_out) + phase_seconds
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('bt.tech.coherence_cardiaque',         'technique_key',            'coherence_cardiaque'),
+  ('bt.tech.coherence_cardiaque',         'color',                    '#4F46E5'),
+  ('bt.tech.coherence_cardiaque',         'recommended_duration_min', '5'),
+  ('bt.tech.coherence_cardiaque.phase_1', 'phase_type',               'inhale'),
+  ('bt.tech.coherence_cardiaque.phase_1', 'phase_seconds',            '5'),
+  ('bt.tech.coherence_cardiaque.phase_2', 'phase_type',               'exhale'),
+  ('bt.tech.coherence_cardiaque.phase_2', 'phase_seconds',            '5'),
+  ('bt.tech.diaphragmatique',             'technique_key',            'diaphragmatique'),
+  ('bt.tech.diaphragmatique',             'color',                    '#059669'),
+  ('bt.tech.diaphragmatique',             'recommended_duration_min', '5'),
+  ('bt.tech.diaphragmatique.phase_1',     'phase_type',               'inhale'),
+  ('bt.tech.diaphragmatique.phase_1',     'phase_seconds',            '4'),
+  ('bt.tech.diaphragmatique.phase_2',     'phase_type',               'exhale'),
+  ('bt.tech.diaphragmatique.phase_2',     'phase_seconds',            '7'),
+  ('bt.tech.carree',                      'technique_key',            'carree'),
+  ('bt.tech.carree',                      'color',                    '#D97706'),
+  ('bt.tech.carree',                      'recommended_duration_min', '4'),
+  ('bt.tech.carree.phase_1',              'phase_type',               'inhale'),
+  ('bt.tech.carree.phase_1',              'phase_seconds',            '4'),
+  ('bt.tech.carree.phase_2',              'phase_type',               'hold_in'),
+  ('bt.tech.carree.phase_2',              'phase_seconds',            '4'),
+  ('bt.tech.carree.phase_3',              'phase_type',               'exhale'),
+  ('bt.tech.carree.phase_3',              'phase_seconds',            '4'),
+  ('bt.tech.carree.phase_4',              'phase_type',               'hold_out'),
+  ('bt.tech.carree.phase_4',              'phase_seconds',            '4'),
+  ('bt.tech.quatre_sept_huit',            'technique_key',            'quatre_sept_huit'),
+  ('bt.tech.quatre_sept_huit',            'color',                    '#9333EA'),
+  ('bt.tech.quatre_sept_huit',            'recommended_duration_min', '3'),
+  ('bt.tech.quatre_sept_huit.phase_1',    'phase_type',               'inhale'),
+  ('bt.tech.quatre_sept_huit.phase_1',    'phase_seconds',            '4'),
+  ('bt.tech.quatre_sept_huit.phase_2',    'phase_type',               'hold_in'),
+  ('bt.tech.quatre_sept_huit.phase_2',    'phase_seconds',            '7'),
+  ('bt.tech.quatre_sept_huit.phase_3',    'phase_type',               'exhale'),
+  ('bt.tech.quatre_sept_huit.phase_3',    'phase_seconds',            '8'),
+  ('bt.tech.pleine_conscience',           'technique_key',            'pleine_conscience'),
+  ('bt.tech.pleine_conscience',           'color',                    '#0EA5E9'),
+  ('bt.tech.pleine_conscience',           'recommended_duration_min', '10'),
+  ('bt.tech.pleine_conscience.phase_1',   'phase_type',               'inhale'),
+  ('bt.tech.pleine_conscience.phase_1',   'phase_seconds',            '4'),
+  ('bt.tech.pleine_conscience.phase_2',   'phase_type',               'hold_in'),
+  ('bt.tech.pleine_conscience.phase_2',   'phase_seconds',            '1'),
+  ('bt.tech.pleine_conscience.phase_3',   'phase_type',               'exhale'),
+  ('bt.tech.pleine_conscience.phase_3',   'phase_seconds',            '6'),
+  ('bt.tech.pleine_conscience.phase_4',   'phase_type',               'hold_out'),
+  ('bt.tech.pleine_conscience.phase_4',   'phase_seconds',            '1')
 on conflict (field_id, prop_key) do nothing;
 
 -- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF

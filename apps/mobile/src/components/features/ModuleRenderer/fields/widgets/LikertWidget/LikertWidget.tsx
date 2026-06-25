@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
-import { colors, radius } from '@theme'
+import React, { useCallback, useMemo } from 'react'
+import { Radio, type RadioOption } from '@ui/Radio'
 
 export interface LikertOption {
   value: number
@@ -14,49 +13,26 @@ interface Props {
   accentColor?: string
 }
 
+/**
+ * Échelle Likert (saisie patient) : colonnes de largeur égale, label centré
+ * multiligne. Simple adaptateur numérique au-dessus du primitive `ui/Radio`
+ * (variant `grid`) : les valeurs cliniques sont des nombres tandis que `ui/Radio`
+ * opère sur des `string`, d'où la conversion à la frontière. Aucun markup ad hoc.
+ */
 export function LikertWidget({ options, selected, onSelect, accentColor }: Props) {
-  const activeColor = accentColor ?? colors.primary
-
-  const handlePress = useCallback((value: number) => { onSelect(value) }, [onSelect])
+  const radioOptions: RadioOption[] = useMemo(
+    () => options.map(o => ({ value: String(o.value), label: o.label })),
+    [options],
+  )
+  const handleChange = useCallback((value: string) => { onSelect(parseInt(value, 10)) }, [onSelect])
 
   return (
-    <View style={styles.row}>
-      {options.map(opt => {
-        const isSelected = selected === opt.value
-        return (
-          <Pressable
-            key={opt.value}
-            style={[
-              styles.option,
-              isSelected && { backgroundColor: activeColor, borderColor: activeColor },
-            ]}
-            onPress={() => handlePress(opt.value)}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: isSelected }}
-          >
-            <Text style={[styles.label, isSelected && styles.labelSelected]} numberOfLines={2}>
-              {opt.label}
-            </Text>
-          </Pressable>
-        )
-      })}
-    </View>
+    <Radio
+      variant="grid"
+      options={radioOptions}
+      value={selected === null ? null : String(selected)}
+      onChange={handleChange}
+      color={accentColor}
+    />
   )
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: 6 },
-  option: {
-    flex: 1,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 52,
-  },
-  label: { fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 15 },
-  labelSelected: { color: colors.white, fontWeight: '600' },
-})

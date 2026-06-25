@@ -128,6 +128,7 @@ describe('DashboardPage — formulaire d\'invitation : présence des champs', ()
 
   it('affiche les options Homme / Femme / Autre dans le select sexe', async () => {
     await openForm()
+    fireEvent.click(screen.getByLabelText(/sexe/i))
     expect(screen.getByRole('option', { name: 'Homme' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Femme' })).toBeInTheDocument()
     expect(screen.getByRole('option', { name: /autre/i })).toBeInTheDocument()
@@ -268,7 +269,8 @@ describe('DashboardPage — formulaire d\'invitation : soumission', () => {
     fireEvent.change(screen.getByLabelText(/date de naissance/i), {
       target: { value: '1990-06-15' },
     })
-    await userEvent.selectOptions(screen.getByLabelText(/sexe/i), 'F')
+    fireEvent.click(screen.getByLabelText(/sexe/i))
+    fireEvent.pointerDown(screen.getByRole('option', { name: 'Femme' }))
     await userEvent.click(screen.getByRole('checkbox'))
     await userEvent.click(screen.getByRole('button', { name: /suivant/i }))
     await userEvent.click(screen.getByRole('button', { name: /envoyer l.invitation/i }))

@@ -418,14 +418,14 @@ flèche, aucun taux (conforme MDR 2017/745).
 
 ### `Radio` (`src/components/ui/Radio/`)
 
-Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list` (radio classique, rangées rond + label, défaut) ou `pills` (pilules en ligne, fond coloré sur l'option active). Couleur d'accent configurable. `readonly` rend le même visuel sans interaction (options en `View`, pas en `Pressable`) — pour un aperçu / affichage en lecture seule, jamais un composant « display-only » parallèle. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, aperçu de champ, etc.
+Sélecteur à **choix exclusif** (radio). Trois habillages via `variant` : `list` (radio classique, rangées rond + label, défaut), `pills` (pilules en ligne, fond coloré sur l'option active) ou `grid` (colonnes de largeur égale, label centré multiligne, fond coloré sur l'option active, pour l'échelle Likert d'un questionnaire clinique). Couleur d'accent configurable. `readonly` rend le même visuel sans interaction (options en `View`, pas en `Pressable`) : pour un aperçu / affichage en lecture seule, jamais un composant « display-only » parallèle. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, aperçu de champ, échelle Likert, etc.
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `options` | `RadioOption[]` | — | Options `{ value, label, sublabel? }` dans l'ordre d'affichage (obligatoire). `sublabel` n'est rendu qu'en variant `list` |
 | `value` | `string \| null` | — | Identifiant de l'option sélectionnée (`null` = aucune) (obligatoire) |
 | `onChange` | `(v: string) => void` | — | Callback de sélection. Optionnel : inutile (et ignoré) en `readonly` |
-| `variant` | `'list' \| 'pills'` | `'list'` | Habillage : radio classique ou pilules |
+| `variant` | `'list' \| 'pills' \| 'grid'` | `'list'` | Habillage : radio classique, pilules, ou colonnes Likert (largeurs égales, label centré multiligne) |
 | `readonly` | `boolean` | `false` | Lecture seule : même rendu, aucune interaction (options en `View`) |
 | `color` | `string` | `colors.primary` | Couleur d'accentuation de l'option active |
 | `testID` | `string` | — | testID du conteneur |
@@ -457,9 +457,23 @@ Sélecteur à **choix exclusif** (radio). Deux habillages via `variant` : `list`
   value="non"
   readonly
 />
+
+// Colonnes Likert (échelle clinique, ex. LikertWidget dans QuestionnaireLayout)
+<Radio
+  variant="grid"
+  options={[
+    { value: '0', label: 'Jamais' },
+    { value: '1', label: 'Parfois' },
+    { value: '2', label: 'Souvent' },
+    { value: '3', label: 'Toujours' },
+  ]}
+  value={selected}
+  onChange={onSelect}
+  color={accentColor}
+/>
 ```
 
-> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`. Un aperçu / affichage en lecture seule reste un `Radio readonly`, jamais un composant « display-only » dupliquant l'habillage pilule.**
+> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`, les colonnes Likert le `variant="grid"`. Un aperçu / affichage en lecture seule reste un `Radio readonly`, jamais un composant « display-only » dupliquant l'habillage. `LikertWidget` (`QuestionnaireLayout`) est un simple adaptateur numérique au-dessus de `variant="grid"` : `ui/Radio` opérant sur des `string`, la conversion nombre↔chaîne se fait à sa frontière.**
 
 ---
 

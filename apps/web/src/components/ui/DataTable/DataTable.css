@@ -18,11 +18,20 @@
   gap: var(--spacing-sm);
 }
 
+/* Zone de filtres encadrée (panel) : regroupe les contrôles de filtrage dans un
+   cadre identifiable plutôt que de les laisser flotter au-dessus de la table. Ne
+   se rend que si l'appelant fournit des `filters` (pas de cadre vide). Habillage
+   neutre (fond blanc surface, pas de hover lift) : un primitive `Card` serait inadapté ici
+   (sémantique header/actions, élévation au survol pour un contenu interactif). */
 .data-table__filters {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 .data-table__scroll {

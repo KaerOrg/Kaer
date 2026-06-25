@@ -17,9 +17,11 @@ export interface RadioProps {
   /**
    * Habillage :
    * - `list` (défaut) : radio classique, rangées rond + label (+ sous-label) ;
-   * - `pills` : pilules en ligne, remplissage couleur sur l'option active.
+   * - `pills` : pilules en ligne, remplissage couleur sur l'option active ;
+   * - `grid` : colonnes de largeur égale, label centré multiligne, remplissage
+   *   couleur sur l'option active (échelle Likert d'un questionnaire clinique).
    */
-  variant?: 'list' | 'pills'
+  variant?: 'list' | 'pills' | 'grid'
   /**
    * Lecture seule : même rendu, aucune interaction (options rendues en `View`,
    * pas en `Pressable`). Un même primitive sert l'affichage et la saisie, on ne

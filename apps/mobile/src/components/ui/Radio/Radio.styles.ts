@@ -23,4 +23,19 @@ export const styles = StyleSheet.create({
   },
   pillLabel:       { fontSize: 13, fontWeight: '600', color: colors.textMuted },
   pillLabelActive: { color: colors.white },
+  // ── Variant 'grid' (colonnes Likert : largeurs égales, label centré multiligne)
+  gridRow:     { flexDirection: 'row', gap: 6 },
+  gridOption: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 52,
+  },
+  gridLabel:       { fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 15 },
+  gridLabelActive: { color: colors.white, fontWeight: '600' },
 })

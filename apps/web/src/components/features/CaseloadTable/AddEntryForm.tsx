@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
-import { Dropdown } from '../../ui/Dropdown'
+import { Dropdown, type DropdownOption } from '../../ui/Dropdown'
 
 export interface AddEntryFormProps {
   open: boolean
@@ -26,13 +26,14 @@ export function AddEntryForm({ open, patients, onAdd, onClose, loading = false }
     if (open) setSelected('')
   }, [open])
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelected(e.target.value)
-  }, [])
-
   const handleConfirm = useCallback(() => {
     if (selected) onAdd(selected)
   }, [selected, onAdd])
+
+  const options = useMemo<DropdownOption[]>(
+    () => patients.map(p => ({ value: p.id, label: p.name })),
+    [patients]
+  )
 
   if (!open) return null
 
@@ -56,18 +57,14 @@ export function AddEntryForm({ open, patients, onAdd, onClose, loading = false }
       <Dropdown
         label={t('file_active.add.patient_label')}
         value={selected}
-        onChange={handleChange}
+        onChange={setSelected}
+        options={options}
         disabled={noneAvailable}
-      >
-        <option value="" disabled>
-          {noneAvailable ? t('file_active.add.none_available') : t('file_active.add.patient_placeholder')}
-        </option>
-        {patients.map(p => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
-        ))}
-      </Dropdown>
+        placeholder={
+          noneAvailable ? t('file_active.add.none_available') : t('file_active.add.patient_placeholder')
+        }
+        emptyText={t('file_active.add.none_available')}
+      />
     </Modal>
   )
 }

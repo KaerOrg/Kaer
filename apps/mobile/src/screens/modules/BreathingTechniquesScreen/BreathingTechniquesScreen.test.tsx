@@ -20,22 +20,34 @@ jest.mock('@react-navigation/native', () => {
   }
 })
 
-jest.mock('../../../lib/database', () => ({
-  getAllBreathingSessions: jest.fn().mockResolvedValue([]),
+// Config des techniques telle que servie par la base (clés = i18n côté écran).
+const TECHNIQUES = [
+  { key: 'coherence_cardiaque', color: '#4F46E5', recommended_duration_min: 5, phases: [{ type: 'inhale', seconds: 5 }, { type: 'exhale', seconds: 5 }] },
+  { key: 'diaphragmatique', color: '#059669', recommended_duration_min: 5, phases: [{ type: 'inhale', seconds: 4 }, { type: 'exhale', seconds: 7 }] },
+  { key: 'carree', color: '#D97706', recommended_duration_min: 4, phases: [{ type: 'inhale', seconds: 4 }, { type: 'hold_in', seconds: 4 }, { type: 'exhale', seconds: 4 }, { type: 'hold_out', seconds: 4 }] },
+  { key: 'quatre_sept_huit', color: '#9333EA', recommended_duration_min: 3, phases: [{ type: 'inhale', seconds: 4 }, { type: 'hold_in', seconds: 7 }, { type: 'exhale', seconds: 8 }] },
+  { key: 'pleine_conscience', color: '#0EA5E9', recommended_duration_min: 10, phases: [{ type: 'inhale', seconds: 4 }, { type: 'hold_in', seconds: 1 }, { type: 'exhale', seconds: 6 }, { type: 'hold_out', seconds: 1 }] },
+]
+
+const mockFetchTechniques = jest.fn().mockResolvedValue(TECHNIQUES)
+const mockFetchSessions = jest.fn().mockResolvedValue([])
+jest.mock('../../../services/breathingService', () => ({
+  fetchBreathingTechniques: () => mockFetchTechniques(),
+  fetchBreathingSessions: () => mockFetchSessions(),
+  getCycleDuration: (t: { phases: { seconds: number }[] }) => t.phases.reduce((a, p) => a + p.seconds, 0),
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
   SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
 }))
 
-const { getAllBreathingSessions } = jest.requireMock('../../../lib/database')
-
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('BreathingTechniquesScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    getAllBreathingSessions.mockResolvedValue([])
+    mockFetchTechniques.mockResolvedValue(TECHNIQUES)
+    mockFetchSessions.mockResolvedValue([])
   })
 
   it('affiche les 5 techniques de respiration', async () => {
@@ -81,7 +93,7 @@ describe('BreathingTechniquesScreen', () => {
   })
 
   it('affiche le nombre de sessions pour une technique déjà utilisée', async () => {
-    getAllBreathingSessions.mockResolvedValue([
+    mockFetchSessions.mockResolvedValue([
       { id: 's1', date: '2026-04-14', technique_key: 'coherence_cardiaque', duration_seconds: 300, created_at: '2026-04-14T10:00:00' },
       { id: 's2', date: '2026-04-13', technique_key: 'coherence_cardiaque', duration_seconds: 300, created_at: '2026-04-13T10:00:00' },
     ])
@@ -90,7 +102,7 @@ describe('BreathingTechniquesScreen', () => {
   })
 
   it('affiche l\'historique récent si des sessions existent', async () => {
-    getAllBreathingSessions.mockResolvedValue([
+    mockFetchSessions.mockResolvedValue([
       { id: 's1', date: '2026-04-14', technique_key: 'carree', duration_seconds: 240, created_at: '2026-04-14T10:00:00' },
     ])
     render(<BreathingTechniquesScreen />)

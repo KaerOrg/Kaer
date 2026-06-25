@@ -270,13 +270,32 @@ where p.id = '<patient_id>'
 |---|---|
 | `supabase/schema.sql` | Table `retention_config`, RLS, `fn_inactive_patient_ids`, `purge_retention_table`, commentaire pg_cron |
 | `supabase/seed.sql` | Durées + gating initiaux (7 règles) |
-| `supabase/functions/purge-retention/index.ts` | Edge Function orchestratrice |
+| `supabase/functions/purge-retention/retention.ts` | Orchestration pure (garde d'autorisation, mapping RPC, boucle de purge) — accès données injecté via `RetentionStore` |
+| `supabase/functions/purge-retention/index.ts` | Enveloppe Deno : garde service_role, montage du store Supabase, réponse HTTP |
+| `supabase/functions/purge-retention/retention.test.ts` | Tests Deno de l'orchestration (13 cas) |
 
-> **Note tests** : la logique de sélection vit dans les fonctions SQL (jointure
-> ensembliste indispensable pour le gating d'inactivité à grande échelle). Le dépôt
-> n'a pas de harnais de test SQL / Edge Function ; la vérification se fait via la
-> requête de comptage ci-dessus avant activation. Une fonction TypeScript pure isolée
-> n'aurait reproduit qu'une partie du critère (la date), sans la jointure patient.
+### Couverture de test
+
+Deux niveaux, séparés par ce qu'un test peut atteindre sans Postgres vivant :
+
+1. **Orchestration (testée, automatisée).** `retention.ts` isole la part testable :
+   garde d'autorisation (`isAuthorized`), mapping config → arguments RPC
+   (`buildPurgeArgs` / `buildAuditArgs`), et la boucle `runPurge`. L'accès données est
+   injecté via l'interface `RetentionStore`, donc les tests passent un faux store et
+   couvrent : refus d'un appelant non service_role, échec de lecture config (→ 500),
+   purge + audit par table, **purge à 0 ligne tracée** (preuve d'exécution), isolation
+   d'erreur par table, et échec d'audit non bloquant. Exécution :
+   `deno test supabase/functions/` — job CI **« Edge — Tests »** (`denoland/setup-deno`).
+
+2. **Sélection ensembliste SQL (vérifiée manuellement).** Le critère de purge lui-même
+   (coupures temporelles + jointure d'inactivité) vit dans `purge_retention_table` /
+   `fn_inactive_patient_ids`, par nécessité de passage à l'échelle. Le valider exige un
+   Postgres réel (schéma `auth.users`, extensions `pg_cron`/`pg_net`) absent du harnais
+   Node/Deno du dépôt. La vérification se fait via la **requête de comptage à blanc**
+   ci-dessus (même condition, `COUNT` au lieu de `DELETE`) avant activation du cron.
+
+> ⚠️ MDR : aucun test ne réintroduit de logique de seuil clinique — l'orchestration ne
+> voit que des règles de date issues de `retention_config`.
 
 ---
 
@@ -287,5 +306,6 @@ where p.id = '<patient_id>'
 - [x] Job de purge programmé (Edge Function + SQL + pg_cron) fonctionnel et idempotent.
 - [x] Purge tracée (nb lignes, paramètres) dans l'audit log.
 - [x] Schéma à jour, doc à jour.
+- [x] Couverture de test automatisée de l'orchestration (garde, mapping RPC, boucle de purge, traçage) — `retention.test.ts`, job CI « Edge — Tests ». La sélection SQL ensembliste reste vérifiée par la requête à blanc (voir « Couverture de test »).
 - [ ] **Durées + fenêtre d'inactivité validées par le DPO** (item non-code, hors périmètre dev).
-- [ ] Couverture de test automatisée de la sélection — bloquée par l'absence de harnais SQL/Edge (voir note ci-dessus).
+- [ ] Activation du `pg_cron` en prod (item non-code, ops).

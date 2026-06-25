@@ -274,6 +274,15 @@ Props de `tree_selector_config` (toutes optionnelles, valeurs = clés i18n sauf 
 niveau de l'arbre ; `enable_context` ajoute une étape de chips multi-choix neutres,
 persistée dans `tree_selections.context_json`. Réf. module : `emotion_wheel`.
 
+**Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
+`breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le
+preview praticien reste en `field_row`)
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `breathing_technique` | Une technique de respiration (parent) | `technique_key`, `color`, `recommended_duration_min` |
+| `breathing_phase` | Une phase d'un cycle (field enfant, ordonné par `sort_order`) | `phase_type` (`inhale`/`hold_in`/`exhale`/`hold_out`), `phase_seconds` |
+
 **Props `questionnaire` :**
 
 | `prop_key` | Utilisé par | Description |

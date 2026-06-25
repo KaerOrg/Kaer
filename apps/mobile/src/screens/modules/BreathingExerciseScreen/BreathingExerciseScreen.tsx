@@ -4,136 +4,59 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { getTechnique, getCycleDuration, type BreathingPhase } from '../../../constants/breathingTechniques'
+import {
+  fetchBreathingTechniques,
+  getCycleDuration,
+  saveBreathingSession,
+  type BreathingTechnique,
+} from '../../../services/breathingService'
 import { generateId } from '../../../lib/database'
-import { saveBreathingSession } from '../../../services/breathingService'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
+import { useTeen } from '../../../hooks/useTeen'
+import { TeenAccent } from '../../../components/features/TeenAccent'
+import { BreathCircle } from './BreathCircle'
+import { PhaseBar } from './PhaseBar'
 
 type RouteType = RouteProp<AppStackParamList, 'BreathingExercise'>
 
-// ─── Cercle animé ─────────────────────────────────────────────────────────────
-// Animation pure JS — pas de bibliothèque d'animation requise.
-// Le cercle scale entre 0.55 (expiration/pause) et 1.0 (inspiration complète).
-
-interface BreathCircleProps {
-  phase: BreathingPhase
-  progress: number  // 0 → 1 au sein de la phase courante
-  color: string
-  countdown: number
-}
-
-function BreathCircle({ phase, progress, color, countdown }: BreathCircleProps) {
-  const { t } = useTranslation()
-  // Scale : inspiration → grandit, expiration → rétrécit, rétentions → stable
-  const getScale = () => {
-    switch (phase.type) {
-      case 'inhale':    return 0.55 + 0.45 * progress
-      case 'hold_in':   return 1.0
-      case 'exhale':    return 1.0 - 0.45 * progress
-      case 'hold_out':  return 0.55
-    }
-  }
-
-  const scale = getScale()
-  const size = 220
-  const innerSize = size * scale
-
-  return (
-    <View style={[circleStyles.outer, { width: size, height: size, borderColor: color + '33' }]}>
-      <View
-        style={[
-          circleStyles.inner,
-          {
-            width: innerSize,
-            height: innerSize,
-            borderRadius: innerSize / 2,
-            backgroundColor: color + '22',
-            borderColor: color,
-          },
-        ]}
-      >
-        <Text style={[circleStyles.countdown, { color }]}>{countdown}</Text>
-        <Text style={[circleStyles.phaseLabel, { color }]}>{t(`modules.breathing_techniques.phase_${phase.type}`)}</Text>
-      </View>
-    </View>
-  )
-}
-
-const circleStyles = StyleSheet.create({
-  outer: {
-    borderRadius: 999,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inner: {
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  countdown: { fontSize: 40, fontWeight: '800' },
-  phaseLabel: { fontSize: 14, fontWeight: '600', textAlign: 'center', paddingHorizontal: spacing.sm },
-})
-
-// ─── Barre de progression des phases ─────────────────────────────────────────
-
-interface PhaseBarProps {
-  phases: BreathingPhase[]
-  currentPhaseIndex: number
-  color: string
-}
-
-function PhaseBar({ phases, currentPhaseIndex, color }: PhaseBarProps) {
-  return (
-    <View style={phaseBarStyles.container}>
-      {phases.map((phase, i) => (
-        <View
-          key={i}
-          style={[
-            phaseBarStyles.segment,
-            { flex: phase.seconds },
-            i === currentPhaseIndex && { backgroundColor: color },
-            i < currentPhaseIndex && { backgroundColor: color + '55' },
-          ]}
-        />
-      ))}
-    </View>
-  )
-}
-
-const phaseBarStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    height: 6,
-    borderRadius: radius.full,
-    overflow: 'hidden',
-    backgroundColor: colors.border,
-    gap: 2,
-  },
-  segment: {
-    height: '100%',
-    borderRadius: radius.full,
-    backgroundColor: colors.border,
-  },
-})
-
-// ─── Écran principal ──────────────────────────────────────────────────────────
-
 export default function BreathingExerciseScreen() {
   const { t } = useTranslation()
+  const { teenColor } = useTeen()
   const navigation = useNavigation()
   const route = useRoute<RouteType>()
   const { showConfirm } = useConfirmDialog()
 
-  const technique = getTechnique(route.params.techniqueKey)
+  // Config chargée depuis la base (config-first) : trois états exclusifs.
+  const [techState, setTechState] = useState<
+    | { status: 'loading' }
+    | { status: 'ready'; technique: BreathingTechnique }
+    | { status: 'not_found' }
+  >({ status: 'loading' })
+  const technique = techState.status === 'ready' ? techState.technique : null
+
+  useEffect(() => {
+    let active = true
+    fetchBreathingTechniques()
+      .then((techs) => {
+        if (!active) return
+        const found = techs.find((tch) => tch.key === route.params.techniqueKey)
+        setTechState(found ? { status: 'ready', technique: found } : { status: 'not_found' })
+      })
+      .catch(() => {
+        if (active) setTechState({ status: 'not_found' })
+      })
+    return () => {
+      active = false
+    }
+  }, [route.params.techniqueKey])
 
   const [running, setRunning] = useState(false)
   const [phaseIndex, setPhaseIndex] = useState(0)
@@ -159,7 +82,7 @@ export default function BreathingExerciseScreen() {
           duration_seconds: totalSeconds,
         })
       } catch {
-        // Échec silencieux — la session n'est pas critique
+        // Échec silencieux : la session n'est pas critique
       }
     }
   }, [totalSeconds, technique])
@@ -175,6 +98,17 @@ export default function BreathingExerciseScreen() {
       },
     })
   }, [stop, navigation, showConfirm, t])
+
+  const handleStart = useCallback(() => {
+    setPhaseIndex(0)
+    setSecondInPhase(0)
+    setRunning(true)
+  }, [])
+
+  const handlePause = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    setRunning(false)
+  }, [])
 
   // Tick toutes les secondes
   useEffect(() => {
@@ -207,7 +141,15 @@ export default function BreathingExerciseScreen() {
     }
   }, [])
 
-  if (!technique) {
+  if (techState.status === 'loading') {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    )
+  }
+
+  if (techState.status === 'not_found' || !technique) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{t('modules.breathing_techniques.technique_not_found')}</Text>
@@ -224,6 +166,7 @@ export default function BreathingExerciseScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      <TeenAccent color={teenColor('breathing_techniques')} />
       <View style={styles.container}>
 
         {/* En-tête */}
@@ -288,11 +231,7 @@ export default function BreathingExerciseScreen() {
           {!running ? (
             <TouchableOpacity
               style={[styles.mainBtn, { backgroundColor: technique.color }]}
-              onPress={() => {
-                setPhaseIndex(0)
-                setSecondInPhase(0)
-                setRunning(true)
-              }}
+              onPress={handleStart}
               activeOpacity={0.8}
               accessibilityRole="button"
               accessibilityLabel={totalSeconds === 0 ? t('modules.breathing_techniques.start_btn') : t('modules.breathing_techniques.resume_btn')}
@@ -305,10 +244,7 @@ export default function BreathingExerciseScreen() {
           ) : (
             <TouchableOpacity
               style={[styles.mainBtn, { backgroundColor: technique.color }]}
-              onPress={() => {
-                if (intervalRef.current) clearInterval(intervalRef.current)
-                setRunning(false)
-              }}
+              onPress={handlePause}
               activeOpacity={0.8}
               accessibilityRole="button"
               accessibilityLabel={t('modules.breathing_techniques.pause_btn')}

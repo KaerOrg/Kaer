@@ -542,37 +542,45 @@ lecture impérative). Un `className` passé est **fusionné** avec les classes d
 | `placeholder` | `string` | Placeholder (obligatoire) |
 | `ariaLabel` | `string` | Label accessibilité |
 
-### `MultiSelectAutocomplete`
+### `Dropdown`
 
-`components/ui/MultiSelectAutocomplete/`. Combobox multi-sélection à autocomplétion :
-champ de saisie + liste déroulante filtrée (insensible casse/accents via
-`lib/search`), options regroupables par section, navigation clavier (↑/↓, Entrée,
-Échap), fermeture au clic extérieur. **Présentationnel** : options, sélection et
-bascule pilotées par le parent ; il n'affiche pas les valeurs retenues (le parent
-rend ses propres `Chip onRemove`). Choisir cette primitive plutôt que `Dropdown`
-dès qu'il faut filtrer en tapant ou sélectionner plusieurs valeurs — un `<select>`
-natif ne sait faire ni l'un ni l'autre proprement.
+`components/ui/Dropdown/`. **Liste déroulante unique** du design system : une combobox
+à autocomplétion paramétrable `mode="single"` (une valeur, ferme à la sélection) ou
+`mode="multiple"` (plusieurs valeurs, liste ouverte — le parent rend ses `Chip onRemove`).
+Filtre à la frappe (`searchable`, défaut `true`, insensible casse/accents via
+`lib/search`), options groupables par section, navigation clavier (↑/↓, Entrée, Échap),
+fermeture au clic extérieur, a11y combobox/listbox. Remplace l'ancien `<select>` natif
+**et** `MultiSelectAutocomplete` (issue #53).
 
 ```tsx
-<MultiSelectAutocomplete
+// Single (formulaire)
+<Dropdown
+  label={t('dashboard.invite_sex_label')}
+  value={inviteSex}
+  onChange={setInviteSex}
+  options={sexOptions}
+  placeholder={t('dashboard.invite_sex_placeholder')}
+  searchable={false}
+/>
+
+// Multiple (barre de filtres)
+<Dropdown
+  mode="multiple"
   options={[{ value: 'anxiety', label: 'Anxiété', group: 'indication' }]}
   selectedValues={selected}
   onToggle={handleToggle}
   groupLabels={{ indication: 'Indication' }}
+  ariaLabel={label}
   placeholder={t('modules.filter_select')}
   emptyText={t('modules.filter_no_match')}
 />
 ```
 
-| Prop | Type | Rôle |
-|---|---|---|
-| `options` | `readonly AutocompleteOption[]` | `{ value, label, group? }`, déjà triées |
-| `selectedValues` | `ReadonlySet<string>` | Valeurs cochées (affichées avec un ✓) |
-| `onToggle` | `(value: string) => void` | Bascule une option |
-| `placeholder` | `string` | Placeholder du champ |
-| `ariaLabel` | `string` | Label a11y de la combobox (défaut : `placeholder`) |
-| `groupLabels` | `Record<string, string>` | En-têtes de section : `group` id → libellé |
-| `emptyText` | `string` | Texte quand aucune option ne correspond |
+Props (union discriminée sur `mode`) : `single` → `value` + `onChange(value)` ;
+`multiple` → `selectedValues` + `onToggle(value)`. Communes : `options`, `label`,
+`ariaLabel`, `error`, `placeholder`, `emptyText`, `searchable`, `groupLabels`,
+`compact`, `clearable` + `clearLabel` (bouton « × » en single), `disabled`, `id`.
+Doc dédiée : [`docs/components/dropdown.md`](components/dropdown.md).
 
 ### `StatusBadge`
 
@@ -777,7 +785,7 @@ const columns: DataTableColumn<Row>[] = [
 | `columns` | `DataTableColumn<T>[]` | Définition des colonnes (`id`, `header`, `cell`, `*ClassName`, `sortable`) |
 | `rows` | `readonly T[]` | Lignes **déjà filtrées/triées/paginées** par l'appelant — la table ne réordonne ni ne tronque jamais |
 | `getRowId` | `(row: T) => string` | Identité stable (clé React + état de dépliage) |
-| `filters` | `ReactNode` | Contrôles de filtrage (recherche, segments, dropdowns…), partie intégrante de la table |
+| `filters` | `ReactNode` | Contrôles de filtrage (recherche, segments, dropdowns…). Rendus dans un **panel encadré** (`.data-table__filters` : bordure + radius + fond blanc surface + padding, 100 % tokens). Le cadre n'apparaît **que si** `filters` est fourni (pas de panel vide) |
 | `actionBar` | `ReactNode` | Barre d'actions de la table (boutons primaires, ex. « Ajouter »). Rendue **sous** les filtres, alignée à gauche |
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
@@ -904,7 +912,7 @@ Fichier : `components/features/ModuleFilterBar/ModuleFilterBar.tsx`
 Panneau de filtres à facettes de l'armoire thérapeutique. Structure :
 1. une recherche par mot-clé optionnelle (`search`, rendue en tête du panneau) ;
 2. **une combobox d'autocomplétion par dimension** (indication, public, approche),
-   via `MultiSelectAutocomplete` — un axe sans tag est omis ;
+   via `Dropdown mode="multiple"` — un axe sans tag est omis ;
 3. une zone de synthèse : les tags retenus en `Chip onRemove`, **regroupés sous le
    titre de leur critère** (le libellé de la dimension est rappelé) ;
 4. un pied : compteur « N sur M modules » + bouton de réinitialisation (visible
