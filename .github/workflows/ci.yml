@@ -69,9 +69,19 @@ jobs:
       - run: npm ci
       - run: cd apps/mobile && npx jest --passWithNoTests
 
+  test-edge:
+    name: Edge — Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno test supabase/functions/
+
   ci-ok:
     name: CI — OK
     runs-on: ubuntu-latest
-    needs: [typecheck-web, lint-web, test-web, typecheck-mobile, test-mobile]
+    needs: [typecheck-web, lint-web, test-web, typecheck-mobile, test-mobile, test-edge]
     steps:
       - run: echo "All checks passed"
