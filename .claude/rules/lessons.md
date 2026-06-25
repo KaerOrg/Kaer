@@ -334,3 +334,26 @@ tableau JSON) hors allowlist (`reference_url`, `reference_label`,
 d'une donnée ? » Si oui → props frères (attribut nommé) ou clés indexées (liste),
 jamais `:`/CSV/JSON. Mettre la config en base ne suffit pas si la base re-cache une
 structure dans du texte.
+
+---
+
+## Internationalisation : texte en dur
+
+> Règle source : [coding-standards.md § Internationalisation](coding-standards.md#internationalisation--zéro-texte-hardcodé).
+
+**refonte/roue-des-emotions (2026-06-25) — `aria-label` codé en dur dans un layout web.**
+Le layout web `TreeSelectorLayout` (aperçu praticien) rendait le bouton retour avec un
+libellé d'accessibilité en anglais figé, alors que `t` est une prop disponible, que la
+clé `common.back` existe déjà, et que le **mobile équivalent l'utilise** (`TreeSelectorHeader.tsx`
+→ `t('common.back')`) :
+```tsx
+// ❌ chaîne lue par les lecteurs d'écran, codée en dur en anglais dans une app FR
+<button className="ts-back" onClick={back} aria-label="back"><ArrowLeft size={20} /></button>
+// ✅ clé i18n existante, alignée sur le mobile
+<button className="ts-back" onClick={back} aria-label={t('common.back')}><ArrowLeft size={20} /></button>
+```
+→ La règle i18n vise **tout texte visible**, et `aria-label`/`alt`/`title`/`placeholder`
+en font partie : ils sont lus aux utilisateurs. Réflexe review : ne pas se limiter au
+texte entre `>` et `<` — grep aussi les **props textuelles** d'accessibilité. Quand le
+mobile résout déjà la clé (`t('common.back')`), un littéral en dur côté web est en plus
+une **rupture de parité**. Vérif : `grep -nE 'aria-label="[A-Za-z]|alt="[A-Za-z]|title="[A-Za-z]' apps/web/src --include="*.tsx"`.

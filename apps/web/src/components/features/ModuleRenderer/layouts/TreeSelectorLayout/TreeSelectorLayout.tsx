@@ -103,7 +103,7 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
 
   const header = (showProgress: boolean) => (
     <div className="ts-head">
-      <button type="button" className="ts-back" onClick={back} aria-label="back"><ArrowLeft size={20} /></button>
+      <button type="button" className="ts-back" onClick={back} aria-label={t('common.back')}><ArrowLeft size={20} /></button>
       {showProgress && (
         <div className="ts-progress">
           <div className="ts-progress__track"><div className="ts-progress__fill" style={{ width: `${(level / Math.max(level, 3)) * 100}%`, background: accent }} /></div>

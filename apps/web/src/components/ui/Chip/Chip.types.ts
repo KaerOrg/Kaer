@@ -23,6 +23,13 @@ export interface ChipProps {
   /** État sélectionné, uniquement avec `selectable`. */
   selected?: boolean
   /**
+   * Couleur d'accent appliquée à l'état **sélectionné** d'une puce `selectable`
+   * (bordure + texte, et fond translucide si c'est un hex). Pour les contextes où
+   * la teinte active dépend de la donnée (ex. couleur de la famille d'émotion
+   * choisie) et non du primaire fixe. Sans effet hors `selectable`/`selected`.
+   */
+  accentColor?: string
+  /**
    * Action au clic. Avec `selectable`, bascule le filtre. Sans `selectable` ni
    * `onRemove`, rend la puce comme un bouton d'action (ex. « +N » qui ouvre un
    * panneau) en conservant l'habillage du `tone`, sans `aria-pressed`.

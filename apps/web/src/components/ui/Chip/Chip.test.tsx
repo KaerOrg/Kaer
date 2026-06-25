@@ -48,6 +48,28 @@ describe('Chip', () => {
     expect(screen.getByRole('button', { pressed: false })).toBeInTheDocument()
   })
 
+  it('applique l\'accent piloté par la donnée à l\'état sélectionné (hex → bordure + fond translucide)', () => {
+    render(<Chip label="Joie" selectable selected accentColor="#F59E0B" onClick={vi.fn()} />)
+    const btn = screen.getByRole('button', { pressed: true })
+    expect(btn.style.borderColor).toBe('#F59E0B')
+    expect(btn.style.color).toBe('#F59E0B')
+    expect(btn.style.background).toBe('#F59E0B1A')
+  })
+
+  it('n\'applique pas l\'accent quand la puce sélectionnable n\'est pas sélectionnée', () => {
+    render(<Chip label="Joie" selectable selected={false} accentColor="#F59E0B" onClick={vi.fn()} />)
+    const btn = screen.getByRole('button', { pressed: false })
+    expect(btn.style.borderColor).toBe('')
+    expect(btn.style.background).toBe('')
+  })
+
+  it('accent non-hex (token CSS) : bordure + texte sans fond translucide', () => {
+    render(<Chip label="Joie" selectable selected accentColor="var(--color-primary)" onClick={vi.fn()} />)
+    const btn = screen.getByRole('button', { pressed: true })
+    expect(btn.style.borderColor).toBe('var(--color-primary)')
+    expect(btn.style.background).toBe('')
+  })
+
   it('rend une puce d\'action (bouton sans aria-pressed) avec onClick hors selectable', () => {
     const onClick = vi.fn()
     const { container } = render(<Chip label="+2" tone="info" onClick={onClick} />)

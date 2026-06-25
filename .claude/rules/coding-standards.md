@@ -571,7 +571,8 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ## Internationalisation — zéro texte hardcodé
 
-**Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.**
+**Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.** Cela inclut les **props textuelles d'accessibilité** (`aria-label`, `alt`, `title`, `placeholder`), lues aux utilisateurs au même titre que le texte affiché.
+> 📌 Cas vécu : voir [lessons.md § Internationalisation, texte en dur](lessons.md).
 
 ### Principe général
 
