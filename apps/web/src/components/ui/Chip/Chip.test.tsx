@@ -49,11 +49,12 @@ describe('Chip', () => {
   })
 
   it('applique l\'accent piloté par la donnée à l\'état sélectionné (hex → bordure + fond translucide)', () => {
+    // jsdom normalise les hex en rgb()/rgba().
     render(<Chip label="Joie" selectable selected accentColor="#F59E0B" onClick={vi.fn()} />)
     const btn = screen.getByRole('button', { pressed: true })
-    expect(btn.style.borderColor).toBe('#F59E0B')
-    expect(btn.style.color).toBe('#F59E0B')
-    expect(btn.style.background).toBe('#F59E0B1A')
+    expect(btn.style.borderColor).toBe('rgb(245, 158, 11)')
+    expect(btn.style.color).toBe('rgb(245, 158, 11)')
+    expect(btn.style.background).toContain('rgba(245, 158, 11')
   })
 
   it('n\'applique pas l\'accent quand la puce sélectionnable n\'est pas sélectionnée', () => {

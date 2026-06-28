@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, ChevronRight, Info, Plus } from 'lucide-react'
 import { collectIndexed } from '@kaer/shared'
+import { Button } from '@ui/Button'
+import { Chip } from '@ui/Chip'
 import type { ContentField } from '../../../../../services/moduleService'
 
 interface Props {
@@ -103,7 +105,7 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
 
   const header = (showProgress: boolean) => (
     <div className="ts-head">
-      <button type="button" className="ts-back" onClick={back} aria-label={t('common.back')}><ArrowLeft size={20} /></button>
+      <Button variant="ghost" size="sm" type="button" className="ts-back" icon={<ArrowLeft size={20} />} aria-label={t('common.back')} onClick={back} />
       {showProgress && (
         <div className="ts-progress">
           <div className="ts-progress__track"><div className="ts-progress__fill" style={{ width: `${(level / Math.max(level, 3)) * 100}%`, background: accent }} /></div>
@@ -124,10 +126,9 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
       <div className="ts">
         {intro && <p className="ts-intro">{intro}</p>}
         {newBtn && (
-          <button type="button" className="ts-new-btn" onClick={() => { reset(); setMode('selection') }}>
-            <Plus size={16} />
-            <span>{newBtn}</span>
-          </button>
+          <Button variant="primary" size="sm" type="button" className="ts-new-btn" icon={<Plus size={16} />} onClick={() => { reset(); setMode('selection') }}>
+            {newBtn}
+          </Button>
         )}
         {historyLabel && (
           <section className="ts-section">
@@ -193,10 +194,9 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
         )}
 
         {showValidate && (
-          <button type="button" className="ts-validate" style={{ borderColor: accent, color: accent }} onClick={() => proceed(path)}>
-            <Check size={16} />
-            <span>{lastLabel ? `${validateLabel} : ${lastLabel}` : validateLabel}</span>
-          </button>
+          <Button variant="outline" type="button" fullWidth className="ts-validate" icon={<Check size={16} />} style={{ borderColor: accent, color: accent }} onClick={() => proceed(path)}>
+            {lastLabel ? `${validateLabel} : ${lastLabel}` : validateLabel}
+          </Button>
         )}
 
         {level === 1 && footer?.text_code && (
@@ -229,9 +229,9 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
             ))}
           </div>
         </div>
-        <button type="button" className="ts-continue" style={{ background: accent }} onClick={() => setMode(enableContext ? 'context' : enableNotes ? 'notes' : 'history')}>
-          <span>{lbl('continue_btn')}</span><ArrowRight size={18} />
-        </button>
+        <Button variant="primary" type="button" fullWidth className="ts-continue" iconRight={<ArrowRight size={18} />} style={{ background: accent }} onClick={() => setMode(enableContext ? 'context' : enableNotes ? 'notes' : 'history')}>
+          {lbl('continue_btn')}
+        </Button>
       </div>
     )
   }
@@ -244,22 +244,21 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
         {lbl('context_title') && <span className="ts-step-title">{lbl('context_title')}</span>}
         {lbl('context_hint') && <span className="ts-step-hint">{lbl('context_hint')}</span>}
         <div className="ts-chips">
-          {contextOptions.map(opt => {
-            const active = context.includes(opt.code)
-            return (
-              <button
-                key={opt.code}
-                type="button"
-                className="ts-chip"
-                style={active ? { borderColor: accent, color: accent, background: accent.startsWith('#') ? `${accent}1A` : undefined } : undefined}
-                onClick={() => toggleCtx(opt.code)}
-              >{t(opt.code)}</button>
-            )
-          })}
+          {contextOptions.map(opt => (
+            <Chip
+              key={opt.code}
+              label={t(opt.code)}
+              className="ts-chip"
+              selectable
+              selected={context.includes(opt.code)}
+              accentColor={accent}
+              onClick={() => toggleCtx(opt.code)}
+            />
+          ))}
         </div>
-        <button type="button" className="ts-continue" style={{ background: accent }} onClick={() => setMode(enableNotes ? 'notes' : 'history')}>
-          <span>{lbl('continue_btn')}</span><ArrowRight size={18} />
-        </button>
+        <Button variant="primary" type="button" fullWidth className="ts-continue" iconRight={<ArrowRight size={18} />} style={{ background: accent }} onClick={() => setMode(enableNotes ? 'notes' : 'history')}>
+          {lbl('continue_btn')}
+        </Button>
       </div>
     )
   }
@@ -279,10 +278,12 @@ export function TreeSelectorLayout({ fields, footer, t }: Props) {
       )}
       <textarea className="ts-notes" placeholder={lbl('notes_placeholder')} rows={4} readOnly />
       <div className="ts-actions">
-        <button type="button" className="ts-cancel" onClick={() => { reset(); setMode('history') }}>{t('common.cancel')}</button>
-        <button type="button" className="ts-save" style={{ background: accent }} onClick={() => { reset(); setMode('history') }}>
-          <span>{lbl('save_btn')}</span><Check size={18} />
-        </button>
+        <Button variant="secondary" size="sm" type="button" className="ts-cancel" onClick={() => { reset(); setMode('history') }}>
+          {t('common.cancel')}
+        </Button>
+        <Button variant="primary" type="button" className="ts-save" iconRight={<Check size={18} />} style={{ background: accent }} onClick={() => { reset(); setMode('history') }}>
+          {lbl('save_btn')}
+        </Button>
       </div>
     </div>
   )

@@ -127,6 +127,36 @@ bloquante, sans exception.** On ne bypass jamais le design system ; on étend le
 primitive ou on l'utilise. « Cohérent avec le code voisin » ne s'applique qu'au
 code **conforme** — jamais pour propager une violation.
 
+**refonte/roue-des-emotions (2026-06-25) — un `<button>` STATIQUE classé « défendable » par association de proximité.**
+Le layout web `TreeSelectorLayout` rendait 7 contrôles en `<button className="ts-…">`
++ CSS maison : `ts-new-btn` (fond `var(--color-primary)` **statique**, icône `Plus` +
+label — un `ui/Button variant="primary"` manuel), `ts-back`, `ts-cancel`, et les
+accentués `ts-save`/`ts-continue`/`ts-validate` (fond/bordure teintés à la famille).
+La review a d'abord **excusé tout le bloc** en « défendable / non bloquant » au motif
+que la rangée d'actions portait une **teinte dynamique** — en englobant au passage
+`ts-new-btn`, qui n'a **aucun** style dynamique.
+```tsx
+// ❌ bouton 100 % statique réimplémentant ui/Button, laissé natif « par cohérence »
+<button className="ts-new-btn" onClick={…}><Plus size={16}/><span>{newBtn}</span></button>
+// ✅ le primitive — variant primary, icône en prop
+<Button variant="primary" size="sm" icon={<Plus size={16}/>} onClick={…}>{newBtn}</Button>
+```
+**Deux erreurs de raisonnement à bannir :**
+1. **La légitimité « natif » se juge bouton par bouton, jamais par voisinage.** Le fait
+   qu'un *frère* porte une teinte dynamique n'exonère pas un bouton **statique** à côté.
+   Chaque `<button>` est évalué seul : a-t-il un habillage de bouton (fond/bordure/radius)
+   couvert par une variante `ui/Button` ? Si oui → migration, point.
+2. **« Accent dynamique » n'est PAS un laissez-passer pour rester natif.** L'accent piloté
+   par la donnée se passe en **`style` inline à `ui/Button`** (`style={{ background: accent }}`
+   — calcul dynamique, autorisé) ou via une **extension du primitive** (ici : prop
+   `iconRight` sur `Button`, prop `accentColor` sur `Chip`, avec doc + test). On migre
+   *aussi* les boutons accentués ; on ne les laisse pas natifs.
+→ Réflexe review : sur **chaque** `<button className="x-btn">` d'un layout, lire **sa
+propre** CSS (`.x-btn { … }`). Si le fond/bordure vient de tokens ou de valeurs fixes →
+`ui/Button` obligatoire. Si une part est dynamique → `ui/Button` + `style` inline, ou
+extension du primitive. Ne **jamais** classer un bouton « défendable » par contagion de
+ses voisins. Vérif : `grep -nE '<button className="[a-z-]+btn"' apps/web/src --include="*.tsx"`.
+
 ---
 
 ## Design system : tokens (pas de valeur hardcodée)
