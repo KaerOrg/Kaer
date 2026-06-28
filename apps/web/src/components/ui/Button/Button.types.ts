@@ -21,4 +21,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
    * → bouton icône-seule (carré). Dans ce dernier cas, fournir `aria-label`.
    */
   icon?: ReactNode
+  /**
+   * Icône optionnelle placée **après** le label (à droite). Pour les CTA
+   * « Continuer › » / « Enregistrer ✓ » où l'icône suit le texte. Ignorée en
+   * mode icône-seule (pas de `children`).
+   */
+  iconRight?: ReactNode
 }

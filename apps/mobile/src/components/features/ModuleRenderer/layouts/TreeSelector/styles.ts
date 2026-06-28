@@ -42,6 +42,8 @@ export const styles = StyleSheet.create({
   entryPrimary:     { fontSize: 15, fontWeight: '700' },
   entrySecondary:   { fontSize: 13, color: colors.textMuted },
   entryRight:       { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  entryEmoji:       { fontSize: 18 },
+  entryChips:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
   intensityBadge: {
     paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full,
   },
@@ -79,6 +81,15 @@ export const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   primaryLabel:     { fontSize: 15, fontWeight: '700', textAlign: 'center' },
+  primaryEmoji:     { fontSize: 30 },
+  cardPressed:      { opacity: 0.7, transform: [{ scale: 0.98 }] },
+  validateHereBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs,
+    borderRadius: radius.lg, borderWidth: 1.5, paddingVertical: spacing.md,
+    marginTop: spacing.sm, backgroundColor: colors.card,
+  },
+  validateHereText: { fontSize: 15, fontWeight: '700' },
+  chipsWrap:        { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
   listContainer:    { gap: spacing.sm },
   optionCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,

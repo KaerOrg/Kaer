@@ -25,12 +25,18 @@ export function Chip({
   onRemove,
   removeLabel,
   title,
+  accentColor,
   className = '',
 }: ChipProps) {
   const iconNode = icon ? <span className="chip__icon">{icon}</span> : null
   const sizeClass = size === 'sm' ? 'chip--sm' : ''
 
   if (selectable) {
+    // Accent piloté par la donnée (ex. couleur de famille d'émotion) pour l'état
+    // sélectionné : bordure + texte à l'accent, fond translucide si c'est un hex.
+    const accentStyle = selected && accentColor
+      ? { borderColor: accentColor, color: accentColor, ...(accentColor.startsWith('#') ? { background: `${accentColor}1A` } : null) }
+      : undefined
     return (
       <button
         type="button"
@@ -38,6 +44,7 @@ export function Chip({
         aria-pressed={selected}
         onClick={onClick}
         title={title}
+        style={accentStyle}
       >
         {iconNode}
         {label}

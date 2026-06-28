@@ -376,6 +376,11 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
   {t('patient.add_module_button')}
 </Button>
 
+{/* Icône à droite du label : CTA « Continuer › » / « Enregistrer ✓ » */}
+<Button variant="primary" iconRight={<ArrowRight size={18} />} onClick={onNext}>
+  {t('common.continue')}
+</Button>
+
 {/* Icône-seule : pas de children → carré. aria-label OBLIGATOIRE. */}
 <Button variant="outline" size="xs" icon={<Bell size={14} />} aria-label={t('notifications.configure_button')} onClick={onNotif} />
 
@@ -393,7 +398,8 @@ Pour étendre un besoin proche : ajouter une prop/variante, ne pas dupliquer.
 | `loading` | `boolean` | `false` | Affiche un spinner (à la place de `icon`) et désactive le bouton |
 | `fullWidth` | `boolean` | `false` | Occupe toute la largeur disponible (`width: 100%`, classe `btn--full`) — CTA pleine largeur (formulaires, layouts de preview) |
 | `icon` | `ReactNode` | — | Icône optionnelle. **Avec** `children` → icône à gauche du label. **Sans** `children` → bouton icône-seule (carré `btn--icon-only`) → fournir `aria-label` |
-| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`… |
+| `iconRight` | `ReactNode` | — | Icône placée **après** le label (CTA « Continuer › », « Enregistrer ✓ »). Ignorée en mode icône-seule |
+| …natifs | `ButtonHTMLAttributes` | — | `onClick`, `disabled`, `type`, `aria-pressed`, `aria-label`, `style`… |
 
 > **Bouton-icône d'action** (supprimer, valider, basculer dans un tableau / une
 > liste) : `<Button variant="ghost" size="xs" icon={…} category="danger" aria-label={…} />`.
@@ -611,6 +617,8 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 <Chip tone="info" icon={<Smartphone size={11} />} label={t('modules.phq9.label')} />
 <Chip tone="info" iconOnly icon={<Brain size={14} />} label={t('modules.phq9.label')} />
 <Chip selectable selected={value.onlyImportant} onClick={toggle} label={t('...')} />
+{/* Bascule dont la teinte active dépend de la donnée (couleur de famille) */}
+<Chip selectable selected={active} accentColor={familyColor} onClick={toggle} label={t('...')} />
 <Chip tone="info" label={`+${extra}`} onClick={openDrawer} title={t('...')} />
 <Chip size="sm" tone="info" label={t('tags.anxiety.label')} />
 ```
@@ -624,6 +632,7 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 | `iconOnly` | `boolean` | `false` | Icône seule : `label` non affiché, sert d'`aria-label` + tooltip (`icon` obligatoire) |
 | `selectable` | `boolean` | `false` | Rend un bouton-bascule (`aria-pressed`) |
 | `selected` | `boolean` | `false` | État sélectionné (avec `selectable`) |
+| `accentColor` | `string` | — | Teinte de l'état sélectionné d'une puce `selectable` quand elle dépend de la donnée (ex. couleur de la famille d'émotion) : bordure + texte, fond translucide si hex. Sans effet hors `selectable`/`selected` |
 | `onClick` | `() => void` | — | Bascule si `selectable` ; sinon (hors `onRemove`) puce d'action (bouton, sans `aria-pressed`) |
 | `onRemove` | `() => void` | — | Affiche un bouton × de suppression |
 | `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |

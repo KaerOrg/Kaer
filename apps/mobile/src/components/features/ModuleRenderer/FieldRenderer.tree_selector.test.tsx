@@ -149,14 +149,41 @@ const MOCK_ENTRY: database.TreeSelection = {
   ],
   intensity: 6,
   notes: 'au lever',
+  context: ['modules.emotion_wheel.context.work'],
   created_at: '2026-05-05T10:00:00Z',
 }
+
+// Config complète : intensité + contexte + notes + profondeur libre.
+const MOCK_FIELDS_FULL: ContentField[] = [
+  makeField({
+    id: 'ew.cfg', field_type: 'tree_selector_config', sort_order: 0,
+    props: {
+      enable_intensity: '1', enable_notes: '1', enable_context: '1',
+      enable_early_validate: '1', intensity_min: '1', intensity_max: '10',
+      context_opt_1: 'modules.emotion_wheel.context.work',
+      context_opt_2: 'modules.emotion_wheel.context.family',
+      context_icon_1: 'briefcase-outline', context_icon_2: 'home-heart',
+    },
+  }),
+  PRIMARY_JOY,
+  PRIMARY_FEAR,
+]
 
 function renderLayout() {
   return render(
     <FieldRenderer
       preview_kind="tree_selector"
       fields={MOCK_FIELDS}
+      moduleId="emotion_wheel"
+    />
+  )
+}
+
+function renderFull() {
+  return render(
+    <FieldRenderer
+      preview_kind="tree_selector"
+      fields={MOCK_FIELDS_FULL}
       moduleId="emotion_wheel"
     />
   )
@@ -286,5 +313,60 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
       expect(database.deleteTreeSelection).toHaveBeenCalledWith('sel-1')
     })
     await waitFor(() => expect(screen.queryByTestId('entry-card-sel-1')).toBeNull())
+  })
+
+  it('affiche les chips de contexte d\'une entrée passée', async () => {
+    ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderLayout()
+    expect(await screen.findByTestId('chips-sel-1')).toBeTruthy()
+  })
+
+  // ── Profondeur libre + contexte (config complète) ──────────────────────────
+
+  it('profondeur libre : bouton « valider ici » dès le niveau 2', async () => {
+    renderFull()
+    fireEvent.press(await screen.findByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-ew.joy'))
+    expect(await screen.findByTestId('validate-here')).toBeTruthy()
+  })
+
+  it('valider une famille seule passe à l\'étape intensité', async () => {
+    renderFull()
+    fireEvent.press(await screen.findByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-ew.joy'))
+    fireEvent.press(await screen.findByTestId('validate-here'))
+    expect(await screen.findByTestId('intensity-card')).toBeTruthy()
+  })
+
+  it('étape contexte après l\'intensité, puis notes', async () => {
+    renderFull()
+    fireEvent.press(await screen.findByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-ew.joy'))
+    fireEvent.press(await screen.findByTestId('validate-here'))
+    fireEvent.press(await screen.findByTestId('continue-intensity'))
+    expect(await screen.findByTestId('context-chips')).toBeTruthy()
+    fireEvent.press(await screen.findByTestId('continue-context'))
+    expect(await screen.findByTestId('notes-input')).toBeTruthy()
+  })
+
+  it('enregistre le contexte sélectionné', async () => {
+    renderFull()
+    fireEvent.press(await screen.findByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-ew.joy'))
+    fireEvent.press(await screen.findByTestId('validate-here'))
+    fireEvent.press(await screen.findByTestId('continue-intensity'))
+    fireEvent.press(await screen.findByTestId('context-modules.emotion_wheel.context.work'))
+    fireEvent.press(screen.getByTestId('continue-context'))
+    await act(async () => {
+      fireEvent.press(await screen.findByTestId('save-entry'))
+    })
+    await waitFor(() => {
+      expect(database.saveTreeSelection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selected_id: 'ew.joy',
+          context: ['modules.emotion_wheel.context.work'],
+        })
+      )
+    })
   })
 })

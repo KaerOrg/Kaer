@@ -116,6 +116,8 @@ export async function initDatabase(): Promise<void> {
     `INSERT OR IGNORE INTO form_entries (id,module_id,"values",created_at) SELECT id,'beck_columns',json_object('situation',situation,'emotion',emotion,'emotion_intensity',emotion_intensity,'automatic_thought',automatic_thought,'thought_belief',thought_belief,'rational_response',rational_response,'outcome_emotion',outcome_emotion,'outcome_intensity',outcome_intensity,'outcome_belief',outcome_belief),COALESCE(created_at,CURRENT_TIMESTAMP) FROM beck_thought_records`,
     // emotion_entries → tree_selections (labels conservés directement dans path_json)
     `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
+    // Tag de contexte (refonte roue des émotions) : domaines déclarés, JSON array
+    `ALTER TABLE tree_selections ADD COLUMN context_json TEXT`,
     // decisional_balance → plan_items (4 quadrants × N args avec weight) + module_settings (target_behavior)
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_change) AS arg`,
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_change) AS arg`,
@@ -1718,6 +1720,7 @@ export interface TreeSelectionPathNode {
   label?: string
   color?: string
   icon?: string
+  emoji?: string
 }
 
 export interface TreeSelection {
@@ -1728,6 +1731,8 @@ export interface TreeSelection {
   path: TreeSelectionPathNode[]
   intensity: number | null
   notes: string | null
+  /** Domaines de contexte déclarés (clés i18n), optionnels. */
+  context: string[]
   created_at: string
 }
 
@@ -1741,6 +1746,7 @@ export async function createTreeSelectionsTable(database: SQLite.SQLiteDatabase)
       path_json       TEXT NOT NULL,
       intensity       INTEGER,
       notes           TEXT,
+      context_json    TEXT,
       created_at      TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_tree_selections_module ON tree_selections(module_id, created_at DESC);
@@ -1755,6 +1761,7 @@ interface TreeSelectionRow {
   path_json: string
   intensity: number | null
   notes: string | null
+  context_json: string | null
   created_at: string
 }
 
@@ -1763,6 +1770,17 @@ function parsePath(json: string): TreeSelectionPathNode[] {
     const parsed = JSON.parse(json)
     if (!Array.isArray(parsed)) return []
     return parsed as TreeSelectionPathNode[]
+  } catch {
+    return []
+  }
+}
+
+function parseContext(json: string | null): string[] {
+  if (!json) return []
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((v): v is string => typeof v === 'string')
   } catch {
     return []
   }
@@ -1782,6 +1800,7 @@ export async function getAllTreeSelections(moduleId: string, limit = 100): Promi
     path: parsePath(r.path_json),
     intensity: r.intensity,
     notes: r.notes,
+    context: parseContext(r.context_json),
     created_at: r.created_at,
   }))
 }
@@ -1792,8 +1811,8 @@ export async function saveTreeSelection(
   const database = getDb()
   await database.runAsync(
     `INSERT OR REPLACE INTO tree_selections
-       (id, module_id, selected_id, selected_label, path_json, intensity, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (id, module_id, selected_id, selected_label, path_json, intensity, notes, context_json)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
       entry.module_id,
@@ -1802,6 +1821,7 @@ export async function saveTreeSelection(
       JSON.stringify(entry.path),
       entry.intensity,
       entry.notes,
+      JSON.stringify(entry.context ?? []),
     ]
   )
 }

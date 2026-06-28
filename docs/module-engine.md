@@ -260,8 +260,19 @@ Deux field_types propres :
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `tree_selector_config` | Config sélecteur arborescent | `max_depth` |
-| `tree_node` | Nœud de l'arbre | `depth`, `parent_id`, `icon` |
+| `tree_selector_config` | Config sélecteur arborescent | étapes optionnelles + libellés (voir ci-dessous) |
+| `tree_node` | Nœud de l'arbre | `parent_field_id` (hiérarchie), `color`, `emoji`, `icon` |
+
+Props de `tree_selector_config` (toutes optionnelles, valeurs = clés i18n sauf flags) :
+`enable_intensity`/`enable_notes`/`enable_context`/`enable_early_validate` (`'0'`/`'1'`),
+`intensity_min`/`intensity_max`, libellés (`intro`, `new_btn`, `step_{1,2,3}_title`/
+`_hint`, `intensity_title`/`_hint`, `context_title`/`_hint`, `notes_title`/`_hint`/
+`_placeholder`, `continue_btn`, `validate_here_btn` (profondeur libre), `save_btn`,
+`history_label`, `empty_title`/`empty_text`), et options de contexte indexées
+`context_opt_N` (clé i18n) + `context_icon_N` (nom MaterialCommunityIcons), lues via
+`collectIndexed`. `enable_early_validate` autorise la validation à n'importe quel
+niveau de l'arbre ; `enable_context` ajoute une étape de chips multi-choix neutres,
+persistée dans `tree_selections.context_json`. Réf. module : `emotion_wheel`.
 
 **Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
 `breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le

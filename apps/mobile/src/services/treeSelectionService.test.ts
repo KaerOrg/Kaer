@@ -24,6 +24,7 @@ describe('treeSelectionService', () => {
       path: [{ id: 'joy', text_code: 'modules.emotion_wheel.joy' }],
       intensity: 8,
       notes: null,
+      context: ['modules.emotion_wheel.context.work'],
     }
     await saveTreeSelection(entry)
     expect(mockSaveDb).toHaveBeenCalledWith(entry)
@@ -32,6 +33,7 @@ describe('treeSelectionService', () => {
       module_id: 'emotion_wheel',
       entry_kind: 'tree_selection',
       operation: 'upsert',
+      payload: expect.objectContaining({ context: ['modules.emotion_wheel.context.work'] }),
     }))
   })
 

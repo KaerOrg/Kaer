@@ -215,6 +215,20 @@ Un composant livré sans sa trace documentaire crée de la dette invisible — l
 > padding de bouton) ? » Si oui → `ui/Button` (ou la variante à ajouter). Si non (reset
 > nu, surface large, wrapper) → natif légitime, mais le justifier en une ligne.
 
+> **Le test se passe bouton par bouton — jamais par voisinage.** Qu'un bouton *frère*
+> soit légitimement natif (teinté dynamiquement, surface-carte…) n'exonère **pas** le
+> bouton d'à côté : chacun est jugé seul, sur **sa propre** CSS. Un `<button>` à
+> habillage **statique** (fond/bordure issus de tokens ou valeurs fixes) qui jouxte des
+> boutons natifs n'hérite pas de leur légitimité — il migre. Réflexe : lire la règle
+> `.x-btn { … }` de **chaque** bouton, pas du bloc.
+
+> **Un accent dynamique n'autorise pas le natif.** Une couleur pilotée par la donnée
+> (teinte de famille, statut…) se passe en **`style` inline à `ui/Button`/`ui/Chip`**
+> (`style={{ background: accent }}` — calcul dynamique ponctuel, autorisé) ou via une
+> **extension du primitive** (prop `iconRight`, `accentColor`… avec doc + test). On migre
+> *aussi* les contrôles accentués ; on ne les laisse pas natifs « parce que la couleur
+> bouge ».
+
 **Cas particulier — pas de variante exacte** : si le besoin est un contrôle bouton mais
 qu'aucune variante ne correspond (ex. bouton « soft danger » persistant rouge clair),
 **ne pas dégrader en outline neutre ni inventer un CSS parallèle silencieusement** :
@@ -571,7 +585,8 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ## Internationalisation — zéro texte hardcodé
 
-**Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.**
+**Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.** Cela inclut les **props textuelles d'accessibilité** (`aria-label`, `alt`, `title`, `placeholder`), lues aux utilisateurs au même titre que le texte affiché.
+> 📌 Cas vécu : voir [lessons.md § Internationalisation, texte en dur](lessons.md).
 
 ### Principe général
 

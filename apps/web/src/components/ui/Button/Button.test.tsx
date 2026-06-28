@@ -52,6 +52,28 @@ describe('Button', () => {
     expect(screen.getByText('Ajouter')).toBeInTheDocument()
   })
 
+  it('rend une icône à droite du label quand iconRight + children', () => {
+    render(<Button iconRight={<svg data-testid="ic-right" />}>Continuer</Button>)
+    const btn = screen.getByRole('button')
+    expect(btn).not.toHaveClass('btn--icon-only')
+    expect(screen.getByTestId('ic-right')).toBeInTheDocument()
+    // l'icône de droite suit le label dans l'ordre du DOM
+    const label = screen.getByText('Continuer')
+    expect(label.compareDocumentPosition(screen.getByTestId('ic-right')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('rend icône gauche ET droite simultanément', () => {
+    render(<Button icon={<svg data-testid="ic-left" />} iconRight={<svg data-testid="ic-right" />}>Valider</Button>)
+    expect(screen.getByTestId('ic-left')).toBeInTheDocument()
+    expect(screen.getByTestId('ic-right')).toBeInTheDocument()
+  })
+
+  it('ignore iconRight en mode icône-seule (icon sans children)', () => {
+    render(<Button icon={<svg data-testid="ic" />} iconRight={<svg data-testid="ic-right" />} aria-label="X" />)
+    expect(screen.getByRole('button')).toHaveClass('btn--icon-only')
+    expect(screen.queryByTestId('ic-right')).not.toBeInTheDocument()
+  })
+
   it('passe en icône-seule (btn--icon-only) quand icon sans children', () => {
     render(<Button icon={<svg data-testid="ic" />} aria-label="Notifier" />)
     const btn = screen.getByRole('button', { name: 'Notifier' })

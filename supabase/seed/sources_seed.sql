@@ -1284,6 +1284,76 @@ values
     2
   )
 
+,
+
+  -- 3. Willcox 1982 — Transactional Analysis Journal (instrument source)
+  (
+    '2e2e2e2e-0003-0001-0001-000000000001',
+    'emotion_wheel',
+    'Willcox — The Feeling Wheel : un outil pour élargir le vocabulaire émotionnel (Transactional Analysis Journal, 1982)',
+    'expert_opinion',
+    'https://doi.org/10.1177/036215378201200411',
+    null,
+    'Source de l''instrument : la roue des émotions de Willcox, support de psychoéducation conçu pour aider à nommer et différencier les ressentis. Base de la taxonomie du module. Outil clinique répandu, non un instrument psychométrique validé.',
+    3
+  )
+
+,
+
+  -- 4. Granularité émotionnelle — revue de portée 2025
+  (
+    '2e2e2e2e-0004-0001-0001-000000000001',
+    'emotion_wheel',
+    'Granularité émotionnelle en santé et psychopathologie : revue de portée (2025)',
+    'systematic_review',
+    'https://www.sciencedirect.com/science/article/abs/pii/S0022395625004881',
+    null,
+    'Une granularité émotionnelle plus fine (capacité à distinguer et nommer précisément ses émotions) est associée à une meilleure régulation émotionnelle et à un moindre risque de troubles anxio-dépressifs ; elle s''entraîne par l''auto-observation répétée.',
+    4
+  )
+
+,
+
+  -- 5. Alexithymie — ECR pilote entraînement reconnaissance émotionnelle (PMID 31110950)
+  (
+    '2e2e2e2e-0005-0001-0001-000000000001',
+    'emotion_wheel',
+    'Entraînement par smartphone à la reconnaissance des émotions dans l''alexithymie : ECR pilote (2019)',
+    'rct',
+    'https://pubmed.ncbi.nlm.nih.gov/31110950/',
+    'B',
+    'ECR pilote : un programme d''entraînement à la reconnaissance émotionnelle améliore la reconnaissance des émotions et l''alexithymie auto-rapportée, bénéfice maintenu à 1 mois — soutient l''indication alexithymie du module.',
+    5
+  )
+
+,
+
+  -- 6. Émotions auto-conscientes — revue systématique (PMC 12647085)
+  (
+    '2e2e2e2e-0006-0001-0001-000000000001',
+    'emotion_wheel',
+    'Honte, culpabilité, gêne, fierté : revue systématique des émotions auto-conscientes',
+    'systematic_review',
+    'https://pmc.ncbi.nlm.nih.gov/articles/PMC12647085/',
+    null,
+    'La honte (jugement global du soi) et la culpabilité (jugement d''un acte) sont des émotions auto-conscientes distinctes aux implications cliniques différentes — justifie une famille dédiée « Honte et culpabilité » dans la roue.',
+    6
+  )
+
+,
+
+  -- 7. Geneva Emotion Wheel (Scherer et al.) — roue validée, alternative de mesure
+  (
+    '2e2e2e2e-0007-0001-0001-000000000001',
+    'emotion_wheel',
+    'Geneva Emotion Wheel (Scherer et al.) — roue des émotions validée (alternative de mesure)',
+    'expert_opinion',
+    'https://www.unige.ch/cisa/gew',
+    null,
+    'Instrument de cotation émotionnelle validé en interculturel (axes valence et contrôle/puissance). Documenté comme alternative de mesure à la roue de psychoéducation (Willcox) retenue ici.',
+    7
+  )
+
 -- ── epds ─────────────────────────────────────────────────────────────────────
 -- EPDS — Edinburgh Postnatal Depression Scale (10 items)
 -- Source vérifiée : PMID 3651732 — Cox, Holden & Sagovsky 1987 (vérifié PubMed, abstract lu)

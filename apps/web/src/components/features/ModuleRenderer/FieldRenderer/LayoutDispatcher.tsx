@@ -117,7 +117,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={contentFields} t={t} />
   if (preview_kind === 'decision_grid') return <DecisionGridLayout fields={contentFields} t={t} />
   if (preview_kind === 'exposure_tracker') return <ExposureTrackerLayout fields={contentFields} t={t} />
-  if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={contentFields} t={t} />
+  if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={contentFields} t={t} />
   if (preview_kind === 'guided_exercise') return <GuidedExerciseLayout fields={contentFields} t={t} />
   if (preview_kind === 'crisis_companion') return <CrisisCompanionLayout fields={contentFields} t={t} moduleId={moduleId ?? ''} />
