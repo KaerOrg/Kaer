@@ -69,32 +69,25 @@ Définies dans `apps/web/src/components/ModulePreviewPanel/ModulePreviewPanel.cs
 Les widgets sont des aperçus en lecture seule du formulaire patient, rendus dans `FieldWidget`.  
 Tous les inputs sont `disabled` ou `readOnly`.
 
+Seul `breathing_techniques` utilise encore le layout `fields` (info ×5 + text ×1),
+donc `FieldWidget` ne rend plus que deux widgets. Les widgets
+`time`/`slider`/`stars`/`boolean`/`radio`/`date`/`checkbox`/`textarea`, devenus
+inatteignables après la migration des autres modules vers des layouts dédiés, ont
+été supprimés (issue #87).
+
 | Widget | Classe CSS | Élément HTML | Notes |
 |---|---|---|---|
-| `TimeWidget` | `.fw-time` | `<input type="time">` | `defaultValue="22:00"` |
-| `SliderWidget` | `.fw-slider` | `<input type="range">` + `<span>` | Saisie. Spec `slider:min:max:unit`. Pour **afficher** une valeur (lecture seule) → `RatingSelector variant="bar"`, pas ce widget |
-| `StarsWidget` | (aucune — délègue) | `RatingSelector variant="icon"` (lecture seule) | Spec `stars:count`. Adaptateur fin → primitive, moitié des étoiles remplies |
-| `BooleanWidget` | (aucune — délègue) | `Radio variant="pills"` (lecture seule) | Pilules `[Non] [Oui]`, "Non" actif. Adaptateur fin → primitive, zéro style pill ad hoc |
-| `RadioWidget` | `.fw-radio` + `fw-radio--ok/partial/miss` | `<span>` coloré | ok=vert, partial=ambre, miss=rouge |
-| `DateWidget` | `.fw-date` | `<input type="date">` | Placeholder natif du navigateur |
-| `TextWidget` | `.fw-text` | `<div>` vide | Hauteur fixe, fond card |
-| `CheckboxWidget` | `.fw-checkbox` | `<label><input type="checkbox" disabled>` | Label "Non accompli" |
-| `TextareaWidget` | `.fw-textarea` | `<div>` vide | Hauteur 80px |
+| `TextWidget` | `.fw-text` | `<input type="text">` | Champ neutre non éditable, opacité 0.6 |
 | `InfoWidget` | `.fw-info` | `<AlignLeft>` + `<span>` | Texte en italique muted |
+
+> `.fw-textarea` subsiste (placeholder de notes réutilisé par `DailyCheckinLayout`
+> et `MedicationTrackerLayout`), mais n'est plus produit par un widget `FieldWidget`.
 
 ### Format de la prop `widget_type`
 
 ```
-"time"                  → TimeWidget
-"slider:0:120:min"      → SliderWidget  (min=0, max=120, unit=min)
-"stars:5"               → StarsWidget   (count=5)
-"boolean"               → BooleanWidget
-"radio:ok"              → RadioWidget   (variant: ok | partial | miss)
-"date"                  → DateWidget
-"text"                  → TextWidget
-"checkbox"              → CheckboxWidget
-"textarea"              → TextareaWidget
-"info"                  → InfoWidget    (texte via detail_code)
+"text"   → TextWidget   (champ texte non éditable, lecture seule)
+"info"   → InfoWidget   (texte via detail_code)
 ```
 
 ---
@@ -139,15 +132,7 @@ apps/web/src/
 │               ├── CardDivider/          # séparateur <hr>
 │               └── widgets/
 │                   ├── index.ts
-│                   ├── TimeWidget/
-│                   ├── SliderWidget/
-│                   ├── StarsWidget/
-│                   ├── BooleanWidget/
-│                   ├── RadioWidget/
-│                   ├── DateWidget/
 │                   ├── TextWidget/
-│                   ├── CheckboxWidget/
-│                   ├── TextareaWidget/
 │                   └── InfoWidget/
 ```
 
@@ -215,24 +200,24 @@ Variantes discrètes : `steps: number[]`, `value: number | null`, `icon?='star'|
 `iconSize?=28`, `onChange?(v)` (absent ⇒ lecture seule), `testIdPrefix?`.
 Variante `bar` : `value`, `min?=1`, `max?=10`, `midHint?`, `layout?='stacked'|'inline'`.
 
-#### `RatingSelector` (sélection/restitution) vs `SliderWidget` (input glissant)
+#### `RatingSelector` — sélection / restitution d'une note
 
-`RatingSelector variant="bar"` **affiche** une valeur (jauge non glissable) ;
-`SliderWidget` est un `<input type="range">` **glissant**. Ce ne sont pas des doublons.
+`RatingSelector` **affiche ou sélectionne** une valeur (pastilles, segments, icônes,
+ou jauge `variant="bar"` non glissable). Primitive `ui/` partagée par les layouts
+d'aperçu du `ModuleRenderer`.
 
-| | `RatingSelector` | `SliderWidget` |
-|---|---|---|
-| Rôle | sélection discrète OU restitution d'une valeur | saisie continue par glissement |
-| Dossier | `components/ui/RatingSelector/` | `components/features/.../widgets/SliderWidget/` |
-| Catégorie | Primitive design system (`ui/`) | Widget d'aperçu module (`fw-*`) |
-| Élément | pastilles / segments / icônes / jauge `<div>` | `<input type="range">` + `<span>` valeur |
-| Utilisé par | aperçus mobile-mock du `ModuleRenderer` | `FieldWidget` via `widget_type="slider:min:max:unit"` |
+| | `RatingSelector` |
+|---|---|
+| Rôle | sélection discrète OU restitution d'une valeur |
+| Dossier | `components/ui/RatingSelector/` |
+| Catégorie | Primitive design system (`ui/`) |
+| Élément | pastilles / segments / icônes / jauge `<div>` |
+| Utilisé par | `ColumnFormLayout`, `SliderDashboardLayout`, `SleepJournalLayout`, `ActivityLogLayout`, `ExposureTrackerLayout`, `DualRulerLayout` |
 
-> **Pourquoi un `RatingSelector` web ?** Règle de parité 1-1 : chaque widget mobile a
-> son pendant web. Le mobile a un unique `RatingSelector` (4 variantes) ; le web le
-> reproduit à l'identique plutôt que de redessiner `mt-slider`/`cf-slider`/`al-pip`/
-> `ej-suds` à la main dans chaque layout. Pour une **saisie glissante** continue côté
-> field widget → `SliderWidget` ; pour **afficher ou sélectionner** une note → `RatingSelector`.
+> **Pourquoi un `RatingSelector` web ?** Règle de parité 1-1 : le mobile a un unique
+> `RatingSelector` (4 variantes) ; le web le reproduit à l'identique plutôt que de
+> redessiner `mt-slider`/`cf-slider`/`al-pip`/`ej-suds` à la main dans chaque layout.
+> Pour **afficher ou sélectionner** une note → `RatingSelector`.
 
 ### `TimePicker` — saisie d'une heure (pendant web 1-1 du mobile)
 
@@ -257,7 +242,7 @@ Supporte les **deux modes** :
 Props : `label?`, `value?`, `defaultValue?`, `onChange?(next)`, `icon?` (défaut horloge),
 `clearable?`, `clearLabel?`, `accent?=var(--color-primary)`, `hint?`, `step?`, `disabled?`,
 `id?`, `className?`, `data-testid?`.
-Branché sur : `TimeWidget` (preview module), `NotificationRoutineModal`, `AvailabilityEditor`.
+Branché sur : `NotificationRoutineModal`, `AvailabilityEditor`.
 
 ### `Radio` — choix exclusif (pendant web 1-1 du mobile)
 
@@ -276,7 +261,7 @@ seule — jamais un composant « display-only » parallèle.
 <Radio variant="cards" color="var(--color-danger)" value={String(level)} onChange={v => set(Number(v))}
        options={[{ value: '0', label: '0', sublabel: 'Aucune lésion', badge: '0' }, /* … */]} />
 
-// Aperçu en lecture seule (sans onChange) — ex. BooleanWidget
+// Aperçu en lecture seule (sans onChange)
 <Radio variant="pills" value="non"
        options={[{ value: 'non', label: 'Non' }, { value: 'oui', label: 'Oui' }]} />
 ```
@@ -284,7 +269,7 @@ seule — jamais un composant « display-only » parallèle.
 Props : `options: {value, label, sublabel?, badge?}[]`, `value: string | null`, `onChange?(value)`
 (absent → lecture seule), `variant?='list'|'pills'|'cards'`, `color?=var(--color-primary)`,
 `className?`, `data-testid?`.
-Branché sur : `CSSRSScreenPanel` (`LikertScale` = `Radio variant="cards"`, accent danger pour la létalité) ; `BooleanWidget` (aperçu pills lecture seule).
+Branché sur : `CSSRSScreenPanel` (`LikertScale` = `Radio variant="cards"`, accent danger pour la létalité).
 
 > **`Radio` vs `SegmentedControl`** : pour un choix exclusif **compact en barre segmentée**
 > → `SegmentedControl` (couvre déjà la variante « pills » dense). Pour une **liste verticale**

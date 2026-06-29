@@ -24,7 +24,7 @@ FieldRenderer  (dispatch preview_kind → layout)
   ├── Grid2x2Layout
   └── CardsLayout
           ↓
-FieldRow → FieldWidget → TimeWidget / SliderWidget / ...
+FieldRow → FieldWidget → TextWidget / InfoWidget
 ```
 
 ---
@@ -320,10 +320,7 @@ create table public.field_props (
 
 | `prop_key` | Valeur exemple | Utilisé par |
 |---|---|---|
-| `widget_type` | `"slider"` (kind seul) | `FieldRow` → `FieldWidget` |
-| `slider_min` / `slider_max` / `slider_unit` | `"0"` / `"120"` / `"min"` | `FieldWidget` → `SliderWidget` |
-| `stars_count` | `"5"` | `FieldWidget` → `StarsWidget` (optionnel, défaut 5) |
-| `radio_variant` | `"ok"` | `FieldWidget` → `RadioWidget` (`ok` \| `partial` \| `miss`) |
+| `widget_type` | `"text"` ou `"info"` (kind seul) | `FieldRow` → `FieldWidget` |
 | `icon` | `"moon"` | `FieldRow`, `scale_slider_question`, `exercise_safety`, `ambient_sound` |
 | `detail_code` | `"sleep.field_1.detail"` | `FieldRow` — texte descriptif sous le label |
 | `color` | `"#4F46E5"` | `StepsLayout` (badge), `Grid2x2Layout` (bordure), `scale_slider_question` (accent) |
@@ -341,24 +338,20 @@ create table public.field_props (
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 
-**`widget_type` = le *kind* seul ; les paramètres sont des props frères atomiques :**
+**`widget_type` = le *kind* seul. Deux kinds sont rendus par `FieldWidget` :**
 
 ```
-"time"       → TimeWidget
-"slider"     → SliderWidget   (+ slider_min, slider_max, slider_unit?)
-"stars"      → StarsWidget    (+ stars_count? — défaut 5)
-"boolean"    → BooleanWidget
-"radio"      → RadioWidget    (+ radio_variant : ok | partial | miss)
-"date"       → DateWidget
-"text"       → TextWidget
-"checkbox"   → CheckboxWidget
-"textarea"   → TextareaWidget
-"info"       → InfoWidget     (texte via detail_code)
+"text"   → TextWidget   (champ texte non éditable, lecture seule)
+"info"   → InfoWidget   (icône + texte via detail_code)
 ```
 
 `FieldRow` passe l'intégralité de `field.props` à `FieldWidget`, qui lit le kind
-(`widget_type`) puis décompose les props frères vers le widget concerné. Aucun
-`split(':')` : les paramètres sont déjà atomiques en base.
+(`widget_type`) et rend le widget. Le layout `fields` n'est plus utilisé que par
+`breathing_techniques` (info ×5 + text ×1), seul module encore en
+`preview_kind='fields'`. Les widgets `slider`/`stars`/`radio`/`boolean`/`date`/
+`checkbox`/`textarea`/`time`, devenus inatteignables après la migration des autres
+modules vers des layouts dédiés, ont été supprimés (web + mobile) avec leurs seeds
+`widget_type` morts — issue #87.
 
 ---
 
@@ -604,13 +597,12 @@ Layout vertical :
 ### `FieldWidget`
 
 Dispatcher pur — aucun état, aucun style propre. Prend `props: Record<string, string>`
-(les `field_props` du champ), lit le kind (`widget_type`) et décompose les props
-frères atomiques (`slider_min`/`slider_max`/`slider_unit`, `stars_count`,
-`radio_variant`) vers le composant widget correspondant.
+(les `field_props` du champ), lit le kind (`widget_type`) et rend le widget
+correspondant (`text` → `TextWidget`, `info` → `InfoWidget`).
 
 ### Widgets (`fields/widgets/`)
 
-Composants de prévisualisation **en lecture seule** — ils montrent au praticien à quoi ressemblera le formulaire patient sans être interactifs. Chaque widget est dans son propre dossier `WidgetName/` avec son test et son `index.ts`.
+Composants d'affichage **en lecture seule** (conformité MDR : affichage passif) — côté web, l'aperçu praticien ; côté mobile, le champ tel que le patient le voit. Deux widgets subsistent : `TextWidget` et `InfoWidget` (mobile garde en plus `LikertWidget`, consommé par `QuestionnaireLayout`, hors chemin `fields`). Chaque widget est dans son propre dossier `WidgetName/` avec son test et son `index.ts`.
 
 ---
 

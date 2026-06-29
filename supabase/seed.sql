@@ -2126,85 +2126,27 @@ on conflict (field_id, prop_key) do nothing;
 
 
 -- ============================================================
--- SEED CONDITIONNEL : widget_type props pour modules 'fields' historiques
+-- SEED CONDITIONNEL : widget_type props pour le module 'fields' restant
 -- ============================================================
--- Les module_content_fields parents (sleep.field_*, mood.field_*, mse.field_*,
--- madh.field_*, ba.field_*, ft.field_*, bt.field_*) ont été créés par une
--- migration historique (`add_module_content_schema`) absente de ce fichier.
--- Le filtre WHERE EXISTS rend l'INSERT inoffensif sur une BDD vierge :
--- les props ne sont insérés que si la ligne parente existe déjà.
--- (Plusieurs de ces parents ont d'ailleurs été supprimés plus haut par les
--- migrations de layout — sleep_journal, activity_log, exposure_tracker.)
+-- `breathing_techniques` est le SEUL module encore en preview_kind='fields'
+-- (tous les autres ont été migrés vers des layouts dédiés : sleep_journal,
+-- slider_dashboard, medication_tracker, activity_log, exposure_tracker…).
+-- Il n'utilise que les widgets `info` et `text` : ce sont les seuls kinds
+-- encore rendus par FieldWidget depuis le nettoyage de l'issue #87. Les widgets
+-- slider/stars/radio/boolean/date/checkbox/textarea/time, devenus
+-- inatteignables, ont été supprimés (web + mobile), ainsi que leurs seeds
+-- widget_type morts (sleep/mood/madh/ba/ft).
+--
+-- Le module_content_fields parent (bt.field_*) a été créé par une migration
+-- historique (`add_module_content_schema`) absente de ce fichier. Le filtre
+-- WHERE EXISTS rend l'INSERT inoffensif sur une BDD vierge : les props ne sont
+-- insérés que si la ligne parente existe déjà.
 
 -- Convention `field_props` : `prop_value` atomique. `widget_type` ne porte que
--- le *kind* (slider, stars, radio…) ; les paramètres sont des props frères
--- atomiques (slider_min, slider_max, slider_unit, stars_count, radio_variant).
--- Voir docs/module-engine.md § « Convention field_props : prop_value atomique ».
+-- le *kind*. Voir docs/module-engine.md § « Convention field_props : prop_value atomique ».
 insert into public.field_props (field_id, prop_key, prop_value)
 select v.field_id, v.prop_key, v.prop_value
 from (values
-  -- sleep_diary
-  ('sleep.field_1', 'widget_type', 'time'),
-  ('sleep.field_2', 'widget_type', 'time'),
-  ('sleep.field_3', 'widget_type', 'slider'),
-  ('sleep.field_3', 'slider_min',  '0'),
-  ('sleep.field_3', 'slider_max',  '120'),
-  ('sleep.field_3', 'slider_unit', 'min'),
-  ('sleep.field_4', 'widget_type', 'slider'),
-  ('sleep.field_4', 'slider_min',  '0'),
-  ('sleep.field_4', 'slider_max',  '10'),
-  ('sleep.field_5', 'widget_type', 'slider'),
-  ('sleep.field_5', 'slider_min',  '0'),
-  ('sleep.field_5', 'slider_max',  '120'),
-  ('sleep.field_5', 'slider_unit', 'min'),
-  ('sleep.field_6', 'widget_type', 'stars'),
-  ('sleep.field_6', 'stars_count', '5'),
-  ('sleep.field_7', 'widget_type', 'boolean'),
-  ('sleep.field_8', 'widget_type', 'textarea'),
-  -- mood_tracker
-  ('mood.field_1', 'widget_type', 'slider'),
-  ('mood.field_1', 'slider_min',  '1'),
-  ('mood.field_1', 'slider_max',  '10'),
-  ('mood.field_2', 'widget_type', 'slider'),
-  ('mood.field_2', 'slider_min',  '1'),
-  ('mood.field_2', 'slider_max',  '10'),
-  ('mood.field_3', 'widget_type', 'slider'),
-  ('mood.field_3', 'slider_min',  '1'),
-  ('mood.field_3', 'slider_max',  '10'),
-  ('mood.field_4', 'widget_type', 'slider'),
-  ('mood.field_4', 'slider_min',  '1'),
-  ('mood.field_4', 'slider_max',  '10'),
-  ('mood.field_5', 'widget_type', 'textarea'),
-  -- medication_adherence
-  ('madh.field_1', 'widget_type',   'radio'),
-  ('madh.field_1', 'radio_variant', 'ok'),
-  ('madh.field_2', 'widget_type',   'radio'),
-  ('madh.field_2', 'radio_variant', 'partial'),
-  ('madh.field_3', 'widget_type',   'radio'),
-  ('madh.field_3', 'radio_variant', 'miss'),
-  ('madh.field_4', 'widget_type', 'textarea'),
-  ('madh.field_5', 'widget_type', 'info'),
-  -- behavioral_activation
-  ('ba.field_1', 'widget_type', 'date'),
-  ('ba.field_2', 'widget_type', 'text'),
-  ('ba.field_3', 'widget_type', 'checkbox'),
-  ('ba.field_4', 'widget_type', 'slider'),
-  ('ba.field_4', 'slider_min',  '0'),
-  ('ba.field_4', 'slider_max',  '10'),
-  ('ba.field_5', 'widget_type', 'slider'),
-  ('ba.field_5', 'slider_min',  '0'),
-  ('ba.field_5', 'slider_max',  '10'),
-  ('ba.field_6', 'widget_type', 'textarea'),
-  -- fear_thermometer
-  ('ft.field_1', 'widget_type', 'text'),
-  ('ft.field_2', 'widget_type', 'slider'),
-  ('ft.field_2', 'slider_min',  '0'),
-  ('ft.field_2', 'slider_max',  '10'),
-  ('ft.field_3', 'widget_type', 'text'),
-  ('ft.field_4', 'widget_type', 'slider'),
-  ('ft.field_4', 'slider_min',  '0'),
-  ('ft.field_4', 'slider_max',  '10'),
-  ('ft.field_5', 'widget_type', 'textarea'),
   -- breathing_techniques
   ('bt.field_1', 'widget_type', 'info'),
   ('bt.field_2', 'widget_type', 'info'),
@@ -2215,6 +2157,15 @@ from (values
 ) as v(field_id, prop_key, prop_value)
 where exists (select 1 from public.module_content_fields where id = v.field_id)
 on conflict (field_id, prop_key) do nothing;
+
+-- Nettoyage des widget_type morts laissés en base par les modules migrés hors
+-- 'fields'. Seul `medication_adherence` a encore des lignes parentes vivantes
+-- (madh.field_*) : son layout `medication_tracker` ne lit que les field_types
+-- config/status/reason et ignore ces field_row — leurs `widget_type` (radio,
+-- textarea, info) et `radio_variant` ne sont donc plus jamais rendus (issue #87).
+delete from public.field_props
+where field_id like 'madh.field_%'
+  and prop_key in ('widget_type', 'radio_variant');
 
 -- ============================================================
 -- Modules issus de la branche `remodeling-fiches-ETP`, migrés vers le
