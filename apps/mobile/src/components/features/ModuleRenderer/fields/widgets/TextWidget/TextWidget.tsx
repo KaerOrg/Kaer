@@ -1,11 +1,18 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
-import { colors, radius } from '@theme'
+import { InputField } from '@ui/InputField'
 
+// Aperçu (lecture seule) d'un champ texte : champ non éditable rendu par le
+// primitive `ui/InputField` (label omis — porté par FieldRow). Atténué pour
+// signaler l'aperçu. Aucun visuel ad hoc — la boîte vient du design system.
 export function TextWidget() {
-  return <View style={styles.field} />
+  return (
+    <View style={styles.wrap}>
+      <InputField editable={false} />
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  field: { height: 32, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.card, opacity: 0.6 },
+  wrap: { opacity: 0.6 },
 })

@@ -2239,6 +2239,7 @@ on conflict (field_id, prop_key) do nothing;
 update public.modules set preview_kind = 'tabbed'              where id = 'distress_tolerance';
 update public.modules set preview_kind = 'tabbed'              where id = 'chronobiology_tracker';
 update public.modules set preview_kind = 'tabbed'              where id = 'craving_journal';
+update public.modules set preview_kind = 'tabbed'              where id = 'motivational_balance';
 
 
 -- ────────────────────────────────────────────────────────────
@@ -2246,7 +2247,7 @@ update public.modules set preview_kind = 'tabbed'              where id = 'cravi
 -- ────────────────────────────────────────────────────────────
 
 delete from public.module_content_fields
-where module_id in ('distress_tolerance', 'chronobiology_tracker', 'craving_journal');
+where module_id in ('distress_tolerance', 'chronobiology_tracker', 'craving_journal', 'motivational_balance');
 
 
 -- ────────────────────────────────────────────────────────────
@@ -2448,6 +2449,70 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('cj.col5.text',   'key',           'coping'),
   ('cj.col5.text',   'multiline',     '1'),
   ('cj.col5.text',   'min_height',    '60');
+
+
+-- ────────────────────────────────────────────────────────────
+-- 4b) motivational_balance — tabs : Fiches (psyedu) + Stade (stage_wheel)
+--     + Thermomètres (dual_ruler) + Balance (weighted_balance)
+-- Données patient en SQLite (em_rulers / em_balance_items / em_values),
+-- répliquées via motivationalBalanceService. Les onglets Stade/Thermomètres/
+-- Balance lisent leur état du service, pas de module_content_fields ; seul le
+-- tab Balance porte un field de config (liste de valeurs).
+-- ────────────────────────────────────────────────────────────
+
+insert into public.module_content_fields
+  (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order)
+values
+  -- bandeau MDR
+  ('mb.disclaimer', 'motivational_balance', null, null, 'disclaimer_banner', null, 0),
+
+  -- tab Fiches → psyedu (lit psyedu_topics par module_key='motivational_balance')
+  ('mb.tab.guides',  'motivational_balance', null, null, 'tab',
+   'modules.motivational_balance.tab_guides', 10),
+
+  -- tab Stade → stage_wheel (modèle transthéorique, 6 stades)
+  ('mb.tab.stage',   'motivational_balance', null, null, 'tab',
+   'modules.motivational_balance.tab_stage', 20),
+
+  -- tab Thermomètres → dual_ruler (importance / confiance 0-10)
+  ('mb.tab.rulers',  'motivational_balance', null, null, 'tab',
+   'modules.motivational_balance.tab_rulers', 30),
+
+  -- tab Balance → weighted_balance (valeurs + Pour/Contre pondérés)
+  ('mb.tab.balance', 'motivational_balance', null, null, 'tab',
+   'modules.motivational_balance.tab_balance', 40),
+
+  -- config du tab Balance : liste de valeurs sélectionnables + maximum
+  ('mb.balance.cfg', 'motivational_balance', null, 'mb.tab.balance',
+   'weighted_balance_config', null, 0);
+
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('mb.tab.guides',  'tab_key',          'guides'),
+  ('mb.tab.guides',  'sub_preview_kind', 'psyedu'),
+  ('mb.tab.guides',  'icon_name',        'BookOpen'),
+  ('mb.tab.stage',   'tab_key',          'stage'),
+  ('mb.tab.stage',   'sub_preview_kind', 'stage_wheel'),
+  ('mb.tab.stage',   'icon_name',        'Footprints'),
+  ('mb.tab.rulers',  'tab_key',          'rulers'),
+  ('mb.tab.rulers',  'sub_preview_kind', 'dual_ruler'),
+  ('mb.tab.rulers',  'icon_name',        'BrainCircuit'),
+  ('mb.tab.balance', 'tab_key',          'balance'),
+  ('mb.tab.balance', 'sub_preview_kind', 'weighted_balance'),
+  ('mb.tab.balance', 'icon_name',        'Scale'),
+  -- valeurs disponibles (clés indexées atomiques) + maximum sélectionnable
+  ('mb.balance.cfg', 'max_values', '3'),
+  ('mb.balance.cfg', 'value_1',  'family'),
+  ('mb.balance.cfg', 'value_2',  'health'),
+  ('mb.balance.cfg', 'value_3',  'freedom'),
+  ('mb.balance.cfg', 'value_4',  'work'),
+  ('mb.balance.cfg', 'value_5',  'relationships'),
+  ('mb.balance.cfg', 'value_6',  'spirituality'),
+  ('mb.balance.cfg', 'value_7',  'creativity'),
+  ('mb.balance.cfg', 'value_8',  'autonomy'),
+  ('mb.balance.cfg', 'value_9',  'pleasure'),
+  ('mb.balance.cfg', 'value_10', 'security'),
+  ('mb.balance.cfg', 'value_11', 'justice'),
+  ('mb.balance.cfg', 'value_12', 'growth');
 
 
 -- ────────────────────────────────────────────────────────────

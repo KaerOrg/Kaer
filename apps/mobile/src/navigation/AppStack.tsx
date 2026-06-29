@@ -15,8 +15,6 @@ import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
-import MotivationalBalanceScreen from '../screens/modules/MotivationalBalanceScreen'
-import MotivationalBalanceDetailScreen from '../screens/modules/MotivationalBalanceDetailScreen'
 import i18next from 'i18next'
 import { colors } from '@theme'
 
@@ -33,8 +31,6 @@ export type AppStackParamList = {
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string; entry_id?: string }
   ModuleContent: { moduleType: string }
-  MotivationalBalance: undefined
-  MotivationalBalanceDetail: { topicId: string; topicKey: string }
   BookAppointment: { practitionerId: string; appointmentId?: string }
   CrisisUrgency: undefined
   MedicationSideEffectsHistory: undefined
@@ -128,21 +124,6 @@ export default function AppStack() {
         name="CrisisUrgency"
         component={CrisisUrgencyScreen}
         options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="MotivationalBalance"
-        component={MotivationalBalanceScreen}
-        options={{ title: 'Balance motivationnelle' }}
-      />
-      <Stack.Screen
-        name="MotivationalBalanceDetail"
-        component={MotivationalBalanceDetailScreen}
-        options={({ route }) => ({
-          title: route.params.topicKey
-            .split('_')
-            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
-        })}
       />
       <Stack.Screen
         name="MedicationSideEffectsHistory"

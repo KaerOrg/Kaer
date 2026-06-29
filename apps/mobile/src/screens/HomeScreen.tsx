@@ -32,7 +32,6 @@ const CUSTOM_ROUTES: Partial<Record<string, keyof AppStackParamList>> = {
   breathing_techniques:     'BreathingTechniques',
   medication_side_effects:  'MedicationSideEffectsHistory',
   mood_tracker:             'MoodTracker',
-  motivational_balance:     'MotivationalBalance',
 }
 
 // Ordre des catégories — miroir de sort_order dans module_categories en base.

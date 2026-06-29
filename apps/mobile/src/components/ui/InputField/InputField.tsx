@@ -11,7 +11,7 @@ export const InputField = React.memo(function InputField({ label, error, contain
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={styles.label}>{label}</Text>
+      {label ? <Text style={styles.label}>{label}</Text> : null}
       <TextInput
         style={[styles.input, focused ? styles.focused : null, error ? styles.inputError : null]}
         onFocus={onFocus}

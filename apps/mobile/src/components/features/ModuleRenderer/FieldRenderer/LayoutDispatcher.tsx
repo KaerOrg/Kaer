@@ -23,16 +23,24 @@ import { PsyEduLayout } from '../layouts/PsyEdu'
 import { PsyEduLibraryLayout } from '../layouts/PsyEduLibrary'
 import { QuestionnaireLayout } from '../layouts/Questionnaire'
 import { SleepJournalLayout } from '../layouts/SleepJournal'
+import { StageWheelLayout } from '../layouts/StageWheel'
 import { StepsLayout } from '../layouts/Steps'
 import { TabsLayout } from '../layouts/Tabs'
 import { TreeSelectorLayout } from '../layouts/TreeSelector'
+import { DualRulerLayout } from '../layouts/DualRuler'
+import { WeightedBalanceLayout } from '../layouts/WeightedBalance'
 import { partitionBySection } from './partitionBySection'
 import type { FieldRendererProps } from './types'
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
 // avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'psyedu_library', 'chrono_month'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>([
+  'psyedu', 'psyedu_library', 'chrono_month',
+  // Layouts adossés à SQLite (motivational_balance) : ils lisent leurs données
+  // via le service, pas depuis module_content_fields — rendu possible sans field.
+  'stage_wheel', 'dual_ruler', 'weighted_balance',
+])
 
 export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
   if (preview_kind === 'coming_soon') return null
@@ -115,6 +123,9 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'chrono_month') return <ChronoMonthLayout moduleId={moduleId ?? ''} />
   if (preview_kind === 'crisis_urgency') return <CrisisUrgencyLayout fields={visibleFields} />
+  if (preview_kind === 'stage_wheel') return <StageWheelLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
+  if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
+  if (preview_kind === 'weighted_balance') return <WeightedBalanceLayout fields={visibleFields} moduleId={moduleId ?? ''} accentColor={accentColor} />
 
   return null
 }

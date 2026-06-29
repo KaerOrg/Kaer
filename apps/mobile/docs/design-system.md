@@ -277,10 +277,10 @@ Champ texte étiqueté avec message d'erreur. Étend `TextInputProps` (donc `val
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `label` | `string` | Libellé (obligatoire) |
+| `label` | `string` | Libellé. Optionnel : omis quand le label est rendu ailleurs (ex. aperçu de module où `FieldRow` porte déjà le libellé). Absent, aucun espace de label n'est réservé. |
 | `error` | `string` | Message d'erreur inline (validation de champ) |
 | `containerStyle` | `ViewStyle` | Style du conteneur |
-| …natifs | `TextInputProps` | `value`, `onChangeText`, `placeholder`… |
+| …natifs | `TextInputProps` | `value`, `onChangeText`, `placeholder`, `editable`, `multiline`… |
 
 ### StatusBadge (`src/components/ui/StatusBadge/`)
 
