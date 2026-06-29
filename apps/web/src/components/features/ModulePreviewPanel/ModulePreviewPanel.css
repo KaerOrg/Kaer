@@ -3739,3 +3739,116 @@
   position: relative;
   box-shadow: var(--shadow-sm);
 }
+
+/* ─── motivational_balance : aperçus stage_wheel / dual_ruler / weighted_balance ─── */
+.mb-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mb-preview__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.mb-preview__subtitle {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* Stade — cartes radio */
+.mb-stage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.mb-stage--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+.mb-stage__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+.mb-stage--active .mb-stage__dot { background: var(--color-primary); }
+.mb-stage__text { display: flex; flex-direction: column; gap: 2px; }
+.mb-stage__name { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+.mb-stage--active .mb-stage__name { color: var(--color-primary); }
+.mb-stage__desc { font-size: 12px; color: var(--color-text-muted); }
+
+/* Thermomètres — cartes + champs */
+.mb-card {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.mb-field { display: flex; flex-direction: column; gap: 4px; }
+.mb-field__label { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+.mb-input {
+  height: 32px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+.mb-textarea {
+  height: 60px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+.mb-input::before,
+.mb-textarea::before {
+  content: attr(data-placeholder);
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Balance — chips de valeurs + colonnes Pour/Contre */
+.mb-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.mb-balance { display: flex; gap: 12px; }
+.mb-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mb-block__title { font-size: 13px; font-weight: 700; text-align: center; }
+.mb-block__title--for { color: var(--color-primary); }
+.mb-block__title--against { color: var(--color-text-muted); }
+.mb-block__empty {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 6px 0;
+}
+.mb-add { display: flex; align-items: center; gap: 6px; }
+.mb-add__input { flex: 1; }
+.mb-add__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}

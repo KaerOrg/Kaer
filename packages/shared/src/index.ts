@@ -157,6 +157,9 @@ export type PreviewKind =
   | 'slider_dashboard'
   | 'crisis_urgency'
   | 'crisis_companion'
+  | 'stage_wheel'
+  | 'dual_ruler'
+  | 'weighted_balance'
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

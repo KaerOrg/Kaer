@@ -8,6 +8,11 @@ describe('InputField', () => {
     expect(screen.getByText('Email')).toBeTruthy()
   })
 
+  it('omet le label quand il est absent', () => {
+    render(<InputField placeholder="sans label" />)
+    expect(screen.getByPlaceholderText('sans label')).toBeTruthy()
+  })
+
   it("affiche le message d'erreur", () => {
     render(<InputField label="Email" error="Champ requis" />)
     expect(screen.getByText('Champ requis')).toBeTruthy()

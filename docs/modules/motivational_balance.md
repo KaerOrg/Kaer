@@ -19,13 +19,24 @@ Outil d'Entretien Motivationnel (EM) basé sur le modèle de Miller & Rollnick (
 
 ## Architecture
 
-### Écrans
+> **Refonte (issue #18)** : le module est passé d'un écran custom 1042 lignes
+> (`MotivationalBalanceScreen`) au moteur générique `ModuleContentScreen` + layout
+> `tabbed`. Plus aucune route custom : chaque onglet est un sous-layout réutilisable
+> dispatché par `FieldRenderer`.
 
-| Fichier | Rôle |
-|---|---|
-| `apps/mobile/src/screens/modules/MotivationalBalanceScreen.tsx` | Écran principal — 4 onglets |
-| `apps/mobile/src/screens/modules/MotivationalBalanceDetailScreen.tsx` | Détail d'une fiche psyedu |
-| `apps/mobile/src/screens/modules/MotivationalBalanceScreen.test.tsx` | 10 tests Jest |
+### Layouts (rendus par le moteur générique)
+
+| `sub_preview_kind` | Layout mobile | Layout web (aperçu) | Rôle |
+|---|---|---|---|
+| `psyedu` | `PsyEdu` | `PsyEduLayout` | Onglet Fiches (lit `psyedu_topics`) |
+| `stage_wheel` | `StageWheel/` | `StageWheelLayout` | Onglet Stade — sélecteur Prochaska + historique |
+| `dual_ruler` | `DualRuler/` | `DualRulerLayout` | Onglet Thermomètres — deux échelles 0-10 + historique |
+| `weighted_balance` | `WeightedBalance/` | `WeightedBalanceLayout` | Onglet Balance — valeurs + Pour/Contre pondérés |
+
+Les onglets Stade / Thermomètres / Balance lisent et écrivent leur état SQLite via
+`motivationalBalanceService` ; le web rend un aperçu structurel statique (les vraies
+données patient passent par l'onglet « Données » du praticien). Tests co-localisés
+dans chaque dossier de layout (mobile + web).
 
 ### Service
 
@@ -68,7 +79,7 @@ Outil d'Entretien Motivationnel (EM) basé sur le modèle de Miller & Rollnick (
 ### Supabase
 
 - Catégorie : `motivation` (sort_order 8, nouveau dans `seed.sql`)
-- `preview_kind` : `tabbed` (déclaré en base, rendu par écran custom)
+- `preview_kind` : `tabbed` ; fields `tab` seedés dans `seed.sql` (`mb.tab.*`) avec `sub_preview_kind` par onglet ; valeurs de la balance dans `mb.balance.cfg` (`value_1..12`, `max_values`)
 - Psyedu : 4 topics (`em_seed.sql`), blocs i18n dans `fr/psyedu.json`
 
 ---
@@ -82,36 +93,28 @@ Outil d'Entretien Motivationnel (EM) basé sur le modèle de Miller & Rollnick (
 - **Mes valeurs, moteur du changement** — SDT, motivation autonome vs. contrôlée
 - **Parler du changement** — change talk, DARN-CAT, discours mobilisateur
 
-### 2. Stade
-- 6 cartes (Pressable) représentant les stades de Prochaska
-- Sélection → bouton "Enregistrer la séance"
-- Historique des stades avec date + suppression
+### 2. Stade (`stage_wheel`)
+- 6 cartes `ui/Card` représentant les stades de Prochaska, sélection exclusive
+- Sélection → bouton `ui/Button` "Enregistrer la séance"
+- Historique des stades avec date + suppression (confirmation `ConfirmDialog`)
 
-### 3. Thermomètres
-- Champ texte : comportement exploré
-- **Importance** (0–10) : pip slider + question de suivi "Pourquoi ce score ?"
-- **Confiance** (0–10) : pip slider + question de suivi "Qu'est-ce qui vous rendrait plus confiant ?"
+### 3. Thermomètres (`dual_ruler`)
+- Champ texte (`ui/InputField`) : comportement exploré
+- **Importance** (0–10) : `RatingSelector` (variante `numbered`) + justification "Pourquoi ce score ?"
+- **Confiance** (0–10) : `RatingSelector` + justification "Qu'est-ce qui vous rendrait plus confiant ?"
 - Phrase d'engagement (texte libre)
 - Historique des séances avec scores + engagement archivé
 
-### 4. Balance
-- Sélecteur de valeurs (12 valeurs, max 3 sélectionnables)
+### 4. Balance (`weighted_balance`)
+- Sélecteur de valeurs (`ui/Chip`, liste et max lus de `mb.balance.cfg`)
 - 2 colonnes : **Pour changer** / **Contre changer**
-- Ajout d'items libres + pondération 1–3 (3 points colorés)
-- Suppression d'items
+- Ajout d'items libres + pondération 1–3 via `RatingSelector` (variante `track`, monochrome — pas de couleur de gravité)
+- Suppression d'items (confirmation `ConfirmDialog`)
 
----
-
-## Bouton "i" — Sources
-
-Bouton `Info` dans le header (via `navigation.setOptions({ headerRight })`) ouvre un bottom sheet Modal avec :
-- Miller & Rollnick (2013)
-- Prochaska & DiClemente (1983)
-- Deci & Ryan (2000 — SDT)
-- HAS (2014)
-- NICE PH49 (2014)
-
-Disponible sur tous les onglets.
+> Les sources scientifiques (Miller & Rollnick, Prochaska, Deci & Ryan, HAS, NICE)
+> ne sont plus dans une modale custom : elles vivent dans la table `module_sources`
+> (déjà affichées au praticien côté web via `ModuleSourcesPanel`). Un affichage
+> patient mobile générique est suivi dans l'issue #86.
 
 ---
 
@@ -119,7 +122,7 @@ Disponible sur tous les onglets.
 
 - Aucun score interprété automatiquement — les valeurs brutes (0–10) sont affichées sans label, couleur interprétative ni seuil
 - L'interprétation appartient exclusivement au soignant en consultation
-- Aucune donnée n'est envoyée à Supabase (100% local SQLite)
+- Données stockées en SQLite local puis répliquées vers `patient_entries` via `syncUpsert`/`syncDelete` **après opt-in** (`share_consent`) — stockées, jamais interprétées par le serveur
 - Le module n'émet aucune notification conditionnelle aux données
 
 ---
@@ -127,9 +130,13 @@ Disponible sur tous les onglets.
 ## Navigation
 
 ```
-AppStack → MotivationalBalance (custom route)
-         → MotivationalBalanceDetail (topicId, topicKey)
+HomeScreen → ModuleContent { moduleType: 'motivational_balance' }
+           → preview_kind 'tabbed' → onglets Fiches / Stade / Thermomètres / Balance
 ```
+
+Plus de route custom (`MotivationalBalance` / `MotivationalBalanceDetail` retirées
+de `AppStack` et `CUSTOM_ROUTES`). Le détail des fiches passe par le flux générique
+`PsyEduLayout`.
 
 ## I18n
 

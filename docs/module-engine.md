@@ -60,6 +60,9 @@ Valeurs de `preview_kind` et leur layout :
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
 | `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
+| `stage_wheel` | Sélecteur de stade en sélection exclusive (modèle transthéorique de Prochaska, 6 stades par défaut) + historique. Mobile : éditeur SQLite (`em_rulers.stage`, via `motivationalBalanceService`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.stage_*`), `stageCount` configurable. MDR : auto-positionnement déclaratif, aucune progression imposée | `motivational_balance` (onglet « Stade ») |
+| `dual_ruler` | Deux échelles 0-10 (importance / confiance via `RatingSelector`) + justifications + engagement + historique. Mobile : éditeur SQLite (`em_rulers`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.rulers_*`). MDR : valeurs brutes, aucun seuil | `motivational_balance` (onglet « Thermomètres ») |
+| `weighted_balance` | Sélection de valeurs (chips, max configurable) + balance Pour/Contre dont chaque raison porte un poids 1-N (`RatingSelector` track, monochrome). Mobile : éditeur SQLite (`em_values` + `em_balance_items`). Web : aperçu structurel statique. Liste de valeurs lue d'un field `weighted_balance_config` (clés indexées `value_1..`, `max_values`) ; libellés dérivés du `moduleId`. MDR : pondération subjective, aucune couleur de gravité | `motivational_balance` (onglet « Balance ») |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -138,6 +141,7 @@ create table public.module_content_fields (
 | `footer_note` | Note texte bas de panel | — | Filtré, affiché séparément après le contenu |
 | `disclaimer_banner` | Bandeau d'avertissement | `color`, `icon`, `module_key`, `text_code`, `tone` | Bandeau haut d'écran configurable. `text_code` override la clé i18n par défaut (`modules.<key>.disclaimer`). `tone` : `"info"` (défaut) ou `"danger"` (fond rouge). Utilisé pour MDR, précautions cliniques, urgences |
 | `tab` | Onglet du layout `tabbed` | `tab_key`, `preview_kind` | Définit un onglet et son sous-layout |
+| `weighted_balance_config` | Config du layout `weighted_balance` | `value_1..N`, `max_values` | Liste indexée des valeurs sélectionnables (lue par `collectIndexed`) + maximum de valeurs cochables |
 
 **Layout `fields`**
 
@@ -496,6 +500,9 @@ interface FieldRendererProps {
 'crisis_companion'→ CrisisCompanionLayout (mobile = machine d'état + minuteur ; web = storyboard lecture seule)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
 'editable_steps'  → EditableStepsLayout (mobile uniquement — étapes éditables, Crisis Plan)
+'stage_wheel'     → StageWheelLayout (mobile = éditeur SQLite em_rulers.stage ; web = aperçu structurel)
+'dual_ruler'      → DualRulerLayout (mobile = éditeur SQLite em_rulers ; web = aperçu structurel)
+'weighted_balance'→ WeightedBalanceLayout (mobile = éditeur SQLite em_values+em_balance_items ; web = aperçu structurel)
 ```
 
 **Filtrage initial commun aux 4 layouts :**

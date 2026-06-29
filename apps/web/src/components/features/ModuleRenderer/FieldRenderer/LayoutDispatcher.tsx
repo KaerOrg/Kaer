@@ -8,6 +8,7 @@ import {
   CrisisCompanionLayout,
   DailyCheckinLayout,
   DecisionGridLayout,
+  DualRulerLayout,
   ExposureTrackerLayout,
   FallbackLayout,
   FieldsLayout,
@@ -19,9 +20,11 @@ import {
   QuestionnaireLayout,
   SleepJournalLayout,
   SliderDashboardLayout,
+  StageWheelLayout,
   StepsLayout,
   TabsLayout,
   TreeSelectorLayout,
+  WeightedBalanceLayout,
 } from '../layouts'
 import { FieldText } from '../fields'
 import { ExerciseSafetyField } from '../fields/ExerciseSafetyField'
@@ -35,7 +38,12 @@ import type { FieldRendererProps } from './types'
 
 // Layouts dont le contenu provient d'une autre source que module_content_fields
 // (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'psyedu_library', 'chrono_month'])
+const FIELDLESS_LAYOUTS = new Set<PreviewKind>([
+  'psyedu', 'psyedu_library', 'chrono_month',
+  // Aperçus motivational_balance adossés à SQLite côté mobile : la « Vue patient »
+  // web est structurelle (sans field enfant pour stade/thermomètres).
+  'stage_wheel', 'dual_ruler', 'weighted_balance',
+])
 
 /**
  * Seule responsabilité : router un `preview_kind` vers son layout.
@@ -122,6 +130,9 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'guided_exercise') return <GuidedExerciseLayout fields={contentFields} t={t} />
   if (preview_kind === 'crisis_companion') return <CrisisCompanionLayout fields={contentFields} t={t} moduleId={moduleId ?? ''} />
   if (preview_kind === 'patient_scenario') return <PatientScenarioLayout fields={contentFields} footer={footer} t={t} />
+  if (preview_kind === 'stage_wheel') return <StageWheelLayout moduleId={moduleId ?? ''} t={t} />
+  if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} t={t} />
+  if (preview_kind === 'weighted_balance') return <WeightedBalanceLayout fields={contentFields} moduleId={moduleId ?? ''} t={t} />
 
   return <FallbackLayout fields={contentFields} footer={footer} t={t} />
 }
