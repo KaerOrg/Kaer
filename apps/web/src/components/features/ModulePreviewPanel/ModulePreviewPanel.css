@@ -239,127 +239,10 @@
   font-style: italic;
 }
 
-/* ── Widgets (alignés sur les widgets React Native du mobile) ─────────────── */
-
-/* Time — chip [⏱ 22:00] aligné à gauche, taille mobile */
-.fw-time {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-  opacity: 0.75;
-  width: auto;
-  max-width: 120px;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-/* Slider — track 4px arrondi, fill primaire */
-.fw-slider {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.fw-slider__track {
-  flex: 1;
-  height: 4px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--color-border);
-  border-radius: 999px;
-  accent-color: var(--color-primary);
-  cursor: not-allowed;
-  opacity: 0.85;
-  min-width: 0;
-}
-
-.fw-slider__track::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
-.fw-slider__track::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border: none;
-  border-radius: 50%;
-  background: var(--color-primary);
-  opacity: 0.9;
-  cursor: not-allowed;
-}
-
-.fw-slider__val {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-primary);
-  white-space: nowrap;
-  min-width: 36px;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Stars — rendus par ui/RatingSelector (variant icon, lecture seule) */
-
-/* Boolean — pills [Non] [Oui] rendues par ui/Radio (variant pills, lecture seule) */
-
-/* Radio status — badge coloré avec icône */
-.fw-radio {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 999px;
-}
-
-.fw-radio--ok {
-  background: #D1FAE5;
-  color: #059669;
-}
-
-.fw-radio--partial {
-  background: #FEF3C7;
-  color: #D97706;
-}
-
-.fw-radio--miss {
-  background: #FEE2E2;
-  color: #DC2626;
-}
-
-/* Date — chip [📅 jj/mm/aaaa] */
-.fw-date {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 10px;
-  font-size: 12px;
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  cursor: not-allowed;
-  opacity: 0.75;
-  max-width: 160px;
-  box-sizing: border-box;
-  font-family: inherit;
-}
+/* ── Widgets de l'aperçu praticien (layout `fields`) ──────────────────────── */
+/* Seuls `text` (TextWidget) et `info` (InfoWidget) sont rendus par FieldWidget.
+   `fw-textarea` n'est plus produit par un widget mais reste réutilisé comme
+   classe de placeholder par DailyCheckinLayout et MedicationTrackerLayout. */
 
 /* Text input — bloc neutre h=32 (taille mobile TextWidget) */
 .fw-text {
@@ -373,28 +256,8 @@
   opacity: 0.6;
 }
 
-/* Checkbox — case + libellé, opacité 0.7 */
-.fw-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.fw-checkbox__input {
-  width: 16px;
-  height: 16px;
-  cursor: not-allowed;
-  accent-color: var(--color-primary);
-}
-
-.fw-checkbox__label {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-/* Textarea — bloc neutre h=52 (taille mobile TextareaWidget) */
+/* Textarea — bloc neutre h=52, réutilisé comme placeholder de notes par
+   DailyCheckinLayout et MedicationTrackerLayout (plus de TextareaWidget). */
 .fw-textarea {
   display: block;
   height: 52px;

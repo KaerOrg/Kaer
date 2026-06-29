@@ -33,8 +33,8 @@ describe('FieldRow', () => {
   })
 
   it('affiche le widget quand widget_type est défini', () => {
-    render(<FieldRow field={field({ widget_type: 'time' }, 'label')} />)
-    expect(screen.getByText('22:00')).toBeTruthy()
+    render(<FieldRow field={field({ widget_type: 'info', detail_code: 'widget.detail' }, 'label')} />)
+    expect(screen.getByText('widget.detail')).toBeTruthy()
   })
 
   it('affiche le detailText quand pas de widget_type', () => {
@@ -45,7 +45,7 @@ describe('FieldRow', () => {
   it("n'affiche pas la zone de contrôle sans widget ni detail_code", () => {
     render(<FieldRow field={field({}, 'label')} />)
     expect(screen.getByText('label')).toBeTruthy()
-    expect(screen.queryByText('22:00')).toBeNull()
+    expect(screen.queryByText('detail.text')).toBeNull()
   })
 
   it("n'affiche pas d'icône quand icon est absent", () => {

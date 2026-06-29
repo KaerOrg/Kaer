@@ -42,25 +42,18 @@ describe('FieldRow', () => {
     expect(container.querySelector('.preview-field__detail')).toBeNull()
   })
 
-  it('avec widget_type=time rend un input[type=time] au lieu du texte détail', () => {
+  it('avec widget_type=text rend le widget texte au lieu du texte détail', () => {
     const { container } = render(
-      <ul><FieldRow field={field({ props: { widget_type: 'time', detail_code: 'detail.key' } })} t={t} /></ul>
+      <ul><FieldRow field={field({ props: { widget_type: 'text', detail_code: 'detail.key' } })} t={t} /></ul>
     )
-    expect(container.querySelector('input[type="time"]')).toBeTruthy()
+    expect(container.querySelector('.fw-text')).toBeTruthy()
     expect(container.querySelector('.preview-field__detail')).toBeNull()
   })
 
-  it('avec widget_type=boolean rend le widget boolean', () => {
+  it('avec widget_type=info rend le widget info avec le texte détail', () => {
     const { container } = render(
-      <ul><FieldRow field={field({ props: { widget_type: 'boolean' } })} t={t} /></ul>
+      <ul><FieldRow field={field({ props: { widget_type: 'info', detail_code: 'detail.key' } })} t={t} /></ul>
     )
-    expect(container.querySelector('.radio--pills')).toBeTruthy()
-  })
-
-  it('avec widget_type=stars (stars_count=5) rend 5 étoiles', () => {
-    const { container } = render(
-      <ul><FieldRow field={field({ props: { widget_type: 'stars', stars_count: '5' } })} t={t} /></ul>
-    )
-    expect(container.querySelectorAll('.rating-selector__icon svg').length).toBe(5)
+    expect(container.querySelector('.fw-info')?.textContent).toContain('detail.key')
   })
 })

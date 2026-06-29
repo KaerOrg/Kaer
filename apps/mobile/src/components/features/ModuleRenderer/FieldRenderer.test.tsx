@@ -71,11 +71,11 @@ describe('FieldRenderer — layout fields', () => {
     render(
       <FieldRenderer
         preview_kind="fields"
-        fields={[f({ id: 'r1', field_type: 'field_row', text_code: 'row.label', props: { widget_type: 'time' } })]}
+        fields={[f({ id: 'r1', field_type: 'field_row', text_code: 'row.label', props: { widget_type: 'info', detail_code: 'row.detail' } })]}
       />,
     )
     expect(screen.getByText('row.label')).toBeTruthy()
-    expect(screen.getByText('22:00')).toBeTruthy()
+    expect(screen.getByText('row.detail')).toBeTruthy()
   })
 
   it('affiche le footer_note separement', () => {

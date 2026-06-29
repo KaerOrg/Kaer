@@ -200,7 +200,7 @@ visuelles pour un même besoin :
 |---|---|---|
 | `numbered` (défaut) | boutons carrés bordés avec le chiffre, seul le sélectionné est mis en évidence | `mood_tracker` (1–10), `fear_thermometer` (0–100 par 10) |
 | `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns`, `activity_log` (plaisir/maîtrise) |
-| `track` + `continuous` | jauge **continue** proportionnelle (fill + thumb) + valeur formatée, au lieu de N pips | aperçu d'un champ `slider:min:max` (`SliderWidget`) |
+| `track` + `continuous` | jauge **continue** proportionnelle (fill + thumb) + valeur formatée, au lieu de N pips | aperçu d'une valeur continue (ex. `slider_dashboard`) |
 | `icon` | rangée d'icônes remplies jusqu'à la valeur (`star` ou `weather-sunny`) | `sleep_diary` (qualité de nuit, ressenti au réveil) |
 
 > **Affichage = un mode, pas un composant à part.** Pour un rendu en lecture seule,
@@ -450,7 +450,7 @@ Sélecteur à **choix exclusif** (radio). Trois habillages via `variant` : `list
   color={accentColor}
 />
 
-// Aperçu en lecture seule (preview, pas de saisie) — ex. BooleanWidget
+// Aperçu en lecture seule (pas de saisie)
 <Radio
   variant="pills"
   options={[{ value: 'non', label: 'Non' }, { value: 'oui', label: 'Oui' }]}
@@ -520,7 +520,7 @@ Pour un indicateur d'état sémantique **rempli** (fond coloré, label + valeur)
 | `testID` | `string` | — | testID du conteneur |
 
 ```tsx
-// Aperçu statique compact (DateWidget / TimeWidget)
+// Aperçu statique compact (puce date / heure en lecture seule)
 <Chip
   label="jj/mm/aaaa"
   size="sm"
@@ -581,22 +581,24 @@ ne pas le passer depuis l'écran. `Toast` s'auto-masque après un délai géré 
 
 ## Widgets du ModuleRenderer
 
-Visuels en lecture seule — rendu dans `FieldWidget`, identique à la version web mais en React Native.
+Affichage **en lecture seule** rendu dans `FieldWidget` (conformité MDR : affichage
+passif). Sur mobile, c'est le champ tel que le **patient** le voit. Seul
+`breathing_techniques` utilise encore le layout `fields` (info ×5 + text ×1), donc
+`FieldWidget` ne rend plus que deux widgets. Les widgets
+`time`/`slider`/`stars`/`boolean`/`radio`/`date`/`checkbox`/`textarea`, devenus
+inatteignables après la migration des autres modules vers des layouts dédiés, ont été
+supprimés (issue #87).
 
 | Widget | Aperçu visuel | Spec |
 |---|---|---|
-| `TimeWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[⏱ 22:00]` | `"time"` |
-| `SliderWidget` | Track 4px fill/empty + thumb + valeur médiane | `"slider:min:max:unit"` |
-| `StarsWidget` | `ui/RatingSelector` (`variant="icon"`, `readonly`) — moitié des étoiles remplies | `"stars:N"` |
-| `BooleanWidget` | `ui/Radio` (`variant="pills"`, `readonly`) — pills `[Non] [Oui]`, "Non" actif | `"boolean"` |
-| `RadioWidget` | Pastille de statut via `ui/StatusBadge` (`ok`→`success`, `partial`→`warning`, `miss`→`danger`) | `"radio:variant"` |
-| `DateWidget` | `ui/Chip` (`size="sm"`, `muted`) — `[📅 jj/mm/aaaa]` | `"date"` |
-| `TextWidget` | `View` vide h=32 avec bordure | `"text"` |
-| `CheckboxWidget` | `ui/Checkbox` statique (`checked={false}`, label `Non accompli`) opacité 0.7 | `"checkbox"` |
-| `TextareaWidget` | `View` vide h=52 avec bordure, opacité 0.5 | `"textarea"` |
+| `TextWidget` | `ui/InputField` (`editable={false}`) opacité 0.6 | `"text"` |
 | `InfoWidget` | Icône `reorder-four-outline` + texte italique muted | `"info"` |
 
 Chemin : `src/components/features/ModuleRenderer/fields/widgets/<Widget>/<Widget>.tsx`
+
+> `LikertWidget` vit dans le même dossier mais **hors** du chemin `fields` : il est
+> consommé directement par `QuestionnaireLayout` (échelles cliniques), pas par
+> `FieldWidget`.
 
 ### Widgets de field interactifs (plan de crise)
 
@@ -812,7 +814,7 @@ apps/mobile/src/
 │       └── fields/                      # field_type → composant + widgets
 │           ├── FieldRow/ FieldWidget/ FieldText/ FieldListItem/
 │           ├── CardDefinition/ InlineText/ CrisisUrgencyContactsWidget/
-│           └── widgets/                 # TimeWidget, SliderWidget, … (10 widgets)
+│           └── widgets/                 # TextWidget, InfoWidget, LikertWidget
 ```
 
 Chaque dossier de layout contient : `<Nom>Layout.tsx` + `styles.ts` + `index.ts`.
