@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { PreviewKind } from '../../../../services/moduleService'
+import { FIELDLESS_LAYOUTS } from '@kaer/shared'
 import {
   ActivityLogLayout,
   CardsLayout,
@@ -35,15 +35,6 @@ import { DisclaimerBanner } from './DisclaimerBanner'
 import { FieldRenderer } from './FieldRenderer'
 import { partitionBySection } from './partitionBySection'
 import type { FieldRendererProps } from './types'
-
-// Layouts dont le contenu provient d'une autre source que module_content_fields
-// (ex. psyedu_topics/psyedu_blocks pour 'psyedu') — peuvent rendre avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>([
-  'psyedu', 'psyedu_library', 'chrono_month',
-  // Aperçus motivational_balance adossés à SQLite côté mobile : la « Vue patient »
-  // web est structurelle (sans field enfant pour stade/thermomètres).
-  'stage_wheel', 'dual_ruler', 'weighted_balance',
-])
 
 /**
  * Seule responsabilité : router un `preview_kind` vers son layout.

@@ -4,7 +4,7 @@
 // Aucune logique de layout ici — le groupement de fields vit dans
 // `partitionBySection`, le rendu dans les composants `layouts/*`.
 
-import type { PreviewKind } from '../../../../services/moduleService'
+import { FIELDLESS_LAYOUTS } from '@kaer/shared'
 import { ActivityLogLayout } from '../layouts/ActivityLog'
 import { CardsLayout } from '../layouts/Cards'
 import { ChronoMonthLayout } from '../layouts/ChronoMonth'
@@ -31,16 +31,6 @@ import { DualRulerLayout } from '../layouts/DualRuler'
 import { WeightedBalanceLayout } from '../layouts/WeightedBalance'
 import { partitionBySection } from './partitionBySection'
 import type { FieldRendererProps } from './types'
-
-// Layouts dont le contenu provient d'une autre source que module_content_fields
-// (ex. psyedu_topics/psyedu_blocks pour le layout 'psyedu') — peuvent rendre
-// avec 0 fields.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>([
-  'psyedu', 'psyedu_library', 'chrono_month',
-  // Layouts adossés à SQLite (motivational_balance) : ils lisent leurs données
-  // via le service, pas depuis module_content_fields — rendu possible sans field.
-  'stage_wheel', 'dual_ruler', 'weighted_balance',
-])
 
 export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentColor, patientConfig, moduleId }: FieldRendererProps) {
   if (preview_kind === 'coming_soon') return null

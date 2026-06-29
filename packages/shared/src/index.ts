@@ -8,6 +8,9 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 
+export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
+export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
+
 export {
   buildRhythmogram,
   parseTimeToMinutes,
@@ -131,35 +134,80 @@ export interface PatientModule {
 
 // Module rendering — partagé entre web (preview praticien) et mobile (rendu patient).
 // La colonne `modules.preview_kind` en base pilote le moteur de rendu.
-export type PreviewKind =
-  | 'coming_soon'
-  | 'steps'
-  | 'editable_steps'
-  | 'cards'
-  | 'fields'
-  | 'grid2x2'
-  | 'questionnaire'
-  | 'guided_exercise'
-  | 'patient_scenario'
-  | 'timed_tap_exercise'
-  | 'daily_checkin'
-  | 'medication_tracker'
-  | 'column_form'
-  | 'tree_selector'
-  | 'sleep_journal'
-  | 'activity_log'
-  | 'exposure_tracker'
-  | 'decision_grid'
-  | 'psyedu'
-  | 'psyedu_library'
-  | 'tabbed'
-  | 'chrono_month'
-  | 'slider_dashboard'
-  | 'crisis_urgency'
-  | 'crisis_companion'
-  | 'stage_wheel'
-  | 'dual_ruler'
-  | 'weighted_balance'
+//
+// Source UNIQUE des preview_kind connus : le tableau `PREVIEW_KINDS` (valeur runtime)
+// dont dérive le type `PreviewKind`. Le moteur d'observabilité (issue #90) et la garde
+// CI confrontent les `preview_kind` des seeds à ce même tableau — pas de duplication
+// type/runtime possible. Tout `preview_kind` en base hors de cette liste est un orphelin.
+export const PREVIEW_KINDS = [
+  'coming_soon',
+  'steps',
+  'editable_steps',
+  'cards',
+  'fields',
+  'questionnaire',
+  'guided_exercise',
+  'patient_scenario',
+  'daily_checkin',
+  'medication_tracker',
+  'column_form',
+  'tree_selector',
+  'sleep_journal',
+  'activity_log',
+  'exposure_tracker',
+  'decision_grid',
+  'psyedu',
+  'psyedu_library',
+  'tabbed',
+  'chrono_month',
+  'slider_dashboard',
+  'crisis_urgency',
+  'crisis_companion',
+  'stage_wheel',
+  'dual_ruler',
+  'weighted_balance',
+] as const
+
+export type PreviewKind = (typeof PREVIEW_KINDS)[number]
+
+// Layouts dont le contenu provient d'une autre source que `module_content_fields`
+// (psyedu_topics/psyedu_blocks, ou SQLite côté mobile pour motivational_balance) :
+// ils rendent légitimement avec 0 field. Source unique partagée par les deux
+// LayoutDispatcher (web + mobile) ET la garde CI — un rendu vide ici n'est PAS un
+// orphelin et ne déclenche aucune alerte (issue #90).
+export const FIELDLESS_LAYOUTS: ReadonlySet<PreviewKind> = new Set<PreviewKind>([
+  'psyedu',
+  'psyedu_library',
+  'chrono_month',
+  'stage_wheel',
+  'dual_ruler',
+  'weighted_balance',
+])
+
+// ─── Observabilité du moteur de rendu (issue #90) ────────────────────────────
+// Télémétrie TECHNIQUE d'un non-match de config (preview_kind / field_type /
+// widget_type / text_code orphelin). ZÉRO donnée patient : uniquement de la config
+// structurelle. Hors périmètre MDR (aucune saisie, aucun identifiant patient).
+
+export type RenderMismatchLevel =
+  | 'preview_kind'
+  | 'field_type'
+  | 'widget_type'
+  | 'missing_text_code'
+
+// Payload envoyé par les apps à l'edge function `report-render-mismatch`.
+// Aucun champ ne porte de donnée patient (pas de payload de saisie, pas d'id patient).
+export interface RenderMismatch {
+  platform: 'web' | 'mobile'
+  app_version: string
+  level: RenderMismatchLevel
+  module_id: string | null
+  preview_kind: string | null
+  field_id: string | null
+  field_type: string | null
+  widget_type: string | null
+  reason: string
+}
 
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {

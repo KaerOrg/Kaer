@@ -460,6 +460,15 @@ Chaque dossier contient : `FieldRenderer.tsx` (point d'entrée — extrait le
 > § *Layouts du ModuleRenderer*. Côté web :
 > [`apps/web/docs/components/module-renderer.md`](../apps/web/docs/components/module-renderer.md).
 
+> **Diagnostics / non-match (issue #90)** : l'observabilité n'est PAS dans les composants
+> de rendu. Un non-match est une propriété pure de `(config) × (capacités)`, calculée par
+> `collectRenderMismatches(preview_kind, fields)` (`@kaer/shared`) appelée **une fois** à
+> la frontière des données (`moduleService.fetchModuleFields`), puis transmise à
+> `renderDiagnosticsService` → Edge Function `report-render-mismatch` (journal
+> `render_mismatch_log` + email). Le runtime couvre `preview_kind` (`PREVIEW_KINDS`) et
+> `widget_type` (`RENDERABLE_WIDGET_TYPES`) ; les niveaux contextuels passent par la garde
+> CI `previewKindCoverage.test.ts`. Circuit complet : [`render-diagnostics.md`](render-diagnostics.md).
+
 **Props :**
 
 ```ts

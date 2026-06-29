@@ -25,6 +25,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`retention-conservation.md`](retention-conservation.md) | Politique de conservation & purge automatique (RGPD art. 5.1.e) — table `retention_config` + Edge Function + pg_cron |
 | [`auth-mfa.md`](auth-mfa.md) | Authentification forte praticien (MFA TOTP) — flux, AAL, récupération, bandeau de rappel |
 | [`support-requests.md`](support-requests.md) | Demandes de support praticien (formulaire borné → table + email Resend) |
+| [`render-diagnostics.md`](render-diagnostics.md) | Observabilité du moteur de rendu — non-match (preview_kind/field_type/widget_type/text_code) → `render_mismatch_log` + email Resend + garde CI |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
 | [`terminologie-praticiens.md`](terminologie-praticiens.md) | Glossaire métier (IDE, IPA, etc.) |
 | [`migration-engine-roadmap.md`](migration-engine-roadmap.md) | Roadmap moteur de migrations |
