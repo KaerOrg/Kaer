@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Lightbulb, CheckCircle2, Check } from 'lucide-react'
-import { fetchBlocksByTopic, type PsyEduBlock } from '../../../../../services/psyeduService'
+import { fetchBlocksByTopic, type PsyEduBlock } from '@services/psyeduService'
 
 interface Props {
   topicId: string

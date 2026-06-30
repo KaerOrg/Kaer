@@ -6,7 +6,7 @@ import { Card } from '../../../components/ui/Card'
 import { Tooltip } from '../../../components/ui/Tooltip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '../../../services/moduleCatalogService'
+import type { ModuleItem } from '@services/moduleCatalogService'
 import { ModuleDataPanel } from './ModuleDataPanel'
 
 const MODULE_TYPE: ModuleType = 'chronobiology_tracker'

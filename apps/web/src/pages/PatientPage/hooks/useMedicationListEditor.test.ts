@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 const fetchMedications = vi.fn()
 const updateMedications = vi.fn()
 
-vi.mock('../../../services/moduleAssignmentService', () => ({
+vi.mock('@services/moduleAssignmentService', () => ({
   fetchMedications: (...a: unknown[]) => fetchMedications(...a),
   updateMedications: (...a: unknown[]) => updateMedications(...a),
 }))

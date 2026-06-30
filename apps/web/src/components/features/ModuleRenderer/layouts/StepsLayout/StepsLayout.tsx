@@ -1,4 +1,4 @@
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
 
 interface Props {

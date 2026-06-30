@@ -23,30 +23,30 @@ vi.mock('../../contexts/ToastContext', () => ({
 }))
 
 // Couche de données — on ne teste ici que l'orchestration de la résolution.
-vi.mock('../../services/patientRefService', () => ({ resolvePatientRef: vi.fn() }))
-vi.mock('../../services/patientService', () => ({
+vi.mock('@services/patientRefService', () => ({ resolvePatientRef: vi.fn() }))
+vi.mock('@services/patientService', () => ({
   fetchPatientHeader: vi.fn(),
   setTeenMode: vi.fn(),
   saveGeneralNote: vi.fn(),
 }))
-vi.mock('../../services/moduleAssignmentService', () => ({
+vi.mock('@services/moduleAssignmentService', () => ({
   fetchPatientModules: vi.fn(() => Promise.resolve([])),
 }))
-vi.mock('../../services/practitionerSettingsService', () => ({
+vi.mock('@services/practitionerSettingsService', () => ({
   fetchEnabledModules: vi.fn(() => Promise.resolve(null)),
 }))
-vi.mock('../../services/moduleCatalogService', () => ({
+vi.mock('@services/moduleCatalogService', () => ({
   fetchModuleCategories: vi.fn(() => Promise.resolve([])),
   fetchComingSoonModuleIds: vi.fn(() => Promise.resolve(new Set())),
 }))
-vi.mock('../../services/psyeduService', () => ({
+vi.mock('@services/psyeduService', () => ({
   fetchLibraryTopics: vi.fn(() => Promise.resolve([])),
   fetchThemes: vi.fn(() => Promise.resolve([])),
 }))
-vi.mock('../../services/noteService', () => ({
+vi.mock('@services/noteService', () => ({
   fetchNotes: vi.fn(() => Promise.resolve([])),
 }))
-vi.mock('../../services/appointmentService', () => ({
+vi.mock('@services/appointmentService', () => ({
   fetchAppointmentsForPatient: vi.fn(() => Promise.resolve([])),
 }))
 
@@ -61,8 +61,8 @@ vi.mock('./tabs/PatientRdvTab', () => ({ PatientRdvTab: () => null }))
 vi.mock('./tabs/PatientEvolutionTab', () => ({ PatientEvolutionTab: () => null }))
 
 import { PatientPage } from './PatientPage'
-import { resolvePatientRef } from '../../services/patientRefService'
-import { fetchPatientHeader } from '../../services/patientService'
+import { resolvePatientRef } from '@services/patientRefService'
+import { fetchPatientHeader } from '@services/patientService'
 
 // Rend la page enveloppée d'un QueryClient neuf (cache isolé, retry désactivé).
 function renderPage() {

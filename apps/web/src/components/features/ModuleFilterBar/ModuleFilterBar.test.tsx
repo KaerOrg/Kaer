@@ -9,7 +9,7 @@ vi.mock('react-i18next', () => ({
 }))
 
 import { ModuleFilterBar } from './ModuleFilterBar'
-import type { ModuleTaxonomy } from '../../../services/moduleCatalogService'
+import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 
 const taxonomy: ModuleTaxonomy = {
   dimensions: [

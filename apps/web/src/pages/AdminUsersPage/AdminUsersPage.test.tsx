@@ -14,7 +14,7 @@ vi.mock('../../components/features/Layout', () => ({
 
 // Filtres / tri / pagination sont côté serveur : on mocke la couche service et on
 // vérifie les PARAMÈTRES envoyés (la page ne filtre/trie plus en mémoire).
-vi.mock('../../services/adminService', () => ({
+vi.mock('@services/adminService', () => ({
   fetchUsers: vi.fn(),
   fetchPractitionerNames: vi.fn(),
 }))
@@ -29,7 +29,7 @@ vi.mock('../../components/features/PatientDataRights', () => ({
 }))
 
 import { AdminUsersPage } from './AdminUsersPage'
-import { fetchUsers, fetchPractitionerNames, type AdminUser } from '../../services/adminService'
+import { fetchUsers, fetchPractitionerNames, type AdminUser } from '@services/adminService'
 
 const USERS: readonly AdminUser[] = [
   { user_id: 'p1', kind: 'patient', email: 'ada@kaer.fr', display_name: 'Ada Lovelace', created_at: '2026-01-01T00:00:00Z', practitioner_names: ['Doc Gyneco'], is_admin: false },

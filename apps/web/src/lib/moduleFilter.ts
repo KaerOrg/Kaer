@@ -1,4 +1,4 @@
-import type { ModuleCategory, ModuleTaxonomy, Tag } from '../services/moduleCatalogService'
+import type { ModuleCategory, ModuleTaxonomy, Tag } from '@services/moduleCatalogService'
 
 /**
  * Sélection active de tags, par dimension. Clé = dimension_id, valeur = tags cochés.

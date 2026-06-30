@@ -15,7 +15,7 @@ import {
   requestNotificationPermission,
   registerPushToken,
   markNotificationOnboardingSeen,
-} from '../services/notificationService'
+} from '@services/notificationService'
 import Button from '@ui/Button'
 import { colors, spacing, radius, fontSize } from '@theme'
 

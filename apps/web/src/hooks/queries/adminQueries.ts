@@ -4,7 +4,7 @@ import {
   fetchPractitionerNames,
   type AdminUsersData,
   type AdminUsersQuery,
-} from '../../services/adminService'
+} from '@services/adminService'
 
 // Factory `queryOptions` de l'administration des utilisateurs.
 // Tri / filtres / pagination sont gérés côté serveur : la `queryKey` embarque tous

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { CrisisCompanionLayout } from './CrisisCompanionLayout'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 // `t` déterministe : renvoie la clé i18n telle quelle (cf. autres tests de layout).
 const t = (key: string) => key

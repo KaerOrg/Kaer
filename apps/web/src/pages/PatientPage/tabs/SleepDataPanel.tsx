@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { SleepPoint } from '../../../services/engagementService'
+import type { SleepPoint } from '@services/engagementService'
 import { ModuleChart } from './ModuleChart'
 import { barGeometry, formatMinutes, avg } from './sleepGrid'
 import './SleepDataPanel.css'

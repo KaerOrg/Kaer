@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from
 import { ChevronRight, ChevronLeft } from 'lucide-react-native'
 import { useTranslation } from 'react-i18next'
 import type { PsyEduTopic, PsyEduBlock } from '@kaer/shared'
-import { fetchTopicsByModule, fetchBlocksByTopic } from '../../../../../services/psyeduService'
+import { fetchTopicsByModule, fetchBlocksByTopic } from '@services/psyeduService'
 import { PsyEduBlockRenderer } from '../../../PsyEduBlockRenderer'
 import { useAuthStore } from '../../../../../store/authStore'
 import { colors, spacing, radius } from '@theme'

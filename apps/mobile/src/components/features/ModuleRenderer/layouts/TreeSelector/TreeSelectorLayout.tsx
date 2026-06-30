@@ -21,12 +21,12 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import { collectIndexed } from '@kaer/shared'
 import { colors } from '@theme'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import {
   getAllTreeSelections, generateId,
   type TreeSelection, type TreeSelectionPathNode,
 } from '../../../../../lib/database'
-import { saveTreeSelection, deleteTreeSelection } from '../../../../../services/treeSelectionService'
+import { saveTreeSelection, deleteTreeSelection } from '@services/treeSelectionService'
 import { formatDateTime } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'

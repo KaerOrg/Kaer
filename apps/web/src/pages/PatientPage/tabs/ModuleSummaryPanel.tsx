@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ModuleType } from '../../../lib/database.types'
-import type { ModuleSummary } from '../../../services/engagementService'
+import type { ModuleSummary } from '@services/engagementService'
 import { readDimensions, readTotalScore } from './summaryReaders'
 import './ModuleSummaryPanel.css'
 

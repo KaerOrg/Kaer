@@ -7,7 +7,7 @@ import {
   clearCrisisPlanConfigCache,
   type CrisisPlanConfig,
   type CrisisPlanCopingCard,
-} from '../../../services/crisisPlanService'
+} from '@services/crisisPlanService'
 import type { PatientModule } from '../../../lib/database.types'
 
 export function useCrisisPlanEditor(

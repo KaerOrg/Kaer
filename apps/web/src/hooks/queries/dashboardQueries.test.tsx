@@ -8,14 +8,14 @@ const mockFetchPendingInvitations = vi.fn()
 const mockSendInvitation = vi.fn()
 const mockFetchInviteCategories = vi.fn()
 
-vi.mock('../../services/patientService', () => ({
+vi.mock('@services/patientService', () => ({
   fetchPatientsWithModules: (id: string) => mockFetchPatientsWithModules(id),
 }))
-vi.mock('../../services/invitationService', () => ({
+vi.mock('@services/invitationService', () => ({
   fetchPendingInvitations: (id: string) => mockFetchPendingInvitations(id),
   sendInvitation: (draft: unknown) => mockSendInvitation(draft),
 }))
-vi.mock('../../services/moduleCatalogService', () => ({
+vi.mock('@services/moduleCatalogService', () => ({
   fetchInviteCategories: () => mockFetchInviteCategories(),
 }))
 

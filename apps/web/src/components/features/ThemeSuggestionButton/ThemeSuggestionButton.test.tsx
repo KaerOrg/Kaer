@@ -6,7 +6,7 @@ import { ThemeSuggestionButton } from './ThemeSuggestionButton'
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 const mockSubmit = vi.fn()
-vi.mock('../../../services/themeSuggestionService', () => ({
+vi.mock('@services/themeSuggestionService', () => ({
   submitThemeSuggestion: (suggestion: string) => mockSubmit(suggestion),
   THEME_SUGGESTION_MAX: 1000,
 }))

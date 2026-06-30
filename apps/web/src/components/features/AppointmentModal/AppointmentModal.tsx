@@ -8,7 +8,7 @@ import { StatusBadge } from '../../ui/StatusBadge'
 import { useToast } from '../../../contexts/ToastContext'
 import type { StatusBadgeVariant } from '../../ui/StatusBadge/StatusBadge.types'
 import type { AppointmentWithPatient, AppointmentStatus } from '../../../lib/calendar.types'
-import type { PatientOption } from '../../../services/patientService'
+import type { PatientOption } from '@services/patientService'
 import './AppointmentModal.css'
 
 type Mode = 'create' | 'view'

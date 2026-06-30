@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import { fetchProfessionalTitles } from '../../services/authService'
+import { fetchProfessionalTitles } from '@services/authService'
 
 // Factories `queryOptions` des données de référence globales (sans paramètre,
 // rarement modifiées). Mutualisables entre plusieurs écrans.

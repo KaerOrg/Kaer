@@ -18,9 +18,9 @@ import {
   deleteCaseloadWait,
   fetchCaseloadNotes,
   createCaseloadNote,
-} from '../../services/caseloadService'
-import { fetchPatientsWithModules } from '../../services/patientService'
-import { fetchModuleCategories } from '../../services/moduleCatalogService'
+} from '@services/caseloadService'
+import { fetchPatientsWithModules } from '@services/patientService'
+import { fetchModuleCategories } from '@services/moduleCatalogService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,

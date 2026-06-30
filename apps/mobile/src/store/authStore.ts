@@ -10,10 +10,10 @@ import {
   signInWithPassword,
   signOut,
   type PatientProfile,
-} from '../services/authService'
-import { updatePatientProfile, type PatientProfileUpdate } from '../services/patientProfileService'
-import { registerPushTokenIfGranted } from '../services/notificationService'
-import { RemoteSyncService } from '../services/sync'
+} from '@services/authService'
+import { updatePatientProfile, type PatientProfileUpdate } from '@services/patientProfileService'
+import { registerPushTokenIfGranted } from '@services/notificationService'
+import { RemoteSyncService } from '@services/sync'
 
 interface AuthState {
   patient: PatientProfile | null

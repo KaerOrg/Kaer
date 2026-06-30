@@ -4,7 +4,7 @@ import { Button } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
 import { SearchInput } from '../../ui/SearchInput'
 import { hasAnyActiveFilter, type ActiveTagFilters } from '../../../lib/moduleFilter'
-import type { ModuleTaxonomy } from '../../../services/moduleCatalogService'
+import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 import { DimensionFilter } from './DimensionFilter'
 import './ModuleFilterBar.css'
 

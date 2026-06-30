@@ -21,7 +21,7 @@ import {
   saveCommitment,
   fetchPractitionerConfig,
   type CrisisCommitment,
-} from '../../../../../services/crisisPlanService'
+} from '@services/crisisPlanService'
 
 export function CrisisCommitmentWidget() {
   const t = useModuleTranslation()

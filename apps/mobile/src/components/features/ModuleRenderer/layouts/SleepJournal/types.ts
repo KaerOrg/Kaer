@@ -1,6 +1,6 @@
 // Contrats partagés des sous-vues de l'agenda du sommeil (sleep_diary).
 
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 /** Résout une clé de config (`sleep_journal_config`) vers son libellé i18n traduit. */
 export type Lbl = (key: string) => string

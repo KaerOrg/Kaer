@@ -12,7 +12,7 @@ jest.mock('lucide-react-native', () => {
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { CrisisCompanionLayout } from './CrisisCompanionLayout'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 function field(overrides: Partial<ContentField>): ContentField {
   return {

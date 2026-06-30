@@ -25,7 +25,7 @@ jest.mock('../../../../../lib/dateUtils', () => ({
   formatDateLong: (s: string) => `long:${s}`,
 }))
 
-jest.mock('../../../../../services/crisisPlanService', () => ({
+jest.mock('@services/crisisPlanService', () => ({
   getCommitment: jest.fn(),
   saveCommitment: jest.fn(),
   fetchPractitionerConfig: jest.fn(),
@@ -36,7 +36,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { CrisisCommitmentWidget } from './CrisisCommitmentWidget'
-import * as service from '../../../../../services/crisisPlanService'
+import * as service from '@services/crisisPlanService'
 
 const svc = service as jest.Mocked<typeof service>
 

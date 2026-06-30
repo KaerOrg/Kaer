@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchModuleCategories, fetchComingSoonModuleIds } from '../../services/moduleCatalogService'
-import { fetchEnabledModules, saveEnabledModules } from '../../services/practitionerSettingsService'
-import { fetchModulePreviewKind } from '../../services/moduleService'
+import { fetchModuleCategories, fetchComingSoonModuleIds } from '@services/moduleCatalogService'
+import { fetchEnabledModules, saveEnabledModules } from '@services/practitionerSettingsService'
+import { fetchModulePreviewKind } from '@services/moduleService'
 import type { ModuleType } from '../../lib/database.types'
 
 // Factories `queryOptions` du catalogue de modules + réglages praticien.

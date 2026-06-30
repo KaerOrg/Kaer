@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, Check, ChevronRight, Info, Plus } from 'lucide-r
 import { collectIndexed } from '@kaer/shared'
 import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 interface Props {
   fields: ContentField[]

@@ -34,7 +34,7 @@ import {
   getAllRoutinesForPatient,
   updateTimeOverride,
   type NotificationRoutine,
-} from '../../../services/notificationService'
+} from '@services/notificationService'
 import {
   DimensionChart,
   CompositeChart,

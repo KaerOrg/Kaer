@@ -22,8 +22,8 @@ import Button from '@ui/Button'
 import { colors, spacing, radius } from '@theme'
 import { SUPPORTED } from '../i18n'
 import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
-import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '../services/avatarService'
-import { exportMyData, eraseMyAccount } from '../services/patientDataRightsService'
+import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '@services/avatarService'
+import { exportMyData, eraseMyAccount } from '@services/patientDataRightsService'
 
 const AVATAR_SIZE = 84
 

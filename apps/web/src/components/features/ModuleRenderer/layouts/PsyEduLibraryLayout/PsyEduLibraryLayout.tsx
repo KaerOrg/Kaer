@@ -6,7 +6,7 @@ import {
   fetchThemes,
   type LibraryTopic,
   type PsyEduTheme,
-} from '../../../../../services/psyeduService'
+} from '@services/psyeduService'
 import { PsyEduBlocks } from '../PsyEduLayout/PsyEduBlocks'
 
 const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }

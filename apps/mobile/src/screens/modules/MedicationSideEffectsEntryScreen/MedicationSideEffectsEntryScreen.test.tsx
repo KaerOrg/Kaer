@@ -40,7 +40,7 @@ jest.mock('../../../lib/database', () => ({
   getScaleEntryById: jest.fn().mockResolvedValue(null),
   generateId: () => 'new-id',
 }))
-jest.mock('../../../services/notificationService', () => ({ logScaleSubmission: jest.fn() }))
+jest.mock('@services/notificationService', () => ({ logScaleSubmission: jest.fn() }))
 
 const mockSave = jest.mocked(database.saveScaleEntry)
 

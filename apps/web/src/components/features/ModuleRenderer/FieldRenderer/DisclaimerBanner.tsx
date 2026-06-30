@@ -1,6 +1,6 @@
 import { Info } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { ContentField } from '../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 interface DisclaimerBannerProps {
   /** The `disclaimer_banner` field to render. */

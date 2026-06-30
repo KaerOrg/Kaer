@@ -10,9 +10,9 @@ import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
 import { Tooltip } from '../../components/ui/Tooltip'
 import type { PatientModule } from '../../lib/database.types'
-import type { ModuleCategory } from '../../services/moduleCatalogService'
-import type { PractitionerNote } from '../../services/noteService'
-import type { LibraryTopic, PsyEduTheme } from '../../services/psyeduService'
+import type { ModuleCategory } from '@services/moduleCatalogService'
+import type { PractitionerNote } from '@services/noteService'
+import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
 import {
   patientQueries,

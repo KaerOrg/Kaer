@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { PREVIEW_STEPS } from './exposureMock'
 import { ExposureLadderView } from './ExposureLadderView'
 import { ExposureStepDetailView } from './ExposureStepDetailView'

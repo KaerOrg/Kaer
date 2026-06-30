@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CreditCard } from 'lucide-react'
 import { usePatientView } from '../../../../../contexts/usePatientView'
-import { fetchCrisisPlanConfig, type CrisisPlanCopingCard } from '../../../../../services/crisisPlanService'
+import { fetchCrisisPlanConfig, type CrisisPlanCopingCard } from '@services/crisisPlanService'
 import './CrisisCopingCardsWidget.css'
 
 export function CrisisCopingCardsWidget() {

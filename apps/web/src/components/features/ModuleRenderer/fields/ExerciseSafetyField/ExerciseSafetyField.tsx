@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Phone } from 'lucide-react'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import './ExerciseSafetyField.css'
 
 interface Props {

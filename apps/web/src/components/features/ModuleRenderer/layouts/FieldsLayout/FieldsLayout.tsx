@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldRow, FieldText } from '../../fields'
 
 interface Props {

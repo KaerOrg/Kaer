@@ -1,6 +1,6 @@
 import { AlertTriangle, Plus, ShieldCheck, Star, ThumbsDown, ThumbsUp, type LucideIcon } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 interface Props {
   fields: ContentField[]

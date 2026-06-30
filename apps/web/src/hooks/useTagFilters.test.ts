@@ -2,13 +2,13 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 
 const fetchModuleTaxonomy = vi.fn()
 
-vi.mock('../services/moduleCatalogService', () => ({
+vi.mock('@services/moduleCatalogService', () => ({
   fetchModuleTaxonomy: (...a: unknown[]) => fetchModuleTaxonomy(...a),
 }))
 
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useTagFilters } from './useTagFilters'
-import type { ModuleTaxonomy } from '../services/moduleCatalogService'
+import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 
 const taxonomy: ModuleTaxonomy = {
   dimensions: [{ id: 'indication', sort_order: 1 }],

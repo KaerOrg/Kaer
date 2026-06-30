@@ -16,7 +16,7 @@ jest.mock('../../../../../store/authStore', () => ({
     selector({ patient: { id: 'patient-1' } }),
 }))
 
-jest.mock('../../../../../services/crisisPlanService', () => ({
+jest.mock('@services/crisisPlanService', () => ({
   fetchPractitionerConfig: jest.fn(),
 }))
 
@@ -25,7 +25,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react-native'
 import { CrisisCopingCardsWidget } from './CrisisCopingCardsWidget'
-import * as service from '../../../../../services/crisisPlanService'
+import * as service from '@services/crisisPlanService'
 
 const svc = service as jest.Mocked<typeof service>
 

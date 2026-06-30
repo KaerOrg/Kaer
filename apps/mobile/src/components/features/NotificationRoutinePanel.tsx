@@ -19,7 +19,7 @@ import {
   updateTimeOverride,
   type NotificationRoutine,
   type NotificationRoutineWithModule,
-} from '../../services/notificationService'
+} from '@services/notificationService'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

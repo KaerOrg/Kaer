@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { AppState, type AppStateStatus } from 'react-native'
-import { RemoteSyncService } from '../../services/sync'
-import { flushRenderMismatchOutbox } from '../../services/renderDiagnosticsService'
+import { RemoteSyncService } from '@services/sync'
+import { flushRenderMismatchOutbox } from '@services/renderDiagnosticsService'
 
 // Déclenche RemoteSyncService.sync() chaque fois que l'app repasse en foreground.
 // À monter une seule fois dans le composant Navigation (ou App.tsx).

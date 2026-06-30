@@ -19,7 +19,7 @@ import {
   updateAppointmentNotes,
   rescheduleAppointment,
   saveAutoConfirmSetting,
-} from '../../services/appointmentService'
+} from '@services/appointmentService'
 import { agendaQueries } from '../../hooks/queries'
 import type {
   AvailabilityRule,
@@ -27,7 +27,7 @@ import type {
   AppointmentWithPatient,
   AppointmentStatus,
 } from '../../lib/calendar.types'
-import type { PatientOption } from '../../services/patientService'
+import type { PatientOption } from '@services/patientService'
 import './AgendaPage.css'
 
 const EMPTY_RULES: AvailabilityRule[] = []

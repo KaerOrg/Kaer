@@ -1,12 +1,12 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchPatientsWithModules } from '../../services/patientService'
+import { fetchPatientsWithModules } from '@services/patientService'
 import {
   fetchPendingInvitations,
   sendInvitation,
   type InvitationDraft,
   type SendInvitationResult,
-} from '../../services/invitationService'
-import { fetchInviteCategories } from '../../services/moduleCatalogService'
+} from '@services/invitationService'
+import { fetchInviteCategories } from '@services/moduleCatalogService'
 
 // Factories `queryOptions` du tableau de bord praticien.
 // Déclaration unique par lecture ; les composants font `useQuery(dashboardQueries.x(id))`

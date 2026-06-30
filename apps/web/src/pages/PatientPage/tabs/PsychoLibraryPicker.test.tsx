@@ -2,8 +2,8 @@ import { vi, beforeEach, describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
-import type { LibraryTopic, PsyEduTheme } from '../../../services/psyeduService'
-import type { ModuleTaxonomy } from '../../../services/moduleCatalogService'
+import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
+import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 
 // ThemeSuggestionButton tire useToast/un service — stub (hors périmètre du picker).
 vi.mock('../../../components/features/ThemeSuggestionButton', () => ({

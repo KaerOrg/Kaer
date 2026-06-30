@@ -9,7 +9,7 @@ import {
   configureForegroundNotifications,
   setupAndroidChannel,
   shouldShowNotificationOnboarding,
-} from '../services/notificationService'
+} from '@services/notificationService'
 import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'

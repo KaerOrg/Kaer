@@ -40,7 +40,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import { useToast } from '../../../contexts/ToastContext'
-import type { ContentField } from '../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 jest.setTimeout(15000)
 

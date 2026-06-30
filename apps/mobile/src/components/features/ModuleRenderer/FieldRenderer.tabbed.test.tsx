@@ -33,7 +33,7 @@ jest.mock('../../../store/authStore', () => ({
     selector({ patient: { id: 'patient-test-id' }, teenMode: false }),
 }))
 
-jest.mock('../../../services/psyeduService', () => ({
+jest.mock('@services/psyeduService', () => ({
   fetchTopicsByModule: jest.fn().mockResolvedValue([]),
   fetchBlocksByTopic: jest.fn().mockResolvedValue([]),
   clearPsyEduCache: jest.fn(),
@@ -56,7 +56,7 @@ jest.mock('lucide-react-native', () => {
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
-import type { ContentField } from '../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 jest.setTimeout(15000)
 

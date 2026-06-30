@@ -13,7 +13,7 @@ import {
   extractUniqueTags,
   extractTopTags,
   type PractitionerNote,
-} from '../../../services/noteService'
+} from '@services/noteService'
 
 const TYPEWRITER_CHAR_MS = 20
 

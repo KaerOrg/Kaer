@@ -1,8 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Mic, MicOff, Loader } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { SpeechRecorder, type RecorderErrorCode } from '../../../services/speechRecorderService'
-import type { RecordingState } from '../../../services/transcriptionService'
+import { SpeechRecorder, type RecorderErrorCode } from '@services/speechRecorderService'
+import type { RecordingState } from '@services/transcriptionService'
 import './SpeechToTextButton.css'
 
 export interface SpeechToTextButtonProps {

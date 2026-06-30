@@ -6,7 +6,7 @@
 // Conformité MDR 2017/745 : affichage de contenu éditorial, zéro interprétation.
 
 import { View, Text } from 'react-native'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
 import { styles } from './styles'
 

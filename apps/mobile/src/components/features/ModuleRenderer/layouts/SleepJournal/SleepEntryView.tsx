@@ -16,7 +16,7 @@ import { Card } from '@ui/Card'
 import {
   getSleepEntry, computeSleepEfficiency, generateId,
 } from '../../../../../lib/database'
-import { saveSleepEntry, deleteSleepEntry } from '../../../../../services/sleepDiaryService'
+import { saveSleepEntry, deleteSleepEntry } from '@services/sleepDiaryService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'

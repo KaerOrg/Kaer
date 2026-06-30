@@ -17,7 +17,7 @@ import { generateId } from '../../../../../lib/database'
 import type { EMRuler } from '../../../../../lib/database'
 import {
   saveEMRuler, listEMRulers, deleteEMRuler,
-} from '../../../../../services/motivationalBalanceService'
+} from '@services/motivationalBalanceService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { styles } from './styles'

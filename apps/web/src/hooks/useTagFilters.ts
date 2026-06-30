@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchModuleTaxonomy, type ModuleTaxonomy } from '../services/moduleCatalogService'
+import { fetchModuleTaxonomy, type ModuleTaxonomy } from '@services/moduleCatalogService'
 
 const EMPTY_TAXONOMY: ModuleTaxonomy = { dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }
 

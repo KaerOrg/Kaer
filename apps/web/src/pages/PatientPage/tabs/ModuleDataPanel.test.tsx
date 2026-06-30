@@ -17,7 +17,7 @@ const mockFetchFearEvolution = vi.fn()
 const mockFetchMedSideEffectsEvolution = vi.fn()
 const mockFetchModuleSummary = vi.fn()
 
-vi.mock('../../../services/engagementService', () => ({
+vi.mock('@services/engagementService', () => ({
   fetchScaleEvolution: (...args: unknown[]) => mockFetchScaleEvolution(...args),
   fetchMoodEvolution: (...args: unknown[]) => mockFetchMoodEvolution(...args),
   fetchFearEvolution: (...args: unknown[]) => mockFetchFearEvolution(...args),

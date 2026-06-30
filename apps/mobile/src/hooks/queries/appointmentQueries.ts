@@ -6,7 +6,7 @@ import {
   fetchPractitionerExceptions,
   fetchBookedSlots,
   cancelAppointment,
-} from '../../services/appointmentService'
+} from '@services/appointmentService'
 
 // Factories `queryOptions` des rendez-vous côté patient.
 export const appointmentQueries = {

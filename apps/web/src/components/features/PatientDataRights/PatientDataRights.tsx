@@ -6,7 +6,7 @@ import { Button } from '../../ui/Button'
 import { Modal } from '../../ui/Modal'
 import { InputField } from '../../ui/InputField'
 import { useToast } from '../../../contexts/ToastContext'
-import { exportPatientData, erasePatientData } from '../../../services/patientDataRightsService'
+import { exportPatientData, erasePatientData } from '@services/patientDataRightsService'
 
 interface PatientDataRightsProps {
   patientId: string

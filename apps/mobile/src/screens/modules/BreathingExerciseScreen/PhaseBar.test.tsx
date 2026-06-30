@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import { render } from '@testing-library/react-native'
 import { PhaseBar } from './PhaseBar'
-import type { BreathingPhase } from '../../../services/breathingService'
+import type { BreathingPhase } from '@services/breathingService'
 
 const PHASES: BreathingPhase[] = [
   { type: 'inhale', seconds: 4 },

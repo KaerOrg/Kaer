@@ -20,11 +20,11 @@ import {
 } from '../../../../../lib/database'
 import {
   saveFearEntry, deleteFearEntry, saveFearSituation, deleteFearSituation,
-} from '../../../../../services/fearTrackerService'
+} from '@services/fearTrackerService'
 import { useTeen } from '../../../../../hooks/useTeen'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import type { ExposureConfig, ExposureDraft, ExposureMode } from './types'
 import { buildSudsSteps, serializeStrategies, deserializeStrategies, sortSteps } from './exposureLogic'
 import { useExposureData } from './useExposureData'

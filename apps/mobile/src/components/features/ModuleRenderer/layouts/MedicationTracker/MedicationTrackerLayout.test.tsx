@@ -7,20 +7,20 @@ jest.mock('../../../../../lib/database', () => ({
 }))
 
 const mockSaveDailyEntry = jest.fn().mockResolvedValue(undefined)
-jest.mock('../../../../../services/dailyEntryService', () => ({
+jest.mock('@services/dailyEntryService', () => ({
   saveDailyEntry: (...a: unknown[]) => mockSaveDailyEntry(...a),
 }))
 
 const mockGetIntakes = jest.fn()
 const mockSaveIntake = jest.fn().mockResolvedValue(undefined)
-jest.mock('../../../../../services/medicationIntakeService', () => ({
+jest.mock('@services/medicationIntakeService', () => ({
   getMedicationIntakes: (...a: unknown[]) => mockGetIntakes(...a),
   saveMedicationIntake: (...a: unknown[]) => mockSaveIntake(...a),
 }))
 
 const mockFetchMeds = jest.fn()
 const mockUpdateMeds = jest.fn().mockResolvedValue({ ok: true })
-jest.mock('../../../../../services/medicationListService', () => ({
+jest.mock('@services/medicationListService', () => ({
   fetchMedications: (...a: unknown[]) => mockFetchMeds(...a),
   updateMedications: (...a: unknown[]) => mockUpdateMeds(...a),
 }))
@@ -58,7 +58,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { MedicationTrackerLayout } from './MedicationTrackerLayout'
 import { shiftDate } from './streakUtils'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 function field(o: Partial<ContentField>): ContentField {
   return {

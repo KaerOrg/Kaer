@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Chip } from '../../ui/Chip'
 import type { ChipTone } from '../../ui/Chip/Chip.types'
 import { selectCardTagRows } from '../../../lib/moduleFilter'
-import type { ModuleTaxonomy } from '../../../services/moduleCatalogService'
+import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 import './ModuleTagChips.css'
 
 const DIMENSION_TONE: Record<string, ChipTone> = {

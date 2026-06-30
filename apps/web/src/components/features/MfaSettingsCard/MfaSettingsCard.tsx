@@ -7,7 +7,7 @@ import { Modal } from '../../ui/Modal'
 import { StatusBadge } from '../../ui/StatusBadge'
 import { useToast } from '../../../contexts/ToastContext'
 import { useAuthStore } from '../../../store/authStore'
-import { unenrollMfa } from '../../../services/authService'
+import { unenrollMfa } from '@services/authService'
 import { MfaEnrollModal } from './MfaEnrollModal'
 
 /**

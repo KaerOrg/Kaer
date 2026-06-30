@@ -31,7 +31,7 @@ const TECHNIQUES = [
 
 const mockFetchTechniques = jest.fn().mockResolvedValue(TECHNIQUES)
 const mockFetchSessions = jest.fn().mockResolvedValue([])
-jest.mock('../../../services/breathingService', () => ({
+jest.mock('@services/breathingService', () => ({
   fetchBreathingTechniques: () => mockFetchTechniques(),
   fetchBreathingSessions: () => mockFetchSessions(),
   getCycleDuration: (t: { phases: { seconds: number }[] }) => t.phases.reduce((a, p) => a + p.seconds, 0),

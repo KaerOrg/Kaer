@@ -12,7 +12,7 @@ import {
   updateLanguagePreference,
   updatePractitionerProfile,
   type MfaStatus,
-} from '../services/authService'
+} from '@services/authService'
 
 interface AuthState {
   practitioner: Practitioner | null

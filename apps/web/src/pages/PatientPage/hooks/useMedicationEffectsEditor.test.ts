@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 const fetchTrackedEffects = vi.fn()
 const updateTrackedEffects = vi.fn()
 
-vi.mock('../../../services/moduleAssignmentService', () => ({
+vi.mock('@services/moduleAssignmentService', () => ({
   fetchTrackedEffects: (...a: unknown[]) => fetchTrackedEffects(...a),
   updateTrackedEffects: (...a: unknown[]) => updateTrackedEffects(...a),
 }))

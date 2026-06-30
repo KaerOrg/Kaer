@@ -4,7 +4,7 @@ import { useToast } from '../../../contexts/ToastContext'
 import {
   unlockPsychoeducation,
   updatePsychoeducationTopics,
-} from '../../../services/moduleAssignmentService'
+} from '@services/moduleAssignmentService'
 import type { PatientModule, PsychoeducationTopicEntry } from '../../../lib/database.types'
 
 type PickerMode = 'off' | 'unlock' | 'edit'

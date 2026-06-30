@@ -2,7 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import {
   fetchUnlockedModules,
   fetchTodayRoutines,
-} from '../../services/homeService'
+} from '@services/homeService'
 
 // Factories `queryOptions` de l'écran d'accueil patient.
 // Chaque entrée déclare UNE FOIS la clé + la fonction de fetch. Les composants

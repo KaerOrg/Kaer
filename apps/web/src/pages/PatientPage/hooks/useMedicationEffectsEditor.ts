@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../../../contexts/ToastContext'
-import { fetchTrackedEffects, updateTrackedEffects } from '../../../services/moduleAssignmentService'
+import { fetchTrackedEffects, updateTrackedEffects } from '@services/moduleAssignmentService'
 import {
   CUSTOM_EFFECT_PALETTE,
   makeCustomKey,

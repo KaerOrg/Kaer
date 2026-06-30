@@ -18,7 +18,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { adminQueries } from '../../hooks/queries'
 import { AdminUserDetail } from './AdminUserDetail'
-import type { AdminUser, AdminUsersQuery, AdminUserSortColumn } from '../../services/adminService'
+import type { AdminUser, AdminUsersQuery, AdminUserSortColumn } from '@services/adminService'
 import './AdminUsersPage.css'
 
 type KindFilter = 'all' | 'patient' | 'practitioner'

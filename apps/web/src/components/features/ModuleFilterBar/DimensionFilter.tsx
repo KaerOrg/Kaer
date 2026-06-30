@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dropdown, type DropdownOption } from '../../ui/Dropdown'
-import type { Tag } from '../../../services/moduleCatalogService'
+import type { Tag } from '@services/moduleCatalogService'
 
 interface DimensionFilterProps {
   dimensionId: string

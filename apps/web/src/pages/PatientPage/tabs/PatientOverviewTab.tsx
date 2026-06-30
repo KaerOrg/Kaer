@@ -5,8 +5,8 @@ import { Button } from '../../../components/ui/Button'
 import { Chip } from '../../../components/ui/Chip'
 import { InputField } from '../../../components/ui/InputField'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleCategory } from '../../../services/moduleCatalogService'
-import type { PractitionerNote } from '../../../services/noteService'
+import type { ModuleCategory } from '@services/moduleCatalogService'
+import type { PractitionerNote } from '@services/noteService'
 
 type Props = {
   modules: PatientModule[]

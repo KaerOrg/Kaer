@@ -5,7 +5,7 @@ import { homeQueries } from './homeQueries'
 
 const mockFetchUnlockedModules = jest.fn()
 const mockFetchTodayRoutines = jest.fn()
-jest.mock('../../services/homeService', () => ({
+jest.mock('@services/homeService', () => ({
   fetchUnlockedModules: (id: string) => mockFetchUnlockedModules(id),
   fetchTodayRoutines: (id: string) => mockFetchTodayRoutines(id),
 }))
