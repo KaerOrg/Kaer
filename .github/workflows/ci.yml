@@ -79,9 +79,23 @@ jobs:
           deno-version: v2.x
       - run: deno test supabase/functions/
 
+  test-sql:
+    name: SQL — Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      # Postgres éphémère (pglite/WASM) → aucun service container requis.
+      # --allow-read (schema.sql + cache npm), --allow-env (config pglite).
+      # --no-lock + --node-modules-dir=none : isole ce job du deno.lock partagé
+      # (réservé aux Edge Functions) ; pglite est épinglé inline (@0.5.3).
+      - run: deno test --allow-read --allow-env --no-lock --node-modules-dir=none supabase/tests/
+
   ci-ok:
     name: CI — OK
     runs-on: ubuntu-latest
-    needs: [typecheck-web, lint-web, test-web, typecheck-mobile, test-mobile, test-edge]
+    needs: [typecheck-web, lint-web, test-web, typecheck-mobile, test-mobile, test-edge, test-sql]
     steps:
       - run: echo "All checks passed"

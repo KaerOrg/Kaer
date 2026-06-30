@@ -273,6 +273,9 @@ where p.id = '<patient_id>'
 | `supabase/functions/purge-retention/retention.ts` | Orchestration pure (garde d'autorisation, mapping RPC, boucle de purge) — accès données injecté via `RetentionStore` |
 | `supabase/functions/purge-retention/index.ts` | Enveloppe Deno : garde service_role, montage du store Supabase, réponse HTTP |
 | `supabase/functions/purge-retention/retention.test.ts` | Tests Deno de l'orchestration (13 cas) |
+| `supabase/tests/schemaFunctions.ts` | Harnais SQL : extraction des fonctions depuis `schema.sql` + chargement dans une base de test |
+| `supabase/tests/schemaFunctions.test.ts` | Tests unitaires de l'extracteur (5 cas) |
+| `supabase/tests/retentionPurge.test.ts` | Tests d'intégration de la sélection SQL de purge sur Postgres éphémère (pglite, 8 cas) |
 
 ### Couverture de test
 
@@ -287,15 +290,24 @@ Deux niveaux, séparés par ce qu'un test peut atteindre sans Postgres vivant :
    d'erreur par table, et échec d'audit non bloquant. Exécution :
    `deno test supabase/functions/` — job CI **« Edge — Tests »** (`denoland/setup-deno`).
 
-2. **Sélection ensembliste SQL (vérifiée manuellement).** Le critère de purge lui-même
-   (coupures temporelles + jointure d'inactivité) vit dans `purge_retention_table` /
-   `fn_inactive_patient_ids`, par nécessité de passage à l'échelle. Le valider exige un
-   Postgres réel (schéma `auth.users`, extensions `pg_cron`/`pg_net`) absent du harnais
-   Node/Deno du dépôt. La vérification se fait via la **requête de comptage à blanc**
-   ci-dessus (même condition, `COUNT` au lieu de `DELETE`) avant activation du cron.
+2. **Sélection ensembliste SQL (testée, automatisée — #38).** Le critère de purge
+   lui-même (coupures temporelles + jointure d'inactivité) vit dans
+   `purge_retention_table` / `fn_inactive_patient_ids`, par nécessité de passage à
+   l'échelle. Il est désormais couvert par un **harnais de test SQL** : un Postgres
+   éphémère compilé en WASM (**pglite**, aucun Docker ni service container) dans lequel
+   on charge les fonctions **telles quelles depuis `schema.sql`** (extraction par
+   `supabase/tests/schemaFunctions.ts` → zéro duplication, toute dérive est détectée),
+   puis on assert les 7 cas d'acceptation : donnée sous le seuil conservée, patient
+   actif (connexion **ou** RDV récent) protégé, patient inactif purgé, dernière
+   connexion `null` traitée comme inactive, ligne pile à la coupure conservée (strict
+   `<`), table non gatée purgée par simple ancienneté, et idempotence (2ᵉ run = 0).
+   Exécution : `deno test --allow-read --allow-env --no-lock --node-modules-dir=none supabase/tests/`
+   — job CI **« SQL — Tests »**. Le harnais est réutilisable pour toute autre fonction
+   `SECURITY DEFINER` du schéma. La requête de comptage à blanc ci-dessus reste utile
+   comme **contrôle de production** (sur données réelles, avant activation du cron).
 
-> ⚠️ MDR : aucun test ne réintroduit de logique de seuil clinique — l'orchestration ne
-> voit que des règles de date issues de `retention_config`.
+> ⚠️ MDR : aucun test ne réintroduit de logique de seuil clinique — orchestration comme
+> sélection ne voient que des règles de date issues de `retention_config`.
 
 ---
 
@@ -306,6 +318,7 @@ Deux niveaux, séparés par ce qu'un test peut atteindre sans Postgres vivant :
 - [x] Job de purge programmé (Edge Function + SQL + pg_cron) fonctionnel et idempotent.
 - [x] Purge tracée (nb lignes, paramètres) dans l'audit log.
 - [x] Schéma à jour, doc à jour.
-- [x] Couverture de test automatisée de l'orchestration (garde, mapping RPC, boucle de purge, traçage) — `retention.test.ts`, job CI « Edge — Tests ». La sélection SQL ensembliste reste vérifiée par la requête à blanc (voir « Couverture de test »).
+- [x] Couverture de test automatisée de l'orchestration (garde, mapping RPC, boucle de purge, traçage) — `retention.test.ts`, job CI « Edge — Tests ».
+- [x] Couverture de test automatisée de la **sélection SQL** (coupures temporelles + gating d'inactivité) — `supabase/tests/retentionPurge.test.ts` sur Postgres éphémère pglite, job CI « SQL — Tests » (#38). Harnais réutilisable pour les fonctions `SECURITY DEFINER` du schéma. À l'occasion, ce harnais a révélé et corrigé un bug latent du chemin gaté : `select id from public.fn_inactive_patient_ids(…)` (la fonction `setof uuid` nomme sa colonne d'après elle-même, pas `id`) → corrigé en `select public.fn_inactive_patient_ids(…)`.
 - [ ] **Durées + fenêtre d'inactivité validées par le DPO** (item non-code, hors périmètre dev).
 - [ ] Activation du `pg_cron` en prod (item non-code, ops).
