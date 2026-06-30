@@ -2408,9 +2408,14 @@ declare
   v_deleted           integer;
 begin
   if p_gate_inactivity then
+    -- NB : `fn_inactive_patient_ids` retourne `setof uuid` ; sa colonne porte le nom
+    -- de la fonction, pas `id`. On la consomme donc en SRF de liste de sélection
+    -- (`select public.fn_…(…)`), forme du test à blanc Option A (cf.
+    -- docs/retention-conservation.md) — un `select id from …` lèverait
+    -- « column "id" does not exist » à l'exécution.
     execute format(
       'delete from public.%I t where t.%I < $1 '
-      'and t.patient_id in (select id from public.fn_inactive_patient_ids($2))',
+      'and t.patient_id in (select public.fn_inactive_patient_ids($2))',
       p_table, p_date_column
     ) using v_retention_cutoff, v_inactivity_cutoff;
   else
