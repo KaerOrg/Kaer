@@ -1,4 +1,4 @@
-jest.mock('../services/notificationService', () => ({
+jest.mock('@services/notificationService', () => ({
   registerPushTokenIfGranted: jest.fn().mockResolvedValue(null),
 }))
 

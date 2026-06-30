@@ -1,4 +1,4 @@
-import type { ContentField, PreviewKind } from '../../../../services/moduleService'
+import type { ContentField, PreviewKind } from '@services/moduleService'
 
 export interface FieldRendererProps {
   preview_kind: PreviewKind

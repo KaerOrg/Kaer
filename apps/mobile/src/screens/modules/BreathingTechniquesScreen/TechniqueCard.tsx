@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@ui/Card'
 import { colors, spacing, radius } from '@theme'
-import { getCycleDuration, type BreathingTechnique } from '../../../services/breathingService'
+import { getCycleDuration, type BreathingTechnique } from '@services/breathingService'
 
 export interface TechniqueCardProps {
   technique: BreathingTechnique

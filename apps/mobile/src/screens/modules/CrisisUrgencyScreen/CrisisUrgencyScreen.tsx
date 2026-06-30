@@ -13,7 +13,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing } from '@theme'
 import { useTeen } from '../../../hooks/useTeen'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
-import { fetchModuleFields, type ContentField } from '../../../services/moduleService'
+import { fetchModuleFields, type ContentField } from '@services/moduleService'
 
 const MODULE_ID = 'crisis_plan'
 

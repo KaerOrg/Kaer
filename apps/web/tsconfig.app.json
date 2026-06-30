@@ -26,7 +26,8 @@
 
     /* Alias */
     "paths": {
-      "@ui/*": ["./src/components/ui/*"]
+      "@ui/*": ["./src/components/ui/*"],
+      "@services/*": ["./src/services/*"]
     }
   },
   "include": ["src"],

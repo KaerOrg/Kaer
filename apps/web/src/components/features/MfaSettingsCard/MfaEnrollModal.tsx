@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
-import { enrollMfaTotp, verifyMfaCode, unenrollMfa } from '../../../services/authService'
+import { enrollMfaTotp, verifyMfaCode, unenrollMfa } from '@services/authService'
 import './MfaSettingsCard.css'
 
 interface MfaEnrollModalProps {

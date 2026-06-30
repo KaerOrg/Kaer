@@ -13,11 +13,11 @@ import {
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import {
   getDailyEntry, getAllDailyEntries, generateId, type DailyEntry,
 } from '../../../../../lib/database'
-import { saveDailyEntry, deleteDailyEntry } from '../../../../../services/dailyEntryService'
+import { saveDailyEntry, deleteDailyEntry } from '@services/dailyEntryService'
 import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'

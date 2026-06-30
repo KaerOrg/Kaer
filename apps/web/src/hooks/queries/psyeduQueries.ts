@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import { fetchLibraryTopics, fetchThemes } from '../../services/psyeduService'
+import { fetchLibraryTopics, fetchThemes } from '@services/psyeduService'
 
 // Factories `queryOptions` du contenu psychoéducatif : la bibliothèque de fiches
 // (`libraryTopics`) et les thèmes (`themes`) sont des référentiels quasi statiques,

@@ -26,7 +26,7 @@ jest.mock('../../../../../contexts/ConfirmDialogContext', () => ({
   useConfirmDialog: () => ({ showConfirm: mockShowConfirm }),
 }))
 
-jest.mock('../../../../../services/crisisPlanService', () => ({
+jest.mock('@services/crisisPlanService', () => ({
   getAnchors: jest.fn(),
   getAnchorPhrase: jest.fn(),
   fetchPractitionerConfig: jest.fn(),
@@ -40,7 +40,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { CrisisAnchorsWidget } from './CrisisAnchorsWidget'
-import * as service from '../../../../../services/crisisPlanService'
+import * as service from '@services/crisisPlanService'
 
 const svc = service as jest.Mocked<typeof service>
 

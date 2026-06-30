@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { spacing } from '@theme'
-import type { BreathingPhase } from '../../../services/breathingService'
+import type { BreathingPhase } from '@services/breathingService'
 
 export interface BreathCircleProps {
   phase: BreathingPhase

@@ -1,7 +1,7 @@
 import { Bed, BedDouble, Calendar, ChevronRight, Clock, Ghost, Moon, Pill, Sparkles } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
 import { RatingSelector } from '../../../../ui/RatingSelector'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 const QUALITY_STEPS = [1, 2, 3, 4, 5]
 

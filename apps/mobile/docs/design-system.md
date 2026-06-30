@@ -32,13 +32,14 @@ Import dans les composants : `import { colors, spacing, radius } from '@theme'`
 
 ## Alias d'import
 
-Deux alias de chemin sont configurés pour éviter les imports relatifs profonds
+Trois alias de chemin sont configurés pour éviter les imports relatifs profonds
 (`../../../../../ui/...`). Ils sont déclarés au même endroit dans la chaîne d'outils :
 
 | Alias | Cible | Exemple |
 |---|---|---|
 | `@ui/*` | `src/components/ui/*` | `import { Chip } from '@ui/Chip'` |
 | `@theme` | `src/theme` (barrel) | `import { colors, spacing } from '@theme'` |
+| `@services/*` | `src/services/*` | `import { unlockModule } from '@services/moduleAssignmentService'` |
 
 Trois points de configuration doivent rester synchronisés :
 

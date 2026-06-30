@@ -34,7 +34,7 @@ const CARREE = {
 }
 
 const mockFetchTechniques = jest.fn().mockResolvedValue([CARREE])
-jest.mock('../../../services/breathingService', () => ({
+jest.mock('@services/breathingService', () => ({
   fetchBreathingTechniques: () => mockFetchTechniques(),
   getCycleDuration: (t: { phases: { seconds: number }[] }) => t.phases.reduce((a, p) => a + p.seconds, 0),
   saveBreathingSession: jest.fn().mockResolvedValue(undefined),

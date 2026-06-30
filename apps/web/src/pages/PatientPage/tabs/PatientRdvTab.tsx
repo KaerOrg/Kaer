@@ -9,9 +9,9 @@ import {
   updateAppointmentStatus,
   updateAppointmentNotes,
   rescheduleAppointment,
-} from '../../../services/appointmentService'
+} from '@services/appointmentService'
 import { patientQueries, agendaQueries } from '../../../hooks/queries'
-import type { PatientOption } from '../../../services/patientService'
+import type { PatientOption } from '@services/patientService'
 import type { AppointmentWithPatient, AppointmentStatus } from '../../../lib/calendar.types'
 
 type Props = {

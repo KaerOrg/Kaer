@@ -7,7 +7,7 @@ jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ tt: (_m: string, k: string) => `tt:${k}` }),
 }))
 
-jest.mock('../../../services/moduleService', () => ({
+jest.mock('@services/moduleService', () => ({
   fetchModuleFields: jest.fn(),
 }))
 
@@ -25,7 +25,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import CrisisUrgencyScreen from './CrisisUrgencyScreen'
-import * as moduleService from '../../../services/moduleService'
+import * as moduleService from '@services/moduleService'
 
 const svc = moduleService as jest.Mocked<typeof moduleService>
 

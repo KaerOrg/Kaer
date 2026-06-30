@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, fireEvent } from '@testing-library/react-native'
 import { TodaySchedule } from './TodaySchedule'
-import type { TodayRoutine } from '../../../services/homeService'
+import type { TodayRoutine } from '@services/homeService'
 
 jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),

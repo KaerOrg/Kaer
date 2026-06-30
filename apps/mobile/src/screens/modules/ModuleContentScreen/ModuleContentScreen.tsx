@@ -8,7 +8,7 @@ import { AppStackParamList } from '../../../navigation/AppStack'
 import {
   fetchModuleFields,
   type ModuleFieldsResult,
-} from '../../../services/moduleService'
+} from '@services/moduleService'
 import { moduleQueries } from '../../../hooks/queries'
 import { useRefreshOnFocus } from '../../../hooks/useRefreshOnFocus'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer'

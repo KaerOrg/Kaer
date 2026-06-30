@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { partitionBySection } from './partitionBySection'
-import type { ContentField } from '../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 function field(field_type: string, overrides: Partial<ContentField> = {}): ContentField {
   return {

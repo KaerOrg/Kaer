@@ -10,7 +10,7 @@ import { InputField } from '../../components/ui/InputField'
 import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
 import { getInitials } from '../../components/features/Layout/Layout.utils'
 import { MfaSettingsCard } from '../../components/features/MfaSettingsCard'
-import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '../../services/avatarService'
+import { uploadPractitionerAvatar, savePractitionerAvatarUrl } from '@services/avatarService'
 import { referenceQueries } from '../../hooks/queries'
 import './ProfilePage.css'
 

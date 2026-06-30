@@ -20,7 +20,7 @@ import {
   type AvailabilityRule,
   type AvailabilityException,
   type ComputedSlot,
-} from '../services/appointmentService'
+} from '@services/appointmentService'
 import { appointmentQueries } from '../hooks/queries'
 import { colors, spacing, radius, fontSize } from '@theme'
 import type { AppStackParamList } from '../navigation/AppStack'

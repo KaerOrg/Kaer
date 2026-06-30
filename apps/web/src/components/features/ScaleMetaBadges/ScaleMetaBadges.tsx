@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { AGE_BADGE_CONFIG, CATEGORY_KEY, type ScaleCategory, type TargetAge } from '../../../services/scaleService'
+import { AGE_BADGE_CONFIG, CATEGORY_KEY, type ScaleCategory, type TargetAge } from '@services/scaleService'
 import './ScaleMetaBadges.css'
 
 type Props = {

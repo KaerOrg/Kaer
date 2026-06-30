@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import { collectIndexed } from '@kaer/shared'
 import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 // Aperçu praticien (« Vue patient ») du motif `weighted_balance` : sélection de
 // valeurs (chips) + balance Pour/Contre. Statique ; les vraies saisies patient

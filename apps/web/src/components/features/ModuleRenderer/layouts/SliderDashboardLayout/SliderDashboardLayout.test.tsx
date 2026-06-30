@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect } from 'vitest'
 import { SliderDashboardLayout } from './SliderDashboardLayout'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 // `t` déterministe : renvoie la clé i18n telle quelle (cf. FieldRenderer.test.tsx).
 const t = (key: string) => key

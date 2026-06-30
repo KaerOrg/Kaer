@@ -5,7 +5,7 @@ import { Button } from '../../ui/Button'
 import { InputField } from '../../ui/InputField'
 import { Modal } from '../../ui/Modal'
 import { useToast } from '../../../contexts/ToastContext'
-import { submitThemeSuggestion, THEME_SUGGESTION_MAX } from '../../../services/themeSuggestionService'
+import { submitThemeSuggestion, THEME_SUGGESTION_MAX } from '@services/themeSuggestionService'
 import './ThemeSuggestionButton.css'
 
 /**

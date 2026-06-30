@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Info, Plus, Bell, Trash2, Flame } from 'lucide-react'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
 import { Button } from '../../../../ui/Button'
 import { Tabs } from '../../../../ui/Tabs'

@@ -7,7 +7,7 @@ vi.mock('react-i18next', () => ({
 import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { DisclaimerBanner } from './DisclaimerBanner'
-import type { ContentField } from '../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 function disclaimer(props: Record<string, unknown> = {}): ContentField {
   return {

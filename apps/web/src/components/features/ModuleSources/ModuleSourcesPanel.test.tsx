@@ -7,11 +7,11 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('../../../services/moduleSourcesService', () => ({
+vi.mock('@services/moduleSourcesService', () => ({
   fetchSourcesByModule: vi.fn(),
 }))
 
-import { fetchSourcesByModule } from '../../../services/moduleSourcesService'
+import { fetchSourcesByModule } from '@services/moduleSourcesService'
 import { ModuleSourcesPanel } from './ModuleSourcesPanel'
 
 const mockedFetch = vi.mocked(fetchSourcesByModule)

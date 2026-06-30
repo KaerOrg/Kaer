@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import { Waves, Wind, Brain, Heart, Sun, Clock } from 'lucide-react'
 import { collectIndexed } from '@kaer/shared'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { parseDurations } from './crisisLogic'
 
 // Aperçu praticien (lecture seule) du compagnon de crise mobile. La version

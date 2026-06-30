@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { computeAvailableSlots, jsDayToSchema } from '../../../services/appointmentService'
+import { computeAvailableSlots, jsDayToSchema } from '@services/appointmentService'
 import type { AppointmentWithPatient } from '../../../lib/calendar.types'
 import type { WeekGridProps } from './WeekGrid.types'
 import './WeekGrid.css'

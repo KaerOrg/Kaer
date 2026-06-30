@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react-native'
 import { FieldRow } from './FieldRow'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 

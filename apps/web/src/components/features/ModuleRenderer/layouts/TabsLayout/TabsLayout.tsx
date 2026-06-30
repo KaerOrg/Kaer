@@ -1,7 +1,7 @@
 import { useState, useMemo, type ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen } from 'lucide-react'
-import type { ContentField, PreviewKind } from '../../../../../services/moduleService'
+import type { ContentField, PreviewKind } from '@services/moduleService'
 
 interface Props {
   fields: ContentField[]

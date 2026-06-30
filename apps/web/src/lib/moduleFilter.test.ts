@@ -5,7 +5,7 @@ import {
   filterCategoriesByTags,
   selectCardTagRows,
 } from './moduleFilter'
-import type { ModuleCategory, Tag } from '../services/moduleCatalogService'
+import type { ModuleCategory, Tag } from '@services/moduleCatalogService'
 
 const mod = (id: string) => ({ id, icon: '', mobile_icon: '', color: '#000' })
 

@@ -18,6 +18,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       '@ui': fileURLToPath(new URL('./src/components/ui', import.meta.url)),
+      '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
     },
   },
   build: {

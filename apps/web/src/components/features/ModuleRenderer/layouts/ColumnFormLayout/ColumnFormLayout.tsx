@@ -1,7 +1,7 @@
 import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
 import { RatingSelector } from '../../../../ui/RatingSelector'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 interface Props {
   fields: ContentField[]

@@ -53,7 +53,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import type { ContentField } from '../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 jest.setTimeout(15000)
 

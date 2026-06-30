@@ -11,7 +11,7 @@ import type {
   FearPoint,
   MedEffectPoint,
   SleepPoint,
-} from '../../../services/engagementService'
+} from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'

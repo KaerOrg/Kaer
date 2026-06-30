@@ -14,7 +14,7 @@ import {
   type MedEffectPoint,
   type SleepPoint,
   type ModuleSummary,
-} from '../../services/engagementService'
+} from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).

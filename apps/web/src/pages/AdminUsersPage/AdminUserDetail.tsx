@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
 import { StatusBadge } from '../../components/ui/StatusBadge'
 import { PatientDataRights } from '../../components/features/PatientDataRights'
-import type { AdminUser } from '../../services/adminService'
+import type { AdminUser } from '@services/adminService'
 
 interface AdminUserDetailProps {
   readonly user: AdminUser

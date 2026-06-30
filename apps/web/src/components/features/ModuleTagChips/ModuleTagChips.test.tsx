@@ -6,7 +6,7 @@ vi.mock('react-i18next', () => ({
 }))
 
 import { ModuleTagChips } from './ModuleTagChips'
-import type { Tag } from '../../../services/moduleCatalogService'
+import type { Tag } from '@services/moduleCatalogService'
 
 const taxonomy = {
   tagsByDimension: new Map<string, Tag[]>([

@@ -7,7 +7,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-
 import { Alert, ActivityIndicator } from 'react-native'
 import MoodTrackerScreen from './MoodTrackerScreen'
 import * as database from '../../../lib/database'
-import * as notificationService from '../../../services/notificationService'
+import * as notificationService from '@services/notificationService'
 import type { ScaleEntry } from '../../../lib/database'
 
 jest.setTimeout(15000)
@@ -83,18 +83,18 @@ jest.mock('../../../lib/database', () => ({
   deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../../services/notificationService', () => ({
+jest.mock('@services/notificationService', () => ({
   getAllRoutinesForPatient: jest.fn().mockResolvedValue([]),
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
-jest.mock('../../../services/moodMarkerService', () => ({
+jest.mock('@services/moodMarkerService', () => ({
   saveMoodMarker: jest.fn().mockResolvedValue(undefined),
   deleteMoodMarker: jest.fn().mockResolvedValue(undefined),
   getAllMoodMarkers: jest.fn().mockResolvedValue([]),
 }))
 
-jest.mock('../../../services/scaleEntryService', () => ({
+jest.mock('@services/scaleEntryService', () => ({
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
 }))
 

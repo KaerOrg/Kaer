@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '../../../services/moduleService'
+import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '@services/moduleService'
 import { Tabs, type TabItem } from '../../ui/Tabs'
 import { FieldRenderer } from '../ModuleRenderer'
 import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'

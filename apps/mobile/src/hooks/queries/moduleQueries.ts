@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import { fetchPatientModuleConfig } from '../../services/moduleService'
+import { fetchPatientModuleConfig } from '@services/moduleService'
 
 // Factories `queryOptions` du moteur de module (côté patient).
 // NB : `fetchModuleFields` n'est PAS ici — ce service a déjà son propre cache mémoire

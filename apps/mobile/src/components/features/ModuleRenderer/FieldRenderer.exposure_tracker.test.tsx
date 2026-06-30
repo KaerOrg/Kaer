@@ -10,7 +10,7 @@ jest.mock('../../../lib/database', () => ({
 }))
 
 // Mutations passent par le service (et non plus par lib/database directement)
-jest.mock('../../../services/fearTrackerService', () => ({
+jest.mock('@services/fearTrackerService', () => ({
   saveFearEntry: jest.fn().mockResolvedValue(undefined),
   deleteFearEntry: jest.fn().mockResolvedValue(undefined),
   saveFearSituation: jest.fn().mockResolvedValue(undefined),
@@ -27,8 +27,8 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
-import * as service from '../../../services/fearTrackerService'
-import type { ContentField } from '../../../services/moduleService'
+import * as service from '@services/fearTrackerService'
+import type { ContentField } from '@services/moduleService'
 import type { FearEntry, FearSituation } from '../../../lib/database'
 
 jest.setTimeout(15000)

@@ -1,9 +1,9 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { TechniqueCard } from './TechniqueCard'
-import type { BreathingTechnique } from '../../../services/breathingService'
+import type { BreathingTechnique } from '@services/breathingService'
 
-jest.mock('../../../services/breathingService', () => ({
+jest.mock('@services/breathingService', () => ({
   getCycleDuration: (t: { phases: { seconds: number }[] }) => t.phases.reduce((a, p) => a + p.seconds, 0),
 }))
 

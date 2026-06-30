@@ -1,13 +1,13 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import { resolvePatientRef } from '../../services/patientRefService'
+import { resolvePatientRef } from '@services/patientRefService'
 import {
   fetchPatientHeader,
   setTeenMode as setTeenModeSvc,
   saveGeneralNote as saveGeneralNoteSvc,
-} from '../../services/patientService'
-import { fetchPatientModules } from '../../services/moduleAssignmentService'
-import { fetchNotes } from '../../services/noteService'
-import { fetchAppointmentsForPatient } from '../../services/appointmentService'
+} from '@services/patientService'
+import { fetchPatientModules } from '@services/moduleAssignmentService'
+import { fetchNotes } from '@services/noteService'
+import { fetchAppointmentsForPatient } from '@services/appointmentService'
 
 // Factories `queryOptions` du dossier patient (vue praticien).
 // `resolveRef` traduit le token public de l'URL en patient_id réel ; toutes les

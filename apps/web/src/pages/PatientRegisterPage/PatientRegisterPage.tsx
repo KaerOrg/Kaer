@@ -6,7 +6,7 @@ import { InputField } from '../../components/ui/InputField'
 import {
   signUpPatientFromInvitation,
   validateInvitationToken,
-} from '../../services/invitationService'
+} from '@services/invitationService'
 import '../LoginPage/LoginPage.css'
 import './PatientRegisterPage.css'
 

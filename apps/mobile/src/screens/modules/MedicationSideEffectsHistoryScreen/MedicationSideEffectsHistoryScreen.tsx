@@ -17,7 +17,7 @@ import {
   makeCustomKey,
   type TrackedEffect,
 } from '../../../lib/sideEffectsCatalog'
-import { fetchTrackedEffects, updateTrackedEffects } from '../../../services/sideEffectsConfigService'
+import { fetchTrackedEffects, updateTrackedEffects } from '@services/sideEffectsConfigService'
 
 const SCALE_ID = 'medication_side_effects'
 const MODULE_COLOR = '#8B5CF6'

@@ -10,7 +10,7 @@ vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => null }))
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '../../../services/moduleCatalogService'
+import type { ModuleItem } from '@services/moduleCatalogService'
 import type { Medication } from '@kaer/shared'
 
 const MOD_ITEM: ModuleItem = { id: 'medication_adherence', icon: 'pill', mobile_icon: 'pill', color: '#2C6E72' }

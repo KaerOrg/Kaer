@@ -25,7 +25,7 @@ import {
   saveAnchorPhrase,
   fetchPractitionerConfig,
   type CrisisAnchor,
-} from '../../../../../services/crisisPlanService'
+} from '@services/crisisPlanService'
 
 const MAX_ANCHORS = 3
 

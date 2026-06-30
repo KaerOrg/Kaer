@@ -11,7 +11,7 @@ vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => <div data-testid="d
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ChronobiologyCard, type ChronobiologyCardProps } from './ChronobiologyCard'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '../../../services/moduleCatalogService'
+import type { ModuleItem } from '@services/moduleCatalogService'
 
 function renderCard(props: Partial<ChronobiologyCardProps> = {}) {
   const onToggleData = vi.fn()

@@ -12,7 +12,7 @@ vi.mock('./ModuleChart', () => ({
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { SleepDataPanel } from './SleepDataPanel'
-import type { SleepPoint } from '../../../services/engagementService'
+import type { SleepPoint } from '@services/engagementService'
 
 function makePoint(overrides: Partial<SleepPoint>): SleepPoint {
   return {

@@ -7,7 +7,7 @@
 import { useTranslation } from 'react-i18next'
 import { View, Text, Pressable, ScrollView, Linking } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { CrisisUrgencyContactsWidget } from '../../fields/CrisisUrgencyContactsWidget'
 import { styles } from './styles'
 

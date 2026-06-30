@@ -1,4 +1,4 @@
-import type { ContentField } from '../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 /**
  * Répartit des fields entre leurs sections (`section_id`) et les fields

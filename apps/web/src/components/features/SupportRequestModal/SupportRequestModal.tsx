@@ -11,7 +11,7 @@ import {
   SUPPORT_REASONS,
   SUPPORT_DESCRIPTION_MAX,
   type SupportReason,
-} from '../../../services/supportService'
+} from '@services/supportService'
 import './SupportRequestModal.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

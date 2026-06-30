@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Bell, X, BellOff } from 'lucide-react'
 import { Button } from '../../ui/Button'
 import { useTranslation } from 'react-i18next'
-import { getActivityFeed } from '../../../services/notificationRoutineService'
+import { getActivityFeed } from '@services/notificationRoutineService'
 import type { ActivityFeedEvent } from '../../../lib/database.types'
 import './ActivityFeedPanel.css'
 

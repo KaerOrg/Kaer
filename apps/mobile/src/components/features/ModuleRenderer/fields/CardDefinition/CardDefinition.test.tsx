@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react-native'
 import { CardDefinition } from './CardDefinition'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 jest.mock('../../../../../hooks/useModuleT', () => ({
   useModuleTranslation: () => (key: string) => key,

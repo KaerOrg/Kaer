@@ -5,7 +5,7 @@ import { Toggle } from '../../ui/Toggle/Toggle'
 import { Button } from '../../ui/Button/Button'
 import { Tooltip } from '../../ui/Tooltip'
 import { TimePicker } from '../../ui/TimePicker'
-import { timesOverlap } from '../../../services/appointmentService'
+import { timesOverlap } from '@services/appointmentService'
 import type { AvailabilityRule, DayOfWeek } from '../../../lib/calendar.types'
 import './AvailabilityEditor.css'
 

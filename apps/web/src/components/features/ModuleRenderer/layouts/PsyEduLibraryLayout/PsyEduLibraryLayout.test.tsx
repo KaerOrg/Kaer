@@ -7,7 +7,7 @@ import { PsyEduLibraryLayout } from './PsyEduLibraryLayout'
 
 const mockFetchTopics = vi.fn()
 const mockFetchThemes = vi.fn()
-vi.mock('../../../../../services/psyeduService', () => ({
+vi.mock('@services/psyeduService', () => ({
   fetchLibraryTopics: () => mockFetchTopics(),
   fetchThemes: () => mockFetchThemes(),
 }))

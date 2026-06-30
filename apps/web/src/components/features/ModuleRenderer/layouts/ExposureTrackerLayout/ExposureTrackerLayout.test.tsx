@@ -7,7 +7,7 @@ vi.mock('react-i18next', () => ({
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { ExposureTrackerLayout } from './ExposureTrackerLayout'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 // `t` déterministe : renvoie la clé i18n telle quelle.
 const t = (key: string) => key

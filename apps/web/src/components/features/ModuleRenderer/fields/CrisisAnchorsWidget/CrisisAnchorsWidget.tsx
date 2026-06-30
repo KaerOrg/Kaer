@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, ImageOff } from 'lucide-react'
 import { usePatientView } from '../../../../../contexts/usePatientView'
-import { fetchCrisisPlanConfig } from '../../../../../services/crisisPlanService'
+import { fetchCrisisPlanConfig } from '@services/crisisPlanService'
 import './CrisisAnchorsWidget.css'
 
 export function CrisisAnchorsWidget() {

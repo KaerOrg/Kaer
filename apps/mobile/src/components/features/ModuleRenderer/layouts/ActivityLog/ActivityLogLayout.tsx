@@ -22,13 +22,13 @@ import { colors } from '@theme'
 import {
   getAllActivityRecords, getActivityRecord, generateId, type ActivityRecord,
 } from '../../../../../lib/database'
-import { saveActivityRecord, deleteActivityRecord } from '../../../../../services/activityRecordService'
+import { saveActivityRecord, deleteActivityRecord } from '@services/activityRecordService'
 import { formatDateFull } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { RatingSelector } from '@ui/RatingSelector'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { ActivityListCard } from './ActivityListCard'
 import { alStyles } from './styles'
 

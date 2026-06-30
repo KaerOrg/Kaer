@@ -8,7 +8,7 @@ import {
   saveCSSRSAssessment,
   deleteCSSRSAssessment,
   type CSSRSAssessment,
-} from '../../services/cssrsService'
+} from '@services/cssrsService'
 import {
   CSSRS_SECTIONS,
   CSSRS_IDEATION_COUNT,

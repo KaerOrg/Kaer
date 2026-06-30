@@ -1,6 +1,6 @@
 import { ChevronRight, Heart, Info, PlayCircle, Shield } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
 
 interface Props {

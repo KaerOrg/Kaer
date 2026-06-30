@@ -14,7 +14,7 @@ import {
   getCycleDuration,
   saveBreathingSession,
   type BreathingTechnique,
-} from '../../../services/breathingService'
+} from '@services/breathingService'
 import { generateId } from '../../../lib/database'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'

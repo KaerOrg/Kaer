@@ -6,7 +6,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import MedicationSideEffectsHistoryScreen from './MedicationSideEffectsHistoryScreen'
 import * as database from '../../../lib/database'
-import * as configService from '../../../services/sideEffectsConfigService'
+import * as configService from '@services/sideEffectsConfigService'
 
 jest.setTimeout(15000)
 
@@ -68,12 +68,12 @@ jest.mock('../../../lib/database', () => ({
   deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('../../../services/notificationService', () => ({
+jest.mock('@services/notificationService', () => ({
   getAllRoutinesForPatient: jest.fn().mockResolvedValue([]),
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
-jest.mock('../../../services/sideEffectsConfigService', () => ({
+jest.mock('@services/sideEffectsConfigService', () => ({
   fetchTrackedEffects: jest.fn().mockResolvedValue([]),
   updateTrackedEffects: jest.fn().mockResolvedValue({ ok: true }),
 }))

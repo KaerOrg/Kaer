@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 import { render } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
-import type { ModuleSummary } from '../../../services/engagementService'
+import type { ModuleSummary } from '@services/engagementService'
 
 describe('ModuleSummaryPanel', () => {
   it('affiche le message de chargement quand loading', () => {

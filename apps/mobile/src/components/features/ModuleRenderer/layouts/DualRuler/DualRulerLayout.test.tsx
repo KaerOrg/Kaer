@@ -1,7 +1,7 @@
 const mockSaveEMRuler = jest.fn().mockResolvedValue(undefined)
 const mockListEMRulers = jest.fn()
 const mockDeleteEMRuler = jest.fn().mockResolvedValue(undefined)
-jest.mock('../../../../../services/motivationalBalanceService', () => ({
+jest.mock('@services/motivationalBalanceService', () => ({
   saveEMRuler: (...a: unknown[]) => mockSaveEMRuler(...a),
   listEMRulers: (...a: unknown[]) => mockListEMRulers(...a),
   deleteEMRuler: (...a: unknown[]) => mockDeleteEMRuler(...a),

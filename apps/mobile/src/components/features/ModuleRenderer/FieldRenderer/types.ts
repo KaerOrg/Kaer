@@ -1,4 +1,4 @@
-import type { ContentField, PreviewKind } from '../../../../services/moduleService'
+import type { ContentField, PreviewKind } from '@services/moduleService'
 
 /** Interaction passée au layout `questionnaire` en mode patient interactif. */
 export interface QuestionnaireInteraction {

@@ -19,13 +19,13 @@ import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPa
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
-import { type LibraryTopic, type PsyEduTheme } from '../../../services/psyeduService'
-import { type ModuleCategory, type ModuleItem } from '../../../services/moduleCatalogService'
+import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
+import { type ModuleCategory, type ModuleItem } from '@services/moduleCatalogService'
 import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
-} from '../../../services/moduleAssignmentService'
-import { fetchScaleMeta, type ScaleMetaRow } from '../../../services/scaleService'
+} from '@services/moduleAssignmentService'
+import { fetchScaleMeta, type ScaleMetaRow } from '@services/scaleService'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'

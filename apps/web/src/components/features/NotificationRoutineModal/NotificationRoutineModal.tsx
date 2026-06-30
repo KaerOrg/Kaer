@@ -12,7 +12,7 @@ import {
   createRoutine,
   updateRoutine,
   deleteRoutine,
-} from '../../../services/notificationRoutineService'
+} from '@services/notificationRoutineService'
 import type { NotificationRoutine } from '../../../lib/database.types'
 import './NotificationRoutineModal.css'
 

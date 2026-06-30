@@ -7,8 +7,8 @@ import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ThemeSuggestionButton } from '../../../components/features/ThemeSuggestionButton'
 import { moduleMatchesTagFilters, type ActiveTagFilters } from '../../../lib/moduleFilter'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
-import type { LibraryTopic, PsyEduTheme } from '../../../services/psyeduService'
-import type { ModuleTaxonomy, Tag } from '../../../services/moduleCatalogService'
+import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
+import type { ModuleTaxonomy, Tag } from '@services/moduleCatalogService'
 
 type Props = {
   mode: 'unlock' | 'edit'

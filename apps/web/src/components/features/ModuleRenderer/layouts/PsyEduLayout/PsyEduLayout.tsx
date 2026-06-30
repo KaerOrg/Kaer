@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
-import { fetchTopicsByModule, type PsyEduTopic } from '../../../../../services/psyeduService'
+import { fetchTopicsByModule, type PsyEduTopic } from '@services/psyeduService'
 import { PsyEduBlocks } from './PsyEduBlocks'
 
 interface Props {

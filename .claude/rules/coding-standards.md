@@ -84,34 +84,43 @@ part dans un layout, un widget ou un helper dédié — jamais inline dans le ro
 
 ---
 
-## Imports — alias `@ui` / `@theme`, jamais de relatif profond
+## Imports — alias `@ui` / `@theme` / `@services`, jamais de relatif profond
 
 > **Règle absolue, les deux apps.** Un primitive du design system s'importe par
-> l'alias `@ui`, le thème par `@theme` — **jamais** par un chemin relatif profond
-> (`../../../../../ui/X`, `../../theme`). Les alias sont configurés et opérationnels
+> l'alias `@ui`, le thème par `@theme`, un service par `@services` — **jamais** par un
+> chemin relatif profond (`../../../../../ui/X`, `../../theme`,
+> `../../../../../services/xxxService`). Les alias sont configurés et opérationnels
 > côté web **et** mobile.
 
 | Alias | Cible | Exemple |
 |---|---|---|
 | `@ui/<Composant>` | `apps/<app>/src/components/ui/<Composant>` | `import { Radio, type RadioOption } from '@ui/Radio'` |
 | `@theme` (mobile) | `apps/mobile/src/theme` (barrel) | `import { colors, spacing } from '@theme'` |
+| `@services/<service>` | `apps/<app>/src/services/<service>` | `import { unlockModule } from '@services/moduleAssignmentService'` |
 
 Config : web → `vite.config.ts` (`resolve.alias`) + `tsconfig.app.json` (`paths`) ;
 mobile → `tsconfig.json` (`paths`, lu nativement par le metro d'Expo) + `package.json`
-(`jest.moduleNameMapper`). Les deux apps résolvent déjà `@ui/*` (et `@theme` côté
-mobile) en build, en runtime **et** en test.
+(`jest.moduleNameMapper`). Les deux apps résolvent déjà `@ui/*`, `@services/*` (et
+`@theme` côté mobile) en build, en runtime **et** en test.
 
 ```ts
 // ❌ chemin relatif profond — illisible, casse au moindre déplacement de fichier
 import { Radio } from '../../../../../ui/Radio'
+import { unlockModule } from '../../../../../services/moduleAssignmentService'
 // ✅ alias
 import { Radio, type RadioOption } from '@ui/Radio'
+import { unlockModule } from '@services/moduleAssignmentService'
 ```
 
-> **Réflexe avant de commiter un import de primitive** : s'il commence par `../`,
-> le convertir en `@ui/…`. Un `grep -rn "\.\./.*ui/" apps/*/src --include="*.tsx"`
-> doit rester vide pour les nouveaux fichiers. La migration vers `@ui`/`@theme` est
-> déjà actée (commit `6c55bef` + suivants) — ne pas réintroduire de relatif profond.
+> **Réflexe avant de commiter un import** : s'il commence par `../` et vise un primitive
+> ou un service, le convertir en `@ui/…` / `@services/…`. Les deux greps
+> `grep -rn "\.\./.*ui/" apps/*/src --include="*.tsx"` et
+> `grep -rnE "from '(\.\./)+services/" apps/*/src --include="*.ts*"` doivent rester
+> vides pour les nouveaux fichiers. **Exception `@services`** : un fichier interne à
+> `src/services/` qui importe un service frère par `./X` reste en relatif local (même
+> logique que pour `@ui`). La migration vers `@ui`/`@theme` (commit `6c55bef` +
+> suivants) puis `@services` (#88) est déjà actée — ne pas réintroduire de relatif
+> profond.
 
 ## Le design system EST ta boîte à outils — pas ton filet de sécurité
 

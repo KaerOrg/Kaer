@@ -24,8 +24,8 @@ import type { EMBalanceItem } from '../../../../../lib/database'
 import {
   listEMValues, saveEMValues,
   listEMBalanceItems, saveEMBalanceItem, deleteEMBalanceItem,
-} from '../../../../../services/motivationalBalanceService'
-import type { ContentField } from '../../../../../services/moduleService'
+} from '@services/motivationalBalanceService'
+import type { ContentField } from '@services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { styles } from './styles'

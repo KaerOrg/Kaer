@@ -6,7 +6,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ScaleEntryScreen from './ScaleEntryScreen'
 import * as database from '../../../lib/database'
-import * as moduleService from '../../../services/moduleService'
+import * as moduleService from '@services/moduleService'
 
 jest.setTimeout(15000)
 
@@ -40,7 +40,7 @@ jest.mock('../../../store/authStore', () => ({
     sel ? sel({ patient: null }) : { patient: null },
 }))
 
-jest.mock('../../../services/notificationService', () => ({
+jest.mock('@services/notificationService', () => ({
   logScaleSubmission: jest.fn(),
 }))
 
@@ -79,7 +79,7 @@ jest.mock('../../../components/features/ModuleRenderer/FieldRenderer', () => {
   }
 })
 
-jest.mock('../../../services/moduleService', () => ({
+jest.mock('@services/moduleService', () => ({
   fetchModuleFields: jest.fn(),
 }))
 

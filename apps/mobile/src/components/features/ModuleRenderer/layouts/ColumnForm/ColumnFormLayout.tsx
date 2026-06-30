@@ -18,11 +18,11 @@ import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
 import { collectIndexed } from '@kaer/shared'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
-import { saveFormEntry, deleteFormEntry } from '../../../../../services/formEntryService'
+import { saveFormEntry, deleteFormEntry } from '@services/formEntryService'
 import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'

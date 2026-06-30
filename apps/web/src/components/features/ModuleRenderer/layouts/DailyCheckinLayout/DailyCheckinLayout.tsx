@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
 import { Tabs } from '../../../../ui/Tabs'
 import type { TabItem } from '../../../../ui/Tabs/Tabs.types'

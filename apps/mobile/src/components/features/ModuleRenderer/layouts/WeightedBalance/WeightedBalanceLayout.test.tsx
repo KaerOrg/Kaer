@@ -3,7 +3,7 @@ const mockSaveEMValues = jest.fn().mockResolvedValue(undefined)
 const mockListEMBalanceItems = jest.fn()
 const mockSaveEMBalanceItem = jest.fn().mockResolvedValue(undefined)
 const mockDeleteEMBalanceItem = jest.fn().mockResolvedValue(undefined)
-jest.mock('../../../../../services/motivationalBalanceService', () => ({
+jest.mock('@services/motivationalBalanceService', () => ({
   listEMValues: (...a: unknown[]) => mockListEMValues(...a),
   saveEMValues: (...a: unknown[]) => mockSaveEMValues(...a),
   listEMBalanceItems: (...a: unknown[]) => mockListEMBalanceItems(...a),
@@ -27,7 +27,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { WeightedBalanceLayout } from './WeightedBalanceLayout'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 function configField(props: Record<string, string>): ContentField {
   return {

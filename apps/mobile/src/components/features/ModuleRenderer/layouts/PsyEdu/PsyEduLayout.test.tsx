@@ -2,7 +2,7 @@ jest.mock('../../../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../../../../services/psyeduService', () => ({
+jest.mock('@services/psyeduService', () => ({
   fetchTopicsByModule: jest.fn(),
   fetchBlocksByTopic: jest.fn(),
   clearPsyEduCache: jest.fn(),
@@ -42,7 +42,7 @@ jest.mock('i18next', () => {
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { PsyEduLayout } from './PsyEduLayout'
-import * as psyeduService from '../../../../../services/psyeduService'
+import * as psyeduService from '@services/psyeduService'
 import type { PsyEduTopic, PsyEduBlock } from '@kaer/shared'
 
 jest.setTimeout(15000)

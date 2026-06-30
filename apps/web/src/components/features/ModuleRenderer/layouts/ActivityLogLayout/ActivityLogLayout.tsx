@@ -1,7 +1,7 @@
 import { Calendar, Check, Circle, ListChecks, Plus } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
 import { RatingSelector } from '../../../../ui/RatingSelector'
-import type { ContentField } from '../../../../../services/moduleService'
+import type { ContentField } from '@services/moduleService'
 
 const PIP_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 

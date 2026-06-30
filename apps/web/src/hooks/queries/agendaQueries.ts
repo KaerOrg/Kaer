@@ -4,8 +4,8 @@ import {
   fetchExceptions,
   fetchAppointmentsForWeek,
   fetchAutoConfirmSetting,
-} from '../../services/appointmentService'
-import { fetchPatientOptions } from '../../services/patientService'
+} from '@services/appointmentService'
+import { fetchPatientOptions } from '@services/patientService'
 
 // Factories `queryOptions` de l'agenda praticien.
 // `exceptions` et `appointmentsForWeek` sont clés par semaine (from/to) → changer de

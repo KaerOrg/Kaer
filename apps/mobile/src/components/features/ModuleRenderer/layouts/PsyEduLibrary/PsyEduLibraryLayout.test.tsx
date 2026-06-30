@@ -2,7 +2,7 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }))
 
-jest.mock('../../../../../services/psyeduService', () => ({
+jest.mock('@services/psyeduService', () => ({
   fetchTopicsByIds: jest.fn(),
   fetchThemes: jest.fn(),
   fetchBlocksByTopic: jest.fn(),
@@ -49,7 +49,7 @@ jest.mock('i18next', () => {
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { PsyEduLibraryLayout } from './PsyEduLibraryLayout'
-import * as psyeduService from '../../../../../services/psyeduService'
+import * as psyeduService from '@services/psyeduService'
 import type { PsyEduTopic, PsyEduTheme } from '@kaer/shared'
 
 jest.setTimeout(15000)

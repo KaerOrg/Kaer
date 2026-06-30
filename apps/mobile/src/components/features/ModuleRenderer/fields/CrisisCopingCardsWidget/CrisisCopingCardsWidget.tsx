@@ -13,7 +13,7 @@ import { colors, spacing, radius } from '@theme'
 import { Card } from '@ui/Card'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
-import { fetchPractitionerConfig } from '../../../../../services/crisisPlanService'
+import { fetchPractitionerConfig } from '@services/crisisPlanService'
 import type { CrisisPlanCopingCard } from '@kaer/shared'
 
 export function CrisisCopingCardsWidget() {

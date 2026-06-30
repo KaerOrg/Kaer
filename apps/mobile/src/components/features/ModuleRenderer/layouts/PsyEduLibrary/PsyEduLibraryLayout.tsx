@@ -9,7 +9,7 @@ import {
   fetchThemes,
   fetchBlocksByTopic,
   markTopicRead,
-} from '../../../../../services/psyeduService'
+} from '@services/psyeduService'
 import { PsyEduBlockRenderer } from '../../../PsyEduBlockRenderer'
 import { useAuthStore } from '../../../../../store/authStore'
 import { colors, spacing, radius } from '@theme'

@@ -14,7 +14,7 @@ import {
   fetchBreathingSessions,
   type BreathingTechnique,
   type BreathingSession,
-} from '../../../services/breathingService'
+} from '@services/breathingService'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
 import { useTranslation } from 'react-i18next'

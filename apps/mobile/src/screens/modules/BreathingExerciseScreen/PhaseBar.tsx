@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native'
 import { colors, radius } from '@theme'
-import type { BreathingPhase } from '../../../services/breathingService'
+import type { BreathingPhase } from '@services/breathingService'
 
 export interface PhaseBarProps {
   phases: BreathingPhase[]
