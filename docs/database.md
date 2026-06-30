@@ -310,6 +310,29 @@ RLS activée sur toutes les tables. Résumé des policies :
 |--------|-----------|-----------|
 | module_settings_own | ALL | `practitioner_id = auth.uid()` |
 
+### `render_mismatch_log` — Observabilité du moteur de rendu (issue #90)
+
+Journal des non-match du moteur de rendu (config qu'une app ne sait pas afficher).
+**Télémétrie technique, zéro donnée patient.** Écrite exclusivement par l'Edge Function
+`report-render-mismatch` (service_role), dédupliquée par `signature`. Détail complet :
+[`render-diagnostics.md`](render-diagnostics.md).
+
+| Colonne | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `occurred_at` / `last_seen_at` | timestamptz | 1ʳᵉ et dernière observation de la signature |
+| `platform` | text | `web` \| `mobile` |
+| `app_version` | text | version de l'app émettrice |
+| `level` | text | `preview_kind` \| `field_type` \| `widget_type` \| `missing_text_code` |
+| `module_id`, `preview_kind`, `field_id`, `field_type`, `widget_type`, `reason` | text | contexte d'enquête |
+| `signature` | text | UNIQUE — clé de déduplication (pilote l'upsert) |
+| `occurrence_count` | int | nombre d'occurrences de la signature |
+| `email_sent_at` | timestamptz | dernier email envoyé (pilote le cooldown) |
+
+| Policy | Opérations | Condition |
+|--------|-----------|-----------|
+| render_mismatch_log_admin_select | SELECT | `fn_is_admin()` (insert/update : service_role uniquement) |
+
 ---
 
 ## Appliquer le schéma

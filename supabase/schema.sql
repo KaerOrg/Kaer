@@ -2245,6 +2245,58 @@ alter table public.theme_suggestions enable row level security;
 
 
 -- ============================================================
+-- TABLE : render_mismatch_log (Observabilité du moteur de rendu — issue #90)
+-- ============================================================
+-- Journal des NON-MATCH du moteur de rendu : une config (preview_kind / field_type /
+-- widget_type / text_code) que web ou mobile ne sait pas afficher. Écrite EXCLUSIVEMENT
+-- par l'Edge Function `report-render-mismatch` (service_role), qui déduplique par
+-- `signature`, applique un cooldown + un coupe-circuit global, et notifie l'équipe par
+-- email (Resend) à la 1ʳᵉ occurrence d'une signature.
+--
+-- ⚠️ MDR / RGPD : télémétrie TECHNIQUE uniquement. AUCUNE donnée patient (pas de payload
+-- de saisie, pas d'identifiant patient) — uniquement de la config structurelle. Hors
+-- périmètre « donnée de santé ».
+--
+-- Déduplication : `signature` = platform + module_id + preview_kind + field_type +
+-- widget_type + reason (calculée côté edge function). 1ʳᵉ occurrence → insert + email ;
+-- occurrences suivantes → increment `occurrence_count` + MAJ `last_seen_at`, email
+-- seulement si le cooldown depuis `email_sent_at` est dépassé.
+
+create table if not exists public.render_mismatch_log (
+  id               uuid        primary key default gen_random_uuid(),
+  -- 1ʳᵉ observation de la signature (immuable) et dernière observation (incrémentée).
+  occurred_at      timestamptz not null default now(),
+  last_seen_at     timestamptz not null default now(),
+  platform         text        not null check (platform in ('web', 'mobile')),
+  app_version      text,
+  level            text        not null check (level in
+                     ('preview_kind', 'field_type', 'widget_type', 'missing_text_code')),
+  module_id        text,
+  preview_kind     text,
+  field_id         text,
+  field_type       text,
+  widget_type      text,
+  reason           text,
+  -- Clé de déduplication — une ligne par problème distinct. UNIQUE → upsert côté edge.
+  signature        text        not null unique,
+  occurrence_count int         not null default 1,
+  -- Horodatage du dernier email envoyé pour cette signature (pilote le cooldown).
+  email_sent_at    timestamptz
+);
+
+create index if not exists idx_render_mismatch_log_occurred
+  on public.render_mismatch_log(occurred_at desc);
+
+alter table public.render_mismatch_log enable row level security;
+
+-- Insertion / mise à jour : Edge Function (service_role, bypass RLS) uniquement.
+-- Lecture : praticiens ADMIN seulement (télémétrie d'exploitation, pas de donnée métier).
+drop policy if exists render_mismatch_log_admin_select on public.render_mismatch_log;
+create policy render_mismatch_log_admin_select on public.render_mismatch_log
+  for select to authenticated using (public.fn_is_admin());
+
+
+-- ============================================================
 -- TABLE : retention_config (Politique de conservation RGPD — art. 5.1.e)
 -- ============================================================
 -- Une ligne par table soumise à une durée de conservation limitée.
