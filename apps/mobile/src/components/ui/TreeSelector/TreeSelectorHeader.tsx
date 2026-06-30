@@ -1,7 +1,6 @@
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
-import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { styles } from './styles'
 
 interface TreeSelectorHeaderProps {
@@ -11,18 +10,19 @@ interface TreeSelectorHeaderProps {
   breadcrumb: string
   /** Progression 0→1 (largeur de la barre). */
   progress: number
+  /** Libellé d'accessibilité du bouton retour (déjà traduit). */
+  backLabel: string
 }
 
 /** En-tête des modes de saisie : flèche retour + barre de progression teintée. */
-export function TreeSelectorHeader({ onBack, showProgress, accentColor, breadcrumb, progress }: TreeSelectorHeaderProps) {
-  const t = useModuleTranslation()
+export function TreeSelectorHeader({ onBack, showProgress, accentColor, breadcrumb, progress, backLabel }: TreeSelectorHeaderProps) {
   return (
     <View style={styles.header}>
       <Pressable
         onPress={onBack}
         style={styles.backBtn}
         accessibilityRole="button"
-        accessibilityLabel={t('common.back')}
+        accessibilityLabel={backLabel}
         testID="back-button"
       >
         <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />

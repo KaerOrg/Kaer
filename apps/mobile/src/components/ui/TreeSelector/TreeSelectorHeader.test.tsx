@@ -1,7 +1,3 @@
-jest.mock('../../../../../hooks/useModuleT', () => ({
-  useModuleTranslation: () => (key: string) => key,
-}))
-
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
 import React from 'react'
@@ -14,6 +10,7 @@ const baseProps = {
   accentColor: '#F59E0B',
   breadcrumb: 'Joie › Plaisir',
   progress: 0.5,
+  backLabel: 'Retour',
 }
 
 describe('TreeSelectorHeader', () => {

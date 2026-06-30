@@ -278,6 +278,17 @@ Props de `tree_selector_config` (toutes optionnelles, valeurs = clés i18n sauf 
 niveau de l'arbre ; `enable_context` ajoute une étape de chips multi-choix neutres,
 persistée dans `tree_selections.context_json`. Réf. module : `emotion_wheel`.
 
+> **Architecture (séparation métier / présentation).** Le layout
+> `features/ModuleRenderer/layouts/TreeSelector/TreeSelectorLayout` est un **wrapper
+> métier mince** : il parse la config ci-dessus (`useTreeSelectorConfig`),
+> charge/persiste/supprime via `treeSelectionService` (`useTreeSelectorData`),
+> traduit tous les libellés et mappe l'arbre + l'historique vers les props du
+> primitive **générique et réutilisable** `@ui/TreeSelector`. Toute l'interaction
+> (navigation, étapes, saisie) vit dans le primitive `ui/`, sans aucune connaissance
+> du moteur de modules. Le layout reconstruit le chemin de persistance (avec
+> `text_code`) depuis les `pathIds` opaques renvoyés par `onSubmit`. Détail du
+> primitive : `apps/mobile/docs/design-system.md` § `TreeSelector`.
+
 **Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
 `breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le
 preview praticien reste en `field_row`)

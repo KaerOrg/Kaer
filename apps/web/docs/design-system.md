@@ -98,7 +98,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle |
+| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -623,6 +623,38 @@ Pour un indicateur d'état sémantique avec valeur, préférer `StatusBadge`.
 | `removeLabel` | `string` | — | Label a11y du × (requis avec `onRemove`) |
 | `title` | `string` | — | Tooltip **natif** (~1 s, non configurable). Pour une infobulle rapide sur une puce `iconOnly`, l'envelopper dans `Tooltip` et neutraliser le natif avec `title=""` |
 | `className` | `string` | — | Classe additionnelle |
+
+### `TreeSelector`
+
+`components/ui/TreeSelector/`. Sélecteur **hiérarchique guidé générique** (pendant web
+du primitive mobile `@ui/TreeSelector`) : navigation niveau par niveau dans un arbre
+(famille → sous-catégorie → … profondeur libre), avec trois étapes optionnelles —
+intensité brute (1–N), contexte (chips multi-choix), notes — puis un écran historique.
+100 % présentationnel : **aucun service, aucune persistance, aucune clé i18n de domaine**.
+Tout entre par props (arbre + config + libellés déjà traduits), tout sort par `onSubmit`
+(`{ pathIds, intensity, context, notes }`, identités opaques). `onSubmit` est **optionnel** —
+l'aperçu praticien est en lecture seule (le primitive revient à l'historique sans persister).
+La machine d'état vit dans `useTreeSelectorFlow` ; chaque étape est un composant dédié
+(`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `…Context` / `…Notes`).
+
+```tsx
+import { TreeSelector } from '@ui/TreeSelector'
+
+<TreeSelector nodes={uiNodes} config={uiConfig} texts={texts} footerText={footerText} />
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `color`/`emoji` optionnels) |
+| `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte (`{ code, label }`) |
+| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits |
+| `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |
+| `onSubmit` | `(r: TreeSelectorSubmit) => void` | Optionnel — sélection validée (le wrapper praticien ne persiste pas) |
+
+> **Wrapper métier** : `features/ModuleRenderer/layouts/TreeSelectorLayout` parse la config
+> DB-driven (`module_content_fields`), traduit et mappe vers ces props.
+> **Conformité MDR** : les teintes codent l'identité de famille (passée par l'appelant),
+> jamais une gravité. Le CSS du primitive vit dans `ui/TreeSelector/TreeSelector.css`.
 
 ### `Tooltip`
 

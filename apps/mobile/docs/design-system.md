@@ -58,7 +58,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -539,6 +539,59 @@ Pour un indicateur d'état sémantique **rempli** (fond coloré, label + valeur)
 ```
 
 > **Règle : toute puce (chip statique, sélectionnable, badge contour) passe par `Chip`, jamais un `View` + `Text` + `styles.chip` assemblés à la main.**
+
+---
+
+### `TreeSelector` (`src/components/ui/TreeSelector/`)
+
+Sélecteur **hiérarchique guidé générique** : navigation niveau par niveau dans un
+arbre de nœuds (famille → sous-catégorie → … profondeur libre), avec trois étapes
+optionnelles enchaînées — intensité brute (1–N), contexte (chips multi-choix), notes
+libres — puis un historique des sélections passées. 100 % présentationnel : **aucun
+service, aucune persistance, aucune clé i18n de domaine**. Tout entre par props
+(arbre + entrées + config + libellés déjà traduits) et ressort par callbacks
+(`onSubmit`, `onDelete`). Les identités (ids de nœuds, codes de contexte) sont
+opaques — le primitive les renvoie tels quels, le parent les interprète.
+
+La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque étape est un
+composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `…Context`
+/ `…Notes`) — un fichier = un composant.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `color`/`icon`/`emoji` optionnels) |
+| `entries` | `TreeSelectorEntry[]` | View-models d'historique déjà résolus (libellés, date, badge intensité formatés) |
+| `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
+| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits |
+| `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |
+| `loading` / `saving` | `boolean` | États de chargement / persistance |
+| `onSubmit` | `(r: TreeSelectorSubmit) => Promise<void>` | Sélection validée : `{ pathIds, intensity, context, notes }` |
+| `onDelete` | `(id: string) => void` | Suppression d'une entrée d'historique |
+
+```tsx
+import { TreeSelector } from '@ui/TreeSelector'
+
+<TreeSelector
+  nodes={uiNodes}
+  entries={uiEntries}
+  config={uiConfig}
+  texts={texts}
+  footerText={footerText}
+  loading={loading}
+  saving={saving}
+  onSubmit={handleSubmit}   // le parent reconstruit le chemin depuis pathIds + persiste
+  onDelete={handleDelete}
+/>
+```
+
+> **Conformité MDR** : aucune couleur ne code une gravité — les teintes/emojis codent
+> l'**identité de famille** (transmise par l'appelant). Le primitive affiche la valeur
+> brute d'intensité sans label interprétatif.
+>
+> **Wrapper métier** : le pont vers le moteur de modules (`preview_kind='tree_selector'`)
+> est `features/ModuleRenderer/layouts/TreeSelector/TreeSelectorLayout` — il parse la
+> config DB-driven, traduit, charge/persiste via `treeSelectionService` et mappe vers
+> ces props. Voir `docs/module-engine.md`.
 
 ---
 
