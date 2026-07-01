@@ -276,7 +276,7 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, appoi
   return (
     <section className="patient-notes">
       {/* ── Formulaire nouvelle note ─────────────────────────── */}
-      <Card className="patient-notes__form-card">
+      <Card className="patient-notes__form-card" header={{ title: t('notes.form_title') }}>
         <div className="patient-notes__form">
         <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
           <div className="patient-notes__textarea-inner">

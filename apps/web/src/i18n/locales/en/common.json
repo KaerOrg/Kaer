@@ -1685,6 +1685,7 @@
   },
   "notes": {
     "section_title": "Notes",
+    "form_title": "Add a note",
     "placeholder": "Add a note…",
     "save_button": "Save",
     "edit_button": "Edit",
