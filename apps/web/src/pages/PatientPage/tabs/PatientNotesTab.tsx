@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, CalendarClock } from 'lucide-react'
 import { useToast } from '../../../contexts/ToastContext'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import { Chip } from '@ui/Chip'
 import { InputField } from '@ui/InputField'
 import { SpeechToTextButton } from '@ui/SpeechToTextButton'
@@ -275,7 +276,8 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, appoi
   return (
     <section className="patient-notes">
       {/* ── Formulaire nouvelle note ─────────────────────────── */}
-      <div className="patient-notes__form">
+      <Card className="patient-notes__form-card" header={{ title: t('notes.form_title') }}>
+        <div className="patient-notes__form">
         <div className={`patient-notes__textarea-frame ${isRecording ? 'patient-notes__textarea-frame--recording' : ''}`}>
           <div className="patient-notes__textarea-inner">
             {isRecording && (
@@ -346,7 +348,8 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, appoi
         {noteError && !editingNoteId && (
           <p className="patient-notes__error">{noteError}</p>
         )}
-      </div>
+        </div>
+      </Card>
 
       {/* ── Filtres (RDV + tags) ──────────────────────────────── */}
       {(apptFilterOptions.length > 1 || allTags.length > 0) && (
