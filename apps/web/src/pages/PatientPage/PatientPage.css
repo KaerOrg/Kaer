@@ -289,10 +289,25 @@
   margin-bottom: var(--spacing-sm);
 }
 
-/* Sélecteur de consultation en ligne dans la rangée d'actions du formulaire de saisie. */
+/* Sélecteur de consultation en ligne dans la rangée d'actions du formulaire de saisie :
+   libellé « Consultation » à gauche + champ, sur la même ligne. */
 .patient-notes__appt-select {
-  width: 200px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 300px;
   flex-shrink: 0;
+}
+
+.patient-notes__appt-select-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.patient-notes__appt-select-field {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Filtre par RDV dans la barre de filtres. */
