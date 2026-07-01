@@ -709,6 +709,7 @@ export interface Database {
           id: string
           practitioner_id: string
           patient_id: string
+          appointment_id: string | null
           content: string
           tags: string[]
           created_at: string
@@ -717,10 +718,12 @@ export interface Database {
         Insert: {
           practitioner_id: string
           patient_id: string
+          appointment_id?: string | null
           content: string
           tags?: string[]
         }
         Update: {
+          appointment_id?: string | null
           content?: string
           tags?: string[]
         }
