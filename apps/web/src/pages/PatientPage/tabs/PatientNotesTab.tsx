@@ -298,15 +298,18 @@ export function PatientNotesTab({ patientId, practitionerId, initialNotes, appoi
         <div className="patient-notes__tag-actions-row">
           {newNoteApptOptions.length > 1 && (
             <div className="patient-notes__appt-select">
-              <Dropdown
-                compact
-                searchable={false}
-                ariaLabel={t('notes.appointment_link_label')}
-                placeholder={t('notes.appointment_select_placeholder')}
-                options={newNoteApptOptions}
-                value={newNoteAppointmentId}
-                onChange={setNewNoteAppointmentId}
-              />
+              <span className="patient-notes__appt-select-label">{t('notes.appointment_link_label')}</span>
+              <div className="patient-notes__appt-select-field">
+                <Dropdown
+                  compact
+                  searchable={false}
+                  ariaLabel={t('notes.appointment_link_label')}
+                  placeholder={t('notes.appointment_select_placeholder')}
+                  options={newNoteApptOptions}
+                  value={newNoteAppointmentId}
+                  onChange={setNewNoteAppointmentId}
+                />
+              </div>
             </div>
           )}
           <div className="patient-notes__tag-row">
