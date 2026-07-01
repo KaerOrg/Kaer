@@ -1845,7 +1845,15 @@
     "filter_clear": "Tout afficher",
     "empty_filtered": "Aucune note pour ce tag.",
     "tag_search_placeholder": "Rechercher un tag…",
-    "tag_remove": "Retirer {{tag}}"
+    "tag_remove": "Retirer {{tag}}",
+    "appointment_link_label": "Consultation",
+    "appointment_none": "Aucune (note libre)",
+    "appointment_select_placeholder": "Choisir une consultation…",
+    "linked_appointment": "Consultation du {{date}}",
+    "filter_appointment_label": "Filtrer par consultation",
+    "filter_appointment_all": "Toutes les consultations",
+    "filter_appointment_unlinked": "Notes libres (sans consultation)",
+    "empty_filtered_appointment": "Aucune note pour cette consultation."
   },
   "speech": {
     "start": "Dicter",
