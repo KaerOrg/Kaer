@@ -122,11 +122,14 @@
   margin-bottom: 16px;
 }
 
+.patient-notes__form-card {
+  margin-bottom: 20px;
+}
+
 .patient-notes__form {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 /* ── Bordure lumineuse rotative pendant l'enregistrement ─────────────────── */
