@@ -166,6 +166,7 @@ export const PREVIEW_KINDS = [
   'stage_wheel',
   'dual_ruler',
   'weighted_balance',
+  'breathing_pacer',
 ] as const
 
 export type PreviewKind = (typeof PREVIEW_KINDS)[number]

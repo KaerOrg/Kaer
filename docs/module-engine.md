@@ -63,6 +63,7 @@ Valeurs de `preview_kind` et leur layout :
 | `stage_wheel` | Sélecteur de stade en sélection exclusive (modèle transthéorique de Prochaska, 6 stades par défaut) + historique. Mobile : éditeur SQLite (`em_rulers.stage`, via `motivationalBalanceService`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.stage_*`), `stageCount` configurable. MDR : auto-positionnement déclaratif, aucune progression imposée | `motivational_balance` (onglet « Stade ») |
 | `dual_ruler` | Deux échelles 0-10 (importance / confiance via `RatingSelector`) + justifications + engagement + historique. Mobile : éditeur SQLite (`em_rulers`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.rulers_*`). MDR : valeurs brutes, aucun seuil | `motivational_balance` (onglet « Thermomètres ») |
 | `weighted_balance` | Sélection de valeurs (chips, max configurable) + balance Pour/Contre dont chaque raison porte un poids 1-N (`RatingSelector` track, monochrome). Mobile : éditeur SQLite (`em_values` + `em_balance_items`). Web : aperçu structurel statique. Liste de valeurs lue d'un field `weighted_balance_config` (clés indexées `value_1..`, `max_values`) ; libellés dérivés du `moduleId`. MDR : pondération subjective, aucune couleur de gravité | `motivational_balance` (onglet « Balance ») |
+| `breathing_pacer` | Liste des techniques de respiration (config lue des fields `breathing_technique` + `breathing_phase`) + historique des sessions, chaque carte ouvrant un lecteur d'exercice animé (machine multi-phases inspiration/rétention/expiration, cercle + barre de phases) dans une modale. Mobile : `BreathingPacerLayout` interactif (sessions SQLite via `breathingService`). Web : aperçu praticien = `field_row` descriptifs (rendu comme `fields`). Nommé par motif, `moduleId` dérivé. MDR : exercice guidé neutre, aucune conclusion | `breathing_techniques` |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -289,9 +290,9 @@ persistée dans `tree_selections.context_json`. Réf. module : `emotion_wheel`.
 > `text_code`) depuis les `pathIds` opaques renvoyés par `onSubmit`. Détail du
 > primitive : `apps/mobile/docs/design-system.md` § `TreeSelector`.
 
-**Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
-`breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le
-preview praticien reste en `field_row`)
+**Config `breathing_techniques`** (config-first, issue #69 — lus par
+`breathingService.techniquesFromFields()` puis rendus par le layout `breathing_pacer`
+du renderer générique, issue #19 ; le preview praticien web reste en `field_row`)
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
@@ -516,6 +517,7 @@ interface FieldRendererProps {
 'stage_wheel'     → StageWheelLayout (mobile = éditeur SQLite em_rulers.stage ; web = aperçu structurel)
 'dual_ruler'      → DualRulerLayout (mobile = éditeur SQLite em_rulers ; web = aperçu structurel)
 'weighted_balance'→ WeightedBalanceLayout (mobile = éditeur SQLite em_values+em_balance_items ; web = aperçu structurel)
+'breathing_pacer' → BreathingPacerLayout (mobile = cartes techniques + exercice animé en modale, sessions SQLite ; web = aperçu field_row via FieldsLayout)
 ```
 
 **Filtrage initial commun aux 4 layouts :**

@@ -52,7 +52,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('grounding',               'cognitive',   'coming_soon', 15, false),
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
-  ('breathing_techniques',    'anxiety',     'fields',      19, false),
+  ('breathing_techniques',    'anxiety',     'breathing_pacer', 19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),

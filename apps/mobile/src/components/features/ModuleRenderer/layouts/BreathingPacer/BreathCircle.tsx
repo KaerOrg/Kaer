@@ -9,6 +9,8 @@ export interface BreathCircleProps {
   progress: number // 0 → 1 au sein de la phase courante
   color: string
   countdown: number
+  /** Module courant : la clé i18n du libellé de phase en est dérivée. */
+  moduleId: string
 }
 
 // ─── Cercle animé ─────────────────────────────────────────────────────────────
@@ -21,6 +23,7 @@ export const BreathCircle = React.memo(function BreathCircle({
   progress,
   color,
   countdown,
+  moduleId,
 }: BreathCircleProps) {
   const { t } = useTranslation()
   // Scale : inspiration → grandit, expiration → rétrécit, rétentions → stable
@@ -52,7 +55,7 @@ export const BreathCircle = React.memo(function BreathCircle({
         ]}
       >
         <Text style={[styles.countdown, { color }]}>{countdown}</Text>
-        <Text style={[styles.phaseLabel, { color }]}>{t(`modules.breathing_techniques.phase_${phase.type}`)}</Text>
+        <Text style={[styles.phaseLabel, { color }]}>{t(`modules.${moduleId}.phase_${phase.type}`)}</Text>
       </View>
     </View>
   )

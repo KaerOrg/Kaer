@@ -6,6 +6,7 @@
 
 import { FIELDLESS_LAYOUTS } from '@kaer/shared'
 import { ActivityLogLayout } from '../layouts/ActivityLog'
+import { BreathingPacerLayout } from '../layouts/BreathingPacer'
 import { CardsLayout } from '../layouts/Cards'
 import { ChronoMonthLayout } from '../layouts/ChronoMonth'
 import { ColumnFormLayout } from '../layouts/ColumnForm'
@@ -116,6 +117,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'stage_wheel') return <StageWheelLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'weighted_balance') return <WeightedBalanceLayout fields={visibleFields} moduleId={moduleId ?? ''} accentColor={accentColor} />
+  if (preview_kind === 'breathing_pacer') return <BreathingPacerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
 
   return null
 }

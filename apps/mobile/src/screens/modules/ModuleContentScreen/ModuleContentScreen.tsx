@@ -34,6 +34,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'psyedu_library',
   'tabbed',
   'chrono_month',
+  'breathing_pacer',
 ])
 
 // Layouts qui ont besoin de la config patient (patient_modules.config).

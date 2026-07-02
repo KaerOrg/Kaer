@@ -56,14 +56,23 @@ function toTechnique(field: ContentField): BreathingTechnique {
 }
 
 /**
+ * Convertit les fields d'un module en techniques de respiration.
+ * Pur (aucun I/O) : partagé par `fetchBreathingTechniques` (service) et le layout
+ * `breathing_pacer` (qui reçoit déjà les fields et évite un second fetch).
+ */
+export function techniquesFromFields(fields: ContentField[]): BreathingTechnique[] {
+  return fields
+    .filter((f) => f.field_type === 'breathing_technique')
+    .map(toTechnique)
+}
+
+/**
  * Charge les techniques de respiration depuis la base, ordonnées par sort_order.
  * S'appuie sur le cache mémoire de fetchModuleFields (un fetch par session).
  */
 export async function fetchBreathingTechniques(): Promise<BreathingTechnique[]> {
   const { fields } = await fetchModuleFields(MODULE_ID)
-  return fields
-    .filter((f) => f.field_type === 'breathing_technique')
-    .map(toTechnique)
+  return techniquesFromFields(fields)
 }
 
 /** Historique local des sessions de respiration, les plus récentes d'abord. */
