@@ -40,6 +40,7 @@
     "save_error": "Unable to save. Please try again.",
     "load_error": "Unable to load this module. Check your connection and try again.",
     "retry": "Retry",
+    "error_boundary_description": "Try again to continue.",
     "saved": "Saved",
     "back": "Back",
     "previous": "Previous",

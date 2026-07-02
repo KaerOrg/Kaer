@@ -6,13 +6,18 @@ import { injectTheme } from './theme'
 import './i18n'
 import App from './App.tsx'
 import { queryClient } from './lib/queryClient'
+import { ErrorBoundary } from './components/features/ErrorBoundary'
+import { installGlobalErrorHandlers } from './services/errorReportingService'
 
 injectTheme()
+installGlobalErrorHandlers()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

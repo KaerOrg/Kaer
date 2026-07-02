@@ -209,6 +209,31 @@ export interface RenderMismatch {
   reason: string
 }
 
+// ─── Alerte email sur erreur applicative (issue #96) ─────────────────────────
+// Généralisation du pattern render-mismatch (#90) à deux catégories d'erreur :
+// un crash (exception de rendu non gérée, promise rejection non gérée) ou une
+// opération échouée (échec réseau / serveur). Télémétrie TECHNIQUE uniquement :
+// ZÉRO donnée patient, jamais de payload de saisie ni d'identifiant patient.
+
+export const APP_ERROR_KINDS = ['crash', 'failed_operation'] as const
+export type AppErrorKind = (typeof APP_ERROR_KINDS)[number]
+
+// Construit par le point de capture (ErrorBoundary, handler global, wrapper
+// fetch) — le service émetteur de chaque app y ajoute `platform`+`app_version`.
+export interface AppErrorDescriptor {
+  kind: AppErrorKind
+  message: string
+  route: string | null
+  stack: string | null
+  reason: string | null
+}
+
+// Payload envoyé par les apps à l'edge function `report-app-error`.
+export interface AppError extends AppErrorDescriptor {
+  platform: 'web' | 'mobile'
+  app_version: string
+}
+
 // Une ligne hydratée de `module_content_fields` + ses `field_props` agrégés et ses enfants.
 export interface ContentField {
   id: string

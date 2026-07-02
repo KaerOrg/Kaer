@@ -11,7 +11,9 @@
     "delete": "Delete",
     "show_more": "Show 3 more symptoms",
     "show_less": "Collapse",
-    "done": "Done"
+    "done": "Done",
+    "error_boundary_description": "Reload the page to continue.",
+    "reload": "Reload page"
   },
   "nav": {
     "profile_menu": "Profile menu",

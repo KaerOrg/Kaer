@@ -1,6 +1,7 @@
 import * as SQLite from 'expo-sqlite'
 import { getSyncOutboxStore } from './syncOutbox'
 import { getRenderMismatchOutboxStore } from './renderMismatchOutbox'
+import { getAppErrorOutboxStore } from './appErrorOutbox'
 
 let db: SQLite.SQLiteDatabase | null = null
 
@@ -78,6 +79,7 @@ export async function initDatabase(): Promise<void> {
     () => createEMValuesTable(database),
     () => getSyncOutboxStore(database).init(),
     () => getRenderMismatchOutboxStore(database).init(),
+    () => getAppErrorOutboxStore(database).init(),
   ]
   for (const step of steps) {
     try { await step() } catch { /* table déjà présente ou erreur isolée — on continue */ }
