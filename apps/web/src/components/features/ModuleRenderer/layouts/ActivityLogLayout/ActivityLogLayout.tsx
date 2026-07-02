@@ -1,9 +1,7 @@
-import { Calendar, Check, Circle, ListChecks, Plus } from 'lucide-react'
-import { Button } from '../../../../ui/Button'
-import { RatingSelector } from '../../../../ui/RatingSelector'
+import { Calendar, CalendarRange, Check, Circle, Clock, ListChecks, Plus } from 'lucide-react'
+import { Button } from '@ui/Button'
+import { ActivityLogPipScale } from './ActivityLogPipScale'
 import type { ContentField } from '@services/moduleService'
-
-const PIP_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 interface Props {
   fields: ContentField[]
@@ -11,29 +9,34 @@ interface Props {
 }
 
 // Aperçu fidèle au mobile : reproduit le mode entry du module behavioral_activation
-// (saisie d'une activité) précédé d'un récap "list mode" : tabs Liste/Mois, FAB +,
-// 2 cartes d'activités mock. Source mobile : ActivityLogLayout.tsx.
+// (cycle prédire/faire/constater) précédé d'un récap "week/list mode" : tabs
+// Semaine/Liste, 2 cartes d'activités mock, FAB +. Les libellés sont lus depuis
+// les props du field `activity_log_config` (même contrat que le mobile).
+// Source mobile : ActivityLogLayout.tsx (mobile).
 export function ActivityLogLayout({ fields, t }: Props) {
-  const ft = (type: string): string => {
-    const f = fields.find(field => field.field_type === type)
-    return f?.text_code ? t(f.text_code) : ''
+  const configField = fields.find(f => f.field_type === 'activity_log_config')
+  const lbl = (key: string): string => {
+    const code = configField?.props[key]
+    return code ? t(code) : ''
   }
 
-  const tabList = ft('activity_log_tab_list_label')
-  const tabMonth = ft('activity_log_tab_month_label')
-  const addBtn = ft('activity_log_add_btn')
-  const dateLabel = ft('activity_log_date_label')
-  const sectionActivity = ft('activity_log_section_activity_title')
-  const sectionEvaluation = ft('activity_log_section_evaluation_title')
-  const sectionNotes = ft('activity_log_section_notes_title')
-  const activityPlaceholder = ft('activity_log_activity_placeholder')
-  const pleasureLabel = ft('activity_log_pleasure_label')
-  const pleasureSub = ft('activity_log_pleasure_sublabel')
-  const masteryLabel = ft('activity_log_mastery_label')
-  const masterySub = ft('activity_log_mastery_sublabel')
-  const markDone = ft('activity_log_mark_done_label')
-  const doneLabel = ft('activity_log_done_label')
-  const saveLabel = ft('activity_log_save_label')
+  const tabWeek = lbl('tab_week_label')
+  const tabList = lbl('tab_list_label')
+  const addBtn = lbl('add_btn')
+  const dateLabel = lbl('date_label')
+  const plannedTimeLabel = lbl('planned_time_label')
+  const sectionActivity = lbl('section_activity_title')
+  const sectionExpected = lbl('section_expected_title')
+  const sectionNotes = lbl('section_notes_title')
+  const activityPlaceholder = lbl('activity_placeholder')
+  const pleasureLabel = lbl('pleasure_label')
+  const pleasureSub = lbl('pleasure_sublabel')
+  const masteryLabel = lbl('mastery_label')
+  const masterySub = lbl('mastery_sublabel')
+  const expectedShort = lbl('expected_short_label')
+  const feltShort = lbl('felt_short_label')
+  const markDone = lbl('mark_done_label')
+  const saveLabel = lbl('save_label')
 
   const suggestions = fields
     .filter(f => f.field_type === 'activity_log_suggestion')
@@ -49,19 +52,19 @@ export function ActivityLogLayout({ fields, t }: Props) {
 
   return (
     <div className="al">
-      {/* List mode header : tabs + FAB ────────────────────────────────── */}
-      {(tabList || tabMonth) && (
+      {/* Week/list mode header : tabs + FAB ─────────────────────────────── */}
+      {(tabWeek || tabList) && (
         <div className="al-tabs">
-          {tabList && (
+          {tabWeek && (
             <span className="al-tab al-tab--active">
-              <ListChecks size={14} />
-              {tabList}
+              <CalendarRange size={14} />
+              {tabWeek}
             </span>
           )}
-          {tabMonth && (
+          {tabList && (
             <span className="al-tab">
-              <Calendar size={14} />
-              {tabMonth}
+              <ListChecks size={14} />
+              {tabList}
             </span>
           )}
         </div>
@@ -76,8 +79,8 @@ export function ActivityLogLayout({ fields, t }: Props) {
           <div className="al-list__info">
             <span className="al-list__title al-list__title--done">Marche en forêt</span>
             <span className="al-list__pills">
-              <span className="al-list__pill">P 7</span>
-              <span className="al-list__pill">M 5</span>
+              {expectedShort && <span className="al-list__pill">{expectedShort} P 4 · M 3</span>}
+              {feltShort && <span className="al-list__pill">{feltShort} P 7 · M 5</span>}
             </span>
           </div>
         </li>
@@ -86,8 +89,8 @@ export function ActivityLogLayout({ fields, t }: Props) {
           <div className="al-list__info">
             <span className="al-list__title">Yoga matinal</span>
             <span className="al-list__pills">
-              <span className="al-list__pill">P 6</span>
-              <span className="al-list__pill">M 4</span>
+              <span className="al-list__pill"><Clock size={10} /> 18:00</span>
+              {expectedShort && <span className="al-list__pill">{expectedShort} P 6 · M 4</span>}
             </span>
           </div>
         </li>
@@ -110,6 +113,13 @@ export function ActivityLogLayout({ fields, t }: Props) {
           </div>
         )}
 
+        {plannedTimeLabel && (
+          <div className="al-entry__date">
+            <Clock size={14} />
+            <span className="al-entry__date-label">{plannedTimeLabel}</span>
+          </div>
+        )}
+
         {sectionActivity && (
           <section className="al-section">
             <span className="al-section__title">{sectionActivity}</span>
@@ -126,20 +136,20 @@ export function ActivityLogLayout({ fields, t }: Props) {
           </section>
         )}
 
-        {(markDone || doneLabel) && (
+        {markDone && (
           <div className="al-toggle-row">
             <Circle size={20} className="al-toggle-row__icon" />
-            <span className="al-toggle-row__label">{markDone || doneLabel}</span>
+            <span className="al-toggle-row__label">{markDone}</span>
           </div>
         )}
 
-        {sectionEvaluation && (
+        {sectionExpected && (
           <section className="al-section">
-            <span className="al-section__title">{sectionEvaluation}</span>
+            <span className="al-section__title">{sectionExpected}</span>
             <div className="al-section__card">
-              <PipScale label={pleasureLabel} sublabel={pleasureSub} value={7} />
+              <ActivityLogPipScale label={pleasureLabel} sublabel={pleasureSub} value={7} />
               <div className="al-divider" />
-              <PipScale label={masteryLabel} sublabel={masterySub} value={5} />
+              <ActivityLogPipScale label={masteryLabel} sublabel={masterySub} value={5} />
             </div>
           </section>
         )}
@@ -160,25 +170,5 @@ export function ActivityLogLayout({ fields, t }: Props) {
         )}
       </div>
     </div>
-  )
-}
-
-interface PipScaleProps {
-  label: string
-  sublabel?: string
-  value: number
-}
-
-function PipScale({ label, sublabel, value }: PipScaleProps) {
-  if (!label) return null
-  return (
-    <RatingSelector
-      variant="track"
-      label={label}
-      sublabel={sublabel}
-      value={value}
-      steps={PIP_STEPS}
-      valueSuffix="/10"
-    />
   )
 }

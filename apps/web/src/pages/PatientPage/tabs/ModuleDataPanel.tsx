@@ -15,6 +15,7 @@ import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
 import { SleepDataPanel } from './SleepDataPanel'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
+import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -61,6 +62,11 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // « Rythmes & régularité » : rythmogramme mensuel (horaires bruts, MDR-safe).
   if (state.status === 'rhythmogram') {
     return <ChronoRhythmogramPanel entries={state.entries} />
+  }
+
+  // Activation comportementale : grille hebdo des activités (P/M bruts, MDR-safe).
+  if (state.status === 'activity') {
+    return <BehavioralActivationPanel entries={state.entries} locale={i18n.language} />
   }
 
   const locale = i18n.language

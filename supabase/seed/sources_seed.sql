@@ -1100,6 +1100,11 @@ values
 -- Sources niveau 1 (efficacité de l''AC) :
 --   PMID 16881773 — Dimidjian et al. 2006 — ECR (n=241, AC ≥ TCC pour dépression sévère)
 --   PMID 17184887 — Cuijpers et al. 2007 — méta-analyse AC (16 études, n=780, g=0,87)
+--   PMID 27461440 — Richards et al. 2016 (COBRA) — ECR non-infériorité (n=440, AC = TCC, Lancet)
+-- Sources niveau 2 (protocole et déclinaison numérique) :
+--   PMID 21324944 — Lejuez et al. 2011 — manuel BATD-R (domaines de vie, valeurs, activités)
+--   PMID 41807539 — Kraiss et al. 2026 — méta-régression 169 essais d'apps (activity scheduling)
+--   PMID 39212598 — Santopetro et al. 2024 — ECR AC numérique entièrement automatisée (n=126)
 
 ,
 
@@ -1129,6 +1134,63 @@ values
     null,
     'Méta-analyse de 16 ECR (n=780) : taille d''effet large g=0,87 pour l''activation comportementale vs contrôle ; équivalente à la TCC à post-traitement (g=0,02) et au suivi — maintien des bénéfices à long terme confirmé',
     2
+  ),
+
+  -- 3. Richards et al. 2016 — Lancet (ECR non-infériorité COBRA, n=440)
+  --    PMID 27461440 — doi:10.1016/S0140-6736(16)31140-0 (vérifié PubMed, abstract lu)
+  --    evidence_grade 'A' : ECR randomisé contrôlé de non-infériorité
+  (
+    '2b2b2b2b-0001-0001-0001-000000000003',
+    'behavioral_activation',
+    'Richards et al. (Lancet, 2016) : essai COBRA, activation comportementale vs TCC, non-infériorité (n=440)',
+    'rct',
+    'https://doi.org/10.1016/S0140-6736(16)31140-0',
+    null,
+    'ECR de non-infériorité (n=440, 12 mois) : l''activation comportementale, délivrable par des intervenants moins spécialisés, est non inférieure à la TCC sur le PHQ-9 (différence 0,1 point ; marge 1,9)',
+    3
+  ),
+
+  -- 4. Lejuez et al. 2011 — Behav Modif (manuel de traitement BATD-R)
+  --    PMID 21324944 — doi:10.1177/0145445510390929 (vérifié PubMed, abstract lu)
+  --    Classé « Practice Guideline » par PubMed → source_type 'guideline'
+  --    evidence_grade : null — manuel de protocole, pas une étude comparative
+  (
+    '2b2b2b2b-0001-0001-0001-000000000004',
+    'behavioral_activation',
+    'Lejuez et al. (Behav Modif, 2011) : BATD-R, manuel révisé du traitement bref par activation comportementale',
+    'guideline',
+    'https://doi.org/10.1177/0145445510390929',
+    null,
+    'Protocole de référence structurant le traitement en domaines de vie, valeurs et activités : fondement du parcours de co-construction praticien-patient de ce module (monitoring quotidien, planification, ancrage aux valeurs)',
+    4
+  ),
+
+  -- 5. Kraiss et al. 2026 — NPJ Digit Med (méta-régression, 169 essais, n=41 807)
+  --    PMID 41807539 — doi:10.1038/s41746-026-02466-z (vérifié PubMed, abstract lu)
+  --    evidence_grade 'A' : méta-analyse / méta-régression d'essais contrôlés
+  (
+    '2b2b2b2b-0001-0001-0001-000000000005',
+    'behavioral_activation',
+    'Kraiss et al. (NPJ Digit Med, 2026) : éléments actifs des apps de santé mentale, méta-régression de 169 essais',
+    'meta_analysis',
+    'https://doi.org/10.1038/s41746-026-02466-z',
+    null,
+    'Méta-régression de 169 essais (n=41 807) : la planification d''activités figure parmi les éléments les plus robustement associés à l''amélioration de la dépression dans les applications de santé mentale',
+    5
+  ),
+
+  -- 6. Santopetro et al. 2024 — JMIR Ment Health (ECR, n=126)
+  --    PMID 39212598 — doi:10.2196/54252 (vérifié PubMed, abstract lu)
+  --    evidence_grade 'A' : ECR randomisé contrôlé
+  (
+    '2b2b2b2b-0001-0001-0001-000000000006',
+    'behavioral_activation',
+    'Santopetro et al. (JMIR Ment Health, 2024) : activation comportementale numérique entièrement automatisée, ECR (n=126)',
+    'rct',
+    'https://doi.org/10.2196/54252',
+    null,
+    'ECR (n=126) : une intervention d''activation comportementale numérique d''un mois (planification quotidienne d''activités agréables) réduit significativement les symptômes dépressifs vs contrôle passif',
+    6
   )
 
 -- ── breathing_techniques ─────────────────────────────────────────────────────

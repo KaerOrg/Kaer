@@ -6,7 +6,7 @@ import type {
   PsychoeducationTopicEntry,
 } from '../lib/database.types'
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
-import type { Medication } from '@kaer/shared'
+import type { BAConfiguredActivity, Medication } from '@kaer/shared'
 
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
   const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)
@@ -172,6 +172,40 @@ export async function updateMedications(
   const existingConfig = (current?.config ?? {}) as Record<string, unknown>
   const update: Database['public']['Tables']['patient_modules']['Update'] = {
     config: { ...existingConfig, medications },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
+// ── behavioral_activation — activités co-construites en consultation ───────────
+
+// Activités personnalisées du patient (domaine de vie + phrase « valeur »),
+// dans patient_modules.config.ba_activities. Définies avec le praticien en
+// consultation (protocole BATD-R), lues par l'app mobile.
+export async function fetchBAActivities(moduleId: string): Promise<BAConfiguredActivity[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const cfg = (data?.config ?? {}) as Record<string, unknown>
+  const activities = cfg['ba_activities']
+  if (!Array.isArray(activities)) return []
+  return activities as BAConfiguredActivity[]
+}
+
+export async function updateBAActivities(
+  moduleId: string,
+  activities: BAConfiguredActivity[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, ba_activities: activities },
   }
   const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
   return { ok: !error }

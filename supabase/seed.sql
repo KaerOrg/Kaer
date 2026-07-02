@@ -879,7 +879,10 @@ on conflict (field_id, prop_key) do nothing;
 -- ============================================================
 -- LAYOUT : behavioral_activation → activity_log
 -- preview_kind = 'activity_log' → ActivityLogLayout
--- 3 modes : list | entry | month
+-- 3 modes : week | list | entry
+-- Domaines de vie (activity_log_domain) : ancrage BATD-R (Lejuez 2011) ;
+-- chaque suggestion porte un prop `domain` (valeur atomique) pour le
+-- groupement, et la diversité des types d'activités (Rohani 2020).
 -- ============================================================
 
 delete from public.field_props
@@ -890,6 +893,14 @@ update public.modules set preview_kind = 'activity_log' where id = 'behavioral_a
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('al.cfg',          'behavioral_activation', 'activity_log_config',     null,                                                  0),
+  -- Domaines de vie (catalogue fixe, extensible par INSERT sans redéploiement)
+  ('al.dom_body',     'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_body',            10),
+  ('al.dom_social',   'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_social',          11),
+  ('al.dom_work',     'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_work',            12),
+  ('al.dom_daily',    'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_daily',           13),
+  ('al.dom_leisure',  'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_leisure',         14),
+  ('al.dom_meaning',  'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_meaning',         15),
+  -- Suggestions d'activités
   ('al.sug_walk',     'behavioral_activation', 'activity_log_suggestion', 'modules.behavioral_activation.suggestion_walk',       100),
   ('al.sug_groceries',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_groceries',  101),
   ('al.sug_gym',            'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_gym',        102),
@@ -909,8 +920,51 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('al.sug_board_game',     'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_board_game', 116),
   ('al.sug_journal',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_journal',    117),
   ('al.sug_swimming',       'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_swimming',   118),
-  ('al.sug_running',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_running',    119)
+  ('al.sug_running',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_running',    119),
+  -- Activités de maîtrise / quotidien (retrait comportemental : réactiver aussi les routines)
+  ('al.sug_tidy',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_tidy',       120),
+  ('al.sug_laundry',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_laundry',    121),
+  ('al.sug_admin',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_admin',      122),
+  ('al.sug_repair',         'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_repair',     123),
+  ('al.sug_email',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_email',      124),
+  ('al.sug_family',         'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_family',     125),
+  ('al.sug_help',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_help',       126),
+  ('al.sug_learn',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_learn',      127),
+  ('al.sug_work_task',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_work_task',  128)
 on conflict (id) do nothing;
+
+-- Domaine de chaque suggestion (prop atomique : une valeur = un domaine)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('al.sug_walk',        'domain', 'al.dom_body'),
+  ('al.sug_groceries',   'domain', 'al.dom_daily'),
+  ('al.sug_gym',         'domain', 'al.dom_body'),
+  ('al.sug_bike',        'domain', 'al.dom_body'),
+  ('al.sug_yoga',        'domain', 'al.dom_body'),
+  ('al.sug_meditation',  'domain', 'al.dom_meaning'),
+  ('al.sug_reading',     'domain', 'al.dom_leisure'),
+  ('al.sug_cooking',     'domain', 'al.dom_daily'),
+  ('al.sug_call_friend', 'domain', 'al.dom_social'),
+  ('al.sug_cafe',        'domain', 'al.dom_social'),
+  ('al.sug_gardening',   'domain', 'al.dom_leisure'),
+  ('al.sug_music',       'domain', 'al.dom_leisure'),
+  ('al.sug_movie',       'domain', 'al.dom_leisure'),
+  ('al.sug_bath',        'domain', 'al.dom_body'),
+  ('al.sug_cleaning',    'domain', 'al.dom_daily'),
+  ('al.sug_drawing',     'domain', 'al.dom_leisure'),
+  ('al.sug_board_game',  'domain', 'al.dom_social'),
+  ('al.sug_journal',     'domain', 'al.dom_meaning'),
+  ('al.sug_swimming',    'domain', 'al.dom_body'),
+  ('al.sug_running',     'domain', 'al.dom_body'),
+  ('al.sug_tidy',        'domain', 'al.dom_daily'),
+  ('al.sug_laundry',     'domain', 'al.dom_daily'),
+  ('al.sug_admin',       'domain', 'al.dom_daily'),
+  ('al.sug_repair',      'domain', 'al.dom_daily'),
+  ('al.sug_email',       'domain', 'al.dom_daily'),
+  ('al.sug_family',      'domain', 'al.dom_social'),
+  ('al.sug_help',        'domain', 'al.dom_meaning'),
+  ('al.sug_learn',       'domain', 'al.dom_work'),
+  ('al.sug_work_task',   'domain', 'al.dom_work')
+on conflict (field_id, prop_key) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'engagement_event_type',  'SAVE_BEHAVIORAL_ACTIVATION'),
@@ -925,25 +979,34 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'dot_done_color',         '#10B981'),
   ('al.cfg', 'dot_planned_color',      '#3B82F6'),
   ('al.cfg', 'locale',                 'fr-FR'),
+  ('al.cfg', 'tab_week_label',         'modules.behavioral_activation.tab_week'),
   ('al.cfg', 'tab_list_label',         'modules.behavioral_activation.tab_list'),
-  ('al.cfg', 'tab_month_label',        'modules.behavioral_activation.tab_month'),
   ('al.cfg', 'add_btn',                'modules.behavioral_activation.add_btn'),
   ('al.cfg', 'empty_title',            'modules.behavioral_activation.empty_title'),
   ('al.cfg', 'empty_text',             'modules.behavioral_activation.empty_text'),
   ('al.cfg', 'section_activity_title', 'modules.behavioral_activation.section_activity'),
-  ('al.cfg', 'section_evaluation_title','modules.behavioral_activation.section_evaluation'),
+  ('al.cfg', 'section_expected_title', 'modules.behavioral_activation.section_expected'),
+  ('al.cfg', 'section_felt_title',     'modules.behavioral_activation.section_felt'),
   ('al.cfg', 'section_notes_title',    'modules.behavioral_activation.section_notes'),
   ('al.cfg', 'activity_placeholder',   'modules.behavioral_activation.activity_placeholder'),
   ('al.cfg', 'pleasure_label',         'modules.behavioral_activation.pleasure_label'),
   ('al.cfg', 'pleasure_sublabel',      'modules.behavioral_activation.pleasure_sublabel'),
   ('al.cfg', 'mastery_label',          'modules.behavioral_activation.mastery_label'),
   ('al.cfg', 'mastery_sublabel',       'modules.behavioral_activation.mastery_sublabel'),
+  ('al.cfg', 'expected_short_label',   'modules.behavioral_activation.expected_short'),
+  ('al.cfg', 'felt_short_label',       'modules.behavioral_activation.felt_short'),
+  ('al.cfg', 'pleasure_short_label',   'modules.behavioral_activation.pleasure_short'),
+  ('al.cfg', 'mastery_short_label',    'modules.behavioral_activation.mastery_short'),
+  ('al.cfg', 'not_rated_label',        'modules.behavioral_activation.not_rated'),
+  ('al.cfg', 'clear_rating_label',     'modules.behavioral_activation.clear_rating'),
   ('al.cfg', 'done_label',             'modules.behavioral_activation.done_label'),
   ('al.cfg', 'mark_done_label',        'modules.behavioral_activation.mark_done'),
   ('al.cfg', 'mark_undone_label',      'modules.behavioral_activation.mark_undone'),
   ('al.cfg', 'notes_placeholder',      'common.notes_placeholder'),
   ('al.cfg', 'date_label',             'modules.behavioral_activation.date_label'),
   ('al.cfg', 'date_confirm_label',     'modules.behavioral_activation.date_confirm'),
+  ('al.cfg', 'planned_time_label',     'modules.behavioral_activation.planned_time'),
+  ('al.cfg', 'planned_time_clear_label','modules.behavioral_activation.planned_time_clear'),
   ('al.cfg', 'save_label',             'modules.behavioral_activation.save'),
   ('al.cfg', 'update_label',           'common.update'),
   ('al.cfg', 'delete_label',           'common.delete'),
@@ -952,8 +1015,11 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'name_missing_msg',       'modules.behavioral_activation.name_missing_msg'),
   ('al.cfg', 'legend_done_label',      'modules.behavioral_activation.legend_done'),
   ('al.cfg', 'legend_planned_label',   'modules.behavioral_activation.legend_planned'),
-  ('al.cfg', 'month_hint_tap',         'modules.behavioral_activation.month_hint_tap'),
-  ('al.cfg', 'month_hint_empty',       'modules.behavioral_activation.month_hint_empty'),
+  ('al.cfg', 'my_activities_title',    'modules.behavioral_activation.my_activities'),
+  ('al.cfg', 'linked_value_prefix',    'modules.behavioral_activation.linked_value'),
+  ('al.cfg', 'week_empty_text',        'modules.behavioral_activation.week_empty'),
+  ('al.cfg', 'week_prev_label',        'modules.behavioral_activation.week_prev'),
+  ('al.cfg', 'week_next_label',        'modules.behavioral_activation.week_next'),
   ('al.cfg', 'back_label',             'modules.behavioral_activation.back_btn')
 on conflict (field_id, prop_key) do nothing;
 

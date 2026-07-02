@@ -4,6 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { ActivityRecord } from '../../../../../lib/database'
+import type { LabelFn } from './types'
 import { alStyles } from './styles'
 
 export interface ActivityListCardProps {
@@ -11,15 +12,27 @@ export interface ActivityListCardProps {
   onToggleDone: () => void
   onEdit: () => void
   onDelete: () => void
-  lbl: (key: string) => string
+  lbl: LabelFn
 }
 
+// Carte d'une activité (liste et vue semaine) : statut, heure prévue et scores
+// bruts. Planifiée → P/M attendus (prédiction) ; réalisée → P/M ressentis.
+// « Non renseigné » n'affiche rien : jamais de zéro fabriqué (MDR : valeurs
+// brutes saisies uniquement).
 export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }: ActivityListCardProps) {
   const t = useModuleTranslation()
   const isDone = record.done === 1
   const toggleAriaLabel = isDone
     ? (lbl('mark_undone_label') || t('common.undo'))
     : (lbl('mark_done_label') || t('common.done'))
+
+  const pShort = lbl('pleasure_short_label') || 'P'
+  const mShort = lbl('mastery_short_label') || 'M'
+  const scorePrefix = isDone ? lbl('felt_short_label') : lbl('expected_short_label')
+  const pleasure = isDone ? record.pleasure : record.expected_pleasure
+  const mastery = isDone ? record.mastery : record.expected_mastery
+  const hasScores = pleasure != null || mastery != null
+
   return (
     <View style={[alStyles.recordCard, isDone && alStyles.recordCardDone]} testID={`record-${record.id}`}>
       <Pressable
@@ -39,16 +52,31 @@ export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }
       </Pressable>
       <View style={alStyles.recordContent}>
         <Text style={[alStyles.recordLabel, isDone && alStyles.recordLabelDone]}>{record.label}</Text>
-        <View style={alStyles.recordScores}>
-          <View style={alStyles.scorePill}>
-            <Text style={alStyles.scorePillKey}>P</Text>
-            <Text style={alStyles.scorePillVal}>{record.pleasure}</Text>
+        {(hasScores || record.planned_time) ? (
+          <View style={alStyles.recordScores}>
+            {record.planned_time ? (
+              <View style={alStyles.scorePill}>
+                <MaterialCommunityIcons name="clock-outline" size={12} color={colors.textMuted} />
+                <Text style={alStyles.scorePillVal}>{record.planned_time}</Text>
+              </View>
+            ) : null}
+            {hasScores && scorePrefix ? (
+              <Text style={alStyles.scorePrefix}>{scorePrefix}</Text>
+            ) : null}
+            {pleasure != null ? (
+              <View style={alStyles.scorePill}>
+                <Text style={alStyles.scorePillKey}>{pShort}</Text>
+                <Text style={alStyles.scorePillVal}>{pleasure}</Text>
+              </View>
+            ) : null}
+            {mastery != null ? (
+              <View style={alStyles.scorePill}>
+                <Text style={alStyles.scorePillKey}>{mShort}</Text>
+                <Text style={alStyles.scorePillVal}>{mastery}</Text>
+              </View>
+            ) : null}
           </View>
-          <View style={alStyles.scorePill}>
-            <Text style={alStyles.scorePillKey}>M</Text>
-            <Text style={alStyles.scorePillVal}>{record.mastery}</Text>
-          </View>
-        </View>
+        ) : null}
         {record.notes ? (
           <Text style={alStyles.recordNotes} numberOfLines={1}>{record.notes}</Text>
         ) : null}
