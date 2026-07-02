@@ -2669,3 +2669,17 @@ update public.practitioners
    'guillaume.zarb@gmail.com',
    'teil.olivier@gmail.com'
  );
+
+
+-- ============================================================
+-- Version de la config — bump du jeton (ETag applicatif)
+-- ============================================================
+-- DOIT rester en TOUTE FIN de seed : toute modification de contenu de config
+-- ci-dessus (module_content_fields, field_props, psyedu_*, échelles…) se traduit
+-- par un nouveau jeton, ce qui invalide le cache React Query du web SANS
+-- redéploiement front. Le changement de valeur à chaque exécution est VOULU
+-- (un re-seed = du contenu a potentiellement changé). Ne PAS déplacer plus haut.
+update public.app_config_meta
+   set config_version = now()::text,
+       updated_at     = now()
+ where singleton;
