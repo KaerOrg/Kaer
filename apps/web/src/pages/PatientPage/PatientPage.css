@@ -122,11 +122,14 @@
   margin-bottom: 16px;
 }
 
+.patient-notes__form-card {
+  margin-bottom: 20px;
+}
+
 .patient-notes__form {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 /* ── Bordure lumineuse rotative pendant l'enregistrement ─────────────────── */
@@ -258,6 +261,62 @@
   line-height: 1.6;
   white-space: pre-wrap;
   margin-bottom: 10px;
+}
+
+/* Ligne meta gauche : date de création + consultation liée, sur la même ligne. */
+.patient-notes__item-meta-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  min-width: 0;
+}
+
+/* Consultation optionnellement rattachée à la note (affichage neutre, factuel). */
+.patient-notes__item-appointment {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.patient-notes__item-appointment-icon {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Sélecteur de consultation dans le formulaire d'édition (largeur bornée). */
+.patient-notes__appointment-row {
+  max-width: 340px;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Sélecteur de consultation en ligne dans la rangée d'actions du formulaire de saisie :
+   libellé « Consultation » à gauche + champ, sur la même ligne. */
+.patient-notes__appt-select {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.patient-notes__appt-select-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.patient-notes__appt-select-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Filtre par RDV dans la barre de filtres. */
+.patient-notes__appt-filter {
+  width: 220px;
+  flex-shrink: 0;
 }
 
 .patient-notes__item-meta {

@@ -1687,6 +1687,7 @@
   },
   "notes": {
     "section_title": "Notes",
+    "form_title": "Add a note",
     "placeholder": "Add a note…",
     "save_button": "Save",
     "edit_button": "Edit",
@@ -1704,7 +1705,15 @@
     "filter_clear": "Show all",
     "empty_filtered": "No notes for this tag.",
     "tag_search_placeholder": "Search a tag…",
-    "tag_remove": "Remove {{tag}}"
+    "tag_remove": "Remove {{tag}}",
+    "appointment_link_label": "Consultation",
+    "appointment_none": "None (free note)",
+    "appointment_select_placeholder": "Choose a consultation…",
+    "linked_appointment": "Consultation of {{date}}",
+    "filter_appointment_label": "Filter by consultation",
+    "filter_appointment_all": "All consultations",
+    "filter_appointment_unlinked": "Free notes (no consultation)",
+    "empty_filtered_appointment": "No notes for this consultation."
   },
   "speech": {
     "start": "Dictate",

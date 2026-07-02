@@ -669,10 +669,15 @@ create policy "practitioner_rw_coping_cards"
 -- ============================================================
 -- Notes libres liées à un patient, visibles uniquement du praticien.
 -- Aucune donnée clinique structurée — texte libre.
+-- appointment_id (nullable) : rattachement OPTIONNEL à un rendez-vous.
+--   null  = note libre ; renseigné = note liée à ce RDV.
+--   La contrainte FK (on delete set null) est ajoutée après la table appointments,
+--   définie plus bas dans ce fichier.
 create table if not exists public.practitioner_patient_notes (
   id              uuid        primary key default gen_random_uuid(),
   practitioner_id uuid        not null references public.practitioners(id) on delete cascade,
   patient_id      uuid        not null references public.patients(id)      on delete cascade,
+  appointment_id  uuid,
   content         text        not null,
   tags            text[]      not null default '{}',
   created_at      timestamptz not null default now(),
@@ -690,8 +695,25 @@ begin
   end if;
 end $$;
 
+-- Migration idempotente : ajouter appointment_id sur BDD existante
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'practitioner_patient_notes' and column_name = 'appointment_id'
+  ) then
+    alter table public.practitioner_patient_notes add column appointment_id uuid;
+  end if;
+end $$;
+
 create index if not exists idx_ppnotes_practitioner_patient
   on public.practitioner_patient_notes(practitioner_id, patient_id);
+
+-- Index sur le RDV lié : accélère le filtre des notes par RDV et la mise à NULL
+-- déclenchée par `on delete set null` à la suppression d'un rendez-vous.
+create index if not exists idx_ppnotes_appointment
+  on public.practitioner_patient_notes(appointment_id)
+  where appointment_id is not null;
 
 create or replace function public.set_updated_at()
 returns trigger language plpgsql as $$
@@ -1361,6 +1383,22 @@ do $$ begin
       add constraint fk_appt_practitioner_patient
       foreign key (practitioner_id, patient_id)
       references public.practitioner_patients (practitioner_id, patient_id);
+  end if;
+end $$;
+
+-- FK note → rendez-vous : rattachement optionnel d'une note praticien à un RDV.
+-- `on delete set null` : supprimer un RDV ne supprime pas la note, elle redevient
+-- libre. Ajoutée ici car appointments est définie après practitioner_patient_notes.
+do $$ begin
+  if not exists (
+    select 1 from information_schema.table_constraints
+    where constraint_name = 'fk_ppnote_appointment'
+      and table_name = 'practitioner_patient_notes'
+  ) then
+    alter table public.practitioner_patient_notes
+      add constraint fk_ppnote_appointment
+      foreign key (appointment_id)
+      references public.appointments(id) on delete set null;
   end if;
 end $$;
 
@@ -2461,9 +2499,14 @@ declare
   v_deleted           integer;
 begin
   if p_gate_inactivity then
+    -- NB : `fn_inactive_patient_ids` retourne `setof uuid` ; sa colonne porte le nom
+    -- de la fonction, pas `id`. On la consomme donc en SRF de liste de sélection
+    -- (`select public.fn_…(…)`), forme du test à blanc Option A (cf.
+    -- docs/retention-conservation.md) — un `select id from …` lèverait
+    -- « column "id" does not exist » à l'exécution.
     execute format(
       'delete from public.%I t where t.%I < $1 '
-      'and t.patient_id in (select id from public.fn_inactive_patient_ids($2))',
+      'and t.patient_id in (select public.fn_inactive_patient_ids($2))',
       p_table, p_date_column
     ) using v_retention_cutoff, v_inactivity_cutoff;
   else

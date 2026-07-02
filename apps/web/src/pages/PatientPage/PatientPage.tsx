@@ -278,6 +278,7 @@ export function PatientPage() {
                 patientId={id}
                 practitionerId={practitioner.id}
                 initialNotes={notes}
+                appointments={appointments}
                 onNotesChange={handleNotesChange}
               />
             )}
