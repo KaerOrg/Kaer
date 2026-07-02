@@ -4,6 +4,7 @@
 export { dashboardQueries, useSendInvitation } from './dashboardQueries'
 export { adminQueries } from './adminQueries'
 export { referenceQueries } from './referenceQueries'
+export { configVersionQueries } from './configVersionQueries'
 export { catalogQueries, useSaveEnabledModules } from './catalogQueries'
 export { psyeduQueries } from './psyeduQueries'
 export { patientQueries, useSetTeenMode, useSaveGeneralNote } from './patientQueries'

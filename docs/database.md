@@ -204,6 +204,24 @@ PK composite `(field_id, prop_key)`. Voir `docs/module-engine.md` pour les props
 
 ---
 
+### `app_config_meta` — Version de la config (ETag applicatif)
+
+Table **singleton** (une seule ligne) portant le jeton de version de toute la config
+quasi-statique. Le web praticien lit ce jeton pour invalider son cache React Query
+sans redéploiement. Bumpée en fin de `seed.sql` à chaque re-seed. Voir
+`docs/services.md` § « Invalidation de la config par jeton de version ».
+
+| Colonne | Type | Description |
+|---------|------|-------------|
+| `singleton` | boolean PK, default true | Contrainte `check (singleton)` → une seule ligne |
+| `config_version` | text NOT NULL, default `now()::text` | Jeton opaque, change à chaque bump |
+| `updated_at` | timestamptz NOT NULL, default now() | – |
+
+RLS : lecture réservée aux praticiens authentifiés (`auth.uid() is not null`) ; **aucune**
+policy d'écriture (bump via seed / `service_role` uniquement).
+
+---
+
 ### `practitioner_module_settings` — Catalogue praticien
 
 Paramètres optionnels de la bibliothèque de modules d'un praticien.
@@ -304,6 +322,13 @@ RLS activée sur toutes les tables. Résumé des policies :
 | Policy | Opérations | Condition |
 |--------|-----------|-----------|
 | *_read | SELECT | Tout utilisateur authentifié |
+
+### `app_config_meta`
+| Policy | Opérations | Condition |
+|--------|-----------|-----------|
+| app_config_meta_select_authenticated | SELECT | `auth.uid() is not null` |
+
+Aucune policy d'écriture : le bump du jeton passe par le seed / `service_role`.
 
 ### `practitioner_module_settings`
 | Policy | Opérations | Condition |

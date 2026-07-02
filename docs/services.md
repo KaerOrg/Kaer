@@ -218,3 +218,34 @@ Documenter le choix en commentaire à chaque exception.
   enveloppant (client neuf, `retry: false`), service mocké. Tout écran qui rend un
   composant utilisant un hook de query doit être enveloppé d'un `QueryClientProvider`
   dans son test.
+
+### Invalidation de la config par jeton de version (ETag applicatif)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #102.
+
+La config est **quasi-statique** : `module_content_fields`, `field_props`, `psyedu_*`,
+échelles, référentiels ne changent qu'au **re-seed / déploiement**, jamais via une
+écriture cliente. Le web est lecteur pur : il n'a donc **aucun événement** pour savoir
+quand invalider son cache. On veut un cache très agressif **sans** jamais afficher du
+périmé, et **sans** coupler l'invalidation au déploiement (ce qui casserait config-first :
+« ajouter une échelle = INSERT en base, zéro redéploiement »).
+
+**Mécanisme — un jeton de version, joué comme un ETag :**
+
+- **Base** : la table singleton `app_config_meta(config_version, updated_at)` porte un
+  jeton unique. Le `seed.sql` le **bump** en toute fin (`config_version = now()::text`) :
+  tout re-seed de contenu produit un nouveau jeton. RLS : lecture réservée aux praticiens
+  authentifiés, **aucune** écriture cliente (bump via seed / `service_role`).
+- **Lecture** : `configVersionService.fetchConfigVersion()` → `configVersionQueries.current()`
+  (`['configVersion']`). C'est le **seul** référentiel qu'on revalide souvent (`staleTime`
+  court + `refetchOnWindowFocus`) — il ne pèse qu'une string. Hook prêt à l'emploi :
+  `useConfigVersion()`.
+- **Usage (#99)** : injecter le jeton dans les `queryKey` de config
+  (`['module', 'fields', moduleId, configVersion]`). Tant que le jeton ne bouge pas,
+  la clé est stable → **0 refetch**, `staleTime` long conservé. Dès qu'un re-seed bump
+  le jeton, la clé change → refetch ciblé de la config, **sans redéploiement**.
+
+> **Push vs pull.** Ce jeton (pull) convient à la config : froide, globale, tolérante à
+> la latence. Les **données patient** (chaudes, ciblées, urgentes) utilisent au contraire
+> l'invalidation sur écriture (#100) et le Realtime (#103). Apparier le mécanisme au
+> profil de la donnée, pas chercher l'uniformité.

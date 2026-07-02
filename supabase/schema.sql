@@ -48,6 +48,41 @@ on conflict (code) do nothing;
 
 
 -- ============================================================
+-- TABLE : app_config_meta (Version de la config — ETag applicatif)
+-- ============================================================
+-- Jeton de version unique de toute la config quasi-statique
+-- (module_content_fields, field_props, psyedu_*, échelles, référentiels).
+-- Le web praticien lit ce jeton pour savoir si sa config cachée (React Query)
+-- est encore valide : tant que `config_version` ne change pas, aucune query de
+-- config ne refetche ; un re-seed de contenu bump le jeton (voir seed.sql), ce
+-- qui invalide le cache SANS redéploiement front — c'est ce qui préserve
+-- config-first (« ajouter une échelle = INSERT en base, zéro redéploiement »).
+-- Table singleton : une seule ligne, garantie par la contrainte booléenne.
+create table if not exists public.app_config_meta (
+  singleton      boolean     primary key default true,
+  config_version text        not null default now()::text,
+  updated_at     timestamptz not null default now(),
+  constraint app_config_meta_singleton_chk check (singleton)
+);
+
+-- Toujours garantir la présence de l'unique ligne (idempotent).
+insert into public.app_config_meta (singleton) values (true)
+on conflict (singleton) do nothing;
+
+alter table public.app_config_meta enable row level security;
+
+-- Lecture : tout praticien authentifié. Le jeton ne révèle rien de sensible
+-- (une simple string de version) mais reste réservé aux comptes connectés.
+drop policy if exists "app_config_meta_select_authenticated" on public.app_config_meta;
+create policy "app_config_meta_select_authenticated"
+  on public.app_config_meta for select
+  using (auth.uid() is not null);
+
+-- AUCUNE policy d'écriture : le bump du jeton se fait uniquement via le seed /
+-- service_role (qui bypasse la RLS). Le client ne peut jamais modifier la version.
+
+
+-- ============================================================
 -- FONCTION : gen_public_ref (identifiant public opaque)
 -- ============================================================
 -- Génère un token court URL-safe (ex. « p_8Kf3aQ ») servant d'identifiant
