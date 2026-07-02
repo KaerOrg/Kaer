@@ -6,8 +6,6 @@ import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import AppointmentsScreen from '../screens/AppointmentsScreen'
 import BookAppointmentScreen from '../screens/BookAppointmentScreen'
-import BreathingTechniquesScreen from '../screens/modules/BreathingTechniquesScreen'
-import BreathingExerciseScreen from '../screens/modules/BreathingExerciseScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
 import MedicationSideEffectsHistoryScreen from '../screens/modules/MedicationSideEffectsHistoryScreen'
 import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideEffectsEntryScreen'
@@ -15,19 +13,10 @@ import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
-import i18next from 'i18next'
 import { colors } from '@theme'
-
-// Le nom d'une technique est une clé i18n dérivée de sa clé (route.params),
-// indépendante de la config en base : on le résout directement pour le titre.
-function getTechniqueTitle(key: string): string {
-  return i18next.t(`modules.breathing_techniques.${key}_name`)
-}
 
 export type AppStackParamList = {
   Tabs: undefined
-  BreathingTechniques: undefined
-  BreathingExercise: { techniqueKey: string }
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string; entry_id?: string }
   ModuleContent: { moduleType: string }
@@ -91,18 +80,6 @@ export default function AppStack() {
         component={BookAppointmentScreen}
         options={({ route }) => ({
           title: route.params.appointmentId ? 'Reprogrammer' : 'Prendre un rendez-vous',
-        })}
-      />
-      <Stack.Screen
-        name="BreathingTechniques"
-        component={BreathingTechniquesScreen}
-        options={{ title: 'Techniques de respiration' }}
-      />
-      <Stack.Screen
-        name="BreathingExercise"
-        component={BreathingExerciseScreen}
-        options={({ route }) => ({
-          title: getTechniqueTitle(route.params.techniqueKey),
         })}
       />
       <Stack.Screen

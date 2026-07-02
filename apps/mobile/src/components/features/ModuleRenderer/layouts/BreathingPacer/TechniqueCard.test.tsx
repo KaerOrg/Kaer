@@ -19,7 +19,7 @@ const TECHNIQUE: BreathingTechnique = {
 
 describe('TechniqueCard', () => {
   it('affiche le nom, le sous-titre et la durée du cycle', () => {
-    render(<TechniqueCard technique={TECHNIQUE} sessionCount={0} onOpen={jest.fn()} />)
+    render(<TechniqueCard technique={TECHNIQUE} moduleId="breathing_techniques" sessionCount={0} onOpen={jest.fn()} />)
     expect(screen.getByText('Cohérence cardiaque')).toBeTruthy()
     expect(screen.getByText('6 respirations par minute')).toBeTruthy()
     expect(screen.getByText('10s / cycle')).toBeTruthy()
@@ -27,18 +27,18 @@ describe('TechniqueCard', () => {
 
   it('appelle onOpen avec la clé de la technique au tap', () => {
     const onOpen = jest.fn()
-    render(<TechniqueCard technique={TECHNIQUE} sessionCount={0} onOpen={onOpen} />)
+    render(<TechniqueCard technique={TECHNIQUE} moduleId="breathing_techniques" sessionCount={0} onOpen={onOpen} />)
     fireEvent.press(screen.getByLabelText('Cohérence cardiaque'))
     expect(onOpen).toHaveBeenCalledWith('coherence_cardiaque')
   })
 
   it('affiche le badge de sessions quand sessionCount > 0', () => {
-    render(<TechniqueCard technique={TECHNIQUE} sessionCount={3} onOpen={jest.fn()} />)
+    render(<TechniqueCard technique={TECHNIQUE} moduleId="breathing_techniques" sessionCount={3} onOpen={jest.fn()} />)
     expect(screen.getByText('3 sessions')).toBeTruthy()
   })
 
   it('masque le badge de sessions quand sessionCount vaut 0', () => {
-    render(<TechniqueCard technique={TECHNIQUE} sessionCount={0} onOpen={jest.fn()} />)
+    render(<TechniqueCard technique={TECHNIQUE} moduleId="breathing_techniques" sessionCount={0} onOpen={jest.fn()} />)
     expect(screen.queryByText(/session/i)).toBeNull()
   })
 })

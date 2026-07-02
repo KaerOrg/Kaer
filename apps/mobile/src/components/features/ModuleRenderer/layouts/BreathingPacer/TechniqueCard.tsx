@@ -8,6 +8,8 @@ import { getCycleDuration, type BreathingTechnique } from '@services/breathingSe
 
 export interface TechniqueCardProps {
   technique: BreathingTechnique
+  /** Module courant : les clés i18n en sont dérivées (layout générique, non hardcodé). */
+  moduleId: string
   sessionCount: number
   // Reçoit la clé de la technique pour que le parent garde un callback stable
   // (évite la recréation d'une lambda par carte à chaque rendu de la liste).
@@ -17,6 +19,7 @@ export interface TechniqueCardProps {
 /** Carte d'une technique de respiration : nom, durée du cycle, description, visualisation des phases. */
 export const TechniqueCard = React.memo(function TechniqueCard({
   technique,
+  moduleId,
   sessionCount,
   onOpen,
 }: TechniqueCardProps) {
@@ -29,10 +32,10 @@ export const TechniqueCard = React.memo(function TechniqueCard({
   )
 
   const cycleDuration = getCycleDuration(technique)
-  const name = t(`modules.breathing_techniques.${technique.key}_name`)
-  const subtitle = t(`modules.breathing_techniques.${technique.key}_subtitle`)
-  const description = t(`modules.breathing_techniques.${technique.key}_description`)
-  const evidence = t(`modules.breathing_techniques.${technique.key}_evidence`)
+  const name = t(`modules.${moduleId}.${technique.key}_name`)
+  const subtitle = t(`modules.${moduleId}.${technique.key}_subtitle`)
+  const description = t(`modules.${moduleId}.${technique.key}_description`)
+  const evidence = t(`modules.${moduleId}.${technique.key}_evidence`)
 
   return (
     <Card variant="elevated" onPress={handlePress} accessibilityLabel={name} style={accentStyle}>
@@ -56,7 +59,7 @@ export const TechniqueCard = React.memo(function TechniqueCard({
           <View style={styles.sessionBadge}>
             <MaterialCommunityIcons name="history" size={12} color={colors.textMuted} />
             <Text style={styles.sessionCount}>
-              {t('modules.breathing_techniques.session_count', { count: sessionCount })}
+              {t(`modules.${moduleId}.session_count`, { count: sessionCount })}
             </Text>
           </View>
         ) : null}
