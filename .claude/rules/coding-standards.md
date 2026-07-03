@@ -323,6 +323,33 @@ function MyScreen() {
 >
 > 📌 Cas vécu : voir [lessons.md § Couches, feuille présentationnelle](lessons.md).
 
+### Une clé canonique par ressource, zéro fetch hors React Query (web)
+
+> **Le client Supabase ne cache rien** (wrapper `fetch` sur PostgREST) : la
+> déduplication des appels vient **uniquement** du passage par React Query avec une
+> `queryKey` **canonique**. Deux règles, vérifiées mécaniquement par
+> `apps/web/src/test/noRawFetch.guard.test.ts` :
+
+1. **Toute lecture cachable = un service (le call) + une factory `hooks/queries/`
+   (la clé) + `useQuery` dans le composant.** Ne jamais appeler une lecture de service
+   (`fetch*`) directement dans un composant/page via `useEffect` : elle re-fetcherait à
+   chaque montage, hors cache. `supabase.from(...)` n'est jamais caché en soi ; seul le
+   passage par la factory déduplique.
+2. **Jamais de `queryKey` en dur dans un composant.** Une invalidation référence
+   `xxxQueries.y(...).queryKey` (ou un préfixe exposé par la factory, ex.
+   `adminQueries.usersPrefix`) — jamais un littéral `['x', 'y']`, qui diverge de la clé
+   de la factory et casse la déduplication.
+
+**Exceptions légitimes** (allowlist du garde-fou, chacune justifiée) : lectures **non
+dup-prone** — chargement paresseux par ligne injecté en callback (`fetchCaseloadNotes`),
+amorçage de formulaire à l'ouverture d'un éditeur (`fetchTrackedEffects`,
+`fetchMedications` — one-shot sur action, state local éditable). Une nouvelle lecture
+directe doit être **migrée** vers une factory, pas ajoutée à l'allowlist par défaut.
+
+> **Mesurer** : les React Query Devtools (montés en dev dans `main.tsx`) affichent
+> chaque query, sa `queryKey` et son nombre de fetch — un doublon s'y repère à l'œil.
+> Détail : [`docs/services.md`](../../docs/services.md) § « Vérifier qu'un call n'est pas dupliqué ».
+
 ## Synchronisation distante (mobile) — toujours via syncHelpers
 
 > **Règle absolue pour tout service mobile qui écrit ou supprime des données patient en SQLite.**

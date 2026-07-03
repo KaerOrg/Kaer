@@ -142,6 +142,20 @@ La table `sync_outbox` (SQLite) est gérée par `SyncOutboxStore` dans `src/lib/
 > [TanStack Query](https://tanstack.com/query) (`@tanstack/react-query` v5) qui
 > apporte déduplication, cache mémoire et revalidation — sur les **deux apps**.
 
+### Vérifier qu'un call n'est pas dupliqué (web)
+
+- **Mesure — React Query Devtools.** Montés en dev dans `apps/web/src/main.tsx`
+  (`import.meta.env.DEV`, tree-shakés du build de prod). Le panneau flottant liste
+  chaque query active, sa `queryKey` et son **nombre de fetch** : deux entrées pour la
+  même donnée (ou un compteur qui grimpe à chaque montage) = doublon à corriger.
+  Complément : onglet Réseau du navigateur filtré sur l'endpoint REST Supabase.
+- **Garde-fou CI — `apps/web/src/test/noRawFetch.guard.test.ts`.** Échoue si (a) une
+  lecture de service (`fetch*`) est importée/appelée directement dans un composant/page
+  (doit passer par une factory `hooks/queries/` + `useQuery`), ou (b) une `queryKey`
+  littérale est écrite hors `hooks/queries/`. Exceptions légitimes dans une allowlist
+  documentée (lectures non dup-prone). Règle : [`coding-standards.md`](../.claude/rules/coding-standards.md)
+  § « Une clé canonique par ressource, zéro fetch hors React Query ».
+
 **Périmètre.** TanStack Query couvre les **lectures réseau** (Supabase). Il ne
 remplace **pas** le stockage offline-first SQLite des saisies patient (services
 `scaleEntryService`, `sleepDiaryService`, etc. via `syncHelpers`) : celles-ci
