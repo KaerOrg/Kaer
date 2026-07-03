@@ -238,6 +238,32 @@ partagées `CONFIG_QUERY_OPTIONS` (`src/hooks/queries/configCache.ts`) :
   (`QueryClientProvider` neuf, `retry: false`) ; un client partagé entre deux montages
   vérifie la déduplication (2e montage = 0 fetch).
 
+### Lectures patient volatiles = React Query + invalidation à l'écriture (web)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #100.
+
+Contrairement à la config, les données patient **changent quand le praticien écrit** :
+elles n'ont donc **pas** de cache infini (staleTime par défaut 30 s), et la fraîcheur
+vient de l'**invalidation à l'écriture**, pas d'une péremption longue. Factories :
+`crisisQueries.planConfig`, `cssrsQueries.assessments`,
+`notificationRoutineQueries.byPatientModule`, `caseloadQueries.rows`,
+`activityFeedQueries.feed`.
+
+- **Écriture = `useMutation` + `onSuccess: invalidateQueries`.** La mutation invalide
+  la clé de la lecture concernée → refetch et fraîcheur immédiate (ex. le modal des
+  rappels invalide `notificationRoutineQueries.byPatientModule` après create/toggle/delete).
+- **Mise à jour optimiste** quand la feuille le faisait déjà : `FileActivePage` remplace
+  ses anciens `setRows(prev => …)` par `queryClient.setQueryData(caseloadQueries.rows(id).queryKey, …)`
+  au succès, et n'invalide (`invalidateQueries`) qu'en cas d'erreur pour resynchroniser.
+- **Réutilisation des référentiels** : `FileActivePage` lit les patients via
+  `dashboardQueries.patients` et les icônes via `catalogQueries.categories` (cache infini
+  de #99) plutôt qu'un fetch dédié.
+- **React Query = unique couche de cache** : le cache `Map` de `crisisPlanService` a été
+  retiré (il déduplicait les 3 widgets d'aperçu et masquait l'invalidation — c'est
+  désormais la clé partagée `crisisQueries.planConfig` qui déduplique).
+- **`ActivityFeedPanel`** : migré aussi (pas de polling réel) ; le badge « nouveauté »
+  est **dérivé pendant le render** (plus de `setState` piloté par le fetch).
+
 ### Invalidation de la config par jeton de version (ETag applicatif)
 
 > Web praticien uniquement. Voir l'epic #104 et le ticket #102.

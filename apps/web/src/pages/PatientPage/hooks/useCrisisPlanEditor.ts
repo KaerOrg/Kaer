@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { useToast } from '../../../contexts/ToastContext'
+import { crisisQueries } from '../../../hooks/queries'
 import {
-  fetchCrisisPlanConfig,
   saveCrisisPlanConfig,
-  clearCrisisPlanConfigCache,
   type CrisisPlanConfig,
   type CrisisPlanCopingCard,
 } from '@services/crisisPlanService'
@@ -17,6 +17,7 @@ export function useCrisisPlanEditor(
 ) {
   const { t } = useTranslation()
   const toast = useToast()
+  const queryClient = useQueryClient()
 
   const [open, setOpen] = useState(false)
   const [config, setConfig] = useState<CrisisPlanConfig>({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
@@ -28,7 +29,9 @@ export function useCrisisPlanEditor(
   const isConfigured = !!(crisisPlanModule && (config.practitionerMessage || config.copingCards.length > 0 || config.commitmentPhrase))
 
   const openEditor = async () => {
-    const cfg = await fetchCrisisPlanConfig(patientId)
+    // Amorce le formulaire depuis le cache React Query (fetch réseau seulement si
+    // absent/périmé), puis édite en state local — pattern « form amorcé du serveur ».
+    const cfg = await queryClient.fetchQuery(crisisQueries.planConfig(patientId))
     setConfig(cfg)
     setCardDraft(null)
     setOpen(true)
@@ -44,7 +47,9 @@ export function useCrisisPlanEditor(
     const { ok } = await saveCrisisPlanConfig(patientId, config)
     setSaving(false)
     if (!ok) { toast.error(t('patient.crisis_error_save')); return }
-    clearCrisisPlanConfigCache()
+    // Invalide le cache partagé → les 3 widgets d'aperçu (anchors/coping/commitment)
+    // se rechargent avec la nouvelle config.
+    await queryClient.invalidateQueries({ queryKey: crisisQueries.planConfig(patientId).queryKey })
     toast.success(t('common.saved'))
     setOpen(false)
     await onReloadModules()

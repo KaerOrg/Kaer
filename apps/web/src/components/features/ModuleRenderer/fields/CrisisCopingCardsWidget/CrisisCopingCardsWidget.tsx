@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { CreditCard } from 'lucide-react'
 import { usePatientView } from '../../../../../contexts/usePatientView'
-import { fetchCrisisPlanConfig, type CrisisPlanCopingCard } from '@services/crisisPlanService'
+import { crisisQueries } from '../../../../../hooks/queries'
 import './CrisisCopingCardsWidget.css'
 
 export function CrisisCopingCardsWidget() {
   const { t } = useTranslation()
   const patientId = usePatientView()
-  const [cards, setCards] = useState<CrisisPlanCopingCard[]>([])
-
-  useEffect(() => {
-    if (!patientId) return
-    fetchCrisisPlanConfig(patientId)
-      .then(cfg => setCards(cfg.copingCards))
-      .catch(() => {})
-  }, [patientId])
+  const { data: config } = useQuery(crisisQueries.planConfig(patientId))
+  const cards = config?.copingCards ?? []
 
   return (
     <div className="crisis-coping-cards-widget">
