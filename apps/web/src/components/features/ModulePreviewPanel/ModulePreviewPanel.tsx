@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { fetchModuleFields, type ModuleFieldsResult, type PreviewKind } from '@services/moduleService'
+import { type PreviewKind } from '@services/moduleService'
+import { moduleQueries } from '../../../hooks/queries'
 import { Tabs, type TabItem } from '../../ui/Tabs'
 import { FieldRenderer } from '../ModuleRenderer'
 import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
@@ -23,20 +25,15 @@ interface Props {
 
 export function ModulePreviewPanel({ moduleType, color }: Props) {
   const { t } = useTranslation()
-  const [result, setResult] = useState<ModuleFieldsResult | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: result = null, isLoading: loading } = useQuery(moduleQueries.fields(moduleType))
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<PanelTab>('preview')
 
+  // Réinitialise l'état d'UI (carte dépliée, onglet) au changement de module — la
+  // donnée, elle, provient du cache React Query (moduleQueries.fields).
   useEffect(() => {
-    setLoading(true)
-    setResult(null)
     setExpandedCard(null)
     setActiveTab('preview')
-    fetchModuleFields(moduleType).then(r => {
-      setResult(r)
-      setLoading(false)
-    })
   }, [moduleType])
 
   const handleToggleCard = useCallback((id: string) => {
