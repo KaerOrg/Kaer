@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { CaseloadTable } from '../../components/features/CaseloadTable'
+import { caseloadQueries, dashboardQueries, catalogQueries } from '../../hooks/queries'
 import {
-  fetchCaseload,
   createCaseloadEntry,
   updateCaseloadEntry,
   setCaseloadStatus,
@@ -19,8 +20,6 @@ import {
   fetchCaseloadNotes,
   createCaseloadNote,
 } from '@services/caseloadService'
-import { fetchPatientsWithModules } from '@services/patientService'
-import { fetchModuleCategories } from '@services/moduleCatalogService'
 import type {
   CaseloadActionInput,
   CaseloadEntryInput,
@@ -32,44 +31,57 @@ import type {
 import type { LinkablePatient } from '../../components/features/CaseloadTable/types'
 import './FileActivePage.css'
 
+type RowsUpdater = (prev: CaseloadRowData[]) => CaseloadRowData[]
+
 export function FileActivePage() {
   const { practitioner } = useAuthStore()
   const { t } = useTranslation()
   const toast = useToast()
-  const [rows, setRows] = useState<CaseloadRowData[]>([])
-  const [patients, setPatients] = useState<LinkablePatient[]>([])
-  const [iconByModule, setIconByModule] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [creating, setCreating] = useState(false)
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
 
-  const loadRows = useCallback(async () => {
-    if (!practitioner) return
-    const [caseloadRows, appPatients, categories] = await Promise.all([
-      fetchCaseload(practitioner.id, { includeArchived: true }),
-      fetchPatientsWithModules(practitioner.id),
-      fetchModuleCategories(),
-    ])
-    const linkable: LinkablePatient[] = appPatients.map(p => ({
-      id: p.id,
-      publicRef: p.public_ref,
-      name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
-      email: p.email,
-      moduleTypes: p.modules.map(m => m.module_type),
-    }))
-    // Map module_id → icône lucide pour afficher la vraie icône de chaque soin (module).
-    const icons: Record<string, string> = {}
-    for (const cat of categories) for (const mod of cat.modules) icons[mod.id] = mod.icon
-    setRows(caseloadRows)
-    setPatients(linkable)
-    setIconByModule(icons)
-    setLoading(false)
-  }, [practitioner])
+  // Trois lectures indépendantes via React Query : la file active, les patients
+  // liables et le catalogue (pour les icônes de module — référentiel déjà caché).
+  const rowsQuery = useQuery(caseloadQueries.rows(practitioner?.id))
+  const patientsQuery = useQuery(dashboardQueries.patients(practitioner?.id))
+  const categoriesQuery = useQuery(catalogQueries.categories())
 
-  useEffect(() => {
-    loadRows()
-  }, [loadRows])
+  const rowsKey = useMemo(() => caseloadQueries.rows(practitioner?.id).queryKey, [practitioner?.id])
+
+  const rows = useMemo<CaseloadRowData[]>(() => rowsQuery.data ?? [], [rowsQuery.data])
+  const loading = rowsQuery.isLoading || patientsQuery.isLoading || categoriesQuery.isLoading
+
+  const patients = useMemo<LinkablePatient[]>(
+    () =>
+      (patientsQuery.data ?? []).map(p => ({
+        id: p.id,
+        publicRef: p.public_ref,
+        name: [p.patient_first_name, p.patient_last_name].filter(Boolean).join(' ') || p.patient_alias || p.email,
+        email: p.email,
+        moduleTypes: p.modules.map(m => m.module_type),
+      })),
+    [patientsQuery.data],
+  )
+
+  // Map module_id → icône lucide, dérivée du catalogue (référentiel).
+  const iconByModule = useMemo<Record<string, string>>(() => {
+    const icons: Record<string, string> = {}
+    for (const cat of categoriesQuery.data ?? []) for (const mod of cat.modules) icons[mod.id] = mod.icon
+    return icons
+  }, [categoriesQuery.data])
+
+  // Mise à jour optimiste du cache des rows (remplace les anciens setRows locaux).
+  const updateRows = useCallback(
+    (updater: RowsUpdater) => queryClient.setQueryData<CaseloadRowData[]>(rowsKey, prev => updater(prev ?? [])),
+    [queryClient, rowsKey],
+  )
+  // Resynchronisation en cas d'erreur (remplace l'ancien invalidateRows()).
+  const invalidateRows = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: rowsKey }),
+    [queryClient, rowsKey],
+  )
 
   // Ajout d'un patient existant à la file (dossier lié). Pas de saisie libre :
   // « Mes suivis » ne contient que de vrais patients de l'app.
@@ -89,10 +101,10 @@ export function FileActivePage() {
         return
       }
       // Relecture : récupère l'avatar (jointure) et l'ordre serveur du nouveau dossier.
-      await loadRows()
+      await invalidateRows()
       setCreating(false)
     },
-    [practitioner, patients, toast, t, loadRows]
+    [practitioner, patients, toast, t, invalidateRows]
   )
 
   const handlePatch = useCallback(
@@ -100,13 +112,13 @@ export function FileActivePage() {
       const result = await updateCaseloadEntry(id, patch)
       if (!result.ok || !result.entry) {
         toast.error(t('file_active.error_save'))
-        loadRows()
+        invalidateRows()
         return
       }
       const entry = result.entry
-      setRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
+      updateRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
     },
-    [toast, t, loadRows]
+    [toast, t, invalidateRows, updateRows]
   )
 
   const handleStatus = useCallback(
@@ -114,16 +126,16 @@ export function FileActivePage() {
       const result = await setCaseloadStatus(id, status)
       if (!result.ok || !result.entry) {
         toast.error(t('file_active.error_save'))
-        loadRows()
+        invalidateRows()
         return
       }
       const entry = result.entry
       // On garde le dossier en mémoire quel que soit le statut : le filtre « Tous »
       // masque les archivés, mais le filtre « Archivés » les retrouve (et permet de désarchiver).
-      setRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
+      updateRows(prev => prev.map(r => (r.entry.id === id ? { ...r, entry } : r)))
       if (entry.status === 'archived') toast.success(t('file_active.archived'))
     },
-    [toast, t, loadRows]
+    [toast, t, invalidateRows, updateRows]
   )
 
   const handleAddAction = useCallback(
@@ -135,9 +147,9 @@ export function FileActivePage() {
         return
       }
       const action = result.action
-      setRows(prev => prev.map(r => (r.entry.id === entryId ? { ...r, actions: [...r.actions, action] } : r)))
+      updateRows(prev => prev.map(r => (r.entry.id === entryId ? { ...r, actions: [...r.actions, action] } : r)))
     },
-    [practitioner, toast, t]
+    [practitioner, toast, t, updateRows]
   )
 
   const handleToggleDone = useCallback(
@@ -145,15 +157,15 @@ export function FileActivePage() {
       const result = await setActionDone(actionId, done)
       if (!result.ok || !result.action) {
         toast.error(t('file_active.error_save'))
-        loadRows()
+        invalidateRows()
         return
       }
       const action = result.action
-      setRows(prev =>
+      updateRows(prev =>
         prev.map(r => (r.entry.id === entryId ? { ...r, actions: r.actions.map(a => (a.id === actionId ? action : a)) } : r))
       )
     },
-    [toast, t, loadRows]
+    [toast, t, invalidateRows, updateRows]
   )
 
   const handlePatchAction = useCallback(
@@ -161,15 +173,15 @@ export function FileActivePage() {
       const result = await updateCaseloadAction(actionId, patch)
       if (!result.ok || !result.action) {
         toast.error(t('file_active.error_save'))
-        loadRows()
+        invalidateRows()
         return
       }
       const action = result.action
-      setRows(prev =>
+      updateRows(prev =>
         prev.map(r => (r.entry.id === entryId ? { ...r, actions: r.actions.map(a => (a.id === actionId ? action : a)) } : r))
       )
     },
-    [toast, t, loadRows]
+    [toast, t, invalidateRows, updateRows]
   )
 
   const handleDeleteAction = useCallback(
@@ -179,11 +191,11 @@ export function FileActivePage() {
         toast.error(t('file_active.error_save'))
         return
       }
-      setRows(prev =>
+      updateRows(prev =>
         prev.map(r => (r.entry.id === entryId ? { ...r, actions: r.actions.filter(a => a.id !== actionId) } : r))
       )
     },
-    [toast, t]
+    [toast, t, updateRows]
   )
 
   const handleAddWait = useCallback(
@@ -195,9 +207,9 @@ export function FileActivePage() {
         return
       }
       const wait = result.wait
-      setRows(prev => prev.map(r => (r.entry.id === entryId ? { ...r, waits: [...r.waits, wait] } : r)))
+      updateRows(prev => prev.map(r => (r.entry.id === entryId ? { ...r, waits: [...r.waits, wait] } : r)))
     },
-    [practitioner, toast, t]
+    [practitioner, toast, t, updateRows]
   )
 
   const handlePatchWait = useCallback(
@@ -205,15 +217,15 @@ export function FileActivePage() {
       const result = await updateCaseloadWait(waitId, patch)
       if (!result.ok || !result.wait) {
         toast.error(t('file_active.error_save'))
-        loadRows()
+        invalidateRows()
         return
       }
       const wait = result.wait
-      setRows(prev =>
+      updateRows(prev =>
         prev.map(r => (r.entry.id === entryId ? { ...r, waits: r.waits.map(w => (w.id === waitId ? wait : w)) } : r))
       )
     },
-    [toast, t, loadRows]
+    [toast, t, invalidateRows, updateRows]
   )
 
   const handleDeleteWait = useCallback(
@@ -223,11 +235,11 @@ export function FileActivePage() {
         toast.error(t('file_active.error_save'))
         return
       }
-      setRows(prev =>
+      updateRows(prev =>
         prev.map(r => (r.entry.id === entryId ? { ...r, waits: r.waits.filter(w => w.id !== waitId) } : r))
       )
     },
-    [toast, t]
+    [toast, t, updateRows]
   )
 
   // Notes : chargées paresseusement quand une ligne est dépliée (le panneau de détail

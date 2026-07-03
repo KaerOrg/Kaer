@@ -16,7 +16,6 @@ vi.mock('@services/crisisPlanService', () => ({
     commitmentPhrase: '',
   }),
   saveCrisisPlanConfig: vi.fn().mockResolvedValue({ ok: true }),
-  clearCrisisPlanConfigCache: vi.fn(),
 }))
 
 import { render, screen } from '@testing-library/react'

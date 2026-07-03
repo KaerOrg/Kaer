@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../../ui/Modal'
@@ -7,8 +8,8 @@ import { Tooltip } from '../../ui/Tooltip'
 import { InputField } from '../../ui/InputField'
 import { TimePicker } from '../../ui/TimePicker'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
+import { notificationRoutineQueries } from '../../../hooks/queries'
 import {
-  getRoutinesForPatientModule,
   createRoutine,
   updateRoutine,
   deleteRoutine,
@@ -39,28 +40,34 @@ export function NotificationRoutineModal({
 }: Props) {
   const { t } = useTranslation()
   const ModuleIcon = LUCIDE_ICONS[moduleIconName]
+  const queryClient = useQueryClient()
 
-  const [routines, setRoutines] = useState<NotificationRoutine[]>([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const routinesQuery = useQuery(notificationRoutineQueries.byPatientModule(patientModuleId))
+  const routines = useMemo(() => routinesQuery.data ?? [], [routinesQuery.data])
+  const loading = routinesQuery.isLoading
+
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 3, 5])
-  const [showForm, setShowForm] = useState(false)
+  // Ouverture explicite du formulaire par l'utilisateur. Le formulaire est aussi
+  // affiché d'office quand il n'existe aucun rappel (rien d'autre à montrer).
+  const [formRequested, setFormRequested] = useState(false)
+  const showForm = formRequested || routines.length === 0
 
   const timeRef = useRef<HTMLInputElement>(null)
   const noteRef = useRef<HTMLTextAreaElement>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await getRoutinesForPatientModule(patientModuleId)
-      setRoutines(data)
-      if (data.length === 0) setShowForm(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [patientModuleId])
+  // Toute écriture invalide la liste du module → refetch et fraîcheur immédiate.
+  const invalidate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: notificationRoutineQueries.byPatientModule(patientModuleId).queryKey }),
+    [queryClient, patientModuleId],
+  )
 
-  useEffect(() => { void load() }, [load])
+  const createMutation = useMutation({ mutationFn: createRoutine, onSuccess: invalidate })
+  const toggleMutation = useMutation({
+    mutationFn: (routine: NotificationRoutine) => updateRoutine(routine.id, { is_active: !routine.is_active }),
+    onSuccess: invalidate,
+  })
+  const deleteMutation = useMutation({ mutationFn: deleteRoutine, onSuccess: invalidate })
+  const saving = createMutation.isPending
 
   const toggleDay = useCallback((iso: number) => {
     setSelectedDays(prev =>
@@ -70,35 +77,29 @@ export function NotificationRoutineModal({
 
   const handleCreate = useCallback(async () => {
     if (selectedDays.length === 0) return
-    setSaving(true)
-    try {
-      await createRoutine({
-        patient_module_id: patientModuleId,
-        practitioner_id: practitionerId,
-        patient_id: patientId,
-        days_of_week: selectedDays,
-        time_of_day: timeRef.current?.value ?? DEFAULT_TIME,
-        practitioner_note: noteRef.current?.value.trim() || null,
-      })
-      setSelectedDays([1, 3, 5])
-      if (timeRef.current) timeRef.current.value = DEFAULT_TIME
-      if (noteRef.current) noteRef.current.value = ''
-      setShowForm(false)
-      await load()
-    } finally {
-      setSaving(false)
-    }
-  }, [selectedDays, patientModuleId, practitionerId, patientId, load])
+    await createMutation.mutateAsync({
+      patient_module_id: patientModuleId,
+      practitioner_id: practitionerId,
+      patient_id: patientId,
+      days_of_week: selectedDays,
+      time_of_day: timeRef.current?.value ?? DEFAULT_TIME,
+      practitioner_note: noteRef.current?.value.trim() || null,
+    })
+    setSelectedDays([1, 3, 5])
+    if (timeRef.current) timeRef.current.value = DEFAULT_TIME
+    if (noteRef.current) noteRef.current.value = ''
+    setFormRequested(false)
+  }, [selectedDays, patientModuleId, practitionerId, patientId, createMutation])
 
-  const handleToggleActive = useCallback(async (routine: NotificationRoutine) => {
-    await updateRoutine(routine.id, { is_active: !routine.is_active })
-    await load()
-  }, [load])
+  const handleToggleActive = useCallback(
+    (routine: NotificationRoutine) => { void toggleMutation.mutate(routine) },
+    [toggleMutation],
+  )
 
-  const handleDelete = useCallback(async (routineId: string) => {
-    await deleteRoutine(routineId)
-    await load()
-  }, [load])
+  const handleDelete = useCallback(
+    (routineId: string) => { void deleteMutation.mutate(routineId) },
+    [deleteMutation],
+  )
 
   const dayLabels = useMemo(() => DAY_KEYS, [])
 
@@ -157,7 +158,7 @@ export function NotificationRoutineModal({
 
               <div className="nr-form__actions">
                 {routines.length > 0 && (
-                  <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
+                  <Button variant="ghost" size="sm" onClick={() => setFormRequested(false)}>
                     {t('common.cancel')}
                   </Button>
                 )}
@@ -178,7 +179,7 @@ export function NotificationRoutineModal({
               variant="outline"
               size="sm"
               fullWidth
-              onClick={() => setShowForm(true)}
+              onClick={() => setFormRequested(true)}
               icon={<Plus size={15} />}
             >
               {t('notifications.add_routine')}

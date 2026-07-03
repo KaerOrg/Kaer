@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ShieldAlert, Plus, Trash2, ChevronDown, ChevronUp,
   BookOpen, Info, ExternalLink,
 } from 'lucide-react'
+import { cssrsQueries } from '../../hooks/queries'
 import {
-  fetchCSSRSAssessments,
   saveCSSRSAssessment,
   deleteCSSRSAssessment,
   type CSSRSAssessment,
@@ -420,13 +421,14 @@ function AssessmentDetail({ assessment: a }: AssessmentDetailProps) {
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
-  const [assessments, setAssessments] = useState<Assessment[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
+  const assessmentsQuery = useQuery(cssrsQueries.assessments(patientId, practitionerId))
+  const assessments = useMemo<Assessment[]>(() => assessmentsQuery.data ?? [], [assessmentsQuery.data])
+  const loading = assessmentsQuery.isLoading
+
   const [formOpen, setFormOpen] = useState(false)
   const [formState, setFormState] = useState<FormState>(makeInitFormState)
-  const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -434,15 +436,17 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
     setExpandedId(prev => prev === id ? null : id)
   }, [])
 
-  // ── Chargement ──────────────────────────────────────────────────────────────
+  // ── Écritures : invalident la liste pour un refetch immédiat ──────────────────
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setAssessments(await fetchCSSRSAssessments(patientId, practitionerId))
-    setLoading(false)
-  }, [patientId, practitionerId])
-
-  useEffect(() => { void load() }, [load])
+  const invalidate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: cssrsQueries.assessments(patientId, practitionerId).queryKey }),
+    [queryClient, patientId, practitionerId],
+  )
+  const saveMutation = useMutation({ mutationFn: saveCSSRSAssessment, onSuccess: invalidate })
+  const deleteMutation = useMutation({ mutationFn: deleteCSSRSAssessment, onSuccess: invalidate })
+  const saving = saveMutation.isPending
+  // Row en cours de suppression (pour le spinner par ligne) : dérivée de la mutation.
+  const deletingId = deleteMutation.isPending ? deleteMutation.variables : null
 
   // ── Dérivations ─────────────────────────────────────────────────────────────
 
@@ -580,7 +584,6 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
 
   const handleSubmit = async () => {
     if (!allAnswered) return
-    setSaving(true)
     setSaveError(null)
 
     const ideationAnswers = formState.ideation.map((item, idx) => ({
@@ -591,7 +594,7 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
     const flatIdeation = ideationAnswers.map(a => a.value)
     const flatBehavior = formState.behavior.map(b => b.value ?? 0)
 
-    const result = await saveCSSRSAssessment({
+    const result = await saveMutation.mutateAsync({
       patientId,
       practitionerId,
       ideation_answers: ideationAnswers,
@@ -616,14 +619,11 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
 
     if (!result.ok) {
       setSaveError(`Erreur lors de l'enregistrement : ${result.message ?? 'inconnue'}`)
-      setSaving(false)
       return
     }
 
     setFormState(makeInitFormState())
     setFormOpen(false)
-    await load()
-    setSaving(false)
   }
 
   // ── Suppression ─────────────────────────────────────────────────────────────
@@ -635,10 +635,8 @@ export function CSSRSScreenPanel({ patientId, practitionerId }: Props) {
     const id = pendingDeleteId
     if (id == null) return
     setPendingDeleteId(null)
-    setDeletingId(id)
-    await deleteCSSRSAssessment(id)
-    setAssessments(prev => prev.filter(a => a.id !== id))
-    setDeletingId(null)
+    // La mutation invalide la liste au succès → le refetch retire la ligne supprimée.
+    await deleteMutation.mutateAsync(id)
   }
 
   // ── Toggle formulaire ───────────────────────────────────────────────────────
