@@ -8,10 +8,14 @@ import { fetchConfigVersion } from '@services/configVersionService'
 // on revérifie le jeton ; s'il a changé, les queries de config qui l'incluent
 // dans leur `queryKey` se rechargent automatiquement. Voir #102.
 export const configVersionQueries = {
-  current: () =>
+  // `enabled` : la lecture est gardée par la RLS `auth.uid() is not null` — inutile
+  // (et sans effet) de la lancer avant l'authentification (page login). L'appelant
+  // passe l'état authentifié.
+  current: (enabled = true) =>
     queryOptions({
       queryKey: ['configVersion'],
       queryFn: fetchConfigVersion,
+      enabled,
       staleTime: 30_000,
       refetchOnWindowFocus: true,
     }),

@@ -2,24 +2,26 @@ import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query
 import { fetchModuleCategories, fetchComingSoonModuleIds } from '@services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '@services/practitionerSettingsService'
 import { fetchModulePreviewKind } from '@services/moduleService'
+import { CONFIG_QUERY_OPTIONS } from './configCache'
 import type { ModuleType } from '../../lib/database.types'
 
 // Factories `queryOptions` du catalogue de modules + réglages praticien.
-// `categories` et `comingSoonIds` sont des référentiels (quasi statiques) ;
-// `enabledModules` dépend du praticien.
+// `categories`, `comingSoonIds` et `previewKind` sont des référentiels de config
+// quasi-statiques (cache infini + invalidation par jeton) ; `enabledModules` dépend
+// du praticien et s'invalide sur écriture (cf. useSaveEnabledModules), pas via le jeton.
 export const catalogQueries = {
   categories: () =>
     queryOptions({
       queryKey: ['catalog', 'categories'],
       queryFn: fetchModuleCategories,
-      staleTime: 10 * 60_000,
+      ...CONFIG_QUERY_OPTIONS,
     }),
 
   comingSoonIds: () =>
     queryOptions({
       queryKey: ['catalog', 'comingSoonIds'],
       queryFn: fetchComingSoonModuleIds,
-      staleTime: 10 * 60_000,
+      ...CONFIG_QUERY_OPTIONS,
     }),
 
   previewKind: (moduleType: string | undefined) =>
@@ -27,7 +29,7 @@ export const catalogQueries = {
       queryKey: ['catalog', 'previewKind', moduleType ?? ''],
       queryFn: () => fetchModulePreviewKind(moduleType!),
       enabled: moduleType != null,
-      staleTime: 10 * 60_000,
+      ...CONFIG_QUERY_OPTIONS,
     }),
 
   enabledModules: (practitionerId: string | undefined) =>

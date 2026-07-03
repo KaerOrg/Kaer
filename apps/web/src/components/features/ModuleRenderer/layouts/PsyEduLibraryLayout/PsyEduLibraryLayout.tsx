@@ -1,12 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
-import {
-  fetchLibraryTopics,
-  fetchThemes,
-  type LibraryTopic,
-  type PsyEduTheme,
-} from '@services/psyeduService'
+import { psyeduQueries } from '../../../../../hooks/queries'
 import { PsyEduBlocks } from '../PsyEduLayout/PsyEduBlocks'
 
 const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, sources: 2 }
@@ -15,41 +11,23 @@ const SECTION_ORDER: Readonly<Record<string, number>> = { why: 0, how: 1, source
 // groupées par thème. (Côté patient mobile, seules les fiches débloquées sont affichées.)
 export function PsyEduLibraryLayout() {
   const { t } = useTranslation()
-  const [topics, setTopics] = useState<readonly LibraryTopic[]>([])
-  const [themes, setThemes] = useState<readonly PsyEduTheme[]>([])
+  const topicsQuery = useQuery(psyeduQueries.libraryTopics())
+  const themesQuery = useQuery(psyeduQueries.themes())
   const [openId, setOpenId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setError(false)
-    Promise.all([fetchLibraryTopics(), fetchThemes()])
-      .then(([topicList, themeList]) => {
-        if (cancelled) return
-        setTopics(topicList)
-        setThemes(themeList)
-      })
-      .catch(() => {
-        if (!cancelled) setError(true)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   const handleToggle = useCallback((id: string) => {
     setOpenId(prev => (prev === id ? null : id))
   }, [])
 
-  if (loading) return <div className="psyedu psyedu--loading">{t('common.loading')}</div>
-  if (error) return <div className="psyedu psyedu--error">{t('common.error')}</div>
+  if (topicsQuery.isLoading || themesQuery.isLoading) {
+    return <div className="psyedu psyedu--loading">{t('common.loading')}</div>
+  }
+  if (topicsQuery.isError || themesQuery.isError) {
+    return <div className="psyedu psyedu--error">{t('common.error')}</div>
+  }
 
-  const groups = themes
+  const topics = topicsQuery.data ?? []
+  const groups = (themesQuery.data ?? [])
     .map(theme => ({ theme, items: topics.filter(tp => tp.theme_id === theme.id) }))
     .filter(group => group.items.length > 0)
 

@@ -1,7 +1,9 @@
-import { useEffect, useState, type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Lightbulb, CheckCircle2, Check } from 'lucide-react'
-import { fetchBlocksByTopic, type PsyEduBlock } from '@services/psyeduService'
+import { type PsyEduBlock } from '@services/psyeduService'
+import { psyeduQueries } from '../../../../../hooks/queries'
 
 interface Props {
   topicId: string
@@ -52,34 +54,17 @@ function renderInline(text: string): ReactElement[] {
 // PsyEduBlockRenderer mobile.
 export function PsyEduBlocks({ topicId, sectionOrder }: Props) {
   const { t } = useTranslation()
-  const [blocks, setBlocks] = useState<readonly PsyEduBlock[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const { data, isLoading, isError } = useQuery(psyeduQueries.blocksByTopic(topicId))
+  const blocks = useMemo(
+    () => (data ? sortBlocks(data, sectionOrder) : []),
+    [data, sectionOrder],
+  )
 
-  useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setError(false)
-    fetchBlocksByTopic(topicId)
-      .then(data => {
-        if (!cancelled) setBlocks(sortBlocks(data, sectionOrder))
-      })
-      .catch(() => {
-        if (!cancelled) setError(true)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [topicId, sectionOrder])
-
-  if (loading) {
+  if (isLoading) {
     return <div className="psyedu__body psyedu__body--loading">{t('common.loading')}</div>
   }
 
-  if (error) {
+  if (isError) {
     return <div className="psyedu__body psyedu__body--error">{t('common.error')}</div>
   }
 

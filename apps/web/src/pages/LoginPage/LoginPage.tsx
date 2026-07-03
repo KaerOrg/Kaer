@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { BrainCircuit } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { referenceQueries } from '../../hooks/queries'
 import { Button } from '../../components/ui/Button'
 import { InputField } from '../../components/ui/InputField'
 import { Dropdown, type DropdownOption } from '../../components/ui/Dropdown'
-import { fetchProfessionalTitles } from '@services/authService'
-import type { ProfessionalTitle } from '../../lib/database.types'
 import { MfaChallengeForm } from './MfaChallengeForm'
 import { SupportRequestModal } from '../../components/features/SupportRequestModal'
 import './LoginPage.css'
@@ -22,11 +22,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [title, setTitle] = useState('')
-  const [professionalTitles, setProfessionalTitles] = useState<ProfessionalTitle[]>([])
-
-  useEffect(() => {
-    void fetchProfessionalTitles().then(setProfessionalTitles)
-  }, [])
+  const { data: professionalTitles = [] } = useQuery(referenceQueries.professionalTitles())
 
   const titleOptions = useMemo<DropdownOption[]>(
     () =>

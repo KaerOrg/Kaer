@@ -197,12 +197,6 @@ export const homeQueries = {
   une **écriture** (ex. `FileActivePage` → `syncCaseloadWithPatients` puis re-fetch
   conditionnel) ne passe pas par une query : y forcer reviendrait à écrire dans un
   `queryFn` (anti-pattern). Il garde son orchestration `useEffect` + `useState`.
-- **Service déjà doté d'un cache mémoire.** `psyeduService` (fiches psyedu) et
-  `moduleService.fetchModuleFields` (contenu de module, cœur du moteur générique)
-  maintiennent leur propre cache de session (`Map`, contenu quasi statique) :
-  ré-encapsuler dans TanStack doublerait le cache pour un gain marginal. Laissés tels
-  quels. (Le seul fetch non caché de `ModuleContentScreen`, `fetchPatientModuleConfig`,
-  est conditionnel et marginal.)
 - **Pas de lecture cacheable.** Un écran dont les données viennent du store
   (`ProfileScreen` → `authStore`) et qui ne fait que des actions one-shot
   (upload, export, effacement) n'a aucune query à migrer.
@@ -218,6 +212,31 @@ Documenter le choix en commentaire à chaque exception.
   enveloppant (client neuf, `retry: false`), service mocké. Tout écran qui rend un
   composant utilisant un hook de query doit être enveloppé d'un `QueryClientProvider`
   dans son test.
+
+### Config quasi-statique = cache infini via React Query (web)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #99.
+
+Toute lecture de config quasi-statique passe par React Query avec les options
+partagées `CONFIG_QUERY_OPTIONS` (`src/hooks/queries/configCache.ts`) :
+`staleTime: Infinity`, `gcTime: Infinity`, `meta.configScoped: true`. Concernées :
+`moduleQueries.fields`, `scaleQueries.meta`, `moduleSourcesQueries.byModule`,
+`psyeduQueries.*`, `referenceQueries.professionalTitles`, et les référentiels
+`catalogQueries` (`categories`, `comingSoonIds`, `previewKind`).
+
+- **Zéro fetch en `useEffect`.** Un composant qui a besoin de config appelle
+  `useQuery(xxxQueries.y())`. Les anciens `useEffect` + `setState` (ModulePreviewPanel,
+  PatientModulesTab, LoginPage, ModuleSourcesPanel, layouts psyedu) ont été supprimés.
+- **React Query est l'UNIQUE couche de cache.** Aucun cache `Map` module-level dans
+  les services (retirés de `psyeduService` et `moduleSourcesService`) : un cache local
+  masquerait l'invalidation par jeton (la config resterait figée malgré un re-seed).
+- **Fraîcheur** : le jeton de version (ci-dessous) invalide en bloc ces queries quand
+  la config change en base — le `staleTime: Infinity` ne fige donc jamais durablement.
+- **Défaut global inchangé.** Le `queryClient` garde ses défauts (30 s / 5 min) pour
+  les données praticien volatiles ; seules les queries de config passent en infini.
+- **Tests** : composant enveloppé par le helper `src/test/renderWithClient.tsx`
+  (`QueryClientProvider` neuf, `retry: false`) ; un client partagé entre deux montages
+  vérifie la déduplication (2e montage = 0 fetch).
 
 ### Invalidation de la config par jeton de version (ETag applicatif)
 

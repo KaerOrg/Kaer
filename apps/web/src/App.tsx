@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
+import { useConfigCacheSync } from './hooks/useConfigCacheSync'
 import { ToastProvider } from './contexts/ToastProvider'
 import { ToastContainer } from './components/ui/Toast'
 
@@ -23,6 +24,11 @@ function App() {
   useEffect(() => {
     loadSession()
   }, [loadSession])
+
+  // Invalide le cache de config quand le jeton de version change (re-seed en base),
+  // sans rechargement de page. Gardé sur l'auth : pas de lecture avant login.
+  // Voir hooks/useConfigCacheSync (#102/#99).
+  useConfigCacheSync(!!practitioner)
 
   if (loading) {
     return (

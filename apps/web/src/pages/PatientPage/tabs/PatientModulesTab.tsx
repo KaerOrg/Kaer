@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, type CSSProperties } from 'react'
+import { useState, useCallback, useMemo, type CSSProperties } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
@@ -25,7 +26,7 @@ import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
-import { fetchScaleMeta, type ScaleMetaRow } from '@services/scaleService'
+import { scaleQueries } from '../../../hooks/queries'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
@@ -71,7 +72,7 @@ export function PatientModulesTab({
 }: Props) {
   const { t, i18n } = useTranslation()
 
-  const [scaleMeta, setScaleMeta] = useState<ScaleMetaRow[]>([])
+  const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   // Opération de bascule en cours — une seule à la fois. `unlock` cible un type de
   // module (la row n'existe pas encore), `revoke` une row déjà déverrouillée. Un
   // state unique discriminé plutôt que deux states couplés (unlocking + revoking).
@@ -89,10 +90,6 @@ export function PatientModulesTab({
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
-
-  useEffect(() => {
-    fetchScaleMeta().then(setScaleMeta)
-  }, [])
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false)

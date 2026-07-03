@@ -1,11 +1,9 @@
 import { supabase } from '../lib/supabase'
 import type { ModuleSource } from '@kaer/shared'
 
-const cache = new Map<string, ModuleSource[]>()
-
+// Pas de cache module-level : React Query (moduleSourcesQueries) est l'unique couche
+// de cache côté web. Un cache local masquerait l'invalidation par jeton de version (#102).
 export async function fetchSourcesByModule(moduleId: string): Promise<ModuleSource[]> {
-  if (cache.has(moduleId)) return cache.get(moduleId)!
-
   const { data, error } = await supabase
     .from('module_sources')
     .select('*')
@@ -13,12 +11,5 @@ export async function fetchSourcesByModule(moduleId: string): Promise<ModuleSour
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-
-  const sources = (data ?? []) as ModuleSource[]
-  cache.set(moduleId, sources)
-  return sources
-}
-
-export function clearModuleSourcesCache(): void {
-  cache.clear()
+  return (data ?? []) as ModuleSource[]
 }
