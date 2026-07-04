@@ -27,7 +27,6 @@ export const alStyles = StyleSheet.create({
   // List / Week
   listContent: { padding: spacing.lg, gap: spacing.lg, paddingBottom: 96 },
   empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
   dayList: { gap: spacing.sm },
   dayListTitle: {
@@ -35,16 +34,7 @@ export const alStyles = StyleSheet.create({
     textTransform: 'uppercase', letterSpacing: 0.8,
   },
   dayListTitleToday: { color: colors.primary },
-
-  // Week nav
-  weekNav: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-    paddingHorizontal: spacing.md, paddingVertical: spacing.xs,
-  },
-  weekTitle: {
-    flex: 1, textAlign: 'center', fontSize: 16, fontWeight: '700',
-    color: colors.text,
-  },
+  todayEmptyText: { fontSize: 14, color: colors.textMuted, fontStyle: 'italic' },
 
   // Record card
   recordCard: {
@@ -58,7 +48,6 @@ export const alStyles = StyleSheet.create({
   recordLabel: { fontSize: 15, fontWeight: '600', color: colors.text },
   recordLabelDone: { textDecorationLine: 'line-through', color: colors.textMuted },
   recordScores: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  scorePrefix: { fontSize: 11, fontWeight: '600', color: colors.textMuted, fontStyle: 'italic' },
   scorePill: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: colors.background, borderRadius: radius.sm,
@@ -116,8 +105,6 @@ export const alStyles = StyleSheet.create({
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   valueText: { fontSize: 13, color: colors.primary, fontStyle: 'italic' },
 
-  expectedRecap: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
-  predictionHint: { fontSize: 13, color: colors.textMuted },
   notesInput: { fontSize: 15, color: colors.text, minHeight: 72, lineHeight: 22 },
 
   // Feuille d'évaluation à la complétion (« C'était comment ? »)

@@ -1194,15 +1194,10 @@
       "label": "Behavioral Activation Journal",
       "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
       "new_btn": "New activity",
-      "empty_title": "No activity yet",
-      "empty_text": "Use the button above to log your first activity.",
-      "tab_week": "Week",
-      "tab_list": "List",
       "add_btn": "Add an activity",
       "date_label": "Date",
       "planned_time": "Planned time (optional)",
       "section_activity": "Activity",
-      "section_expected": "What you expect from it",
       "section_felt": "What it gave you",
       "section_notes": "Notes",
       "activity_placeholder": "E.g.: 20-min walk, Call a friend, Reading…",
@@ -1210,8 +1205,6 @@
       "pleasure_sublabel": "Enjoyment from the activity",
       "mastery_label": "Mastery (M)",
       "mastery_sublabel": "Sense of accomplishment",
-      "expected_short": "expected",
-      "felt_short": "felt",
       "mark_done": "Mark as completed",
       "save": "Save",
       "domain_body": "Body and health",
@@ -1263,9 +1256,10 @@
       "mastery_short": "M",
       "status_planned": "I'm planning it",
       "status_done": "I already did it",
-      "prediction_toggle": "Add a prediction (optional)",
       "completion_title": "How was it?",
-      "completion_skip": "Skip"
+      "completion_skip": "Skip",
+      "tab_upcoming": "Upcoming",
+      "tab_history": "History"
     },
     "beck_columns": {
       "label": "Beck Columns",
@@ -2152,6 +2146,12 @@
     "ba_mastery_short": "M",
     "ba_legend_done": "Done",
     "ba_legend_planned": "Planned",
-    "ba_legend_scores": "P = pleasure · M = mastery (0 to 10, raw values)"
+    "ba_legend_scores": "P = pleasure · M = mastery (0 to 10, raw values)",
+    "ba_stat_done": "Done",
+    "ba_stat_missed": "Not done",
+    "ba_stat_upcoming": "Upcoming",
+    "ba_curve_title": "Felt pleasure and mastery (daily average)",
+    "ba_curve_pleasure": "Pleasure",
+    "ba_curve_mastery": "Mastery"
   }
 }

@@ -9,6 +9,7 @@ import { ActivityListCard } from './ActivityListCard'
 import { alStyles } from './styles'
 
 export interface ListViewProps {
+  /** Activités passées (date < aujourd'hui), pré-filtrées par le layout. */
   records: ActivityRecord[]
   lbl: LabelFn
   onEdit: (recordId: string) => void
@@ -16,7 +17,9 @@ export interface ListViewProps {
   onDelete: (record: ActivityRecord) => void
 }
 
-// Historique complet : activités groupées par date métier, plus récentes en premier.
+// Onglet Historique : les jours passés, plus récents en premier. Les activités
+// non réalisées y glissent telles quelles, sans marquage « en retard » (aucune
+// culpabilisation, aucune relance conditionnelle aux données : MDR).
 export function ListView({ records, lbl, onEdit, onToggleDone, onDelete }: ListViewProps) {
   const groupedDates = useMemo(() => {
     const groups = new Map<string, ActivityRecord[]>()
@@ -33,12 +36,9 @@ export function ListView({ records, lbl, onEdit, onToggleDone, onDelete }: ListV
       <ScrollView contentContainerStyle={alStyles.listContent}>
         {records.length === 0 ? (
           <View style={alStyles.empty} testID="list-empty">
-            <MaterialCommunityIcons name="run-fast" size={52} color={colors.border} />
-            {lbl('empty_title') ? (
-              <Text style={alStyles.emptyTitle}>{lbl('empty_title')}</Text>
-            ) : null}
-            {lbl('empty_text') ? (
-              <Text style={alStyles.emptyText}>{lbl('empty_text')}</Text>
+            <MaterialCommunityIcons name="history" size={52} color={colors.border} />
+            {lbl('history_empty_text') ? (
+              <Text style={alStyles.emptyText}>{lbl('history_empty_text')}</Text>
             ) : null}
           </View>
         ) : (

@@ -2,7 +2,9 @@
 
 ## Objectif clinique
 
-Permettre au patient de planifier des activités reliées à ses domaines de vie, de prédire ce qu'elles lui apporteront (Plaisir et Maîtrise attendus), de les réaliser, puis de noter ce qu'elles lui ont réellement apporté (P/M ressentis). L'écart entre attendu et ressenti est restitué brut, côte à côte : c'est le patient (et le praticien en consultation) qui en tire les conclusions, jamais l'application.
+Permettre au patient de planifier des activités reliées à ses domaines de vie (quoi + quand, sans aucune évaluation imposée), de les réaliser, puis de noter ce qu'elles lui ont apporté (Plaisir et Accomplissement ressentis) au moment où il les coche. Le praticien lit l'évolution des ressentis dans le temps (levée de l'anhédonie, sentiment d'efficacité) sur son panneau web : le constat se fait en séance, accompagné, jamais par l'application.
+
+Note de conception : la saisie d'une « prédiction » (P/M attendus) a été retirée du parcours patient. L'anhédonie anticipatoire est une cible réelle (Hallford 2019, g=-0,87) mais l'exercice prédire-puis-comparer en autonomie n'a pas de preuve directe (Wu 2016 : les patients déprimés prédisent leur plaisir avec justesse) ; les colonnes `expected_*` restent en base pour un éventuel usage futur en séance.
 
 **Base de preuves :**
 
@@ -37,15 +39,15 @@ Ce module est un **carnet de bord numérique**. Il n'est pas un dispositif médi
 
 Layout `activity_log` (moteur FieldRenderer), 3 modes internes :
 
-### Mode Semaine (défaut)
+### Mode Agenda (défaut)
 
-- 7 jours de la semaine courante, aujourd'hui mis en évidence, navigation semaine précédente/suivante
-- Chaque activité : carte avec statut (planifiée/réalisée), heure prévue, P/M bruts (attendus si planifiée, ressentis si réalisée)
-- La rétrospection longue vit côté praticien (panneau web) : le patient pense sa semaine
+- **Aujourd'hui** toujours en tête, mis en évidence, même vide (invitation implicite à planifier)
+- **À venir** : les jours futurs qui portent des activités, ordre croissant
+- Chaque activité : carte avec statut, heure prévue et, une fois réalisée, P/A ressentis bruts
 
-### Mode Liste
+### Mode Historique (second onglet)
 
-Historique complet groupé par date, plus récentes en premier.
+Les jours passés, plus récents en premier. Une activité planifiée non réalisée y glisse telle quelle, sans badge « en retard » ni relance (aucune culpabilisation ; les relances conditionnelles aux données sont interdites MDR). La rétrospection longue et l'évolution vivent côté praticien.
 
 ### Mode Formulaire : le statut est explicite, on n'évalue jamais avant d'avoir fait
 
@@ -61,14 +63,13 @@ Segment de statut en tête (`ui/SegmentedControl`) : **« Je la prévois »** / 
 | Mes activités | Chips | Activités co-construites en consultation, proposées en premier ; la sélection affiche la phrase « valeur » du patient |
 | Suggestions | Chips groupées par domaine de vie | Seed : 29 suggestions sur 6 domaines |
 | Date + heure prévue | Sélecteur + `ui/TimePicker` (optionnel) | `planned_time` |
-| Prédiction | Bloc **optionnel replié** (« Ajouter une prédiction ») | Une fois déplié : « À votre avis, qu'est-ce que cette activité vous apportera ? » + 2 sliders attendus. Jamais imposé |
 | Notes | Texte libre | — |
 
-**« Je l'ai déjà faite »** (journalisation après coup) : les 2 sliders **ressentis** s'affichent directement (+ rappel brut des attendus s'il y a eu prédiction). Pas d'heure prévue.
+**« Je l'ai déjà faite »** (journalisation après coup) : les 2 sliders **ressentis** s'affichent directement. Pas d'heure prévue.
 
 ### Feuille d'évaluation à la complétion (`CompletionSheet`)
 
-Cocher une activité **réalisée** (carte de la semaine ou de la liste) ouvre immédiatement une feuille bas d'écran : **« C'était comment ? »** + P/M ressentis + rappel brut de la prédiction si elle existe. C'est LE moment de la notation.
+Cocher une activité **réalisée** (agenda ou historique) ouvre immédiatement une feuille bas d'écran : **« C'était comment ? »** + P/A ressentis. C'est LE moment de la notation.
 
 - **Enregistrer** : réalisée + ressentis choisis
 - **Passer** : réalisée sans noter (« non renseigné » est légitime)
@@ -87,7 +88,11 @@ Le praticien définit **avec** le patient des activités personnalisées : libel
 
 ### Panneau de données (`BehavioralActivationPanel`)
 
-Grille hebdomadaire des activités réelles du patient (synchronisées via `patient_entries`) : navigation semaine par semaine, statut planifiée/réalisée, P/M attendus et ressentis bruts, heure prévue, notes. Compteurs bruts (n réalisées, n planifiées). Datation par `payload.date` (date métier choisie par le patient), jamais par l'horodatage de sync.
+Trois étages, tous alimentés par `patient_entries` et datés par `payload.date` (date métier choisie par le patient, jamais l'horodatage de sync) :
+
+1. **Compteurs bruts** : réalisées / non réalisées (planifiées échues) / à venir.
+2. **Courbes P et A ressentis** : moyenne journalière des activités réalisées et notées (`dailyFeltMeans`), 2 séries sur un axe 0-10. Lecture clinicienne de l'évolution hédonique (levée de l'anhédonie) et du sentiment d'efficacité : l'agrégation côté soignant est autorisée, aucun seuil ni conclusion automatique.
+3. **Grille hebdomadaire** : navigation semaine par semaine, statut, heure prévue, ressentis bruts, notes.
 
 ---
 
@@ -134,8 +139,8 @@ Grille hebdomadaire des activités réelles du patient (synchronisées via `pati
 | Fichier | Rôle |
 |---|---|
 | `apps/mobile/.../layouts/ActivityLog/ActivityLogLayout.tsx` | Routeur des 3 modes + données + handlers |
-| `apps/mobile/.../layouts/ActivityLog/WeekView.tsx` | Vue semaine |
-| `apps/mobile/.../layouts/ActivityLog/ListView.tsx` | Historique groupé par date |
+| `apps/mobile/.../layouts/ActivityLog/AgendaView.tsx` | Aujourd'hui + À venir |
+| `apps/mobile/.../layouts/ActivityLog/ListView.tsx` | Onglet Historique (jours passés) |
 | `apps/mobile/.../layouts/ActivityLog/EntryForm.tsx` | Formulaire (statut explicite, prédiction repliée) |
 | `apps/mobile/.../layouts/ActivityLog/CompletionSheet.tsx` | Feuille « C'était comment ? » à la complétion |
 | `apps/mobile/.../layouts/ActivityLog/ActivityListCard.tsx` | Carte d'une activité |

@@ -15,10 +15,9 @@ export interface ActivityListCardProps {
   lbl: LabelFn
 }
 
-// Carte d'une activité (liste et vue semaine) : statut, heure prévue et scores
-// bruts. Planifiée → P/M attendus (prédiction) ; réalisée → P/M ressentis.
-// « Non renseigné » n'affiche rien : jamais de zéro fabriqué (MDR : valeurs
-// brutes saisies uniquement).
+// Carte d'une activité (agenda et historique) : statut, heure prévue et,
+// une fois réalisée, les P/M ressentis bruts. « Non renseigné » n'affiche
+// rien : jamais de zéro fabriqué (MDR : valeurs brutes saisies uniquement).
 export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }: ActivityListCardProps) {
   const t = useModuleTranslation()
   const isDone = record.done === 1
@@ -28,9 +27,8 @@ export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }
 
   const pShort = lbl('pleasure_short_label') || 'P'
   const mShort = lbl('mastery_short_label') || 'M'
-  const scorePrefix = isDone ? lbl('felt_short_label') : lbl('expected_short_label')
-  const pleasure = isDone ? record.pleasure : record.expected_pleasure
-  const mastery = isDone ? record.mastery : record.expected_mastery
+  const pleasure = isDone ? record.pleasure : null
+  const mastery = isDone ? record.mastery : null
   const hasScores = pleasure != null || mastery != null
 
   return (
@@ -59,9 +57,6 @@ export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }
                 <MaterialCommunityIcons name="clock-outline" size={12} color={colors.textMuted} />
                 <Text style={alStyles.scorePillVal}>{record.planned_time}</Text>
               </View>
-            ) : null}
-            {hasScores && scorePrefix ? (
-              <Text style={alStyles.scorePrefix}>{scorePrefix}</Text>
             ) : null}
             {pleasure != null ? (
               <View style={alStyles.scorePill}>

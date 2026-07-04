@@ -4,6 +4,13 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: { count?: number }) => (opts?.count != null ? `${key}:${opts.count}` : key) }),
 }))
 
+// Stub du graphique recharts (non rendu en jsdom) : on expose séries et données.
+vi.mock('../../../components/ui/Chart', () => ({
+  LineChart: ({ series }: { series: { key: string }[] }) => (
+    <div data-testid="linechart" data-series={series.length} />
+  ),
+}))
+
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import type { ActivityEntryPoint } from '@services/engagementService'
@@ -85,6 +92,29 @@ describe('BehavioralActivationPanel', () => {
 
     fireEvent.click(screen.getByLabelText('evolution.ba_next_week'))
     expect(screen.getByText('Activité récente')).toBeInTheDocument()
+  })
+
+  it('affiche compteurs globaux et courbe des ressentis (moyennes journalières)', () => {
+    const entries = [
+      makeEntry({ id: 'a1', date: '2026-07-01', done: true, pleasure: 7, mastery: 5 }),
+      makeEntry({ id: 'a2', date: '2026-07-02', done: true, pleasure: 5, mastery: null }),
+      makeEntry({ id: 'a3', date: '2026-06-20', done: false }),
+      makeEntry({ id: 'a4', date: '2026-08-20', done: false }),
+    ]
+    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+
+    // Stats brutes : 2 réalisées, 1 non réalisée (passée), 1 à venir
+    expect(screen.getByText('evolution.ba_stat_done').previousSibling?.textContent).toBe('2')
+    expect(screen.getByText('evolution.ba_stat_missed').previousSibling?.textContent).toBe('1')
+    expect(screen.getByText('evolution.ba_stat_upcoming').previousSibling?.textContent).toBe('1')
+    // Courbe à 2 séries (P et A ressentis)
+    expect(screen.getByTestId('linechart').getAttribute('data-series')).toBe('2')
+  })
+
+  it('sans activité réalisée notée, la courbe est absente', () => {
+    const entries = [makeEntry({ id: 'a1', date: '2026-07-01', done: false })]
+    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    expect(screen.queryByTestId('linechart')).toBeNull()
   })
 
   it('affiche heure prévue et notes brutes quand présentes', () => {

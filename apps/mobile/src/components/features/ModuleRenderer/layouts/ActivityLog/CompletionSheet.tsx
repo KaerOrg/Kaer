@@ -21,8 +21,8 @@ export interface CompletionSheetProps {
 
 /**
  * Feuille d'évaluation ouverte au moment où le patient coche une activité
- * réalisée : « C'était comment ? », P/M ressentis, avec la prédiction rappelée
- * en brut si elle existe. C'est LE moment de la notation (jamais avant l'action).
+ * réalisée : « C'était comment ? » + P/M ressentis. C'est LE moment de la
+ * notation (jamais avant l'action).
  * « Passer » marque réalisée sans noter : non renseigné est un état légitime.
  * `ui/ActionSheet` ne convient pas (contrat liste d'options, sans contenu
  * libre) : feuille dédiée sur le même motif Modal bas d'écran.
@@ -40,10 +40,6 @@ export function CompletionSheet({ record, config, lbl, onSave, onSkip, onCancel 
   }, [])
   const handleSave = useCallback(() => onSave(pleasure, mastery), [onSave, pleasure, mastery])
 
-  const pShort = lbl('pleasure_short_label') || 'P'
-  const mShort = lbl('mastery_short_label') || 'M'
-  const hasExpected = record.expected_pleasure != null || record.expected_mastery != null
-
   return (
     <Modal transparent visible animationType="fade" onRequestClose={onCancel} statusBarTranslucent>
       <View style={alStyles.sheetBackdrop}>
@@ -51,13 +47,6 @@ export function CompletionSheet({ record, config, lbl, onSave, onSkip, onCancel 
         <View style={alStyles.sheet} testID="completion-sheet">
           <Text style={alStyles.sheetTitle}>{lbl('completion_title')}</Text>
           <Text style={alStyles.sheetActivity}>{record.label}</Text>
-          {hasExpected ? (
-            <Text style={alStyles.expectedRecap} testID="completion-expected-recap">
-              {lbl('expected_short_label')}
-              {record.expected_pleasure != null ? ` · ${pShort} ${record.expected_pleasure}` : ''}
-              {record.expected_mastery != null ? ` · ${mShort} ${record.expected_mastery}` : ''}
-            </Text>
-          ) : null}
           <RatingSelector
             label={lbl('pleasure_label')}
             sublabel={lbl('pleasure_sublabel')}

@@ -879,7 +879,8 @@ on conflict (field_id, prop_key) do nothing;
 -- ============================================================
 -- LAYOUT : behavioral_activation → activity_log
 -- preview_kind = 'activity_log' → ActivityLogLayout
--- 3 modes : week | list | entry
+-- 3 modes : agenda (Aujourd'hui + À venir) | history | entry
+-- Les ressentis P/M se notent au moment de cocher réalisée (CompletionSheet).
 -- Domaines de vie (activity_log_domain) : ancrage BATD-R (Lejuez 2011) ;
 -- chaque suggestion porte un prop `domain` (valeur atomique) pour le
 -- groupement, et la diversité des types d'activités (Rohani 2020).
@@ -979,13 +980,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'dot_done_color',         '#10B981'),
   ('al.cfg', 'dot_planned_color',      '#3B82F6'),
   ('al.cfg', 'locale',                 'fr-FR'),
-  ('al.cfg', 'tab_week_label',         'modules.behavioral_activation.tab_week'),
-  ('al.cfg', 'tab_list_label',         'modules.behavioral_activation.tab_list'),
+  ('al.cfg', 'tab_upcoming_label',     'modules.behavioral_activation.tab_upcoming'),
+  ('al.cfg', 'tab_history_label',      'modules.behavioral_activation.tab_history'),
   ('al.cfg', 'add_btn',                'modules.behavioral_activation.add_btn'),
-  ('al.cfg', 'empty_title',            'modules.behavioral_activation.empty_title'),
-  ('al.cfg', 'empty_text',             'modules.behavioral_activation.empty_text'),
+  ('al.cfg', 'today_empty_text',       'modules.behavioral_activation.today_empty'),
+  ('al.cfg', 'history_empty_text',     'modules.behavioral_activation.history_empty'),
   ('al.cfg', 'section_activity_title', 'modules.behavioral_activation.section_activity'),
-  ('al.cfg', 'section_expected_title', 'modules.behavioral_activation.section_expected'),
   ('al.cfg', 'section_felt_title',     'modules.behavioral_activation.section_felt'),
   ('al.cfg', 'section_notes_title',    'modules.behavioral_activation.section_notes'),
   ('al.cfg', 'activity_placeholder',   'modules.behavioral_activation.activity_placeholder'),
@@ -993,19 +993,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'pleasure_sublabel',      'modules.behavioral_activation.pleasure_sublabel'),
   ('al.cfg', 'mastery_label',          'modules.behavioral_activation.mastery_label'),
   ('al.cfg', 'mastery_sublabel',       'modules.behavioral_activation.mastery_sublabel'),
-  ('al.cfg', 'expected_short_label',   'modules.behavioral_activation.expected_short'),
-  ('al.cfg', 'felt_short_label',       'modules.behavioral_activation.felt_short'),
   ('al.cfg', 'pleasure_short_label',   'modules.behavioral_activation.pleasure_short'),
   ('al.cfg', 'mastery_short_label',    'modules.behavioral_activation.mastery_short'),
-  ('al.cfg', 'not_rated_label',        'modules.behavioral_activation.not_rated'),
-  ('al.cfg', 'clear_rating_label',     'modules.behavioral_activation.clear_rating'),
-  ('al.cfg', 'done_label',             'modules.behavioral_activation.done_label'),
   ('al.cfg', 'mark_done_label',        'modules.behavioral_activation.mark_done'),
   ('al.cfg', 'mark_undone_label',      'modules.behavioral_activation.mark_undone'),
   ('al.cfg', 'status_planned_label',   'modules.behavioral_activation.status_planned'),
   ('al.cfg', 'status_done_label',      'modules.behavioral_activation.status_done'),
-  ('al.cfg', 'prediction_toggle_label','modules.behavioral_activation.prediction_toggle'),
-  ('al.cfg', 'prediction_hint',        'modules.behavioral_activation.prediction_hint'),
   ('al.cfg', 'completion_title',       'modules.behavioral_activation.completion_title'),
   ('al.cfg', 'completion_skip_label',  'modules.behavioral_activation.completion_skip'),
   ('al.cfg', 'notes_placeholder',      'common.notes_placeholder'),
@@ -1019,13 +1012,8 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'delete_title',           'modules.behavioral_activation.delete_activity_title'),
   ('al.cfg', 'name_missing_title',     'modules.behavioral_activation.name_missing'),
   ('al.cfg', 'name_missing_msg',       'modules.behavioral_activation.name_missing_msg'),
-  ('al.cfg', 'legend_done_label',      'modules.behavioral_activation.legend_done'),
-  ('al.cfg', 'legend_planned_label',   'modules.behavioral_activation.legend_planned'),
   ('al.cfg', 'my_activities_title',    'modules.behavioral_activation.my_activities'),
   ('al.cfg', 'linked_value_prefix',    'modules.behavioral_activation.linked_value'),
-  ('al.cfg', 'week_empty_text',        'modules.behavioral_activation.week_empty'),
-  ('al.cfg', 'week_prev_label',        'modules.behavioral_activation.week_prev'),
-  ('al.cfg', 'week_next_label',        'modules.behavioral_activation.week_next'),
   ('al.cfg', 'back_label',             'modules.behavioral_activation.back_btn')
 on conflict (field_id, prop_key) do nothing;
 

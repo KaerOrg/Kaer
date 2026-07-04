@@ -98,13 +98,12 @@ const MOCK_FIELDS: ContentField[] = [
       dot_done_color:         '#10B981',
       dot_planned_color:      '#3B82F6',
       locale:                 'fr-FR',
-      tab_week_label:         'modules.behavioral_activation.tab_week',
-      tab_list_label:         'modules.behavioral_activation.tab_list',
+      tab_upcoming_label:     'modules.behavioral_activation.tab_upcoming',
+      tab_history_label:      'modules.behavioral_activation.tab_history',
       add_btn:                'modules.behavioral_activation.add_btn',
-      empty_title:            'modules.behavioral_activation.empty_title',
-      empty_text:             'modules.behavioral_activation.empty_text',
+      today_empty_text:       'modules.behavioral_activation.today_empty',
+      history_empty_text:     'modules.behavioral_activation.history_empty',
       section_activity_title: 'modules.behavioral_activation.section_activity',
-      section_expected_title: 'modules.behavioral_activation.section_expected',
       section_felt_title:     'modules.behavioral_activation.section_felt',
       section_notes_title:    'modules.behavioral_activation.section_notes',
       activity_placeholder:   'modules.behavioral_activation.activity_placeholder',
@@ -112,17 +111,12 @@ const MOCK_FIELDS: ContentField[] = [
       pleasure_sublabel:      'modules.behavioral_activation.pleasure_sublabel',
       mastery_label:          'modules.behavioral_activation.mastery_label',
       mastery_sublabel:       'modules.behavioral_activation.mastery_sublabel',
-      expected_short_label:   'modules.behavioral_activation.expected_short',
-      felt_short_label:       'modules.behavioral_activation.felt_short',
       pleasure_short_label:   'modules.behavioral_activation.pleasure_short',
       mastery_short_label:    'modules.behavioral_activation.mastery_short',
-      done_label:             'modules.behavioral_activation.done_label',
       mark_done_label:        'modules.behavioral_activation.mark_done',
       mark_undone_label:      'modules.behavioral_activation.mark_undone',
       status_planned_label:   'modules.behavioral_activation.status_planned',
       status_done_label:      'modules.behavioral_activation.status_done',
-      prediction_toggle_label:'modules.behavioral_activation.prediction_toggle',
-      prediction_hint:        'modules.behavioral_activation.prediction_hint',
       completion_title:       'modules.behavioral_activation.completion_title',
       completion_skip_label:  'modules.behavioral_activation.completion_skip',
       notes_placeholder:      'common.notes_placeholder',
@@ -136,13 +130,8 @@ const MOCK_FIELDS: ContentField[] = [
       delete_title:           'modules.behavioral_activation.delete_activity_title',
       name_missing_title:     'modules.behavioral_activation.name_missing',
       name_missing_msg:       'modules.behavioral_activation.name_missing_msg',
-      legend_done_label:      'modules.behavioral_activation.legend_done',
-      legend_planned_label:   'modules.behavioral_activation.legend_planned',
       my_activities_title:    'modules.behavioral_activation.my_activities',
       linked_value_prefix:    'modules.behavioral_activation.linked_value',
-      week_empty_text:        'modules.behavioral_activation.week_empty',
-      week_prev_label:        'modules.behavioral_activation.week_prev',
-      week_next_label:        'modules.behavioral_activation.week_next',
       back_label:             'modules.behavioral_activation.back_btn',
     },
   }),
@@ -197,41 +186,42 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     mockFetchBAActivities.mockResolvedValue([])
   })
 
-  it('monte en vue semaine et affiche l\'état vide de la semaine', async () => {
+  it('monte en vue agenda : Aujourd\'hui toujours affiché, même vide', async () => {
     renderLayout()
     await waitFor(() => {
       expect(database.getAllActivityRecords).toHaveBeenCalled()
     })
-    expect(await screen.findByTestId('activity-log-week')).toBeTruthy()
-    expect(await screen.findByTestId('week-empty')).toBeTruthy()
+    expect(await screen.findByTestId('activity-log-agenda')).toBeTruthy()
+    expect(await screen.findByTestId('agenda-today')).toBeTruthy()
+    expect(await screen.findByTestId('agenda-today-empty')).toBeTruthy()
   })
 
-  it('affiche les activités du jour dans la semaine courante', async () => {
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD, MOCK_DONE_RECORD])
+  it('affiche les activités du jour et celles à venir dans l\'agenda', async () => {
+    const futureRecord = makeRecord({ id: 'rec-future', date: shiftDate(TODAY, 3), label: 'Piscine' })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD, MOCK_DONE_RECORD, futureRecord])
     renderLayout()
     expect(await screen.findByTestId('record-rec-1')).toBeTruthy()
     expect(await screen.findByTestId('record-rec-2')).toBeTruthy()
+    expect(await screen.findByTestId(`agenda-day-${shiftDate(TODAY, 3)}`)).toBeTruthy()
+    expect(await screen.findByTestId('record-rec-future')).toBeTruthy()
   })
 
-  it('la navigation de semaine masque les activités hors semaine affichée', async () => {
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
-    renderLayout()
-    await screen.findByTestId('record-rec-1')
-    fireEvent.press(screen.getByTestId('week-prev'))
-    await waitFor(() => expect(screen.queryByTestId('record-rec-1')).toBeNull())
-    fireEvent.press(screen.getByTestId('week-next'))
-    expect(await screen.findByTestId('record-rec-1')).toBeTruthy()
-  })
-
-  it('une activité d\'une autre semaine reste visible dans l\'onglet Liste', async () => {
+  it('une activité passée vit dans l\'onglet Historique, pas dans l\'agenda', async () => {
     const oldRecord = makeRecord({ id: 'rec-old', date: shiftDate(TODAY, -30), label: 'Ancienne' })
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([oldRecord])
     renderLayout()
-    await screen.findByTestId('activity-log-week')
+    await screen.findByTestId('activity-log-agenda')
     expect(screen.queryByTestId('record-rec-old')).toBeNull()
-    fireEvent.press(screen.getByTestId('tab-list'))
+    fireEvent.press(screen.getByTestId('tab-history'))
     expect(await screen.findByTestId('activity-log-list')).toBeTruthy()
     expect(await screen.findByTestId('record-rec-old')).toBeTruthy()
+  })
+
+  it('l\'historique vide affiche son message dédié', async () => {
+    renderLayout()
+    await screen.findByTestId('activity-log-agenda')
+    fireEvent.press(screen.getByTestId('tab-history'))
+    expect(await screen.findByTestId('list-empty')).toBeTruthy()
   })
 
   it('passe en mode entry depuis le FAB', async () => {
@@ -249,13 +239,13 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 
-  it('planifier = quoi + quand : aucun slider imposé, prédiction repliée', async () => {
+  it('planifier = quoi + quand : aucun slider, aucune évaluation imposée', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
-    // Aucun slider visible tant que la prédiction n'est pas ouverte
-    expect(screen.queryByTestId('expected-pleasure-7')).toBeNull()
+    // Aucun slider visible en mode planification
     expect(screen.queryByTestId('pleasure-7')).toBeNull()
+    expect(screen.queryByTestId('mastery-5')).toBeNull()
     fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
@@ -272,33 +262,18 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     })
   })
 
-  it('la prédiction optionnelle se déplie et enregistre les attendus', async () => {
-    renderLayout()
-    fireEvent.press(await screen.findByTestId('fab-add-button'))
-    await screen.findByTestId('activity-log-entry')
-    fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
-    fireEvent.press(screen.getByTestId('prediction-toggle'))
-    fireEvent.press(await screen.findByTestId('expected-pleasure-7'))
-    await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
-    await waitFor(() => {
-      expect(database.saveActivityRecord).toHaveBeenCalledWith(
-        expect.objectContaining({ done: 0, expected_pleasure: 7, expected_mastery: null, pleasure: null })
-      )
-    })
-  })
-
   it('re-taper le pip sélectionné efface la note (retour à non renseigné)', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
     fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
-    fireEvent.press(screen.getByTestId('prediction-toggle'))
-    fireEvent.press(await screen.findByTestId('expected-pleasure-7'))
-    fireEvent.press(screen.getByTestId('expected-pleasure-7'))
+    fireEvent.press(screen.getByText("Je l'ai déjà faite"))
+    fireEvent.press(await screen.findByTestId('pleasure-7'))
+    fireEvent.press(screen.getByTestId('pleasure-7'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
-        expect.objectContaining({ expected_pleasure: null })
+        expect.objectContaining({ done: 1, pleasure: null })
       )
     })
   })
@@ -325,16 +300,13 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     })
   })
 
-  it('édition d\'une activité réalisée : rappel brut des attendus affiché', async () => {
-    const doneWithExpected = makeRecord({
-      id: 'rec-3', done: 1, expected_pleasure: 4, expected_mastery: 3, pleasure: 7, mastery: 5,
-    })
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([doneWithExpected])
-    ;(database.getActivityRecord as jest.Mock).mockResolvedValue(doneWithExpected)
+  it('édition : pré-remplit le formulaire et propose la suppression', async () => {
+    const doneRecord = makeRecord({ id: 'rec-3', done: 1, pleasure: 7, mastery: 5 })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([doneRecord])
+    ;(database.getActivityRecord as jest.Mock).mockResolvedValue(doneRecord)
     renderLayout()
     fireEvent.press(await screen.findByTestId('edit-rec-3'))
     await screen.findByTestId('activity-log-entry')
-    expect(await screen.findByTestId('expected-recap')).toBeTruthy()
     expect(screen.getByTestId('delete-button')).toBeTruthy()
     expect(database.getActivityRecord).toHaveBeenCalledWith('rec-3')
   })
@@ -366,8 +338,6 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('toggle-rec-1'))
     expect(await screen.findByTestId('completion-sheet')).toBeTruthy()
-    // La prédiction existante est rappelée en brut
-    expect(screen.getByTestId('completion-expected-recap')).toBeTruthy()
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 

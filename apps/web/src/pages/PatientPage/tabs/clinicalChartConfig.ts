@@ -31,3 +31,7 @@ export const MOOD_DIMENSIONS = [
 // Thermomètre de la peur — SUDS avant / après exposition.
 export const FEAR_BEFORE_COLOR = CHART_PALETTE[2]
 export const FEAR_AFTER_COLOR = CHART_PALETTE[1]
+
+// Activation comportementale — P/A ressentis (mêmes teintes que l'app patient).
+export const BA_PLEASURE_COLOR = CHART_PALETTE[1]
+export const BA_MASTERY_COLOR = CHART_PALETTE[0]

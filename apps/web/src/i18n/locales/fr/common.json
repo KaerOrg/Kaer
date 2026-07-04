@@ -931,13 +931,10 @@
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
       "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel.",
-      "tab_week": "Semaine",
-      "tab_list": "Liste",
       "add_btn": "Ajouter une activité",
       "date_label": "Date",
       "planned_time": "Heure prévue (optionnel)",
       "section_activity": "Activité",
-      "section_expected": "Ce que vous en attendez",
       "section_felt": "Ce que ça vous a apporté",
       "section_notes": "Notes",
       "activity_placeholder": "Ex : Marche 20 min, Appel à un ami, Lecture…",
@@ -945,8 +942,6 @@
       "pleasure_sublabel": "Satisfaction retirée de l'activité",
       "mastery_label": "Accomplissement (A)",
       "mastery_sublabel": "Sentiment d'accomplissement",
-      "expected_short": "attendu",
-      "felt_short": "ressenti",
       "mark_done": "Marquer comme réalisée",
       "save": "Enregistrer",
       "domain_body": "Corps et santé",
@@ -998,9 +993,10 @@
       "mastery_short": "A",
       "status_planned": "Je la prévois",
       "status_done": "Je l'ai déjà faite",
-      "prediction_toggle": "Ajouter une prédiction (optionnel)",
       "completion_title": "C'était comment ?",
-      "completion_skip": "Passer"
+      "completion_skip": "Passer",
+      "tab_upcoming": "À venir",
+      "tab_history": "Historique"
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -2296,6 +2292,12 @@
     "ba_mastery_short": "A",
     "ba_legend_done": "Réalisée",
     "ba_legend_planned": "Planifiée",
-    "ba_legend_scores": "P = plaisir · A = accomplissement (0 à 10, valeurs brutes)"
+    "ba_legend_scores": "P = plaisir · A = accomplissement (0 à 10, valeurs brutes)",
+    "ba_stat_done": "Réalisées",
+    "ba_stat_missed": "Non réalisées",
+    "ba_stat_upcoming": "À venir",
+    "ba_curve_title": "Plaisir et accomplissement ressentis (moyenne par jour)",
+    "ba_curve_pleasure": "Plaisir",
+    "ba_curve_mastery": "Accomplissement"
   }
 }

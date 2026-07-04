@@ -34,9 +34,8 @@ export interface EntryFormProps {
 /**
  * Formulaire d'activité. Le statut est EXPLICITE (« Je la prévois » /
  * « Je l'ai déjà faite ») : on n'évalue jamais une activité pas encore faite.
- * - Prévue : quoi + quand, c'est tout. La prédiction (P/M attendus) est un
- *   bloc optionnel replié, jamais imposé. La notation des ressentis viendra
- *   au moment de cocher réalisée (CompletionSheet).
+ * - Prévue : quoi + quand, c'est tout. La notation des ressentis viendra au
+ *   moment de cocher réalisée (CompletionSheet).
  * - Déjà faite : les sliders ressentis s'affichent directement.
  * Aucune valeur par défaut : « non renseigné » (null) est un état légitime ;
  * re-taper le pip sélectionné efface la note. Les activités co-construites en
@@ -54,10 +53,6 @@ export function EntryForm({
   const [label, setLabel] = useState(editingRecord?.label ?? '')
   const [domainId, setDomainId] = useState<string | null>(editingRecord?.domain_id ?? null)
   const [configActivityId, setConfigActivityId] = useState<string | null>(editingRecord?.config_activity_id ?? null)
-  const [predictionOpen, setPredictionOpen] = useState(
-    editingRecord != null && (editingRecord.expected_pleasure != null || editingRecord.expected_mastery != null))
-  const [expectedPleasure, setExpectedPleasure] = useState<number | null>(editingRecord?.expected_pleasure ?? null)
-  const [expectedMastery, setExpectedMastery] = useState<number | null>(editingRecord?.expected_mastery ?? null)
   const [pleasure, setPleasure] = useState<number | null>(editingRecord?.pleasure ?? null)
   const [mastery, setMastery] = useState<number | null>(editingRecord?.mastery ?? null)
   const [notes, setNotes] = useState(editingRecord?.notes ?? '')
@@ -103,12 +98,6 @@ export function EntryForm({
   }, [allSuggestions, label, configActivityId])
 
   // Re-taper le pip sélectionné efface la note (retour à « non renseigné »).
-  const handleExpectedPleasurePress = useCallback((value: number) => {
-    setExpectedPleasure(prev => (prev === value ? null : value))
-  }, [])
-  const handleExpectedMasteryPress = useCallback((value: number) => {
-    setExpectedMastery(prev => (prev === value ? null : value))
-  }, [])
   const handlePleasurePress = useCallback((value: number) => {
     setPleasure(prev => (prev === value ? null : value))
   }, [])
@@ -116,15 +105,14 @@ export function EntryForm({
     setMastery(prev => (prev === value ? null : value))
   }, [])
 
-  const openPrediction = useCallback(() => setPredictionOpen(true), [])
-
   const handleSave = useCallback(() => {
     onSave({
       id: editingRecord?.id ?? null,
       date: entryDate.toISOString().slice(0, 10),
       label: label.trim(),
-      expected_pleasure: expectedPleasure,
-      expected_mastery: expectedMastery,
+      // Colonnes conservées en base (legacy) : plus de saisie de prédiction dans l'app.
+      expected_pleasure: editingRecord?.expected_pleasure ?? null,
+      expected_mastery: editingRecord?.expected_mastery ?? null,
       pleasure: status === 'done' ? pleasure : null,
       mastery: status === 'done' ? mastery : null,
       done: status === 'done',
@@ -134,7 +122,7 @@ export function EntryForm({
       config_activity_id: configActivityId,
     })
   }, [
-    onSave, editingRecord, entryDate, label, expectedPleasure, expectedMastery,
+    onSave, editingRecord, entryDate, label,
     pleasure, mastery, status, notes, plannedTime, domainId, configActivityId,
   ])
 
@@ -142,9 +130,6 @@ export function EntryForm({
   const dateValueText = entryDate.toLocaleDateString(config.locale, {
     weekday: 'long', day: 'numeric', month: 'long',
   })
-  const pShort = lbl('pleasure_short_label') || 'P'
-  const mShort = lbl('mastery_short_label') || 'M'
-  const hasExpected = expectedPleasure != null || expectedMastery != null
 
   return (
     <KeyboardAvoidingView
@@ -277,63 +262,11 @@ export function EntryForm({
           </View>
         </View>
 
-        {/* Prévue : prédiction optionnelle repliée. Jamais de notation imposée avant l'action. */}
-        {status === 'planned' ? (
-          predictionOpen ? (
-            <View style={alStyles.section}>
-              <Text style={alStyles.sectionLabel}>{lbl('section_expected_title')}</Text>
-              <View style={alStyles.card}>
-                <Text style={alStyles.predictionHint}>{lbl('prediction_hint')}</Text>
-                <RatingSelector
-                  label={lbl('pleasure_label')}
-                  sublabel={lbl('pleasure_sublabel')}
-                  value={expectedPleasure}
-                  steps={config.pleasureSteps}
-                  color={config.pleasureColor}
-                  variant="track"
-                  showEndLabels
-                  testIdPrefix="expected-pleasure"
-                  onPress={handleExpectedPleasurePress}
-                />
-                <View style={alStyles.cardDivider} />
-                <RatingSelector
-                  label={lbl('mastery_label')}
-                  sublabel={lbl('mastery_sublabel')}
-                  value={expectedMastery}
-                  steps={config.masterySteps}
-                  color={config.masteryColor}
-                  variant="track"
-                  showEndLabels
-                  testIdPrefix="expected-mastery"
-                  onPress={handleExpectedMasteryPress}
-                />
-              </View>
-            </View>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              label={lbl('prediction_toggle_label')}
-              iconLeft={<MaterialCommunityIcons name="lightbulb-outline" size={16} color={colors.primary} />}
-              onPress={openPrediction}
-              accessibilityLabel={lbl('prediction_toggle_label')}
-              testID="prediction-toggle"
-            />
-          )
-        ) : null}
-
         {/* Déjà faite : les ressentis, directement */}
         {status === 'done' ? (
           <View style={alStyles.section}>
             <Text style={alStyles.sectionLabel}>{lbl('section_felt_title')}</Text>
             <View style={alStyles.card}>
-              {hasExpected ? (
-                <Text style={alStyles.expectedRecap} testID="expected-recap">
-                  {lbl('expected_short_label')}
-                  {expectedPleasure != null ? ` · ${pShort} ${expectedPleasure}` : ''}
-                  {expectedMastery != null ? ` · ${mShort} ${expectedMastery}` : ''}
-                </Text>
-              ) : null}
               <RatingSelector
                 label={lbl('pleasure_label')}
                 sublabel={lbl('pleasure_sublabel')}

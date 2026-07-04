@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Check, ChevronLeft, ChevronRight, Circle, Clock } from 'lucide-react'
 import { Button } from '@ui/Button'
 import type { ActivityEntryPoint } from '@services/engagementService'
-import { mondayOf, shiftDate, weekDays, todayIso, groupByDate } from './baWeek'
+import { mondayOf, shiftDate, weekDays, todayIso, groupByDate, dailyFeltMeans } from './baWeek'
+import { BA_PLEASURE_COLOR, BA_MASTERY_COLOR } from './clinicalChartConfig'
+import { ModuleChart } from './ModuleChart'
 import { BAScoreLine } from './BAScoreLine'
 import './BehavioralActivationPanel.css'
 
@@ -14,11 +16,14 @@ interface Props {
 
 /**
  * Panneau « Données » de l'activation comportementale pour le praticien :
- * grille hebdomadaire des activités du patient (planifiées / réalisées),
- * navigation semaine par semaine, P/M attendus et ressentis bruts.
- * Restitution neutre conforme MDR : aucune moyenne interprétée, aucun seuil,
- * aucun codage couleur de gravité. Présentationnel : entrées calculées en
- * amont (engagementService), datées par la date métier choisie par le patient.
+ * compteurs bruts (réalisées / non réalisées / à venir), courbes des P/A
+ * ressentis (moyenne journalière : lecture de l'évolution hédonique et du
+ * sentiment d'efficacité par le soignant), puis grille hebdomadaire des
+ * activités avec navigation semaine par semaine.
+ * Côté praticien, l'agrégation et le codage visuel des métriques sont
+ * autorisés (analyse clinique) : aucun seuil ni conclusion automatique.
+ * Présentationnel : entrées calculées en amont (engagementService), datées
+ * par la date métier choisie par le patient.
  */
 export function BehavioralActivationPanel({ entries, locale }: Props) {
   const { t } = useTranslation()
@@ -50,8 +55,49 @@ export function BehavioralActivationPanel({ entries, locale }: Props) {
     return `${fmt(days[0])} - ${fmt(days[6])}`
   }, [days, locale])
 
+  // Compteurs bruts globaux (toutes semaines confondues).
+  const stats = useMemo(() => {
+    const doneTotal = entries.filter(e => e.done).length
+    const missed = entries.filter(e => !e.done && e.date < today).length
+    const upcoming = entries.filter(e => !e.done && e.date >= today).length
+    return { doneTotal, missed, upcoming }
+  }, [entries, today])
+
+  // Moyennes journalières des ressentis (activités réalisées et notées).
+  const feltMeans = useMemo(() => dailyFeltMeans(entries), [entries])
+
   return (
     <div className="module-data-panel">
+      <div className="ba-stats">
+        <div className="ba-stats__item">
+          <span className="ba-stats__value">{stats.doneTotal}</span>
+          <span className="ba-stats__label">{t('evolution.ba_stat_done')}</span>
+        </div>
+        <div className="ba-stats__item">
+          <span className="ba-stats__value">{stats.missed}</span>
+          <span className="ba-stats__label">{t('evolution.ba_stat_missed')}</span>
+        </div>
+        <div className="ba-stats__item">
+          <span className="ba-stats__value">{stats.upcoming}</span>
+          <span className="ba-stats__label">{t('evolution.ba_stat_upcoming')}</span>
+        </div>
+      </div>
+
+      {feltMeans.length > 0 && (
+        <ModuleChart
+          title={t('evolution.ba_curve_title')}
+          count={feltMeans.length}
+          data={feltMeans}
+          series={[
+            { key: 'pleasure', color: BA_PLEASURE_COLOR, label: t('evolution.ba_curve_pleasure') },
+            { key: 'mastery', color: BA_MASTERY_COLOR, label: t('evolution.ba_curve_mastery') },
+          ]}
+          yDomain={[0, 10]}
+          showLegend
+          locale={locale}
+        />
+      )}
+
       <div className="ba-week__nav">
         <Button
           variant="ghost"

@@ -3,6 +3,41 @@
    réalisés, P/M attendus et ressentis bruts. Restitution neutre (MDR) : le
    style distingue les statuts saisis, jamais une gravité clinique. */
 
+.ba-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ba-stats__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  background: var(--color-card, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.ba-stats__value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.ba-stats__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.module-data-panel__chart + .ba-week__nav {
+  margin-top: 20px;
+}
+
 .ba-week__nav {
   display: flex;
   align-items: center;

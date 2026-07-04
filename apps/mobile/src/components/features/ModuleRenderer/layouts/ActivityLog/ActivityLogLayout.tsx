@@ -1,8 +1,9 @@
 // ─── Layout — journal d'activités (behavioral_activation…) ──────────────────
 //
-// Cycle prédire/faire/constater : le patient planifie des activités (P/M
-// attendus, prédiction), les réalise, puis note P/M ressentis. 3 modes :
-// week (défaut, unité de planification) | list (historique) | entry (formulaire).
+// Le patient planifie des activités (quoi + quand, zéro évaluation imposée),
+// les réalise, et note P/M ressentis au moment de cocher (CompletionSheet).
+// 3 modes : agenda (défaut : Aujourd'hui + À venir) | history (jours passés)
+// | entry (formulaire à statut explicite).
 // Les activités co-construites en consultation (patient_modules.config.
 // ba_activities) sont proposées en premier ; les suggestions du seed sont
 // groupées par domaine de vie (fields activity_log_domain, prop `domain`).
@@ -28,8 +29,9 @@ import type { ContentField } from '@services/moduleService'
 import {
   parseActivityLogConfig, collectDomains, collectSuggestions, groupSuggestionsByDomain,
 } from './activityLogConfig'
+import { todayIso } from '@kaer/shared'
 import type { ActivityDraft } from './types'
-import { WeekView } from './WeekView'
+import { AgendaView } from './AgendaView'
 import { ListView } from './ListView'
 import { EntryForm } from './EntryForm'
 import { CompletionSheet } from './CompletionSheet'
@@ -65,7 +67,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   )
 
   // ── State
-  const [mode, setMode] = useState<'week' | 'list' | 'entry'>('week')
+  const [mode, setMode] = useState<'agenda' | 'history' | 'entry'>('agenda')
   const [records, setRecords] = useState<ActivityRecord[]>([])
   const [myActivities, setMyActivities] = useState<BAConfiguredActivity[]>([])
   const [loading, setLoading] = useState(true)
@@ -105,11 +107,11 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
 
   const handleBack = useCallback(() => {
     setEditingRecord(null)
-    setMode('week')
+    setMode('agenda')
   }, [])
 
-  const showWeek = useCallback(() => setMode('week'), [])
-  const showList = useCallback(() => setMode('list'), [])
+  const showAgenda = useCallback(() => setMode('agenda'), [])
+  const showHistory = useCallback(() => setMode('history'), [])
 
   // ── Save / delete / toggle
   const handleSave = useCallback(async (draft: ActivityDraft) => {
@@ -135,7 +137,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
       })
       await loadRecords()
       setEditingRecord(null)
-      setMode('week')
+      setMode('agenda')
     } catch {
       showToast(t('common.save_error'), 'error')
     } finally {
@@ -154,7 +156,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         await deleteActivityRecord(editingRecord.id)
         await loadRecords()
         setEditingRecord(null)
-        setMode('week')
+        setMode('agenda')
       },
     })
   }, [editingRecord, loadRecords, lbl, t, showConfirm])
@@ -243,44 +245,48 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     )
   }
 
-  // ── MODES WEEK / LIST ───────────────────────────────────────────────────
+  // ── MODES AGENDA / HISTORIQUE ───────────────────────────────────────────
+  const today = todayIso()
+  const agendaRecords = records.filter(r => r.date >= today)
+  const historyRecords = records.filter(r => r.date < today)
+
   return (
     <View style={alStyles.container}>
-      {/* Tab bar Semaine / Liste */}
+      {/* Tab bar À venir / Historique */}
       <View style={alStyles.tabBar}>
         <Pressable
-          style={[alStyles.tab, mode === 'week' && alStyles.tabActive]}
-          onPress={showWeek}
+          style={[alStyles.tab, mode === 'agenda' && alStyles.tabActive]}
+          onPress={showAgenda}
           accessibilityRole="tab"
-          accessibilityState={{ selected: mode === 'week' }}
-          testID="tab-week"
+          accessibilityState={{ selected: mode === 'agenda' }}
+          testID="tab-agenda"
         >
           <MaterialCommunityIcons
-            name="calendar-week"
+            name="calendar-today"
             size={16}
-            color={mode === 'week' ? colors.primary : colors.textMuted}
+            color={mode === 'agenda' ? colors.primary : colors.textMuted}
           />
-          <Text style={[alStyles.tabText, mode === 'week' && alStyles.tabTextActive]}>{lbl('tab_week_label')}</Text>
+          <Text style={[alStyles.tabText, mode === 'agenda' && alStyles.tabTextActive]}>{lbl('tab_upcoming_label')}</Text>
         </Pressable>
         <Pressable
-          style={[alStyles.tab, mode === 'list' && alStyles.tabActive]}
-          onPress={showList}
+          style={[alStyles.tab, mode === 'history' && alStyles.tabActive]}
+          onPress={showHistory}
           accessibilityRole="tab"
-          accessibilityState={{ selected: mode === 'list' }}
-          testID="tab-list"
+          accessibilityState={{ selected: mode === 'history' }}
+          testID="tab-history"
         >
           <MaterialCommunityIcons
-            name="format-list-bulleted"
+            name="history"
             size={16}
-            color={mode === 'list' ? colors.primary : colors.textMuted}
+            color={mode === 'history' ? colors.primary : colors.textMuted}
           />
-          <Text style={[alStyles.tabText, mode === 'list' && alStyles.tabTextActive]}>{lbl('tab_list_label')}</Text>
+          <Text style={[alStyles.tabText, mode === 'history' && alStyles.tabTextActive]}>{lbl('tab_history_label')}</Text>
         </Pressable>
       </View>
 
-      {mode === 'week' ? (
-        <WeekView
-          records={records}
+      {mode === 'agenda' ? (
+        <AgendaView
+          records={agendaRecords}
           lbl={lbl}
           locale={config.locale}
           onEdit={handleEdit}
@@ -289,7 +295,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
         />
       ) : (
         <ListView
-          records={records}
+          records={historyRecords}
           lbl={lbl}
           onEdit={handleEdit}
           onToggleDone={handleToggleDone}

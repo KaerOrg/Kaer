@@ -1454,13 +1454,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Rappel brut de la prédiction dans la feuille d'évaluation */
-.al-completion__recap {
-  font-size: 11px;
-  font-style: italic;
-  color: var(--color-text-muted);
-}
-
 .al-toggle-row {
   display: flex;
   align-items: center;
