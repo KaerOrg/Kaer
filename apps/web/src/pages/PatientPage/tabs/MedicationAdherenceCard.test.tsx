@@ -69,27 +69,27 @@ describe('MedicationAdherenceCard', () => {
     setup()
     expect(screen.getByText('modules.medication_adherence.label')).toBeTruthy()
     expect(screen.getByText('modules.medication_adherence.description')).toBeTruthy()
-    expect(screen.getByText('patient.preview_button')).toBeTruthy()
-    expect(screen.getByText('patient.data_button')).toBeTruthy()
-    expect(screen.getByText('modules.medication_adherence.config_button')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'patient.preview_button' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'patient.data_button' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'modules.medication_adherence.config_button' })).toBeTruthy()
   })
 
   it('le bouton aperçu déclenche onTogglePreview', () => {
     const { onTogglePreview } = setup()
-    fireEvent.click(screen.getByText('patient.preview_button'))
+    fireEvent.click(screen.getByRole('button', { name: 'patient.preview_button' }))
     expect(onTogglePreview).toHaveBeenCalledWith('medication_adherence')
   })
 
   it('le bouton données déclenche onToggleData', () => {
     const { onToggleData } = setup()
-    fireEvent.click(screen.getByText('patient.data_button'))
+    fireEvent.click(screen.getByRole('button', { name: 'patient.data_button' }))
     expect(onToggleData).toHaveBeenCalledWith('medication_adherence')
   })
 
   it('le bouton configurer ouvre l\'éditeur de liste', () => {
     const medList = makeMedList()
     setup({ medList })
-    fireEvent.click(screen.getByText('modules.medication_adherence.config_button'))
+    fireEvent.click(screen.getByRole('button', { name: 'modules.medication_adherence.config_button' }))
     expect(medList.openEditor).toHaveBeenCalled()
   })
 

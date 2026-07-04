@@ -831,22 +831,6 @@
   color: var(--color-danger) !important;
 }
 
-.module-card__notif-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  /* Aligné sur .preview-toggle-btn pour une rangée d'actions homogène
-     (même hauteur que « Aperçu » / « Données »). */
-  padding: 3px 7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-
 /* Barre d'actions des cartes de module : en flux normal + retour à la ligne.
    Évite tout débordement quand 4 actions (Configurer… + Aperçu + Données +
    cloche) dépassent la largeur de la carte. Reste une barre pleine largeur
@@ -863,12 +847,6 @@
   margin-left: calc(-1 * var(--spacing-md));
   margin-right: calc(-1 * var(--spacing-md));
   margin-bottom: calc(-1 * var(--spacing-md));
-}
-
-.module-card__notif-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-primary-light, #eef2ff);
-  border-color: var(--color-primary);
 }
 
 .psycho-observance-summary {

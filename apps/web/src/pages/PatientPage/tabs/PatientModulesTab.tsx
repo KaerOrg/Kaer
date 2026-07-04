@@ -1,11 +1,10 @@
 import { useState, useCallback, useMemo, type CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, Eye, EyeOff, Bell, LineChart, Plus } from 'lucide-react'
+import { ShieldAlert, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { Tooltip } from '../../../components/ui/Tooltip'
 import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -19,6 +18,7 @@ import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleDataPanel } from './ModuleDataPanel'
+import { ModuleCardFooter } from './ModuleCardFooter'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '@services/moduleCatalogService'
@@ -205,24 +205,15 @@ export function PatientModulesTab({
               right: moduleToggle(unlocked, false, handlePsychoToggle),
             }}
             actions={
-              <>
-                <Tooltip label={t('patient.patient_view')}>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    aria-pressed={isPreviewOpen('psychoeducation')}
-                    icon={isPreviewOpen('psychoeducation') ? <EyeOff size={14} /> : <Eye size={14} />}
-                    onClick={() => togglePreview('psychoeducation')}
-                  >
-                    {t('patient.preview_button')}
-                  </Button>
-                </Tooltip>
-                {unlocked && mod && psycho.mode !== 'edit' && (
+              <ModuleCardFooter
+                previewOpen={isPreviewOpen('psychoeducation')}
+                onTogglePreview={() => togglePreview('psychoeducation')}
+                extra={unlocked && mod && psycho.mode !== 'edit' ? (
                   <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
                     {t('patient.psycho_edit_cards')}
                   </Button>
-                )}
-              </>
+                ) : undefined}
+              />
             }
           >
             {tagChips('psychoeducation')}
@@ -297,21 +288,12 @@ export function PatientModulesTab({
               right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), handleCrisisToggle),
             }}
             actions={unlocked && mod && !crisis.open ? (
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  aria-pressed={isPreviewOpen('crisis_plan')}
-                  icon={isPreviewOpen('crisis_plan') ? <EyeOff size={14} /> : <Eye size={14} />}
-                  onClick={() => togglePreview('crisis_plan')}
-                  aria-label={isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
-                >
-                  {isPreviewOpen('crisis_plan') ? t('patient.hide_preview') : t('patient.show_preview')}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={crisis.openEditor}>
-                  {t('patient.crisis_configure')}
-                </Button>
-              </div>
+              <ModuleCardFooter
+                configLabel={t('patient.crisis_configure')}
+                onConfigure={crisis.openEditor}
+                previewOpen={isPreviewOpen('crisis_plan')}
+                onTogglePreview={() => togglePreview('crisis_plan')}
+              />
             ) : undefined}
           >
             {tagChips('crisis_plan')}
@@ -593,34 +575,12 @@ export function PatientModulesTab({
             className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
             header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), subtitle: t(`scales.full_title.${moduleType}`), right }}
             actions={
-              <>
-                {scale.hasPreview && (
-                  <Tooltip label={t('patient.patient_view')}>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      aria-pressed={isPreviewOpen(moduleType)}
-                      icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
-                      onClick={() => togglePreview(moduleType)}
-                    >
-                      {t('patient.preview_button')}
-                    </Button>
-                  </Tooltip>
-                )}
-                {unlocked && mod && (
-                  <Tooltip label={t('patient.data_button')}>
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      aria-pressed={isDataOpen(moduleType)}
-                      icon={<LineChart size={14} />}
-                      onClick={() => toggleData(moduleType)}
-                    >
-                      {t('patient.data_button')}
-                    </Button>
-                  </Tooltip>
-                )}
-              </>
+              <ModuleCardFooter
+                previewOpen={isPreviewOpen(moduleType)}
+                onTogglePreview={scale.hasPreview ? () => togglePreview(moduleType) : undefined}
+                dataOpen={isDataOpen(moduleType)}
+                onToggleData={unlocked && mod ? () => toggleData(moduleType) : undefined}
+              />
             }
           >
             <ScaleMetaBadges
@@ -655,43 +615,13 @@ export function PatientModulesTab({
             }),
           }}
           actions={
-            <>
-              {unlocked && mod && (
-                <Tooltip label={t('notifications.configure_button')}>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    icon={<Bell size={14} />}
-                    aria-label={t('notifications.configure_button')}
-                    onClick={() => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon })}
-                  />
-                </Tooltip>
-              )}
-              <Tooltip label={t('patient.patient_view')}>
-                <Button
-                  variant="outline"
-                  size="xs"
-                  aria-pressed={isPreviewOpen(moduleType)}
-                  icon={isPreviewOpen(moduleType) ? <EyeOff size={14} /> : <Eye size={14} />}
-                  onClick={() => togglePreview(moduleType)}
-                >
-                  {t('patient.preview_button')}
-                </Button>
-              </Tooltip>
-              {unlocked && mod && (
-                <Tooltip label={t('patient.data_button')}>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    aria-pressed={isDataOpen(moduleType)}
-                    icon={<LineChart size={14} />}
-                    onClick={() => toggleData(moduleType)}
-                  >
-                    {t('patient.data_button')}
-                  </Button>
-                </Tooltip>
-              )}
-            </>
+            <ModuleCardFooter
+              onConfigureNotif={unlocked && mod ? () => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon }) : undefined}
+              previewOpen={isPreviewOpen(moduleType)}
+              onTogglePreview={() => togglePreview(moduleType)}
+              dataOpen={isDataOpen(moduleType)}
+              onToggleData={unlocked && mod ? () => toggleData(moduleType) : undefined}
+            />
           }
         >
           {tagChips(moduleType)}

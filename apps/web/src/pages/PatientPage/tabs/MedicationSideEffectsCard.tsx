@@ -1,10 +1,9 @@
 import { useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell, Eye, EyeOff, LineChart } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { Tooltip } from '../../../components/ui/Tooltip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
+import { ModuleCardFooter } from './ModuleCardFooter'
 import { SIDE_EFFECT_CATALOG, isCustomKey } from '../../../lib/sideEffectsCatalog'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '@services/moduleCatalogService'
@@ -113,44 +112,15 @@ export function MedicationSideEffectsCard({
           right: moduleToggle(unlocked, loading, handleToggle),
         }}
         actions={unlocked && mod ? (
-          <>
-            <Tooltip label={t('notifications.configure_button')}>
-              <Button
-                variant="outline"
-                size="xs"
-                icon={<Bell size={14} />}
-                aria-label={t('notifications.configure_button')}
-                onClick={handleNotif}
-              />
-            </Tooltip>
-            {!medEffects.open && (
-              <Button variant="ghost" size="sm" onClick={medEffects.openEditor}>
-                {t('modules.medication_side_effects.config_button')}
-              </Button>
-            )}
-            <Tooltip label={t('patient.patient_view')}>
-              <Button
-                variant="outline"
-                size="xs"
-                aria-pressed={previewOpen}
-                icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
-                onClick={handlePreviewToggle}
-              >
-                {t('patient.preview_button')}
-              </Button>
-            </Tooltip>
-            <Tooltip label={t('patient.data_button')}>
-              <Button
-                variant="outline"
-                size="xs"
-                aria-pressed={dataOpen}
-                icon={<LineChart size={14} />}
-                onClick={handleDataToggle}
-              >
-                {t('patient.data_button')}
-              </Button>
-            </Tooltip>
-          </>
+          <ModuleCardFooter
+            onConfigureNotif={handleNotif}
+            configLabel={t('modules.medication_side_effects.config_button')}
+            onConfigure={!medEffects.open ? medEffects.openEditor : undefined}
+            previewOpen={previewOpen}
+            onTogglePreview={handlePreviewToggle}
+            dataOpen={dataOpen}
+            onToggleData={handleDataToggle}
+          />
         ) : undefined}
       >
         {tagChips}

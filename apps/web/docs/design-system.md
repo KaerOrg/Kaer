@@ -1033,6 +1033,43 @@ config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 
 ---
 
+## Rangée d'actions des cartes module — `ModuleCardFooter` (armoire patient)
+
+Fichiers : `pages/PatientPage/tabs/ModuleCardFooter.tsx` (point d'entrée) +
+`Module{Preview,Data,Notif,Config}Button.tsx` (boutons unitaires).
+
+> **`ModuleCardFooter` est la source unique de la rangée d'actions (`actions` de la
+> `Card`) de toutes les cartes de l'armoire module** — le render générique de
+> `PatientModulesTab` **et** les cartes spécialisées `ChronobiologyCard` /
+> `MedicationAdherenceCard` / `MedicationSideEffectsCard`. Il impose un **ordre
+> canonique unique** : cloche → configuration (roue crantée) → aperçu → données →
+> actions spécifiques (`extra`). Chaque bouton n'est rendu **que si son handler est
+> fourni**. Ne **jamais** réassembler la rangée à la main (`<>…</>` de boutons) ni
+> réécrire un `<Button>`/`<button>` d'action dans une carte : c'est une régression
+> (ordre qui diverge, habillage incohérent).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `onConfigureNotif` | `() => void` | Rend la cloche « Configurer les rappels » |
+| `configLabel` | `string` | Libellé de la roue crantée (varie par module) |
+| `onConfigure` | `() => void` | Rend la roue crantée (avec `configLabel`) |
+| `previewOpen` / `onTogglePreview` | `boolean` / `() => void` | Rend l'œil « Aperçu » (`aria-pressed` = `previewOpen`) |
+| `dataOpen` / `onToggleData` | `boolean` / `() => void` | Rend la courbe « Données » (`aria-pressed` = `dataOpen`) |
+| `extra` | `ReactNode` | Actions bespoke rendues en fin de rangée (ex. « Débloquer des fiches ») |
+
+Chaque bouton unitaire est une **icône seule** (`ui/Button variant="outline"
+size="xs"`) enveloppée d'un `ui/Tooltip` ; le libellé est porté par le tooltip **et**
+l'`aria-label` (accessibilité) :
+
+| Composant | Icône | Libellé (tooltip + aria-label) |
+|---|---|---|
+| `ModulePreviewButton` | `Eye` / `EyeOff` | `patient.preview_button` |
+| `ModuleDataButton` | `LineChart` | `patient.data_button` |
+| `ModuleNotifButton` | `Bell` | `notifications.configure_button` |
+| `ModuleConfigButton` | `Settings` (roue crantée) | libellé **fourni** par l'appelant (varie par module) |
+
+---
+
 ## Feedback utilisateur — Toasts
 
 Tout feedback d'opération réseau passe par le système de toast. Voir la doc complète : [`docs/components/toast.md`](components/toast.md).
