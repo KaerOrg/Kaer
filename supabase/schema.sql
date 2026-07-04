@@ -1767,6 +1767,29 @@ create policy "patient_entries_practitioner_select"
     )
   );
 
+-- Realtime (issue #103) : le web praticien s'abonne aux changements de
+-- patient_entries pour rafraîchir instantanément quand un patient saisit sur
+-- mobile. Postgres Changes RESPECTE la RLS ci-dessus : un praticien ne reçoit que
+-- les entrées de ses patients consentants (aucun élargissement d'accès).
+--   - replica identity full : sans elle, les événements DELETE/UPDATE ne portent
+--     pas l'ancien patient_id → impossible de router l'événement vers le bon canal.
+--   - ajout à la publication supabase_realtime, gardé idempotent (ré-exécutable).
+alter table public.patient_entries replica identity full;
+
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (
+       select 1 from pg_publication_tables
+       where pubname = 'supabase_realtime'
+         and schemaname = 'public'
+         and tablename = 'patient_entries'
+     )
+  then
+    alter publication supabase_realtime add table public.patient_entries;
+  end if;
+end $$;
+
 
 -- ============================================================
 -- TABLE : access_audit_log (Journal d'audit des accès — RGPD/HDS)

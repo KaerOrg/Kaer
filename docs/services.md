@@ -308,3 +308,28 @@ périmé, et **sans** coupler l'invalidation au déploiement (ce qui casserait c
 > la latence. Les **données patient** (chaudes, ciblées, urgentes) utilisent au contraire
 > l'invalidation sur écriture (#100) et le Realtime (#103). Apparier le mécanisme au
 > profil de la donnée, pas chercher l'uniformité.
+
+### Fraîcheur temps réel des données patient — Supabase Realtime (web, #103)
+
+> Web praticien uniquement. Complète #100.
+
+L'invalidation-sur-écriture de #100 ne couvre que les écritures **du web** : quand un
+patient saisit sur **mobile** (→ `patient_entries` via la sync), le web n'a aucun
+événement pour le savoir. Supabase Realtime (push websocket) comble ce trou.
+
+- **Service** : `patientRealtimeService.subscribePatientEntries(patientId, onChange)` ouvre
+  un `supabase.channel` filtré `patient_id=eq.<id>` sur les `postgres_changes` de
+  `patient_entries`, et renvoie la fonction de désabonnement (`removeChannel`). Toute la
+  plomberie Supabase reste dans le service.
+- **Hook** : `usePatientEntriesRealtime(patientId)` (dans `src/hooks/realtime/`) monte
+  l'abonnement pour le patient courant et, à chaque événement, invalide les clés
+  `engagementQueries.patientDataKeys(patientId)` → refetch. Le cleanup de l'effet ferme le
+  canal au démontage **et** au changement de patient (un seul canal par patient consulté).
+  Branché sur `PatientPage`.
+- **RLS = autorisation** : Postgres Changes respecte la RLS `patient_entries_practitioner_select`
+  (patients liés + consentement). Aucun élargissement d'accès ; le payload est **signalé**
+  puis réaffiché brut (conforme MDR — on ne conclut rien).
+- **Best-effort** : si le socket tombe, `staleTime` + `refetchOnWindowFocus` restent le filet.
+- **Base** : `patient_entries` doit être dans la publication `supabase_realtime` +
+  `replica identity full` (cf. `schema.sql` / `docs/database.md`). Cette migration est un
+  **acte de déploiement** à appliquer sur la base (non fait automatiquement par le front).

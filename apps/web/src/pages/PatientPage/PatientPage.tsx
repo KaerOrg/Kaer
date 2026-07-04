@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { LayoutDashboard, Package2, FileText, CalendarDays, TrendingUp } from 'lucide-react'
 
 import { useAuthStore } from '../../store/authStore'
+import { usePatientEntriesRealtime } from '../../hooks/realtime/usePatientEntriesRealtime'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
@@ -77,6 +78,10 @@ export function PatientPage() {
   // ── Résolution du token public → patient_id réel ─────────────────────────
   const resolveRefQuery = useQuery(patientQueries.resolveRef(ref))
   const id = resolveRefQuery.data ?? null
+
+  // Temps réel : rafraîchit les données d'engagement quand le patient saisit sur
+  // mobile (Realtime patient_entries, #103). Un seul canal pour le patient consulté.
+  usePatientEntriesRealtime(id)
 
   // Token absent de l'URL → retour dashboard (la query reste désactivée).
   useEffect(() => {
