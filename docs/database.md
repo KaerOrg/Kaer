@@ -268,6 +268,17 @@ Bucket public pour les photos de profil patients. Structure: `avatars/{user_id}/
 
 ---
 
+## Realtime — `patient_entries` (issue #103)
+
+`patient_entries` est publiée dans `supabase_realtime` (`replica identity full`) : le web
+praticien s'abonne aux INSERT/UPDATE/DELETE d'un patient pour rafraîchir instantanément
+quand celui-ci saisit sur mobile. Postgres Changes **respecte la RLS** — un praticien ne
+reçoit que les entrées de ses patients consentants (policy `patient_entries_practitioner_select`),
+aucun élargissement d'accès. `replica identity full` est requise pour que les événements
+DELETE/UPDATE portent l'ancien `patient_id` (routage vers le bon canal). Ajout à la
+publication idempotent (`do $$ … pg_publication_tables … $$`). Côté web :
+`patientRealtimeService.subscribePatientEntries` + hook `usePatientEntriesRealtime`.
+
 ## Index
 
 | Table | Index | Colonne(s) | Usage |
