@@ -1260,7 +1260,12 @@
       "config_value_placeholder": "Why it matters (patient's words, optional)",
       "config_add": "Add",
       "pleasure_short": "P",
-      "mastery_short": "M"
+      "mastery_short": "M",
+      "status_planned": "I'm planning it",
+      "status_done": "I already did it",
+      "prediction_toggle": "Add a prediction (optional)",
+      "completion_title": "How was it?",
+      "completion_skip": "Skip"
     },
     "beck_columns": {
       "label": "Beck Columns",

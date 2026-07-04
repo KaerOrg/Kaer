@@ -6,8 +6,8 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { Button } from '@ui/Button'
-import { Checkbox } from '@ui/Checkbox'
 import { RatingSelector } from '@ui/RatingSelector'
+import { SegmentedControl, type SegmentOption } from '@ui/SegmentedControl'
 import { TimePicker } from '@ui/TimePicker'
 import { PickChip } from './PickChip'
 import type { BAConfiguredActivity } from '@kaer/shared'
@@ -15,6 +15,8 @@ import type { ActivityRecord } from '../../../../../lib/database'
 import type { ActivityLogConfig } from './activityLogConfig'
 import type { ActivityDraft, DomainItem, LabelFn, SuggestionItem } from './types'
 import { alStyles } from './styles'
+
+type EntryStatus = 'planned' | 'done'
 
 export interface EntryFormProps {
   /** Enregistrement en cours d'édition, ou null en création. */
@@ -30,17 +32,21 @@ export interface EntryFormProps {
 }
 
 /**
- * Formulaire d'activité : cycle prédire/faire/constater.
- * Le statut décide des échelles affichées : planifiée → P/M **attendus**
- * (prédiction), réalisée → P/M **ressentis** (+ rappel brut des attendus).
+ * Formulaire d'activité. Le statut est EXPLICITE (« Je la prévois » /
+ * « Je l'ai déjà faite ») : on n'évalue jamais une activité pas encore faite.
+ * - Prévue : quoi + quand, c'est tout. La prédiction (P/M attendus) est un
+ *   bloc optionnel replié, jamais imposé. La notation des ressentis viendra
+ *   au moment de cocher réalisée (CompletionSheet).
+ * - Déjà faite : les sliders ressentis s'affichent directement.
  * Aucune valeur par défaut : « non renseigné » (null) est un état légitime ;
  * re-taper le pip sélectionné efface la note. Les activités co-construites en
- * consultation (myActivities) sont proposées en premier, avec la phrase
- * « valeur » du patient. Affichage brut, aucune interprétation (MDR 2017/745).
+ * consultation sont proposées en premier, avec la phrase « valeur » du patient.
+ * Affichage brut, aucune interprétation (MDR 2017/745).
  */
 export function EntryForm({
   editingRecord, config, lbl, suggestionGroups, myActivities, saving, onSave, onDelete, onBack,
 }: EntryFormProps) {
+  const [status, setStatus] = useState<EntryStatus>(editingRecord?.done === 1 ? 'done' : 'planned')
   const [entryDate, setEntryDate] = useState<Date>(() =>
     editingRecord ? new Date(`${editingRecord.date}T00:00:00`) : new Date())
   const [showDatePicker, setShowDatePicker] = useState(false)
@@ -48,12 +54,18 @@ export function EntryForm({
   const [label, setLabel] = useState(editingRecord?.label ?? '')
   const [domainId, setDomainId] = useState<string | null>(editingRecord?.domain_id ?? null)
   const [configActivityId, setConfigActivityId] = useState<string | null>(editingRecord?.config_activity_id ?? null)
-  const [done, setDone] = useState(editingRecord?.done === 1)
+  const [predictionOpen, setPredictionOpen] = useState(
+    editingRecord != null && (editingRecord.expected_pleasure != null || editingRecord.expected_mastery != null))
   const [expectedPleasure, setExpectedPleasure] = useState<number | null>(editingRecord?.expected_pleasure ?? null)
   const [expectedMastery, setExpectedMastery] = useState<number | null>(editingRecord?.expected_mastery ?? null)
   const [pleasure, setPleasure] = useState<number | null>(editingRecord?.pleasure ?? null)
   const [mastery, setMastery] = useState<number | null>(editingRecord?.mastery ?? null)
   const [notes, setNotes] = useState(editingRecord?.notes ?? '')
+
+  const statusOptions = useMemo<SegmentOption<EntryStatus>[]>(() => [
+    { value: 'planned', label: lbl('status_planned_label') },
+    { value: 'done', label: lbl('status_done_label') },
+  ], [lbl])
 
   const selectedActivity = useMemo(
     () => myActivities.find(a => a.id === configActivityId) ?? null,
@@ -91,15 +103,20 @@ export function EntryForm({
   }, [allSuggestions, label, configActivityId])
 
   // Re-taper le pip sélectionné efface la note (retour à « non renseigné »).
+  const handleExpectedPleasurePress = useCallback((value: number) => {
+    setExpectedPleasure(prev => (prev === value ? null : value))
+  }, [])
+  const handleExpectedMasteryPress = useCallback((value: number) => {
+    setExpectedMastery(prev => (prev === value ? null : value))
+  }, [])
   const handlePleasurePress = useCallback((value: number) => {
-    const setter = done ? setPleasure : setExpectedPleasure
-    setter(prev => (prev === value ? null : value))
-  }, [done])
-
+    setPleasure(prev => (prev === value ? null : value))
+  }, [])
   const handleMasteryPress = useCallback((value: number) => {
-    const setter = done ? setMastery : setExpectedMastery
-    setter(prev => (prev === value ? null : value))
-  }, [done])
+    setMastery(prev => (prev === value ? null : value))
+  }, [])
+
+  const openPrediction = useCallback(() => setPredictionOpen(true), [])
 
   const handleSave = useCallback(() => {
     onSave({
@@ -108,17 +125,17 @@ export function EntryForm({
       label: label.trim(),
       expected_pleasure: expectedPleasure,
       expected_mastery: expectedMastery,
-      pleasure,
-      mastery,
-      done,
+      pleasure: status === 'done' ? pleasure : null,
+      mastery: status === 'done' ? mastery : null,
+      done: status === 'done',
       notes: notes.trim(),
-      planned_time: plannedTime.length > 0 ? plannedTime : null,
+      planned_time: status === 'planned' && plannedTime.length > 0 ? plannedTime : null,
       domain_id: domainId,
       config_activity_id: configActivityId,
     })
   }, [
     onSave, editingRecord, entryDate, label, expectedPleasure, expectedMastery,
-    pleasure, mastery, done, notes, plannedTime, domainId, configActivityId,
+    pleasure, mastery, status, notes, plannedTime, domainId, configActivityId,
   ])
 
   const saveLabel = editingRecord ? lbl('update_label') : lbl('save_label')
@@ -147,48 +164,14 @@ export function EntryForm({
         />
       </View>
       <ScrollView contentContainerStyle={alStyles.entryContent} keyboardShouldPersistTaps="handled">
-        {/* Date */}
-        <View style={alStyles.section}>
-          <Text style={alStyles.sectionLabel}>{lbl('date_label')}</Text>
-          <View style={alStyles.card}>
-            <TouchableOpacity
-              style={alStyles.dateBtn}
-              onPress={() => setShowDatePicker(true)}
-              activeOpacity={0.7}
-              accessibilityRole="button"
-              testID="date-btn"
-            >
-              <MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />
-              <Text style={alStyles.dateValue}>{dateValueText}</Text>
-            </TouchableOpacity>
-            {showDatePicker ? (
-              <DateTimePicker
-                value={entryDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(_, date) => {
-                  if (Platform.OS === 'android') setShowDatePicker(false)
-                  if (date) setEntryDate(date)
-                }}
-              />
-            ) : null}
-            {showDatePicker && Platform.OS === 'ios' ? (
-              <Pressable style={alStyles.confirmBtn} onPress={() => setShowDatePicker(false)}>
-                <Text style={alStyles.confirmBtnText}>{lbl('date_confirm_label')}</Text>
-              </Pressable>
-            ) : null}
-            <TimePicker
-              value={plannedTime}
-              onChange={setPlannedTime}
-              label={lbl('planned_time_label')}
-              placeholder={lbl('planned_time_label')}
-              confirmLabel={lbl('date_confirm_label')}
-              clearable
-              clearLabel={lbl('planned_time_clear_label')}
-              testID="planned-time"
-            />
-          </View>
-        </View>
+        {/* Statut explicite : on n'évalue jamais une activité pas encore faite */}
+        <SegmentedControl
+          options={statusOptions}
+          value={status}
+          onChange={setStatus}
+          accessibilityLabel={lbl('status_planned_label')}
+          testID="status-segment"
+        />
 
         {/* Activité */}
         <View style={alStyles.section}>
@@ -249,55 +232,134 @@ export function EntryForm({
           ))}
         </View>
 
-        {/* Statut réalisée */}
-        <View style={[alStyles.doneRow, done && alStyles.doneRowActive]}>
-          <Checkbox
-            checked={done}
-            onChange={setDone}
-            label={done ? lbl('done_label') : lbl('mark_done_label')}
-            color={colors.success}
-            testID="done-toggle"
-          />
-        </View>
-
-        {/* Évaluation : attendus (planifiée) ou ressentis (réalisée) */}
+        {/* Date + heure prévue */}
         <View style={alStyles.section}>
-          <Text style={alStyles.sectionLabel}>
-            {done ? lbl('section_felt_title') : lbl('section_expected_title')}
-          </Text>
+          <Text style={alStyles.sectionLabel}>{lbl('date_label')}</Text>
           <View style={alStyles.card}>
-            {done && hasExpected ? (
-              <Text style={alStyles.expectedRecap} testID="expected-recap">
-                {lbl('expected_short_label')}
-                {expectedPleasure != null ? ` · ${pShort} ${expectedPleasure}` : ''}
-                {expectedMastery != null ? ` · ${mShort} ${expectedMastery}` : ''}
-              </Text>
+            <TouchableOpacity
+              style={alStyles.dateBtn}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              testID="date-btn"
+            >
+              <MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />
+              <Text style={alStyles.dateValue}>{dateValueText}</Text>
+            </TouchableOpacity>
+            {showDatePicker ? (
+              <DateTimePicker
+                value={entryDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(_, date) => {
+                  if (Platform.OS === 'android') setShowDatePicker(false)
+                  if (date) setEntryDate(date)
+                }}
+              />
             ) : null}
-            <RatingSelector
-              label={lbl('pleasure_label')}
-              sublabel={lbl('pleasure_sublabel')}
-              value={done ? pleasure : expectedPleasure}
-              steps={config.pleasureSteps}
-              color={config.pleasureColor}
-              variant="track"
-              showEndLabels
-              testIdPrefix="pleasure"
-              onPress={handlePleasurePress}
-            />
-            <View style={alStyles.cardDivider} />
-            <RatingSelector
-              label={lbl('mastery_label')}
-              sublabel={lbl('mastery_sublabel')}
-              value={done ? mastery : expectedMastery}
-              steps={config.masterySteps}
-              color={config.masteryColor}
-              variant="track"
-              showEndLabels
-              testIdPrefix="mastery"
-              onPress={handleMasteryPress}
-            />
+            {showDatePicker && Platform.OS === 'ios' ? (
+              <Pressable style={alStyles.confirmBtn} onPress={() => setShowDatePicker(false)}>
+                <Text style={alStyles.confirmBtnText}>{lbl('date_confirm_label')}</Text>
+              </Pressable>
+            ) : null}
+            {status === 'planned' ? (
+              <TimePicker
+                value={plannedTime}
+                onChange={setPlannedTime}
+                label={lbl('planned_time_label')}
+                placeholder={lbl('planned_time_label')}
+                confirmLabel={lbl('date_confirm_label')}
+                clearable
+                clearLabel={lbl('planned_time_clear_label')}
+                testID="planned-time"
+              />
+            ) : null}
           </View>
         </View>
+
+        {/* Prévue : prédiction optionnelle repliée. Jamais de notation imposée avant l'action. */}
+        {status === 'planned' ? (
+          predictionOpen ? (
+            <View style={alStyles.section}>
+              <Text style={alStyles.sectionLabel}>{lbl('section_expected_title')}</Text>
+              <View style={alStyles.card}>
+                <Text style={alStyles.predictionHint}>{lbl('prediction_hint')}</Text>
+                <RatingSelector
+                  label={lbl('pleasure_label')}
+                  sublabel={lbl('pleasure_sublabel')}
+                  value={expectedPleasure}
+                  steps={config.pleasureSteps}
+                  color={config.pleasureColor}
+                  variant="track"
+                  showEndLabels
+                  testIdPrefix="expected-pleasure"
+                  onPress={handleExpectedPleasurePress}
+                />
+                <View style={alStyles.cardDivider} />
+                <RatingSelector
+                  label={lbl('mastery_label')}
+                  sublabel={lbl('mastery_sublabel')}
+                  value={expectedMastery}
+                  steps={config.masterySteps}
+                  color={config.masteryColor}
+                  variant="track"
+                  showEndLabels
+                  testIdPrefix="expected-mastery"
+                  onPress={handleExpectedMasteryPress}
+                />
+              </View>
+            </View>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              label={lbl('prediction_toggle_label')}
+              iconLeft={<MaterialCommunityIcons name="lightbulb-outline" size={16} color={colors.primary} />}
+              onPress={openPrediction}
+              accessibilityLabel={lbl('prediction_toggle_label')}
+              testID="prediction-toggle"
+            />
+          )
+        ) : null}
+
+        {/* Déjà faite : les ressentis, directement */}
+        {status === 'done' ? (
+          <View style={alStyles.section}>
+            <Text style={alStyles.sectionLabel}>{lbl('section_felt_title')}</Text>
+            <View style={alStyles.card}>
+              {hasExpected ? (
+                <Text style={alStyles.expectedRecap} testID="expected-recap">
+                  {lbl('expected_short_label')}
+                  {expectedPleasure != null ? ` · ${pShort} ${expectedPleasure}` : ''}
+                  {expectedMastery != null ? ` · ${mShort} ${expectedMastery}` : ''}
+                </Text>
+              ) : null}
+              <RatingSelector
+                label={lbl('pleasure_label')}
+                sublabel={lbl('pleasure_sublabel')}
+                value={pleasure}
+                steps={config.pleasureSteps}
+                color={config.pleasureColor}
+                variant="track"
+                showEndLabels
+                testIdPrefix="pleasure"
+                onPress={handlePleasurePress}
+              />
+              <View style={alStyles.cardDivider} />
+              <RatingSelector
+                label={lbl('mastery_label')}
+                sublabel={lbl('mastery_sublabel')}
+                value={mastery}
+                steps={config.masterySteps}
+                color={config.masteryColor}
+                variant="track"
+                showEndLabels
+                testIdPrefix="mastery"
+                onPress={handleMasteryPress}
+              />
+            </View>
+          </View>
+        ) : null}
 
         {/* Notes */}
         <View style={alStyles.section}>

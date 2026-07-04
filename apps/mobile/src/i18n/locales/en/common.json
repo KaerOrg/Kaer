@@ -866,7 +866,13 @@
       "pleasure_short": "P",
       "mastery_short": "M",
       "week_prev": "Previous week",
-      "week_next": "Next week"
+      "week_next": "Next week",
+      "status_planned": "I'm planning it",
+      "status_done": "I already did it",
+      "prediction_toggle": "Add a prediction (optional)",
+      "prediction_hint": "What do you think this activity will give you?",
+      "completion_title": "How was it?",
+      "completion_skip": "Skip"
     },
     "beck_columns": {
       "label": "Beck columns",

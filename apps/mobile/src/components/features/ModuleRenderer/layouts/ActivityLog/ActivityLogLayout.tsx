@@ -32,6 +32,7 @@ import type { ActivityDraft } from './types'
 import { WeekView } from './WeekView'
 import { ListView } from './ListView'
 import { EntryForm } from './EntryForm'
+import { CompletionSheet } from './CompletionSheet'
 import { alStyles } from './styles'
 
 export interface ActivityLogLayoutProps {
@@ -70,6 +71,9 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [editingRecord, setEditingRecord] = useState<ActivityRecord | null>(null)
+  // Activité en cours de complétion : cocher réalisée ouvre la feuille
+  // « C'était comment ? » — c'est LE moment de la notation des ressentis.
+  const [completingRecord, setCompletingRecord] = useState<ActivityRecord | null>(null)
 
   // ── Loaders
   const loadRecords = useCallback(async () => {
@@ -168,18 +172,22 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     })
   }, [loadRecords, lbl, t, showConfirm])
 
-  // Cocher réalisée depuis une carte : le statut change, les scores restent
-  // tels que saisis (les ressentis se notent ensuite via le formulaire).
-  const handleToggleDone = useCallback(async (record: ActivityRecord) => {
+  // Enregistre un changement de statut, avec ou sans ressentis.
+  const persistCompletion = useCallback(async (
+    record: ActivityRecord,
+    done: 0 | 1,
+    pleasure: number | null,
+    mastery: number | null,
+  ) => {
     await saveActivityRecord({
       id: record.id,
       date: record.date,
       label: record.label,
       expected_pleasure: record.expected_pleasure,
       expected_mastery: record.expected_mastery,
-      pleasure: record.pleasure,
-      mastery: record.mastery,
-      done: record.done === 1 ? 0 : 1,
+      pleasure,
+      mastery,
+      done,
       notes: record.notes,
       planned_time: record.planned_time,
       domain_id: record.domain_id,
@@ -187,6 +195,31 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     })
     await loadRecords()
   }, [loadRecords])
+
+  // Cocher réalisée depuis une carte : on ouvre la feuille d'évaluation
+  // (« C'était comment ? ») — rien n'est enregistré tant que le patient n'a
+  // pas choisi Enregistrer, Passer, ou refermé. Décocher reste immédiat.
+  const handleToggleDone = useCallback((record: ActivityRecord) => {
+    if (record.done === 1) {
+      void persistCompletion(record, 0, null, null)
+      return
+    }
+    setCompletingRecord(record)
+  }, [persistCompletion])
+
+  const handleCompletionSave = useCallback(async (pleasure: number | null, mastery: number | null) => {
+    if (!completingRecord) return
+    await persistCompletion(completingRecord, 1, pleasure, mastery)
+    setCompletingRecord(null)
+  }, [completingRecord, persistCompletion])
+
+  const handleCompletionSkip = useCallback(async () => {
+    if (!completingRecord) return
+    await persistCompletion(completingRecord, 1, null, null)
+    setCompletingRecord(null)
+  }, [completingRecord, persistCompletion])
+
+  const handleCompletionCancel = useCallback(() => setCompletingRecord(null), [])
 
   if (loading) {
     return <View style={alStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -273,6 +306,17 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
       >
         <MaterialCommunityIcons name="plus" size={28} color={colors.white} />
       </Pressable>
+
+      {completingRecord ? (
+        <CompletionSheet
+          record={completingRecord}
+          config={config}
+          lbl={lbl}
+          onSave={handleCompletionSave}
+          onSkip={handleCompletionSkip}
+          onCancel={handleCompletionCancel}
+        />
+      ) : null}
     </View>
   )
 }

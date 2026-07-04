@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing, radius, shadows } from '@theme'
 
 export const alStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
@@ -116,11 +116,26 @@ export const alStyles = StyleSheet.create({
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   valueText: { fontSize: 13, color: colors.primary, fontStyle: 'italic' },
 
-  doneRow: {
-    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    borderWidth: 1.5, borderColor: colors.border,
-  },
-  doneRowActive: { borderColor: colors.success, backgroundColor: colors.successLight },
   expectedRecap: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
+  predictionHint: { fontSize: 13, color: colors.textMuted },
   notesInput: { fontSize: 15, color: colors.text, minHeight: 72, lineHeight: 22 },
+
+  // Feuille d'évaluation à la complétion (« C'était comment ? »)
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  sheetBackdropTap: { flex: 1 },
+  sheet: {
+    backgroundColor: colors.card,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    padding: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.md,
+    ...shadows.md,
+  },
+  sheetTitle: { fontSize: 18, fontWeight: '700', color: colors.text, textAlign: 'center' },
+  sheetActivity: { fontSize: 14, fontWeight: '600', color: colors.textMuted, textAlign: 'center' },
 })

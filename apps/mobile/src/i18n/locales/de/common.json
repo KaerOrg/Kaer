@@ -256,7 +256,13 @@
       "pleasure_short": "P",
       "mastery_short": "M",
       "week_prev": "Vorherige Woche",
-      "week_next": "Nächste Woche"
+      "week_next": "Nächste Woche",
+      "status_planned": "Ich plane sie",
+      "status_done": "Schon erledigt",
+      "prediction_toggle": "Vorhersage hinzufügen (optional)",
+      "prediction_hint": "Was wird Ihnen diese Aktivität Ihrer Meinung nach geben?",
+      "completion_title": "Wie war es?",
+      "completion_skip": "Überspringen"
     },
     "beck_columns": {
       "label": "Beck-Spalten",

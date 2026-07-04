@@ -119,6 +119,12 @@ const MOCK_FIELDS: ContentField[] = [
       done_label:             'modules.behavioral_activation.done_label',
       mark_done_label:        'modules.behavioral_activation.mark_done',
       mark_undone_label:      'modules.behavioral_activation.mark_undone',
+      status_planned_label:   'modules.behavioral_activation.status_planned',
+      status_done_label:      'modules.behavioral_activation.status_done',
+      prediction_toggle_label:'modules.behavioral_activation.prediction_toggle',
+      prediction_hint:        'modules.behavioral_activation.prediction_hint',
+      completion_title:       'modules.behavioral_activation.completion_title',
+      completion_skip_label:  'modules.behavioral_activation.completion_skip',
       notes_placeholder:      'common.notes_placeholder',
       date_label:             'modules.behavioral_activation.date_label',
       date_confirm_label:     'modules.behavioral_activation.date_confirm',
@@ -243,23 +249,40 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 
-  it('enregistre une activité planifiée : sliders = attendus, ressentis null, pas de défaut à 5', async () => {
+  it('planifier = quoi + quand : aucun slider imposé, prédiction repliée', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
+    // Aucun slider visible tant que la prédiction n'est pas ouverte
+    expect(screen.queryByTestId('expected-pleasure-7')).toBeNull()
+    expect(screen.queryByTestId('pleasure-7')).toBeNull()
     fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
-    fireEvent.press(screen.getByTestId('pleasure-7'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
         expect.objectContaining({
           label: 'Marche',
           done: 0,
-          expected_pleasure: 7,
+          expected_pleasure: null,
           expected_mastery: null,
           pleasure: null,
           mastery: null,
         })
+      )
+    })
+  })
+
+  it('la prédiction optionnelle se déplie et enregistre les attendus', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('fab-add-button'))
+    await screen.findByTestId('activity-log-entry')
+    fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
+    fireEvent.press(screen.getByTestId('prediction-toggle'))
+    fireEvent.press(await screen.findByTestId('expected-pleasure-7'))
+    await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ done: 0, expected_pleasure: 7, expected_mastery: null, pleasure: null })
       )
     })
   })
@@ -269,8 +292,9 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
     fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
-    fireEvent.press(screen.getByTestId('pleasure-7'))
-    fireEvent.press(screen.getByTestId('pleasure-7'))
+    fireEvent.press(screen.getByTestId('prediction-toggle'))
+    fireEvent.press(await screen.findByTestId('expected-pleasure-7'))
+    fireEvent.press(screen.getByTestId('expected-pleasure-7'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
@@ -279,13 +303,13 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     })
   })
 
-  it('activité réalisée : les sliders notent les ressentis', async () => {
+  it('« Je l\'ai déjà faite » : les sliders ressentis s\'affichent directement', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
     fireEvent.changeText(screen.getByTestId('label-input'), 'Lecture')
-    fireEvent.press(screen.getByTestId('done-toggle'))
-    fireEvent.press(screen.getByTestId('pleasure-8'))
+    fireEvent.press(screen.getByText("Je l'ai déjà faite"))
+    fireEvent.press(await screen.findByTestId('pleasure-8'))
     fireEvent.press(screen.getByTestId('mastery-6'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
@@ -337,22 +361,63 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     })
   })
 
-  it('toggle done depuis la carte préserve les nouveaux champs', async () => {
+  it('cocher réalisée ouvre la feuille « C\'était comment ? » sans rien enregistrer', async () => {
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    expect(await screen.findByTestId('completion-sheet')).toBeTruthy()
+    // La prédiction existante est rappelée en brut
+    expect(screen.getByTestId('completion-expected-recap')).toBeTruthy()
+    expect(database.saveActivityRecord).not.toHaveBeenCalled()
+  })
+
+  it('feuille de complétion : noter puis enregistrer écrit les ressentis et préserve les champs', async () => {
     const withTime = makeRecord({ planned_time: '17:30' })
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([withTime])
     renderLayout()
     fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    await screen.findByTestId('completion-sheet')
+    fireEvent.press(screen.getByTestId('completion-pleasure-7'))
+    await act(async () => { fireEvent.press(screen.getByTestId('completion-save')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'rec-1',
           done: 1,
+          pleasure: 7,
+          mastery: null,
           expected_pleasure: 6,
           planned_time: '17:30',
           domain_id: 'al.dom_body',
         })
       )
     })
+    await waitFor(() => expect(screen.queryByTestId('completion-sheet')).toBeNull())
+  })
+
+  it('feuille de complétion : « Passer » marque réalisée sans noter', async () => {
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    await screen.findByTestId('completion-sheet')
+    await act(async () => { fireEvent.press(screen.getByTestId('completion-skip')) })
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'rec-1', done: 1, pleasure: null, mastery: null })
+      )
+    })
+  })
+
+  it('décocher une activité réalisée reste immédiat (pas de feuille)', async () => {
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_DONE_RECORD])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('toggle-rec-2'))
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'rec-2', done: 0 })
+      )
+    })
+    expect(screen.queryByTestId('completion-sheet')).toBeNull()
   })
 
   it('supprime une entrée depuis le mode entry après confirmation', async () => {

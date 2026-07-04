@@ -487,7 +487,13 @@
       "pleasure_short": "P",
       "mastery_short": "M",
       "week_prev": "Previous week",
-      "week_next": "Next week"
+      "week_next": "Next week",
+      "status_planned": "I'm planning it",
+      "status_done": "Already did it",
+      "prediction_toggle": "Your bet (optional)",
+      "prediction_hint": "What do you think it'll give you?",
+      "completion_title": "So, how was it?",
+      "completion_skip": "Skip"
     },
     "breathing_techniques": {
       "title": "Breathing to calm down",

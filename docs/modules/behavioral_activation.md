@@ -47,18 +47,35 @@ Layout `activity_log` (moteur FieldRenderer), 3 modes internes :
 
 Historique complet groupé par date, plus récentes en premier.
 
-### Mode Formulaire (prédire/faire/constater)
+### Mode Formulaire : le statut est explicite, on n'évalue jamais avant d'avoir fait
+
+Principe UX : **on ne demande jamais de noter une activité pas encore faite.** Le timing de chaque évaluation est le bon moment vécu.
+
+Segment de statut en tête (`ui/SegmentedControl`) : **« Je la prévois »** / **« Je l'ai déjà faite »**.
+
+**« Je la prévois »** (planification, 3 gestes) :
 
 | Champ | Type | Description |
 |---|---|---|
-| Date | Sélecteur | Date de l'activité (passée ou à venir) |
-| Heure prévue | `ui/TimePicker` (optionnel, effaçable) | Stockée dans `planned_time` |
 | Nom | Texte libre | Ou sélection d'une activité ci-dessous |
 | Mes activités | Chips | Activités co-construites en consultation, proposées en premier ; la sélection affiche la phrase « valeur » du patient |
-| Suggestions | Chips groupées par domaine de vie | Seed : 29 suggestions réparties sur 6 domaines (corps, relations, travail, quotidien, loisirs, sens) |
-| Réalisée | `ui/Checkbox` | Bascule planifiée → réalisée |
-| P/M | 2 × `ui/RatingSelector` (0-10) | **Planifiée → attendus** (prédiction) ; **réalisée → ressentis** (+ rappel brut des attendus). Aucun défaut ; re-taper le pip sélectionné efface la note |
-| Notes | Texte libre | Contexte, ressenti |
+| Suggestions | Chips groupées par domaine de vie | Seed : 29 suggestions sur 6 domaines |
+| Date + heure prévue | Sélecteur + `ui/TimePicker` (optionnel) | `planned_time` |
+| Prédiction | Bloc **optionnel replié** (« Ajouter une prédiction ») | Une fois déplié : « À votre avis, qu'est-ce que cette activité vous apportera ? » + 2 sliders attendus. Jamais imposé |
+| Notes | Texte libre | — |
+
+**« Je l'ai déjà faite »** (journalisation après coup) : les 2 sliders **ressentis** s'affichent directement (+ rappel brut des attendus s'il y a eu prédiction). Pas d'heure prévue.
+
+### Feuille d'évaluation à la complétion (`CompletionSheet`)
+
+Cocher une activité **réalisée** (carte de la semaine ou de la liste) ouvre immédiatement une feuille bas d'écran : **« C'était comment ? »** + P/M ressentis + rappel brut de la prédiction si elle existe. C'est LE moment de la notation.
+
+- **Enregistrer** : réalisée + ressentis choisis
+- **Passer** : réalisée sans noter (« non renseigné » est légitime)
+- Refermer (backdrop) : rien ne change, l'activité reste planifiée
+- Décocher une activité réalisée reste immédiat (pas de feuille) ; ses ressentis sont remis à zéro (une activité planifiée n'a pas de ressenti)
+
+Partout : aucun défaut de valeur, re-taper le pip sélectionné efface la note.
 
 ---
 
@@ -119,7 +136,8 @@ Grille hebdomadaire des activités réelles du patient (synchronisées via `pati
 | `apps/mobile/.../layouts/ActivityLog/ActivityLogLayout.tsx` | Routeur des 3 modes + données + handlers |
 | `apps/mobile/.../layouts/ActivityLog/WeekView.tsx` | Vue semaine |
 | `apps/mobile/.../layouts/ActivityLog/ListView.tsx` | Historique groupé par date |
-| `apps/mobile/.../layouts/ActivityLog/EntryForm.tsx` | Formulaire prédire/faire/constater |
+| `apps/mobile/.../layouts/ActivityLog/EntryForm.tsx` | Formulaire (statut explicite, prédiction repliée) |
+| `apps/mobile/.../layouts/ActivityLog/CompletionSheet.tsx` | Feuille « C'était comment ? » à la complétion |
 | `apps/mobile/.../layouts/ActivityLog/ActivityListCard.tsx` | Carte d'une activité |
 | `apps/mobile/.../layouts/ActivityLog/PickChip.tsx` | Chip sélectionnable mémoïsé |
 | `apps/mobile/.../layouts/ActivityLog/activityLogConfig.ts` | Parsing pur de la config (+ test) |

@@ -488,7 +488,13 @@
       "pleasure_short": "P",
       "mastery_short": "A",
       "week_prev": "Semaine précédente",
-      "week_next": "Semaine suivante"
+      "week_next": "Semaine suivante",
+      "status_planned": "Je prévois de la faire",
+      "status_done": "Je l'ai déjà faite",
+      "prediction_toggle": "Ton pari (optionnel)",
+      "prediction_hint": "À ton avis, ça va te faire quoi ?",
+      "completion_title": "Alors, c'était comment ?",
+      "completion_skip": "Passer"
     },
     "breathing_techniques": {
       "title": "Respirer pour se calmer",

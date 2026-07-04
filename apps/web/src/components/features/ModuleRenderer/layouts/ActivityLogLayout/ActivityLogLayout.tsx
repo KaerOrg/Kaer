@@ -1,4 +1,4 @@
-import { Calendar, CalendarRange, Check, Circle, Clock, ListChecks, Plus } from 'lucide-react'
+import { Calendar, CalendarRange, Check, Circle, Clock, Lightbulb, ListChecks, Plus } from 'lucide-react'
 import { Button } from '@ui/Button'
 import { ActivityLogPipScale } from './ActivityLogPipScale'
 import type { ContentField } from '@services/moduleService'
@@ -8,11 +8,12 @@ interface Props {
   t: (key: string) => string
 }
 
-// Aperçu fidèle au mobile : reproduit le mode entry du module behavioral_activation
-// (cycle prédire/faire/constater) précédé d'un récap "week/list mode" : tabs
-// Semaine/Liste, 2 cartes d'activités mock, FAB +. Les libellés sont lus depuis
-// les props du field `activity_log_config` (même contrat que le mobile).
-// Source mobile : ActivityLogLayout.tsx (mobile).
+// Aperçu fidèle au mobile : tabs Semaine/Liste + cartes mock, puis le formulaire
+// de planification (statut explicite « Je la prévois / Je l'ai déjà faite »,
+// prédiction optionnelle repliée) et la feuille d'évaluation ouverte au moment
+// de cocher réalisée (« C'était comment ? »). Les libellés sont lus depuis les
+// props du field `activity_log_config` (même contrat que le mobile).
+// Source mobile : ActivityLog/{EntryForm,CompletionSheet}.tsx.
 export function ActivityLogLayout({ fields, t }: Props) {
   const configField = fields.find(f => f.field_type === 'activity_log_config')
   const lbl = (key: string): string => {
@@ -26,7 +27,6 @@ export function ActivityLogLayout({ fields, t }: Props) {
   const dateLabel = lbl('date_label')
   const plannedTimeLabel = lbl('planned_time_label')
   const sectionActivity = lbl('section_activity_title')
-  const sectionExpected = lbl('section_expected_title')
   const sectionNotes = lbl('section_notes_title')
   const activityPlaceholder = lbl('activity_placeholder')
   const pleasureLabel = lbl('pleasure_label')
@@ -35,7 +35,11 @@ export function ActivityLogLayout({ fields, t }: Props) {
   const masterySub = lbl('mastery_sublabel')
   const expectedShort = lbl('expected_short_label')
   const feltShort = lbl('felt_short_label')
-  const markDone = lbl('mark_done_label')
+  const statusPlanned = lbl('status_planned_label')
+  const statusDone = lbl('status_done_label')
+  const predictionToggle = lbl('prediction_toggle_label')
+  const completionTitle = lbl('completion_title')
+  const completionSkip = lbl('completion_skip_label')
   const saveLabel = lbl('save_label')
 
   const suggestions = fields
@@ -103,20 +107,22 @@ export function ActivityLogLayout({ fields, t }: Props) {
         </div>
       )}
 
-      {/* Entry mode ───────────────────────────────────────────────────── */}
+      {/* Formulaire de planification ────────────────────────────────────── */}
       <div className="al-entry">
-        {dateLabel && (
-          <div className="al-entry__date">
-            <Calendar size={14} />
-            <span className="al-entry__date-label">{dateLabel}</span>
-            <span className="al-entry__date-value">{todayLabel}</span>
-          </div>
-        )}
-
-        {plannedTimeLabel && (
-          <div className="al-entry__date">
-            <Clock size={14} />
-            <span className="al-entry__date-label">{plannedTimeLabel}</span>
+        {(statusPlanned || statusDone) && (
+          <div className="al-tabs">
+            {statusPlanned && (
+              <span className="al-tab al-tab--active">
+                <Circle size={14} />
+                {statusPlanned}
+              </span>
+            )}
+            {statusDone && (
+              <span className="al-tab">
+                <Check size={14} />
+                {statusDone}
+              </span>
+            )}
           </div>
         )}
 
@@ -136,22 +142,27 @@ export function ActivityLogLayout({ fields, t }: Props) {
           </section>
         )}
 
-        {markDone && (
-          <div className="al-toggle-row">
-            <Circle size={20} className="al-toggle-row__icon" />
-            <span className="al-toggle-row__label">{markDone}</span>
+        {dateLabel && (
+          <div className="al-entry__date">
+            <Calendar size={14} />
+            <span className="al-entry__date-label">{dateLabel}</span>
+            <span className="al-entry__date-value">{todayLabel}</span>
           </div>
         )}
 
-        {sectionExpected && (
-          <section className="al-section">
-            <span className="al-section__title">{sectionExpected}</span>
-            <div className="al-section__card">
-              <ActivityLogPipScale label={pleasureLabel} sublabel={pleasureSub} value={7} />
-              <div className="al-divider" />
-              <ActivityLogPipScale label={masteryLabel} sublabel={masterySub} value={5} />
-            </div>
-          </section>
+        {plannedTimeLabel && (
+          <div className="al-entry__date">
+            <Clock size={14} />
+            <span className="al-entry__date-label">{plannedTimeLabel}</span>
+          </div>
+        )}
+
+        {/* Prédiction optionnelle : repliée par défaut, jamais imposée */}
+        {predictionToggle && (
+          <div className="al-entry__date">
+            <Lightbulb size={14} />
+            <span className="al-entry__date-label">{predictionToggle}</span>
+          </div>
         )}
 
         {sectionNotes && (
@@ -169,6 +180,33 @@ export function ActivityLogLayout({ fields, t }: Props) {
           </Button>
         )}
       </div>
+
+      {/* Feuille d'évaluation à la complétion (« C'était comment ? ») ───── */}
+      {completionTitle && (
+        <div className="al-entry">
+          <section className="al-section">
+            <span className="al-section__title">{completionTitle}</span>
+            <div className="al-section__card">
+              {expectedShort && (
+                <span className="al-completion__recap">{expectedShort} · P 6 · A 4</span>
+              )}
+              <ActivityLogPipScale label={pleasureLabel} sublabel={pleasureSub} value={7} />
+              <div className="al-divider" />
+              <ActivityLogPipScale label={masteryLabel} sublabel={masterySub} value={5} />
+              {saveLabel && (
+                <Button type="button" variant="primary" fullWidth disabled icon={<Check size={16} />}>
+                  {saveLabel}
+                </Button>
+              )}
+              {completionSkip && (
+                <Button type="button" variant="ghost" size="sm" fullWidth disabled>
+                  {completionSkip}
+                </Button>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   )
 }

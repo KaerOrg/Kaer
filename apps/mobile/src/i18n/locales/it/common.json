@@ -256,7 +256,13 @@
       "pleasure_short": "P",
       "mastery_short": "M",
       "week_prev": "Settimana precedente",
-      "week_next": "Settimana successiva"
+      "week_next": "Settimana successiva",
+      "status_planned": "La sto pianificando",
+      "status_done": "L'ho già fatta",
+      "prediction_toggle": "Aggiungi una previsione (facoltativo)",
+      "prediction_hint": "Secondo lei, cosa le darà questa attività?",
+      "completion_title": "Com'è andata?",
+      "completion_skip": "Salta"
     },
     "beck_columns": {
       "label": "Colonne di Beck",

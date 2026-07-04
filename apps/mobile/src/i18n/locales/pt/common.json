@@ -256,7 +256,13 @@
       "pleasure_short": "P",
       "mastery_short": "M",
       "week_prev": "Semana anterior",
-      "week_next": "Semana seguinte"
+      "week_next": "Semana seguinte",
+      "status_planned": "Estou a planeá-la",
+      "status_done": "Já a fiz",
+      "prediction_toggle": "Adicionar uma previsão (opcional)",
+      "prediction_hint": "Na sua opinião, o que lhe trará esta atividade?",
+      "completion_title": "Como correu?",
+      "completion_skip": "Ignorar"
     },
     "beck_columns": {
       "label": "Colunas de Beck",

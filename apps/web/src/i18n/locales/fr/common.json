@@ -995,7 +995,12 @@
       "config_value_placeholder": "Pourquoi c'est important (mots du patient, optionnel)",
       "config_add": "Ajouter",
       "pleasure_short": "P",
-      "mastery_short": "A"
+      "mastery_short": "A",
+      "status_planned": "Je la prévois",
+      "status_done": "Je l'ai déjà faite",
+      "prediction_toggle": "Ajouter une prédiction (optionnel)",
+      "completion_title": "C'était comment ?",
+      "completion_skip": "Passer"
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
