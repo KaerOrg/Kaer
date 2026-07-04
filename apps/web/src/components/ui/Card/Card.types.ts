@@ -9,6 +9,8 @@ export interface CardHeader {
 
 export interface CardProps {
   header?: CardHeader
+  /** Section rendue entre le body et les actions (bas de carte, dans le flux). */
+  footer?: ReactNode
   actions?: ReactNode
   children?: ReactNode
   variant?: 'default' | 'outlined' | 'elevated'

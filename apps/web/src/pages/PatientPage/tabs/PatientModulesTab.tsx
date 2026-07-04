@@ -201,9 +201,9 @@ export function PatientModulesTab({
             header={{
               icon: modIcon,
               title: t('modules.psychoeducation.label'),
-              subtitle: t('modules.psychoeducation.description'),
               right: moduleToggle(unlocked, false, handlePsychoToggle),
             }}
+            footer={tagChips('psychoeducation')}
             actions={
               <ModuleCardFooter
                 previewOpen={isPreviewOpen('psychoeducation')}
@@ -216,7 +216,7 @@ export function PatientModulesTab({
               />
             }
           >
-            {tagChips('psychoeducation')}
+            <p className="module-card__description">{t('modules.psychoeducation.description')}</p>
             {unlocked && mod && (
               <>
                 <div className="module-card__date">
@@ -284,9 +284,9 @@ export function PatientModulesTab({
             header={{
               icon: modIcon,
               title: t('modules.crisis_plan.label'),
-              subtitle: t('modules.crisis_plan.description'),
               right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), handleCrisisToggle),
             }}
+            footer={tagChips('crisis_plan')}
             actions={unlocked && mod && !crisis.open ? (
               <ModuleCardFooter
                 configLabel={t('patient.crisis_configure')}
@@ -296,7 +296,7 @@ export function PatientModulesTab({
               />
             ) : undefined}
           >
-            {tagChips('crisis_plan')}
+            <p className="module-card__description">{t('modules.crisis_plan.description')}</p>
             {unlocked && mod && (
               <div className="module-card__date">
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
@@ -493,16 +493,16 @@ export function PatientModulesTab({
             header={{
               icon: modIcon,
               title: t('modules.rim.label'),
-              subtitle: t('modules.rim.description'),
               right: moduleToggle(unlocked, false, handleRimToggle),
             }}
+            footer={tagChips('rim')}
             actions={unlocked && mod && rim.mode !== 'edit' ? (
               <Button variant="ghost" size="sm" onClick={() => rim.open('edit')}>
                 {t('patient.rim_edit_scenario')}
               </Button>
             ) : undefined}
           >
-            {tagChips('rim')}
+            <p className="module-card__description">{t('modules.rim.description')}</p>
             {unlocked && mod && (
               <div className="module-card__date">
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
@@ -573,7 +573,15 @@ export function PatientModulesTab({
         <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
-            header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), subtitle: t(`scales.full_title.${moduleType}`), right }}
+            header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), right }}
+            footer={
+              <ScaleMetaBadges
+                scaleId={moduleType}
+                evaluationType={scale.evaluationType}
+                category={scale.category}
+                targetAges={scale.targetAges}
+              />
+            }
             actions={
               <ModuleCardFooter
                 previewOpen={isPreviewOpen(moduleType)}
@@ -583,12 +591,7 @@ export function PatientModulesTab({
               />
             }
           >
-            <ScaleMetaBadges
-              scaleId={moduleType}
-              evaluationType={scale.evaluationType}
-              category={scale.category}
-              targetAges={scale.targetAges}
-            />
+            <p className="module-card__description">{t(`scales.full_title.${moduleType}`)}</p>
             {unlocked && mod && (
               <div className="module-card__date">
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
@@ -608,12 +611,12 @@ export function PatientModulesTab({
           header={{
             icon: modIcon,
             title: t(`modules.${moduleType}.label`),
-            subtitle: t(`modules.${moduleType}.description`),
             right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
               if (unlocked && mod) revokeModule(mod.id)
               else unlockModule(moduleType)
             }),
           }}
+          footer={tagChips(moduleType)}
           actions={
             <ModuleCardFooter
               onConfigureNotif={unlocked && mod ? () => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon }) : undefined}
@@ -624,7 +627,7 @@ export function PatientModulesTab({
             />
           }
         >
-          {tagChips(moduleType)}
+          <p className="module-card__description">{t(`modules.${moduleType}.description`)}</p>
           {unlocked && mod && (
             <div className="module-card__date">
               {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}

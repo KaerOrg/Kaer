@@ -108,9 +108,9 @@ export function MedicationSideEffectsCard({
         header={{
           icon: modIcon,
           title: t('modules.medication_side_effects.label'),
-          subtitle: t('modules.medication_side_effects.description'),
           right: moduleToggle(unlocked, loading, handleToggle),
         }}
+        footer={tagChips}
         actions={unlocked && mod ? (
           <ModuleCardFooter
             onConfigureNotif={handleNotif}
@@ -123,7 +123,7 @@ export function MedicationSideEffectsCard({
           />
         ) : undefined}
       >
-        {tagChips}
+        <p className="module-card__description">{t('modules.medication_side_effects.description')}</p>
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}

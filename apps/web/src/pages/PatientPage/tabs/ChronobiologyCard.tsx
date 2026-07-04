@@ -78,9 +78,9 @@ export function ChronobiologyCard({
         header={{
           icon: modIcon,
           title: t('modules.chronobiology_tracker.label'),
-          subtitle: t('modules.chronobiology_tracker.description'),
           right: moduleToggle(unlocked, loading, handleToggle),
         }}
+        footer={tagChips}
         actions={unlocked && mod ? (
           <ModuleCardFooter
             onConfigureNotif={handleNotif}
@@ -91,7 +91,7 @@ export function ChronobiologyCard({
           />
         ) : undefined}
       >
-        {tagChips}
+        <p className="module-card__description">{t('modules.chronobiology_tracker.description')}</p>
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}

@@ -414,11 +414,17 @@ d'actions + contenu. Base de la plupart des panneaux.
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `header` | `CardHeader` | — | `{ title, subtitle?, icon?, right? }` |
-| `actions` | `ReactNode` | — | Zone d'actions (bas de carte) |
+| `footer` | `ReactNode` | — | Section rendue **entre le body et les actions**, dans le flux (ex. rangée de chips) |
+| `actions` | `ReactNode` | — | Zone d'actions (bas de carte, en position absolue) |
 | `variant` | `'default' \| 'outlined' \| 'elevated'` | `'default'` | Style de bordure/ombre |
 | `state` | `'active' \| 'disabled'` | — | État visuel |
-| `children` | `ReactNode` | — | Contenu |
+| `children` | `ReactNode` | — | Contenu (body) |
 | `className` | `string` | — | Classe additionnelle |
+
+> Ordre de rendu : `header` → `children` (body) → `footer` → `actions`. Le `footer`
+> (`.card__footer`, flex + wrap) sert de rangée en bas de body ; les cartes de
+> l'armoire module y placent leurs chips de tags / `ScaleMetaBadges` et remontent la
+> description du module dans le body (au lieu du `header.subtitle`).
 
 ### `Modal`
 

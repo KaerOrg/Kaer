@@ -18,6 +18,25 @@ describe('Card', () => {
     expect(screen.getByText('Action')).toBeInTheDocument()
   })
 
+  it('affiche le footer entre le body et les actions', () => {
+    const { container } = render(
+      <Card footer={<span>Chips</span>} actions={<button>Action</button>}>
+        <p>Contenu</p>
+      </Card>
+    )
+    const footer = container.querySelector('.card__footer')
+    expect(footer).not.toBeNull()
+    expect(footer).toHaveTextContent('Chips')
+    // ordre dans le DOM : body → footer → actions
+    const sections = Array.from(container.querySelectorAll('.card__body, .card__footer, .card__actions'))
+    expect(sections.map(s => s.className)).toEqual(['card__body', 'card__footer', 'card__actions'])
+  })
+
+  it("n'affiche pas le footer si absent", () => {
+    render(<Card><p>body</p></Card>)
+    expect(document.querySelector('.card__footer')).toBeNull()
+  })
+
   it('applique la variante CSS', () => {
     const { container } = render(<Card variant="elevated" />)
     expect(container.firstChild).toHaveClass('card--elevated')
