@@ -52,6 +52,7 @@
     "exercise_step_of": "Step {{current}} of {{total}}",
     "exercise_steps_overview": "The steps",
     "optional_info_label": "Additional information (optional)",
+    "details": "View details",
     "modify": "Edit",
     "saving": "Saving…",
     "reuse_last_values": "Reuse values from {{date}}",

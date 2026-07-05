@@ -11,7 +11,7 @@ import { useState, useCallback, useEffect, useMemo, Fragment } from 'react'
 import {
 
   View, Text, ScrollView, TextInput, ActivityIndicator,
-  KeyboardAvoidingView, Platform,
+  KeyboardAvoidingView, Platform, Pressable,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
@@ -120,6 +120,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
   const [entries, setEntries] = useState<FormEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
+  // Fiche dépliée en mode liste (textes intégraux + toutes les valeurs) — une à la fois.
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [values, setValues] = useState<Record<string, string | number>>({})
   const [saving, setSaving] = useState(false)
   // Date de la saisie (saisie rétroactive). Pilotée seulement si `editable_date` activé.
@@ -135,19 +137,17 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
 
   useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
+  // Les curseurs ne sont PAS pré-positionnés : aucune valeur n'est écrite tant
+  // que le patient n'a pas touché le curseur (pas de faux « 50 » d'ancrage dans
+  // les données ni dans les courbes praticien). Seuls les champs texte/horaire
+  // sont initialisés à vide.
   const initialValuesFor = useCallback((cols: ColumnSpec[]): Record<string, string | number> => {
     const init: Record<string, string | number> = {}
     for (const col of cols) {
       for (const child of col.children) {
         const key = child.props['key']
         if (!key) continue
-        if (child.field_type === 'column_slider_field') {
-          const min = parseInt(child.props['min'] ?? '0', 10)
-          const max = parseInt(child.props['max'] ?? '100', 10)
-          init[key] = Math.round((min + max) / 2)
-        } else {
-          init[key] = ''
-        }
+        if (child.field_type !== 'column_slider_field') init[key] = ''
       }
     }
     return init
@@ -378,7 +378,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
                       const steps = (min === 0 && max === 100 && step === 10)
                         ? PIP_STEPS_0_100
                         : buildPipSteps(min, max, step)
-                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : Math.round((min + max) / 2)
+                      // null = curseur non touché : aucun pip sélectionné, rien de sauvegardé.
+                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : null
                       return (
                         <View key={child.id} testID={`slider-${key}`}>
                           <RatingSelector
@@ -461,8 +462,15 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
           <View style={styles.list}>
             {entries.map(entry => {
               const dateLabel = formatDateFull(entry.created_at)
+              const expanded = expandedId === entry.id
               return (
-                <View key={entry.id} style={styles.recordCard} testID={`record-${entry.id}`}>
+                <Pressable
+                  key={entry.id}
+                  style={styles.recordCard}
+                  testID={`record-${entry.id}`}
+                  onPress={() => setExpandedId(prev => (prev === entry.id ? null : entry.id))}
+                  accessibilityHint={t('common.details')}
+                >
                   <View style={styles.recordHeader}>
                     <View style={styles.recordHeaderLeft}>
                       <Text style={styles.recordDate}>{dateLabel}</Text>
@@ -505,22 +513,41 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
                           if (!key) return null
                           const value = entry.values[key]
                           if (typeof value !== 'string' || !value) return null
-                          // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
+                          // Replié : annote avec le 1er slider de la colonne. Déplié :
+                          // texte intégral, les sliders ont leurs propres lignes.
                           const slider = sliderChildren[0]
                           const sliderKey = slider?.props['key']
                           const sliderVal = sliderKey ? entry.values[sliderKey] : null
                           return (
                             <View key={child.id} style={styles.recordRow}>
                               <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                              <Text style={styles.recordText} numberOfLines={2}>
+                              <Text style={styles.recordText} numberOfLines={expanded ? undefined : 2}>
                                 {value}
-                                {typeof sliderVal === 'number' ? (
+                                {!expanded && typeof sliderVal === 'number' ? (
                                   <Text style={styles.recordIntensity}> ({sliderVal}%)</Text>
                                 ) : null}
                               </Text>
                             </View>
                           )
                         })}
+                        {expanded
+                          ? sliderChildren.map(child => {
+                              const key = child.props['key']
+                              if (!key) return null
+                              const value = entry.values[key]
+                              if (typeof value !== 'number') return null
+                              const labelText = child.text_code ? t(child.text_code) : ''
+                              return (
+                                <View key={child.id} style={styles.recordRow} testID={`record-slider-${key}`}>
+                                  <View style={[styles.recordDot, { backgroundColor: accent }]} />
+                                  <Text style={styles.recordText}>
+                                    {labelText ? <Text style={styles.recordIntensity}>{labelText} </Text> : null}
+                                    {value}
+                                  </Text>
+                                </View>
+                              )
+                            })
+                          : null}
                         {timeChildren.map(child => {
                           const key = child.props['key']
                           if (!key) return null
@@ -540,7 +567,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
                       </Fragment>
                     )
                   })}
-                </View>
+                </Pressable>
               )
             })}
           </View>

@@ -6,25 +6,27 @@
 
 Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR), sont l'outil de restructuration cognitive fondateur de la TCC. Leur efficacité est documentée dans de nombreuses méta-analyses (Hofmann et al., 2012 ; Cuijpers et al., 2019) pour la dépression unipolaire, les troubles anxieux, le PTSD et l'insomnie chronique. Recommandées par la HAS, le NICE et l'APA.
 
-**Version implémentée : 6 colonnes (standard + distorsion optionnelle)**
+**Version implémentée : 6 colonnes standard + 2 colonnes « preuves » optionnelles**
 
 | # | Colonne | Ce que le patient renseigne |
 |---|---|---|
 | 1 | Situation | Contexte déclencheur (qui, quoi, quand, où) |
 | 2 | Émotion(s) | Nom libre + chips d'aide au vocabulaire + intensité initiale (0 à 100) |
 | 3 | Pensée automatique | Contenu + conviction initiale (0 à 100) |
-| 4 | Distorsion cognitive (optionnelle) | Piège de pensée auto-étiqueté par le patient : texte libre + chips des 8 pièges classiques (Burns) |
-| 5 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 6 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0 à 100) |
+| 4 | Distorsion cognitive (facultative) | Piège de pensée auto-étiqueté par le patient : texte libre + chips des 8 pièges classiques (Burns) |
+| (5) | Preuves pour la pensée (groupe optionnel `evidence`) | Faits concrets soutenant la pensée |
+| (6) | Preuves contre la pensée (groupe optionnel `evidence`) | Faits contredisant la pensée |
+| 5/7 | Réponse rationnelle | Pensée alternative construite par le patient |
+| 6/8 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0 à 100) |
 
-**Examen des preuves, format 7 colonnes de Padesky (2026-07, optionnel)** : deux
-colonnes « Preuves pour la pensée » / « Preuves contre la pensée » (groupe
-`optional_group='evidence'`) s'insèrent entre la distorsion et la réponse
-rationnelle. Masquées par défaut ; le praticien les active **par patient** via la
-bascule « Examen des preuves » de la card Beck
-(`patient_modules.config.enabled_groups`). La numérotation des étapes est
-dynamique (position parmi les colonnes visibles). Référence : Greenberger &
-Padesky, *Mind Over Mood* (examen des preuves avant la pensée alternative).
+La numérotation affichée est **dynamique** : position parmi les colonnes visibles.
+
+**Examen des preuves, format 7 colonnes de Padesky (2026-07, optionnel)** : les deux
+colonnes « preuves » (`optional_group='evidence'`) sont masquées par défaut ; le
+praticien les active **par patient** via la bascule « Examen des preuves » de la
+card Beck (`patient_modules.config.enabled_groups`, helper partagé
+`readEnabledGroups`). Référence : Greenberger & Padesky, *Mind Over Mood*
+(examiner les preuves avant de construire la pensée alternative).
 
 **Saisie assistée (2026-07)** : les colonnes Émotion et Distorsion portent des
 chips de suggestions (`suggestion_1..n` sur le `column_text_field`, codes i18n
@@ -38,103 +40,70 @@ sans couplage technique.
 
 ## Conformité MDR 2017/745
 
-Kær est un Carnet de Bord Numérique — non-Dispositif Médical.
+Kær est un Carnet de Bord Numérique, non-Dispositif Médical.
 
 **Règle appliquée :** le code affiche, jamais il ne conclut.
 
-- Les valeurs d'intensité (0–100) sont des **chiffres bruts** saisis par le patient, affichés tels quels sans aucun label interprétatif (ni couleur, ni mention "sévère", "modéré", etc.).
-- Aucun seuil ne déclenche une action ou une notification.
-- L'historique est une liste neutre chronologique.
-- L'interprétation appartient exclusivement au patient et au soignant en consultation.
+- Les intensités et convictions (0 à 100) sont des **chiffres bruts** saisis par le patient, affichés tels quels, sans label interprétatif (ni couleur, ni mention « sévère », « modéré », etc.).
+- **Les curseurs ne sont pas pré-positionnés** : aucune valeur n'est enregistrée tant que le patient n'a pas touché le curseur (pas de faux « 50 » d'ancrage dans les données ni dans les courbes praticien).
+- Aucun seuil ne déclenche une action ou une notification. La puce « À compléter » est un statut de workflow dérivé (fiche sans réponse rationnelle), pas une interprétation.
+- L'historique est une liste neutre antichronologique ; l'interprétation appartient exclusivement au patient et au soignant en consultation.
 
 ---
 
 ## Architecture technique
 
-### Stockage
-- **Local uniquement** (offline-first) : table SQLite `beck_thought_records` dans `psytool.db`
-- **Signal d'observance** anonymisé vers Supabase (`patient_engagement_logs`, `event_type: 'SAVE_BECK_THOUGHT_RECORD'`) — aucune donnée clinique transmise
+Le module est rendu par le **moteur générique `column_form`** (zéro écran dédié) :
+tout le contenu (colonnes, hints, placeholders, chips, validation, capture rapide)
+vit en base dans `module_content_fields` + `field_props` (seed `supabase/seed.sql`,
+section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../module-engine.md)
+§ Layout `column_form`.
 
-### Schéma SQLite
+### Stockage & synchronisation
 
-```sql
-CREATE TABLE IF NOT EXISTS beck_thought_records (
-  id TEXT PRIMARY KEY,
-  date TEXT NOT NULL,
-  situation TEXT NOT NULL DEFAULT '',
-  emotion TEXT NOT NULL DEFAULT '',
-  emotion_intensity INTEGER NOT NULL DEFAULT 50,
-  automatic_thought TEXT NOT NULL DEFAULT '',
-  thought_belief INTEGER NOT NULL DEFAULT 50,
-  rational_response TEXT NOT NULL DEFAULT '',
-  outcome_emotion TEXT NOT NULL DEFAULT '',
-  outcome_intensity INTEGER NOT NULL DEFAULT 50,
-  outcome_belief INTEGER NOT NULL DEFAULT 50,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-```
+- **Offline-first** : chaque fiche = une ligne `form_entries` SQLite
+  (`values` JSON indexé par clé logique : `situation`, `emotion`,
+  `emotion_intensity`, `automatic_thought`, `thought_belief`, `distortion`,
+  `evidence_for`, `evidence_against`, `rational_response`, `outcome_emotion`,
+  `outcome_intensity`, `outcome_belief`).
+- **Synchronisation** : `formEntryService.saveFormEntry` passe par
+  `syncHelpers.syncUpsert` → `patient_entries` (payload `{ module_id, values }`,
+  `entry_kind='form_entry'`), sous gate de consentement `patients.share_consent`.
+- **Migration legacy** : l'ancienne table `beck_thought_records` est migrée vers
+  `form_entries` au démarrage (`INSERT OR IGNORE`, cf. `apps/mobile/src/lib/database.ts`).
+
+### Parcours patient (mobile)
+
+- **Capture en deux temps (2026-07)** : bouton secondaire « Noter vite »
+  (formulaire réduit aux `quick_key_*` : situation + pensée automatique). Une
+  fiche sans réponse rationnelle (`complete_key_*`) porte une puce « À
+  compléter » qui rouvre l'édition complète, pour terminer plus tard ou en séance.
+- **Fiche dépliable** : en liste, un appui sur une fiche déplie le détail
+  (textes intégraux + chaque curseur renseigné avec son libellé et sa valeur brute).
+- Édition et suppression (avec confirmation) sur chaque fiche.
+
+### Vue praticien (web)
+
+Le panneau « Données » de la card Beck (`PatientPage`) restitue les fiches
+synchronisées : courbes brutes de tous les curseurs (`ColumnFormDataPanel`,
+pattern `fear_thermometer`) + fiches complètes antichronologiques paginées.
+Circuit : `fetchFormEntries` → `engagementQueries.moduleData` (kind `'form'`).
+La card porte aussi la bascule « Examen des preuves » (`ColumnFormOptionsRow`).
+L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus,
+avec badge « Option » sur les colonnes optionnelles.
 
 ### Fichiers
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/src/lib/database.ts` | Types `ThoughtRecord`, CRUD SQLite, `createBeckColumnsTable` |
-| `apps/mobile/src/screens/modules/BeckColumnsScreen.tsx` | Liste des enregistrements |
-| `apps/mobile/src/screens/modules/BeckEntryScreen.tsx` | Formulaire 5 colonnes (création + édition) |
-| `apps/mobile/src/screens/modules/BeckColumnsScreen.test.tsx` | 10 tests Jest + RNTL |
-| `apps/mobile/src/navigation/AppStack.tsx` | Routes `BeckColumns` et `BeckEntry` |
-| `apps/mobile/src/screens/HomeScreen.tsx` | Entrée `beck_columns` activée (`available: true`) |
-| `apps/web/src/lib/modulePreviewContent.ts` | Preview praticien (5 étapes) |
-| `packages/shared/src/index.ts` | `ModuleType` `beck_columns` déjà présent |
-| `apps/web/src/lib/database.types.ts` | `MODULE_LABELS` + `MODULE_DESCRIPTIONS` déjà présents |
-
----
-
-## Capture en deux temps (mobile)
-
-La friction de saisie est le premier facteur d'abandon des colonnes de Beck : la
-pensée automatique est fugace, le formulaire complet est long. Depuis 2026-07, le
-mode liste propose deux entrées :
-
-- **« Noter vite »** (bouton secondaire) : formulaire réduit aux colonnes
-  Situation + Pensée automatique (`quick_key_1..n` sur `column_form_config`).
-  La fiche sauvegardée ne contient QUE ces valeurs : aucun défaut de curseur
-  n'est écrit, donc aucune fausse donnée dans le graphe praticien.
-- **« Nouvelle pensée »** (bouton principal) : parcours complet 5 colonnes.
-
-Une fiche dont la réponse rationnelle (`complete_key_1`) est vide porte une puce
-« À compléter » (statut **dérivé** des valeurs, jamais stocké ni synchronisé) ;
-appuyer dessus ouvre l'édition complète pour terminer la restructuration, seul
-ou en séance. Conforme MDR : statut de workflow non clinique, aucune notification.
-
-Config seed : `quick_btn_label`, `quick_key_1/2`, `complete_key_1`,
-`to_complete_label` sur `beck.cfg` (voir `docs/module-engine.md` § column_form).
-
----
-
-## Vue praticien (web) — panneau « Données »
-
-Depuis 2026-07, le panneau « Données » de la card `beck_columns` (`PatientPage`)
-restitue les fiches synchronisées du patient (après opt-in `share_consent`) :
-
-- **Courbes brutes de tous les curseurs** du module (intensité initiale, conviction
-  dans la pensée automatique, intensité après réexamen, conviction dans la pensée
-  alternative), une série par curseur, libellées par leurs clés i18n. Rendu
-  `ModuleChart` (même pattern que `fear_thermometer`).
-- **Fiches complètes antichronologiques** : chaque colonne renseignée avec ses
-  textes intégraux et ses valeurs de curseurs brutes ; pagination « voir plus »
-  (10 par page).
-
-Circuit : `fetchFormEntries(patientId, moduleId)` (`engagementService`, lit
-`patient_entries` `entry_kind='form_entry'`) → `engagementQueries.moduleData`
-(kind `'form'`) → `ColumnFormDataPanel`. La structure (colonnes, libellés,
-couleurs, curseurs) est dérivée de `module_content_fields` via
-`moduleQueries.fields` — **zéro hardcode Beck** : tout module `column_form`
-routé vers le kind `'form'` hérite du panneau.
-
-Conformité MDR 2017/745 : valeurs brutes uniquement, aucun seuil, label
-interprétatif ni couleur de jugement (les accents de colonne sont la config
-visuelle du module, identique au mobile).
+| `apps/mobile/.../layouts/ColumnForm/ColumnFormLayout.tsx` | Layout générique : liste, saisie, capture rapide, chips, groupes optionnels |
+| `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions}.ts` | Helpers purs (statut « à compléter », toggle des chips) |
+| `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
+| `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (fiches + courbes) |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormOptionsRow.tsx` | Bascule des groupes optionnels (`enabled_groups`) |
+| `packages/shared/src/services/patientModuleConfig.ts` | `readEnabledGroups` (contrat partagé web ≡ mobile) |
+| `supabase/seed.sql` § beck_columns | Source de vérité du contenu (colonnes, props, i18n codes) |
 
 ---
 
@@ -142,31 +111,26 @@ visuelle du module, identique au mobile).
 
 ```
 HomeScreen
-  └── BeckColumns (liste des enregistrements)
-        ├── BeckEntry {}                    → nouvel enregistrement
-        └── BeckEntry { recordId: string }  → édition
+  └── ModuleContent { moduleType: 'beck_columns' }   → moteur column_form
+        ├── mode liste   (fiches dépliables, puce « à compléter »)
+        ├── mode entry   (formulaire complet, colonnes visibles selon config)
+        └── mode quick   (capture rapide : situation + pensée automatique)
 ```
 
 ---
 
 ## Tests
 
-10 tests dans `BeckColumnsScreen.test.tsx` :
-
-1. Affiche l'état vide quand aucun enregistrement
-2. Affiche le bouton "Nouvelle pensée" dans l'état vide
-3. Affiche les enregistrements existants
-4. Affiche l'émotion et son intensité brute (conformité MDR)
-5. Affiche l'émotion résultante si renseignée
-6. Navigue vers `BeckEntry` (nouvelle entrée) via le bouton
-7. Navigue vers `BeckEntry` avec `recordId` via le crayon d'édition
-8. Appelle `Alert.alert` en appuyant sur supprimer
-9. Appelle `deleteThoughtRecord` après confirmation
-10. N'affiche aucun label interprétatif (test de conformité MDR explicite)
-
-### Lancer les tests
+- `apps/mobile/.../FieldRenderer.column_form.test.tsx` : 24 tests (liste, saisie,
+  édition, suppression, validation, capture rapide, puce « à compléter », chips
+  de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable)
+- `apps/mobile/.../ColumnForm/entryCompletion.test.ts` + `textSuggestions.test.ts` : helpers purs
+- `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
+- `apps/web/.../ColumnFormDataPanel.test.tsx` + `columnFormData.test.ts` : panneau Données (dont test de conformité MDR)
+- `apps/web/.../ColumnFormOptionsRow.test.tsx` : bascule praticien
+- `apps/web/src/services/engagementService.test.ts` (`fetchFormEntries`) et `moduleAssignmentService.test.ts` (`updateEnabledGroups`)
 
 ```bash
-# Depuis la racine du projet
-npx jest apps/mobile/src/screens/modules/BeckColumnsScreen.test.tsx
+cd apps/mobile && npx jest FieldRenderer.column_form
+cd apps/web    && npx vitest run src/pages/PatientPage/tabs
 ```

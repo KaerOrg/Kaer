@@ -339,6 +339,49 @@ describe('FieldRenderer — column_form : capture en deux temps', () => {
   })
 })
 
+describe('FieldRenderer — column_form : curseurs sans pré-sélection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('un curseur non touché ne sauvegarde AUCUNE valeur (pas de faux 50)', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.changeText(screen.getByTestId('field-situation'), 'au bureau')
+    fireEvent.press(screen.getByTestId('save-entry'))
+
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const saved = (database.saveFormEntry as jest.Mock).mock.calls[0][0] as database.FormEntry
+    expect(saved.values.situation).toBe('au bureau')
+    expect(saved.values.thought_belief).toBeUndefined()
+  })
+})
+
+describe('FieldRenderer — column_form : fiche dépliable en liste', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+  })
+
+  it('replié : textes tronqués, pas de ligne dédiée par curseur', async () => {
+    renderLayout()
+    await screen.findByTestId('record-entry-1')
+    expect(screen.queryByTestId('record-slider-thought_belief')).toBeNull()
+  })
+
+  it('déplié au tap : chaque curseur renseigné a sa ligne (valeur brute), re-tap replie', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('record-entry-1'))
+
+    expect(screen.getByTestId('record-slider-thought_belief')).toBeTruthy()
+    expect(screen.getByText(/80/)).toBeTruthy()
+
+    fireEvent.press(screen.getByTestId('record-entry-1'))
+    expect(screen.queryByTestId('record-slider-thought_belief')).toBeNull()
+  })
+})
+
 describe('FieldRenderer — column_form : colonnes optionnelles (optional_group)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
