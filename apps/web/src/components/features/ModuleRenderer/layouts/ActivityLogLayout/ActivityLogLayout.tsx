@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Calendar, CalendarClock, Check, Circle, Clock, History, Plus } from 'lucide-react'
 import { Button } from '@ui/Button'
 import { ActivityLogPipScale } from './ActivityLogPipScale'
@@ -15,6 +16,7 @@ interface Props {
 // `activity_log_config` (même contrat que le mobile).
 // Source mobile : ActivityLog/{EntryForm,CompletionSheet}.tsx.
 export function ActivityLogLayout({ fields, t }: Props) {
+  const { i18n } = useTranslation()
   const configField = fields.find(f => f.field_type === 'activity_log_config')
   const lbl = (key: string): string => {
     const code = configField?.props[key]
@@ -47,7 +49,7 @@ export function ActivityLogLayout({ fields, t }: Props) {
     .map(f => (f.text_code ? t(f.text_code) : ''))
     .filter(Boolean)
 
-  const todayLabel = new Date().toLocaleDateString('fr-FR', {
+  const todayLabel = new Date().toLocaleDateString(i18n.language, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -73,28 +75,32 @@ export function ActivityLogLayout({ fields, t }: Props) {
         </div>
       )}
 
-      {/* Activités mock pour donner un aperçu de la liste ──────────────── */}
+      {/* Aperçu de la liste — libellés tirés des suggestions du seed (i18n) ── */}
       <ul className="al-list">
-        <li className="al-list__row al-list__row--done">
-          <span className="al-list__check al-list__check--done">
-            <Check size={14} />
-          </span>
-          <div className="al-list__info">
-            <span className="al-list__title al-list__title--done">Marche en forêt</span>
-            <span className="al-list__pills">
-              <span className="al-list__pill">{pShort} 7 · {mShort} 5</span>
+        {suggestions[0] && (
+          <li className="al-list__row al-list__row--done">
+            <span className="al-list__check al-list__check--done">
+              <Check size={14} />
             </span>
-          </div>
-        </li>
-        <li className="al-list__row">
-          <span className="al-list__check"><Circle size={14} /></span>
-          <div className="al-list__info">
-            <span className="al-list__title">Yoga matinal</span>
-            <span className="al-list__pills">
-              <span className="al-list__pill"><Clock size={10} /> 18:00</span>
-            </span>
-          </div>
-        </li>
+            <div className="al-list__info">
+              <span className="al-list__title al-list__title--done">{suggestions[0]}</span>
+              <span className="al-list__pills">
+                <span className="al-list__pill">{pShort} 7 · {mShort} 5</span>
+              </span>
+            </div>
+          </li>
+        )}
+        {suggestions[1] && (
+          <li className="al-list__row">
+            <span className="al-list__check"><Circle size={14} /></span>
+            <div className="al-list__info">
+              <span className="al-list__title">{suggestions[1]}</span>
+              <span className="al-list__pills">
+                <span className="al-list__pill"><Clock size={10} /> 18:00</span>
+              </span>
+            </div>
+          </li>
+        )}
       </ul>
 
       {addBtn && (

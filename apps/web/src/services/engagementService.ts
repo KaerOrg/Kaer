@@ -332,10 +332,6 @@ function readNullableScore(value: unknown): number | null {
   return toNumber(value) ?? null
 }
 
-function readNullableStr(value: unknown): string | null {
-  return typeof value === 'string' && value.trim() !== '' ? value : null
-}
-
 export async function fetchActivityEntries(patientId: string): Promise<ActivityEntryPoint[]> {
   const { data, error } = await supabase
     .from('patient_entries')
@@ -367,9 +363,9 @@ export async function fetchActivityEntries(patientId: string): Promise<ActivityE
       expected_mastery: isLegacy ? (done ? null : mastery) : readNullableScore(p.expected_mastery),
       pleasure: isLegacy && !done ? null : pleasure,
       mastery: isLegacy && !done ? null : mastery,
-      planned_time: readNullableStr(p.planned_time),
-      domain_id: readNullableStr(p.domain_id),
-      notes: readNullableStr(p.notes),
+      planned_time: readStr(p.planned_time),
+      domain_id: readStr(p.domain_id),
+      notes: readStr(p.notes),
     })
   }
   // Tri par date métier puis heure prévue, pas par horodatage de sync.

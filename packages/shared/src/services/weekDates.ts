@@ -2,7 +2,12 @@
 // Les calculs passent par un Date ancré à midi local pour ne pas décaler de jour
 // selon le fuseau horaire (minuit UTC vs minuit local).
 
-function toIso(d: Date): string {
+/**
+ * Formate un `Date` en `YYYY-MM-DD` depuis ses composants **locaux**.
+ * Ne jamais utiliser `toISOString().slice(0, 10)` pour une date métier : en
+ * fuseau positif, minuit local retombe sur la veille en UTC → décalage d'un jour.
+ */
+export function dateToIso(d: Date): string {
   const mm = String(d.getMonth() + 1).padStart(2, '0')
   const dd = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${mm}-${dd}`
@@ -12,7 +17,7 @@ function toIso(d: Date): string {
 export function shiftDate(iso: string, days: number): string {
   const d = new Date(`${iso}T12:00:00`)
   d.setDate(d.getDate() + days)
-  return toIso(d)
+  return dateToIso(d)
 }
 
 /** Lundi (ISO) de la semaine contenant la date donnée. */
@@ -29,5 +34,5 @@ export function weekDays(monday: string): string[] {
 
 /** Date ISO du jour courant (heure locale). */
 export function todayIso(): string {
-  return toIso(new Date())
+  return dateToIso(new Date())
 }

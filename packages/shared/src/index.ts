@@ -8,7 +8,7 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 
-export { shiftDate, mondayOf, weekDays, todayIso } from './services/weekDates'
+export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'

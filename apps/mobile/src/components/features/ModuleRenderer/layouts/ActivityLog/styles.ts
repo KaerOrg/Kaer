@@ -92,11 +92,6 @@ export const alStyles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   dateValue: { fontSize: 15, fontWeight: '500', color: colors.text },
-  confirmBtn: {
-    backgroundColor: colors.primaryLight, borderRadius: radius.md,
-    padding: spacing.sm, alignItems: 'center',
-  },
-  confirmBtnText: { color: colors.primary, fontWeight: '600' },
   labelInput: { fontSize: 16, color: colors.text, minHeight: 44 },
 
   // Suggestions / activités co-construites

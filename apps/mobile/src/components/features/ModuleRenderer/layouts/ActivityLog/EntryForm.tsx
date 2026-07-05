@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
-  View, Text, ScrollView, TextInput, Platform, KeyboardAvoidingView, TouchableOpacity, Pressable,
+  View, Text, ScrollView, TextInput, Platform, KeyboardAvoidingView, TouchableOpacity,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -11,6 +11,7 @@ import { SegmentedControl, type SegmentOption } from '@ui/SegmentedControl'
 import { TimePicker } from '@ui/TimePicker'
 import { PickChip } from './PickChip'
 import type { BAConfiguredActivity } from '@kaer/shared'
+import { dateToIso } from '@kaer/shared'
 import type { ActivityRecord } from '../../../../../lib/database'
 import type { ActivityLogConfig } from './activityLogConfig'
 import type { ActivityDraft, DomainItem, LabelFn, SuggestionItem } from './types'
@@ -55,7 +56,9 @@ export function EntryForm({
   const [configActivityId, setConfigActivityId] = useState<string | null>(editingRecord?.config_activity_id ?? null)
   const [pleasure, setPleasure] = useState<number | null>(editingRecord?.pleasure ?? null)
   const [mastery, setMastery] = useState<number | null>(editingRecord?.mastery ?? null)
-  const [notes, setNotes] = useState(editingRecord?.notes ?? '')
+  // Notes : non contrôlées (lues au submit, ne pilotent aucune UI) — pas de
+  // re-render à chaque frappe, donc pas de recalcul des rangées de chips.
+  const notesRef = useRef(editingRecord?.notes ?? '')
 
   const statusOptions = useMemo<SegmentOption<EntryStatus>[]>(() => [
     { value: 'planned', label: lbl('status_planned_label') },
@@ -97,6 +100,9 @@ export function EntryForm({
     setLabel(active ? '' : suggestion.text)
   }, [allSuggestions, label, configActivityId])
 
+  const openDatePicker = useCallback(() => setShowDatePicker(true), [])
+  const closeDatePicker = useCallback(() => setShowDatePicker(false), [])
+
   // Re-taper le pip sélectionné efface la note (retour à « non renseigné »).
   const handlePleasurePress = useCallback((value: number) => {
     setPleasure(prev => (prev === value ? null : value))
@@ -108,7 +114,7 @@ export function EntryForm({
   const handleSave = useCallback(() => {
     onSave({
       id: editingRecord?.id ?? null,
-      date: entryDate.toISOString().slice(0, 10),
+      date: dateToIso(entryDate),
       label: label.trim(),
       // Colonnes conservées en base (legacy) : plus de saisie de prédiction dans l'app.
       expected_pleasure: editingRecord?.expected_pleasure ?? null,
@@ -116,14 +122,14 @@ export function EntryForm({
       pleasure: status === 'done' ? pleasure : null,
       mastery: status === 'done' ? mastery : null,
       done: status === 'done',
-      notes: notes.trim(),
+      notes: notesRef.current.trim(),
       planned_time: status === 'planned' && plannedTime.length > 0 ? plannedTime : null,
       domain_id: domainId,
       config_activity_id: configActivityId,
     })
   }, [
     onSave, editingRecord, entryDate, label,
-    pleasure, mastery, status, notes, plannedTime, domainId, configActivityId,
+    pleasure, mastery, status, plannedTime, domainId, configActivityId,
   ])
 
   const saveLabel = editingRecord ? lbl('update_label') : lbl('save_label')
@@ -223,7 +229,7 @@ export function EntryForm({
           <View style={alStyles.card}>
             <TouchableOpacity
               style={alStyles.dateBtn}
-              onPress={() => setShowDatePicker(true)}
+              onPress={openDatePicker}
               activeOpacity={0.7}
               accessibilityRole="button"
               testID="date-btn"
@@ -243,9 +249,14 @@ export function EntryForm({
               />
             ) : null}
             {showDatePicker && Platform.OS === 'ios' ? (
-              <Pressable style={alStyles.confirmBtn} onPress={() => setShowDatePicker(false)}>
-                <Text style={alStyles.confirmBtnText}>{lbl('date_confirm_label')}</Text>
-              </Pressable>
+              <Button
+                variant="secondary"
+                size="sm"
+                label={lbl('date_confirm_label')}
+                onPress={closeDatePicker}
+                accessibilityLabel={lbl('date_confirm_label')}
+                testID="date-confirm"
+              />
             ) : null}
             {status === 'planned' ? (
               <TimePicker
@@ -300,8 +311,8 @@ export function EntryForm({
           <View style={alStyles.card}>
             <TextInput
               style={alStyles.notesInput}
-              value={notes}
-              onChangeText={setNotes}
+              defaultValue={notesRef.current}
+              onChangeText={text => { notesRef.current = text }}
               placeholder={lbl('notes_placeholder')}
               placeholderTextColor={colors.textMuted}
               multiline

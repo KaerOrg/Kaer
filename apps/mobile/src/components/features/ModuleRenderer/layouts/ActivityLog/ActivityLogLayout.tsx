@@ -77,6 +77,14 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   // « C'était comment ? » — c'est LE moment de la notation des ressentis.
   const [completingRecord, setCompletingRecord] = useState<ActivityRecord | null>(null)
 
+  // Agenda (aujourd'hui + à venir) vs historique (jours passés) : identités
+  // stables pour que le regroupement par date des vues enfant ne recalcule pas.
+  const today = todayIso()
+  const { agendaRecords, historyRecords } = useMemo(() => ({
+    agendaRecords: records.filter(r => r.date >= today),
+    historyRecords: records.filter(r => r.date < today),
+  }), [records, today])
+
   // ── Loaders
   const loadRecords = useCallback(async () => {
     const data = await getAllActivityRecords()
@@ -181,20 +189,7 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     pleasure: number | null,
     mastery: number | null,
   ) => {
-    await saveActivityRecord({
-      id: record.id,
-      date: record.date,
-      label: record.label,
-      expected_pleasure: record.expected_pleasure,
-      expected_mastery: record.expected_mastery,
-      pleasure,
-      mastery,
-      done,
-      notes: record.notes,
-      planned_time: record.planned_time,
-      domain_id: record.domain_id,
-      config_activity_id: record.config_activity_id,
-    })
+    await saveActivityRecord({ ...record, done, pleasure, mastery })
     await loadRecords()
   }, [loadRecords])
 
@@ -246,9 +241,6 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   }
 
   // ── MODES AGENDA / HISTORIQUE ───────────────────────────────────────────
-  const today = todayIso()
-  const agendaRecords = records.filter(r => r.date >= today)
-  const historyRecords = records.filter(r => r.date < today)
 
   return (
     <View style={alStyles.container}>
