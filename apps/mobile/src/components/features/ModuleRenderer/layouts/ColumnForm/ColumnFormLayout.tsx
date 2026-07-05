@@ -32,6 +32,7 @@ import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
 import { ColumnTimeField } from './ColumnTimeField'
 import { isEntryComplete } from './entryCompletion'
+import { hasToken, toggleToken } from './textSuggestions'
 import { styles } from './styles'
 
 const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -321,18 +322,45 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
                       const multiline = (child.props['multiline'] ?? '1') !== '0'
                       const minHeight = parseInt(child.props['min_height'] ?? (multiline ? '72' : '0'), 10)
                       const value = String(values[key] ?? '')
+                      // Chips d'aide au vocabulaire (suggestion_1..n) : ajoutent /
+                      // retirent leur mot dans le champ — le texte libre reste roi.
+                      const suggestionCodes = collectIndexed(child.props, 'suggestion')
                       return (
-                        <TextInput
-                          key={child.id}
-                          style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
-                          placeholder={labelOrPlaceholder}
-                          placeholderTextColor={colors.textMuted}
-                          value={value}
-                          onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
-                          multiline={multiline}
-                          textAlignVertical={multiline ? 'top' : 'center'}
-                          testID={`field-${key}`}
-                        />
+                        <Fragment key={child.id}>
+                          <TextInput
+                            style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
+                            placeholder={labelOrPlaceholder}
+                            placeholderTextColor={colors.textMuted}
+                            value={value}
+                            onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
+                            multiline={multiline}
+                            textAlignVertical={multiline ? 'top' : 'center'}
+                            testID={`field-${key}`}
+                          />
+                          {suggestionCodes.length > 0 ? (
+                            <View style={styles.suggestions} testID={`suggestions-${key}`}>
+                              {suggestionCodes.map(code => {
+                                const suggestion = t(code)
+                                return (
+                                  <Chip
+                                    key={code}
+                                    label={suggestion}
+                                    size="sm"
+                                    color={accent}
+                                    selected={hasToken(value, suggestion)}
+                                    onPress={() =>
+                                      setValues(prev => ({
+                                        ...prev,
+                                        [key]: toggleToken(String(prev[key] ?? ''), suggestion),
+                                      }))
+                                    }
+                                    testID={`suggestion-${key}-${code}`}
+                                  />
+                                )
+                              })}
+                            </View>
+                          ) : null}
+                        </Fragment>
                       )
                     }
                     if (child.field_type === 'column_slider_field') {

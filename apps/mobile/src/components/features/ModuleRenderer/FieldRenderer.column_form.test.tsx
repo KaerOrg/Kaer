@@ -137,6 +137,25 @@ const COMPLETE_ENTRY: database.FormEntry = {
   values: { ...MOCK_ENTRY.values, rational_response: 'une lecture plus nuancée existe' },
 }
 
+// Variante avec chips de suggestions sur le champ situation.
+const COL1_WITH_SUGGESTIONS = makeField({
+  id: 'beck.col1.h', section_id: 'beck.col_situation', sort_order: 10,
+  text_code: 'modules.beck_columns.entry_col_1_title',
+  props: { color: '#0EA5E9', step_number: '1' },
+  children: [
+    makeField({
+      id: 'beck.col1.text', section_id: 'beck.col_situation', parent_field_id: 'beck.col1.h',
+      field_type: 'column_text_field', sort_order: 11,
+      props: {
+        key: 'situation', multiline: '1',
+        suggestion_1: 'modules.beck_columns.sugg_anxiety',
+        suggestion_2: 'modules.beck_columns.sugg_anger',
+      },
+    }),
+  ],
+})
+const SUGG_FIELDS: ContentField[] = [MOCK_FIELDS[0], COL1_WITH_SUGGESTIONS, COL3]
+
 function renderLayout(fields: ContentField[] = MOCK_FIELDS) {
   return render(
     <FieldRenderer
@@ -297,5 +316,46 @@ describe('FieldRenderer — column_form : capture en deux temps', () => {
     // Formulaire complet : valeurs existantes préservées + slider visible.
     expect(screen.getByDisplayValue('au travail')).toBeTruthy()
     expect(screen.getByTestId('slider-thought_belief')).toBeTruthy()
+  })
+})
+
+describe('FieldRenderer — column_form : chips de suggestions', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('sans props suggestion_*, aucune rangée de chips', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('suggestions-situation')).toBeNull()
+  })
+
+  it('une chip ajoute son mot au champ, une seconde pression le retire', async () => {
+    renderLayout(SUGG_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    const chip = screen.getByTestId('suggestion-situation-modules.beck_columns.sugg_anxiety')
+
+    fireEvent.press(chip)
+    const added = String(screen.getByTestId('field-situation').props.value)
+    expect(added.length).toBeGreaterThan(0)
+
+    fireEvent.press(chip)
+    expect(screen.getByTestId('field-situation').props.value).toBe('')
+  })
+
+  it('le texte libre du patient est préservé quand une chip est ajoutée puis retirée', async () => {
+    renderLayout(SUGG_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    const input = screen.getByTestId('field-situation')
+    fireEvent.changeText(input, 'un peu perdu')
+
+    const chip = screen.getByTestId('suggestion-situation-modules.beck_columns.sugg_anger')
+    fireEvent.press(chip)
+    const withChip = String(screen.getByTestId('field-situation').props.value)
+    expect(withChip.startsWith('un peu perdu, ')).toBe(true)
+
+    fireEvent.press(chip)
+    expect(screen.getByTestId('field-situation').props.value).toBe('un peu perdu')
   })
 })

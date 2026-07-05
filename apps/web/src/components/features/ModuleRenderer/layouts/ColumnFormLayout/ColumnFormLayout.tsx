@@ -1,4 +1,5 @@
 import { Clock, Pencil, Plus, Save, Trash2, Zap } from 'lucide-react'
+import { collectIndexed } from '@kaer/shared'
 import { Button } from '../../../../ui/Button'
 import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '@services/moduleService'
@@ -161,9 +162,22 @@ export function ColumnFormLayout({ fields, t }: Props) {
                 {children.map(child => {
                   if (child.field_type === 'column_text_field') {
                     const placeholder = child.text_code ? t(child.text_code) : ''
+                    // Parité mobile : chips d'aide au vocabulaire (suggestion_1..n).
+                    const suggestionCodes = collectIndexed(child.props, 'suggestion')
                     return (
-                      <div key={child.id} className="cf-text-input">
-                        <span className="cf-text-input__placeholder">{placeholder}</span>
+                      <div key={child.id} className="cf-field">
+                        <div className="cf-text-input">
+                          <span className="cf-text-input__placeholder">{placeholder}</span>
+                        </div>
+                        {suggestionCodes.length > 0 && (
+                          <div className="cf-suggestions">
+                            {suggestionCodes.map(code => (
+                              <span key={code} className="cf-suggestion" style={{ borderColor: color, color }}>
+                                {t(code)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )
                   }

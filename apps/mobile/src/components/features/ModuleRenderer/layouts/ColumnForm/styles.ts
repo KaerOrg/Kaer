@@ -66,6 +66,10 @@ export const styles = StyleSheet.create({
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
   },
+  // Chips de suggestions (ui/Chip) sous un champ texte — rangée enveloppante.
+  suggestions: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs,
+  },
   // ── Actions de saisie (date rétroactive, « comme d'habitude ») — ui/Button
   // compact aligné à gauche (le primitive porte fond/bordure/radius).
   entryActionBtn: { alignSelf: 'flex-start', minHeight: 0, paddingVertical: spacing.sm },

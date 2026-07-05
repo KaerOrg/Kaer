@@ -6,15 +6,24 @@
 
 Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR), sont l'outil de restructuration cognitive fondateur de la TCC. Leur efficacité est documentée dans de nombreuses méta-analyses (Hofmann et al., 2012 ; Cuijpers et al., 2019) pour la dépression unipolaire, les troubles anxieux, le PTSD et l'insomnie chronique. Recommandées par la HAS, le NICE et l'APA.
 
-**Version implémentée : 5 colonnes (standard)**
+**Version implémentée : 6 colonnes (standard + distorsion optionnelle)**
 
 | # | Colonne | Ce que le patient renseigne |
 |---|---|---|
 | 1 | Situation | Contexte déclencheur (qui, quoi, quand, où) |
-| 2 | Émotion(s) | Nom libre + intensité initiale (0–100) |
-| 3 | Pensée automatique | Contenu + conviction initiale (0–100) |
-| 4 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 5 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0–100) |
+| 2 | Émotion(s) | Nom libre + chips d'aide au vocabulaire + intensité initiale (0 à 100) |
+| 3 | Pensée automatique | Contenu + conviction initiale (0 à 100) |
+| 4 | Distorsion cognitive (optionnelle) | Piège de pensée auto-étiqueté par le patient : texte libre + chips des 8 pièges classiques (Burns) |
+| 5 | Réponse rationnelle | Pensée alternative construite par le patient |
+| 6 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0 à 100) |
+
+**Saisie assistée (2026-07)** : les colonnes Émotion et Distorsion portent des
+chips de suggestions (`suggestion_1..n` sur le `column_text_field`, codes i18n
+en seed). Une chip ajoute/retire son mot dans le champ ; le texte libre reste
+roi. Conformité MDR : auto-étiquetage par le patient, aucune détection ni
+suggestion conditionnelle aux données. La liste des pièges est alignée sur les
+fiches psyedu du module `cognitive_distortions` (ressource pédagogique sœur),
+sans couplage technique.
 
 ---
 

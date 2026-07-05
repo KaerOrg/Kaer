@@ -236,7 +236,7 @@ Deux field_types propres :
 |---|---|---|
 | `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, capture en deux temps : `quick_btn_label`, `quick_key_1..n`, `complete_key_1..n`, `to_complete_label` |
 | `column_header` | En-tête de colonne | `color` |
-| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index` |
+| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
 | `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
 
