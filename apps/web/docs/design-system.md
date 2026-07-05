@@ -414,11 +414,17 @@ d'actions + contenu. Base de la plupart des panneaux.
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `header` | `CardHeader` | — | `{ title, subtitle?, icon?, right? }` |
-| `actions` | `ReactNode` | — | Zone d'actions (bas de carte) |
+| `footer` | `ReactNode` | — | Section rendue **entre le body et les actions**, dans le flux (ex. rangée de chips) |
+| `actions` | `ReactNode` | — | Zone d'actions (bas de carte, en position absolue) |
 | `variant` | `'default' \| 'outlined' \| 'elevated'` | `'default'` | Style de bordure/ombre |
 | `state` | `'active' \| 'disabled'` | — | État visuel |
-| `children` | `ReactNode` | — | Contenu |
+| `children` | `ReactNode` | — | Contenu (body) |
 | `className` | `string` | — | Classe additionnelle |
+
+> Ordre de rendu : `header` → `children` (body) → `footer` → `actions`. Le `footer`
+> (`.card__footer`, flex + wrap) sert de rangée en bas de body ; les cartes de
+> l'armoire module y placent leurs chips de tags / `ScaleMetaBadges` et remontent la
+> description du module dans le body (au lieu du `header.subtitle`).
 
 ### `Modal`
 
@@ -1030,6 +1036,43 @@ config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 | `year` / `month` | `number` | Mois affiché (month 1-12) — formatage des dates du tooltip |
 | `locale` | `string` | Locale i18n pour le formatage des dates |
 | `xAxisLabel` / `yAxisLabel` | `string?` | Titres d'axes déjà traduits (« Jour du mois » / « Heure ») — fournis par l'appelant pour garder le composant générique |
+
+---
+
+## Rangée d'actions des cartes module — `ModuleCardFooter` (armoire patient)
+
+Fichiers : `pages/PatientPage/tabs/ModuleCardFooter.tsx` (point d'entrée) +
+`Module{Preview,Data,Notif,Config}Button.tsx` (boutons unitaires).
+
+> **`ModuleCardFooter` est la source unique de la rangée d'actions (`actions` de la
+> `Card`) de toutes les cartes de l'armoire module** — le render générique de
+> `PatientModulesTab` **et** les cartes spécialisées `ChronobiologyCard` /
+> `MedicationAdherenceCard` / `MedicationSideEffectsCard`. Il impose un **ordre
+> canonique unique** : cloche → configuration (roue crantée) → aperçu → données →
+> actions spécifiques (`extra`). Chaque bouton n'est rendu **que si son handler est
+> fourni**. Ne **jamais** réassembler la rangée à la main (`<>…</>` de boutons) ni
+> réécrire un `<Button>`/`<button>` d'action dans une carte : c'est une régression
+> (ordre qui diverge, habillage incohérent).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `onConfigureNotif` | `() => void` | Rend la cloche « Configurer les rappels » |
+| `configLabel` | `string` | Libellé de la roue crantée (varie par module) |
+| `onConfigure` | `() => void` | Rend la roue crantée (avec `configLabel`) |
+| `previewOpen` / `onTogglePreview` | `boolean` / `() => void` | Rend l'œil « Aperçu » (`aria-pressed` = `previewOpen`) |
+| `dataOpen` / `onToggleData` | `boolean` / `() => void` | Rend la courbe « Données » (`aria-pressed` = `dataOpen`) |
+| `extra` | `ReactNode` | Actions bespoke rendues en fin de rangée (ex. « Débloquer des fiches ») |
+
+Chaque bouton unitaire est une **icône seule** (`ui/Button variant="outline"
+size="xs"`) enveloppée d'un `ui/Tooltip` ; le libellé est porté par le tooltip **et**
+l'`aria-label` (accessibilité) :
+
+| Composant | Icône | Libellé (tooltip + aria-label) |
+|---|---|---|
+| `ModulePreviewButton` | `Eye` / `EyeOff` | `patient.preview_button` |
+| `ModuleDataButton` | `LineChart` | `patient.data_button` |
+| `ModuleNotifButton` | `Bell` | `notifications.configure_button` |
+| `ModuleConfigButton` | `Settings` (roue crantée) | libellé **fourni** par l'appelant (varie par module) |
 
 ---
 

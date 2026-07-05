@@ -6,7 +6,6 @@ vi.mock('../lib/supabase', () => ({ supabase: { from: (...a: unknown[]) => mockF
 import {
   fetchCrisisPlanConfig,
   saveCrisisPlanConfig,
-  clearCrisisPlanConfigCache,
 } from './crisisPlanService'
 
 function makeChain(result: { data?: unknown; error?: unknown }) {
@@ -22,7 +21,6 @@ function makeChain(result: { data?: unknown; error?: unknown }) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  clearCrisisPlanConfigCache()
 })
 
 describe('fetchCrisisPlanConfig', () => {
@@ -47,16 +45,16 @@ describe('fetchCrisisPlanConfig', () => {
     expect(cfg.commitmentPhrase).toBe('')
   })
 
-  it('utilise le cache au deuxième appel', async () => {
+  it('requête à chaque appel — la déduplication est déléguée à React Query', async () => {
     mockFrom
-      .mockReturnValueOnce(makeChain({ data: { practitioner_message: 'Cached', commitment_phrase: '' } }))
+      .mockReturnValueOnce(makeChain({ data: { practitioner_message: 'A', commitment_phrase: '' } }))
+      .mockReturnValueOnce(makeChain({ data: [] }))
+      .mockReturnValueOnce(makeChain({ data: { practitioner_message: 'A', commitment_phrase: '' } }))
       .mockReturnValueOnce(makeChain({ data: [] }))
     await fetchCrisisPlanConfig('patient-3')
-    // Second call — should not hit mockFrom again
-    const cfg = await fetchCrisisPlanConfig('patient-3')
-    expect(cfg.practitionerMessage).toBe('Cached')
-    // mockFrom called only twice (for the first fetch, never for the second)
-    expect(mockFrom).toHaveBeenCalledTimes(2)
+    await fetchCrisisPlanConfig('patient-3')
+    // 2 requêtes Supabase par appel (config + cards) × 2 appels = 4 (aucun cache service).
+    expect(mockFrom).toHaveBeenCalledTimes(4)
   })
 })
 

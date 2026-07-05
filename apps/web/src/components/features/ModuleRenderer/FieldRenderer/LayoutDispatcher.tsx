@@ -103,7 +103,10 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
     )
   }
 
-  if (preview_kind === 'fields') {
+  // `breathing_pacer` : côté patient mobile, un layout interactif (liste de
+  // techniques + exercice animé). Côté praticien web, seul l'aperçu descriptif a
+  // du sens — on rend les `field_row` comme le layout `fields`.
+  if (preview_kind === 'fields' || preview_kind === 'breathing_pacer') {
     const fieldRows = contentFields.filter(f => f.field_type === 'field_row')
     return <FieldsLayout fields={fieldRows} footer={footer} t={t} />
   }

@@ -111,4 +111,12 @@ export const engagementQueries = {
         return summary.count === 0 ? { status: 'empty' } : { status: 'summary', summary }
       },
     }),
+
+  // Préfixes de clés dérivées de `patient_entries` pour UN patient — à invalider
+  // quand une entrée de ce patient change (Realtime #103). Prefix match : couvre
+  // l'évolution ET toutes les cards `moduleData` (tous modules/kinds) du patient.
+  patientDataKeys: (patientId: string): readonly (readonly string[])[] => [
+    ['engagement', 'evolution', patientId],
+    ['engagement', 'moduleData', patientId],
+  ],
 }

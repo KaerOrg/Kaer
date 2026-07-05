@@ -31,12 +31,20 @@ Proposer au patient un guide animé pour 5 techniques de respiration validées, 
 
 ## Architecture technique
 
-### Écrans
+### Rendu (moteur générique, issue #19)
 
-| Écran | Route | Rôle |
-|---|---|---|
-| `BreathingTechniquesScreen` | `BreathingTechniques` | Liste des 5 techniques avec description, niveau de preuve, historique de sessions |
-| `BreathingExerciseScreen` | `BreathingExercise` | Guide animé : cercle respiratoire, barre de phases, compteurs cycles/durée |
+Le module n'a plus d'écran custom : il passe par le moteur générique via
+`preview_kind = 'breathing_pacer'` (`ModuleContentScreen` → `FieldRenderer` →
+`BreathingPacerLayout`).
+
+| Composant | Rôle |
+|---|---|
+| `layouts/BreathingPacer/BreathingPacerLayout` | Liste des 5 techniques (config lue des fields) + historique de sessions ; ouvre le lecteur en modale |
+| `layouts/BreathingPacer/BreathingExercisePlayer` | Lecteur animé (modale) : cercle respiratoire, barre de phases, compteurs cycles/durée |
+| `layouts/BreathingPacer/{TechniqueCard,BreathCircle,PhaseBar}` | Primitives présentationnelles du layout |
+
+Côté web praticien, `breathing_pacer` rend l'aperçu descriptif (`field_row`) via
+`FieldsLayout` : le praticien n'exécute pas l'exercice.
 
 ### Stockage
 
@@ -61,9 +69,10 @@ La définition des 5 techniques (couleur, durée recommandée, séquence de phas
 - **`field_props`** (atomiques) :
   - technique → `technique_key`, `color` (hex), `recommended_duration_min`
   - phase → `phase_type` (`inhale`|`hold_in`|`exhale`|`hold_out`), `phase_seconds`
-- **Lecture mobile** : `breathingService.fetchBreathingTechniques()` appelle
-  `fetchModuleFields('breathing_techniques')` (cache mémoire) et mappe les fields
-  en `BreathingTechnique[]`.
+- **Lecture mobile** : le layout `breathing_pacer` reçoit déjà les fields et les
+  convertit via `breathingService.techniquesFromFields()` (helper pur) ;
+  `breathingService.fetchBreathingTechniques()` réutilise ce même helper après
+  `fetchModuleFields('breathing_techniques')` (cache mémoire).
 
 Les libellés (nom, sous-titre, description, niveau de preuve, label de phase) restent
 en i18n bundlé : `modules.breathing_techniques.<key>_name` / `_subtitle` /
@@ -83,13 +92,11 @@ en commentaire d'en-tête du bloc seed.
 | Fichier | Rôle |
 |---|---|
 | `supabase/seed.sql` | Config des techniques (`breathing_technique`/`breathing_phase` + `field_props`) |
-| `apps/mobile/src/services/breathingService.ts` | Lecture config (`fetchBreathingTechniques`) + sessions + sync |
+| `apps/mobile/src/services/breathingService.ts` | Lecture config (`techniquesFromFields` / `fetchBreathingTechniques`) + sessions + sync |
 | `apps/mobile/src/lib/database.ts` | Table + CRUD `breathing_sessions` |
-| `apps/mobile/src/screens/modules/BreathingTechniquesScreen/` | Écran liste + test |
-| `apps/mobile/src/screens/modules/BreathingExerciseScreen/` | Guide animé + test |
+| `apps/mobile/src/components/features/ModuleRenderer/layouts/BreathingPacer/` | Layout `breathing_pacer` : liste + lecteur animé + primitives + tests |
 | `apps/mobile/src/services/breathingService.test.ts` | Tests service (save, fetch, parsing) |
-| `apps/mobile/src/navigation/AppStack.tsx` | Routes `BreathingTechniques` + `BreathingExercise` |
-| `apps/web/src/lib/modulePreviewContent.ts` | Aperçu praticien |
+| `apps/web/src/components/features/ModuleRenderer/FieldRenderer/LayoutDispatcher.tsx` | Aperçu praticien web (`breathing_pacer` → `FieldsLayout`) |
 
 ---
 
@@ -97,21 +104,20 @@ en commentaire d'en-tête du bloc seed.
 
 ```bash
 cd apps/mobile
-npx jest BreathingTechniquesScreen.test.tsx
+npx jest BreathingPacer
 ```
 
 ---
 
 ## Checklist de livraison
 
-- [x] Web : aperçu praticien dans `MODULE_PREVIEW`
+- [x] Web : aperçu praticien via `breathing_pacer` → `FieldsLayout` (`field_row`)
 - [x] Config-first : 5 techniques en base (`module_content_fields` / `field_props`)
-- [x] Mobile : `breathingService.fetchBreathingTechniques()` lit la config depuis la base
-- [x] Mobile : `BreathingTechniquesScreen` — liste + historique
-- [x] Mobile : `BreathingExerciseScreen` — guide animé avec cercle, phases, compteurs
+- [x] Mobile : `techniquesFromFields()` convertit les fields en techniques
+- [x] Mobile : `BreathingPacerLayout` : liste + historique
+- [x] Mobile : `BreathingExercisePlayer` : guide animé (modale) avec cercle, phases, compteurs
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
-- [x] Mobile : routes `BreathingTechniques` + `BreathingExercise` dans `AppStack.tsx`
-- [x] Mobile : `available: true` + navigation dans `HomeScreen.tsx`
+- [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom
 - [x] i18n : clés `fr`/`en` en `common` + `teen`
-- [x] Tests : service + 2 écrans
+- [x] Tests : service + layout + lecteur
 - [x] Conformité MDR : rythme fixe, pas de biofeedback, aucune interprétation

@@ -55,12 +55,12 @@ describe('ChronobiologyCard', () => {
 
   it('déclenche onToggleData au clic sur « Données »', () => {
     const { onToggleData } = renderCard()
-    fireEvent.click(screen.getByText('patient.data_button'))
+    fireEvent.click(screen.getByRole('button', { name: 'patient.data_button' }))
     expect(onToggleData).toHaveBeenCalledWith('chronobiology_tracker')
   })
 
   it('n’affiche pas les actions si le module n’est pas débloqué', () => {
     renderCard({ unlocked: false, mod: undefined })
-    expect(screen.queryByText('patient.data_button')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'patient.data_button' })).toBeNull()
   })
 })

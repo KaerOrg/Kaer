@@ -52,7 +52,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('grounding',               'cognitive',   'coming_soon', 15, false),
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
-  ('breathing_techniques',    'anxiety',     'fields',      19, false),
+  ('breathing_techniques',    'anxiety',     'breathing_pacer', 19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),
@@ -2729,3 +2729,17 @@ update public.practitioners
    'guillaume.zarb@gmail.com',
    'teil.olivier@gmail.com'
  );
+
+
+-- ============================================================
+-- Version de la config — bump du jeton (ETag applicatif)
+-- ============================================================
+-- DOIT rester en TOUTE FIN de seed : toute modification de contenu de config
+-- ci-dessus (module_content_fields, field_props, psyedu_*, échelles…) se traduit
+-- par un nouveau jeton, ce qui invalide le cache React Query du web SANS
+-- redéploiement front. Le changement de valeur à chaque exécution est VOULU
+-- (un re-seed = du contenu a potentiellement changé). Ne PAS déplacer plus haut.
+update public.app_config_meta
+   set config_version = now()::text,
+       updated_at     = now()
+ where singleton;

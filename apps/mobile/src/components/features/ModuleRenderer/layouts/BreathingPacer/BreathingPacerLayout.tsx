@@ -1,54 +1,59 @@
-import React, { useCallback, useMemo, useState } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import {
-  fetchBreathingTechniques,
-  fetchBreathingSessions,
-  type BreathingTechnique,
-  type BreathingSession,
-} from '@services/breathingService'
-import { AppStackParamList } from '../../../navigation/AppStack'
-import { colors, spacing, radius } from '@theme'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { View, Text, StyleSheet, ScrollView, Modal } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { useTeen } from '../../../hooks/useTeen'
-import { TeenAccent } from '../../../components/features/TeenAccent'
+import {
+  fetchBreathingSessions,
+  techniquesFromFields,
+  type BreathingSession,
+  type BreathingTechnique,
+} from '@services/breathingService'
+import type { ContentField } from '@services/moduleService'
+import { colors, spacing, radius } from '@theme'
+import { useTeen } from '../../../../../hooks/useTeen'
 import { TechniqueCard } from './TechniqueCard'
+import { BreathingExercisePlayer } from './BreathingExercisePlayer'
 
-type Nav = NativeStackNavigationProp<AppStackParamList>
+export interface BreathingPacerLayoutProps {
+  fields: ContentField[]
+  moduleId: string
+}
 
-export default function BreathingTechniquesScreen() {
+/**
+ * Layout `breathing_pacer` (patient mobile) : liste des techniques de respiration
+ * (config lue depuis les fields) + historique des sessions, chaque carte ouvrant
+ * le lecteur d'exercice animé dans une modale. Remplace les anciens écrans custom
+ * `BreathingTechniquesScreen` / `BreathingExerciseScreen` (issue #19).
+ */
+export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutProps) {
   const { t } = useTranslation()
-  const { tt, teenColor } = useTeen()
-  const navigation = useNavigation<Nav>()
-  const [sessions, setSessions] = useState<BreathingSession[]>([])
-  const [techniques, setTechniques] = useState<BreathingTechnique[]>([])
-  const [loading, setLoading] = useState(true)
+  const { tt } = useTeen()
 
-  useFocusEffect(
-    useCallback(() => {
-      Promise.all([fetchBreathingTechniques(), fetchBreathingSessions()])
-        .then(([techs, data]) => {
-          setTechniques(techs)
-          setSessions(data)
-          setLoading(false)
-        })
-        .catch(() => setLoading(false))
-    }, [])
-  )
+  const techniques = useMemo(() => techniquesFromFields(fields), [fields])
+  const [sessions, setSessions] = useState<BreathingSession[]>([])
+  const [activeTechnique, setActiveTechnique] = useState<BreathingTechnique | null>(null)
+
+  const loadSessions = useCallback(() => {
+    fetchBreathingSessions()
+      .then(setSessions)
+      .catch(() => setSessions([]))
+  }, [])
+
+  useEffect(() => { loadSessions() }, [loadSessions])
 
   // Callback stable : la carte reçoit la clé et le rappelle, pas de lambda par carte.
   const handleOpen = useCallback(
-    (techniqueKey: string) => navigation.navigate('BreathingExercise', { techniqueKey }),
-    [navigation]
+    (techniqueKey: string) => {
+      const found = techniques.find((tech) => tech.key === techniqueKey)
+      if (found) setActiveTechnique(found)
+    },
+    [techniques]
   )
+
+  // Ferme le lecteur ; si une session a été enregistrée, rafraîchit l'historique.
+  const handleCloseExercise = useCallback((saved: boolean) => {
+    setActiveTechnique(null)
+    if (saved) loadSessions()
+  }, [loadSessions])
 
   // Nombre de sessions par technique (lookup O(1), recalculé quand les sessions changent).
   const sessionCountByKey = useMemo(() => {
@@ -57,32 +62,24 @@ export default function BreathingTechniquesScreen() {
     return counts
   }, [sessions])
 
-  // Lookup O(1) technique par clé pour l'historique
+  // Lookup O(1) technique par clé pour l'historique.
   const techniqueByKey = useMemo(
     () => new Map(techniques.map((tech) => [tech.key, tech])),
     [techniques]
   )
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator color={colors.primary} size="large" />
-      </View>
-    )
-  }
+  const intro = tt(moduleId, 'intro') || t(`modules.${moduleId}.intro_guide`)
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <TeenAccent color={teenColor('breathing_techniques')} />
+    <>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.intro}>
-          {tt('breathing_techniques', 'intro') || t('modules.breathing_techniques.intro_guide')}
-        </Text>
+        <Text style={styles.intro}>{intro}</Text>
 
         {techniques.map((technique) => (
           <TechniqueCard
             key={technique.key}
             technique={technique}
+            moduleId={moduleId}
             sessionCount={sessionCountByKey.get(technique.key) ?? 0}
             onOpen={handleOpen}
           />
@@ -91,7 +88,7 @@ export default function BreathingTechniquesScreen() {
         {/* Historique récent */}
         {sessions.length > 0 ? (
           <View style={styles.historySection}>
-            <Text style={styles.historyTitle}>{t('modules.breathing_techniques.recent_sessions')}</Text>
+            <Text style={styles.historyTitle}>{t(`modules.${moduleId}.recent_sessions`)}</Text>
             {sessions.slice(0, 10).map((s) => {
               const tech = techniqueByKey.get(s.technique_key)
               const mins = Math.floor(s.duration_seconds / 60)
@@ -102,7 +99,7 @@ export default function BreathingTechniquesScreen() {
               return (
                 <View key={s.id} style={styles.historyRow}>
                   <View style={[styles.historyDot, { backgroundColor: tech?.color ?? colors.border }]} />
-                  <Text style={styles.historyName}>{tech ? t(`modules.breathing_techniques.${tech.key}_name`) : s.technique_key}</Text>
+                  <Text style={styles.historyName}>{tech ? t(`modules.${moduleId}.${tech.key}_name`) : s.technique_key}</Text>
                   <Text style={styles.historyDuration}>
                     {mins > 0 ? `${mins}min ` : ''}{secs > 0 ? `${secs}s` : ''}
                   </Text>
@@ -113,13 +110,22 @@ export default function BreathingTechniquesScreen() {
           </View>
         ) : null}
       </ScrollView>
-    </SafeAreaView>
+
+      <Modal
+        visible={activeTechnique != null}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={() => handleCloseExercise(false)}
+      >
+        {activeTechnique != null ? (
+          <BreathingExercisePlayer technique={activeTechnique} moduleId={moduleId} onClose={handleCloseExercise} />
+        ) : null}
+      </Modal>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   container: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
 
   intro: { fontSize: 14, color: colors.textMuted, lineHeight: 20 },

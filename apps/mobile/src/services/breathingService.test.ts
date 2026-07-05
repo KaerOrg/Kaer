@@ -19,6 +19,7 @@ import {
   saveBreathingSession,
   fetchBreathingSessions,
   fetchBreathingTechniques,
+  techniquesFromFields,
   getCycleDuration,
 } from './breathingService'
 import type { ContentField } from '@kaer/shared'
@@ -89,7 +90,7 @@ describe('breathingService — fetchBreathingSessions', () => {
 describe('breathingService — fetchBreathingTechniques', () => {
   it('mappe les fields breathing_technique en techniques, phases ordonnées', async () => {
     mockFetchModuleFields.mockResolvedValueOnce({
-      preview_kind: 'fields',
+      preview_kind: 'breathing_pacer',
       fields: [
         makeField({
           id: 'bt.tech.coherence_cardiaque',
@@ -116,7 +117,7 @@ describe('breathingService — fetchBreathingTechniques', () => {
 
   it('ignore les fields qui ne sont pas des techniques', async () => {
     mockFetchModuleFields.mockResolvedValueOnce({
-      preview_kind: 'fields',
+      preview_kind: 'breathing_pacer',
       fields: [
         makeField({ id: 'bt.label', field_type: 'module_label' }),
         makeField({ id: 'bt.field_1', field_type: 'field_row' }),
@@ -135,6 +136,34 @@ describe('breathingService — fetchBreathingTechniques', () => {
   it('retourne [] quand le module n\'a aucun field', async () => {
     mockFetchModuleFields.mockResolvedValueOnce({ preview_kind: 'fields', fields: [] })
     expect(await fetchBreathingTechniques()).toEqual([])
+  })
+})
+
+describe('breathingService — techniquesFromFields', () => {
+  it('convertit les fields breathing_technique en techniques (phases ordonnées)', () => {
+    const techs = techniquesFromFields([
+      makeField({ id: 'bt.label', field_type: 'module_label' }),
+      makeField({
+        id: 'bt.tech.carree',
+        props: { technique_key: 'carree', color: '#D97706', recommended_duration_min: '4' },
+        children: [phase('exhale', 4, 2), phase('inhale', 4, 1)],
+      }),
+    ])
+    expect(techs).toEqual([
+      {
+        key: 'carree',
+        color: '#D97706',
+        recommended_duration_min: 4,
+        phases: [
+          { type: 'inhale', seconds: 4 },
+          { type: 'exhale', seconds: 4 },
+        ],
+      },
+    ])
+  })
+
+  it('retourne [] sans field de technique', () => {
+    expect(techniquesFromFields([makeField({ field_type: 'field_row' })])).toEqual([])
   })
 })
 

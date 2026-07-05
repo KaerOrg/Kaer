@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, BookOpen, FlaskConical, GitBranch, FileText, Users } from 'lucide-react'
-import type { ModuleSource, ModuleSourceType } from '@kaer/shared'
-import { fetchSourcesByModule } from '@services/moduleSourcesService'
+import type { ModuleSourceType } from '@kaer/shared'
+import { moduleSourcesQueries } from '../../../hooks/queries'
 import './ModuleSourcesPanel.css'
 
 interface Props {
@@ -20,24 +20,13 @@ const SOURCE_ICONS: Record<ModuleSourceType, React.ComponentType<{ size: number 
 
 export function ModuleSourcesPanel({ moduleId }: Props) {
   const { t } = useTranslation()
-  const [sources, setSources] = useState<ModuleSource[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const { data: sources = [], isLoading, isError } = useQuery(moduleSourcesQueries.byModule(moduleId))
 
-  useEffect(() => {
-    setLoading(true)
-    setError(false)
-    fetchSourcesByModule(moduleId)
-      .then(setSources)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false))
-  }, [moduleId])
-
-  if (loading) {
+  if (isLoading) {
     return <div className="sources-panel__empty">{t('common.loading')}</div>
   }
 
-  if (error || sources.length === 0) {
+  if (isError || sources.length === 0) {
     return <div className="sources-panel__empty">{t('patient.sources_empty')}</div>
   }
 

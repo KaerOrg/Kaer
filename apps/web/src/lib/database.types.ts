@@ -3,6 +3,26 @@ export type ModuleType = string
 export interface Database {
   public: {
     Tables: {
+      app_config_meta: {
+        // Jeton de version de la config quasi-statique (ETag applicatif) — voir
+        // configVersionService. Table singleton : une seule ligne.
+        Row: {
+          singleton: boolean
+          config_version: string
+          updated_at: string
+        }
+        Insert: {
+          singleton?: boolean
+          config_version?: string
+          updated_at?: string
+        }
+        // Aucune écriture cliente : le bump se fait via le seed / service_role.
+        Update: {
+          config_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       practitioners: {
         Row: {
           id: string

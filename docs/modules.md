@@ -25,7 +25,7 @@
 | `motivational_balance` | Balance motivationnelle (EM) | `tabbed` | SQLite `em_rulers`, `em_balance_items`, `em_values` | [doc](modules/motivational_balance.md) |
 | `medication_adherence` | Observance médicamenteuse | `medication_tracker` | SQLite `daily_entries` + `medication_intakes` ; liste molécules dans `patient_modules.config.medications` | [doc](modules/medication_adherence.md) |
 | `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
-| `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
+| `breathing_techniques` | Techniques de respiration | `breathing_pacer` | SQLite local | [doc](modules/breathing_techniques.md) |
 | `psychoeducation` | Psychoéducation (bibliothèque) | `psyedu_library` | Fiches `psyedu_topics` (par thème) débloquées via `patient_modules.config.unlocked_topics`. Inclut les fiches médicaments/poids (thème « Mon traitement ») et hygiène de vie, anciennement le module `diet_weight_psycho` retiré. | [doc](modules/psychoeducation.md) |
 | `chronobiology_tracker` | Rythmes & régularité | `tabbed` (Journal + Mois) | SQLite `chrono_entries` (offline-first) | [doc](modules/chronobiology_tracker.md) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Comprendre `psyedu` + Agir en crise `crisis_companion`) | Supabase `psyedu_topics`/`psyedu_blocks` ; onglet « Agir en crise » sans stockage | [doc](modules/distress_tolerance.md) |

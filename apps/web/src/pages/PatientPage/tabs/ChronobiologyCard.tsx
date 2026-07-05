@@ -1,10 +1,8 @@
 import { useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell, Eye, EyeOff, LineChart } from 'lucide-react'
-import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { Tooltip } from '../../../components/ui/Tooltip'
 import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
+import { ModuleCardFooter } from './ModuleCardFooter'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '@services/moduleCatalogService'
 import { ModuleDataPanel } from './ModuleDataPanel'
@@ -80,46 +78,20 @@ export function ChronobiologyCard({
         header={{
           icon: modIcon,
           title: t('modules.chronobiology_tracker.label'),
-          subtitle: t('modules.chronobiology_tracker.description'),
           right: moduleToggle(unlocked, loading, handleToggle),
         }}
+        footer={tagChips}
         actions={unlocked && mod ? (
-          <>
-            <Tooltip label={t('notifications.configure_button')}>
-              <Button
-                variant="outline"
-                size="xs"
-                icon={<Bell size={14} />}
-                aria-label={t('notifications.configure_button')}
-                onClick={handleNotif}
-              />
-            </Tooltip>
-            <Tooltip label={t('patient.patient_view')}>
-              <Button
-                variant="outline"
-                size="xs"
-                aria-pressed={previewOpen}
-                icon={previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
-                onClick={handlePreviewToggle}
-              >
-                {t('patient.preview_button')}
-              </Button>
-            </Tooltip>
-            <Tooltip label={t('patient.data_button')}>
-              <Button
-                variant="outline"
-                size="xs"
-                aria-pressed={dataOpen}
-                icon={<LineChart size={14} />}
-                onClick={handleDataToggle}
-              >
-                {t('patient.data_button')}
-              </Button>
-            </Tooltip>
-          </>
+          <ModuleCardFooter
+            onConfigureNotif={handleNotif}
+            previewOpen={previewOpen}
+            onTogglePreview={handlePreviewToggle}
+            dataOpen={dataOpen}
+            onToggleData={handleDataToggle}
+          />
         ) : undefined}
       >
-        {tagChips}
+        <p className="module-card__description">{t('modules.chronobiology_tracker.description')}</p>
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
