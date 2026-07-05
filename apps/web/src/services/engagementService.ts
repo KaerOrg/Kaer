@@ -21,6 +21,10 @@ export type MedEffectPoint = { date: string; [key: string]: number | string }
 // saisies par le patient (textes libres et curseurs). Aucune interprétation (MDR).
 export type FormEntryRow = { date: string; values: Record<string, string | number> }
 
+// Colonnes de Beck : intensité de l'émotion de départ avant / après
+// restructuration (même émotion ré-évaluée — mesure canonique du DTR).
+export type BeckPoint = { date: string; intensity_before?: number; intensity_after?: number }
+
 // Résumé brut d'un module pour la card praticien : date et payload de la
 // dernière saisie + nombre total d'entrées. Aucune interprétation (MDR).
 export type ModuleSummary = {
@@ -340,6 +344,24 @@ export async function fetchFormEntries(
     entries.push({ date: row.client_created_at, values })
   }
   return entries
+}
+
+// ── Évolution des colonnes de Beck (intensité avant/après restructuration) ───
+
+export async function fetchBeckEvolution(patientId: string): Promise<BeckPoint[]> {
+  const entries = await fetchFormEntries(patientId, 'beck_columns')
+  const points: BeckPoint[] = []
+  for (const entry of entries) {
+    const before = toNumber(entry.values['emotion_intensity'])
+    const after = toNumber(entry.values['outcome_intensity'])
+    if (before == null && after == null) continue
+    points.push({
+      date: entry.date,
+      ...(before != null ? { intensity_before: before } : {}),
+      ...(after != null ? { intensity_after: after } : {}),
+    })
+  }
+  return points
 }
 
 // ── Liste des échelles disponibles pour ce patient ───────────────────────────

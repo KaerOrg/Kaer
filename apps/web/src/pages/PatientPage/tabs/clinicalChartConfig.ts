@@ -31,3 +31,7 @@ export const MOOD_DIMENSIONS = [
 // Thermomètre de la peur — SUDS avant / après exposition.
 export const FEAR_BEFORE_COLOR = CHART_PALETTE[2]
 export const FEAR_AFTER_COLOR = CHART_PALETTE[1]
+
+// Colonnes de Beck — intensité émotionnelle avant / après restructuration.
+export const BECK_BEFORE_COLOR = CHART_PALETTE[3]
+export const BECK_AFTER_COLOR = CHART_PALETTE[4]

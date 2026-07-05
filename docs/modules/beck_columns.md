@@ -90,6 +90,9 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 
 ### Vue praticien (web)
 
+L'onglet **Évolution** du patient affiche la courbe « intensité émotionnelle
+avant / après restructuration » (`fetchBeckEvolution` : `emotion_intensity` vs
+`outcome_intensity`, même émotion ré-évaluée), aux côtés des SUDS et des échelles.
 Le panneau « Données » de la card Beck (`PatientPage`) restitue les fiches
 synchronisées : courbes brutes de tous les curseurs (`ColumnFormDataPanel`,
 pattern `fear_thermometer`) + fiches complètes antichronologiques paginées.
