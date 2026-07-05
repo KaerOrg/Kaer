@@ -37,4 +37,18 @@ describe('SearchInput', () => {
     render(<SearchInput value="marie" onChange={() => {}} placeholder="Rechercher" />)
     expect(screen.getByRole('searchbox')).toHaveValue('marie')
   })
+
+  it('taille par défaut : pas de modificateur compact', () => {
+    const { container } = render(
+      <SearchInput value="" onChange={() => {}} placeholder="Rechercher" />
+    )
+    expect(container.querySelector('.search-input')).not.toHaveClass('search-input--sm')
+  })
+
+  it('applique le modificateur compact quand compact est vrai', () => {
+    const { container } = render(
+      <SearchInput value="" onChange={() => {}} placeholder="Rechercher" compact />
+    )
+    expect(container.querySelector('.search-input')).toHaveClass('search-input--sm')
+  })
 })

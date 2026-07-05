@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Users } from 'lucide-react'
+import { Users, UserRoundPlus } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
@@ -171,7 +171,7 @@ export function DashboardPage() {
             <h1 className="dashboard__title">{t('dashboard.title')}</h1>
             <p className="dashboard__subtitle">{patientSubtitle}</p>
           </div>
-          <Button onClick={openInviteForm}>
+          <Button onClick={openInviteForm} icon={<UserRoundPlus size={18} />}>
             {t('dashboard.invite_button')}
           </Button>
         </div>
