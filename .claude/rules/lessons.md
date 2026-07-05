@@ -367,6 +367,35 @@ structure dans du texte.
 
 ---
 
+## Mode ado : registre (tutoiement ≠ familiarité)
+
+> Règle source : [coding-standards.md § Mode ado (teen) — règle d'or](coding-standards.md#mode-ado-teen--règle-dor).
+
+**colonne-beck-reflexion (2026-07-05) — le teen a glissé vers le langage familier.**
+Les variantes teen du module Beck ont été écrites en registre relâché, corrigées
+**trois fois de suite** par l'utilisateur (perte de temps explicitement signalée) :
+
+```json
+// ❌ familier — élisions, « pote », « vite fait », questions sans inversion
+"entry_col_3_belief": "T'y croyais à quel point ?"
+"quick_capture": "Note vite fait"
+"entry_col_evidence_against_hint": "… Tu dirais quoi à un pote dans la même situation ?"
+"entry_col_distortion_hint": "Tu reconnais un piège de la pensée là-dedans ? (pas obligé)"
+// ✅ tutoiement professionnel — vocabulaire standard, inversion interrogative
+"entry_col_3_belief": "À quel point y croyais-tu ?"
+"quick_capture": "Note rapide"
+"entry_col_evidence_against_hint": "… Que dirais-tu à un ami dans la même situation ?"
+"entry_col_distortion_hint": "Reconnais-tu un piège de la pensée ? (facultatif)"
+```
+
+→ Le mode ado est du **tutoiement professionnel** : vocabulaire simple, phrases
+courtes, jamais de mots familiers ni d'élisions orales. Vaut aussi pour l'anglais
+(« in the same spot », « no pressure », « jot it down » → registre neutre).
+Réflexe review sur tout ajout à `teen.json` :
+`grep -inE "pote|vite fait|là-dedans|pas oblig|t'y |t'étais|no pressure|jot it" apps/mobile/src/i18n/locales/*/teen.json` doit rester vide.
+
+---
+
 ## Internationalisation : texte en dur
 
 > Règle source : [coding-standards.md § Internationalisation](coding-standards.md#internationalisation--zéro-texte-hardcodé).

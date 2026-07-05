@@ -650,6 +650,22 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
 
+> **Registre ado = tutoiement + vocabulaire simple, JAMAIS de familiarité.**
+> L'app reste un outil de soin professionnel, y compris pour les adolescents. Le
+> teen se distingue du common par le tutoiement et des phrases plus courtes ou
+> concrètes, pas par le relâchement du langage.
+>
+> **Interdits** : mots familiers (« pote », « vite fait », « direct », « là-dedans »,
+> « pas obligé » ; en anglais « in the same spot », « no pressure », « jot it down ») ;
+> élisions orales (« T'y croyais », « T'étais où ») ; questions relâchées sans
+> inversion (« Tu dirais quoi ? », « elle est à combien ? »).
+>
+> **Corrects** : « ami » (pas « pote »), « facultatif » (pas « pas obligé »),
+> inversion interrogative (« Que dirais-tu à un ami dans la même situation ? »,
+> « À quel point y croyais-tu ? », « Où étais-tu ? »).
+>
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
+
 - i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** pour toute clé de module.
 - `de`, `es`, `it`, `pt` n'ont pas de `teen.json` — aucune traduction teen requise pour ces langues.
 - **Le web n'a pas de mode ado** — `teen.json` est mobile uniquement.
