@@ -17,7 +17,13 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 | (5) | Preuves pour la pensée (groupe optionnel `evidence`) | Faits concrets soutenant la pensée |
 | (6) | Preuves contre la pensée (groupe optionnel `evidence`) | Faits contredisant la pensée |
 | 5/7 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 6/8 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0 à 100) |
+| 6/8 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
+
+> Choix clinique (2026-07) : la colonne Résultat ré-évalue la **même** émotion
+> qu'en colonne 2 (protocole Beck/Padesky), ce qui rend `emotion_intensity` et
+> `outcome_intensity` directement comparables dans la courbe praticien. La
+> conviction mesurée est celle dans la pensée **alternative** (variante Padesky),
+> pas la re-cotation de la pensée automatique initiale.
 
 La numérotation affichée est **dynamique** : position parmi les colonnes visibles.
 

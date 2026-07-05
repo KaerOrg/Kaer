@@ -1571,7 +1571,7 @@
       },
       "step_5": {
         "title": "Outcome",
-        "hint": "What emotion now? Intensity (0 à 100)? Belief in the alternative thought (0 à 100)?"
+        "hint": "Re-rate the initial emotion: intensity now (0 to 100), any new emotions, belief in the alternative thought (0 to 100)."
       },
       "footer": "Each record is stored locally on the patient's device. History is accessible at any time."
     },

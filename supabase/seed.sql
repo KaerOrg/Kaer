@@ -476,8 +476,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col_evf.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_for_placeholder',     'beck.col_evidence_for',     'beck.col_evf.h', 37),
   ('beck.col_eva.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_against_placeholder', 'beck.col_evidence_against', 'beck.col_eva.h', 38),
   ('beck.col4.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_4_placeholder', 'beck.col_rational',  'beck.col4.h', 41),
-  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 51),
-  ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 52),
+  -- Résultat : la ré-évaluation de l'émotion de départ (curseur) vient EN PREMIER
+  -- (mesure avant/après du DTR) ; les nouvelles émotions éventuelles ensuite.
+  ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 51),
+  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 52),
   ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
 on conflict (id) do nothing;
 

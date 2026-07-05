@@ -1714,7 +1714,7 @@
       },
       "step_5": {
         "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0 à 100) ? Conviction en la pensée alternative (0 à 100) ?"
+        "hint": "Reprise de l'émotion de départ : intensité maintenant (0 à 100), nouvelles émotions éventuelles, conviction en la pensée alternative (0 à 100)."
       },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
