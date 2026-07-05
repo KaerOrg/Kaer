@@ -117,11 +117,31 @@ const MOCK_ENTRY: database.FormEntry = {
   created_at: '2026-05-05T10:00:00Z',
 }
 
-function renderLayout() {
+// Variante avec capture en deux temps : formulaire réduit + statut « à compléter ».
+const QUICK_CFG = makeField({
+  id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
+  props: {
+    engagement_event_type: 'SAVE_BECK_THOUGHT_RECORD',
+    required_key_1: 'situation', required_key_2: 'automatic_thought',
+    quick_btn_label: 'modules.beck_columns.quick_capture',
+    quick_key_1: 'situation', quick_key_2: 'automatic_thought',
+    complete_key_1: 'rational_response',
+    to_complete_label: 'modules.beck_columns.to_complete',
+  },
+})
+const QUICK_FIELDS: ContentField[] = [QUICK_CFG, ...MOCK_FIELDS.slice(1)]
+
+const COMPLETE_ENTRY: database.FormEntry = {
+  ...MOCK_ENTRY,
+  id: 'entry-2',
+  values: { ...MOCK_ENTRY.values, rational_response: 'une lecture plus nuancée existe' },
+}
+
+function renderLayout(fields: ContentField[] = MOCK_FIELDS) {
   return render(
     <FieldRenderer
       preview_kind="column_form"
-      fields={MOCK_FIELDS}
+      fields={fields}
       moduleId="beck_columns"
     />
   )
@@ -225,5 +245,57 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
       expect(database.deleteFormEntry).toHaveBeenCalledWith('entry-1')
     })
     await waitFor(() => expect(screen.queryByTestId('record-entry-1')).toBeNull())
+  })
+})
+
+describe('FieldRenderer — column_form : capture en deux temps', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('sans config quick_key_*, aucun bouton de capture rapide', async () => {
+    renderLayout()
+    await screen.findByTestId('new-entry')
+    expect(screen.queryByTestId('quick-entry')).toBeNull()
+  })
+
+  it('la capture rapide ne montre que les champs quick (pas de slider)', async () => {
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('quick-entry'))
+
+    expect(await screen.findByTestId('field-situation')).toBeTruthy()
+    expect(screen.getByTestId('field-automatic_thought')).toBeTruthy()
+    expect(screen.queryByTestId('slider-thought_belief')).toBeNull()
+  })
+
+  it('une fiche rapide ne sauvegarde AUCUNE valeur par défaut pour les champs non montrés', async () => {
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('quick-entry'))
+    fireEvent.changeText(screen.getByTestId('field-automatic_thought'), 'je vais tout rater')
+    fireEvent.press(screen.getByTestId('save-entry'))
+
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const saved = (database.saveFormEntry as jest.Mock).mock.calls[0][0] as database.FormEntry
+    expect(saved.values.automatic_thought).toBe('je vais tout rater')
+    expect(saved.values.thought_belief).toBeUndefined()
+  })
+
+  it('une fiche sans réponse rationnelle porte la puce « à compléter »', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY, COMPLETE_ENTRY])
+    renderLayout(QUICK_FIELDS)
+
+    expect(await screen.findByTestId('to-complete-entry-1')).toBeTruthy()
+    expect(screen.queryByTestId('to-complete-entry-2')).toBeNull()
+  })
+
+  it('la puce « à compléter » ouvre l’édition COMPLÈTE de la fiche', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('to-complete-entry-1'))
+
+    // Formulaire complet : valeurs existantes préservées + slider visible.
+    expect(screen.getByDisplayValue('au travail')).toBeTruthy()
+    expect(screen.getByTestId('slider-thought_belief')).toBeTruthy()
   })
 })

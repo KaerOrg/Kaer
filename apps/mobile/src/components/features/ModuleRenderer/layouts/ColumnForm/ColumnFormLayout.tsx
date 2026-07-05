@@ -29,7 +29,9 @@ import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { RatingSelector } from '@ui/RatingSelector'
 import { Button } from '@ui/Button'
+import { Chip } from '@ui/Chip'
 import { ColumnTimeField } from './ColumnTimeField'
+import { isEntryComplete } from './entryCompletion'
 import { styles } from './styles'
 
 const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -70,6 +72,16 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     () => collectIndexed(configField?.props ?? {}, 'required_key'),
     [configField]
   )
+  // Capture en deux temps : `quick_key_*` = champs du formulaire réduit,
+  // `complete_key_*` = champs dont l'absence marque la fiche « à compléter ».
+  const quickKeys = useMemo(
+    () => collectIndexed(configField?.props ?? {}, 'quick_key'),
+    [configField]
+  )
+  const completeKeys = useMemo(
+    () => collectIndexed(configField?.props ?? {}, 'complete_key'),
+    [configField]
+  )
 
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)
   const columns = useMemo<ColumnSpec[]>(() => {
@@ -83,8 +95,18 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     }))
   }, [fields])
 
-  // ── State
-  const [mode, setMode] = useState<'list' | 'entry'>('list')
+  // Colonnes du formulaire réduit : seuls les enfants dont la clé est une
+  // quick_key ; les colonnes vidées disparaissent.
+  const quickColumns = useMemo<ColumnSpec[]>(() => {
+    if (quickKeys.length === 0) return []
+    const keySet = new Set(quickKeys)
+    return columns
+      .map(col => ({ ...col, children: col.children.filter(c => keySet.has(c.props['key'] ?? '')) }))
+      .filter(col => col.children.length > 0)
+  }, [columns, quickKeys])
+
+  // ── State — `quick` = formulaire réduit (capture rapide), `entry` = complet
+  const [mode, setMode] = useState<'list' | 'entry' | 'quick'>('list')
   const [entries, setEntries] = useState<FormEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -103,9 +125,9 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
 
   useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
-  const initialValuesForNew = useCallback((): Record<string, string | number> => {
+  const initialValuesFor = useCallback((cols: ColumnSpec[]): Record<string, string | number> => {
     const init: Record<string, string | number> = {}
-    for (const col of columns) {
+    for (const col of cols) {
       for (const child of col.children) {
         const key = child.props['key']
         if (!key) continue
@@ -119,22 +141,31 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
       }
     }
     return init
-  }, [columns])
+  }, [])
 
   const handleNew = useCallback(() => {
     setEditingId(null)
-    setValues(initialValuesForNew())
+    setValues(initialValuesFor(columns))
     setEntryDate(new Date())
     setMode('entry')
-  }, [initialValuesForNew])
+  }, [initialValuesFor, columns])
+
+  // Capture rapide : n'initialise QUE les champs quick — une fiche rapide ne
+  // sauvegarde aucune valeur par défaut pour les champs non montrés.
+  const handleQuickNew = useCallback(() => {
+    setEditingId(null)
+    setValues(initialValuesFor(quickColumns))
+    setEntryDate(new Date())
+    setMode('quick')
+  }, [initialValuesFor, quickColumns])
 
   const handleEdit = useCallback((entry: FormEntry) => {
-    const merged = { ...initialValuesForNew(), ...entry.values }
+    const merged = { ...initialValuesFor(columns), ...entry.values }
     setEditingId(entry.id)
     setValues(merged)
     setEntryDate(new Date(entry.created_at))
     setMode('entry')
-  }, [initialValuesForNew])
+  }, [initialValuesFor, columns])
 
   // Capture anti-friction : la dernière saisie sert de base au bouton « comme
   // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
@@ -143,13 +174,15 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     return entries.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
   }, [entries])
 
+  // Préremplissage réservé au formulaire complet : en capture rapide il
+  // réinjecterait des valeurs pour des champs non montrés.
   const prefillLabel = lbl('prefill_from_last')
-  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null
+  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null && mode === 'entry'
 
   const handlePrefillFromLast = useCallback(() => {
     if (!lastEntry) return
-    setValues({ ...initialValuesForNew(), ...lastEntry.values })
-  }, [lastEntry, initialValuesForNew])
+    setValues({ ...initialValuesFor(columns), ...lastEntry.values })
+  }, [lastEntry, initialValuesFor, columns])
 
   const handleOpenDatePicker = useCallback(() => setShowDatePicker(true), [])
   const handleDatePicked = useCallback((_: unknown, picked?: Date) => {
@@ -211,8 +244,9 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
-  // ── Mode entry
-  if (mode === 'entry') {
+  // ── Mode entry (complet ou capture rapide)
+  if (mode !== 'list') {
+    const activeColumns = mode === 'quick' ? quickColumns : columns
     return (
       <KeyboardAvoidingView
         style={styles.container}
@@ -253,9 +287,13 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
               testID="prefill-from-last"
             />
           ) : null}
-          {columns.map((col, idx) => {
+          {activeColumns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
-            const stepNumber = col.header.props['step_number'] ?? String(idx + 1)
+            // En capture rapide, renuméroter les étapes visibles (1, 2…) plutôt
+            // que d'exposer les numéros du parcours complet (1, 3…).
+            const stepNumber = mode === 'quick'
+              ? String(idx + 1)
+              : col.header.props['step_number'] ?? String(idx + 1)
             const hintCode = col.header.props['hint_code']
             const titleText = col.header.text_code ? t(col.header.text_code) : ''
             const hintText = hintCode ? t(hintCode) : ''
@@ -364,6 +402,10 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   }
 
   // ── Mode list
+  const quickLabel = lbl('quick_btn_label')
+  const canQuickCapture = quickLabel.length > 0 && quickColumns.length > 0
+  const toCompleteLabel = lbl('to_complete_label')
+  const showCompletion = toCompleteLabel.length > 0 && completeKeys.length > 0
   return (
     <View style={styles.container}>
       <ScrollView
@@ -387,7 +429,18 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
               return (
                 <View key={entry.id} style={styles.recordCard} testID={`record-${entry.id}`}>
                   <View style={styles.recordHeader}>
-                    <Text style={styles.recordDate}>{dateLabel}</Text>
+                    <View style={styles.recordHeaderLeft}>
+                      <Text style={styles.recordDate}>{dateLabel}</Text>
+                      {showCompletion && !isEntryComplete(entry.values, completeKeys) ? (
+                        <Chip
+                          label={toCompleteLabel}
+                          size="sm"
+                          selected
+                          onPress={() => handleEdit(entry)}
+                          testID={`to-complete-${entry.id}`}
+                        />
+                      ) : null}
+                    </View>
                     <View style={styles.recordActions}>
                       <Button
                         variant="ghost"
@@ -465,6 +518,15 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
         )}
       </ScrollView>
       <View style={styles.footer}>
+        {canQuickCapture ? (
+          <Button
+            variant="secondary"
+            label={quickLabel}
+            onPress={handleQuickNew}
+            iconLeft={<MaterialCommunityIcons name="flash-outline" size={20} color={colors.primary} />}
+            testID="quick-entry"
+          />
+        ) : null}
         <Button
           variant="primary"
           style={styles.footerBtnFlex}

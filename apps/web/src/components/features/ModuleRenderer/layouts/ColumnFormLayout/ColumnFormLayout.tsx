@@ -1,4 +1,4 @@
-import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
+import { Clock, Pencil, Plus, Save, Trash2, Zap } from 'lucide-react'
 import { Button } from '../../../../ui/Button'
 import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '@services/moduleService'
@@ -58,6 +58,8 @@ export function ColumnFormLayout({ fields, t }: Props) {
 
   const newBtn = lbl('new_btn_label')
   const saveLabel = lbl('save_label')
+  // Parité mobile : bouton « capture rapide » (formulaire réduit aux quick_key_*).
+  const quickBtn = lbl('quick_btn_label')
 
   const headers = fields
     .filter(f => f.field_type === 'column_header')
@@ -120,10 +122,20 @@ export function ColumnFormLayout({ fields, t }: Props) {
           </article>
         ))}
 
-      {newBtn && (
-        <div className="cf-new-btn">
-          <Plus size={16} />
-          <span>{newBtn}</span>
+      {(newBtn || quickBtn) && (
+        <div className="cf-actions">
+          {quickBtn && (
+            <div className="cf-new-btn cf-new-btn--secondary">
+              <Zap size={16} />
+              <span>{quickBtn}</span>
+            </div>
+          )}
+          {newBtn && (
+            <div className="cf-new-btn">
+              <Plus size={16} />
+              <span>{newBtn}</span>
+            </div>
+          )}
         </div>
       )}
 

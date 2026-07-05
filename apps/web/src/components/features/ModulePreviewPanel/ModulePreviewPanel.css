@@ -1926,8 +1926,14 @@
 
 .cf-record__val { font-size: 11px; color: var(--color-text-muted); font-style: italic; flex-shrink: 0; }
 
-.cf-new-btn {
+.cf-actions {
   align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cf-new-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1938,6 +1944,14 @@
   font-size: 13px;
   font-weight: 600;
   box-shadow: var(--shadow-md);
+}
+
+/* Variante secondaire (capture rapide) : contour, parité avec le bouton mobile. */
+.cf-new-btn--secondary {
+  background: var(--color-bg);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  box-shadow: none;
 }
 
 .cf-entry { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; border-top: 1px dashed var(--color-border); }

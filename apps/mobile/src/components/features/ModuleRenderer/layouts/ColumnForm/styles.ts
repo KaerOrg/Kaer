@@ -29,6 +29,10 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: spacing.xs,
   },
+  // Date + puce « à compléter » (Chip du design system) groupées à gauche.
+  recordHeaderLeft: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1,
+  },
   recordDate:        { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
   recordActions:     { flexDirection: 'row', gap: spacing.sm },
   recordRow:         { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },

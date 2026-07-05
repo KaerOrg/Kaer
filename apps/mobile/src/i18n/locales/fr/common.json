@@ -920,6 +920,8 @@
       "intro": "Appuyez sur le bouton ci-dessous pour noter votre première pensée automatique.",
       "empty_title": "Aucun enregistrement",
       "new_thought": "Nouvelle pensée",
+      "quick_capture": "Noter vite",
+      "to_complete": "À compléter",
       "delete_record_title": "Supprimer cet enregistrement ?",
       "col_situation": "Situation",
       "col_emotion": "Émotion",

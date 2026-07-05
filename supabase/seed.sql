@@ -490,6 +490,13 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'delete_title',          'modules.beck_columns.delete_record_title'),
   ('beck.cfg', 'validation_title',      'modules.beck_columns.empty_alert_title'),
   ('beck.cfg', 'validation_msg',        'modules.beck_columns.empty_alert_msg'),
+  -- Capture en deux temps : formulaire réduit (quick_key_*) ; une fiche sans
+  -- toutes les complete_key_* porte la puce « à compléter » (statut dérivé).
+  ('beck.cfg', 'quick_btn_label',       'modules.beck_columns.quick_capture'),
+  ('beck.cfg', 'quick_key_1',           'situation'),
+  ('beck.cfg', 'quick_key_2',           'automatic_thought'),
+  ('beck.cfg', 'complete_key_1',        'rational_response'),
+  ('beck.cfg', 'to_complete_label',     'modules.beck_columns.to_complete'),
   ('beck.col1.h', 'color',       '#0EA5E9'),
   ('beck.col1.h', 'step_number', '1'),
   ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),

@@ -72,6 +72,28 @@ CREATE TABLE IF NOT EXISTS beck_thought_records (
 
 ---
 
+## Capture en deux temps (mobile)
+
+La friction de saisie est le premier facteur d'abandon des colonnes de Beck : la
+pensée automatique est fugace, le formulaire complet est long. Depuis 2026-07, le
+mode liste propose deux entrées :
+
+- **« Noter vite »** (bouton secondaire) : formulaire réduit aux colonnes
+  Situation + Pensée automatique (`quick_key_1..n` sur `column_form_config`).
+  La fiche sauvegardée ne contient QUE ces valeurs : aucun défaut de curseur
+  n'est écrit, donc aucune fausse donnée dans le graphe praticien.
+- **« Nouvelle pensée »** (bouton principal) : parcours complet 5 colonnes.
+
+Une fiche dont la réponse rationnelle (`complete_key_1`) est vide porte une puce
+« À compléter » (statut **dérivé** des valeurs, jamais stocké ni synchronisé) ;
+appuyer dessus ouvre l'édition complète pour terminer la restructuration, seul
+ou en séance. Conforme MDR : statut de workflow non clinique, aucune notification.
+
+Config seed : `quick_btn_label`, `quick_key_1/2`, `complete_key_1`,
+`to_complete_label` sur `beck.cfg` (voir `docs/module-engine.md` § column_form).
+
+---
+
 ## Vue praticien (web) — panneau « Données »
 
 Depuis 2026-07, le panneau « Données » de la card `beck_columns` (`PatientPage`)

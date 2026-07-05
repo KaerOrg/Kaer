@@ -48,6 +48,8 @@
     "beck_columns": {
       "title": "Untangling my thoughts",
       "intro": "Write down a negative thought and we'll break it down together.",
+      "quick_capture": "Jot it down",
+      "to_complete": "Finish later",
       "col_situation": "What happened",
       "col_emotion": "What I felt",
       "col_thought": "What I thought right away",
