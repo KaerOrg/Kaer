@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { useToast } from '../../../contexts/ToastContext'
 import { fetchBAActivities, updateBAActivities } from '@services/moduleAssignmentService'
-import { fetchModuleFields } from '@services/moduleService'
+import { moduleQueries } from '../../../hooks/queries'
 import type { PatientModule } from '../../../lib/database.types'
 import type { BAConfiguredActivity } from '@kaer/shared'
 
@@ -30,6 +31,8 @@ export interface BAActivityDraft {
 // Éditeur praticien des activités co-construites en consultation (activation
 // comportementale) : domaine de vie + phrase « valeur » avec les mots du patient.
 // Persistées dans patient_modules.config.ba_activities, lues par l'app mobile.
+// Les domaines (config quasi-statique) passent par moduleQueries.fields (#101) ;
+// fetchBAActivities est un amorçage de formulaire one-shot (allowlist du garde-fou).
 export function useBAActivitiesEditor(
   modules: PatientModule[],
   onReloadModules: () => Promise<void>,
@@ -39,23 +42,27 @@ export function useBAActivitiesEditor(
 
   const [open, setOpen] = useState(false)
   const [activities, setActivities] = useState<BAConfiguredActivity[]>([])
-  const [domains, setDomains] = useState<BADomainOption[]>([])
   const [saving, setSaving] = useState(false)
 
   const module = modules.find(m => m.module_type === 'behavioral_activation')
 
-  const openEditor = async () => {
-    if (!module) return
-    const [list, fieldsResult] = await Promise.all([
-      fetchBAActivities(module.id),
-      fetchModuleFields('behavioral_activation'),
-    ])
-    setActivities(list)
-    setDomains(
-      fieldsResult.fields
+  // Catalogue des domaines de vie : cache config partagé, chargé à l'ouverture.
+  const fieldsQuery = useQuery({
+    ...moduleQueries.fields('behavioral_activation'),
+    enabled: open,
+  })
+  const domains = useMemo<BADomainOption[]>(
+    () =>
+      (fieldsQuery.data?.fields ?? [])
         .filter(f => f.field_type === 'activity_log_domain' && f.text_code != null)
         .map(f => ({ id: f.id, textCode: f.text_code as string })),
-    )
+    [fieldsQuery.data],
+  )
+
+  const openEditor = async () => {
+    if (!module) return
+    const list = await fetchBAActivities(module.id)
+    setActivities(list)
     setOpen(true)
   }
 

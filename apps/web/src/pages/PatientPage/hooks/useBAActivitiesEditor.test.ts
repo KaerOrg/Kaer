@@ -14,7 +14,9 @@ vi.mock('@services/moduleService', () => ({
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('../../../contexts/ToastContext', () => ({ useToast: () => ({ error: vi.fn(), success: vi.fn() }) }))
 
+import { createElement, type ReactNode } from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useBAActivitiesEditor } from './useBAActivitiesEditor'
 import type { PatientModule } from '../../../lib/database.types'
 
@@ -41,6 +43,17 @@ const DOMAIN_FIELD = {
   children: [],
 }
 
+// Le hook consomme moduleQueries.fields via useQuery : chaque test rend dans un
+// QueryClientProvider frais (pas de cache partagé entre tests).
+function wrapper({ children }: { children: ReactNode }) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return createElement(QueryClientProvider, { client }, children)
+}
+
+function renderEditor(mods: PatientModule[] = modules) {
+  return renderHook(() => useBAActivitiesEditor(mods, onReload), { wrapper })
+}
+
 describe('useBAActivitiesEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -49,20 +62,22 @@ describe('useBAActivitiesEditor', () => {
     fetchModuleFields.mockResolvedValue({ preview_kind: 'activity_log', fields: [DOMAIN_FIELD] })
   })
 
-  it('openEditor charge activités et domaines depuis les services', async () => {
-    const { result } = renderHook(() => useBAActivitiesEditor(modules, onReload))
+  it('openEditor charge les activités, puis les domaines arrivent via React Query', async () => {
+    const { result } = renderEditor()
+    expect(fetchModuleFields).not.toHaveBeenCalled() // query désactivée tant que fermé
     await act(async () => { await result.current.openEditor() })
     expect(fetchBAActivities).toHaveBeenCalledWith('pm1')
-    expect(fetchModuleFields).toHaveBeenCalledWith('behavioral_activation')
     expect(result.current.open).toBe(true)
     expect(result.current.activities).toEqual([ACTIVITY])
-    expect(result.current.domains).toEqual([
-      { id: 'al.dom_body', textCode: 'modules.behavioral_activation.domain_body' },
-    ])
+    await waitFor(() => {
+      expect(result.current.domains).toEqual([
+        { id: 'al.dom_body', textCode: 'modules.behavioral_activation.domain_body' },
+      ])
+    })
   })
 
   it('addActivity trime, tronque et persiste (value_text vide → null)', async () => {
-    const { result } = renderHook(() => useBAActivitiesEditor(modules, onReload))
+    const { result } = renderEditor()
     await act(async () => { await result.current.openEditor() })
     await act(async () => {
       result.current.addActivity({ label: '  Appel ami  ', domainId: 'al.dom_social', valueText: '   ' })
@@ -77,7 +92,7 @@ describe('useBAActivitiesEditor', () => {
   })
 
   it('addActivity ignore un label vide ou un domaine manquant', async () => {
-    const { result } = renderHook(() => useBAActivitiesEditor(modules, onReload))
+    const { result } = renderEditor()
     await act(async () => { await result.current.openEditor() })
     updateBAActivities.mockClear()
     await act(async () => { result.current.addActivity({ label: '   ', domainId: 'al.dom_body', valueText: '' }) })
@@ -86,14 +101,14 @@ describe('useBAActivitiesEditor', () => {
   })
 
   it('removeActivity retire par id et persiste', async () => {
-    const { result } = renderHook(() => useBAActivitiesEditor(modules, onReload))
+    const { result } = renderEditor()
     await act(async () => { await result.current.openEditor() })
     await act(async () => { result.current.removeActivity('a1') })
     await waitFor(() => expect(updateBAActivities).toHaveBeenLastCalledWith('pm1', []))
   })
 
   it('sans module behavioral_activation, openEditor est un no-op', async () => {
-    const { result } = renderHook(() => useBAActivitiesEditor([], onReload))
+    const { result } = renderEditor([])
     await act(async () => { await result.current.openEditor() })
     expect(fetchBAActivities).not.toHaveBeenCalled()
     expect(result.current.open).toBe(false)
