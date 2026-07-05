@@ -648,7 +648,17 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ### Mode ado (teen) — règle d'or
 
-Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en), **sauf le contenu psychométrique des échelles validées** (voir exception ci-dessous). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+
+> **Exception : fidélité aux échelles cliniques validées.** Le contenu
+> psychométrique d'un instrument validé (consignes `instructions*`, items `q*`,
+> options `opt_*` / `legend_*`, sections, `warning`) n'est **jamais** surchargé
+> dans `teen.json` : on ne « traduit » pas une échelle en tutoiement, on reste
+> fidèle mot pour mot à la version validée en français portée par `common.json`.
+> Le fallback i18next sert cette version au mode ado. Seul l'**habillage
+> applicatif** (hors instrument : `new_btn`, `empty_*`, `footer`, `progress`,
+> `submit`, `chip_*`, `label`, `description`) peut avoir une variante teen.
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
 
 > **Registre ado = tutoiement + vocabulaire simple, JAMAIS de familiarité.**
 > L'app reste un outil de soin professionnel, y compris pour les adolescents. Le
