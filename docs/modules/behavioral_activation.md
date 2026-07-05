@@ -86,6 +86,10 @@ Partout : aucun défaut de valeur, re-taper le pip sélectionné efface la note.
 
 Le praticien définit **avec** le patient des activités personnalisées : libellé + domaine de vie + phrase « pourquoi c'est important » formulée avec les mots du patient (ancrage aux valeurs, BATD-R). Stockage : `patient_modules.config.ba_activities` (même pattern que `medications`). L'app mobile les propose en premier dans le formulaire.
 
+### Suivi dans l'onglet Évolution
+
+L'onglet **Évolution** de la fiche patient intègre une section « Activation comportementale » (même motif que l'agenda du sommeil) : le panneau complet ci-dessous, filtré par le sélecteur de période global (3 mois / 6 mois / 1 an), avec badge « archivé » si le module a été révoqué.
+
 ### Panneau de données (`BehavioralActivationPanel`)
 
 Trois étages, tous alimentés par `patient_entries` et datés par `payload.date` (date métier choisie par le patient, jamais l'horodatage de sync) :
