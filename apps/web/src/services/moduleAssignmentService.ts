@@ -111,6 +111,28 @@ export async function updateRim(
   return { ok: !error }
 }
 
+// ── Groupes de colonnes optionnelles (layout column_form) ─────────────────────
+
+// Active/désactive des groupes de colonnes optionnelles pour ce patient
+// (patient_modules.config.enabled_groups — ex. 'evidence' sur beck_columns).
+// Lecture côté mobile via readEnabledGroups (@kaer/shared).
+export async function updateEnabledGroups(
+  moduleId: string,
+  groups: string[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, enabled_groups: groups },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
 // ── medication_side_effects ───────────────────────────────────────────────────
 
 // Effets suivis configurés pour ce patient (config partagée praticien↔patient,

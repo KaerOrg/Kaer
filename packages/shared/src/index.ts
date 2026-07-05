@@ -8,6 +8,8 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 
+export { readEnabledGroups } from './services/patientModuleConfig'
+
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 

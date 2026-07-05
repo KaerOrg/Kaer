@@ -282,6 +282,8 @@
     "summary_total_score": "Last total score",
     "form_records_title": "Completed records",
     "form_show_more": "Show more entries ({{count}} remaining)",
+    "beck_evidence_toggle": "Evidence review (for / against)",
+    "optional_column_badge": "Optional",
     "psycho_read_count": "{{read}}/{{total}} sheet read",
     "psycho_read_count_plural": "{{read}}/{{total}} sheets read",
     "psycho_pick_unlock": "Choose the sheets to unlock for this patient:",

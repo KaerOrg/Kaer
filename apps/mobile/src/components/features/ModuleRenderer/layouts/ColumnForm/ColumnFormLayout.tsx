@@ -17,7 +17,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
-import { collectIndexed } from '@kaer/shared'
+import { collectIndexed, readEnabledGroups } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
@@ -56,9 +56,11 @@ export interface ColumnFormLayoutProps {
   footer?: ContentField
   /** Identifiant du module — clé de persistance des `form_entries`. */
   moduleId: string
+  /** Config par patient (`patient_modules.config`) — porte `enabled_groups`. */
+  patientConfig?: Record<string, unknown> | null
 }
 
-export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
+export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: ColumnFormLayoutProps) {
   const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -85,16 +87,23 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   )
 
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)
+  // Une colonne portant `optional_group` n'apparaît que si le praticien a activé
+  // ce groupe pour ce patient (patient_modules.config.enabled_groups).
   const columns = useMemo<ColumnSpec[]>(() => {
+    const enabledGroups = readEnabledGroups(patientConfig)
     const headers = fields
       .filter(f => f.field_type === 'column_header' && f.section_id != null)
+      .filter(f => {
+        const group = f.props['optional_group']
+        return !group || enabledGroups.includes(group)
+      })
       .sort((a, b) => a.sort_order - b.sort_order)
     return headers.map(h => ({
       sectionId: h.section_id!,
       header: h,
       children: (h.children ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
     }))
-  }, [fields])
+  }, [fields, patientConfig])
 
   // Colonnes du formulaire réduit : seuls les enfants dont la clé est une
   // quick_key ; les colonnes vidées disparaissent.
@@ -290,11 +299,9 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           ) : null}
           {activeColumns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
-            // En capture rapide, renuméroter les étapes visibles (1, 2…) plutôt
-            // que d'exposer les numéros du parcours complet (1, 3…).
-            const stepNumber = mode === 'quick'
-              ? String(idx + 1)
-              : col.header.props['step_number'] ?? String(idx + 1)
+            // Numérotation dynamique : position parmi les colonnes VISIBLES
+            // (capture rapide et groupes optionnels changent l'ensemble affiché).
+            const stepNumber = String(idx + 1)
             const hintCode = col.header.props['hint_code']
             const titleText = col.header.text_code ? t(col.header.text_code) : ''
             const hintText = hintCode ? t(hintCode) : ''

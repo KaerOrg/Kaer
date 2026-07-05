@@ -144,8 +144,10 @@ export function ColumnFormLayout({ fields, t }: Props) {
       <div className="cf-entry">
         {headers.map((h, idx) => {
           const color = h.props['color'] ?? 'var(--color-primary)'
-          const stepNumber = h.props['step_number'] ?? String(idx + 1)
+          // Numérotation dynamique (parité mobile : position parmi les visibles).
+          const stepNumber = String(idx + 1)
           const hintCode = h.props['hint_code']
+          const isOptional = Boolean(h.props['optional_group'])
           const headerLabel = h.text_code ? t(h.text_code) : ''
           const children = headerChildren(h)
 
@@ -154,7 +156,10 @@ export function ColumnFormLayout({ fields, t }: Props) {
               <div className="cf-column__head">
                 <span className="cf-column__num" style={{ background: color }}>{stepNumber}</span>
                 <div className="cf-column__titles">
-                  <span className="cf-column__title" style={{ color }}>{headerLabel}</span>
+                  <span className="cf-column__title" style={{ color }}>
+                    {headerLabel}
+                    {isOptional && <span className="cf-column__optional">{t('patient.optional_column_badge')}</span>}
+                  </span>
                   {hintCode && <span className="cf-column__hint">{t(hintCode)}</span>}
                 </div>
               </div>

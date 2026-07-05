@@ -156,12 +156,32 @@ const COL1_WITH_SUGGESTIONS = makeField({
 })
 const SUGG_FIELDS: ContentField[] = [MOCK_FIELDS[0], COL1_WITH_SUGGESTIONS, COL3]
 
-function renderLayout(fields: ContentField[] = MOCK_FIELDS) {
+// Colonne optionnelle (groupe « evidence ») — visible seulement si le praticien
+// a activé le groupe dans patient_modules.config.enabled_groups.
+const EVIDENCE_COL = makeField({
+  id: 'beck.col_evf.h', section_id: 'beck.col_evidence_for', sort_order: 37,
+  text_code: 'modules.beck_columns.entry_col_evidence_for_title',
+  props: { color: '#0891B2', optional_group: 'evidence' },
+  children: [
+    makeField({
+      id: 'beck.col_evf.text', section_id: 'beck.col_evidence_for', parent_field_id: 'beck.col_evf.h',
+      field_type: 'column_text_field', sort_order: 37,
+      props: { key: 'evidence_for', multiline: '1' },
+    }),
+  ],
+})
+const FIELDS_WITH_OPTIONAL: ContentField[] = [...MOCK_FIELDS, EVIDENCE_COL]
+
+function renderLayout(
+  fields: ContentField[] = MOCK_FIELDS,
+  patientConfig: Record<string, unknown> | null = null,
+) {
   return render(
     <FieldRenderer
       preview_kind="column_form"
       fields={fields}
       moduleId="beck_columns"
+      patientConfig={patientConfig}
     />
   )
 }
@@ -316,6 +336,38 @@ describe('FieldRenderer — column_form : capture en deux temps', () => {
     // Formulaire complet : valeurs existantes préservées + slider visible.
     expect(screen.getByDisplayValue('au travail')).toBeTruthy()
     expect(screen.getByTestId('slider-thought_belief')).toBeTruthy()
+  })
+})
+
+describe('FieldRenderer — column_form : colonnes optionnelles (optional_group)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('une colonne optional_group est masquée sans activation praticien', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
+    expect(screen.queryByTestId('column-beck.col_evidence_for')).toBeNull()
+    expect(screen.queryByTestId('field-evidence_for')).toBeNull()
+  })
+
+  it('la colonne apparaît quand le groupe est activé dans la config patient', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL, { enabled_groups: ['evidence'] })
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_evidence_for')).toBeTruthy()
+    expect(screen.getByTestId('field-evidence_for')).toBeTruthy()
+  })
+
+  it('une colonne SANS optional_group reste visible quelle que soit la config', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL, { enabled_groups: [] })
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
+    expect(screen.getByTestId('column-beck.col_thought')).toBeTruthy()
   })
 })
 

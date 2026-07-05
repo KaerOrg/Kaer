@@ -17,6 +17,15 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 | 5 | Réponse rationnelle | Pensée alternative construite par le patient |
 | 6 | Résultat | Émotion après réexamen + intensité + conviction en la PA (0 à 100) |
 
+**Examen des preuves, format 7 colonnes de Padesky (2026-07, optionnel)** : deux
+colonnes « Preuves pour la pensée » / « Preuves contre la pensée » (groupe
+`optional_group='evidence'`) s'insèrent entre la distorsion et la réponse
+rationnelle. Masquées par défaut ; le praticien les active **par patient** via la
+bascule « Examen des preuves » de la card Beck
+(`patient_modules.config.enabled_groups`). La numérotation des étapes est
+dynamique (position parmi les colonnes visibles). Référence : Greenberger &
+Padesky, *Mind Over Mood* (examen des preuves avant la pensée alternative).
+
 **Saisie assistée (2026-07)** : les colonnes Émotion et Distorsion portent des
 chips de suggestions (`suggestion_1..n` sur le `column_text_field`, codes i18n
 en seed). Une chip ajoute/retire son mot dans le champ ; le texte libre reste

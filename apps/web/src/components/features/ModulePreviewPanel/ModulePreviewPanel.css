@@ -1956,6 +1956,20 @@
 
 .cf-field { display: flex; flex-direction: column; gap: 6px; }
 
+/* Badge « Option » d'une colonne optionnelle (optional_group) dans l'aperçu. */
+.cf-column__optional {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
 /* Chips d'aide au vocabulaire (parité mobile) — teinte de la colonne. */
 .cf-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
 
