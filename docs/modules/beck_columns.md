@@ -72,6 +72,32 @@ CREATE TABLE IF NOT EXISTS beck_thought_records (
 
 ---
 
+## Vue praticien (web) — panneau « Données »
+
+Depuis 2026-07, le panneau « Données » de la card `beck_columns` (`PatientPage`)
+restitue les fiches synchronisées du patient (après opt-in `share_consent`) :
+
+- **Courbes brutes de tous les curseurs** du module (intensité initiale, conviction
+  dans la pensée automatique, intensité après réexamen, conviction dans la pensée
+  alternative), une série par curseur, libellées par leurs clés i18n. Rendu
+  `ModuleChart` (même pattern que `fear_thermometer`).
+- **Fiches complètes antichronologiques** : chaque colonne renseignée avec ses
+  textes intégraux et ses valeurs de curseurs brutes ; pagination « voir plus »
+  (10 par page).
+
+Circuit : `fetchFormEntries(patientId, moduleId)` (`engagementService`, lit
+`patient_entries` `entry_kind='form_entry'`) → `engagementQueries.moduleData`
+(kind `'form'`) → `ColumnFormDataPanel`. La structure (colonnes, libellés,
+couleurs, curseurs) est dérivée de `module_content_fields` via
+`moduleQueries.fields` — **zéro hardcode Beck** : tout module `column_form`
+routé vers le kind `'form'` hérite du panneau.
+
+Conformité MDR 2017/745 : valeurs brutes uniquement, aucun seuil, label
+interprétatif ni couleur de jugement (les accents de colonne sont la config
+visuelle du module, identique au mobile).
+
+---
+
 ## Navigation mobile
 
 ```

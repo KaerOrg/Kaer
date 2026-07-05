@@ -280,6 +280,8 @@
     "summary_last_entry": "Dernière saisie",
     "summary_count": "Saisies enregistrées",
     "summary_total_score": "Dernier score total",
+    "form_records_title": "Fiches saisies",
+    "form_show_more": "Voir plus de fiches ({{count}} restantes)",
     "psycho_read_count": "{{read}}/{{total}} fiche lue",
     "psycho_read_count_plural": "{{read}}/{{total}} fiches lues",
     "psycho_pick_unlock": "Choisissez les fiches à débloquer pour ce patient :",

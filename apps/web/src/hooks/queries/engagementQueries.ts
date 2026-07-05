@@ -8,17 +8,19 @@ import {
   fetchAvailableScales,
   fetchModuleSummary,
   fetchChronoEntries,
+  fetchFormEntries,
   type ScorePoint,
   type MoodPoint,
   type FearPoint,
   type MedEffectPoint,
   type SleepPoint,
   type ModuleSummary,
+  type FormEntryRow,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep'
+export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep' | 'form'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -31,6 +33,7 @@ export type ModuleDataResult =
   | { status: 'med'; effects: string[]; points: MedEffectPoint[] }
   | { status: 'sleep'; points: SleepPoint[] }
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
+  | { status: 'form'; entries: FormEntryRow[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -89,6 +92,10 @@ export const engagementQueries = {
         if (kind === 'sleep') {
           const points = await fetchSleepEvolution(patientId)
           return points.length === 0 ? { status: 'empty' } : { status: 'sleep', points }
+        }
+        if (kind === 'form') {
+          const entries = await fetchFormEntries(patientId, moduleType)
+          return entries.length === 0 ? { status: 'empty' } : { status: 'form', entries }
         }
         if (moduleType === 'chronobiology_tracker') {
           const entries = await fetchChronoEntries(patientId)
