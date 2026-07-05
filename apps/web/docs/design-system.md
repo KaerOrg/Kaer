@@ -33,9 +33,21 @@ Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 --font-family -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
 --font-size-caption 14px  --font-size-body  16px
 --font-size-h3      18px  --font-size-h2    22px  --font-size-h1  28px
+
+/* Contrôles de formulaire — dimensionnement partagé (InputField, Dropdown, SearchInput) */
+--control-pad-y      10px  --control-pad-x      14px  --control-font-size    15px
+--control-pad-y-sm    7px  --control-pad-x-sm   12px  --control-font-size-sm 14px
+--control-icon-room  22px  /* place d'un ornement (loupe, chevron) au-delà du padding texte */
 ```
 
 Dans le CSS : `color: var(--color-primary)` — jamais de valeur hex directe.
+
+> **Contrôles de formulaire — une seule hauteur, deux tailles.** `InputField`,
+> `Dropdown` et `SearchInput` dérivent **tous** padding et `font-size` des tokens
+> `--control-*` : jamais de padding/taille en dur dans un CSS de composant. Un champ et
+> une liste déroulante côte à côte ont donc la **même hauteur** — variante par défaut
+> (`--control-*`) ou compacte (`--control-*-sm`, prop `compact`). Source unique :
+> `control` dans `theme.ts`.
 
 ---
 
@@ -99,7 +111,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -538,6 +550,12 @@ lecture impérative). Un `className` passé est **fusionné** avec les classes d
 | `onChange` | `(value: string) => void` | Reçoit la nouvelle valeur (pas l'event) |
 | `placeholder` | `string` | Placeholder (obligatoire) |
 | `ariaLabel` | `string` | Label accessibilité |
+| `compact` | `boolean` | Variante réduite, hauteur alignée sur `Dropdown compact`. Défaut `false` = même hauteur qu'un `Dropdown` / `InputField` par défaut |
+
+> **Hauteur cohérente** : `SearchInput`, `Dropdown` et `InputField` partagent les mêmes
+> métriques (tokens `--control-*`, cf. § *Contrôles de formulaire*). Dans une barre de
+> filtres, harmoniser le flag : `SearchInput compact` **avec** `Dropdown compact`, ou les
+> deux par défaut. Ne jamais laisser un `SearchInput` compact à côté d'un `Dropdown` plein.
 
 ### `Dropdown`
 
@@ -1036,6 +1054,55 @@ config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 | `year` / `month` | `number` | Mois affiché (month 1-12) — formatage des dates du tooltip |
 | `locale` | `string` | Locale i18n pour le formatage des dates |
 | `xAxisLabel` / `yAxisLabel` | `string?` | Titres d'axes déjà traduits (« Jour du mois » / « Heure ») — fournis par l'appelant pour garder le composant générique |
+
+---
+
+## Carte de module — `ModuleCard` (shell partagé)
+
+Fichier : `components/features/ModuleCard/ModuleCard.tsx` (+ `ModuleCard.css`).
+
+> **Shell présentationnel unique des cartes de module**, partagé par l'écran
+> Modules (catalogue praticien — enable/disable global) **et** l'armoire
+> thérapeutique (onglet Modules d'un patient — unlock/revoke). Seules la **source**
+> et les **contrôles** diffèrent ; la **forme** est identique : icône + titre +
+> contrôle à droite (`headerRight`), description en tête de body, chips de tags en
+> footer, rangée d'actions collée en bas. Assemble `ui/Card` (classe
+> `module-card-item`). Ne **jamais** réécrire ce shell à la main (`<Card
+> className="module-card-item">` + `<p className="module-card__description">`) dans
+> une page : passer par `ModuleCard`.
+
+Les styles partagés (`.category-modules-grid`, `.module-toggle`,
+`.module-card__description`, barre d'actions `.module-card-item .card__actions`)
+vivent dans `ModuleCard.css` — importé partout où `ModuleCard` est utilisé. Les
+états propres à chaque écran restent locaux : `catalog-card--disabled` /
+`catalog-card--coming-soon` (catalogue), `module-card--unlocked` / `module-card__date`
+(armoire).
+
+```tsx
+<div className="category-modules-grid">
+  <ModuleCard
+    icon={<Icon size={18} />}
+    title={t(`modules.${id}.label`)}
+    description={t(`modules.${id}.description`)}
+    headerRight={<button className="module-toggle"><Toggle checked={on} /></button>}
+    tags={<ModuleTagChips tagIds={...} taxonomy={taxonomy} />}
+    actions={<ModuleCardFooter … />}
+  >
+    {/* body additionnel : date de déverrouillage, panneaux aperçu/données… */}
+  </ModuleCard>
+</div>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `ReactNode` | Icône du module (gauche du titre) |
+| `title` | `string` | Libellé du module |
+| `headerRight` | `ReactNode` | Contrôle à droite du header (toggle, bouton de vue) |
+| `description` | `ReactNode` | Description courte, rendue en tête de body (`.module-card__description`) |
+| `tags` | `ReactNode` | Rangée de chips de tags (footer) |
+| `actions` | `ReactNode` | Rangée d'actions collée en bas (typiquement `ModuleCardFooter`) |
+| `className` | `string` | Classes d'état additionnelles (`module-card-item` toujours ajoutée) |
+| `children` | `ReactNode` | Body additionnel sous la description (date, badges, panneaux) |
 
 ---
 

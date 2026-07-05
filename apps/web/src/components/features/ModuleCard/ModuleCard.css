@@ -1,0 +1,60 @@
+/* ── Grille de cartes module ─────────────────────────────────────────────────
+   Partagée par l'écran Modules (catalogue) et l'armoire thérapeutique (onglet
+   patient). Cartes de largeur ~280px, remplissage automatique. */
+.category-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+/* ── Toggle d'activation module (reset de bouton autour de ui/Toggle) ────────── */
+.module-toggle {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.module-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Description du module ────────────────────────────────────────────────────
+   Rendue en tête du body des cartes (déplacée depuis le sous-titre du header).
+   Reprend le style discret de .card__subtitle. */
+.module-card__description {
+  font-size: var(--font-size-caption, 14px);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Barre d'actions de la carte ──────────────────────────────────────────────
+   En flux normal + retour à la ligne : évite tout débordement quand plusieurs
+   actions (configurer + aperçu + données + cloche) dépassent la largeur. Reste
+   une barre pleine largeur collée en bas grâce à margin-top:auto + marges
+   latérales négatives. */
+.card.module-card-item:has(.card__actions:not(:empty)) {
+  padding-bottom: var(--spacing-md);
+}
+
+.module-card-item .card__actions {
+  position: static;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: auto;
+  margin-left: calc(-1 * var(--spacing-md));
+  margin-right: calc(-1 * var(--spacing-md));
+  margin-bottom: calc(-1 * var(--spacing-md));
+}
+
+/* Quand un footer (rangée de chips) précède les actions, c'est LUI qui absorbe
+   l'espace libre (margin-top:auto sur .card__footer). Les actions ne doivent alors
+   PAS ajouter un second margin-top:auto — sinon les deux se partagent l'espace et un
+   écart apparaît entre les chips et la barre d'actions. On les colle au footer. */
+.module-card-item .card__footer + .card__actions {
+  margin-top: 0;
+}

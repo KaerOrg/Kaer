@@ -47,6 +47,7 @@ export function CaseloadFilters({ value, onChange }: CaseloadFiltersProps) {
     <div className="caseload-filters">
       <div className="caseload-filters__search">
         <SearchInput
+          compact
           value={value.search}
           onChange={handleSearch}
           placeholder={t('file_active.filters.search_placeholder')}

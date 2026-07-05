@@ -3,4 +3,6 @@ export interface SearchInputProps {
   onChange: (value: string) => void
   placeholder: string
   ariaLabel?: string
+  /** Variante compacte, alignée sur `Dropdown compact` (barres de filtres). */
+  compact?: boolean
 }

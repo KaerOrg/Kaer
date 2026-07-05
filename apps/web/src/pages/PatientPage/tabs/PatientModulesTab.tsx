@@ -5,6 +5,7 @@ import { ShieldAlert, Plus } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { ModuleCard } from '../../../components/features/ModuleCard'
 import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -598,10 +599,13 @@ export function PatientModulesTab({
 
       return (
         <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
-          <Card
-            className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
-            header={{ icon: modIcon, title: t(`modules.${moduleType}.label`), right }}
-            footer={
+          <ModuleCard
+            className={unlocked ? 'module-card--unlocked' : undefined}
+            icon={modIcon}
+            title={t(`modules.${moduleType}.label`)}
+            headerRight={right}
+            description={t(`scales.full_title.${moduleType}`)}
+            tags={
               <ScaleMetaBadges
                 scaleId={moduleType}
                 evaluationType={scale.evaluationType}
@@ -618,7 +622,6 @@ export function PatientModulesTab({
               />
             }
           >
-            <p className="module-card__description">{t(`scales.full_title.${moduleType}`)}</p>
             {unlocked && mod && (
               <div className="module-card__date">
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
@@ -626,24 +629,23 @@ export function PatientModulesTab({
             )}
             {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} />}
             {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
-          </Card>
+          </ModuleCard>
         </div>
       )
     }
 
     return (
       <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
-        <Card
-          className={`module-card-item${unlocked ? ' module-card--unlocked' : ''}`}
-          header={{
-            icon: modIcon,
-            title: t(`modules.${moduleType}.label`),
-            right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
-              if (unlocked && mod) revokeModule(mod.id)
-              else unlockModule(moduleType)
-            }),
-          }}
-          footer={tagChips(moduleType)}
+        <ModuleCard
+          className={unlocked ? 'module-card--unlocked' : undefined}
+          icon={modIcon}
+          title={t(`modules.${moduleType}.label`)}
+          headerRight={moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
+            if (unlocked && mod) revokeModule(mod.id)
+            else unlockModule(moduleType)
+          })}
+          description={t(`modules.${moduleType}.description`)}
+          tags={tagChips(moduleType)}
           actions={
             <ModuleCardFooter
               onConfigureNotif={unlocked && mod ? () => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon }) : undefined}
@@ -654,19 +656,14 @@ export function PatientModulesTab({
             />
           }
         >
-          <p className="module-card__description">{t(`modules.${moduleType}.description`)}</p>
           {unlocked && mod && (
             <div className="module-card__date">
               {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
             </div>
           )}
-          {(isPreviewOpen(moduleType) || isDataOpen(moduleType)) && (
-            <>
-              {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
-              {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
-            </>
-          )}
-        </Card>
+          {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
+          {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
+        </ModuleCard>
       </div>
     )
   }

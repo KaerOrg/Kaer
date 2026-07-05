@@ -11,11 +11,13 @@
 
 .dropdown__input {
   width: 100%;
-  padding: 10px 36px 10px 14px;
+  /* Droite : padding texte + place pour le chevron (--control-icon-room). */
+  padding: var(--control-pad-y) calc(var(--control-pad-x) + var(--control-icon-room))
+    var(--control-pad-y) var(--control-pad-x);
   border: 1px solid var(--color-border);
   border-left: 3px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 15px;
+  font-size: var(--control-font-size);
   color: var(--color-text);
   background: var(--color-surface);
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -28,13 +30,14 @@
 }
 
 .dropdown__input--sm {
-  padding: 7px 32px 7px 12px;
-  font-size: 14px;
+  padding: var(--control-pad-y-sm) calc(var(--control-pad-x-sm) + var(--control-icon-room))
+    var(--control-pad-y-sm) var(--control-pad-x-sm);
+  font-size: var(--control-font-size-sm);
 }
 
-/* Place pour le bouton « × » en plus du chevron. */
+/* Place pour le bouton « × » en plus du chevron (deux ornements). */
 .dropdown__input--clearable {
-  padding-right: 56px;
+  padding-right: calc(var(--control-pad-x) + var(--control-icon-room) * 2);
 }
 
 .dropdown__input:focus {
@@ -60,7 +63,7 @@
 
 .dropdown__clear {
   position: absolute;
-  right: 32px;
+  right: calc(var(--control-pad-x) + var(--control-icon-room));
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -80,7 +83,7 @@
 
 .dropdown__chevron {
   position: absolute;
-  right: 12px;
+  right: var(--control-pad-x);
   color: var(--color-text-muted);
   pointer-events: none;
   transition: transform 0.15s;
