@@ -255,6 +255,17 @@ Deux field_types propres :
 | `daily_status_option` | Statut de prise (réutilisé) | `value`, `color`, `bg_color`, `icon` |
 | `medication_reason_option` | Motif de non-prise (chip) | `value`, `icon`, `links_module` (pont vers un autre module) |
 
+**Layout `activity_log` (behavioral_activation)**
+
+3 modes internes : `week` (défaut, planification) | `list` (historique) | `entry`
+(formulaire prédire/faire/constater : P/M attendus si planifiée, ressentis si réalisée).
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `activity_log_config` | Config du journal (bornes P/M, couleurs, tous les libellés) | `pleasure_min/max/step`, `mastery_min/max/step`, `pleasure_color`, `mastery_color`, `dot_done_color`, `dot_planned_color`, `locale` + clés i18n par libellé (`tab_week_label`, `section_expected_title`, `section_felt_title`, `planned_time_label`, `my_activities_title`, `linked_value_prefix`, `pleasure_short_label`, `mastery_short_label`…) |
+| `activity_log_domain` | Domaine de vie (BATD-R) : groupe les suggestions, alimente l'éditeur praticien | — (text_code = libellé i18n) |
+| `activity_log_suggestion` | Suggestion d'activité (chip), groupée par domaine | `domain` (id d'un field `activity_log_domain`) |
+
 **Layout `sleep_journal`**
 
 | `field_type` | Rendu | Props clés |

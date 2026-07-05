@@ -34,11 +34,13 @@ import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
+import { useBAActivitiesEditor } from '../hooks/useBAActivitiesEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
 import { ChronobiologyCard } from './ChronobiologyCard'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
+import { BehavioralActivationCard } from './BehavioralActivationCard'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -109,6 +111,7 @@ export function PatientModulesTab({
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
   const medList = useMedicationListEditor(modules, onReloadModules)
+  const baList = useBAActivitiesEditor(modules, onReloadModules)
 
   // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
   const isPreviewOpen = useCallback(
@@ -447,6 +450,30 @@ export function PatientModulesTab({
           previewOpen={isPreviewOpen('medication_adherence')}
           dataOpen={isDataOpen('medication_adherence')}
           medList={medList}
+          moduleToggle={moduleToggle}
+          onTogglePreview={togglePreview}
+          onToggleData={toggleData}
+          onConfigureNotif={setNotifModal}
+          onUnlock={unlockModule}
+          onRevoke={revokeModule}
+        />
+      )
+    }
+
+    if (moduleType === 'behavioral_activation') {
+      return (
+        <BehavioralActivationCard
+          key="behavioral_activation"
+          tagChips={tagChips('behavioral_activation')}
+          modItem={modItem}
+          modIcon={modIcon}
+          mod={mod}
+          patientId={patientId}
+          unlocked={unlocked}
+          loading={isModuleBusy('behavioral_activation', mod?.id)}
+          previewOpen={isPreviewOpen('behavioral_activation')}
+          dataOpen={isDataOpen('behavioral_activation')}
+          baList={baList}
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}

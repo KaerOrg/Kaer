@@ -39,7 +39,7 @@ Deux entrées possibles :
             ├── column_form        → ColumnFormLayout      (beck_columns : sections + champs enfants + form_entries)
             ├── tree_selector      → TreeSelectorLayout    (emotion_wheel : arbre N niveaux + tree_selections)
             ├── sleep_journal      → SleepJournalLayout    (sleep_diary : 3 modes internes list/entry/month, time pickers natifs, grille calendrier, table sleep_diary_entries)
-            ├── activity_log       → ActivityLogLayout     (behavioral_activation : 3 modes internes list/entry/month, suggestions chips, 2 sliders P/M, calendrier dots done/planned, table activity_records)
+            ├── activity_log       → ActivityLogLayout     (behavioral_activation : 3 modes internes week/list/entry, cycle prédire/faire/constater P/M attendus vs ressentis, suggestions chips groupées par domaines de vie, activités co-construites config.ba_activities, table activity_records)
             ├── exposure_tracker   → ExposureTrackerLayout (fear_thermometer : tabs Saisies/Situations, mode entry avec SUDs avant/après, catalogue + texte libre, stratégies DB-driven, tables fear_entries + fear_situations)
             ├── decision_grid      → DecisionGridLayout    (decisional_balance : grille 2×2 + items pondérés 1–5 étoiles + jauge motivation, tables plan_items.weight + module_settings, sous-composant EditableItemsList partagé avec editable_steps)
             ├── steps              → StepsLayout

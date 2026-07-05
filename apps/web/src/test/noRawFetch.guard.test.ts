@@ -36,6 +36,8 @@ const READ_ALLOWLIST = new Set<string>([
   // sur action utilisateur — même pattern que useCrisisPlanEditor.openEditor.
   'fetchTrackedEffects',
   'fetchMedications',
+  // Idem : activités co-construites (useBAActivitiesEditor.openEditor).
+  'fetchBAActivities',
 ])
 
 // (b) Les invalidations doivent référencer `xxxQueries.y(...).queryKey` (ou un prefix

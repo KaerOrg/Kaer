@@ -269,7 +269,8 @@
     "wardrobe_desc": "The modules currently activated for this patient.",
     "wardrobe_empty": "No module activated for this patient. Click “Add a module” to get started.",
     "add_module_button": "Add a module",
-    "add_module_title": "Add a module",    "unlock_button": "Unlock",
+    "add_module_title": "Add a module",
+    "unlock_button": "Unlock",
     "revoke_button": "Revoke",
     "preview_button": "Preview",
     "patient_view": "What your patient will see",
@@ -912,8 +913,7 @@
       "footer": "Sleep diary structured after the Consensus Sleep Diary (Carney et al., Sleep 2012). A CBT-I tool, the first-line treatment for chronic insomnia (Trauer et al., Ann Intern Med 2015 · NICE NG215, 2022).",
       "new_btn": "New entry",
       "empty_title": "No entry yet",
-      "empty_text": "Use the button above to log your first night.",
-      "footer": "Sleep diary structured after the Consensus Sleep Diary (Carney et al., Sleep 2012). A CBT-I tool, the first-line treatment for chronic insomnia (Trauer et al., Ann Intern Med 2015 · NICE NG215, 2022)."
+      "empty_text": "Use the button above to log your first night."
     },
     "diet_weight_psycho": {
       "label": "Diet & Weight Psychoeducation",
@@ -1194,8 +1194,72 @@
       "label": "Behavioral Activation Journal",
       "description": "Activity planning rated by Pleasure (0-10) and Mastery (0-10).",
       "new_btn": "New activity",
-      "empty_title": "No activity yet",
-      "empty_text": "Use the button above to log your first activity."
+      "add_btn": "Add an activity",
+      "date_label": "Date",
+      "planned_time": "Planned time (optional)",
+      "section_activity": "Activity",
+      "section_felt": "What it gave you",
+      "section_notes": "Notes",
+      "activity_placeholder": "E.g.: 20-min walk, Call a friend, Reading…",
+      "pleasure_label": "Pleasure (P)",
+      "pleasure_sublabel": "Enjoyment from the activity",
+      "mastery_label": "Mastery (M)",
+      "mastery_sublabel": "Sense of accomplishment",
+      "mark_done": "Mark as completed",
+      "save": "Save",
+      "domain_body": "Body and health",
+      "domain_social": "Relationships",
+      "domain_work": "Work and studies",
+      "domain_daily": "Daily life and responsibilities",
+      "domain_leisure": "Leisure and pleasure",
+      "domain_meaning": "Meaning and values",
+      "suggestion_tidy": "Tidy a room",
+      "suggestion_laundry": "Do the laundry",
+      "suggestion_admin": "Handle some paperwork",
+      "suggestion_repair": "Fix or repair something",
+      "suggestion_email": "Reply to an overdue message",
+      "suggestion_family": "Spend time with family",
+      "suggestion_help": "Help someone out",
+      "suggestion_learn": "Learn something new",
+      "suggestion_work_task": "Finish a small postponed task",
+      "suggestion_walk": "Walk",
+      "suggestion_groceries": "Grocery shopping",
+      "suggestion_gym": "Gym / sport",
+      "suggestion_bike": "Cycling",
+      "suggestion_yoga": "Yoga",
+      "suggestion_meditation": "Meditation",
+      "suggestion_reading": "Reading",
+      "suggestion_cooking": "Cooking",
+      "suggestion_call_friend": "Call a loved one",
+      "suggestion_cafe": "Coffee outing",
+      "suggestion_gardening": "Gardening",
+      "suggestion_music": "Music",
+      "suggestion_movie": "Film / series",
+      "suggestion_bath": "Relaxing bath",
+      "suggestion_cleaning": "Tidying / cleaning",
+      "suggestion_drawing": "Drawing / painting",
+      "suggestion_board_game": "Board game",
+      "suggestion_journal": "Writing / journaling",
+      "suggestion_swimming": "Swimming",
+      "suggestion_running": "Running",
+      "config_button": "Configure activities",
+      "config_title": "Activities defined together",
+      "config_hint": "Define activities with the patient, linked to their life areas, using their own words about what matters. The app will offer them first.",
+      "config_empty": "No custom activities yet.",
+      "config_count": "{{count}} activity configured",
+      "config_count_plural": "{{count}} activities configured",
+      "config_activity_placeholder": "E.g.: 20 min walk…",
+      "config_domain_label": "Life area",
+      "config_value_placeholder": "Why it matters (patient's words, optional)",
+      "config_add": "Add",
+      "pleasure_short": "P",
+      "mastery_short": "M",
+      "status_planned": "I'm planning it",
+      "status_done": "I already did it",
+      "completion_title": "How was it?",
+      "completion_skip": "Skip",
+      "tab_upcoming": "Upcoming",
+      "tab_history": "History"
     },
     "beck_columns": {
       "label": "Beck Columns",
@@ -1386,38 +1450,98 @@
     }
   },
   "tag_dimensions": {
-    "indication": { "label": "Indication" },
-    "population": { "label": "Audience" },
-    "approach": { "label": "Approach" }
+    "indication": {
+      "label": "Indication"
+    },
+    "population": {
+      "label": "Audience"
+    },
+    "approach": {
+      "label": "Approach"
+    }
   },
   "tags": {
-    "anxiety": { "label": "Anxiety" },
-    "ocd": { "label": "OCD" },
-    "depression": { "label": "Depression" },
-    "bipolar": { "label": "Bipolar disorder" },
-    "trauma": { "label": "Trauma / PTSD" },
-    "psychological_distress": { "label": "Psychological distress" },
-    "emotion_dysregulation": { "label": "Emotion dysregulation" },
-    "suicidal_crisis": { "label": "Suicidal crisis" },
-    "addiction": { "label": "Addiction" },
-    "sleep": { "label": "Sleep" },
-    "adhd": { "label": "ADHD" },
-    "eating_disorder": { "label": "Eating disorders" },
-    "perinatal": { "label": "Perinatal" },
-    "psychosis": { "label": "Psychosis" },
-    "child": { "label": "Child" },
-    "teen": { "label": "Teen" },
-    "adult": { "label": "Adult" },
-    "senior": { "label": "Older adult" },
-    "cbt": { "label": "CBT" },
-    "act": { "label": "ACT" },
-    "dbt": { "label": "DBT" },
-    "motivational_interviewing": { "label": "Motivational interviewing" },
-    "psychoeducation": { "label": "Psychoeducation" },
-    "relaxation": { "label": "Relaxation & grounding" },
-    "self_monitoring": { "label": "Self-monitoring" },
-    "imagery": { "label": "Mental imagery" },
-    "crisis_management": { "label": "Crisis planning" }
+    "anxiety": {
+      "label": "Anxiety"
+    },
+    "ocd": {
+      "label": "OCD"
+    },
+    "depression": {
+      "label": "Depression"
+    },
+    "bipolar": {
+      "label": "Bipolar disorder"
+    },
+    "trauma": {
+      "label": "Trauma / PTSD"
+    },
+    "psychological_distress": {
+      "label": "Psychological distress"
+    },
+    "emotion_dysregulation": {
+      "label": "Emotion dysregulation"
+    },
+    "suicidal_crisis": {
+      "label": "Suicidal crisis"
+    },
+    "addiction": {
+      "label": "Addiction"
+    },
+    "sleep": {
+      "label": "Sleep"
+    },
+    "adhd": {
+      "label": "ADHD"
+    },
+    "eating_disorder": {
+      "label": "Eating disorders"
+    },
+    "perinatal": {
+      "label": "Perinatal"
+    },
+    "psychosis": {
+      "label": "Psychosis"
+    },
+    "child": {
+      "label": "Child"
+    },
+    "teen": {
+      "label": "Teen"
+    },
+    "adult": {
+      "label": "Adult"
+    },
+    "senior": {
+      "label": "Older adult"
+    },
+    "cbt": {
+      "label": "CBT"
+    },
+    "act": {
+      "label": "ACT"
+    },
+    "dbt": {
+      "label": "DBT"
+    },
+    "motivational_interviewing": {
+      "label": "Motivational interviewing"
+    },
+    "psychoeducation": {
+      "label": "Psychoeducation"
+    },
+    "relaxation": {
+      "label": "Relaxation & grounding"
+    },
+    "self_monitoring": {
+      "label": "Self-monitoring"
+    },
+    "imagery": {
+      "label": "Mental imagery"
+    },
+    "crisis_management": {
+      "label": "Crisis planning"
+    }
   },
   "module": {
     "crisis_plan": {
@@ -2009,6 +2133,26 @@
     "med_effect_dysfonction_sexuelle": "Sexual dysfunction",
     "med_effect_anxiete": "Anxiety",
     "med_effect_cephalees": "Headaches",
-    "med_effect_vertiges": "Dizziness"
+    "med_effect_vertiges": "Dizziness",
+    "ba_prev_week": "Previous week",
+    "ba_next_week": "Next week",
+    "ba_done_count": "{{count}} done",
+    "ba_done_count_plural": "{{count}} done",
+    "ba_planned_count": "{{count}} planned",
+    "ba_planned_count_plural": "{{count}} planned",
+    "ba_expected": "expected",
+    "ba_felt": "felt",
+    "ba_pleasure_short": "P",
+    "ba_mastery_short": "M",
+    "ba_legend_done": "Done",
+    "ba_legend_planned": "Planned",
+    "ba_legend_scores": "P = pleasure · M = mastery (0 to 10, raw values)",
+    "ba_stat_done": "Done",
+    "ba_stat_missed": "Not done",
+    "ba_stat_upcoming": "Upcoming",
+    "ba_curve_title": "Felt pleasure and mastery (daily average)",
+    "ba_curve_pleasure": "Pleasure",
+    "ba_curve_mastery": "Mastery",
+    "ba_section_title": "Behavioral activation"
   }
 }

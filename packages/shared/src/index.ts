@@ -8,6 +8,8 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 
+export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
+
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 
@@ -98,6 +100,19 @@ export interface Medication {
   readonly kind: MedicationKind
 }
 
+// Activation comportementale — activité co-construite en consultation.
+// `domain_id` référence un field `activity_log_domain` du seed (config-first).
+// `value_text` : « pourquoi c'est important », formulé avec les mots du patient
+// (ancrage aux valeurs du protocole BATD-R, Lejuez et al. 2011).
+// Persistée telle quelle dans `patient_modules.config.ba_activities` (clé plate,
+// convention identique à `medications` / `tracked_effects`).
+export interface BAConfiguredActivity {
+  readonly id: string
+  readonly label: string
+  readonly domain_id: string
+  readonly value_text: string | null
+}
+
 export interface ModuleConfig {
   // Agenda du sommeil
   sleepDiary?: {
@@ -121,6 +136,11 @@ export interface ModuleConfig {
   // Observance médicamenteuse — liste de molécules co-éditée patient↔praticien
   medicationAdherence?: {
     medications: Medication[]
+  }
+  // Activation comportementale — activités co-construites en consultation,
+  // reliées aux domaines de vie et aux valeurs du patient (BATD-R)
+  behavioralActivation?: {
+    activities: BAConfiguredActivity[]
   }
 }
 

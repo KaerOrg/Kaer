@@ -16,10 +16,15 @@ const record = {
   id: 'ar-1',
   date: '2025-01-01',
   label: 'Promenade',
+  expected_pleasure: 4,
+  expected_mastery: 3,
   pleasure: 7,
   mastery: 5,
   done: 1 as const,
   notes: null,
+  planned_time: '17:30',
+  domain_id: 'al.dom_body',
+  config_activity_id: null,
 }
 
 beforeEach(() => jest.clearAllMocks())
@@ -33,7 +38,36 @@ describe('activityRecordService', () => {
       module_id: 'behavioral_activation',
       entry_kind: 'activity_record',
       operation: 'upsert',
-      payload: expect.objectContaining({ label: 'Promenade', pleasure: 7 }),
+      payload: expect.objectContaining({
+        label: 'Promenade',
+        expected_pleasure: 4,
+        expected_mastery: 3,
+        pleasure: 7,
+        mastery: 5,
+        planned_time: '17:30',
+        domain_id: 'al.dom_body',
+        config_activity_id: null,
+      }),
+    }))
+  })
+
+  it('saveActivityRecord : les valeurs non renseignées (null) voyagent telles quelles', async () => {
+    const planned = {
+      ...record,
+      done: 0 as const,
+      expected_pleasure: null,
+      expected_mastery: null,
+      pleasure: null,
+      mastery: null,
+      planned_time: null,
+    }
+    await saveActivityRecord(planned)
+    expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
+      payload: expect.objectContaining({
+        expected_pleasure: null,
+        pleasure: null,
+        planned_time: null,
+      }),
     }))
   })
 
