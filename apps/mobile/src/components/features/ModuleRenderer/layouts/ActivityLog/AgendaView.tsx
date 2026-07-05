@@ -59,9 +59,9 @@ export function AgendaView({ records, lbl, locale, onEdit, onToggleDone, onDelet
               <ActivityListCard
                 key={r.id}
                 record={r}
-                onToggleDone={() => onToggleDone(r)}
-                onEdit={() => onEdit(r.id)}
-                onDelete={() => onDelete(r)}
+                onToggleDone={onToggleDone}
+                onEdit={onEdit}
+                onDelete={onDelete}
                 lbl={lbl}
               />
             ))
@@ -76,9 +76,9 @@ export function AgendaView({ records, lbl, locale, onEdit, onToggleDone, onDelet
               <ActivityListCard
                 key={r.id}
                 record={r}
-                onToggleDone={() => onToggleDone(r)}
-                onEdit={() => onEdit(r.id)}
-                onDelete={() => onDelete(r)}
+                onToggleDone={onToggleDone}
+                onEdit={onEdit}
+                onDelete={onDelete}
                 lbl={lbl}
               />
             ))}

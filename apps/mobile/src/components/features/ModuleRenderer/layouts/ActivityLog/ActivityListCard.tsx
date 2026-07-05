@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
@@ -9,18 +9,25 @@ import { alStyles } from './styles'
 
 export interface ActivityListCardProps {
   record: ActivityRecord
-  onToggleDone: () => void
-  onEdit: () => void
-  onDelete: () => void
+  onToggleDone: (record: ActivityRecord) => void
+  onEdit: (recordId: string) => void
+  onDelete: (record: ActivityRecord) => void
   lbl: LabelFn
 }
 
 // Carte d'une activité (agenda et historique) : statut, heure prévue et,
 // une fois réalisée, les P/M ressentis bruts. « Non renseigné » n'affiche
 // rien : jamais de zéro fabriqué (MDR : valeurs brutes saisies uniquement).
-export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }: ActivityListCardProps) {
+// Mémoïsée avec callbacks stables (record injecté ici) : les vues parentes
+// passent leurs handlers directement, sans closure recréée par item.
+export const ActivityListCard = React.memo(function ActivityListCard({
+  record, onToggleDone, onEdit, onDelete, lbl,
+}: ActivityListCardProps) {
   const t = useModuleTranslation()
   const isDone = record.done === 1
+  const handleToggle = useCallback(() => onToggleDone(record), [onToggleDone, record])
+  const handleEdit = useCallback(() => onEdit(record.id), [onEdit, record.id])
+  const handleDelete = useCallback(() => onDelete(record), [onDelete, record])
   const toggleAriaLabel = isDone
     ? (lbl('mark_undone_label') || t('common.undo'))
     : (lbl('mark_done_label') || t('common.done'))
@@ -35,7 +42,7 @@ export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }
     <View style={[alStyles.recordCard, isDone && alStyles.recordCardDone]} testID={`record-${record.id}`}>
       <Pressable
         style={alStyles.checkbox}
-        onPress={onToggleDone}
+        onPress={handleToggle}
         hitSlop={8}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: isDone }}
@@ -77,13 +84,13 @@ export function ActivityListCard({ record, onToggleDone, onEdit, onDelete, lbl }
         ) : null}
       </View>
       <View style={alStyles.recordActions}>
-        <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={t('common.edit')} testID={`edit-${record.id}`}>
+        <Pressable onPress={handleEdit} hitSlop={8} accessibilityLabel={t('common.edit')} testID={`edit-${record.id}`}>
           <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
         </Pressable>
-        <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={t('common.delete')} testID={`delete-${record.id}`}>
+        <Pressable onPress={handleDelete} hitSlop={8} accessibilityLabel={t('common.delete')} testID={`delete-${record.id}`}>
           <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
         </Pressable>
       </View>
     </View>
   )
-}
+})

@@ -49,9 +49,9 @@ export function ListView({ records, lbl, onEdit, onToggleDone, onDelete }: ListV
                 <ActivityListCard
                   key={r.id}
                   record={r}
-                  onToggleDone={() => onToggleDone(r)}
-                  onEdit={() => onEdit(r.id)}
-                  onDelete={() => onDelete(r)}
+                  onToggleDone={onToggleDone}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                   lbl={lbl}
                 />
               ))}

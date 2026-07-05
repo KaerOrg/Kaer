@@ -66,8 +66,7 @@ export const alStyles = StyleSheet.create({
     width: 56, height: 56, borderRadius: radius.full,
     backgroundColor: colors.primary,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2, shadowRadius: 8, elevation: 6,
+    ...shadows.lg,
   },
 
   // Entry

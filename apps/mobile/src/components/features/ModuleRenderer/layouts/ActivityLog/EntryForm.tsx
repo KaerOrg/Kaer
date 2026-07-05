@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
-  View, Text, ScrollView, TextInput, Platform, KeyboardAvoidingView, TouchableOpacity,
+  View, Text, ScrollView, TextInput, Platform, KeyboardAvoidingView, Pressable,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
@@ -227,16 +227,15 @@ export function EntryForm({
         <View style={alStyles.section}>
           <Text style={alStyles.sectionLabel}>{lbl('date_label')}</Text>
           <View style={alStyles.card}>
-            <TouchableOpacity
+            <Pressable
               style={alStyles.dateBtn}
               onPress={openDatePicker}
-              activeOpacity={0.7}
               accessibilityRole="button"
               testID="date-btn"
             >
               <MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />
               <Text style={alStyles.dateValue}>{dateValueText}</Text>
-            </TouchableOpacity>
+            </Pressable>
             {showDatePicker ? (
               <DateTimePicker
                 value={entryDate}
