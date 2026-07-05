@@ -517,14 +517,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col_dist.h', 'color',       '#EC4899'),
   ('beck.col_dist.h', 'step_number', '4'),
   ('beck.col_dist.h', 'hint_code',   'modules.beck_columns.entry_col_distortion_hint'),
-  -- Examen des preuves (7 colonnes de Padesky) : groupe optionnel activé par le
-  -- praticien via patient_modules.config.enabled_groups = ['evidence']
+  -- Examen des preuves (7 colonnes de Padesky) : colonnes standard, facultatives
+  -- à remplir (décision 2026-07 : pas de bascule praticien, simplicité d'usage)
   ('beck.col_evf.h', 'color',          '#0891B2'),
   ('beck.col_evf.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_for_hint'),
-  ('beck.col_evf.h', 'optional_group', 'evidence'),
   ('beck.col_eva.h', 'color',          '#0D9488'),
   ('beck.col_eva.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_against_hint'),
-  ('beck.col_eva.h', 'optional_group', 'evidence'),
   ('beck.col_evf.text', 'key',        'evidence_for'),
   ('beck.col_evf.text', 'multiline',  '1'),
   ('beck.col_evf.text', 'min_height', '72'),

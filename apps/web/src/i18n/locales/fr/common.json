@@ -282,7 +282,6 @@
     "summary_total_score": "Dernier score total",
     "form_records_title": "Fiches saisies",
     "form_show_more": "Voir plus de fiches ({{count}} restantes)",
-    "beck_evidence_toggle": "Examen des preuves (pour / contre)",
     "optional_column_badge": "Option",
     "psycho_read_count": "{{read}}/{{total}} fiche lue",
     "psycho_read_count_plural": "{{read}}/{{total}} fiches lues",

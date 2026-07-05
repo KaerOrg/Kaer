@@ -6,7 +6,7 @@
 
 Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR), sont l'outil de restructuration cognitive fondateur de la TCC. Leur efficacité est documentée dans de nombreuses méta-analyses (Hofmann et al., 2012 ; Cuijpers et al., 2019) pour la dépression unipolaire, les troubles anxieux, le PTSD et l'insomnie chronique. Recommandées par la HAS, le NICE et l'APA.
 
-**Version implémentée : 6 colonnes standard + 2 colonnes « preuves » optionnelles**
+**Version implémentée : 8 colonnes (format complet de Padesky)**
 
 | # | Colonne | Ce que le patient renseigne |
 |---|---|---|
@@ -14,10 +14,10 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 | 2 | Émotion(s) | Nom libre + chips d'aide au vocabulaire + intensité initiale (0 à 100) |
 | 3 | Pensée automatique | Contenu + conviction initiale (0 à 100) |
 | 4 | Distorsion cognitive (facultative) | Piège de pensée auto-étiqueté par le patient : texte libre + chips des 8 pièges classiques (Burns) |
-| (5) | Preuves pour la pensée (groupe optionnel `evidence`) | Faits concrets soutenant la pensée |
-| (6) | Preuves contre la pensée (groupe optionnel `evidence`) | Faits contredisant la pensée |
-| 5/7 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 6/8 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
+| 5 | Preuves pour la pensée (facultative) | Faits concrets soutenant la pensée |
+| 6 | Preuves contre la pensée (facultative) | Faits contredisant la pensée |
+| 7 | Réponse rationnelle | Pensée alternative construite par le patient |
+| 8 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
 
 > Choix clinique (2026-07) : la colonne Résultat ré-évalue la **même** émotion
 > qu'en colonne 2 (protocole Beck/Padesky), ce qui rend `emotion_intensity` et
@@ -25,14 +25,16 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 > conviction mesurée est celle dans la pensée **alternative** (variante Padesky),
 > pas la re-cotation de la pensée automatique initiale.
 
-La numérotation affichée est **dynamique** : position parmi les colonnes visibles.
+La numérotation affichée est **dynamique** : position parmi les colonnes visibles
+(en capture rapide, seules 2 colonnes apparaissent).
 
-**Examen des preuves, format 7 colonnes de Padesky (2026-07, optionnel)** : les deux
-colonnes « preuves » (`optional_group='evidence'`) sont masquées par défaut ; le
-praticien les active **par patient** via la bascule « Examen des preuves » de la
-card Beck (`patient_modules.config.enabled_groups`, helper partagé
-`readEnabledGroups`). Référence : Greenberger & Padesky, *Mind Over Mood*
-(examiner les preuves avant de construire la pensée alternative).
+**Examen des preuves (2026-07)** : les colonnes « preuves » suivent Greenberger &
+Padesky, *Mind Over Mood* (examiner les preuves avant de construire la pensée
+alternative). D'abord livrées derrière une bascule praticien par patient
+(`optional_group`), elles sont devenues **standard** sur décision utilisateur :
+facultatives à remplir, la validation n'exige toujours que situation ou pensée
+automatique, et la « Note rapide » reste le parcours court. Le mécanisme
+`optional_group` reste disponible dans le moteur (dormant).
 
 **Saisie assistée (2026-07)** : les colonnes Émotion et Distorsion portent des
 chips de suggestions (`suggestion_1..n` sur le `column_text_field`, codes i18n
@@ -97,9 +99,7 @@ Le panneau « Données » de la card Beck (`PatientPage`) restitue les fiches
 synchronisées : courbes brutes de tous les curseurs (`ColumnFormDataPanel`,
 pattern `fear_thermometer`) + fiches complètes antichronologiques paginées.
 Circuit : `fetchFormEntries` → `engagementQueries.moduleData` (kind `'form'`).
-La card porte aussi la bascule « Examen des preuves » (`ColumnFormOptionsRow`).
-L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus,
-avec badge « Option » sur les colonnes optionnelles.
+L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus.
 
 ### Fichiers
 
@@ -110,8 +110,7 @@ avec badge « Option » sur les colonnes optionnelles.
 | `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
 | `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
 | `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (fiches + courbes) |
-| `apps/web/src/pages/PatientPage/tabs/ColumnFormOptionsRow.tsx` | Bascule des groupes optionnels (`enabled_groups`) |
-| `packages/shared/src/services/patientModuleConfig.ts` | `readEnabledGroups` (contrat partagé web ≡ mobile) |
+| `packages/shared/src/services/patientModuleConfig.ts` | `readEnabledGroups` (mécanisme `optional_group`, dormant) |
 | `supabase/seed.sql` § beck_columns | Source de vérité du contenu (colonnes, props, i18n codes) |
 
 ---
@@ -136,8 +135,7 @@ HomeScreen
 - `apps/mobile/.../ColumnForm/entryCompletion.test.ts` + `textSuggestions.test.ts` : helpers purs
 - `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
 - `apps/web/.../ColumnFormDataPanel.test.tsx` + `columnFormData.test.ts` : panneau Données (dont test de conformité MDR)
-- `apps/web/.../ColumnFormOptionsRow.test.tsx` : bascule praticien
-- `apps/web/src/services/engagementService.test.ts` (`fetchFormEntries`) et `moduleAssignmentService.test.ts` (`updateEnabledGroups`)
+- `apps/web/src/services/engagementService.test.ts` : `fetchFormEntries` + `fetchBeckEvolution`
 
 ```bash
 cd apps/mobile && npx jest FieldRenderer.column_form

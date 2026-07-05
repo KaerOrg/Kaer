@@ -12,7 +12,6 @@ import {
   unlockModule,
   unlockPsychoeducation,
   unlockRim,
-  updateEnabledGroups,
   updateMedications,
   updatePsychoeducationTopics,
   updateRim,
@@ -155,31 +154,6 @@ describe('moduleAssignmentService.fetchMedications / updateMedications', () => {
 
     expect(result).toEqual({ ok: true })
     expect(update.mock.calls[0][0].config).toEqual({ tracked_effects: ['x'], medications: [MED] })
-  })
-})
-
-describe('moduleAssignmentService.updateEnabledGroups', () => {
-  it('préserve le reste de la config et écrit enabled_groups', async () => {
-    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
-    const select = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { config: { medications: ['m'] } } }) }),
-    })
-    vi.mocked(supabase.from).mockReturnValue({ select, update } as never)
-
-    const result = await updateEnabledGroups('pm-1', ['evidence'])
-
-    expect(result).toEqual({ ok: true })
-    expect(update.mock.calls[0][0].config).toEqual({ medications: ['m'], enabled_groups: ['evidence'] })
-  })
-
-  it('renvoie ok: false en cas d’erreur Supabase', async () => {
-    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: new Error('rls') }) })
-    const select = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null }) }),
-    })
-    vi.mocked(supabase.from).mockReturnValue({ select, update } as never)
-
-    expect(await updateEnabledGroups('pm-1', [])).toEqual({ ok: false })
   })
 })
 

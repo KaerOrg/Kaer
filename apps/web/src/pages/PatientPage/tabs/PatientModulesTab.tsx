@@ -19,7 +19,6 @@ import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPa
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
-import { ColumnFormOptionsRow } from './ColumnFormOptionsRow'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '@services/moduleCatalogService'
@@ -625,14 +624,6 @@ export function PatientModulesTab({
               onTogglePreview={() => togglePreview(moduleType)}
               dataOpen={isDataOpen(moduleType)}
               onToggleData={unlocked && mod ? () => toggleData(moduleType) : undefined}
-              extra={moduleType === 'beck_columns' && unlocked && mod ? (
-                <ColumnFormOptionsRow
-                  mod={mod}
-                  group="evidence"
-                  label={t('patient.beck_evidence_toggle')}
-                  onReload={onReloadModules}
-                />
-              ) : undefined}
             />
           }
         >
