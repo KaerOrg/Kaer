@@ -35,3 +35,7 @@ export const FEAR_AFTER_COLOR = CHART_PALETTE[1]
 // Colonnes de Beck — intensité émotionnelle avant / après restructuration.
 export const BECK_BEFORE_COLOR = CHART_PALETTE[3]
 export const BECK_AFTER_COLOR = CHART_PALETTE[4]
+
+// Activation comportementale — P/A ressentis (mêmes teintes que l'app patient).
+export const BA_PLEASURE_COLOR = CHART_PALETTE[1]
+export const BA_MASTERY_COLOR = CHART_PALETTE[0]

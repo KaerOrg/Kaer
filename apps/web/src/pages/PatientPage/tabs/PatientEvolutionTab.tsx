@@ -12,11 +12,13 @@ import type {
   MedEffectPoint,
   SleepPoint,
   BeckPoint,
+  ActivityEntryPoint,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
+import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import {
   type TimeRange,
   RANGE_DAYS,
@@ -49,6 +51,7 @@ type EvolutionData = {
   sleepData: SleepPoint[]
   chronoEntries: RhythmEntry[]
   beckData: BeckPoint[]
+  activityEntries: ActivityEntryPoint[]
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -61,6 +64,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   sleepData: [],
   chronoEntries: [],
   beckData: [],
+  activityEntries: [],
 }
 
 export function PatientEvolutionTab({ patientId }: Props) {
@@ -71,7 +75,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
   const modulesQuery = useQuery(patientQueries.modules(patientId))
-  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, beckData } =
+  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, beckData, activityEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
 
@@ -93,7 +97,8 @@ export function PatientEvolutionTab({ patientId }: Props) {
     medData.length > 0 ||
     sleepData.length > 0 ||
     chronoEntries.length > 0 ||
-    beckData.length > 0
+    beckData.length > 0 ||
+    activityEntries.length > 0
 
   // Types de modules ayant des données ; au moins un est-il archivé ?
   const dataTypes = useMemo(() => {
@@ -103,8 +108,9 @@ export function PatientEvolutionTab({ patientId }: Props) {
     if (medData.length > 0) types.push('medication_side_effects')
     if (sleepData.length > 0) types.push('sleep_diary')
     if (beckData.length > 0) types.push('beck_columns')
+    if (activityEntries.length > 0) types.push('behavioral_activation')
     return types
-  }, [scales, moodData.length, fearData.length, medData.length, sleepData.length, beckData.length])
+  }, [scales, moodData.length, fearData.length, medData.length, sleepData.length, beckData.length, activityEntries.length])
   const hasArchived = dataTypes.some(mt => !activeTypes.has(mt))
   const hasActiveData = dataTypes.some(mt => activeTypes.has(mt))
 
@@ -158,6 +164,22 @@ export function PatientEvolutionTab({ patientId }: Props) {
             )}
           </div>
           <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} />
+        </section>
+      )}
+
+      {/* ── Activation comportementale (compteurs + courbe P/A + grille hebdo) ── */}
+      {activityEntries.length > 0 && isShown('behavioral_activation') && (
+        <section className="evolution__sleep">
+          <div className="evolution__section-header">
+            <h3 className="evolution__section-title">{t('evolution.ba_section_title')}</h3>
+            {isArchived('behavioral_activation') && (
+              <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
+            )}
+          </div>
+          <BehavioralActivationPanel
+            entries={filterByRange(activityEntries, days)}
+            locale={i18n.language}
+          />
         </section>
       )}
 

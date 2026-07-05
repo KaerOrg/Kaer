@@ -10,6 +10,7 @@ import {
   fetchChronoEntries,
   fetchFormEntries,
   fetchBeckEvolution,
+  fetchActivityEntries,
   type ScorePoint,
   type MoodPoint,
   type FearPoint,
@@ -17,6 +18,7 @@ import {
   type SleepPoint,
   type ModuleSummary,
   type FormEntryRow,
+  type ActivityEntryPoint,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
@@ -35,6 +37,7 @@ export type ModuleDataResult =
   | { status: 'sleep'; points: SleepPoint[] }
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
   | { status: 'form'; entries: FormEntryRow[] }
+  | { status: 'activity'; entries: ActivityEntryPoint[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -45,7 +48,7 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med, sleep, chronoEntries, beck] = await Promise.all([
+        const [scaleResults, mood, fear, med, sleep, chronoEntries, beck, activityEntries] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
@@ -53,6 +56,7 @@ export const engagementQueries = {
           fetchSleepEvolution(patientId),
           fetchChronoEntries(patientId),
           fetchBeckEvolution(patientId),
+          fetchActivityEntries(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
         available.forEach((mt, i) => { scaleData[mt] = scaleResults[i] })
@@ -66,6 +70,7 @@ export const engagementQueries = {
           sleepData: sleep,
           chronoEntries,
           beckData: beck,
+          activityEntries,
         }
       },
     }),
@@ -105,6 +110,12 @@ export const engagementQueries = {
           return entries.length === 0
             ? { status: 'empty' }
             : { status: 'rhythmogram', entries }
+        }
+        if (moduleType === 'behavioral_activation') {
+          const entries = await fetchActivityEntries(patientId)
+          return entries.length === 0
+            ? { status: 'empty' }
+            : { status: 'activity', entries }
         }
         const summary = await fetchModuleSummary(patientId, moduleType)
         return summary.count === 0 ? { status: 'empty' } : { status: 'summary', summary }

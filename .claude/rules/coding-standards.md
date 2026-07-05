@@ -619,6 +619,35 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ---
 
+## Dates : une date métier locale ne passe jamais par `toISOString()`
+
+> **Règle absolue.** Convertir un `Date` (issu d'un picker, d'un calendrier, d'un
+> jour affiché) en `YYYY-MM-DD` avec `toISOString().slice(0, 10)` **décale d'un jour
+> en fuseau positif** (toute l'Europe, dont la France) : `toISOString()` bascule en
+> UTC, et minuit local y retombe sur la veille.
+
+Une **date métier** (le jour que l'utilisateur choisit ou voit) se formate depuis les
+getters **locaux** — jamais UTC. Réutiliser le helper partagé plutôt que le refaire :
+
+```ts
+// ❌ UTC → en France, minuit local = 22:00 UTC la veille → mauvais jour
+date: pickedDate.toISOString().slice(0, 10)
+// ✅ composants locaux (motif de packages/shared/src/services/weekDates.ts)
+const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+```
+
+Distinguer : un **horodatage d'événement** (instant de sync, `created_at`) peut rester
+en UTC ISO ; une **date choisie/affichée** doit être locale. `@kaer/shared/weekDates`
+(`todayIso`, `shiftDate`, `mondayOf`, `weekDays`) est la source de vérité de cette
+arithmétique — l'étendre (`toIsoDate(d)`) au lieu de hand-roller.
+
+Vérif : `grep -rn "toISOString().slice(0, 10)" apps/*/src` — chaque occurrence sur une
+date métier locale est un bug de fuseau.
+
+> 📌 Cas vécu : voir [lessons.md § Dates : jamais `toISOString()`](lessons.md).
+
+---
+
 ## Internationalisation — zéro texte hardcodé
 
 **Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.** Cela inclut les **props textuelles d'accessibilité** (`aria-label`, `alt`, `title`, `placeholder`), lues aux utilisateurs au même titre que le texte affiché.

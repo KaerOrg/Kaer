@@ -17,6 +17,7 @@ const mockFetchFearEvolution = vi.fn()
 const mockFetchMedSideEffectsEvolution = vi.fn()
 const mockFetchModuleSummary = vi.fn()
 const mockFetchFormEntries = vi.fn()
+const mockFetchActivityEntries = vi.fn()
 
 vi.mock('@services/engagementService', () => ({
   fetchScaleEvolution: (...args: unknown[]) => mockFetchScaleEvolution(...args),
@@ -25,6 +26,7 @@ vi.mock('@services/engagementService', () => ({
   fetchMedSideEffectsEvolution: (...args: unknown[]) => mockFetchMedSideEffectsEvolution(...args),
   fetchModuleSummary: (...args: unknown[]) => mockFetchModuleSummary(...args),
   fetchFormEntries: (...args: unknown[]) => mockFetchFormEntries(...args),
+  fetchActivityEntries: (...args: unknown[]) => mockFetchActivityEntries(...args),
 }))
 
 // Routage seul : le panneau column_form est couvert par ColumnFormDataPanel.test.tsx.
@@ -111,6 +113,30 @@ describe('ModuleDataPanel', () => {
   it('aucune donnée → message vide', async () => {
     mockFetchScaleEvolution.mockResolvedValue([])
     const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="gad7" /></QueryClientProvider>)
+
+    await waitFor(() =>
+      expect(container.querySelector('.module-data-panel__message')?.textContent).toBe('patient.summary_empty')
+    )
+  })
+
+  it('behavioral_activation → grille hebdo (BehavioralActivationPanel)', async () => {
+    mockFetchActivityEntries.mockResolvedValue([
+      {
+        id: 'a1', date: '2026-07-01', label: 'Marche en forêt', done: true,
+        expected_pleasure: 4, expected_mastery: 3, pleasure: 7, mastery: 5,
+        planned_time: null, domain_id: 'al.dom_body', notes: null,
+      },
+    ])
+    const { container, getByText } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="behavioral_activation" /></QueryClientProvider>)
+
+    await waitFor(() => expect(container.querySelector('.ba-week__grid')).toBeTruthy())
+    expect(mockFetchActivityEntries).toHaveBeenCalledWith('p1')
+    expect(getByText('Marche en forêt')).toBeTruthy()
+  })
+
+  it('behavioral_activation sans saisie → message vide', async () => {
+    mockFetchActivityEntries.mockResolvedValue([])
+    const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="behavioral_activation" /></QueryClientProvider>)
 
     await waitFor(() =>
       expect(container.querySelector('.module-data-panel__message')?.textContent).toBe('patient.summary_empty')

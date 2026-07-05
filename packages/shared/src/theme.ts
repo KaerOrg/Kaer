@@ -15,6 +15,8 @@ export const colors = {
   neutral: '#F3F4F6',
   white: '#FFFFFF',
   stars: '#F59E0B',
+  // Voile des overlays (modales, feuilles bas d'écran)
+  overlay: 'rgba(0,0,0,0.45)',
 } as const
 
 export const spacing = {
