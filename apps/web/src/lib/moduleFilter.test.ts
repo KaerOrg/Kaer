@@ -118,12 +118,11 @@ describe('selectCardTagRows', () => {
     ]),
   }
 
-  it('groupe par dimension (indication puis public), en excluant l approche', () => {
+  it('affiche uniquement l indication, en excluant population et approche', () => {
     const ids = new Set(['cbt', 'adult', 'anxiety', 'trauma', 'teen'])
     const rows = selectCardTagRows(ids, taxonomy)
-    expect(rows.map(r => r.dimensionId)).toEqual(['indication', 'population'])
+    expect(rows.map(r => r.dimensionId)).toEqual(['indication'])
     expect(rows[0].tags.map(t => t.id)).toEqual(['anxiety', 'trauma'])
-    expect(rows[1].tags.map(t => t.id)).toEqual(['teen', 'adult'])
   })
 
   it('omet une dimension sans tag pour ce module', () => {

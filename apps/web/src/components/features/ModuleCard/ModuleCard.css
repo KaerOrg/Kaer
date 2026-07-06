@@ -51,10 +51,14 @@
   margin-bottom: calc(-1 * var(--spacing-md));
 }
 
-/* Quand un footer (rangée de chips) précède les actions, c'est LUI qui absorbe
-   l'espace libre (margin-top:auto sur .card__footer). Les actions ne doivent alors
-   PAS ajouter un second margin-top:auto — sinon les deux se partagent l'espace et un
-   écart apparaît entre les chips et la barre d'actions. On les colle au footer. */
-.module-card-item .card__footer + .card__actions {
+/* Quand un footer (rangée de chips) NON VIDE précède les actions, c'est LUI qui
+   absorbe l'espace libre (margin-top:auto sur .card__footer). Les actions ne doivent
+   alors PAS ajouter un second margin-top:auto — sinon les deux se partagent l'espace
+   et un écart apparaît entre les chips et la barre d'actions. On les colle au footer.
+   Si le footer est vide (module sans chips visibles), le sélecteur `+` s'appliquerait
+   quand même (il ignore display:none) et volerait le margin-top:auto des actions, qui
+   ne seraient plus collées en bas. Le `:not(:empty)` réserve donc l'override aux cartes
+   qui ont réellement des chips. */
+.module-card-item .card__footer:not(:empty) + .card__actions {
   margin-top: 0;
 }

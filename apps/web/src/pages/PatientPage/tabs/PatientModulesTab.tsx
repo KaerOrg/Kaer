@@ -610,7 +610,6 @@ export function PatientModulesTab({
                 scaleId={moduleType}
                 evaluationType={scale.evaluationType}
                 category={scale.category}
-                targetAges={scale.targetAges}
               />
             }
             actions={
