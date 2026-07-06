@@ -38,7 +38,9 @@ const SELF_MANAGED_LAYOUTS = new Set([
 ])
 
 // Layouts qui ont besoin de la config patient (patient_modules.config).
-const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library'])
+// column_form : groupes de colonnes optionnelles activés par le praticien
+// (config.enabled_groups, ex. « examen des preuves » sur beck_columns).
+const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library', 'column_form'])
 
 export default function ModuleContentScreen({ route, navigation }: Props) {
   const { moduleType } = route.params

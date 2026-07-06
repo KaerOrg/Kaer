@@ -1,0 +1,72 @@
+/* ── Panneau « Données » des modules column_form (fiches complètes) ────────── */
+/* Restitution neutre des fiches patient : accents de colonne issus de la config
+   du module (parité mobile), aucune couleur de jugement (MDR 2017/745). */
+
+.cfd-records {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.cfd-records__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.cfd-record {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-bg);
+}
+
+.cfd-record__date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.cfd-record__column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cfd-record__column-title {
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cfd-record__text {
+  font-size: 13px;
+  color: var(--color-text);
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cfd-record__value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cfd-record__value-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cfd-record__value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}

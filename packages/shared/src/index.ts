@@ -8,6 +8,10 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 
+export { readEnabledGroups } from './services/patientModuleConfig'
+export { isFilledValue } from './services/entryValues'
+export { buildColumnSpecs, readSliderParams, CHILD_FIELD_TYPES } from './services/columnForm'
+export type { ColumnSpec, SliderParams } from './services/columnForm'
 export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'

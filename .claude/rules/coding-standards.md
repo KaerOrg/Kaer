@@ -677,7 +677,33 @@ date métier locale est un bug de fuseau.
 
 ### Mode ado (teen) — règle d'or
 
-Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en), **sauf le contenu psychométrique des échelles validées** (voir exception ci-dessous). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+
+> **Exception : fidélité aux échelles cliniques validées.** Le contenu
+> psychométrique d'un instrument validé (consignes `instructions*`, items `q*`,
+> options `opt_*` / `legend_*`, sections, `warning`) n'est **jamais** surchargé
+> dans `teen.json` : on ne « traduit » pas une échelle en tutoiement, on reste
+> fidèle mot pour mot à la version validée en français portée par `common.json`.
+> Le fallback i18next sert cette version au mode ado. Seul l'**habillage
+> applicatif** (hors instrument : `new_btn`, `empty_*`, `footer`, `progress`,
+> `submit`, `chip_*`, `label`, `description`) peut avoir une variante teen.
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
+
+> **Registre ado = tutoiement + vocabulaire simple, JAMAIS de familiarité.**
+> L'app reste un outil de soin professionnel, y compris pour les adolescents. Le
+> teen se distingue du common par le tutoiement et des phrases plus courtes ou
+> concrètes, pas par le relâchement du langage.
+>
+> **Interdits** : mots familiers (« pote », « vite fait », « direct », « là-dedans »,
+> « pas obligé » ; en anglais « in the same spot », « no pressure », « jot it down ») ;
+> élisions orales (« T'y croyais », « T'étais où ») ; questions relâchées sans
+> inversion (« Tu dirais quoi ? », « elle est à combien ? »).
+>
+> **Corrects** : « ami » (pas « pote »), « facultatif » (pas « pas obligé »),
+> inversion interrogative (« Que dirais-tu à un ami dans la même situation ? »,
+> « À quel point y croyais-tu ? », « Où étais-tu ? »).
+>
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
 
 - i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** pour toute clé de module.
 - `de`, `es`, `it`, `pt` n'ont pas de `teen.json` — aucune traduction teen requise pour ces langues.

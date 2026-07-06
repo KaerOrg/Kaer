@@ -234,11 +234,18 @@ Deux field_types propres :
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `column_form_config` | Config du formulaire | `columns` |
-| `column_header` | En-tête de colonne | `color` |
-| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index` |
+| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, capture en deux temps : `quick_btn_label`, `quick_key_1..n`, `complete_key_1..n`, `to_complete_label` |
+| `column_header` | En-tête de colonne | `color`, `optional_group` (colonne masquée côté patient tant que le groupe ne figure pas dans `patient_modules.config.enabled_groups` — lecture `readEnabledGroups` de `@kaer/shared`. Capacité moteur dormante : aucun seed ni UI ne l'utilise actuellement, beck_columns y a renoncé en 2026-07 au profit de colonnes standard) |
+| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
 | `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
+
+> **Capture en deux temps** (`quick_key_*`) : un bouton secondaire en mode liste
+> ouvre le formulaire réduit aux seuls champs dont la clé est une `quick_key` ;
+> la fiche sauvegardée ne porte que ces valeurs (aucun défaut de slider). Tant que
+> toutes les `complete_key_*` ne sont pas renseignées, la fiche affiche une puce
+> « à compléter » (`to_complete_label`, statut **dérivé** jamais stocké) qui ouvre
+> l'édition complète. Utilisé par `beck_columns`.
 
 **Layout `daily_checkin`**
 

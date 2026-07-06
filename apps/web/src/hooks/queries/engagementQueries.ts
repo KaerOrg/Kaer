@@ -8,6 +8,8 @@ import {
   fetchAvailableScales,
   fetchModuleSummary,
   fetchChronoEntries,
+  fetchFormEntries,
+  fetchBeckEvolution,
   fetchActivityEntries,
   type ScorePoint,
   type MoodPoint,
@@ -15,12 +17,13 @@ import {
   type MedEffectPoint,
   type SleepPoint,
   type ModuleSummary,
+  type FormEntryRow,
   type ActivityEntryPoint,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep'
+export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep' | 'form'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -33,6 +36,7 @@ export type ModuleDataResult =
   | { status: 'med'; effects: string[]; points: MedEffectPoint[] }
   | { status: 'sleep'; points: SleepPoint[] }
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
+  | { status: 'form'; entries: FormEntryRow[] }
   | { status: 'activity'; entries: ActivityEntryPoint[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
@@ -44,13 +48,14 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med, sleep, chronoEntries, activityEntries] = await Promise.all([
+        const [scaleResults, mood, fear, med, sleep, chronoEntries, beck, activityEntries] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
           fetchMedSideEffectsEvolution(patientId),
           fetchSleepEvolution(patientId),
           fetchChronoEntries(patientId),
+          fetchBeckEvolution(patientId),
           fetchActivityEntries(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
@@ -64,6 +69,7 @@ export const engagementQueries = {
           medData: med.data,
           sleepData: sleep,
           chronoEntries,
+          beckData: beck,
           activityEntries,
         }
       },
@@ -94,6 +100,10 @@ export const engagementQueries = {
         if (kind === 'sleep') {
           const points = await fetchSleepEvolution(patientId)
           return points.length === 0 ? { status: 'empty' } : { status: 'sleep', points }
+        }
+        if (kind === 'form') {
+          const entries = await fetchFormEntries(patientId, moduleType)
+          return entries.length === 0 ? { status: 'empty' } : { status: 'form', entries }
         }
         if (moduleType === 'chronobiology_tracker') {
           const entries = await fetchChronoEntries(patientId)

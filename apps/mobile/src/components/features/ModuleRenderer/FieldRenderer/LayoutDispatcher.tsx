@@ -103,7 +103,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
 
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'medication_tracker') return <MedicationTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
-  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} patientConfig={patientConfig ?? null} />
   if (preview_kind === 'tree_selector') return <TreeSelectorLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} />
   if (preview_kind === 'sleep_journal') return <SleepJournalLayout fields={visibleFields} footer={footer} />
   if (preview_kind === 'activity_log') return <ActivityLogLayout fields={visibleFields} moduleId={moduleId ?? ''} />

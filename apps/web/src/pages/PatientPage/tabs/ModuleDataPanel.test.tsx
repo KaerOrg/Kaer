@@ -16,6 +16,7 @@ const mockFetchMoodEvolution = vi.fn()
 const mockFetchFearEvolution = vi.fn()
 const mockFetchMedSideEffectsEvolution = vi.fn()
 const mockFetchModuleSummary = vi.fn()
+const mockFetchFormEntries = vi.fn()
 const mockFetchActivityEntries = vi.fn()
 
 vi.mock('@services/engagementService', () => ({
@@ -24,7 +25,15 @@ vi.mock('@services/engagementService', () => ({
   fetchFearEvolution: (...args: unknown[]) => mockFetchFearEvolution(...args),
   fetchMedSideEffectsEvolution: (...args: unknown[]) => mockFetchMedSideEffectsEvolution(...args),
   fetchModuleSummary: (...args: unknown[]) => mockFetchModuleSummary(...args),
+  fetchFormEntries: (...args: unknown[]) => mockFetchFormEntries(...args),
   fetchActivityEntries: (...args: unknown[]) => mockFetchActivityEntries(...args),
+}))
+
+// Routage seul : le panneau column_form est couvert par ColumnFormDataPanel.test.tsx.
+vi.mock('./ColumnFormDataPanel', () => ({
+  ColumnFormDataPanel: ({ entries }: { entries: unknown[] }) => (
+    <div data-testid="column-form-panel" data-entries={entries.length} />
+  ),
 }))
 
 import { render, waitFor } from '@testing-library/react'
@@ -83,10 +92,22 @@ describe('ModuleDataPanel', () => {
       count: 3,
       lastPayload: { total_score: 5 },
     })
-    const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="beck_columns" /></QueryClientProvider>)
+    const { container } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="crisis_plan" /></QueryClientProvider>)
 
     await waitFor(() => expect(container.querySelector('.summary-panel')).toBeTruthy())
-    expect(mockFetchModuleSummary).toHaveBeenCalledWith('p1', 'beck_columns')
+    expect(mockFetchModuleSummary).toHaveBeenCalledWith('p1', 'crisis_plan')
+  })
+
+  it('beck_columns → panneau column_form avec les fiches synchronisées', async () => {
+    mockFetchFormEntries.mockResolvedValue([
+      { date: '2026-06-01T10:00:00Z', values: { situation: 'Réunion', emotion_intensity: 80 } },
+      { date: '2026-06-03T18:00:00Z', values: { situation: 'Repas', outcome_intensity: 40 } },
+    ])
+    const { getByTestId } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="beck_columns" /></QueryClientProvider>)
+
+    await waitFor(() => expect(getByTestId('column-form-panel')).toBeTruthy())
+    expect(mockFetchFormEntries).toHaveBeenCalledWith('p1', 'beck_columns')
+    expect(getByTestId('column-form-panel').getAttribute('data-entries')).toBe('2')
   })
 
   it('aucune donnée → message vide', async () => {

@@ -29,6 +29,10 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: spacing.xs,
   },
+  // Date + puce « à compléter » (Chip du design system) groupées à gauche.
+  recordHeaderLeft: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1,
+  },
   recordDate:        { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
   recordActions:     { flexDirection: 'row', gap: spacing.sm },
   recordRow:         { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
@@ -61,6 +65,10 @@ export const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm,
     padding: spacing.sm, fontSize: 14, color: colors.text,
     backgroundColor: colors.background,
+  },
+  // Chips de suggestions (ui/Chip) sous un champ texte — rangée enveloppante.
+  suggestions: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs,
   },
   // ── Actions de saisie (date rétroactive, « comme d'habitude ») — ui/Button
   // compact aligné à gauche (le primitive porte fond/bordure/radius).

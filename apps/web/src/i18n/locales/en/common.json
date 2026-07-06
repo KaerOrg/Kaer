@@ -281,6 +281,9 @@
     "summary_last_entry": "Last entry",
     "summary_count": "Recorded entries",
     "summary_total_score": "Last total score",
+    "form_records_title": "Completed records",
+    "form_show_more": "Show more entries ({{count}} remaining)",
+    "optional_column_badge": "Optional",
     "psycho_read_count": "{{read}}/{{total}} sheet read",
     "psycho_read_count_plural": "{{read}}/{{total}} sheets read",
     "psycho_pick_unlock": "Choose the sheets to unlock for this patient:",
@@ -1691,7 +1694,7 @@
       },
       "step_5": {
         "title": "Outcome",
-        "hint": "What emotion now? Intensity (0 à 100)? Belief in the alternative thought (0 à 100)?"
+        "hint": "Re-rate the initial emotion: intensity now (0 to 100), any new emotions, belief in the alternative thought (0 to 100)."
       },
       "footer": "Each record is stored locally on the patient's device. History is accessible at any time."
     },
@@ -2108,6 +2111,9 @@
     "fear_title": "Graded Exposure (SUDS)",
     "fear_before": "Before exposure",
     "fear_after": "After exposure",
+    "beck_title": "Beck columns: emotional intensity",
+    "beck_before": "Before restructuring",
+    "beck_after": "After restructuring",
     "sleep_section_title": "Sleep diary",
     "sleep_grid_title": "Sleep diary grid",
     "sleep_efficiency_title": "Sleep efficiency (%)",

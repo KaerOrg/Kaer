@@ -17,6 +17,14 @@ export type FearPoint = { date: string; suds_before: number; suds_after: number 
 
 export type MedEffectPoint = { date: string; [key: string]: number | string }
 
+// Fiche d'un module `column_form` (payload { values }) : date + valeurs brutes
+// saisies par le patient (textes libres et curseurs). Aucune interprétation (MDR).
+export type FormEntryRow = { date: string; values: Record<string, string | number> }
+
+// Colonnes de Beck : intensité de l'émotion de départ avant / après
+// restructuration (même émotion ré-évaluée — mesure canonique du DTR).
+export type BeckPoint = { date: string; intensity_before?: number; intensity_after?: number }
+
 // Résumé brut d'un module pour la card praticien : date et payload de la
 // dernière saisie + nombre total d'entrées. Aucune interprétation (MDR).
 export type ModuleSummary = {
@@ -319,6 +327,58 @@ export async function fetchChronoEntries(patientId: string): Promise<RhythmEntry
   }
 
   return entries
+}
+
+// ── Fiches des modules `column_form` (vue praticien) ─────────────────────────
+// Restitution BRUTE des fiches saisies (textes et curseurs), triées par date de
+// saisie croissante. La date = client_created_at (saisie rétroactive : ce champ
+// porte le jour concerné). Aucune interprétation ni seuil (MDR 2017/745).
+
+export async function fetchFormEntries(
+  patientId: string,
+  moduleId: string,
+): Promise<FormEntryRow[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('payload, client_created_at')
+    .eq('patient_id', patientId)
+    .eq('module_id', moduleId)
+    .eq('entry_kind', 'form_entry')
+    .order('client_created_at', { ascending: true })
+
+  if (error || !data) return []
+
+  const entries: FormEntryRow[] = []
+  for (const row of data) {
+    if (typeof row.client_created_at !== 'string') continue
+    const payload = row.payload as { values?: Record<string, unknown> } | null
+    if (!payload || typeof payload !== 'object' || !payload.values || typeof payload.values !== 'object') continue
+    // Validation de forme : seules les valeurs texte/nombre du payload opaque sont relayées.
+    const values: Record<string, string | number> = {}
+    for (const [key, value] of Object.entries(payload.values)) {
+      if (typeof value === 'string' || typeof value === 'number') values[key] = value
+    }
+    entries.push({ date: row.client_created_at, values })
+  }
+  return entries
+}
+
+// ── Évolution des colonnes de Beck (intensité avant/après restructuration) ───
+
+export async function fetchBeckEvolution(patientId: string): Promise<BeckPoint[]> {
+  const entries = await fetchFormEntries(patientId, 'beck_columns')
+  const points: BeckPoint[] = []
+  for (const entry of entries) {
+    const before = toNumber(entry.values['emotion_intensity'])
+    const after = toNumber(entry.values['outcome_intensity'])
+    if (before == null && after == null) continue
+    points.push({
+      date: entry.date,
+      ...(before != null ? { intensity_before: before } : {}),
+      ...(after != null ? { intensity_after: after } : {}),
+    })
+  }
+  return points
 }
 
 // ── Activités « Activation comportementale » (vue praticien) ─────────────────

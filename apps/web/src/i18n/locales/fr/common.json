@@ -281,6 +281,9 @@
     "summary_last_entry": "Dernière saisie",
     "summary_count": "Saisies enregistrées",
     "summary_total_score": "Dernier score total",
+    "form_records_title": "Fiches saisies",
+    "form_show_more": "Voir plus de fiches ({{count}} restantes)",
+    "optional_column_badge": "Option",
     "psycho_read_count": "{{read}}/{{total}} fiche lue",
     "psycho_read_count_plural": "{{read}}/{{total}} fiches lues",
     "psycho_pick_unlock": "Choisissez les fiches à débloquer pour ce patient :",
@@ -1837,7 +1840,7 @@
       },
       "step_5": {
         "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0 à 100) ? Conviction en la pensée alternative (0 à 100) ?"
+        "hint": "Reprise de l'émotion de départ : intensité maintenant (0 à 100), nouvelles émotions éventuelles, conviction en la pensée alternative (0 à 100)."
       },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
@@ -2254,6 +2257,9 @@
     "fear_title": "Exposition graduée (SUDS)",
     "fear_before": "Avant exposition",
     "fear_after": "Après exposition",
+    "beck_title": "Colonnes de Beck : intensité émotionnelle",
+    "beck_before": "Avant restructuration",
+    "beck_after": "Après restructuration",
     "sleep_section_title": "Agenda du sommeil",
     "sleep_grid_title": "Grille agenda du sommeil",
     "sleep_efficiency_title": "Efficacité du sommeil (%)",

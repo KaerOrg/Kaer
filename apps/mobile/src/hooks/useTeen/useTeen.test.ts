@@ -48,7 +48,8 @@ describe('fr/teen.json — locale ado française', () => {
   })
 
   it('contient les surcharges globales (greeting, modulesTitle)', () => {
-    expect(frTeen.global.greeting).toBe('Salut !')
+    // Registre ado professionnel : tutoiement sans familiarité (cf. coding-standards § Mode ado).
+    expect(frTeen.global.greeting).toBe('Bonjour !')
     expect(frTeen.global.modulesTitle).toBeTruthy()
   })
 

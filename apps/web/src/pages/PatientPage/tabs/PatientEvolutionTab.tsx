@@ -11,6 +11,7 @@ import type {
   FearPoint,
   MedEffectPoint,
   SleepPoint,
+  BeckPoint,
   ActivityEntryPoint,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
@@ -31,6 +32,8 @@ import {
   DEFAULT_SCALE_COLOR,
   FEAR_BEFORE_COLOR,
   FEAR_AFTER_COLOR,
+  BECK_BEFORE_COLOR,
+  BECK_AFTER_COLOR,
 } from './clinicalChartConfig'
 import './PatientEvolutionTab.css'
 
@@ -47,6 +50,7 @@ type EvolutionData = {
   medData: MedEffectPoint[]
   sleepData: SleepPoint[]
   chronoEntries: RhythmEntry[]
+  beckData: BeckPoint[]
   activityEntries: ActivityEntryPoint[]
 }
 
@@ -59,6 +63,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   medData: [],
   sleepData: [],
   chronoEntries: [],
+  beckData: [],
   activityEntries: [],
 }
 
@@ -70,7 +75,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
   const modulesQuery = useQuery(patientQueries.modules(patientId))
-  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, activityEntries } =
+  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, beckData, activityEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
 
@@ -92,6 +97,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
     medData.length > 0 ||
     sleepData.length > 0 ||
     chronoEntries.length > 0 ||
+    beckData.length > 0 ||
     activityEntries.length > 0
 
   // Types de modules ayant des données ; au moins un est-il archivé ?
@@ -101,9 +107,10 @@ export function PatientEvolutionTab({ patientId }: Props) {
     if (fearData.length > 0) types.push('fear_thermometer')
     if (medData.length > 0) types.push('medication_side_effects')
     if (sleepData.length > 0) types.push('sleep_diary')
+    if (beckData.length > 0) types.push('beck_columns')
     if (activityEntries.length > 0) types.push('behavioral_activation')
     return types
-  }, [scales, moodData.length, fearData.length, medData.length, sleepData.length, activityEntries.length])
+  }, [scales, moodData.length, fearData.length, medData.length, sleepData.length, beckData.length, activityEntries.length])
   const hasArchived = dataTypes.some(mt => !activeTypes.has(mt))
   const hasActiveData = dataTypes.some(mt => activeTypes.has(mt))
 
@@ -327,6 +334,40 @@ export function PatientEvolutionTab({ patientId }: Props) {
                   series={[
                     { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
                     { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
+                  ]}
+                  yDomain={[0, 100]}
+                  showLegend
+                  locale={i18n.language}
+                />
+              ) : (
+                <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
+              )}
+            </EvolutionCard>
+          )
+        })()}
+
+        {/* ── Colonnes de Beck — intensité émotionnelle avant/après ── */}
+        {beckData.length > 0 && isShown('beck_columns') && (() => {
+          const points = filterByRange(beckData, days)
+          const chartData = points.map(p => ({
+            date: p.date,
+            ...(p.intensity_before != null ? { intensity_before: p.intensity_before } : {}),
+            ...(p.intensity_after != null ? { intensity_after: p.intensity_after } : {}),
+          }))
+          return (
+            <EvolutionCard
+              title={t('evolution.beck_title')}
+              badge={t('evolution.n_sessions', { count: points.length })}
+              wide
+              archived={isArchived('beck_columns')}
+              archivedLabel={t('evolution.archived_badge')}
+            >
+              {chartData.length >= 2 ? (
+                <LineChart
+                  data={chartData}
+                  series={[
+                    { key: 'intensity_before', color: BECK_BEFORE_COLOR, label: t('evolution.beck_before') },
+                    { key: 'intensity_after',  color: BECK_AFTER_COLOR, label: t('evolution.beck_after') },
                   ]}
                   yDomain={[0, 100]}
                   showLegend

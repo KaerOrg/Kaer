@@ -367,6 +367,47 @@ structure dans du texte.
 
 ---
 
+## Mode ado : registre (tutoiement ≠ familiarité)
+
+> Règle source : [coding-standards.md § Mode ado (teen) — règle d'or](coding-standards.md#mode-ado-teen--règle-dor).
+
+**colonne-beck-reflexion (2026-07-05) — le teen a glissé vers le langage familier.**
+Les variantes teen du module Beck ont été écrites en registre relâché, corrigées
+**trois fois de suite** par l'utilisateur (perte de temps explicitement signalée) :
+
+```json
+// ❌ familier — élisions, « pote », « vite fait », questions sans inversion
+"entry_col_3_belief": "T'y croyais à quel point ?"
+"quick_capture": "Note vite fait"
+"entry_col_evidence_against_hint": "… Tu dirais quoi à un pote dans la même situation ?"
+"entry_col_distortion_hint": "Tu reconnais un piège de la pensée là-dedans ? (pas obligé)"
+// ✅ tutoiement professionnel — vocabulaire standard, inversion interrogative
+"entry_col_3_belief": "À quel point y croyais-tu ?"
+"quick_capture": "Note rapide"
+"entry_col_evidence_against_hint": "… Que dirais-tu à un ami dans la même situation ?"
+"entry_col_distortion_hint": "Reconnais-tu un piège de la pensée ? (facultatif)"
+```
+
+→ Le mode ado est du **tutoiement professionnel** : vocabulaire simple, phrases
+courtes, jamais de mots familiers ni d'élisions orales. Vaut aussi pour l'anglais
+(« in the same spot », « no pressure », « jot it down » → registre neutre).
+Réflexe review sur tout ajout à `teen.json` :
+`grep -inE "pote|vite fait|là-dedans|pas oblig|t'y |t'étais|no pressure|jot it" apps/mobile/src/i18n/locales/*/teen.json` doit rester vide.
+
+**Suite du même incident — les échelles validées avaient été réécrites en teen.**
+La passe de correction a révélé plus grave que le registre : les items, consignes
+et options de PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS, RCADS, NSI et EPDS avaient des
+variantes teen **réécrites** (« tu as été combien gêné(e)… », « regarder un truc »).
+Or on ne modifie JAMAIS la formulation d'un instrument psychométrique validé, ni
+pour le tutoyer ni pour le simplifier : la validation porte sur les mots exacts.
+Correctif : toutes les surcharges teen psychométriques supprimées ; le mode ado
+retombe sur la version validée de `common.json` (fallback i18next). Seul
+l'habillage applicatif garde une variante teen.
+→ Réflexe review : dans `teen.json`, un bloc d'échelle clinique ne doit contenir
+AUCUNE clé `instructions*`, `q*`, `opt_*`, `legend_*`, `section_*`, `warning`.
+
+---
+
 ## Internationalisation : texte en dur
 
 > Règle source : [coding-standards.md § Internationalisation](coding-standards.md#internationalisation--zéro-texte-hardcodé).

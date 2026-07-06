@@ -117,12 +117,71 @@ const MOCK_ENTRY: database.FormEntry = {
   created_at: '2026-05-05T10:00:00Z',
 }
 
-function renderLayout() {
+// Variante avec capture en deux temps : formulaire réduit + statut « à compléter ».
+const QUICK_CFG = makeField({
+  id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
+  props: {
+    engagement_event_type: 'SAVE_BECK_THOUGHT_RECORD',
+    required_key_1: 'situation', required_key_2: 'automatic_thought',
+    quick_btn_label: 'modules.beck_columns.quick_capture',
+    quick_key_1: 'situation', quick_key_2: 'automatic_thought',
+    complete_key_1: 'rational_response',
+    to_complete_label: 'modules.beck_columns.to_complete',
+  },
+})
+const QUICK_FIELDS: ContentField[] = [QUICK_CFG, ...MOCK_FIELDS.slice(1)]
+
+const COMPLETE_ENTRY: database.FormEntry = {
+  ...MOCK_ENTRY,
+  id: 'entry-2',
+  values: { ...MOCK_ENTRY.values, rational_response: 'une lecture plus nuancée existe' },
+}
+
+// Variante avec chips de suggestions sur le champ situation.
+const COL1_WITH_SUGGESTIONS = makeField({
+  id: 'beck.col1.h', section_id: 'beck.col_situation', sort_order: 10,
+  text_code: 'modules.beck_columns.entry_col_1_title',
+  props: { color: '#0EA5E9', step_number: '1' },
+  children: [
+    makeField({
+      id: 'beck.col1.text', section_id: 'beck.col_situation', parent_field_id: 'beck.col1.h',
+      field_type: 'column_text_field', sort_order: 11,
+      props: {
+        key: 'situation', multiline: '1',
+        suggestion_1: 'modules.beck_columns.sugg_anxiety',
+        suggestion_2: 'modules.beck_columns.sugg_anger',
+      },
+    }),
+  ],
+})
+const SUGG_FIELDS: ContentField[] = [MOCK_FIELDS[0], COL1_WITH_SUGGESTIONS, COL3]
+
+// Colonne optionnelle (groupe « evidence ») — visible seulement si le praticien
+// a activé le groupe dans patient_modules.config.enabled_groups.
+const EVIDENCE_COL = makeField({
+  id: 'beck.col_evf.h', section_id: 'beck.col_evidence_for', sort_order: 37,
+  text_code: 'modules.beck_columns.entry_col_evidence_for_title',
+  props: { color: '#0891B2', optional_group: 'evidence' },
+  children: [
+    makeField({
+      id: 'beck.col_evf.text', section_id: 'beck.col_evidence_for', parent_field_id: 'beck.col_evf.h',
+      field_type: 'column_text_field', sort_order: 37,
+      props: { key: 'evidence_for', multiline: '1' },
+    }),
+  ],
+})
+const FIELDS_WITH_OPTIONAL: ContentField[] = [...MOCK_FIELDS, EVIDENCE_COL]
+
+function renderLayout(
+  fields: ContentField[] = MOCK_FIELDS,
+  patientConfig: Record<string, unknown> | null = null,
+) {
   return render(
     <FieldRenderer
       preview_kind="column_form"
-      fields={MOCK_FIELDS}
+      fields={fields}
       moduleId="beck_columns"
+      patientConfig={patientConfig}
     />
   )
 }
@@ -225,5 +284,173 @@ describe('FieldRenderer — column_form (ColumnFormLayout)', () => {
       expect(database.deleteFormEntry).toHaveBeenCalledWith('entry-1')
     })
     await waitFor(() => expect(screen.queryByTestId('record-entry-1')).toBeNull())
+  })
+})
+
+describe('FieldRenderer — column_form : capture en deux temps', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('sans config quick_key_*, aucun bouton de capture rapide', async () => {
+    renderLayout()
+    await screen.findByTestId('new-entry')
+    expect(screen.queryByTestId('quick-entry')).toBeNull()
+  })
+
+  it('la capture rapide ne montre que les champs quick (pas de slider)', async () => {
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('quick-entry'))
+
+    expect(await screen.findByTestId('field-situation')).toBeTruthy()
+    expect(screen.getByTestId('field-automatic_thought')).toBeTruthy()
+    expect(screen.queryByTestId('slider-thought_belief')).toBeNull()
+  })
+
+  it('une fiche rapide ne sauvegarde AUCUNE valeur par défaut pour les champs non montrés', async () => {
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('quick-entry'))
+    fireEvent.changeText(screen.getByTestId('field-automatic_thought'), 'je vais tout rater')
+    fireEvent.press(screen.getByTestId('save-entry'))
+
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const saved = (database.saveFormEntry as jest.Mock).mock.calls[0][0] as database.FormEntry
+    expect(saved.values.automatic_thought).toBe('je vais tout rater')
+    expect(saved.values.thought_belief).toBeUndefined()
+  })
+
+  it('une fiche sans réponse rationnelle porte la puce « à compléter »', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY, COMPLETE_ENTRY])
+    renderLayout(QUICK_FIELDS)
+
+    expect(await screen.findByTestId('to-complete-entry-1')).toBeTruthy()
+    expect(screen.queryByTestId('to-complete-entry-2')).toBeNull()
+  })
+
+  it('la puce « à compléter » ouvre l’édition COMPLÈTE de la fiche', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderLayout(QUICK_FIELDS)
+    fireEvent.press(await screen.findByTestId('to-complete-entry-1'))
+
+    // Formulaire complet : valeurs existantes préservées + slider visible.
+    expect(screen.getByDisplayValue('au travail')).toBeTruthy()
+    expect(screen.getByTestId('slider-thought_belief')).toBeTruthy()
+  })
+})
+
+describe('FieldRenderer — column_form : curseurs sans pré-sélection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('un curseur non touché ne sauvegarde AUCUNE valeur (pas de faux 50)', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.changeText(screen.getByTestId('field-situation'), 'au bureau')
+    fireEvent.press(screen.getByTestId('save-entry'))
+
+    await waitFor(() => expect(database.saveFormEntry).toHaveBeenCalled())
+    const saved = (database.saveFormEntry as jest.Mock).mock.calls[0][0] as database.FormEntry
+    expect(saved.values.situation).toBe('au bureau')
+    expect(saved.values.thought_belief).toBeUndefined()
+  })
+})
+
+describe('FieldRenderer — column_form : fiche dépliable en liste', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+  })
+
+  it('replié : textes tronqués, pas de ligne dédiée par curseur', async () => {
+    renderLayout()
+    await screen.findByTestId('record-entry-1')
+    expect(screen.queryByTestId('record-slider-thought_belief')).toBeNull()
+  })
+
+  it('déplié au tap : chaque curseur renseigné a sa ligne (valeur brute), re-tap replie', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('record-entry-1'))
+
+    expect(screen.getByTestId('record-slider-thought_belief')).toBeTruthy()
+    expect(screen.getByText(/80/)).toBeTruthy()
+
+    fireEvent.press(screen.getByTestId('record-entry-1'))
+    expect(screen.queryByTestId('record-slider-thought_belief')).toBeNull()
+  })
+})
+
+describe('FieldRenderer — column_form : colonnes optionnelles (optional_group)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('une colonne optional_group est masquée sans activation praticien', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
+    expect(screen.queryByTestId('column-beck.col_evidence_for')).toBeNull()
+    expect(screen.queryByTestId('field-evidence_for')).toBeNull()
+  })
+
+  it('la colonne apparaît quand le groupe est activé dans la config patient', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL, { enabled_groups: ['evidence'] })
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_evidence_for')).toBeTruthy()
+    expect(screen.getByTestId('field-evidence_for')).toBeTruthy()
+  })
+
+  it('une colonne SANS optional_group reste visible quelle que soit la config', async () => {
+    renderLayout(FIELDS_WITH_OPTIONAL, { enabled_groups: [] })
+    fireEvent.press(await screen.findByTestId('new-entry'))
+
+    expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
+    expect(screen.getByTestId('column-beck.col_thought')).toBeTruthy()
+  })
+})
+
+describe('FieldRenderer — column_form : chips de suggestions', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('sans props suggestion_*, aucune rangée de chips', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('suggestions-situation')).toBeNull()
+  })
+
+  it('une chip ajoute son mot au champ, une seconde pression le retire', async () => {
+    renderLayout(SUGG_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    const chip = screen.getByTestId('suggestion-situation-modules.beck_columns.sugg_anxiety')
+
+    fireEvent.press(chip)
+    const added = String(screen.getByTestId('field-situation').props.value)
+    expect(added.length).toBeGreaterThan(0)
+
+    fireEvent.press(chip)
+    expect(screen.getByTestId('field-situation').props.value).toBe('')
+  })
+
+  it('le texte libre du patient est préservé quand une chip est ajoutée puis retirée', async () => {
+    renderLayout(SUGG_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    const input = screen.getByTestId('field-situation')
+    fireEvent.changeText(input, 'un peu perdu')
+
+    const chip = screen.getByTestId('suggestion-situation-modules.beck_columns.sugg_anger')
+    fireEvent.press(chip)
+    const withChip = String(screen.getByTestId('field-situation').props.value)
+    expect(withChip.startsWith('un peu perdu, ')).toBe(true)
+
+    fireEvent.press(chip)
+    expect(screen.getByTestId('field-situation').props.value).toBe('un peu perdu')
   })
 })
