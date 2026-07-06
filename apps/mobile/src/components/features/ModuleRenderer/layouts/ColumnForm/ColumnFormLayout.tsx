@@ -17,7 +17,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
-import { collectIndexed, readEnabledGroups } from '@kaer/shared'
+import { collectIndexed, readEnabledGroups, buildColumnSpecs, readSliderParams } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
@@ -91,18 +91,13 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
   // ce groupe pour ce patient (patient_modules.config.enabled_groups).
   const columns = useMemo<ColumnSpec[]>(() => {
     const enabledGroups = readEnabledGroups(patientConfig)
-    const headers = fields
-      .filter(f => f.field_type === 'column_header' && f.section_id != null)
-      .filter(f => {
-        const group = f.props['optional_group']
+    return buildColumnSpecs(fields)
+      .filter(({ header }) => {
+        if (header.section_id == null) return false
+        const group = header.props['optional_group']
         return !group || enabledGroups.includes(group)
       })
-      .sort((a, b) => a.sort_order - b.sort_order)
-    return headers.map(h => ({
-      sectionId: h.section_id!,
-      header: h,
-      children: (h.children ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
-    }))
+      .map(({ header, children }) => ({ sectionId: header.section_id!, header, children }))
   }, [fields, patientConfig])
 
   // Colonnes du formulaire réduit : seuls les enfants dont la clé est une
@@ -388,10 +383,10 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
                       )
                     }
                     if (child.field_type === 'column_slider_field') {
-                      const min = parseInt(child.props['min'] ?? '0', 10)
-                      const max = parseInt(child.props['max'] ?? '100', 10)
-                      const step = parseInt(child.props['step'] ?? '10', 10)
+                      const { min, max, step } = readSliderParams(child)
                       const sliderColor = child.props['color'] ?? accent
+                      // Cas courant 0-100/10 : réf. stable (module-level) pour ne pas
+                      // ré-allouer le tableau de pips à chaque frappe (mémo RatingSelector).
                       const steps = (min === 0 && max === 100 && step === 10)
                         ? PIP_STEPS_0_100
                         : buildPipSteps(min, max, step)

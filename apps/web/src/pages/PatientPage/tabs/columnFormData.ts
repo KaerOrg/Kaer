@@ -1,39 +1,18 @@
-import type { ContentField } from '@services/moduleService'
+import { buildColumnSpecs, readSliderParams, type ColumnSpec } from '@kaer/shared'
 import type { FormEntryRow } from '@services/engagementService'
 
 // Helpers purs du panneau « Données » des modules `column_form` : dérivent la
 // structure (colonnes, curseurs) depuis `module_content_fields` — zéro hardcode
 // d'un module particulier (config-first). Valeurs brutes uniquement (MDR).
+// La construction des colonnes vient de `@kaer/shared` (source unique web ≡ mobile).
 
-export interface ColumnSpec {
-  header: ContentField
-  children: ContentField[]
-}
+export { buildColumnSpecs, type ColumnSpec }
 
 export interface SliderSpec {
   key: string
   labelCode: string | null
   min: number
   max: number
-}
-
-const CHILD_FIELD_TYPES = new Set([
-  'column_text_field',
-  'column_slider_field',
-  'column_time_field',
-])
-
-/** Colonnes du module : chaque `column_header` + ses champs enfants triés. */
-export function buildColumnSpecs(fields: ContentField[]): ColumnSpec[] {
-  return fields
-    .filter(f => f.field_type === 'column_header')
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map(header => ({
-      header,
-      children: (header.children ?? [])
-        .filter(c => CHILD_FIELD_TYPES.has(c.field_type))
-        .sort((a, b) => a.sort_order - b.sort_order),
-    }))
 }
 
 /** Tous les curseurs du module, dans l'ordre des colonnes (séries du graphique). */
@@ -44,12 +23,8 @@ export function buildSliderSpecs(columns: ColumnSpec[]): SliderSpec[] {
       if (child.field_type !== 'column_slider_field') continue
       const key = child.props['key']
       if (!key) continue
-      sliders.push({
-        key,
-        labelCode: child.text_code,
-        min: parseInt(child.props['min'] ?? '0', 10),
-        max: parseInt(child.props['max'] ?? '100', 10),
-      })
+      const { min, max } = readSliderParams(child)
+      sliders.push({ key, labelCode: child.text_code, min, max })
     }
   }
   return sliders
