@@ -1,3 +1,5 @@
+import { memo } from 'react'
+import { isFilledValue } from '@kaer/shared'
 import type { FormEntryRow } from '@services/engagementService'
 import type { ColumnSpec } from './columnFormData'
 
@@ -14,7 +16,7 @@ interface Props {
  * Présentationnel pur. Conforme MDR 2017/745 : restitution neutre, aucun
  * seuil ni label interprétatif — les accents de colonne viennent de la config.
  */
-export function ColumnFormRecordCard({ entry, columns, locale, t }: Props) {
+function ColumnFormRecordCardBase({ entry, columns, locale, t }: Props) {
   const dateLabel = new Date(entry.date).toLocaleDateString(locale, { dateStyle: 'long' })
 
   return (
@@ -22,20 +24,16 @@ export function ColumnFormRecordCard({ entry, columns, locale, t }: Props) {
       <header className="cfd-record__date">{dateLabel}</header>
       {columns.map(col => {
         const accent = col.header.props['color'] ?? 'var(--color-primary)'
-        const filled = col.children.filter(child => {
-          const key = child.props['key']
-          const value = key ? entry.values[key] : undefined
-          return typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')
-        })
+        const filled = col.children
+          .map(child => ({ child, value: child.props['key'] ? entry.values[child.props['key']] : undefined }))
+          .filter(({ value }) => isFilledValue(value))
         if (filled.length === 0) return null
         return (
           <section key={col.header.id} className="cfd-record__column">
             <h5 className="cfd-record__column-title" style={{ color: accent }}>
               {col.header.text_code ? t(col.header.text_code) : ''}
             </h5>
-            {filled.map(child => {
-              const key = child.props['key']
-              const value = key ? entry.values[key] : undefined
+            {filled.map(({ child, value }) => {
               const label = child.text_code ? t(child.text_code) : ''
               // Curseur ou horaire : paire libellé + valeur brute. Texte : intégral.
               if (child.field_type !== 'column_text_field') {
@@ -56,3 +54,5 @@ export function ColumnFormRecordCard({ entry, columns, locale, t }: Props) {
     </article>
   )
 }
+
+export const ColumnFormRecordCard = memo(ColumnFormRecordCardBase)

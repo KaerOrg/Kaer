@@ -1,6 +1,7 @@
 import { Clock, Pencil, Plus, Save, Trash2, Zap } from 'lucide-react'
 import { collectIndexed } from '@kaer/shared'
 import { Button } from '../../../../ui/Button'
+import { Chip } from '../../../../ui/Chip'
 import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '@services/moduleService'
 
@@ -126,16 +127,14 @@ export function ColumnFormLayout({ fields, t }: Props) {
       {(newBtn || quickBtn) && (
         <div className="cf-actions">
           {quickBtn && (
-            <div className="cf-new-btn cf-new-btn--secondary">
-              <Zap size={16} />
-              <span>{quickBtn}</span>
-            </div>
+            <Button variant="secondary" size="sm" disabled icon={<Zap size={16} />}>
+              {quickBtn}
+            </Button>
           )}
           {newBtn && (
-            <div className="cf-new-btn">
-              <Plus size={16} />
-              <span>{newBtn}</span>
-            </div>
+            <Button variant="primary" size="sm" disabled icon={<Plus size={16} />}>
+              {newBtn}
+            </Button>
           )}
         </div>
       )}
@@ -177,9 +176,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
                         {suggestionCodes.length > 0 && (
                           <div className="cf-suggestions">
                             {suggestionCodes.map(code => (
-                              <span key={code} className="cf-suggestion" style={{ borderColor: color, color }}>
-                                {t(code)}
-                              </span>
+                              <Chip key={code} label={t(code)} size="sm" />
                             ))}
                           </div>
                         )}

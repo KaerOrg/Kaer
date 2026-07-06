@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { Button } from '../../../components/ui/Button'
+import { Button } from '@ui/Button'
 import type { ModuleType } from '../../../lib/database.types'
 import type { FormEntryRow } from '@services/engagementService'
 import { moduleQueries } from '../../../hooks/queries'
@@ -53,7 +53,7 @@ export function ColumnFormDataPanel({ moduleType, entries }: Props) {
   const records = useMemo(() => entries.slice().reverse(), [entries])
   const [visibleCount, setVisibleCount] = useState(RECORDS_PAGE_SIZE)
   const showMore = useCallback(() => setVisibleCount(c => c + RECORDS_PAGE_SIZE), [])
-  const visible = records.slice(0, visibleCount)
+  const visible = useMemo(() => records.slice(0, visibleCount), [records, visibleCount])
 
   if (fieldsQuery.isLoading) {
     return (

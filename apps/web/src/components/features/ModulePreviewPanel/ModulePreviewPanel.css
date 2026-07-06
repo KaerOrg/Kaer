@@ -1933,27 +1933,6 @@
   gap: 8px;
 }
 
-.cf-new-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-}
-
-/* Variante secondaire (capture rapide) : contour, parité avec le bouton mobile. */
-.cf-new-btn--secondary {
-  background: var(--color-bg);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-  box-shadow: none;
-}
-
 .cf-field { display: flex; flex-direction: column; gap: 6px; }
 
 /* Badge « Option » d'une colonne optionnelle (optional_group) dans l'aperçu. */
@@ -1970,19 +1949,8 @@
   vertical-align: middle;
 }
 
-/* Chips d'aide au vocabulaire (parité mobile) — teinte de la colonne. */
+/* Chips d'aide au vocabulaire (parité mobile) — primitive ui/Chip. */
 .cf-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
-
-.cf-suggestion {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  opacity: 0.85;
-}
 
 .cf-entry { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; border-top: 1px dashed var(--color-border); }
 

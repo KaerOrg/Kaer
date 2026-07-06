@@ -11,7 +11,7 @@ import { useState, useCallback, useEffect, useMemo, Fragment } from 'react'
 import {
 
   View, Text, ScrollView, TextInput, ActivityIndicator,
-  KeyboardAvoidingView, Platform, Pressable,
+  KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
@@ -23,7 +23,7 @@ import {
   getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '@services/formEntryService'
-import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
+import { formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -31,8 +31,8 @@ import { RatingSelector } from '@ui/RatingSelector'
 import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
 import { ColumnTimeField } from './ColumnTimeField'
-import { isEntryComplete } from './entryCompletion'
 import { hasToken, toggleToken } from './textSuggestions'
+import { RecordCard, type RecordColumnPart } from './RecordCard'
 import { styles } from './styles'
 
 const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -114,6 +114,19 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
       .map(col => ({ ...col, children: col.children.filter(c => keySet.has(c.props['key'] ?? '')) }))
       .filter(col => col.children.length > 0)
   }, [columns, quickKeys])
+
+  // Découpage des colonnes par type de widget — calculé une fois par module (pas
+  // par fiche) et partagé par toutes les cartes de la liste (RecordCard mémoïsée).
+  const listColumnParts = useMemo<RecordColumnPart[]>(
+    () => columns.map(col => ({
+      sectionId: col.sectionId,
+      accent: col.header.props['color'] ?? colors.primary,
+      textChildren: col.children.filter(c => c.field_type === 'column_text_field'),
+      sliderChildren: col.children.filter(c => c.field_type === 'column_slider_field'),
+      timeChildren: col.children.filter(c => c.field_type === 'column_time_field'),
+    })),
+    [columns],
+  )
 
   // ── State — `quick` = formulaire réduit (capture rapide), `entry` = complet
   const [mode, setMode] = useState<'list' | 'entry' | 'quick'>('list')
@@ -204,6 +217,10 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     setMode('list')
     setEditingId(null)
     setValues({})
+  }, [])
+
+  const handleToggleExpand = useCallback((id: string) => {
+    setExpandedId(prev => (prev === id ? null : id))
   }, [])
 
   const handleDelete = useCallback((entry: FormEntry) => {
@@ -460,116 +477,21 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
           </View>
         ) : (
           <View style={styles.list}>
-            {entries.map(entry => {
-              const dateLabel = formatDateFull(entry.created_at)
-              const expanded = expandedId === entry.id
-              return (
-                <Pressable
-                  key={entry.id}
-                  style={styles.recordCard}
-                  testID={`record-${entry.id}`}
-                  onPress={() => setExpandedId(prev => (prev === entry.id ? null : entry.id))}
-                  accessibilityHint={t('common.details')}
-                >
-                  <View style={styles.recordHeader}>
-                    <View style={styles.recordHeaderLeft}>
-                      <Text style={styles.recordDate}>{dateLabel}</Text>
-                      {showCompletion && !isEntryComplete(entry.values, completeKeys) ? (
-                        <Chip
-                          label={toCompleteLabel}
-                          size="sm"
-                          selected
-                          onPress={() => handleEdit(entry)}
-                          testID={`to-complete-${entry.id}`}
-                        />
-                      ) : null}
-                    </View>
-                    <View style={styles.recordActions}>
-                      <Button
-                        variant="ghost"
-                        onPress={() => handleEdit(entry)}
-                        iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
-                        accessibilityLabel={t('common.modify')}
-                        testID={`edit-${entry.id}`}
-                      />
-                      <Button
-                        variant="ghost"
-                        onPress={() => handleDelete(entry)}
-                        iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
-                        accessibilityLabel={t('common.delete')}
-                        testID={`delete-${entry.id}`}
-                      />
-                    </View>
-                  </View>
-                  {columns.map(col => {
-                    const textChildren = col.children.filter(c => c.field_type === 'column_text_field')
-                    const sliderChildren = col.children.filter(c => c.field_type === 'column_slider_field')
-                    const timeChildren = col.children.filter(c => c.field_type === 'column_time_field')
-                    const accent = col.header.props['color'] ?? colors.primary
-                    return (
-                      <Fragment key={col.sectionId}>
-                        {textChildren.map(child => {
-                          const key = child.props['key']
-                          if (!key) return null
-                          const value = entry.values[key]
-                          if (typeof value !== 'string' || !value) return null
-                          // Replié : annote avec le 1er slider de la colonne. Déplié :
-                          // texte intégral, les sliders ont leurs propres lignes.
-                          const slider = sliderChildren[0]
-                          const sliderKey = slider?.props['key']
-                          const sliderVal = sliderKey ? entry.values[sliderKey] : null
-                          return (
-                            <View key={child.id} style={styles.recordRow}>
-                              <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                              <Text style={styles.recordText} numberOfLines={expanded ? undefined : 2}>
-                                {value}
-                                {!expanded && typeof sliderVal === 'number' ? (
-                                  <Text style={styles.recordIntensity}> ({sliderVal}%)</Text>
-                                ) : null}
-                              </Text>
-                            </View>
-                          )
-                        })}
-                        {expanded
-                          ? sliderChildren.map(child => {
-                              const key = child.props['key']
-                              if (!key) return null
-                              const value = entry.values[key]
-                              if (typeof value !== 'number') return null
-                              const labelText = child.text_code ? t(child.text_code) : ''
-                              return (
-                                <View key={child.id} style={styles.recordRow} testID={`record-slider-${key}`}>
-                                  <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                                  <Text style={styles.recordText}>
-                                    {labelText ? <Text style={styles.recordIntensity}>{labelText} </Text> : null}
-                                    {value}
-                                  </Text>
-                                </View>
-                              )
-                            })
-                          : null}
-                        {timeChildren.map(child => {
-                          const key = child.props['key']
-                          if (!key) return null
-                          const value = entry.values[key]
-                          if (typeof value !== 'string' || !value) return null
-                          const labelText = child.text_code ? t(child.text_code) : ''
-                          return (
-                            <View key={child.id} style={styles.recordRow} testID={`record-time-${key}`}>
-                              <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                              <Text style={styles.recordText} numberOfLines={1}>
-                                {labelText ? <Text style={styles.recordIntensity}>{labelText} </Text> : null}
-                                {value}
-                              </Text>
-                            </View>
-                          )
-                        })}
-                      </Fragment>
-                    )
-                  })}
-                </Pressable>
-              )
-            })}
+            {entries.map(entry => (
+              <RecordCard
+                key={entry.id}
+                entry={entry}
+                columnParts={listColumnParts}
+                expanded={expandedId === entry.id}
+                showCompletion={showCompletion}
+                completeKeys={completeKeys}
+                toCompleteLabel={toCompleteLabel}
+                t={t}
+                onToggleExpand={handleToggleExpand}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </View>
         )}
         {footer != null && (
