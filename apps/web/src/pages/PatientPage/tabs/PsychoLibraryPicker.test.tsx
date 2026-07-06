@@ -5,11 +5,6 @@ import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
 import type { ModuleTaxonomy } from '@services/moduleCatalogService'
 
-// ThemeSuggestionButton tire useToast/un service — stub (hors périmètre du picker).
-vi.mock('../../../components/features/ThemeSuggestionButton', () => ({
-  ThemeSuggestionButton: () => <div data-testid="suggest-btn" />,
-}))
-
 const THEMES: PsyEduTheme[] = [{ id: 'treatment', icon_name: 'Pill', sort_order: 1 }]
 const TOPICS: LibraryTopic[] = [
   {

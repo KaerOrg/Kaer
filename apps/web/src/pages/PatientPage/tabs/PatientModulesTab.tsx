@@ -106,8 +106,7 @@ export function PatientModulesTab({
   )
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
-  const allTopicIds = useMemo(() => libraryTopics.map(topic => topic.id), [libraryTopics])
-  const psycho = usePsychoEducationPicker(modules, allTopicIds, patientId, practitionerId, onReloadModules)
+  const psycho = usePsychoEducationPicker(modules, patientId, practitionerId, onReloadModules)
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
   const medList = useMedicationListEditor(modules, onReloadModules)

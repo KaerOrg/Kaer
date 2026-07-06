@@ -4,7 +4,6 @@ import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { SearchInput } from '../../../components/ui/SearchInput'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
-import { ThemeSuggestionButton } from '../../../components/features/ThemeSuggestionButton'
 import { moduleMatchesTagFilters, type ActiveTagFilters } from '../../../lib/moduleFilter'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
@@ -148,10 +147,6 @@ export function PsychoLibraryPicker({
       )}
 
       {error ? <p className="psycho-card-picker__error">{error}</p> : null}
-
-      <div className="psycho-card-picker__suggest">
-        <ThemeSuggestionButton />
-      </div>
 
       <div className="psycho-card-picker__actions">
         <Button size="sm" loading={saving} onClick={onConfirm}>
