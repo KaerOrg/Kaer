@@ -2,12 +2,10 @@ import { useCallback, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
-import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
 import { SIDE_EFFECT_CATALOG, isCustomKey } from '../../../lib/sideEffectsCatalog'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '@services/moduleCatalogService'
-import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { SideEffectToggleRow } from './SideEffectToggleRow'
 import { CustomEffectRow } from './CustomEffectRow'
@@ -17,7 +15,6 @@ const MODULE_TYPE: ModuleType = 'medication_side_effects'
 type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
 
 export interface MedicationSideEffectsCardProps {
-  patientId: string
   tagChips: ReactNode
   modItem: ModuleItem
   modIcon: ReactNode
@@ -41,7 +38,6 @@ export interface MedicationSideEffectsCardProps {
  * callbacks stables (useCallback) — un branchement de render ne peut pas appeler de hooks.
  */
 export function MedicationSideEffectsCard({
-  patientId,
   tagChips,
   modItem,
   modIcon,
@@ -99,7 +95,9 @@ export function MedicationSideEffectsCard({
     [addCustom]
   )
 
-  const isWide = medEffects.open || previewOpen || dataOpen
+  // Seul l'éditeur de configuration élargit encore la carte : aperçu et données
+  // s'affichent désormais en modale, hors de la grille.
+  const isWide = medEffects.open
 
   return (
     <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
@@ -134,8 +132,6 @@ export function MedicationSideEffectsCard({
             )}
           </div>
         )}
-        {previewOpen && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
-        {dataOpen && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
       </Card>
 
       {medEffects.open && unlocked && mod && (

@@ -3,9 +3,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'fr' } }),
 }))
-// Panneaux lourds (self-fetch react-query) — non rendus dans ces cas, mockés par sûreté.
-vi.mock('../../../components/features/ModulePreviewPanel', () => ({ ModulePreviewPanel: () => null }))
-vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => null }))
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
@@ -38,7 +35,6 @@ function makeMedList(over: Partial<MedList> = {}): MedList {
 
 function setup(over: Partial<React.ComponentProps<typeof MedicationAdherenceCard>> = {}) {
   const props: React.ComponentProps<typeof MedicationAdherenceCard> = {
-    patientId: 'p1',
     tagChips: null,
     modItem: MOD_ITEM,
     modIcon: null,

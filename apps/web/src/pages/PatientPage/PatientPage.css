@@ -794,17 +794,6 @@
   margin-top: 6px;
 }
 
-/* ── Panneaux aperçu / données intégrés dans le body de la card ──────────────── */
-/* Les panneaux (.preview-panel, .module-data-panel, .summary-panel) sont conçus
-   pour s'accoler sous une card ; intégrés ici dans le body, on les présente comme
-   des sous-panneaux autonomes : marge haute + coins entièrement arrondis. */
-.module-card-item .card__body > .preview-panel,
-.module-card-item .card__body > .module-data-panel,
-.module-card-item .card__body > .summary-panel {
-  margin-top: var(--spacing-sm);
-  border-radius: var(--radius-md);
-}
-
 .module-card__revoke {
   color: var(--color-danger) !important;
 }

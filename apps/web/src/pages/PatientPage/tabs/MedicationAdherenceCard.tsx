@@ -5,10 +5,8 @@ import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { Chip } from '../../../components/ui/Chip'
 import { Tooltip } from '../../../components/ui/Tooltip'
-import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '@services/moduleCatalogService'
-import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { MedicationAddForm } from './MedicationAddForm'
 import { ModuleCardFooter } from './ModuleCardFooter'
@@ -18,7 +16,6 @@ const MODULE_TYPE: ModuleType = 'medication_adherence'
 type MedList = ReturnType<typeof useMedicationListEditor>
 
 export interface MedicationAdherenceCardProps {
-  patientId: string
   tagChips: ReactNode
   modItem: ModuleItem
   modIcon: ReactNode
@@ -42,7 +39,7 @@ export interface MedicationAdherenceCardProps {
  * render de PatientModulesTab pour héberger des callbacks stables (useCallback).
  */
 export function MedicationAdherenceCard({
-  patientId, tagChips, modItem, modIcon, mod, unlocked, loading,
+  tagChips, modItem, modIcon, mod, unlocked, loading,
   previewOpen, dataOpen, medList, moduleToggle,
   onTogglePreview, onToggleData, onConfigureNotif, onUnlock, onRevoke,
 }: MedicationAdherenceCardProps) {
@@ -65,7 +62,9 @@ export function MedicationAdherenceCard({
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
   const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
 
-  const isWide = medList.open || previewOpen || dataOpen
+  // Seul l'éditeur de liste élargit encore la carte : aperçu et données s'affichent
+  // désormais en modale, hors de la grille.
+  const isWide = medList.open
 
   return (
     <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
@@ -100,8 +99,6 @@ export function MedicationAdherenceCard({
             )}
           </div>
         )}
-        {previewOpen && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
-        {dataOpen && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
       </Card>
 
       {medList.open && unlocked && mod && (

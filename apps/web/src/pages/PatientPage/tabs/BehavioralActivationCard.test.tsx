@@ -3,9 +3,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: 'fr' } }),
 }))
-// Panneaux lourds (self-fetch react-query) — non rendus dans ces cas, mockés par sûreté.
-vi.mock('../../../components/features/ModulePreviewPanel', () => ({ ModulePreviewPanel: () => null }))
-vi.mock('./ModuleDataPanel', () => ({ ModuleDataPanel: () => null }))
 
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BehavioralActivationCard } from './BehavioralActivationCard'
@@ -41,7 +38,6 @@ function makeBAList(over: Partial<BAList> = {}): BAList {
 
 function setup(over: Partial<React.ComponentProps<typeof BehavioralActivationCard>> = {}) {
   const props: React.ComponentProps<typeof BehavioralActivationCard> = {
-    patientId: 'p1',
     tagChips: null,
     modItem: MOD_ITEM,
     modIcon: null,
