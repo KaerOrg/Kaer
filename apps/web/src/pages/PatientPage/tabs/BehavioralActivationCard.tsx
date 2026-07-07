@@ -5,10 +5,8 @@ import { Button } from '@ui/Button'
 import { Card } from '@ui/Card'
 import { Chip } from '@ui/Chip'
 import { Tooltip } from '@ui/Tooltip'
-import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
 import type { ModuleItem } from '@services/moduleCatalogService'
-import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useBAActivitiesEditor } from '../hooks/useBAActivitiesEditor'
 import { BAActivityAddForm } from './BAActivityAddForm'
 
@@ -17,7 +15,6 @@ const MODULE_TYPE: ModuleType = 'behavioral_activation'
 type BAList = ReturnType<typeof useBAActivitiesEditor>
 
 export interface BehavioralActivationCardProps {
-  patientId: string
   tagChips: ReactNode
   modItem: ModuleItem
   modIcon: ReactNode
@@ -42,7 +39,7 @@ export interface BehavioralActivationCardProps {
  * MedicationAdherenceCard pour les callbacks stables.
  */
 export function BehavioralActivationCard({
-  patientId, tagChips, modItem, modIcon, mod, unlocked, loading,
+  tagChips, modItem, modIcon, mod, unlocked, loading,
   previewOpen, dataOpen, baList, moduleToggle,
   onTogglePreview, onToggleData, onConfigureNotif, onUnlock, onRevoke,
 }: BehavioralActivationCardProps) {
@@ -72,7 +69,9 @@ export function BehavioralActivationCard({
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
   const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
 
-  const isWide = baList.open || previewOpen || dataOpen
+  // Seul l'éditeur d'activités élargit encore la carte : aperçu et données
+  // s'affichent désormais en modale, hors de la grille.
+  const isWide = baList.open
 
   return (
     <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
@@ -129,8 +128,6 @@ export function BehavioralActivationCard({
             )}
           </div>
         )}
-        {previewOpen && <ModulePreviewPanel moduleType={MODULE_TYPE} color={modItem.color} />}
-        {dataOpen && <ModuleDataPanel patientId={patientId} moduleType={MODULE_TYPE} />}
       </Card>
 
       {baList.open && unlocked && mod && (

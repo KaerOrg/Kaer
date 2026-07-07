@@ -16,10 +16,9 @@ import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
-import { ModulePreviewPanel } from '../../../components/features/ModulePreviewPanel'
 import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
-import { ModuleDataPanel } from './ModuleDataPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
+import { ModulePanelModal, type ModulePanel } from './ModulePanelModal'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '@services/moduleCatalogService'
@@ -82,12 +81,10 @@ export function PatientModulesTab({
   const [busyModule, setBusyModule] = useState<
     { op: 'unlock'; type: ModuleType } | { op: 'revoke'; id: string } | null
   >(null)
-  // Panneau ouvert sous une carte — aperçu OU données, jamais les deux. L'exclusivité
-  // est portée structurellement par ce state unique, plus par deux states à remettre
-  // à null en miroir à chaque bascule.
-  const [activePanel, setActivePanel] = useState<
-    { kind: 'preview' | 'data'; module: ModuleType } | null
-  >(null)
+  // Panneau ouvert au-dessus de la grille — aperçu OU données, jamais les deux.
+  // L'exclusivité est portée structurellement par ce state unique (une seule modale
+  // ouverte à la fois), plutôt que deux states à remettre à null en miroir.
+  const [activePanel, setActivePanel] = useState<ModulePanel | null>(null)
   const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -141,6 +138,8 @@ export function PatientModulesTab({
       prev?.kind === 'data' && prev.module === type ? null : { kind: 'data', module: type },
     )
   }, [])
+
+  const closeActivePanel = useCallback(() => setActivePanel(null), [])
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -198,7 +197,7 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' || isPreviewOpen('psychoeducation') ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -251,9 +250,6 @@ export function PatientModulesTab({
                 )}
               </>
             )}
-            {isPreviewOpen('psychoeducation') && (
-              <ModulePreviewPanel moduleType="psychoeducation" color={modItem.color} />
-            )}
           </Card>
 
           {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
@@ -281,7 +277,7 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${(crisis.open || isPreviewOpen('crisis_plan')) && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${crisis.open && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
           <Card
             className="module-card-item"
             header={{
@@ -307,9 +303,6 @@ export function PatientModulesTab({
                   <span className="psycho-observance-summary"> · {t('patient.crisis_configured')}</span>
                 )}
               </div>
-            )}
-            {isPreviewOpen('crisis_plan') && unlocked && (
-              <ModulePreviewPanel moduleType="crisis_plan" color={modItem.color} />
             )}
           </Card>
 
@@ -419,7 +412,6 @@ export function PatientModulesTab({
           modItem={modItem}
           modIcon={modIcon}
           mod={mod}
-          patientId={patientId}
           unlocked={unlocked}
           loading={isModuleBusy('medication_side_effects', mod?.id)}
           previewOpen={isPreviewOpen('medication_side_effects')}
@@ -443,7 +435,6 @@ export function PatientModulesTab({
           modItem={modItem}
           modIcon={modIcon}
           mod={mod}
-          patientId={patientId}
           unlocked={unlocked}
           loading={isModuleBusy('medication_adherence', mod?.id)}
           previewOpen={isPreviewOpen('medication_adherence')}
@@ -467,7 +458,6 @@ export function PatientModulesTab({
           modItem={modItem}
           modIcon={modIcon}
           mod={mod}
-          patientId={patientId}
           unlocked={unlocked}
           loading={isModuleBusy('behavioral_activation', mod?.id)}
           previewOpen={isPreviewOpen('behavioral_activation')}
@@ -491,7 +481,6 @@ export function PatientModulesTab({
           modItem={modItem}
           modIcon={modIcon}
           mod={mod}
-          patientId={patientId}
           unlocked={unlocked}
           loading={isModuleBusy('chronobiology_tracker', mod?.id)}
           previewOpen={isPreviewOpen('chronobiology_tracker')}
@@ -597,7 +586,7 @@ export function PatientModulesTab({
           })
 
       return (
-        <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key={moduleType} className="module-card-wrapper-block">
           <ModuleCard
             className={unlocked ? 'module-card--unlocked' : undefined}
             icon={modIcon}
@@ -625,15 +614,13 @@ export function PatientModulesTab({
                 {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
               </div>
             )}
-            {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} />}
-            {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
           </ModuleCard>
         </div>
       )
     }
 
     return (
-      <div key={moduleType} className={`module-card-wrapper-block ${isPreviewOpen(moduleType) || isDataOpen(moduleType) ? 'module-card-wrapper-block--wide' : ''}`}>
+      <div key={moduleType} className="module-card-wrapper-block">
         <ModuleCard
           className={unlocked ? 'module-card--unlocked' : undefined}
           icon={modIcon}
@@ -659,8 +646,6 @@ export function PatientModulesTab({
               {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
             </div>
           )}
-          {isPreviewOpen(moduleType) && <ModulePreviewPanel moduleType={moduleType} color={modItem.color} />}
-          {isDataOpen(moduleType) && <ModuleDataPanel patientId={patientId} moduleType={moduleType} />}
         </ModuleCard>
       </div>
     )
@@ -684,6 +669,16 @@ export function PatientModulesTab({
     },
     [categories, enabledModules, comingSoonIds],
   )
+
+  // Couleur d'accent d'un module, indexée par type — pour la modale de panneau, qui
+  // est rendue hors de la boucle `renderModuleCard` et n'a donc pas accès au `modItem`.
+  const moduleColorByType = useMemo(() => {
+    const map = new Map<string, string | undefined>()
+    for (const category of categories) {
+      for (const m of category.modules) map.set(m.id, m.color)
+    }
+    return map
+  }, [categories])
 
   const activatedModules = collectModules(isActivated)
   const activatableModules = collectModules(type => !isActivated(type))
@@ -807,6 +802,17 @@ export function PatientModulesTab({
             )}
           </div>
         </Modal>
+      )}
+
+      {/* Rendu en dernier pour rester au-dessus des autres modales : l'aperçu peut
+          être ouvert depuis la modale « Ajouter un module ». */}
+      {activePanel && (
+        <ModulePanelModal
+          panel={activePanel}
+          patientId={patientId}
+          color={moduleColorByType.get(activePanel.module)}
+          onClose={closeActivePanel}
+        />
       )}
     </PatientViewProvider>
   )
