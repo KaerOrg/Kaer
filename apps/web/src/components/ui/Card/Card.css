@@ -58,6 +58,20 @@
 
 .card__body { color: var(--color-text); }
 
+.card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  /* Collé en bas du body : absorbe l'espace vertical libre au-dessus (colonne flex),
+     de sorte que la rangée de chips repose juste au-dessus de la barre d'actions. */
+  margin-top: auto;
+}
+
+.card__footer:empty {
+  display: none;
+}
+
 .card__actions:empty {
   display: none;
 }

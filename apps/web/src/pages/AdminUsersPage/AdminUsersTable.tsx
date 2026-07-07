@@ -79,7 +79,7 @@ export function AdminUsersTable() {
   // Effacement d'un patient → recharger la page courante (la suppression décale la
   // pagination ; invalider et refetch est plus juste qu'une retouche de cache locale).
   const handleErased = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] })
+    void queryClient.invalidateQueries({ queryKey: adminQueries.usersPrefix })
   }, [queryClient])
 
   const toggleSelected = useCallback(

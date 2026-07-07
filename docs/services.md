@@ -51,7 +51,7 @@ Quand une fonction de service est **strictement identique** entre web et mobile 
 | [`moduleCatalogService.ts`](../apps/web/src/services/moduleCatalogService.ts) | Catégories + modules pour l'armoire thérapeutique et le formulaire d'invitation ; `fetchModuleTaxonomy` (axes/tags/liaisons `tag_dimensions`+`tags`+`module_tags` pour les filtres par facettes — [`spec/module-taxonomy.md`](spec/module-taxonomy.md)) |
 | [`moduleSourcesService.ts`](../apps/web/src/services/moduleSourcesService.ts) | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` — sources & recommandations d'un module ([doc](module-sources.md)) |
 | [`caseloadService.ts`](../apps/web/src/services/caseloadService.ts) | File active praticien : `fetchCaseload` (assemble dossiers + actions + attentes), `syncCaseloadWithPatients` (crée un dossier lié pour chaque patient app — auto, idempotent), CRUD `caseload_entries` (création, édition inline, statut), `caseload_actions` (coche `setActionDone`…), `caseload_waits` (attentes de retour) et `caseload_notes` (observations : `fetchCaseloadNotes`/`createCaseloadNote`) + ré-export des fonctions pures de [`caseloadLogic.ts`](../apps/web/src/lib/caseloadLogic.ts). Spec : [`spec/file-active.md`](spec/file-active.md) |
-| [`engagementService.ts`](../apps/web/src/services/engagementService.ts) | **Graphes d'évolution patient** (`PatientEvolutionTab`) : `fetchScaleEvolution` / `fetchMoodEvolution` / `fetchFearEvolution` / `fetchMedSideEffectsEvolution` / `fetchAvailableScales` — lit **`patient_entries.payload`** (filtré par RLS selon `patients.share_consent`). **Panneau « Données » d'une card module** (`PatientModulesTab` → `ModuleDataPanel`) : graphe d'évolution pour les modules à séries temporelles (mêmes fetchers que ci-dessus), sinon `fetchModuleSummary(patientId, moduleType)` → `{ lastDate, count, lastPayload }` (filtre par `module_id` seul, tri desc) rendu en tableau (`ModuleSummaryPanel`). Affichage passif, zéro interprétation (MDR). |
+| [`engagementService.ts`](../apps/web/src/services/engagementService.ts) | **Graphes d'évolution patient** (`PatientEvolutionTab`) : `fetchScaleEvolution` / `fetchMoodEvolution` / `fetchFearEvolution` / `fetchMedSideEffectsEvolution` / `fetchAvailableScales` — lit **`patient_entries.payload`** (filtré par RLS selon `patients.share_consent`). **Panneau « Données » d'une card module** (`PatientModulesTab` → `ModuleDataPanel`) : graphe d'évolution pour les modules à séries temporelles (mêmes fetchers que ci-dessus), sinon `fetchModuleSummary(patientId, moduleType)` → `{ lastDate, count, lastPayload }` (filtre par `module_id` seul, tri desc) rendu en tableau (`ModuleSummaryPanel`). **Modules `column_form`** (colonnes de Beck…) : `fetchFormEntries(patientId, moduleId)` → `FormEntryRow[]` (`{ date, values }` bruts depuis `entry_kind='form_entry'`) rendu par `ColumnFormDataPanel` (courbes de tous les curseurs + fiches complètes antichronologiques, structure dérivée de `module_content_fields`). Affichage passif, zéro interprétation (MDR). |
 | [`patientDataRightsService.ts`](../apps/web/src/services/patientDataRightsService.ts) | **Droits patient RGPD** : `exportPatientData` (RPC `export_patient_data` → JSON brut) et `erasePatientData` (RPC `erase_patient_data` + Edge Function `delete-patient-account`). Voir [`rgpd-droits-patient.md`](rgpd-droits-patient.md). |
 | [`adminService.ts`](../apps/web/src/services/adminService.ts) | **Gestion des utilisateurs (admin)** : `fetchAllUsers` (RPC `admin_list_users`, admin-only + audité) — patients ET médecins avec discriminant `kind`. Alimente `AdminUsersPage`. Voir [`spec/admin-users.md`](spec/admin-users.md). |
 | [`appointmentService.ts`](../apps/web/src/services/appointmentService.ts) | Disponibilités (`fetchAvailabilityRules`, `saveAvailabilityRule`, `deleteAvailabilityRule`), exceptions (`fetchExceptions`, `upsertException`), RDV (`fetchAppointmentsForPatient`, `fetchAppointmentsForWeek`, `createAppointment`, `updateAppointmentStatus`, `updateAppointmentNotes`), paramètre auto-confirm. Fonctions pures : `computeAvailableSlots`, `jsDayToSchema`, `timeToMinutes`, `timesOverlap`. |
@@ -144,6 +144,20 @@ La table `sync_outbox` (SQLite) est gérée par `SyncOutboxStore` dans `src/lib/
 > [TanStack Query](https://tanstack.com/query) (`@tanstack/react-query` v5) qui
 > apporte déduplication, cache mémoire et revalidation — sur les **deux apps**.
 
+### Vérifier qu'un call n'est pas dupliqué (web)
+
+- **Mesure — React Query Devtools.** Montés en dev dans `apps/web/src/main.tsx`
+  (`import.meta.env.DEV`, tree-shakés du build de prod). Le panneau flottant liste
+  chaque query active, sa `queryKey` et son **nombre de fetch** : deux entrées pour la
+  même donnée (ou un compteur qui grimpe à chaque montage) = doublon à corriger.
+  Complément : onglet Réseau du navigateur filtré sur l'endpoint REST Supabase.
+- **Garde-fou CI — `apps/web/src/test/noRawFetch.guard.test.ts`.** Échoue si (a) une
+  lecture de service (`fetch*`) est importée/appelée directement dans un composant/page
+  (doit passer par une factory `hooks/queries/` + `useQuery`), ou (b) une `queryKey`
+  littérale est écrite hors `hooks/queries/`. Exceptions légitimes dans une allowlist
+  documentée (lectures non dup-prone). Règle : [`coding-standards.md`](../.claude/rules/coding-standards.md)
+  § « Une clé canonique par ressource, zéro fetch hors React Query ».
+
 **Périmètre.** TanStack Query couvre les **lectures réseau** (Supabase). Il ne
 remplace **pas** le stockage offline-first SQLite des saisies patient (services
 `scaleEntryService`, `sleepDiaryService`, etc. via `syncHelpers`) : celles-ci
@@ -199,12 +213,6 @@ export const homeQueries = {
   une **écriture** (ex. `FileActivePage` → `syncCaseloadWithPatients` puis re-fetch
   conditionnel) ne passe pas par une query : y forcer reviendrait à écrire dans un
   `queryFn` (anti-pattern). Il garde son orchestration `useEffect` + `useState`.
-- **Service déjà doté d'un cache mémoire.** `psyeduService` (fiches psyedu) et
-  `moduleService.fetchModuleFields` (contenu de module, cœur du moteur générique)
-  maintiennent leur propre cache de session (`Map`, contenu quasi statique) :
-  ré-encapsuler dans TanStack doublerait le cache pour un gain marginal. Laissés tels
-  quels. (Le seul fetch non caché de `ModuleContentScreen`, `fetchPatientModuleConfig`,
-  est conditionnel et marginal.)
 - **Pas de lecture cacheable.** Un écran dont les données viennent du store
   (`ProfileScreen` → `authStore`) et qui ne fait que des actions one-shot
   (upload, export, effacement) n'a aucune query à migrer.
@@ -220,3 +228,110 @@ Documenter le choix en commentaire à chaque exception.
   enveloppant (client neuf, `retry: false`), service mocké. Tout écran qui rend un
   composant utilisant un hook de query doit être enveloppé d'un `QueryClientProvider`
   dans son test.
+
+### Config quasi-statique = cache infini via React Query (web)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #99.
+
+Toute lecture de config quasi-statique passe par React Query avec les options
+partagées `CONFIG_QUERY_OPTIONS` (`src/hooks/queries/configCache.ts`) :
+`staleTime: Infinity`, `gcTime: Infinity`, `meta.configScoped: true`. Concernées :
+`moduleQueries.fields`, `scaleQueries.meta`, `moduleSourcesQueries.byModule`,
+`psyeduQueries.*`, `referenceQueries.professionalTitles`, et les référentiels
+`catalogQueries` (`categories`, `comingSoonIds`, `previewKind`).
+
+- **Zéro fetch en `useEffect`.** Un composant qui a besoin de config appelle
+  `useQuery(xxxQueries.y())`. Les anciens `useEffect` + `setState` (ModulePreviewPanel,
+  PatientModulesTab, LoginPage, ModuleSourcesPanel, layouts psyedu) ont été supprimés.
+- **React Query est l'UNIQUE couche de cache.** Aucun cache `Map` module-level dans
+  les services (retirés de `psyeduService` et `moduleSourcesService`) : un cache local
+  masquerait l'invalidation par jeton (la config resterait figée malgré un re-seed).
+- **Fraîcheur** : le jeton de version (ci-dessous) invalide en bloc ces queries quand
+  la config change en base — le `staleTime: Infinity` ne fige donc jamais durablement.
+- **Défaut global inchangé.** Le `queryClient` garde ses défauts (30 s / 5 min) pour
+  les données praticien volatiles ; seules les queries de config passent en infini.
+- **Tests** : composant enveloppé par le helper `src/test/renderWithClient.tsx`
+  (`QueryClientProvider` neuf, `retry: false`) ; un client partagé entre deux montages
+  vérifie la déduplication (2e montage = 0 fetch).
+
+### Lectures patient volatiles = React Query + invalidation à l'écriture (web)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #100.
+
+Contrairement à la config, les données patient **changent quand le praticien écrit** :
+elles n'ont donc **pas** de cache infini (staleTime par défaut 30 s), et la fraîcheur
+vient de l'**invalidation à l'écriture**, pas d'une péremption longue. Factories :
+`crisisQueries.planConfig`, `cssrsQueries.assessments`,
+`notificationRoutineQueries.byPatientModule`, `caseloadQueries.rows`,
+`activityFeedQueries.feed`.
+
+- **Écriture = `useMutation` + `onSuccess: invalidateQueries`.** La mutation invalide
+  la clé de la lecture concernée → refetch et fraîcheur immédiate (ex. le modal des
+  rappels invalide `notificationRoutineQueries.byPatientModule` après create/toggle/delete).
+- **Mise à jour optimiste** quand la feuille le faisait déjà : `FileActivePage` remplace
+  ses anciens `setRows(prev => …)` par `queryClient.setQueryData(caseloadQueries.rows(id).queryKey, …)`
+  au succès, et n'invalide (`invalidateQueries`) qu'en cas d'erreur pour resynchroniser.
+- **Réutilisation des référentiels** : `FileActivePage` lit les patients via
+  `dashboardQueries.patients` et les icônes via `catalogQueries.categories` (cache infini
+  de #99) plutôt qu'un fetch dédié.
+- **React Query = unique couche de cache** : le cache `Map` de `crisisPlanService` a été
+  retiré (il déduplicait les 3 widgets d'aperçu et masquait l'invalidation — c'est
+  désormais la clé partagée `crisisQueries.planConfig` qui déduplique).
+- **`ActivityFeedPanel`** : migré aussi (pas de polling réel) ; le badge « nouveauté »
+  est **dérivé pendant le render** (plus de `setState` piloté par le fetch).
+
+### Invalidation de la config par jeton de version (ETag applicatif)
+
+> Web praticien uniquement. Voir l'epic #104 et le ticket #102.
+
+La config est **quasi-statique** : `module_content_fields`, `field_props`, `psyedu_*`,
+échelles, référentiels ne changent qu'au **re-seed / déploiement**, jamais via une
+écriture cliente. Le web est lecteur pur : il n'a donc **aucun événement** pour savoir
+quand invalider son cache. On veut un cache très agressif **sans** jamais afficher du
+périmé, et **sans** coupler l'invalidation au déploiement (ce qui casserait config-first :
+« ajouter une échelle = INSERT en base, zéro redéploiement »).
+
+**Mécanisme — un jeton de version, joué comme un ETag :**
+
+- **Base** : la table singleton `app_config_meta(config_version, updated_at)` porte un
+  jeton unique. Le `seed.sql` le **bump** en toute fin (`config_version = now()::text`) :
+  tout re-seed de contenu produit un nouveau jeton. RLS : lecture réservée aux praticiens
+  authentifiés, **aucune** écriture cliente (bump via seed / `service_role`).
+- **Lecture** : `configVersionService.fetchConfigVersion()` → `configVersionQueries.current()`
+  (`['configVersion']`). C'est le **seul** référentiel qu'on revalide souvent (`staleTime`
+  court + `refetchOnWindowFocus`) — il ne pèse qu'une string. Hook prêt à l'emploi :
+  `useConfigVersion()`.
+- **Usage (#99)** : injecter le jeton dans les `queryKey` de config
+  (`['module', 'fields', moduleId, configVersion]`). Tant que le jeton ne bouge pas,
+  la clé est stable → **0 refetch**, `staleTime` long conservé. Dès qu'un re-seed bump
+  le jeton, la clé change → refetch ciblé de la config, **sans redéploiement**.
+
+> **Push vs pull.** Ce jeton (pull) convient à la config : froide, globale, tolérante à
+> la latence. Les **données patient** (chaudes, ciblées, urgentes) utilisent au contraire
+> l'invalidation sur écriture (#100) et le Realtime (#103). Apparier le mécanisme au
+> profil de la donnée, pas chercher l'uniformité.
+
+### Fraîcheur temps réel des données patient — Supabase Realtime (web, #103)
+
+> Web praticien uniquement. Complète #100.
+
+L'invalidation-sur-écriture de #100 ne couvre que les écritures **du web** : quand un
+patient saisit sur **mobile** (→ `patient_entries` via la sync), le web n'a aucun
+événement pour le savoir. Supabase Realtime (push websocket) comble ce trou.
+
+- **Service** : `patientRealtimeService.subscribePatientEntries(patientId, onChange)` ouvre
+  un `supabase.channel` filtré `patient_id=eq.<id>` sur les `postgres_changes` de
+  `patient_entries`, et renvoie la fonction de désabonnement (`removeChannel`). Toute la
+  plomberie Supabase reste dans le service.
+- **Hook** : `usePatientEntriesRealtime(patientId)` (dans `src/hooks/realtime/`) monte
+  l'abonnement pour le patient courant et, à chaque événement, invalide les clés
+  `engagementQueries.patientDataKeys(patientId)` → refetch. Le cleanup de l'effet ferme le
+  canal au démontage **et** au changement de patient (un seul canal par patient consulté).
+  Branché sur `PatientPage`.
+- **RLS = autorisation** : Postgres Changes respecte la RLS `patient_entries_practitioner_select`
+  (patients liés + consentement). Aucun élargissement d'accès ; le payload est **signalé**
+  puis réaffiché brut (conforme MDR — on ne conclut rien).
+- **Best-effort** : si le socket tombe, `staleTime` + `refetchOnWindowFocus` restent le filet.
+- **Base** : `patient_entries` doit être dans la publication `supabase_realtime` +
+  `replica identity full` (cf. `schema.sql` / `docs/database.md`). Cette migration est un
+  **acte de déploiement** à appliquer sur la base (non fait automatiquement par le front).

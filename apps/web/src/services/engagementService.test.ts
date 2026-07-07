@@ -14,6 +14,9 @@ import {
   fetchAvailableScales,
   fetchModuleSummary,
   fetchChronoEntries,
+  fetchFormEntries,
+  fetchBeckEvolution,
+  fetchActivityEntries,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -105,6 +108,65 @@ describe('engagementService.fetchSleepEvolution', () => {
   it('retourne [] en cas d’erreur Supabase', async () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
     expect(await fetchSleepEvolution('p1')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchActivityEntries', () => {
+  it('mappe le payload complet et trie par date métier puis heure prévue', async () => {
+    const rows = [
+      { local_id: 'a2', payload: {
+        date: '2026-06-02', label: 'Yoga', done: 0, expected_pleasure: 6, expected_mastery: 4,
+        pleasure: null, mastery: null, planned_time: '18:00', domain_id: 'al.dom_body', notes: null,
+      } },
+      { local_id: 'a1', payload: {
+        date: '2026-06-01', label: 'Marche', done: 1, expected_pleasure: 3, expected_mastery: 2,
+        pleasure: 7, mastery: 5, planned_time: null, domain_id: 'al.dom_body', notes: 'super',
+      } },
+      { local_id: 'a3', payload: {
+        date: '2026-06-02', label: 'Appel ami', done: 0, expected_pleasure: null, expected_mastery: null,
+        pleasure: null, mastery: null, planned_time: '10:00', domain_id: 'al.dom_social', notes: null,
+      } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchActivityEntries('p1')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result.map(e => e.id)).toEqual(['a1', 'a3', 'a2'])
+    expect(result[0]).toEqual({
+      id: 'a1', date: '2026-06-01', label: 'Marche', done: true,
+      expected_pleasure: 3, expected_mastery: 2, pleasure: 7, mastery: 5,
+      planned_time: null, domain_id: 'al.dom_body', notes: 'super',
+    })
+  })
+
+  it('legacy sans expected_* : planifiée → P/M lus comme attendus, réalisée → ressentis', async () => {
+    const rows = [
+      { local_id: 'old1', payload: { date: '2026-05-01', label: 'Lecture', done: 0, pleasure: 5, mastery: 5, notes: null } },
+      { local_id: 'old2', payload: { date: '2026-05-02', label: 'Course', done: 1, pleasure: 8, mastery: 6, notes: null } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchActivityEntries('p1')
+
+    expect(result[0]).toMatchObject({
+      id: 'old1', done: false, expected_pleasure: 5, expected_mastery: 5, pleasure: null, mastery: null,
+    })
+    expect(result[1]).toMatchObject({
+      id: 'old2', done: true, expected_pleasure: null, expected_mastery: null, pleasure: 8, mastery: 6,
+    })
+  })
+
+  it('ignore les payloads sans date ou label, retourne [] sur erreur Supabase', async () => {
+    const rows = [
+      { local_id: 'x1', payload: { label: 'Sans date', done: 0 } },
+      { local_id: 'x2', payload: { date: '2026-05-01', done: 0 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+    expect(await fetchActivityEntries('p1')).toEqual([])
+
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+    expect(await fetchActivityEntries('p1')).toEqual([])
   })
 })
 
@@ -233,6 +295,84 @@ describe('engagementService.fetchAvailableScales', () => {
     const result = await fetchAvailableScales('p1')
 
     expect(result.sort()).toEqual(['gad7', 'phq9'])
+  })
+})
+
+describe('engagementService.fetchFormEntries', () => {
+  it('mappe chaque fiche en { date, values } avec textes et curseurs bruts (happy path)', async () => {
+    const rows = [
+      {
+        client_created_at: '2026-06-01T10:00:00Z',
+        payload: { values: { situation: 'Réunion', emotion: 'anxiété', emotion_intensity: 80 } },
+      },
+      {
+        client_created_at: '2026-06-03T18:00:00Z',
+        payload: { values: { situation: 'Repas', outcome_intensity: 40 } },
+      },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchFormEntries('p1', 'beck_columns')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result).toEqual([
+      { date: '2026-06-01T10:00:00Z', values: { situation: 'Réunion', emotion: 'anxiété', emotion_intensity: 80 } },
+      { date: '2026-06-03T18:00:00Z', values: { situation: 'Repas', outcome_intensity: 40 } },
+    ])
+  })
+
+  it('filtre les valeurs non texte/nombre et les lignes sans values ou sans date', async () => {
+    const rows = [
+      { client_created_at: '2026-06-01T10:00:00Z', payload: null },
+      { client_created_at: null, payload: { values: { situation: 'x' } } },
+      { client_created_at: '2026-06-02T10:00:00Z', payload: { foo: 1 } },
+      {
+        client_created_at: '2026-06-03T10:00:00Z',
+        payload: { values: { situation: 'ok', nested: { a: 1 }, empty: null, belief: 50 } },
+      },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchFormEntries('p1', 'beck_columns')).toEqual([
+      { date: '2026-06-03T10:00:00Z', values: { situation: 'ok', belief: 50 } },
+    ])
+  })
+
+  it('retourne vide en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect(await fetchFormEntries('p1', 'beck_columns')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchBeckEvolution', () => {
+  it('mappe emotion_intensity/outcome_intensity en points avant/après', async () => {
+    const rows = [
+      {
+        client_created_at: '2026-06-01T10:00:00Z',
+        payload: { values: { emotion_intensity: 100, outcome_intensity: 60, situation: 'x' } },
+      },
+      {
+        client_created_at: '2026-06-02T10:00:00Z',
+        payload: { values: { emotion_intensity: 70 } },
+      },
+      {
+        client_created_at: '2026-06-03T10:00:00Z',
+        payload: { values: { situation: 'texte seul, aucun curseur' } },
+      },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchBeckEvolution('p1')).toEqual([
+      { date: '2026-06-01T10:00:00Z', intensity_before: 100, intensity_after: 60 },
+      { date: '2026-06-02T10:00:00Z', intensity_before: 70 },
+    ])
+  })
+
+  it('retourne vide en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect(await fetchBeckEvolution('p1')).toEqual([])
   })
 })
 

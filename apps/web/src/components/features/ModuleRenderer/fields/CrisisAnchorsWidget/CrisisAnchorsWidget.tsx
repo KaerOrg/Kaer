@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Heart, ImageOff } from 'lucide-react'
 import { usePatientView } from '../../../../../contexts/usePatientView'
-import { fetchCrisisPlanConfig } from '@services/crisisPlanService'
+import { crisisQueries } from '../../../../../hooks/queries'
 import './CrisisAnchorsWidget.css'
 
 export function CrisisAnchorsWidget() {
   const { t } = useTranslation()
   const patientId = usePatientView()
-  const [practitionerMessage, setPractitionerMessage] = useState('')
-
-  useEffect(() => {
-    if (!patientId) return
-    fetchCrisisPlanConfig(patientId)
-      .then(cfg => setPractitionerMessage(cfg.practitionerMessage))
-      .catch(() => {})
-  }, [patientId])
+  const { data: config } = useQuery(crisisQueries.planConfig(patientId))
+  const practitionerMessage = config?.practitionerMessage ?? ''
 
   return (
     <div className="crisis-anchors-widget">

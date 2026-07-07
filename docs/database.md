@@ -204,6 +204,24 @@ PK composite `(field_id, prop_key)`. Voir `docs/module-engine.md` pour les props
 
 ---
 
+### `app_config_meta` — Version de la config (ETag applicatif)
+
+Table **singleton** (une seule ligne) portant le jeton de version de toute la config
+quasi-statique. Le web praticien lit ce jeton pour invalider son cache React Query
+sans redéploiement. Bumpée en fin de `seed.sql` à chaque re-seed. Voir
+`docs/services.md` § « Invalidation de la config par jeton de version ».
+
+| Colonne | Type | Description |
+|---------|------|-------------|
+| `singleton` | boolean PK, default true | Contrainte `check (singleton)` → une seule ligne |
+| `config_version` | text NOT NULL, default `now()::text` | Jeton opaque, change à chaque bump |
+| `updated_at` | timestamptz NOT NULL, default now() | – |
+
+RLS : lecture réservée aux praticiens authentifiés (`auth.uid() is not null`) ; **aucune**
+policy d'écriture (bump via seed / `service_role` uniquement).
+
+---
+
 ### `practitioner_module_settings` — Catalogue praticien
 
 Paramètres optionnels de la bibliothèque de modules d'un praticien.
@@ -249,6 +267,17 @@ Bucket public pour les photos de profil patients. Structure: `avatars/{user_id}/
 | `avatars_select_public` | SELECT | public (lecture sans auth) |
 
 ---
+
+## Realtime — `patient_entries` (issue #103)
+
+`patient_entries` est publiée dans `supabase_realtime` (`replica identity full`) : le web
+praticien s'abonne aux INSERT/UPDATE/DELETE d'un patient pour rafraîchir instantanément
+quand celui-ci saisit sur mobile. Postgres Changes **respecte la RLS** — un praticien ne
+reçoit que les entrées de ses patients consentants (policy `patient_entries_practitioner_select`),
+aucun élargissement d'accès. `replica identity full` est requise pour que les événements
+DELETE/UPDATE portent l'ancien `patient_id` (routage vers le bon canal). Ajout à la
+publication idempotent (`do $$ … pg_publication_tables … $$`). Côté web :
+`patientRealtimeService.subscribePatientEntries` + hook `usePatientEntriesRealtime`.
 
 ## Index
 
@@ -304,6 +333,13 @@ RLS activée sur toutes les tables. Résumé des policies :
 | Policy | Opérations | Condition |
 |--------|-----------|-----------|
 | *_read | SELECT | Tout utilisateur authentifié |
+
+### `app_config_meta`
+| Policy | Opérations | Condition |
+|--------|-----------|-----------|
+| app_config_meta_select_authenticated | SELECT | `auth.uid() is not null` |
+
+Aucune policy d'écriture : le bump du jeton passe par le seed / `service_role`.
 
 ### `practitioner_module_settings`
 | Policy | Opérations | Condition |

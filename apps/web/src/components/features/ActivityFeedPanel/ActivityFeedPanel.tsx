@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Bell, X, BellOff } from 'lucide-react'
 import { Button } from '../../ui/Button'
 import { useTranslation } from 'react-i18next'
-import { getActivityFeed } from '@services/notificationRoutineService'
-import type { ActivityFeedEvent } from '../../../lib/database.types'
+import { activityFeedQueries } from '../../../hooks/queries'
 import './ActivityFeedPanel.css'
 
 interface Props {
@@ -23,38 +23,19 @@ function formatRelativeTime(iso: string, t: (k: string) => string): string {
 export function ActivityFeedPanel({ practitionerId }: Props) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const [events, setEvents] = useState<ActivityFeedEvent[]>([])
-  const [loading, setLoading] = useState(false)
-  const [hasNew, setHasNew] = useState(false)
+  const { data: events = [], isLoading: loading } = useQuery(activityFeedQueries.feed(practitionerId))
+  const [lastSeen, setLastSeen] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const lastSeenRef = useRef<string | null>(null)
 
-  const loadFeed = useCallback(async () => {
-    setLoading(true)
-    try {
-      const data = await getActivityFeed(practitionerId)
-      setEvents(data)
-      if (data.length > 0 && data[0].created_at !== lastSeenRef.current) {
-        setHasNew(true)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [practitionerId])
-
-  useEffect(() => {
-    void loadFeed()
-  }, [loadFeed])
+  // Badge « nouveauté » dérivé pendant le render : l'événement le plus récent
+  // diffère-t-il du dernier consulté (mémorisé à l'ouverture du panneau) ?
+  const latest = events[0]?.created_at ?? null
+  const hasNew = latest !== null && latest !== lastSeen
 
   const handleOpen = useCallback(() => {
-    setOpen(prev => {
-      if (!prev && events.length > 0) {
-        lastSeenRef.current = events[0].created_at
-        setHasNew(false)
-      }
-      return !prev
-    })
-  }, [events])
+    if (!open && latest !== null) setLastSeen(latest)
+    setOpen(prev => !prev)
+  }, [open, latest])
 
   // Ferme le panel en cliquant à l'extérieur
   useEffect(() => {

@@ -26,4 +26,12 @@ export const shadows = {
     shadowRadius: 12,
     elevation: 5,
   },
+  // Ombre marquée pour les éléments flottants (FAB, feuilles bas d'écran).
+  lg: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
 }

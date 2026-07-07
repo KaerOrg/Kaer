@@ -63,6 +63,7 @@ Valeurs de `preview_kind` et leur layout :
 | `stage_wheel` | Sélecteur de stade en sélection exclusive (modèle transthéorique de Prochaska, 6 stades par défaut) + historique. Mobile : éditeur SQLite (`em_rulers.stage`, via `motivationalBalanceService`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.stage_*`), `stageCount` configurable. MDR : auto-positionnement déclaratif, aucune progression imposée | `motivational_balance` (onglet « Stade ») |
 | `dual_ruler` | Deux échelles 0-10 (importance / confiance via `RatingSelector`) + justifications + engagement + historique. Mobile : éditeur SQLite (`em_rulers`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.rulers_*`). MDR : valeurs brutes, aucun seuil | `motivational_balance` (onglet « Thermomètres ») |
 | `weighted_balance` | Sélection de valeurs (chips, max configurable) + balance Pour/Contre dont chaque raison porte un poids 1-N (`RatingSelector` track, monochrome). Mobile : éditeur SQLite (`em_values` + `em_balance_items`). Web : aperçu structurel statique. Liste de valeurs lue d'un field `weighted_balance_config` (clés indexées `value_1..`, `max_values`) ; libellés dérivés du `moduleId`. MDR : pondération subjective, aucune couleur de gravité | `motivational_balance` (onglet « Balance ») |
+| `breathing_pacer` | Liste des techniques de respiration (config lue des fields `breathing_technique` + `breathing_phase`) + historique des sessions, chaque carte ouvrant un lecteur d'exercice animé (machine multi-phases inspiration/rétention/expiration, cercle + barre de phases) dans une modale. Mobile : `BreathingPacerLayout` interactif (sessions SQLite via `breathingService`). Web : aperçu praticien = `field_row` descriptifs (rendu comme `fields`). Nommé par motif, `moduleId` dérivé. MDR : exercice guidé neutre, aucune conclusion | `breathing_techniques` |
 | `coming_soon` | Rien affiché | Tout module non encore implémenté |
 
 #### `questionnaire` — circuit spécifique mobile
@@ -233,11 +234,18 @@ Deux field_types propres :
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `column_form_config` | Config du formulaire | `columns` |
-| `column_header` | En-tête de colonne | `color` |
-| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index` |
+| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, capture en deux temps : `quick_btn_label`, `quick_key_1..n`, `complete_key_1..n`, `to_complete_label` |
+| `column_header` | En-tête de colonne | `color`, `optional_group` (colonne masquée côté patient tant que le groupe ne figure pas dans `patient_modules.config.enabled_groups` — lecture `readEnabledGroups` de `@kaer/shared`. Capacité moteur dormante : aucun seed ni UI ne l'utilise actuellement, beck_columns y a renoncé en 2026-07 au profit de colonnes standard) |
+| `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
 | `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
+
+> **Capture en deux temps** (`quick_key_*`) : un bouton secondaire en mode liste
+> ouvre le formulaire réduit aux seuls champs dont la clé est une `quick_key` ;
+> la fiche sauvegardée ne porte que ces valeurs (aucun défaut de slider). Tant que
+> toutes les `complete_key_*` ne sont pas renseignées, la fiche affiche une puce
+> « à compléter » (`to_complete_label`, statut **dérivé** jamais stocké) qui ouvre
+> l'édition complète. Utilisé par `beck_columns`.
 
 **Layout `daily_checkin`**
 
@@ -253,6 +261,17 @@ Deux field_types propres :
 | `medication_tracker_config` | Libellés des 3 onglets + sections (streak, calendrier, liste molécules, pont effets) | clés i18n par libellé |
 | `daily_status_option` | Statut de prise (réutilisé) | `value`, `color`, `bg_color`, `icon` |
 | `medication_reason_option` | Motif de non-prise (chip) | `value`, `icon`, `links_module` (pont vers un autre module) |
+
+**Layout `activity_log` (behavioral_activation)**
+
+3 modes internes : `week` (défaut, planification) | `list` (historique) | `entry`
+(formulaire prédire/faire/constater : P/M attendus si planifiée, ressentis si réalisée).
+
+| `field_type` | Rendu | Props clés |
+|---|---|---|
+| `activity_log_config` | Config du journal (bornes P/M, couleurs, tous les libellés) | `pleasure_min/max/step`, `mastery_min/max/step`, `pleasure_color`, `mastery_color`, `dot_done_color`, `dot_planned_color`, `locale` + clés i18n par libellé (`tab_week_label`, `section_expected_title`, `section_felt_title`, `planned_time_label`, `my_activities_title`, `linked_value_prefix`, `pleasure_short_label`, `mastery_short_label`…) |
+| `activity_log_domain` | Domaine de vie (BATD-R) : groupe les suggestions, alimente l'éditeur praticien | — (text_code = libellé i18n) |
+| `activity_log_suggestion` | Suggestion d'activité (chip), groupée par domaine | `domain` (id d'un field `activity_log_domain`) |
 
 **Layout `sleep_journal`**
 
@@ -289,9 +308,9 @@ persistée dans `tree_selections.context_json`. Réf. module : `emotion_wheel`.
 > `text_code`) depuis les `pathIds` opaques renvoyés par `onSubmit`. Détail du
 > primitive : `apps/mobile/docs/design-system.md` § `TreeSelector`.
 
-**Écrans custom `breathing_techniques`** (config-first, issue #69 — lus par
-`breathingService.fetchBreathingTechniques()`, **pas** par le renderer générique ; le
-preview praticien reste en `field_row`)
+**Config `breathing_techniques`** (config-first, issue #69 — lus par
+`breathingService.techniquesFromFields()` puis rendus par le layout `breathing_pacer`
+du renderer générique, issue #19 ; le preview praticien web reste en `field_row`)
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
@@ -516,6 +535,7 @@ interface FieldRendererProps {
 'stage_wheel'     → StageWheelLayout (mobile = éditeur SQLite em_rulers.stage ; web = aperçu structurel)
 'dual_ruler'      → DualRulerLayout (mobile = éditeur SQLite em_rulers ; web = aperçu structurel)
 'weighted_balance'→ WeightedBalanceLayout (mobile = éditeur SQLite em_values+em_balance_items ; web = aperçu structurel)
+'breathing_pacer' → BreathingPacerLayout (mobile = cartes techniques + exercice animé en modale, sessions SQLite ; web = aperçu field_row via FieldsLayout)
 ```
 
 **Filtrage initial commun aux 4 layouts :**

@@ -271,7 +271,8 @@
     "wardrobe_desc": "Les modules actuellement activés pour ce patient.",
     "wardrobe_empty": "Aucun module activé pour ce patient. Cliquez sur « Ajouter un module » pour commencer.",
     "add_module_button": "Ajouter un module",
-    "add_module_title": "Ajouter un module",    "unlock_button": "Débloquer",
+    "add_module_title": "Ajouter un module",
+    "unlock_button": "Débloquer",
     "revoke_button": "Révoquer",
     "preview_button": "Aperçu",
     "patient_view": "Ce que verra votre patient",
@@ -282,6 +283,9 @@
     "summary_last_entry": "Dernière saisie",
     "summary_count": "Saisies enregistrées",
     "summary_total_score": "Dernier score total",
+    "form_records_title": "Fiches saisies",
+    "form_show_more": "Voir plus de fiches ({{count}} restantes)",
+    "optional_column_badge": "Option",
     "psycho_read_count": "{{read}}/{{total}} fiche lue",
     "psycho_read_count_plural": "{{read}}/{{total}} fiches lues",
     "psycho_pick_unlock": "Choisissez les fiches à débloquer pour ce patient :",
@@ -931,7 +935,73 @@
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
       "description": "Planification d'activités notées selon le Plaisir (0-10) et la Maîtrise (0-10).",
-      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel."
+      "footer": "Le patient planifie et évalue ses activités selon deux dimensions (P et M). Données stockées localement. Aucun score global, les valeurs brutes P et M sont lues par le praticien en consultation pour guider l'entretien motivationnel.",
+      "add_btn": "Ajouter une activité",
+      "date_label": "Date",
+      "planned_time": "Heure prévue (optionnel)",
+      "section_activity": "Activité",
+      "section_felt": "Ce que ça vous a apporté",
+      "section_notes": "Notes",
+      "activity_placeholder": "Ex : Marche 20 min, Appel à un ami, Lecture…",
+      "pleasure_label": "Plaisir (P)",
+      "pleasure_sublabel": "Satisfaction retirée de l'activité",
+      "mastery_label": "Accomplissement (A)",
+      "mastery_sublabel": "Sentiment d'accomplissement",
+      "mark_done": "Marquer comme réalisée",
+      "save": "Enregistrer",
+      "domain_body": "Corps et santé",
+      "domain_social": "Relations",
+      "domain_work": "Travail et études",
+      "domain_daily": "Quotidien et responsabilités",
+      "domain_leisure": "Loisirs et plaisir",
+      "domain_meaning": "Sens et valeurs",
+      "suggestion_tidy": "Ranger une pièce",
+      "suggestion_laundry": "Faire une lessive",
+      "suggestion_admin": "Faire une démarche administrative",
+      "suggestion_repair": "Réparer ou bricoler quelque chose",
+      "suggestion_email": "Répondre à un message en retard",
+      "suggestion_family": "Passer du temps en famille",
+      "suggestion_help": "Rendre service à quelqu'un",
+      "suggestion_learn": "Apprendre quelque chose de nouveau",
+      "suggestion_work_task": "Terminer une petite tâche reportée",
+      "suggestion_walk": "Marche / promenade",
+      "suggestion_groceries": "Faire ses courses",
+      "suggestion_gym": "Sport / salle de sport",
+      "suggestion_bike": "Vélo",
+      "suggestion_yoga": "Yoga",
+      "suggestion_meditation": "Méditation",
+      "suggestion_reading": "Lecture",
+      "suggestion_cooking": "Cuisine",
+      "suggestion_call_friend": "Appel à un proche",
+      "suggestion_cafe": "Sortie au café",
+      "suggestion_gardening": "Jardinage",
+      "suggestion_music": "Musique",
+      "suggestion_movie": "Film / série",
+      "suggestion_bath": "Bain relaxant",
+      "suggestion_cleaning": "Rangement / ménage",
+      "suggestion_drawing": "Dessin / peinture",
+      "suggestion_board_game": "Jeu de société",
+      "suggestion_journal": "Écriture / journal",
+      "suggestion_swimming": "Natation",
+      "suggestion_running": "Courir",
+      "config_button": "Configurer les activités",
+      "config_title": "Activités co-construites",
+      "config_hint": "Définissez avec le patient des activités reliées à ses domaines de vie, avec ses mots à lui sur ce qui compte. L'application les lui proposera en premier.",
+      "config_empty": "Aucune activité personnalisée pour le moment.",
+      "config_count": "{{count}} activité configurée",
+      "config_count_plural": "{{count}} activités configurées",
+      "config_activity_placeholder": "Ex : Marche 20 min…",
+      "config_domain_label": "Domaine de vie",
+      "config_value_placeholder": "Pourquoi c'est important (mots du patient, optionnel)",
+      "config_add": "Ajouter",
+      "pleasure_short": "P",
+      "mastery_short": "A",
+      "status_planned": "Je la prévois",
+      "status_done": "Je l'ai déjà faite",
+      "completion_title": "C'était comment ?",
+      "completion_skip": "Passer",
+      "tab_upcoming": "À venir",
+      "tab_history": "Historique"
     },
     "beck_columns": {
       "label": "Colonnes de Beck",
@@ -1327,38 +1397,98 @@
     }
   },
   "tag_dimensions": {
-    "indication": { "label": "Indication" },
-    "population": { "label": "Public" },
-    "approach": { "label": "Approche" }
+    "indication": {
+      "label": "Indication"
+    },
+    "population": {
+      "label": "Public"
+    },
+    "approach": {
+      "label": "Approche"
+    }
   },
   "tags": {
-    "anxiety": { "label": "Anxiété" },
-    "ocd": { "label": "TOC" },
-    "depression": { "label": "Dépression" },
-    "bipolar": { "label": "Bipolarité" },
-    "trauma": { "label": "Trauma / ESPT" },
-    "psychological_distress": { "label": "Souffrance psychique" },
-    "emotion_dysregulation": { "label": "Dysrégulation émotionnelle" },
-    "suicidal_crisis": { "label": "Crise suicidaire" },
-    "addiction": { "label": "Addiction" },
-    "sleep": { "label": "Sommeil" },
-    "adhd": { "label": "TDAH" },
-    "eating_disorder": { "label": "Troubles alimentaires" },
-    "perinatal": { "label": "Périnatalité" },
-    "psychosis": { "label": "Psychose" },
-    "child": { "label": "Enfant" },
-    "teen": { "label": "Ado" },
-    "adult": { "label": "Adulte" },
-    "senior": { "label": "Sujet âgé" },
-    "cbt": { "label": "TCC" },
-    "act": { "label": "ACT" },
-    "dbt": { "label": "DBT" },
-    "motivational_interviewing": { "label": "Entretien motivationnel" },
-    "psychoeducation": { "label": "Psychoéducation" },
-    "relaxation": { "label": "Relaxation & ancrage" },
-    "self_monitoring": { "label": "Auto-observation" },
-    "imagery": { "label": "Imagerie mentale" },
-    "crisis_management": { "label": "Planification de crise" }
+    "anxiety": {
+      "label": "Anxiété"
+    },
+    "ocd": {
+      "label": "TOC"
+    },
+    "depression": {
+      "label": "Dépression"
+    },
+    "bipolar": {
+      "label": "Bipolarité"
+    },
+    "trauma": {
+      "label": "Trauma / ESPT"
+    },
+    "psychological_distress": {
+      "label": "Souffrance psychique"
+    },
+    "emotion_dysregulation": {
+      "label": "Dysrégulation émotionnelle"
+    },
+    "suicidal_crisis": {
+      "label": "Crise suicidaire"
+    },
+    "addiction": {
+      "label": "Addiction"
+    },
+    "sleep": {
+      "label": "Sommeil"
+    },
+    "adhd": {
+      "label": "TDAH"
+    },
+    "eating_disorder": {
+      "label": "Troubles alimentaires"
+    },
+    "perinatal": {
+      "label": "Périnatalité"
+    },
+    "psychosis": {
+      "label": "Psychose"
+    },
+    "child": {
+      "label": "Enfant"
+    },
+    "teen": {
+      "label": "Ado"
+    },
+    "adult": {
+      "label": "Adulte"
+    },
+    "senior": {
+      "label": "Sujet âgé"
+    },
+    "cbt": {
+      "label": "TCC"
+    },
+    "act": {
+      "label": "ACT"
+    },
+    "dbt": {
+      "label": "DBT"
+    },
+    "motivational_interviewing": {
+      "label": "Entretien motivationnel"
+    },
+    "psychoeducation": {
+      "label": "Psychoéducation"
+    },
+    "relaxation": {
+      "label": "Relaxation & ancrage"
+    },
+    "self_monitoring": {
+      "label": "Auto-observation"
+    },
+    "imagery": {
+      "label": "Imagerie mentale"
+    },
+    "crisis_management": {
+      "label": "Planification de crise"
+    }
   },
   "card": {
     "sleep_01": {
@@ -1712,7 +1842,7 @@
       },
       "step_5": {
         "title": "Résultat",
-        "hint": "Quelle émotion maintenant ? Intensité (0 à 100) ? Conviction en la pensée alternative (0 à 100) ?"
+        "hint": "Reprise de l'émotion de départ : intensité maintenant (0 à 100), nouvelles émotions éventuelles, conviction en la pensée alternative (0 à 100)."
       },
       "footer": "Chaque enregistrement est stocké localement sur l'appareil du patient. L'historique est accessible à tout moment."
     },
@@ -2129,6 +2259,9 @@
     "fear_title": "Exposition graduée (SUDS)",
     "fear_before": "Avant exposition",
     "fear_after": "Après exposition",
+    "beck_title": "Colonnes de Beck : intensité émotionnelle",
+    "beck_before": "Avant restructuration",
+    "beck_after": "Après restructuration",
     "sleep_section_title": "Agenda du sommeil",
     "sleep_grid_title": "Grille agenda du sommeil",
     "sleep_efficiency_title": "Efficacité du sommeil (%)",
@@ -2154,6 +2287,26 @@
     "med_effect_dysfonction_sexuelle": "Dysfonction sexuelle",
     "med_effect_anxiete": "Anxiété",
     "med_effect_cephalees": "Céphalées",
-    "med_effect_vertiges": "Vertiges"
+    "med_effect_vertiges": "Vertiges",
+    "ba_prev_week": "Semaine précédente",
+    "ba_next_week": "Semaine suivante",
+    "ba_done_count": "{{count}} réalisée",
+    "ba_done_count_plural": "{{count}} réalisées",
+    "ba_planned_count": "{{count}} planifiée",
+    "ba_planned_count_plural": "{{count}} planifiées",
+    "ba_expected": "attendu",
+    "ba_felt": "ressenti",
+    "ba_pleasure_short": "P",
+    "ba_mastery_short": "A",
+    "ba_legend_done": "Réalisée",
+    "ba_legend_planned": "Planifiée",
+    "ba_legend_scores": "P = plaisir · A = accomplissement (0 à 10, valeurs brutes)",
+    "ba_stat_done": "Réalisées",
+    "ba_stat_missed": "Non réalisées",
+    "ba_stat_upcoming": "À venir",
+    "ba_curve_title": "Plaisir et accomplissement ressentis (moyenne par jour)",
+    "ba_curve_pleasure": "Plaisir",
+    "ba_curve_mastery": "Accomplissement",
+    "ba_section_title": "Activation comportementale"
   }
 }

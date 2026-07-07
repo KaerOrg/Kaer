@@ -367,6 +367,47 @@ structure dans du texte.
 
 ---
 
+## Mode ado : registre (tutoiement ≠ familiarité)
+
+> Règle source : [coding-standards.md § Mode ado (teen) — règle d'or](coding-standards.md#mode-ado-teen--règle-dor).
+
+**colonne-beck-reflexion (2026-07-05) — le teen a glissé vers le langage familier.**
+Les variantes teen du module Beck ont été écrites en registre relâché, corrigées
+**trois fois de suite** par l'utilisateur (perte de temps explicitement signalée) :
+
+```json
+// ❌ familier — élisions, « pote », « vite fait », questions sans inversion
+"entry_col_3_belief": "T'y croyais à quel point ?"
+"quick_capture": "Note vite fait"
+"entry_col_evidence_against_hint": "… Tu dirais quoi à un pote dans la même situation ?"
+"entry_col_distortion_hint": "Tu reconnais un piège de la pensée là-dedans ? (pas obligé)"
+// ✅ tutoiement professionnel — vocabulaire standard, inversion interrogative
+"entry_col_3_belief": "À quel point y croyais-tu ?"
+"quick_capture": "Note rapide"
+"entry_col_evidence_against_hint": "… Que dirais-tu à un ami dans la même situation ?"
+"entry_col_distortion_hint": "Reconnais-tu un piège de la pensée ? (facultatif)"
+```
+
+→ Le mode ado est du **tutoiement professionnel** : vocabulaire simple, phrases
+courtes, jamais de mots familiers ni d'élisions orales. Vaut aussi pour l'anglais
+(« in the same spot », « no pressure », « jot it down » → registre neutre).
+Réflexe review sur tout ajout à `teen.json` :
+`grep -inE "pote|vite fait|là-dedans|pas oblig|t'y |t'étais|no pressure|jot it" apps/mobile/src/i18n/locales/*/teen.json` doit rester vide.
+
+**Suite du même incident — les échelles validées avaient été réécrites en teen.**
+La passe de correction a révélé plus grave que le registre : les items, consignes
+et options de PHQ-9, GAD-7, BSL-23, SNAP-IV, ASRS, RCADS, NSI et EPDS avaient des
+variantes teen **réécrites** (« tu as été combien gêné(e)… », « regarder un truc »).
+Or on ne modifie JAMAIS la formulation d'un instrument psychométrique validé, ni
+pour le tutoyer ni pour le simplifier : la validation porte sur les mots exacts.
+Correctif : toutes les surcharges teen psychométriques supprimées ; le mode ado
+retombe sur la version validée de `common.json` (fallback i18next). Seul
+l'habillage applicatif garde une variante teen.
+→ Réflexe review : dans `teen.json`, un bloc d'échelle clinique ne doit contenir
+AUCUNE clé `instructions*`, `q*`, `opt_*`, `legend_*`, `section_*`, `warning`.
+
+---
+
 ## Internationalisation : texte en dur
 
 > Règle source : [coding-standards.md § Internationalisation](coding-standards.md#internationalisation--zéro-texte-hardcodé).
@@ -387,3 +428,49 @@ en font partie : ils sont lus aux utilisateurs. Réflexe review : ne pas se limi
 texte entre `>` et `<` — grep aussi les **props textuelles** d'accessibilité. Quand le
 mobile résout déjà la clé (`t('common.back')`), un littéral en dur côté web est en plus
 une **rupture de parité**. Vérif : `grep -nE 'aria-label="[A-Za-z]|alt="[A-Za-z]|title="[A-Za-z]' apps/web/src --include="*.tsx"`.
+
+**refonte/activation-comportementale (2026-07-05) — texte d'exemple FR en dur dans un aperçu web.**
+Le layout d'aperçu praticien `ActivityLogLayout` (web) rendait des cartes mock avec des
+libellés d'activité **codés en dur en français** :
+```tsx
+// ❌ texte visible figé en FR dans une app fr/en — un praticien EN voit « Marche en forêt »
+<span className="al-list__title">Marche en forêt</span>
+<span className="al-list__title">Yoga matinal</span>
+// ✅ clé i18n dédiée, ou placeholder neutre non textuel
+<span className="al-list__title">{t('modules.behavioral_activation.preview_sample_1')}</span>
+```
+Même dans un **mock d'aperçu**, un texte visible reste soumis à l'i18n : aucun autre
+layout d'aperçu web ne hardcode de texte d'exemple (vérifié par grep). La règle « zéro
+texte en dur » **n'a pas d'exception « ce ne sont que des données de démo »**.
+→ Réflexe review : sur un layout d'aperçu, grep les libellés littéraux hors `t(...)` —
+`grep -rnE ">[A-ZÀ-Ü][a-zà-ü]+ " apps/web/src/components/features/ModuleRenderer/layouts` doit
+rester vide de prose. Idem pour une **locale figée** (`toLocaleDateString('fr-FR', …)`) :
+dériver de `i18n.language`.
+
+---
+
+## Dates : jamais `toISOString()` pour une date métier locale
+
+> Règle source : [coding-standards.md § React performance](coding-standards.md) (correctness) + le module partagé `packages/shared/src/services/weekDates.ts` (ancrage midi local).
+
+**refonte/activation-comportementale (2026-07-05) — décalage d'un jour en fuseau positif.**
+`EntryForm` (mobile) dérivait la date métier d'une activité depuis un `Date` de picker
+avec `toISOString()` :
+```ts
+// ❌ toISOString() = UTC → en France (UTC+1/+2) minuit local retombe sur la veille
+date: entryDate.toISOString().slice(0, 10),
+// ✅ composants LOCAUX (comme weekDates.toIso)
+const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+```
+Reproductible à 100 % : éditer une activité puis Enregistrer → `new Date(\`${date}T00:00:00\`)`
+(minuit local) `.toISOString()` renvoie la veille (22:00 UTC) → l'activité **change de jour**.
+Une activité « aujourd'hui » peut ainsi tomber dans l'onglet Historique
+(`records.filter(r => r.date >= todayIso())`). La date fautive se propage au web
+(`fetchActivityEntries` date par `payload.date`). `@kaer/shared/services/weekDates` existe
+**précisément** pour éviter ça (commentaire « minuit UTC vs minuit local ») mais n'exposait
+pas de `Date → ISO` réutilisable, d'où le hand-roll fautif.
+→ Réflexe review : tout `toISOString().slice(0,10)` sur une **date choisie/affichée** (par
+opposition à un horodatage d'événement) est suspect en fuseau positif. Formater depuis les
+getters locaux, ou via un helper partagé `toIsoDate(d)`. Vérif :
+`grep -rn "toISOString().slice(0, 10)" apps/*/src` — chaque occurrence porte-t-elle une date
+métier locale ? Si oui → bug de fuseau.

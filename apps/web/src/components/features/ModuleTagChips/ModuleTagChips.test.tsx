@@ -20,12 +20,12 @@ const taxonomy = {
 }
 
 describe('ModuleTagChips', () => {
-  it('affiche les tags indication + public du module, pas l approche', () => {
+  it('affiche les tags indication du module, pas la population ni l approche', () => {
     render(<ModuleTagChips tagIds={new Set(['anxiety', 'trauma', 'teen', 'cbt'])} taxonomy={taxonomy} />)
     expect(screen.getByText('tags.anxiety.label')).toBeInTheDocument()
     expect(screen.getByText('tags.trauma.label')).toBeInTheDocument()
-    expect(screen.getByText('tags.teen.label')).toBeInTheDocument()
-    // l'approche ne s'affiche pas sur les cartes (CARD_DIMENSIONS)
+    // population (âge) et approche ne s'affichent pas sur les cartes (CARD_DIMENSIONS)
+    expect(screen.queryByText('tags.teen.label')).not.toBeInTheDocument()
     expect(screen.queryByText('tags.cbt.label')).not.toBeInTheDocument()
   })
 

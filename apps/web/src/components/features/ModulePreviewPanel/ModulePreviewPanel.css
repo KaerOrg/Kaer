@@ -1926,19 +1926,31 @@
 
 .cf-record__val { font-size: 11px; color: var(--color-text-muted); font-style: italic; flex-shrink: 0; }
 
-.cf-new-btn {
+.cf-actions {
   align-self: flex-end;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--color-primary);
-  color: white;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
+  gap: 8px;
 }
+
+.cf-field { display: flex; flex-direction: column; gap: 6px; }
+
+/* Badge « Option » d'une colonne optionnelle (optional_group) dans l'aperçu. */
+.cf-column__optional {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
+/* Chips d'aide au vocabulaire (parité mobile) — primitive ui/Chip. */
+.cf-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .cf-entry { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; border-top: 1px dashed var(--color-border); }
 

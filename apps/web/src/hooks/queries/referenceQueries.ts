@@ -1,13 +1,15 @@
 import { queryOptions } from '@tanstack/react-query'
 import { fetchProfessionalTitles } from '@services/authService'
+import { CONFIG_QUERY_OPTIONS } from './configCache'
 
 // Factories `queryOptions` des données de référence globales (sans paramètre,
-// rarement modifiées). Mutualisables entre plusieurs écrans.
+// seedées, rarement modifiées). Config quasi-statique → cache infini + invalidation
+// par jeton de version (cf. CONFIG_QUERY_OPTIONS).
 export const referenceQueries = {
   professionalTitles: () =>
     queryOptions({
       queryKey: ['reference', 'professionalTitles'],
       queryFn: fetchProfessionalTitles,
-      staleTime: 60 * 60_000, // référentiel quasi statique → 1 h
+      ...CONFIG_QUERY_OPTIONS,
     }),
 }

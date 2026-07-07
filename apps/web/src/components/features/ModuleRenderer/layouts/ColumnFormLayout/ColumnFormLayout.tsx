@@ -1,5 +1,7 @@
-import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
+import { Clock, Pencil, Plus, Save, Trash2, Zap } from 'lucide-react'
+import { collectIndexed, buildColumnSpecs, readSliderParams } from '@kaer/shared'
 import { Button } from '../../../../ui/Button'
+import { Chip } from '../../../../ui/Chip'
 import { RatingSelector } from '../../../../ui/RatingSelector'
 import type { ContentField } from '@services/moduleService'
 
@@ -27,8 +29,10 @@ const EXAMPLE_DAYS: readonly { dayOffset: number; shift: number }[] = [
 ]
 
 function exampleTimeFor(child: ContentField): string {
+  // Config-first : la valeur d'aperçu de la config (`preview_value`) prime sur
+  // l'exemple générique par clé connue, lui-même devant le défaut.
   const key = child.props['key']
-  return (key && EXAMPLE_TIME[key]) || child.props['preview_value'] || '08:00'
+  return child.props['preview_value'] || (key && EXAMPLE_TIME[key]) || '08:00'
 }
 
 function shiftTime(hhmm: string, deltaMin: number): string {
@@ -58,29 +62,19 @@ export function ColumnFormLayout({ fields, t }: Props) {
 
   const newBtn = lbl('new_btn_label')
   const saveLabel = lbl('save_label')
+  // Parité mobile : bouton « capture rapide » (formulaire réduit aux quick_key_*).
+  const quickBtn = lbl('quick_btn_label')
 
-  const headers = fields
-    .filter(f => f.field_type === 'column_header')
-    .sort((a, b) => a.sort_order - b.sort_order)
-
-  // Les champs (texte/slider/horaire) sont IMBRIQUÉS sous leur column_header
-  // (`h.children`), comme côté mobile — pas à plat dans `fields`.
-  const headerChildren = (h: ContentField): ContentField[] =>
-    (h.children ?? [])
-      .filter(
-        c =>
-          c.field_type === 'column_text_field' ||
-          c.field_type === 'column_slider_field' ||
-          c.field_type === 'column_time_field',
-      )
-      .sort((a, b) => a.sort_order - b.sort_order)
+  // Colonnes + enfants dérivés une seule fois (source partagée web ≡ mobile),
+  // comme côté mobile — pas à plat dans `fields`.
+  const columns = buildColumnSpecs(fields)
 
   // Rangées d'une carte récap, pour un décalage horaire donné (jour d'exemple).
   const buildRows = (shift: number): RecordRow[] => {
     const rows: RecordRow[] = []
-    for (const h of headers) {
-      const color = h.props['color'] ?? 'var(--color-primary)'
-      for (const child of headerChildren(h)) {
+    for (const { header, children } of columns) {
+      const color = header.props['color'] ?? 'var(--color-primary)'
+      for (const child of children) {
         const label = child.text_code ? t(child.text_code) : ''
         if (!label) continue
         let value = ''
@@ -93,7 +87,7 @@ export function ColumnFormLayout({ fields, t }: Props) {
     return rows
   }
 
-  const hasExamples = headers.some(h => headerChildren(h).length > 0)
+  const hasExamples = columns.some(c => c.children.length > 0)
 
   return (
     <div className="cf">
@@ -120,28 +114,40 @@ export function ColumnFormLayout({ fields, t }: Props) {
           </article>
         ))}
 
-      {newBtn && (
-        <div className="cf-new-btn">
-          <Plus size={16} />
-          <span>{newBtn}</span>
+      {(newBtn || quickBtn) && (
+        <div className="cf-actions">
+          {quickBtn && (
+            <Button variant="secondary" size="sm" disabled icon={<Zap size={16} />}>
+              {quickBtn}
+            </Button>
+          )}
+          {newBtn && (
+            <Button variant="primary" size="sm" disabled icon={<Plus size={16} />}>
+              {newBtn}
+            </Button>
+          )}
         </div>
       )}
 
       {/* Formulaire de saisie — colonnes empilées */}
       <div className="cf-entry">
-        {headers.map((h, idx) => {
+        {columns.map(({ header: h, children }, idx) => {
           const color = h.props['color'] ?? 'var(--color-primary)'
-          const stepNumber = h.props['step_number'] ?? String(idx + 1)
+          // Numérotation dynamique (parité mobile : position parmi les visibles).
+          const stepNumber = String(idx + 1)
           const hintCode = h.props['hint_code']
+          const isOptional = Boolean(h.props['optional_group'])
           const headerLabel = h.text_code ? t(h.text_code) : ''
-          const children = headerChildren(h)
 
           return (
             <section key={h.id} className="cf-column">
               <div className="cf-column__head">
                 <span className="cf-column__num" style={{ background: color }}>{stepNumber}</span>
                 <div className="cf-column__titles">
-                  <span className="cf-column__title" style={{ color }}>{headerLabel}</span>
+                  <span className="cf-column__title" style={{ color }}>
+                    {headerLabel}
+                    {isOptional && <span className="cf-column__optional">{t('patient.optional_column_badge')}</span>}
+                  </span>
                   {hintCode && <span className="cf-column__hint">{t(hintCode)}</span>}
                 </div>
               </div>
@@ -149,16 +155,26 @@ export function ColumnFormLayout({ fields, t }: Props) {
                 {children.map(child => {
                   if (child.field_type === 'column_text_field') {
                     const placeholder = child.text_code ? t(child.text_code) : ''
+                    // Parité mobile : chips d'aide au vocabulaire (suggestion_1..n).
+                    const suggestionCodes = collectIndexed(child.props, 'suggestion')
                     return (
-                      <div key={child.id} className="cf-text-input">
-                        <span className="cf-text-input__placeholder">{placeholder}</span>
+                      <div key={child.id} className="cf-field">
+                        <div className="cf-text-input">
+                          <span className="cf-text-input__placeholder">{placeholder}</span>
+                        </div>
+                        {suggestionCodes.length > 0 && (
+                          <div className="cf-suggestions">
+                            {suggestionCodes.map(code => (
+                              <Chip key={code} label={t(code)} size="sm" />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )
                   }
                   if (child.field_type === 'column_slider_field') {
                     const sliderLabel = child.text_code ? t(child.text_code) : ''
-                    const min = Number(child.props['min'] ?? 0)
-                    const max = Number(child.props['max'] ?? 100)
+                    const { min, max } = readSliderParams(child)
                     const sliderColor = child.props['color'] ?? color
                     const value = Math.round((min + max) * 0.7)
                     return (

@@ -1,52 +1,41 @@
 // ─── Layout — journal d'activités (behavioral_activation…) ──────────────────
 //
-// Pattern « plusieurs activités par jour, planifiées ou réalisées, notées
-// selon deux dimensions brutes (Plaisir / Maîtrise) ». 3 modes internes :
-// list | entry | month. Mode list = liste groupée par date. Mode entry =
-// formulaire date + label + suggestions + toggle réalisée + 2 sliders
-// (plaisir/maîtrise) + notes. Mode month = grille calendrier avec points
-// done/planned + filtre par jour sélectionné.
-// Persistance dans la table SQLite dédiée `activity_records`.
+// Le patient planifie des activités (quoi + quand, zéro évaluation imposée),
+// les réalise, et note P/M ressentis au moment de cocher (CompletionSheet).
+// 3 modes : agenda (défaut : Aujourd'hui + À venir) | history (jours passés)
+// | entry (formulaire à statut explicite).
+// Les activités co-construites en consultation (patient_modules.config.
+// ba_activities) sont proposées en premier ; les suggestions du seed sont
+// groupées par domaine de vie (fields activity_log_domain, prop `domain`).
+// Persistance dans la table SQLite dédiée `activity_records` + sync outbox.
 // Conformité MDR 2017/745 : valeurs brutes uniquement, pas de seuil ni
-// d'interprétation. La couleur des points = convention d'affichage des
-// statuts done/planned saisis, pas un score clinique.
+// d'interprétation ; « non renseigné » (null) est un état légitime.
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
-  KeyboardAvoidingView, Platform, TouchableOpacity,
-} from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker'
+import { View, Text, Pressable, ActivityIndicator } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import type { BAConfiguredActivity } from '@kaer/shared'
 import {
   getAllActivityRecords, getActivityRecord, generateId, type ActivityRecord,
 } from '../../../../../lib/database'
 import { saveActivityRecord, deleteActivityRecord } from '@services/activityRecordService'
-import { formatDateFull } from '../../../../../lib/dateUtils'
+import { fetchBAActivities } from '@services/baActivitiesService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { RatingSelector } from '@ui/RatingSelector'
+import { useAuthStore } from '../../../../../store/authStore'
 import type { ContentField } from '@services/moduleService'
-import { ActivityListCard } from './ActivityListCard'
+import {
+  parseActivityLogConfig, collectDomains, collectSuggestions, groupSuggestionsByDomain,
+} from './activityLogConfig'
+import { todayIso } from '@kaer/shared'
+import type { ActivityDraft } from './types'
+import { AgendaView } from './AgendaView'
+import { ListView } from './ListView'
+import { EntryForm } from './EntryForm'
+import { CompletionSheet } from './CompletionSheet'
 import { alStyles } from './styles'
-
-const WEEKDAYS_SHORT = ['L', 'M', 'M', 'J', 'V', 'S', 'D'] as const
-
-function startOfMonth(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-}
-
-function formatLongMonth(date: Date, locale: string): string {
-  return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
-}
-
-function buildPipSteps(min: number, max: number, step: number): number[] {
-  const steps: number[] = []
-  for (let v = min; v <= max; v += step) steps.push(v)
-  return steps
-}
 
 export interface ActivityLogLayoutProps {
   fields: ContentField[]
@@ -57,61 +46,44 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
   const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
+  const patientId = useAuthStore(s => s.patient?.id)
 
-  const configField = fields.find(f => f.field_type === 'activity_log_config')
+  const configField = useMemo(() => fields.find(f => f.field_type === 'activity_log_config'), [fields])
 
   // ── Labels UI — lus depuis les props de activity_log_config
   const lbl = useCallback((key: string): string => {
     const code = configField?.props[key]
     return code ? t(code) : ''
   }, [configField, t])
-  const pleasureMin = parseInt(configField?.props['pleasure_min'] ?? '0', 10)
-  const pleasureMax = parseInt(configField?.props['pleasure_max'] ?? '10', 10)
-  const pleasureStep = parseInt(configField?.props['pleasure_step'] ?? '1', 10)
-  const masteryMin = parseInt(configField?.props['mastery_min'] ?? '0', 10)
-  const masteryMax = parseInt(configField?.props['mastery_max'] ?? '10', 10)
-  const masteryStep = parseInt(configField?.props['mastery_step'] ?? '1', 10)
-  const pleasureColor = configField?.props['pleasure_color'] ?? '#059669'
-  const masteryColor = configField?.props['mastery_color'] ?? '#4F46E5'
-  const dotDoneColor = configField?.props['dot_done_color'] ?? colors.success
-  const dotPlannedColor = configField?.props['dot_planned_color'] ?? colors.primary
-  const localeProp = configField?.props['locale'] ?? 'fr-FR'
 
-  const pleasureSteps = useMemo(
-    () => buildPipSteps(pleasureMin, pleasureMax, pleasureStep),
-    [pleasureMin, pleasureMax, pleasureStep]
+  const config = useMemo(
+    () => parseActivityLogConfig(configField, { successColor: colors.success, primaryColor: colors.primary }),
+    [configField],
   )
-  const masterySteps = useMemo(
-    () => buildPipSteps(masteryMin, masteryMax, masteryStep),
-    [masteryMin, masteryMax, masteryStep]
-  )
-
-  const suggestionFields = useMemo(
-    () => fields
-      .filter(f => f.field_type === 'activity_log_suggestion')
-      .sort((a, b) => a.sort_order - b.sort_order),
-    [fields]
+  const domains = useMemo(() => collectDomains(fields, t), [fields, t])
+  const suggestionGroups = useMemo(
+    () => groupSuggestionsByDomain(collectSuggestions(fields, t), domains),
+    [fields, t, domains],
   )
 
   // ── State
-  const [mode, setMode] = useState<'list' | 'entry' | 'month'>('list')
+  const [mode, setMode] = useState<'agenda' | 'history' | 'entry'>('agenda')
   const [records, setRecords] = useState<ActivityRecord[]>([])
+  const [myActivities, setMyActivities] = useState<BAConfiguredActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [editingRecord, setEditingRecord] = useState<ActivityRecord | null>(null)
+  // Activité en cours de complétion : cocher réalisée ouvre la feuille
+  // « C'était comment ? » — c'est LE moment de la notation des ressentis.
+  const [completingRecord, setCompletingRecord] = useState<ActivityRecord | null>(null)
 
-  // Mode entry
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [entryDate, setEntryDate] = useState<Date>(() => new Date())
-  const [label, setLabel] = useState('')
-  const [pleasure, setPleasure] = useState(Math.round((pleasureMin + pleasureMax) / 2))
-  const [mastery, setMastery] = useState(Math.round((masteryMin + masteryMax) / 2))
-  const [done, setDone] = useState(false)
-  const [notes, setNotes] = useState('')
-  const [showDatePicker, setShowDatePicker] = useState(false)
-
-  // Mode month
-  const [monthAnchor, setMonthAnchor] = useState<Date>(() => startOfMonth(new Date()))
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  // Agenda (aujourd'hui + à venir) vs historique (jours passés) : identités
+  // stables pour que le regroupement par date des vues enfant ne recalcule pas.
+  const today = todayIso()
+  const { agendaRecords, historyRecords } = useMemo(() => ({
+    agendaRecords: records.filter(r => r.date >= today),
+    historyRecords: records.filter(r => r.date < today),
+  }), [records, today])
 
   // ── Loaders
   const loadRecords = useCallback(async () => {
@@ -122,79 +94,80 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
 
   useEffect(() => { loadRecords().catch(() => setLoading(false)) }, [loadRecords])
 
+  // Activités co-construites : setup en ligne, silencieux hors connexion.
+  useEffect(() => {
+    if (!patientId) return
+    fetchBAActivities(patientId).then(setMyActivities).catch(() => {})
+  }, [patientId])
+
   // ── Navigation
   const handleNew = useCallback(() => {
-    setEditingId(null)
-    setEntryDate(new Date())
-    setLabel('')
-    setPleasure(Math.round((pleasureMin + pleasureMax) / 2))
-    setMastery(Math.round((masteryMin + masteryMax) / 2))
-    setDone(false)
-    setNotes('')
+    setEditingRecord(null)
     setMode('entry')
-  }, [pleasureMin, pleasureMax, masteryMin, masteryMax])
+  }, [])
 
   const handleEdit = useCallback(async (recordId: string) => {
     const r = await getActivityRecord(recordId)
     if (!r) return
-    setEditingId(r.id)
-    setEntryDate(new Date(`${r.date}T00:00:00`))
-    setLabel(r.label)
-    setPleasure(r.pleasure)
-    setMastery(r.mastery)
-    setDone(r.done === 1)
-    setNotes(r.notes ?? '')
+    setEditingRecord(r)
     setMode('entry')
   }, [])
 
-  const handleBackToList = useCallback(() => {
-    setMode('list')
-    setEditingId(null)
+  const handleBack = useCallback(() => {
+    setEditingRecord(null)
+    setMode('agenda')
   }, [])
 
+  const showAgenda = useCallback(() => setMode('agenda'), [])
+  const showHistory = useCallback(() => setMode('history'), [])
+
   // ── Save / delete / toggle
-  const handleSave = useCallback(async () => {
-    if (!label.trim()) {
+  const handleSave = useCallback(async (draft: ActivityDraft) => {
+    if (!draft.label) {
       showToast(lbl('name_missing_msg') || t('common.error'), 'info')
       return
     }
     setSaving(true)
     try {
-      const id = editingId ?? generateId()
       await saveActivityRecord({
-        id,
-        date: entryDate.toISOString().slice(0, 10),
-        label: label.trim(),
-        pleasure,
-        mastery,
-        done: done ? 1 : 0,
-        notes: notes.trim() || null,
+        id: draft.id ?? generateId(),
+        date: draft.date,
+        label: draft.label,
+        expected_pleasure: draft.expected_pleasure,
+        expected_mastery: draft.expected_mastery,
+        pleasure: draft.pleasure,
+        mastery: draft.mastery,
+        done: draft.done ? 1 : 0,
+        notes: draft.notes.length > 0 ? draft.notes : null,
+        planned_time: draft.planned_time,
+        domain_id: draft.domain_id,
+        config_activity_id: draft.config_activity_id,
       })
       await loadRecords()
-      setMode('list')
-      setEditingId(null)
+      setEditingRecord(null)
+      setMode('agenda')
     } catch {
       showToast(t('common.save_error'), 'error')
     } finally {
       setSaving(false)
     }
-  }, [label, editingId, entryDate, pleasure, mastery, done, notes, loadRecords, lbl, t, showToast])
+  }, [loadRecords, lbl, t, showToast])
 
-  const handleDelete = useCallback(() => {
-    if (!editingId) return
+  const handleDeleteEditing = useCallback(() => {
+    if (!editingRecord) return
     showConfirm({
       title: lbl('delete_title') || t('common.delete'),
       message: t('common.irreversible'),
       confirmLabel: t('common.delete'),
       destructive: true,
       onConfirm: async () => {
-        await deleteActivityRecord(editingId)
+        await deleteActivityRecord(editingRecord.id)
         await loadRecords()
-        setMode('list')
-        setEditingId(null)
+        setEditingRecord(null)
+        setMode('agenda')
       },
     })
-  }, [editingId, loadRecords, lbl, t, showConfirm])
+  }, [editingRecord, loadRecords, lbl, t, showConfirm])
 
   const handleDeleteFromList = useCallback((record: ActivityRecord) => {
     showConfirm({
@@ -209,27 +182,41 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
     })
   }, [loadRecords, lbl, t, showConfirm])
 
-  const handleToggleDone = useCallback(async (record: ActivityRecord) => {
-    await saveActivityRecord({
-      id: record.id,
-      date: record.date,
-      label: record.label,
-      pleasure: record.pleasure,
-      mastery: record.mastery,
-      done: record.done === 1 ? 0 : 1,
-      notes: record.notes,
-    })
+  // Enregistre un changement de statut, avec ou sans ressentis.
+  const persistCompletion = useCallback(async (
+    record: ActivityRecord,
+    done: 0 | 1,
+    pleasure: number | null,
+    mastery: number | null,
+  ) => {
+    await saveActivityRecord({ ...record, done, pleasure, mastery })
     await loadRecords()
   }, [loadRecords])
 
-  // ── Month nav
-  const goPrevMonth = useCallback(() => {
-    setMonthAnchor(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
-  }, [])
+  // Cocher réalisée depuis une carte : on ouvre la feuille d'évaluation
+  // (« C'était comment ? ») — rien n'est enregistré tant que le patient n'a
+  // pas choisi Enregistrer, Passer, ou refermé. Décocher reste immédiat.
+  const handleToggleDone = useCallback((record: ActivityRecord) => {
+    if (record.done === 1) {
+      void persistCompletion(record, 0, null, null)
+      return
+    }
+    setCompletingRecord(record)
+  }, [persistCompletion])
 
-  const goNextMonth = useCallback(() => {
-    setMonthAnchor(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
-  }, [])
+  const handleCompletionSave = useCallback(async (pleasure: number | null, mastery: number | null) => {
+    if (!completingRecord) return
+    await persistCompletion(completingRecord, 1, pleasure, mastery)
+    setCompletingRecord(null)
+  }, [completingRecord, persistCompletion])
+
+  const handleCompletionSkip = useCallback(async () => {
+    if (!completingRecord) return
+    await persistCompletion(completingRecord, 1, null, null)
+    setCompletingRecord(null)
+  }, [completingRecord, persistCompletion])
+
+  const handleCompletionCancel = useCallback(() => setCompletingRecord(null), [])
 
   if (loading) {
     return <View style={alStyles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
@@ -237,424 +224,76 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
 
   // ── MODE ENTRY ──────────────────────────────────────────────────────────
   if (mode === 'entry') {
-    const saveLabel = editingId
-      ? (lbl('update_label') || t('common.update'))
-      : (lbl('save_label') || t('common.save'))
-    const dateValueText = entryDate.toLocaleDateString(localeProp, {
-      weekday: 'long', day: 'numeric', month: 'long',
-    })
-
     return (
-      <KeyboardAvoidingView
-        style={alStyles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={88}
-        testID="activity-log-entry"
-      >
-        <View style={alStyles.entryHeaderBar}>
-          <Pressable
-            onPress={handleBackToList}
-            style={alStyles.backBtn}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('back_label') || t('common.back')}
-            testID="entry-back-button"
-          >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-          </Pressable>
-        </View>
-        <ScrollView
-          contentContainerStyle={alStyles.entryContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Date */}
-          <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{lbl('date_label')}</Text>
-            <View style={alStyles.card}>
-              <TouchableOpacity
-                style={alStyles.dateBtn}
-                onPress={() => setShowDatePicker(true)}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                testID="date-btn"
-              >
-                <MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />
-                <Text style={alStyles.dateValue}>{dateValueText}</Text>
-              </TouchableOpacity>
-              {showDatePicker ? (
-                <DateTimePicker
-                  value={entryDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(_, date) => {
-                    if (Platform.OS === 'android') setShowDatePicker(false)
-                    if (date) setEntryDate(date)
-                  }}
-                />
-              ) : null}
-              {showDatePicker && Platform.OS === 'ios' ? (
-                <Pressable style={alStyles.confirmBtn} onPress={() => setShowDatePicker(false)}>
-                  <Text style={alStyles.confirmBtnText}>{lbl('date_confirm_label') || t('common.ok')}</Text>
-                </Pressable>
-              ) : null}
-            </View>
-          </View>
-
-          {/* Activité */}
-          <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{lbl('section_activity_title')}</Text>
-            <View style={alStyles.card}>
-              <TextInput
-                style={alStyles.labelInput}
-                value={label}
-                onChangeText={setLabel}
-                placeholder={lbl('activity_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                returnKeyType="done"
-                testID="label-input"
-              />
-            </View>
-            {suggestionFields.length > 0 ? (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={alStyles.chipList}
-                keyboardShouldPersistTaps="handled"
-              >
-                {suggestionFields.map(s => {
-                  const text = s.text_code ? t(s.text_code) : ''
-                  if (!text) return null
-                  const active = label === text
-                  return (
-                    <TouchableOpacity
-                      key={s.id}
-                      style={[alStyles.chip, active && alStyles.chipActive]}
-                      onPress={() => setLabel(active ? '' : text)}
-                      activeOpacity={0.7}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: active }}
-                      accessibilityLabel={text}
-                      testID={`suggestion-${s.id}`}
-                    >
-                      <Text style={[alStyles.chipText, active && alStyles.chipTextActive]}>{text}</Text>
-                    </TouchableOpacity>
-                  )
-                })}
-              </ScrollView>
-            ) : null}
-          </View>
-
-          {/* Statut réalisée */}
-          <Pressable
-            style={[alStyles.doneRow, done && alStyles.doneRowActive]}
-            onPress={() => setDone(!done)}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: done }}
-            testID="done-toggle"
-          >
-            <MaterialCommunityIcons
-              name={done ? 'checkbox-marked-circle' : 'checkbox-blank-circle-outline'}
-              size={24}
-              color={done ? colors.success : colors.textMuted}
-            />
-            <Text style={[alStyles.doneLabel, done && { color: colors.success }]}>
-              {done ? lbl('done_label') : lbl('mark_done_label')}
-            </Text>
-          </Pressable>
-
-          {/* Évaluation */}
-          <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{lbl('section_evaluation_title')}</Text>
-            <View style={alStyles.card}>
-              <RatingSelector
-                label={lbl('pleasure_label')}
-                sublabel={lbl('pleasure_sublabel')}
-                value={pleasure}
-                steps={pleasureSteps}
-                color={pleasureColor}
-                variant="track"
-                showEndLabels
-                onPress={setPleasure}
-              />
-              <View style={alStyles.cardDivider} />
-              <RatingSelector
-                label={lbl('mastery_label')}
-                sublabel={lbl('mastery_sublabel')}
-                value={mastery}
-                steps={masterySteps}
-                color={masteryColor}
-                variant="track"
-                showEndLabels
-                onPress={setMastery}
-              />
-            </View>
-          </View>
-
-          {/* Notes */}
-          <View style={alStyles.section}>
-            <Text style={alStyles.sectionLabel}>{lbl('section_notes_title') || t('common.notes_optional')}</Text>
-            <View style={alStyles.card}>
-              <TextInput
-                style={alStyles.notesInput}
-                value={notes}
-                onChangeText={setNotes}
-                placeholder={lbl('notes_placeholder') || t('common.notes_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-                testID="notes-input"
-              />
-            </View>
-          </View>
-
-          <Pressable
-            style={[alStyles.saveBtn, saving && alStyles.btnDisabled]}
-            onPress={handleSave}
-            disabled={saving}
-            accessibilityRole="button"
-            accessibilityLabel={saveLabel}
-            testID="save-button"
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.white} size="small" />
-            ) : (
-              <>
-                <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-                <Text style={alStyles.saveBtnText}>{saveLabel}</Text>
-              </>
-            )}
-          </Pressable>
-          {editingId ? (
-            <Pressable
-              style={alStyles.deleteBtn}
-              onPress={handleDelete}
-              accessibilityRole="button"
-              accessibilityLabel={lbl('delete_label') || t('common.delete')}
-              testID="delete-button"
-            >
-              <Text style={alStyles.deleteBtnText}>{lbl('delete_label') || t('common.delete')}</Text>
-            </Pressable>
-          ) : null}
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <EntryForm
+        key={editingRecord?.id ?? 'new'}
+        editingRecord={editingRecord}
+        config={config}
+        lbl={lbl}
+        suggestionGroups={suggestionGroups}
+        myActivities={myActivities}
+        saving={saving}
+        onSave={handleSave}
+        onDelete={editingRecord ? handleDeleteEditing : null}
+        onBack={handleBack}
+      />
     )
   }
 
-  // ── MODE MONTH ──────────────────────────────────────────────────────────
-  if (mode === 'month') {
-    const year = monthAnchor.getFullYear()
-    const m = monthAnchor.getMonth()
-    const totalDays = new Date(year, m + 1, 0).getDate()
-    let offset = new Date(year, m, 1).getDay() - 1
-    if (offset < 0) offset = 6
-    const cells: (number | null)[] = [
-      ...Array(offset).fill(null),
-      ...Array.from({ length: totalDays }, (_, i) => i + 1),
-    ]
-    while (cells.length % 7 !== 0) cells.push(null)
-
-    const dayMap = new Map<string, { done: number; planned: number }>()
-    for (const r of records) {
-      const d = new Date(`${r.date}T00:00:00`)
-      if (d.getFullYear() === year && d.getMonth() === m) {
-        const cur = dayMap.get(r.date) ?? { done: 0, planned: 0 }
-        if (r.done === 1) cur.done += 1
-        else cur.planned += 1
-        dayMap.set(r.date, cur)
-      }
-    }
-
-    const today = new Date()
-    const isCurrentMonth = year === today.getFullYear() && m === today.getMonth()
-    const monthLabel = formatLongMonth(monthAnchor, localeProp)
-    const monthDone = [...dayMap.values()].reduce((acc, v) => acc + v.done, 0)
-    const monthPlanned = [...dayMap.values()].reduce((acc, v) => acc + v.planned, 0)
-
-    const dayRecords = selectedDay
-      ? records.filter(r => r.date === selectedDay)
-      : []
-
-    return (
-      <View style={alStyles.container} testID="activity-log-month">
-        <View style={alStyles.monthNav}>
-          <Pressable
-            onPress={handleBackToList}
-            style={alStyles.backBtn}
-            accessibilityRole="button"
-            accessibilityLabel={lbl('back_label') || t('common.back')}
-            testID="month-back-button"
-          >
-            <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-          </Pressable>
-          <Pressable onPress={goPrevMonth} style={alStyles.navBtn} accessibilityRole="button" testID="month-prev">
-            <MaterialCommunityIcons name="chevron-left" size={26} color={colors.primary} />
-          </Pressable>
-          <Text style={alStyles.monthTitle}>{monthLabel}</Text>
-          <Pressable onPress={goNextMonth} style={alStyles.navBtn} accessibilityRole="button" testID="month-next">
-            <MaterialCommunityIcons name="chevron-right" size={26} color={colors.primary} />
-          </Pressable>
-        </View>
-
-        <ScrollView contentContainerStyle={alStyles.monthContent}>
-          <View style={alStyles.calendarCard}>
-            <View style={alStyles.calendarHeader}>
-              {WEEKDAYS_SHORT.map((d, i) => (
-                <Text key={i} style={alStyles.weekday}>{d}</Text>
-              ))}
-            </View>
-            {Array.from({ length: cells.length / 7 }, (_, rowIdx) => (
-              <View key={rowIdx} style={alStyles.calendarRow}>
-                {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
-                  if (!day) return <View key={colIdx} style={alStyles.calendarCell} />
-                  const mm = String(m + 1).padStart(2, '0')
-                  const dd = String(day).padStart(2, '0')
-                  const dateStr = `${year}-${mm}-${dd}`
-                  const acts = dayMap.get(dateStr)
-                  const isToday = isCurrentMonth && day === today.getDate()
-                  const isSelected = selectedDay === dateStr
-                  return (
-                    <Pressable
-                      key={colIdx}
-                      style={[
-                        alStyles.calendarCell,
-                        alStyles.calendarCellPressable,
-                        isSelected && alStyles.calendarCellSelected,
-                        !isSelected && acts != null && alStyles.calendarCellHasActivity,
-                        !isSelected && isToday && alStyles.calendarCellToday,
-                      ]}
-                      onPress={() => setSelectedDay(prev => prev === dateStr ? null : dateStr)}
-                      accessibilityRole="button"
-                      testID={`day-${dateStr}`}
-                    >
-                      <Text style={[
-                        alStyles.dayNum,
-                        isToday && !isSelected && alStyles.dayNumToday,
-                        isSelected && alStyles.dayNumSelected,
-                      ]}>
-                        {day}
-                      </Text>
-                      {acts != null ? (
-                        <View style={alStyles.dots}>
-                          {acts.done > 0 ? <View style={[alStyles.dot, { backgroundColor: dotDoneColor }]} /> : null}
-                          {acts.planned > 0 ? <View style={[alStyles.dot, { backgroundColor: dotPlannedColor }]} /> : null}
-                        </View>
-                      ) : null}
-                    </Pressable>
-                  )
-                })}
-              </View>
-            ))}
-            <View style={alStyles.legendRow}>
-              <View style={alStyles.legendItem}>
-                <View style={[alStyles.legendDot, { backgroundColor: dotDoneColor }]} />
-                <Text style={alStyles.legendText}>{lbl('legend_done_label')}</Text>
-              </View>
-              <View style={alStyles.legendItem}>
-                <View style={[alStyles.legendDot, { backgroundColor: dotPlannedColor }]} />
-                <Text style={alStyles.legendText}>{lbl('legend_planned_label')}</Text>
-              </View>
-              {(monthDone > 0 || monthPlanned > 0) ? (
-                <Text style={alStyles.legendStat} testID="month-stats">
-                  {monthDone} · {monthPlanned}
-                </Text>
-              ) : null}
-            </View>
-          </View>
-
-          {selectedDay == null ? (
-            <View style={alStyles.monthHint}>
-              <MaterialCommunityIcons name="gesture-tap" size={24} color={colors.textMuted} />
-              <Text style={alStyles.monthHintText}>{lbl('month_hint_tap')}</Text>
-            </View>
-          ) : dayRecords.length === 0 ? (
-            <View style={alStyles.monthHint}>
-              <MaterialCommunityIcons name="calendar-blank-outline" size={24} color={colors.textMuted} />
-              <Text style={alStyles.monthHintText}>{lbl('month_hint_empty')}</Text>
-            </View>
-          ) : (
-            <View style={alStyles.dayList}>
-              <Text style={alStyles.dayListTitle}>{formatDateFull(selectedDay)}</Text>
-              {dayRecords.map(r => (
-                <ActivityListCard
-                  key={r.id}
-                  record={r}
-                  onToggleDone={() => handleToggleDone(r)}
-                  onEdit={() => handleEdit(r.id)}
-                  onDelete={() => handleDeleteFromList(r)}
-                  lbl={lbl}
-                />
-              ))}
-            </View>
-          )}
-        </ScrollView>
-      </View>
-    )
-  }
-
-  // ── MODE LIST ───────────────────────────────────────────────────────────
-  // Groupage par date
-  const groups = new Map<string, ActivityRecord[]>()
-  for (const r of records) {
-    const list = groups.get(r.date) ?? []
-    list.push(r)
-    groups.set(r.date, list)
-  }
-  const groupedDates = [...groups.keys()].sort((a, b) => b.localeCompare(a))
+  // ── MODES AGENDA / HISTORIQUE ───────────────────────────────────────────
 
   return (
-    <View style={alStyles.container} testID="activity-log-list">
-      {/* Tab bar Liste / Mois */}
+    <View style={alStyles.container}>
+      {/* Tab bar À venir / Historique */}
       <View style={alStyles.tabBar}>
         <Pressable
-          style={[alStyles.tab, alStyles.tabActive]}
+          style={[alStyles.tab, mode === 'agenda' && alStyles.tabActive]}
+          onPress={showAgenda}
           accessibilityRole="tab"
-          accessibilityState={{ selected: true }}
-          testID="tab-list"
+          accessibilityState={{ selected: mode === 'agenda' }}
+          testID="tab-agenda"
         >
-          <MaterialCommunityIcons name="format-list-bulleted" size={16} color={colors.primary} />
-          <Text style={[alStyles.tabText, alStyles.tabTextActive]}>{lbl('tab_list_label')}</Text>
+          <MaterialCommunityIcons
+            name="calendar-today"
+            size={16}
+            color={mode === 'agenda' ? colors.primary : colors.textMuted}
+          />
+          <Text style={[alStyles.tabText, mode === 'agenda' && alStyles.tabTextActive]}>{lbl('tab_upcoming_label')}</Text>
         </Pressable>
         <Pressable
-          style={alStyles.tab}
-          onPress={() => { setSelectedDay(null); setMode('month') }}
+          style={[alStyles.tab, mode === 'history' && alStyles.tabActive]}
+          onPress={showHistory}
           accessibilityRole="tab"
-          accessibilityState={{ selected: false }}
-          testID="tab-month"
+          accessibilityState={{ selected: mode === 'history' }}
+          testID="tab-history"
         >
-          <MaterialCommunityIcons name="calendar-month-outline" size={16} color={colors.textMuted} />
-          <Text style={alStyles.tabText}>{lbl('tab_month_label')}</Text>
+          <MaterialCommunityIcons
+            name="history"
+            size={16}
+            color={mode === 'history' ? colors.primary : colors.textMuted}
+          />
+          <Text style={[alStyles.tabText, mode === 'history' && alStyles.tabTextActive]}>{lbl('tab_history_label')}</Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={alStyles.listContent}>
-        {records.length === 0 ? (
-          <View style={alStyles.empty} testID="list-empty">
-            <MaterialCommunityIcons name="run-fast" size={52} color={colors.border} />
-            {lbl('empty_title') ? (
-              <Text style={alStyles.emptyTitle}>{lbl('empty_title')}</Text>
-            ) : null}
-            {lbl('empty_text') ? (
-              <Text style={alStyles.emptyText}>{lbl('empty_text')}</Text>
-            ) : null}
-          </View>
-        ) : (
-          groupedDates.map(date => (
-            <View key={date} style={alStyles.dayList}>
-              <Text style={alStyles.dayListTitle}>{formatDateFull(date)}</Text>
-              {groups.get(date)!.map(r => (
-                <ActivityListCard
-                  key={r.id}
-                  record={r}
-                  onToggleDone={() => handleToggleDone(r)}
-                  onEdit={() => handleEdit(r.id)}
-                  onDelete={() => handleDeleteFromList(r)}
-                  lbl={lbl}
-                />
-              ))}
-            </View>
-          ))
-        )}
-      </ScrollView>
+      {mode === 'agenda' ? (
+        <AgendaView
+          records={agendaRecords}
+          lbl={lbl}
+          locale={config.locale}
+          onEdit={handleEdit}
+          onToggleDone={handleToggleDone}
+          onDelete={handleDeleteFromList}
+        />
+      ) : (
+        <ListView
+          records={historyRecords}
+          lbl={lbl}
+          onEdit={handleEdit}
+          onToggleDone={handleToggleDone}
+          onDelete={handleDeleteFromList}
+        />
+      )}
 
       <Pressable
         style={alStyles.fab}
@@ -665,6 +304,17 @@ export function ActivityLogLayout({ fields, moduleId: _moduleId }: ActivityLogLa
       >
         <MaterialCommunityIcons name="plus" size={28} color={colors.white} />
       </Pressable>
+
+      {completingRecord ? (
+        <CompletionSheet
+          record={completingRecord}
+          config={config}
+          lbl={lbl}
+          onSave={handleCompletionSave}
+          onSkip={handleCompletionSkip}
+          onCancel={handleCompletionCancel}
+        />
+      ) : null}
     </View>
   )
 }

@@ -323,6 +323,33 @@ function MyScreen() {
 >
 > 📌 Cas vécu : voir [lessons.md § Couches, feuille présentationnelle](lessons.md).
 
+### Une clé canonique par ressource, zéro fetch hors React Query (web)
+
+> **Le client Supabase ne cache rien** (wrapper `fetch` sur PostgREST) : la
+> déduplication des appels vient **uniquement** du passage par React Query avec une
+> `queryKey` **canonique**. Deux règles, vérifiées mécaniquement par
+> `apps/web/src/test/noRawFetch.guard.test.ts` :
+
+1. **Toute lecture cachable = un service (le call) + une factory `hooks/queries/`
+   (la clé) + `useQuery` dans le composant.** Ne jamais appeler une lecture de service
+   (`fetch*`) directement dans un composant/page via `useEffect` : elle re-fetcherait à
+   chaque montage, hors cache. `supabase.from(...)` n'est jamais caché en soi ; seul le
+   passage par la factory déduplique.
+2. **Jamais de `queryKey` en dur dans un composant.** Une invalidation référence
+   `xxxQueries.y(...).queryKey` (ou un préfixe exposé par la factory, ex.
+   `adminQueries.usersPrefix`) — jamais un littéral `['x', 'y']`, qui diverge de la clé
+   de la factory et casse la déduplication.
+
+**Exceptions légitimes** (allowlist du garde-fou, chacune justifiée) : lectures **non
+dup-prone** — chargement paresseux par ligne injecté en callback (`fetchCaseloadNotes`),
+amorçage de formulaire à l'ouverture d'un éditeur (`fetchTrackedEffects`,
+`fetchMedications` — one-shot sur action, state local éditable). Une nouvelle lecture
+directe doit être **migrée** vers une factory, pas ajoutée à l'allowlist par défaut.
+
+> **Mesurer** : les React Query Devtools (montés en dev dans `main.tsx`) affichent
+> chaque query, sa `queryKey` et son nombre de fetch — un doublon s'y repère à l'œil.
+> Détail : [`docs/services.md`](../../docs/services.md) § « Vérifier qu'un call n'est pas dupliqué ».
+
 ## Synchronisation distante (mobile) — toujours via syncHelpers
 
 > **Règle absolue pour tout service mobile qui écrit ou supprime des données patient en SQLite.**
@@ -592,6 +619,35 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ---
 
+## Dates : une date métier locale ne passe jamais par `toISOString()`
+
+> **Règle absolue.** Convertir un `Date` (issu d'un picker, d'un calendrier, d'un
+> jour affiché) en `YYYY-MM-DD` avec `toISOString().slice(0, 10)` **décale d'un jour
+> en fuseau positif** (toute l'Europe, dont la France) : `toISOString()` bascule en
+> UTC, et minuit local y retombe sur la veille.
+
+Une **date métier** (le jour que l'utilisateur choisit ou voit) se formate depuis les
+getters **locaux** — jamais UTC. Réutiliser le helper partagé plutôt que le refaire :
+
+```ts
+// ❌ UTC → en France, minuit local = 22:00 UTC la veille → mauvais jour
+date: pickedDate.toISOString().slice(0, 10)
+// ✅ composants locaux (motif de packages/shared/src/services/weekDates.ts)
+const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+```
+
+Distinguer : un **horodatage d'événement** (instant de sync, `created_at`) peut rester
+en UTC ISO ; une **date choisie/affichée** doit être locale. `@kaer/shared/weekDates`
+(`todayIso`, `shiftDate`, `mondayOf`, `weekDays`) est la source de vérité de cette
+arithmétique — l'étendre (`toIsoDate(d)`) au lieu de hand-roller.
+
+Vérif : `grep -rn "toISOString().slice(0, 10)" apps/*/src` — chaque occurrence sur une
+date métier locale est un bug de fuseau.
+
+> 📌 Cas vécu : voir [lessons.md § Dates : jamais `toISOString()`](lessons.md).
+
+---
+
 ## Internationalisation — zéro texte hardcodé
 
 **Règle absolue : aucun texte visible par l'utilisateur n'est hardcodé, ni dans le code ni en base de données.** Cela inclut les **props textuelles d'accessibilité** (`aria-label`, `alt`, `title`, `placeholder`), lues aux utilisateurs au même titre que le texte affiché.
@@ -621,7 +677,33 @@ Vérification avant commit sur des textes visibles : `grep -rlP "\x{2014}|\x{201
 
 ### Mode ado (teen) — règle d'or
 
-Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en), **sauf le contenu psychométrique des échelles validées** (voir exception ci-dessous). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+
+> **Exception : fidélité aux échelles cliniques validées.** Le contenu
+> psychométrique d'un instrument validé (consignes `instructions*`, items `q*`,
+> options `opt_*` / `legend_*`, sections, `warning`) n'est **jamais** surchargé
+> dans `teen.json` : on ne « traduit » pas une échelle en tutoiement, on reste
+> fidèle mot pour mot à la version validée en français portée par `common.json`.
+> Le fallback i18next sert cette version au mode ado. Seul l'**habillage
+> applicatif** (hors instrument : `new_btn`, `empty_*`, `footer`, `progress`,
+> `submit`, `chip_*`, `label`, `description`) peut avoir une variante teen.
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
+
+> **Registre ado = tutoiement + vocabulaire simple, JAMAIS de familiarité.**
+> L'app reste un outil de soin professionnel, y compris pour les adolescents. Le
+> teen se distingue du common par le tutoiement et des phrases plus courtes ou
+> concrètes, pas par le relâchement du langage.
+>
+> **Interdits** : mots familiers (« pote », « vite fait », « direct », « là-dedans »,
+> « pas obligé » ; en anglais « in the same spot », « no pressure », « jot it down ») ;
+> élisions orales (« T'y croyais », « T'étais où ») ; questions relâchées sans
+> inversion (« Tu dirais quoi ? », « elle est à combien ? »).
+>
+> **Corrects** : « ami » (pas « pote »), « facultatif » (pas « pas obligé »),
+> inversion interrogative (« Que dirais-tu à un ami dans la même situation ? »,
+> « À quel point y croyais-tu ? », « Où étais-tu ? »).
+>
+> 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
 
 - i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** pour toute clé de module.
 - `de`, `es`, `it`, `pt` n'ont pas de `teen.json` — aucune traduction teen requise pour ces langues.

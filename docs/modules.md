@@ -19,13 +19,13 @@
 | `rim` | RIM — Retraitement par Imagerie Mentale | `patient_scenario` | Supabase `patient_modules.config` (lecture seule patient) | [doc](modules/rim.md) |
 | `cognitive_saturation` | Saturation cognitive (ACT) | `guided_exercise` | SQLite `cognitive_saturation_sessions` | [doc](modules/cognitive_saturation.md) |
 | `decisional_balance` | Balance décisionnelle | `decision_grid` | SQLite `plan_items` + Supabase signal | — |
-| `behavioral_activation` | Activation comportementale | `activity_log` | SQLite `activity_records` | [doc](modules/behavioral_activation.md) |
+| `behavioral_activation` | Activation comportementale | `activity_log` | SQLite `activity_records` ; activités co-construites dans `patient_modules.config.ba_activities` | [doc](modules/behavioral_activation.md) |
 | `grounding` | Ancrage 5-4-3-2-1 (DBT) | `guided_exercise` | Aucun (exercice sans persistance) | [doc](modules/grounding.md) |
 | `mood_tracker` | Thermomètre de l'humeur | `slider_dashboard` | SQLite `scale_entries` + `mood_markers` | [doc](modules/mood_tracker.md) |
 | `motivational_balance` | Balance motivationnelle (EM) | `tabbed` | SQLite `em_rulers`, `em_balance_items`, `em_values` | [doc](modules/motivational_balance.md) |
 | `medication_adherence` | Observance médicamenteuse | `medication_tracker` | SQLite `daily_entries` + `medication_intakes` ; liste molécules dans `patient_modules.config.medications` | [doc](modules/medication_adherence.md) |
 | `medication_side_effects` | Effets indésirables du traitement | `slider_dashboard` | SQLite `scale_entries` ; config effets dans `patient_modules.config.tracked_effects` | [doc](modules/medication_side_effects.md) |
-| `breathing_techniques` | Techniques de respiration | `fields` | SQLite local | [doc](modules/breathing_techniques.md) |
+| `breathing_techniques` | Techniques de respiration | `breathing_pacer` | SQLite local | [doc](modules/breathing_techniques.md) |
 | `psychoeducation` | Psychoéducation (bibliothèque) | `psyedu_library` | Fiches `psyedu_topics` (par thème) débloquées via `patient_modules.config.unlocked_topics`. Inclut les fiches médicaments/poids (thème « Mon traitement ») et hygiène de vie, anciennement le module `diet_weight_psycho` retiré. | [doc](modules/psychoeducation.md) |
 | `chronobiology_tracker` | Rythmes & régularité | `tabbed` (Journal + Mois) | SQLite `chrono_entries` (offline-first) | [doc](modules/chronobiology_tracker.md) |
 | `distress_tolerance` | Tolérance à la détresse (DBT) | `tabbed` (Comprendre `psyedu` + Agir en crise `crisis_companion`) | Supabase `psyedu_topics`/`psyedu_blocks` ; onglet « Agir en crise » sans stockage | [doc](modules/distress_tolerance.md) |

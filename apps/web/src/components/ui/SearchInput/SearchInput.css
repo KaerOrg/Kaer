@@ -7,24 +7,36 @@
 
 .search-input__icon {
   position: absolute;
-  left: 12px;
+  left: var(--control-pad-x);
   color: var(--color-text-muted);
   pointer-events: none;
 }
 
-/* Le Dropdown des filtres (variante `compact` = `.input-field__input--sm`) est la
-   référence de hauteur : padding 7px, font-size 14px. Le SearchInput reprend ces mêmes
-   métriques (left à 34px pour loger l'icône) pour une hauteur identique. */
+/* Même dimensionnement que InputField/Dropdown (tokens `--control-*`) : un SearchInput
+   par défaut a la hauteur d'un Dropdown par défaut, un SearchInput `compact` celle d'un
+   Dropdown `compact`. Gauche : padding texte + place pour la loupe (--control-icon-room). */
 .search-input__input {
   width: 100%;
-  padding: 7px 12px 7px 34px;
+  padding: var(--control-pad-y) var(--control-pad-x) var(--control-pad-y)
+    calc(var(--control-pad-x) + var(--control-icon-room));
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--control-font-size);
   color: var(--color-text);
   background: var(--color-surface);
   transition: border-color 0.15s, box-shadow 0.15s;
   appearance: none;
+}
+
+/* Variante compacte (barres de filtres) — aligne la hauteur sur un Dropdown `compact`. */
+.search-input--sm .search-input__icon {
+  left: var(--control-pad-x-sm);
+}
+
+.search-input--sm .search-input__input {
+  padding: var(--control-pad-y-sm) var(--control-pad-x-sm) var(--control-pad-y-sm)
+    calc(var(--control-pad-x-sm) + var(--control-icon-room));
+  font-size: var(--control-font-size-sm);
 }
 
 .search-input__input::-webkit-search-cancel-button {

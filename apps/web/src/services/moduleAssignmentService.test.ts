@@ -6,12 +6,14 @@ vi.mock('../lib/supabase', () => ({
 
 import { supabase } from '../lib/supabase'
 import {
+  fetchBAActivities,
   fetchPatientModules,
   fetchMedications,
   revokeModule,
   unlockModule,
   unlockPsychoeducation,
   unlockRim,
+  updateBAActivities,
   updateMedications,
   updatePsychoeducationTopics,
   updateRim,
@@ -154,6 +156,55 @@ describe('moduleAssignmentService.fetchMedications / updateMedications', () => {
 
     expect(result).toEqual({ ok: true })
     expect(update.mock.calls[0][0].config).toEqual({ tracked_effects: ['x'], medications: [MED] })
+  })
+})
+
+describe('moduleAssignmentService.fetchBAActivities / updateBAActivities', () => {
+  const ACTIVITY = {
+    id: 'a1',
+    label: 'Marche 20 min',
+    domain_id: 'al.dom_body',
+    value_text: 'Retrouver mon souffle',
+  }
+
+  it('fetchBAActivities retourne la liste depuis config.ba_activities', async () => {
+    vi.mocked(supabase.from).mockReturnValue(
+      makeChain({ data: { config: { ba_activities: [ACTIVITY] } }, error: null }) as never
+    )
+    expect(await fetchBAActivities('pm-1')).toEqual([ACTIVITY])
+  })
+
+  it('fetchBAActivities retourne [] si config absente ou clé non-tableau', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    expect(await fetchBAActivities('pm-1')).toEqual([])
+
+    vi.mocked(supabase.from).mockReturnValue(
+      makeChain({ data: { config: { ba_activities: 'oops' } }, error: null }) as never
+    )
+    expect(await fetchBAActivities('pm-1')).toEqual([])
+  })
+
+  it('updateBAActivities préserve le reste de la config et écrit ba_activities', async () => {
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+    const select = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { config: { medications: ['m'] } } }) }),
+    })
+    vi.mocked(supabase.from).mockReturnValue({ select, update } as never)
+
+    const result = await updateBAActivities('pm-1', [ACTIVITY])
+
+    expect(result).toEqual({ ok: true })
+    expect(update.mock.calls[0][0].config).toEqual({ medications: ['m'], ba_activities: [ACTIVITY] })
+  })
+
+  it('updateBAActivities remonte ok:false si Supabase renvoie une erreur', async () => {
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: { message: 'boom' } }) })
+    const select = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null }) }),
+    })
+    vi.mocked(supabase.from).mockReturnValue({ select, update } as never)
+
+    expect(await updateBAActivities('pm-1', [ACTIVITY])).toEqual({ ok: false })
   })
 })
 

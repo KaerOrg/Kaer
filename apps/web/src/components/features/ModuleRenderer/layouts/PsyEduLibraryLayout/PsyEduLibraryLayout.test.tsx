@@ -1,6 +1,7 @@
 import { vi, beforeEach, describe, it, expect } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { renderWithClient } from '../../../../../test/renderWithClient'
 import { PsyEduLibraryLayout } from './PsyEduLibraryLayout'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ describe('PsyEduLibraryLayout (web)', () => {
   it('charge puis affiche les fiches groupées par thème', async () => {
     mockFetchTopics.mockResolvedValue(TOPICS)
     mockFetchThemes.mockResolvedValue(THEMES)
-    render(<PsyEduLibraryLayout />)
+    renderWithClient(<PsyEduLibraryLayout />)
     // titleKey absent des locales → defaultValue = topic_key ('sleep').
     expect(await screen.findByText('sleep')).toBeInTheDocument()
   })
@@ -42,7 +43,7 @@ describe('PsyEduLibraryLayout (web)', () => {
   it('affiche un état vide quand aucune fiche', async () => {
     mockFetchTopics.mockResolvedValue([])
     mockFetchThemes.mockResolvedValue(THEMES)
-    render(<PsyEduLibraryLayout />)
+    renderWithClient(<PsyEduLibraryLayout />)
     await waitFor(() => expect(mockFetchTopics).toHaveBeenCalled())
     expect(await screen.findByText(/aucune fiche|empty/i)).toBeInTheDocument()
   })
@@ -50,7 +51,7 @@ describe('PsyEduLibraryLayout (web)', () => {
   it('affiche un état erreur si le chargement échoue', async () => {
     mockFetchTopics.mockRejectedValue(new Error('boom'))
     mockFetchThemes.mockResolvedValue(THEMES)
-    render(<PsyEduLibraryLayout />)
+    renderWithClient(<PsyEduLibraryLayout />)
     await waitFor(() =>
       expect(document.querySelector('.psyedu--error')).toBeInTheDocument()
     )
@@ -59,7 +60,7 @@ describe('PsyEduLibraryLayout (web)', () => {
   it('déplie une fiche au clic et rend ses blocs', async () => {
     mockFetchTopics.mockResolvedValue(TOPICS)
     mockFetchThemes.mockResolvedValue(THEMES)
-    render(<PsyEduLibraryLayout />)
+    renderWithClient(<PsyEduLibraryLayout />)
     const row = await screen.findByRole('button', { name: /sleep/i })
     expect(row).toHaveAttribute('aria-expanded', 'false')
     await userEvent.click(row)

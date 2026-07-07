@@ -15,10 +15,15 @@ export async function saveActivityRecord(record: Omit<ActivityRecord, 'created_a
     payload: {
       date: record.date,
       label: record.label,
+      expected_pleasure: record.expected_pleasure,
+      expected_mastery: record.expected_mastery,
       pleasure: record.pleasure,
       mastery: record.mastery,
       done: record.done,
       notes: record.notes,
+      planned_time: record.planned_time,
+      domain_id: record.domain_id,
+      config_activity_id: record.config_activity_id,
     },
   })
 }

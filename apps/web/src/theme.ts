@@ -10,6 +10,24 @@ export const shadows = {
 
 export const fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
 
+/**
+ * Métriques partagées de tous les contrôles de formulaire (InputField, Dropdown,
+ * SearchInput). Source unique : un champ et une liste déroulante côte à côte doivent
+ * avoir la MÊME hauteur. Deux tailles seulement — défaut et `sm` (barres de filtres) —
+ * pilotées par ces tokens, jamais redéfinies en dur dans un CSS de composant.
+ * `iconRoom` = espace horizontal réservé à un ornement (loupe, chevron) au-delà du
+ * padding texte.
+ */
+export const control = {
+  paddingY: 10,
+  paddingX: 14,
+  fontSize: 15,
+  paddingYSm: 7,
+  paddingXSm: 12,
+  fontSizeSm: 14,
+  iconRoom: 22,
+} as const
+
 export function injectTheme(): void {
   const root = document.documentElement.style
   root.setProperty('--color-primary', colors.primary)
@@ -48,4 +66,12 @@ export function injectTheme(): void {
   root.setProperty('--shadow-sm', shadows.sm)
   root.setProperty('--shadow-md', shadows.md)
   root.setProperty('--shadow-lg', shadows.lg)
+
+  root.setProperty('--control-pad-y', `${control.paddingY}px`)
+  root.setProperty('--control-pad-x', `${control.paddingX}px`)
+  root.setProperty('--control-font-size', `${control.fontSize}px`)
+  root.setProperty('--control-pad-y-sm', `${control.paddingYSm}px`)
+  root.setProperty('--control-pad-x-sm', `${control.paddingXSm}px`)
+  root.setProperty('--control-font-size-sm', `${control.fontSizeSm}px`)
+  root.setProperty('--control-icon-room', `${control.iconRoom}px`)
 }

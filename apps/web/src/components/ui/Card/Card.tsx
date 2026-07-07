@@ -1,7 +1,7 @@
 import './Card.css'
 import type { CardProps } from './Card.types'
 
-export function Card({ header, actions, children, variant = 'default', state, className = '' }: CardProps) {
+export function Card({ header, footer, actions, children, variant = 'default', state, className = '' }: CardProps) {
   return (
     <div className={`card card--${variant} ${state ? `card--${state}` : ''} ${className}`}>
       {header ? (
@@ -15,6 +15,7 @@ export function Card({ header, actions, children, variant = 'default', state, cl
         </div>
       ) : null}
       {children ? <div className="card__body">{children}</div> : null}
+      {footer ? <div className="card__footer">{footer}</div> : null}
       {actions ? <div className="card__actions">{actions}</div> : null}
     </div>
   )

@@ -52,7 +52,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('grounding',               'cognitive',   'coming_soon', 15, false),
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
-  ('breathing_techniques',    'anxiety',     'fields',      19, false),
+  ('breathing_techniques',    'anxiety',     'breathing_pacer', 19, false),
   ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),
@@ -459,6 +459,9 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col1.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_1_title', 'beck.col_situation', 10),
   ('beck.col2.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_2_title', 'beck.col_emotion',   20),
   ('beck.col3.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_3_title', 'beck.col_thought',   30),
+  ('beck.col_dist.h', 'beck_columns', 'column_header', 'modules.beck_columns.col_distortion', 'beck.col_distortion', 35),
+  ('beck.col_evf.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_evidence_for_title',     'beck.col_evidence_for',     37),
+  ('beck.col_eva.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_evidence_against_title', 'beck.col_evidence_against', 38),
   ('beck.col4.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_4_title', 'beck.col_rational',  40),
   ('beck.col5.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_5_title', 'beck.col_outcome',   50)
 on conflict (id) do nothing;
@@ -469,9 +472,14 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col2.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_2_intensity',   'beck.col_emotion',   'beck.col2.h', 22),
   ('beck.col3.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_3_placeholder', 'beck.col_thought',   'beck.col3.h', 31),
   ('beck.col3.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_3_belief',      'beck.col_thought',   'beck.col3.h', 32),
+  ('beck.col_dist.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_distortion_placeholder', 'beck.col_distortion', 'beck.col_dist.h', 36),
+  ('beck.col_evf.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_for_placeholder',     'beck.col_evidence_for',     'beck.col_evf.h', 37),
+  ('beck.col_eva.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_against_placeholder', 'beck.col_evidence_against', 'beck.col_eva.h', 38),
   ('beck.col4.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_4_placeholder', 'beck.col_rational',  'beck.col4.h', 41),
-  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 51),
-  ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 52),
+  -- Résultat : la ré-évaluation de l'émotion de départ (curseur) vient EN PREMIER
+  -- (mesure avant/après du DTR) ; les nouvelles émotions éventuelles ensuite.
+  ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 51),
+  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 52),
   ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
 on conflict (id) do nothing;
 
@@ -490,6 +498,13 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'delete_title',          'modules.beck_columns.delete_record_title'),
   ('beck.cfg', 'validation_title',      'modules.beck_columns.empty_alert_title'),
   ('beck.cfg', 'validation_msg',        'modules.beck_columns.empty_alert_msg'),
+  -- Capture en deux temps : formulaire réduit (quick_key_*) ; une fiche sans
+  -- toutes les complete_key_* porte la puce « à compléter » (statut dérivé).
+  ('beck.cfg', 'quick_btn_label',       'modules.beck_columns.quick_capture'),
+  ('beck.cfg', 'quick_key_1',           'situation'),
+  ('beck.cfg', 'quick_key_2',           'automatic_thought'),
+  ('beck.cfg', 'complete_key_1',        'rational_response'),
+  ('beck.cfg', 'to_complete_label',     'modules.beck_columns.to_complete'),
   ('beck.col1.h', 'color',       '#0EA5E9'),
   ('beck.col1.h', 'step_number', '1'),
   ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),
@@ -499,17 +514,53 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col3.h', 'color',       '#EF4444'),
   ('beck.col3.h', 'step_number', '3'),
   ('beck.col3.h', 'hint_code',   'modules.beck_columns.entry_col_3_hint'),
+  ('beck.col_dist.h', 'color',       '#EC4899'),
+  ('beck.col_dist.h', 'step_number', '4'),
+  ('beck.col_dist.h', 'hint_code',   'modules.beck_columns.entry_col_distortion_hint'),
+  -- Examen des preuves (7 colonnes de Padesky) : colonnes standard, facultatives
+  -- à remplir (décision 2026-07 : pas de bascule praticien, simplicité d'usage)
+  ('beck.col_evf.h', 'color',          '#0891B2'),
+  ('beck.col_evf.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_for_hint'),
+  ('beck.col_eva.h', 'color',          '#0D9488'),
+  ('beck.col_eva.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_against_hint'),
+  ('beck.col_evf.text', 'key',        'evidence_for'),
+  ('beck.col_evf.text', 'multiline',  '1'),
+  ('beck.col_evf.text', 'min_height', '72'),
+  ('beck.col_eva.text', 'key',        'evidence_against'),
+  ('beck.col_eva.text', 'multiline',  '1'),
+  ('beck.col_eva.text', 'min_height', '72'),
   ('beck.col4.h', 'color',       '#059669'),
-  ('beck.col4.h', 'step_number', '4'),
+  ('beck.col4.h', 'step_number', '5'),
   ('beck.col4.h', 'hint_code',   'modules.beck_columns.entry_col_4_hint'),
   ('beck.col5.h', 'color',       '#D97706'),
-  ('beck.col5.h', 'step_number', '5'),
+  ('beck.col5.h', 'step_number', '6'),
   ('beck.col5.h', 'hint_code',   'modules.beck_columns.entry_col_5_hint'),
   ('beck.col1.text', 'key',        'situation'),
   ('beck.col1.text', 'multiline',  '1'),
   ('beck.col1.text', 'min_height', '72'),
   ('beck.col2.text', 'key',        'emotion'),
   ('beck.col2.text', 'multiline',  '0'),
+  -- Chips d'aide au vocabulaire émotionnel (le texte libre reste roi)
+  ('beck.col2.text', 'suggestion_1', 'modules.beck_columns.sugg_anxiety'),
+  ('beck.col2.text', 'suggestion_2', 'modules.beck_columns.sugg_sadness'),
+  ('beck.col2.text', 'suggestion_3', 'modules.beck_columns.sugg_anger'),
+  ('beck.col2.text', 'suggestion_4', 'modules.beck_columns.sugg_fear'),
+  ('beck.col2.text', 'suggestion_5', 'modules.beck_columns.sugg_shame'),
+  ('beck.col2.text', 'suggestion_6', 'modules.beck_columns.sugg_guilt'),
+  ('beck.col2.text', 'suggestion_7', 'modules.beck_columns.sugg_frustration'),
+  ('beck.col2.text', 'suggestion_8', 'modules.beck_columns.sugg_discouragement'),
+  -- Colonne « Distorsion cognitive » (optionnelle) : auto-étiquetage patient,
+  -- 8 pièges classiques (Burns) en chips — aucune détection automatique (MDR)
+  ('beck.col_dist.text', 'key',       'distortion'),
+  ('beck.col_dist.text', 'multiline', '0'),
+  ('beck.col_dist.text', 'suggestion_1', 'modules.beck_columns.dist_all_or_nothing'),
+  ('beck.col_dist.text', 'suggestion_2', 'modules.beck_columns.dist_overgeneralization'),
+  ('beck.col_dist.text', 'suggestion_3', 'modules.beck_columns.dist_mental_filter'),
+  ('beck.col_dist.text', 'suggestion_4', 'modules.beck_columns.dist_mind_reading'),
+  ('beck.col_dist.text', 'suggestion_5', 'modules.beck_columns.dist_catastrophizing'),
+  ('beck.col_dist.text', 'suggestion_6', 'modules.beck_columns.dist_emotional_reasoning'),
+  ('beck.col_dist.text', 'suggestion_7', 'modules.beck_columns.dist_should'),
+  ('beck.col_dist.text', 'suggestion_8', 'modules.beck_columns.dist_personalization'),
   ('beck.col3.text', 'key',        'automatic_thought'),
   ('beck.col3.text', 'multiline',  '1'),
   ('beck.col3.text', 'min_height', '72'),
@@ -879,7 +930,11 @@ on conflict (field_id, prop_key) do nothing;
 -- ============================================================
 -- LAYOUT : behavioral_activation → activity_log
 -- preview_kind = 'activity_log' → ActivityLogLayout
--- 3 modes : list | entry | month
+-- 3 modes : agenda (Aujourd'hui + À venir) | history | entry
+-- Les ressentis P/M se notent au moment de cocher réalisée (CompletionSheet).
+-- Domaines de vie (activity_log_domain) : ancrage BATD-R (Lejuez 2011) ;
+-- chaque suggestion porte un prop `domain` (valeur atomique) pour le
+-- groupement, et la diversité des types d'activités (Rohani 2020).
 -- ============================================================
 
 delete from public.field_props
@@ -890,6 +945,14 @@ update public.modules set preview_kind = 'activity_log' where id = 'behavioral_a
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('al.cfg',          'behavioral_activation', 'activity_log_config',     null,                                                  0),
+  -- Domaines de vie (catalogue fixe, extensible par INSERT sans redéploiement)
+  ('al.dom_body',     'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_body',            10),
+  ('al.dom_social',   'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_social',          11),
+  ('al.dom_work',     'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_work',            12),
+  ('al.dom_daily',    'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_daily',           13),
+  ('al.dom_leisure',  'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_leisure',         14),
+  ('al.dom_meaning',  'behavioral_activation', 'activity_log_domain',     'modules.behavioral_activation.domain_meaning',         15),
+  -- Suggestions d'activités
   ('al.sug_walk',     'behavioral_activation', 'activity_log_suggestion', 'modules.behavioral_activation.suggestion_walk',       100),
   ('al.sug_groceries',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_groceries',  101),
   ('al.sug_gym',            'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_gym',        102),
@@ -909,8 +972,51 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('al.sug_board_game',     'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_board_game', 116),
   ('al.sug_journal',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_journal',    117),
   ('al.sug_swimming',       'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_swimming',   118),
-  ('al.sug_running',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_running',    119)
+  ('al.sug_running',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_running',    119),
+  -- Activités de maîtrise / quotidien (retrait comportemental : réactiver aussi les routines)
+  ('al.sug_tidy',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_tidy',       120),
+  ('al.sug_laundry',        'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_laundry',    121),
+  ('al.sug_admin',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_admin',      122),
+  ('al.sug_repair',         'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_repair',     123),
+  ('al.sug_email',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_email',      124),
+  ('al.sug_family',         'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_family',     125),
+  ('al.sug_help',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_help',       126),
+  ('al.sug_learn',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_learn',      127),
+  ('al.sug_work_task',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_work_task',  128)
 on conflict (id) do nothing;
+
+-- Domaine de chaque suggestion (prop atomique : une valeur = un domaine)
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('al.sug_walk',        'domain', 'al.dom_body'),
+  ('al.sug_groceries',   'domain', 'al.dom_daily'),
+  ('al.sug_gym',         'domain', 'al.dom_body'),
+  ('al.sug_bike',        'domain', 'al.dom_body'),
+  ('al.sug_yoga',        'domain', 'al.dom_body'),
+  ('al.sug_meditation',  'domain', 'al.dom_meaning'),
+  ('al.sug_reading',     'domain', 'al.dom_leisure'),
+  ('al.sug_cooking',     'domain', 'al.dom_daily'),
+  ('al.sug_call_friend', 'domain', 'al.dom_social'),
+  ('al.sug_cafe',        'domain', 'al.dom_social'),
+  ('al.sug_gardening',   'domain', 'al.dom_leisure'),
+  ('al.sug_music',       'domain', 'al.dom_leisure'),
+  ('al.sug_movie',       'domain', 'al.dom_leisure'),
+  ('al.sug_bath',        'domain', 'al.dom_body'),
+  ('al.sug_cleaning',    'domain', 'al.dom_daily'),
+  ('al.sug_drawing',     'domain', 'al.dom_leisure'),
+  ('al.sug_board_game',  'domain', 'al.dom_social'),
+  ('al.sug_journal',     'domain', 'al.dom_meaning'),
+  ('al.sug_swimming',    'domain', 'al.dom_body'),
+  ('al.sug_running',     'domain', 'al.dom_body'),
+  ('al.sug_tidy',        'domain', 'al.dom_daily'),
+  ('al.sug_laundry',     'domain', 'al.dom_daily'),
+  ('al.sug_admin',       'domain', 'al.dom_daily'),
+  ('al.sug_repair',      'domain', 'al.dom_daily'),
+  ('al.sug_email',       'domain', 'al.dom_daily'),
+  ('al.sug_family',      'domain', 'al.dom_social'),
+  ('al.sug_help',        'domain', 'al.dom_meaning'),
+  ('al.sug_learn',       'domain', 'al.dom_work'),
+  ('al.sug_work_task',   'domain', 'al.dom_work')
+on conflict (field_id, prop_key) do nothing;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'engagement_event_type',  'SAVE_BEHAVIORAL_ACTIVATION'),
@@ -925,35 +1031,40 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'dot_done_color',         '#10B981'),
   ('al.cfg', 'dot_planned_color',      '#3B82F6'),
   ('al.cfg', 'locale',                 'fr-FR'),
-  ('al.cfg', 'tab_list_label',         'modules.behavioral_activation.tab_list'),
-  ('al.cfg', 'tab_month_label',        'modules.behavioral_activation.tab_month'),
+  ('al.cfg', 'tab_upcoming_label',     'modules.behavioral_activation.tab_upcoming'),
+  ('al.cfg', 'tab_history_label',      'modules.behavioral_activation.tab_history'),
   ('al.cfg', 'add_btn',                'modules.behavioral_activation.add_btn'),
-  ('al.cfg', 'empty_title',            'modules.behavioral_activation.empty_title'),
-  ('al.cfg', 'empty_text',             'modules.behavioral_activation.empty_text'),
+  ('al.cfg', 'today_empty_text',       'modules.behavioral_activation.today_empty'),
+  ('al.cfg', 'history_empty_text',     'modules.behavioral_activation.history_empty'),
   ('al.cfg', 'section_activity_title', 'modules.behavioral_activation.section_activity'),
-  ('al.cfg', 'section_evaluation_title','modules.behavioral_activation.section_evaluation'),
+  ('al.cfg', 'section_felt_title',     'modules.behavioral_activation.section_felt'),
   ('al.cfg', 'section_notes_title',    'modules.behavioral_activation.section_notes'),
   ('al.cfg', 'activity_placeholder',   'modules.behavioral_activation.activity_placeholder'),
   ('al.cfg', 'pleasure_label',         'modules.behavioral_activation.pleasure_label'),
   ('al.cfg', 'pleasure_sublabel',      'modules.behavioral_activation.pleasure_sublabel'),
   ('al.cfg', 'mastery_label',          'modules.behavioral_activation.mastery_label'),
   ('al.cfg', 'mastery_sublabel',       'modules.behavioral_activation.mastery_sublabel'),
-  ('al.cfg', 'done_label',             'modules.behavioral_activation.done_label'),
+  ('al.cfg', 'pleasure_short_label',   'modules.behavioral_activation.pleasure_short'),
+  ('al.cfg', 'mastery_short_label',    'modules.behavioral_activation.mastery_short'),
   ('al.cfg', 'mark_done_label',        'modules.behavioral_activation.mark_done'),
   ('al.cfg', 'mark_undone_label',      'modules.behavioral_activation.mark_undone'),
+  ('al.cfg', 'status_planned_label',   'modules.behavioral_activation.status_planned'),
+  ('al.cfg', 'status_done_label',      'modules.behavioral_activation.status_done'),
+  ('al.cfg', 'completion_title',       'modules.behavioral_activation.completion_title'),
+  ('al.cfg', 'completion_skip_label',  'modules.behavioral_activation.completion_skip'),
   ('al.cfg', 'notes_placeholder',      'common.notes_placeholder'),
   ('al.cfg', 'date_label',             'modules.behavioral_activation.date_label'),
   ('al.cfg', 'date_confirm_label',     'modules.behavioral_activation.date_confirm'),
+  ('al.cfg', 'planned_time_label',     'modules.behavioral_activation.planned_time'),
+  ('al.cfg', 'planned_time_clear_label','modules.behavioral_activation.planned_time_clear'),
   ('al.cfg', 'save_label',             'modules.behavioral_activation.save'),
   ('al.cfg', 'update_label',           'common.update'),
   ('al.cfg', 'delete_label',           'common.delete'),
   ('al.cfg', 'delete_title',           'modules.behavioral_activation.delete_activity_title'),
   ('al.cfg', 'name_missing_title',     'modules.behavioral_activation.name_missing'),
   ('al.cfg', 'name_missing_msg',       'modules.behavioral_activation.name_missing_msg'),
-  ('al.cfg', 'legend_done_label',      'modules.behavioral_activation.legend_done'),
-  ('al.cfg', 'legend_planned_label',   'modules.behavioral_activation.legend_planned'),
-  ('al.cfg', 'month_hint_tap',         'modules.behavioral_activation.month_hint_tap'),
-  ('al.cfg', 'month_hint_empty',       'modules.behavioral_activation.month_hint_empty'),
+  ('al.cfg', 'my_activities_title',    'modules.behavioral_activation.my_activities'),
+  ('al.cfg', 'linked_value_prefix',    'modules.behavioral_activation.linked_value'),
   ('al.cfg', 'back_label',             'modules.behavioral_activation.back_btn')
 on conflict (field_id, prop_key) do nothing;
 
@@ -2669,3 +2780,17 @@ update public.practitioners
    'guillaume.zarb@gmail.com',
    'teil.olivier@gmail.com'
  );
+
+
+-- ============================================================
+-- Version de la config — bump du jeton (ETag applicatif)
+-- ============================================================
+-- DOIT rester en TOUTE FIN de seed : toute modification de contenu de config
+-- ci-dessus (module_content_fields, field_props, psyedu_*, échelles…) se traduit
+-- par un nouveau jeton, ce qui invalide le cache React Query du web SANS
+-- redéploiement front. Le changement de valeur à chaque exécution est VOULU
+-- (un re-seed = du contenu a potentiellement changé). Ne PAS déplacer plus haut.
+update public.app_config_meta
+   set config_version = now()::text,
+       updated_at     = now()
+ where singleton;

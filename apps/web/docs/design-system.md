@@ -33,9 +33,21 @@ Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 --font-family -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
 --font-size-caption 14px  --font-size-body  16px
 --font-size-h3      18px  --font-size-h2    22px  --font-size-h1  28px
+
+/* Contrôles de formulaire — dimensionnement partagé (InputField, Dropdown, SearchInput) */
+--control-pad-y      10px  --control-pad-x      14px  --control-font-size    15px
+--control-pad-y-sm    7px  --control-pad-x-sm   12px  --control-font-size-sm 14px
+--control-icon-room  22px  /* place d'un ornement (loupe, chevron) au-delà du padding texte */
 ```
 
 Dans le CSS : `color: var(--color-primary)` — jamais de valeur hex directe.
+
+> **Contrôles de formulaire — une seule hauteur, deux tailles.** `InputField`,
+> `Dropdown` et `SearchInput` dérivent **tous** padding et `font-size` des tokens
+> `--control-*` : jamais de padding/taille en dur dans un CSS de composant. Un champ et
+> une liste déroulante côte à côte ont donc la **même hauteur** — variante par défaut
+> (`--control-*`) ou compacte (`--control-*-sm`, prop `compact`). Source unique :
+> `control` dans `theme.ts`.
 
 ---
 
@@ -99,7 +111,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -414,11 +426,17 @@ d'actions + contenu. Base de la plupart des panneaux.
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `header` | `CardHeader` | — | `{ title, subtitle?, icon?, right? }` |
-| `actions` | `ReactNode` | — | Zone d'actions (bas de carte) |
+| `footer` | `ReactNode` | — | Section rendue **entre le body et les actions**, dans le flux (ex. rangée de chips) |
+| `actions` | `ReactNode` | — | Zone d'actions (bas de carte, en position absolue) |
 | `variant` | `'default' \| 'outlined' \| 'elevated'` | `'default'` | Style de bordure/ombre |
 | `state` | `'active' \| 'disabled'` | — | État visuel |
-| `children` | `ReactNode` | — | Contenu |
+| `children` | `ReactNode` | — | Contenu (body) |
 | `className` | `string` | — | Classe additionnelle |
+
+> Ordre de rendu : `header` → `children` (body) → `footer` → `actions`. Le `footer`
+> (`.card__footer`, flex + wrap) sert de rangée en bas de body ; les cartes de
+> l'armoire module y placent leurs chips de tags / `ScaleMetaBadges` et remontent la
+> description du module dans le body (au lieu du `header.subtitle`).
 
 ### `Modal`
 
@@ -532,6 +550,12 @@ lecture impérative). Un `className` passé est **fusionné** avec les classes d
 | `onChange` | `(value: string) => void` | Reçoit la nouvelle valeur (pas l'event) |
 | `placeholder` | `string` | Placeholder (obligatoire) |
 | `ariaLabel` | `string` | Label accessibilité |
+| `compact` | `boolean` | Variante réduite, hauteur alignée sur `Dropdown compact`. Défaut `false` = même hauteur qu'un `Dropdown` / `InputField` par défaut |
+
+> **Hauteur cohérente** : `SearchInput`, `Dropdown` et `InputField` partagent les mêmes
+> métriques (tokens `--control-*`, cf. § *Contrôles de formulaire*). Dans une barre de
+> filtres, harmoniser le flag : `SearchInput compact` **avec** `Dropdown compact`, ou les
+> deux par défaut. Ne jamais laisser un `SearchInput` compact à côté d'un `Dropdown` plein.
 
 ### `Dropdown`
 
@@ -1030,6 +1054,92 @@ config couleurs/libellés et le mapping `buildRhythmogramAnchors` vivent dans
 | `year` / `month` | `number` | Mois affiché (month 1-12) — formatage des dates du tooltip |
 | `locale` | `string` | Locale i18n pour le formatage des dates |
 | `xAxisLabel` / `yAxisLabel` | `string?` | Titres d'axes déjà traduits (« Jour du mois » / « Heure ») — fournis par l'appelant pour garder le composant générique |
+
+---
+
+## Carte de module — `ModuleCard` (shell partagé)
+
+Fichier : `components/features/ModuleCard/ModuleCard.tsx` (+ `ModuleCard.css`).
+
+> **Shell présentationnel unique des cartes de module**, partagé par l'écran
+> Modules (catalogue praticien — enable/disable global) **et** l'armoire
+> thérapeutique (onglet Modules d'un patient — unlock/revoke). Seules la **source**
+> et les **contrôles** diffèrent ; la **forme** est identique : icône + titre +
+> contrôle à droite (`headerRight`), description en tête de body, chips de tags en
+> footer, rangée d'actions collée en bas. Assemble `ui/Card` (classe
+> `module-card-item`). Ne **jamais** réécrire ce shell à la main (`<Card
+> className="module-card-item">` + `<p className="module-card__description">`) dans
+> une page : passer par `ModuleCard`.
+
+Les styles partagés (`.category-modules-grid`, `.module-toggle`,
+`.module-card__description`, barre d'actions `.module-card-item .card__actions`)
+vivent dans `ModuleCard.css` — importé partout où `ModuleCard` est utilisé. Les
+états propres à chaque écran restent locaux : `catalog-card--disabled` /
+`catalog-card--coming-soon` (catalogue), `module-card--unlocked` / `module-card__date`
+(armoire).
+
+```tsx
+<div className="category-modules-grid">
+  <ModuleCard
+    icon={<Icon size={18} />}
+    title={t(`modules.${id}.label`)}
+    description={t(`modules.${id}.description`)}
+    headerRight={<button className="module-toggle"><Toggle checked={on} /></button>}
+    tags={<ModuleTagChips tagIds={...} taxonomy={taxonomy} />}
+    actions={<ModuleCardFooter … />}
+  >
+    {/* body additionnel : date de déverrouillage, panneaux aperçu/données… */}
+  </ModuleCard>
+</div>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `icon` | `ReactNode` | Icône du module (gauche du titre) |
+| `title` | `string` | Libellé du module |
+| `headerRight` | `ReactNode` | Contrôle à droite du header (toggle, bouton de vue) |
+| `description` | `ReactNode` | Description courte, rendue en tête de body (`.module-card__description`) |
+| `tags` | `ReactNode` | Rangée de chips de tags (footer) |
+| `actions` | `ReactNode` | Rangée d'actions collée en bas (typiquement `ModuleCardFooter`) |
+| `className` | `string` | Classes d'état additionnelles (`module-card-item` toujours ajoutée) |
+| `children` | `ReactNode` | Body additionnel sous la description (date, badges, panneaux) |
+
+---
+
+## Rangée d'actions des cartes module — `ModuleCardFooter` (armoire patient)
+
+Fichiers : `pages/PatientPage/tabs/ModuleCardFooter.tsx` (point d'entrée) +
+`Module{Preview,Data,Notif,Config}Button.tsx` (boutons unitaires).
+
+> **`ModuleCardFooter` est la source unique de la rangée d'actions (`actions` de la
+> `Card`) de toutes les cartes de l'armoire module** — le render générique de
+> `PatientModulesTab` **et** les cartes spécialisées `ChronobiologyCard` /
+> `MedicationAdherenceCard` / `MedicationSideEffectsCard`. Il impose un **ordre
+> canonique unique** : cloche → configuration (roue crantée) → aperçu → données →
+> actions spécifiques (`extra`). Chaque bouton n'est rendu **que si son handler est
+> fourni**. Ne **jamais** réassembler la rangée à la main (`<>…</>` de boutons) ni
+> réécrire un `<Button>`/`<button>` d'action dans une carte : c'est une régression
+> (ordre qui diverge, habillage incohérent).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `onConfigureNotif` | `() => void` | Rend la cloche « Configurer les rappels » |
+| `configLabel` | `string` | Libellé de la roue crantée (varie par module) |
+| `onConfigure` | `() => void` | Rend la roue crantée (avec `configLabel`) |
+| `previewOpen` / `onTogglePreview` | `boolean` / `() => void` | Rend l'œil « Aperçu » (`aria-pressed` = `previewOpen`) |
+| `dataOpen` / `onToggleData` | `boolean` / `() => void` | Rend la courbe « Données » (`aria-pressed` = `dataOpen`) |
+| `extra` | `ReactNode` | Actions bespoke rendues en fin de rangée (ex. « Débloquer des fiches ») |
+
+Chaque bouton unitaire est une **icône seule** (`ui/Button variant="outline"
+size="xs"`) enveloppée d'un `ui/Tooltip` ; le libellé est porté par le tooltip **et**
+l'`aria-label` (accessibilité) :
+
+| Composant | Icône | Libellé (tooltip + aria-label) |
+|---|---|---|
+| `ModulePreviewButton` | `Eye` / `EyeOff` | `patient.preview_button` |
+| `ModuleDataButton` | `LineChart` | `patient.data_button` |
+| `ModuleNotifButton` | `Bell` | `notifications.configure_button` |
+| `ModuleConfigButton` | `Settings` (roue crantée) | libellé **fourni** par l'appelant (varie par module) |
 
 ---
 

@@ -1,6 +1,6 @@
 import { useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell, Eye, EyeOff, LineChart, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { Chip } from '../../../components/ui/Chip'
@@ -11,6 +11,7 @@ import type { ModuleItem } from '@services/moduleCatalogService'
 import { ModuleDataPanel } from './ModuleDataPanel'
 import type { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { MedicationAddForm } from './MedicationAddForm'
+import { ModuleCardFooter } from './ModuleCardFooter'
 
 const MODULE_TYPE: ModuleType = 'medication_adherence'
 
@@ -73,44 +74,22 @@ export function MedicationAdherenceCard({
         header={{
           icon: modIcon,
           title: t('modules.medication_adherence.label'),
-          subtitle: t('modules.medication_adherence.description'),
           right: moduleToggle(unlocked, loading, handleToggle),
         }}
+        footer={tagChips}
         actions={unlocked && mod ? (
-          <>
-            <Tooltip label={t('notifications.configure_button')}>
-              <button type="button" className="module-card__notif-btn" aria-label={t('notifications.configure_button')} onClick={handleNotif}>
-                <Bell size={14} />
-              </button>
-            </Tooltip>
-            {!medList.open && (
-              <Button variant="ghost" size="sm" onClick={medList.openEditor}>
-                {t('modules.medication_adherence.config_button')}
-              </Button>
-            )}
-            <Tooltip label={t('patient.patient_view')}>
-              <button
-                className={`preview-toggle-btn ${previewOpen ? 'preview-toggle-btn--active' : ''}`}
-                onClick={handlePreviewToggle}
-              >
-                {previewOpen ? <EyeOff size={14} /> : <Eye size={14} />}
-                {t('patient.preview_button')}
-              </button>
-            </Tooltip>
-            <Tooltip label={t('patient.data_button')}>
-              <button
-                type="button"
-                className={`preview-toggle-btn ${dataOpen ? 'preview-toggle-btn--active' : ''}`}
-                onClick={handleDataToggle}
-              >
-                <LineChart size={14} />
-                {t('patient.data_button')}
-              </button>
-            </Tooltip>
-          </>
+          <ModuleCardFooter
+            onConfigureNotif={handleNotif}
+            configLabel={t('modules.medication_adherence.config_button')}
+            onConfigure={!medList.open ? medList.openEditor : undefined}
+            previewOpen={previewOpen}
+            onTogglePreview={handlePreviewToggle}
+            dataOpen={dataOpen}
+            onToggleData={handleDataToggle}
+          />
         ) : undefined}
       >
-        {tagChips}
+        <p className="module-card__description">{t('modules.medication_adherence.description')}</p>
         {unlocked && mod && (
           <div className="module-card__date">
             {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}

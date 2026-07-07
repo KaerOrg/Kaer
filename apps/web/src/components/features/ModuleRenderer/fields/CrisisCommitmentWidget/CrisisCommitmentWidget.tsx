@@ -1,22 +1,15 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { Handshake } from 'lucide-react'
 import { usePatientView } from '../../../../../contexts/usePatientView'
-import { fetchCrisisPlanConfig } from '@services/crisisPlanService'
+import { crisisQueries } from '../../../../../hooks/queries'
 import './CrisisCommitmentWidget.css'
 
 export function CrisisCommitmentWidget() {
   const { t } = useTranslation()
   const patientId = usePatientView()
-  const [commitmentPhrase, setCommitmentPhrase] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!patientId) return
-    fetchCrisisPlanConfig(patientId)
-      .then(cfg => setCommitmentPhrase(cfg.commitmentPhrase))
-      .catch(() => {})
-  }, [patientId])
-
+  const { data: config } = useQuery(crisisQueries.planConfig(patientId))
+  const commitmentPhrase = config?.commitmentPhrase ?? ''
   const phrase = commitmentPhrase || t('modules.crisis_plan.commitment_phrase_default')
 
   return (

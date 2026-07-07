@@ -5,7 +5,7 @@ vi.mock('../lib/supabase', () => ({
 }))
 
 import { supabase } from '../lib/supabase'
-import { fetchSourcesByModule, clearModuleSourcesCache } from './moduleSourcesService'
+import { fetchSourcesByModule } from './moduleSourcesService'
 
 function makeChain(result: { data: unknown; error?: unknown } = { data: null, error: null }) {
   const chain = new Proxy({} as Record<string, unknown>, {
@@ -20,7 +20,6 @@ function makeChain(result: { data: unknown; error?: unknown } = { data: null, er
 
 beforeEach(() => {
   vi.clearAllMocks()
-  clearModuleSourcesCache()
 })
 
 describe('moduleSourcesService.fetchSourcesByModule', () => {
@@ -45,20 +44,6 @@ describe('moduleSourcesService.fetchSourcesByModule', () => {
     expect(result).toEqual([])
   })
 
-  it('sert le second appel depuis le cache sans re-requêter', async () => {
-    const rows = [
-      { id: 's1', module_id: 'phq9', label: 'Source', source_type: 'meta_analysis', url: null, evidence_grade: null, description: null, sort_order: 1 },
-    ]
-    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
-
-    const first = await fetchSourcesByModule('phq9')
-    const second = await fetchSourcesByModule('phq9')
-
-    expect(first).toEqual(rows)
-    expect(second).toBe(first)
-    expect(supabase.from).toHaveBeenCalledTimes(1)
-  })
-
   it('propage l’erreur Supabase (cas d’erreur)', async () => {
     const error = new Error('rls denied')
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error }) as never)
@@ -66,15 +51,14 @@ describe('moduleSourcesService.fetchSourcesByModule', () => {
     await expect(fetchSourcesByModule('gad7')).rejects.toThrow('rls denied')
   })
 
-  it('clearModuleSourcesCache force un rechargement', async () => {
+  it('requête à chaque appel — la déduplication est déléguée à React Query', async () => {
     const rows = [
-      { id: 's1', module_id: 'gad7', label: 'Source', source_type: 'rct', url: null, evidence_grade: null, description: null, sort_order: 1 },
+      { id: 's1', module_id: 'phq9', label: 'Source', source_type: 'meta_analysis', url: null, evidence_grade: null, description: null, sort_order: 1 },
     ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
-    await fetchSourcesByModule('gad7')
-    clearModuleSourcesCache()
-    await fetchSourcesByModule('gad7')
+    await fetchSourcesByModule('phq9')
+    await fetchSourcesByModule('phq9')
 
     expect(supabase.from).toHaveBeenCalledTimes(2)
   })

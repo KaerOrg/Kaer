@@ -17,12 +17,37 @@ export type FearPoint = { date: string; suds_before: number; suds_after: number 
 
 export type MedEffectPoint = { date: string; [key: string]: number | string }
 
+// Fiche d'un module `column_form` (payload { values }) : date + valeurs brutes
+// saisies par le patient (textes libres et curseurs). Aucune interprétation (MDR).
+export type FormEntryRow = { date: string; values: Record<string, string | number> }
+
+// Colonnes de Beck : intensité de l'émotion de départ avant / après
+// restructuration (même émotion ré-évaluée — mesure canonique du DTR).
+export type BeckPoint = { date: string; intensity_before?: number; intensity_after?: number }
+
 // Résumé brut d'un module pour la card praticien : date et payload de la
 // dernière saisie + nombre total d'entrées. Aucune interprétation (MDR).
 export type ModuleSummary = {
   lastDate: string | null
   count: number
   lastPayload: Record<string, unknown> | null
+}
+
+// Activité du module behavioral_activation, telle que saisie par le patient.
+// P/M attendus (prédiction à la planification) et ressentis (après réalisation)
+// sont des valeurs brutes 0-10, nullables : « non renseigné » est un état légitime.
+export type ActivityEntryPoint = {
+  id: string
+  date: string // YYYY-MM-DD — date métier de l'activité (payload.date), pas la date de sync
+  label: string
+  done: boolean
+  expected_pleasure: number | null
+  expected_mastery: number | null
+  pleasure: number | null
+  mastery: number | null
+  planned_time: string | null // HH:MM
+  domain_id: string | null
+  notes: string | null
 }
 
 // Modules d'échelles graphés par le praticien (lecture depuis patient_entries).
@@ -302,6 +327,110 @@ export async function fetchChronoEntries(patientId: string): Promise<RhythmEntry
   }
 
   return entries
+}
+
+// ── Fiches des modules `column_form` (vue praticien) ─────────────────────────
+// Restitution BRUTE des fiches saisies (textes et curseurs), triées par date de
+// saisie croissante. La date = client_created_at (saisie rétroactive : ce champ
+// porte le jour concerné). Aucune interprétation ni seuil (MDR 2017/745).
+
+export async function fetchFormEntries(
+  patientId: string,
+  moduleId: string,
+): Promise<FormEntryRow[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('payload, client_created_at')
+    .eq('patient_id', patientId)
+    .eq('module_id', moduleId)
+    .eq('entry_kind', 'form_entry')
+    .order('client_created_at', { ascending: true })
+
+  if (error || !data) return []
+
+  const entries: FormEntryRow[] = []
+  for (const row of data) {
+    if (typeof row.client_created_at !== 'string') continue
+    const payload = row.payload as { values?: Record<string, unknown> } | null
+    if (!payload || typeof payload !== 'object' || !payload.values || typeof payload.values !== 'object') continue
+    // Validation de forme : seules les valeurs texte/nombre du payload opaque sont relayées.
+    const values: Record<string, string | number> = {}
+    for (const [key, value] of Object.entries(payload.values)) {
+      if (typeof value === 'string' || typeof value === 'number') values[key] = value
+    }
+    entries.push({ date: row.client_created_at, values })
+  }
+  return entries
+}
+
+// ── Évolution des colonnes de Beck (intensité avant/après restructuration) ───
+
+export async function fetchBeckEvolution(patientId: string): Promise<BeckPoint[]> {
+  const entries = await fetchFormEntries(patientId, 'beck_columns')
+  const points: BeckPoint[] = []
+  for (const entry of entries) {
+    const before = toNumber(entry.values['emotion_intensity'])
+    const after = toNumber(entry.values['outcome_intensity'])
+    if (before == null && after == null) continue
+    points.push({
+      date: entry.date,
+      ...(before != null ? { intensity_before: before } : {}),
+      ...(after != null ? { intensity_after: after } : {}),
+    })
+  }
+  return points
+}
+
+// ── Activités « Activation comportementale » (vue praticien) ─────────────────
+// Restitution brute des activités planifiées/réalisées avec leurs P/M attendus
+// et ressentis, datées par payload.date (date métier choisie par le patient,
+// jamais l'horodatage de sync). Aucune interprétation ni seuil (MDR 2017/745).
+// Compat legacy (saisies antérieures à la refonte, sans champs expected_*) :
+// planifiée → P/M lus comme attendus ; réalisée → P/M lus comme ressentis.
+
+function readNullableScore(value: unknown): number | null {
+  return toNumber(value) ?? null
+}
+
+export async function fetchActivityEntries(patientId: string): Promise<ActivityEntryPoint[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('local_id, payload')
+    .eq('patient_id', patientId)
+    .eq('module_id', 'behavioral_activation')
+    .eq('entry_kind', 'activity_record')
+
+  if (error || !data) return []
+
+  const points: ActivityEntryPoint[] = []
+  for (const row of data) {
+    const p = row.payload as Record<string, unknown>
+    const date = typeof p.date === 'string' ? p.date : null
+    const label = typeof p.label === 'string' ? p.label : null
+    if (date == null || label == null) continue
+
+    const done = toNumber(p.done) === 1
+    const isLegacy = !('expected_pleasure' in p)
+    const pleasure = readNullableScore(p.pleasure)
+    const mastery = readNullableScore(p.mastery)
+
+    points.push({
+      id: row.local_id,
+      date,
+      label,
+      done,
+      expected_pleasure: isLegacy ? (done ? null : pleasure) : readNullableScore(p.expected_pleasure),
+      expected_mastery: isLegacy ? (done ? null : mastery) : readNullableScore(p.expected_mastery),
+      pleasure: isLegacy && !done ? null : pleasure,
+      mastery: isLegacy && !done ? null : mastery,
+      planned_time: readStr(p.planned_time),
+      domain_id: readStr(p.domain_id),
+      notes: readStr(p.notes),
+    })
+  }
+  // Tri par date métier puis heure prévue, pas par horodatage de sync.
+  points.sort((a, b) => a.date.localeCompare(b.date) || (a.planned_time ?? '').localeCompare(b.planned_time ?? ''))
+  return points
 }
 
 // ── Liste des échelles disponibles pour ce patient ───────────────────────────

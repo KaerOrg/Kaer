@@ -35,6 +35,11 @@ jest.mock('../../../lib/database', () => ({
   generateId: jest.fn().mockReturnValue('test-activity-id-1'),
 }))
 
+const mockFetchBAActivities = jest.fn()
+jest.mock('@services/baActivitiesService', () => ({
+  fetchBAActivities: (...a: unknown[]) => mockFetchBAActivities(...a),
+}))
+
 jest.mock('../../../lib/dateUtils', () => ({
   formatDateTime: (str: string) => str,
   formatDateFull: (str: string) => `full:${str}`,
@@ -53,6 +58,7 @@ jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
+import { todayIso, shiftDate } from '@kaer/shared'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import { useToast } from '../../../contexts/ToastContext'
@@ -92,63 +98,73 @@ const MOCK_FIELDS: ContentField[] = [
       dot_done_color:         '#10B981',
       dot_planned_color:      '#3B82F6',
       locale:                 'fr-FR',
-      tab_list_label:         'modules.behavioral_activation.tab_list',
-      tab_month_label:        'modules.behavioral_activation.tab_month',
+      tab_upcoming_label:     'modules.behavioral_activation.tab_upcoming',
+      tab_history_label:      'modules.behavioral_activation.tab_history',
       add_btn:                'modules.behavioral_activation.add_btn',
-      empty_title:            'modules.behavioral_activation.empty_title',
-      empty_text:             'modules.behavioral_activation.empty_text',
-      section_activity_title:   'modules.behavioral_activation.section_activity',
-      section_evaluation_title: 'modules.behavioral_activation.section_evaluation',
-      section_notes_title:      'modules.behavioral_activation.section_notes',
+      today_empty_text:       'modules.behavioral_activation.today_empty',
+      history_empty_text:     'modules.behavioral_activation.history_empty',
+      section_activity_title: 'modules.behavioral_activation.section_activity',
+      section_felt_title:     'modules.behavioral_activation.section_felt',
+      section_notes_title:    'modules.behavioral_activation.section_notes',
       activity_placeholder:   'modules.behavioral_activation.activity_placeholder',
       pleasure_label:         'modules.behavioral_activation.pleasure_label',
       pleasure_sublabel:      'modules.behavioral_activation.pleasure_sublabel',
       mastery_label:          'modules.behavioral_activation.mastery_label',
       mastery_sublabel:       'modules.behavioral_activation.mastery_sublabel',
-      done_label:             'modules.behavioral_activation.done_label',
+      pleasure_short_label:   'modules.behavioral_activation.pleasure_short',
+      mastery_short_label:    'modules.behavioral_activation.mastery_short',
       mark_done_label:        'modules.behavioral_activation.mark_done',
       mark_undone_label:      'modules.behavioral_activation.mark_undone',
+      status_planned_label:   'modules.behavioral_activation.status_planned',
+      status_done_label:      'modules.behavioral_activation.status_done',
+      completion_title:       'modules.behavioral_activation.completion_title',
+      completion_skip_label:  'modules.behavioral_activation.completion_skip',
       notes_placeholder:      'common.notes_placeholder',
       date_label:             'modules.behavioral_activation.date_label',
       date_confirm_label:     'modules.behavioral_activation.date_confirm',
+      planned_time_label:     'modules.behavioral_activation.planned_time',
+      planned_time_clear_label: 'modules.behavioral_activation.planned_time_clear',
       save_label:             'modules.behavioral_activation.save',
       update_label:           'common.update',
       delete_label:           'common.delete',
       delete_title:           'modules.behavioral_activation.delete_activity_title',
       name_missing_title:     'modules.behavioral_activation.name_missing',
       name_missing_msg:       'modules.behavioral_activation.name_missing_msg',
-      legend_done_label:      'modules.behavioral_activation.legend_done',
-      legend_planned_label:   'modules.behavioral_activation.legend_planned',
-      month_hint_tap:         'modules.behavioral_activation.month_hint_tap',
-      month_hint_empty:       'modules.behavioral_activation.month_hint_empty',
+      my_activities_title:    'modules.behavioral_activation.my_activities',
+      linked_value_prefix:    'modules.behavioral_activation.linked_value',
       back_label:             'modules.behavioral_activation.back_btn',
     },
   }),
-  makeField({ id: 'al.sug_walk', field_type: 'activity_log_suggestion', sort_order: 100, text_code: 'modules.behavioral_activation.suggestion_walk' }),
-  makeField({ id: 'al.sug_yoga', field_type: 'activity_log_suggestion', sort_order: 104, text_code: 'modules.behavioral_activation.suggestion_yoga' }),
+  makeField({ id: 'al.dom_body', field_type: 'activity_log_domain', sort_order: 10, text_code: 'modules.behavioral_activation.domain_body' }),
+  makeField({ id: 'al.sug_walk', field_type: 'activity_log_suggestion', sort_order: 100, text_code: 'modules.behavioral_activation.suggestion_walk', props: { domain: 'al.dom_body' } }),
+  makeField({ id: 'al.sug_yoga', field_type: 'activity_log_suggestion', sort_order: 104, text_code: 'modules.behavioral_activation.suggestion_yoga', props: { domain: 'al.dom_body' } }),
 ]
 
-const MOCK_RECORD: database.ActivityRecord = {
-  id: 'rec-1',
-  date: '2026-05-06',
-  label: 'Marche au parc',
-  pleasure: 7,
-  mastery: 5,
-  done: 0,
-  notes: null,
-  created_at: '2026-05-06T10:00:00Z',
+const TODAY = todayIso()
+
+function makeRecord(overrides: Partial<database.ActivityRecord>): database.ActivityRecord {
+  return {
+    id: 'rec-1',
+    date: TODAY,
+    label: 'Marche au parc',
+    expected_pleasure: 6,
+    expected_mastery: 4,
+    pleasure: null,
+    mastery: null,
+    done: 0,
+    notes: null,
+    planned_time: null,
+    domain_id: 'al.dom_body',
+    config_activity_id: null,
+    created_at: '2026-05-06T10:00:00Z',
+  ...overrides,
+  }
 }
 
-const MOCK_DONE_RECORD: database.ActivityRecord = {
-  id: 'rec-2',
-  date: '2026-05-06',
-  label: 'Lecture',
-  pleasure: 8,
-  mastery: 6,
-  done: 1,
-  notes: 'Très agréable',
-  created_at: '2026-05-06T11:00:00Z',
-}
+const MOCK_RECORD = makeRecord({})
+const MOCK_DONE_RECORD = makeRecord({
+  id: 'rec-2', label: 'Lecture', done: 1, pleasure: 8, mastery: 6, notes: 'Très agréable',
+})
 
 function renderLayout() {
   return render(
@@ -167,21 +183,45 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     jest.clearAllMocks()
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([])
     ;(database.getActivityRecord as jest.Mock).mockResolvedValue(null)
+    mockFetchBAActivities.mockResolvedValue([])
   })
 
-  it('charge les enregistrements au montage et affiche l\'état vide', async () => {
+  it('monte en vue agenda : Aujourd\'hui toujours affiché, même vide', async () => {
     renderLayout()
     await waitFor(() => {
       expect(database.getAllActivityRecords).toHaveBeenCalled()
     })
-    expect(await screen.findByTestId('list-empty')).toBeTruthy()
+    expect(await screen.findByTestId('activity-log-agenda')).toBeTruthy()
+    expect(await screen.findByTestId('agenda-today')).toBeTruthy()
+    expect(await screen.findByTestId('agenda-today-empty')).toBeTruthy()
   })
 
-  it('affiche la liste des enregistrements groupés par date', async () => {
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD, MOCK_DONE_RECORD])
+  it('affiche les activités du jour et celles à venir dans l\'agenda', async () => {
+    const futureRecord = makeRecord({ id: 'rec-future', date: shiftDate(TODAY, 3), label: 'Piscine' })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD, MOCK_DONE_RECORD, futureRecord])
     renderLayout()
     expect(await screen.findByTestId('record-rec-1')).toBeTruthy()
     expect(await screen.findByTestId('record-rec-2')).toBeTruthy()
+    expect(await screen.findByTestId(`agenda-day-${shiftDate(TODAY, 3)}`)).toBeTruthy()
+    expect(await screen.findByTestId('record-rec-future')).toBeTruthy()
+  })
+
+  it('une activité passée vit dans l\'onglet Historique, pas dans l\'agenda', async () => {
+    const oldRecord = makeRecord({ id: 'rec-old', date: shiftDate(TODAY, -30), label: 'Ancienne' })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([oldRecord])
+    renderLayout()
+    await screen.findByTestId('activity-log-agenda')
+    expect(screen.queryByTestId('record-rec-old')).toBeNull()
+    fireEvent.press(screen.getByTestId('tab-history'))
+    expect(await screen.findByTestId('activity-log-list')).toBeTruthy()
+    expect(await screen.findByTestId('record-rec-old')).toBeTruthy()
+  })
+
+  it('l\'historique vide affiche son message dédié', async () => {
+    renderLayout()
+    await screen.findByTestId('activity-log-agenda')
+    fireEvent.press(screen.getByTestId('tab-history'))
+    expect(await screen.findByTestId('list-empty')).toBeTruthy()
   })
 
   it('passe en mode entry depuis le FAB', async () => {
@@ -199,74 +239,155 @@ describe('FieldRenderer — activity_log (ActivityLogLayout)', () => {
     expect(database.saveActivityRecord).not.toHaveBeenCalled()
   })
 
-  it('enregistre une nouvelle activité', async () => {
+  it('planifier = quoi + quand : aucun slider, aucune évaluation imposée', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
+    // Aucun slider visible en mode planification
+    expect(screen.queryByTestId('pleasure-7')).toBeNull()
+    expect(screen.queryByTestId('mastery-5')).toBeNull()
     fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
-        expect.objectContaining({ label: 'Marche', done: 0 })
+        expect.objectContaining({
+          label: 'Marche',
+          done: 0,
+          expected_pleasure: null,
+          expected_mastery: null,
+          pleasure: null,
+          mastery: null,
+        })
       )
     })
   })
 
-  it('toggle l\'état done depuis l\'entrée', async () => {
+  it('re-taper le pip sélectionné efface la note (retour à non renseigné)', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('fab-add-button'))
+    await screen.findByTestId('activity-log-entry')
+    fireEvent.changeText(screen.getByTestId('label-input'), 'Marche')
+    fireEvent.press(screen.getByText("Je l'ai déjà faite"))
+    fireEvent.press(await screen.findByTestId('pleasure-7'))
+    fireEvent.press(screen.getByTestId('pleasure-7'))
+    await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ done: 1, pleasure: null })
+      )
+    })
+  })
+
+  it('« Je l\'ai déjà faite » : les sliders ressentis s\'affichent directement', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
     fireEvent.changeText(screen.getByTestId('label-input'), 'Lecture')
-    fireEvent.press(screen.getByTestId('done-toggle'))
+    fireEvent.press(screen.getByText("Je l'ai déjà faite"))
+    fireEvent.press(await screen.findByTestId('pleasure-8'))
+    fireEvent.press(screen.getByTestId('mastery-6'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
-        expect.objectContaining({ label: 'Lecture', done: 1 })
+        expect.objectContaining({
+          label: 'Lecture',
+          done: 1,
+          pleasure: 8,
+          mastery: 6,
+          expected_pleasure: null,
+        })
       )
     })
   })
 
-  it('pré-remplit le formulaire avec un enregistrement existant', async () => {
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
-    ;(database.getActivityRecord as jest.Mock).mockResolvedValue(MOCK_RECORD)
+  it('édition : pré-remplit le formulaire et propose la suppression', async () => {
+    const doneRecord = makeRecord({ id: 'rec-3', done: 1, pleasure: 7, mastery: 5 })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([doneRecord])
+    ;(database.getActivityRecord as jest.Mock).mockResolvedValue(doneRecord)
     renderLayout()
-    fireEvent.press(await screen.findByTestId('edit-rec-1'))
+    fireEvent.press(await screen.findByTestId('edit-rec-3'))
     await screen.findByTestId('activity-log-entry')
-    await waitFor(() => expect(screen.queryByTestId('delete-button')).toBeTruthy())
-    expect(database.getActivityRecord).toHaveBeenCalledWith('rec-1')
+    expect(screen.getByTestId('delete-button')).toBeTruthy()
+    expect(database.getActivityRecord).toHaveBeenCalledWith('rec-3')
   })
 
-  it('édite un enregistrement existant', async () => {
-    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
-    ;(database.getActivityRecord as jest.Mock).mockResolvedValue(MOCK_RECORD)
+  it('propose les activités co-construites en premier et affiche la phrase valeur', async () => {
+    mockFetchBAActivities.mockResolvedValue([
+      { id: 'cfg-a1', label: 'Marche 20 min', domain_id: 'al.dom_body', value_text: 'Retrouver mon souffle' },
+    ])
     renderLayout()
-    fireEvent.press(await screen.findByTestId('edit-rec-1'))
+    fireEvent.press(await screen.findByTestId('fab-add-button'))
     await screen.findByTestId('activity-log-entry')
+    const chip = await screen.findByTestId('my-activity-cfg-a1')
+    fireEvent.press(chip)
+    expect(await screen.findByTestId('linked-value')).toBeTruthy()
     await act(async () => { fireEvent.press(screen.getByTestId('save-button')) })
     await waitFor(() => {
-      expect(database.saveActivityRecord).toHaveBeenCalled()
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({
+          label: 'Marche 20 min',
+          domain_id: 'al.dom_body',
+          config_activity_id: 'cfg-a1',
+        })
+      )
     })
   })
 
-  it('toggle done directement depuis la liste', async () => {
+  it('cocher réalisée ouvre la feuille « C\'était comment ? » sans rien enregistrer', async () => {
     ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
     renderLayout()
     fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    expect(await screen.findByTestId('completion-sheet')).toBeTruthy()
+    expect(database.saveActivityRecord).not.toHaveBeenCalled()
+  })
+
+  it('feuille de complétion : noter puis enregistrer écrit les ressentis et préserve les champs', async () => {
+    const withTime = makeRecord({ planned_time: '17:30' })
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([withTime])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    await screen.findByTestId('completion-sheet')
+    fireEvent.press(screen.getByTestId('completion-pleasure-7'))
+    await act(async () => { fireEvent.press(screen.getByTestId('completion-save')) })
     await waitFor(() => {
       expect(database.saveActivityRecord).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'rec-1', done: 1 })
+        expect.objectContaining({
+          id: 'rec-1',
+          done: 1,
+          pleasure: 7,
+          mastery: null,
+          expected_pleasure: 6,
+          planned_time: '17:30',
+          domain_id: 'al.dom_body',
+        })
+      )
+    })
+    await waitFor(() => expect(screen.queryByTestId('completion-sheet')).toBeNull())
+  })
+
+  it('feuille de complétion : « Passer » marque réalisée sans noter', async () => {
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_RECORD])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('toggle-rec-1'))
+    await screen.findByTestId('completion-sheet')
+    await act(async () => { fireEvent.press(screen.getByTestId('completion-skip')) })
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'rec-1', done: 1, pleasure: null, mastery: null })
       )
     })
   })
 
-  it('passe en mode month et navigue', async () => {
+  it('décocher une activité réalisée reste immédiat (pas de feuille)', async () => {
+    ;(database.getAllActivityRecords as jest.Mock).mockResolvedValue([MOCK_DONE_RECORD])
     renderLayout()
-    fireEvent.press(await screen.findByTestId('tab-month'))
-    expect(await screen.findByTestId('activity-log-month')).toBeTruthy()
-    fireEvent.press(screen.getByTestId('month-prev'))
-    fireEvent.press(screen.getByTestId('month-next'))
-    fireEvent.press(screen.getByTestId('month-back-button'))
-    await waitFor(() => expect(screen.getByTestId('activity-log-list')).toBeTruthy())
+    fireEvent.press(await screen.findByTestId('toggle-rec-2'))
+    await waitFor(() => {
+      expect(database.saveActivityRecord).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'rec-2', done: 0 })
+      )
+    })
+    expect(screen.queryByTestId('completion-sheet')).toBeNull()
   })
 
   it('supprime une entrée depuis le mode entry après confirmation', async () => {

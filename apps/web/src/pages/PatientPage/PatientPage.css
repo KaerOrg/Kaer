@@ -769,11 +769,8 @@
   gap: 16px;
 }
 
-.category-modules-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-}
+/* La grille .category-modules-grid et le toggle .module-toggle sont définis dans
+   components/features/ModuleCard/ModuleCard.css (partagés avec l'écran Modules). */
 
 /* Psycho picker and expanded wrappers span full grid width */
 .category-modules-grid .psycho-card-picker,
@@ -786,25 +783,6 @@
 .module-card-wrapper {
   display: contents;
 }
-
-/* ── Toggle activation module ────────────────────────────────────────────── */
-
-.module-toggle {
-  background: none;
-  border: none;
-  padding: 2px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-}
-
-.module-toggle:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-
-/* ── ─────────────────────────────────────────────────────────────────────── */
 
 .module-card--unlocked {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
@@ -831,45 +809,8 @@
   color: var(--color-danger) !important;
 }
 
-.module-card__notif-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  /* Aligné sur .preview-toggle-btn pour une rangée d'actions homogène
-     (même hauteur que « Aperçu » / « Données »). */
-  padding: 3px 7px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: color 0.15s, background 0.15s, border-color 0.15s;
-}
-
-/* Barre d'actions des cartes de module : en flux normal + retour à la ligne.
-   Évite tout débordement quand 4 actions (Configurer… + Aperçu + Données +
-   cloche) dépassent la largeur de la carte. Reste une barre pleine largeur
-   collée en bas grâce à margin-top:auto + marges latérales négatives. */
-.card.module-card-item:has(.card__actions:not(:empty)) {
-  padding-bottom: var(--spacing-md);
-}
-
-.module-card-item .card__actions {
-  position: static;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  margin-top: auto;
-  margin-left: calc(-1 * var(--spacing-md));
-  margin-right: calc(-1 * var(--spacing-md));
-  margin-bottom: calc(-1 * var(--spacing-md));
-}
-
-.module-card__notif-btn:hover {
-  color: var(--color-primary);
-  background: var(--color-primary-light, #eef2ff);
-  border-color: var(--color-primary);
-}
+/* La barre d'actions .module-card-item .card__actions est définie dans
+   components/features/ModuleCard/ModuleCard.css (partagée avec l'écran Modules). */
 
 .psycho-observance-summary {
   color: var(--color-primary);

@@ -809,30 +809,76 @@ export async function deleteFearEntry(id: string): Promise<void> {
 
 export interface ActivityRecord {
   id: string
-  date: string            // YYYY-MM-DD
-  label: string           // Nom de l'activité (ex: "Marche 20 min")
-  pleasure: number        // 0–10, brut
-  mastery: number         // 0–10, brut
-  done: number            // 0 = planifiée, 1 = réalisée
+  date: string                       // YYYY-MM-DD — date métier de l'activité
+  label: string                      // Nom de l'activité (ex: "Marche 20 min")
+  expected_pleasure: number | null   // 0–10 attendu (prédiction), null = non renseigné
+  expected_mastery: number | null    // 0–10 attendu, null = non renseigné
+  pleasure: number | null            // 0–10 ressenti (après réalisation), null = non renseigné
+  mastery: number | null             // 0–10 ressenti, null = non renseigné
+  done: number                       // 0 = planifiée, 1 = réalisée
   notes: string | null
+  planned_time: string | null        // HH:MM — heure prévue (préparation rappels)
+  domain_id: string | null           // domaine de vie (field activity_log_domain)
+  config_activity_id: string | null  // activité co-construite (config.ba_activities)
   created_at: string
 }
 
 // ─── SQLite Activation Comportementale ───────────────────────────────────────
 
-export async function createBehavioralActivationTable(database: SQLite.SQLiteDatabase): Promise<void> {
-  await database.execAsync(`
+// Migration v2 (refonte prédire/faire/constater) : P/M deviennent nullables et se
+// dédoublent en attendus/ressentis. SQLite ne sait pas retirer un NOT NULL →
+// rebuild de table avec mapping legacy : planifiée → P/M lus comme attendus,
+// réalisée → P/M conservés en ressentis.
+export const ACTIVITY_RECORDS_SCHEMA_V2 = `
     CREATE TABLE IF NOT EXISTS activity_records (
       id TEXT PRIMARY KEY,
       date TEXT NOT NULL,
       label TEXT NOT NULL DEFAULT '',
-      pleasure INTEGER NOT NULL DEFAULT 5,
-      mastery INTEGER NOT NULL DEFAULT 5,
+      expected_pleasure INTEGER,
+      expected_mastery INTEGER,
+      pleasure INTEGER,
+      mastery INTEGER,
       done INTEGER NOT NULL DEFAULT 0,
       notes TEXT,
+      planned_time TEXT,
+      domain_id TEXT,
+      config_activity_id TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
-  `)
+`
+
+export const ACTIVITY_RECORDS_REBUILD_STATEMENTS = [
+  ACTIVITY_RECORDS_SCHEMA_V2.replace('activity_records', 'activity_records_v2'),
+  `INSERT INTO activity_records_v2
+     (id, date, label, expected_pleasure, expected_mastery, pleasure, mastery,
+      done, notes, planned_time, domain_id, config_activity_id, created_at)
+   SELECT id, date, label,
+     CASE WHEN done = 0 THEN pleasure ELSE NULL END,
+     CASE WHEN done = 0 THEN mastery ELSE NULL END,
+     CASE WHEN done = 1 THEN pleasure ELSE NULL END,
+     CASE WHEN done = 1 THEN mastery ELSE NULL END,
+     done, notes, NULL, NULL, NULL, created_at
+   FROM activity_records`,
+  `DROP TABLE activity_records`,
+  `ALTER TABLE activity_records_v2 RENAME TO activity_records`,
+] as const
+
+/** Le rebuild v2 est requis si la table existe encore au schéma v1 (sans expected_pleasure). */
+export function needsActivityRecordsRebuild(columns: readonly { name: string }[]): boolean {
+  return columns.length > 0 && !columns.some(c => c.name === 'expected_pleasure')
+}
+
+export async function createBehavioralActivationTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  const columns = await database.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(activity_records)`
+  )
+  if (needsActivityRecordsRebuild(columns)) {
+    for (const sql of ACTIVITY_RECORDS_REBUILD_STATEMENTS) {
+      await database.execAsync(sql)
+    }
+    return
+  }
+  await database.execAsync(ACTIVITY_RECORDS_SCHEMA_V2)
 }
 
 /** Récupère toutes les activités, de la plus récente à la plus ancienne */
@@ -865,9 +911,15 @@ export async function getActivityRecordsForDate(date: string): Promise<ActivityR
 export async function saveActivityRecord(record: Omit<ActivityRecord, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO activity_records (id, date, label, pleasure, mastery, done, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [record.id, record.date, record.label, record.pleasure, record.mastery, record.done, record.notes]
+    `INSERT OR REPLACE INTO activity_records
+       (id, date, label, expected_pleasure, expected_mastery, pleasure, mastery,
+        done, notes, planned_time, domain_id, config_activity_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      record.id, record.date, record.label,
+      record.expected_pleasure, record.expected_mastery, record.pleasure, record.mastery,
+      record.done, record.notes, record.planned_time, record.domain_id, record.config_activity_id,
+    ]
   )
 }
 

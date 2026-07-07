@@ -17,19 +17,22 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
-import { collectIndexed } from '@kaer/shared'
+import { collectIndexed, readEnabledGroups, buildColumnSpecs, readSliderParams } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '@services/formEntryService'
-import { formatDateFull, formatDateNumeric } from '../../../../../lib/dateUtils'
+import { formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { RatingSelector } from '@ui/RatingSelector'
 import { Button } from '@ui/Button'
+import { Chip } from '@ui/Chip'
 import { ColumnTimeField } from './ColumnTimeField'
+import { hasToken, toggleToken } from './textSuggestions'
+import { RecordCard, type RecordColumnPart } from './RecordCard'
 import { styles } from './styles'
 
 const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -53,9 +56,11 @@ export interface ColumnFormLayoutProps {
   footer?: ContentField
   /** Identifiant du module — clé de persistance des `form_entries`. */
   moduleId: string
+  /** Config par patient (`patient_modules.config`) — porte `enabled_groups`. */
+  patientConfig?: Record<string, unknown> | null
 }
 
-export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutProps) {
+export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: ColumnFormLayoutProps) {
   const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -70,24 +75,61 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     () => collectIndexed(configField?.props ?? {}, 'required_key'),
     [configField]
   )
+  // Capture en deux temps : `quick_key_*` = champs du formulaire réduit,
+  // `complete_key_*` = champs dont l'absence marque la fiche « à compléter ».
+  const quickKeys = useMemo(
+    () => collectIndexed(configField?.props ?? {}, 'quick_key'),
+    [configField]
+  )
+  const completeKeys = useMemo(
+    () => collectIndexed(configField?.props ?? {}, 'complete_key'),
+    [configField]
+  )
 
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)
+  // Une colonne portant `optional_group` n'apparaît que si le praticien a activé
+  // ce groupe pour ce patient (patient_modules.config.enabled_groups).
   const columns = useMemo<ColumnSpec[]>(() => {
-    const headers = fields
-      .filter(f => f.field_type === 'column_header' && f.section_id != null)
-      .sort((a, b) => a.sort_order - b.sort_order)
-    return headers.map(h => ({
-      sectionId: h.section_id!,
-      header: h,
-      children: (h.children ?? []).slice().sort((a, b) => a.sort_order - b.sort_order),
-    }))
-  }, [fields])
+    const enabledGroups = readEnabledGroups(patientConfig)
+    return buildColumnSpecs(fields)
+      .filter(({ header }) => {
+        if (header.section_id == null) return false
+        const group = header.props['optional_group']
+        return !group || enabledGroups.includes(group)
+      })
+      .map(({ header, children }) => ({ sectionId: header.section_id!, header, children }))
+  }, [fields, patientConfig])
 
-  // ── State
-  const [mode, setMode] = useState<'list' | 'entry'>('list')
+  // Colonnes du formulaire réduit : seuls les enfants dont la clé est une
+  // quick_key ; les colonnes vidées disparaissent.
+  const quickColumns = useMemo<ColumnSpec[]>(() => {
+    if (quickKeys.length === 0) return []
+    const keySet = new Set(quickKeys)
+    return columns
+      .map(col => ({ ...col, children: col.children.filter(c => keySet.has(c.props['key'] ?? '')) }))
+      .filter(col => col.children.length > 0)
+  }, [columns, quickKeys])
+
+  // Découpage des colonnes par type de widget — calculé une fois par module (pas
+  // par fiche) et partagé par toutes les cartes de la liste (RecordCard mémoïsée).
+  const listColumnParts = useMemo<RecordColumnPart[]>(
+    () => columns.map(col => ({
+      sectionId: col.sectionId,
+      accent: col.header.props['color'] ?? colors.primary,
+      textChildren: col.children.filter(c => c.field_type === 'column_text_field'),
+      sliderChildren: col.children.filter(c => c.field_type === 'column_slider_field'),
+      timeChildren: col.children.filter(c => c.field_type === 'column_time_field'),
+    })),
+    [columns],
+  )
+
+  // ── State — `quick` = formulaire réduit (capture rapide), `entry` = complet
+  const [mode, setMode] = useState<'list' | 'entry' | 'quick'>('list')
   const [entries, setEntries] = useState<FormEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
+  // Fiche dépliée en mode liste (textes intégraux + toutes les valeurs) — une à la fois.
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [values, setValues] = useState<Record<string, string | number>>({})
   const [saving, setSaving] = useState(false)
   // Date de la saisie (saisie rétroactive). Pilotée seulement si `editable_date` activé.
@@ -103,38 +145,45 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
 
   useEffect(() => { loadEntries().catch(() => setLoading(false)) }, [loadEntries])
 
-  const initialValuesForNew = useCallback((): Record<string, string | number> => {
+  // Les curseurs ne sont PAS pré-positionnés : aucune valeur n'est écrite tant
+  // que le patient n'a pas touché le curseur (pas de faux « 50 » d'ancrage dans
+  // les données ni dans les courbes praticien). Seuls les champs texte/horaire
+  // sont initialisés à vide.
+  const initialValuesFor = useCallback((cols: ColumnSpec[]): Record<string, string | number> => {
     const init: Record<string, string | number> = {}
-    for (const col of columns) {
+    for (const col of cols) {
       for (const child of col.children) {
         const key = child.props['key']
         if (!key) continue
-        if (child.field_type === 'column_slider_field') {
-          const min = parseInt(child.props['min'] ?? '0', 10)
-          const max = parseInt(child.props['max'] ?? '100', 10)
-          init[key] = Math.round((min + max) / 2)
-        } else {
-          init[key] = ''
-        }
+        if (child.field_type !== 'column_slider_field') init[key] = ''
       }
     }
     return init
-  }, [columns])
+  }, [])
 
   const handleNew = useCallback(() => {
     setEditingId(null)
-    setValues(initialValuesForNew())
+    setValues(initialValuesFor(columns))
     setEntryDate(new Date())
     setMode('entry')
-  }, [initialValuesForNew])
+  }, [initialValuesFor, columns])
+
+  // Capture rapide : n'initialise QUE les champs quick — une fiche rapide ne
+  // sauvegarde aucune valeur par défaut pour les champs non montrés.
+  const handleQuickNew = useCallback(() => {
+    setEditingId(null)
+    setValues(initialValuesFor(quickColumns))
+    setEntryDate(new Date())
+    setMode('quick')
+  }, [initialValuesFor, quickColumns])
 
   const handleEdit = useCallback((entry: FormEntry) => {
-    const merged = { ...initialValuesForNew(), ...entry.values }
+    const merged = { ...initialValuesFor(columns), ...entry.values }
     setEditingId(entry.id)
     setValues(merged)
     setEntryDate(new Date(entry.created_at))
     setMode('entry')
-  }, [initialValuesForNew])
+  }, [initialValuesFor, columns])
 
   // Capture anti-friction : la dernière saisie sert de base au bouton « comme
   // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
@@ -143,13 +192,15 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     return entries.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
   }, [entries])
 
+  // Préremplissage réservé au formulaire complet : en capture rapide il
+  // réinjecterait des valeurs pour des champs non montrés.
   const prefillLabel = lbl('prefill_from_last')
-  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null
+  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null && mode === 'entry'
 
   const handlePrefillFromLast = useCallback(() => {
     if (!lastEntry) return
-    setValues({ ...initialValuesForNew(), ...lastEntry.values })
-  }, [lastEntry, initialValuesForNew])
+    setValues({ ...initialValuesFor(columns), ...lastEntry.values })
+  }, [lastEntry, initialValuesFor, columns])
 
   const handleOpenDatePicker = useCallback(() => setShowDatePicker(true), [])
   const handleDatePicked = useCallback((_: unknown, picked?: Date) => {
@@ -161,6 +212,10 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     setMode('list')
     setEditingId(null)
     setValues({})
+  }, [])
+
+  const handleToggleExpand = useCallback((id: string) => {
+    setExpandedId(prev => (prev === id ? null : id))
   }, [])
 
   const handleDelete = useCallback((entry: FormEntry) => {
@@ -211,8 +266,9 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
-  // ── Mode entry
-  if (mode === 'entry') {
+  // ── Mode entry (complet ou capture rapide)
+  if (mode !== 'list') {
+    const activeColumns = mode === 'quick' ? quickColumns : columns
     return (
       <KeyboardAvoidingView
         style={styles.container}
@@ -253,9 +309,11 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
               testID="prefill-from-last"
             />
           ) : null}
-          {columns.map((col, idx) => {
+          {activeColumns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
-            const stepNumber = col.header.props['step_number'] ?? String(idx + 1)
+            // Numérotation dynamique : position parmi les colonnes VISIBLES
+            // (capture rapide et groupes optionnels changent l'ensemble affiché).
+            const stepNumber = String(idx + 1)
             const hintCode = col.header.props['hint_code']
             const titleText = col.header.text_code ? t(col.header.text_code) : ''
             const hintText = hintCode ? t(hintCode) : ''
@@ -283,29 +341,57 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
                       const multiline = (child.props['multiline'] ?? '1') !== '0'
                       const minHeight = parseInt(child.props['min_height'] ?? (multiline ? '72' : '0'), 10)
                       const value = String(values[key] ?? '')
+                      // Chips d'aide au vocabulaire (suggestion_1..n) : ajoutent /
+                      // retirent leur mot dans le champ — le texte libre reste roi.
+                      const suggestionCodes = collectIndexed(child.props, 'suggestion')
                       return (
-                        <TextInput
-                          key={child.id}
-                          style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
-                          placeholder={labelOrPlaceholder}
-                          placeholderTextColor={colors.textMuted}
-                          value={value}
-                          onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
-                          multiline={multiline}
-                          textAlignVertical={multiline ? 'top' : 'center'}
-                          testID={`field-${key}`}
-                        />
+                        <Fragment key={child.id}>
+                          <TextInput
+                            style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
+                            placeholder={labelOrPlaceholder}
+                            placeholderTextColor={colors.textMuted}
+                            value={value}
+                            onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
+                            multiline={multiline}
+                            textAlignVertical={multiline ? 'top' : 'center'}
+                            testID={`field-${key}`}
+                          />
+                          {suggestionCodes.length > 0 ? (
+                            <View style={styles.suggestions} testID={`suggestions-${key}`}>
+                              {suggestionCodes.map(code => {
+                                const suggestion = t(code)
+                                return (
+                                  <Chip
+                                    key={code}
+                                    label={suggestion}
+                                    size="sm"
+                                    color={accent}
+                                    selected={hasToken(value, suggestion)}
+                                    onPress={() =>
+                                      setValues(prev => ({
+                                        ...prev,
+                                        [key]: toggleToken(String(prev[key] ?? ''), suggestion),
+                                      }))
+                                    }
+                                    testID={`suggestion-${key}-${code}`}
+                                  />
+                                )
+                              })}
+                            </View>
+                          ) : null}
+                        </Fragment>
                       )
                     }
                     if (child.field_type === 'column_slider_field') {
-                      const min = parseInt(child.props['min'] ?? '0', 10)
-                      const max = parseInt(child.props['max'] ?? '100', 10)
-                      const step = parseInt(child.props['step'] ?? '10', 10)
+                      const { min, max, step } = readSliderParams(child)
                       const sliderColor = child.props['color'] ?? accent
+                      // Cas courant 0-100/10 : réf. stable (module-level) pour ne pas
+                      // ré-allouer le tableau de pips à chaque frappe (mémo RatingSelector).
                       const steps = (min === 0 && max === 100 && step === 10)
                         ? PIP_STEPS_0_100
                         : buildPipSteps(min, max, step)
-                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : Math.round((min + max) / 2)
+                      // null = curseur non touché : aucun pip sélectionné, rien de sauvegardé.
+                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : null
                       return (
                         <View key={child.id} testID={`slider-${key}`}>
                           <RatingSelector
@@ -364,6 +450,10 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
   }
 
   // ── Mode list
+  const quickLabel = lbl('quick_btn_label')
+  const canQuickCapture = quickLabel.length > 0 && quickColumns.length > 0
+  const toCompleteLabel = lbl('to_complete_label')
+  const showCompletion = toCompleteLabel.length > 0 && completeKeys.length > 0
   return (
     <View style={styles.container}>
       <ScrollView
@@ -382,79 +472,21 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
           </View>
         ) : (
           <View style={styles.list}>
-            {entries.map(entry => {
-              const dateLabel = formatDateFull(entry.created_at)
-              return (
-                <View key={entry.id} style={styles.recordCard} testID={`record-${entry.id}`}>
-                  <View style={styles.recordHeader}>
-                    <Text style={styles.recordDate}>{dateLabel}</Text>
-                    <View style={styles.recordActions}>
-                      <Button
-                        variant="ghost"
-                        onPress={() => handleEdit(entry)}
-                        iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
-                        accessibilityLabel={t('common.modify')}
-                        testID={`edit-${entry.id}`}
-                      />
-                      <Button
-                        variant="ghost"
-                        onPress={() => handleDelete(entry)}
-                        iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
-                        accessibilityLabel={t('common.delete')}
-                        testID={`delete-${entry.id}`}
-                      />
-                    </View>
-                  </View>
-                  {columns.map(col => {
-                    const textChildren = col.children.filter(c => c.field_type === 'column_text_field')
-                    const sliderChildren = col.children.filter(c => c.field_type === 'column_slider_field')
-                    const timeChildren = col.children.filter(c => c.field_type === 'column_time_field')
-                    const accent = col.header.props['color'] ?? colors.primary
-                    return (
-                      <Fragment key={col.sectionId}>
-                        {textChildren.map(child => {
-                          const key = child.props['key']
-                          if (!key) return null
-                          const value = entry.values[key]
-                          if (typeof value !== 'string' || !value) return null
-                          // Trouve un slider associé (intensité/croyance) dans la même colonne pour annoter
-                          const slider = sliderChildren[0]
-                          const sliderKey = slider?.props['key']
-                          const sliderVal = sliderKey ? entry.values[sliderKey] : null
-                          return (
-                            <View key={child.id} style={styles.recordRow}>
-                              <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                              <Text style={styles.recordText} numberOfLines={2}>
-                                {value}
-                                {typeof sliderVal === 'number' ? (
-                                  <Text style={styles.recordIntensity}> ({sliderVal}%)</Text>
-                                ) : null}
-                              </Text>
-                            </View>
-                          )
-                        })}
-                        {timeChildren.map(child => {
-                          const key = child.props['key']
-                          if (!key) return null
-                          const value = entry.values[key]
-                          if (typeof value !== 'string' || !value) return null
-                          const labelText = child.text_code ? t(child.text_code) : ''
-                          return (
-                            <View key={child.id} style={styles.recordRow} testID={`record-time-${key}`}>
-                              <View style={[styles.recordDot, { backgroundColor: accent }]} />
-                              <Text style={styles.recordText} numberOfLines={1}>
-                                {labelText ? <Text style={styles.recordIntensity}>{labelText} </Text> : null}
-                                {value}
-                              </Text>
-                            </View>
-                          )
-                        })}
-                      </Fragment>
-                    )
-                  })}
-                </View>
-              )
-            })}
+            {entries.map(entry => (
+              <RecordCard
+                key={entry.id}
+                entry={entry}
+                columnParts={listColumnParts}
+                expanded={expandedId === entry.id}
+                showCompletion={showCompletion}
+                completeKeys={completeKeys}
+                toCompleteLabel={toCompleteLabel}
+                t={t}
+                onToggleExpand={handleToggleExpand}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </View>
         )}
         {footer != null && (
@@ -465,6 +497,15 @@ export function ColumnFormLayout({ fields, footer, moduleId }: ColumnFormLayoutP
         )}
       </ScrollView>
       <View style={styles.footer}>
+        {canQuickCapture ? (
+          <Button
+            variant="secondary"
+            label={quickLabel}
+            onPress={handleQuickNew}
+            iconLeft={<MaterialCommunityIcons name="flash-outline" size={20} color={colors.primary} />}
+            testID="quick-entry"
+          />
+        ) : null}
         <Button
           variant="primary"
           style={styles.footerBtnFlex}

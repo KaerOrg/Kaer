@@ -56,7 +56,7 @@ export function filterCategoriesByTags(
 }
 
 /** Dimensions affichées en chips sur la carte d'un module (le reste sert aux filtres). */
-const CARD_DIMENSIONS: readonly string[] = ['indication', 'population']
+const CARD_DIMENSIONS: readonly string[] = ['indication']
 
 /** Une ligne de puces sur la carte : une dimension + ses tags portés par le module. */
 export interface CardTagRow {

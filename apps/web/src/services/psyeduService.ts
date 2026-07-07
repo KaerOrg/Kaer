@@ -109,12 +109,10 @@ export async function fetchLibraryTopics(): Promise<LibraryTopic[]> {
   }))
 }
 
-const topicsCache = new Map<string, PsyEduTopic[]>()
-const blocksCache = new Map<string, PsyEduBlock[]>()
-
+// Pas de cache module-level : la déduplication et la péremption sont assurées par
+// React Query (psyeduQueries), l'unique couche de cache côté web. Un cache local ici
+// masquerait l'invalidation par jeton de version (#102) — la config resterait figée.
 export async function fetchTopicsByModule(moduleKey: string): Promise<PsyEduTopic[]> {
-  if (topicsCache.has(moduleKey)) return topicsCache.get(moduleKey)!
-
   const { data, error } = await supabase
     .from('psyedu_topics')
     .select('*')
@@ -123,15 +121,10 @@ export async function fetchTopicsByModule(moduleKey: string): Promise<PsyEduTopi
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-
-  const topics = (data ?? []) as PsyEduTopic[]
-  topicsCache.set(moduleKey, topics)
-  return topics
+  return (data ?? []) as PsyEduTopic[]
 }
 
 export async function fetchBlocksByTopic(topicId: string): Promise<PsyEduBlock[]> {
-  if (blocksCache.has(topicId)) return blocksCache.get(topicId)!
-
   const { data, error } = await supabase
     .from('psyedu_blocks')
     .select('*')
@@ -140,8 +133,5 @@ export async function fetchBlocksByTopic(topicId: string): Promise<PsyEduBlock[]
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-
-  const blocks = (data ?? []) as PsyEduBlock[]
-  blocksCache.set(topicId, blocks)
-  return blocks
+  return (data ?? []) as PsyEduBlock[]
 }

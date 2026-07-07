@@ -14,13 +14,10 @@ export interface ServiceResult {
   message?: string
 }
 
-// Cache session par patientId — évite les triple-fetches des widgets de prévisualisation.
-const configCache = new Map<string, CrisisPlanConfig>()
-export function clearCrisisPlanConfigCache() { configCache.clear() }
-
+// Pas de cache module-level : React Query (crisisQueries.planConfig) est l'unique
+// couche de cache et déduplique les 3 widgets d'aperçu ; l'invalidation à l'écriture
+// (useSaveCrisisPlan) garantit la fraîcheur. Un cache Map masquerait cette invalidation.
 export async function fetchCrisisPlanConfig(patientId: string): Promise<CrisisPlanConfig> {
-  if (configCache.has(patientId)) return configCache.get(patientId)!
-
   const [configResult, cardsResult] = await Promise.all([
     supabase
       .from('crisis_plan_configs')
@@ -44,7 +41,6 @@ export async function fetchCrisisPlanConfig(patientId: string): Promise<CrisisPl
     commitmentPhrase: configResult.data?.commitment_phrase ?? '',
   }
 
-  configCache.set(patientId, result)
   return result
 }
 
@@ -84,7 +80,5 @@ export async function saveCrisisPlanConfig(
     if (insErr) return { ok: false, message: insErr.message }
   }
 
-  // Invalider le cache pour ce patient
-  configCache.delete(patientId)
   return { ok: true }
 }
