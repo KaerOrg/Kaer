@@ -16,7 +16,6 @@ function getUnlockedTopics(mod: PatientModule): PsychoeducationTopicEntry[] {
 
 export function usePsychoEducationPicker(
   modules: PatientModule[],
-  allTopicIds: string[],
   patientId: string,
   practitionerId: string,
   onReloadModules: () => Promise<void>,
@@ -36,7 +35,8 @@ export function usePsychoEducationPicker(
     if (openMode === 'edit' && psychoModule) {
       setSelectedTopicIds(new Set(getUnlockedTopics(psychoModule).map(tpc => tpc.topic_id)))
     } else {
-      setSelectedTopicIds(new Set(allTopicIds))
+      // Débloquer : aucune fiche pré-cochée, le praticien choisit explicitement.
+      setSelectedTopicIds(new Set())
     }
     setMode(openMode)
   }
