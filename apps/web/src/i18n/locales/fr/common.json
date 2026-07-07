@@ -11,7 +11,9 @@
     "delete": "Supprimer",
     "show_more": "Voir les 3 autres symptômes",
     "show_less": "Réduire",
-    "done": "Terminé"
+    "done": "Terminé",
+    "error_boundary_description": "Rechargez la page pour continuer.",
+    "reload": "Recharger la page"
   },
   "nav": {
     "profile_menu": "Menu profil",

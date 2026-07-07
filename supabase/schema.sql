@@ -2393,6 +2393,59 @@ create policy render_mismatch_log_admin_select on public.render_mismatch_log
 
 
 -- ============================================================
+-- TABLE : app_error_log (Alerte email sur erreur applicative — issue #96)
+-- ============================================================
+-- Généralisation de render_mismatch_log (#90) à deux catégories d'erreur :
+-- `crash` (exception de rendu / promise rejection non gérée) et
+-- `failed_operation` (échec réseau ou serveur). Écrite EXCLUSIVEMENT par l'Edge
+-- Function `report-app-error` (service_role), qui déduplique par `signature`,
+-- applique un cooldown + un coupe-circuit global (état anti-flood INDÉPENDANT
+-- de celui du render-mismatch), et notifie l'équipe par email (Resend) à la
+-- 1ʳᵉ occurrence d'une signature.
+--
+-- ⚠️ MDR / RGPD : télémétrie TECHNIQUE uniquement. AUCUNE donnée patient (pas de
+-- payload de saisie, pas d'identifiant patient) — uniquement message, route,
+-- plateforme, version, kind et une trace d'appel tronquée. Hors périmètre
+-- « donnée de santé ».
+--
+-- Déduplication : `signature` = platform + kind + route + message (calculée
+-- côté edge function). La trace d'appel (`stack`) est volontairement EXCLUE de
+-- la signature : elle varie d'une occurrence à l'autre sans changer la nature
+-- du problème, et l'inclure exploserait le nombre de signatures distinctes.
+
+create table if not exists public.app_error_log (
+  id               uuid        primary key default gen_random_uuid(),
+  -- 1ʳᵉ observation de la signature (immuable) et dernière observation (incrémentée).
+  occurred_at      timestamptz not null default now(),
+  last_seen_at     timestamptz not null default now(),
+  platform         text        not null check (platform in ('web', 'mobile')),
+  app_version      text,
+  kind             text        not null check (kind in ('crash', 'failed_operation')),
+  message          text        not null,
+  route            text,
+  -- Trace d'appel tronquée (2000 caractères max, appliqué côté edge function).
+  stack            text,
+  reason           text,
+  -- Clé de déduplication — une ligne par problème distinct. UNIQUE → upsert côté edge.
+  signature        text        not null unique,
+  occurrence_count int         not null default 1,
+  -- Horodatage du dernier email envoyé pour cette signature (pilote le cooldown).
+  email_sent_at    timestamptz
+);
+
+create index if not exists idx_app_error_log_occurred
+  on public.app_error_log(occurred_at desc);
+
+alter table public.app_error_log enable row level security;
+
+-- Insertion / mise à jour : Edge Function (service_role, bypass RLS) uniquement.
+-- Lecture : praticiens ADMIN seulement (télémétrie d'exploitation, pas de donnée métier).
+drop policy if exists app_error_log_admin_select on public.app_error_log;
+create policy app_error_log_admin_select on public.app_error_log
+  for select to authenticated using (public.fn_is_admin());
+
+
+-- ============================================================
 -- TABLE : retention_config (Politique de conservation RGPD — art. 5.1.e)
 -- ============================================================
 -- Une ligne par table soumise à une durée de conservation limitée.

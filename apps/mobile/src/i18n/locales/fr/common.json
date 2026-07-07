@@ -19,6 +19,7 @@
     "save_error": "Impossible de sauvegarder. Réessayez.",
     "load_error": "Impossible de charger ce module. Vérifiez votre connexion et réessayez.",
     "retry": "Réessayer",
+    "error_boundary_description": "Réessayez pour continuer.",
     "delete_record_title": "Supprimer cet enregistrement ?",
     "today": "Aujourd'hui",
     "confirm": "Confirmer",

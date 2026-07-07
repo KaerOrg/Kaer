@@ -369,6 +369,30 @@ Journal des non-match du moteur de rendu (config qu'une app ne sait pas afficher
 |--------|-----------|-----------|
 | render_mismatch_log_admin_select | SELECT | `fn_is_admin()` (insert/update : service_role uniquement) |
 
+### `app_error_log` — Alerte email sur erreur applicative (issue #96)
+
+Journal des erreurs applicatives (`crash` / `failed_operation`). **Télémétrie
+technique, zéro donnée patient.** Écrite exclusivement par l'Edge Function
+`report-app-error` (service_role), dédupliquée par `signature`. État anti-flood
+INDÉPENDANT de `render_mismatch_log`. Détail complet :
+[`app-error-alerting.md`](app-error-alerting.md).
+
+| Colonne | Type | Notes |
+|---|---|---|
+| `id` | uuid | PK |
+| `occurred_at` / `last_seen_at` | timestamptz | 1ʳᵉ et dernière observation de la signature |
+| `platform` | text | `web` \| `mobile` |
+| `app_version` | text | version de l'app émettrice |
+| `kind` | text | `crash` \| `failed_operation` |
+| `message`, `route`, `stack`, `reason` | text | contexte d'enquête (`stack` tronquée à 2000 caractères) |
+| `signature` | text | UNIQUE — clé de déduplication (pilote l'upsert) |
+| `occurrence_count` | int | nombre d'occurrences de la signature |
+| `email_sent_at` | timestamptz | dernier email envoyé (pilote le cooldown) |
+
+| Policy | Opérations | Condition |
+|--------|-----------|-----------|
+| app_error_log_admin_select | SELECT | `fn_is_admin()` (insert/update : service_role uniquement) |
+
 ---
 
 ## Appliquer le schéma
