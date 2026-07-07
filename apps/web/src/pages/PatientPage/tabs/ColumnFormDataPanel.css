@@ -1,70 +1,255 @@
-/* ── Panneau « Données » des modules column_form (fiches complètes) ────────── */
-/* Restitution neutre des fiches patient : accents de colonne issus de la config
-   du module (parité mobile), aucune couleur de jugement (MDR 2017/745). */
+/* ── Panneau « Données » des modules column_form (vue praticien maître-détail) ─ */
+/* Colonnes de Beck : liste latérale des saisies + détail (mouvement de
+   restructuration avant→après, texte du patient par colonne). Restitution neutre
+   (MDR 2017/745) : les couleurs codent l'identité de colonne (config), jamais une
+   gravité ; le delta est une différence brute, sans couleur de jugement. */
 
-.cfd-records {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+.cfd-layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
-.cfd-records__title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
-  margin: 0;
+@media (max-width: 720px) {
+  .cfd-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
-.cfd-record {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: var(--color-bg);
-}
+/* ── Liste latérale des saisies ─────────────────────────────────────────────── */
 
-.cfd-record__date {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.cfd-record__column {
+.cfd-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
-.cfd-record__column-title {
+.cfd-list__title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.cfd-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cfd-entry:hover {
+  background: color-mix(in srgb, var(--color-border) 14%, transparent);
+}
+
+.cfd-entry--active {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-left-color: var(--color-primary);
+}
+
+.cfd-entry__date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: capitalize;
+}
+
+.cfd-entry__summary {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cfd-entry__move {
+  font-variant-numeric: tabular-nums;
+}
+
+.cfd-entry__arrow {
+  margin: 0 2px;
+}
+
+/* ── Détail de la saisie ────────────────────────────────────────────────────── */
+
+.cfd-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cfd-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cfd-detail__date {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-transform: capitalize;
+}
+
+.cfd-detail__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cfd-detail__nav-label {
+  min-width: 60px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+  text-transform: capitalize;
+}
+
+/* ── Cartes du mouvement de restructuration (avant → après) ─────────────────── */
+
+.cfd-moves {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.cfd-move {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  background: var(--color-card, #fff);
+}
+
+.cfd-move__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cfd-move__title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cfd-move__caption {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.cfd-move__values {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.cfd-move__side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cfd-move__label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.cfd-move__value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cfd-move__arrow {
+  align-self: center;
+  margin-bottom: 2px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cfd-move__delta {
+  align-self: center;
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
-  margin: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  background: color-mix(in srgb, var(--color-border) 20%, transparent);
 }
 
-.cfd-record__text {
-  font-size: 13px;
-  color: var(--color-text);
+/* ── Grille des colonnes (texte intégral du patient) ────────────────────────── */
+
+.cfd-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px 18px;
+}
+
+.cfd-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cfd-col__title {
   margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cfd-col__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
-.cfd-record__value-row {
+.cfd-col__value-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
 }
 
-.cfd-record__value-label {
+.cfd-col__value-label {
   font-size: 12px;
   color: var(--color-text-muted);
 }
 
-.cfd-record__value {
+.cfd-col__value {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text);

@@ -2,9 +2,13 @@ import { describe, it, expect } from 'vitest'
 import type { ContentField } from '@services/moduleService'
 import {
   buildColumnSpecs,
-  buildSliderSpecs,
-  buildChartData,
-  chartYDomain,
+  BECK_MOVEMENTS,
+  SUMMARIZED_KEYS,
+  readMovement,
+  hasAnyMovement,
+  findSliderColor,
+  formatEntryDate,
+  formatEntryDateShort,
 } from './columnFormData'
 
 // Factory typée : évite tout cast en construisant des ContentField complets.
@@ -45,71 +49,76 @@ describe('buildColumnSpecs', () => {
   })
 })
 
-describe('buildSliderSpecs', () => {
-  it('collecte les curseurs dans l’ordre des colonnes, avec bornes par défaut 0-100', () => {
-    const specs = buildColumnSpecs([
-      field({ id: 'h1', field_type: 'column_header', sort_order: 10, children: [slider('s1', 'emotion_intensity', 11)] }),
-      field({ id: 'h2', field_type: 'column_header', sort_order: 20, children: [slider('s2', 'outcome_intensity', 21, { min: '10', max: '50' }), text('t1', 'outcome', 22)] }),
-    ])
-
-    const sliders = buildSliderSpecs(specs)
-
-    expect(sliders).toEqual([
-      { key: 'emotion_intensity', labelCode: 'modules.beck_columns.emotion_intensity', min: 0, max: 100 },
-      { key: 'outcome_intensity', labelCode: 'modules.beck_columns.outcome_intensity', min: 10, max: 50 },
+describe('BECK_MOVEMENTS / SUMMARIZED_KEYS', () => {
+  it('couvre les deux mouvements du DTR (intensité, croyance)', () => {
+    expect(BECK_MOVEMENTS.map(m => [m.beforeKey, m.afterKey])).toEqual([
+      ['emotion_intensity', 'outcome_intensity'],
+      ['thought_belief', 'outcome_belief'],
     ])
   })
 
-  it('ignore un curseur sans prop key', () => {
-    const specs = buildColumnSpecs([
-      field({ id: 'h1', field_type: 'column_header', children: [field({ id: 's1', field_type: 'column_slider_field' })] }),
-    ])
-
-    expect(buildSliderSpecs(specs)).toEqual([])
+  it('résume les quatre clés de curseur portées par les cartes de mouvement', () => {
+    expect([...SUMMARIZED_KEYS].sort()).toEqual(
+      ['emotion_intensity', 'outcome_belief', 'outcome_intensity', 'thought_belief'],
+    )
   })
 })
 
-describe('buildChartData', () => {
-  const sliders = [
-    { key: 'emotion_intensity', labelCode: null, min: 0, max: 100 },
-    { key: 'outcome_intensity', labelCode: null, min: 0, max: 100 },
-  ]
-
-  it('produit une ligne datée par fiche portant au moins une valeur numérique', () => {
-    const rows = buildChartData(
-      [
-        { date: '2026-06-01', values: { emotion_intensity: 80, outcome_intensity: 40 } },
-        { date: '2026-06-02', values: { situation: 'texte seul' } },
-        { date: '2026-06-03', values: { outcome_intensity: 30 } },
-      ],
-      sliders,
-    )
-
-    expect(rows).toEqual([
-      { date: '2026-06-01', emotion_intensity: 80, outcome_intensity: 40 },
-      { date: '2026-06-03', outcome_intensity: 30 },
-    ])
+describe('readMovement', () => {
+  it('restitue avant / après bruts et la différence arithmétique', () => {
+    const res = readMovement({ date: 'd', values: { emotion_intensity: 80, outcome_intensity: 40 } }, BECK_MOVEMENTS[0])
+    expect(res).toEqual({ before: 80, after: 40, delta: -40 })
   })
 
-  it('ignore les valeurs non numériques d’une clé de curseur', () => {
-    const rows = buildChartData(
-      [{ date: '2026-06-01', values: { emotion_intensity: 'fort' } }],
-      sliders,
-    )
+  it('coerce les valeurs numériques stockées en chaîne', () => {
+    const res = readMovement({ date: 'd', values: { thought_belief: '85', outcome_belief: '60' } }, BECK_MOVEMENTS[1])
+    expect(res).toEqual({ before: 85, after: 60, delta: -25 })
+  })
 
-    expect(rows).toEqual([])
+  it('delta null si une des deux bornes manque', () => {
+    expect(readMovement({ date: 'd', values: { emotion_intensity: 80 } }, BECK_MOVEMENTS[0]))
+      .toEqual({ before: 80, after: null, delta: null })
+  })
+
+  it('ignore une valeur non numérique', () => {
+    expect(readMovement({ date: 'd', values: { emotion_intensity: 'fort' } }, BECK_MOVEMENTS[0]))
+      .toEqual({ before: null, after: null, delta: null })
   })
 })
 
-describe('chartYDomain', () => {
-  it('englobe les bornes de tous les curseurs', () => {
-    expect(chartYDomain([
-      { key: 'a', labelCode: null, min: 10, max: 50 },
-      { key: 'b', labelCode: null, min: 0, max: 80 },
-    ])).toEqual([0, 80])
+describe('hasAnyMovement', () => {
+  it('vrai dès qu’une borne d’un mouvement est présente', () => {
+    expect(hasAnyMovement({ date: 'd', values: { outcome_belief: 60 } })).toBe(true)
   })
 
-  it('retombe sur 0-100 sans curseur', () => {
-    expect(chartYDomain([])).toEqual([0, 100])
+  it('faux si aucune valeur de curseur résumé', () => {
+    expect(hasAnyMovement({ date: 'd', values: { situation: 'texte' } })).toBe(false)
+  })
+})
+
+describe('findSliderColor', () => {
+  const columns = buildColumnSpecs([
+    field({ id: 'h1', field_type: 'column_header', sort_order: 10, children: [slider('s1', 'emotion_intensity', 11, { color: '#8B5CF6' })] }),
+    field({ id: 'h2', field_type: 'column_header', sort_order: 20, children: [text('t2', 'situation', 21)] }),
+  ])
+
+  it('dérive la couleur d’un curseur depuis la config (identité de colonne)', () => {
+    expect(findSliderColor(columns, 'emotion_intensity')).toBe('#8B5CF6')
+  })
+
+  it('null si aucun curseur ne porte la clé', () => {
+    expect(findSliderColor(columns, 'thought_belief')).toBeNull()
+  })
+})
+
+describe('formatEntryDate', () => {
+  it('formate la date métier locale en toutes lettres (fr) sans anglais', () => {
+    const long = formatEntryDate('2026-07-06T10:00:00Z', 'fr-FR')
+    expect(long.toLowerCase()).toContain('juillet')
+    expect(long).not.toContain('July')
+  })
+
+  it('formate une date courte jour + mois', () => {
+    expect(formatEntryDateShort('2026-07-06T10:00:00Z', 'fr-FR').toLowerCase()).toContain('juillet')
   })
 })

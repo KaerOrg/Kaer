@@ -95,10 +95,27 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 L'onglet **Évolution** du patient affiche la courbe « intensité émotionnelle
 avant / après restructuration » (`fetchBeckEvolution` : `emotion_intensity` vs
 `outcome_intensity`, même émotion ré-évaluée), aux côtés des SUDS et des échelles.
-Le panneau « Données » de la card Beck (`PatientPage`) restitue les fiches
-synchronisées : courbes brutes de tous les curseurs (`ColumnFormDataPanel`,
-pattern `fear_thermometer`) + fiches complètes antichronologiques paginées.
-Circuit : `fetchFormEntries` → `engagementQueries.moduleData` (kind `'form'`).
+
+Le panneau « Données » de la card Beck (`PatientPage`) est une vue **maître-détail**
+pensée pour l'écran large (`ColumnFormDataPanel`) :
+
+- **Liste latérale** (`ColumnFormEntryList`) : une ligne par saisie (antichronologique),
+  date courte + libellé d'émotion et mouvement d'intensité brut (« Anxiété 80→40 »).
+- **Détail** (`ColumnFormRecordDetail`) : en-tête daté en toutes lettres (locale) +
+  navigation saisie précédente / suivante ; deux cartes du **mouvement de
+  restructuration** avant→après : intensité (`emotion_intensity`→`outcome_intensity`)
+  et croyance (`thought_belief`→`outcome_belief`), avec la différence brute ; puis
+  grille responsive des colonnes restituant le **texte intégral du patient**, titres et
+  couleurs dérivés de la config (`buildColumnSpecs`). Les curseurs déjà portés par les
+  cartes (`SUMMARIZED_KEYS`) ne sont pas répétés dans la grille.
+
+Le signal clinique du DTR (paires de curseurs, clé d'émotion) est décrit par
+`BECK_MOVEMENTS` / `BECK_EMOTION_KEY` (`columnFormData.ts`), même connaissance métier que
+`fetchBeckEvolution`. Circuit : `fetchFormEntries` → `engagementQueries.moduleData`
+(kind `'form'`). **Conformité MDR** : valeurs brutes, delta = simple différence
+arithmétique (score pour le praticien), aucun seuil ni couleur de jugement : les
+couleurs codent l'identité de colonne (config).
+
 L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus.
 
 ### Fichiers
@@ -109,7 +126,11 @@ L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus
 | `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions}.ts` | Helpers purs (statut « à compléter », toggle des chips) |
 | `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
 | `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
-| `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (fiches + courbes) |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (vue maître-détail) |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormEntryList.tsx` | Liste latérale des saisies (sélection) |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormEntryItem.tsx` | Ligne de saisie (date + émotion + mouvement) |
+| `apps/web/src/pages/PatientPage/tabs/ColumnFormRecordDetail.tsx` | Détail d'une saisie (mouvement + colonnes) |
+| `apps/web/src/pages/PatientPage/tabs/columnFormData.ts` | Helpers purs (colonnes, mouvements Beck, dates) |
 | `packages/shared/src/services/patientModuleConfig.ts` | `readEnabledGroups` (mécanisme `optional_group`, dormant) |
 | `supabase/seed.sql` § beck_columns | Source de vérité du contenu (colonnes, props, i18n codes) |
 
@@ -134,7 +155,10 @@ HomeScreen
   de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable)
 - `apps/mobile/.../ColumnForm/entryCompletion.test.ts` + `textSuggestions.test.ts` : helpers purs
 - `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
-- `apps/web/.../ColumnFormDataPanel.test.tsx` + `columnFormData.test.ts` : panneau Données (dont test de conformité MDR)
+- `apps/web/.../ColumnFormDataPanel.test.tsx` : panneau Données maître-détail (liste, sélection, MDR)
+- `apps/web/.../ColumnFormEntryList.test.tsx` : liste latérale (rendu, sélection, mouvement)
+- `apps/web/.../ColumnFormRecordDetail.test.tsx` : détail (cartes de mouvement, colonnes, navigation, MDR)
+- `apps/web/.../columnFormData.test.ts` : helpers purs (colonnes, mouvements Beck, dates)
 - `apps/web/src/services/engagementService.test.ts` : `fetchFormEntries` + `fetchBeckEvolution`
 
 ```bash
