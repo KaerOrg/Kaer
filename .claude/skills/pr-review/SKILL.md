@@ -310,6 +310,65 @@ Ces règles s'appliquent à tous les fichiers `.tsx` / `.ts` React.
 - `console.log` / `console.debug` laissés dans le code de production → **point d'attention** (ne pas bloquer si délibéré/debug)
 - Image importée avec `<img>` brut au lieu d'`expo-image` (mobile) ou d'un composant optimisé (web) → **point d'attention**
 
+#### RULE — Gestion d'erreur : via le système de report/log en place, jamais avalée
+*(source : observabilité #96 — `errorReportingService` + `ErrorBoundary` + alerte email `report-app-error`)*
+
+> **Kær dispose d'un système unique de remontée d'erreur applicative** (feature #96) :
+> une erreur technique doit **remonter à ce système** (télémétrie + alerte email) et/ou
+> être **rendue visible à l'utilisateur** (`useToast`) — jamais être **silencieusement
+> avalée**. Le système :
+>
+> | Surface | Chemin de report |
+> |---|---|
+> | Crash de rendu React | `ErrorBoundary` (web + mobile) → `reportAppError({ kind: 'crash' })` |
+> | Rejection de promesse non gérée | `installGlobalErrorHandlers()` (bootstrap `main.tsx` / app init) |
+> | 5xx / échec réseau Supabase | wrapper `fetch` de `src/lib/supabase.ts` (**auto-report**, ne pas redoubler) |
+> | Échec d'opération anormal (4xx hors flux, `{ ok: false }` inattendu) | **`reportFailedOperation(route, message, reason)`** — point d'entrée explicite |
+>
+> Web : `apps/web/src/services/errorReportingService.ts`. Mobile :
+> `apps/mobile/src/services/errorReportingService.ts` (+ file offline `app_error_outbox`).
+> ⚠️ Les émetteurs sont **fire-and-forget** et **ne transmettent QUE de la télémétrie
+> technique — jamais de donnée patient** (MDR/RGPD).
+
+Pour **chaque `catch` / chemin d'erreur** des fichiers du diff :
+
+- **`catch` vide, ou qui ne fait que `console.*` / `.catch(() => {})`**, sans **ni**
+  feedback utilisateur (`useToast`) **ni** report (`reportAppError`/`reportFailedOperation`)
+  → **violation bloquante** : erreur avalée. Une erreur se surface (toast) **ou** se
+  reporte, jamais les deux absents.
+  ```ts
+  // ❌ erreur avalée — ni l'utilisateur ni l'alerte email ne la voient
+  try { await unlockModule(...) } catch { /* rien */ }
+  try { await save() } catch (e) { console.error(e) }
+  // ✅ feedback + (si anormal) report
+  try { await save() } catch (err: unknown) {
+    showToast(t('errors.save_failed'))
+    reportFailedOperation(normalizeRoute(location.pathname), 'save failed', err instanceof Error ? err.message : String(err))
+  }
+  ```
+- **`supabase.functions.invoke('report-app-error', …)` en direct**, ou tout POST
+  d'erreur ad hoc, au lieu de `reportAppError` / `reportFailedOperation` → **violation** :
+  contourne l'ajout `platform`/`app_version` et le contrat de déduplication (coupe-circuit
+  edge). Toujours passer par le service.
+- **Double report** : re-signaler manuellement un **5xx / échec réseau** déjà couvert par
+  le wrapper `lib/supabase.ts` → **point d'attention** (report en double, épuise le
+  coupe-circuit). Le report manuel est réservé aux **4xx anormaux / états `{ ok:false }`
+  inattendus**.
+- **Échec d'opération anormal** (résultat métier qui « ne devrait jamais arriver ») traité
+  par un simple toast/log **sans** `reportFailedOperation(...)` → **point d'attention** :
+  le câbler pour qu'il atteigne l'alerte.
+- **Nouvelle surface de premier niveau** (page/écran/route) susceptible de planter, montée
+  **sans ancêtre `ErrorBoundary`** → **point d'attention** : hors `ErrorBoundary`, le crash
+  ne remonte pas au système (il ne reste qu'en rejection globale, moins contextualisée).
+
+**Exceptions légitimes** (ne pas signaler) :
+- Les **émetteurs du service eux-mêmes** (`errorReportingService.ts`) avalent volontairement
+  leur propre échec réseau (`.catch(() => {})`) — c'est le contrat fire-and-forget.
+- Un `catch` qui **surface** proprement l'erreur à l'utilisateur (`useToast`) pour un échec
+  **attendu** (mot de passe faux, validation) n'a pas à reporter — pas d'alerte sur un flux
+  utilisateur normal.
+- `catch (err: unknown)` reste la **forme requise** (cf. RULE TypeScript strict).
+
 #### RULE — useState vs useRef
 *(source : coding-standards.md § "React performance")*
 
@@ -929,6 +988,7 @@ Appel direct `supabase.from('modules')` dans un composant.
 - [ ] Clés stables dans les listes `.map()` (pas d'index si ordre peut changer)
 - [ ] Zéro `async` callback direct dans `useEffect`
 - [ ] Imports dynamiques avec `Suspense` si `React.lazy`
+- [ ] **Gestion d'erreur via le système en place (#96)** — aucun `catch` avalé (vide / `console.*` seul / `.catch(() => {})`) : feedback `useToast` et/ou `reportAppError`/`reportFailedOperation` ; pas de report direct de `report-app-error` ni de double report des 5xx (déjà couverts par `lib/supabase.ts`)
 
 ### coding-standards.md
 - [ ] Zéro Supabase/SQLite dans les composants
