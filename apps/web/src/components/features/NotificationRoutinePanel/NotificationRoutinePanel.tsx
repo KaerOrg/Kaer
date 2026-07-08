@@ -109,8 +109,6 @@ export function NotificationRoutinePanel({
     [deleteMutation],
   )
 
-  const dayLabels = useMemo(() => DAY_KEYS, [])
-
   return (
     <>
       {moduleLabel && (
@@ -138,7 +136,7 @@ export function NotificationRoutinePanel({
             <div className="nr-form">
               <div className="nr-form__label">{t('notifications.days_label')}</div>
               <div className="nr-form__days">
-                {dayLabels.map((key, i) => (
+                {DAY_KEYS.map((key, i) => (
                   <button
                     key={key}
                     type="button"

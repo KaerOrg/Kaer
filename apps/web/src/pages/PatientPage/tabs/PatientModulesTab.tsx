@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Plus } from 'lucide-react'
@@ -142,7 +142,10 @@ export function PatientModulesTab({
   // partagées avec la carte). Ouvrir/fermer l'onglet Config amorce/réinitialise le hook
   // correspondant. Pour rim/psycho, le mode dépend de l'état déverrouillé : `unlock`
   // (le formulaire crée le module) ou `edit`.
-  const openConfigEditor = useCallback((type: ModuleType) => {
+  // Fonctions simples (non mémoïsées) : elles dépendent des retours de hooks d'édition
+  // recréés à chaque render, donc un useCallback ne se stabiliserait jamais — et aucun
+  // consommateur (modale, cartes) n'est mémoïsé, la stabilité n'apporterait rien.
+  const openConfigEditor = (type: ModuleType) => {
     const unlocked = modules.some(m => m.module_type === type)
     switch (type) {
       case 'rim': rim.open(unlocked ? 'edit' : 'unlock'); break
@@ -152,9 +155,9 @@ export function PatientModulesTab({
       case 'medication_adherence': void medList.openEditor(); break
       case 'behavioral_activation': void baList.openEditor(); break
     }
-  }, [modules, rim, psycho, crisis, medEffects, medList, baList])
+  }
 
-  const closeConfigEditor = useCallback((type: ModuleType) => {
+  const closeConfigEditor = (type: ModuleType) => {
     switch (type) {
       case 'rim': rim.cancel(); break
       case 'psychoeducation': psycho.cancel(); break
@@ -163,28 +166,28 @@ export function PatientModulesTab({
       case 'medication_adherence': medList.close(); break
       case 'behavioral_activation': baList.close(); break
     }
-  }, [rim, psycho, crisis, medEffects, medList, baList])
+  }
 
   // Ouvre la modale sur l'onglet Configuration en amorçant l'éditeur du module.
-  const openConfig = useCallback((type: ModuleType) => {
+  const openConfig = (type: ModuleType) => {
     openConfigEditor(type)
     setActiveModule({ module: type, tab: 'config' })
-  }, [openConfigEditor])
+  }
 
   // Fermeture de la modale : réinitialise l'éditeur de config s'il était ouvert.
-  const closeModal = useCallback(() => {
+  const closeModal = () => {
     if (activeModule?.tab === 'config') closeConfigEditor(activeModule.module)
     setActiveModule(null)
-  }, [activeModule, closeConfigEditor])
+  }
 
   // Changement d'onglet interne : amorce l'éditeur en entrant dans Config, le
   // réinitialise en le quittant.
-  const changeActiveTab = useCallback((tab: ModuleActionTab) => {
+  const changeActiveTab = (tab: ModuleActionTab) => {
     if (!activeModule) return
     if (tab === 'config') openConfigEditor(activeModule.module)
     else if (activeModule.tab === 'config') closeConfigEditor(activeModule.module)
     setActiveModule({ ...activeModule, tab })
-  }, [activeModule, openConfigEditor, closeConfigEditor])
+  }
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -597,14 +600,16 @@ export function PatientModulesTab({
   }, [activeModule, modules, scaleMeta])
 
   // Confirmation psychoédu : enregistre puis ferme la modale uniquement au succès.
-  const handlePsychoConfirm = useCallback(async () => {
+  const handlePsychoConfirm = async () => {
     const ok = await psycho.confirm()
     if (ok) closeModal()
-  }, [psycho, closeModal])
+  }
 
   // Panneau de l'onglet Configuration du module actif — construit ici car le parent
   // détient les hooks d'édition. Rendu par ModuleActionsModal sous l'onglet Config.
-  const configPanel = useMemo(() => {
+  // Expression simple (non mémoïsée) : les hooks d'édition changent d'identité à chaque
+  // render, un useMemo ne prendrait jamais, et le nœud n'est monté que sur l'onglet Config.
+  const configPanel = ((): ReactNode => {
     if (!activeModule) return null
     switch (activeModule.module) {
       case 'crisis_plan':
@@ -635,7 +640,7 @@ export function PatientModulesTab({
       default:
         return null
     }
-  }, [activeModule, crisis, rim, psycho, medEffects, medList, baList, closeModal, handlePsychoConfirm, libraryTopics, themes, taxonomy])
+  })()
 
   const activatedModules = collectModules(isActivated)
   const activatableModules = collectModules(type => !isActivated(type))
