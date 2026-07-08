@@ -12,17 +12,13 @@ type Crisis = React.ComponentProps<typeof CrisisPlanConfigPanel>['crisis']
 function makeCrisis(over: Partial<Crisis> = {}): Crisis {
   return {
     open: true,
-    config: { practitionerMessage: '', copingCards: [], commitmentPhrase: '' },
+    config: { practitionerMessage: '' },
     setConfig: vi.fn(),
-    cardDraft: null,
-    setCardDraft: vi.fn(),
     saving: false,
     isConfigured: false,
     openEditor: vi.fn(),
     closeEditor: vi.fn(),
     saveEditor: vi.fn().mockResolvedValue(true),
-    addCopingCard: vi.fn(),
-    removeCopingCard: vi.fn(),
     ...over,
   }
 }
@@ -53,12 +49,10 @@ describe('CrisisPlanConfigPanel', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
-  it('supprime une coping card par id', () => {
-    const crisis = makeCrisis({
-      config: { practitionerMessage: '', commitmentPhrase: '', copingCards: [{ id: 'c1', thought: 'a', response: 'b' }] },
-    })
+  it('édite le message du praticien', () => {
+    const crisis = makeCrisis()
     render(<CrisisPlanConfigPanel crisis={crisis} onClose={vi.fn()} />)
-    fireEvent.click(screen.getByText('patient.crisis_card_delete'))
-    expect(crisis.removeCopingCard).toHaveBeenCalledWith('c1')
+    fireEvent.change(screen.getByPlaceholderText('patient.crisis_msg_placeholder'), { target: { value: 'Tu comptes' } })
+    expect(crisis.setConfig).toHaveBeenCalled()
   })
 })

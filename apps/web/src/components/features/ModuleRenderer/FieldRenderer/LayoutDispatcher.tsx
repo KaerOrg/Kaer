@@ -29,8 +29,6 @@ import {
 import { FieldText } from '../fields'
 import { ExerciseSafetyField } from '../fields/ExerciseSafetyField'
 import { CrisisAnchorsWidget } from '../fields/CrisisAnchorsWidget'
-import { CrisisCopingCardsWidget } from '../fields/CrisisCopingCardsWidget'
-import { CrisisCommitmentWidget } from '../fields/CrisisCommitmentWidget'
 import { DisclaimerBanner } from './DisclaimerBanner'
 import { FieldRenderer } from './FieldRenderer'
 import { partitionBySection } from './partitionBySection'
@@ -95,8 +93,6 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
           // l'entrée urgence en bandeau danger statique, via DisclaimerBanner (tone danger).
           if (f.field_type === 'crisis_urgency_entry') return <DisclaimerBanner key={f.id} field={f} moduleId={moduleId} />
           if (f.field_type === 'crisis_anchors_preview') return <CrisisAnchorsWidget key={f.id} />
-          if (f.field_type === 'crisis_coping_cards_preview') return <CrisisCopingCardsWidget key={f.id} />
-          if (f.field_type === 'crisis_commitment_preview') return <CrisisCommitmentWidget key={f.id} />
           return null
         })}
       </>

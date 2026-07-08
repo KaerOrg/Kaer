@@ -753,40 +753,16 @@ export interface Database {
         Row: {
           patient_id: string
           practitioner_message: string
-          commitment_phrase: string
           updated_at: string
         }
         Insert: {
           patient_id: string
           practitioner_message?: string
-          commitment_phrase?: string
           updated_at?: string
         }
         Update: {
           practitioner_message?: string
-          commitment_phrase?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      crisis_plan_coping_cards: {
-        Row: {
-          id: string
-          patient_id: string
-          thought: string
-          response: string
-          sort_order: number
-        }
-        Insert: {
-          patient_id: string
-          thought?: string
-          response?: string
-          sort_order?: number
-        }
-        Update: {
-          thought?: string
-          response?: string
-          sort_order?: number
         }
         Relationships: []
       }

@@ -48,7 +48,7 @@ beforeEach(() => {
   jest.clearAllMocks()
   svc.getAnchors.mockResolvedValue([])
   svc.getAnchorPhrase.mockResolvedValue('')
-  svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
+  svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: '' })
   svc.pickAndSaveAnchorPhoto.mockResolvedValue(null)
   svc.removeAnchorPhoto.mockResolvedValue(undefined)
   svc.saveAnchorPhrase.mockResolvedValue(undefined)
@@ -66,7 +66,7 @@ describe('CrisisAnchorsWidget', () => {
   })
 
   it('affiche le message du praticien quand présent', async () => {
-    svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: 'Tiens bon', copingCards: [], commitmentPhrase: '' })
+    svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: 'Tiens bon' })
     render(<CrisisAnchorsWidget />)
     expect(await screen.findByText('Tiens bon')).toBeTruthy()
   })

@@ -91,7 +91,7 @@ horodatage.
 
 ```
 patients · practitioner_patients · invitations · patient_modules ·
-cssrs_screen_assessments · crisis_plan_configs · crisis_plan_coping_cards ·
+cssrs_screen_assessments · crisis_plan_configs ·
 practitioner_patient_notes · patient_push_tokens · notification_routines ·
 appointments · patient_entries ·
 notification_events · caseload_entries · caseload_notes · caseload_waits · caseload_actions

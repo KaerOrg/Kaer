@@ -36,8 +36,6 @@ import {
   getAnchors,
   getAnchorPhrase,
   saveAnchorPhrase,
-  getCommitment,
-  saveCommitment,
   getUrgencyItems,
   pickAndSaveAnchorPhoto,
   removeAnchorPhoto,
@@ -61,35 +59,16 @@ beforeEach(() => jest.clearAllMocks())
 // ─── fetchPractitionerConfig ──────────────────────────────────────────────────
 
 describe('fetchPractitionerConfig', () => {
-  it('retourne la config praticien si présente', async () => {
-    mockFrom
-      .mockReturnValueOnce(makeChain({ data: { practitioner_message: 'Tu es courageux', commitment_phrase: "Je m'engage" } }))
-      .mockReturnValueOnce(makeChain({ data: [] }))
+  it('retourne le message praticien si présent', async () => {
+    mockFrom.mockReturnValueOnce(makeChain({ data: { practitioner_message: 'Tu es courageux' } }))
     const cfg = await fetchPractitionerConfig('patient-1')
     expect(cfg.practitionerMessage).toBe('Tu es courageux')
-    expect(cfg.commitmentPhrase).toBe("Je m'engage")
   })
 
-  it('retourne des valeurs vides si aucune ligne en base', async () => {
-    mockFrom
-      .mockReturnValueOnce(makeChain({ data: null }))
-      .mockReturnValueOnce(makeChain({ data: [] }))
+  it('retourne une valeur vide si aucune ligne en base', async () => {
+    mockFrom.mockReturnValueOnce(makeChain({ data: null }))
     const cfg = await fetchPractitionerConfig('patient-1')
     expect(cfg.practitionerMessage).toBe('')
-    expect(cfg.copingCards).toEqual([])
-    expect(cfg.commitmentPhrase).toBe('')
-  })
-
-  it('mappe correctement les cartes de coping', async () => {
-    mockFrom
-      .mockReturnValueOnce(makeChain({ data: { practitioner_message: '', commitment_phrase: '' } }))
-      .mockReturnValueOnce(makeChain({ data: [
-        { id: 'card-1', thought: 'Je suis nul', response: 'Je fais de mon mieux', sort_order: 0 },
-      ] }))
-    const cfg = await fetchPractitionerConfig('patient-1')
-    expect(cfg.copingCards).toHaveLength(1)
-    expect(cfg.copingCards[0].thought).toBe('Je suis nul')
-    expect(cfg.copingCards[0].response).toBe('Je fais de mon mieux')
   })
 })
 
@@ -179,32 +158,6 @@ describe('getAnchorPhrase / saveAnchorPhrase', () => {
     mockSetModuleSetting.mockResolvedValueOnce(undefined)
     await saveAnchorPhrase('Je tiens à mes enfants')
     expect(mockSetModuleSetting).toHaveBeenCalledWith('crisis_plan', 'anchor_phrase', 'Je tiens à mes enfants')
-  })
-})
-
-// ─── Engagement thérapeutique ─────────────────────────────────────────────────
-
-describe('getCommitment / saveCommitment', () => {
-  it('retourne null si aucun engagement', async () => {
-    mockGetModuleSetting.mockResolvedValueOnce(null)
-    expect(await getCommitment()).toBeNull()
-  })
-
-  it('retourne l\'engagement parsé', async () => {
-    mockGetModuleSetting.mockResolvedValueOnce(JSON.stringify({ name: 'Jean', date: '2026-05-17T10:00:00.000Z' }))
-    const result = await getCommitment()
-    expect(result?.name).toBe('Jean')
-  })
-
-  it('sauvegarde l\'engagement avec la date courante', async () => {
-    mockSetModuleSetting.mockResolvedValueOnce(undefined)
-    await saveCommitment('Marie')
-    const call = mockSetModuleSetting.mock.calls[0]
-    expect(call[0]).toBe('crisis_plan')
-    expect(call[1]).toBe('commitment')
-    const parsed = JSON.parse(call[2])
-    expect(parsed.name).toBe('Marie')
-    expect(parsed.date).toBeDefined()
   })
 })
 

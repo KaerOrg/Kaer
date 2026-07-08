@@ -1,1 +1,0 @@
-export { CrisisCopingCardsWidget } from './CrisisCopingCardsWidget'

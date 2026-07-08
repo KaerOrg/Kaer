@@ -713,8 +713,6 @@ passe par `crisisPlanService` (jamais Supabase/SQLite direct), avec `@ui/Button`
 |---|---|---|---|
 | `CrisisUrgencyEntry` | `crisis_urgency_entry` | Bandeau rouge en tête → navigue vers l'écran `CrisisUrgency` | — (navigation) |
 | `CrisisAnchorsWidget` | `crisis_anchors_preview` | Photos d'ancrage + phrase + message praticien | FileSystem + SQLite + Supabase |
-| `CrisisCopingCardsWidget` | `crisis_coping_cards_preview` | Cartes de coping praticien (lecture seule) | Supabase |
-| `CrisisCommitmentWidget` | `crisis_commitment_preview` | Signature de l'engagement (nom + date) | SQLite |
 | `CrisisUrgencyContactsWidget` | `crisis_urgency_contacts` | Contacts de confiance (step4/step5), rendu dans `crisis_urgency` | SQLite |
 
 ---

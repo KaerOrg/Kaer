@@ -649,28 +649,23 @@ create policy "notification_events_practitioner_select"
 
 
 -- ============================================================
--- TABLES : crisis_plan_configs + crisis_plan_coping_cards
+-- TABLE : crisis_plan_configs
 -- ============================================================
--- Config praticien pour le plan de crise (VHB-EF).
+-- Config praticien pour le plan de crise (message affiché au patient).
 -- Remplace le JSON dans patient_modules.config.crisisPlan.
 
 create table if not exists public.crisis_plan_configs (
   patient_id        uuid primary key references public.patients(id) on delete cascade,
   practitioner_message text not null default '',
-  commitment_phrase text not null default '',
   updated_at        timestamptz not null default now()
 );
 
-create table if not exists public.crisis_plan_coping_cards (
-  id         uuid primary key default gen_random_uuid(),
-  patient_id uuid not null references public.patients(id) on delete cascade,
-  thought    text not null default '',
-  response   text not null default '',
-  sort_order integer not null default 0
-);
+-- Nettoyage idempotent des vestiges « cartes SOS » / « engagement » (retirés #114) :
+-- la table de coping cards et la colonne d'engagement sont supprimées si présentes.
+drop table if exists public.crisis_plan_coping_cards cascade;
+alter table public.crisis_plan_configs drop column if exists commitment_phrase;
 
 alter table public.crisis_plan_configs enable row level security;
-alter table public.crisis_plan_coping_cards enable row level security;
 
 drop policy if exists "patient_read_own_crisis_config" on public.crisis_plan_configs;
 create policy "patient_read_own_crisis_config"
@@ -683,19 +678,6 @@ create policy "practitioner_rw_crisis_config"
   using (auth.uid() in (
     select pp.practitioner_id from public.practitioner_patients pp
     where pp.patient_id = crisis_plan_configs.patient_id
-  ));
-
-drop policy if exists "patient_read_own_coping_cards" on public.crisis_plan_coping_cards;
-create policy "patient_read_own_coping_cards"
-  on public.crisis_plan_coping_cards for select
-  using (auth.uid() = patient_id);
-
-drop policy if exists "practitioner_rw_coping_cards" on public.crisis_plan_coping_cards;
-create policy "practitioner_rw_coping_cards"
-  on public.crisis_plan_coping_cards for all
-  using (auth.uid() in (
-    select pp.practitioner_id from public.practitioner_patients pp
-    where pp.patient_id = crisis_plan_coping_cards.patient_id
   ));
 
 
@@ -1913,7 +1895,6 @@ declare
     'patient_modules',
     'cssrs_screen_assessments',
     'crisis_plan_configs',
-    'crisis_plan_coping_cards',
     'practitioner_patient_notes',
     'patient_push_tokens',
     'notification_routines',
@@ -2066,9 +2047,6 @@ begin
     'crisis_plan_configs',
       (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
          from public.crisis_plan_configs t where t.patient_id = p_patient_id),
-    'crisis_plan_coping_cards',
-      (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
-         from public.crisis_plan_coping_cards t where t.patient_id = p_patient_id),
     'practitioner_patient_notes',
       (select coalesce(jsonb_agg(to_jsonb(t)), '[]'::jsonb)
          from public.practitioner_patient_notes t where t.patient_id = p_patient_id),
