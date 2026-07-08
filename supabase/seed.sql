@@ -447,24 +447,30 @@ on conflict (field_id, prop_key) do nothing;
 -- preview_kind = 'column_form' → ColumnFormLayout
 -- N enregistrements / module dans `form_entries` (JSON values).
 -- 5 colonnes TCC + signal logEvent('SAVE_BECK_THOUGHT_RECORD').
+--
+-- Idempotent : purge complète des fields/props beck_columns puis ré-insertion,
+-- pour que le seed reste la source de vérité (un field retiré ici disparaît
+-- de la base au ré-jeu, contrairement à un simple `on conflict do nothing`).
 -- ============================================================
 
 update public.modules set preview_kind = 'column_form' where id = 'beck_columns';
 
+-- 0) Purge de toute config précédente (fields + props) du module
+delete from public.field_props
+  where field_id in (select id from public.module_content_fields where module_id = 'beck_columns');
+delete from public.module_content_fields where module_id = 'beck_columns';
+
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('beck.cfg', 'beck_columns', 'column_form_config', null, 0)
-on conflict (id) do nothing;
+  ('beck.cfg', 'beck_columns', 'column_form_config', null, 0);
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) values
   ('beck.col1.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_1_title', 'beck.col_situation', 10),
   ('beck.col2.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_2_title', 'beck.col_emotion',   20),
   ('beck.col3.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_3_title', 'beck.col_thought',   30),
-  ('beck.col_dist.h', 'beck_columns', 'column_header', 'modules.beck_columns.col_distortion', 'beck.col_distortion', 35),
   ('beck.col_evf.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_evidence_for_title',     'beck.col_evidence_for',     37),
   ('beck.col_eva.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_evidence_against_title', 'beck.col_evidence_against', 38),
   ('beck.col4.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_4_title', 'beck.col_rational',  40),
-  ('beck.col5.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_5_title', 'beck.col_outcome',   50)
-on conflict (id) do nothing;
+  ('beck.col5.h', 'beck_columns', 'column_header', 'modules.beck_columns.entry_col_5_title', 'beck.col_outcome',   50);
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, parent_field_id, sort_order) values
   ('beck.col1.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_1_placeholder', 'beck.col_situation', 'beck.col1.h', 11),
@@ -472,7 +478,6 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col2.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_2_intensity',   'beck.col_emotion',   'beck.col2.h', 22),
   ('beck.col3.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_3_placeholder', 'beck.col_thought',   'beck.col3.h', 31),
   ('beck.col3.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_3_belief',      'beck.col_thought',   'beck.col3.h', 32),
-  ('beck.col_dist.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_distortion_placeholder', 'beck.col_distortion', 'beck.col_dist.h', 36),
   ('beck.col_evf.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_for_placeholder',     'beck.col_evidence_for',     'beck.col_evf.h', 37),
   ('beck.col_eva.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_against_placeholder', 'beck.col_evidence_against', 'beck.col_eva.h', 38),
   ('beck.col4.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_4_placeholder', 'beck.col_rational',  'beck.col4.h', 41),
@@ -480,12 +485,10 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   -- (mesure avant/après du DTR) ; les nouvelles émotions éventuelles ensuite.
   ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 51),
   ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 52),
-  ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53)
-on conflict (id) do nothing;
+  ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53);
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
-  ('beck.footer', 'beck_columns', 'footer_note', 'modules.beck_columns.footer', 999)
-on conflict (id) do nothing;
+  ('beck.footer', 'beck_columns', 'footer_note', 'modules.beck_columns.footer', 999);
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'engagement_event_type', 'SAVE_BECK_THOUGHT_RECORD'),
@@ -514,9 +517,6 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col3.h', 'color',       '#EF4444'),
   ('beck.col3.h', 'step_number', '3'),
   ('beck.col3.h', 'hint_code',   'modules.beck_columns.entry_col_3_hint'),
-  ('beck.col_dist.h', 'color',       '#EC4899'),
-  ('beck.col_dist.h', 'step_number', '4'),
-  ('beck.col_dist.h', 'hint_code',   'modules.beck_columns.entry_col_distortion_hint'),
   -- Examen des preuves (7 colonnes de Padesky) : colonnes standard, facultatives
   -- à remplir (décision 2026-07 : pas de bascule praticien, simplicité d'usage)
   ('beck.col_evf.h', 'color',          '#0891B2'),
@@ -530,10 +530,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col_eva.text', 'multiline',  '1'),
   ('beck.col_eva.text', 'min_height', '72'),
   ('beck.col4.h', 'color',       '#059669'),
-  ('beck.col4.h', 'step_number', '5'),
+  ('beck.col4.h', 'step_number', '4'),
   ('beck.col4.h', 'hint_code',   'modules.beck_columns.entry_col_4_hint'),
   ('beck.col5.h', 'color',       '#D97706'),
-  ('beck.col5.h', 'step_number', '6'),
+  ('beck.col5.h', 'step_number', '5'),
   ('beck.col5.h', 'hint_code',   'modules.beck_columns.entry_col_5_hint'),
   ('beck.col1.text', 'key',        'situation'),
   ('beck.col1.text', 'multiline',  '1'),
@@ -549,18 +549,6 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col2.text', 'suggestion_6', 'modules.beck_columns.sugg_guilt'),
   ('beck.col2.text', 'suggestion_7', 'modules.beck_columns.sugg_frustration'),
   ('beck.col2.text', 'suggestion_8', 'modules.beck_columns.sugg_discouragement'),
-  -- Colonne « Distorsion cognitive » (optionnelle) : auto-étiquetage patient,
-  -- 8 pièges classiques (Burns) en chips — aucune détection automatique (MDR)
-  ('beck.col_dist.text', 'key',       'distortion'),
-  ('beck.col_dist.text', 'multiline', '0'),
-  ('beck.col_dist.text', 'suggestion_1', 'modules.beck_columns.dist_all_or_nothing'),
-  ('beck.col_dist.text', 'suggestion_2', 'modules.beck_columns.dist_overgeneralization'),
-  ('beck.col_dist.text', 'suggestion_3', 'modules.beck_columns.dist_mental_filter'),
-  ('beck.col_dist.text', 'suggestion_4', 'modules.beck_columns.dist_mind_reading'),
-  ('beck.col_dist.text', 'suggestion_5', 'modules.beck_columns.dist_catastrophizing'),
-  ('beck.col_dist.text', 'suggestion_6', 'modules.beck_columns.dist_emotional_reasoning'),
-  ('beck.col_dist.text', 'suggestion_7', 'modules.beck_columns.dist_should'),
-  ('beck.col_dist.text', 'suggestion_8', 'modules.beck_columns.dist_personalization'),
   ('beck.col3.text', 'key',        'automatic_thought'),
   ('beck.col3.text', 'multiline',  '1'),
   ('beck.col3.text', 'min_height', '72'),
@@ -588,8 +576,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col5.belief', 'min',   '0'),
   ('beck.col5.belief', 'max',   '100'),
   ('beck.col5.belief', 'step',  '10'),
-  ('beck.col5.belief', 'color', '#D97706')
-on conflict (field_id, prop_key) do nothing;
+  ('beck.col5.belief', 'color', '#D97706');
 
 
 -- ============================================================
