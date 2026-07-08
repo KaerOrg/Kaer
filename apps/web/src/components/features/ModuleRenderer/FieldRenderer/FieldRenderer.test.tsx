@@ -12,8 +12,6 @@ vi.mock('@services/psyeduService', () => ({
 vi.mock('@services/crisisPlanService', () => ({
   fetchCrisisPlanConfig: vi.fn().mockResolvedValue({
     practitionerMessage: '',
-    copingCards: [],
-    commitmentPhrase: '',
   }),
   saveCrisisPlanConfig: vi.fn().mockResolvedValue({ ok: true }),
 }))

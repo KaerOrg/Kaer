@@ -11,7 +11,6 @@ import {
   type CrisisAnchor,
   type PlanItem,
 } from '../lib/database'
-import type { CrisisPlanCopingCard } from '@kaer/shared'
 import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { CrisisAnchor }
@@ -20,34 +19,19 @@ export type { CrisisAnchor }
 
 export interface CrisisPlanPractitionerConfig {
   practitionerMessage: string
-  copingCards: CrisisPlanCopingCard[]
-  commitmentPhrase: string
 }
 
 export async function fetchPractitionerConfig(
   patientId: string
 ): Promise<CrisisPlanPractitionerConfig> {
-  const [configResult, cardsResult] = await Promise.all([
-    supabase
-      .from('crisis_plan_configs')
-      .select('practitioner_message, commitment_phrase')
-      .eq('patient_id', patientId)
-      .maybeSingle(),
-    supabase
-      .from('crisis_plan_coping_cards')
-      .select('id, thought, response, sort_order')
-      .eq('patient_id', patientId)
-      .order('sort_order', { ascending: true }),
-  ])
+  const { data } = await supabase
+    .from('crisis_plan_configs')
+    .select('practitioner_message')
+    .eq('patient_id', patientId)
+    .maybeSingle()
 
   return {
-    practitionerMessage: configResult.data?.practitioner_message ?? '',
-    copingCards: (cardsResult.data ?? []).map(c => ({
-      id: c.id as string,
-      thought: c.thought as string,
-      response: c.response as string,
-    })),
-    commitmentPhrase: configResult.data?.commitment_phrase ?? '',
+    practitionerMessage: data?.practitioner_message ?? '',
   }
 }
 
@@ -126,38 +110,6 @@ export async function saveAnchorPhrase(phrase: string): Promise<void> {
     module_id: 'crisis_plan',
     entry_kind: 'module_setting',
     payload: { key: ANCHOR_PHRASE_KEY, value: phrase },
-  })
-}
-
-// ─── Engagement thérapeutique (SQLite module_settings) ───────────────────────
-
-const COMMITMENT_KEY = 'commitment'
-
-export interface CrisisCommitment {
-  name: string
-  date: string
-}
-
-export async function getCommitment(): Promise<CrisisCommitment | null> {
-  const raw = await getModuleSetting('crisis_plan', COMMITMENT_KEY)
-  if (!raw) return null
-  try {
-    return JSON.parse(raw) as CrisisCommitment
-  } catch {
-    return null
-  }
-}
-
-export async function saveCommitment(name: string): Promise<void> {
-  const commitment: CrisisCommitment = {
-    name: name.trim(),
-    date: new Date().toISOString(),
-  }
-  await syncUpsert(() => setModuleSetting('crisis_plan', COMMITMENT_KEY, JSON.stringify(commitment)), {
-    local_id: `crisis_plan:${COMMITMENT_KEY}`,
-    module_id: 'crisis_plan',
-    entry_kind: 'module_setting',
-    payload: { key: COMMITMENT_KEY, value: commitment },
   })
 }
 

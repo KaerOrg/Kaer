@@ -15,7 +15,7 @@ beforeEach(() => vi.clearAllMocks())
 
 describe('CrisisAnchorsWidget', () => {
   it('affiche le message praticien configuré', async () => {
-    mockFetch.mockResolvedValue({ practitionerMessage: 'Tu comptes', copingCards: [], commitmentPhrase: '' })
+    mockFetch.mockResolvedValue({ practitionerMessage: 'Tu comptes' })
     renderWithClient(<CrisisAnchorsWidget />)
 
     expect(await screen.findByText('Tu comptes')).toBeInTheDocument()
@@ -23,7 +23,7 @@ describe('CrisisAnchorsWidget', () => {
   })
 
   it('n\'affiche pas de message quand vide', async () => {
-    mockFetch.mockResolvedValue({ practitionerMessage: '', copingCards: [], commitmentPhrase: '' })
+    mockFetch.mockResolvedValue({ practitionerMessage: '' })
     const { container } = renderWithClient(<CrisisAnchorsWidget />)
 
     await waitFor(() => expect(mockFetch).toHaveBeenCalled())

@@ -86,12 +86,6 @@ export interface PsychoeducationCardEntry {
   unlocked_at: string // ISO 8601
 }
 
-export interface CrisisPlanCopingCard {
-  id: string
-  thought: string
-  response: string
-}
-
 // Observance médicamenteuse — une molécule du traitement du patient.
 // `kind` distingue le traitement de fond (pris en continu) du « si besoin » (PRN).
 // Donnée co-éditée patient↔praticien, stockée dans `patient_modules.config.medications`.
@@ -134,8 +128,6 @@ export interface ModuleConfig {
   // Plan de crise — contenu co-construit par le praticien
   crisisPlan?: {
     practitionerMessage?: string
-    copingCards?: CrisisPlanCopingCard[]
-    commitmentPhrase?: string
   }
   // Observance médicamenteuse — liste de molécules co-éditée patient↔praticien
   medicationAdherence?: {

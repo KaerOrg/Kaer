@@ -18,8 +18,6 @@ import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { EditableItemsList } from '../shared'
 import { CrisisUrgencyEntry } from '../../fields/CrisisUrgencyEntry'
 import { CrisisAnchorsWidget } from '../../fields/CrisisAnchorsWidget'
-import { CrisisCopingCardsWidget } from '../../fields/CrisisCopingCardsWidget'
-import { CrisisCommitmentWidget } from '../../fields/CrisisCommitmentWidget'
 import { styles } from './styles'
 
 // Widgets rendus pour les fields hors-section (après les étapes), dispatchés par
@@ -29,8 +27,6 @@ import { styles } from './styles'
 // dispatch devra être généralisé (config-driven via field_props plutôt que cette map).
 const SECTION_WIDGETS: Record<string, ComponentType> = {
   crisis_anchors_preview: CrisisAnchorsWidget,
-  crisis_coping_cards_preview: CrisisCopingCardsWidget,
-  crisis_commitment_preview: CrisisCommitmentWidget,
 }
 
 export interface EditableStepsLayoutProps {
