@@ -134,3 +134,20 @@ lui-même n'a pas de test unitaire dédié.
 - [x] Tests — chaque source créé a son test
 - [x] Documentation créée/mise à jour et indexée
 - [x] Zéro texte en dur (code + seed)
+
+---
+
+## Suivi — points d'attention corrigés (2026-07-09)
+
+Les 3 points d'attention ont été traités :
+
+1. **CrisisEmergencyCalls** → migré sur `ui/Button` : ajout d'une prop `sublabel`
+   (ligne secondaire, doc + test dans `ui/Button`) + `style` élargi à `StyleProp<ViewStyle>`.
+   Fin de l'exception « bouton natif ».
+2. **Lecture `plan_items`** → centralisée dans `planItemService.getPlanItems` (lecture
+   seule, testée), utilisée par `SafetyPlanLayout` **et** `EditableStepsLayout` (plus de
+   lecture directe `lib/database` dans les layouts).
+3. **`previewKindOverride`** → test dédié `ModuleContentScreen.test.tsx` (2 cas : layout
+   par défaut vs override roue crantée).
+
+CI mobile reverte : `tsc` + `jest` (125 suites, 970 tests). Aucun fichier web touché.
