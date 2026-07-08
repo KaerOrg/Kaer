@@ -1,0 +1,16 @@
+/* Modale d'actions d'un module : barre d'onglets pleine largeur + corps scrollable.
+   `ui/Modal` est monté en `noPadding` pour que le bandeau d'onglets touche les bords ;
+   le padding est réintroduit sur la barre et le panneau. */
+
+.module-actions-modal__tabs {
+  padding: 0 var(--spacing-lg);
+}
+
+/* Hauteur fixe du panneau : la modale garde la même taille quel que soit l'onglet
+   (pas de « saut » au changement d'onglet). Le contenu plus long scrolle à l'intérieur. */
+.module-actions-modal__panel {
+  height: 60vh;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+}

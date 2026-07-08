@@ -23,10 +23,11 @@ interface ModuleCardFooterProps {
 
 /**
  * Rangée d'actions (footer) partagée par toutes les cartes de l'armoire module.
- * Impose un **ordre canonique unique** : cloche, configuration (roue crantée),
- * aperçu, données, puis actions spécifiques. Chaque bouton n'est rendu que si son
- * handler est fourni. Passer par ce composant garantit un ordre et un habillage
- * identiques sur toutes les cartes — ne jamais réassembler la rangée à la main.
+ * Impose un **ordre canonique unique**, aligné sur les onglets de la modale
+ * d'actions : données, configuration (roue crantée), cloche (rappels), aperçu, puis
+ * actions spécifiques. Chaque bouton n'est rendu que si son handler est fourni.
+ * Passer par ce composant garantit un ordre et un habillage identiques sur toutes les
+ * cartes — ne jamais réassembler la rangée à la main.
  */
 export function ModuleCardFooter({
   onConfigureNotif,
@@ -40,12 +41,12 @@ export function ModuleCardFooter({
 }: ModuleCardFooterProps) {
   return (
     <>
-      {onConfigureNotif && <ModuleNotifButton onClick={onConfigureNotif} />}
+      {onToggleData && <ModuleDataButton open={dataOpen} onToggle={onToggleData} />}
       {onConfigure && configLabel !== undefined && (
         <ModuleConfigButton label={configLabel} onClick={onConfigure} />
       )}
+      {onConfigureNotif && <ModuleNotifButton onClick={onConfigureNotif} />}
       {onTogglePreview && <ModulePreviewButton open={previewOpen} onToggle={onTogglePreview} />}
-      {onToggleData && <ModuleDataButton open={dataOpen} onToggle={onToggleData} />}
       {extra}
     </>
   )

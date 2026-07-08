@@ -7,15 +7,11 @@ vi.mock('react-i18next', () => ({
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '@services/moduleCatalogService'
-import type { Medication } from '@kaer/shared'
 
-const MOD_ITEM: ModuleItem = { id: 'medication_adherence', icon: 'pill', mobile_icon: 'pill', color: '#2C6E72' }
 const MOD: PatientModule = {
   id: 'pm1', patient_id: 'p1', practitioner_id: 'pr1',
   module_type: 'medication_adherence', config: {}, unlocked_at: '2026-06-01T00:00:00Z',
 }
-const MED: Medication = { id: 'm1', name: 'Sertraline', posology: '50 mg', kind: 'maintenance' }
 
 type MedList = React.ComponentProps<typeof MedicationAdherenceCard>['medList']
 
@@ -36,7 +32,6 @@ function makeMedList(over: Partial<MedList> = {}): MedList {
 function setup(over: Partial<React.ComponentProps<typeof MedicationAdherenceCard>> = {}) {
   const props: React.ComponentProps<typeof MedicationAdherenceCard> = {
     tagChips: null,
-    modItem: MOD_ITEM,
     modIcon: null,
     mod: MOD,
     unlocked: true,
@@ -50,6 +45,7 @@ function setup(over: Partial<React.ComponentProps<typeof MedicationAdherenceCard
     onTogglePreview: vi.fn(),
     onToggleData: vi.fn(),
     onConfigureNotif: vi.fn(),
+    onConfigure: vi.fn(),
     onUnlock: vi.fn(),
     onRevoke: vi.fn(),
     ...over,
@@ -82,11 +78,10 @@ describe('MedicationAdherenceCard', () => {
     expect(onToggleData).toHaveBeenCalledWith('medication_adherence')
   })
 
-  it('le bouton configurer ouvre l\'éditeur de liste', () => {
-    const medList = makeMedList()
-    setup({ medList })
+  it('le bouton configurer ouvre la modale sur l\'onglet Configuration', () => {
+    const { onConfigure } = setup()
     fireEvent.click(screen.getByRole('button', { name: 'modules.medication_adherence.config_button' }))
-    expect(medList.openEditor).toHaveBeenCalled()
+    expect(onConfigure).toHaveBeenCalledWith('medication_adherence')
   })
 
   it('la bascule révoque le module débloqué et ferme l\'éditeur', () => {
@@ -97,12 +92,10 @@ describe('MedicationAdherenceCard', () => {
     expect(onRevoke).toHaveBeenCalledWith('pm1')
   })
 
-  it('éditeur ouvert : liste les molécules et supprime par id', () => {
-    const medList = makeMedList({ open: true, medications: [MED] })
-    setup({ medList })
-    expect(screen.getByText('Sertraline')).toBeTruthy()
-    expect(screen.getByText('50 mg')).toBeTruthy()
-    fireEvent.click(screen.getByLabelText('common.delete'))
-    expect(medList.removeMedication).toHaveBeenCalledWith('m1')
+  it('affiche le résumé du nombre de médicaments', () => {
+    setup({ medList: makeMedList({ medications: [
+      { id: 'm1', name: 'Sertraline', posology: '50 mg', kind: 'maintenance' },
+    ] }) })
+    expect(screen.getByText('modules.medication_adherence.config_count', { exact: false })).toBeTruthy()
   })
 })

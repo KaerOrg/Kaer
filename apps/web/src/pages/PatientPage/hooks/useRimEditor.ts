@@ -46,10 +46,13 @@ export function useRimEditor(
     setError(null)
   }
 
-  const confirm = async () => {
+  // Retourne `true` si la config a été enregistrée (module créé/mis à jour), `false`
+  // sur erreur de validation ou d'écriture — l'appelant s'en sert pour fermer la modale
+  // uniquement en cas de succès.
+  const confirm = async (): Promise<boolean> => {
     if (!alternative.trim()) {
       setError(t('patient.rim_error_required'))
-      return
+      return false
     }
     setSaving(true)
     setError(null)
@@ -57,15 +60,16 @@ export function useRimEditor(
 
     if (mode === 'unlock') {
       const { ok } = await unlockRim(patientId, practitionerId, scenario)
-      if (!ok) { toast.error(t('patient.rim_error_unlock')); setSaving(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_unlock')); setSaving(false); return false }
     } else if (mode === 'edit' && rimModule) {
       const { ok } = await updateRim(rimModule.id, scenario)
-      if (!ok) { toast.error(t('patient.rim_error_update')); setSaving(false); return }
+      if (!ok) { toast.error(t('patient.rim_error_update')); setSaving(false); return false }
     }
 
     setSaving(false)
     setMode('off')
     await onReloadModules()
+    return true
   }
 
   return {

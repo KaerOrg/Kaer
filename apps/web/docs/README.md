@@ -8,6 +8,7 @@ Documentation spécifique à `apps/web` (React + Vite). Pour la doc transversale
 |---|---|
 | [`design-system.md`](design-system.md) | CSS custom properties, classes `preview-*` et `fw-*`, widgets HTML |
 | [`web-app.md`](web-app.md) | Vue d'ensemble : structure, routing, pages, composants, store auth |
+| [`module-actions-modal.md`](module-actions-modal.md) | Modale d'actions d'un module (onglets Vue patient / Sources / Données / Notifications / Configuration) |
 | [`invitation-flow.md`](invitation-flow.md) | Volet web du flux d'invitation (génération token, PatientRegisterPage) |
 
 ## Composants UI

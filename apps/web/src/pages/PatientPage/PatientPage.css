@@ -1019,6 +1019,38 @@
   margin-top: 16px;
 }
 
+/* ── Éditeur effets indésirables (bascules + ajout personnalisé) ──────────── */
+
+.med-effects-config__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.med-effects-config__custom-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 12px 0 4px;
+}
+
+.med-effects-config__add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.med-effects-config__add-input {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
 /* ── Éditeurs de config module (champs partagés : crisis_plan, rim…) ──────── */
 
 .module-editor-fields {

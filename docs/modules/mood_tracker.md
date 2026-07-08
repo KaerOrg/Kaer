@@ -85,7 +85,7 @@ Composants extraits, partagés avec `MedicationSideEffectsHistoryScreen` :
 
 ### Rappels
 - Infrastructure Supabase `notification_routines` existante — aucune table supplémentaire
-- Le praticien configure depuis PatientPage web (NotificationRoutineModal)
+- Le praticien configure depuis PatientPage web (onglet Notifications de la modale d'actions du module, `NotificationRoutinePanel`)
 - Le patient ajuste l'heure dans l'onglet Saisie via un **modal JS** (deux champs heure/minute → `updateTimeOverride`)
 - Pas de `@react-native-community/datetimepicker` (non supporté dans Expo Go SDK 53+)
 

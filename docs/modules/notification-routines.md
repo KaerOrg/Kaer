@@ -46,7 +46,7 @@ Système permettant aux praticiens de programmer des rappels push par module pat
 
 | Fichier | Rôle |
 |---|---|
-| `apps/web/src/components/NotificationRoutineModal/` | Modale praticien — CRUD des routines par module |
+| `apps/web/src/components/features/NotificationRoutinePanel/` | Panneau praticien — CRUD des routines par module. Monté dans l'onglet **Notifications** de la modale d'actions du module (`ModuleActionsModal`), plus voir `apps/web/docs/module-actions-modal.md`. |
 | `apps/web/src/components/ActivityFeedPanel/` | Icône cloche header + panel événements pause |
 | `apps/mobile/src/components/NotificationRoutinePanel.tsx` | Section dans écran module — patient voit/ajuste ses rappels |
 

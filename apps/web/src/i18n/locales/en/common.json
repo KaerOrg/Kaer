@@ -279,6 +279,7 @@
     "unlocked_on": "Unlocked on {{date}}",
     "coming_soon": "Module under development, preview not available.",
     "data_button": "Data",
+    "config_tab": "Configuration",
     "summary_empty": "No synced data",
     "summary_last_entry": "Last entry",
     "summary_count": "Recorded entries",

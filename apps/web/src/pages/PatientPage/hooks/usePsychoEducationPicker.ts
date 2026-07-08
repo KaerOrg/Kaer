@@ -54,10 +54,13 @@ export function usePsychoEducationPicker(
     })
   }
 
-  const confirm = async () => {
+  // Retourne `true` si les fiches ont été enregistrées (module créé/mis à jour),
+  // `false` sur validation (aucune fiche) ou erreur d'écriture — l'appelant ferme la
+  // modale uniquement en cas de succès.
+  const confirm = async (): Promise<boolean> => {
     if (selectedTopicIds.size === 0) {
       setError(t('patient.psycho_pick_error'))
-      return
+      return false
     }
     setSaving(true)
     setError(null)
@@ -67,7 +70,7 @@ export function usePsychoEducationPicker(
       if (!ok) {
         toast.error(t('patient.psycho_error_unlock'))
         setSaving(false)
-        return
+        return false
       }
     } else if (mode === 'edit' && psychoModule) {
       const { ok } = await updatePsychoeducationTopics(
@@ -78,13 +81,14 @@ export function usePsychoEducationPicker(
       if (!ok) {
         toast.error(t('patient.psycho_error_update'))
         setSaving(false)
-        return
+        return false
       }
     }
 
     setSaving(false)
     setMode('off')
     await onReloadModules()
+    return true
   }
 
   return {

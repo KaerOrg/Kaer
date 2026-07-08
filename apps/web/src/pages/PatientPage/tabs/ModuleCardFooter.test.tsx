@@ -20,7 +20,7 @@ describe('ModuleCardFooter', () => {
     expect(screen.queryByRole('button', { name: 'Configurer le plan' })).toBeNull()
   })
 
-  it('applique l’ordre canonique : cloche, config, aperçu, données, extra', () => {
+  it('applique l’ordre canonique : données, config, cloche, aperçu, extra', () => {
     render(
       <ModuleCardFooter
         onConfigureNotif={vi.fn()}
@@ -35,10 +35,10 @@ describe('ModuleCardFooter', () => {
     )
     const names = screen.getAllByRole('button').map(b => b.getAttribute('aria-label') ?? b.textContent)
     expect(names).toEqual([
-      'notifications.configure_button',
-      'Configurer le traitement',
-      'patient.preview_button',
       'patient.data_button',
+      'Configurer le traitement',
+      'notifications.configure_button',
+      'patient.preview_button',
       'extra-action',
     ])
   })

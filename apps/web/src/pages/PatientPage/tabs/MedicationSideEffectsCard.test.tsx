@@ -7,9 +7,7 @@ vi.mock('react-i18next', () => ({
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MedicationSideEffectsCard } from './MedicationSideEffectsCard'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '@services/moduleCatalogService'
 
-const MOD_ITEM: ModuleItem = { id: 'medication_side_effects', icon: 'pill', mobile_icon: 'pill', color: '#2C6E72' }
 const MOD: PatientModule = {
   id: 'pm1', patient_id: 'p1', practitioner_id: 'pr1',
   module_type: 'medication_side_effects', config: {}, unlocked_at: '2026-06-01T00:00:00Z',
@@ -35,7 +33,6 @@ function makeMedEffects(over: Partial<MedEffects> = {}): MedEffects {
 function setup(over: Partial<React.ComponentProps<typeof MedicationSideEffectsCard>> = {}) {
   const props: React.ComponentProps<typeof MedicationSideEffectsCard> = {
     tagChips: null,
-    modItem: MOD_ITEM,
     modIcon: null,
     mod: MOD,
     unlocked: true,
@@ -49,6 +46,7 @@ function setup(over: Partial<React.ComponentProps<typeof MedicationSideEffectsCa
     onTogglePreview: vi.fn(),
     onToggleData: vi.fn(),
     onConfigureNotif: vi.fn(),
+    onConfigure: vi.fn(),
     onUnlock: vi.fn(),
     onRevoke: vi.fn(),
     ...over,
@@ -78,6 +76,12 @@ describe('MedicationSideEffectsCard', () => {
     const { onToggleData } = setup()
     fireEvent.click(screen.getByRole('button', { name: 'patient.data_button' }))
     expect(onToggleData).toHaveBeenCalledWith('medication_side_effects')
+  })
+
+  it('le bouton configurer ouvre la modale sur l\'onglet Configuration', () => {
+    const { onConfigure } = setup()
+    fireEvent.click(screen.getByRole('button', { name: 'modules.medication_side_effects.config_button' }))
+    expect(onConfigure).toHaveBeenCalledWith('medication_side_effects')
   })
 
   it('ne rend aucun panneau inline dans la carte', () => {

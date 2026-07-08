@@ -1,20 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Eye, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { type PreviewKind } from '@services/moduleService'
-import { moduleQueries } from '../../../hooks/queries'
 import { Tabs, type TabItem } from '../../ui/Tabs'
-import { FieldRenderer } from '../ModuleRenderer'
 import { ModuleSourcesPanel } from '../ModuleSources/ModuleSourcesPanel'
+import { ModulePatientViewPanel } from './ModulePatientViewPanel'
 import './ModulePreviewPanel.css'
 
 const DEFAULT_ACCENT = '#6366F1'
-
-// Layouts dont le contenu vit dans une autre table que module_content_fields
-// (psyedu_topics/blocks). Ils peuvent rendre avec 0 fields — le fallback
-// "coming soon" ne s'applique pas.
-const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
 
 type PanelTab = 'preview' | 'sources'
 
@@ -23,22 +15,20 @@ interface Props {
   color?: string
 }
 
+/**
+ * Aperçu praticien d'un module sous deux sous-onglets : « Vue patient »
+ * (`ModulePatientViewPanel`) et « Sources & recommandations » (`ModuleSourcesPanel`).
+ * Utilisé par la page d'aperçu standalone. La modale d'actions du module, elle, monte
+ * ces deux panneaux comme onglets de premier niveau (pas ce composant).
+ */
 export function ModulePreviewPanel({ moduleType, color }: Props) {
   const { t } = useTranslation()
-  const { data: result = null, isLoading: loading } = useQuery(moduleQueries.fields(moduleType))
-  const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<PanelTab>('preview')
 
-  // Réinitialise l'état d'UI (carte dépliée, onglet) au changement de module — la
-  // donnée, elle, provient du cache React Query (moduleQueries.fields).
+  // Réinitialise l'onglet au changement de module.
   useEffect(() => {
-    setExpandedCard(null)
     setActiveTab('preview')
   }, [moduleType])
-
-  const handleToggleCard = useCallback((id: string) => {
-    setExpandedCard(prev => (prev === id ? null : id))
-  }, [])
 
   const handleTabChange = useCallback((id: string) => {
     setActiveTab(id === 'sources' ? 'sources' : 'preview')
@@ -54,20 +44,6 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
 
   const accentColor = color ?? DEFAULT_ACCENT
 
-  const meaningfulFieldsCount = result
-    ? result.fields.filter(
-        f =>
-          f.field_type !== 'coming_soon' &&
-          f.field_type !== 'module_label' &&
-          f.field_type !== 'module_description',
-      ).length
-    : 0
-  const isFieldless = !!result && FIELDLESS_LAYOUTS.has(result.preview_kind)
-  const showComingSoon =
-    !!result &&
-    !isFieldless &&
-    (result.preview_kind === 'coming_soon' || meaningfulFieldsCount === 0)
-
   return (
     <div className="preview-panel" style={{ borderTopColor: accentColor }}>
       <Tabs
@@ -78,29 +54,7 @@ export function ModulePreviewPanel({ moduleType, color }: Props) {
         accentColor={accentColor}
       />
 
-      {activeTab === 'preview' && (
-        <>
-          {loading && (
-            <div className="preview-panel__coming-soon">{t('common.loading')}</div>
-          )}
-
-          {!loading && showComingSoon && (
-            <div className="preview-panel__coming-soon">{t('patient.coming_soon')}</div>
-          )}
-
-          {!loading && result && !showComingSoon && (
-            <div className="preview-panel__inner">
-              <FieldRenderer
-                preview_kind={result.preview_kind}
-                fields={result.fields}
-                moduleId={moduleType}
-                expandedCard={expandedCard}
-                onToggleCard={handleToggleCard}
-              />
-            </div>
-          )}
-        </>
-      )}
+      {activeTab === 'preview' && <ModulePatientViewPanel moduleType={moduleType} />}
 
       {activeTab === 'sources' && (
         <div className="preview-panel__inner preview-panel__inner--sources">
