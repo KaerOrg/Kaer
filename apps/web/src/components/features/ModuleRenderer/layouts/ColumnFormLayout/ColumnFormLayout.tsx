@@ -1,4 +1,4 @@
-import { Clock, Pencil, Plus, Save, Trash2, Zap } from 'lucide-react'
+import { Clock, Pencil, Plus, Save, Trash2 } from 'lucide-react'
 import { collectIndexed, buildColumnSpecs, readSliderParams } from '@kaer/shared'
 import { Button } from '../../../../ui/Button'
 import { Chip } from '../../../../ui/Chip'
@@ -62,8 +62,6 @@ export function ColumnFormLayout({ fields, t }: Props) {
 
   const newBtn = lbl('new_btn_label')
   const saveLabel = lbl('save_label')
-  // Parité mobile : bouton « capture rapide » (formulaire réduit aux quick_key_*).
-  const quickBtn = lbl('quick_btn_label')
 
   // Colonnes + enfants dérivés une seule fois (source partagée web ≡ mobile),
   // comme côté mobile — pas à plat dans `fields`.
@@ -114,18 +112,11 @@ export function ColumnFormLayout({ fields, t }: Props) {
           </article>
         ))}
 
-      {(newBtn || quickBtn) && (
+      {newBtn && (
         <div className="cf-actions">
-          {quickBtn && (
-            <Button variant="secondary" size="sm" disabled icon={<Zap size={16} />}>
-              {quickBtn}
-            </Button>
-          )}
-          {newBtn && (
-            <Button variant="primary" size="sm" disabled icon={<Plus size={16} />}>
-              {newBtn}
-            </Button>
-          )}
+          <Button variant="primary" size="sm" disabled icon={<Plus size={16} />}>
+            {newBtn}
+          </Button>
         </div>
       )}
 
