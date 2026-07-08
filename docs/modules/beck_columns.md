@@ -30,15 +30,14 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 > pas la re-cotation de la pensée automatique initiale.
 
 La numérotation affichée est **dynamique** : position parmi les colonnes visibles
-(en capture rapide, seules 2 colonnes apparaissent).
+(les groupes optionnels changent l'ensemble affiché).
 
 **Examen des preuves (2026-07)** : les colonnes « preuves » suivent Greenberger &
 Padesky, *Mind Over Mood* (examiner les preuves avant de construire la pensée
 alternative). D'abord livrées derrière une bascule praticien par patient
 (`optional_group`), elles sont devenues **standard** sur décision utilisateur :
 facultatives à remplir, la validation n'exige toujours que situation ou pensée
-automatique, et la « Note rapide » reste le parcours court. Le mécanisme
-`optional_group` reste disponible dans le moteur (dormant).
+automatique. Le mécanisme `optional_group` reste disponible dans le moteur (dormant).
 
 **Saisie assistée (2026-07)** : la colonne Émotion porte des chips de suggestions
 (`suggestion_1..n` sur le `column_text_field`, codes i18n en seed). Une chip
@@ -64,8 +63,8 @@ Kær est un Carnet de Bord Numérique, non-Dispositif Médical.
 ## Architecture technique
 
 Le module est rendu par le **moteur générique `column_form`** (zéro écran dédié) :
-tout le contenu (colonnes, hints, placeholders, chips, validation, capture rapide)
-vit en base dans `module_content_fields` + `field_props` (seed `supabase/seed.sql`,
+tout le contenu (colonnes, hints, placeholders, chips, validation) vit en base
+dans `module_content_fields` + `field_props` (seed `supabase/seed.sql`,
 section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../module-engine.md)
 § Layout `column_form`.
 
@@ -84,10 +83,11 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 
 ### Parcours patient (mobile)
 
-- **Capture en deux temps (2026-07)** : bouton secondaire « Noter vite »
-  (formulaire réduit aux `quick_key_*` : situation + pensée automatique). Une
-  fiche sans réponse rationnelle (`complete_key_*`) porte une puce « À
-  compléter » qui rouvre l'édition complète, pour terminer plus tard ou en séance.
+- **Statut « à compléter » (2026-07)** : une fiche sans réponse rationnelle
+  (`complete_key_*`) porte une puce « À compléter » (statut de workflow dérivé,
+  jamais stocké) qui rouvre l'édition complète, pour terminer plus tard ou en séance.
+  La saisie se fait par le seul bouton principal « + Ajouter » (la note rapide a
+  été retirée, #115).
 - **Fiche dépliable** : en liste, un appui sur une fiche déplie le détail
   (textes intégraux + chaque curseur renseigné avec son libellé et sa valeur brute).
 - Édition et suppression (avec confirmation) sur chaque fiche.
@@ -124,7 +124,7 @@ L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/.../layouts/ColumnForm/ColumnFormLayout.tsx` | Layout générique : liste, saisie, capture rapide, chips, groupes optionnels |
+| `apps/mobile/.../layouts/ColumnForm/ColumnFormLayout.tsx` | Layout générique : liste, saisie, chips, groupes optionnels |
 | `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions}.ts` | Helpers purs (statut « à compléter », toggle des chips) |
 | `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
 | `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
@@ -144,17 +144,16 @@ L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus
 HomeScreen
   └── ModuleContent { moduleType: 'beck_columns' }   → moteur column_form
         ├── mode liste   (fiches dépliables, puce « à compléter »)
-        ├── mode entry   (formulaire complet, colonnes visibles selon config)
-        └── mode quick   (capture rapide : situation + pensée automatique)
+        └── mode entry   (formulaire complet, colonnes visibles selon config)
 ```
 
 ---
 
 ## Tests
 
-- `apps/mobile/.../FieldRenderer.column_form.test.tsx` : 24 tests (liste, saisie,
-  édition, suppression, validation, capture rapide, puce « à compléter », chips
-  de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable)
+- `apps/mobile/.../FieldRenderer.column_form.test.tsx` : liste, saisie,
+  édition, suppression, validation, puce « à compléter », chips
+  de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable
 - `apps/mobile/.../ColumnForm/entryCompletion.test.ts` + `textSuggestions.test.ts` : helpers purs
 - `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
 - `apps/web/.../ColumnFormDataPanel.test.tsx` : panneau Données maître-détail (liste, sélection, MDR)

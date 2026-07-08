@@ -75,12 +75,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     () => collectIndexed(configField?.props ?? {}, 'required_key'),
     [configField]
   )
-  // Capture en deux temps : `quick_key_*` = champs du formulaire réduit,
-  // `complete_key_*` = champs dont l'absence marque la fiche « à compléter ».
-  const quickKeys = useMemo(
-    () => collectIndexed(configField?.props ?? {}, 'quick_key'),
-    [configField]
-  )
+  // `complete_key_*` = champs dont l'absence marque la fiche « à compléter »
+  // (statut de workflow dérivé, jamais stocké).
   const completeKeys = useMemo(
     () => collectIndexed(configField?.props ?? {}, 'complete_key'),
     [configField]
@@ -100,16 +96,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
       .map(({ header, children }) => ({ sectionId: header.section_id!, header, children }))
   }, [fields, patientConfig])
 
-  // Colonnes du formulaire réduit : seuls les enfants dont la clé est une
-  // quick_key ; les colonnes vidées disparaissent.
-  const quickColumns = useMemo<ColumnSpec[]>(() => {
-    if (quickKeys.length === 0) return []
-    const keySet = new Set(quickKeys)
-    return columns
-      .map(col => ({ ...col, children: col.children.filter(c => keySet.has(c.props['key'] ?? '')) }))
-      .filter(col => col.children.length > 0)
-  }, [columns, quickKeys])
-
   // Découpage des colonnes par type de widget — calculé une fois par module (pas
   // par fiche) et partagé par toutes les cartes de la liste (RecordCard mémoïsée).
   const listColumnParts = useMemo<RecordColumnPart[]>(
@@ -123,8 +109,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     [columns],
   )
 
-  // ── State — `quick` = formulaire réduit (capture rapide), `entry` = complet
-  const [mode, setMode] = useState<'list' | 'entry' | 'quick'>('list')
+  // ── State — `entry` = formulaire complet, `list` = historique des fiches
+  const [mode, setMode] = useState<'list' | 'entry'>('list')
   const [entries, setEntries] = useState<FormEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -168,15 +154,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     setMode('entry')
   }, [initialValuesFor, columns])
 
-  // Capture rapide : n'initialise QUE les champs quick — une fiche rapide ne
-  // sauvegarde aucune valeur par défaut pour les champs non montrés.
-  const handleQuickNew = useCallback(() => {
-    setEditingId(null)
-    setValues(initialValuesFor(quickColumns))
-    setEntryDate(new Date())
-    setMode('quick')
-  }, [initialValuesFor, quickColumns])
-
   const handleEdit = useCallback((entry: FormEntry) => {
     const merged = { ...initialValuesFor(columns), ...entry.values }
     setEditingId(entry.id)
@@ -192,10 +169,10 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     return entries.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
   }, [entries])
 
-  // Préremplissage réservé au formulaire complet : en capture rapide il
-  // réinjecterait des valeurs pour des champs non montrés.
+  // Préremplissage « comme d'habitude » : uniquement à la création d'une fiche
+  // (pas en édition), quand une saisie précédente existe.
   const prefillLabel = lbl('prefill_from_last')
-  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null && mode === 'entry'
+  const canPrefill = prefillLabel.length > 0 && editingId === null && lastEntry !== null
 
   const handlePrefillFromLast = useCallback(() => {
     if (!lastEntry) return
@@ -266,9 +243,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
-  // ── Mode entry (complet ou capture rapide)
+  // ── Mode entry (formulaire complet)
   if (mode !== 'list') {
-    const activeColumns = mode === 'quick' ? quickColumns : columns
     return (
       <KeyboardAvoidingView
         style={styles.container}
@@ -309,10 +285,10 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
               testID="prefill-from-last"
             />
           ) : null}
-          {activeColumns.map((col, idx) => {
+          {columns.map((col, idx) => {
             const accent = col.header.props['color'] ?? colors.primary
             // Numérotation dynamique : position parmi les colonnes VISIBLES
-            // (capture rapide et groupes optionnels changent l'ensemble affiché).
+            // (les groupes optionnels changent l'ensemble affiché).
             const stepNumber = String(idx + 1)
             const hintCode = col.header.props['hint_code']
             const titleText = col.header.text_code ? t(col.header.text_code) : ''
@@ -450,8 +426,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
   }
 
   // ── Mode list
-  const quickLabel = lbl('quick_btn_label')
-  const canQuickCapture = quickLabel.length > 0 && quickColumns.length > 0
   const toCompleteLabel = lbl('to_complete_label')
   const showCompletion = toCompleteLabel.length > 0 && completeKeys.length > 0
   return (
@@ -497,15 +471,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
         )}
       </ScrollView>
       <View style={styles.footer}>
-        {canQuickCapture ? (
-          <Button
-            variant="secondary"
-            label={quickLabel}
-            onPress={handleQuickNew}
-            iconLeft={<MaterialCommunityIcons name="flash-outline" size={20} color={colors.primary} />}
-            testID="quick-entry"
-          />
-        ) : null}
         <Button
           variant="primary"
           style={styles.footerBtnFlex}
