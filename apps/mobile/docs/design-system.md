@@ -60,7 +60,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -202,8 +202,12 @@ visuelles pour un même besoin :
 | Variante | Rendu | Usage |
 |---|---|---|
 | `numbered` (défaut) | boutons carrés bordés avec le chiffre, seul le sélectionné est mis en évidence | `mood_tracker` (1–10), `fear_thermometer` (0–100 par 10) |
-| `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `beck_columns`, `activity_log` (plaisir/maîtrise) |
+| `track` | segments fins formant une barre de progression (fill cumulatif) | `behavioral_activation` (0–10), `activity_log` (plaisir/maîtrise) |
 | `track` + `continuous` | jauge **continue** proportionnelle (fill + thumb) + valeur formatée, au lieu de N pips | aperçu d'une valeur continue (ex. `slider_dashboard`) |
+
+> Pour une **saisie continue par glissement** (curseur draggable), utiliser
+> [`Slider`](#slider-srccomponentsuislider) — `RatingSelector` reste le contrôle à
+> **paliers discrets** (pips / icônes).
 | `icon` | rangée d'icônes remplies jusqu'à la valeur (`star` ou `weather-sunny`) | `sleep_diary` (qualité de nuit, ressenti au réveil) |
 
 > **Affichage = un mode, pas un composant à part.** Pour un rendu en lecture seule,
@@ -237,6 +241,46 @@ visuelles pour un même besoin :
 // Jauge continue en lecture seule (aperçu d'un champ slider 0–120 min)
 <RatingSelector variant="track" continuous steps={[0, 120]} value={60}
   unit="min" color={colors.primary} showHeader={false} />
+```
+
+---
+
+### Slider (`src/components/ui/Slider/`)
+
+Curseur **continu** (glissement ou tap) sur une plage `[min, max]` alignée sur
+`step` — le contrôle de saisie proportionnelle du design system. À préférer à
+`RatingSelector variant="track"` dès qu'on veut un vrai curseur draggable plutôt
+qu'une rangée de paliers. Usage : intensités / niveaux de croyance de `beck_columns`.
+
+> **`value = null` = pas d'ancrage (MDR 2017/745).** Tant que le patient n'a pas
+> touché le curseur, la piste est vide et aucun thumb n'est affiché : rien n'est
+> pré-sélectionné ni sauvegardé (pas de faux « 50 » d'ancrage). `onChange` n'est émis
+> qu'à l'interaction réelle.
+
+Le remplissage et le thumb sont positionnés par **flexbox** (`flex: ratio`), sans
+mesure de largeur au rendu ; seule l'interaction lit la largeur mesurée
+(`onLayout`). Accessible : `accessibilityRole="adjustable"` + actions
+increment / decrement (pas de `step`). Logique pure de mapping isolée et testée
+dans `sliderMath.ts`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number \| null` | Valeur courante ; `null` = non touché (piste vide, aucun thumb) |
+| `min` | `number` | Borne basse |
+| `max` | `number` | Borne haute |
+| `step?` | `number` | Pas d'alignement (défaut `1` = continu au point près) |
+| `color` | `string` | Couleur d'accent (remplissage + thumb) |
+| `label?` | `string` | Libellé au-dessus de la piste (sert d'`accessibilityLabel`) |
+| `unit?` | `string` | Unité affichée après la valeur (ex. `"%"`) |
+| `showEndLabels?` | `boolean` | Affiche les bornes min/max sous la piste |
+| `testID?` | `string` | Expose `${testID}-track`, `${testID}-value`, `${testID}-fill` |
+| `onChange` | `(value: number) => void` | Émis à chaque interaction, valeur alignée/bornée |
+
+```tsx
+// Intensité émotionnelle 0–100 (config-first : min/max/step/unit lus des field_props)
+<Slider label={lbl('intensity')} value={intensity} min={0} max={100} step={1}
+  unit="%" color={colors.primary} showEndLabels
+  onChange={setIntensity} testID="slider-input-emotion_intensity" />
 ```
 
 ---

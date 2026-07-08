@@ -234,18 +234,21 @@ Deux field_types propres :
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, capture en deux temps : `quick_btn_label`, `quick_key_1..n`, `complete_key_1..n`, `to_complete_label` |
+| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, statut « à compléter » : `complete_key_1..n`, `to_complete_label` |
 | `column_header` | En-tête de colonne | `color`, `optional_group` (colonne masquée côté patient tant que le groupe ne figure pas dans `patient_modules.config.enabled_groups` — lecture `readEnabledGroups` de `@kaer/shared`. Capacité moteur dormante : aucun seed ni UI ne l'utilise actuellement, beck_columns y a renoncé en 2026-07 au profit de colonnes standard) |
 | `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
-| `column_slider_field` | Slider dans colonne | `min`, `max`, `column_index` |
+| `column_slider_field` | Curseur continu (`@ui/Slider`) dans colonne | `key`, `min`, `max`, `step` (1 = continu), `unit` (ex. `%`), `color` |
 
-> **Capture en deux temps** (`quick_key_*`) : un bouton secondaire en mode liste
-> ouvre le formulaire réduit aux seuls champs dont la clé est une `quick_key` ;
-> la fiche sauvegardée ne porte que ces valeurs (aucun défaut de slider). Tant que
-> toutes les `complete_key_*` ne sont pas renseignées, la fiche affiche une puce
-> « à compléter » (`to_complete_label`, statut **dérivé** jamais stocké) qui ouvre
-> l'édition complète. Utilisé par `beck_columns`.
+> **Curseur continu** : le `column_slider_field` est rendu par le primitive
+> `@ui/Slider` (glissement / tap). `value = null` tant que le patient n'a pas touché
+> le curseur — aucune valeur d'ancrage n'est écrite (MDR 2017/745). `min`/`max`/`step`/
+> `unit` sont lus des `field_props` (config-first).
+
+> **Statut « à compléter »** (`complete_key_*`) : tant que toutes les `complete_key_*`
+> ne sont pas renseignées, la fiche affiche une puce « à compléter »
+> (`to_complete_label`, statut **dérivé** jamais stocké) qui ouvre l'édition complète.
+> Utilisé par `beck_columns`. (La note rapide `quick_key_*` a été retirée en 2026-07, #115.)
 
 **Layout `daily_checkin`**
 

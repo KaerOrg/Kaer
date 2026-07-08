@@ -27,21 +27,13 @@ import { formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { RatingSelector } from '@ui/RatingSelector'
+import { Slider } from '@ui/Slider'
 import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
 import { ColumnTimeField } from './ColumnTimeField'
 import { hasToken, toggleToken } from './textSuggestions'
 import { RecordCard, type RecordColumnPart } from './RecordCard'
 import { styles } from './styles'
-
-const PIP_STEPS_0_100 = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-
-function buildPipSteps(min: number, max: number, step: number): number[] {
-  const steps: number[] = []
-  for (let v = min; v <= max; v += step) steps.push(v)
-  return steps
-}
 
 interface ColumnSpec {
   sectionId: string
@@ -361,23 +353,22 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
                     if (child.field_type === 'column_slider_field') {
                       const { min, max, step } = readSliderParams(child)
                       const sliderColor = child.props['color'] ?? accent
-                      // Cas courant 0-100/10 : réf. stable (module-level) pour ne pas
-                      // ré-allouer le tableau de pips à chaque frappe (mémo RatingSelector).
-                      const steps = (min === 0 && max === 100 && step === 10)
-                        ? PIP_STEPS_0_100
-                        : buildPipSteps(min, max, step)
-                      // null = curseur non touché : aucun pip sélectionné, rien de sauvegardé.
+                      // null = curseur non touché : rien n'est saisi tant que le
+                      // patient n'a pas glissé le curseur (pas de valeur d'ancrage).
                       const numValue = typeof values[key] === 'number' ? (values[key] as number) : null
                       return (
                         <View key={child.id} testID={`slider-${key}`}>
-                          <RatingSelector
+                          <Slider
                             label={labelOrPlaceholder}
                             value={numValue}
+                            min={min}
+                            max={max}
+                            step={step}
+                            unit={child.props['unit']}
                             color={sliderColor}
-                            steps={steps}
-                            variant="track"
                             showEndLabels
-                            onPress={(v) => setValues(prev => ({ ...prev, [key]: v }))}
+                            testID={`slider-input-${key}`}
+                            onChange={(v) => setValues(prev => ({ ...prev, [key]: v }))}
                           />
                         </View>
                       )
