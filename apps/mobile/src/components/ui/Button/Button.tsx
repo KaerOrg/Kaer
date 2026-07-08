@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react'
-import { Pressable, Text, ActivityIndicator } from 'react-native'
+import { View, Pressable, Text, ActivityIndicator } from 'react-native'
 import { colors } from '@theme'
 import { styles } from './Button.styles'
 import type { ButtonProps } from './Button.types'
 
-export const Button = React.memo(function Button({ label, onPress, variant = 'primary', size = 'md', loading, disabled, style, iconLeft, accessibilityLabel, testID }: ButtonProps) {
+export const Button = React.memo(function Button({ label, sublabel, onPress, variant = 'primary', size = 'md', loading, disabled, style, iconLeft, accessibilityLabel, testID }: ButtonProps) {
   const isDisabled = disabled || loading
   const iconOnly = label == null
 
@@ -36,7 +36,16 @@ export const Button = React.memo(function Button({ label, onPress, variant = 'pr
       ) : (
         <>
           {iconLeft}
-          {label != null ? <Text style={[styles.label, size === 'sm' ? styles.labelSm : styles.labelMd, styles[`${variant}Label`]]}>{label}</Text> : null}
+          {label != null ? (
+            sublabel != null ? (
+              <View style={styles.textColumn}>
+                <Text style={[styles.label, size === 'sm' ? styles.labelSm : styles.labelMd, styles[`${variant}Label`]]}>{label}</Text>
+                <Text style={[styles.sublabel, styles[`${variant}Label`]]}>{sublabel}</Text>
+              </View>
+            ) : (
+              <Text style={[styles.label, size === 'sm' ? styles.labelSm : styles.labelMd, styles[`${variant}Label`]]}>{label}</Text>
+            )
+          ) : null}
         </>
       )}
     </Pressable>

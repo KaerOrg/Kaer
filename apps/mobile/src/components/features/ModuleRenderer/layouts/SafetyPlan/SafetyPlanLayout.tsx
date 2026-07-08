@@ -15,7 +15,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { Button } from '@ui/Button'
 import type { ContentField } from '@services/moduleService'
-import { getAllPlanItemsForModule, type PlanItem } from '../../../../../lib/database'
+import { getPlanItems, type PlanItem } from '@services/planItemService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { CrisisEmergencyCalls } from '../shared'
@@ -44,7 +44,7 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
 
   useEffect(() => {
     let active = true
-    getAllPlanItemsForModule(moduleId)
+    getPlanItems(moduleId)
       .then(data => { if (active) setItems(data) })
       .catch(() => { /* la vue reste sur les étapes vides + numéros d'urgence */ })
       .finally(() => { if (active) setLoading(false) })

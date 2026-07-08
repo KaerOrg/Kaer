@@ -145,6 +145,7 @@ couleur reste pilotée par `variant`. `sm` sert aux actions inline compactes (ex
 | Prop | Type | Rôle |
 |---|---|---|
 | `label` | `string` | Texte du bouton. **Optionnel** : sans libellé, le bouton est « icône seule » (rendu compact, sans le chrome CTA) |
+| `sublabel` | `string` | Ligne secondaire optionnelle sous le `label` (bouton à deux lignes, ex. bouton d'appel « numéro + intitulé »). Plus petite, atténuée, dans la couleur du variant |
 | `onPress` | `() => void` | Callback (obligatoire) |
 | `variant` | `ButtonVariant` | Variante visuelle (défaut `'primary'`) |
 | `size` | `ButtonSize` | Taille `'sm'` ou `'md'` (défaut `'md'`) |

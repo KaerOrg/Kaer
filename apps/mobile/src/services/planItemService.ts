@@ -1,12 +1,18 @@
 import {
   savePlanItem as dbSavePlanItem,
   deletePlanItem as dbDeletePlanItem,
+  getAllPlanItemsForModule as dbGetAllPlanItemsForModule,
   setModuleSetting as dbSetModuleSetting,
   type PlanItem,
 } from '../lib/database'
 import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { PlanItem }
+
+/** Lecture SQLite locale des items du plan d'un module (lecture seule, pas de sync). */
+export async function getPlanItems(moduleId: string): Promise<PlanItem[]> {
+  return dbGetAllPlanItemsForModule(moduleId)
+}
 
 export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
   await syncUpsert(() => dbSavePlanItem(item), {

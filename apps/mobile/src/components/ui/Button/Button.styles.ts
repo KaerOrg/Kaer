@@ -19,9 +19,12 @@ export const styles = StyleSheet.create({
   withIcon:   { flexDirection: 'row', gap: spacing.xs },
   // Mode icône seule : annule le « chrome » CTA (hauteur min + padding large).
   iconOnly:   { minHeight: 0, paddingVertical: spacing.xs, paddingHorizontal: spacing.xs },
+  // Colonne label + sublabel (bouton à deux lignes) — alignée à gauche.
+  textColumn:     { alignItems: 'flex-start' },
   label:          { fontWeight: '600' },
   labelMd:        { fontSize: 16 },
   labelSm:        { fontSize: 14 },
+  sublabel:       { fontSize: 12, fontWeight: '400', opacity: 0.85, marginTop: 1 },
   primaryLabel:   { color: colors.white },
   secondaryLabel: { color: colors.primary },
   ghostLabel:     { color: colors.primary },

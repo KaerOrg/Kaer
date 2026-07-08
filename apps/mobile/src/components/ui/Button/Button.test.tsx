@@ -45,4 +45,10 @@ describe('Button', () => {
     const styleArray = screen.getByText('Standard').props.style.flat()
     expect(styleArray).toContainEqual({ fontSize: 16 })
   })
+
+  it('affiche le sublabel sous le label (bouton à deux lignes)', () => {
+    render(<Button label="15, SAMU" sublabel="Urgence médicale" onPress={() => {}} />)
+    expect(screen.getByText('15, SAMU')).toBeTruthy()
+    expect(screen.getByText('Urgence médicale')).toBeTruthy()
+  })
 })

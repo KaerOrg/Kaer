@@ -3,9 +3,9 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ push: mockPush }),
 }))
 
-const mockGetAllPlanItemsForModule = jest.fn()
-jest.mock('../../../../../lib/database', () => ({
-  getAllPlanItemsForModule: (...a: unknown[]) => mockGetAllPlanItemsForModule(...a),
+const mockGetPlanItems = jest.fn()
+jest.mock('@services/planItemService', () => ({
+  getPlanItems: (...a: unknown[]) => mockGetPlanItems(...a),
 }))
 
 jest.mock('../../../../../hooks/useModuleT', () => ({
@@ -58,14 +58,14 @@ const UI_FIELDS: ContentField[] = [
 
 beforeEach(() => {
   jest.clearAllMocks()
-  mockGetAllPlanItemsForModule.mockResolvedValue([])
+  mockGetPlanItems.mockResolvedValue([])
   jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined as never)
 })
 
 describe('SafetyPlanLayout', () => {
   it('charge les items du plan au montage', async () => {
     render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
-    await waitFor(() => expect(mockGetAllPlanItemsForModule).toHaveBeenCalledWith('crisis_plan'))
+    await waitFor(() => expect(mockGetPlanItems).toHaveBeenCalledWith('crisis_plan'))
   })
 
   it('affiche le titre de consultation, les étapes et les ancres', async () => {
@@ -77,7 +77,7 @@ describe('SafetyPlanLayout', () => {
   })
 
   it('affiche les items saisis dans leur étape et un placeholder pour les étapes vides', async () => {
-    mockGetAllPlanItemsForModule.mockResolvedValue([
+    mockGetPlanItems.mockResolvedValue([
       { id: 'i1', module_id: 'crisis_plan', section_id: 'step_1', text: 'Je me sens tendu', sort_order: 0, weight: null, created_at: '' },
     ])
     render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)

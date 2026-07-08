@@ -11,8 +11,8 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-nati
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
-import { getAllPlanItemsForModule, generateId, type PlanItem } from '../../../../../lib/database'
-import { savePlanItem, deletePlanItem } from '@services/planItemService'
+import { generateId } from '../../../../../lib/database'
+import { getPlanItems, savePlanItem, deletePlanItem, type PlanItem } from '@services/planItemService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { EditableItemsList, CrisisEmergencyCalls } from '../shared'
@@ -45,7 +45,7 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
 
   useEffect(() => {
-    getAllPlanItemsForModule(moduleId)
+    getPlanItems(moduleId)
       .then(data => {
         setItems(data)
         setLoading(false)

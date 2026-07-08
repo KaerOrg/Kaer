@@ -1,9 +1,11 @@
 const mockSaveDb = jest.fn().mockResolvedValue(undefined)
 const mockDeleteDb = jest.fn().mockResolvedValue(undefined)
 const mockSetSettingDb = jest.fn().mockResolvedValue(undefined)
+const mockGetAllDb = jest.fn().mockResolvedValue([])
 jest.mock('../lib/database', () => ({
   savePlanItem: (...a: unknown[]) => mockSaveDb(...a),
   deletePlanItem: (...a: unknown[]) => mockDeleteDb(...a),
+  getAllPlanItemsForModule: (...a: unknown[]) => mockGetAllDb(...a),
   setModuleSetting: (...a: unknown[]) => mockSetSettingDb(...a),
 }))
 
@@ -12,7 +14,7 @@ jest.mock('./sync', () => ({
   RemoteSyncService: { getInstance: () => ({ enqueue: mockEnqueue }) },
 }))
 
-import { savePlanItem, deletePlanItem, setModuleSetting } from './planItemService'
+import { getPlanItems, savePlanItem, deletePlanItem, setModuleSetting } from './planItemService'
 
 const item = {
   id: 'pi-1',
@@ -26,6 +28,16 @@ const item = {
 beforeEach(() => jest.clearAllMocks())
 
 describe('planItemService', () => {
+  describe('getPlanItems', () => {
+    it('lit les items du module depuis SQLite (lecture seule, sans enqueue)', async () => {
+      mockGetAllDb.mockResolvedValueOnce([item])
+      const result = await getPlanItems('crisis_plan')
+      expect(mockGetAllDb).toHaveBeenCalledWith('crisis_plan')
+      expect(result).toEqual([item])
+      expect(mockEnqueue).not.toHaveBeenCalled()
+    })
+  })
+
   describe('savePlanItem', () => {
     it('écrit SQLite puis enqueue upsert plan_item avec module_id', async () => {
       await savePlanItem(item)

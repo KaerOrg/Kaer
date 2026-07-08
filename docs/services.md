@@ -93,7 +93,7 @@ Le [`store/authStore.ts`](../apps/web/src/store/authStore.ts) est un thin wrappe
 | [`medicationIntakeService.ts`](../apps/mobile/src/services/medicationIntakeService.ts) | `saveMedicationIntake`, `deleteMedicationIntake`, `getMedicationIntakes` — détail de prise par molécule (`medication_intakes`) + sync |
 | [`medicationListService.ts`](../apps/mobile/src/services/medicationListService.ts) | `fetchMedications`, `updateMedications` — liste de molécules co-éditée patient↔praticien (`patient_modules.config.medications`) |
 | [`treeSelectionService.ts`](../apps/mobile/src/services/treeSelectionService.ts) | `saveTreeSelection`, `deleteTreeSelection` — sélecteurs hiérarchiques (roue des émotions) |
-| [`planItemService.ts`](../apps/mobile/src/services/planItemService.ts) | `savePlanItem`, `deletePlanItem`, `setModuleSetting` — plans éditables + settings module |
+| [`planItemService.ts`](../apps/mobile/src/services/planItemService.ts) | `getPlanItems` (lecture), `savePlanItem`, `deletePlanItem`, `setModuleSetting` — plans éditables + settings module |
 | [`activityRecordService.ts`](../apps/mobile/src/services/activityRecordService.ts) | `saveActivityRecord`, `deleteActivityRecord` — activation comportementale |
 | [`fearTrackerService.ts`](../apps/mobile/src/services/fearTrackerService.ts) | `saveFearEntry`, `deleteFearEntry`, `saveFearSituation`, `deleteFearSituation`, `createExposureHierarchy`, `deleteExposureHierarchy` |
 | [`breathingService.ts`](../apps/mobile/src/services/breathingService.ts) | `fetchBreathingTechniques` (config-first, lue en base), `fetchBreathingSessions`, `saveBreathingSession` — techniques de respiration |
