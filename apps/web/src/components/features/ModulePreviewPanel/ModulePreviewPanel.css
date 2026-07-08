@@ -1895,37 +1895,6 @@
 .cf-empty__title { font-size: 13px; font-weight: 700; color: var(--color-primary); }
 .cf-empty__text { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
 
-.cf-record {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.cf-record__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg);
-}
-
-.cf-record__date { font-size: 11px; color: var(--color-text-muted); }
-
-.cf-record__icons { display: flex; gap: 8px; color: var(--color-text-muted); }
-
-.cf-record__body { display: flex; flex-direction: column; gap: 7px; padding: 10px 12px; }
-
-.cf-record__row { display: flex; align-items: center; gap: 8px; }
-
-.cf-record__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-.cf-record__label { font-size: 12px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-.cf-record__val { font-size: 11px; color: var(--color-text-muted); font-style: italic; flex-shrink: 0; }
-
 .cf-actions {
   align-self: flex-end;
   display: flex;
