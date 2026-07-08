@@ -177,7 +177,7 @@ export const PREVIEW_KINDS = [
   'tabbed',
   'chrono_month',
   'slider_dashboard',
-  'crisis_urgency',
+  'safety_plan',
   'crisis_companion',
   'stage_wheel',
   'dual_ruler',

@@ -21,7 +21,6 @@ function mockStubWidget(testID: string) {
   const { Text } = require('react-native')
   return () => R.createElement(Text, { testID }, testID)
 }
-jest.mock('./fields/CrisisUrgencyEntry', () => ({ CrisisUrgencyEntry: mockStubWidget('urgency-entry-stub') }))
 jest.mock('./fields/CrisisAnchorsWidget', () => ({ CrisisAnchorsWidget: mockStubWidget('anchors-stub') }))
 
 import React from 'react'
@@ -185,15 +184,13 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     })
   })
 
-  it('dispatche les fields hors-section : bandeau urgence en tête, widgets après les étapes', async () => {
+  it('dispatche les fields hors-section : widgets après les étapes', async () => {
     const fields: ContentField[] = [
-      makeField({ id: 'urgency', field_type: 'crisis_urgency_entry', text_code: 'modules.crisis_plan.urgency_title', section_id: null, sort_order: 5 }),
       ...MOCK_FIELDS,
       makeField({ id: 'anchors', field_type: 'crisis_anchors_preview', section_id: null, sort_order: 70 }),
     ]
     render(<FieldRenderer preview_kind="editable_steps" fields={fields} moduleId="crisis_plan" />)
     await waitFor(() => {
-      expect(screen.getByTestId('urgency-entry-stub')).toBeTruthy()
       expect(screen.getByTestId('anchors-stub')).toBeTruthy()
     })
   })

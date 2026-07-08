@@ -7,9 +7,7 @@ import {
   deleteCrisisAnchor,
   getModuleSetting,
   setModuleSetting,
-  getAllPlanItemsForModule,
   type CrisisAnchor,
-  type PlanItem,
 } from '../lib/database'
 import { syncUpsert, syncDelete } from './syncHelpers'
 
@@ -111,14 +109,4 @@ export async function saveAnchorPhrase(phrase: string): Promise<void> {
     entry_kind: 'module_setting',
     payload: { key: ANCHOR_PHRASE_KEY, value: phrase },
   })
-}
-
-// ─── Items des étapes 4 et 5 (mode urgence) ──────────────────────────────────
-
-export async function getUrgencyItems(): Promise<{ step4: PlanItem[]; step5: PlanItem[] }> {
-  const all = await getAllPlanItemsForModule('crisis_plan')
-  return {
-    step4: all.filter(i => i.section_id === 'step_4'),
-    step5: all.filter(i => i.section_id === 'step_5'),
-  }
 }

@@ -17,9 +17,5 @@ export const styles = StyleSheet.create({
   badgeText:       { color: '#fff', fontSize: 11, fontWeight: '700' },
   stepContent:     { borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.md, gap: spacing.sm },
   stepHint:        { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginBottom: spacing.xs },
-  emergencyBar:    { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
-  emergencyRow:    { flexDirection: 'row', padding: spacing.sm, gap: spacing.sm },
-  emergencyBtn:    { flex: 1, flexDirection: 'row', alignItems: 'center', padding: spacing.sm, borderRadius: radius.md, gap: spacing.sm },
-  emergencyNumber: { color: '#fff', fontSize: 14, fontWeight: '700', lineHeight: 18 },
-  emergencyLabel:  { color: 'rgba(255,255,255,0.8)', fontSize: 11, lineHeight: 14 },
+  emergencyBar:    { backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border, padding: spacing.sm },
 })

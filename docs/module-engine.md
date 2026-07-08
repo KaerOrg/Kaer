@@ -58,8 +58,8 @@ Valeurs de `preview_kind` et leur layout :
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `crisis_companion` | Compagnon de crise « urge surfing » : machine à états accueil+catégories (un écran) → activité + délai → minuteur décompté → fin neutre. Aucune persistance. Nommé par motif, `moduleId` dérivé pour le chrome. Aperçu web = storyboard lecture seule | `distress_tolerance` (onglet « Agir en crise ») |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
-| `editable_steps` | Étapes éditables par le patient (Plan de crise) | `crisis_plan` |
-| `crisis_urgency` | Vue urgence 1-tap : boutons d'appel + contacts patient (mobile uniquement — passé directement à `FieldRenderer`, pas en base) | `crisis_plan` (écran `CrisisUrgencyScreen`) |
+| `safety_plan` | Vue de consultation « Je suis en crise » (entrée par défaut du Plan de crise) : numéros d'urgence en tête, 6 étapes remplies en lecture seule, « Mes raisons de tenir » ; roue crantée → mode édition. Web : aperçu reflétant la vue mobile, réponses patient privées → placeholder | `crisis_plan` |
+| `editable_steps` | Étapes éditables par le patient (Plan de crise, mode édition atteint via la roue crantée de `safety_plan`) | `crisis_plan` |
 | `stage_wheel` | Sélecteur de stade en sélection exclusive (modèle transthéorique de Prochaska, 6 stades par défaut) + historique. Mobile : éditeur SQLite (`em_rulers.stage`, via `motivationalBalanceService`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.stage_*`), `stageCount` configurable. MDR : auto-positionnement déclaratif, aucune progression imposée | `motivational_balance` (onglet « Stade ») |
 | `dual_ruler` | Deux échelles 0-10 (importance / confiance via `RatingSelector`) + justifications + engagement + historique. Mobile : éditeur SQLite (`em_rulers`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.rulers_*`). MDR : valeurs brutes, aucun seuil | `motivational_balance` (onglet « Thermomètres ») |
 | `weighted_balance` | Sélection de valeurs (chips, max configurable) + balance Pour/Contre dont chaque raison porte un poids 1-N (`RatingSelector` track, monochrome). Mobile : éditeur SQLite (`em_values` + `em_balance_items`). Web : aperçu structurel statique. Liste de valeurs lue d'un field `weighted_balance_config` (clés indexées `value_1..`, `max_values`) ; libellés dérivés du `moduleId`. MDR : pondération subjective, aucune couleur de gravité | `motivational_balance` (onglet « Balance ») |
@@ -157,15 +157,13 @@ create table public.module_content_fields (
 | `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number` |
 | `step_hint` | Sous-titre / question guide | `color`, `step_number` |
 
-**Layout `editable_steps` — champs suffixes** (sans `section_id`, rendus après les étapes, triés par `sort_order`)
+**Layouts `safety_plan` / `editable_steps` — champs suffixes** (sans `section_id`, rendus après les étapes, triés par `sort_order`)
 
 | `field_type` | Rendu | Props clés | Contexte |
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
-| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Bouton coloré non-cliquable (aperçu web), actif sur mobile |
-| `crisis_urgency_entry` | Bandeau d'accès mode urgence | `text_code`, `tone` | **Mobile** : bandeau rouge en tête qui navigue vers l'écran `CrisisUrgency`. **Web** : aperçu statique (rendu via `DisclaimerBanner`, le praticien n'a pas de mode urgence) |
+| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Rangée de boutons d'appel colorés (`CrisisEmergencyCalls`, partagé) en tête de `safety_plan` et en barre de `editable_steps` ; sur web, chip d'aperçu |
 | `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem, phrase SQLite, message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
-| `crisis_urgency_contacts` | Widget contacts urgence | — | Lit step4/step5 depuis SQLite (`getUrgencyItems`). Rendu uniquement dans le layout `crisis_urgency` (mobile). Pas de props — données 100% locales |
 
 **Layout `cards`**
 
@@ -532,7 +530,8 @@ interface FieldRendererProps {
 'guided_exercise' → GuidedExerciseLayout (mobile uniquement — machine d'état intro/guided/done)
 'crisis_companion'→ CrisisCompanionLayout (mobile = machine d'état + minuteur ; web = storyboard lecture seule)
 'patient_scenario'→ PatientScenarioLayout (mobile uniquement — scénario RIM + sons + urgence)
-'editable_steps'  → EditableStepsLayout (mobile uniquement — étapes éditables, Crisis Plan)
+'safety_plan'     → SafetyPlanLayout (mobile = vue consultation lecture seule + roue crantée ; web = aperçu praticien, plan de crise par défaut)
+'editable_steps'  → EditableStepsLayout (mobile = étapes éditables, mode édition du Crisis Plan)
 'stage_wheel'     → StageWheelLayout (mobile = éditeur SQLite em_rulers.stage ; web = aperçu structurel)
 'dual_ruler'      → DualRulerLayout (mobile = éditeur SQLite em_rulers ; web = aperçu structurel)
 'weighted_balance'→ WeightedBalanceLayout (mobile = éditeur SQLite em_values+em_balance_items ; web = aperçu structurel)

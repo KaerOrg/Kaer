@@ -22,6 +22,7 @@ type Props = NativeStackScreenProps<AppStackParamList, 'ModuleContent'>
 const SELF_MANAGED_LAYOUTS = new Set([
   'guided_exercise',
   'editable_steps',
+  'safety_plan',
   'daily_checkin',
   'column_form',
   'tree_selector',
@@ -43,7 +44,7 @@ const SELF_MANAGED_LAYOUTS = new Set([
 const CONFIG_LAYOUTS = new Set(['patient_scenario', 'psyedu_library', 'column_form'])
 
 export default function ModuleContentScreen({ route, navigation }: Props) {
-  const { moduleType } = route.params
+  const { moduleType, previewKindOverride } = route.params
   const { t } = useTranslation()
   const { teenColor } = useTeen()
 
@@ -74,7 +75,10 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     loadFields()
   }, [loadFields])
 
-  const needsConfig = result != null && CONFIG_LAYOUTS.has(result.preview_kind)
+  // Layout effectif : le `previewKindOverride` (ex. roue crantée → édition) prime sur
+  // le preview_kind du module. Sinon on garde celui résolu depuis la base.
+  const previewKind = previewKindOverride ?? result?.preview_kind
+  const needsConfig = previewKind != null && CONFIG_LAYOUTS.has(previewKind)
 
   // Config patient : seulement pour les layouts de CONFIG_LAYOUTS, rafraîchie au focus.
   // (fetchModuleFields a son propre cache service ; seule cette config y échappe.)
@@ -112,12 +116,12 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
   // Layouts qui gèrent leur propre scroll / structure — rendu sans ScrollView externe.
   // Le bandeau disclaimer est rendu par FieldRenderer (field `disclaimer_banner`) — ne
   // pas le dupliquer ici.
-  if (result != null && SELF_MANAGED_LAYOUTS.has(result.preview_kind)) {
+  if (result != null && previewKind != null && SELF_MANAGED_LAYOUTS.has(previewKind)) {
     return (
       <SafeAreaView style={styles.safe} edges={['bottom']}>
         <TeenAccent color={accentColor} />
         <FieldRenderer
-          preview_kind={result.preview_kind}
+          preview_kind={previewKind}
           fields={result.fields}
           accentColor={accentColor}
           moduleId={moduleType}
@@ -135,9 +139,9 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
         {description ? (
           <Text style={styles.description}>{description}</Text>
         ) : null}
-        {result != null && result.preview_kind !== 'coming_soon' ? (
+        {result != null && previewKind != null && previewKind !== 'coming_soon' ? (
           <FieldRenderer
-            preview_kind={result.preview_kind}
+            preview_kind={previewKind}
             fields={result.fields}
             accentColor={accentColor}
           />

@@ -2,7 +2,7 @@ import type { ContentField } from '@services/moduleService'
 
 /**
  * Répartit des fields entre leurs sections (`section_id`) et les fields
- * hors section. Utilisé par les layouts `steps`, `cards` et `editable_steps`.
+ * hors section. Utilisé par les layouts `steps`, `cards` et `safety_plan`.
  */
 export function partitionBySection(fields: ContentField[]): {
   sections: Map<string, ContentField[]>

@@ -1,0 +1,48 @@
+.safety-plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.safety-plan__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.safety-plan__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.safety-plan__title-icon {
+  color: var(--color-danger);
+}
+
+.safety-plan__title {
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.safety-plan__gear {
+  color: var(--color-text-muted);
+}
+
+.safety-plan__calls {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.safety-plan__calls > * {
+  flex: 1 1 40%;
+}
+
+.safety-plan__private-note {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0;
+}

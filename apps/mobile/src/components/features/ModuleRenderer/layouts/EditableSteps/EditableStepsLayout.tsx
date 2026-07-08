@@ -7,16 +7,15 @@
 // Conformité MDR 2017/745 : journal libre du patient, zéro interprétation.
 
 import { useState, useCallback, useEffect, useMemo, type ComponentProps, type ComponentType } from 'react'
-import { View, Text, Pressable, ScrollView, Linking, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
-import { getAllPlanItemsForModule, generateId, type PlanItem } from '../../../../../lib/database'
-import { savePlanItem, deletePlanItem } from '@services/planItemService'
+import { generateId } from '../../../../../lib/database'
+import { getPlanItems, savePlanItem, deletePlanItem, type PlanItem } from '@services/planItemService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { EditableItemsList } from '../shared'
-import { CrisisUrgencyEntry } from '../../fields/CrisisUrgencyEntry'
+import { EditableItemsList, CrisisEmergencyCalls } from '../shared'
 import { CrisisAnchorsWidget } from '../../fields/CrisisAnchorsWidget'
 import { styles } from './styles'
 
@@ -46,7 +45,7 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
 
   useEffect(() => {
-    getAllPlanItemsForModule(moduleId)
+    getPlanItems(moduleId)
       .then(data => {
         setItems(data)
         setLoading(false)
@@ -106,22 +105,19 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
     })
   }, [t, showConfirm])
 
-  // Partition unique des fields hors-section : bandeau d'entrée urgence (en tête),
-  // widgets de section (après les étapes, triés par sort_order) et boutons d'appel
-  // (barre fixe en bas). Parité avec le LayoutDispatcher web.
-  const { emergencyFields, hasUrgencyEntry, sectionWidgetFields } = useMemo(() => {
+  // Partition des fields hors-section : widgets de section (après les étapes, triés
+  // par sort_order) et boutons d'appel (barre fixe en bas). Parité avec le web.
+  const { emergencyFields, sectionWidgetFields } = useMemo(() => {
     const emergency: ContentField[] = []
     const sectionWidgets: ContentField[] = []
-    let urgency = false
     for (const f of uiFields) {
       if (f.field_type === 'exercise_safety') emergency.push(f)
-      else if (f.field_type === 'crisis_urgency_entry') urgency = true
       else if (SECTION_WIDGETS[f.field_type] != null) sectionWidgets.push(f)
     }
     const bySortOrder = (a: ContentField, b: ContentField) => a.sort_order - b.sort_order
     emergency.sort(bySortOrder)
     sectionWidgets.sort(bySortOrder)
-    return { emergencyFields: emergency, hasUrgencyEntry: urgency, sectionWidgetFields: sectionWidgets }
+    return { emergencyFields: emergency, sectionWidgetFields: sectionWidgets }
   }, [uiFields])
 
   if (loading) {
@@ -131,7 +127,6 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {hasUrgencyEntry && <CrisisUrgencyEntry />}
         {[...sections.entries()].map(([sectionId, fields], idx) => {
           const titleField = fields.find(f => f.field_type === 'step_title')
           const hintField = fields.find(f => f.field_type === 'step_hint')
@@ -200,29 +195,7 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
 
       {emergencyFields.length > 0 && (
         <View style={styles.emergencyBar}>
-          <View style={styles.emergencyRow}>
-            {emergencyFields.map(f => {
-              const phone = f.props['phone'] ?? ''
-              const btnColor = (f.props['bgColor'] as string | undefined) ?? '#DC2626'
-              return (
-                <Pressable
-                  key={f.id}
-                  style={[styles.emergencyBtn, { backgroundColor: btnColor }]}
-                  onPress={() => { if (phone) void Linking.openURL(`tel:${phone}`) }}
-                  testID={`emergency-${phone}`}
-                  accessibilityRole="button"
-                >
-                  <MaterialCommunityIcons name="phone" size={20} color="#fff" />
-                  <View>
-                    <Text style={styles.emergencyNumber}>{t(f.text_code ?? '')}</Text>
-                    {f.props['label_code'] != null && (
-                      <Text style={styles.emergencyLabel}>{t(f.props['label_code'] as string)}</Text>
-                    )}
-                  </View>
-                </Pressable>
-              )
-            })}
-          </View>
+          <CrisisEmergencyCalls fields={emergencyFields} />
         </View>
       )}
     </View>

@@ -15,7 +15,7 @@
 | `beck_columns` | Colonnes de Beck (TCC) | `column_form` | SQLite `form_entries` | [doc](modules/beck_columns.md) |
 | `fear_thermometer` | Exposition graduée | `exposure_tracker` | SQLite `fear_situations` / `fear_entries` | [doc](modules/fear_thermometer.md) |
 | `emotion_wheel` | Roue des émotions (Willcox) | `tree_selector` | SQLite `tree_selections` | [doc](modules/emotion_wheel.md) |
-| `crisis_plan` | Plan de crise (Safety Plan) | `editable_steps` | SQLite `crisis_anchors` + Supabase config | — |
+| `crisis_plan` | Plan de crise (Safety Plan) | `safety_plan` (édition via `editable_steps`) | SQLite `crisis_anchors` + Supabase config | — |
 | `rim` | RIM — Retraitement par Imagerie Mentale | `patient_scenario` | Supabase `patient_modules.config` (lecture seule patient) | [doc](modules/rim.md) |
 | `cognitive_saturation` | Saturation cognitive (ACT) | `guided_exercise` | SQLite `cognitive_saturation_sessions` | [doc](modules/cognitive_saturation.md) |
 | `decisional_balance` | Balance décisionnelle | `decision_grid` | SQLite `plan_items` + Supabase signal | — |

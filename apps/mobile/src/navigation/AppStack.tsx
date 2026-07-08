@@ -12,16 +12,17 @@ import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideE
 import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
-import CrisisUrgencyScreen from '../screens/modules/CrisisUrgencyScreen'
+import type { PreviewKind } from '@kaer/shared'
 import { colors } from '@theme'
 
 export type AppStackParamList = {
   Tabs: undefined
   ScaleHistory: { scale_id: string }
   ScaleEntry: { scale_id: string; entry_id?: string }
-  ModuleContent: { moduleType: string }
+  // previewKindOverride : force un layout précis au lieu de celui du module (ex. la
+  // roue crantée du plan de crise ouvre le module en mode édition `editable_steps`).
+  ModuleContent: { moduleType: string; previewKindOverride?: PreviewKind }
   BookAppointment: { practitionerId: string; appointmentId?: string }
-  CrisisUrgency: undefined
   MedicationSideEffectsHistory: undefined
   MedicationSideEffectsEntry: {
     effects: { key: string; label: string; color: string }[]
@@ -96,11 +97,6 @@ export default function AppStack() {
         name="ModuleContent"
         component={ModuleContentScreen}
         options={{ title: '' }}
-      />
-      <Stack.Screen
-        name="CrisisUrgency"
-        component={CrisisUrgencyScreen}
-        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="MedicationSideEffectsHistory"

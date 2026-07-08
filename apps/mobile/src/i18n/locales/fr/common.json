@@ -205,11 +205,9 @@
       "emergency_3114_label": "Numéro national",
       "emergency_samu_a11y": "Appeler le 15 SAMU, urgence médicale",
       "emergency_3114_a11y": "Appeler le 3114, numéro national de prévention du suicide",
-      "urgency_title": "Je suis en crise",
-      "urgency_subtitle": "Voici vos contacts et ressources d'urgence.",
-      "urgency_close_contacts": "Proches à appeler",
-      "urgency_professionals": "Professionnels & urgences",
-      "urgency_no_items": "Aucun contact renseigné dans votre plan.",
+      "consultation_title": "Je suis en crise",
+      "configure_plan": "Personnaliser mon plan",
+      "step_empty": "Rien de noté pour cette étape.",
       "anchors_title": "Mes raisons de tenir",
       "anchors_subtitle": "Des images et une phrase qui vous rappellent pourquoi la vie vaut la peine d'être vécue.",
       "practitioner_message_label": "Message de votre soignant",
@@ -1760,12 +1758,7 @@
       "photo_limit": "Maximum 3 photos",
       "anchor_phrase_placeholder": "Une phrase qui vous ancre dans le présent…",
       "anchor_phrase_label": "Ma phrase d'ancrage",
-      "anchor_phrase_save": "Enregistrer",
-      "urgency_title": "Je suis en crise",
-      "urgency_subtitle": "Voici vos contacts et ressources d'urgence.",
-      "urgency_close_contacts": "Proches à appeler",
-      "urgency_professionals": "Professionnels & urgences",
-      "urgency_no_items": "Aucun contact renseigné dans votre plan."
+      "anchor_phrase_save": "Enregistrer"
     },
     "therapeutic_commitment": {
       "label": "Contrat d'engagement thérapeutique",

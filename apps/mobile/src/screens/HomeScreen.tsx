@@ -239,11 +239,11 @@ export default function HomeScreen() {
         {modules.some(m => m.module_type === 'crisis_plan') && (
           <Pressable
             style={styles.urgencyBtn}
-            onPress={() => navigation.navigate('CrisisUrgency')}
+            onPress={() => navigation.navigate('ModuleContent', { moduleType: 'crisis_plan' })}
             accessibilityRole="button"
           >
             <MaterialCommunityIcons name="alert-circle" size={20} color="#fff" />
-            <Text style={styles.urgencyBtnText}>{t('modules.crisis_plan.urgency_title')}</Text>
+            <Text style={styles.urgencyBtnText}>{t('modules.crisis_plan.consultation_title')}</Text>
             <MaterialCommunityIcons name="chevron-right" size={18} color="rgba(255,255,255,0.8)" />
           </Pressable>
         )}
