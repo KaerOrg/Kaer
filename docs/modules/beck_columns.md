@@ -6,18 +6,22 @@
 
 Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR), sont l'outil de restructuration cognitive fondateur de la TCC. Leur efficacité est documentée dans de nombreuses méta-analyses (Hofmann et al., 2012 ; Cuijpers et al., 2019) pour la dépression unipolaire, les troubles anxieux, le PTSD et l'insomnie chronique. Recommandées par la HAS, le NICE et l'APA.
 
-**Version implémentée : 8 colonnes (format complet de Padesky)**
+**Version implémentée : 7 colonnes (format complet de Padesky)**
 
 | # | Colonne | Ce que le patient renseigne |
 |---|---|---|
 | 1 | Situation | Contexte déclencheur (qui, quoi, quand, où) |
 | 2 | Émotion(s) | Nom libre + chips d'aide au vocabulaire + intensité initiale (0 à 100) |
 | 3 | Pensée automatique | Contenu + conviction initiale (0 à 100) |
-| 4 | Distorsion cognitive (facultative) | Piège de pensée auto-étiqueté par le patient : texte libre + chips des 8 pièges classiques (Burns) |
-| 5 | Preuves pour la pensée (facultative) | Faits concrets soutenant la pensée |
-| 6 | Preuves contre la pensée (facultative) | Faits contredisant la pensée |
-| 7 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 8 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
+| 4 | Preuves pour la pensée (facultative) | Faits concrets soutenant la pensée |
+| 5 | Preuves contre la pensée (facultative) | Faits contredisant la pensée |
+| 6 | Réponse rationnelle | Pensée alternative construite par le patient |
+| 7 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
+
+> Colonne « Distorsion cognitive » retirée (2026-07, #117) : le piège de pensée
+> auto-étiqueté alourdissait la saisie sans bénéfice clinique clair. La
+> restructuration passe désormais directement de la pensée automatique à l'examen
+> des preuves.
 
 > Choix clinique (2026-07) : la colonne Résultat ré-évalue la **même** émotion
 > qu'en colonne 2 (protocole Beck/Padesky), ce qui rend `emotion_intensity` et
@@ -36,13 +40,11 @@ facultatives à remplir, la validation n'exige toujours que situation ou pensée
 automatique, et la « Note rapide » reste le parcours court. Le mécanisme
 `optional_group` reste disponible dans le moteur (dormant).
 
-**Saisie assistée (2026-07)** : les colonnes Émotion et Distorsion portent des
-chips de suggestions (`suggestion_1..n` sur le `column_text_field`, codes i18n
-en seed). Une chip ajoute/retire son mot dans le champ ; le texte libre reste
-roi. Conformité MDR : auto-étiquetage par le patient, aucune détection ni
-suggestion conditionnelle aux données. La liste des pièges est alignée sur les
-fiches psyedu du module `cognitive_distortions` (ressource pédagogique sœur),
-sans couplage technique.
+**Saisie assistée (2026-07)** : la colonne Émotion porte des chips de suggestions
+(`suggestion_1..n` sur le `column_text_field`, codes i18n en seed). Une chip
+ajoute/retire son mot dans le champ ; le texte libre reste roi. Conformité MDR :
+auto-étiquetage par le patient, aucune détection ni suggestion conditionnelle aux
+données.
 
 ---
 
@@ -71,7 +73,7 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 
 - **Offline-first** : chaque fiche = une ligne `form_entries` SQLite
   (`values` JSON indexé par clé logique : `situation`, `emotion`,
-  `emotion_intensity`, `automatic_thought`, `thought_belief`, `distortion`,
+  `emotion_intensity`, `automatic_thought`, `thought_belief`,
   `evidence_for`, `evidence_against`, `rational_response`, `outcome_emotion`,
   `outcome_intensity`, `outcome_belief`).
 - **Synchronisation** : `formEntryService.saveFormEntry` passe par
