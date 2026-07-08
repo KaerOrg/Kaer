@@ -1249,7 +1249,9 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
 on conflict (id) do nothing;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
-update public.modules set preview_kind = 'editable_steps'    where id = 'crisis_plan'             and preview_kind = 'steps';
+-- crisis_plan : vue de consultation « Je suis en crise » par défaut (safety_plan) ;
+-- l'édition (editable_steps) est atteinte via la roue crantée (previewKindOverride).
+update public.modules set preview_kind = 'safety_plan'        where id = 'crisis_plan'             and preview_kind in ('steps', 'editable_steps');
 update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tracker'            and preview_kind in ('fields', 'mood_tracker');
 update public.modules set preview_kind = 'slider_dashboard'  where id = 'medication_side_effects' and preview_kind in ('fields', 'questionnaire', 'medication_side_effects');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
@@ -1420,14 +1422,12 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.step_5.hint', 'crisis_plan', 'step_5', NULL, 'step_hint', 'modules.crisis_plan.step_5_hint', 51),
   ('crisis_plan.step_6.title', 'crisis_plan', 'step_6', NULL, 'step_title', 'modules.crisis_plan.step_6_title', 60),
   ('crisis_plan.step_6.hint', 'crisis_plan', 'step_6', NULL, 'step_hint', 'modules.crisis_plan.step_6_hint', 61),
-  -- Bannière urgence — crisis_urgency_entry (sort_order 5 = avant les étapes) : ouvre le mode urgence sur mobile, aperçu statique sur web
-  ('crisis_plan.urgency_banner', 'crisis_plan', NULL, NULL, 'crisis_urgency_entry', 'modules.crisis_plan.urgency_title', 5),
   -- Section VHB-EF « Mes raisons de tenir » (sort_order 70 : après les étapes, avant le footer)
   ('crisis_plan.anchors', 'crisis_plan', NULL, NULL, 'crisis_anchors_preview', 'modules.crisis_plan.anchors_title', 70),
   ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'module.crisis_plan.footer', 99),
+  -- Numéros d'urgence (exercise_safety) : affichés en tête de la vue de consultation
   ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 130),
-  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140),
-  ('crisis_plan.urgency_contacts', 'crisis_plan', NULL, NULL, 'crisis_urgency_contacts', NULL, 150)
+  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140)
 on conflict (id) do nothing;
 
 -- ── module_content_fields : EPDS ─────────────────────────────────────────────
@@ -1955,9 +1955,6 @@ on conflict (field_id, prop_key) do nothing;
 
 -- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF
 insert into public.field_props (field_id, prop_key, prop_value) values
-  -- Bannière urgence (crisis_urgency_entry : tone danger pour l'aperçu web)
-  ('crisis_plan.urgency_banner', 'text_code', 'modules.crisis_plan.urgency_title'),
-  ('crisis_plan.urgency_banner', 'tone', 'danger'),
   -- Boutons urgence
   ('crisis_plan.emergency_15', 'bgColor', '#0D9488'),
   ('crisis_plan.emergency_15', 'label_code', 'modules.crisis_plan.emergency_samu_label'),

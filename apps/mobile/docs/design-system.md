@@ -711,9 +711,8 @@ passe par `crisisPlanService` (jamais Supabase/SQLite direct), avec `@ui/Button`
 
 | Widget | `field_type` | Rôle | Persistance |
 |---|---|---|---|
-| `CrisisUrgencyEntry` | `crisis_urgency_entry` | Bandeau rouge en tête → navigue vers l'écran `CrisisUrgency` | — (navigation) |
 | `CrisisAnchorsWidget` | `crisis_anchors_preview` | Photos d'ancrage + phrase + message praticien | FileSystem + SQLite + Supabase |
-| `CrisisUrgencyContactsWidget` | `crisis_urgency_contacts` | Contacts de confiance (step4/step5), rendu dans `crisis_urgency` | SQLite |
+| `CrisisEmergencyCalls` (shared) | `exercise_safety` | Rangée de boutons d'appel `tel:` colorés (numéro + intitulé). Réutilisé par `SafetyPlanLayout` (tête) et `EditableStepsLayout` (barre) | — (appel) |
 
 ---
 
@@ -764,13 +763,13 @@ n'en crée un nouveau qu'en dernier recours.
 | `questionnaire` | `Questionnaire/` | `QuestionnaireLayout` | Échelle clinique interactive (Likert / slider à pips) | parent (`ScaleEntryScreen`) |
 | `guided_exercise` | `GuidedExercise/` | `GuidedExerciseLayout` | Exercice guidé — 3 modes intro / guided / done | — |
 | `patient_scenario` | `PatientScenario/` | `PatientScenarioLayout` | Scénario alternatif par patient (RIM) | Supabase (`patient_modules.config`) |
-| `editable_steps` | `EditableSteps/` | `EditableStepsLayout` | Plan éditable par sections (crisis_plan) | SQLite `plan_items` |
+| `safety_plan` | `SafetyPlan/` | `SafetyPlanLayout` | Vue de consultation « Je suis en crise » (lecture seule + roue crantée → édition) | SQLite `plan_items` |
+| `editable_steps` | `EditableSteps/` | `EditableStepsLayout` | Plan éditable par sections (mode édition du plan de crise) | SQLite `plan_items` |
 | `daily_checkin` | `DailyCheckin/` | `DailyCheckinLayout` | Saisie quotidienne — 1 statut / jour, 2 onglets | SQLite `daily_entries` |
 | `column_form` | `ColumnForm/` | `ColumnFormLayout` | Formulaire à colonnes hétérogènes (beck_columns) | SQLite `form_entries` |
 | `tree_selector` | `TreeSelector/` | `TreeSelectorLayout` | Sélecteur d'arbre hiérarchique guidé (emotion_wheel) | SQLite `tree_selections` |
 | `sleep_journal` | `SleepJournal/` | `SleepJournalLayout` | Agenda du sommeil — 3 modes list / entry / month | SQLite `sleep_diary_entries` |
 | `tabbed` | `Tabs/` | `TabsLayout` | Onglets génériques — rend récursivement `FieldRenderer` | — |
-| `crisis_urgency` | `CrisisUrgency/` | `CrisisUrgencyLayout` | Mode urgence 1-tap (gros boutons d'appel) | — |
 | `activity_log` | `ActivityLog/` | `ActivityLogLayout` | Journal d'activités (Plaisir / Maîtrise) | SQLite `activity_records` |
 | `exposure_tracker` | `ExposureTracker/` | `ExposureTrackerLayout` | Exposition graduée (échelle → expositions → courbe) | SQLite `fear_situations` / `fear_entries` |
 | `decision_grid` | `DecisionGrid/` | `DecisionGridLayout` | Balance décisionnelle 2×2 + items pondérés | SQLite `plan_items` |
@@ -904,14 +903,14 @@ apps/mobile/src/
 │       │   └── index.ts
 │       ├── layouts/                     # un dossier par layout (preview_kind)
 │       │   ├── Steps/ Fields/ Cards/ Questionnaire/ GuidedExercise/
-│       │   ├── PatientScenario/ EditableSteps/ DailyCheckin/ ColumnForm/
-│       │   ├── TreeSelector/ SleepJournal/ Tabs/ CrisisUrgency/
+│       │   ├── PatientScenario/ EditableSteps/ SafetyPlan/ DailyCheckin/ ColumnForm/
+│       │   ├── TreeSelector/ SleepJournal/ Tabs/
 │       │   ├── ActivityLog/ ExposureTracker/ DecisionGrid/ PsyEdu/
 │       │   ├── ChronoMonth/ ExposureHierarchy/
-│       │   └── shared/                  # EditableItemsList, WeightPicker, ExerciseSafetySection
+│       │   └── shared/                  # EditableItemsList, WeightPicker, ExerciseSafetySection, CrisisEmergencyCalls
 │       └── fields/                      # field_type → composant + widgets
 │           ├── FieldRow/ FieldWidget/ FieldText/ FieldListItem/
-│           ├── CardDefinition/ InlineText/ CrisisUrgencyContactsWidget/
+│           ├── CardDefinition/ InlineText/ CrisisAnchorsWidget/
 │           └── widgets/                 # TextWidget, InfoWidget, LikertWidget
 ```
 

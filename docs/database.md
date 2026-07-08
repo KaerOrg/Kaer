@@ -138,7 +138,7 @@ Une ligne par module. `preview_kind` pilote le moteur de rendu.
 
 | `id` | Catégorie | `preview_kind` | `is_invite_excluded` |
 |------|-----------|---------------|----------------------|
-| `crisis_plan` | safety | `editable_steps` | false |
+| `crisis_plan` | safety | `safety_plan` | false |
 | `therapeutic_commitment` | safety | `coming_soon` | false |
 | `distress_tolerance` | safety | `tabbed` | false |
 | `medication_side_effects` | iatrogenic | `slider_dashboard` | false |

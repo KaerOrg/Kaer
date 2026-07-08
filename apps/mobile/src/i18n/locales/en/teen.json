@@ -27,11 +27,9 @@
       "anchor_phrase_placeholder": "A phrase that brings you back to what matters…",
       "anchor_phrase_label": "My grounding phrase",
       "anchor_phrase_save": "Save",
-      "urgency_title": "I'm in crisis",
-      "urgency_subtitle": "Here are your emergency contacts.",
-      "urgency_close_contacts": "People to call",
-      "urgency_professionals": "Professionals & emergency services",
-      "urgency_no_items": "No contacts filled in your plan."
+      "consultation_title": "I'm in crisis",
+      "configure_plan": "Customise my plan",
+      "step_empty": "Nothing noted for this step."
     },
     "beck_columns": {
       "title": "Untangling my thoughts",

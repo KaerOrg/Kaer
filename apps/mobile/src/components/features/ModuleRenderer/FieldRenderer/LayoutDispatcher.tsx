@@ -11,7 +11,6 @@ import { CardsLayout } from '../layouts/Cards'
 import { ChronoMonthLayout } from '../layouts/ChronoMonth'
 import { ColumnFormLayout } from '../layouts/ColumnForm'
 import { CrisisCompanionLayout } from '../layouts/CrisisCompanion'
-import { CrisisUrgencyLayout } from '../layouts/CrisisUrgency'
 import { DailyCheckinLayout } from '../layouts/DailyCheckin'
 import { DecisionGridLayout } from '../layouts/DecisionGrid'
 import { EditableStepsLayout } from '../layouts/EditableSteps'
@@ -20,6 +19,7 @@ import { FieldsLayout } from '../layouts/Fields'
 import { GuidedExerciseLayout } from '../layouts/GuidedExercise'
 import { MedicationTrackerLayout } from '../layouts/MedicationTracker'
 import { PatientScenarioLayout } from '../layouts/PatientScenario'
+import { SafetyPlanLayout } from '../layouts/SafetyPlan'
 import { PsyEduLayout } from '../layouts/PsyEdu'
 import { PsyEduLibraryLayout } from '../layouts/PsyEduLibrary'
 import { QuestionnaireLayout } from '../layouts/Questionnaire'
@@ -101,6 +101,11 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
     return <EditableStepsLayout sections={sections} uiFields={unsectioned} moduleId={moduleId ?? ''} />
   }
 
+  if (preview_kind === 'safety_plan') {
+    const { sections, unsectioned } = partitionBySection(contentFields)
+    return <SafetyPlanLayout sections={sections} uiFields={unsectioned} moduleId={moduleId ?? ''} />
+  }
+
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'medication_tracker') return <MedicationTrackerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={visibleFields} footer={footer} moduleId={moduleId ?? ''} patientConfig={patientConfig ?? null} />
@@ -113,7 +118,6 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'psyedu_library') return <PsyEduLibraryLayout patientConfig={patientConfig ?? null} />
   if (preview_kind === 'tabbed') return <TabsLayout fields={visibleFields} moduleId={moduleId ?? ''} />
   if (preview_kind === 'chrono_month') return <ChronoMonthLayout moduleId={moduleId ?? ''} />
-  if (preview_kind === 'crisis_urgency') return <CrisisUrgencyLayout fields={visibleFields} />
   if (preview_kind === 'stage_wheel') return <StageWheelLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'weighted_balance') return <WeightedBalanceLayout fields={visibleFields} moduleId={moduleId ?? ''} accentColor={accentColor} />

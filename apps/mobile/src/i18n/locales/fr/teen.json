@@ -27,11 +27,9 @@
       "anchor_phrase_placeholder": "Une phrase qui te ramène à ce qui compte…",
       "anchor_phrase_label": "Ma phrase qui m'ancre",
       "anchor_phrase_save": "Enregistrer",
-      "urgency_title": "Je suis en crise",
-      "urgency_subtitle": "Voici tes contacts et ressources d'urgence.",
-      "urgency_close_contacts": "Proches à appeler",
-      "urgency_professionals": "Professionnels & urgences",
-      "urgency_no_items": "Aucun contact renseigné dans ton plan."
+      "consultation_title": "Je suis en crise",
+      "configure_plan": "Personnaliser mon plan",
+      "step_empty": "Rien de noté pour cette étape."
     },
     "beck_columns": {
       "title": "Démêler mes pensées",

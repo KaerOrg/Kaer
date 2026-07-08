@@ -7,14 +7,12 @@ const mockSaveCrisisAnchor = jest.fn()
 const mockDeleteCrisisAnchor = jest.fn()
 const mockGetModuleSetting = jest.fn()
 const mockSetModuleSetting = jest.fn()
-const mockGetAllPlanItemsForModule = jest.fn()
 jest.mock('../lib/database', () => ({
   getCrisisAnchors: (...a: unknown[]) => mockGetCrisisAnchors(...a),
   saveCrisisAnchor: (...a: unknown[]) => mockSaveCrisisAnchor(...a),
   deleteCrisisAnchor: (...a: unknown[]) => mockDeleteCrisisAnchor(...a),
   getModuleSetting: (...a: unknown[]) => mockGetModuleSetting(...a),
   setModuleSetting: (...a: unknown[]) => mockSetModuleSetting(...a),
-  getAllPlanItemsForModule: (...a: unknown[]) => mockGetAllPlanItemsForModule(...a),
 }))
 
 jest.mock('expo-file-system/legacy', () => ({
@@ -36,7 +34,6 @@ import {
   getAnchors,
   getAnchorPhrase,
   saveAnchorPhrase,
-  getUrgencyItems,
   pickAndSaveAnchorPhoto,
   removeAnchorPhoto,
 } from './crisisPlanService'
@@ -158,29 +155,5 @@ describe('getAnchorPhrase / saveAnchorPhrase', () => {
     mockSetModuleSetting.mockResolvedValueOnce(undefined)
     await saveAnchorPhrase('Je tiens à mes enfants')
     expect(mockSetModuleSetting).toHaveBeenCalledWith('crisis_plan', 'anchor_phrase', 'Je tiens à mes enfants')
-  })
-})
-
-// ─── getUrgencyItems ──────────────────────────────────────────────────────────
-
-describe('getUrgencyItems', () => {
-  it('filtre correctement les étapes 4 et 5', async () => {
-    mockGetAllPlanItemsForModule.mockResolvedValueOnce([
-      { id: '1', section_id: 'step_4', text: 'Appeler Sophie', module_id: 'crisis_plan', sort_order: 0, weight: null, created_at: '' },
-      { id: '2', section_id: 'step_5', text: '3114', module_id: 'crisis_plan', sort_order: 0, weight: null, created_at: '' },
-      { id: '3', section_id: 'step_1', text: 'Signe avant-coureur', module_id: 'crisis_plan', sort_order: 0, weight: null, created_at: '' },
-    ])
-    const result = await getUrgencyItems()
-    expect(result.step4).toHaveLength(1)
-    expect(result.step4[0].text).toBe('Appeler Sophie')
-    expect(result.step5).toHaveLength(1)
-    expect(result.step5[0].text).toBe('3114')
-  })
-
-  it('retourne des tableaux vides si aucun item', async () => {
-    mockGetAllPlanItemsForModule.mockResolvedValueOnce([])
-    const result = await getUrgencyItems()
-    expect(result.step4).toEqual([])
-    expect(result.step5).toEqual([])
   })
 })

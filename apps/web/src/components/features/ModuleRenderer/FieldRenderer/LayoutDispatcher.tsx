@@ -18,6 +18,7 @@ import {
   PsyEduLayout,
   PsyEduLibraryLayout,
   QuestionnaireLayout,
+  SafetyPlanLayout,
   SleepJournalLayout,
   SliderDashboardLayout,
   StageWheelLayout,
@@ -26,10 +27,6 @@ import {
   TreeSelectorLayout,
   WeightedBalanceLayout,
 } from '../layouts'
-import { FieldText } from '../fields'
-import { ExerciseSafetyField } from '../fields/ExerciseSafetyField'
-import { CrisisAnchorsWidget } from '../fields/CrisisAnchorsWidget'
-import { DisclaimerBanner } from './DisclaimerBanner'
 import { FieldRenderer } from './FieldRenderer'
 import { partitionBySection } from './partitionBySection'
 import type { FieldRendererProps } from './types'
@@ -78,25 +75,12 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
     return <CardsLayout sections={sections} expandedCard={expandedCard} onToggle={onToggleCard} t={t} />
   }
 
-  // editable_steps : les fields hors section (footer_note, exercise_safety, widgets VHB-EF)
-  // sont rendus APRÈS les étapes, triés par sort_order, pour respecter l'ordre de l'écran mobile.
-  if (preview_kind === 'editable_steps') {
+  // safety_plan : aperçu praticien de la vue de consultation « Je suis en crise »
+  // (numéros d'urgence, plan de sécurité, « Mes raisons de tenir »). Reflète l'écran
+  // patient mobile ; les réponses du patient sont privées → structure + placeholder.
+  if (preview_kind === 'safety_plan') {
     const { sections, unsectioned } = partitionBySection(visibleFields)
-    const sorted = [...unsectioned].sort((a, b) => a.sort_order - b.sort_order)
-    return (
-      <>
-        <StepsLayout sections={sections} footer={undefined} t={t} />
-        {sorted.map(f => {
-          if (f.field_type === 'footer_note') return <FieldText key={f.id} field={f} t={t} />
-          if (f.field_type === 'exercise_safety') return <ExerciseSafetyField key={f.id} field={f} />
-          // Le praticien n'a pas de mode urgence (réservé au patient mobile) : on rend
-          // l'entrée urgence en bandeau danger statique, via DisclaimerBanner (tone danger).
-          if (f.field_type === 'crisis_urgency_entry') return <DisclaimerBanner key={f.id} field={f} moduleId={moduleId} />
-          if (f.field_type === 'crisis_anchors_preview') return <CrisisAnchorsWidget key={f.id} />
-          return null
-        })}
-      </>
-    )
+    return <SafetyPlanLayout sections={sections} unsectioned={unsectioned} moduleId={moduleId} t={t} />
   }
 
   // `breathing_pacer` : côté patient mobile, un layout interactif (liste de
