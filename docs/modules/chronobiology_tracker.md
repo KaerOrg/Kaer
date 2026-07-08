@@ -107,7 +107,7 @@ retourne que les fiches avec `theme_id`). Titres/contenus i18n dans `psyedu.json
 
 ## Rappels (Phase 5 — livré)
 
-`ChronobiologyCard` expose un bouton cloche (`onConfigureNotif` → `NotificationRoutineModal`) :
+`ChronobiologyCard` expose un bouton cloche (`onConfigureNotif` → onglet Notifications de la modale d'actions, `NotificationRoutinePanel`) :
 le praticien configure un **rappel d'horaire fixe** invitant le patient à saisir ses ancres.
 Rappel **non conditionnel aux données** (horaire fixe) → explicitement autorisé par la règle d'or
 MDR (≠ alerte déclenchée par un score).

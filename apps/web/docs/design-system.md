@@ -111,7 +111,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel, ModuleRenderer, ModuleSources, NotificationRoutineModal, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -254,7 +254,7 @@ Supporte les **deux modes** :
 Props : `label?`, `value?`, `defaultValue?`, `onChange?(next)`, `icon?` (défaut horloge),
 `clearable?`, `clearLabel?`, `accent?=var(--color-primary)`, `hint?`, `step?`, `disabled?`,
 `id?`, `className?`, `data-testid?`.
-Branché sur : `NotificationRoutineModal`, `AvailabilityEditor`.
+Branché sur : `NotificationRoutinePanel`, `AvailabilityEditor`.
 
 ### `Radio` — choix exclusif (pendant web 1-1 du mobile)
 

@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Modal } from '../../ui/Modal'
 import { Button } from '../../ui/Button'
 import { Tooltip } from '../../ui/Tooltip'
 import { InputField } from '../../ui/InputField'
@@ -15,31 +14,40 @@ import {
   deleteRoutine,
 } from '@services/notificationRoutineService'
 import type { NotificationRoutine } from '../../../lib/database.types'
-import './NotificationRoutineModal.css'
+import './NotificationRoutinePanel.css'
 
 interface Props {
   patientModuleId: string
   practitionerId: string
   patientId: string
-  moduleLabel: string
-  moduleIconName: string
-  onClose: () => void
+  /**
+   * Libellé + icône du module, affichés en tête du panneau. Optionnels : quand le
+   * panneau est monté dans une modale qui porte déjà le nom du module (onglets), on
+   * les omet pour éviter un doublon de titre.
+   */
+  moduleLabel?: string
+  moduleIconName?: string
 }
 
 const DAY_KEYS = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'] as const
 const DAY_ISO = [1, 2, 3, 4, 5, 6, 7] as const
 const DEFAULT_TIME = '09:00'
 
-export function NotificationRoutineModal({
+/**
+ * Panneau « Rappels » d'un module patient : liste les routines de notification,
+ * permet d'en créer, activer/désactiver et supprimer. Rendu au choix dans la modale
+ * d'actions du module (onglet Notifications) ou seul. Ne porte PAS son propre cadre
+ * de modale — l'appelant fournit le chrome (titre, fermeture).
+ */
+export function NotificationRoutinePanel({
   patientModuleId,
   practitionerId,
   patientId,
   moduleLabel,
   moduleIconName,
-  onClose,
 }: Props) {
   const { t } = useTranslation()
-  const ModuleIcon = LUCIDE_ICONS[moduleIconName]
+  const ModuleIcon = moduleIconName ? LUCIDE_ICONS[moduleIconName] : undefined
   const queryClient = useQueryClient()
 
   const routinesQuery = useQuery(notificationRoutineQueries.byPatientModule(patientModuleId))
@@ -104,15 +112,13 @@ export function NotificationRoutineModal({
   const dayLabels = useMemo(() => DAY_KEYS, [])
 
   return (
-    <Modal
-      title={t('notifications.modal_title')}
-      icon={<Bell size={18} />}
-      onClose={onClose}
-    >
-      <p className="nr-module-label">
-        {ModuleIcon && <ModuleIcon size={14} className="nr-module-icon" />}
-        {moduleLabel}
-      </p>
+    <>
+      {moduleLabel && (
+        <p className="nr-module-label">
+          {ModuleIcon && <ModuleIcon size={14} className="nr-module-icon" />}
+          {moduleLabel}
+        </p>
+      )}
 
       {loading ? (
         <div className="nr-loading"><Loader size={20} className="nr-spinner" /></div>
@@ -187,7 +193,7 @@ export function NotificationRoutineModal({
           )}
         </>
       )}
-    </Modal>
+    </>
   )
 }
 

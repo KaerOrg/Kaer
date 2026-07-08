@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { NotificationRoutine } from '../../../lib/database.types'
 import { renderWithClient } from '../../../test/renderWithClient'
-import { NotificationRoutineModal } from './NotificationRoutineModal'
+import { NotificationRoutinePanel } from './NotificationRoutinePanel'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -31,16 +31,16 @@ function routine(over: Partial<NotificationRoutine> = {}): NotificationRoutine {
 
 function open() {
   return renderWithClient(
-    <NotificationRoutineModal
+    <NotificationRoutinePanel
       patientModuleId="pm1" practitionerId="pr1" patientId="pt1"
-      moduleLabel="Sommeil" moduleIconName="Moon" onClose={() => {}}
+      moduleLabel="Sommeil" moduleIconName="Moon"
     />,
   )
 }
 
 beforeEach(() => vi.clearAllMocks())
 
-describe('NotificationRoutineModal', () => {
+describe('NotificationRoutinePanel', () => {
   it('charge et affiche les rappels existants', async () => {
     mockGet.mockResolvedValue([routine()])
     open()

@@ -42,17 +42,20 @@ export function useCrisisPlanEditor(
     setCardDraft(null)
   }
 
-  const saveEditor = async () => {
+  // Retourne `true` si la config a été enregistrée, `false` sur erreur — l'appelant
+  // ferme la modale uniquement en cas de succès.
+  const saveEditor = async (): Promise<boolean> => {
     setSaving(true)
     const { ok } = await saveCrisisPlanConfig(patientId, config)
     setSaving(false)
-    if (!ok) { toast.error(t('patient.crisis_error_save')); return }
+    if (!ok) { toast.error(t('patient.crisis_error_save')); return false }
     // Invalide le cache partagé → les 3 widgets d'aperçu (anchors/coping/commitment)
     // se rechargent avec la nouvelle config.
     await queryClient.invalidateQueries({ queryKey: crisisQueries.planConfig(patientId).queryKey })
     toast.success(t('common.saved'))
     setOpen(false)
     await onReloadModules()
+    return true
   }
 
   const addCopingCard = () => {

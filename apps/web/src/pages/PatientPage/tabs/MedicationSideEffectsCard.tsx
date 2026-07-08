@@ -1,14 +1,9 @@
-import { useCallback, useRef, type ReactNode } from 'react'
+import { useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { ModuleCardFooter } from './ModuleCardFooter'
-import { SIDE_EFFECT_CATALOG, isCustomKey } from '../../../lib/sideEffectsCatalog'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '@services/moduleCatalogService'
 import type { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
-import { SideEffectToggleRow } from './SideEffectToggleRow'
-import { CustomEffectRow } from './CustomEffectRow'
 
 const MODULE_TYPE: ModuleType = 'medication_side_effects'
 
@@ -16,7 +11,6 @@ type MedEffects = ReturnType<typeof useMedicationEffectsEditor>
 
 export interface MedicationSideEffectsCardProps {
   tagChips: ReactNode
-  modItem: ModuleItem
   modIcon: ReactNode
   mod: PatientModule | undefined
   unlocked: boolean
@@ -27,19 +21,20 @@ export interface MedicationSideEffectsCardProps {
   moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
   onTogglePreview: (type: ModuleType) => void
   onToggleData: (type: ModuleType) => void
-  onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
+  onConfigureNotif: (type: ModuleType) => void
+  onConfigure: (type: ModuleType) => void
   onUnlock: (type: ModuleType) => void
   onRevoke: (moduleId: string) => void
 }
 
 /**
  * Carte module « Effets indésirables du traitement » de l'armoire praticien.
- * Extraite du `renderModuleCard` de PatientModulesTab pour pouvoir héberger des
- * callbacks stables (useCallback) — un branchement de render ne peut pas appeler de hooks.
+ * L'édition (sélection des effets suivis) se fait dans l'onglet Configuration de la
+ * modale d'actions ; la carte n'affiche que le résumé (nombre d'effets suivis) et les
+ * boutons d'ouverture de la modale.
  */
 export function MedicationSideEffectsCard({
   tagChips,
-  modItem,
   modIcon,
   mod,
   unlocked,
@@ -51,14 +46,11 @@ export function MedicationSideEffectsCard({
   onTogglePreview,
   onToggleData,
   onConfigureNotif,
+  onConfigure,
   onUnlock,
   onRevoke,
 }: MedicationSideEffectsCardProps) {
   const { t, i18n } = useTranslation()
-  const customRef = useRef<HTMLInputElement>(null)
-
-  const trackedKeys = new Set(medEffects.tracked.map(e => e.key))
-  const customs = medEffects.tracked.filter(e => isCustomKey(e.key) || e.custom)
 
   const handleToggle = useCallback(() => {
     if (unlocked && mod) {
@@ -71,36 +63,15 @@ export function MedicationSideEffectsCard({
 
   const handleNotif = useCallback(() => {
     if (!mod) return
-    onConfigureNotif({
-      patientModuleId: mod.id,
-      moduleLabel: t('modules.medication_side_effects.label'),
-      moduleIconName: modItem.icon,
-    })
-  }, [mod, onConfigureNotif, t, modItem.icon])
+    onConfigureNotif(MODULE_TYPE)
+  }, [mod, onConfigureNotif])
 
+  const handleConfigure = useCallback(() => onConfigure(MODULE_TYPE), [onConfigure])
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
   const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
 
-  const addCustom = useCallback(() => {
-    if (customRef.current) {
-      medEffects.addCustom(customRef.current.value)
-      customRef.current.value = ''
-    }
-  }, [medEffects])
-
-  const handleCustomKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') addCustom()
-    },
-    [addCustom]
-  )
-
-  // Seul l'éditeur de configuration élargit encore la carte : aperçu et données
-  // s'affichent désormais en modale, hors de la grille.
-  const isWide = medEffects.open
-
   return (
-    <div className={`module-card-wrapper module-card-wrapper-block ${isWide ? 'module-card-wrapper-block--wide' : ''}`}>
+    <div className="module-card-wrapper module-card-wrapper-block">
       <Card
         className="module-card-item"
         header={{
@@ -113,7 +84,7 @@ export function MedicationSideEffectsCard({
           <ModuleCardFooter
             onConfigureNotif={handleNotif}
             configLabel={t('modules.medication_side_effects.config_button')}
-            onConfigure={!medEffects.open ? medEffects.openEditor : undefined}
+            onConfigure={handleConfigure}
             previewOpen={previewOpen}
             onTogglePreview={handlePreviewToggle}
             dataOpen={dataOpen}
@@ -133,60 +104,6 @@ export function MedicationSideEffectsCard({
           </div>
         )}
       </Card>
-
-      {medEffects.open && unlocked && mod && (
-        <div className="psycho-card-picker">
-          <p className="psycho-card-picker__label">{t('modules.medication_side_effects.config_title')}</p>
-          <p style={{ fontSize: 12, color: '#6B7280', marginTop: -8, marginBottom: 12 }}>
-            {t('modules.medication_side_effects.config_hint')}
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {SIDE_EFFECT_CATALOG.map(cat => (
-              <SideEffectToggleRow
-                key={cat.key}
-                item={cat}
-                checked={trackedKeys.has(cat.key)}
-                label={t(`modules.medication_side_effects.${cat.labelKey}`)}
-                onToggle={medEffects.toggleFixed}
-              />
-            ))}
-
-            {customs.length > 0 && (
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '12px 0 4px' }}>
-                {t('modules.medication_side_effects.config_custom_title')}
-              </p>
-            )}
-            {customs.map(e => (
-              <CustomEffectRow
-                key={e.key}
-                effect={e}
-                deleteLabel={t('common.delete')}
-                onRemove={medEffects.removeEffect}
-              />
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12 }}>
-            <input
-              ref={customRef}
-              type="text"
-              placeholder={t('modules.medication_side_effects.config_add_placeholder')}
-              style={{ flex: 1, padding: '8px 10px', borderRadius: 6, border: '1px solid #D1D5DB', fontSize: 13 }}
-              onKeyDown={handleCustomKeyDown}
-            />
-            <Button size="sm" variant="ghost" onClick={addCustom}>
-              {t('modules.medication_side_effects.config_add')}
-            </Button>
-          </div>
-
-          <div className="psycho-card-picker__actions" style={{ marginTop: 16 }}>
-            <Button size="sm" loading={medEffects.saving} onClick={medEffects.close}>
-              {t('common.done', { defaultValue: 'Terminé' })}
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

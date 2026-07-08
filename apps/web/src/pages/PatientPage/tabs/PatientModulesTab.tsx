@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, type CSSProperties } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Plus } from 'lucide-react'
@@ -6,7 +6,6 @@ import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
 import { ModuleCard } from '../../../components/features/ModuleCard'
-import { InputField } from '../../../components/ui/InputField'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { Modal } from '../../../components/ui/Modal'
@@ -16,9 +15,9 @@ import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
-import { NotificationRoutineModal } from '../../../components/features/NotificationRoutineModal/NotificationRoutineModal'
 import { ModuleCardFooter } from './ModuleCardFooter'
-import { ModulePanelModal, type ModulePanel } from './ModulePanelModal'
+import { ModuleActionsModal, type ModuleActionTab } from './ModuleActionsModal'
+import { computeModuleTabs } from './moduleActionTabs'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
 import { type ModuleCategory, type ModuleItem } from '@services/moduleCatalogService'
@@ -40,14 +39,15 @@ import { ChronobiologyCard } from './ChronobiologyCard'
 import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 import { BehavioralActivationCard } from './BehavioralActivationCard'
+import { RimConfigPanel } from './RimConfigPanel'
+import { CrisisPlanConfigPanel } from './CrisisPlanConfigPanel'
+import { MedicationEffectsConfigPanel } from './MedicationEffectsConfigPanel'
+import { MedicationListConfigPanel } from './MedicationListConfigPanel'
+import { BAActivitiesConfigPanel } from './BAActivitiesConfigPanel'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
 const ACTIVE_FILTER_THRESHOLD = 8
-
-// Alignement à droite du bouton « supprimer » d'une coping card (positionnement
-// de layout uniquement — l'habillage du bouton vient du design system).
-const CRISIS_CARD_DELETE_STYLE: CSSProperties = { alignSelf: 'flex-end' }
 
 type Props = {
   patientId: string
@@ -81,11 +81,10 @@ export function PatientModulesTab({
   const [busyModule, setBusyModule] = useState<
     { op: 'unlock'; type: ModuleType } | { op: 'revoke'; id: string } | null
   >(null)
-  // Panneau ouvert au-dessus de la grille — aperçu OU données, jamais les deux.
-  // L'exclusivité est portée structurellement par ce state unique (une seule modale
-  // ouverte à la fois), plutôt que deux states à remettre à null en miroir.
-  const [activePanel, setActivePanel] = useState<ModulePanel | null>(null)
-  const [notifModal, setNotifModal] = useState<{ patientModuleId: string; moduleLabel: string; moduleIconName: string } | null>(null)
+  // Module dont la modale d'actions est ouverte, et sur quel onglet. Un seul state :
+  // une seule modale à la fois (exclusivité structurelle), l'onglet actif remplace les
+  // anciens states séparés aperçu / données / notifications.
+  const [activeModule, setActiveModule] = useState<{ module: ModuleType; tab: ModuleActionTab } | null>(null)
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -109,14 +108,14 @@ export function PatientModulesTab({
   const medList = useMedicationListEditor(modules, onReloadModules)
   const baList = useBAActivitiesEditor(modules, onReloadModules)
 
-  // Lecture du panneau actif — l'exclusivité aperçu/données vit dans `activePanel`.
+  // Lecture de l'onglet actif — l'exclusivité vit dans `activeModule`.
   const isPreviewOpen = useCallback(
-    (type: ModuleType) => activePanel?.kind === 'preview' && activePanel.module === type,
-    [activePanel],
+    (type: ModuleType) => activeModule?.module === type && activeModule.tab === 'preview',
+    [activeModule],
   )
   const isDataOpen = useCallback(
-    (type: ModuleType) => activePanel?.kind === 'data' && activePanel.module === type,
-    [activePanel],
+    (type: ModuleType) => activeModule?.module === type && activeModule.tab === 'data',
+    [activeModule],
   )
   // Carte occupée : déverrouillage de ce type, ou révocation de cette row.
   const isModuleBusy = useCallback(
@@ -126,20 +125,66 @@ export function PatientModulesTab({
     [busyModule],
   )
 
-  // Aperçu et Données sont mutuellement exclusifs : ouvrir l'un ferme l'autre.
-  const togglePreview = useCallback((type: ModuleType) => {
-    setActivePanel(prev =>
-      prev?.kind === 'preview' && prev.module === type ? null : { kind: 'preview', module: type },
+  // Ouvre la modale d'actions du module sur l'onglet demandé ; re-cliquer sur le
+  // bouton déjà actif referme (bascule). Tous les boutons de carte passent par ici.
+  const openTab = useCallback((type: ModuleType, tab: ModuleActionTab) => {
+    setActiveModule(prev =>
+      prev?.module === type && prev.tab === tab ? null : { module: type, tab },
     )
   }, [])
 
-  const toggleData = useCallback((type: ModuleType) => {
-    setActivePanel(prev =>
-      prev?.kind === 'data' && prev.module === type ? null : { kind: 'data', module: type },
-    )
-  }, [])
+  const togglePreview = useCallback((type: ModuleType) => openTab(type, 'preview'), [openTab])
+  const toggleData = useCallback((type: ModuleType) => openTab(type, 'data'), [openTab])
+  const openNotif = useCallback((type: ModuleType) => openTab(type, 'notifications'), [openTab])
 
-  const closeActivePanel = useCallback(() => setActivePanel(null), [])
+  // ── Onglet Configuration : coordination modale ↔ hooks d'édition ──────────
+  // L'éditeur de chaque module vit dans un hook unique (state + données de synthèse
+  // partagées avec la carte). Ouvrir/fermer l'onglet Config amorce/réinitialise le hook
+  // correspondant. Pour rim/psycho, le mode dépend de l'état déverrouillé : `unlock`
+  // (le formulaire crée le module) ou `edit`.
+  const openConfigEditor = useCallback((type: ModuleType) => {
+    const unlocked = modules.some(m => m.module_type === type)
+    switch (type) {
+      case 'rim': rim.open(unlocked ? 'edit' : 'unlock'); break
+      case 'psychoeducation': psycho.open(unlocked ? 'edit' : 'unlock'); break
+      case 'crisis_plan': void crisis.openEditor(); break
+      case 'medication_side_effects': void medEffects.openEditor(); break
+      case 'medication_adherence': void medList.openEditor(); break
+      case 'behavioral_activation': void baList.openEditor(); break
+    }
+  }, [modules, rim, psycho, crisis, medEffects, medList, baList])
+
+  const closeConfigEditor = useCallback((type: ModuleType) => {
+    switch (type) {
+      case 'rim': rim.cancel(); break
+      case 'psychoeducation': psycho.cancel(); break
+      case 'crisis_plan': crisis.closeEditor(); break
+      case 'medication_side_effects': medEffects.close(); break
+      case 'medication_adherence': medList.close(); break
+      case 'behavioral_activation': baList.close(); break
+    }
+  }, [rim, psycho, crisis, medEffects, medList, baList])
+
+  // Ouvre la modale sur l'onglet Configuration en amorçant l'éditeur du module.
+  const openConfig = useCallback((type: ModuleType) => {
+    openConfigEditor(type)
+    setActiveModule({ module: type, tab: 'config' })
+  }, [openConfigEditor])
+
+  // Fermeture de la modale : réinitialise l'éditeur de config s'il était ouvert.
+  const closeModal = useCallback(() => {
+    if (activeModule?.tab === 'config') closeConfigEditor(activeModule.module)
+    setActiveModule(null)
+  }, [activeModule, closeConfigEditor])
+
+  // Changement d'onglet interne : amorce l'éditeur en entrant dans Config, le
+  // réinitialise en le quittant.
+  const changeActiveTab = useCallback((tab: ModuleActionTab) => {
+    if (!activeModule) return
+    if (tab === 'config') openConfigEditor(activeModule.module)
+    else if (activeModule.tab === 'config') closeConfigEditor(activeModule.module)
+    setActiveModule({ ...activeModule, tab })
+  }, [activeModule, openConfigEditor, closeConfigEditor])
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
@@ -191,13 +236,12 @@ export function PatientModulesTab({
       const readCount = topics.filter(tpc => tpc.is_read).length
 
       const handlePsychoToggle = () => {
-        if (unlocked && mod) { psycho.cancel(); revokeModule(mod.id) }
-        else if (psycho.mode === 'unlock') psycho.cancel()
-        else psycho.open('unlock')
+        if (unlocked && mod) revokeModule(mod.id)
+        else openConfig('psychoeducation')
       }
 
       return (
-        <div key="psychoeducation" className={`module-card-wrapper module-card-wrapper-block ${psycho.mode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="psychoeducation" className="module-card-wrapper module-card-wrapper-block">
           <Card
             className="module-card-item"
             header={{
@@ -210,8 +254,8 @@ export function PatientModulesTab({
               <ModuleCardFooter
                 previewOpen={isPreviewOpen('psychoeducation')}
                 onTogglePreview={() => togglePreview('psychoeducation')}
-                extra={unlocked && mod && psycho.mode !== 'edit' ? (
-                  <Button variant="ghost" size="sm" onClick={() => psycho.open('edit')}>
+                extra={unlocked && mod ? (
+                  <Button variant="ghost" size="sm" onClick={() => openConfig('psychoeducation')}>
                     {t('patient.psycho_edit_cards')}
                   </Button>
                 ) : undefined}
@@ -251,21 +295,6 @@ export function PatientModulesTab({
               </>
             )}
           </Card>
-
-          {(psycho.mode === 'unlock' || psycho.mode === 'edit') && (
-            <PsychoLibraryPicker
-              mode={psycho.mode}
-              libraryTopics={libraryTopics}
-              themes={themes}
-              taxonomy={taxonomy}
-              selectedTopicIds={psycho.selectedTopicIds}
-              saving={psycho.saving}
-              error={psycho.error}
-              onToggle={psycho.toggleTopic}
-              onConfirm={psycho.confirm}
-              onCancel={psycho.cancel}
-            />
-          )}
         </div>
       )
     }
@@ -277,7 +306,7 @@ export function PatientModulesTab({
       }
 
       return (
-        <div key="crisis_plan" className={`module-card-wrapper module-card-wrapper-block ${crisis.open && unlocked ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="crisis_plan" className="module-card-wrapper module-card-wrapper-block">
           <Card
             className="module-card-item"
             header={{
@@ -286,10 +315,10 @@ export function PatientModulesTab({
               right: moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), handleCrisisToggle),
             }}
             footer={tagChips('crisis_plan')}
-            actions={unlocked && mod && !crisis.open ? (
+            actions={unlocked && mod ? (
               <ModuleCardFooter
                 configLabel={t('patient.crisis_configure')}
-                onConfigure={crisis.openEditor}
+                onConfigure={() => openConfig('crisis_plan')}
                 previewOpen={isPreviewOpen('crisis_plan')}
                 onTogglePreview={() => togglePreview('crisis_plan')}
               />
@@ -305,101 +334,6 @@ export function PatientModulesTab({
               </div>
             )}
           </Card>
-
-          {crisis.open && unlocked && mod && (
-            <div className="psycho-card-picker">
-              <p className="psycho-card-picker__label">{t('patient.crisis_editor_title')}</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <InputField
-                  label={t('patient.crisis_msg_label')}
-                  multiline
-                  rows={3}
-                  placeholder={t('patient.crisis_msg_placeholder')}
-                  value={crisis.config.practitionerMessage}
-                  onChange={e => crisis.setConfig(prev => ({ ...prev, practitionerMessage: e.target.value }))}
-                />
-                <InputField
-                  label={t('patient.crisis_commitment_label')}
-                  multiline
-                  rows={3}
-                  placeholder={t('patient.crisis_commitment_placeholder')}
-                  value={crisis.config.commitmentPhrase}
-                  onChange={e => crisis.setConfig(prev => ({ ...prev, commitmentPhrase: e.target.value }))}
-                />
-                <div>
-                  <p className="crisis-cards-title">
-                    {t('patient.crisis_cards_title')}
-                  </p>
-                  {crisis.config.copingCards.map(card => (
-                    <div key={card.id} style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid #E5E7EB', borderLeft: '3px solid #4F46E5' }}>
-                      <div style={{ fontSize: 12, color: '#6B7280' }}>{t('patient.crisis_card_thought_label')}</div>
-                      <div style={{ fontSize: 13, color: '#111827', fontStyle: 'italic' }}>{card.thought}</div>
-                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{t('patient.crisis_card_response_label')}</div>
-                      <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{card.response}</div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        category="danger"
-                        size="xs"
-                        onClick={() => crisis.removeCopingCard(card.id)}
-                        style={CRISIS_CARD_DELETE_STYLE}
-                      >
-                        {t('patient.crisis_card_delete')}
-                      </Button>
-                    </div>
-                  ))}
-                  {crisis.config.copingCards.length < 4 && (
-                    crisis.cardDraft ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px dashed #4F46E5' }}>
-                        <InputField
-                          label={t('patient.crisis_card_thought_label')}
-                          multiline
-                          required
-                          rows={2}
-                          placeholder={t('patient.crisis_card_thought_placeholder')}
-                          value={crisis.cardDraft.thought}
-                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, thought: e.target.value } : null)}
-                        />
-                        <InputField
-                          label={t('patient.crisis_card_response_label')}
-                          multiline
-                          required
-                          rows={2}
-                          placeholder={t('patient.crisis_card_response_placeholder')}
-                          value={crisis.cardDraft.response}
-                          onChange={e => crisis.setCardDraft(prev => prev ? { ...prev, response: e.target.value } : null)}
-                        />
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <Button
-                            size="sm"
-                            onClick={crisis.addCopingCard}
-                            disabled={!crisis.cardDraft.thought.trim() || !crisis.cardDraft.response.trim()}
-                          >
-                            {t('patient.crisis_card_save')}
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => crisis.setCardDraft(null)}>
-                            {t('common.cancel')}
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Button size="sm" variant="ghost" onClick={crisis.addCopingCard}>
-                        + {t('patient.crisis_cards_add')}
-                      </Button>
-                    )
-                  )}
-                </div>
-              </div>
-              <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={crisis.saving} onClick={crisis.saveEditor}>
-                  {t('patient.crisis_btn_save')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={crisis.closeEditor}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       )
     }
@@ -409,7 +343,6 @@ export function PatientModulesTab({
         <MedicationSideEffectsCard
           key="medication_side_effects"
           tagChips={tagChips('medication_side_effects')}
-          modItem={modItem}
           modIcon={modIcon}
           mod={mod}
           unlocked={unlocked}
@@ -420,7 +353,8 @@ export function PatientModulesTab({
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
-          onConfigureNotif={setNotifModal}
+          onConfigureNotif={openNotif}
+          onConfigure={openConfig}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
         />
@@ -432,7 +366,6 @@ export function PatientModulesTab({
         <MedicationAdherenceCard
           key="medication_adherence"
           tagChips={tagChips('medication_adherence')}
-          modItem={modItem}
           modIcon={modIcon}
           mod={mod}
           unlocked={unlocked}
@@ -443,7 +376,8 @@ export function PatientModulesTab({
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
-          onConfigureNotif={setNotifModal}
+          onConfigureNotif={openNotif}
+          onConfigure={openConfig}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
         />
@@ -455,7 +389,6 @@ export function PatientModulesTab({
         <BehavioralActivationCard
           key="behavioral_activation"
           tagChips={tagChips('behavioral_activation')}
-          modItem={modItem}
           modIcon={modIcon}
           mod={mod}
           unlocked={unlocked}
@@ -466,7 +399,8 @@ export function PatientModulesTab({
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
-          onConfigureNotif={setNotifModal}
+          onConfigureNotif={openNotif}
+          onConfigure={openConfig}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
         />
@@ -478,7 +412,6 @@ export function PatientModulesTab({
         <ChronobiologyCard
           key="chronobiology_tracker"
           tagChips={tagChips('chronobiology_tracker')}
-          modItem={modItem}
           modIcon={modIcon}
           mod={mod}
           unlocked={unlocked}
@@ -488,7 +421,7 @@ export function PatientModulesTab({
           moduleToggle={moduleToggle}
           onTogglePreview={togglePreview}
           onToggleData={toggleData}
-          onConfigureNotif={setNotifModal}
+          onConfigureNotif={openNotif}
           onUnlock={unlockModule}
           onRevoke={revokeModule}
         />
@@ -497,13 +430,12 @@ export function PatientModulesTab({
 
     if (moduleType === 'rim') {
       const handleRimToggle = () => {
-        if (unlocked && mod) { rim.cancel(); revokeModule(mod.id) }
-        else if (rim.mode === 'unlock') rim.cancel()
-        else rim.open('unlock')
+        if (unlocked && mod) revokeModule(mod.id)
+        else openConfig('rim')
       }
 
       return (
-        <div key="rim" className={`module-card-wrapper module-card-wrapper-block ${rim.mode !== 'off' ? 'module-card-wrapper-block--wide' : ''}`}>
+        <div key="rim" className="module-card-wrapper module-card-wrapper-block">
           <Card
             className="module-card-item"
             header={{
@@ -512,8 +444,8 @@ export function PatientModulesTab({
               right: moduleToggle(unlocked, false, handleRimToggle),
             }}
             footer={tagChips('rim')}
-            actions={unlocked && mod && rim.mode !== 'edit' ? (
-              <Button variant="ghost" size="sm" onClick={() => rim.open('edit')}>
+            actions={unlocked && mod ? (
+              <Button variant="ghost" size="sm" onClick={() => openConfig('rim')}>
                 {t('patient.rim_edit_scenario')}
               </Button>
             ) : undefined}
@@ -528,44 +460,6 @@ export function PatientModulesTab({
               </div>
             )}
           </Card>
-
-          {(rim.mode === 'unlock' || rim.mode === 'edit') && (
-            <div className="psycho-card-picker">
-              <p className="psycho-card-picker__label">
-                {rim.mode === 'unlock'
-                  ? t('patient.rim_write_unlock')
-                  : t('patient.rim_write_edit')}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <InputField
-                  label={t('patient.rim_alt_label')}
-                  multiline
-                  required
-                  rows={5}
-                  placeholder={t('patient.rim_alt_placeholder')}
-                  value={rim.alternative}
-                  onChange={e => rim.setAlternative(e.target.value)}
-                />
-                <InputField
-                  label={t('patient.rim_orig_label')}
-                  multiline
-                  rows={3}
-                  placeholder={t('patient.rim_orig_placeholder')}
-                  value={rim.original}
-                  onChange={e => rim.setOriginal(e.target.value)}
-                />
-              </div>
-              {rim.error && <p className="psycho-card-picker__error">{rim.error}</p>}
-              <div className="psycho-card-picker__actions">
-                <Button size="sm" loading={rim.saving} onClick={rim.confirm}>
-                  {rim.mode === 'unlock' ? t('patient.rim_btn_unlock') : t('patient.rim_btn_save')}
-                </Button>
-                <Button size="sm" variant="ghost" onClick={rim.cancel}>
-                  {t('common.cancel')}
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       )
     }
@@ -633,7 +527,7 @@ export function PatientModulesTab({
           tags={tagChips(moduleType)}
           actions={
             <ModuleCardFooter
-              onConfigureNotif={unlocked && mod ? () => setNotifModal({ patientModuleId: mod.id, moduleLabel: t(`modules.${moduleType}.label`), moduleIconName: modItem.icon }) : undefined}
+              onConfigureNotif={unlocked && mod ? () => openNotif(moduleType) : undefined}
               previewOpen={isPreviewOpen(moduleType)}
               onTogglePreview={() => togglePreview(moduleType)}
               dataOpen={isDataOpen(moduleType)}
@@ -670,8 +564,8 @@ export function PatientModulesTab({
     [categories, enabledModules, comingSoonIds],
   )
 
-  // Couleur d'accent d'un module, indexée par type — pour la modale de panneau, qui
-  // est rendue hors de la boucle `renderModuleCard` et n'a donc pas accès au `modItem`.
+  // Couleur d'accent et nom d'icône d'un module, indexés par type — pour la modale
+  // d'actions, rendue hors de la boucle `renderModuleCard` (pas d'accès au `modItem`).
   const moduleColorByType = useMemo(() => {
     const map = new Map<string, string | undefined>()
     for (const category of categories) {
@@ -679,6 +573,69 @@ export function PatientModulesTab({
     }
     return map
   }, [categories])
+
+  const moduleIconByType = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const category of categories) {
+      for (const m of category.modules) map.set(m.id, m.icon)
+    }
+    return map
+  }, [categories])
+
+  // Contexte de la modale d'actions du module actif : row déverrouillée + onglets
+  // disponibles, dérivés du module courant. `null` quand aucune modale n'est ouverte.
+  const activeModalContext = useMemo(() => {
+    if (!activeModule) return null
+    const mod = modules.find(m => m.module_type === activeModule.module)
+    const scale = scaleMeta.find(s => s.id === activeModule.module)
+    const tabs = computeModuleTabs(activeModule.module, {
+      unlocked: !!mod,
+      isScale: !!scale,
+      scaleHasPreview: scale?.hasPreview ?? false,
+    })
+    return { patientModuleId: mod?.id, tabs }
+  }, [activeModule, modules, scaleMeta])
+
+  // Confirmation psychoédu : enregistre puis ferme la modale uniquement au succès.
+  const handlePsychoConfirm = useCallback(async () => {
+    const ok = await psycho.confirm()
+    if (ok) closeModal()
+  }, [psycho, closeModal])
+
+  // Panneau de l'onglet Configuration du module actif — construit ici car le parent
+  // détient les hooks d'édition. Rendu par ModuleActionsModal sous l'onglet Config.
+  const configPanel = useMemo(() => {
+    if (!activeModule) return null
+    switch (activeModule.module) {
+      case 'crisis_plan':
+        return <CrisisPlanConfigPanel crisis={crisis} onClose={closeModal} />
+      case 'rim':
+        return <RimConfigPanel rim={rim} onClose={closeModal} />
+      case 'psychoeducation':
+        return (
+          <PsychoLibraryPicker
+            mode={psycho.mode === 'off' ? 'edit' : psycho.mode}
+            libraryTopics={libraryTopics}
+            themes={themes}
+            taxonomy={taxonomy}
+            selectedTopicIds={psycho.selectedTopicIds}
+            saving={psycho.saving}
+            error={psycho.error}
+            onToggle={psycho.toggleTopic}
+            onConfirm={handlePsychoConfirm}
+            onCancel={closeModal}
+          />
+        )
+      case 'medication_side_effects':
+        return <MedicationEffectsConfigPanel medEffects={medEffects} onClose={closeModal} />
+      case 'medication_adherence':
+        return <MedicationListConfigPanel medList={medList} onClose={closeModal} />
+      case 'behavioral_activation':
+        return <BAActivitiesConfigPanel baList={baList} onClose={closeModal} />
+      default:
+        return null
+    }
+  }, [activeModule, crisis, rim, psycho, medEffects, medList, baList, closeModal, handlePsychoConfirm, libraryTopics, themes, taxonomy])
 
   const activatedModules = collectModules(isActivated)
   const activatableModules = collectModules(type => !isActivated(type))
@@ -747,17 +704,6 @@ export function PatientModulesTab({
         )}
       </section>
 
-      {notifModal && (
-        <NotificationRoutineModal
-          patientModuleId={notifModal.patientModuleId}
-          practitionerId={practitionerId}
-          patientId={patientId}
-          moduleLabel={notifModal.moduleLabel}
-          moduleIconName={notifModal.moduleIconName}
-          onClose={() => setNotifModal(null)}
-        />
-      )}
-
       {showCSSRSModal && (
         <Modal
           title={t('patient.cssrs_modal_title')}
@@ -804,14 +750,21 @@ export function PatientModulesTab({
         </Modal>
       )}
 
-      {/* Rendu en dernier pour rester au-dessus des autres modales : l'aperçu peut
-          être ouvert depuis la modale « Ajouter un module ». */}
-      {activePanel && (
-        <ModulePanelModal
-          panel={activePanel}
+      {/* Rendu en dernier pour rester au-dessus des autres modales : la modale d'actions
+          peut être ouverte depuis la modale « Ajouter un module ». */}
+      {activeModule && activeModalContext && (
+        <ModuleActionsModal
+          module={activeModule.module}
           patientId={patientId}
-          color={moduleColorByType.get(activePanel.module)}
-          onClose={closeActivePanel}
+          practitionerId={practitionerId}
+          patientModuleId={activeModalContext.patientModuleId}
+          moduleIconName={moduleIconByType.get(activeModule.module)}
+          color={moduleColorByType.get(activeModule.module)}
+          tabs={activeModalContext.tabs}
+          activeTab={activeModule.tab}
+          onTabChange={changeActiveTab}
+          configPanel={configPanel}
+          onClose={closeModal}
         />
       )}
     </PatientViewProvider>

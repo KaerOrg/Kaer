@@ -7,10 +7,8 @@ vi.mock('react-i18next', () => ({
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BehavioralActivationCard } from './BehavioralActivationCard'
 import type { PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '@services/moduleCatalogService'
 import type { BAConfiguredActivity } from '@kaer/shared'
 
-const MOD_ITEM: ModuleItem = { id: 'behavioral_activation', icon: 'activity', mobile_icon: 'activity', color: '#2C6E72' }
 const MOD: PatientModule = {
   id: 'pm1', patient_id: 'p1', practitioner_id: 'pr1',
   module_type: 'behavioral_activation', config: {}, unlocked_at: '2026-06-01T00:00:00Z',
@@ -39,7 +37,6 @@ function makeBAList(over: Partial<BAList> = {}): BAList {
 function setup(over: Partial<React.ComponentProps<typeof BehavioralActivationCard>> = {}) {
   const props: React.ComponentProps<typeof BehavioralActivationCard> = {
     tagChips: null,
-    modItem: MOD_ITEM,
     modIcon: null,
     mod: MOD,
     unlocked: true,
@@ -53,6 +50,7 @@ function setup(over: Partial<React.ComponentProps<typeof BehavioralActivationCar
     onTogglePreview: vi.fn(),
     onToggleData: vi.fn(),
     onConfigureNotif: vi.fn(),
+    onConfigure: vi.fn(),
     onUnlock: vi.fn(),
     onRevoke: vi.fn(),
     ...over,
@@ -85,11 +83,10 @@ describe('BehavioralActivationCard', () => {
     expect(onToggleData).toHaveBeenCalledWith('behavioral_activation')
   })
 
-  it('le bouton configurer ouvre l\'éditeur', () => {
-    const baList = makeBAList()
-    setup({ baList })
+  it('le bouton configurer ouvre la modale sur l\'onglet Configuration', () => {
+    const { onConfigure } = setup()
     fireEvent.click(screen.getByRole('button', { name: 'modules.behavioral_activation.config_button' }))
-    expect(baList.openEditor).toHaveBeenCalled()
+    expect(onConfigure).toHaveBeenCalledWith('behavioral_activation')
   })
 
   it('la bascule révoque le module débloqué et ferme l\'éditeur', () => {
@@ -100,12 +97,8 @@ describe('BehavioralActivationCard', () => {
     expect(onRevoke).toHaveBeenCalledWith('pm1')
   })
 
-  it('éditeur ouvert : liste les activités co-construites et supprime par id', () => {
-    const baList = makeBAList({ open: true, activities: [ACT] })
-    setup({ baList })
-    expect(screen.getByText('Marcher')).toBeTruthy()
-    expect(screen.getByText('Prendre soin de moi')).toBeTruthy()
-    fireEvent.click(screen.getByLabelText('common.delete'))
-    expect(baList.removeActivity).toHaveBeenCalledWith('a1')
+  it('affiche le résumé du nombre d\'activités', () => {
+    setup({ baList: makeBAList({ activities: [ACT] }) })
+    expect(screen.getByText('modules.behavioral_activation.config_count', { exact: false })).toBeTruthy()
   })
 })

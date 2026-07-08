@@ -279,6 +279,7 @@
     "unlocked_on": "Débloqué le {{date}}",
     "coming_soon": "Module en cours de développement, aperçu non disponible.",
     "data_button": "Données",
+    "config_tab": "Configuration",
     "summary_empty": "Aucune donnée synchronisée",
     "summary_last_entry": "Dernière saisie",
     "summary_count": "Saisies enregistrées",

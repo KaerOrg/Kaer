@@ -3,13 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { Card } from '../../../components/ui/Card'
 import { ModuleCardFooter } from './ModuleCardFooter'
 import type { ModuleType, PatientModule } from '../../../lib/database.types'
-import type { ModuleItem } from '@services/moduleCatalogService'
 
 const MODULE_TYPE: ModuleType = 'chronobiology_tracker'
 
 export interface ChronobiologyCardProps {
   tagChips: ReactNode
-  modItem: ModuleItem
   modIcon: ReactNode
   mod: PatientModule | undefined
   unlocked: boolean
@@ -19,7 +17,7 @@ export interface ChronobiologyCardProps {
   moduleToggle: (on: boolean, loading: boolean, onToggle: () => void) => ReactNode
   onTogglePreview: (type: ModuleType) => void
   onToggleData: (type: ModuleType) => void
-  onConfigureNotif: (args: { patientModuleId: string; moduleLabel: string; moduleIconName: string }) => void
+  onConfigureNotif: (type: ModuleType) => void
   onUnlock: (type: ModuleType) => void
   onRevoke: (moduleId: string) => void
 }
@@ -32,7 +30,6 @@ export interface ChronobiologyCardProps {
  */
 export function ChronobiologyCard({
   tagChips,
-  modItem,
   modIcon,
   mod,
   unlocked,
@@ -55,12 +52,8 @@ export function ChronobiologyCard({
 
   const handleNotif = useCallback(() => {
     if (!mod) return
-    onConfigureNotif({
-      patientModuleId: mod.id,
-      moduleLabel: t('modules.chronobiology_tracker.label'),
-      moduleIconName: modItem.icon,
-    })
-  }, [mod, onConfigureNotif, t, modItem.icon])
+    onConfigureNotif(MODULE_TYPE)
+  }, [mod, onConfigureNotif])
 
   const handlePreviewToggle = useCallback(() => onTogglePreview(MODULE_TYPE), [onTogglePreview])
   const handleDataToggle = useCallback(() => onToggleData(MODULE_TYPE), [onToggleData])
