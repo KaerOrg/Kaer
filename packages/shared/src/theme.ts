@@ -17,6 +17,8 @@ export const colors = {
   stars: '#F59E0B',
   // Voile des overlays (modales, feuilles bas d'écran)
   overlay: 'rgba(0,0,0,0.45)',
+  // Voile opaque des visionneuses plein écran (diaporama photo) : la photo prime.
+  overlayStrong: 'rgba(0,0,0,0.92)',
 } as const
 
 export const spacing = {

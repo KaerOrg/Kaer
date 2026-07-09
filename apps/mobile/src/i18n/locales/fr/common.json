@@ -203,6 +203,8 @@
       "contact_name_placeholder": "Nom du contact",
       "contact_phone_placeholder": "Numéro de téléphone",
       "call_contact": "Appeler",
+      "carousel_prev": "Photo précédente",
+      "carousel_next": "Photo suivante",
       "delete_item_title": "Supprimer cet élément",
       "emergency_samu": "15, SAMU",
       "emergency_samu_label": "Urgence médicale",
