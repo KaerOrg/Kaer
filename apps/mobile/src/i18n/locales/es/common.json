@@ -127,6 +127,8 @@
       "contact_name_placeholder": "Nombre del contacto",
       "contact_phone_placeholder": "Número de teléfono",
       "call_contact": "Llamar",
+      "carousel_prev": "Foto anterior",
+      "carousel_next": "Foto siguiente",
       "delete_item_title": "Eliminar este elemento",
       "emergency_samu": "112, Emergencia",
       "emergency_samu_label": "Emergencia médica",

@@ -60,7 +60,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -373,6 +373,43 @@ Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
 
 ```tsx
 if (loading) return <ScreenLoader />
+```
+
+### PhotoCarousel (`src/components/ui/PhotoCarousel/`)
+
+Visionneuse photo plein écran : modale (`animationType="fade"`) + `FlatList`
+horizontale paginée (swipe), flèches précédent/suivant, bouton de fermeture et
+indicateur de page (`n / total`). Rendu via `expo-image` (`contentFit="contain"` :
+la photo n'est jamais rognée). Primitive **générique et sans métier** : reçoit les
+URIs et les libellés d'accessibilité par props. Animations : opacité (fondu) et
+translation (pagination native) uniquement.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `visible` | `boolean` | Ouvre / ferme la modale |
+| `uris` | `ReadonlyArray<string>` | Photos à afficher (rien n'est rendu si vide) |
+| `initialIndex` | `number` | Photo affichée à l'ouverture (défaut `0`) |
+| `onClose` | `() => void` | Fermeture (bouton, geste retour Android) |
+| `closeLabel` / `prevLabel` / `nextLabel` | `string` | Libellés d'accessibilité (i18n, fournis par le parent) |
+| `testID` | `string` | Préfixe des testIDs (`-photo-<i>`, `-prev`, `-next`, `-close`) |
+
+> **Règle : toute galerie / vignette photo ouvrant un plein écran utilise `PhotoCarousel`
+> — jamais un `Modal + Image` ad hoc.** Les flèches et l'indicateur n'apparaissent qu'à
+> partir de 2 photos.
+
+```tsx
+const [viewer, setViewer] = useState<{ open: boolean; index: number }>({ open: false, index: 0 })
+// …au tap sur une vignette : setViewer({ open: true, index })
+<PhotoCarousel
+  visible={viewer.open}
+  uris={anchors.map(a => a.uri)}
+  initialIndex={viewer.index}
+  onClose={() => setViewer(v => ({ ...v, open: false }))}
+  closeLabel={t('common.close')}
+  prevLabel={t('modules.crisis_plan.carousel_prev')}
+  nextLabel={t('modules.crisis_plan.carousel_next')}
+  testID="anchors-carousel"
+/>
 ```
 
 ### SegmentedControl (`src/components/ui/SegmentedControl/`)

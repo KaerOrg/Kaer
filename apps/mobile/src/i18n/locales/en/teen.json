@@ -34,6 +34,8 @@
       "contact_name_placeholder": "Contact name",
       "contact_phone_placeholder": "Phone number",
       "call_contact": "Call",
+      "carousel_prev": "Previous photo",
+      "carousel_next": "Next photo",
       "step_empty": "Nothing noted for this step."
     },
     "beck_columns": {

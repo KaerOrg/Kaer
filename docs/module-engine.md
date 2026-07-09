@@ -172,7 +172,7 @@ create table public.module_content_fields (
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
 | `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Rangée de boutons d'appel colorés (`CrisisEmergencyCalls`, partagé) en tête de `safety_plan` et en barre de `editable_steps` ; sur web, chip d'aperçu |
-| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem, phrase SQLite, message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
+| `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem via `expo-image`, tap → diaporama plein écran `@ui/PhotoCarousel` ; phrase SQLite ; message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
 
 **Layout `cards`**
 

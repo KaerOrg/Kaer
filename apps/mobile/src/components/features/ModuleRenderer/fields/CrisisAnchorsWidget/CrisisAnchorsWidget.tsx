@@ -5,14 +5,16 @@
 // phrase d'ancrage (SQLite) et message du praticien (Supabase) : tout passe par
 // `crisisPlanService`. Conformité MDR 2017/745 : journal libre, zéro interprétation.
 
-import { useState, useCallback } from 'react'
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native'
+import { useState, useCallback, useMemo } from 'react'
+import { View, Text, StyleSheet, Pressable } from 'react-native'
+import { Image } from 'expo-image'
 import { useFocusEffect } from '@react-navigation/native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
 import { Button } from '@ui/Button'
 import { Card } from '@ui/Card'
 import { InputField } from '@ui/InputField'
+import { PhotoCarousel } from '@ui/PhotoCarousel'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useAuthStore } from '../../../../../store/authStore'
 import { useToast } from '../../../../../contexts/ToastContext'
@@ -35,6 +37,8 @@ export function CrisisAnchorsWidget() {
   const [practitionerMessage, setPractitionerMessage] = useState('')
   const [anchorPhrase, setAnchorPhrase] = useState('')
   const [editingPhrase, setEditingPhrase] = useState(false)
+  // Diaporama plein écran : ouvert + index de la photo tapée (états solidaires).
+  const [viewer, setViewer] = useState<{ open: boolean; index: number }>({ open: false, index: 0 })
   const patient = useAuthStore(s => s.patient)
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -82,6 +86,10 @@ export function CrisisAnchorsWidget() {
 
   const startEditing = useCallback(() => setEditingPhrase(true), [])
 
+  const anchorUris = useMemo(() => anchors.map(a => a.uri), [anchors])
+  const openViewer = useCallback((index: number) => setViewer({ open: true, index }), [])
+  const closeViewer = useCallback(() => setViewer(v => ({ ...v, open: false })), [])
+
   return (
     <Card style={styles.card}>
       <View style={styles.sectionHeader}>
@@ -98,9 +106,16 @@ export function CrisisAnchorsWidget() {
       )}
 
       <View style={styles.photosRow}>
-        {anchors.map(anchor => (
-          <Pressable key={anchor.id} style={styles.photoWrapper} onLongPress={() => handleDeletePhoto(anchor)}>
-            <Image source={{ uri: anchor.uri }} style={styles.photo} />
+        {anchors.map((anchor, index) => (
+          <Pressable
+            key={anchor.id}
+            style={styles.photoWrapper}
+            onPress={() => openViewer(index)}
+            onLongPress={() => handleDeletePhoto(anchor)}
+            accessibilityRole="imagebutton"
+            accessibilityLabel={t('modules.crisis_plan.anchors_title')}
+          >
+            <Image source={{ uri: anchor.uri }} style={styles.photo} contentFit="cover" />
             <Pressable
               style={styles.photoDelete}
               onPress={() => handleDeletePhoto(anchor)}
@@ -159,6 +174,17 @@ export function CrisisAnchorsWidget() {
           </Pressable>
         </View>
       )}
+
+      <PhotoCarousel
+        visible={viewer.open}
+        uris={anchorUris}
+        initialIndex={viewer.index}
+        onClose={closeViewer}
+        closeLabel={t('common.close')}
+        prevLabel={t('modules.crisis_plan.carousel_prev')}
+        nextLabel={t('modules.crisis_plan.carousel_next')}
+        testID="anchors-carousel"
+      />
     </Card>
   )
 }

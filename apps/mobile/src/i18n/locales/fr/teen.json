@@ -34,6 +34,8 @@
       "contact_name_placeholder": "Nom du contact",
       "contact_phone_placeholder": "Numéro de téléphone",
       "call_contact": "Appeler",
+      "carousel_prev": "Photo précédente",
+      "carousel_next": "Photo suivante",
       "step_empty": "Rien de noté pour cette étape."
     },
     "beck_columns": {

@@ -36,6 +36,9 @@ jest.mock('@services/crisisPlanService', () => ({
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}))
 
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
@@ -81,6 +84,22 @@ describe('CrisisAnchorsWidget', () => {
     fireEvent.press(screen.getByText('modules.crisis_plan.anchor_phrase_save'))
 
     await waitFor(() => expect(svc.saveAnchorPhrase).toHaveBeenCalledWith('Ma raison de tenir'))
+  })
+
+  it('ouvre le diaporama plein écran au tap sur une ancre', async () => {
+    svc.getAnchors.mockResolvedValue([
+      { id: 'a1', uri: 'file://a1.jpg', sort_order: 0, created_at: '' },
+      { id: 'a2', uri: 'file://a2.jpg', sort_order: 1, created_at: '' },
+    ])
+    render(<CrisisAnchorsWidget />)
+    await waitFor(() => expect(screen.getAllByLabelText('modules.crisis_plan.anchors_title').length).toBeGreaterThan(0))
+
+    // Carrousel fermé au départ (Modal non monté → contenu absent).
+    expect(screen.queryByTestId('anchors-carousel-photo-0')).toBeNull()
+    // Tap sur la 1re vignette → ouverture plein écran (2 photos → indicateur + flèches).
+    fireEvent.press(screen.getAllByLabelText('modules.crisis_plan.anchors_title')[0])
+    expect(screen.getByTestId('anchors-carousel-photo-0')).toBeTruthy()
+    expect(screen.getByText('1 / 2')).toBeTruthy()
   })
 
   it('toast d\'erreur si l\'ajout de photo échoue', async () => {
