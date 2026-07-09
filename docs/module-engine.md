@@ -154,8 +154,17 @@ create table public.module_content_fields (
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number` |
+| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number`, `contactable` |
 | `step_hint` | Sous-titre / question guide | `color`, `step_number` |
+
+> **Étapes « contactables » (`contactable: 'true'`)** : quand un `step_title` porte cette
+> prop (ex. crisis_plan étapes 4 & 5 : proches / professionnels), les items de l'étape
+> sont des **contacts appelables** : nom + numéro. En consultation (`safety_plan`), chaque
+> item est rendu par `CallableContact` (bouton d'appel `tel:`). En édition
+> (`editable_steps`), la saisie passe par `EditableContactsList` (nom + numéro + « Importer
+> depuis mes contacts » via `contactsService.pickContact`). Le numéro est porté par
+> `plan_items.phone` (SQLite + payload sync) ; `contact_source='phonebook'` si importé.
+> Piloté par la config (jamais par un numéro d'étape en dur).
 
 **Layouts `safety_plan` / `editable_steps` — champs suffixes** (sans `section_id`, rendus après les étapes, triés par `sort_order`)
 

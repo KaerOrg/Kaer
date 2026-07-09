@@ -7,6 +7,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants'
 import { Platform } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from '../lib/supabase'
+import { checkPermission, ensurePermission } from './permissionsService'
 
 const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient
 
@@ -52,10 +53,8 @@ export function configureForegroundNotifications(): void {
 // ── Permissions & token ─────────────────────────────────────────────────────
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync()
-  if (existing === 'granted') return true
-  const { status } = await Notifications.requestPermissionsAsync()
-  return status === 'granted'
+  // Délègue au service d'autorisations générique (« vérifier puis demander »).
+  return ensurePermission('notifications')
 }
 
 export async function setupAndroidChannel(): Promise<void> {
@@ -123,8 +122,7 @@ export async function registerPushToken(patientId: string): Promise<string | nul
  * (le prompt initial est géré par l'écran d'onboarding des notifications).
  */
 export async function registerPushTokenIfGranted(patientId: string): Promise<string | null> {
-  const { status } = await Notifications.getPermissionsAsync()
-  if (status !== 'granted') return null
+  if ((await checkPermission('notifications')) !== 'granted') return null
   return registerPushToken(patientId)
 }
 
@@ -139,8 +137,7 @@ export async function shouldShowNotificationOnboarding(): Promise<boolean> {
   try {
     const seen = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY)
     if (seen !== null) return false
-    const { status } = await Notifications.getPermissionsAsync()
-    return status === 'undetermined'
+    return (await checkPermission('notifications')) === 'undetermined'
   } catch {
     return false
   }

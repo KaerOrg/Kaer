@@ -786,6 +786,8 @@ n'en crée un nouveau qu'en dernier recours.
 | `EditableItemsList` | Liste d'items CRUD inline (avec poids optionnel) | `editable_steps`, `decision_grid` |
 | `WeightPicker` | Sélecteur de poids 1–5 étoiles | `EditableItemsList` |
 | `ExerciseSafetySection` | Encart rouge de numéros d'urgence cliquables (`tel:`) | `guided_exercise`, `patient_scenario` |
+| `CallableContact` | Rangée de contact en lecture seule : nom + numéro + bouton d'appel `tel:` (`@ui/Button`). Sans numéro → simple ligne | `safety_plan` (étapes contactables) |
+| `EditableContactsList` | Liste CRUD de contacts (nom + numéro) + « Importer depuis mes contacts » (`contactsService`). Construite avec `@ui/Button` + `@ui/InputField` | `editable_steps` (étapes contactables) |
 
 ### Sous-composants de layout
 
@@ -908,7 +910,7 @@ apps/mobile/src/
 │       │   ├── TreeSelector/ SleepJournal/ Tabs/
 │       │   ├── ActivityLog/ ExposureTracker/ DecisionGrid/ PsyEdu/
 │       │   ├── ChronoMonth/ ExposureHierarchy/
-│       │   └── shared/                  # EditableItemsList, WeightPicker, ExerciseSafetySection, CrisisEmergencyCalls
+│       │   └── shared/                  # EditableItemsList, WeightPicker, ExerciseSafetySection, CrisisEmergencyCalls, CallableContact, EditableContactsList
 │       └── fields/                      # field_type → composant + widgets
 │           ├── FieldRow/ FieldWidget/ FieldText/ FieldListItem/
 │           ├── CardDefinition/ InlineText/ CrisisAnchorsWidget/

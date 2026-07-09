@@ -93,6 +93,22 @@ describe('SafetyPlanLayout', () => {
     expect(Linking.openURL).toHaveBeenCalledWith('tel:15')
   })
 
+  it('rend les items d\'une étape contactable comme contacts appelables (tel:)', async () => {
+    const sections = new Map<string, ContentField[]>([
+      ['step_4', [
+        field({ id: 's4t', field_type: 'step_title', text_code: 'modules.crisis_plan.step_4_title', section_id: 'step_4', props: { step_number: '4', contactable: 'true' } }),
+      ]],
+    ])
+    mockGetPlanItems.mockResolvedValue([
+      { id: 'ct1', module_id: 'crisis_plan', section_id: 'step_4', text: 'Marie', sort_order: 0, weight: null, phone: '0102030405', contact_source: 'phonebook', created_at: '' },
+    ])
+    render(<SafetyPlanLayout sections={sections} uiFields={[]} moduleId="crisis_plan" />)
+    await waitFor(() => expect(screen.getByText('Marie')).toBeTruthy())
+    expect(screen.getByText('0102030405')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('contact-ct1-call'))
+    expect(Linking.openURL).toHaveBeenCalledWith('tel:0102030405')
+  })
+
   it('la roue crantée ouvre le module en mode édition', async () => {
     render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
     await waitFor(() => expect(screen.getByTestId('safety-plan-configure')).toBeTruthy())

@@ -29,6 +29,11 @@
       "anchor_phrase_save": "Save",
       "consultation_title": "I'm in crisis",
       "configure_plan": "Customise my plan",
+      "add_contact": "Add a contact",
+      "import_contact": "Import from my contacts",
+      "contact_name_placeholder": "Contact name",
+      "contact_phone_placeholder": "Phone number",
+      "call_contact": "Call",
       "step_empty": "Nothing noted for this step."
     },
     "beck_columns": {

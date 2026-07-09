@@ -97,6 +97,9 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE sleep_diary_entries ADD COLUMN sleep_aid INTEGER DEFAULT 0`,
     `ALTER TABLE mood_entries ADD COLUMN pleasure INTEGER NOT NULL DEFAULT 5`,
     `ALTER TABLE plan_items ADD COLUMN weight INTEGER`,
+    // Contacts appelables du plan de crise (proches/pros, étapes 4 & 5) : numéro + provenance.
+    `ALTER TABLE plan_items ADD COLUMN phone TEXT`,
+    `ALTER TABLE plan_items ADD COLUMN contact_source TEXT`,
     // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
     `ALTER TABLE mood_markers ADD COLUMN scale_id TEXT NOT NULL DEFAULT 'mood_tracker'`,
     // Motif déclaré sur la saisie quotidienne (medication_adherence : motif de non-prise)
@@ -1222,19 +1225,25 @@ export interface PlanItem {
   sort_order: number
   /** Poids optionnel (1..N selon le layout). null pour les modules qui n'utilisent pas de pondération (ex. crisis_plan). */
   weight: number | null
+  /** Numéro de téléphone optionnel : sections « contactables » (proches/pros du plan de crise), null sinon. */
+  phone: string | null
+  /** Provenance du contact : 'phonebook' si importé du répertoire, null si saisi à la main. */
+  contact_source: string | null
   created_at: string
 }
 
 async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS plan_items (
-      id         TEXT PRIMARY KEY,
-      module_id  TEXT NOT NULL,
-      section_id TEXT NOT NULL,
-      text       TEXT NOT NULL,
-      sort_order INTEGER NOT NULL DEFAULT 0,
-      weight     INTEGER,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      id             TEXT PRIMARY KEY,
+      module_id      TEXT NOT NULL,
+      section_id     TEXT NOT NULL,
+      text           TEXT NOT NULL,
+      sort_order     INTEGER NOT NULL DEFAULT 0,
+      weight         INTEGER,
+      phone          TEXT,
+      contact_source TEXT,
+      created_at     TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_plan_items_module ON plan_items(module_id, section_id);
   `)
@@ -1252,8 +1261,8 @@ export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanIt
 export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight) VALUES (?, ?, ?, ?, ?, ?)`,
-    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null]
+    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight, phone, contact_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null, item.phone ?? null, item.contact_source ?? null]
   )
 }
 

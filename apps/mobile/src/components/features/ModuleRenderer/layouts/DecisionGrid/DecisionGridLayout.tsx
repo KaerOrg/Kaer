@@ -145,6 +145,8 @@ export function DecisionGridLayout({ fields, moduleId }: DecisionGridLayoutProps
       text,
       sort_order: existingItems.length,
       weight,
+      phone: null,
+      contact_source: null,
       created_at: new Date().toISOString(),
     }
     await savePlanItem(newItem)

@@ -24,6 +24,9 @@ jest.mock('expo-file-system/legacy', () => ({
 }))
 
 jest.mock('expo-image-picker', () => ({
+  // getMediaLibraryPermissionsAsync : lu par le permissionsService générique avant
+  // de demander (undetermined par défaut → déclenche la demande).
+  getMediaLibraryPermissionsAsync: jest.fn().mockResolvedValue({ status: 'undetermined' }),
   requestMediaLibraryPermissionsAsync: jest.fn(),
   launchImageLibraryAsync: jest.fn(),
   MediaTypeOptions: { Images: 'Images' },
@@ -90,7 +93,7 @@ describe('pickAndSaveAnchorPhoto', () => {
 
   it('retourne null si permission refusée', async () => {
     jest.mocked(ImagePicker.requestMediaLibraryPermissionsAsync).mockResolvedValueOnce(
-      { granted: false } as ImagePicker.MediaLibraryPermissionResponse
+      { status: 'denied' } as ImagePicker.MediaLibraryPermissionResponse
     )
     const result = await pickAndSaveAnchorPhoto(0)
     expect(result).toBeNull()
@@ -98,7 +101,7 @@ describe('pickAndSaveAnchorPhoto', () => {
 
   it('retourne null si picker annulé', async () => {
     jest.mocked(ImagePicker.requestMediaLibraryPermissionsAsync).mockResolvedValueOnce(
-      { granted: true } as ImagePicker.MediaLibraryPermissionResponse
+      { status: 'granted' } as ImagePicker.MediaLibraryPermissionResponse
     )
     jest.mocked(ImagePicker.launchImageLibraryAsync).mockResolvedValueOnce(
       { canceled: true, assets: null } as unknown as ImagePicker.ImagePickerResult
@@ -109,7 +112,7 @@ describe('pickAndSaveAnchorPhoto', () => {
 
   it('sauvegarde et retourne l\'anchor si photo sélectionnée', async () => {
     jest.mocked(ImagePicker.requestMediaLibraryPermissionsAsync).mockResolvedValueOnce(
-      { granted: true } as ImagePicker.MediaLibraryPermissionResponse
+      { status: 'granted' } as ImagePicker.MediaLibraryPermissionResponse
     )
     jest.mocked(ImagePicker.launchImageLibraryAsync).mockResolvedValueOnce({
       canceled: false,

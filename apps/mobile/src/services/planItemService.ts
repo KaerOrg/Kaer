@@ -25,6 +25,8 @@ export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<
       text: item.text,
       sort_order: item.sort_order,
       weight: item.weight ?? null,
+      phone: item.phone ?? null,
+      contact_source: item.contact_source ?? null,
     },
   })
 }
