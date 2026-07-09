@@ -184,6 +184,30 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     })
   })
 
+  it('étape contactable : ajoute un contact nom + numéro via savePlanItem', async () => {
+    const fields: ContentField[] = [
+      makeField({ id: 'step_4.title', field_type: 'step_title', text_code: 'modules.crisis_plan.step_4_title', section_id: 'step_4', sort_order: 40, props: { step_number: '4', color: '#9333EA', bgColor: '#FDF4FF', icon: 'account-heart-outline', contactable: 'true' } }),
+    ]
+    render(<FieldRenderer preview_kind="editable_steps" fields={fields} moduleId="crisis_plan" />)
+    await waitFor(() => expect(screen.getByTestId('step-header-4')).toBeTruthy())
+
+    fireEvent.press(screen.getByTestId('step-header-4'))
+    // La liste contactable expose les déclencheurs « ajouter » et « importer ».
+    await waitFor(() => expect(screen.getByTestId('step-4-add')).toBeTruthy())
+    expect(screen.getByTestId('step-4-import')).toBeTruthy()
+
+    fireEvent.press(screen.getByTestId('step-4-add'))
+    fireEvent.changeText(screen.getByTestId('step-4-new-name'), 'Marie')
+    fireEvent.changeText(screen.getByTestId('step-4-new-phone'), '0102030405')
+    fireEvent.press(screen.getByTestId('step-4-validate-new'))
+
+    await waitFor(() => {
+      expect(database.savePlanItem).toHaveBeenCalledWith(
+        expect.objectContaining({ section_id: 'step_4', text: 'Marie', phone: '0102030405' })
+      )
+    })
+  })
+
   it('dispatche les fields hors-section : widgets après les étapes', async () => {
     const fields: ContentField[] = [
       ...MOCK_FIELDS,

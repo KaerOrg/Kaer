@@ -41,7 +41,20 @@
           "defaultChannel": "psytool-reminders"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Kær accède à vos contacts uniquement lorsque vous choisissez d'importer un proche ou un professionnel dans votre plan de sécurité, pour pouvoir l'appeler d'un geste en cas de besoin. Aucun contact n'est envoyé ni conservé sans votre action."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kær accède à vos photos uniquement lorsque vous ajoutez une image d'ancrage à votre plan de sécurité ou une photo de profil. Aucune image n'est consultée sans votre action.",
+          "cameraPermission": "Kær utilise l'appareil photo uniquement lorsque vous prenez une photo de profil."
+        }
+      ]
     ]
   }
 }

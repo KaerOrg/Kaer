@@ -10,6 +10,7 @@ import {
   type CrisisAnchor,
 } from '../lib/database'
 import { syncUpsert, syncDelete } from './syncHelpers'
+import { ensurePermission } from './permissionsService'
 
 export type { CrisisAnchor }
 
@@ -54,8 +55,7 @@ export async function pickAndSaveAnchorPhoto(
 ): Promise<CrisisAnchor | null> {
   if (existingCount >= MAX_ANCHORS) return null
 
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
-  if (!permission.granted) return null
+  if (!(await ensurePermission('mediaLibrary'))) return null
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],

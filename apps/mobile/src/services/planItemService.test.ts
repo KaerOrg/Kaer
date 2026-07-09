@@ -23,6 +23,8 @@ const item = {
   text: 'Appeler un ami',
   sort_order: 0,
   weight: null,
+  phone: null,
+  contact_source: null,
 }
 
 beforeEach(() => jest.clearAllMocks())
@@ -57,6 +59,13 @@ describe('planItemService', () => {
       mockEnqueue.mockImplementation(() => { order.push('enqueue'); return Promise.resolve() })
       await savePlanItem(item)
       expect(order[0]).toBe('db')
+    })
+
+    it('propage numéro + provenance d\'un contact dans le payload synchronisé', async () => {
+      await savePlanItem({ ...item, phone: '0102030405', contact_source: 'phonebook' })
+      expect(mockEnqueue).toHaveBeenCalledWith(expect.objectContaining({
+        payload: expect.objectContaining({ phone: '0102030405', contact_source: 'phonebook' }),
+      }))
     })
   })
 

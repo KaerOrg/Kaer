@@ -1,5 +1,6 @@
 import * as ImagePicker from 'expo-image-picker'
 import { supabase } from '../lib/supabase'
+import { ensurePermission } from './permissionsService'
 
 export type AvatarSource = 'library' | 'camera'
 
@@ -7,8 +8,7 @@ export type AvatarSource = 'library' | 'camera'
  *  Retourne l'URI locale de l'image, ou null si l'utilisateur annule / refuse. */
 export async function pickAvatarImage(source: AvatarSource): Promise<string | null> {
   if (source === 'camera') {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync()
-    if (status !== 'granted') return null
+    if (!(await ensurePermission('camera'))) return null
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
@@ -19,8 +19,7 @@ export async function pickAvatarImage(source: AvatarSource): Promise<string | nu
     return result.canceled ? null : result.assets[0].uri
   }
 
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-  if (status !== 'granted') return null
+  if (!(await ensurePermission('mediaLibrary'))) return null
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],

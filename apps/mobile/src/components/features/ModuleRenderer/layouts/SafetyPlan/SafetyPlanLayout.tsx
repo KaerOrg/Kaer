@@ -18,7 +18,7 @@ import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
-import { CrisisEmergencyCalls } from '../shared'
+import { CrisisEmergencyCalls, CallableContact } from '../shared'
 import { CrisisAnchorsWidget } from '../../fields/CrisisAnchorsWidget'
 import { styles } from './styles'
 
@@ -103,6 +103,8 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
           const bgColor = (titleField.props['bgColor'] as string | undefined) ?? '#F3F4F6'
           const iconColor = (titleField.props['color'] as string | undefined) ?? colors.primary
           const stepNumber = titleField.props['step_number'] ?? String(idx + 1)
+          // Étape « contactable » (proches/pros) : items rendus comme contacts appelables.
+          const isContactable = titleField.props['contactable'] === 'true'
           const sectionItems = itemsBySection.get(sectionId) ?? []
 
           return (
@@ -122,10 +124,21 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
                 ) : null}
                 {sectionItems.length > 0 ? (
                   sectionItems.map(item => (
-                    <View key={item.id} style={styles.item}>
-                      <MaterialCommunityIcons name="circle-small" size={20} color={iconColor} />
-                      <Text style={styles.itemText}>{item.text}</Text>
-                    </View>
+                    isContactable ? (
+                      <CallableContact
+                        key={item.id}
+                        name={item.text}
+                        phone={item.phone}
+                        accentColor={iconColor}
+                        callAccessibilityLabel={`${lbl('call_contact')} : ${item.text}`}
+                        testID={`contact-${item.id}`}
+                      />
+                    ) : (
+                      <View key={item.id} style={styles.item}>
+                        <MaterialCommunityIcons name="circle-small" size={20} color={iconColor} />
+                        <Text style={styles.itemText}>{item.text}</Text>
+                      </View>
+                    )
                   ))
                 ) : (
                   <Text style={styles.emptyStep}>{lbl('step_empty')}</Text>

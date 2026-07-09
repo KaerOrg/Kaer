@@ -13,9 +13,10 @@ import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
 import { generateId } from '../../../../../lib/database'
 import { getPlanItems, savePlanItem, deletePlanItem, type PlanItem } from '@services/planItemService'
+import { pickContact } from '@services/contactsService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { EditableItemsList, CrisisEmergencyCalls } from '../shared'
+import { EditableItemsList, EditableContactsList, CrisisEmergencyCalls, type EditableContact } from '../shared'
 import { CrisisAnchorsWidget } from '../../fields/CrisisAnchorsWidget'
 import { styles } from './styles'
 
@@ -81,6 +82,8 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
       text,
       sort_order: existingItems.length,
       weight: null,
+      phone: null,
+      contact_source: null,
       created_at: new Date().toISOString(),
     }
     await savePlanItem(newItem)
@@ -88,9 +91,36 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   }, [itemsBySection, moduleId])
 
   const handleEdit = useCallback(async (item: PlanItem, text: string) => {
-    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text, sort_order: item.sort_order, weight: item.weight })
+    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text, sort_order: item.sort_order, weight: item.weight, phone: item.phone, contact_source: item.contact_source })
     setItems(prev => prev.map(i => (i.id === item.id ? { ...i, text } : i)))
   }, [])
+
+  // ── Contacts (étapes « contactables » : proches/pros, avec numéro appelable) ──
+
+  const handleAddContact = useCallback(async (sectionId: string, name: string, phone: string, source: string | null) => {
+    const existingItems = itemsBySection.get(sectionId) ?? []
+    const newItem: PlanItem = {
+      id: generateId(),
+      module_id: moduleId,
+      section_id: sectionId,
+      text: name,
+      sort_order: existingItems.length,
+      weight: null,
+      phone: phone !== '' ? phone : null,
+      contact_source: source,
+      created_at: new Date().toISOString(),
+    }
+    await savePlanItem(newItem)
+    setItems(prev => [...prev, newItem])
+  }, [itemsBySection, moduleId])
+
+  const handleEditContact = useCallback(async (id: string, name: string, phone: string) => {
+    const item = items.find(i => i.id === id)
+    if (item == null) return
+    const nextPhone = phone !== '' ? phone : null
+    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text: name, sort_order: item.sort_order, weight: item.weight, phone: nextPhone, contact_source: item.contact_source })
+    setItems(prev => prev.map(i => (i.id === id ? { ...i, text: name, phone: nextPhone } : i)))
+  }, [items])
 
   const handleDelete = useCallback((item: PlanItem) => {
     showConfirm({
@@ -104,6 +134,11 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
       },
     })
   }, [t, showConfirm])
+
+  const handleDeleteContact = useCallback((contact: EditableContact) => {
+    const item = items.find(i => i.id === contact.id)
+    if (item != null) handleDelete(item)
+  }, [items, handleDelete])
 
   // Partition des fields hors-section : widgets de section (après les étapes, triés
   // par sort_order) et boutons d'appel (barre fixe en bas). Parité avec le web.
@@ -136,6 +171,9 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
           const bgColor = (titleField.props['bgColor'] as string | undefined) ?? '#F3F4F6'
           const iconColor = (titleField.props['color'] as string | undefined) ?? colors.primary
           const stepNumber = titleField.props['step_number'] ?? String(idx + 1)
+          // Étape « contactable » (proches/pros) : items = contacts nom + numéro appelable.
+          // Piloté par la config (`field_props.contactable`), jamais par un numéro d'étape en dur.
+          const isContactable = titleField.props['contactable'] === 'true'
           const isExpanded = expandedSections.has(sectionId)
           const sectionItems = itemsBySection.get(sectionId) ?? []
 
@@ -170,17 +208,36 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
                   {hintField != null && (
                     <Text style={styles.stepHint}>{t(hintField.text_code ?? '')}</Text>
                   )}
-                  <EditableItemsList
-                    items={sectionItems}
-                    accentColor={iconColor}
-                    weightConfig={null}
-                    addLabel={t('modules.crisis_plan.add_item')}
-                    placeholder={t('modules.crisis_plan.item_placeholder')}
-                    onAdd={(text) => handleAdd(sectionId, text)}
-                    onEdit={(item, text) => handleEdit(item, text)}
-                    onDelete={handleDelete}
-                    testIdPrefix={`step-${stepNumber}`}
-                  />
+                  {isContactable ? (
+                    <EditableContactsList
+                      contacts={sectionItems.map(i => ({ id: i.id, name: i.text, phone: i.phone ?? '' }))}
+                      accentColor={iconColor}
+                      addLabel={t('modules.crisis_plan.add_contact')}
+                      importLabel={t('modules.crisis_plan.import_contact')}
+                      namePlaceholder={t('modules.crisis_plan.contact_name_placeholder')}
+                      phonePlaceholder={t('modules.crisis_plan.contact_phone_placeholder')}
+                      validateLabel={t('common.validate')}
+                      cancelLabel={t('common.cancel')}
+                      deleteLabel={t('common.delete')}
+                      onAdd={(name, phone, source) => handleAddContact(sectionId, name, phone, source)}
+                      onEdit={handleEditContact}
+                      onDelete={handleDeleteContact}
+                      onImport={pickContact}
+                      testIdPrefix={`step-${stepNumber}`}
+                    />
+                  ) : (
+                    <EditableItemsList
+                      items={sectionItems}
+                      accentColor={iconColor}
+                      weightConfig={null}
+                      addLabel={t('modules.crisis_plan.add_item')}
+                      placeholder={t('modules.crisis_plan.item_placeholder')}
+                      onAdd={(text) => handleAdd(sectionId, text)}
+                      onEdit={(item, text) => handleEdit(item, text)}
+                      onDelete={handleDelete}
+                      testIdPrefix={`step-${stepNumber}`}
+                    />
+                  )}
                 </View>
               )}
             </View>
