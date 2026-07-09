@@ -13,12 +13,12 @@ import './ModuleActionsModal.css'
 
 /**
  * Onglets possibles de la modale d'actions d'un module. L'ordre d'affichage canonique
- * est Données → Configuration → Notifications → Sources → Vue patient (porté par
+ * est Données → Configuration → Notifications → Vue patient → Sources (porté par
  * `computeModuleTabs`) ; cette union sert au typage, `TAB_ORDER` à la validation.
  */
 export type ModuleActionTab = 'preview' | 'sources' | 'data' | 'notifications' | 'config'
 
-const TAB_ORDER: readonly ModuleActionTab[] = ['data', 'config', 'notifications', 'sources', 'preview']
+const TAB_ORDER: readonly ModuleActionTab[] = ['data', 'config', 'notifications', 'preview', 'sources']
 
 const TAB_LABEL_KEY: Record<ModuleActionTab, string> = {
   preview: 'patient.patient_view_tab',

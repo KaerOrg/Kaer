@@ -70,7 +70,7 @@ export function computeModuleTabs(type: ModuleType, ctx: ModuleTabContext): Modu
   else if (PREVIEW_REQUIRES_UNLOCK.has(type)) hasPreview = ctx.unlocked
   else hasPreview = true
 
-  // Ordre d'affichage : Données → Configuration → Notifications → Sources → Vue patient.
+  // Ordre d'affichage : Données → Configuration → Notifications → Vue patient → Sources.
 
   // Données (en tête)
   if (ctx.unlocked && !NO_DATA_NO_NOTIF.has(type)) tabs.push('data')
@@ -84,10 +84,10 @@ export function computeModuleTabs(type: ModuleType, ctx: ModuleTabContext): Modu
   // Notifications
   if (ctx.unlocked && !ctx.isScale && !NO_DATA_NO_NOTIF.has(type)) tabs.push('notifications')
 
-  // Sources puis Vue patient (en dernier)
+  // Vue patient puis Sources (en dernier)
   if (hasPreview) {
-    tabs.push('sources')
     tabs.push('preview')
+    tabs.push('sources')
   }
 
   return tabs
