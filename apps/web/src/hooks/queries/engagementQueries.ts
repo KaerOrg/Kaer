@@ -9,7 +9,6 @@ import {
   fetchModuleSummary,
   fetchChronoEntries,
   fetchFormEntries,
-  fetchBeckEvolution,
   fetchActivityEntries,
   type ScorePoint,
   type MoodPoint,
@@ -48,14 +47,16 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med, sleep, chronoEntries, beck, activityEntries] = await Promise.all([
+        const [scaleResults, mood, fear, med, sleep, chronoEntries, beckEntries, activityEntries] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
           fetchMedSideEffectsEvolution(patientId),
           fetchSleepEvolution(patientId),
           fetchChronoEntries(patientId),
-          fetchBeckEvolution(patientId),
+          // Colonnes de Beck : fiches complètes (mêmes données que l'onglet
+          // « Données » du module) rendues en maître-détail dans l'onglet Évolution.
+          fetchFormEntries(patientId, 'beck_columns'),
           fetchActivityEntries(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
@@ -69,7 +70,7 @@ export const engagementQueries = {
           medData: med.data,
           sleepData: sleep,
           chronoEntries,
-          beckData: beck,
+          beckEntries,
           activityEntries,
         }
       },

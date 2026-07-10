@@ -15,7 +15,6 @@ import {
   fetchModuleSummary,
   fetchChronoEntries,
   fetchFormEntries,
-  fetchBeckEvolution,
   fetchActivityEntries,
 } from './engagementService'
 
@@ -342,37 +341,6 @@ describe('engagementService.fetchFormEntries', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
     expect(await fetchFormEntries('p1', 'beck_columns')).toEqual([])
-  })
-})
-
-describe('engagementService.fetchBeckEvolution', () => {
-  it('mappe emotion_intensity/outcome_intensity en points avant/après', async () => {
-    const rows = [
-      {
-        client_created_at: '2026-06-01T10:00:00Z',
-        payload: { values: { emotion_intensity: 100, outcome_intensity: 60, situation: 'x' } },
-      },
-      {
-        client_created_at: '2026-06-02T10:00:00Z',
-        payload: { values: { emotion_intensity: 70 } },
-      },
-      {
-        client_created_at: '2026-06-03T10:00:00Z',
-        payload: { values: { situation: 'texte seul, aucun curseur' } },
-      },
-    ]
-    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
-
-    expect(await fetchBeckEvolution('p1')).toEqual([
-      { date: '2026-06-01T10:00:00Z', intensity_before: 100, intensity_after: 60 },
-      { date: '2026-06-02T10:00:00Z', intensity_before: 70 },
-    ])
-  })
-
-  it('retourne vide en cas d’erreur Supabase', async () => {
-    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
-
-    expect(await fetchBeckEvolution('p1')).toEqual([])
   })
 })
 

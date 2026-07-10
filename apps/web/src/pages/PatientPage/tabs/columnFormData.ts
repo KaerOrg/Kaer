@@ -5,8 +5,7 @@ import type { FormEntryRow } from '@services/engagementService'
 // colonnes (titres, couleurs, curseurs) est dérivée de `module_content_fields`
 // (config-first, source unique web ≡ mobile via `@kaer/shared`). Le SIGNAL
 // CLINIQUE du DTR de Beck (mouvement de restructuration avant→après) est propre
-// à `beck_columns` (seul module `column_form`), au même titre que
-// `fetchBeckEvolution`. Conformité MDR 2017/745 : valeurs brutes uniquement,
+// à `beck_columns` (seul module `column_form`). Conformité MDR 2017/745 : valeurs brutes uniquement,
 // aucun seuil, label interprétatif ni couleur de jugement (les couleurs codent
 // l'identité de colonne, jamais une gravité).
 
