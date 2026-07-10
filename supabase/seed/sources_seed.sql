@@ -1059,40 +1059,137 @@ values
   )
 
 -- ── beck_columns ─────────────────────────────────────────────────────────────
--- Colonnes de Beck (restructuration cognitive TCC)
--- Sources niveau 1 (efficacité de la TCC et de la restructuration cognitive) :
---   PMID 23459093 — Hofmann et al. 2012 — revue de 106 méta-analyses sur la TCC (vérifié PubMed, abstract lu)
+-- Colonnes de Beck (restructuration cognitive TCC), composant central de la TCC
+-- Sources vérifiées le 2026-07-09 (études : PMID + abstract lu via PubMed ;
+--   guidelines : URL vérifiée via WebFetch). Données bibliographiques issues de PubMed.
+-- Ordre : grandes méta-analyses et recommandations institutionnelles en tête.
 
 ,
 
-  -- 1. Hofmann et al. 2012 — Cognit Ther Res (revue systématique de 106 méta-analyses TCC)
-  --    PMID 23459093 — doi:10.1007/s10608-012-9476-1 (vérifié PubMed, abstract lu)
-  --    evidence_grade : null — revue, non un ECR individuel
+  -- 1. Cuijpers et al. 2023, World Psychiatry (méta-analyse, 409 essais, 52 702 patients)
+  --    PMID 36640411, doi:10.1002/wps.21069 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null (méta-analyse, grade A/B/C non applicable)
   (
-    '2a2a2a2a-0001-0001-0001-000000000001',
+    '2a2a2a2a-0003-0001-0001-000000000001',
     'beck_columns',
-    'Hofmann et al. — Efficacité de la TCC : revue de méta-analyses (Cognit Ther Res, 2012)',
-    'systematic_review',
-    'https://doi.org/10.1007/s10608-012-9476-1',
+    'Cuijpers et al., TCC pour la dépression : méta-analyse de 409 essais (World Psychiatry, 2023)',
+    'meta_analysis',
+    'https://doi.org/10.1002/wps.21069',
     null,
-    'Revue de 106 méta-analyses de la TCC : support le plus fort pour les troubles anxieux, les troubles somatoformes, la boulimie, le contrôle de la colère et le stress général — la restructuration cognitive (colonnes de Beck) est un composant central de la TCC validée dans cet ensemble',
+    'La plus grande méta-analyse réalisée sur une psychothérapie pour un trouble mental : 409 essais, 518 comparaisons, 52 702 patients. Effet modéré à large de la TCC contre les conditions contrôle (g = 0,79 ; IC 95 % 0,70 à 0,89), maintenu à 6 à 12 mois de suivi. Efficace aussi en auto-support non guidé (g = 0,45) et chez l''enfant et l''adolescent (g = 0,41) ; aussi efficace que les pharmacothérapies à court terme, plus efficace à long terme',
     1
   )
 
 ,
 
-  -- 2. NICE NG222 — Dépression de l'adulte : traitement et management (guideline, 2022)
+  -- 2. Cuijpers et al. 2016, World Psychiatry (méta-analyse, 144 essais, multi-troubles)
+  --    PMID 27717254, doi:10.1002/wps.20346 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null (méta-analyse, grade A/B/C non applicable)
+  (
+    '2a2a2a2a-0004-0001-0001-000000000001',
+    'beck_columns',
+    'Cuijpers et al., efficacité de la TCC pour la dépression et l''anxiété : mise à jour méta-analytique (World Psychiatry, 2016)',
+    'meta_analysis',
+    'https://doi.org/10.1002/wps.20346',
+    null,
+    '144 essais (184 comparaisons) : effets larges de la TCC sur la dépression majeure (g = 0,75), l''anxiété généralisée (g = 0,80), le trouble panique (g = 0,81) et l''anxiété sociale (g = 0,88), analyse tenant compte du biais de publication et de la qualité des essais',
+    2
+  )
+
+,
+
+  -- 3. APA 2019, Clinical Practice Guideline for the Treatment of Depression
+  --    https://www.apa.org/depression-guideline (URL vérifiée via WebFetch)
+  --    evidence_grade : null (grade GRADE non transposable en A/B/C sans lecture du document complet)
+  (
+    '2a2a2a2a-0005-0001-0001-000000000001',
+    'beck_columns',
+    'APA, Clinical Practice Guideline for the Treatment of Depression (American Psychological Association, 2019)',
+    'guideline',
+    'https://www.apa.org/depression-guideline',
+    null,
+    'Recommandation formelle de l''American Psychological Association : la TCC figure parmi les psychothérapies recommandées pour le traitement de la dépression de l''adulte',
+    3
+  )
+
+,
+
+  -- 4. HAS 2017, Épisode dépressif caractérisé de l'adulte : prise en charge en premier recours
+  --    https://www.has-sante.fr/jcms/c_1739917/ (URL vérifiée via WebFetch, validée 2017)
+  --    evidence_grade : null (grade non lu dans l'argumentaire complet)
+  (
+    '2a2a2a2a-0006-0001-0001-000000000001',
+    'beck_columns',
+    'HAS, Épisode dépressif caractérisé de l''adulte : prise en charge en premier recours (Haute Autorité de Santé, 2017)',
+    'guideline',
+    'https://www.has-sante.fr/jcms/c_1739917/fr/episode-depressif-caracterise-de-l-adulte-prise-en-charge-en-premier-recours',
+    null,
+    'Recommandation française de référence : la prise en charge de la dépression associe une psychothérapie de soutien et/ou des thérapies cognitivo-comportementales (TCC)',
+    4
+  )
+
+,
+
+  -- 5. NICE NG222, Dépression de l'adulte : traitement et management (guideline, 2022)
   --    https://www.nice.org.uk/guidance/ng222
-  --    evidence_grade : 'A' — recommandation NICE Grade A (TCC recommandée en 1ère ligne)
+  --    evidence_grade : null (NICE n'utilise pas de grades A/B/C)
   (
     '2a2a2a2a-0002-0001-0001-000000000001',
     'beck_columns',
-    'NICE NG222 — Dépression de l''adulte : traitement et management (guideline, 2022)',
+    'NICE NG222, Dépression de l''adulte : traitement et management (guideline, 2022)',
     'guideline',
     'https://www.nice.org.uk/guidance/ng222',
     null,
     'Recommandation clinique NICE 2022 : la TCC, dont la restructuration cognitive (colonnes de Beck), est recommandée en première ligne pour la dépression légère à modérée chez l''adulte',
-    2
+    5
+  )
+
+,
+
+  -- 6. Papola et al. 2024, JAMA Psychiatry (network meta-analysis, 65 essais, TAG)
+  --    PMID 37851421, doi:10.1001/jamapsychiatry.2023.3971 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null (méta-analyse, grade A/B/C non applicable)
+  (
+    '2a2a2a2a-0007-0001-0001-000000000001',
+    'beck_columns',
+    'Papola et al., psychothérapies du trouble anxieux généralisé : méta-analyse en réseau (JAMA Psychiatry, 2024)',
+    'meta_analysis',
+    'https://doi.org/10.1001/jamapsychiatry.2023.3971',
+    null,
+    'Méta-analyse en réseau de 65 essais randomisés (5 048 participants) : la TCC est associée à la plus forte efficacité et reste la seule significativement supérieure au traitement usuel à 3 à 12 mois. Les auteurs concluent que la TCC peut être considérée comme traitement de première ligne du trouble anxieux généralisé',
+    6
+  )
+
+,
+
+  -- 7. Hofmann et al. 2012, Cognit Ther Res (revue systématique de 106 méta-analyses TCC)
+  --    PMID 23459093, doi:10.1007/s10608-012-9476-1 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null (revue, non un ECR individuel)
+  (
+    '2a2a2a2a-0001-0001-0001-000000000001',
+    'beck_columns',
+    'Hofmann et al., efficacité de la TCC : revue de méta-analyses (Cognit Ther Res, 2012)',
+    'systematic_review',
+    'https://doi.org/10.1007/s10608-012-9476-1',
+    null,
+    'Revue de 106 méta-analyses de la TCC : support le plus fort pour les troubles anxieux, les troubles somatoformes, la boulimie, le contrôle de la colère et le stress général ; la restructuration cognitive (colonnes de Beck) est un composant central de la TCC validée dans cet ensemble',
+    7
+  )
+
+,
+
+  -- 8. Morello et al. 2023, Front Digit Health (méta-analyse mHealth, réévaluation cognitive)
+  --    PMID 37927578, doi:10.3389/fdgth.2023.1253390 (vérifié PubMed, abstract lu)
+  --    evidence_grade : null (méta-analyse, grade A/B/C non applicable)
+  (
+    '2a2a2a2a-0008-0001-0001-000000000001',
+    'beck_columns',
+    'Morello et al., réévaluation cognitive dans les interventions mHealth : revue systématique et méta-analyse (Front Digit Health, 2023)',
+    'meta_analysis',
+    'https://doi.org/10.3389/fdgth.2023.1253390',
+    null,
+    'Méta-analyse de 30 essais randomisés (3 904 participants) : les interventions mHealth intégrant une composante de restructuration cognitive (réévaluation cognitive) améliorent les symptômes anxieux et dépressifs (SMD = 0,34). À noter : risque de biais élevé dans la plupart des études, effet préliminaire',
+    8
   )
 
 -- ── behavioral_activation ────────────────────────────────────────────────────
