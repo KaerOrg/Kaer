@@ -94,11 +94,14 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 
 ### Vue praticien (web)
 
-L'onglet **Évolution** du patient affiche la courbe « intensité émotionnelle
-avant / après restructuration » (`fetchBeckEvolution` : `emotion_intensity` vs
-`outcome_intensity`, même émotion ré-évaluée), aux côtés des SUDS et des échelles.
+L'onglet **Évolution** du patient affiche, pour Beck, le **même panneau détaillé**
+que l'onglet « Données » du module (`ColumnFormDataPanel`) : une deuxième entrée
+vers les fiches complètes, sans ouvrir la modale du module. Les fiches sont chargées
+par l'agrégat d'évolution (`fetchFormEntries(patientId, 'beck_columns')` →
+`FormEntryRow[]`), et la section suit le comportement « archivé » commun (masquée par
+défaut si le module est révoqué, révélée par le toggle « Afficher les archivés »).
 
-Le panneau « Données » de la card Beck (`PatientPage`) est une vue **maître-détail**
+Ce panneau « Données » (identique dans les deux entrées) est une vue **maître-détail**
 pensée pour l'écran large (`ColumnFormDataPanel`) :
 
 - **Liste latérale** (`ColumnFormEntryList`) : une ligne par saisie (antichronologique),

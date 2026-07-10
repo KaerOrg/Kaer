@@ -5,7 +5,7 @@ vi.mock('@services/engagementService', () => ({
   fetchMedSideEffectsEvolution: vi.fn(), fetchSleepEvolution: vi.fn(),
   fetchAvailableScales: vi.fn(), fetchModuleSummary: vi.fn(), fetchChronoEntries: vi.fn(),
   fetchFormEntries: vi.fn(),
-  fetchBeckEvolution: vi.fn(),
+  fetchActivityEntries: vi.fn(),
 }))
 
 import { engagementQueries } from './engagementQueries'
