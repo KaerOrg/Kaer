@@ -425,3 +425,159 @@ describe('FieldRenderer — column_form : chips de suggestions', () => {
     expect(screen.getByTestId('field-situation').props.value).toBe('un peu perdu')
   })
 })
+
+// ─── Refonte 1B (#145) : wizard opt-in ─────────────────────────────────────────
+
+const COL1_Q: ContentField = { ...COL1, props: { ...COL1.props, question_code: 'modules.beck_columns.entry_col_1_question' } }
+const COL3_Q: ContentField = { ...COL3, props: { ...COL3.props, question_code: 'modules.beck_columns.entry_col_3_question' } }
+const WIZARD_CFG = makeField({
+  id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
+  props: {
+    entry_mode: 'wizard',
+    required_key_1: 'situation', required_key_2: 'automatic_thought',
+    save_label: 'modules.beck_columns.save',
+  },
+})
+const WIZARD_FIELDS: ContentField[] = [WIZARD_CFG, COL1_Q, COL3_Q]
+
+describe('FieldRenderer — column_form : wizard (entry_mode=wizard)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('affiche la barre de progression (un segment par colonne) et UNE colonne à la fois', async () => {
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.getByTestId('wizard-progress')).toBeTruthy()
+    expect(screen.getByTestId('wizard-progress-0')).toBeTruthy()
+    expect(screen.getByTestId('wizard-progress-1')).toBeTruthy()
+    expect(screen.queryByTestId('wizard-progress-2')).toBeNull()
+    // Étape 1 : situation seulement.
+    expect(screen.getByTestId('field-situation')).toBeTruthy()
+    expect(screen.queryByTestId('field-automatic_thought')).toBeNull()
+    // Pas d'enregistrement tant qu'on n'est pas à la dernière étape.
+    expect(screen.getByTestId('wizard-next')).toBeTruthy()
+    expect(screen.queryByTestId('save-entry')).toBeNull()
+  })
+
+  it('« Continuer » avance à l\'étape suivante ; la dernière étape montre « Enregistrer »', async () => {
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.press(screen.getByTestId('wizard-next'))
+    expect(screen.getByTestId('field-automatic_thought')).toBeTruthy()
+    expect(screen.queryByTestId('field-situation')).toBeNull()
+    expect(screen.getByTestId('save-entry')).toBeTruthy()
+    expect(screen.queryByTestId('wizard-next')).toBeNull()
+  })
+
+  it('enregistre depuis la dernière étape du wizard', async () => {
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.changeText(screen.getByTestId('field-situation'), 'dans le métro')
+    fireEvent.press(screen.getByTestId('wizard-next'))
+    fireEvent.press(screen.getByTestId('save-entry'))
+    await waitFor(() => {
+      expect(database.saveFormEntry).toHaveBeenCalledWith(
+        expect.objectContaining({ values: expect.objectContaining({ situation: 'dans le métro' }) }),
+      )
+    })
+  })
+
+  it('« retour » à la première étape revient à la liste', async () => {
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.press(screen.getByTestId('wizard-back'))
+    await waitFor(() => expect(screen.getByTestId('list-empty')).toBeTruthy())
+  })
+
+  it('sans entry_mode=wizard, la saisie reste en scroll (toutes les colonnes, pas de progression)', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('wizard-progress')).toBeNull()
+    expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
+    expect(screen.getByTestId('column-beck.col_thought')).toBeTruthy()
+  })
+})
+
+// ─── Refonte 1B (#145) : carte récit (list_card_variant=narrative) ──────────────
+
+const NARR_EMOTION = makeField({
+  id: 'beck.col2.h', section_id: 'beck.col_emotion', sort_order: 20,
+  text_code: 'modules.beck_columns.entry_col_2_title', props: { color: '#8B5CF6' },
+  children: [
+    makeField({
+      id: 'beck.col2.slider', section_id: 'beck.col_emotion', parent_field_id: 'beck.col2.h',
+      field_type: 'column_slider_field', sort_order: 22,
+      text_code: 'modules.beck_columns.entry_col_2_intensity',
+      props: { key: 'emotion_intensity', min: '0', max: '100', step: '1', unit: '%' },
+    }),
+  ],
+})
+const NARR_OUTCOME = makeField({
+  id: 'beck.col5.h', section_id: 'beck.col_outcome', sort_order: 50,
+  text_code: 'modules.beck_columns.entry_col_5_title', props: { color: '#EC4899' },
+  children: [
+    makeField({
+      id: 'beck.col5.intens', section_id: 'beck.col_outcome', parent_field_id: 'beck.col5.h',
+      field_type: 'column_slider_field', sort_order: 51,
+      text_code: 'modules.beck_columns.entry_col_5_intensity',
+      props: { key: 'outcome_intensity', min: '0', max: '100', step: '1', unit: '%' },
+    }),
+  ],
+})
+const NARRATIVE_CFG = makeField({
+  id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
+  props: {
+    required_key_1: 'situation',
+    list_card_variant: 'narrative',
+    narrative_title_key: 'situation',
+    narrative_strike_key: 'automatic_thought',
+    narrative_strike_label: 'modules.beck_columns.narrative_strike',
+    narrative_reframe_key: 'rational_response',
+    narrative_reframe_label: 'modules.beck_columns.narrative_reframe',
+    narrative_expand_label: 'modules.beck_columns.see_reasoning',
+    arc_before_key: 'emotion_intensity',
+    arc_after_key: 'outcome_intensity',
+    arc_caption_key: 'emotion',
+    arc_unit: '%',
+    arc_before_label: 'modules.beck_columns.arc_before',
+    arc_after_label: 'modules.beck_columns.arc_after',
+    arc_todo_label: 'modules.beck_columns.arc_todo',
+  },
+})
+const NARRATIVE_FIELDS: ContentField[] = [NARRATIVE_CFG, COL1, NARR_EMOTION, COL3, NARR_OUTCOME]
+
+describe('FieldRenderer — column_form : carte récit (list_card_variant=narrative)', () => {
+  beforeEach(() => { jest.clearAllMocks() })
+
+  it('rend la carte récit (lien de dépliage) quand la variante narrative est active', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([
+      { id: 'e1', module_id: 'beck_columns', values: { situation: 'dans le métro' }, created_at: '2026-07-05T10:00:00Z' },
+    ])
+    renderLayout(NARRATIVE_FIELDS)
+    expect(await screen.findByTestId('record-e1')).toBeTruthy()
+    // Le lien « voir le raisonnement complet » est propre à la carte récit.
+    expect(screen.getByTestId('expand-e1')).toBeTruthy()
+    expect(screen.getByText('dans le métro')).toBeTruthy()
+  })
+
+  it('affiche l\'arc avant → après quand les deux mesures sont renseignées', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([
+      { id: 'e1', module_id: 'beck_columns', values: { situation: 'x', emotion_intensity: 90, outcome_intensity: 40 }, created_at: '2026-07-05T10:00:00Z' },
+    ])
+    renderLayout(NARRATIVE_FIELDS)
+    expect(await screen.findByTestId('arc-e1')).toBeTruthy()
+    expect(screen.getByText('90%')).toBeTruthy()
+    expect(screen.getByText('40%')).toBeTruthy()
+  })
+
+  it('affiche l\'encart « à finir » quand la ré-évaluation manque', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([
+      { id: 'e1', module_id: 'beck_columns', values: { situation: 'x', emotion_intensity: 100 }, created_at: '2026-07-05T10:00:00Z' },
+    ])
+    renderLayout(NARRATIVE_FIELDS)
+    expect(await screen.findByTestId('arc-todo-e1')).toBeTruthy()
+    expect(screen.queryByTestId('arc-e1')).toBeNull()
+  })
+})

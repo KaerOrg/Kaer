@@ -481,11 +481,13 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('beck.col_evf.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_for_placeholder',     'beck.col_evidence_for',     'beck.col_evf.h', 37),
   ('beck.col_eva.text', 'beck_columns', 'column_text_field', 'modules.beck_columns.entry_col_evidence_against_placeholder', 'beck.col_evidence_against', 'beck.col_eva.h', 38),
   ('beck.col4.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_4_placeholder', 'beck.col_rational',  'beck.col4.h', 41),
-  -- Résultat : la ré-évaluation de l'émotion de départ (curseur) vient EN PREMIER
-  -- (mesure avant/après du DTR) ; les nouvelles émotions éventuelles ensuite.
+  -- Résultat : les DEUX curseurs de ré-évaluation viennent EN PREMIER (mesure
+  -- avant/après du DTR : émotion de départ maintenant, puis croyance en la pensée
+  -- alternative) ; le champ « nouvelles émotions éventuelles » facultatif ferme
+  -- l'étape (décision #145 : conservé, en dernier, sous les deux curseurs).
   ('beck.col5.intens', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_intensity',   'beck.col_outcome',   'beck.col5.h', 51),
-  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 52),
-  ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 53);
+  ('beck.col5.belief', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_5_belief',      'beck.col_outcome',   'beck.col5.h', 52),
+  ('beck.col5.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_5_placeholder', 'beck.col_outcome',   'beck.col5.h', 53);
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('beck.footer', 'beck_columns', 'footer_note', 'modules.beck_columns.footer', 999);
@@ -505,33 +507,67 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- statut de workflow dérivé (jamais stocké).
   ('beck.cfg', 'complete_key_1',        'rational_response'),
   ('beck.cfg', 'to_complete_label',     'modules.beck_columns.to_complete'),
+  -- Refonte 1B (#145) — OPT-IN, propre à beck_columns : les autres modules qui
+  -- partagent `column_form` (craving_journal, chronobiology) n'ont pas ces props
+  -- et gardent le scroll + la carte à puces génériques.
+  --   entry_mode=wizard : saisie « une question à la fois » (barre de progression).
+  ('beck.cfg', 'entry_mode',            'wizard'),
+  --   list_card_variant=narrative : carte « récit avant → après » en mode liste.
+  ('beck.cfg', 'list_card_variant',     'narrative'),
+  --   Arc avant → après : deux valeurs brutes (émotion de départ vs ré-évaluée),
+  --   affichage NEUTRE — aucune couleur de gravité ni flèche de tendance (MDR).
+  ('beck.cfg', 'arc_before_key',        'emotion_intensity'),
+  ('beck.cfg', 'arc_after_key',         'outcome_intensity'),
+  ('beck.cfg', 'arc_caption_key',       'emotion'),
+  ('beck.cfg', 'arc_unit',              '%'),
+  ('beck.cfg', 'arc_before_label',      'modules.beck_columns.arc_before'),
+  ('beck.cfg', 'arc_after_label',       'modules.beck_columns.arc_after'),
+  ('beck.cfg', 'arc_todo_label',        'modules.beck_columns.arc_todo'),
+  --   Récit : pensée automatique barrée (« je pensais »), pensée alternative
+  --   mise en avant (« je me dis »). Les couleurs des labels viennent des colonnes.
+  ('beck.cfg', 'narrative_title_key',    'situation'),
+  ('beck.cfg', 'narrative_strike_key',   'automatic_thought'),
+  ('beck.cfg', 'narrative_strike_label', 'modules.beck_columns.narrative_strike'),
+  ('beck.cfg', 'narrative_reframe_key',  'rational_response'),
+  ('beck.cfg', 'narrative_reframe_label','modules.beck_columns.narrative_reframe'),
+  ('beck.cfg', 'narrative_expand_label', 'modules.beck_columns.see_reasoning'),
   ('beck.col1.h', 'color',       '#0EA5E9'),
   ('beck.col1.h', 'step_number', '1'),
   ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),
+  ('beck.col1.h', 'question_code', 'modules.beck_columns.entry_col_1_question'),
   ('beck.col2.h', 'color',       '#8B5CF6'),
   ('beck.col2.h', 'step_number', '2'),
   ('beck.col2.h', 'hint_code',   'modules.beck_columns.entry_col_2_hint'),
+  ('beck.col2.h', 'question_code', 'modules.beck_columns.entry_col_2_question'),
   ('beck.col3.h', 'color',       '#EF4444'),
   ('beck.col3.h', 'step_number', '3'),
   ('beck.col3.h', 'hint_code',   'modules.beck_columns.entry_col_3_hint'),
+  ('beck.col3.h', 'question_code', 'modules.beck_columns.entry_col_3_question'),
+  ('beck.col3.h', 'note_code',   'modules.beck_columns.entry_col_3_note'),
   -- Examen des preuves (7 colonnes de Padesky) : colonnes standard, facultatives
   -- à remplir (décision 2026-07 : pas de bascule praticien, simplicité d'usage)
-  ('beck.col_evf.h', 'color',          '#0891B2'),
+  -- Couleurs alignées sur la palette du design 1B (#145) : les teintes portent le
+  -- sens clinique (identiques adulte/ado), jamais une gravité (MDR 2017/745).
+  ('beck.col_evf.h', 'color',          '#F59E0B'),
   ('beck.col_evf.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_for_hint'),
-  ('beck.col_eva.h', 'color',          '#0D9488'),
+  ('beck.col_evf.h', 'question_code',  'modules.beck_columns.entry_col_evidence_for_question'),
+  ('beck.col_eva.h', 'color',          '#10B981'),
   ('beck.col_eva.h', 'hint_code',      'modules.beck_columns.entry_col_evidence_against_hint'),
+  ('beck.col_eva.h', 'question_code',  'modules.beck_columns.entry_col_evidence_against_question'),
   ('beck.col_evf.text', 'key',        'evidence_for'),
   ('beck.col_evf.text', 'multiline',  '1'),
   ('beck.col_evf.text', 'min_height', '72'),
   ('beck.col_eva.text', 'key',        'evidence_against'),
   ('beck.col_eva.text', 'multiline',  '1'),
   ('beck.col_eva.text', 'min_height', '72'),
-  ('beck.col4.h', 'color',       '#059669'),
+  ('beck.col4.h', 'color',       '#6366F1'),
   ('beck.col4.h', 'step_number', '4'),
   ('beck.col4.h', 'hint_code',   'modules.beck_columns.entry_col_4_hint'),
-  ('beck.col5.h', 'color',       '#D97706'),
+  ('beck.col4.h', 'question_code', 'modules.beck_columns.entry_col_4_question'),
+  ('beck.col5.h', 'color',       '#EC4899'),
   ('beck.col5.h', 'step_number', '5'),
   ('beck.col5.h', 'hint_code',   'modules.beck_columns.entry_col_5_hint'),
+  ('beck.col5.h', 'question_code', 'modules.beck_columns.entry_col_5_question'),
   ('beck.col1.text', 'key',        'situation'),
   ('beck.col1.text', 'multiline',  '1'),
   ('beck.col1.text', 'min_height', '72'),
@@ -572,13 +608,13 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col5.intens', 'max',   '100'),
   ('beck.col5.intens', 'step',  '1'),
   ('beck.col5.intens', 'unit',  '%'),
-  ('beck.col5.intens', 'color', '#D97706'),
+  ('beck.col5.intens', 'color', '#EC4899'),
   ('beck.col5.belief', 'key',   'outcome_belief'),
   ('beck.col5.belief', 'min',   '0'),
   ('beck.col5.belief', 'max',   '100'),
   ('beck.col5.belief', 'step',  '1'),
   ('beck.col5.belief', 'unit',  '%'),
-  ('beck.col5.belief', 'color', '#D97706');
+  ('beck.col5.belief', 'color', '#EC4899');
 
 
 -- ============================================================

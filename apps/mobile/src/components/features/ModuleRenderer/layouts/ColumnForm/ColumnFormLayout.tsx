@@ -7,17 +7,16 @@
 // `column_time_field`. Persistance JSON dans `form_entries`. 2 modes : list | entry.
 // Conformité MDR 2017/745 : aucune interprétation, simple journal libre.
 
-import { useState, useCallback, useEffect, useMemo, Fragment } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import {
-
-  View, Text, ScrollView, TextInput, ActivityIndicator,
+  View, Text, ScrollView, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { colors } from '@theme'
-import { collectIndexed, readEnabledGroups, buildColumnSpecs, readSliderParams } from '@kaer/shared'
+import { collectIndexed, readEnabledGroups, buildColumnSpecs } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import {
   getAllFormEntries, generateId, type FormEntry,
@@ -27,12 +26,12 @@ import { formatDateNumeric } from '../../../../../lib/dateUtils'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useToast } from '../../../../../contexts/ToastContext'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
-import { Slider } from '@ui/Slider'
 import { Button } from '@ui/Button'
-import { Chip } from '@ui/Chip'
-import { ColumnTimeField } from './ColumnTimeField'
-import { hasToken, toggleToken } from './textSuggestions'
+import { ColumnFields } from './ColumnFields'
 import { RecordCard, type RecordColumnPart } from './RecordCard'
+import { NarrativeRecordCard } from './NarrativeRecordCard'
+import { WizardProgress } from './WizardProgress'
+import { isWizardMode, readNarrativeConfig } from './narrativeConfig'
 import { styles } from './styles'
 
 interface ColumnSpec {
@@ -50,12 +49,15 @@ export interface ColumnFormLayoutProps {
   moduleId: string
   /** Config par patient (`patient_modules.config`) — porte `enabled_groups`. */
   patientConfig?: Record<string, unknown> | null
+  /** Couleur d'accent (mode ado / thème module) — barre de progression + CTA wizard. */
+  accentColor?: string
 }
 
-export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: ColumnFormLayoutProps) {
+export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, accentColor }: ColumnFormLayoutProps) {
   const t = useModuleTranslation()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
+  const accent = accentColor ?? colors.primary
 
   // ── Résolution des champs DB-driven
   const configField = fields.find(f => f.field_type === 'column_form_config')
@@ -71,6 +73,13 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
   // (statut de workflow dérivé, jamais stocké).
   const completeKeys = useMemo(
     () => collectIndexed(configField?.props ?? {}, 'complete_key'),
+    [configField]
+  )
+  // Refonte 1B (#145), OPT-IN : wizard « une question à la fois » et carte récit
+  // « avant → après ». Absents des autres modules column_form (scroll + puces).
+  const wizard = isWizardMode(configField?.props)
+  const narrativeConfig = useMemo(
+    () => readNarrativeConfig(configField?.props),
     [configField]
   )
 
@@ -94,6 +103,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     () => columns.map(col => ({
       sectionId: col.sectionId,
       accent: col.header.props['color'] ?? colors.primary,
+      headerLabelCode: col.header.text_code,
       textChildren: col.children.filter(c => c.field_type === 'column_text_field'),
       sliderChildren: col.children.filter(c => c.field_type === 'column_slider_field'),
       timeChildren: col.children.filter(c => c.field_type === 'column_time_field'),
@@ -110,6 +120,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [values, setValues] = useState<Record<string, string | number>>({})
   const [saving, setSaving] = useState(false)
+  // Étape courante du wizard (mode entry_mode=wizard) — une colonne par étape.
+  const [stepIndex, setStepIndex] = useState(0)
   // Date de la saisie (saisie rétroactive). Pilotée seulement si `editable_date` activé.
   const [entryDate, setEntryDate] = useState<Date>(() => new Date())
   const [showDatePicker, setShowDatePicker] = useState(false)
@@ -143,6 +155,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     setEditingId(null)
     setValues(initialValuesFor(columns))
     setEntryDate(new Date())
+    setStepIndex(0)
     setMode('entry')
   }, [initialValuesFor, columns])
 
@@ -151,8 +164,14 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     setEditingId(entry.id)
     setValues(merged)
     setEntryDate(new Date(entry.created_at))
+    setStepIndex(0)
     setMode('entry')
   }, [initialValuesFor, columns])
+
+  // Écriture d'une valeur — callback stable partagé par ColumnFields (scroll + wizard).
+  const handleChangeValue = useCallback((key: string, value: string | number) => {
+    setValues(prev => ({ ...prev, [key]: value }))
+  }, [])
 
   // Capture anti-friction : la dernière saisie sert de base au bouton « comme
   // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
@@ -181,7 +200,17 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     setMode('list')
     setEditingId(null)
     setValues({})
+    setStepIndex(0)
   }, [])
+
+  // Navigation wizard : avancer d'une étape / reculer (retour à la liste au 1er pas).
+  const handleWizardNext = useCallback(() => {
+    setStepIndex(i => Math.min(i + 1, columns.length - 1))
+  }, [columns.length])
+  const handleWizardBack = useCallback(() => {
+    if (stepIndex === 0) handleCancelEntry()
+    else setStepIndex(i => i - 1)
+  }, [stepIndex, handleCancelEntry])
 
   const handleToggleExpand = useCallback((id: string) => {
     setExpandedId(prev => (prev === id ? null : id))
@@ -235,8 +264,92 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
     return <View style={styles.center}><ActivityIndicator color={colors.primary} size="large" /></View>
   }
 
-  // ── Mode entry (formulaire complet)
+  // ── Mode entry : wizard (opt-in) OU scroll complet (défaut) ────────────────
   if (mode !== 'list') {
+    // Wizard « une question à la fois » — une colonne visible par étape.
+    if (wizard) {
+      const step = columns[stepIndex]
+      const stepAccent = step?.header.props['color'] ?? accent
+      const isLastStep = stepIndex >= columns.length - 1
+      const questionCode = step?.header.props['question_code']
+      const hintCode = step?.header.props['hint_code']
+      const noteCode = step?.header.props['note_code']
+      const title = step?.header.text_code ? t(step.header.text_code) : ''
+      const question = questionCode ? t(questionCode) : title
+      return (
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={88}
+        >
+          <WizardProgress
+            total={columns.length}
+            current={stepIndex}
+            accent={accent}
+            testID="wizard-progress"
+          />
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.wizardContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            {step ? (
+              <View testID={`column-${step.sectionId}`}>
+                <Text style={[styles.wizardOverline, { color: stepAccent }]}>
+                  {`${t('common.step')} ${stepIndex + 1} · ${title}`}
+                </Text>
+                {question ? <Text style={styles.wizardQuestion}>{question}</Text> : null}
+                {hintCode ? <Text style={styles.wizardHelp}>{t(hintCode)}</Text> : null}
+                <ColumnFields
+                  fields={step.children}
+                  values={values}
+                  accent={stepAccent}
+                  t={t}
+                  onChangeValue={handleChangeValue}
+                />
+                {noteCode ? (
+                  <View style={styles.wizardNote} testID="wizard-note">
+                    <MaterialCommunityIcons name="information-outline" size={16} color={colors.textMuted} />
+                    <Text style={styles.wizardNoteText}>{t(noteCode)}</Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
+          </ScrollView>
+          <View style={styles.footer}>
+            <Button
+              variant="ghost"
+              onPress={handleWizardBack}
+              iconLeft={<MaterialCommunityIcons name="arrow-left" size={20} color={colors.textMuted} />}
+              accessibilityLabel={t('common.back')}
+              testID="wizard-back"
+            />
+            {isLastStep ? (
+              <Button
+                variant="primary"
+                style={[styles.footerBtnFlex, { backgroundColor: accent }]}
+                label={lbl('save_label') || t('common.save')}
+                loading={saving}
+                onPress={handleSave}
+                iconLeft={<MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />}
+                testID="save-entry"
+              />
+            ) : (
+              <Button
+                variant="primary"
+                style={[styles.footerBtnFlex, { backgroundColor: accent }]}
+                label={t('common.continue')}
+                onPress={handleWizardNext}
+                iconRight={<MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />}
+                testID="wizard-next"
+              />
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      )
+    }
+
+    // Scroll complet (défaut) — toutes les colonnes empilées.
     return (
       <KeyboardAvoidingView
         style={styles.container}
@@ -278,7 +391,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
             />
           ) : null}
           {columns.map((col, idx) => {
-            const accent = col.header.props['color'] ?? colors.primary
+            const colAccent = col.header.props['color'] ?? colors.primary
             // Numérotation dynamique : position parmi les colonnes VISIBLES
             // (les groupes optionnels changent l'ensemble affiché).
             const stepNumber = String(idx + 1)
@@ -288,108 +401,26 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
             return (
               <View
                 key={col.sectionId}
-                style={[styles.section, { borderLeftColor: accent }]}
+                style={[styles.section, { borderLeftColor: colAccent }]}
                 testID={`column-${col.sectionId}`}
               >
                 <View style={styles.sectionHeader}>
-                  <View style={[styles.sectionBadge, { backgroundColor: accent }]}>
+                  <View style={[styles.sectionBadge, { backgroundColor: colAccent }]}>
                     <Text style={styles.sectionBadgeText}>{stepNumber}</Text>
                   </View>
                   <View style={styles.sectionHeaderText}>
-                    {titleText ? <Text style={[styles.sectionTitle, { color: accent }]}>{titleText}</Text> : null}
+                    {titleText ? <Text style={[styles.sectionTitle, { color: colAccent }]}>{titleText}</Text> : null}
                     {hintText ? <Text style={styles.sectionHint}>{hintText}</Text> : null}
                   </View>
                 </View>
                 <View style={styles.sectionBody}>
-                  {col.children.map(child => {
-                    const key = child.props['key']
-                    if (!key) return null
-                    const labelOrPlaceholder = child.text_code ? t(child.text_code) : ''
-                    if (child.field_type === 'column_text_field') {
-                      const multiline = (child.props['multiline'] ?? '1') !== '0'
-                      const minHeight = parseInt(child.props['min_height'] ?? (multiline ? '72' : '0'), 10)
-                      const value = String(values[key] ?? '')
-                      // Chips d'aide au vocabulaire (suggestion_1..n) : ajoutent /
-                      // retirent leur mot dans le champ — le texte libre reste roi.
-                      const suggestionCodes = collectIndexed(child.props, 'suggestion')
-                      return (
-                        <Fragment key={child.id}>
-                          <TextInput
-                            style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
-                            placeholder={labelOrPlaceholder}
-                            placeholderTextColor={colors.textMuted}
-                            value={value}
-                            onChangeText={(v) => setValues(prev => ({ ...prev, [key]: v }))}
-                            multiline={multiline}
-                            textAlignVertical={multiline ? 'top' : 'center'}
-                            testID={`field-${key}`}
-                          />
-                          {suggestionCodes.length > 0 ? (
-                            <View style={styles.suggestions} testID={`suggestions-${key}`}>
-                              {suggestionCodes.map(code => {
-                                const suggestion = t(code)
-                                return (
-                                  <Chip
-                                    key={code}
-                                    label={suggestion}
-                                    size="sm"
-                                    color={accent}
-                                    selected={hasToken(value, suggestion)}
-                                    onPress={() =>
-                                      setValues(prev => ({
-                                        ...prev,
-                                        [key]: toggleToken(String(prev[key] ?? ''), suggestion),
-                                      }))
-                                    }
-                                    testID={`suggestion-${key}-${code}`}
-                                  />
-                                )
-                              })}
-                            </View>
-                          ) : null}
-                        </Fragment>
-                      )
-                    }
-                    if (child.field_type === 'column_slider_field') {
-                      const { min, max, step } = readSliderParams(child)
-                      const sliderColor = child.props['color'] ?? accent
-                      // null = curseur non touché : rien n'est saisi tant que le
-                      // patient n'a pas glissé le curseur (pas de valeur d'ancrage).
-                      const numValue = typeof values[key] === 'number' ? (values[key] as number) : null
-                      return (
-                        <View key={child.id} testID={`slider-${key}`}>
-                          <Slider
-                            label={labelOrPlaceholder}
-                            value={numValue}
-                            min={min}
-                            max={max}
-                            step={step}
-                            unit={child.props['unit']}
-                            color={sliderColor}
-                            showEndLabels
-                            testID={`slider-input-${key}`}
-                            onChange={(v) => setValues(prev => ({ ...prev, [key]: v }))}
-                          />
-                        </View>
-                      )
-                    }
-                    if (child.field_type === 'column_time_field') {
-                      const optional = (child.props['optional'] ?? '1') !== '0'
-                      const timeValue = typeof values[key] === 'string' ? (values[key] as string) : ''
-                      return (
-                        <ColumnTimeField
-                          key={child.id}
-                          fieldKey={key}
-                          label={labelOrPlaceholder}
-                          value={timeValue}
-                          optional={optional}
-                          accent={accent}
-                          onChange={(next) => setValues(prev => ({ ...prev, [key]: next }))}
-                        />
-                      )
-                    }
-                    return null
-                  })}
+                  <ColumnFields
+                    fields={col.children}
+                    values={values}
+                    accent={colAccent}
+                    t={t}
+                    onChangeValue={handleChangeValue}
+                  />
                 </View>
               </View>
             )
@@ -437,21 +468,38 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig }: Co
           </View>
         ) : (
           <View style={styles.list}>
-            {entries.map(entry => (
-              <RecordCard
-                key={entry.id}
-                entry={entry}
-                columnParts={listColumnParts}
-                expanded={expandedId === entry.id}
-                showCompletion={showCompletion}
-                completeKeys={completeKeys}
-                toCompleteLabel={toCompleteLabel}
-                t={t}
-                onToggleExpand={handleToggleExpand}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+            {entries.map(entry =>
+              narrativeConfig ? (
+                <NarrativeRecordCard
+                  key={entry.id}
+                  entry={entry}
+                  columnParts={listColumnParts}
+                  config={narrativeConfig}
+                  expanded={expandedId === entry.id}
+                  showCompletion={showCompletion}
+                  completeKeys={completeKeys}
+                  toCompleteLabel={toCompleteLabel}
+                  t={t}
+                  onToggleExpand={handleToggleExpand}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ) : (
+                <RecordCard
+                  key={entry.id}
+                  entry={entry}
+                  columnParts={listColumnParts}
+                  expanded={expandedId === entry.id}
+                  showCompletion={showCompletion}
+                  completeKeys={completeKeys}
+                  toCompleteLabel={toCompleteLabel}
+                  t={t}
+                  onToggleExpand={handleToggleExpand}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )
+            )}
           </View>
         )}
         {footer != null && (

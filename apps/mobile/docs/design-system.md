@@ -153,6 +153,7 @@ couleur reste pilotée par `variant`. `sm` sert aux actions inline compactes (ex
 | `disabled` | `boolean` | Désactive le bouton |
 | `style` | `ViewStyle` | Style additionnel (ex. override `backgroundColor` pour couleur d'accent) |
 | `iconLeft` | `ReactNode` | Nœud affiché à gauche du label, ou seul contenu en mode icône seule |
+| `iconRight` | `ReactNode` | Nœud affiché à droite du label (ex. chevron « Continuer › »). Ignoré en mode icône seule |
 | `accessibilityLabel` | `string` | Libellé d'accessibilité — **obligatoire en mode icône seule** (pas de texte visible) |
 
 **Bouton icône seule** (retour, navigation, action à icône) : ne pas écrire un

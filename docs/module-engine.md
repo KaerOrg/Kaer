@@ -239,8 +239,8 @@ Deux field_types propres :
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, statut « à compléter » : `complete_key_1..n`, `to_complete_label` |
-| `column_header` | En-tête de colonne | `color`, `optional_group` (colonne masquée côté patient tant que le groupe ne figure pas dans `patient_modules.config.enabled_groups` — lecture `readEnabledGroups` de `@kaer/shared`. Capacité moteur dormante : aucun seed ni UI ne l'utilise actuellement, beck_columns y a renoncé en 2026-07 au profit de colonnes standard) |
+| `column_form_config` | Config du formulaire | `columns`, labels (`new_btn_label`, `save_label`, `empty_*`, `validation_*`), `required_key_1..n`, statut « à compléter » : `complete_key_1..n`, `to_complete_label`. **Refonte 1B opt-in** (voir encart) : `entry_mode`, `list_card_variant`, `arc_*`, `narrative_*` |
+| `column_header` | En-tête de colonne | `color`, `question_code` (question du wizard), `note_code` (encart d'aide du wizard), `hint_code`, `optional_group` (colonne masquée côté patient tant que le groupe ne figure pas dans `patient_modules.config.enabled_groups` — lecture `readEnabledGroups` de `@kaer/shared`. Capacité moteur dormante : aucun seed ni UI ne l'utilise actuellement, beck_columns y a renoncé en 2026-07 au profit de colonnes standard) |
 | `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
 | `column_slider_field` | Curseur continu (`@ui/Slider`) dans colonne | `key`, `min`, `max`, `step` (1 = continu), `unit` (ex. `%`), `color` |
@@ -254,6 +254,25 @@ Deux field_types propres :
 > ne sont pas renseignées, la fiche affiche une puce « à compléter »
 > (`to_complete_label`, statut **dérivé** jamais stocké) qui ouvre l'édition complète.
 > Utilisé par `beck_columns`. (La note rapide `quick_key_*` a été retirée en 2026-07, #115.)
+
+> **Refonte « récit avant → après » (1B, #145) — OPT-IN, `beck_columns` uniquement.**
+> Ces props de `column_form_config` sont absentes des autres modules qui partagent
+> `column_form` (`craving_journal`, `chronobiology`), qui gardent donc le scroll et la
+> carte à puces génériques. Lecture pure : `narrativeConfig.ts` (`isWizardMode`,
+> `readNarrativeConfig`).
+> - **`entry_mode='wizard'`** : saisie « une question à la fois » — une colonne visible
+>   par étape, barre de progression segmentée (`WizardProgress`), `Continuer` /
+>   `Enregistrer`. Défaut (prop absente) = scroll de toutes les colonnes.
+> - **`list_card_variant='narrative'`** : carte liste « récit » (`NarrativeRecordCard`)
+>   au lieu de la carte à puces (`RecordCard`). Clés associées : `narrative_title_key`
+>   (titre = situation), `narrative_strike_key` + `narrative_strike_label` (pensée
+>   barrée « je pensais »), `narrative_reframe_key` + `narrative_reframe_label` (pensée
+>   alternative « je me dis »), `narrative_expand_label` (lien de dépliage).
+> - **Arc `arc_*`** : `arc_before_key` / `arc_after_key` (deux valeurs à rapprocher),
+>   `arc_caption_key` (texte sous les nombres), `arc_unit`, `arc_before_label` /
+>   `arc_after_label`, `arc_todo_label` (invite quand la mesure « après » manque). Rendu
+>   **NEUTRE** : mêmes teintes avant/après, flèche atténuée — aucun codage couleur de
+>   gravité ni flèche de tendance (MDR 2017/745).
 
 **Layout `daily_checkin`**
 
