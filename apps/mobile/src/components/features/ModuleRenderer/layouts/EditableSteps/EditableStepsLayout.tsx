@@ -7,7 +7,7 @@
 // Conformité MDR 2017/745 : journal libre du patient, zéro interprétation.
 
 import { useState, useCallback, useEffect, useMemo, type ComponentProps, type ComponentType } from 'react'
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
@@ -160,7 +160,15 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   }
 
   return (
-    <View style={styles.container}>
+    // KeyboardAvoidingView : sans lui, le clavier recouvre le champ d'ajout/édition d'un
+    // item et la frappe ne s'inscrit pas dans la zone de saisie (issue #143). Même motif
+    // que tous les autres layouts éditables (decision_grid, column_form, daily_checkin…) —
+    // offset 88 = hauteur du header natif de ModuleContentScreen.
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+    >
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         {[...sections.entries()].map(([sectionId, fields], idx) => {
           const titleField = fields.find(f => f.field_type === 'step_title')
@@ -255,6 +263,6 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
           <CrisisEmergencyCalls fields={emergencyFields} />
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   )
 }
