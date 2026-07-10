@@ -80,4 +80,61 @@ export const styles = StyleSheet.create({
   },
   // Le CTA principal (enregistrer / nouvelle saisie) occupe l'espace restant.
   footerBtnFlex:     { flex: 1 },
+
+  // ── Wizard (saisie « une question à la fois », opt-in entry_mode=wizard) ────
+  // Barre de progression segmentée sous le header natif.
+  progress: {
+    flexDirection: 'row', gap: 6,
+    paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.xs,
+    backgroundColor: colors.card,
+  },
+  progressSegment:   { flex: 1, height: 4, borderRadius: 2 },
+  wizardContent:     { padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.sm },
+  // Sur-titre « ÉTAPE n · TITRE », teinté à la couleur de la colonne.
+  wizardOverline:    { fontSize: 12, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  wizardQuestion:    { fontSize: 22, fontWeight: '700', color: colors.text, lineHeight: 29, marginTop: spacing.xs },
+  wizardHelp:        { fontSize: 14, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.xs },
+  // Encart d'aide contextuel (ex. « on y reviendra à la fin pour comparer »).
+  wizardNote: {
+    flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start',
+    backgroundColor: colors.background, borderRadius: radius.sm,
+    padding: spacing.sm, marginTop: spacing.xs,
+  },
+  wizardNoteText:    { flex: 1, fontSize: 13, color: colors.textMuted, lineHeight: 18 },
+
+  // ── Carte récit (list_card_variant=narrative) ─────────────────────────────
+  narrativeTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  narrativeTitle:    { flex: 1, fontSize: 16, fontWeight: '700', color: colors.text },
+  // Arc « avant → après » : deux valeurs brutes, rendu NEUTRE (MDR 2017/745) —
+  // mêmes teintes pour les deux nombres, flèche atténuée, aucune couleur de
+  // gravité ni flèche de tendance.
+  arcCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around',
+    backgroundColor: colors.background, borderRadius: radius.md,
+    paddingVertical: spacing.md, paddingHorizontal: spacing.sm, marginVertical: spacing.xs,
+  },
+  arcSide:           { alignItems: 'center', gap: 2, flexShrink: 1 },
+  arcLabel:          { fontSize: 11, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.5 },
+  arcValue:          { fontSize: 24, fontWeight: '800', color: colors.text },
+  arcCaption:        { fontSize: 12, color: colors.textMuted },
+  // Encart « à finir » (ré-évaluation manquante) — statut de workflow neutre.
+  arcTodo: {
+    flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start',
+    backgroundColor: colors.background, borderRadius: radius.sm,
+    borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed',
+    padding: spacing.sm, marginVertical: spacing.xs,
+  },
+  arcTodoText:       { flex: 1, fontSize: 13, color: colors.textMuted, lineHeight: 18 },
+  // Lignes « je pensais » (barrée) / « je me dis » (mise en avant).
+  narrativeLine:     { gap: 2, marginTop: spacing.xs },
+  narrativeLabel:    { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
+  narrativeStrikeValue: { fontSize: 14, color: colors.textMuted, lineHeight: 20, textDecorationLine: 'line-through' },
+  narrativeReframeValue: { fontSize: 14, color: colors.text, fontWeight: '600', lineHeight: 20 },
+  // Dépliage « raisonnement complet » : lignes étiquetées (filet + label couleur).
+  expandedBlock:     { gap: spacing.sm, marginTop: spacing.sm },
+  labeledLine:       { flexDirection: 'row', gap: spacing.sm, alignItems: 'stretch' },
+  labeledRule:       { width: 3, borderRadius: 2 },
+  labeledBody:       { flex: 1, gap: 2 },
+  labeledLabel:      { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
+  labeledValue:      { fontSize: 14, color: colors.text, lineHeight: 20 },
 })

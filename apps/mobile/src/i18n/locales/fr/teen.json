@@ -82,7 +82,21 @@
       "entry_col_5_belief": "À quel point crois-tu à cette nouvelle pensée ?",
       "empty_alert_title": "Rien à enregistrer",
       "empty_alert_msg": "Remplis au moins la situation ou la pensée automatique.",
-      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
+      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022).",
+      "entry_col_1_question": "Que s'est-il passé ?",
+      "entry_col_2_question": "Qu'as-tu ressenti ?",
+      "entry_col_3_question": "Sur le moment, qu'est-ce qui t'a traversé l'esprit ?",
+      "entry_col_evidence_for_question": "Qu'est-ce qui va dans le sens de cette pensée ?",
+      "entry_col_evidence_against_question": "Qu'est-ce qui la contredit ?",
+      "entry_col_4_question": "Quelle autre façon de voir la situation ?",
+      "entry_col_5_question": "Et maintenant, où en es-tu ?",
+      "entry_col_3_note": "Tu indiqueras juste en dessous à quel point tu y crois. On y reviendra à la fin pour comparer.",
+      "arc_before": "AVANT",
+      "arc_after": "APRÈS",
+      "arc_todo": "Termine la ré-évaluation pour voir ton avant → après.",
+      "narrative_strike": "JE PENSAIS",
+      "narrative_reframe": "JE ME DIS",
+      "see_reasoning": "Voir le raisonnement complet"
     },
     "grounding": {
       "title": "Revenir ici et maintenant",

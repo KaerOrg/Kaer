@@ -25,6 +25,8 @@ export interface ButtonProps {
   style?: StyleProp<ViewStyle>
   /** Nœud affiché à gauche du label, ou seul contenu en mode icône seule. */
   iconLeft?: ReactNode
+  /** Nœud affiché à droite du label (ex. chevron « Continuer › »). */
+  iconRight?: ReactNode
   /** accessibilityLabel (obligatoire en mode icône seule, faute de texte). */
   accessibilityLabel?: string
   testID?: string

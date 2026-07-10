@@ -1,13 +1,8 @@
 import { memo, Fragment } from 'react'
 import { View, Text, Pressable } from 'react-native'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { colors } from '@theme'
-import { Button } from '@ui/Button'
-import { Chip } from '@ui/Chip'
 import type { ContentField } from '@services/moduleService'
 import type { FormEntry } from '../../../../../lib/database'
-import { formatDateFull } from '../../../../../lib/dateUtils'
-import { isEntryComplete } from './entryCompletion'
+import { RecordCardHeader } from './RecordCardHeader'
 import { styles } from './styles'
 
 // Colonne pré-découpée (une fois par module, pas par fiche) : ses enfants déjà
@@ -15,6 +10,8 @@ import { styles } from './styles'
 export interface RecordColumnPart {
   sectionId: string
   accent: string
+  /** Code i18n du titre de la colonne (label des lignes étiquetées du récit). */
+  headerLabelCode: string | null
   textChildren: ContentField[]
   sliderChildren: ContentField[]
   timeChildren: ContentField[]
@@ -50,36 +47,15 @@ function RecordCardBase({
       onPress={() => onToggleExpand(entry.id)}
       accessibilityHint={t('common.details')}
     >
-      <View style={styles.recordHeader}>
-        <View style={styles.recordHeaderLeft}>
-          <Text style={styles.recordDate}>{formatDateFull(entry.created_at)}</Text>
-          {showCompletion && !isEntryComplete(entry.values, completeKeys) ? (
-            <Chip
-              label={toCompleteLabel}
-              size="sm"
-              selected
-              onPress={() => onEdit(entry)}
-              testID={`to-complete-${entry.id}`}
-            />
-          ) : null}
-        </View>
-        <View style={styles.recordActions}>
-          <Button
-            variant="ghost"
-            onPress={() => onEdit(entry)}
-            iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
-            accessibilityLabel={t('common.modify')}
-            testID={`edit-${entry.id}`}
-          />
-          <Button
-            variant="ghost"
-            onPress={() => onDelete(entry)}
-            iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
-            accessibilityLabel={t('common.delete')}
-            testID={`delete-${entry.id}`}
-          />
-        </View>
-      </View>
+      <RecordCardHeader
+        entry={entry}
+        showCompletion={showCompletion}
+        completeKeys={completeKeys}
+        toCompleteLabel={toCompleteLabel}
+        t={t}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
       {columnParts.map(col => (
         <Fragment key={col.sectionId}>
           {col.textChildren.map(child => {

@@ -82,7 +82,21 @@
       "entry_col_5_belief": "How much do you believe this new thought?",
       "empty_alert_title": "Nothing to save",
       "empty_alert_msg": "Fill in at least the situation or the automatic thought.",
-      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
+      "footer": "Cognitive restructuring journal (Beck's cognitive therapy). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022).",
+      "entry_col_1_question": "What happened?",
+      "entry_col_2_question": "What did you feel?",
+      "entry_col_3_question": "In the moment, what crossed your mind?",
+      "entry_col_evidence_for_question": "What supports this thought?",
+      "entry_col_evidence_against_question": "What contradicts it?",
+      "entry_col_4_question": "What's another way to see the situation?",
+      "entry_col_5_question": "And now, where are you at?",
+      "entry_col_3_note": "You'll rate how much you believe it just below. We'll come back to it at the end to compare.",
+      "arc_before": "BEFORE",
+      "arc_after": "AFTER",
+      "arc_todo": "Finish the re-evaluation to see your before → after.",
+      "narrative_strike": "I THOUGHT",
+      "narrative_reframe": "I TELL MYSELF",
+      "see_reasoning": "See the full reasoning"
     },
     "grounding": {
       "title": "Back to the present",

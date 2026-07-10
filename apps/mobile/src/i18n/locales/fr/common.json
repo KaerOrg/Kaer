@@ -74,7 +74,8 @@
     "next_month": "Mois suivant",
     "exercise_step_of": "Étape {{current}} sur {{total}}",
     "exercise_steps_overview": "Les étapes",
-    "optional_info_label": "Informations complémentaires (facultatif)"
+    "optional_info_label": "Informations complémentaires (facultatif)",
+    "step": "Étape"
   },
   "global": {
     "greeting": "Bienvenue",
@@ -976,7 +977,21 @@
       "entry_col_5_belief": "À quel point croyez-vous à cette nouvelle pensée ?",
       "empty_alert_title": "Enregistrement vide",
       "empty_alert_msg": "Renseignez au moins la situation ou la pensée automatique.",
-      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022)."
+      "footer": "Journal de restructuration cognitive (thérapie cognitive de Beck). Hofmann et al., Cognit Ther Res 2012 · NICE NG222 (2022).",
+      "entry_col_1_question": "Que s'est-il passé ?",
+      "entry_col_2_question": "Qu'avez-vous ressenti ?",
+      "entry_col_3_question": "Sur le moment, qu'est-ce qui vous a traversé l'esprit ?",
+      "entry_col_evidence_for_question": "Qu'est-ce qui va dans le sens de cette pensée ?",
+      "entry_col_evidence_against_question": "Qu'est-ce qui la contredit ?",
+      "entry_col_4_question": "Quelle autre façon de voir la situation ?",
+      "entry_col_5_question": "Et maintenant, où en êtes-vous ?",
+      "entry_col_3_note": "Vous indiquerez juste en dessous à quel point vous y croyez. On y reviendra à la fin pour comparer.",
+      "arc_before": "AVANT",
+      "arc_after": "APRÈS",
+      "arc_todo": "Terminez la ré-évaluation pour voir votre avant → après.",
+      "narrative_strike": "JE PENSAIS",
+      "narrative_reframe": "JE ME DIS",
+      "see_reasoning": "Voir le raisonnement complet"
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",

@@ -16,7 +16,7 @@ Les Colonnes de Beck, également appelées *Dysfunctional Thought Record* (DTR),
 | 4 | Preuves pour la pensée (facultative) | Faits concrets soutenant la pensée |
 | 5 | Preuves contre la pensée (facultative) | Faits contredisant la pensée |
 | 6 | Réponse rationnelle | Pensée alternative construite par le patient |
-| 7 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + nouvelles émotions éventuelles (texte libre optionnel) + conviction en la PA (0 à 100) |
+| 7 | Résultat | **Ré-évaluation de l'émotion de départ** (intensité maintenant, 0 à 100 : la mesure avant/après du DTR) + conviction en la pensée alternative (0 à 100) + nouvelles émotions éventuelles (texte libre optionnel, en dernier — décision #145) |
 
 > Colonne « Distorsion cognitive » retirée (2026-07, #117) : le piège de pensée
 > auto-étiqueté alourdissait la saisie sans bénéfice clinique clair. La
@@ -92,6 +92,28 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
   (textes intégraux + chaque curseur renseigné avec son libellé et sa valeur brute).
 - Édition et suppression (avec confirmation) sur chaque fiche.
 
+#### Refonte « récit avant → après » (1B, #145)
+
+Refonte UX patient (adulte **et** ado) activée par la config, OPT-IN et propre à
+`beck_columns` (les autres modules `column_form` gardent le rendu générique) :
+
+- **Liste — carte « récit »** (`NarrativeRecordCard`, `list_card_variant='narrative'`) :
+  titre = situation (chevron teinté), **arc avant → après** (intensité émotion col.2 →
+  ré-évaluation col.7), pensée automatique **barrée** (« je pensais ») et pensée
+  alternative mise en avant (« je me dis »), dépliage « voir le raisonnement complet »
+  en lignes étiquetées (filet + label couleur de colonne). Quand la ré-évaluation
+  manque, l'arc laisse place à un encart « à finir ».
+- **Saisie — wizard** (`entry_mode='wizard'`) : une colonne par étape, barre de
+  progression segmentée (`WizardProgress`), question (`question_code`) + aide
+  (`hint_code`) + encart optionnel (`note_code`), `Continuer` / `Enregistrer`. Le mode
+  scroll reste le défaut moteur pour les autres modules.
+- **Palette 1B** : les couleurs des colonnes 4 à 7 portent le sens clinique (identiques
+  adulte/ado) ; migrées dans le seed. Le seul accent qui bascule teal → menthe en mode
+  ado est celui de la progression / du CTA (`accentColor`).
+- **Conformité MDR** : l'arc est **neutre** (mêmes teintes avant/après, flèche
+  atténuée) — aucun codage couleur de gravité ni flèche de tendance. Le screenshot de
+  handoff colorait « avant » en rouge / « après » en vert : écart volontaire, non retenu.
+
 ### Vue praticien (web)
 
 L'onglet **Évolution** du patient affiche, pour Beck, le **même panneau détaillé**
@@ -127,8 +149,12 @@ L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus
 
 | Fichier | Rôle |
 |---|---|
-| `apps/mobile/.../layouts/ColumnForm/ColumnFormLayout.tsx` | Layout générique : liste, saisie, chips, groupes optionnels |
-| `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions}.ts` | Helpers purs (statut « à compléter », toggle des chips) |
+| `apps/mobile/.../layouts/ColumnForm/ColumnFormLayout.tsx` | Layout générique : liste, saisie (scroll **ou** wizard), chips, groupes optionnels |
+| `apps/mobile/.../layouts/ColumnForm/ColumnFields.tsx` | Rendu du corps d'une colonne (texte/slider/horaire), partagé scroll ≡ wizard |
+| `apps/mobile/.../layouts/ColumnForm/{RecordCard,NarrativeRecordCard}.tsx` | Cartes liste : générique à puces / récit « avant → après » (opt-in 1B) |
+| `apps/mobile/.../layouts/ColumnForm/RecordCardHeader.tsx` | En-tête commun des deux cartes (date, puce « à finir », crayon/poubelle) |
+| `apps/mobile/.../layouts/ColumnForm/WizardProgress.tsx` | Barre de progression segmentée du wizard |
+| `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions,narrativeConfig}.ts` | Helpers purs (statut « à compléter », toggle des chips, config récit/wizard) |
 | `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
 | `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
 | `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (vue maître-détail) |
@@ -156,8 +182,10 @@ HomeScreen
 
 - `apps/mobile/.../FieldRenderer.column_form.test.tsx` : liste, saisie,
   édition, suppression, validation, puce « à compléter », chips
-  de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable
-- `apps/mobile/.../ColumnForm/entryCompletion.test.ts` + `textSuggestions.test.ts` : helpers purs
+  de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable,
+  **wizard** (progression, navigation, scroll conservé par défaut), **carte récit** (arc / encart « à finir »)
+- `apps/mobile/.../ColumnForm/{entryCompletion,textSuggestions,narrativeConfig}.test.ts` : helpers purs
+- `apps/mobile/.../ColumnForm/{WizardProgress,NarrativeRecordCard}.test.tsx` : progression segmentée, carte récit (arc, barré, dépliage)
 - `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
 - `apps/web/.../ColumnFormDataPanel.test.tsx` : panneau Données maître-détail (liste, sélection, MDR)
 - `apps/web/.../ColumnFormEntryList.test.tsx` : liste latérale (rendu, sélection, mouvement)

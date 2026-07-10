@@ -1,4 +1,5 @@
 import React from 'react'
+import { Text } from 'react-native'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { Button } from './Button'
 
@@ -50,5 +51,25 @@ describe('Button', () => {
     render(<Button label="15, SAMU" sublabel="Urgence médicale" onPress={() => {}} />)
     expect(screen.getByText('15, SAMU')).toBeTruthy()
     expect(screen.getByText('Urgence médicale')).toBeTruthy()
+  })
+
+  it('affiche iconLeft et iconRight autour du label', () => {
+    render(
+      <Button
+        label="Continuer"
+        onPress={() => {}}
+        iconLeft={<Text>L</Text>}
+        iconRight={<Text>R</Text>}
+      />,
+    )
+    expect(screen.getByText('L')).toBeTruthy()
+    expect(screen.getByText('Continuer')).toBeTruthy()
+    expect(screen.getByText('R')).toBeTruthy()
+  })
+
+  it('en mode icône seule (sans label), iconRight n\'est pas rendu', () => {
+    render(<Button onPress={() => {}} accessibilityLabel="fermer" iconLeft={<Text>X</Text>} iconRight={<Text>R</Text>} />)
+    expect(screen.getByText('X')).toBeTruthy()
+    expect(screen.queryByText('R')).toBeNull()
   })
 })
