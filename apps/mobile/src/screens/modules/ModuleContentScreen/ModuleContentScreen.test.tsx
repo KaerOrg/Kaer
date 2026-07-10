@@ -24,6 +24,10 @@ const mockFetchModuleFields = jest.fn()
 jest.mock('@services/moduleService', () => ({
   fetchModuleFields: (...a: unknown[]) => mockFetchModuleFields(...a),
 }))
+const mockGetPlanItems = jest.fn()
+jest.mock('@services/planItemService', () => ({
+  getPlanItems: (...a: unknown[]) => mockGetPlanItems(...a),
+}))
 jest.mock('../../../hooks/queries', () => ({
   moduleQueries: { patientModuleConfig: () => ({ queryKey: ['x'], queryFn: () => null }) },
 }))
@@ -43,17 +47,38 @@ function renderScreen(params: Params) {
 beforeEach(() => {
   jest.clearAllMocks()
   mockFetchModuleFields.mockResolvedValue({ preview_kind: 'safety_plan', fields: [] })
+  mockGetPlanItems.mockResolvedValue([]) // plan vide par défaut
 })
 
 describe('ModuleContentScreen — previewKindOverride', () => {
-  it('rend le layout du module par défaut (sans override)', async () => {
-    renderScreen({ moduleType: 'crisis_plan' })
-    await waitFor(() => expect(screen.getByText('renderer:safety_plan')).toBeTruthy())
-  })
-
   it('force le layout de l\'override quand fourni (roue crantée → édition)', async () => {
     renderScreen({ moduleType: 'crisis_plan', previewKindOverride: 'editable_steps' })
     await waitFor(() => expect(screen.getByText('renderer:editable_steps')).toBeTruthy())
     expect(screen.queryByText('renderer:safety_plan')).toBeNull()
+    // L'override court-circuite la bascule : aucune lecture du plan.
+    expect(mockGetPlanItems).not.toHaveBeenCalled()
+  })
+})
+
+describe('ModuleContentScreen — bascule config-first quand le plan est vide', () => {
+  it('ouverture nue + plan vide → paramétrage (editable_steps)', async () => {
+    mockGetPlanItems.mockResolvedValue([])
+    renderScreen({ moduleType: 'crisis_plan' })
+    await waitFor(() => expect(screen.getByText('renderer:editable_steps')).toBeTruthy())
+    expect(screen.queryByText('renderer:safety_plan')).toBeNull()
+  })
+
+  it('ouverture nue + plan rempli → consultation (safety_plan)', async () => {
+    mockGetPlanItems.mockResolvedValue([{ id: 'i1', section_id: 's1', text: 'x' }])
+    renderScreen({ moduleType: 'crisis_plan' })
+    await waitFor(() => expect(screen.getByText('renderer:safety_plan')).toBeTruthy())
+    expect(screen.queryByText('renderer:editable_steps')).toBeNull()
+  })
+
+  it('module sans setup-fallback → son layout nominal, sans lire le plan', async () => {
+    mockFetchModuleFields.mockResolvedValue({ preview_kind: 'daily_checkin', fields: [] })
+    renderScreen({ moduleType: 'mood_tracker' })
+    await waitFor(() => expect(screen.getByText('renderer:daily_checkin')).toBeTruthy())
+    expect(mockGetPlanItems).not.toHaveBeenCalled()
   })
 })
