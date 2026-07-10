@@ -8,7 +8,10 @@ import { AppStackParamList } from '../../../navigation/AppStack'
 import {
   fetchModuleFields,
   type ModuleFieldsResult,
+  type PreviewKind,
 } from '@services/moduleService'
+import { getPlanItems } from '@services/planItemService'
+import { hasSetupFallback, resolveInitialPreviewKind } from './initialPreviewKind'
 import { moduleQueries } from '../../../hooks/queries'
 import { useRefreshOnFocus } from '../../../hooks/useRefreshOnFocus'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer'
@@ -56,6 +59,8 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
   const [result, setResult] = useState<ModuleFieldsResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  // Bascule « config-first quand vide » : `null` tant que l'état du plan n'est pas connu.
+  const [hasEntries, setHasEntries] = useState<boolean | null>(null)
 
   const loadFields = useCallback(() => {
     setLoading(true)
@@ -75,9 +80,34 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
     loadFields()
   }, [loadFields])
 
-  // Layout effectif : le `previewKindOverride` (ex. roue crantée → édition) prime sur
-  // le preview_kind du module. Sinon on garde celui résolu depuis la base.
-  const previewKind = previewKindOverride ?? result?.preview_kind
+  // Ouverture nue (sans override) d'un layout à setup-fallback (ex. safety_plan) :
+  // on route vers le paramétrage tant que le plan est vide. Un override explicite (roue
+  // crantée → édition, retour consultation) court-circuite toujours cette bascule.
+  const baseKind = result?.preview_kind
+  const setupFallbackKind =
+    previewKindOverride == null && baseKind != null && hasSetupFallback(baseKind) ? baseKind : null
+  const needsEntryCheck = setupFallbackKind != null
+
+  // Lecture FRAÎCHE de l'état du plan à chaque montage (comme les layouts safety_plan /
+  // editable_steps) : évite un cache périmé qui rouvrirait le paramétrage après une
+  // première saisie. Décision prise AVANT le rendu → pas de clignotement.
+  useEffect(() => {
+    if (!needsEntryCheck) return
+    let active = true
+    getPlanItems(moduleType)
+      .then(items => { if (active) setHasEntries(items.length > 0) })
+      // Lecture impossible : garder la consultation nominale (dégradation gracieuse,
+      // comme les layouts qui restent sur les étapes vides + numéros d'urgence).
+      .catch(() => { if (active) setHasEntries(true) })
+    return () => { active = false }
+  }, [needsEntryCheck, moduleType])
+
+  // Layout effectif : override > bascule setup-fallback > preview_kind du module.
+  const previewKind: PreviewKind | undefined =
+    previewKindOverride ??
+    (setupFallbackKind != null
+      ? (hasEntries == null ? undefined : resolveInitialPreviewKind(setupFallbackKind, hasEntries))
+      : baseKind)
   const needsConfig = previewKind != null && CONFIG_LAYOUTS.has(previewKind)
 
   // Config patient : seulement pour les layouts de CONFIG_LAYOUTS, rafraîchie au focus.
@@ -94,7 +124,7 @@ export default function ModuleContentScreen({ route, navigation }: Props) {
   }, [needsConfig, patientConfigQuery])
   useRefreshOnFocus(refetchPatientConfig)
 
-  if (loading || (needsConfig && patientConfig === undefined)) {
+  if (loading || (needsEntryCheck && hasEntries == null) || (needsConfig && patientConfig === undefined)) {
     return (
       <View style={styles.center}>
         <ActivityIndicator color={colors.primary} size="large" />
