@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet, Linking } from 'react-native'
 import i18next from 'i18next'
-import { Lightbulb, ExternalLink, CheckCircle2, Check } from 'lucide-react-native'
+import { Lightbulb, ExternalLink, CheckCircle2 } from 'lucide-react-native'
 import { useAuthStore } from '../../store/authStore'
 import { InlineText } from './InlineText'
 import { colors, spacing, radius } from '@theme'
@@ -33,9 +33,13 @@ export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
         switch (block.block_type) {
           case 'heading':
             return block.text_code ? (
-              <Text key={block.id} style={styles.heading}>
-                {resolveText(block.text_code, isTeenMode)}
-              </Text>
+              // Titre de section précédé d'un filet vertical coloré (4 px).
+              <View key={block.id} style={styles.headingRow}>
+                <View style={[styles.headingRule, { backgroundColor: accent }]} />
+                <Text style={styles.heading}>
+                  {resolveText(block.text_code, isTeenMode)}
+                </Text>
+              </View>
             ) : null
 
           case 'paragraph':
@@ -66,7 +70,10 @@ export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
                 </View>
                 {block.items_codes.map((itemCode: string, i: number) => (
                   <View key={i} style={styles.actionItem}>
-                    <Check size={15} color={accent} style={styles.actionCheck} />
+                    {/* Étape numérotée : pastille ronde teintée + numéro. */}
+                    <View style={[styles.stepNum, { backgroundColor: accent }]}>
+                      <Text style={styles.stepNumText}>{i + 1}</Text>
+                    </View>
                     <InlineText code={itemCode} style={styles.actionText} />
                   </View>
                 ))}
@@ -118,12 +125,23 @@ export function PsyEduBlockRenderer({ blocks, accentColor }: Props) {
 }
 
 const styles = StyleSheet.create({
+  headingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  headingRule: {
+    width: 4,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+  },
   heading: {
+    flex: 1,
     fontSize: 20,
     fontWeight: '700',
     color: colors.text,
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
   },
   paragraph: {
     marginBottom: spacing.sm,
@@ -170,9 +188,19 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: spacing.sm,
   },
-  actionCheck: {
-    marginTop: 2,
+  stepNum: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
+    marginTop: 1,
+  },
+  stepNumText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '700',
   },
   actionText: {
     flex: 1,

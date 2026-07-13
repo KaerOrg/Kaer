@@ -128,13 +128,16 @@ describe('FieldRenderer — column_form (column_time_field)', () => {
     expect(screen.queryByTestId('time-wake_time-clear')).toBeNull()
   })
 
-  it('affiche les valeurs HH:MM en mode list', async () => {
+  it('affiche la frise 24 h en mode list, heures visibles au dépli', async () => {
     ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
     renderLayout()
     expect(await screen.findByTestId('record-chrono-entry-1')).toBeTruthy()
-    expect(screen.getByTestId('record-time-wake_time')).toBeTruthy()
-    expect(screen.getByTestId('record-time-bedtime')).toBeTruthy()
-    expect(screen.getByText(/07:30/)).toBeTruthy()
+    // Un marqueur par repère renseigné sur la frise (pas de ligne à puces).
+    expect(screen.getByTestId('frise-marker-wake_time')).toBeTruthy()
+    expect(screen.getByTestId('frise-marker-bedtime')).toBeTruthy()
+    // Les heures HH:MM apparaissent dans le détail au dépli.
+    fireEvent.press(screen.getByTestId('record-chrono-entry-1'))
+    expect(await screen.findByText(/07:30/)).toBeTruthy()
     expect(screen.getByText(/23:15/)).toBeTruthy()
   })
 

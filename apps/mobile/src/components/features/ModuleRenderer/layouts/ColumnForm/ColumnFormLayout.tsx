@@ -30,6 +30,9 @@ import { Button } from '@ui/Button'
 import { ColumnFields } from './ColumnFields'
 import { RecordCard, type RecordColumnPart } from './RecordCard'
 import { NarrativeRecordCard } from './NarrativeRecordCard'
+import { DayTimelineCard } from './DayTimelineCard'
+import { ChronoLegend } from './ChronoLegend'
+import { isTimelineConfig } from './chronoFrise'
 import { WizardProgress } from './WizardProgress'
 import { isWizardMode, readNarrativeConfig } from './narrativeConfig'
 import { styles } from './styles'
@@ -110,6 +113,13 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
     })),
     [columns],
   )
+
+  // Journal chronobiologique : quand toutes les colonnes visibles ne portent que
+  // des champs horaires (repères d'ancrage), la liste s'affiche en frise 24 h
+  // (une carte-jour + légende figée) au lieu de la liste à puces générique. Les
+  // autres modules `column_form` (craving_journal : slider + textes) gardent la
+  // carte à puces. Détection structurelle → aucun flag de config à ajouter.
+  const isTimeline = useMemo(() => isTimelineConfig(listColumnParts), [listColumnParts])
 
   // ── State — `entry` = formulaire complet, `list` = historique des fiches
   const [mode, setMode] = useState<'list' | 'entry'>('list')
@@ -380,15 +390,29 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
           contentContainerStyle={styles.entryContent}
           keyboardShouldPersistTaps="handled"
         >
-          {editableDate ? (
-            <Button
-              variant="secondary"
-              style={styles.entryActionBtn}
-              onPress={handleOpenDatePicker}
-              iconLeft={<MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />}
-              label={`${t('common.entry_date')} : ${formatDateNumeric(entryDate.toISOString())}`}
-              testID="entry-date"
-            />
+          {editableDate || canPrefill ? (
+            <View style={styles.entryActionsRow}>
+              {editableDate ? (
+                <Button
+                  variant="secondary"
+                  style={styles.entryActionBtn}
+                  onPress={handleOpenDatePicker}
+                  iconLeft={<MaterialCommunityIcons name="calendar-outline" size={18} color={colors.primary} />}
+                  label={`${t('common.entry_date')} : ${formatDateNumeric(entryDate.toISOString())}`}
+                  testID="entry-date"
+                />
+              ) : null}
+              {canPrefill ? (
+                <Button
+                  variant="secondary"
+                  style={styles.entryActionBtn}
+                  onPress={handlePrefillFromLast}
+                  iconLeft={<MaterialCommunityIcons name="backup-restore" size={18} color={colors.primary} />}
+                  label={prefillLabel}
+                  testID="prefill-from-last"
+                />
+              ) : null}
+            </View>
           ) : null}
           {showDatePicker ? (
             <DateTimePicker
@@ -397,16 +421,6 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
               maximumDate={new Date()}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={handleDatePicked}
-            />
-          ) : null}
-          {canPrefill ? (
-            <Button
-              variant="secondary"
-              style={styles.entryActionBtn}
-              onPress={handlePrefillFromLast}
-              iconLeft={<MaterialCommunityIcons name="history" size={18} color={colors.primary} />}
-              label={prefillLabel}
-              testID="prefill-from-last"
             />
           ) : null}
           {columns.map((col, idx) => {
@@ -471,6 +485,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
   const showCompletion = toCompleteLabel.length > 0 && completeKeys.length > 0
   return (
     <View style={styles.container}>
+      {isTimeline && entries.length > 0 ? <ChronoLegend t={t} /> : null}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.listContent}
@@ -488,7 +503,17 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
         ) : (
           <View style={styles.list}>
             {entries.map(entry =>
-              narrativeConfig ? (
+              isTimeline ? (
+                <DayTimelineCard
+                  key={entry.id}
+                  entry={entry}
+                  expanded={expandedId === entry.id}
+                  t={t}
+                  onToggleExpand={handleToggleExpand}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ) : narrativeConfig ? (
                 <NarrativeRecordCard
                   key={entry.id}
                   entry={entry}

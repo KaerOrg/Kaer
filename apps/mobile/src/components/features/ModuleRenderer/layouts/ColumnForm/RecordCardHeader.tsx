@@ -23,15 +23,20 @@ interface Props {
   t: (key: string) => string
   onEdit: (entry: FormEntry) => void
   onDelete: (entry: FormEntry) => void
+  /** Date en titre proéminent (Journal chronobiologique) au lieu du libellé discret. */
+  prominent?: boolean
+  /** Si fourni, affiche un chevron d'état de dépli (carte frise). */
+  expanded?: boolean
 }
 
 export const RecordCardHeader = memo(function RecordCardHeader({
   entry, showCompletion, completeKeys, toCompleteLabel, t, onEdit, onDelete,
+  prominent, expanded,
 }: Props) {
   return (
     <View style={styles.recordHeader}>
       <View style={styles.recordHeaderLeft}>
-        <Text style={styles.recordDate}>{formatDateFull(entry.created_at)}</Text>
+        <Text style={prominent ? styles.recordDateProminent : styles.recordDate}>{formatDateFull(entry.created_at)}</Text>
         {showCompletion && !isEntryComplete(entry.values, completeKeys) ? (
           <Chip
             label={toCompleteLabel}
@@ -43,6 +48,13 @@ export const RecordCardHeader = memo(function RecordCardHeader({
         ) : null}
       </View>
       <View style={styles.recordActions}>
+        {expanded != null ? (
+          <MaterialCommunityIcons
+            name={expanded ? 'chevron-up' : 'chevron-down'}
+            size={22}
+            color={colors.textMuted}
+          />
+        ) : null}
         <Button
           variant="ghost"
           onPress={() => onEdit(entry)}

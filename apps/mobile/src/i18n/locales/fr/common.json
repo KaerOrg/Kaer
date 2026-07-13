@@ -75,7 +75,8 @@
     "exercise_step_of": "Étape {{current}} sur {{total}}",
     "exercise_steps_overview": "Les étapes",
     "optional_info_label": "Informations complémentaires (facultatif)",
-    "step": "Étape"
+    "step": "Étape",
+    "read_sheet": "Lire la fiche"
   },
   "global": {
     "greeting": "Bienvenue",
@@ -590,7 +591,12 @@
       "anchor_bedtime": "Coucher",
       "anchor_light": "Lumière",
       "axis_time": "Heure",
-      "axis_day": "Jour du mois"
+      "axis_day": "Jour du mois",
+      "range_month": "Ce mois",
+      "range_3m": "3 mois",
+      "spread_title": "Écart d'un jour à l'autre",
+      "spread_unit": "minutes",
+      "rhythm_band_subtitle": "L'heure de chaque repère, jour après jour."
     },
     "chrono_bio": {
       "tab_journal": "Journal",
@@ -619,7 +625,8 @@
       "no_entry_day": "Aucun repère",
       "legend_recorded": "Repère enregistré",
       "legend_empty_day": "Aucune saisie",
-      "rhythm_band_title": "Bande de rythme"
+      "rhythm_band_title": "Bande de rythme",
+      "day_no_anchors": "Aucun repère noté ce jour."
     },
     "mood_tracker": {
       "label": "Thermomètre de l'humeur",

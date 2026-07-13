@@ -15,19 +15,16 @@ const ENTRIES: RhythmEntry[] = [
 ]
 
 describe('RhythmogramChart', () => {
-  it('rend le rythmogramme et la légende des repères saisis du mois', () => {
+  it('rend le rythmogramme (tracé) et ses titres d’axes', () => {
     render(<RhythmogramChart entries={ENTRIES} year={2026} month={6} anchors={DEFAULT_ANCHORS} />)
     expect(screen.getByTestId('chrono-rhythmogram')).toBeTruthy()
-    // Repères renseignés en juin → libellés présents dans la légende.
-    expect(screen.getByText('anchor_wake')).toBeTruthy()
-    expect(screen.getByText('anchor_bedtime')).toBeTruthy()
-    // Repère jamais saisi → absent de la légende.
-    expect(screen.queryByText('anchor_first_meal')).toBeNull()
+    // Titres d'axes (l'écart ±min est désormais rendu par SpreadBars, pas ici).
+    expect(screen.getByText('axis_time')).toBeTruthy()
+    expect(screen.getByText('axis_day')).toBeTruthy()
   })
 
   it('rend sans repère saisi (mois vide) sans planter', () => {
     render(<RhythmogramChart entries={[]} year={2026} month={6} anchors={DEFAULT_ANCHORS} />)
     expect(screen.getByTestId('chrono-rhythmogram')).toBeTruthy()
-    expect(screen.queryByText('anchor_wake')).toBeNull()
   })
 })

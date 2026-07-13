@@ -19,7 +19,8 @@ const PAD_L = 30
 const PAD_R = 10
 const PAD_T = 10
 const PAD_B = 6
-const DATA_H = 150
+// Hauteur « hero » : le rythmogramme est l'élément principal de la Vue mensuelle.
+const DATA_H = 220
 const LABEL_H = 14
 const SVG_H = DATA_H + LABEL_H
 
@@ -71,11 +72,11 @@ export function RhythmogramChart({ entries, year, month, anchors }: Props) {
       }
       if (current.length > 1) segments.push(current)
       const stat = result.anchors.find(s => s.key === a.key)
+      // Les écarts ±min sont désormais rendus par le bloc SpreadBars ; ici on ne
+      // garde que le tracé (une courbe par repère renseigné).
       return {
         key: a.key,
         color: a.color,
-        label: t(a.labelCode),
-        sdMinutes: stat?.sdMinutes ?? 0,
         count: stat?.count ?? 0,
         segments,
         dots,
@@ -143,28 +144,13 @@ export function RhythmogramChart({ entries, year, month, anchors }: Props) {
         )}
       </Svg>
       <Text style={styles.axisTitleX}>{t('modules.chronobiology_tracker.axis_day')}</Text>
-
-      {/* Légende : repère + écart-type brut (valeur neutre, MDR-safe) */}
-      <View style={styles.legend}>
-        {model.series.map(s => (
-          <View key={s.key} style={styles.legendItem}>
-            <View style={[styles.legendDot, { backgroundColor: s.color }]} />
-            <Text style={styles.legendLabel} numberOfLines={1}>{s.label}</Text>
-            <Text style={styles.legendSd}>±{s.sdMinutes} min</Text>
-          </View>
-        ))}
-      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  wrapper: { marginHorizontal: spacing.lg, marginTop: spacing.xs },
+  // Marges horizontales pilotées par le parent (carte hero) — le tracé remplit sa largeur.
+  wrapper: { marginTop: spacing.xs },
   axisTitleY: { fontSize: 10, color: colors.textMuted, fontWeight: '600', marginBottom: 1 },
   axisTitleX: { fontSize: 10, color: colors.textMuted, fontWeight: '600', textAlign: 'center', marginTop: 1 },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm, gap: 8 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 8 },
-  legendDot: { width: 9, height: 9, borderRadius: 4.5 },
-  legendLabel: { fontSize: 11, color: colors.text },
-  legendSd: { fontSize: 11, color: colors.textMuted, fontVariant: ['tabular-nums'] },
 })

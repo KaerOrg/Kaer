@@ -2,6 +2,8 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
+import { SegmentedControl } from '@ui/SegmentedControl'
 import { useTranslation } from 'react-i18next'
 import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -10,12 +12,16 @@ import { getAllFormEntries, type FormEntry } from '../../../../../lib/database'
 import type { AppStackParamList } from '../../../../../navigation/AppStack'
 import { CalendarGrid } from './CalendarGrid'
 import { RhythmogramChart } from './RhythmogramChart'
+import { SpreadBars, type SpreadRow } from './SpreadBars'
 import {
   buildEntriesByDate,
+  buildSpread,
   DEFAULT_ANCHORS,
   type AnchorEntry,
   type AnchorSpec,
 } from './chronoMonthUtils'
+
+type Period = 'month' | '3m'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 
@@ -57,6 +63,8 @@ export function ChronoMonthLayout({ moduleId }: Props) {
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [entries, setEntries] = useState<readonly AnchorEntry[]>([])
   const [loading, setLoading] = useState(true)
+  // Fenêtre du bloc « Écart d'un jour à l'autre » : mois courant ou 3 derniers mois.
+  const [period, setPeriod] = useState<Period>('month')
 
   const todayISO = useMemo(() => now.toISOString().slice(0, 10), [now])
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1
@@ -113,6 +121,30 @@ export function ChronoMonthLayout({ moduleId }: Props) {
   const anchors: readonly AnchorSpec[] = DEFAULT_ANCHORS
   const anchorKeys = useMemo(() => anchors.map(a => a.key), [anchors])
 
+  const periodOptions = useMemo(
+    () => [
+      { value: 'month' as const, label: t('modules.chronobiology_tracker.range_month') },
+      { value: '3m' as const, label: t('modules.chronobiology_tracker.range_3m') },
+    ],
+    [t],
+  )
+
+  // Écarts bruts par repère sur la fenêtre choisie, prêts pour SpreadBars
+  // (fusion config couleur/libellé + stat brute). MDR : valeur descriptive.
+  const spreadRows = useMemo<SpreadRow[]>(() => {
+    const stats = buildSpread(rhythmEntries, anchorKeys, year, month, period === '3m' ? 3 : 1)
+    return anchors.map(a => {
+      const s = stats.find(x => x.key === a.key)
+      return {
+        key: a.key,
+        color: a.color,
+        label: t(a.labelCode),
+        sdMinutes: s?.sdMinutes ?? 0,
+        count: s?.count ?? 0,
+      }
+    })
+  }, [rhythmEntries, anchorKeys, year, month, period, anchors, t])
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -151,6 +183,39 @@ export function ChronoMonthLayout({ moduleId }: Props) {
           />
         </View>
 
+        {/* Hero : le rythmogramme est l'élément principal de la Vue mensuelle. */}
+        <Card
+          header={{
+            title: t('modules.chronobiology_tracker.rhythm_band_title'),
+            subtitle: t('modules.chronobiology_tracker.rhythm_band_subtitle'),
+          }}
+          style={styles.heroCard}
+          testID="chrono-rhythm-hero"
+        >
+          <SegmentedControl
+            options={periodOptions}
+            value={period}
+            onChange={setPeriod}
+            variant="pills"
+            style={styles.periodToggle}
+            accessibilityLabel={t('modules.chronobiology_tracker.spread_title')}
+            testID="chrono-period"
+          />
+          <RhythmogramChart entries={rhythmEntries} year={year} month={month} anchors={anchors} />
+        </Card>
+
+        {/* Écart brut jour à jour (± minutes) — barres grises neutres (MDR). */}
+        <SpreadBars
+          rows={spreadRows}
+          title={t('modules.chronobiology_tracker.spread_title')}
+          unit={t('modules.chronobiology_tracker.spread_unit')}
+          testID="chrono-spread"
+        />
+
+        <View style={styles.divider} />
+
+        {/* Calendrier de densité, compacté sous le hero. */}
+        <Text style={styles.sectionTitle}>{t('modules.chrono_bio.view_month')}</Text>
         <CalendarGrid
           year={year}
           month={month}
@@ -159,14 +224,6 @@ export function ChronoMonthLayout({ moduleId }: Props) {
           anchorKeys={anchorKeys}
           onDayPress={handleDayPress}
         />
-
-        <View style={styles.divider} />
-
-        <Text style={styles.sectionTitle}>
-          {t('modules.chronobiology_tracker.rhythm_band_title')}
-        </Text>
-
-        <RhythmogramChart entries={rhythmEntries} year={year} month={month} anchors={anchors} />
       </ScrollView>
     </View>
   )
@@ -190,6 +247,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   monthTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+  heroCard: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
+  periodToggle: { alignSelf: 'flex-start', marginBottom: spacing.xs },
   divider: {
     height: 1,
     backgroundColor: colors.border,

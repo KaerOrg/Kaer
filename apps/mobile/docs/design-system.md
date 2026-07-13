@@ -30,6 +30,11 @@ export const shadows = {
 Import dans les composants : `import { colors, spacing, radius } from '@theme'`
 (jamais `@kaer/shared` directement dans le mobile).
 
+**Token `colors.neutralBar` (`#94A3B8`, partagé web ≡ mobile)** : gris imposé des
+barres **purement descriptives** (écarts en minutes, plages horaires) — jamais une
+teinte de gravité clinique (MDR 2017/745). À utiliser pour toute barre de mesure
+neutre plutôt qu'un hex en dur (ex. `SpreadBars` de la Vue mensuelle chrono).
+
 ---
 
 ## Alias d'import

@@ -68,6 +68,7 @@ export function PsyEduLayout({ moduleId }: Props) {
   if (selectedTopic) {
     const Icon = resolvePsyEduIcon(selectedTopic.icon_name)
     const title = topicTitle(selectedTopic, isTeenMode)
+    const summary = topicSummary(selectedTopic, isTeenMode)
     return (
       <View style={styles.container} testID="psyedu-detail">
         <View style={styles.detailHeader}>
@@ -82,6 +83,14 @@ export function PsyEduLayout({ moduleId }: Props) {
           </Text>
         </View>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.detailContent}>
+          {/* Bandeau d'intro teinté : grande tuile d'icône + titre + phrase d'accroche. */}
+          <View style={styles.introBanner}>
+            <View style={styles.introIcon}>
+              <Icon size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.introTitle}>{title}</Text>
+            {summary ? <Text style={styles.introText}>{summary}</Text> : null}
+          </View>
           {blocksLoading ? (
             <ActivityIndicator color={colors.primary} testID="psyedu-blocks-loading" />
           ) : (
@@ -107,23 +116,28 @@ export function PsyEduLayout({ moduleId }: Props) {
             return (
               <Pressable
                 key={topic.id}
-                style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
+                style={({ pressed }) => [styles.card, pressed && styles.rowPressed]}
                 onPress={() => handleSelect(topic)}
                 testID={`psyedu-topic-${topic.topic_key}`}
                 accessibilityRole="button"
               >
-                <View style={styles.rowIcon}>
-                  <Icon size={20} color={colors.primary} />
+                <View style={styles.cardTop}>
+                  <View style={styles.rowIcon}>
+                    <Icon size={22} color={colors.primary} />
+                  </View>
+                  <View style={styles.rowText}>
+                    <Text style={styles.rowTitle}>{title}</Text>
+                    {summary ? (
+                      <Text style={styles.rowSummary} numberOfLines={2}>
+                        {summary}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
-                <View style={styles.rowText}>
-                  <Text style={styles.rowTitle}>{title}</Text>
-                  {summary ? (
-                    <Text style={styles.rowSummary} numberOfLines={2}>
-                      {summary}
-                    </Text>
-                  ) : null}
+                <View style={styles.cardFooter}>
+                  <Text style={styles.readLink}>{t('common.read_sheet')}</Text>
+                  <ChevronRight size={16} color={colors.primary} />
                 </View>
-                <ChevronRight size={18} color={colors.textMuted} />
               </Pressable>
             )
           })
@@ -146,28 +160,53 @@ const styles = StyleSheet.create({
   listContent: { padding: spacing.md, gap: spacing.sm, paddingBottom: spacing.lg },
   empty: { alignItems: 'center', paddingVertical: spacing.xl * 2 },
   emptyText: { fontSize: 14, color: colors.textMuted },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
+  // Carte de fiche : tuile d'icône teintée + titre + résumé, pied « Lire la fiche → ».
+  card: {
     backgroundColor: colors.card,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
+    gap: spacing.sm,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
+  cardTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  cardFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4,
+    borderTopWidth: 1, borderTopColor: colors.border, paddingTop: spacing.sm,
+  },
+  readLink: { fontSize: 13, fontWeight: '700', color: colors.primary },
   rowPressed: { opacity: 0.7 },
   rowIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 999,
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary + '18',
   },
   rowText: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
+  rowTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
   rowSummary: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
+  // ── Bandeau d'intro (lecture de fiche)
+  introBanner: {
+    backgroundColor: colors.primary + '14',
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    gap: spacing.xs,
+  },
+  introIcon: {
+    width: 52, height: 52, borderRadius: radius.md,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: colors.card, marginBottom: spacing.xs,
+  },
+  introTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
+  introText: { fontSize: 14, color: colors.textMuted, lineHeight: 21 },
   // ── Detail
   detailHeader: {
     flexDirection: 'row',

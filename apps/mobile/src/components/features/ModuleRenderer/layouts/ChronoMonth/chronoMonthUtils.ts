@@ -1,7 +1,14 @@
 // Helpers purs pour le layout 'chrono_month'.
 // Aucune dépendance React — math + parsing date.
 
-import { CHRONO_ANCHORS, type ChronoAnchorSpec } from '@kaer/shared'
+import {
+  CHRONO_ANCHORS,
+  circularSdMinutes,
+  parseTimeToMinutes,
+  type ChronoAnchorSpec,
+  type RhythmAnchorStat,
+  type RhythmEntry,
+} from '@kaer/shared'
 
 export interface AnchorEntry {
   /** Date locale au format YYYY-MM-DD. */
@@ -51,4 +58,51 @@ export function buildEntriesByDate(entries: readonly AnchorEntry[]): Map<string,
   const m = new Map<string, AnchorEntry>()
   for (const e of entries) m.set(e.date, e)
   return m
+}
+
+/** Préfixes « YYYY-MM- » du mois (year, month) et des `monthsBack-1` mois précédents. */
+function windowPrefixes(year: number, month: number, monthsBack: number): Set<string> {
+  const prefixes = new Set<string>()
+  for (let i = 0; i < monthsBack; i++) {
+    let m = month - i
+    let y = year
+    while (m < 1) {
+      m += 12
+      y -= 1
+    }
+    prefixes.add(`${y}-${m.toString().padStart(2, '0')}-`)
+  }
+  return prefixes
+}
+
+/**
+ * Écart brut jour à jour (écart-type circulaire, en minutes) par repère, sur une
+ * fenêtre de `monthsBack` mois se terminant à (year, month). Réutilise le calcul
+ * partagé (`parseTimeToMinutes` + `circularSdMinutes`) — la LOGIQUE est inchangée,
+ * on l'applique juste à une fenêtre glissante. `monthsBack=1` reproduit exactement
+ * `buildRhythmogram(...).anchors[].sdMinutes` du mois courant.
+ * MDR 2017/745 : valeur brute descriptive, aucun seuil ni jugement.
+ */
+export function buildSpread(
+  entries: readonly RhythmEntry[],
+  anchorKeys: readonly string[],
+  year: number,
+  month: number,
+  monthsBack = 1,
+): RhythmAnchorStat[] {
+  const prefixes = windowPrefixes(year, month, monthsBack)
+  const byKey: Record<string, number[]> = {}
+  for (const k of anchorKeys) byKey[k] = []
+  for (const e of entries) {
+    if (!prefixes.has(e.date.slice(0, 8))) continue
+    for (const k of anchorKeys) {
+      const m = parseTimeToMinutes(e.values[k])
+      if (m !== null) byKey[k].push(m)
+    }
+  }
+  return anchorKeys.map(k => ({
+    key: k,
+    count: byKey[k].length,
+    sdMinutes: circularSdMinutes(byKey[k]),
+  }))
 }
