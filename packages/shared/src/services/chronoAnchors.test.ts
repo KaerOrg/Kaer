@@ -12,10 +12,11 @@ describe('CHRONO_ANCHORS (source unique web ≡ mobile)', () => {
     expect(CHRONO_ANCHOR_KEYS).toEqual(CHRONO_ANCHORS.map(a => a.key))
   })
 
-  it('chaque repère porte une couleur et une clé i18n modules.chronobiology_tracker.*', () => {
+  it('chaque repère porte une couleur, une clé i18n modules.chronobiology_tracker.* et une icône', () => {
     for (const a of CHRONO_ANCHORS) {
       expect(a.color).toMatch(/^#[0-9A-F]{6}$/i)
       expect(a.labelCode).toMatch(/^modules\.chronobiology_tracker\.anchor_/)
+      expect(a.iconName).toMatch(/^[a-z-]+$/)
     }
   })
 

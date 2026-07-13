@@ -5,8 +5,10 @@ import {
   timeToFraction,
   countFilledAnchors,
   buildEntriesByDate,
+  buildSpread,
   type AnchorEntry,
 } from './chronoMonthUtils'
+import { buildRhythmogram, type RhythmEntry } from '@kaer/shared'
 
 describe('chronoMonthUtils', () => {
   describe('firstWeekday', () => {
@@ -93,6 +95,39 @@ describe('chronoMonthUtils', () => {
       expect(map.size).toBe(2)
       expect(map.get('2026-05-10')?.anchors.wake_time).toBe('07:00')
       expect(map.get('2026-05-11')?.anchors.bedtime).toBe('23:00')
+    })
+  })
+
+  describe('buildSpread', () => {
+    const ENTRIES: RhythmEntry[] = [
+      { date: '2026-06-02', values: { wake_time: '07:00' } },
+      { date: '2026-06-09', values: { wake_time: '08:00' } },
+      { date: '2026-05-20', values: { wake_time: '06:00' } }, // mois précédent
+    ]
+
+    it('monthsBack=1 reproduit le sdMinutes de buildRhythmogram du mois', () => {
+      const spread = buildSpread(ENTRIES, ['wake_time'], 2026, 6, 1)
+      const rhythm = buildRhythmogram(ENTRIES, ['wake_time'], 2026, 6)
+      const wakeSpread = spread.find(s => s.key === 'wake_time')!
+      const wakeRhythm = rhythm.anchors.find(s => s.key === 'wake_time')!
+      expect(wakeSpread.sdMinutes).toBe(wakeRhythm.sdMinutes)
+      expect(wakeSpread.count).toBe(2) // seuls les 2 jours de juin
+    })
+
+    it('monthsBack=3 agrège la fenêtre de 3 mois', () => {
+      const spread = buildSpread(ENTRIES, ['wake_time'], 2026, 6, 3)
+      expect(spread.find(s => s.key === 'wake_time')!.count).toBe(3) // juin + mai inclus
+    })
+
+    it('gère le passage d’année en arrière (janvier → décembre)', () => {
+      const entries: RhythmEntry[] = [{ date: '2025-12-15', values: { wake_time: '07:00' } }]
+      const spread = buildSpread(entries, ['wake_time'], 2026, 1, 2)
+      expect(spread.find(s => s.key === 'wake_time')!.count).toBe(1)
+    })
+
+    it('renvoie count 0 et sd 0 pour un repère jamais saisi', () => {
+      const spread = buildSpread(ENTRIES, ['bedtime'], 2026, 6, 1)
+      expect(spread[0]).toEqual({ key: 'bedtime', count: 0, sdMinutes: 0 })
     })
   })
 })

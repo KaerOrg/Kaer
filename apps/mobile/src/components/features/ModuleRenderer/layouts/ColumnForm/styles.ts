@@ -1,6 +1,11 @@
 import { StyleSheet } from 'react-native'
 import { colors, spacing, radius } from '@theme'
 
+// Barres d'écart / rail neutres : gris descriptif, jamais une teinte de gravité (MDR).
+const RAIL_GREY = colors.border
+const MARKER_SIZE = 18
+const LEGEND_PILL = 16
+
 export const styles = StyleSheet.create({
   container:         { flex: 1, backgroundColor: colors.background },
   center:            { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
@@ -34,6 +39,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1,
   },
   recordDate:        { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+  recordDateProminent: { fontSize: 15, color: colors.text, fontWeight: '700', textTransform: 'capitalize' },
   recordActions:     { flexDirection: 'row', gap: spacing.sm },
   recordRow:         { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs },
   recordDot:         { width: 8, height: 8, borderRadius: 4, marginTop: 5 },
@@ -73,6 +79,8 @@ export const styles = StyleSheet.create({
   // ── Actions de saisie (date rétroactive, « comme d'habitude ») — ui/Button
   // compact aligné à gauche (le primitive porte fond/bordure/radius).
   entryActionBtn: { alignSelf: 'flex-start', minHeight: 0, paddingVertical: spacing.sm },
+  // Rangée « date rétroactive + comme d'habitude » enveloppante (chip + reprise).
+  entryActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   // ── Footer (boutons = ui/Button ; ici uniquement le conteneur + le flex CTA)
   footer: {
     backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
@@ -137,4 +145,44 @@ export const styles = StyleSheet.create({
   labeledBody:       { flex: 1, gap: 2 },
   labeledLabel:      { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
   labeledValue:      { fontSize: 14, color: colors.text, lineHeight: 20 },
+
+  // ── Journal chronobiologique : légende figée + frise 24 h ──────────────────
+  // Légende sous la barre d'onglets : pastilles couleur d'ancre + libellé court.
+  legendBar: {
+    flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md, rowGap: spacing.xs,
+    paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
+    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  legendItem:        { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendPill: {
+    width: LEGEND_PILL, height: LEGEND_PILL, borderRadius: LEGEND_PILL / 2,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  legendLabel:       { fontSize: 11, color: colors.textMuted, fontWeight: '500' },
+
+  // Carte d'un jour (radius lg, ombre légère). Date + chevron dans le header.
+  friseCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
+    gap: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05, shadowRadius: 3, elevation: 1,
+  },
+  // Rail gris arrondi (h 5) + marqueurs absolus positionnés à l'heure exacte.
+  friseRailWrap:     { height: MARKER_SIZE, justifyContent: 'center', marginHorizontal: MARKER_SIZE / 2 },
+  friseRail:         { height: 5, borderRadius: 3, backgroundColor: RAIL_GREY },
+  friseMarker: {
+    position: 'absolute', width: MARKER_SIZE, height: MARKER_SIZE, borderRadius: MARKER_SIZE / 2,
+    marginLeft: -MARKER_SIZE / 2, justifyContent: 'center', alignItems: 'center',
+    borderWidth: 2, borderColor: colors.white,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.15, shadowRadius: 1, elevation: 2,
+  },
+  friseScale:        { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: MARKER_SIZE / 2 },
+  friseScaleText:    { fontSize: 10, color: colors.textMuted },
+  // Dépli : lignes « icône + libellé + heure ».
+  friseDetail:       { gap: spacing.xs, marginTop: spacing.xs },
+  friseDetailRow:    { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  friseDetailLabel:  { flex: 1, fontSize: 14, color: colors.text },
+  friseDetailTime:   { fontSize: 14, color: colors.text, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  friseEmpty:        { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
 })

@@ -111,7 +111,12 @@
       "description": "La régularité de tes journées : lever, repas, activité, lumière, coucher",
       "anchor_light": "Lumière",
       "axis_time": "Heure",
-      "axis_day": "Jour du mois"
+      "axis_day": "Jour du mois",
+      "range_month": "Ce mois",
+      "range_3m": "3 mois",
+      "spread_title": "Écart d'un jour à l'autre",
+      "spread_unit": "minutes",
+      "rhythm_band_subtitle": "L'heure de chaque repère, jour après jour."
     },
     "chrono_bio": {
       "add_today": "Noter mes repères du jour",
@@ -123,7 +128,8 @@
       "optional_hint": "Tous les repères sont au choix, mets ceux dont tu te souviens.",
       "save_entry": "Enregistrer",
       "today_label": "Aujourd'hui",
-      "light": "Lumière / sortie dehors"
+      "light": "Lumière / sortie dehors",
+      "day_no_anchors": "Aucun repère noté ce jour."
     },
     "mood_tracker": {
       "title": "Comment vas-tu ?",

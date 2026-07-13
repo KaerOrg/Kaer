@@ -45,9 +45,11 @@ describe('ChronoMonthLayout', () => {
     })
   })
 
-  it('rend la grille calendaire et le rythmogramme', async () => {
+  it('rend le hero rythmogramme, le sélecteur de période et la grille', async () => {
     render(<ChronoMonthLayout moduleId="chronobiology_tracker" />)
     expect(await screen.findByTestId('chrono-month-layout')).toBeTruthy()
+    expect(screen.getByTestId('chrono-rhythm-hero')).toBeTruthy()
+    expect(screen.getByTestId('chrono-period')).toBeTruthy()
     expect(screen.getByTestId('chrono-month-grid')).toBeTruthy()
     expect(screen.getByTestId('chrono-rhythmogram')).toBeTruthy()
   })

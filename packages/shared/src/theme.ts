@@ -15,6 +15,9 @@ export const colors = {
   neutral: '#F3F4F6',
   white: '#FFFFFF',
   stars: '#F59E0B',
+  // Barres purement DESCRIPTIVES (écarts en minutes, plages horaires) : gris neutre
+  // imposé, jamais une teinte de gravité clinique (MDR 2017/745). Partagé web ≡ mobile.
+  neutralBar: '#94A3B8',
   // Voile des overlays (modales, feuilles bas d'écran)
   overlay: 'rgba(0,0,0,0.45)',
   // Voile opaque des visionneuses plein écran (diaporama photo) : la photo prime.
