@@ -29,10 +29,17 @@ export interface ColumnFieldsProps {
   t: (key: string) => string
   /** Écriture d'une valeur (clé `form_entries` → valeur). */
   onChangeValue: (key: string, value: string | number) => void
+  /**
+   * Teinte la bordure des champs texte à la couleur d'accent de la colonne.
+   * Activé uniquement en mode wizard (refonte 1B) : une seule colonne à l'écran,
+   * la bordure accentuée renforce le rattachement du champ à l'étape. En mode
+   * scroll, le liseré gauche de la carte de section porte déjà l'accent.
+   */
+  accentInputBorder?: boolean
 }
 
 export const ColumnFields = memo(function ColumnFields({
-  fields, values, accent, t, onChangeValue,
+  fields, values, accent, t, onChangeValue, accentInputBorder = false,
 }: ColumnFieldsProps) {
   return (
     <>
@@ -51,7 +58,11 @@ export const ColumnFields = memo(function ColumnFields({
           return (
             <Fragment key={child.id}>
               <TextInput
-                style={[styles.textInput, multiline && minHeight > 0 && { minHeight }]}
+                style={[
+                  styles.textInput,
+                  multiline && minHeight > 0 && { minHeight },
+                  accentInputBorder && { borderColor: accent },
+                ]}
                 placeholder={labelOrPlaceholder}
                 placeholderTextColor={colors.textMuted}
                 value={value}
