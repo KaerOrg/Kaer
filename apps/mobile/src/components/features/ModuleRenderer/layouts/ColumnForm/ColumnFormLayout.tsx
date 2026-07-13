@@ -276,6 +276,11 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
       const noteCode = step?.header.props['note_code']
       const title = step?.header.text_code ? t(step.header.text_code) : ''
       const question = questionCode ? t(questionCode) : title
+      // Refonte 1B : la note (« vous indiquerez juste en dessous à quel point vous y
+      // croyez ») introduit le curseur de croyance qui la suit. On rend donc d'abord
+      // les champs texte, puis la note, puis les champs restants (curseur/horaire).
+      const textChildren = step?.children.filter(c => c.field_type === 'column_text_field') ?? []
+      const restChildren = step?.children.filter(c => c.field_type !== 'column_text_field') ?? []
       return (
         <KeyboardAvoidingView
           style={styles.container}
@@ -301,17 +306,31 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
                 {question ? <Text style={styles.wizardQuestion}>{question}</Text> : null}
                 {hintCode ? <Text style={styles.wizardHelp}>{t(hintCode)}</Text> : null}
                 <ColumnFields
-                  fields={step.children}
+                  fields={textChildren}
                   values={values}
                   accent={stepAccent}
                   t={t}
                   onChangeValue={handleChangeValue}
+                  accentInputBorder
                 />
                 {noteCode ? (
-                  <View style={styles.wizardNote} testID="wizard-note">
-                    <MaterialCommunityIcons name="information-outline" size={16} color={colors.textMuted} />
-                    <Text style={styles.wizardNoteText}>{t(noteCode)}</Text>
+                  // Encart d'aide teinté à l'accent de l'étape (fond à 10 %, icône
+                  // pleine). L'accent est une couleur de thème fixe de la colonne
+                  // (config, identique pour tous les patients) — pas un codage de
+                  // gravité clinique piloté par la donnée (MDR 2017/745).
+                  <View style={[styles.wizardNote, { backgroundColor: stepAccent + '1A' }]} testID="wizard-note">
+                    <MaterialCommunityIcons name="information" size={16} color={stepAccent} />
+                    <Text style={[styles.wizardNoteText, { color: stepAccent }]}>{t(noteCode)}</Text>
                   </View>
+                ) : null}
+                {restChildren.length > 0 ? (
+                  <ColumnFields
+                    fields={restChildren}
+                    values={values}
+                    accent={stepAccent}
+                    t={t}
+                    onChangeValue={handleChangeValue}
+                  />
                 ) : null}
               </View>
             ) : null}

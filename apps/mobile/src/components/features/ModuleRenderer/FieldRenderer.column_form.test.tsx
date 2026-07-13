@@ -36,6 +36,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
+import { StyleSheet } from 'react-native'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
@@ -429,7 +430,10 @@ describe('FieldRenderer — column_form : chips de suggestions', () => {
 // ─── Refonte 1B (#145) : wizard opt-in ─────────────────────────────────────────
 
 const COL1_Q: ContentField = { ...COL1, props: { ...COL1.props, question_code: 'modules.beck_columns.entry_col_1_question' } }
-const COL3_Q: ContentField = { ...COL3, props: { ...COL3.props, question_code: 'modules.beck_columns.entry_col_3_question' } }
+const COL3_Q: ContentField = {
+  ...COL3,
+  props: { ...COL3.props, question_code: 'modules.beck_columns.entry_col_3_question', note_code: 'modules.beck_columns.entry_col_3_note' },
+}
 const WIZARD_CFG = makeField({
   id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
   props: {
@@ -497,6 +501,30 @@ describe('FieldRenderer — column_form : wizard (entry_mode=wizard)', () => {
     expect(screen.queryByTestId('wizard-progress')).toBeNull()
     expect(screen.getByTestId('column-beck.col_situation')).toBeTruthy()
     expect(screen.getByTestId('column-beck.col_thought')).toBeTruthy()
+  })
+
+  // Refonte 1B — parité spec « saisie » : le champ texte porte le liseré d'accent
+  // de l'étape, et l'encart `note_code` est un bandeau teinté à ce même accent.
+  it('teinte le champ texte et le bandeau d\'aide à la couleur d\'accent de l\'étape', async () => {
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    // Étape 1 (situation, accent bleu) : pas de note.
+    const input1 = StyleSheet.flatten(screen.getByTestId('field-situation').props.style)
+    expect(input1.borderColor).toBe('#0EA5E9')
+    expect(screen.queryByTestId('wizard-note')).toBeNull()
+    // Étape 2 = colonne « pensée automatique » (accent rouge) : note visible + teintée.
+    fireEvent.press(screen.getByTestId('wizard-next'))
+    const input3 = StyleSheet.flatten(screen.getByTestId('field-automatic_thought').props.style)
+    expect(input3.borderColor).toBe('#EF4444')
+    const note = StyleSheet.flatten(screen.getByTestId('wizard-note').props.style)
+    expect(note.backgroundColor).toBe('#EF4444' + '1A')
+    // La note s'intercale entre le champ texte et le curseur de croyance (spec 1B).
+    const col = screen.getByTestId('column-beck.col_thought')
+    const ids = col
+      .findAll((n: { props: { testID?: string } }) => typeof n.props.testID === 'string')
+      .map((n: { props: { testID?: string } }) => n.props.testID)
+    expect(ids.indexOf('field-automatic_thought')).toBeLessThan(ids.indexOf('wizard-note'))
+    expect(ids.indexOf('wizard-note')).toBeLessThan(ids.indexOf('slider-thought_belief'))
   })
 })
 

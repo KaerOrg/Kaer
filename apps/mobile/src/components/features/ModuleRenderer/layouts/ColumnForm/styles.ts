@@ -98,7 +98,7 @@ export const styles = StyleSheet.create({
   wizardNote: {
     flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start',
     backgroundColor: colors.background, borderRadius: radius.sm,
-    padding: spacing.sm, marginTop: spacing.xs,
+    padding: spacing.sm, marginTop: spacing.xs, marginBottom: spacing.xs,
   },
   wizardNoteText:    { flex: 1, fontSize: 13, color: colors.textMuted, lineHeight: 18 },
 
