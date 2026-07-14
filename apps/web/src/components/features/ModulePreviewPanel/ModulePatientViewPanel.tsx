@@ -1,8 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Eye } from 'lucide-react'
 import { type PreviewKind } from '@services/moduleService'
 import { moduleQueries } from '../../../hooks/queries'
+import { Banner } from '../../ui/Banner'
 import { FieldRenderer } from '../ModuleRenderer'
 import './ModulePreviewPanel.css'
 
@@ -62,6 +64,9 @@ export function ModulePatientViewPanel({ moduleType }: Props) {
 
   return (
     <div className="preview-panel__inner">
+      <Banner variant="info" icon={<Eye size={16} />}>
+        {t('patient.preview_banner')}
+      </Banner>
       <FieldRenderer
         preview_kind={result.preview_kind}
         fields={result.fields}

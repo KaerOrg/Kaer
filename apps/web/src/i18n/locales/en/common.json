@@ -373,7 +373,8 @@
     "scale_read": "Read",
     "scale_unread": "Unread",
     "cssrs_modal_title": "C-SSRS, Suicide Screening",
-    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated"
+    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Clinician-rated",
+    "preview_banner": "Preview matching the patient screen (mobile)."
   },
   "modules": {
     "nav_link": "Library",
@@ -923,7 +924,18 @@
       "anchor_bedtime": "Bedtime",
       "anchor_light": "Light",
       "axis_time": "Time",
-      "axis_day": "Day of month"
+      "axis_day": "Day of month",
+      "spread_unit": "minutes",
+      "col_anchor": "Marker",
+      "col_median": "Median",
+      "col_range": "Range over the month (min → max)",
+      "col_gap": "Variation",
+      "days_logged": "Days logged",
+      "anchors_tracked": "Markers tracked",
+      "median_gap": "Median variation",
+      "range_to": "to",
+      "raw_values_note": "Raw values, to interpret during the session.",
+      "tracking_legend": "Range = month min → max · dot = median · ± = raw standard deviation, in minutes."
     },
     "chrono_bio": {
       "add_today": "Log my markers for today",
@@ -1785,7 +1797,14 @@
     "day_jeu": "T",
     "day_ven": "F",
     "day_sam": "S",
-    "day_dim": "S"
+    "day_dim": "S",
+    "freq_label": "Frequency",
+    "freq_daily": "Every day",
+    "freq_custom": "Chosen days",
+    "freq_workdays": "Workdays",
+    "preview": "Preview",
+    "preview_hint": "The patient will get a reminder {{days}} at {{time}}.",
+    "preview_empty": "Select at least one day."
   },
   "notes": {
     "section_title": "Notes",

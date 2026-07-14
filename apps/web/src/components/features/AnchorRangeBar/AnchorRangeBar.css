@@ -1,0 +1,32 @@
+.anchor-range-bar {
+  width: 100%;
+  min-width: 120px;
+}
+
+.anchor-range-bar__track {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--color-neutral, #f3f4f6);
+  overflow: hidden;
+}
+
+/* Segment min→max : couleur d'identité du repère, atténuée (descriptif, pas plein). */
+.anchor-range-bar__segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-full, 999px);
+  opacity: 0.35;
+}
+
+/* Point médian : couleur d'identité pleine, centré verticalement. */
+.anchor-range-bar__median {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px var(--color-card, #fff);
+}

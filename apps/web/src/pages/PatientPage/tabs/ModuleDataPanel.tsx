@@ -14,7 +14,7 @@ import {
 import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
 import { SleepDataPanel } from './SleepDataPanel'
-import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
+import { ChronoDataPanel } from './ChronoDataPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import './ModuleDataPanel.css'
@@ -63,7 +63,7 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
 
   // « Rythmes & régularité » : rythmogramme mensuel (horaires bruts, MDR-safe).
   if (state.status === 'rhythmogram') {
-    return <ChronoRhythmogramPanel entries={state.entries} />
+    return <ChronoDataPanel entries={state.entries} />
   }
 
   // Modules `column_form` (colonnes de Beck…) : fiches complètes + courbes brutes.

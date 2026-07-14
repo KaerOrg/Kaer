@@ -183,6 +183,55 @@ export function buildRhythmogram(
   }
 }
 
+export interface RhythmRangeStat {
+  key: string
+  /** Nombre de jours renseignés pour ce repère. */
+  count: number
+  /** Écart-type circulaire brut (minutes) — repris de `buildRhythmogram`. */
+  sdMinutes: number
+  /** Horaire le plus tôt / médian / le plus tard (minutes déroulées), `null` si vide. */
+  min: number | null
+  median: number | null
+  max: number | null
+}
+
+/** Médiane d'une série triée (moyenne des deux centraux si pair), arrondie. */
+function medianOfSorted(sorted: readonly number[]): number {
+  const n = sorted.length
+  const mid = Math.floor(n / 2)
+  return n % 2 === 0 ? Math.round((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid]
+}
+
+/**
+ * Stats de PLAGE par repère sur le mois : min / médiane / max des horaires
+ * (minutes déroulées autour de la moyenne circulaire, comme le rythmogramme) +
+ * l'écart-type brut déjà calculé. Réutilise `RhythmogramResult` (LOGIQUE inchangée)
+ * pour la « barre de plage » praticien (onglet Données + carte de suivi).
+ * MDR 2017/745 : valeurs brutes descriptives, aucun seuil ni jugement.
+ */
+export function buildRangeStats(
+  result: RhythmogramResult,
+  anchorKeys: readonly string[],
+): RhythmRangeStat[] {
+  return anchorKeys.map(key => {
+    const stat = result.anchors.find(a => a.key === key)
+    const values: number[] = []
+    for (const row of result.data) {
+      const v = row[key]
+      if (typeof v === 'number') values.push(v)
+    }
+    values.sort((a, b) => a - b)
+    return {
+      key,
+      count: stat?.count ?? 0,
+      sdMinutes: stat?.sdMinutes ?? 0,
+      min: values.length ? values[0] : null,
+      median: values.length ? medianOfSorted(values) : null,
+      max: values.length ? values[values.length - 1] : null,
+    }
+  })
+}
+
 /** Formate des minutes (éventuellement > 1440) en libellé d'heure « 7h », « 23h ». */
 export function minutesToHourLabel(minutes: number): string {
   const h = Math.round((((minutes % MIN_PER_DAY) + MIN_PER_DAY) % MIN_PER_DAY) / 60)

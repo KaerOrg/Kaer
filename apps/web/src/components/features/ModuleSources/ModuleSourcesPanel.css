@@ -30,12 +30,21 @@
 .sources-item {
   background: var(--color-surface, #fff);
   border: 1px solid var(--color-border);
+  /* Liseré gauche coloré par type de source (accent d'identité, pas de gravité). */
+  border-left: 3px solid var(--source-accent, var(--color-border));
   border-radius: var(--radius-md);
   padding: 10px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
+.sources-item--guideline { --source-accent: #16a34a; }
+.sources-item--rct { --source-accent: #2563eb; }
+.sources-item--cohort_study { --source-accent: #7c3aed; }
+.sources-item--meta_analysis,
+.sources-item--systematic_review { --source-accent: #ea580c; }
+.sources-item--expert_opinion { --source-accent: #64748b; }
 
 .sources-item__header {
   display: flex;

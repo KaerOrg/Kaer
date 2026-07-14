@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { RhythmAnchorStat } from '@kaer/shared'
-import { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS, buildRhythmogramAnchors } from './chronoAnchors'
+import { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS, buildRhythmogramAnchors, monthsWithData } from './chronoAnchors'
 
 // `t` factice : renvoie la clé, suffit à vérifier la résolution du libellé.
 const t = (key: string) => key
@@ -37,6 +37,30 @@ describe('chronoAnchors', () => {
       const result = buildRhythmogramAnchors([{ key: 'wake_time', sdMinutes: 18, count: 12 }], t)
       const light = result.find(a => a.key === 'light')
       expect(light).toMatchObject({ sdMinutes: 0, count: 0 })
+    })
+
+    it('reprend l’icône de chaque repère (source unique CHRONO_ANCHORS)', () => {
+      const result = buildRhythmogramAnchors([], t)
+      expect(result[0].iconName).toBe(CHRONO_ANCHORS[0].iconName)
+      expect(result.every(a => a.iconName.length > 0)).toBe(true)
+    })
+  })
+
+  describe('monthsWithData', () => {
+    it('renvoie les mois distincts, du plus ancien au plus récent', () => {
+      const months = monthsWithData([
+        { date: '2026-06-09', values: {} },
+        { date: '2026-05-10', values: {} },
+        { date: '2026-06-02', values: {} },
+      ])
+      expect(months).toEqual([
+        { year: 2026, month: 5 },
+        { year: 2026, month: 6 },
+      ])
+    })
+
+    it('renvoie une liste vide sans saisie', () => {
+      expect(monthsWithData([])).toEqual([])
     })
   })
 })

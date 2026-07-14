@@ -38,7 +38,7 @@ export function ModuleSourcesPanel({ moduleId }: Props) {
         {sources.map(source => {
           const Icon = SOURCE_ICONS[source.source_type]
           return (
-            <li key={source.id} className="sources-item">
+            <li key={source.id} className={`sources-item sources-item--${source.source_type}`}>
               <div className="sources-item__header">
                 <span className={`sources-item__type-badge sources-item__type-badge--${source.source_type}`}>
                   <Icon size={11} />
