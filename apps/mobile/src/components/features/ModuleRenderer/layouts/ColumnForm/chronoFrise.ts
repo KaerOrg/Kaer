@@ -1,26 +1,12 @@
-// Helpers purs de la frise 24 h du Journal chronobiologique.
-// Aucune dépendance React : lecture des repères d'une saisie → marqueurs positionnés.
+// Helpers purs de la frise 24 h du Journal chronobiologique (mobile).
+// `buildDayMarkers` + `FriseMarker` vivent dans `@kaer/shared` (source UNIQUE de
+// placement web ≡ mobile) et sont ré-exportés ici pour les consommateurs mobiles.
+// La détection « config en frise » (`isTimelineConfig`) reste locale : elle dépend
+// de la forme des colonnes `column_form` propre au layout mobile.
 // Conforme MDR 2017/745 : horaires bruts uniquement, aucun seuil ni jugement.
 
-import { CHRONO_ANCHORS } from '@kaer/shared'
-import { timeToFraction } from '../ChronoMonth/chronoMonthUtils'
-
-export interface FriseMarker {
-  /** Clé du repère (`wake_time`…) — source `form_entries.values`. */
-  readonly key: string
-  /** Couleur d'accent du repère (source unique `CHRONO_ANCHORS`). */
-  readonly color: string
-  /** Nom d'icône lucide du repère (source unique `CHRONO_ANCHORS`). */
-  readonly iconName: string
-  /** Clé i18n du libellé court du repère. */
-  readonly labelCode: string
-  /** Horaire brut « HH:MM » tel que saisi. */
-  readonly time: string
-  /** Position horizontale sur la frise 0 h → 24 h, en pourcentage (0 à 100). */
-  readonly leftPct: number
-}
-
-const TIME_RE = /^\d{1,2}:\d{2}$/
+export { buildDayMarkers } from '@kaer/shared'
+export type { FriseMarker } from '@kaer/shared'
 
 /** Une colonne « part » de la liste : suffit d'en connaître les compteurs par type. */
 export interface TimelineColumnShape {
@@ -42,26 +28,4 @@ export function isTimelineConfig(parts: readonly TimelineColumnShape[]): boolean
       p => p.timeChildren.length > 0 && p.textChildren.length === 0 && p.sliderChildren.length === 0,
     )
   )
-}
-
-/**
- * Marqueurs de la frise pour une saisie : un repère par ancre RENSEIGNÉE
- * (valeur « HH:MM » valide), dans l'ordre canonique de `CHRONO_ANCHORS`.
- * Les ancres non renseignées ne produisent aucun marqueur (pas de placeholder).
- */
-export function buildDayMarkers(values: Readonly<Record<string, string | number>>): FriseMarker[] {
-  const markers: FriseMarker[] = []
-  for (const anchor of CHRONO_ANCHORS) {
-    const raw = values[anchor.key]
-    if (typeof raw !== 'string' || !TIME_RE.test(raw)) continue
-    markers.push({
-      key: anchor.key,
-      color: anchor.color,
-      iconName: anchor.iconName,
-      labelCode: anchor.labelCode,
-      time: raw,
-      leftPct: timeToFraction(raw) * 100,
-    })
-  }
-  return markers
 }

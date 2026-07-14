@@ -1,0 +1,77 @@
+.cj-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Légende figée : pastilles couleur d'ancre + icône + libellé court. */
+.cj-legend {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 14px;
+  row-gap: 6px;
+  padding: 8px 10px;
+  background: var(--color-card, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 8px);
+}
+
+.cj-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.cj-legend__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.cj-day {
+  /* Card fournit fond/bordure/rayon ; on ne surcharge que l'espacement interne. */
+  gap: 6px;
+}
+
+/* Rail gris arrondi + marqueurs absolus positionnés à l'heure exacte. */
+.cj-frise {
+  position: relative;
+  height: 18px;
+  margin: 4px 9px 0;
+  display: flex;
+  align-items: center;
+}
+
+.cj-frise__rail {
+  width: 100%;
+  height: 5px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--color-border);
+}
+
+.cj-frise__marker {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-card, #fff);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.cj-frise__scale {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 9px 0;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}

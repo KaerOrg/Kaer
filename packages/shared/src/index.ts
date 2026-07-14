@@ -28,6 +28,8 @@ export {
 export type { RhythmEntry, RhythmAnchorStat, RhythmogramResult, RhythmRangeStat } from './services/rhythmogram'
 export { CHRONO_ANCHORS, CHRONO_ANCHOR_KEYS } from './services/chronoAnchors'
 export type { ChronoAnchorSpec } from './services/chronoAnchors'
+export { buildDayMarkers } from './services/chronoFrise'
+export type { FriseMarker } from './services/chronoFrise'
 
 export type UserRole = 'practitioner' | 'patient'
 

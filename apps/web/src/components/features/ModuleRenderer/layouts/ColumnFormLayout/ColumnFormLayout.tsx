@@ -4,6 +4,7 @@ import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
 import { RatingSelector } from '@ui/RatingSelector'
 import type { ContentField } from '@services/moduleService'
+import { ChronoJournalPreview } from './ChronoJournalPreview'
 
 interface Props {
   fields: ContentField[]
@@ -43,6 +44,24 @@ export function ColumnFormLayout({ fields, t }: Props) {
   // Colonnes + enfants dérivés une seule fois (source partagée web ≡ mobile),
   // comme côté mobile — pas à plat dans `fields`.
   const columns = buildColumnSpecs(fields)
+
+  // Journal chronobiologique : quand toutes les colonnes ne portent que des champs
+  // horaires (repères), l'aperçu patient montre la FRISE 24 h (ce que voit le patient
+  // dans sa liste), pas le formulaire de saisie. Détection structurelle — parité avec
+  // le mobile. Les autres modules column_form (beck, craving) gardent le formulaire.
+  const isTimeline =
+    columns.length > 0 &&
+    columns.every(
+      ({ children }) => children.length > 0 && children.every(c => c.field_type === 'column_time_field'),
+    )
+
+  if (isTimeline) {
+    return (
+      <div className="cf">
+        <ChronoJournalPreview ctaLabel={newBtn || undefined} />
+      </div>
+    )
+  }
 
   return (
     <div className="cf">
