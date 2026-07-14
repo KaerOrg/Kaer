@@ -144,3 +144,26 @@
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
+
+/* Bloc d'aperçu : récapitule ce que recevra le patient (teinte primaire douce). */
+.nr-form__preview {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light, #eff6ff);
+  border: 1px solid var(--color-primary);
+}
+
+.nr-form__preview-title {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.nr-form__preview-body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text);
+}

@@ -79,4 +79,16 @@ describe('NotificationRoutinePanel', () => {
     // Le libellé « jours » du formulaire est visible sans clic sur « ajouter ».
     expect(await screen.findByText('notifications.days_label')).toBeInTheDocument()
   })
+
+  it('le préréglage « tous les jours » active les 7 jours et le bloc d\'aperçu récapitule', async () => {
+    mockGet.mockResolvedValue([])
+    open()
+    await screen.findByText('notifications.days_label')
+    // Bloc d'aperçu présent.
+    expect(screen.getByText('notifications.preview')).toBeInTheDocument()
+    // Préréglage « Tous les jours » → les 7 pastilles jour deviennent actives.
+    await userEvent.click(screen.getByText('notifications.freq_daily'))
+    const dayButtons = document.querySelectorAll('.nr-form__day--on')
+    expect(dayButtons).toHaveLength(7)
+  })
 })

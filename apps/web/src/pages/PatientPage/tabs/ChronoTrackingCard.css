@@ -1,0 +1,79 @@
+.chrono-tracking {
+  width: 100%;
+}
+
+.chrono-tracking__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chrono-tracking__title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.chrono-tracking__month {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.chrono-tracking__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Ligne : repère | barre de plage (flexible) | médiane | écart. */
+.chrono-tracking__row {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr 3.5rem 3rem;
+  align-items: center;
+  gap: 12px;
+}
+
+.chrono-tracking__anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.chrono-tracking__tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-md, 8px);
+  flex-shrink: 0;
+}
+
+.chrono-tracking__median {
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  text-align: right;
+}
+
+.chrono-tracking__gap {
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.chrono-tracking__legend {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 12px 0 0;
+}

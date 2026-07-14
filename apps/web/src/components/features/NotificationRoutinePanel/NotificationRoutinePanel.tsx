@@ -6,6 +6,7 @@ import { Button } from '../../ui/Button'
 import { Tooltip } from '../../ui/Tooltip'
 import { InputField } from '../../ui/InputField'
 import { TimePicker } from '../../ui/TimePicker'
+import { SegmentedControl } from '../../ui/SegmentedControl'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { notificationRoutineQueries } from '../../../hooks/queries'
 import {
@@ -32,6 +33,17 @@ interface Props {
 const DAY_KEYS = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'] as const
 const DAY_ISO = [1, 2, 3, 4, 5, 6, 7] as const
 const DEFAULT_TIME = '09:00'
+const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7]
+const WORKDAYS = [1, 2, 3, 4, 5]
+
+type Frequency = 'daily' | 'workdays' | 'custom'
+
+/** Déduit la fréquence à partir de l'ensemble de jours sélectionné. */
+function frequencyFromDays(days: readonly number[]): Frequency {
+  if (days.length === 7) return 'daily'
+  if (days.length === 5 && WORKDAYS.every(d => days.includes(d))) return 'workdays'
+  return 'custom'
+}
 
 /**
  * Panneau « Rappels » d'un module patient : liste les routines de notification,
@@ -55,6 +67,10 @@ export function NotificationRoutinePanel({
   const loading = routinesQuery.isLoading
 
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 3, 5])
+  // Heure contrôlée uniquement pour alimenter le bloc d'aperçu (l'enregistrement
+  // lit `timeRef`). La fréquence est DÉRIVÉE des jours (pas un state parallèle).
+  const [previewTime, setPreviewTime] = useState(DEFAULT_TIME)
+  const frequency = frequencyFromDays(selectedDays)
   // Ouverture explicite du formulaire par l'utilisateur. Le formulaire est aussi
   // affiché d'office quand il n'existe aucun rappel (rien d'autre à montrer).
   const [formRequested, setFormRequested] = useState(false)
@@ -83,6 +99,31 @@ export function NotificationRoutinePanel({
     )
   }, [])
 
+  // Les presets « tous les jours / jours ouvrés » posent l'ensemble de jours ;
+  // « jours choisis » laisse la sélection courante libre.
+  const applyFrequency = useCallback((next: Frequency) => {
+    if (next === 'daily') setSelectedDays([...ALL_DAYS])
+    else if (next === 'workdays') setSelectedDays([...WORKDAYS])
+  }, [])
+
+  const frequencyOptions = useMemo(
+    () => [
+      { value: 'daily' as const, label: t('notifications.freq_daily') },
+      { value: 'custom' as const, label: t('notifications.freq_custom') },
+      { value: 'workdays' as const, label: t('notifications.freq_workdays') },
+    ],
+    [t],
+  )
+
+  // Récap lisible des jours sélectionnés pour le bloc d'aperçu.
+  const previewDays = useMemo(
+    () =>
+      selectedDays
+        .map(iso => t(`notifications.day_${DAY_KEYS[iso - 1]}`))
+        .join(', '),
+    [selectedDays, t],
+  )
+
   const handleCreate = useCallback(async () => {
     if (selectedDays.length === 0) return
     await createMutation.mutateAsync({
@@ -96,6 +137,7 @@ export function NotificationRoutinePanel({
     setSelectedDays([1, 3, 5])
     if (timeRef.current) timeRef.current.value = DEFAULT_TIME
     if (noteRef.current) noteRef.current.value = ''
+    setPreviewTime(DEFAULT_TIME)
     setFormRequested(false)
   }, [selectedDays, patientModuleId, practitionerId, patientId, createMutation])
 
@@ -134,6 +176,15 @@ export function NotificationRoutinePanel({
 
           {showForm ? (
             <div className="nr-form">
+              <div className="nr-form__label">{t('notifications.freq_label')}</div>
+              <SegmentedControl
+                options={frequencyOptions}
+                value={frequency}
+                onChange={applyFrequency}
+                variant="pills"
+                aria-label={t('notifications.freq_label')}
+              />
+
               <div className="nr-form__label">{t('notifications.days_label')}</div>
               <div className="nr-form__days">
                 {DAY_KEYS.map((key, i) => (
@@ -149,7 +200,12 @@ export function NotificationRoutinePanel({
               </div>
 
               <div className="nr-form__label">{t('notifications.time_label')}</div>
-              <TimePicker ref={timeRef} defaultValue={DEFAULT_TIME} className="nr-form__time" />
+              <TimePicker
+                ref={timeRef}
+                defaultValue={DEFAULT_TIME}
+                onChange={setPreviewTime}
+                className="nr-form__time"
+              />
 
               <div className="nr-form__label">{t('notifications.note_label')}</div>
               <InputField
@@ -159,6 +215,16 @@ export function NotificationRoutinePanel({
                 placeholder={t('notifications.note_placeholder')}
                 rows={2}
               />
+
+              {/* Aperçu de ce que recevra le patient (jours + heure). */}
+              <div className="nr-form__preview">
+                <p className="nr-form__preview-title">{t('notifications.preview')}</p>
+                <p className="nr-form__preview-body">
+                  {selectedDays.length > 0
+                    ? t('notifications.preview_hint', { days: previewDays, time: previewTime })
+                    : t('notifications.preview_empty')}
+                </p>
+              </div>
 
               <div className="nr-form__actions">
                 {routines.length > 0 && (

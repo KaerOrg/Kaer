@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Lightbulb, CheckCircle2, Check } from 'lucide-react'
+import { ExternalLink, Lightbulb, CheckCircle2 } from 'lucide-react'
 import { type PsyEduBlock } from '@services/psyeduService'
 import { psyeduQueries } from '../../../../../hooks/queries'
 
@@ -132,7 +132,8 @@ export function PsyEduBlocks({ topicId, sectionOrder }: Props) {
                 <ul className="psyedu-block__action-list">
                   {block.items_codes.map((code, i) => (
                     <li key={i} className="psyedu-block__action-item">
-                      <Check size={15} />
+                      {/* Étape numérotée : pastille ronde teintée + numéro (parité mobile). */}
+                      <span className="psyedu-block__step-num">{i + 1}</span>
                       <span>{renderInline(t(code, { ns: 'psyedu', defaultValue: code }))}</span>
                     </li>
                   ))}

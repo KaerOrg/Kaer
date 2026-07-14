@@ -15,7 +15,7 @@ import type {
   ActivityEntryPoint,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
-import { ChronoRhythmogramPanel } from './ChronoRhythmogramPanel'
+import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
@@ -362,7 +362,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
         {/* ── Rythmes & régularité ────────────────────────────── */}
         {chronoEntries.length > 0 && (
           <div className="evolution-card evolution-card--wide">
-            <ChronoRhythmogramPanel entries={chronoEntries} />
+            <ChronoTrackingCard entries={chronoEntries} />
           </div>
         )}
 

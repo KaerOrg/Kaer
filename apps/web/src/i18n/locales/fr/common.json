@@ -359,7 +359,8 @@
     "scale_read": "Lu",
     "scale_unread": "Non lu",
     "cssrs_modal_title": "C-SSRS, Dépistage suicidaire",
-    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien"
+    "cssrs_modal_subtitle": "Columbia Suicide Severity Rating Scale · Hétéro-évaluation praticien",
+    "preview_banner": "Aperçu conforme à l'écran patient (mobile)."
   },
   "modules": {
     "nav_link": "Bibliothèque",
@@ -660,7 +661,18 @@
       "anchor_bedtime": "Coucher",
       "anchor_light": "Lumière",
       "axis_time": "Heure",
-      "axis_day": "Jour du mois"
+      "axis_day": "Jour du mois",
+      "spread_unit": "minutes",
+      "col_anchor": "Repère",
+      "col_median": "Médiane",
+      "col_range": "Plage sur le mois (min → max)",
+      "col_gap": "Écart",
+      "days_logged": "Jours saisis",
+      "anchors_tracked": "Repères suivis",
+      "median_gap": "Écart médian",
+      "range_to": "à",
+      "raw_values_note": "Valeurs brutes, à interpréter en consultation.",
+      "tracking_legend": "Plage = min → max du mois · point = médiane · ± = écart-type brut, en minutes."
     },
     "chrono_bio": {
       "add_today": "Noter mes repères du jour",
@@ -1931,7 +1943,14 @@
     "day_jeu": "J",
     "day_ven": "V",
     "day_sam": "S",
-    "day_dim": "D"
+    "day_dim": "D",
+    "freq_label": "Fréquence",
+    "freq_daily": "Tous les jours",
+    "freq_custom": "Jours choisis",
+    "freq_workdays": "Jours ouvrés",
+    "preview": "Aperçu",
+    "preview_hint": "Le patient recevra un rappel {{days}} à {{time}}.",
+    "preview_empty": "Sélectionnez au moins un jour."
   },
   "notes": {
     "section_title": "Notes",

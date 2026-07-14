@@ -1,0 +1,97 @@
+.chrono-data__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chrono-data__title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.chrono-data__note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 42ch;
+}
+
+.chrono-data__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.chrono-data__month {
+  min-width: 7.5rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Synthèse : 3 tuiles de stats brutes. */
+.chrono-data__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chrono-data__stat-value {
+  font-size: var(--font-size-lg, 1.25rem);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.chrono-data__stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 2px 0 0;
+}
+
+/* Cellule « Repère » : tuile d'icône teintée + libellé. */
+.chrono-data__anchor {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.chrono-data__anchor-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-md, 8px);
+  flex-shrink: 0;
+}
+
+.chrono-data__range-cell {
+  min-width: 160px;
+  width: 40%;
+}
+
+.chrono-data__gap {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.chrono-data__mdr-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 12px 0 0;
+}
+
+@media (max-width: 640px) {
+  .chrono-data__summary {
+    grid-template-columns: 1fr;
+  }
+}

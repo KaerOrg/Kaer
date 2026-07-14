@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildRhythmogram, minutesToHourLabel, minutesToClock } from './rhythmogram'
+import { buildRhythmogram, buildRangeStats, minutesToHourLabel, minutesToClock } from './rhythmogram'
 
 const KEYS = ['wake_time', 'bedtime']
 
@@ -61,5 +61,37 @@ describe('formatters', () => {
   it('minutesToClock', () => {
     expect(minutesToClock(450)).toBe('07:30')
     expect(minutesToClock(1450)).toBe('00:10') // déroulé → ramené dans la journée
+  })
+})
+
+describe('buildRangeStats', () => {
+  it('calcule min / médiane / max et reprend sd + count par repère', () => {
+    const entries = [
+      { date: '2026-06-01', values: { wake_time: '07:00' } },
+      { date: '2026-06-02', values: { wake_time: '08:00' } },
+      { date: '2026-06-03', values: { wake_time: '07:30' } },
+    ]
+    const result = buildRhythmogram(entries, ['wake_time', 'bedtime'], 2026, 6)
+    const stats = buildRangeStats(result, ['wake_time', 'bedtime'])
+    const wake = stats.find(s => s.key === 'wake_time')!
+    expect(wake.min).toBe(420)   // 07:00
+    expect(wake.median).toBe(450) // 07:30
+    expect(wake.max).toBe(480)   // 08:00
+    expect(wake.count).toBe(3)
+    expect(wake.sdMinutes).toBe(result.anchors.find(a => a.key === 'wake_time')!.sdMinutes)
+  })
+
+  it('médiane = moyenne des deux centraux pour un nombre pair de valeurs', () => {
+    const entries = [
+      { date: '2026-06-01', values: { wake_time: '07:00' } },
+      { date: '2026-06-02', values: { wake_time: '08:00' } },
+    ]
+    const result = buildRhythmogram(entries, ['wake_time'], 2026, 6)
+    expect(buildRangeStats(result, ['wake_time'])[0].median).toBe(450) // (420+480)/2
+  })
+
+  it('renvoie min/median/max null et count 0 pour un repère jamais saisi', () => {
+    const result = buildRhythmogram([], ['bedtime'], 2026, 6)
+    expect(buildRangeStats(result, ['bedtime'])[0]).toMatchObject({ min: null, median: null, max: null, count: 0, sdMinutes: 0 })
   })
 })
