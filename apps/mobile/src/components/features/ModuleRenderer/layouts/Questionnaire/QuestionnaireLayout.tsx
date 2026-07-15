@@ -49,6 +49,11 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
     .filter(f => f.field_type === 'scale_question' || f.field_type === 'scale_slider_question')
     .sort((a, b) => a.sort_order - b.sort_order)
 
+  // Questionnaire tout en curseurs (ex. mood_tracker) : le bloc d'instructions
+  // paraphrase ce que les curseurs et leurs ancres montrent déjà → on le masque
+  // (le titre suffit). Les échelles Likert cliniques gardent leurs consignes.
+  const allSliders = allQuestions.length > 0 && allQuestions.every(f => f.field_type === 'scale_slider_question')
+
   const questionIndexMap = new Map(allQuestions.map((q, i) => [q.id, i]))
 
   const contentItems = fields
@@ -61,8 +66,8 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
 
   return (
     <View style={styles.questionnaireContainer}>
-      {/* Instructions */}
-      {instructions.length > 0 && (
+      {/* Instructions (masquées pour un questionnaire tout en curseurs) */}
+      {instructions.length > 0 && !allSliders && (
         <View style={styles.instructionBlock}>
           {instructions.map(f => (
             <Text key={f.id} style={styles.instructionText}>{t(f.text_code ?? '')}</Text>

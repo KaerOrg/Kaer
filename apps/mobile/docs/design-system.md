@@ -302,8 +302,11 @@ dans `sliderMath.ts`.
 | `label?` | `string` | Libellé au-dessus de la piste (sert d'`accessibilityLabel`) |
 | `unit?` | `string` | Unité affichée après la valeur (ex. `"%"`) |
 | `showEndLabels?` | `boolean` | Affiche les bornes min/max sous la piste |
+| `showHeader?` | `boolean` | En-tête interne (libellé + valeur) au-dessus de la piste (défaut `true`). `false` quand le parent rend son propre en-tête et ne veut que la piste (ex. `SliderQuestion` du mood_tracker : icône + valeur en grand). Le `label` reste l'`accessibilityLabel`. |
 | `testID?` | `string` | Expose `${testID}-track`, `${testID}-value`, `${testID}-fill` |
 | `onChange` | `(value: number) => void` | Émis à chaque interaction, valeur alignée/bornée |
+
+La zone tactile de la piste fait **≥ 44 px** de haut (la barre visible reste fine, centrée dedans).
 
 ```tsx
 // Intensité émotionnelle 0–100 (config-first : min/max/step/unit lus des field_props)
@@ -912,6 +915,56 @@ n'en crée un nouveau qu'en dernier recours.
 Tous les layouts respectent la règle d'or : **affichage de valeurs brutes, zéro
 interprétation**. Les couleurs (qualité de sommeil, pastilles de statut) sont
 des conventions d'affichage fournies par la base, jamais des verdicts cliniques.
+
+---
+
+## Data-viz `mood_tracker` (Thermomètre de l'humeur)
+
+Composants de la refonte du module `mood_tracker` (épique #162). La **palette de
+dimensions** est la source de vérité **partagée web ≡ mobile** :
+`packages/shared/src/services/moodPalette.ts` (`MOOD_DIMENSION_COLORS`,
+`MOOD_ACCENT`, `ribbonCellOpacity`, `SEASONALITY_*`).
+
+### Palette de dimensions — encodage « magnitude » (MDR 2017/745)
+
+Six dimensions (`mood`, `energy`, `anxiety`, `pleasure`, `sleep`, `food`), trois
+nuances chacune. **La couleur n'encode QUE l'identité de la dimension** (une teinte
+par symptôme) et, dans le ruban, la **magnitude brute** (opacité proportionnelle à
+la valeur). Jamais de rouge/vert « ça va / ça ne va pas », aucun seuil, aucune zone
+de gravité. Aucune moyenne « bien-être » globale — on lit 6 symptômes, pas un score.
+
+| Nuance | Rôle | Exemple (Humeur) |
+|---|---|---|
+| `fill` | Pastel — barres d'empreinte, remplissage des curseurs | `#C4B8ED` |
+| `ink` | Soutenue — texte de valeur, thumb du curseur | `#7C6DB6` |
+| `mid` | Mi-teinte — courbes de tendance, cellules du ruban | `#9C89D6` |
+
+Accent du module (CTA, onglet actif) : **teal `MOOD_ACCENT` `#4FA5A9`** (remplace
+l'ancien orange `#F97316`, banni des aplats). Opacité d'une cellule de ruban :
+`ribbonCellOpacity(value, yMax)` = `0.38 + (value/yMax) × 0.62`, `null` si non saisie
+(cellule vide à contour clair — jamais une valeur inventée).
+
+### Composants `features/`
+
+| Composant | Rôle |
+|---|---|
+| `DimensionFingerprint` | Empreinte N barres verticales (valeur au-dessus, libellé court dessous). Remplace la moyenne « X/10 » dans les cartes d'historique. Largeur fluide (`flex: 1` par barre). |
+| `SymptomRibbon` | Heatmap dimensions × jours du mois. Cellule = mi-teinte + opacité de magnitude ; jour non saisi = cellule vide. Helper pur `buildRibbonGrid`. |
+| `SeasonalityStrip` | Frise pluri-annuelle (≤ 5 ans) des moyennes mensuelles d'une dimension. Comparaison repliée par défaut, dépliée via « Comparer » (`Checkbox`). Helper pur `buildSeasonality`. |
+| `MarkerModal` | Modale « Ajouter un repère » typé (traitement / événement de vie / autre via `Chip`), calendrier direct (`DateTimePicker`). |
+| `DimensionTrackerView/HistoryCard` | Carte d'historique `score` (legacy) \| `fingerprint` (mood). |
+| `DimensionTrackerView/MarkersCard` | Liste des repères typés + filtre par type. |
+| `DimensionTrackerView/TrackingTab` | Onglet « Suivi » : sélecteur de mois + ruban + saisonnalité + courbes. |
+
+`DimensionTrackerView` est **config-driven** : `config.tabs` (jeu d'onglets),
+`config.historyCardKind` (`'score' | 'fingerprint'`), `config.dimensionFills`,
+`config.showSeasonality`. Le module `medication_side_effects` garde ses 3 onglets
+(`entry`/`charts`/`month`) sans changement ; `mood_tracker` opte pour `entry`/`tracking`.
+
+Les types de repère et leurs couleurs d'identité vivent dans `src/lib/markerTheme.ts`
+(`MARKER_TYPES`, `MARKER_TYPE_COLORS`, `MARKER_TYPE_ICONS`) ; le type `MarkerType`
+dans `src/lib/database.ts`. Écriture des repères **toujours** via
+`services/timelineMarkerService` (SQLite + synchronisation).
 
 ---
 
