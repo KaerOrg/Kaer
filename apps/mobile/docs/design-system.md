@@ -37,6 +37,28 @@ neutre plutôt qu'un hex en dur (ex. `SpreadBars` de la Vue mensuelle chrono).
 
 ---
 
+## Largeur fluide — zéro scroll horizontal
+
+Aucun écran, aucune vue, aucune carte ne défile horizontalement : le contenu
+s'adapte **toujours** à la largeur de l'appareil. Un débordement latéral est un bug
+bloquant. Règle complète : [`coding-standards.md`](../../../.claude/rules/coding-standards.md)
+§ « Zéro scroll horizontal (mobile) ».
+
+- **Largeur d'écran / de carte = fluide** : `width: '100%'`, `flex: 1`, ou
+  `alignSelf: 'stretch'` — jamais une largeur figée en dur (`width: 400`). Une largeur
+  fixe ne vaut que pour un élément intrinsèquement petit (icône, pastille, avatar).
+- **Rangée `flexDirection: 'row'` avec texte de longueur variable** : donner
+  `flex: 1`/`flexShrink: 1` au bloc texte pour qu'il se compresse au lieu de pousser
+  ses voisins hors écran (`flexWrap: 'wrap'` s'il doit passer à la ligne).
+- **Seul défilement horizontal légitime** : un carrousel / pager explicitement voulu
+  (ex. `PhotoCarousel`), borné à son conteneur.
+
+> **Garde-fou mécanique** : `apps/mobile/src/__tests__/noHorizontalScroll.guard.test.ts`
+> échoue si une prop `horizontal` (`ScrollView`/`FlatList`/`FlashList`) apparaît hors
+> de `HORIZONTAL_ALLOWLIST`. Un nouveau carrousel voulu s'y ajoute avec justification.
+
+---
+
 ## Alias d'import
 
 Trois alias de chemin sont configurés pour éviter les imports relatifs profonds

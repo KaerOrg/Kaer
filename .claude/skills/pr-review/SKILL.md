@@ -432,6 +432,17 @@ Exception : fichiers `index.ts` de ré-export uniquement.
 - `Animated` de react-native au lieu de `Reanimated` pour animations complexes → **point d'attention**
 - Safe area manquante dans un `ScrollView` plein écran → **point d'attention**
 
+#### RULE — Zéro scroll horizontal (mobile)
+*(source : coding-standards.md § "Zéro scroll horizontal (mobile)") — applicable aux fichiers dans `apps/mobile/`*
+
+Aucun écran / vue / carte ne défile horizontalement ; le contenu s'adapte toujours à la largeur de l'appareil. Le seul défilement horizontal légitime est un **carrousel / pager explicitement voulu** (inscrit dans `HORIZONTAL_ALLOWLIST` du guard `apps/mobile/src/__tests__/noHorizontalScroll.guard.test.ts`).
+
+- Prop `horizontal` sur un `ScrollView`/`FlatList`/`FlashList` **hors allowlist** → **violation** (le guard test échoue). Carrousel voulu → l'ajouter à l'allowlist avec justification ; sinon supprimer.
+- Cause de **layout** (non détectée par le guard, à lire à l'œil) :
+  - `width`/`minWidth` **figé en dur** (`width: 400`) sur un conteneur d'écran ou de carte au lieu d'une largeur fluide (`'100%'`, `flex: 1`, `alignSelf: 'stretch'`) → **violation**
+  - rangée `flexDirection: 'row'` contenant un texte de longueur variable **sans** `flex: 1`/`flexShrink: 1` sur le bloc texte (ni `flexWrap`) → **point d'attention** (débordement latéral probable)
+- Grep utile : `grep -rn "horizontal" apps/mobile/src --include="*.tsx"` — chaque `ScrollView`/`FlatList` `horizontal` doit être un carrousel assumé.
+
 #### RULE — Design system web : zéro valeur hardcodée
 *(source : coding-standards.md § "Design system" + module-builder SKILL.md § 4.10) — applicable aux fichiers dans `apps/web/`*
 
