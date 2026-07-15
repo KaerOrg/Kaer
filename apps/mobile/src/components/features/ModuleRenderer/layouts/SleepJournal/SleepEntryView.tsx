@@ -24,6 +24,7 @@ import type { Lbl, SleepConfig } from './types'
 import { minutesToHhmmHint } from './sleepHelpers'
 import { RatingSelector } from '@ui/RatingSelector'
 import { TimePicker } from '@ui/TimePicker'
+import { ProgressRing } from '@ui/ProgressRing'
 import { MinutesField } from './MinutesField'
 import { styles } from './styles'
 
@@ -148,7 +149,6 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
   const qualityLabels = useMemo(() => RATING_STEPS.map(n => lbl(`quality_label_${n}`)), [lbl])
   const restednessLabels = useMemo(() => RATING_STEPS.map(n => lbl(`restedness_label_${n}`)), [lbl])
   const saveLabel = existingId ? (lbl('update_label') || t('common.update')) : (lbl('save_label') || t('common.save'))
-  const tapModify = lbl('tap_to_modify_hint')
   const minutesUnit = lbl('minutes_unit') || 'min'
   const deleteLabel = lbl('delete_label') || t('common.delete')
 
@@ -173,30 +173,36 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.entryContent} keyboardShouldPersistTaps="handled">
-        {/* Horaires de la nuit (4 horaires CSD + latence) ────────────────── */}
+        {/* Horaires de la nuit (4 horaires CSD en grille 2×2 + latence) ───── */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>{lbl('section_schedule_title')}</Text>
+          <View style={styles.timeGrid}>
+            <View style={styles.timeCell}>
+              <TimePicker
+                label={lbl('in_bed_label')} value={inBedTime} icon="bed-outline"
+                onChange={setInBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="in-bed"
+              />
+            </View>
+            <View style={styles.timeCell}>
+              <TimePicker
+                label={lbl('bedtime_label')} value={bedtime} icon="clock-outline"
+                onChange={setBedtime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="bedtime"
+              />
+            </View>
+            <View style={styles.timeCell}>
+              <TimePicker
+                label={lbl('wake_time_label')} value={wakeTime} icon="clock-outline"
+                onChange={setWakeTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="wake-time"
+              />
+            </View>
+            <View style={styles.timeCell}>
+              <TimePicker
+                label={lbl('out_of_bed_label')} value={outOfBedTime} icon="bed-empty"
+                onChange={setOutOfBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="out-of-bed"
+              />
+            </View>
+          </View>
           <Card variant="elevated">
-            <TimePicker
-              label={lbl('in_bed_label')} value={inBedTime} icon="bed-outline" hint={tapModify}
-              onChange={setInBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="in-bed"
-            />
-            <View style={styles.divider} />
-            <TimePicker
-              label={lbl('bedtime_label')} value={bedtime} icon="clock-outline" hint={tapModify}
-              onChange={setBedtime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="bedtime"
-            />
-            <View style={styles.divider} />
-            <TimePicker
-              label={lbl('wake_time_label')} value={wakeTime} icon="clock-outline" hint={tapModify}
-              onChange={setWakeTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="wake-time"
-            />
-            <View style={styles.divider} />
-            <TimePicker
-              label={lbl('out_of_bed_label')} value={outOfBedTime} icon="bed-empty" hint={tapModify}
-              onChange={setOutOfBedTime} confirmLabel={lbl('confirm_label') || t('common.ok')} testID="out-of-bed"
-            />
-            <View style={styles.divider} />
             <View style={styles.timeFieldGroup}>
               <Text style={styles.fieldLabel}>{lbl('onset_label')}</Text>
               <MinutesField
@@ -345,13 +351,22 @@ export function SleepEntryView({ targetDate, lbl, t, config, onClose }: Props) {
         </View>
 
         {liveSE !== null ? (
-          <View style={styles.seCard} testID="sleep-efficiency">
-            <View style={styles.seRow}>
-              <MaterialCommunityIcons name="sleep" size={20} color={colors.primary} />
-              <Text style={styles.seTitle}>{lbl('efficiency_label')}</Text>
-              <Text style={styles.seScore}>{liveSE} %</Text>
+          <Card variant="elevated" style={styles.efficiencyCard} testID="sleep-efficiency">
+            <ProgressRing
+              value={liveSE}
+              max={100}
+              size={84}
+              label={`${liveSE} %`}
+              color={colors.primary}
+              accessibilityLabel={lbl('efficiency_label')}
+            />
+            <View style={styles.efficiencyText}>
+              <Text style={styles.efficiencyTitle}>{lbl('efficiency_label')}</Text>
+              {lbl('efficiency_explanation') ? (
+                <Text style={styles.efficiencyHint}>{lbl('efficiency_explanation')}</Text>
+              ) : null}
             </View>
-          </View>
+          </Card>
         ) : null}
 
         <Button label={saving ? '…' : saveLabel} onPress={handleSave} loading={saving} testID="save-button"

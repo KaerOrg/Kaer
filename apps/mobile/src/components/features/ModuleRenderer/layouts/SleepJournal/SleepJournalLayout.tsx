@@ -1,30 +1,34 @@
 // ─── Layout `sleep_journal` — agenda du sommeil (sleep_diary) ────────────────
 //
-// Orchestrateur : route entre 3 vues (liste / saisie / mois), détient la liste
-// des entrées et l'état du mois, construit le résolveur de libellés (`lbl`) et la
-// config numérique depuis le field `sleep_journal_config`. La saisie d'une nuit
-// possède son propre état (SleepEntryView). Persistance SQLite dédiée
-// (`sleep_diary_entries`, UNIQUE par date), alignée Consensus Sleep Diary.
-// Conformité MDR 2017/745 : côté patient, affichage neutre des valeurs brutes,
-// aucune couleur de jugement.
+// Orchestrateur : route entre 3 vues (liste / saisie / bilan), détient la liste
+// des entrées, l'état du mois et la plage d'évolution, construit le résolveur de
+// libellés (`lbl`) et la config numérique depuis le field `sleep_journal_config`.
+// La saisie d'une nuit possède son propre état (SleepEntryView). Le bilan réunit
+// deux onglets (Mois | Évolution) — le calendrier n'apparaît qu'une fois.
+// Persistance SQLite dédiée (`sleep_diary_entries`, UNIQUE par date), alignée
+// Consensus Sleep Diary. Conformité MDR 2017/745 : côté patient, affichage neutre
+// des valeurs brutes, aucune couleur de jugement.
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
+import { useTranslation } from 'react-i18next'
 import { colors } from '@theme'
 import {
-  getAllSleepEntries, getSleepEntriesForMonth, type SleepEntry,
+  getAllSleepEntries, getSleepEntriesForMonth, getSleepEntriesForRange, type SleepEntry,
 } from '../../../../../lib/database'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { SleepJournalLayoutProps, SleepConfig, Lbl } from './types'
-import { toYearMonth, yesterdayDateStr } from './sleepHelpers'
+import { toYearMonth, yesterdayDateStr, rangeStartIso, todayIso, type EvolutionRange } from './sleepHelpers'
 import { SleepListView } from './SleepListView'
-import { SleepMonthView } from './SleepMonthView'
+import { SleepBilanView } from './SleepBilanView'
 import { SleepEntryView } from './SleepEntryView'
 import { styles } from './styles'
 
 export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) {
   const t = useModuleTranslation()
+  const { i18n } = useTranslation()
+  const locale = i18n.language
 
   const configField = fields.find(f => f.field_type === 'sleep_journal_config')
   const lbl = useCallback<Lbl>((key: string): string => {
@@ -43,7 +47,7 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
 
   const now = useMemo(() => new Date(), [])
 
-  const [mode, setMode] = useState<'list' | 'entry' | 'month'>('list')
+  const [mode, setMode] = useState<'list' | 'entry' | 'bilan'>('list')
   const [entries, setEntries] = useState<SleepEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [targetDate, setTargetDate] = useState<string>(yesterdayDateStr())
@@ -51,6 +55,9 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
   const [monthYear, setMonthYear] = useState(now.getFullYear())
   const [monthNum, setMonthNum] = useState(now.getMonth() + 1)
   const [monthEntries, setMonthEntries] = useState<SleepEntry[]>([])
+
+  const [evolutionRange, setEvolutionRange] = useState<EvolutionRange>('1M')
+  const [evolutionEntries, setEvolutionEntries] = useState<SleepEntry[]>([])
 
   // Masque le header React Navigation en mode saisie (l'en-tête interne porte le titre).
   const navigation = useNavigation()
@@ -71,15 +78,21 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
     setMonthEntries(data)
   }, [])
 
+  const loadEvolution = useCallback(async (range: EvolutionRange) => {
+    const data = await getSleepEntriesForRange(rangeStartIso(range), todayIso())
+    setEvolutionEntries(data)
+  }, [])
+
   const handleOpenEntry = useCallback((date: string) => {
     setTargetDate(date)
     setMode('entry')
   }, [])
 
-  const handleOpenMonth = useCallback(() => {
+  const handleOpenBilan = useCallback(() => {
     void loadMonth(monthYear, monthNum)
-    setMode('month')
-  }, [loadMonth, monthYear, monthNum])
+    void loadEvolution(evolutionRange)
+    setMode('bilan')
+  }, [loadMonth, monthYear, monthNum, loadEvolution, evolutionRange])
 
   const handleEntryClose = useCallback(() => {
     void loadEntries()
@@ -90,6 +103,11 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
     void loadEntries()
     setMode('list')
   }, [loadEntries])
+
+  const handleEvolutionRangeChange = useCallback((range: EvolutionRange) => {
+    setEvolutionRange(range)
+    void loadEvolution(range)
+  }, [loadEvolution])
 
   const goPrevMonth = useCallback(() => {
     let y = monthYear, m = monthNum
@@ -118,18 +136,22 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
     return <SleepEntryView targetDate={targetDate} lbl={lbl} t={t} config={config} onClose={handleEntryClose} />
   }
 
-  if (mode === 'month') {
+  if (mode === 'bilan') {
     return (
-      <SleepMonthView
+      <SleepBilanView
         lbl={lbl}
         t={t}
+        locale={locale}
         monthYear={monthYear}
         monthNum={monthNum}
         monthEntries={monthEntries}
         now={now}
-        onBack={handleBackToList}
+        evolutionEntries={evolutionEntries}
+        evolutionRange={evolutionRange}
+        onEvolutionRangeChange={handleEvolutionRangeChange}
         onPrevMonth={goPrevMonth}
         onNextMonth={goNextMonth}
+        onBack={handleBackToList}
       />
     )
   }
@@ -143,7 +165,7 @@ export function SleepJournalLayout({ fields, footer }: SleepJournalLayoutProps) 
       qualityMax={config.qualityMax}
       footer={footer}
       onOpenEntry={handleOpenEntry}
-      onOpenMonth={handleOpenMonth}
+      onOpenBilan={handleOpenBilan}
     />
   )
 }

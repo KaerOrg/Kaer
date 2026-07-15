@@ -30,23 +30,29 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase', letterSpacing: 0.8,
     marginBottom: spacing.sm, marginTop: spacing.sm,
   },
-  dayRow: {
-    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    paddingVertical: spacing.sm + 4, paddingHorizontal: spacing.md,
+  // Ligne « nuit » : en-tête (date + étoiles), barre fenêtre de sommeil, horaires.
+  nightRow: {
+    paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md,
     borderRadius: radius.md, marginBottom: spacing.xs, backgroundColor: colors.card,
+    gap: spacing.xs,
   },
-  dayRowFilled:      { borderLeftWidth: 3, borderLeftColor: colors.primary },
-  dot:               { width: 10, height: 10, borderRadius: 5 },
-  dotFilled:         { backgroundColor: colors.primary },
-  dotEmpty:          { backgroundColor: colors.border },
-  dayInfo:           { flex: 1 },
-  dayDate:           { fontSize: 15, fontWeight: '500', color: colors.textMuted },
-  dayDateFilled:     { color: colors.text, fontWeight: '600' },
-  entryDetails:      { marginTop: 2, gap: 1 },
-  entryMeta:         { fontSize: 13, color: colors.textMuted },
-  entryMetaStrong:   { fontWeight: '600', color: colors.primary },
-  emptyDay:          { fontSize: 13, color: colors.border, fontStyle: 'italic', marginTop: 2 },
-  starsRow:          { flexDirection: 'row', gap: 2, marginTop: 2 },
+  nightRowFilled:    { borderLeftWidth: 3, borderLeftColor: colors.primary },
+  nightHeader:       { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  nightDate:         { fontSize: 15, fontWeight: '500', color: colors.textMuted },
+  nightDateFilled:   { color: colors.text, fontWeight: '600' },
+  windowTrack: {
+    height: 8, borderRadius: radius.full, backgroundColor: colors.border,
+    overflow: 'hidden', marginTop: 2,
+  },
+  windowSegment: {
+    position: 'absolute', top: 0, bottom: 0,
+    backgroundColor: colors.primary, borderRadius: radius.full,
+  },
+  nightMeta:         { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
+  nightTime:         { fontSize: 12, color: colors.textMuted },
+  nightDuration:     { fontSize: 13, fontWeight: '700', color: colors.primary },
+  nightEmpty:        { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
+  starsRow:          { flexDirection: 'row', gap: 2 },
   // ── Month
   monthNav: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
@@ -57,7 +63,34 @@ export const styles = StyleSheet.create({
     flex: 1, fontSize: 17, fontWeight: '700',
     color: colors.text, textAlign: 'center', textTransform: 'capitalize',
   },
+  navSpacer:         { width: 44 },
+  monthNavInline: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
   monthContent:      { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
+  // Carte de moyennes du mois : anneau d'efficacité + durée + endormissement.
+  summaryCard: {
+    flexDirection: 'row', alignItems: 'center', gap: spacing.md,
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  summaryFacts:          { flex: 1, gap: spacing.xs },
+  summaryEfficiencyLabel:{ fontSize: 13, color: colors.textMuted, fontWeight: '600' },
+  summaryFactRow:        { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  summaryFactValue:      { fontSize: 20, fontWeight: '800', color: colors.primary, minWidth: 70 },
+  summaryFactLabel:      { flex: 1, fontSize: 13, color: colors.textMuted },
+  // Écran Évolution : sélecteurs + cartes graphiques + note MDR.
+  evolutionContent:      { gap: spacing.md },
+  chartCard: {
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
+  },
+  chartTitle: {
+    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  evolutionNote:     { fontSize: 12, color: colors.textMuted, fontStyle: 'italic', lineHeight: 17, marginTop: spacing.xs },
   calendarCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2,
@@ -171,13 +204,18 @@ export const styles = StyleSheet.create({
   notesInput: {
     fontSize: 15, color: colors.text, minHeight: 90, lineHeight: 22,
   },
-  seCard: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md,
-    backgroundColor: colors.card, gap: spacing.xs,
+  // Grille 2×2 des horaires CSD (chaque cellule = un TimePicker).
+  timeGrid:          { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  timeCell: {
+    flex: 1, minWidth: '45%',
+    backgroundColor: colors.card, borderRadius: radius.lg,
+    borderWidth: 1, borderColor: colors.border, padding: spacing.md,
   },
-  seRow:             { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  seTitle:           { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
-  seScore:           { fontSize: 24, fontWeight: '800', color: colors.primary },
+  // Carte Efficacité : anneau brut + libellé + explication (aucun jugement).
+  efficiencyCard:    { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  efficiencyText:    { flex: 1, gap: 2 },
+  efficiencyTitle:   { fontSize: 15, fontWeight: '700', color: colors.text },
+  efficiencyHint:    { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
   saveBtn: {
     backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: spacing.md,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,

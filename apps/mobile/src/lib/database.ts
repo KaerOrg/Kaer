@@ -245,6 +245,17 @@ export async function getSleepEntriesForMonth(yearMonth: string): Promise<SleepE
   )
 }
 
+// Récupère les entrées d'une plage de dates inclusive [fromDate, toDate] (YYYY-MM-DD).
+// Sert l'écran Évolution : borne la lecture à la fenêtre affichée plutôt que de
+// charger tout l'historique.
+export async function getSleepEntriesForRange(fromDate: string, toDate: string): Promise<SleepEntry[]> {
+  const database = getDb()
+  return database.getAllAsync<SleepEntry>(
+    `SELECT * FROM sleep_diary_entries WHERE date >= ? AND date <= ? ORDER BY date ASC`,
+    [fromDate, toDate]
+  )
+}
+
 export async function deleteSleepEntry(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM sleep_diary_entries WHERE id = ?', [id])

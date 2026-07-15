@@ -65,7 +65,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -288,6 +288,41 @@ dans `sliderMath.ts`.
 <Slider label={lbl('intensity')} value={intensity} min={0} max={100} step={1}
   unit="%" color={colors.primary} showEndLabels
   onChange={setIntensity} testID="slider-input-emotion_intensity" />
+```
+
+---
+
+### ProgressRing (`src/components/ui/ProgressRing/`)
+
+Jauge **circulaire** remplie au prorata d'une valeur brute (SVG `Circle` +
+`strokeDasharray`), avec label central optionnel. L'arc démarre en haut (12 h) et se
+remplit dans le sens horaire. Usage : anneau d'efficacité de l'agenda du sommeil
+(saisie + bilan mensuel).
+
+> **Une seule couleur d'accent — aucun codage conditionnel (MDR 2017/745).** Le
+> primitive ne colore jamais selon un seuil : la valeur est affichée, jamais jugée.
+> La couleur est passée par l'appelant et reste constante quelle que soit la valeur.
+> À distinguer de [`Slider`](#slider-srccomponentsuislider) (saisie proportionnelle) :
+> `ProgressRing` est un **affichage** en lecture seule.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number` | Valeur remplie, bornée à `[0, max]` au rendu |
+| `max?` | `number` | Valeur de remplissage complet (défaut `100`) |
+| `size?` | `number` | Diamètre extérieur en px (défaut `96`) |
+| `strokeWidth?` | `number` | Épaisseur de l'anneau en px (défaut `10`) |
+| `color?` | `string` | Couleur de l'arc rempli (défaut `colors.primary`) |
+| `trackColor?` | `string` | Couleur de la piste vide (défaut `colors.border`) |
+| `label?` | `string` | Texte central principal (ex. `"91 %"`) |
+| `sublabel?` | `string` | Texte central secondaire, plus petit |
+| `accessibilityLabel?` | `string` | Libellé accessible de la jauge |
+| `testID?` | `string` | Identifiant de test |
+
+```tsx
+// Efficacité du sommeil — valeur brute, une seule couleur (jamais de seuil coloré)
+<ProgressRing value={efficiency} max={100} size={84}
+  label={`${efficiency} %`} color={colors.primary}
+  accessibilityLabel={lbl('efficiency_label')} />
 ```
 
 ---

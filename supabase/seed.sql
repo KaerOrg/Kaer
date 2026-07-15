@@ -856,7 +856,7 @@ on conflict (id) do nothing;
 -- ============================================================
 -- LAYOUT : sleep_diary → sleep_journal
 -- preview_kind = 'sleep_journal' → SleepJournalLayout
--- 3 modes : list | entry | month
+-- 3 modes : list | entry | bilan (onglets Mois | Évolution)
 -- ============================================================
 
 -- Nettoyage des anciens props 'fields' (sleep.field_*) puis reset des champs
@@ -948,7 +948,25 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'stat_avg_efficiency_label',   'modules.sleep_diary.stat_avg_efficiency'),
   ('sj.cfg', 'stat_avg_onset_label',        'modules.sleep_diary.stat_avg_onset'),
   ('sj.cfg', 'legend_filled_label',         'modules.sleep_diary.legend_filled'),
-  ('sj.cfg', 'legend_nap_label',            'modules.sleep_diary.legend_nap')
+  ('sj.cfg', 'legend_nap_label',            'modules.sleep_diary.legend_nap'),
+  -- Refonte « Coup d'œil » : Bilan à onglets (Mois | Évolution), anneau
+  -- d'efficacité (explication brute), écran Évolution (plages, métriques, note MDR).
+  ('sj.cfg', 'bilan_button_label',          'modules.sleep_diary.bilan_button'),
+  ('sj.cfg', 'bilan_title',                 'modules.sleep_diary.bilan_title'),
+  ('sj.cfg', 'bilan_tab_month',             'modules.sleep_diary.bilan_tab_month'),
+  ('sj.cfg', 'bilan_tab_evolution',         'modules.sleep_diary.bilan_tab_evolution'),
+  ('sj.cfg', 'efficiency_explanation',      'modules.sleep_diary.efficiency_explanation'),
+  ('sj.cfg', 'evolution_range_1m',          'modules.sleep_diary.evolution_range_1m'),
+  ('sj.cfg', 'evolution_range_3m',          'modules.sleep_diary.evolution_range_3m'),
+  ('sj.cfg', 'evolution_range_6m',          'modules.sleep_diary.evolution_range_6m'),
+  ('sj.cfg', 'evolution_range_label',       'modules.sleep_diary.evolution_range_a11y'),
+  ('sj.cfg', 'evolution_metric_duration',   'modules.sleep_diary.evolution_metric_duration'),
+  ('sj.cfg', 'evolution_metric_efficiency', 'modules.sleep_diary.evolution_metric_efficiency'),
+  ('sj.cfg', 'evolution_metric_label',      'modules.sleep_diary.evolution_metric_a11y'),
+  ('sj.cfg', 'evolution_week_prefix',       'modules.sleep_diary.evolution_week_prefix'),
+  ('sj.cfg', 'evolution_nightly_title',     'modules.sleep_diary.evolution_nightly_title'),
+  ('sj.cfg', 'evolution_weekly_title',      'modules.sleep_diary.evolution_weekly_title'),
+  ('sj.cfg', 'evolution_mdr_note',          'modules.sleep_diary.evolution_mdr_note')
 on conflict (field_id, prop_key) do nothing;
 
 
