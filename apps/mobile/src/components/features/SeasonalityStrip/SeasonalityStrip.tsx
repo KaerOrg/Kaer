@@ -3,7 +3,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
 import { ribbonCellOpacity } from '@kaer/shared'
-import { Checkbox } from '@ui/Checkbox'
+import { YearCheckbox } from './YearCheckbox'
 import type { SeasonYearRow } from './seasonality'
 
 // ─── Saisonnalité — frise pluri-annuelle des moyennes mensuelles ─────────────
@@ -81,12 +81,12 @@ export const SeasonalityStrip = React.memo(function SeasonalityStrip({
       {comparing && pastYears.length > 0 ? (
         <View style={styles.compareMenu}>
           {pastYears.map(year => (
-            <Checkbox
+            <YearCheckbox
               key={year}
+              year={year}
               checked={selectedPast.has(year)}
-              onChange={() => togglePastYear(year)}
-              label={String(year)}
               color={pastColor}
+              onToggle={togglePastYear}
             />
           ))}
         </View>

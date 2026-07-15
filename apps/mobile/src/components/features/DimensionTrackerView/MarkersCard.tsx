@@ -1,18 +1,18 @@
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
-import { Chip } from '@ui/Chip'
 import type { MarkerType, TimelineMarker } from '../../../lib/database'
-import { MARKER_TYPES, MARKER_TYPE_COLORS, MARKER_TYPE_ICONS } from '../../../lib/markerTheme'
+import { MARKER_TYPES, MARKER_TYPE_COLORS } from '../../../lib/markerTheme'
+import { MarkerRow } from './MarkerRow'
+import { MarkerFilterChip } from './MarkerFilterChip'
 
 // ─── Carte des repères temporels (Life Chart) — liste typée + filtre ─────────
 //
 // En-tête (titre + « Ajouter un repère »), filtre optionnel par type, puis la
-// liste des repères : point/icône coloré selon le TYPE (identité, pas gravité —
-// MDR), date, libellé, suppression. Partagée entre les onglets Suivi et Graphiques.
-
-type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name']
+// liste des repères (leaf `MarkerRow`) : point/icône coloré selon le TYPE
+// (identité, pas gravité — MDR), date, libellé, suppression. Partagée entre les
+// onglets Suivi et Graphiques.
 
 export interface MarkersCardProps {
   readonly markers: readonly TimelineMarker[]
@@ -33,6 +33,7 @@ export const MarkersCard = React.memo(function MarkersCard({
   locale, accentColor, onAdd, onDelete,
 }: MarkersCardProps) {
   const [filter, setFilter] = useState<MarkerType | null>(null)
+  const handleFilter = useCallback((v: MarkerType | null) => setFilter(v), [])
 
   const shown = useMemo(
     () => (filter == null ? markers : markers.filter(m => m.type === filter)),
@@ -56,15 +57,15 @@ export const MarkersCard = React.memo(function MarkersCard({
 
       {markers.length > 0 ? (
         <View style={styles.filterRow}>
-          <Chip label={allLabel} selected={filter == null} color={accentColor} size="sm" onPress={() => setFilter(null)} />
+          <MarkerFilterChip value={null} label={allLabel} color={accentColor} selected={filter == null} onSelect={handleFilter} />
           {MARKER_TYPES.map(mt => (
-            <Chip
+            <MarkerFilterChip
               key={mt}
+              value={mt}
               label={typeLabels[mt]}
-              selected={filter === mt}
               color={MARKER_TYPE_COLORS[mt]}
-              size="sm"
-              onPress={() => setFilter(mt)}
+              selected={filter === mt}
+              onSelect={handleFilter}
             />
           ))}
         </View>
@@ -75,20 +76,7 @@ export const MarkersCard = React.memo(function MarkersCard({
       ) : (
         <View style={styles.list}>
           {shown.map(marker => (
-            <View key={marker.id} style={styles.row}>
-              <MaterialCommunityIcons
-                name={MARKER_TYPE_ICONS[marker.type] as IconName}
-                size={16}
-                color={MARKER_TYPE_COLORS[marker.type]}
-              />
-              <Text style={styles.date}>
-                {new Date(marker.date + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
-              </Text>
-              <Text style={styles.label} numberOfLines={1}>{marker.label}</Text>
-              <Pressable onPress={() => onDelete(marker.id)} hitSlop={8} accessibilityLabel={deleteLabel}>
-                <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
-              </Pressable>
-            </View>
+            <MarkerRow key={marker.id} marker={marker} locale={locale} deleteLabel={deleteLabel} onDelete={onDelete} />
           ))}
         </View>
       )}
@@ -111,7 +99,4 @@ const styles = StyleSheet.create({
   filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   empty: { fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
   list: { gap: 6 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  date: { fontSize: 12, fontWeight: '700', color: colors.textMuted, minWidth: 52 },
-  label: { fontSize: 13, color: colors.text, flex: 1 },
 })
