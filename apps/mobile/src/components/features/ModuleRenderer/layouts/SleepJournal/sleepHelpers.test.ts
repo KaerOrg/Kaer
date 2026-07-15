@@ -9,6 +9,14 @@ import {
   sleepMinutes,
   formatMinutes,
   minutesToHhmmHint,
+  computeSleepWindow,
+  entryEfficiency,
+  metricValue,
+  rangeStartIso,
+  daysBetweenIso,
+  buildNightlyPoints,
+  buildNightlyLabels,
+  buildWeeklyAverages,
 } from './sleepHelpers'
 
 // Entrée SQLite complète — surchargée champ par champ dans chaque test.
@@ -109,5 +117,94 @@ describe('sleepHelpers — formatage de durées', () => {
     expect(minutesToHhmmHint(60)).toBe('= 1h00')
     expect(minutesToHhmmHint(90)).toBe('= 1h30')
     expect(minutesToHhmmHint(125)).toBe('= 2h05')
+  })
+})
+
+describe('sleepHelpers — computeSleepWindow (barre fenêtre 18 h → midi)', () => {
+  it('positionne le segment coucher→lever dans la fenêtre de référence', () => {
+    // 23:00 = 300 min après 18 h ; 07:00 = 780 min. Fenêtre = 1080 min.
+    const geo = computeSleepWindow('23:00', '07:00')
+    expect(geo).not.toBeNull()
+    expect(geo?.leftPct).toBeCloseTo((300 / 1080) * 100, 4)
+    expect(geo?.widthPct).toBeCloseTo((480 / 1080) * 100, 4)
+  })
+
+  it('retourne null si un horaire manque', () => {
+    expect(computeSleepWindow(null, '07:00')).toBeNull()
+    expect(computeSleepWindow('23:00', null)).toBeNull()
+  })
+
+  it('retourne null si la largeur est nulle (horaires identiques)', () => {
+    expect(computeSleepWindow('23:00', '23:00')).toBeNull()
+  })
+
+  it('borne le segment à la fenêtre (horaires hors 18 h→midi)', () => {
+    // 13:00 (offset 1140 → clamp 1080) au lever après un coucher à 12:00 (clamp 1080) → largeur nulle.
+    expect(computeSleepWindow('12:00', '13:00')).toBeNull()
+  })
+})
+
+describe('sleepHelpers — métriques brutes', () => {
+  it('metricValue(duration) rend la durée en heures (1 décimale)', () => {
+    expect(metricValue(makeEntry({ bedtime: '23:00', wake_time: '07:00' }), 'duration')).toBe(8)
+    expect(metricValue(makeEntry({ bedtime: '23:00', wake_time: '06:30' }), 'duration')).toBe(7.5)
+  })
+
+  it('metricValue(duration) null si horaires manquants', () => {
+    expect(metricValue(makeEntry({ bedtime: null }), 'duration')).toBeNull()
+  })
+
+  it('entryEfficiency = TST / TPL en %', () => {
+    // fenêtre 23:00→07:00 = 480 ; TPL 22:45→07:15 = 510 → 480/510 ≈ 94 %
+    const e = makeEntry({ bedtime: '23:00', wake_time: '07:00', in_bed_time: '22:45', out_of_bed_time: '07:15' })
+    expect(entryEfficiency(e)).toBe(94)
+    expect(metricValue(e, 'efficiency')).toBe(94)
+  })
+
+  it('entryEfficiency null si horaires insuffisants', () => {
+    expect(entryEfficiency(makeEntry({ bedtime: null }))).toBeNull()
+  })
+})
+
+describe('sleepHelpers — plages temporelles', () => {
+  it('rangeStartIso couvre une fenêtre de N jours se terminant à endIso', () => {
+    expect(rangeStartIso('1M', '2026-03-31')).toBe('2026-03-02') // 30 jours inclusifs
+    expect(daysBetweenIso(rangeStartIso('1M', '2026-03-31'), '2026-03-31')).toBe(29)
+    expect(daysBetweenIso(rangeStartIso('3M', '2026-03-31'), '2026-03-31')).toBe(89)
+    expect(daysBetweenIso(rangeStartIso('6M', '2026-03-31'), '2026-03-31')).toBe(179)
+  })
+
+  it('daysBetweenIso gère le passage de mois sans décalage de fuseau', () => {
+    expect(daysBetweenIso('2026-01-30', '2026-02-02')).toBe(3)
+  })
+})
+
+describe('sleepHelpers — agrégations Évolution', () => {
+  it('buildNightlyPoints : un point par nuit, gap sur les nuits sans donnée', () => {
+    const entries = [makeEntry({ date: '2026-03-02', bedtime: '23:00', wake_time: '07:00' })]
+    const points = buildNightlyPoints(entries, 'duration', '2026-03-01', '2026-03-03')
+    expect(points).toHaveLength(3)
+    expect(points[0]).toEqual({ value: 0, hasValue: false })
+    expect(points[1]).toEqual({ value: 8, hasValue: true })
+    expect(points[2]).toEqual({ value: 0, hasValue: false })
+  })
+
+  it('buildNightlyLabels : une étiquette au changement de mois', () => {
+    const labels = buildNightlyLabels('2026-01-30', '2026-02-02', 'fr')
+    expect(labels).toHaveLength(2)
+    expect(labels[0].index).toBe(0)
+    expect(labels[1].index).toBe(2) // 2026-02-01 = 3e jour (index 2)
+    labels.forEach(l => expect(l.label.length).toBeGreaterThan(0))
+  })
+
+  it('buildWeeklyAverages : moyenne brute par semaine, étiquettes S1…Sn', () => {
+    const entries = [
+      makeEntry({ date: '2026-03-03', bedtime: '23:00', wake_time: '07:00' }), // 8 h
+      makeEntry({ date: '2026-03-04', bedtime: '23:00', wake_time: '05:00' }), // 6 h
+    ]
+    const { points, labels } = buildWeeklyAverages(entries, 'duration', '2026-03-02', '2026-03-08', 'S')
+    expect(labels[0].label).toBe('S1')
+    const filled = points.find(p => p.hasValue)
+    expect(filled?.value).toBe(7) // (8 + 6) / 2
   })
 })

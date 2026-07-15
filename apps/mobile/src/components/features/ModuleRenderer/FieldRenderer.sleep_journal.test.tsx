@@ -24,6 +24,7 @@ jest.mock('../../../lib/database', () => ({
   getAllSleepEntries: jest.fn().mockResolvedValue([]),
   getSleepEntry: jest.fn().mockResolvedValue(null),
   getSleepEntriesForMonth: jest.fn().mockResolvedValue([]),
+  getSleepEntriesForRange: jest.fn().mockResolvedValue([]),
   saveSleepEntry: jest.fn().mockResolvedValue(undefined),
   deleteSleepEntry: jest.fn().mockResolvedValue(undefined),
   computeSleepDuration: jest.requireActual('../../../lib/database').computeSleepDuration,
@@ -174,6 +175,7 @@ describe('FieldRenderer — sleep_journal (SleepJournalLayout)', () => {
     ;(database.getAllSleepEntries as jest.Mock).mockResolvedValue([])
     ;(database.getSleepEntry as jest.Mock).mockResolvedValue(null)
     ;(database.getSleepEntriesForMonth as jest.Mock).mockResolvedValue([])
+    ;(database.getSleepEntriesForRange as jest.Mock).mockResolvedValue([])
   })
 
   it('charge l\'historique au montage', async () => {
@@ -189,7 +191,7 @@ describe('FieldRenderer — sleep_journal (SleepJournalLayout)', () => {
     await screen.findByTestId('sleep-journal-list')
     // Au moins le bouton CTA et un day-* doivent être présents
     expect(screen.getByTestId('cta-yesterday')).toBeTruthy()
-    expect(screen.getByTestId('cta-month')).toBeTruthy()
+    expect(screen.getByTestId('cta-bilan')).toBeTruthy()
     expect(screen.getByTestId(`day-${yesterdayStr()}`)).toBeTruthy()
   })
 
@@ -270,25 +272,28 @@ describe('FieldRenderer — sleep_journal (SleepJournalLayout)', () => {
     })
   })
 
-  it('passe en mode month et charge les entrées', async () => {
+  it('passe en mode bilan (onglet Mois) et charge les entrées du mois et de la plage', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('cta-month'))
+    fireEvent.press(await screen.findByTestId('cta-bilan'))
+    expect(await screen.findByTestId('sleep-journal-bilan')).toBeTruthy()
+    // Onglet Mois affiché par défaut
     expect(await screen.findByTestId('sleep-journal-month')).toBeTruthy()
     await waitFor(() => {
       expect(database.getSleepEntriesForMonth).toHaveBeenCalled()
+      expect(database.getSleepEntriesForRange).toHaveBeenCalled()
     })
   })
 
   it('navigue d\'un mois en arrière puis revient à la liste', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('cta-month'))
+    fireEvent.press(await screen.findByTestId('cta-bilan'))
     await screen.findByTestId('sleep-journal-month')
     fireEvent.press(screen.getByTestId('month-prev'))
     await waitFor(() => {
       // 2 calls: initial load + after prev
       expect((database.getSleepEntriesForMonth as jest.Mock).mock.calls.length).toBeGreaterThanOrEqual(2)
     })
-    fireEvent.press(screen.getByTestId('month-back-button'))
+    fireEvent.press(screen.getByTestId('bilan-back-button'))
     await waitFor(() => expect(screen.getByTestId('sleep-journal-list')).toBeTruthy())
   })
 
