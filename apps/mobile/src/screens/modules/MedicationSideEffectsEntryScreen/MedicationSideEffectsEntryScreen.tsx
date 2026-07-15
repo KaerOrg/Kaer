@@ -9,14 +9,15 @@ import { getScaleEntryById, generateId } from '../../../lib/database'
 import { saveScaleEntry } from '@services/scaleEntryService'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing, radius } from '@theme'
+import { Button } from '@ui/Button'
 import { useTeen } from '../../../hooks/useTeen'
 import { TeenAccent } from '../../../components/features/TeenAccent'
+import { EffectSlider } from './EffectSlider'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'MedicationSideEffectsEntry'>
 
 const SCALE_ID = 'medication_side_effects'
-const PIPS = Array.from({ length: 11 }, (_, i) => i) // 0..10
 
 export default function MedicationSideEffectsEntryScreen() {
   const navigation = useNavigation<Nav>()
@@ -80,6 +81,8 @@ export default function MedicationSideEffectsEntryScreen() {
 
   const answeredCount = useMemo(() => effects.filter(e => values[e.key] != null).length, [effects, values])
   const allAnswered = answeredCount === effects.length
+  // Fond teinté seulement quand tout est renseigné ; sinon le Button rend son état désactivé.
+  const submitBtnStyle = useMemo(() => (allAnswered ? { backgroundColor: accentColor } : undefined), [allAnswered, accentColor])
 
   const handleSubmit = useCallback(async () => {
     if (!allAnswered || saving) return
@@ -128,54 +131,28 @@ export default function MedicationSideEffectsEntryScreen() {
           </View>
         </View>
 
-        {effects.map(effect => {
-          const val = values[effect.key]
-          const color = effect.color ?? accentColor
-          return (
-            <View key={effect.key} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={[styles.dot, { backgroundColor: color }]} />
-                <Text style={styles.label}>{effect.label}</Text>
-                <Text style={[styles.value, { color }]}>{val ?? '–'}</Text>
-              </View>
-              <View style={styles.pips}>
-                {PIPS.map(n => {
-                  const selected = val === n
-                  const filled = val != null && n <= val
-                  return (
-                    <Pressable
-                      key={n}
-                      style={[
-                        styles.pip,
-                        filled && { backgroundColor: color + '22', borderColor: color },
-                        selected && { backgroundColor: color, borderColor: color },
-                      ]}
-                      onPress={() => setValue(effect.key, n)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${effect.label} ${n}`}
-                    >
-                      <Text style={[styles.pipText, selected && styles.pipTextSelected]}>{n}</Text>
-                    </Pressable>
-                  )
-                })}
-              </View>
-              <View style={styles.hints}>
-                <Text style={styles.hint}>{t(`modules.${SCALE_ID}.dim_hint_low`)}</Text>
-                <Text style={styles.hint}>{t(`modules.${SCALE_ID}.dim_hint_high`)}</Text>
-              </View>
-            </View>
-          )
-        })}
+        {effects.map(effect => (
+          <EffectSlider
+            key={effect.key}
+            effectKey={effect.key}
+            label={effect.label}
+            color={effect.color ?? accentColor}
+            value={values[effect.key] ?? null}
+            lowHint={t(`modules.${SCALE_ID}.dim_hint_low`)}
+            highHint={t(`modules.${SCALE_ID}.dim_hint_high`)}
+            onChange={setValue}
+          />
+        ))}
 
-        <Pressable
-          style={[styles.saveBtn, { backgroundColor: allAnswered ? accentColor : colors.border }]}
+        <Button
+          label={allAnswered
+            ? t('common.save')
+            : t(`modules.${SCALE_ID}.progress`, { answered: answeredCount, total: effects.length })}
           onPress={handleSubmit}
+          loading={saving}
           disabled={!allAnswered || saving}
-        >
-          <Text style={styles.saveBtnText}>
-            {allAnswered ? t('common.save') : t(`modules.${SCALE_ID}.progress`, { answered: answeredCount, total: effects.length })}
-          </Text>
-        </Pressable>
+          style={submitBtnStyle}
+        />
       </ScrollView>
     </SafeAreaView>
   )
@@ -198,38 +175,4 @@ const styles = StyleSheet.create({
   dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   dateBtn: { padding: 2 },
   dateValue: { flex: 1, textAlign: 'center', fontSize: 15, fontWeight: '600', color: colors.text, textTransform: 'capitalize' },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: 10,
-  },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  label: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
-  value: { fontSize: 20, fontWeight: '700', minWidth: 28, textAlign: 'right' },
-  pips: { flexDirection: 'row', gap: 3 },
-  pip: {
-    flex: 1,
-    aspectRatio: 1,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-  pipText: { fontSize: 11, fontWeight: '500', color: colors.textMuted },
-  pipTextSelected: { color: colors.white, fontWeight: '700' },
-  hints: { flexDirection: 'row', justifyContent: 'space-between' },
-  hint: { fontSize: 11, color: colors.textMuted },
-  saveBtn: {
-    borderRadius: radius.md,
-    paddingVertical: 15,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  saveBtnText: { color: colors.white, fontWeight: '700', fontSize: 15 },
 })
