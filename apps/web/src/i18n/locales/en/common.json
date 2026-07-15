@@ -863,6 +863,8 @@
       "description": "Daily sleep tracking: bedtime, wake time, sleep efficiency.",
       "cta_title": "Log last night",
       "monthly_button": "Monthly view",
+      "bilan_button": "My overview",
+      "efficiency_explanation": "Time asleep ÷ time in bed",
       "list_header": "Last 14 nights",
       "incomplete": "Incomplete entry",
       "empty_day": "Not recorded, tap to enter",

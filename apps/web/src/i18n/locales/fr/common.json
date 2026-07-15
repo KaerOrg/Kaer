@@ -609,6 +609,8 @@
       "description": "Suivi quotidien du sommeil : heure de coucher, lever, efficacité.",
       "cta_title": "Saisir ma nuit d'hier",
       "monthly_button": "Vue mensuelle",
+      "bilan_button": "Mon bilan",
+      "efficiency_explanation": "Temps endormi ÷ temps passé au lit",
       "list_header": "Les 14 dernières nuits",
       "incomplete": "Saisie incomplète",
       "empty_day": "Non renseigné, appuyer pour saisir",
