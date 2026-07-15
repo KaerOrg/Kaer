@@ -32,7 +32,8 @@ jest.mock('../../../navigation/AppStack', () => ({}))
 jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 4, md: 8 },
+  radius: { sm: 4, md: 8, full: 999 },
+  shadows: { sm: {}, md: {} },
 }))
 jest.mock('../../../store/authStore', () => ({ useAuthStore: (sel: (s: unknown) => unknown) => sel({ patient: { id: 'patient-1' } }) }))
 jest.mock('../../../lib/database', () => ({
@@ -44,6 +45,16 @@ jest.mock('@services/notificationService', () => ({ logScaleSubmission: jest.fn(
 
 const mockSave = jest.mocked(database.saveScaleEntry)
 
+// Décale la valeur d'un curseur d'effet via son action d'accessibilité (le geste
+// PanResponder n'est pas simulable sans layout). increment part de min (0).
+const step = (key: string, action: 'increment' | 'decrement', times = 1) => {
+  for (let i = 0; i < times; i++) {
+    fireEvent(screen.getByTestId(`effect-${key}-track`), 'accessibilityAction', {
+      nativeEvent: { actionName: action },
+    })
+  }
+}
+
 describe('MedicationSideEffectsEntryScreen', () => {
   beforeEach(() => { jest.clearAllMocks(); routeParams.entry_id = undefined })
 
@@ -52,13 +63,15 @@ describe('MedicationSideEffectsEntryScreen', () => {
     expect(screen.getByText('Somnolence')).toBeTruthy()
     expect(screen.getByText('Nausées')).toBeTruthy()
     expect(screen.getByText('entry_date_label')).toBeTruthy()
+    // Curseurs du design system (ui/Slider), plus aucun « pip » ad hoc.
+    expect(screen.getByTestId('effect-sedation-track')).toBeTruthy()
+    expect(screen.getByTestId('effect-nausea-track')).toBeTruthy()
   })
 
   it('enregistre les valeurs par clé d’effet une fois tous les effets renseignés', async () => {
     render(<MedicationSideEffectsEntryScreen />)
-    // sélectionne une valeur pour chaque effet (accessibilityLabel "<label> <n>")
-    fireEvent.press(screen.getByLabelText('Somnolence 3'))
-    fireEvent.press(screen.getByLabelText('Nausées 0'))
+    step('sedation', 'increment', 3) // null → 1 → 2 → 3
+    step('nausea', 'decrement', 1)   // null → 0
     await act(async () => { fireEvent.press(screen.getByText('save')) })
     await waitFor(() => expect(mockSave).toHaveBeenCalled())
     const entry = mockSave.mock.calls[0][0]
@@ -67,9 +80,9 @@ describe('MedicationSideEffectsEntryScreen', () => {
     expect(entry.answers).toEqual([3, 0])
   })
 
-  it('ne sauvegarde pas tant qu’un effet n’est pas renseigné', async () => {
+  it('ne sauvegarde pas tant qu’un effet n’est pas renseigné', () => {
     render(<MedicationSideEffectsEntryScreen />)
-    fireEvent.press(screen.getByLabelText('Somnolence 3'))
+    step('sedation', 'increment', 3)
     // nausea non renseigné → le bouton affiche la progression, pas "save"
     expect(screen.queryByText('save')).toBeNull()
     expect(mockSave).not.toHaveBeenCalled()
