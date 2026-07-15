@@ -62,6 +62,21 @@
   margin-bottom: 14px;
 }
 
+.sleep-trend__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sleep-trend__delta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── Grille agenda du sommeil ─────────────────────────────────────────────── */
 
 .sleep-grid {

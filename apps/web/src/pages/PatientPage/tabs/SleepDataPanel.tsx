@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { SleepPoint } from '@services/engagementService'
 import { ProgressRing } from '@ui/ProgressRing'
 import { Chip } from '@ui/Chip'
-import { TrendChart, type TrendPoint } from '@ui/Chart'
+import { TrendChart, type TrendPoint, computeTrendMean, formatTrendValue } from '@ui/Chart'
 import { barGeometry, formatMinutes, avg } from './sleepGrid'
 import { SLEEP_METRICS, metricDomain, type SleepMetricKey } from './sleepMetrics'
 import { MetricChip } from './MetricChip'
@@ -12,6 +12,11 @@ import './SleepDataPanel.css'
 interface Props {
   points: SleepPoint[]
   locale: string
+  /**
+   * Période de référence optionnelle (page Évolution) : nuits déjà re-datées sur
+   * l'axe courant. Superpose une courbe de comparaison + un delta chiffré.
+   */
+  comparison?: { points: SleepPoint[]; label: string }
 }
 
 // Repères horaires de l'axe noon→noon (toutes les 6 h).
@@ -31,7 +36,7 @@ const AXIS_TICKS = [
  * Côté praticien, le codage visuel des métriques est autorisé (analyse soignant) ;
  * les valeurs restent brutes, sans seuil de jugement automatique.
  */
-export function SleepDataPanel({ points, locale }: Props) {
+export function SleepDataPanel({ points, locale, comparison }: Props) {
   const { t } = useTranslation()
   const [metric, setMetric] = useState<SleepMetricKey>('efficiency')
   const handleSelectMetric = useCallback((key: SleepMetricKey) => setMetric(key), [])
@@ -60,6 +65,17 @@ export function SleepDataPanel({ points, locale }: Props) {
     [points, activeMetric],
   )
   const trendDomain = useMemo(() => metricDomain(activeMetric, points), [activeMetric, points])
+
+  const comparisonTrend = useMemo<TrendPoint[] | null>(
+    () => comparison ? comparison.points.map(p => ({ date: p.date, value: activeMetric.value(p) })) : null,
+    [comparison, activeMetric],
+  )
+  const delta = useMemo(() => {
+    if (!comparisonTrend) return null
+    const main = computeTrendMean(trendData)
+    const ref = computeTrendMean(comparisonTrend)
+    return main != null && ref != null ? Math.round((main - ref) * 10) / 10 : null
+  }, [comparisonTrend, trendData])
 
   // Grille : nuits les plus récentes en premier, plafonnées à 21 pour la lisibilité.
   const gridNights = useMemo(() => points.slice(-21).reverse(), [points])
@@ -153,12 +169,20 @@ export function SleepDataPanel({ points, locale }: Props) {
             />
           ))}
         </div>
-        <h4 className="module-data-panel__chart-title">{t(activeMetric.labelKey)}</h4>
+        <div className="sleep-trend__head">
+          <h4 className="module-data-panel__chart-title">{t(activeMetric.labelKey)}</h4>
+          {comparison && delta != null ? (
+            <span className="sleep-trend__delta">
+              {comparison.label} · Δ {delta > 0 ? '+' : ''}{formatTrendValue(delta, activeMetric.unit)}
+            </span>
+          ) : null}
+        </div>
         <TrendChart
           data={trendData}
           unit={activeMetric.unit}
           yDomain={trendDomain}
           meanLabel={t('evolution.trend_mean')}
+          comparison={comparisonTrend ? { data: comparisonTrend, label: comparison?.label ?? '' } : undefined}
           locale={locale}
         />
       </div>
