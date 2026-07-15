@@ -31,6 +31,16 @@ export type { ChronoAnchorSpec } from './services/chronoAnchors'
 export { buildDayMarkers } from './services/chronoFrise'
 export type { FriseMarker } from './services/chronoFrise'
 
+export {
+  MOOD_DIMENSION_KEYS,
+  MOOD_DIMENSION_COLORS,
+  MOOD_ACCENT,
+  SEASONALITY_CURRENT_COLOR,
+  SEASONALITY_PAST_COLOR,
+  ribbonCellOpacity,
+} from './services/moodPalette'
+export type { MoodDimensionKey, MoodDimensionColorSet } from './services/moodPalette'
+
 export type UserRole = 'practitioner' | 'patient'
 
 export type ModuleType =

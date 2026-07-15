@@ -7,6 +7,7 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "add": "Add",
+    "all": "All",
     "time_picker": {
       "tap_to_set": "Set time"
     },
@@ -649,7 +650,19 @@
       "entries_recent": "Recent entries",
       "reminder_preview_time": "8:00 PM",
       "month_days_label": "days logged",
-      "month_legend": "The higher the day's average score, the darker the circle (1 = light, 10 = dark)."
+      "month_legend": "The higher the day's average score, the darker the circle (1 = light, 10 = dark).",
+      "tab_tracking": "Tracking",
+      "ribbon_title": "By symptom",
+      "assiduity": "{{done}}/{{total}} logged",
+      "ruban_legend": "Raw intensity: light to dark. Empty column = day not logged.",
+      "marker_add_title": "Add a marker",
+      "marker_type_treatment": "Treatment",
+      "marker_type_life_event": "Life event",
+      "marker_type_other": "Other",
+      "season_title": "Seasonality",
+      "season_compare": "Compare",
+      "season_hint": "Overlays up to 5 years: useful for seasonal rhythms.",
+      "season_dimension": "Dimension"
     },
     "emotion_wheel": {
       "label": "Emotion wheel",

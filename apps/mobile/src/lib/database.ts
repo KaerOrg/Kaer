@@ -102,6 +102,8 @@ export async function initDatabase(): Promise<void> {
     `ALTER TABLE plan_items ADD COLUMN contact_source TEXT`,
     // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
     `ALTER TABLE mood_markers ADD COLUMN scale_id TEXT NOT NULL DEFAULT 'mood_tracker'`,
+    // Repères typés (épique #162) : traitement / événement de vie / autre
+    `ALTER TABLE mood_markers ADD COLUMN type TEXT NOT NULL DEFAULT 'other'`,
     // Motif déclaré sur la saisie quotidienne (medication_adherence : motif de non-prise)
     `ALTER TABLE daily_entries ADD COLUMN reason TEXT`,
     // Copie des entrées des tables dédiées vers scale_entries
@@ -1460,6 +1462,11 @@ export async function deleteScaleEntry(id: string): Promise<void> {
 // Table partagée par tous les modules « tracker multi-dimensions » : la colonne
 // `scale_id` cloisonne les repères par module (mood_tracker, medication_side_effects…).
 
+// Type d'un repère (liste fermée, partagée web ≡ mobile — épique #162) : la
+// couleur/puce d'un repère dérive de son type (identité), jamais d'un jugement.
+// La liste runtime `MARKER_TYPES` vit dans `lib/markerTheme` (hors couche DB).
+export type MarkerType = 'treatment' | 'life_event' | 'other'
+
 export async function createMoodMarkersTable(database: SQLite.SQLiteDatabase): Promise<void> {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS mood_markers (
@@ -1467,6 +1474,7 @@ export async function createMoodMarkersTable(database: SQLite.SQLiteDatabase): P
       scale_id TEXT NOT NULL DEFAULT 'mood_tracker',
       date TEXT NOT NULL,
       label TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'other',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_mood_markers_date ON mood_markers(date);
@@ -1479,50 +1487,37 @@ export interface TimelineMarker {
   scale_id: string
   date: string   // YYYY-MM-DD
   label: string
+  type: MarkerType
   created_at: string
+}
+
+// Ligne brute SQLite : `type` peut manquer sur une base antérieure à la migration.
+type TimelineMarkerRow = Omit<TimelineMarker, 'type'> & { type: string | null }
+
+function normalizeMarkerType(raw: string | null): MarkerType {
+  return raw === 'treatment' || raw === 'life_event' ? raw : 'other'
 }
 
 export async function getAllTimelineMarkers(scaleId: string): Promise<TimelineMarker[]> {
   const database = getDb()
-  return database.getAllAsync<TimelineMarker>(
+  const rows = await database.getAllAsync<TimelineMarkerRow>(
     'SELECT * FROM mood_markers WHERE scale_id = ? ORDER BY date DESC',
     [scaleId]
   )
+  return rows.map(r => ({ ...r, type: normalizeMarkerType(r.type) }))
 }
 
 export async function saveTimelineMarker(marker: TimelineMarker): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO mood_markers (id, scale_id, date, label, created_at) VALUES (?, ?, ?, ?, ?)`,
-    [marker.id, marker.scale_id, marker.date, marker.label, marker.created_at]
+    `INSERT OR REPLACE INTO mood_markers (id, scale_id, date, label, type, created_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    [marker.id, marker.scale_id, marker.date, marker.label, marker.type, marker.created_at]
   )
 }
 
 export async function deleteTimelineMarker(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM mood_markers WHERE id = ?', [id])
-}
-
-// ─── Alias rétro-compatibles (mood_tracker) — délèguent au CRUD générique ─────
-// MoodTrackerScreen reste inchangé tant qu'il n'est pas migré vers le composant
-// générique : il manipule des MoodMarker sans scale_id, ajouté ici à 'mood_tracker'.
-export interface MoodMarker {
-  id: string
-  date: string   // YYYY-MM-DD
-  label: string
-  created_at: string
-}
-
-export function getAllMoodMarkers(): Promise<MoodMarker[]> {
-  return getAllTimelineMarkers('mood_tracker')
-}
-
-export function saveMoodMarker(marker: MoodMarker): Promise<void> {
-  return saveTimelineMarker({ ...marker, scale_id: 'mood_tracker' })
-}
-
-export function deleteMoodMarker(id: string): Promise<void> {
-  return deleteTimelineMarker(id)
 }
 
 // ─── custom_dimensions — dimensions personnalisées ajoutées par le patient ────

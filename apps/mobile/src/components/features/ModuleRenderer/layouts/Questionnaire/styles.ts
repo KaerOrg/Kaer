@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing } from '@theme'
 
 export const styles = StyleSheet.create({
   questionnaireContainer: { gap: spacing.md },
@@ -49,13 +49,9 @@ export const styles = StyleSheet.create({
   },
   sliderCard:      { backgroundColor: colors.card, borderRadius: 10, padding: spacing.md, borderWidth: 1, borderColor: colors.border, gap: spacing.sm },
   sliderHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sliderLabelRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  sliderLabelRow:  { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flex: 1 },
   sliderLabel:     { fontSize: 15, fontWeight: '600' },
   sliderValue:     { fontSize: 24, fontWeight: '800', minWidth: 32, textAlign: 'right' },
-  sliderPips:      { flexDirection: 'row', gap: 4 },
-  sliderPip:       { flex: 1, aspectRatio: 1, borderRadius: radius.sm, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
-  sliderPipText:   { fontSize: 11, fontWeight: '500', color: colors.textMuted },
-  sliderPipTextSelected: { color: colors.white, fontWeight: '700' },
   sliderHints:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sliderHint:      { fontSize: 11, color: colors.textMuted },
   sliderHintMid:   { fontSize: 11, fontWeight: '700', textAlign: 'center' },

@@ -65,11 +65,15 @@ jest.mock('@theme', () => ({
     card: '#f5f5f5',
     text: '#111',
     neutral: '#f3f4f6',
+    neutralBar: '#94A3B8',
+    overlay: 'rgba(0,0,0,0.45)',
   },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 4, md: 8, full: 999 },
+  radius: { sm: 4, md: 8, lg: 16, full: 999 },
   typography: { h2: {}, h3: {}, caption: {} },
 }))
+
+jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 jest.mock('../../../store/authStore', () => ({
   useAuthStore: (sel: (s: { patient: { id: string } }) => unknown) => sel({ patient: { id: 'patient-1' } }),
@@ -88,10 +92,10 @@ jest.mock('@services/notificationService', () => ({
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
-jest.mock('@services/moodMarkerService', () => ({
-  saveMoodMarker: jest.fn().mockResolvedValue(undefined),
-  deleteMoodMarker: jest.fn().mockResolvedValue(undefined),
-  getAllMoodMarkers: jest.fn().mockResolvedValue([]),
+jest.mock('@services/timelineMarkerService', () => ({
+  getAllTimelineMarkers: jest.fn().mockResolvedValue([]),
+  saveTimelineMarker: jest.fn().mockResolvedValue(undefined),
+  deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('@services/scaleEntryService', () => ({
@@ -133,13 +137,14 @@ describe('MoodTrackerScreen', () => {
     expect(screen.UNSAFE_queryAllByType(ActivityIndicator).length).toBeGreaterThan(0)
   })
 
-  it('affiche les 3 onglets Saisie / Graphiques / Mois', async () => {
+  it('affiche 2 onglets Saisie / Suivi (plus d\'Évolution ni Vue mensuelle)', async () => {
     render(<MoodTrackerScreen />)
     await waitFor(() => {
       expect(screen.getByText('tab_entry')).toBeTruthy()
-      expect(screen.getByText('tab_charts')).toBeTruthy()
-      expect(screen.getByText('tab_month')).toBeTruthy()
+      expect(screen.getByText('tab_tracking')).toBeTruthy()
     })
+    expect(screen.queryByText('tab_charts')).toBeNull()
+    expect(screen.queryByText('tab_month')).toBeNull()
   })
 
   it('affiche le bouton Nouvelle saisie dans l\'onglet Saisie', async () => {
@@ -163,7 +168,7 @@ describe('MoodTrackerScreen', () => {
     })
   })
 
-  it('affiche les entrées avec chips de dimensions', async () => {
+  it('affiche une carte empreinte (aucune moyenne X/10) pour chaque saisie', async () => {
     mockGetAllScaleEntries.mockResolvedValue([
       makeMoodEntry('e1', '2025-05-30T10:00:00'),
     ])
@@ -171,6 +176,9 @@ describe('MoodTrackerScreen', () => {
     await waitFor(() => {
       expect(screen.queryByText('empty_title')).toBeNull()
     })
+    // Empreinte 6 barres rendue, pas de libellé de score global.
+    expect(screen.getByTestId('fingerprint-e1')).toBeTruthy()
+    expect(screen.queryByText('score_label')).toBeNull()
   })
 
   it('affiche le badge streak quand des entrées existent', async () => {
@@ -183,62 +191,43 @@ describe('MoodTrackerScreen', () => {
     })
   })
 
-  it('bascule vers l\'onglet Graphiques et affiche le compositeChart', async () => {
+  it('onglet Suivi : affiche le ruban multi-symptômes et la saisonnalité', async () => {
     mockGetAllScaleEntries.mockResolvedValue([
       makeMoodEntry('e1', '2025-05-30T10:00:00'),
     ])
     render(<MoodTrackerScreen />)
-    await waitFor(() => screen.getByText('tab_charts'))
-    fireEvent.press(screen.getByText('tab_charts'))
+    await waitFor(() => screen.getByText('tab_tracking'))
+    fireEvent.press(screen.getByText('tab_tracking'))
     await waitFor(() => {
-      expect(screen.getByTestId('composite-chart')).toBeTruthy()
+      expect(screen.getByTestId('symptom-ribbon')).toBeTruthy()
+      expect(screen.getByTestId('seasonality-strip')).toBeTruthy()
     })
+    // Plus de moyenne composite trompeuse dans le Suivi.
+    expect(screen.queryByTestId('composite-chart')).toBeNull()
   })
 
-  it('affiche 6 DimensionChart dans l\'onglet Graphiques', async () => {
+  it('onglet Suivi : 6 courbes de détail par dimension', async () => {
     mockGetAllScaleEntries.mockResolvedValue([
       makeMoodEntry('e1', '2025-05-30T10:00:00'),
     ])
     render(<MoodTrackerScreen />)
-    await waitFor(() => screen.getByText('tab_charts'))
-    fireEvent.press(screen.getByText('tab_charts'))
+    await waitFor(() => screen.getByText('tab_tracking'))
+    fireEvent.press(screen.getByText('tab_tracking'))
     await waitFor(() => {
-      const charts = screen.getAllByTestId('dimension-chart')
-      expect(charts.length).toBe(6)
+      expect(screen.getAllByTestId('dimension-chart').length).toBe(6)
     })
   })
 
-  it('bascule vers l\'onglet Mois et affiche le calendrier', async () => {
-    render(<MoodTrackerScreen />)
-    await waitFor(() => screen.getByText('tab_month'))
-    fireEvent.press(screen.getByText('tab_month'))
-    await waitFor(() => {
-      expect(screen.getByTestId('month-calendar')).toBeTruthy()
-    })
-  })
-
-  it('affiche la section repères dans l\'onglet Évolution', async () => {
+  it('onglet Suivi : carte des repères + ouverture de la modale typée', async () => {
     mockGetAllScaleEntries.mockResolvedValue([
       makeMoodEntry('e1', '2025-05-30T10:00:00'),
     ])
     render(<MoodTrackerScreen />)
-    await waitFor(() => screen.getByText('tab_charts'))
-    fireEvent.press(screen.getByText('tab_charts'))
-    await waitFor(() => {
-      expect(screen.getByText('markers_title')).toBeTruthy()
-      expect(screen.getByText('markers_add')).toBeTruthy()
-    })
-  })
-
-  it('ouvre le modal d\'ajout de repère au clic sur Ajouter', async () => {
-    mockGetAllScaleEntries.mockResolvedValue([
-      makeMoodEntry('e1', '2025-05-30T10:00:00'),
-    ])
-    render(<MoodTrackerScreen />)
-    await waitFor(() => screen.getByText('tab_charts'))
-    fireEvent.press(screen.getByText('tab_charts'))
-    await waitFor(() => screen.getByText('markers_add'))
-    fireEvent.press(screen.getByText('markers_add'))
+    await waitFor(() => screen.getByText('tab_tracking'))
+    fireEvent.press(screen.getByText('tab_tracking'))
+    await waitFor(() => screen.getByText('markers_title'))
+    // Le bouton « Ajouter un repère » ouvre la modale (placeholder visible).
+    fireEvent.press(screen.getAllByText('marker_add_title')[0])
     await waitFor(() => {
       expect(screen.getByPlaceholderText('markers_placeholder')).toBeTruthy()
     })

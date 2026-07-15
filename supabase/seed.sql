@@ -1694,7 +1694,7 @@ on conflict (id) do nothing;
 -- Lue par le layout générique (SliderDashboardLayout) — onglet actif, calendrier,
 -- rappel. Donnée de présentation portée par la config (instruction field), pas en dur.
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('mood_tracker.instruction', 'accent_color', '#F97316'),
+  ('mood_tracker.instruction', 'accent_color', '#4FA5A9'),
   ('mse.instruction',          'accent_color', '#8B5CF6')
 on conflict (field_id, prop_key) do nothing;
 
@@ -2160,42 +2160,51 @@ on conflict (field_id, prop_key) do nothing;
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('mood_tracker.notes', 'placeholder_code', 'modules.mood_tracker.notes_placeholder'),
   ('mood_tracker.notes', 'subscale_key', 'notes'),
-  ('mood_tracker.q_anxiety', 'color', '#EF4444'),
+  -- Palette de dimensions (parité web ≡ mobile, cf. packages/shared moodPalette) :
+  -- `color` = fill pastel (piste du curseur), `ink_color` = teinte soutenue
+  -- (libellé, valeur, thumb). La couleur n'encode que l'identité de la dimension.
+  ('mood_tracker.q_anxiety', 'color', '#EDB1B1'),
+  ('mood_tracker.q_anxiety', 'ink_color', '#B66B6B'),
   ('mood_tracker.q_anxiety', 'high_hint_code', 'modules.mood_tracker.dim_anxiety_high'),
   ('mood_tracker.q_anxiety', 'icon', 'pulse'),
   ('mood_tracker.q_anxiety', 'low_hint_code', 'modules.mood_tracker.dim_anxiety_low'),
   ('mood_tracker.q_anxiety', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_anxiety', 'max', '10'),
   ('mood_tracker.q_anxiety', 'min', '1'),
-  ('mood_tracker.q_energy', 'color', '#F59E0B'),
+  ('mood_tracker.q_energy', 'color', '#F0CE96'),
+  ('mood_tracker.q_energy', 'ink_color', '#B5842F'),
   ('mood_tracker.q_energy', 'high_hint_code', 'modules.mood_tracker.dim_energy_high'),
   ('mood_tracker.q_energy', 'icon', 'lightning-bolt-outline'),
   ('mood_tracker.q_energy', 'low_hint_code', 'modules.mood_tracker.dim_energy_low'),
   ('mood_tracker.q_energy', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_energy', 'max', '10'),
   ('mood_tracker.q_energy', 'min', '1'),
-  ('mood_tracker.q_mood', 'color', '#8B5CF6'),
+  ('mood_tracker.q_mood', 'color', '#C4B8ED'),
+  ('mood_tracker.q_mood', 'ink_color', '#7C6DB6'),
   ('mood_tracker.q_mood', 'high_hint_code', 'modules.mood_tracker.dim_mood_high'),
   ('mood_tracker.q_mood', 'icon', 'emoticon-outline'),
   ('mood_tracker.q_mood', 'low_hint_code', 'modules.mood_tracker.dim_mood_low'),
   ('mood_tracker.q_mood', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_mood', 'max', '10'),
   ('mood_tracker.q_mood', 'min', '1'),
-  ('mood_tracker.q_pleasure', 'color', '#059669'),
+  ('mood_tracker.q_pleasure', 'color', '#A7D4BC'),
+  ('mood_tracker.q_pleasure', 'ink_color', '#4F9478'),
   ('mood_tracker.q_pleasure', 'high_hint_code', 'modules.mood_tracker.dim_pleasure_high'),
   ('mood_tracker.q_pleasure', 'icon', 'heart-outline'),
   ('mood_tracker.q_pleasure', 'low_hint_code', 'modules.mood_tracker.dim_pleasure_low'),
   ('mood_tracker.q_pleasure', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_pleasure', 'max', '10'),
   ('mood_tracker.q_pleasure', 'min', '1'),
-  ('mood_tracker.q_sleep', 'color', '#0EA5E9'),
+  ('mood_tracker.q_sleep', 'color', '#ABCEEB'),
+  ('mood_tracker.q_sleep', 'ink_color', '#517FA6'),
   ('mood_tracker.q_sleep', 'high_hint_code', 'modules.mood_tracker.dim_sleep_high'),
   ('mood_tracker.q_sleep', 'icon', 'sleep'),
   ('mood_tracker.q_sleep', 'low_hint_code', 'modules.mood_tracker.dim_sleep_low'),
   ('mood_tracker.q_sleep', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_sleep', 'max', '10'),
   ('mood_tracker.q_sleep', 'min', '1'),
-  ('mood_tracker.q_food', 'color', '#10B981'),
+  ('mood_tracker.q_food', 'color', '#99D1C8'),
+  ('mood_tracker.q_food', 'ink_color', '#48958B'),
   ('mood_tracker.q_food', 'high_hint_code', 'modules.mood_tracker.dim_food_high'),
   ('mood_tracker.q_food', 'icon', 'food-apple-outline'),
   ('mood_tracker.q_food', 'low_hint_code', 'modules.mood_tracker.dim_food_low'),
@@ -2203,6 +2212,17 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('mood_tracker.q_food', 'max', '10'),
   ('mood_tracker.q_food', 'min', '1')
 on conflict (field_id, prop_key) do nothing;
+
+-- Refonte palette mood_tracker (épique #162) : les valeurs `color`/`accent_color`
+-- préexistantes doivent être RÉÉCRITES sur une base déjà semée (le `do nothing`
+-- ci-dessus ne met pas à jour une clé existante). Idempotent et ré-exécutable.
+update public.field_props set prop_value = '#EDB1B1' where field_id = 'mood_tracker.q_anxiety'  and prop_key = 'color';
+update public.field_props set prop_value = '#F0CE96' where field_id = 'mood_tracker.q_energy'   and prop_key = 'color';
+update public.field_props set prop_value = '#C4B8ED' where field_id = 'mood_tracker.q_mood'     and prop_key = 'color';
+update public.field_props set prop_value = '#A7D4BC' where field_id = 'mood_tracker.q_pleasure' and prop_key = 'color';
+update public.field_props set prop_value = '#ABCEEB' where field_id = 'mood_tracker.q_sleep'    and prop_key = 'color';
+update public.field_props set prop_value = '#99D1C8' where field_id = 'mood_tracker.q_food'     and prop_key = 'color';
+update public.field_props set prop_value = '#4FA5A9' where field_id = 'mood_tracker.instruction' and prop_key = 'accent_color';
 
 -- NSI : valeurs options + champs spécifiques
 insert into public.field_props (field_id, prop_key, prop_value) values

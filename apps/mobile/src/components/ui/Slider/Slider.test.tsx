@@ -17,6 +17,15 @@ describe('Slider', () => {
     expect(screen.queryByTestId('s-value')).toBeNull()
   })
 
+  it('showHeader=false masque l’en-tête interne (valeur) mais garde la piste', () => {
+    render(<Slider label="Humeur" value={7} min={1} max={10} color="#7C6DB6" showHeader={false} onChange={jest.fn()} testID="s" />)
+    // Le parent rend son propre en-tête : pas de valeur ni de libellé internes.
+    expect(screen.queryByTestId('s-value')).toBeNull()
+    expect(screen.queryByText('Humeur')).toBeNull()
+    // La piste reste rendue et interactive.
+    expect(screen.getByTestId('s-track')).toBeTruthy()
+  })
+
   it('affiche les bornes min/max quand showEndLabels', () => {
     render(<Slider value={30} min={0} max={100} color="#000" showEndLabels onChange={jest.fn()} />)
     expect(screen.getByText('0')).toBeTruthy()

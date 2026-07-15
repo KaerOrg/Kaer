@@ -5,6 +5,9 @@ import { colors, spacing, radius, shadows } from '@theme'
 // dimensions propres au curseur, indépendantes des tokens d'espacement.
 const TRACK_HEIGHT = 6
 const THUMB_SIZE = 22
+// Cible tactile ≥ 44 px (recommandation d'accessibilité tactile) : la barre reste
+// fine (TRACK_HEIGHT) mais la zone de saisie qui l'entoure fait au moins 44 px.
+const TOUCH_HEIGHT = 44
 
 export const styles = StyleSheet.create({
   container: { gap: spacing.xs },
@@ -13,8 +16,8 @@ export const styles = StyleSheet.create({
   label:  { fontSize: 14, fontWeight: '600', color: colors.text },
   value:  { fontSize: 16, fontWeight: '700' },
 
-  // Zone tactile généreuse ; la barre est centrée dedans (le thumb déborde).
-  track: { height: THUMB_SIZE + spacing.sm, justifyContent: 'center' },
+  // Zone tactile généreuse (≥ 44 px) ; la barre est centrée dedans (le thumb déborde).
+  track: { height: TOUCH_HEIGHT, justifyContent: 'center' },
   bar:   { flexDirection: 'row', height: TRACK_HEIGHT, borderRadius: radius.full, backgroundColor: colors.border, alignItems: 'center' },
 
   // Remplissage proportionnel (flex: ratio) — le thumb est ancré à son bord droit
