@@ -196,7 +196,9 @@ export type SleepPoint = {
   efficiency: number | null          // SE % = TST / TPL
   total_sleep_min: number | null     // TST en minutes
   onset_min: number                  // latence (SOL)
-  waso_min: number                   // durée des réveils (WASO)
+  waso_min: number                   // durée des réveils (WASO) — libellé praticien « Réveils nocturnes »
+  nap_min: number                    // durée des siestes diurnes
+  quality: number | null             // qualité ressentie 1 à 5 (saisie subjective)
   in_bed_time: string | null
   bedtime: string | null
   wake_time: string | null
@@ -238,6 +240,8 @@ export async function fetchSleepEvolution(patientId: string): Promise<SleepPoint
     const outBed = readStr(p.out_of_bed_time)
     const onset = toNumber(p.sleep_onset_minutes) ?? 0
     const waso = toNumber(p.awakenings_duration_minutes) ?? 0
+    const nap = toNumber(p.nap_minutes) ?? 0
+    const quality = toNumber(p.quality) ?? null
 
     let totalSleep: number | null = null
     let efficiency: number | null = null
@@ -258,6 +262,8 @@ export async function fetchSleepEvolution(patientId: string): Promise<SleepPoint
       total_sleep_min: totalSleep,
       onset_min: onset,
       waso_min: waso,
+      nap_min: nap,
+      quality,
       in_bed_time: inBed,
       bedtime,
       wake_time: wakeTime,

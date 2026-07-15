@@ -1,8 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { SleepPoint } from '@services/engagementService'
-import { ModuleChart } from './ModuleChart'
+import { ProgressRing } from '@ui/ProgressRing'
+import { Chip } from '@ui/Chip'
+import { TrendChart, type TrendPoint } from '@ui/Chart'
 import { barGeometry, formatMinutes, avg } from './sleepGrid'
+import { SLEEP_METRICS, metricDomain, type SleepMetricKey } from './sleepMetrics'
+import { MetricChip } from './MetricChip'
 import './SleepDataPanel.css'
 
 interface Props {
@@ -20,74 +24,78 @@ const AXIS_TICKS = [
 ] as const
 
 /**
- * Panneau « Données » de l'agenda du sommeil pour le praticien : grille agenda
- * (barres 24h par nuit), courbes d'efficacité et de temps de sommeil, stats
- * moyennes. Présentationnel : points calculés en amont (engagementService).
- * Côté praticien, le codage visuel des métriques est autorisé (analyse soignant).
+ * Panneau « Données » de l'agenda du sommeil pour le praticien : bandeau à la une
+ * (anneau d'efficacité + durée + endormissement), stats secondaires en puces,
+ * grille agenda 24 h, et graphe de tendance précis piloté par un sélecteur de
+ * métrique. Présentationnel : points calculés en amont (engagementService).
+ * Côté praticien, le codage visuel des métriques est autorisé (analyse soignant) ;
+ * les valeurs restent brutes, sans seuil de jugement automatique.
  */
 export function SleepDataPanel({ points, locale }: Props) {
   const { t } = useTranslation()
-
-  const efficiencyData = useMemo(
-    () => points.filter(p => p.efficiency != null).map(p => ({ date: p.date, efficiency: p.efficiency as number })),
-    [points],
-  )
-  const sleepData = useMemo(
-    () => points
-      .filter(p => p.total_sleep_min != null)
-      .map(p => ({ date: p.date, hours: Math.round(((p.total_sleep_min as number) / 60) * 10) / 10 })),
-    [points],
-  )
+  const [metric, setMetric] = useState<SleepMetricKey>('efficiency')
+  const handleSelectMetric = useCallback((key: SleepMetricKey) => setMetric(key), [])
 
   const stats = useMemo(() => {
     const eff = points.map(p => p.efficiency).filter((v): v is number => v != null)
     const tst = points.map(p => p.total_sleep_min).filter((v): v is number => v != null)
-    const sol = points.map(p => p.onset_min)
-    const waso = points.map(p => p.waso_min)
     return {
       avgEfficiency: avg(eff),
       avgSleep: avg(tst),
-      avgOnset: avg(sol),
-      avgWaso: avg(waso),
+      avgOnset: avg(points.map(p => p.onset_min)),
+      avgWaso: avg(points.map(p => p.waso_min)),
       nights: points.length,
       nightmares: points.filter(p => p.nightmares).length,
     }
   }, [points])
+
+  const activeMetric = useMemo(() => SLEEP_METRICS.find(m => m.key === metric) ?? SLEEP_METRICS[0], [metric])
+
+  const trendData = useMemo<TrendPoint[]>(
+    () => points.map(p => ({
+      date: p.date,
+      value: activeMetric.value(p),
+      event: activeMetric.markNightmares && p.nightmares,
+    })),
+    [points, activeMetric],
+  )
+  const trendDomain = useMemo(() => metricDomain(activeMetric, points), [activeMetric, points])
 
   // Grille : nuits les plus récentes en premier, plafonnées à 21 pour la lisibilité.
   const gridNights = useMemo(() => points.slice(-21).reverse(), [points])
 
   return (
     <div className="module-data-panel">
-      {/* Stats moyennes ───────────────────────────────────────────────── */}
-      <div className="sleep-stats">
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgEfficiency != null ? `${stats.avgEfficiency} %` : '-'}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_avg_efficiency')}</span>
-        </div>
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgSleep != null ? formatMinutes(stats.avgSleep) : '-'}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_avg_duration')}</span>
-        </div>
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgOnset != null ? formatMinutes(stats.avgOnset) : '-'}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_avg_onset')}</span>
-        </div>
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.avgWaso != null ? formatMinutes(stats.avgWaso) : '-'}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_avg_waso')}</span>
-        </div>
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.nights}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_nights')}</span>
-        </div>
-        <div className="sleep-stats__item">
-          <span className="sleep-stats__value">{stats.nightmares}</span>
-          <span className="sleep-stats__label">{t('evolution.sleep_nightmares')}</span>
+      {/* Bandeau à la une : anneau d'efficacité + durée + endormissement ─── */}
+      <div className="sleep-hero">
+        <ProgressRing
+          value={stats.avgEfficiency ?? 0}
+          size={104}
+          strokeWidth={11}
+          label={stats.avgEfficiency != null ? `${stats.avgEfficiency} %` : '-'}
+          sublabel={t('evolution.sleep_avg_efficiency')}
+          ariaLabel={t('evolution.sleep_avg_efficiency')}
+        />
+        <div className="sleep-hero__facts">
+          <div className="sleep-hero__fact">
+            <span className="sleep-hero__value">{stats.avgSleep != null ? formatMinutes(stats.avgSleep) : '-'}</span>
+            <span className="sleep-hero__label">{t('evolution.sleep_avg_duration')}</span>
+          </div>
+          <div className="sleep-hero__fact">
+            <span className="sleep-hero__value">{stats.avgOnset != null ? formatMinutes(stats.avgOnset) : '-'}</span>
+            <span className="sleep-hero__label">{t('evolution.sleep_avg_onset')}</span>
+          </div>
         </div>
       </div>
 
-      {/* Grille agenda du sommeil ─────────────────────────────────────── */}
+      {/* Stats secondaires en puces compactes ─────────────────────────────── */}
+      <div className="sleep-secondary">
+        <Chip size="sm" label={`${t('evolution.sleep_avg_waso')} · ${stats.avgWaso != null ? formatMinutes(stats.avgWaso) : '-'}`} />
+        <Chip size="sm" label={`${t('evolution.sleep_nights')} · ${stats.nights}`} />
+        <Chip size="sm" label={`${t('evolution.sleep_nightmares')} · ${stats.nightmares}`} />
+      </div>
+
+      {/* Grille agenda du sommeil (24 h) ──────────────────────────────────── */}
       <div className="sleep-grid">
         <div className="sleep-grid__header">
           <h4 className="module-data-panel__chart-title">{t('evolution.sleep_grid_title')}</h4>
@@ -132,23 +140,28 @@ export function SleepDataPanel({ points, locale }: Props) {
         </div>
       </div>
 
-      {/* Courbes de tendance ──────────────────────────────────────────── */}
-      <ModuleChart
-        title={t('evolution.sleep_efficiency_title')}
-        count={efficiencyData.length}
-        data={efficiencyData}
-        series={[{ key: 'efficiency', color: '#06B6D4', label: t('evolution.sleep_efficiency_title') }]}
-        yDomain={[0, 100]}
-        locale={locale}
-      />
-      <ModuleChart
-        title={t('evolution.sleep_duration_title')}
-        count={sleepData.length}
-        data={sleepData}
-        series={[{ key: 'hours', color: '#6366F1', label: t('evolution.sleep_duration_title') }]}
-        yDomain={[0, 12]}
-        locale={locale}
-      />
+      {/* Tendances : sélecteur de métrique + graphe précis ────────────────── */}
+      <div className="sleep-trend">
+        <div className="sleep-trend__chips">
+          {SLEEP_METRICS.map(m => (
+            <MetricChip
+              key={m.key}
+              metricKey={m.key}
+              label={t(m.labelKey)}
+              active={m.key === metric}
+              onSelect={handleSelectMetric}
+            />
+          ))}
+        </div>
+        <h4 className="module-data-panel__chart-title">{t(activeMetric.labelKey)}</h4>
+        <TrendChart
+          data={trendData}
+          unit={activeMetric.unit}
+          yDomain={trendDomain}
+          meanLabel={t('evolution.trend_mean')}
+          locale={locale}
+        />
+      </div>
     </div>
   )
 }

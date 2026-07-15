@@ -1,0 +1,42 @@
+.trend-chart__tooltip {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: var(--font-size-caption);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  min-width: 140px;
+}
+
+.trend-chart__tooltip-date {
+  color: var(--color-text-muted);
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.trend-chart__tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 3px 0;
+}
+
+.trend-chart__tooltip-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trend-chart__tooltip-label {
+  color: var(--color-text-muted);
+}
+
+.trend-chart__tooltip-value {
+  margin-left: auto;
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+}
