@@ -7,13 +7,18 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-// Stub du graphique recharts (non rendu en jsdom). Sa présence servirait à
-// détecter qu'une courbe est encore rendue : pour Beck il ne doit plus y en avoir.
-vi.mock('../../../components/ui/Chart', () => ({
-  LineChart: ({ series }: { series: { key: string }[] }) => (
-    <div data-testid="linechart" data-series-keys={series.map(s => s.key).join(',')} />
-  ),
-}))
+// Stub de LineChart (non rendu en jsdom) : sa présence détecte qu'une courbe est
+// encore rendue (pour Beck il ne doit plus y en avoir). Le reste de ui/Chart reste
+// réel (TrendChart / helpers) — le TrendChart de la section sommeil monte pour de vrai.
+vi.mock('../../../components/ui/Chart', async (importActual) => {
+  const actual = await importActual<typeof import('../../../components/ui/Chart')>()
+  return {
+    ...actual,
+    LineChart: ({ series }: { series: { key: string }[] }) => (
+      <div data-testid="linechart" data-series-keys={series.map(s => s.key).join(',')} />
+    ),
+  }
+})
 
 // Le panneau détaillé lui-même est couvert par ColumnFormDataPanel.test.tsx :
 // ici on vérifie seulement qu'il est monté avec les fiches de l'agrégat.
@@ -23,9 +28,10 @@ vi.mock('./ColumnFormDataPanel', () => ({
   ),
 }))
 
-const { mockFetchFormEntries, mockFetchPatientModules } = vi.hoisted(() => ({
+const { mockFetchFormEntries, mockFetchPatientModules, mockFetchSleepEvolution } = vi.hoisted(() => ({
   mockFetchFormEntries: vi.fn(),
   mockFetchPatientModules: vi.fn(),
+  mockFetchSleepEvolution: vi.fn(),
 }))
 
 // Agrégat d'évolution : tous les autres modules sans donnée, seul Beck en porte.
@@ -35,7 +41,7 @@ vi.mock('@services/engagementService', () => ({
   fetchMoodEvolution: async () => [],
   fetchFearEvolution: async () => [],
   fetchMedSideEffectsEvolution: async () => ({ effects: [], data: [] }),
-  fetchSleepEvolution: async () => [],
+  fetchSleepEvolution: (...args: unknown[]) => mockFetchSleepEvolution(...args),
   fetchChronoEntries: async () => [],
   fetchActivityEntries: async () => [],
   fetchModuleSummary: async () => ({ lastDate: null, count: 0, lastPayload: null }),
@@ -69,6 +75,7 @@ function renderTab() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockFetchFormEntries.mockResolvedValue(BECK_ENTRIES)
+  mockFetchSleepEvolution.mockResolvedValue([])
 })
 
 describe('PatientEvolutionTab — section Colonnes de Beck', () => {
@@ -99,5 +106,27 @@ describe('PatientEvolutionTab — section Colonnes de Beck', () => {
     fireEvent.click(getByLabelText('evolution.show_archived'))
     await waitFor(() => expect(getByTestId('beck-panel')).toBeTruthy())
     expect(getByText('evolution.archived_badge')).toBeTruthy()
+  })
+})
+
+describe('PatientEvolutionTab — comparaison période de référence (sommeil)', () => {
+  it('le bouton « Comparer » révèle le choix de période de référence (off par défaut)', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'sleep_diary' }])
+    mockFetchSleepEvolution.mockResolvedValue([
+      {
+        date: '2026-03-15', efficiency: 82, total_sleep_min: 450, onset_min: 12, waso_min: 18,
+        nap_min: 0, quality: 4, in_bed_time: '22:45', bedtime: '23:00', wake_time: '07:00',
+        out_of_bed_time: '07:15', nightmares: false,
+      },
+    ])
+    const { getByLabelText, getByText, queryByText } = renderTab()
+
+    await waitFor(() => expect(getByText('evolution.sleep_section_title')).toBeTruthy())
+    // Décoché par défaut → aucune période de référence proposée (graphe épuré)
+    expect(queryByText('evolution.compare_ref_previous')).toBeNull()
+
+    fireEvent.click(getByLabelText('evolution.compare_toggle'))
+    expect(getByText('evolution.compare_ref_previous')).toBeTruthy()
+    expect(getByText('evolution.compare_ref_last_year')).toBeTruthy()
   })
 })

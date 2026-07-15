@@ -81,4 +81,13 @@ describe('SleepDataPanel', () => {
     // Anneau (label) + sommeil moyen + endormissement moyen = 3 tirets autonomes
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(3)
   })
+
+  it('superpose la courbe de référence et affiche le delta quand une comparaison est fournie', () => {
+    const ref = [makePoint({ date: '2026-01-15', efficiency: 70 })]
+    render(<SleepDataPanel points={POINTS} locale="fr" comparison={{ points: ref, label: 'Réf.' }} />)
+    // 2 courbes : principale + référence
+    expect(screen.getAllByTestId('line')).toHaveLength(2)
+    // Delta efficacité moyenne 85 − 70 = +15
+    expect(screen.getByText(/Δ \+15 %/)).toBeInTheDocument()
+  })
 })

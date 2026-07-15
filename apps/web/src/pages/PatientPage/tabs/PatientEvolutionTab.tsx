@@ -18,6 +18,7 @@ import type { RhythmEntry } from '@kaer/shared'
 import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
+import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
 import {
@@ -71,6 +72,9 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const [range, setRange] = useState<TimeRange>('1y')
   const [moodExpanded, setMoodExpanded] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+  // Comparaison à une période de référence (sommeil) — décochée par défaut (graphe épuré).
+  const [sleepCompare, setSleepCompare] = useState(false)
+  const [sleepRefKind, setSleepRefKind] = useState<ReferenceKind>('previous')
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
   const modulesQuery = useQuery(patientQueries.modules(patientId))
@@ -89,6 +93,24 @@ export function PatientEvolutionTab({ patientId }: Props) {
   const isArchived = (moduleType: string) => !activeTypes.has(moduleType)
 
   const days = RANGE_DAYS[range]
+
+  // Nuits de la période de référence, re-datées sur l'axe courant (undefined si off/vide).
+  const sleepComparison = useMemo(() => {
+    if (!sleepCompare) return undefined
+    const refPoints = buildReferenceWindow(sleepData, days, sleepRefKind)
+    return refPoints.length > 0
+      ? { points: refPoints, label: t(`evolution.compare_ref_${sleepRefKind}`) }
+      : undefined
+  }, [sleepCompare, sleepData, days, sleepRefKind, t])
+
+  const refKindOptions = useMemo<readonly SegmentOption<ReferenceKind>[]>(
+    () => [
+      { value: 'previous', label: t('evolution.compare_ref_previous') },
+      { value: 'last_year', label: t('evolution.compare_ref_last_year') },
+    ],
+    [t],
+  )
+
   const hasData =
     scales.length > 0 ||
     moodData.length > 0 ||
@@ -162,7 +184,23 @@ export function PatientEvolutionTab({ patientId }: Props) {
               <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
             )}
           </div>
-          <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} />
+          <div className="evolution__compare">
+            <Toggle
+              checked={sleepCompare}
+              onChange={setSleepCompare}
+              label={t('evolution.compare_toggle')}
+            />
+            {sleepCompare && (
+              <SegmentedControl
+                options={refKindOptions}
+                value={sleepRefKind}
+                onChange={setSleepRefKind}
+                variant="pills"
+                ariaLabel={t('evolution.compare_ref_label')}
+              />
+            )}
+          </div>
+          <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} comparison={sleepComparison} />
         </section>
       )}
 
