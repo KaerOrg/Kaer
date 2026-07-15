@@ -960,78 +960,74 @@
   margin: 0;
 }
 
-.sj-history__row {
+/* Ligne « nuit » — miroir mobile : barre fenêtre de sommeil + horaires + étoiles */
+.sj-night {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 10px 14px;
 }
 
-.sj-history__row--filled {
-  background: var(--color-surface);
+.sj-night--filled {
+  border-left: 3px solid var(--color-primary);
 }
 
-.sj-history__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-border);
-  flex-shrink: 0;
-}
-
-.sj-history__dot--filled {
-  background: var(--color-primary);
-}
-
-.sj-history__info {
-  flex: 1;
+.sj-night__header {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.sj-history__date {
+.sj-night__date {
   font-size: 13px;
   font-weight: 600;
   color: var(--color-text);
   text-transform: capitalize;
 }
 
-.sj-history__meta {
+.sj-night__stars {
+  display: inline-flex;
+  gap: 1px;
+}
+
+.sj-night__track {
+  position: relative;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-border) 55%, transparent);
+  overflow: hidden;
+}
+
+.sj-night__segment {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+.sj-night__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 
-.sj-history__meta strong {
-  color: var(--color-text);
-  font-weight: 600;
+.sj-night__duration {
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
-.sj-history__meta-muted {
+.sj-night__muted {
   font-size: 12px;
   color: var(--color-text-muted);
   font-style: italic;
-}
-
-.sj-history__empty {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.sj-history__stars {
-  display: inline-flex;
-  gap: 1px;
-  margin-top: 2px;
-}
-
-.sj-history__chevron {
-  color: var(--color-text-muted);
-  flex-shrink: 0;
 }
 
 /* Mode entry — bloc complet de saisie */
@@ -1141,6 +1137,35 @@
   font-weight: 600;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
+}
+
+/* Horaires CSD en grille 2×2 (miroir mobile) */
+.sj-time-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.sj-time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.sj-time-cell__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sj-time-cell .sj-time-btn {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 /* Numeric input — onset / awakenings duration */
@@ -1267,30 +1292,29 @@
 .sj-efficiency {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--color-primary-light);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-md);
+  gap: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 12px 14px;
 }
 
-.sj-efficiency__icon {
-  color: var(--color-primary);
-  flex-shrink: 0;
+.sj-efficiency__texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .sj-efficiency__label {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
-.sj-efficiency__value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-primary);
-  font-variant-numeric: tabular-nums;
+.sj-efficiency__hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
 }
 
 /* ── Activity log (behavioral_activation) ────────────────────────────────── */
