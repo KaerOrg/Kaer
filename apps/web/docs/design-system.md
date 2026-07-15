@@ -110,7 +110,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
+| `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
 | `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
@@ -347,6 +347,58 @@ import { BarChart } from '../components/ui/Chart'
 ```
 
 > **Règle : tout graphique de séries temporelles web utilise `LineChart` ou `BarChart` depuis `ui/Chart/`.**
+
+#### `TrendChart` — graphe de tendance précis (une métrique)
+
+Graphe **clinique précis** (Recharts) : axe Y chiffré + unité, un point par nuit
+(marqueurs), **ligne de moyenne** pointillée avec valeur, dernière valeur mise en
+avant, **marqueurs d'événement** (cauchemars) sur l'axe, et **série de comparaison**
+optionnelle (pointillés gris) pour comparer à une période de référence. Prend un
+tableau `TrendPoint[]` (`{ date, value: number | null, event? }`) — `value: null` =
+nuit non renseignée (interruption). Métrique **injectée** (unité, barème, extracteur
+côté appelant) : le composant reste générique. Valeurs brutes, aucun seuil de jugement.
+Les helpers purs (`computeTrendMean`, `lastFilledPoint`, `eventDates`, `mergeTrendSeries`)
+sont exportés depuis `ui/Chart` et testés isolément.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `data` | `TrendPoint[]` | Série principale, un point par nuit (`value: null` = gap) |
+| `unit` | `string` | Unité (`'%'`, `'h'`, `'min'`, `'/5'`) — axe Y, moyenne, tooltip |
+| `yDomain` | `[number, number]` | Bornes de l'axe Y |
+| `color?` | `string` | Couleur d'accent (défaut teal) |
+| `meanLabel?` | `string` | Préfixe de la ligne de moyenne (`'moy.'`) ; absent → pas de ligne |
+| `comparison?` | `{ data: TrendPoint[]; label: string }` | Série de référence (pointillés gris) |
+| `locale?` | `string` | Locale des dates |
+| `height?` | `number` | Hauteur en px (défaut 240) |
+
+```tsx
+import { TrendChart } from '../components/ui/Chart'
+<TrendChart data={points} unit="%" yDomain={[0, 100]} meanLabel="moy." locale="fr" />
+```
+
+#### `ProgressRing` — anneau de valeur (jauge circulaire)
+
+`components/ui/ProgressRing/`. Jauge circulaire (SVG `circle` + `stroke-dasharray`)
+remplie au prorata d'une valeur brute, label central optionnel. **Une seule couleur
+d'accent, aucun codage conditionnel** selon un seuil (affichage neutre). Pendant web
+du `ProgressRing` mobile. Usage : anneau d'efficacité du sommeil (bandeau Données,
+page Évolution).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number` | Valeur remplie, bornée à `[0, max]` |
+| `max?` | `number` | Remplissage complet (défaut 100) |
+| `size?` | `number` | Diamètre px (défaut 96) |
+| `strokeWidth?` | `number` | Épaisseur px (défaut 10) |
+| `color?` | `string` | Arc rempli (défaut `var(--color-primary)`) |
+| `trackColor?` | `string` | Piste vide (défaut `var(--color-border)`) |
+| `label?` / `sublabel?` | `ReactNode` | Textes centraux |
+| `ariaLabel?` | `string` | Libellé accessible |
+
+```tsx
+import { ProgressRing } from '../components/ui/ProgressRing'
+<ProgressRing value={91} label="91 %" sublabel="efficacité moy." ariaLabel="Efficacité moyenne" />
+```
 
 ---
 

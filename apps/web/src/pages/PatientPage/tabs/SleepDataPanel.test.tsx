@@ -1,53 +1,53 @@
 import { vi } from 'vitest'
+import type { ReactNode } from 'react'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'fr' } }),
 }))
 
-// Stub des graphiques recharts (non rendus en jsdom).
-vi.mock('./ModuleChart', () => ({
-  ModuleChart: ({ count }: { count: number }) => <div data-testid="module-chart" data-count={count} />,
-}))
+// Recharts ne se rend pas en jsdom : on stube la lib tierce (le TrendChart réel monte).
+vi.mock('recharts', () => {
+  const Stub = ({ children }: { children?: ReactNode }) => <div>{children}</div>
+  const Mark = (testid: string) => () => <div data-testid={testid} />
+  return {
+    ResponsiveContainer: Stub, LineChart: Stub, Line: Mark('line'),
+    XAxis: Mark('xaxis'), YAxis: Mark('yaxis'), CartesianGrid: Mark('grid'),
+    Tooltip: Mark('tooltip'), ReferenceLine: Mark('refline'), ReferenceDot: Mark('refdot'),
+  }
+})
 
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { SleepDataPanel } from './SleepDataPanel'
 import type { SleepPoint } from '@services/engagementService'
 
 function makePoint(overrides: Partial<SleepPoint>): SleepPoint {
   return {
-    date: '2026-02-01',
-    efficiency: null,
-    total_sleep_min: null,
-    onset_min: 0,
-    waso_min: 0,
-    in_bed_time: null,
-    bedtime: null,
-    wake_time: null,
-    out_of_bed_time: null,
-    nightmares: false,
-    ...overrides,
+    date: '2026-02-01', efficiency: null, total_sleep_min: null, onset_min: 0, waso_min: 0,
+    nap_min: 0, quality: null, in_bed_time: null, bedtime: null, wake_time: null,
+    out_of_bed_time: null, nightmares: false, ...overrides,
   }
 }
 
 const POINTS: SleepPoint[] = [
   makePoint({
     date: '2026-02-01', efficiency: 80, total_sleep_min: 480, onset_min: 10, waso_min: 20,
-    in_bed_time: '22:30', bedtime: '23:00', wake_time: '07:00', out_of_bed_time: '07:30', nightmares: false,
+    nap_min: 15, quality: 4, in_bed_time: '22:30', bedtime: '23:00', wake_time: '07:00', out_of_bed_time: '07:30',
   }),
   makePoint({
     date: '2026-02-02', efficiency: 90, total_sleep_min: 420, onset_min: 30, waso_min: 30,
-    in_bed_time: '23:00', bedtime: '23:30', wake_time: '06:30', out_of_bed_time: '07:00', nightmares: true,
+    nap_min: 0, quality: 3, in_bed_time: '23:00', bedtime: '23:30', wake_time: '06:30', out_of_bed_time: '07:00', nightmares: true,
   }),
 ]
 
 describe('SleepDataPanel', () => {
-  it('affiche les moyennes calculées et le nombre de nuits', () => {
+  it('bandeau à la une : anneau d’efficacité + durée + endormissement moyens', () => {
     render(<SleepDataPanel points={POINTS} locale="fr" />)
     expect(screen.getByText('85 %')).toBeTruthy() // efficacité moyenne (80+90)/2
     expect(screen.getByText('7h30')).toBeTruthy() // sommeil moyen (480+420)/2 = 450
     expect(screen.getByText('0h20')).toBeTruthy() // latence moyenne
-    expect(screen.getByText('0h25')).toBeTruthy() // WASO moyen
+    // WASO moyen relégué en puce compacte
+    expect(screen.getByText(/0h25/)).toBeTruthy()
   })
 
   it('rend une ligne de grille par nuit et marque les cauchemars', () => {
@@ -56,14 +56,29 @@ describe('SleepDataPanel', () => {
     expect(container.querySelectorAll('.sleep-grid__nightmare')).toHaveLength(1)
   })
 
-  it('rend les deux courbes de tendance', () => {
+  it('affiche le sélecteur des 6 métriques et un graphe de tendance', () => {
     render(<SleepDataPanel points={POINTS} locale="fr" />)
-    expect(screen.getAllByTestId('module-chart')).toHaveLength(2)
+    for (const key of [
+      'evolution.sleep_metric_efficiency', 'evolution.sleep_metric_duration', 'evolution.sleep_metric_onset',
+      'evolution.sleep_metric_waso', 'evolution.sleep_metric_naps', 'evolution.sleep_metric_quality',
+    ]) {
+      expect(screen.getByRole('button', { name: key })).toBeTruthy()
+    }
+    expect(screen.getAllByTestId('line')).toHaveLength(1)
   })
 
-  it('affiche le placeholder « - » quand aucune métrique exploitable', () => {
+  it('sélectionne une autre métrique au clic', () => {
+    render(<SleepDataPanel points={POINTS} locale="fr" />)
+    // Efficacité active par défaut
+    expect(screen.getByRole('button', { name: 'evolution.sleep_metric_efficiency', pressed: true })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'evolution.sleep_metric_onset' }))
+    expect(screen.getByRole('button', { name: 'evolution.sleep_metric_onset', pressed: true })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'evolution.sleep_metric_efficiency', pressed: false })).toBeTruthy()
+  })
+
+  it('placeholder « - » sur le bandeau quand aucune donnée', () => {
     render(<SleepDataPanel points={[]} locale="fr" />)
-    // 4 moyennes (efficacité, sommeil, latence, WASO) sans donnée → trait d'union
-    expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(4)
+    // Anneau (label) + sommeil moyen + endormissement moyen = 3 tirets autonomes
+    expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(3)
   })
 })

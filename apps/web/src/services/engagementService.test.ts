@@ -75,7 +75,8 @@ describe('engagementService.fetchSleepEvolution', () => {
     const rows = [
       { client_created_at: '2026-02-02T08:00:00Z', payload: {
         date: '2026-02-01', in_bed_time: '22:30', bedtime: '23:00', wake_time: '07:00',
-        out_of_bed_time: '07:30', sleep_onset_minutes: 0, awakenings_duration_minutes: 0, nightmares: 0,
+        out_of_bed_time: '07:30', sleep_onset_minutes: 0, awakenings_duration_minutes: 0,
+        nap_minutes: 20, quality: 4, nightmares: 0,
       } },
       { client_created_at: '2026-02-01T08:00:00Z', payload: {
         date: '2026-01-31', bedtime: '23:00', wake_time: '07:00',
@@ -92,10 +93,15 @@ describe('engagementService.fetchSleepEvolution', () => {
     const night = result[1]
     expect(night.efficiency).toBe(89)
     expect(night.total_sleep_min).toBe(480)
+    expect(night.nap_min).toBe(20)
+    expect(night.quality).toBe(4)
     // Nuit 01-31 : fallback fenêtre 480, TST = 480-60 = 420 → SE 88, cauchemar
     expect(result[0].total_sleep_min).toBe(420)
     expect(result[0].efficiency).toBe(88)
     expect(result[0].nightmares).toBe(true)
+    // Champs absents du payload → valeurs neutres (0 sieste, qualité nulle)
+    expect(result[0].nap_min).toBe(0)
+    expect(result[0].quality).toBeNull()
   })
 
   it('ignore les entrées sans payload.date', async () => {

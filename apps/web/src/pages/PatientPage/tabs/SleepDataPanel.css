@@ -2,35 +2,64 @@
 /* Stats + grille agenda (barres 24h) + courbes de tendance. Vue soignant :
    le codage visuel des métriques est autorisé (analyse clinique). */
 
-.sleep-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* ── Bandeau à la une : anneau d'efficacité + durée + endormissement ───────── */
+
+.sleep-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+}
+
+.sleep-hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+}
+
+.sleep-hero__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sleep-hero__value {
+  font-size: var(--font-size-h2);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.sleep-hero__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ── Stats secondaires (puces compactes) ──────────────────────────────────── */
+
+.sleep-secondary {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 20px;
 }
 
-.sleep-stats__item {
+/* ── Tendances : sélecteur de métrique + graphe précis ────────────────────── */
+
+.sleep-trend {
+  margin-top: 20px;
+}
+
+.sleep-trend__chips {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 10px 6px;
-  background: var(--color-card, #fff);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.sleep-stats__value {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--color-primary);
-}
-
-.sleep-stats__label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-align: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 /* ── Grille agenda du sommeil ─────────────────────────────────────────────── */
@@ -151,9 +180,4 @@
   border-radius: 50%;
   background: #fff;
   border: 1.5px solid var(--color-text);
-}
-
-.sleep-grid + .module-data-panel__chart,
-.module-data-panel__chart + .module-data-panel__chart {
-  margin-top: 20px;
 }
