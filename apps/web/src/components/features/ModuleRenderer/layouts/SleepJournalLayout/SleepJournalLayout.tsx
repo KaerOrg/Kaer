@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Bed, BedDouble, ChartColumnBig, ChevronRight, Clock, Ghost, Moon, Pill } from 'lucide-react'
-import { Button } from '../../../../ui/Button'
-import { RatingSelector } from '../../../../ui/RatingSelector'
-import { ProgressRing } from '../../../../ui/ProgressRing'
+import { Button } from '@ui/Button'
+import { RatingSelector } from '@ui/RatingSelector'
+import { ProgressRing } from '@ui/ProgressRing'
 import type { ContentField } from '@services/moduleService'
 import { SleepPreviewNight } from './SleepPreviewNight'
 

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { RatingSelector } from '../../../../ui/RatingSelector'
+import { RatingSelector } from '@ui/RatingSelector'
 
 const QUALITY_STEPS = [1, 2, 3, 4, 5]
 
