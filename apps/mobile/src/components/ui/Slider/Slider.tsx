@@ -17,7 +17,7 @@ const A11Y_ACTIONS: AccessibilityActionInfo[] = [{ name: 'increment' }, { name: 
 // de largeur au rendu ; seule l'interaction lit la largeur mesurée (onLayout).
 export const Slider = React.memo(function Slider({
   value, min, max, step = 1, color, label = '', unit, showEndLabels = false,
-  testID, onChange,
+  showHeader = true, testID, onChange,
 }: SliderProps) {
   const widthRef = useRef(0)
 
@@ -51,7 +51,7 @@ export const Slider = React.memo(function Slider({
 
   return (
     <View style={styles.container} testID={testID}>
-      {(label !== '' || value != null) && (
+      {showHeader && (label !== '' || value != null) && (
         <View style={styles.header}>
           <Text style={styles.label}>{label}</Text>
           {value != null ? (

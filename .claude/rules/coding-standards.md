@@ -561,6 +561,59 @@ import { shadows } from '../../theme'
 - Texte toujours dans `<Text>` — jamais de string nue dans le JSX
 - Ternaire plutôt que `&&` avec valeurs potentiellement falsy
 
+## Zéro scroll horizontal (mobile) — sauf carrousel intentionnel
+
+> **Règle absolue, tout écran mobile.** Aucun écran, aucune vue, aucune carte ne doit
+> pouvoir défiler horizontalement. Le contenu s'adapte **toujours** à la largeur de
+> l'appareil. Un débordement latéral (texte tronqué qui pousse la mise en page, ligne
+> qui dépasse le bord, `ScrollView horizontal` involontaire) est un **bug bloquant** :
+> il casse la lisibilité et signe une largeur figée au lieu de fluide.
+
+**Un seul cas légitime de défilement horizontal** : un **carrousel/pager explicite et
+voulu** (`ScrollView horizontal` paginé, `FlatList horizontal`, swipe de fiches). Il
+est intentionnel, borné à son conteneur, et n'entraîne jamais le débordement de
+**l'écran** — le reste de la page reste fixe en largeur.
+
+### Ce qui provoque un scroll horizontal accidentel — à bannir
+
+- **Largeur figée en dur** (`width: 360`, `width: 500`) sur un conteneur de page ou
+  une carte. Une largeur d'écran/carte est **fluide** : `width: '100%'`,
+  `alignSelf: 'stretch'`, ou bornée par `maxWidth` + `flex`. Une largeur fixe ne vaut
+  que pour un élément intrinsèquement petit (icône, pastille, avatar).
+- **`flexDirection: 'row'` sans garde-fou de retour à la ligne ni rétrécissement** :
+  une rangée dont la somme des enfants dépasse la largeur pousse hors écran. Ajouter
+  `flexWrap: 'wrap'` si les éléments peuvent passer à la ligne, ou `flexShrink: 1` +
+  `flex: 1` sur l'enfant extensible (typiquement le bloc texte) pour qu'il se compresse
+  au lieu de pousser ses voisins.
+- **Texte long non contraint** : un `<Text>` sans `flexShrink: 1` dans une rangée
+  élargit sa cellule à l'infini. Le contenir (`flex: 1` / `flexShrink: 1`) et, si
+  nécessaire, `numberOfLines` + `ellipsizeMode`.
+- **`padding`/`margin` négatifs ou sur-dimensionnés** qui débordent le parent, et
+  **valeurs de position absolue** qui sortent du cadre.
+- **`minWidth` supérieur à la largeur d'écran** sur un enfant de page.
+
+### Réflexes à appliquer dès le StyleSheet
+
+```ts
+// ❌ Largeur d'écran figée → déborde sur les petits appareils → scroll horizontal
+container: { width: 400, flexDirection: 'row' }
+title:     { fontSize: 18 }               // texte long → pousse hors cadre
+
+// ✅ Largeur fluide, rangée qui rétrécit son bloc texte
+container: { width: '100%', flexDirection: 'row', alignItems: 'center' }
+titleWrap: { flex: 1, flexShrink: 1 }     // le texte se compresse, ne pousse rien
+title:     { fontSize: 18 }
+```
+
+- Le conteneur racine d'un écran est **fluide** (`flex: 1`, largeur non figée) et son
+  `ScrollView` reste **vertical** (`horizontal` par défaut = `false` — ne jamais le
+  passer à `true` hors carrousel voulu).
+- Toute rangée `row` contenant un texte de longueur variable donne au texte
+  `flex: 1`/`flexShrink: 1`.
+- Vérif avant commit : `grep -rn "horizontal" apps/mobile/src --include="*.tsx"` — chaque
+  `ScrollView`/`FlatList` `horizontal` doit être un **carrousel assumé**, jamais un écran.
+  Tester en aperçu sur un petit gabarit : la page ne doit **jamais** glisser latéralement.
+
 ## React performance
 
 - `Promise.all` pour les fetches indépendants — démarrer tôt, `await` tard

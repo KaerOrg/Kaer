@@ -207,6 +207,13 @@ export default function ScaleEntryScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
+      {/* Progression — sticky en haut, toujours visible pendant la saisie */}
+      <View style={styles.progressBar}>
+        <Text style={styles.progress}>
+          {t(`modules.${scale_id}.progress`, { answered: answeredCount, total: totalItems })}
+        </Text>
+      </View>
+
       <ScrollView contentContainerStyle={styles.container}>
 
         {/* Date row — toujours visible, permet de corriger la date */}
@@ -256,23 +263,18 @@ export default function ScaleEntryScreen() {
           }}
         />
 
-        <View style={styles.footer}>
-          <Text style={styles.progress}>
-            {t(`modules.${scale_id}.progress`, {
-              answered: answeredCount,
-              total: totalItems,
-            })}
-          </Text>
-          <Button
-            label={isEditing ? t('common.save_changes') : t(`modules.${scale_id}.submit`)}
-            onPress={handleSubmit}
-            loading={saving}
-            disabled={!allAnswered}
-            style={submitBtnStyle}
-          />
-        </View>
-
       </ScrollView>
+
+      {/* Bouton Enregistrer — sticky en bas, toujours accessible */}
+      <View style={styles.bottomBar}>
+        <Button
+          label={isEditing ? t('common.save_changes') : t(`modules.${scale_id}.submit`)}
+          onPress={handleSubmit}
+          loading={saving}
+          disabled={!allAnswered}
+          style={submitBtnStyle}
+        />
+      </View>
     </SafeAreaView>
   )
 }
@@ -293,8 +295,20 @@ const styles = StyleSheet.create({
   },
   dateLabelText: { fontSize: 13, color: colors.textMuted, flex: 0 },
   dateValue: { flex: 1, fontSize: 13, fontWeight: '600', textAlign: 'right' },
-  footer: { gap: spacing.sm, marginTop: 4 },
-  progress: { textAlign: 'center', fontSize: 13, color: colors.textMuted },
+  progressBar: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.card,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  progress: { textAlign: 'center', fontSize: 13, fontWeight: '600', color: colors.textMuted },
+  bottomBar: {
+    padding: spacing.md,
+    backgroundColor: colors.card,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: 16 },
   reuseBtn: { alignSelf: 'flex-start' },
 })

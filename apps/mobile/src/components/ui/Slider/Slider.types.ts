@@ -19,6 +19,12 @@ export interface SliderProps {
   unit?: string
   /** Affiche les bornes min / max sous la piste (défaut false). */
   showEndLabels?: boolean
+  /**
+   * Affiche l'en-tête interne (libellé + valeur) au-dessus de la piste (défaut
+   * true). `false` quand le parent rend son propre en-tête (icône, valeur en
+   * grand) et ne veut que la piste — le `label` reste l'`accessibilityLabel`.
+   */
+  showHeader?: boolean
   /** Préfixe de testID : expose `${testID}-value` et `${testID}-fill`. */
   testID?: string
   /** Émis à chaque interaction (tap ou glissement) avec la valeur alignée/bornée. */

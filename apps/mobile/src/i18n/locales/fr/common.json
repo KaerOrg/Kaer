@@ -7,6 +7,7 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "add": "Ajouter",
+    "all": "Tout",
     "create": "Créer",
     "update": "Mettre à jour",
     "error": "Erreur",
@@ -720,7 +721,19 @@
       "entries_recent": "Saisies récentes",
       "reminder_preview_time": "20:00",
       "month_days_label": "jours saisis",
-      "month_legend": "Plus la moyenne des scores du jour est élevée, plus le cercle est foncé (1 = clair, 10 = foncé)."
+      "month_legend": "Plus la moyenne des scores du jour est élevée, plus le cercle est foncé (1 = clair, 10 = foncé).",
+      "tab_tracking": "Suivi",
+      "ribbon_title": "Vue par symptôme",
+      "assiduity": "{{done}}/{{total}} saisis",
+      "ruban_legend": "Intensité brute : clair vers foncé. Colonne vide = jour non renseigné.",
+      "marker_add_title": "Ajouter un repère",
+      "marker_type_treatment": "Traitement",
+      "marker_type_life_event": "Événement de vie",
+      "marker_type_other": "Autre",
+      "season_title": "Saisonnalité",
+      "season_compare": "Comparer",
+      "season_hint": "Superpose jusqu'à 5 années : utile pour les rythmes saisonniers.",
+      "season_dimension": "Dimension"
     },
     "emotion_wheel": {
       "label": "Roue des émotions",

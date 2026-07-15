@@ -8,14 +8,13 @@
 // Conformité MDR 2017/745 : saisie brute uniquement, aucun score ni seuil
 // affiché ; le calcul du score est fait ailleurs, pour lecture praticien.
 
-import type { ComponentProps } from 'react'
-import { View, Text, Pressable, TextInput } from 'react-native'
+import { View, Text, TextInput } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { LikertWidget, type LikertOption } from '../../fields/widgets/LikertWidget'
+import { SliderQuestion } from './SliderQuestion'
 import { styles } from './styles'
 
 export interface QuestionnaireLayoutProps {
@@ -50,6 +49,11 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
     .filter(f => f.field_type === 'scale_question' || f.field_type === 'scale_slider_question')
     .sort((a, b) => a.sort_order - b.sort_order)
 
+  // Questionnaire tout en curseurs (ex. mood_tracker) : le bloc d'instructions
+  // paraphrase ce que les curseurs et leurs ancres montrent déjà → on le masque
+  // (le titre suffit). Les échelles Likert cliniques gardent leurs consignes.
+  const allSliders = allQuestions.length > 0 && allQuestions.every(f => f.field_type === 'scale_slider_question')
+
   const questionIndexMap = new Map(allQuestions.map((q, i) => [q.id, i]))
 
   const contentItems = fields
@@ -62,8 +66,8 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
 
   return (
     <View style={styles.questionnaireContainer}>
-      {/* Instructions */}
-      {instructions.length > 0 && (
+      {/* Instructions (masquées pour un questionnaire tout en curseurs) */}
+      {instructions.length > 0 && !allSliders && (
         <View style={styles.instructionBlock}>
           {instructions.map(f => (
             <Text key={f.id} style={styles.instructionText}>{t(f.text_code ?? '')}</Text>
@@ -103,62 +107,15 @@ export function QuestionnaireLayout({ fields, answers, onAnswer, textInputValues
           if (qIndex === undefined) return null
 
           if (f.field_type === 'scale_slider_question') {
-            const min = parseInt((f.props['min'] as string | undefined) ?? '1', 10)
-            const max = parseInt((f.props['max'] as string | undefined) ?? '10', 10)
-            const color = (f.props['color'] as string | undefined) ?? colors.primary
-            const icon = (f.props['icon'] as string | undefined) as ComponentProps<typeof MaterialCommunityIcons>['name'] | undefined
-            const lowHintCode = f.props['low_hint_code'] as string | undefined
-            const highHintCode = f.props['high_hint_code'] as string | undefined
-            const midHintCode = f.props['mid_hint_code'] as string | undefined
-            const selectedValue = answers[qIndex] ?? null
-            const pips = Array.from({ length: max - min + 1 }, (_, i) => min + i)
             return (
-              <View key={f.id} style={styles.sliderCard}>
-                <View style={styles.sliderHeader}>
-                  <View style={styles.sliderLabelRow}>
-                    {icon != null && <MaterialCommunityIcons name={icon} size={18} color={color} />}
-                    <Text style={[styles.sliderLabel, { color }]}>{t(f.text_code ?? '')}</Text>
-                  </View>
-                  {selectedValue !== null && (
-                    <Text style={[styles.sliderValue, { color }]}>{selectedValue}</Text>
-                  )}
-                </View>
-                <View style={styles.sliderPips}>
-                  {pips.map(n => {
-                    const selected = n === selectedValue
-                    return (
-                      <Pressable
-                        key={n}
-                        style={[
-                          styles.sliderPip,
-                          selectedValue !== null && n <= selectedValue && { backgroundColor: color + '33' },
-                          selected && { backgroundColor: color, borderColor: color },
-                        ]}
-                        onPress={() => onAnswer(qIndex, n)}
-                        hitSlop={4}
-                        accessibilityRole="radio"
-                        accessibilityState={{ checked: selected }}
-                        accessibilityLabel={`${t(f.text_code ?? '')} : ${n}`}
-                      >
-                        <Text style={[styles.sliderPipText, selected && styles.sliderPipTextSelected]}>
-                          {n}
-                        </Text>
-                      </Pressable>
-                    )
-                  })}
-                </View>
-                {(lowHintCode != null || midHintCode != null || highHintCode != null) && (
-                  <View style={styles.sliderHints}>
-                    <Text style={styles.sliderHint}>{lowHintCode != null ? t(lowHintCode) : ''}</Text>
-                    {midHintCode != null && (
-                      <Text style={[styles.sliderHint, styles.sliderHintMid, { color }]}>
-                        {t(midHintCode)}
-                      </Text>
-                    )}
-                    <Text style={styles.sliderHint}>{highHintCode != null ? t(highHintCode) : ''}</Text>
-                  </View>
-                )}
-              </View>
+              <SliderQuestion
+                key={f.id}
+                field={f}
+                index={qIndex}
+                value={answers[qIndex] ?? null}
+                onAnswer={onAnswer}
+                t={t}
+              />
             )
           }
 

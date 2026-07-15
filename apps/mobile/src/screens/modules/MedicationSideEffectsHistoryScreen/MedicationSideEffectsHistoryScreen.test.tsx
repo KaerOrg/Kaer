@@ -73,6 +73,16 @@ jest.mock('@services/notificationService', () => ({
   updateTimeOverride: jest.fn().mockResolvedValue(true),
 }))
 
+jest.mock('@services/scaleEntryService', () => ({
+  deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
+}))
+
+jest.mock('@services/timelineMarkerService', () => ({
+  getAllTimelineMarkers: jest.fn().mockResolvedValue([]),
+  saveTimelineMarker: jest.fn().mockResolvedValue(undefined),
+  deleteTimelineMarker: jest.fn().mockResolvedValue(undefined),
+}))
+
 jest.mock('@services/sideEffectsConfigService', () => ({
   fetchTrackedEffects: jest.fn().mockResolvedValue([]),
   updateTrackedEffects: jest.fn().mockResolvedValue({ ok: true }),
