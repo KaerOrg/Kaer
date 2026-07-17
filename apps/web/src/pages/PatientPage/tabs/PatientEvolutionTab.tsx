@@ -19,6 +19,8 @@ import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
 import { MoodEvolutionBlock } from './MoodEvolutionBlock'
+import { EvolutionOverviewBand } from '../../../components/features/EvolutionOverviewBand'
+import { sleepCard, moodCard, activationCard, fearCard, type OverviewCard } from './overviewMetrics'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
@@ -98,6 +100,18 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
   const days = RANGE_DAYS[range]
 
+  // Cartes du bandeau d'aperçu (métrique 30 j glissants fixes, indépendante de la
+  // période). Une par module actif ayant des données. Humeur = mini-empreinte.
+  const overviewCards = useMemo<OverviewCard[]>(() => {
+    const shown = (mt: string) => activeTypes.has(mt) || showArchived
+    const cards: OverviewCard[] = []
+    if (sleepData.length > 0 && shown('sleep_diary')) cards.push(sleepCard(sleepData))
+    if (moodData.length > 0 && shown('mood_tracker')) cards.push(moodCard(moodData, t))
+    if (activityEntries.length > 0 && shown('behavioral_activation')) cards.push(activationCard(activityEntries))
+    if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
+    return cards
+  }, [sleepData, moodData, activityEntries, fearData, activeTypes, showArchived, t])
+
   // Nuits de la période de référence, re-datées sur l'axe courant (undefined si off/vide).
   const sleepComparison = useMemo(() => {
     if (!sleepCompare) return undefined
@@ -175,13 +189,15 @@ export function PatientEvolutionTab({ patientId }: Props) {
         </div>
       </div>
 
+      <EvolutionOverviewBand cards={overviewCards} />
+
       {!hasActiveData && !showArchived && (
         <p className="evolution-empty__desc">{t('evolution.all_archived')}</p>
       )}
 
       {/* ── Agenda du sommeil (grille + tableau fenêtre + courbes) ─────── */}
       {sleepData.length > 0 && isShown('sleep_diary') && (
-        <section className="evolution__sleep">
+        <section className="evolution__sleep" id="evo-section-sleep_diary">
           <div className="evolution__section-header">
             <h3 className="evolution__section-title">{t('evolution.sleep_section_title')}</h3>
             {isArchived('sleep_diary') && (
@@ -210,7 +226,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
       {/* ── Activation comportementale (compteurs + courbe P/A + grille hebdo) ── */}
       {activityEntries.length > 0 && isShown('behavioral_activation') && (
-        <section className="evolution__sleep">
+        <section className="evolution__sleep" id="evo-section-behavioral_activation">
           <div className="evolution__section-header">
             <h3 className="evolution__section-title">{t('evolution.ba_section_title')}</h3>
             {isArchived('behavioral_activation') && (
@@ -273,7 +289,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
         {/* ── Mood tracker — frise 6 dimensions (#164) ─────────── */}
         {moodData.length > 0 && isShown('mood_tracker') && (
           <>
-            <div className="evolution__section-header">
+            <div className="evolution__section-header" id="evo-section-mood_tracker">
               <h3 className="evolution__section-title">{t('evolution.mood_title')}</h3>
               {isArchived('mood_tracker') && (
                 <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
@@ -333,6 +349,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
           }))
           return (
             <EvolutionCard
+              id="evo-section-fear_thermometer"
               title={t('evolution.fear_title')}
               badge={t('evolution.n_sessions', { count: points.length })}
               wide
@@ -372,6 +389,8 @@ export function PatientEvolutionTab({ patientId }: Props) {
 // ─── EvolutionCard ────────────────────────────────────────────────────────────
 
 interface EvolutionCardProps {
+  /** Ancre de scroll pour le bandeau d'aperçu (#159). */
+  id?: string
   title: string
   badge?: string
   score?: string
@@ -383,7 +402,7 @@ interface EvolutionCardProps {
   children: React.ReactNode
 }
 
-function EvolutionCard({ title, badge, score, scoreColor, wide, animateIn, archived, archivedLabel, children }: EvolutionCardProps) {
+function EvolutionCard({ id, title, badge, score, scoreColor, wide, animateIn, archived, archivedLabel, children }: EvolutionCardProps) {
   const cls = [
     'evolution-card',
     wide ? 'evolution-card--wide' : '',
@@ -391,7 +410,7 @@ function EvolutionCard({ title, badge, score, scoreColor, wide, animateIn, archi
     archived ? 'evolution-card--archived' : '',
   ].filter(Boolean).join(' ')
   return (
-    <div className={cls}>
+    <div className={cls} id={id}>
       <div className="evolution-card__header">
         <div className="evolution-card__heading">
           <h3 className="evolution-card__title">{title}</h3>
