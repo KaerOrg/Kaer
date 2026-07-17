@@ -2127,6 +2127,8 @@
     "marker_type_treatment": "Treatment",
     "marker_type_life_event": "Life event",
     "marker_type_other": "Other",
+    "ba_completion_rate": "Completion rate",
+    "fear_delta": "SUDS delta",
     "fear_title": "Graded Exposure (SUDS)",
     "fear_before": "Before exposure",
     "fear_after": "After exposure",

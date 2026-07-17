@@ -369,6 +369,8 @@ sont exportés depuis `ui/Chart` et testés isolément.
 | `meanLabel?` | `string` | Préfixe de la ligne de moyenne (`'moy.'`) ; absent → pas de ligne |
 | `comparison?` | `{ data: TrendPoint[]; label: string }` | Série de référence (pointillés gris) |
 | `markers?` | `TrendMarker[]` | Repères datés verticaux (`{ date, label, color? }`) — traits en travers (traitement, événement…). Couleur = identité, jamais gravité (MDR). NB : axe X catégoriel → un repère n'apparaît qu'à une date présente dans les données |
+| `gaps?` | `GapSegments` | Politique des trous (#159) : `bands` = 2 unités vides ou + → bande grise « aucune saisie » ; `bridges` = 1 unité vide → pont pointillé. Calculée par `computeGapSegments` sur la série agrégée. |
+| `noDataLabel?` | `string` | Libellé i18n de la bande « aucune saisie » |
 | `locale?` | `string` | Locale des dates |
 | `height?` | `number` | Hauteur en px (défaut 240) |
 
@@ -376,6 +378,8 @@ sont exportés depuis `ui/Chart` et testés isolément.
 import { TrendChart } from '../components/ui/Chart'
 <TrendChart data={points} unit="%" yDomain={[0, 100]} meanLabel="moy." locale="fr" />
 ```
+
+> **Moteur d'agrégation & trous (`lib/chartAggregation.ts`, #159).** `aggregateByCadence(points, 'weekly'|'monthly', rangeDays)` transforme des saisies brutes datées en une série continue d'unités de cadence (1 point/unité, moyenne + `n`, `null` pour une unité vide). `computeGapSegments(series)` en dérive les `bridges` (trou d'1 unité) et `bands` (2 unités vides ou +), à passer en prop `gaps` de `TrendChart`. La **config par type** (`clinicalChartConfig.ts` → `MODULE_EVOLUTION_CONFIG` / `moduleEvolutionConfig(type)`) fixe unité, bornes Y, cadence, métrique d'aperçu et `kind` (`metric` / `fingerprint` / `scale` / `text`) par module. Logique pure testée.
 
 #### `DimensionFingerprint` — empreinte multi-dimensions (`components/features/`)
 
