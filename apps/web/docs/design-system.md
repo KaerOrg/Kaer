@@ -382,7 +382,9 @@ import { TrendChart } from '../components/ui/Chart'
 Miroir web du composant mobile (#161) : mini-graphe à barres verticales, une barre
 par dimension (valeur au-dessus, libellé court dessous, teinte = identité). Remplace
 toute **moyenne globale** — on lit N symptômes bruts. Largeur fluide (`flex: 1` par
-barre). Utilisé par le panneau « Données » de l'humeur (moyennes récentes). Props :
+barre). Utilisé par le panneau « Données » de l'humeur (moyennes récentes) **et** par
+la carte d'aperçu de la frise Humeur de la page Évolution (`MoodEvolutionBlock`, 30 j
+glissants). Props :
 `bars: FingerprintBar[]` (`{ key, label, value: number | null, color }`), `yMax`,
 `barAreaHeight?`, `showValues?`. Conformité MDR : couleur = identité, hauteur = magnitude.
 
