@@ -1,7 +1,8 @@
 import React, { useCallback } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '@ui/Button'
 import type { TimelineMarker } from '../../../lib/database'
 import { MARKER_TYPE_COLORS, MARKER_TYPE_ICONS } from '../../../lib/markerTheme'
 
@@ -29,9 +30,12 @@ export const MarkerRow = React.memo(function MarkerRow({ marker, locale, deleteL
         {new Date(marker.date + 'T12:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short' })}
       </Text>
       <Text style={styles.label} numberOfLines={1}>{marker.label}</Text>
-      <Pressable onPress={handleDelete} hitSlop={8} accessibilityLabel={deleteLabel}>
-        <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
-      </Pressable>
+      <Button
+        variant="ghost"
+        onPress={handleDelete}
+        accessibilityLabel={deleteLabel}
+        iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />}
+      />
     </View>
   )
 })

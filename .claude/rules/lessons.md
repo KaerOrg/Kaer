@@ -157,6 +157,34 @@ propre** CSS (`.x-btn { … }`). Si le fond/bordure vient de tokens ou de valeur
 extension du primitive. Ne **jamais** classer un bouton « défendable » par contagion de
 ses voisins. Vérif : `grep -nE '<button className="[a-z-]+btn"' apps/web/src --include="*.tsx"`.
 
+**mse-entry-slider (2026-07-16, mobile) — l'icône nue « sans habillage » classée natif légitime.**
+Une icône poubelle dans un `Pressable` **sans aucun style** (ni fond, ni bordure, ni
+radius, ni padding — juste `hitSlop={8}`) avait été jugée « natif légitime » au motif
+qu'elle n'a **pas d'habillage de bouton**. Or l'utilisateur a tranché net : **le rendu
+n'entre pas en ligne de compte — tout élément cliquable qui déclenche une action est un
+bouton, et son rendu appartient à `ui/Button`.**
+```tsx
+// ❌ icône d'action dans un Pressable nu — hitSlop recopié à la main
+<Pressable onPress={handleDelete} hitSlop={8} accessibilityLabel={deleteLabel}>
+  <MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />
+</Pressable>
+// ✅ le primitive — mode icône seule (label omis), ghost = rendu transparent, hitSlop fourni
+<Button variant="ghost" onPress={handleDelete} accessibilityLabel={deleteLabel}
+  iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={16} color={colors.textMuted} />} />
+```
+Le smoking gun : `ui/Button` (mobile) pose déjà `hitSlop={iconOnly ? 8 : undefined}` — le
+`hitSlop={8}` hand-rollé **recopiait** un détail que le primitive encapsule. Le mode
+icône-seule (déclenché par l'absence de `label`) + `variant="ghost"` (fond transparent)
+produit **exactement** le même rendu. Trois fichiers portaient le même Pressable nu
+(`MarkerRow`, `HistoryCard`, `ActivityListCard`) : dette répétée, jamais une norme.
+→ **« Pas d'habillage » n'est PLUS une exception.** Le test décisif n'est pas « a-t-il un
+fond/bordure ? » mais « est-ce cliquable et déclenche-t-il une action ? ». Si oui →
+`ui/Button` (ghost + icône seule pour une icône nue). Ne restent natifs qu'une **surface**
+entière (→ `ui/Card onPress`), un **wrapper** autour d'un primitive, ou un **rôle a11y
+non-bouton** (`accessibilityRole="checkbox"` — un vrai toggle, pas un bouton). Vérif :
+`grep -rn "<Pressable" apps/mobile/src --include="*.tsx" | grep -v components/ui/` — chaque
+occurrence est-elle une surface/wrapper/rôle, ou un bouton d'action déguisé ?
+
 ---
 
 ## Design system : tokens (pas de valeur hardcodée)

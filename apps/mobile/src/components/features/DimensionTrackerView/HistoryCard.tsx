@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react'
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors, spacing, radius } from '@theme'
+import { Button } from '@ui/Button'
 import { formatDateLong } from '../../../lib/dateUtils'
 import type { ScaleEntry } from '../../../lib/database'
 import { DimensionFingerprint, type FingerprintBar } from '../DimensionFingerprint'
@@ -100,9 +101,12 @@ export const HistoryCard = React.memo(function HistoryCard({
 
       <View style={styles.actions}>
         <MaterialCommunityIcons name="pencil-outline" size={17} color={accentColor} />
-        <Pressable onPress={handleDelete} hitSlop={8} accessibilityLabel={deleteLabel}>
-          <MaterialCommunityIcons name="trash-can-outline" size={17} color={colors.textMuted} />
-        </Pressable>
+        <Button
+          variant="ghost"
+          onPress={handleDelete}
+          accessibilityLabel={deleteLabel}
+          iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={17} color={colors.textMuted} />}
+        />
       </View>
     </Pressable>
   )
