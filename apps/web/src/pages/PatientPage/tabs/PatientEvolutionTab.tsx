@@ -18,6 +18,7 @@ import type { RhythmEntry } from '@kaer/shared'
 import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
 import { SleepDataPanel } from './SleepDataPanel'
+import { MoodEvolutionBlock } from './MoodEvolutionBlock'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
@@ -30,7 +31,6 @@ import {
 } from '../../../lib/chartConfig'
 import {
   SCALE_CONFIG,
-  MOOD_DIMENSIONS,
   DEFAULT_SCALE_COLOR,
   FEAR_BEFORE_COLOR,
   FEAR_AFTER_COLOR,
@@ -70,7 +70,6 @@ const EMPTY_EVOLUTION: EvolutionData = {
 export function PatientEvolutionTab({ patientId }: Props) {
   const { t, i18n } = useTranslation()
   const [range, setRange] = useState<TimeRange>('1y')
-  const [moodExpanded, setMoodExpanded] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   // Comparaison à une période de référence (sommeil) — décochée par défaut (graphe épuré).
   const [sleepCompare, setSleepCompare] = useState(false)
@@ -78,6 +77,11 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
   const evolutionQuery = useQuery(engagementQueries.patientEvolution(patientId))
   const modulesQuery = useQuery(patientQueries.modules(patientId))
+  // Repères du mood_tracker : chargés seulement si le patient a des saisies d'humeur.
+  const moodMarkersQuery = useQuery({
+    ...engagementQueries.moodMarkers(patientId),
+    enabled: (evolutionQuery.data?.moodData.length ?? 0) > 0,
+  })
   const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
@@ -266,67 +270,23 @@ export function PatientEvolutionTab({ patientId }: Props) {
           )
         })}
 
-        {/* ── Mood tracker ─────────────────────────────────────── */}
-        {moodData.length > 0 && isShown('mood_tracker') && (() => {
-          const filteredMood = filterByRange(moodData, days)
-          return (
-            <>
-              <div className="evolution__section-header">
-                <h3 className="evolution__section-title">{t('evolution.mood_title')}</h3>
-                {isArchived('mood_tracker') && (
-                  <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-                )}
-                <Toggle
-                  checked={moodExpanded}
-                  onChange={setMoodExpanded}
-                  label={t('evolution.mood_detail')}
-                />
-              </div>
-
-              {!moodExpanded && filteredMood.length >= 2 && (
-                <EvolutionCard
-                  key="mood-composite"
-                  title={t('evolution.mood_title')}
-                  badge={t('evolution.n_sessions', { count: filteredMood.length })}
-                  wide
-                  animateIn
-                >
-                  <LineChart
-                    data={filteredMood}
-                    series={MOOD_DIMENSIONS.map(d => ({ key: d.key, color: d.color, label: t(`evolution.mood_${d.key}`) }))}
-                    yDomain={[1, 10]}
-                    showLegend
-                    height={240}
-                    locale={i18n.language}
-                  />
-                </EvolutionCard>
+        {/* ── Mood tracker — frise 6 dimensions (#164) ─────────── */}
+        {moodData.length > 0 && isShown('mood_tracker') && (
+          <>
+            <div className="evolution__section-header">
+              <h3 className="evolution__section-title">{t('evolution.mood_title')}</h3>
+              {isArchived('mood_tracker') && (
+                <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
               )}
-
-              {moodExpanded && MOOD_DIMENSIONS.map(dim => {
-                const points = filteredMood.filter(p => p[dim.key] != null)
-                if (points.length < 2) return null
-                const last = points.at(-1)?.[dim.key]
-                return (
-                  <EvolutionCard
-                    key={dim.key}
-                    title={t(`evolution.mood_${dim.key}`)}
-                    badge={t('evolution.n_sessions', { count: points.length })}
-                    score={last != null ? String(last) + ' / 10' : undefined}
-                    scoreColor={dim.color}
-                    animateIn
-                  >
-                    <LineChart
-                      data={points}
-                      series={[{ key: dim.key, color: dim.color, label: t(`evolution.mood_${dim.key}`) }]}
-                      yDomain={[1, 10]}
-                      locale={i18n.language}
-                    />
-                  </EvolutionCard>
-                )
-              })}
-            </>
-          )
-        })()}
+            </div>
+            <MoodEvolutionBlock
+              points={moodData}
+              markers={moodMarkersQuery.data ?? []}
+              locale={i18n.language}
+              periodDays={days}
+            />
+          </>
+        )}
 
         {/* ── Effets indésirables — 1 carte par effet ───────────── */}
         {medData.length > 0 && isShown('medication_side_effects') && (

@@ -1,0 +1,106 @@
+.mood-frise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+}
+
+/* Carte d'aperçu : mini-empreinte 30 jours glissants. */
+.mood-frise__overview {
+  border: 1px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-card, #FFFFFF);
+  padding: var(--spacing-md, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+}
+
+.mood-frise__overview-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm, 8px);
+  font-size: 12px;
+  color: var(--color-text-muted, #6B7280);
+}
+
+.mood-frise__lines {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border, #E5E7EB);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-card, #FFFFFF);
+  overflow: hidden;
+}
+
+.mood-frise__line + .mood-frise__line {
+  border-top: 1px solid var(--color-border, #E5E7EB);
+}
+
+.mood-frise__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+}
+
+.mood-frise__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mood-frise__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+  width: 92px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Sparkline repliée : occupe l'espace disponible, ne pousse jamais hors cadre. */
+.mood-frise__spark {
+  flex: 1;
+  min-width: 0;
+}
+
+.mood-frise__stats {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm, 8px);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.mood-frise__last {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.mood-frise__last small {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-muted, #6B7280);
+}
+
+.mood-frise__stat {
+  font-size: 11px;
+  color: var(--color-text-muted, #6B7280);
+}
+
+.mood-frise__detail {
+  padding: 0 var(--spacing-md, 16px) var(--spacing-md, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+}
+
+.mood-frise__compare {
+  display: flex;
+  justify-content: flex-end;
+}
