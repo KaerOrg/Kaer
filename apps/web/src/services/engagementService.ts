@@ -15,6 +15,12 @@ export type MoodPoint = {
 
 export type FearPoint = { date: string; suds_before: number; suds_after: number }
 
+// Repère temporel (Life Chart) posé par le patient sur le mood_tracker (#161),
+// lu par le praticien. Type en liste fermée ; `date` = jour métier du repère
+// (payload.date), pas l'instant de sync. Aucune interprétation (contexte brut).
+export type MoodMarkerType = 'treatment' | 'life_event' | 'other'
+export type MoodMarkerRow = { id: string; date: string; label: string; type: MoodMarkerType }
+
 export type MedEffectPoint = { date: string; [key: string]: number | string }
 
 // Fiche d'un module `column_form` (payload { values }) : date + valeurs brutes
@@ -123,6 +129,32 @@ export async function fetchMoodEvolution(patientId: string): Promise<MoodPoint[]
     if (hasValue) points.push(point)
   }
   return points
+}
+
+// ── Repères temporels du mood_tracker (posés par le patient, #161) ───────────
+
+function normalizeMarkerType(raw: unknown): MoodMarkerType {
+  return raw === 'treatment' || raw === 'life_event' ? raw : 'other'
+}
+
+export async function fetchMoodMarkers(patientId: string): Promise<MoodMarkerRow[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('id, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'mood_marker')
+    .eq('module_id', 'mood_tracker')
+    .order('client_created_at')
+
+  if (error || !data) return []
+  const markers: MoodMarkerRow[] = []
+  for (const row of data) {
+    const date = typeof row.payload.date === 'string' ? row.payload.date : null
+    const label = typeof row.payload.label === 'string' ? row.payload.label : ''
+    if (date == null) continue
+    markers.push({ id: row.id, date, label, type: normalizeMarkerType(row.payload.type) })
+  }
+  return markers
 }
 
 // ── Évolution du thermomètre de la peur (SUDS avant/après) ───────────────────

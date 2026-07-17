@@ -368,6 +368,7 @@ sont exportés depuis `ui/Chart` et testés isolément.
 | `color?` | `string` | Couleur d'accent (défaut teal) |
 | `meanLabel?` | `string` | Préfixe de la ligne de moyenne (`'moy.'`) ; absent → pas de ligne |
 | `comparison?` | `{ data: TrendPoint[]; label: string }` | Série de référence (pointillés gris) |
+| `markers?` | `TrendMarker[]` | Repères datés verticaux (`{ date, label, color? }`) — traits en travers (traitement, événement…). Couleur = identité, jamais gravité (MDR). NB : axe X catégoriel → un repère n'apparaît qu'à une date présente dans les données |
 | `locale?` | `string` | Locale des dates |
 | `height?` | `number` | Hauteur en px (défaut 240) |
 
@@ -375,6 +376,15 @@ sont exportés depuis `ui/Chart` et testés isolément.
 import { TrendChart } from '../components/ui/Chart'
 <TrendChart data={points} unit="%" yDomain={[0, 100]} meanLabel="moy." locale="fr" />
 ```
+
+#### `DimensionFingerprint` — empreinte multi-dimensions (`components/features/`)
+
+Miroir web du composant mobile (#161) : mini-graphe à barres verticales, une barre
+par dimension (valeur au-dessus, libellé court dessous, teinte = identité). Remplace
+toute **moyenne globale** — on lit N symptômes bruts. Largeur fluide (`flex: 1` par
+barre). Utilisé par le panneau « Données » de l'humeur (moyennes récentes). Props :
+`bars: FingerprintBar[]` (`{ key, label, value: number | null, color }`), `yMax`,
+`barAreaHeight?`, `showValues?`. Conformité MDR : couleur = identité, hauteur = magnitude.
 
 #### `ProgressRing` — anneau de valeur (jauge circulaire)
 

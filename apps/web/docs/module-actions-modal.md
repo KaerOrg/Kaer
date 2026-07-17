@@ -12,11 +12,21 @@ Vue patient** (porté par `computeModuleTabs`).
 
 | Onglet | Contenu | Composant |
 |---|---|---|
-| **Données** (`data`) | Vraies données patient synchronisées (graphiques / fiches / résumé) | `ModuleDataPanel` |
+| **Données** (`data`) | Vraies données patient synchronisées (graphiques / fiches / résumé) | `ModuleDataPanel` (routeur) |
 | **Configuration** (`config`) | Éditeur de config propre au module (voir plus bas) | panneaux dédiés |
 | **Notifications** (`notifications`) | CRUD des routines de rappel | `NotificationRoutinePanel` |
 | **Sources & recommandations** (`sources`) | Références bibliographiques du module | `ModuleSourcesPanel` |
 | **Vue patient** (`preview`) | Rendu de l'écran patient (FieldRenderer) | `ModulePatientViewPanel` |
+
+> **Onglet Données — panneaux dédiés par module.** `ModuleDataPanel` route selon le
+> type : agenda du sommeil → `SleepDataPanel`, **humeur → `MoodDataPanel`** (moyennes
+> récentes 7 j / 1 mois + empreinte 6 barres, petits multiples par dimension avec
+> « agrandir », détail au clic via `TrendChart` + repères + comparaison mois -1, liste
+> des repères typés posés par le patient), rythmes → `ChronoDataPanel`, colonnes →
+> `ColumnFormDataPanel`, activation → `BehavioralActivationPanel` ; sinon graphe
+> générique `ModuleChart` ou tableau `ModuleSummaryPanel`. Le bloc humeur lit les
+> repères via `engagementQueries.moodMarkers` (parité mobile #161). Aucune moyenne
+> « bien-être » globale (MDR).
 
 > Historique : les onglets **Vue patient** et **Sources** étaient auparavant des
 > sous-onglets internes à `ModulePreviewPanel`. Ils sont désormais aplatis en onglets

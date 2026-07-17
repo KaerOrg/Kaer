@@ -9,6 +9,15 @@ import {
 } from './trendMath'
 import './TrendChart.css'
 
+// Repère daté vertical (Life Chart) tracé en travers du graphe. La couleur encode
+// l'identité (type de repère), jamais une gravité clinique (MDR). NB : l'axe X
+// étant catégoriel, un repère n'apparaît qu'à une date présente dans les données.
+export interface TrendMarker {
+  date: string
+  label: string
+  color?: string
+}
+
 export interface TrendChartProps {
   /** Série principale, un point par nuit (valeur `null` = nuit non renseignée). */
   data: TrendPoint[]
@@ -22,6 +31,8 @@ export interface TrendChartProps {
   meanLabel?: string
   /** Série de référence optionnelle (pointillés gris) — comparaison de période. */
   comparison?: { data: TrendPoint[]; label: string }
+  /** Repères datés verticaux (traitement, événement…) tracés en travers. */
+  markers?: TrendMarker[]
   locale?: string
   height?: number
 }
@@ -75,7 +86,7 @@ function TrendTooltip({ active, payload, label, unit, locale, comparisonLabel }:
  */
 export function TrendChart({
   data, unit = '', yDomain, color = DEFAULT_COLOR,
-  meanLabel, comparison, locale = 'fr-FR', height = 240,
+  meanLabel, comparison, markers, locale = 'fr-FR', height = 240,
 }: TrendChartProps) {
   const merged = useMemo(() => mergeTrendSeries(data, comparison?.data), [data, comparison])
   const mean = useMemo(() => computeTrendMean(data), [data])
@@ -118,6 +129,14 @@ export function TrendChart({
             strokeWidth={1.5} dot={false} connectNulls isAnimationActive={false}
           />
         ) : null}
+
+        {markers?.map(m => (
+          <ReferenceLine
+            key={`${m.date}-${m.label}`}
+            x={m.date} stroke={m.color ?? REF_COLOR} strokeDasharray="4 4" strokeWidth={1.5}
+            label={{ value: m.label, position: 'top', fill: m.color ?? REF_COLOR, fontSize: 10, fontWeight: 700 }}
+          />
+        ))}
 
         <Line
           dataKey="value" type="monotone" stroke={color} strokeWidth={2.5}

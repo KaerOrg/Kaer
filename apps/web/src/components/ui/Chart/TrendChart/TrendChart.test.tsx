@@ -58,4 +58,20 @@ describe('TrendChart', () => {
     // 1 marqueur « dernière valeur » + 1 marqueur événement
     expect(getAllByTestId('refdot')).toHaveLength(2)
   })
+
+  it('trace une ligne verticale par repère daté (markers)', () => {
+    const { getAllByTestId } = render(
+      <TrendChart
+        data={DATA}
+        yDomain={[0, 100]}
+        markers={[
+          { date: '2026-03-01', label: 'Traitement', color: '#4FA5A9' },
+          { date: '2026-03-03', label: 'Événement', color: '#9C89D6' },
+        ]}
+      />,
+    )
+    const reflines = getAllByTestId('refline').map(el => el.getAttribute('data-key'))
+    // Pas de meanLabel ici → seuls les 2 repères sont des reflines.
+    expect(reflines).toEqual(['2026-03-01', '2026-03-03'])
+  })
 })
