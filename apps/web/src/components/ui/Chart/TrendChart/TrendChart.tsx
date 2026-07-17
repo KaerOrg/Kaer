@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from 'react'
 import {
   ResponsiveContainer, LineChart as RechartsLineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ReferenceDot,
+  XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ReferenceDot, ReferenceArea,
 } from 'recharts'
+import type { GapSegments } from '../../../../lib/chartAggregation'
 import {
   computeTrendMean, lastFilledPoint, eventDates, formatTrendValue, mergeTrendSeries,
   type TrendPoint,
@@ -33,6 +34,14 @@ export interface TrendChartProps {
   comparison?: { data: TrendPoint[]; label: string }
   /** Repères datés verticaux (traitement, événement…) tracés en travers. */
   markers?: TrendMarker[]
+  /**
+   * Politique des trous (#159) : `bridges` = trous d'1 unité (pont pointillé),
+   * `bands` = 2 unités vides ou + (bande « aucune saisie »). Calculée par
+   * `computeGapSegments` sur la série agrégée. La courbe se coupe déjà sur les null.
+   */
+  gaps?: GapSegments
+  /** Libellé de la bande « aucune saisie » (i18n, fourni par l'appelant). */
+  noDataLabel?: string
   locale?: string
   height?: number
 }
@@ -40,6 +49,7 @@ export interface TrendChartProps {
 const AXIS_COLOR = '#94A3B8'
 const GRID_COLOR = '#F1F5F9'
 const REF_COLOR = '#94A3B8'
+const BAND_COLOR = '#F1F5F9'
 const DEFAULT_COLOR = 'var(--color-primary)'
 
 interface TooltipEntry { dataKey?: string | number; value?: number | string; color?: string }
@@ -86,12 +96,22 @@ function TrendTooltip({ active, payload, label, unit, locale, comparisonLabel }:
  */
 export function TrendChart({
   data, unit = '', yDomain, color = DEFAULT_COLOR,
-  meanLabel, comparison, markers, locale = 'fr-FR', height = 240,
+  meanLabel, comparison, markers, gaps, noDataLabel, locale = 'fr-FR', height = 240,
 }: TrendChartProps) {
   const merged = useMemo(() => mergeTrendSeries(data, comparison?.data), [data, comparison])
   const mean = useMemo(() => computeTrendMean(data), [data])
   const last = useMemo(() => lastFilledPoint(data), [data])
   const events = useMemo(() => eventDates(data), [data])
+
+  // Ponts d'1 unité : segment pointillé entre les deux points renseignés qui
+  // encadrent le trou (valeurs lues dans la série).
+  const bridgeSegments = useMemo(() => {
+    if (gaps == null) return []
+    const valueByDate = new Map(data.filter(p => p.value != null).map(p => [p.date, p.value as number]))
+    return gaps.bridges
+      .map(b => ({ from: b.from, to: b.to, vFrom: valueByDate.get(b.from), vTo: valueByDate.get(b.to) }))
+      .filter((b): b is { from: string; to: string; vFrom: number; vTo: number } => b.vFrom != null && b.vTo != null)
+  }, [gaps, data])
 
   const formatXTick = useCallback(
     (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
@@ -102,6 +122,22 @@ export function TrendChart({
     <ResponsiveContainer width="100%" height={height}>
       <RechartsLineChart data={merged} margin={{ top: 16, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="4 4" stroke={GRID_COLOR} vertical={false} />
+
+        {gaps?.bands.map(band => (
+          <ReferenceArea
+            key={`band-${band.from}-${band.to}`}
+            x1={band.from} x2={band.to} fill={BAND_COLOR} fillOpacity={0.9} stroke="none"
+            label={noDataLabel != null ? { value: noDataLabel, fontSize: 10, fill: REF_COLOR } : undefined}
+          />
+        ))}
+
+        {bridgeSegments.map(b => (
+          <ReferenceLine
+            key={`bridge-${b.from}-${b.to}`}
+            stroke={color} strokeDasharray="4 4" strokeWidth={2} ifOverflow="extendDomain"
+            segment={[{ x: b.from, y: b.vFrom }, { x: b.to, y: b.vTo }]}
+          />
+        ))}
         <XAxis
           dataKey="date" tickFormatter={formatXTick}
           tick={{ fontSize: 11, fill: AXIS_COLOR }} axisLine={false} tickLine={false}

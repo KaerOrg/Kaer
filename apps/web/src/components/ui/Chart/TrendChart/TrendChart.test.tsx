@@ -18,6 +18,7 @@ vi.mock('recharts', () => {
     Tooltip: Mark('tooltip'),
     ReferenceLine: Mark('refline'),
     ReferenceDot: Mark('refdot'),
+    ReferenceArea: Mark('refarea'),
   }
 })
 
@@ -73,5 +74,27 @@ describe('TrendChart', () => {
     const reflines = getAllByTestId('refline').map(el => el.getAttribute('data-key'))
     // Pas de meanLabel ici → seuls les 2 repères sont des reflines.
     expect(reflines).toEqual(['2026-03-01', '2026-03-03'])
+  })
+
+  it('politique des trous : bande grise (2+ vides) + pont pointillé (1 vide)', () => {
+    const data: TrendPoint[] = [
+      { date: '2026-03-01', value: 5 },
+      { date: '2026-03-03', value: 8 }, // encadre un pont
+    ]
+    const { getAllByTestId, queryAllByTestId } = render(
+      <TrendChart
+        data={data}
+        yDomain={[0, 10]}
+        gaps={{
+          bands: [{ from: '2026-03-10', to: '2026-03-17' }],
+          bridges: [{ from: '2026-03-01', to: '2026-03-03' }],
+        }}
+        noDataLabel="aucune saisie"
+      />,
+    )
+    // Une bande « aucune saisie ».
+    expect(getAllByTestId('refarea')).toHaveLength(1)
+    // Un pont (refline sans meanLabel/markers → uniquement le segment de pont).
+    expect(queryAllByTestId('refline')).toHaveLength(1)
   })
 })
