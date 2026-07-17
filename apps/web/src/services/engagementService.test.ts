@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase'
 import {
   fetchScaleEvolution,
   fetchMoodEvolution,
+  fetchMoodMarkers,
   fetchFearEvolution,
   fetchMedSideEffectsEvolution,
   fetchSleepEvolution,
@@ -194,6 +195,38 @@ describe('engagementService.fetchMoodEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
     expect(await fetchMoodEvolution('p1')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchMoodMarkers', () => {
+  it('mappe les repères (date/label/type), id depuis la ligne', async () => {
+    const rows = [
+      { id: 'm1', payload: { date: '2026-06-14', label: 'Passage à 150 mg', type: 'treatment' } },
+      { id: 'm2', payload: { date: '2026-07-02', label: 'Reprise du travail', type: 'life_event' } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchMoodMarkers('p1')).toEqual([
+      { id: 'm1', date: '2026-06-14', label: 'Passage à 150 mg', type: 'treatment' },
+      { id: 'm2', date: '2026-07-02', label: 'Reprise du travail', type: 'life_event' },
+    ])
+  })
+
+  it('normalise un type inconnu vers "other" et ignore un repère sans date', async () => {
+    const rows = [
+      { id: 'm1', payload: { date: '2026-06-14', label: 'X', type: 'bogus' } },
+      { id: 'm2', payload: { label: 'sans date' } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchMoodMarkers('p1')).toEqual([
+      { id: 'm1', date: '2026-06-14', label: 'X', type: 'other' },
+    ])
+  })
+
+  it('retourne [] sur erreur', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: { message: 'x' } }) as never)
+    expect(await fetchMoodMarkers('p1')).toEqual([])
   })
 })
 

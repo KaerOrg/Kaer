@@ -13,6 +13,7 @@ vi.mock('../../../components/ui/Chart', () => ({
 
 const mockFetchScaleEvolution = vi.fn()
 const mockFetchMoodEvolution = vi.fn()
+const mockFetchMoodMarkers = vi.fn()
 const mockFetchFearEvolution = vi.fn()
 const mockFetchMedSideEffectsEvolution = vi.fn()
 const mockFetchModuleSummary = vi.fn()
@@ -22,6 +23,7 @@ const mockFetchActivityEntries = vi.fn()
 vi.mock('@services/engagementService', () => ({
   fetchScaleEvolution: (...args: unknown[]) => mockFetchScaleEvolution(...args),
   fetchMoodEvolution: (...args: unknown[]) => mockFetchMoodEvolution(...args),
+  fetchMoodMarkers: (...args: unknown[]) => mockFetchMoodMarkers(...args),
   fetchFearEvolution: (...args: unknown[]) => mockFetchFearEvolution(...args),
   fetchMedSideEffectsEvolution: (...args: unknown[]) => mockFetchMedSideEffectsEvolution(...args),
   fetchModuleSummary: (...args: unknown[]) => mockFetchModuleSummary(...args),
@@ -33,6 +35,13 @@ vi.mock('@services/engagementService', () => ({
 vi.mock('./ColumnFormDataPanel', () => ({
   ColumnFormDataPanel: ({ entries }: { entries: unknown[] }) => (
     <div data-testid="column-form-panel" data-entries={entries.length} />
+  ),
+}))
+
+// Idem : le panneau humeur est couvert par MoodDataPanel.test.tsx.
+vi.mock('./MoodDataPanel', () => ({
+  MoodDataPanel: ({ points, markers }: { points: unknown[]; markers: unknown[] }) => (
+    <div data-testid="mood-panel" data-points={points.length} data-markers={markers.length} />
   ),
 }))
 
@@ -61,15 +70,18 @@ describe('ModuleDataPanel', () => {
     expect(container.querySelector('.module-data-panel__chart-count')?.textContent).toBe('evolution.n_sessions')
   })
 
-  it('mood_tracker → graphe à 6 séries (dimensions)', async () => {
+  it('mood_tracker → panneau humeur dédié (points + repères)', async () => {
     mockFetchMoodEvolution.mockResolvedValue([
       { date: '2026-01-01', humeur: 7, energie: 6, anxiete: 4, plaisir: 5, sommeil: 8, alimentation: 6 },
       { date: '2026-02-01', humeur: 6, energie: 5, anxiete: 5, plaisir: 4, sommeil: 7, alimentation: 5 },
     ])
+    mockFetchMoodMarkers.mockResolvedValue([{ id: 'm1', date: '2026-01-15', label: 'X', type: 'treatment' }])
     const { getByTestId } = render(<QueryClientProvider client={makeClient()}><ModuleDataPanel patientId="p1" moduleType="mood_tracker" /></QueryClientProvider>)
 
-    await waitFor(() => expect(getByTestId('linechart')).toBeTruthy())
-    expect(getByTestId('linechart').getAttribute('data-series')).toBe('6')
+    await waitFor(() => expect(getByTestId('mood-panel')).toBeTruthy())
+    expect(mockFetchMoodMarkers).toHaveBeenCalledWith('p1')
+    expect(getByTestId('mood-panel').getAttribute('data-points')).toBe('2')
+    expect(getByTestId('mood-panel').getAttribute('data-markers')).toBe('1')
   })
 
   it('effets indésirables → une série par effet', async () => {

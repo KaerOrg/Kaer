@@ -6,13 +6,13 @@ import { engagementQueries, type ChartKind, type ModuleDataResult } from '../../
 import { colorAt } from '../../../lib/chartConfig'
 import {
   SCALE_CONFIG,
-  MOOD_DIMENSIONS,
   DEFAULT_SCALE_COLOR,
   FEAR_BEFORE_COLOR,
   FEAR_AFTER_COLOR,
 } from './clinicalChartConfig'
 import { ModuleChart } from './ModuleChart'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
+import { MoodDataPanel } from './MoodDataPanel'
 import { SleepDataPanel } from './SleepDataPanel'
 import { ChronoDataPanel } from './ChronoDataPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
@@ -50,10 +50,21 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   const kind = useMemo(() => chartKind(moduleType), [moduleType])
   const dataQuery = useQuery(engagementQueries.moduleData(patientId, moduleType, kind))
   const state: Fetched = dataQuery.isSuccess ? dataQuery.data : { status: 'loading' }
+  // Repères du mood_tracker : lus seulement pour ce module (parité mobile #161).
+  const markersQuery = useQuery({
+    ...engagementQueries.moodMarkers(patientId),
+    enabled: moduleType === 'mood_tracker',
+  })
 
   // Tableau résumé : ModuleSummaryPanel porte son propre cadre (chrome identique).
   if (state.status === 'summary') {
     return <ModuleSummaryPanel summary={state.summary} moduleType={moduleType} loading={false} />
+  }
+
+  // Thermomètre de l'humeur : panneau dédié (moyennes + petits multiples + détail
+  // + repères), cadre propre. Miroir de l'app patient refondue (#161).
+  if (state.status === 'mood') {
+    return <MoodDataPanel points={state.points} markers={markersQuery.data ?? []} locale={i18n.language} />
   }
 
   // Agenda du sommeil : panneau dédié (grille + courbes + stats), cadre propre.
@@ -101,18 +112,6 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
           />
         )
       })()}
-
-      {state.status === 'mood' && (
-        <ModuleChart
-          title={t('evolution.mood_title')}
-          count={state.points.length}
-          data={state.points}
-          series={MOOD_DIMENSIONS.map(d => ({ key: d.key, color: d.color, label: t(`evolution.mood_${d.key}`) }))}
-          yDomain={[1, 10]}
-          showLegend
-          locale={locale}
-        />
-      )}
 
       {state.status === 'fear' && (
         <ModuleChart

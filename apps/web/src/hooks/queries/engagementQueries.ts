@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import {
   fetchScaleEvolution,
   fetchMoodEvolution,
+  fetchMoodMarkers,
   fetchFearEvolution,
   fetchMedSideEffectsEvolution,
   fetchSleepEvolution,
@@ -12,6 +13,7 @@ import {
   fetchActivityEntries,
   type ScorePoint,
   type MoodPoint,
+  type MoodMarkerRow,
   type FearPoint,
   type MedEffectPoint,
   type SleepPoint,
@@ -123,11 +125,19 @@ export const engagementQueries = {
       },
     }),
 
+  // Repères temporels du mood_tracker posés par le patient (lecture seule).
+  moodMarkers: (patientId: string) =>
+    queryOptions({
+      queryKey: ['engagement', 'moodMarkers', patientId],
+      queryFn: (): Promise<MoodMarkerRow[]> => fetchMoodMarkers(patientId),
+    }),
+
   // Préfixes de clés dérivées de `patient_entries` pour UN patient — à invalider
   // quand une entrée de ce patient change (Realtime #103). Prefix match : couvre
   // l'évolution ET toutes les cards `moduleData` (tous modules/kinds) du patient.
   patientDataKeys: (patientId: string): readonly (readonly string[])[] => [
     ['engagement', 'evolution', patientId],
     ['engagement', 'moduleData', patientId],
+    ['engagement', 'moodMarkers', patientId],
   ],
 }

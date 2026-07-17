@@ -22,6 +22,7 @@ describe('engagementQueries', () => {
     expect(engagementQueries.patientDataKeys('pt1')).toEqual([
       ['engagement', 'evolution', 'pt1'],
       ['engagement', 'moduleData', 'pt1'],
+      ['engagement', 'moodMarkers', 'pt1'],
     ])
   })
 })
