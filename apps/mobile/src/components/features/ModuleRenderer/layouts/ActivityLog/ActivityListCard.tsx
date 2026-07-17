@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 import { View, Text, Pressable } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '@ui/Button'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import type { ActivityRecord } from '../../../../../lib/database'
 import type { LabelFn } from './types'
@@ -84,12 +85,20 @@ export const ActivityListCard = React.memo(function ActivityListCard({
         ) : null}
       </View>
       <View style={alStyles.recordActions}>
-        <Pressable onPress={handleEdit} hitSlop={8} accessibilityLabel={t('common.edit')} testID={`edit-${record.id}`}>
-          <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
-        </Pressable>
-        <Pressable onPress={handleDelete} hitSlop={8} accessibilityLabel={t('common.delete')} testID={`delete-${record.id}`}>
-          <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-        </Pressable>
+        <Button
+          variant="ghost"
+          onPress={handleEdit}
+          accessibilityLabel={t('common.edit')}
+          testID={`edit-${record.id}`}
+          iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
+        />
+        <Button
+          variant="ghost"
+          onPress={handleDelete}
+          accessibilityLabel={t('common.delete')}
+          testID={`delete-${record.id}`}
+          iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
+        />
       </View>
     </View>
   )

@@ -213,16 +213,26 @@ Un composant livré sans sa trace documentaire crée de la dette invisible — l
 - **Le primitive lui-même** : `ui/Button`, `ui/Chip`, `ui/Tabs`, `ui/SegmentedControl`,
   `ui/Modal` (close), `ui/Banner`, `ui/Accordion`… un primitive ne se construit pas sur
   un autre.
-- **Surface cliquable non bouton-shaped** : une carte, une ligne de liste/tableau, une
-  cellule, un item de menu, une vignette entière rendue cliquable. `Button` imposerait
-  son habillage (padding/fond/radius) — garder un `<button>` neutre (reset CSS) est correct.
+- **Surface-carte / ligne / cellule entière rendue cliquable** : une carte, une ligne de
+  liste/tableau, une cellule, un item de menu, une vignette. Ce n'est pas un bouton mais
+  une **surface** — elle passe par le primitive de surface (`ui/Card` avec `onPress`), pas
+  par un `<button>`/`Pressable` nu réinventé. Le `<button>` natif nu n'est toléré que si
+  **aucun** primitive de surface ne couvre le cas.
 - **Wrapper d'interaction autour d'un primitive présentationnel** : ex. `<button>`
   transparent (padding 0, sans fond) qui rend un `<Toggle>` cliquable. Ce n'est pas un
   bouton visuel.
+- **Contrôle à sémantique non-bouton** : `role`/`accessibilityRole` `checkbox`, `radio`,
+  `switch`, `link`… que `ui/Button` (rôle `button` figé) ne peut pas exprimer → primitive
+  dédié (`ui/Toggle`…) ou natif justifié.
 
-> **Test décisif** : « ce `<button>` a-t-il un habillage de bouton (fond, bordure, radius,
-> padding de bouton) ? » Si oui → `ui/Button` (ou la variante à ajouter). Si non (reset
-> nu, surface large, wrapper) → natif légitime, mais le justifier en une ligne.
+> **Test décisif** : « ce contrôle est-il **cliquable et déclenche-t-il une action**
+> (icône seule, label, CTA) ? » Si oui → **`ui/Button`** (variante `ghost` + icône seule
+> pour une icône nue), **quel que soit son habillage**. **L'absence de fond/bordure/radius
+> n'est PAS une exception** : une icône poubelle/crayon nue dans un `Pressable` (mobile) ou
+> un `<button>` sans CSS (web) **est un bouton** et se rend via `ui/Button` — le design
+> system possède le rendu, y compris le rendu « invisible » (ghost) et le `hitSlop`. Ne
+> restent natifs que : le primitive lui-même, une **surface** entière (→ `ui/Card`), un
+> **wrapper** autour d'un primitive, ou un **rôle a11y non-bouton**. Tout le reste migre.
 
 > **Le test se passe bouton par bouton — jamais par voisinage.** Qu'un bouton *frère*
 > soit légitimement natif (teinté dynamiquement, surface-carte…) n'exonère **pas** le
@@ -551,7 +561,8 @@ import { shadows } from '../../theme'
 ## React Native
 
 - `expo-image` pour toutes les images
-- `Pressable` > `TouchableOpacity`
+- **Tout élément cliquable qui déclenche une action = `ui/Button`, jamais un `Pressable`/`TouchableOpacity` nu.** La règle « `<button>` natif (web) » ci-dessus s'applique **à l'identique** au mobile : un `Pressable` autour d'une icône (poubelle, crayon, `+`…) ou d'un texte d'action **est un bouton**. Le rendu (y compris ghost/invisible et le `hitSlop`) appartient à `ui/Button` — `<Button variant="ghost" iconLeft={<Icon/>} onPress accessibilityLabel />` pour une icône seule (le mode icône-seule est déclenché par l'absence de `label`, et pose déjà `hitSlop={8}`). L'absence de fond/bordure n'est **jamais** une excuse pour un `Pressable` nu. Restent natifs uniquement : l'intérieur d'un primitive, une **surface-carte** (→ `ui/Card onPress`), un **wrapper** autour d'un primitive, un **rôle a11y non-bouton** (`accessibilityRole="checkbox"`…). Vérif : `grep -rn "<Pressable" apps/mobile/src --include="*.tsx" | grep -v components/ui/` — chaque occurrence doit être une surface/wrapper/rôle, jamais un bouton d'action déguisé.
+- `Pressable` > `TouchableOpacity` (quand un `Pressable` nu est légitime, cf. ci-dessus)
 - `FlashList` > `FlatList` pour les listes longues — items mémoïsés, callbacks stables, zéro inline style dans les items
 - Navigateurs natifs uniquement (`createNativeStackNavigator`, native bottom tabs)
 - Safe areas dans les ScrollViews
