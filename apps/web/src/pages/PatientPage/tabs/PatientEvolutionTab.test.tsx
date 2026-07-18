@@ -22,6 +22,14 @@ vi.mock('../../../components/ui/Chart', async (importActual) => {
 
 // Le panneau détaillé lui-même est couvert par ColumnFormDataPanel.test.tsx :
 // ici on vérifie seulement qu'il est monté avec les fiches de l'agrégat.
+// Le bandeau d'aperçu est couvert par EvolutionOverviewBand.test.tsx ; ici on
+// teste le routage des sections. Stub pour ne pas dupliquer les libellés de module.
+vi.mock('../../../components/features/EvolutionOverviewBand', () => ({
+  EvolutionOverviewBand: ({ cards }: { cards: unknown[] }) => (
+    <div data-testid="overview-band" data-count={cards.length} />
+  ),
+}))
+
 vi.mock('./ColumnFormDataPanel', () => ({
   ColumnFormDataPanel: ({ moduleType, entries }: { moduleType: string; entries: unknown[] }) => (
     <div data-testid="beck-panel" data-module={moduleType} data-entries={entries.length} />

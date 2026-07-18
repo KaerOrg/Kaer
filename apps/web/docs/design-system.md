@@ -381,6 +381,23 @@ import { TrendChart } from '../components/ui/Chart'
 
 > **Moteur d'agrégation & trous (`lib/chartAggregation.ts`, #159).** `aggregateByCadence(points, 'weekly'|'monthly', rangeDays)` transforme des saisies brutes datées en une série continue d'unités de cadence (1 point/unité, moyenne + `n`, `null` pour une unité vide). `computeGapSegments(series)` en dérive les `bridges` (trou d'1 unité) et `bands` (2 unités vides ou +), à passer en prop `gaps` de `TrendChart`. La **config par type** (`clinicalChartConfig.ts` → `MODULE_EVOLUTION_CONFIG` / `moduleEvolutionConfig(type)`) fixe unité, bornes Y, cadence, métrique d'aperçu et `kind` (`metric` / `fingerprint` / `scale` / `text`) par module. Logique pure testée.
 
+#### `Sparkline` — mini-courbe de tendance sans axes (`ui/Chart/Sparkline/`)
+
+Micro-visualisation générique : polyline SVG bornée par un `domain` explicite,
+segments interrompus sur les `null` (saisies manquantes), aucune grille imposée.
+Props : `data: (number|null)[]`, `color`, `domain: [min,max]`, `width?`, `height?`.
+Logique pure (`sparklinePoints`) testée. Utilisée par les mini-cartes du bandeau
+d'aperçu Évolution (`EvolutionOverviewBand`). À préférer à `MiniLineChart` (grille figée).
+
+> **Bandeau d'aperçu Évolution (`components/features/EvolutionOverviewBand/`, #159).**
+> Rangée sticky de mini-cartes (une par module actif), barre de navigation permanente :
+> chiffre = moyenne **30 j glissants** de la métrique clé (fenêtre fixe), sparkline,
+> humeur = mini-empreinte. Au clic : scroll doux (`scrollTo`) vers `#evo-section-<module>` ;
+> la carte du module en cours de lecture est surlignée (scroll-spy `useActiveSection`).
+> Débordement = rail à défilement horizontal **contenu** (jamais la page). Carte « en
+> attente de saisies » si aucune donnée sur la fenêtre. Modèles de carte purs :
+> `overviewMetrics.ts` (`sleepCard` / `moodCard` / `fearCard` / `activationCard` / `scaleCard`).
+
 #### `DimensionFingerprint` — empreinte multi-dimensions (`components/features/`)
 
 Miroir web du composant mobile (#161) : mini-graphe à barres verticales, une barre
