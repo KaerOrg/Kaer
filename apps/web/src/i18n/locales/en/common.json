@@ -2132,6 +2132,8 @@
     "overview_window": "Last 30 days",
     "overview_empty": "Awaiting entries",
     "overview_reading": "reading",
+    "show_each_entry": "Show each entry",
+    "no_data_band": "no entries",
     "fear_title": "Graded Exposure (SUDS)",
     "fear_before": "Before exposure",
     "fear_after": "After exposure",

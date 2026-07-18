@@ -104,3 +104,8 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.mood-frise__cadence {
+  display: flex;
+  justify-content: flex-end;
+}
