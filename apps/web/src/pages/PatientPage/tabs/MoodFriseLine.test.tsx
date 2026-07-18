@@ -20,6 +20,8 @@ function renderLine(over: Partial<React.ComponentProps<typeof MoodFriseLine>> = 
     <MoodFriseLine
       dim={dim}
       trend={trend}
+      gaps={undefined}
+      lastValue={8}
       stats={stats}
       expanded={false}
       onToggle={vi.fn()}
@@ -37,7 +39,7 @@ describe('MoodFriseLine', () => {
   it('replié : libellé + stats (dernière valeur, min/max/moy/N), pas de comparateur', () => {
     const { container } = render(
       <MoodFriseLine
-        dim={dim} trend={trend} stats={stats} expanded={false} onToggle={vi.fn()}
+        dim={dim} trend={trend} gaps={undefined} lastValue={8} stats={stats} expanded={false} onToggle={vi.fn()}
         markers={[]} comparison={undefined} compareMode="none" onCompareChange={vi.fn()} locale="fr"
       />,
     )

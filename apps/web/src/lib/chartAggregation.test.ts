@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { aggregateByCadence, computeGapSegments, type AggregatedPoint, type RawDatedPoint } from './chartAggregation'
+import { aggregateByCadence, computeGapSegments, buildCadenceTrend, type AggregatedPoint, type RawDatedPoint } from './chartAggregation'
 
 // Ancre « now » fixe pour des fenêtres déterministes (mardi 14 juillet 2026, midi local).
 const NOW = new Date(2026, 6, 14, 12, 0, 0).getTime()
@@ -67,5 +67,15 @@ describe('computeGapSegments', () => {
 
   it('série < 2 points renseignés → aucun segment', () => {
     expect(computeGapSegments(mk([['w1', null], ['w2', 5]]))).toEqual({ bridges: [], bands: [] })
+  })
+})
+
+describe('buildCadenceTrend', () => {
+  it('combine agrégation + segments de trous en une passe', () => {
+    const points = [at(2026, 6, 6, 6), at(2026, 6, 8, 8)] // semaine du 6 juillet
+    const { data, gaps } = buildCadenceTrend(points, 'weekly', 21, NOW)
+    expect(data.find(p => p.date === '2026-07-06')?.value).toBe(7)
+    expect(gaps).toHaveProperty('bridges')
+    expect(gaps).toHaveProperty('bands')
   })
 })

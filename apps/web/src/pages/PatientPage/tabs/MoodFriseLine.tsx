@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Button } from '@ui/Button'
 import { SegmentedControl } from '@ui/SegmentedControl'
 import { TrendChart, type TrendMarker, type TrendPoint } from '@ui/Chart'
+import type { GapSegments } from '../../../lib/chartAggregation'
 import type { MoodWebDimension, MoodFrKey } from './moodDimensions'
 import type { DimensionStats } from './moodTrend'
 
@@ -20,6 +21,10 @@ export type MoodCompareMode = 'none' | 'prev' | 'year'
 export interface MoodFriseLineProps {
   readonly dim: MoodWebDimension
   readonly trend: TrendPoint[]
+  /** Segments de trous (courbe agrégée). Absent en mode « chaque saisie ». */
+  readonly gaps: GapSegments | undefined
+  /** Dernière valeur BRUTE saisie (la courbe pouvant être agrégée). */
+  readonly lastValue: number | null
   readonly stats: DimensionStats
   readonly expanded: boolean
   readonly onToggle: (frKey: MoodFrKey) => void
@@ -31,7 +36,7 @@ export interface MoodFriseLineProps {
 }
 
 export const MoodFriseLine = memo(function MoodFriseLine({
-  dim, trend, stats, expanded, onToggle, markers, comparison, compareMode, onCompareChange, locale,
+  dim, trend, gaps, lastValue, stats, expanded, onToggle, markers, comparison, compareMode, onCompareChange, locale,
 }: MoodFriseLineProps) {
   const { t } = useTranslation()
   const label = t(dim.labelKey)
@@ -60,7 +65,7 @@ export const MoodFriseLine = memo(function MoodFriseLine({
 
         <span className="mood-frise__stats">
           <span className="mood-frise__last" style={{ color: dim.colors.ink }}>
-            {stats.n > 0 && trend.length > 0 ? (trend.at(-1)?.value ?? stats.mean) : '-'}<small> / 10</small>
+            {lastValue ?? '-'}<small> / 10</small>
           </span>
           <span className="mood-frise__stat">{t('evolution.mood_stat_min')} {stats.min ?? '-'}</span>
           <span className="mood-frise__stat">{t('evolution.mood_stat_max')} {stats.max ?? '-'}</span>
@@ -93,6 +98,8 @@ export const MoodFriseLine = memo(function MoodFriseLine({
             meanLabel={t('evolution.trend_mean')}
             markers={markers}
             comparison={comparison}
+            gaps={gaps}
+            noDataLabel={t('evolution.no_data_band')}
             locale={locale}
             height={220}
           />

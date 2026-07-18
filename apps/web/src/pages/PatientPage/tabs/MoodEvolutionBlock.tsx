@@ -2,8 +2,10 @@ import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MoodPoint, MoodMarkerRow } from '@services/engagementService'
 import { filterByRange } from '../../../lib/chartConfig'
+import { buildCadenceTrend, type GapSegments } from '../../../lib/chartAggregation'
 import { DimensionFingerprint, type FingerprintBar } from '../../../components/features/DimensionFingerprint'
-import { type TrendMarker, type TrendPoint } from '@ui/Chart'
+import { Toggle } from '../../../components/ui/Toggle/Toggle'
+import { lastFilledPoint, type TrendMarker, type TrendPoint } from '@ui/Chart'
 import { MOOD_WEB_DIMENSIONS, MOOD_MARKER_COLORS, type MoodFrKey } from './moodDimensions'
 import { buildDimensionTrend, moodWindowSummary, dimensionStats, buildComparisonTrend, type DimensionStats } from './moodTrend'
 import { MoodFriseLine, type MoodCompareMode } from './MoodFriseLine'
@@ -23,6 +25,8 @@ const OVERVIEW_WINDOW_DAYS = 30 // fixe : le sélecteur de période ne pilote PA
 interface FriseLineData {
   readonly dim: (typeof MOOD_WEB_DIMENSIONS)[number]
   readonly trend: TrendPoint[]
+  readonly gaps: GapSegments | undefined
+  readonly lastValue: number | null
   readonly stats: DimensionStats
   readonly mode: MoodCompareMode
   readonly comparison: { data: TrendPoint[]; label: string } | undefined
@@ -37,6 +41,9 @@ export function MoodEvolutionBlock({ points, markers, locale, periodDays }: Prop
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState<ReadonlySet<MoodFrKey>>(() => new Set())
   const [compareModes, setCompareModes] = useState<Record<string, MoodCompareMode>>({})
+  // Courbe : moyenne lissée à la cadence hebdomadaire par défaut (#159), avec
+  // bascule « voir chaque saisie » (points bruts, sans agrégat ni bande de trou).
+  const [rawMode, setRawMode] = useState(false)
 
   const handleToggle = useCallback((k: MoodFrKey) => {
     setExpanded(prev => {
@@ -69,7 +76,11 @@ export function MoodEvolutionBlock({ points, markers, locale, periodDays }: Prop
   // Données par ligne mémoïsées : objets stables pour le memo de MoodFriseLine.
   const lines = useMemo<FriseLineData[]>(
     () => MOOD_WEB_DIMENSIONS.map(dim => {
-      const trend = buildDimensionTrend(filtered, dim.frKey)
+      // Stats sur les saisies brutes (N = nombre de saisies renseignées).
+      const rawTrend = buildDimensionTrend(filtered, dim.frKey)
+      // Courbe : brute (chaque saisie) ou agrégée hebdo + politique des trous.
+      const rawPoints = filtered.map(p => ({ date: p.date, value: typeof p[dim.frKey] === 'number' ? (p[dim.frKey] as number) : null }))
+      const agg = rawMode ? null : buildCadenceTrend(rawPoints, 'weekly', periodDays)
       const mode: MoodCompareMode = compareModes[dim.frKey] ?? 'none'
       const comparison = mode === 'none'
         ? undefined
@@ -77,9 +88,17 @@ export function MoodEvolutionBlock({ points, markers, locale, periodDays }: Prop
             data: buildComparisonTrend(filtered, dim.frKey, mode === 'prev' ? 30 : 365),
             label: t(mode === 'prev' ? 'evolution.mood_compare_prev' : 'evolution.mood_compare_year'),
           }
-      return { dim, trend, stats: dimensionStats(trend), mode, comparison }
+      return {
+        dim,
+        trend: agg ? agg.data : rawTrend,
+        gaps: agg ? agg.gaps : undefined,
+        lastValue: lastFilledPoint(rawTrend)?.value ?? null,
+        stats: dimensionStats(rawTrend),
+        mode,
+        comparison,
+      }
     }),
-    [filtered, compareModes, t],
+    [filtered, compareModes, rawMode, periodDays, t],
   )
 
   return (
@@ -92,12 +111,18 @@ export function MoodEvolutionBlock({ points, markers, locale, periodDays }: Prop
         </div>
       </div>
 
+      <div className="mood-frise__cadence">
+        <Toggle checked={rawMode} onChange={setRawMode} label={t('evolution.show_each_entry')} />
+      </div>
+
       <div className="mood-frise__lines">
         {lines.map(line => (
           <MoodFriseLine
             key={line.dim.frKey}
             dim={line.dim}
             trend={line.trend}
+            gaps={line.gaps}
+            lastValue={line.lastValue}
             stats={line.stats}
             expanded={expanded.has(line.dim.frKey)}
             onToggle={handleToggle}

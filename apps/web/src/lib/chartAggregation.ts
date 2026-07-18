@@ -88,6 +88,22 @@ export function aggregateByCadence(
   return out
 }
 
+/**
+ * Pont engine → `TrendChart` : agrège les saisies brutes à la cadence puis calcule
+ * les segments de trous. `data` est directement une série `TrendPoint[]` (les
+ * `AggregatedPoint` en sont un sur-ensemble structurel), `gaps` alimente la prop
+ * `gaps` du graphe. C'est la forme « courbe lissée à la cadence » de #159.
+ */
+export function buildCadenceTrend(
+  points: readonly RawDatedPoint[],
+  cadence: Cadence,
+  rangeDays: number,
+  now: number = Date.now(),
+): { data: AggregatedPoint[]; gaps: GapSegments } {
+  const data = aggregateByCadence(points, cadence, rangeDays, now)
+  return { data, gaps: computeGapSegments(data) }
+}
+
 export interface GapSegments {
   /** Trous d'UNE unité, à ponter en pointillé (dates des deux points encadrants). */
   readonly bridges: { readonly from: string; readonly to: string }[]

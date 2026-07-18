@@ -30,6 +30,15 @@ describe('MoodEvolutionBlock', () => {
     expect(container.querySelectorAll('.mood-frise__line').length).toBe(6)
   })
 
+  it('propose la bascule « voir chaque saisie » (agrégé ⇄ brut)', () => {
+    render(<MoodEvolutionBlock points={POINTS} markers={MARKERS} locale="fr" periodDays={365} />)
+    const toggle = screen.getByText('evolution.show_each_entry')
+    expect(toggle).toBeTruthy()
+    fireEvent.click(toggle)
+    // Le rendu tient après bascule (mode brut) : la frise reste présente.
+    expect(document.querySelectorAll('.mood-frise__line').length).toBe(6)
+  })
+
   it('déplie une dimension au clic (comparateur visible)', () => {
     render(<MoodEvolutionBlock points={POINTS} markers={MARKERS} locale="fr" periodDays={365} />)
     expect(screen.queryByText('evolution.mood_compare_prev')).toBeNull()
