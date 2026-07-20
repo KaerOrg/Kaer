@@ -36,19 +36,25 @@ vi.mock('./ColumnFormDataPanel', () => ({
   ),
 }))
 
-const { mockFetchFormEntries, mockFetchPatientModules, mockFetchSleepEvolution } = vi.hoisted(() => ({
+const {
+  mockFetchFormEntries, mockFetchPatientModules, mockFetchSleepEvolution,
+  mockFetchAvailableScales, mockFetchScaleEvolution, mockFetchMed,
+} = vi.hoisted(() => ({
   mockFetchFormEntries: vi.fn(),
   mockFetchPatientModules: vi.fn(),
   mockFetchSleepEvolution: vi.fn(),
+  mockFetchAvailableScales: vi.fn(),
+  mockFetchScaleEvolution: vi.fn(),
+  mockFetchMed: vi.fn(),
 }))
 
-// Agrégat d'évolution : tous les autres modules sans donnée, seul Beck en porte.
+// Agrégat d'évolution : les modules non pilotés par un mock restent sans donnée.
 vi.mock('@services/engagementService', () => ({
-  fetchAvailableScales: async () => [],
-  fetchScaleEvolution: async () => [],
+  fetchAvailableScales: (...args: unknown[]) => mockFetchAvailableScales(...args),
+  fetchScaleEvolution: (...args: unknown[]) => mockFetchScaleEvolution(...args),
   fetchMoodEvolution: async () => [],
   fetchFearEvolution: async () => [],
-  fetchMedSideEffectsEvolution: async () => ({ effects: [], data: [] }),
+  fetchMedSideEffectsEvolution: (...args: unknown[]) => mockFetchMed(...args),
   fetchSleepEvolution: (...args: unknown[]) => mockFetchSleepEvolution(...args),
   fetchChronoEntries: async () => [],
   fetchActivityEntries: async () => [],
@@ -84,6 +90,9 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockFetchFormEntries.mockResolvedValue(BECK_ENTRIES)
   mockFetchSleepEvolution.mockResolvedValue([])
+  mockFetchAvailableScales.mockResolvedValue([])
+  mockFetchScaleEvolution.mockResolvedValue([])
+  mockFetchMed.mockResolvedValue({ effects: [], data: [] })
 })
 
 describe('PatientEvolutionTab — section Colonnes de Beck', () => {
@@ -137,6 +146,42 @@ describe('PatientEvolutionTab — sections repliables', () => {
     await waitFor(() => expect(getByTestId('beck-panel')).toBeTruthy())
     fireEvent.click(getByRole('button', { name: /evolution\.view_data/ }))
     expect(onOpen).toHaveBeenCalledWith('beck_columns')
+  })
+})
+
+describe('PatientEvolutionTab — sections converties (échelle, effets)', () => {
+  it('échelle clinique : section repliable + « Voir les données → » porte la clé de l’échelle', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'phq9' }])
+    mockFetchAvailableScales.mockResolvedValue(['phq9'])
+    mockFetchScaleEvolution.mockResolvedValue([
+      { date: '2026-05-01', score: 12 },
+      { date: '2026-06-01', score: 8 },
+    ])
+    const onOpen = vi.fn()
+    const { getByRole, getAllByTestId } = render(
+      <QueryClientProvider client={makeClient()}>
+        <PatientEvolutionTab patientId="p1" onOpenModuleData={onOpen} />
+      </QueryClientProvider>,
+    )
+    await waitFor(() => expect(getByRole('button', { name: /evolution\.scale_phq9/ })).toBeTruthy())
+    expect(getAllByTestId('linechart').length).toBeGreaterThanOrEqual(1)
+    fireEvent.click(getByRole('button', { name: /evolution\.view_data/ }))
+    expect(onOpen).toHaveBeenCalledWith('phq9')
+  })
+
+  it('effets indésirables : une seule section groupe un sous-graphe par effet', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'medication_side_effects' }])
+    mockFetchMed.mockResolvedValue({
+      effects: ['nausea', 'insomnia'],
+      data: [
+        { date: '2026-05-01', nausea: 3, insomnia: 5 },
+        { date: '2026-06-01', nausea: 6, insomnia: 2 },
+      ],
+    })
+    const { getByRole, getAllByTestId } = renderTab()
+    await waitFor(() => expect(getByRole('button', { name: /evolution\.med_effects_title/ })).toBeTruthy())
+    // Deux effets → deux sous-graphes dans la même section.
+    expect(getAllByTestId('linechart')).toHaveLength(2)
   })
 })
 
