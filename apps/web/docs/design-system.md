@@ -392,11 +392,14 @@ d'aperçu Évolution (`EvolutionOverviewBand`). À préférer à `MiniLineChart`
 > **Bandeau d'aperçu Évolution (`components/features/EvolutionOverviewBand/`, #159).**
 > Rangée sticky de mini-cartes (une par module actif), barre de navigation permanente :
 > chiffre = moyenne **30 j glissants** de la métrique clé (fenêtre fixe), sparkline,
-> humeur = mini-empreinte. Au clic : scroll doux (`scrollTo`) vers `#evo-section-<module>` ;
-> la carte du module en cours de lecture est surlignée (scroll-spy `useActiveSection`).
-> Débordement = rail à défilement horizontal **contenu** (jamais la page). Carte « en
-> attente de saisies » si aucune donnée sur la fenêtre. Modèles de carte purs :
-> `overviewMetrics.ts` (`sleepCard` / `moodCard` / `fearCard` / `activationCard` / `scaleCard`).
+> humeur **et effets indésirables** = mini-empreinte (une barre par dimension/effet,
+> aucun agrégat composite — MDR). Au clic : scroll doux (`scrollTo`) vers
+> `#evo-section-<module>` ; la carte du module en cours de lecture est surlignée
+> (scroll-spy `useActiveSection`). Débordement = rail à défilement horizontal **contenu**
+> (jamais la page). Carte « en attente de saisies » si aucune donnée sur la fenêtre.
+> Une carte par module actif ayant des données, **échelles cliniques incluses** (une par
+> échelle). Modèles de carte purs : `overviewMetrics.ts` (`sleepCard` / `moodCard` /
+> `fearCard` / `activationCard` / `scaleCard` / `medCard`).
 
 > **Section module repliable (`components/features/EvolutionSection/`, #159).**
 > Coquille d'une section de la page Évolution : en-tête = contrôle de dévoilement

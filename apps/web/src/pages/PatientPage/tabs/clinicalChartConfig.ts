@@ -90,6 +90,14 @@ export const MODULE_EVOLUTION_CONFIG: Record<string, ModuleEvolutionConfig> = {
     unit: 'pts', yDomain: [-100, 0], overviewMetricKey: 'evolution.fear_delta',
     cadence: 'per_session', kind: 'metric',
   },
+  // Effets indésirables : plusieurs effets 0..10 → empreinte (une barre par effet,
+  // aucun agrégat composite, comme l'humeur). Couleur neutre (ni rouge ni orange :
+  // pas de codage de gravité, MDR).
+  medication_side_effects: {
+    key: 'medication_side_effects', labelKey: 'evolution.med_effects_title', color: CHART_PALETTE[11],
+    unit: '/10', yDomain: [0, 10], overviewMetricKey: 'evolution.med_effects_title',
+    cadence: 'weekly', kind: 'fingerprint',
+  },
 }
 
 /** Config du module, avec repli sur une échelle clinique (score brut) si absente. */

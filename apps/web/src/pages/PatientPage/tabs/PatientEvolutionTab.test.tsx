@@ -185,6 +185,22 @@ describe('PatientEvolutionTab — sections converties (échelle, effets)', () =>
   })
 })
 
+describe('PatientEvolutionTab — bandeau d’aperçu (échelles + médication)', () => {
+  it('pousse une carte par échelle active et une carte médication', async () => {
+    const recent = new Date(Date.now() - 2 * 86_400_000).toISOString().slice(0, 10)
+    mockFetchPatientModules.mockResolvedValue([
+      { module_type: 'phq9' }, { module_type: 'medication_side_effects' },
+    ])
+    mockFetchAvailableScales.mockResolvedValue(['phq9'])
+    mockFetchScaleEvolution.mockResolvedValue([{ date: recent, score: 10 }])
+    mockFetchMed.mockResolvedValue({ effects: ['nausea'], data: [{ date: recent, nausea: 5 }] })
+    const { getByTestId } = renderTab()
+    await waitFor(() => expect(getByTestId('overview-band')).toBeTruthy())
+    // phq9 + medication_side_effects = 2 cartes.
+    expect(getByTestId('overview-band').getAttribute('data-count')).toBe('2')
+  })
+})
+
 describe('PatientEvolutionTab — comparaison période de référence (sommeil)', () => {
   it('le bouton « Comparer » révèle le choix de période de référence (off par défaut)', async () => {
     mockFetchPatientModules.mockResolvedValue([{ module_type: 'sleep_diary' }])

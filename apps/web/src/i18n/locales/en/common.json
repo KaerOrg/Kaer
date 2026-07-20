@@ -2133,6 +2133,7 @@
     "overview_window": "Last 30 days",
     "overview_empty": "Awaiting entries",
     "overview_reading": "reading",
+    "overview_scale_metric": "Average score",
     "show_each_entry": "Show each entry",
     "no_data_band": "no entries",
     "fear_title": "Graded Exposure (SUDS)",
