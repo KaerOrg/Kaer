@@ -283,6 +283,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           <BehavioralActivationPanel
             entries={filterByRange(activityEntries, days)}
             locale={i18n.language}
+            periodDays={days}
           />
         </EvolutionSection>
       )}

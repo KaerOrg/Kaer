@@ -85,8 +85,9 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   }
 
   // Activation comportementale : grille hebdo des activités (P/M bruts, MDR-safe).
+  // Pas de sélecteur de période ici → fenêtre couvrant tout l'historique.
   if (state.status === 'activity') {
-    return <BehavioralActivationPanel entries={state.entries} locale={i18n.language} />
+    return <BehavioralActivationPanel entries={state.entries} locale={i18n.language} periodDays={spanDays(state.entries)} />
   }
 
   const locale = i18n.language

@@ -2,16 +2,29 @@ import { useMemo, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronLeft, ChevronRight, Circle, Clock } from 'lucide-react'
 import { Button } from '@ui/Button'
+import { TrendChart, type TrendPoint } from '@ui/Chart'
+import { Toggle } from '../../../components/ui/Toggle/Toggle'
+import { buildCadenceTrend, type GapSegments } from '../../../lib/chartAggregation'
 import type { ActivityEntryPoint } from '@services/engagementService'
 import { mondayOf, shiftDate, weekDays, todayIso, groupByDate, dailyFeltMeans } from './baWeek'
 import { BA_PLEASURE_COLOR, BA_MASTERY_COLOR } from './clinicalChartConfig'
-import { ModuleChart } from './ModuleChart'
 import { BAScoreLine } from './BAScoreLine'
 import './BehavioralActivationPanel.css'
 
 interface Props {
   entries: ActivityEntryPoint[]
   locale: string
+  /** Fenêtre des courbes, pilotée par le sélecteur de période de la page (#159). */
+  periodDays: number
+}
+
+// Cadence d'agrégation (`MODULE_EVOLUTION_CONFIG.behavioral_activation.cadence`) :
+// auto-relevé quotidien → moyenne lissée à la semaine par défaut.
+const BA_CADENCE = 'weekly'
+
+interface FeltTrend {
+  readonly data: TrendPoint[]
+  readonly gaps: GapSegments | undefined
 }
 
 /**
@@ -25,8 +38,11 @@ interface Props {
  * Présentationnel : entrées calculées en amont (engagementService), datées
  * par la date métier choisie par le patient.
  */
-export function BehavioralActivationPanel({ entries, locale }: Props) {
+export function BehavioralActivationPanel({ entries, locale, periodDays }: Props) {
   const { t } = useTranslation()
+  // Courbes P/A : moyenne hebdomadaire + politique des trous par défaut (#159), avec
+  // bascule « voir chaque saisie » (une moyenne journalière = un point, sans agrégat).
+  const [rawMode, setRawMode] = useState(false)
 
   // Semaine affichée : par défaut, celle de la saisie la plus récente.
   const latestDate = useMemo(
@@ -66,6 +82,19 @@ export function BehavioralActivationPanel({ entries, locale }: Props) {
   // Moyennes journalières des ressentis (activités réalisées et notées).
   const feltMeans = useMemo(() => dailyFeltMeans(entries), [entries])
 
+  // Courbe d'une dimension ressentie : agrégée hebdo + trous par défaut, ou brute.
+  const buildFeltTrend = useCallback(
+    (pick: (f: (typeof feltMeans)[number]) => number | undefined): FeltTrend => {
+      const raw: TrendPoint[] = feltMeans.map(f => ({ date: f.date, value: pick(f) ?? null }))
+      if (rawMode) return { data: raw, gaps: undefined }
+      const agg = buildCadenceTrend(raw, BA_CADENCE, periodDays)
+      return { data: agg.data, gaps: agg.gaps }
+    },
+    [feltMeans, rawMode, periodDays],
+  )
+  const pleasureTrend = useMemo(() => buildFeltTrend(f => f.pleasure), [buildFeltTrend])
+  const masteryTrend = useMemo(() => buildFeltTrend(f => f.mastery), [buildFeltTrend])
+
   return (
     <div className="module-data-panel">
       <div className="ba-stats">
@@ -84,18 +113,40 @@ export function BehavioralActivationPanel({ entries, locale }: Props) {
       </div>
 
       {feltMeans.length > 0 && (
-        <ModuleChart
-          title={t('evolution.ba_curve_title')}
-          count={feltMeans.length}
-          data={feltMeans}
-          series={[
-            { key: 'pleasure', color: BA_PLEASURE_COLOR, label: t('evolution.ba_curve_pleasure') },
-            { key: 'mastery', color: BA_MASTERY_COLOR, label: t('evolution.ba_curve_mastery') },
-          ]}
-          yDomain={[0, 10]}
-          showLegend
-          locale={locale}
-        />
+        <div className="ba-felt">
+          <div className="ba-felt__head">
+            <h4 className="module-data-panel__chart-title">{t('evolution.ba_curve_title')}</h4>
+            <Toggle checked={rawMode} onChange={setRawMode} label={t('evolution.show_each_entry')} />
+          </div>
+          <div className="ba-felt__chart">
+            <span className="ba-felt__metric" style={{ color: BA_PLEASURE_COLOR }}>{t('evolution.ba_curve_pleasure')}</span>
+            <TrendChart
+              data={pleasureTrend.data}
+              gaps={pleasureTrend.gaps}
+              unit="/10"
+              yDomain={[0, 10]}
+              color={BA_PLEASURE_COLOR}
+              meanLabel={t('evolution.trend_mean')}
+              noDataLabel={t('evolution.no_data_band')}
+              locale={locale}
+              height={180}
+            />
+          </div>
+          <div className="ba-felt__chart">
+            <span className="ba-felt__metric" style={{ color: BA_MASTERY_COLOR }}>{t('evolution.ba_curve_mastery')}</span>
+            <TrendChart
+              data={masteryTrend.data}
+              gaps={masteryTrend.gaps}
+              unit="/10"
+              yDomain={[0, 10]}
+              color={BA_MASTERY_COLOR}
+              meanLabel={t('evolution.trend_mean')}
+              noDataLabel={t('evolution.no_data_band')}
+              locale={locale}
+              height={180}
+            />
+          </div>
+        </div>
       )}
 
       <div className="ba-week__nav">

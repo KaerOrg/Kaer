@@ -16,8 +16,8 @@ export function groupByDate(entries: ActivityEntryPoint[]): Map<string, Activity
   return map
 }
 
-// Alias de type (pas une interface) : la signature d'index implicite le rend
-// assignable au contrat `Record<string, number | string>[]` de ModuleChart.
+// Moyenne journalière des ressentis (une par jour ayant au moins une activité
+// réalisée et notée). Projetée en `TrendPoint` par dimension pour l'agrégation.
 export type FeltMeanPoint = {
   date: string
   pleasure?: number
