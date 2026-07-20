@@ -22,7 +22,7 @@ import { SleepDataPanel } from './SleepDataPanel'
 import { MoodEvolutionBlock } from './MoodEvolutionBlock'
 import { EvolutionOverviewBand } from '../../../components/features/EvolutionOverviewBand'
 import { EvolutionSection } from '../../../components/features/EvolutionSection'
-import { sleepCard, moodCard, activationCard, fearCard, type OverviewCard } from './overviewMetrics'
+import { sleepCard, moodCard, activationCard, fearCard, scaleCard, medCard, type OverviewCard } from './overviewMetrics'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
@@ -129,9 +129,17 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     if (sleepData.length > 0 && shown('sleep_diary')) cards.push(sleepCard(sleepData))
     if (moodData.length > 0 && shown('mood_tracker')) cards.push(moodCard(moodData, t))
     if (activityEntries.length > 0 && shown('behavioral_activation')) cards.push(activationCard(activityEntries))
+    // Échelles : une carte par échelle active ayant des saisies (score moyen 30 j).
+    for (const mt of scales) {
+      if ((scaleData[mt]?.length ?? 0) > 0 && shown(mt)) cards.push(scaleCard(mt, scaleData[mt] ?? []))
+    }
+    // Effets indésirables : empreinte (une barre par effet, aucun composite, MDR).
+    if (medData.length > 0 && shown('medication_side_effects')) {
+      cards.push(medCard(medEffects, medData, effect => t(`evolution.med_effect_${effect}`, { defaultValue: effect })))
+    }
     if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
     return cards
-  }, [sleepData, moodData, activityEntries, fearData, activeTypes, showArchived, t])
+  }, [sleepData, moodData, activityEntries, scales, scaleData, medEffects, medData, fearData, activeTypes, showArchived, t])
 
   // Rappel de métrique clé pour l'en-tête des sections repliables (réutilise la
   // métrique 30 j des cartes d'aperçu ; humeur = empreinte, donc pas de rappel).

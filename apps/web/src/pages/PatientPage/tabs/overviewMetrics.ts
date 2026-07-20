@@ -6,8 +6,9 @@
 // Humeur = mini-empreinte 6 barres (aucun agrégat — MDR). Trop peu de saisies sur
 // la fenêtre → carte « en attente de saisies ». Logique pure, testée.
 
-import type { MoodPoint, SleepPoint, FearPoint, ScorePoint, ActivityEntryPoint } from '@services/engagementService'
+import type { MoodPoint, SleepPoint, FearPoint, ScorePoint, ActivityEntryPoint, MedEffectPoint } from '@services/engagementService'
 import { aggregateByCadence } from '../../../lib/chartAggregation'
+import { colorAt } from '../../../lib/chartConfig'
 import { moduleEvolutionConfig } from './clinicalChartConfig'
 import { MOOD_WEB_DIMENSIONS } from './moodDimensions'
 import { moodWindowSummary } from './moodTrend'
@@ -86,8 +87,34 @@ export function activationCard(entries: readonly ActivityEntryPoint[], now: numb
 }
 
 export function scaleCard(moduleType: string, points: readonly ScorePoint[], now: number = Date.now()): OverviewCard {
-  const cfg = moduleEvolutionConfig(moduleType)
-  return metricCard(moduleType, points.map(p => ({ date: p.date, value: p.score })), cfg.overviewMetricKey, now)
+  // Label = nom de l'échelle (aligné sur la section : `evolution.scale_<mt>`), métrique
+  // = score moyen brut sur la fenêtre. Le fallback de config ne porte pas ces libellés.
+  const card = metricCard(moduleType, points.map(p => ({ date: p.date, value: p.score })), 'evolution.overview_scale_metric', now)
+  return { ...card, labelKey: `evolution.scale_${moduleType}` }
+}
+
+// Effets indésirables : une barre par effet (moyenne 30 j de l'intensité déclarée),
+// jamais une moyenne composite de tous les effets (MDR : aucun agrégat interprétatif).
+// Miroir de l'humeur : carte empreinte.
+export function medCard(
+  effects: readonly string[],
+  points: readonly MedEffectPoint[],
+  labelFor: (effect: string) => string,
+  now: number = Date.now(),
+): OverviewCard {
+  const cfg = moduleEvolutionConfig('medication_side_effects')
+  const win = points.filter(p => withinWindow(p.date, now))
+  if (win.length === 0) {
+    return { kind: 'empty', moduleType: 'medication_side_effects', labelKey: cfg.labelKey, color: cfg.color }
+  }
+  const bars: FingerprintBar[] = effects.map((effect, i) => {
+    const values = win
+      .map(p => p[effect])
+      .filter((v): v is number => typeof v === 'number')
+    return { key: effect, label: labelFor(effect), value: mean(values) ?? 0, color: colorAt(i) }
+  })
+  const daysLogged = new Set(win.map(p => p.date.slice(0, 10))).size
+  return { kind: 'fingerprint', moduleType: 'medication_side_effects', labelKey: cfg.labelKey, color: cfg.color, bars, daysLogged }
 }
 
 export function moodCard(

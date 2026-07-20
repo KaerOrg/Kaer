@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { SleepPoint, FearPoint, MoodPoint, ScorePoint, ActivityEntryPoint } from '@services/engagementService'
-import { sleepCard, fearCard, moodCard, scaleCard, activationCard } from './overviewMetrics'
+import type { SleepPoint, FearPoint, MoodPoint, ScorePoint, ActivityEntryPoint, MedEffectPoint } from '@services/engagementService'
+import { sleepCard, fearCard, moodCard, scaleCard, activationCard, medCard } from './overviewMetrics'
 
 const NOW = new Date(2026, 6, 14, 12).getTime()
 const DAY = 86_400_000
@@ -54,7 +54,32 @@ describe('overviewMetrics.scaleCard', () => {
     if (card.kind === 'metric') {
       expect(card.value).toBe(10)
       expect(card.domain[1]).toBeGreaterThan(0)
+      // Label = nom de l'échelle (aligné sur la section), pas la clé de config par défaut.
+      expect(card.labelKey).toBe('evolution.scale_phq9')
+      expect(card.metricLabelKey).toBe('evolution.overview_scale_metric')
     }
+  })
+})
+
+describe('overviewMetrics.medCard', () => {
+  it('carte empreinte : une barre par effet (moyenne 30 j, aucun composite)', () => {
+    const pts = [
+      { date: iso(1), nausea: 4, insomnia: 6 },
+      { date: iso(3), nausea: 6, insomnia: 2 },
+    ] as MedEffectPoint[]
+    const card = medCard(['nausea', 'insomnia'], pts, e => `label:${e}`, NOW)
+    expect(card.kind).toBe('fingerprint')
+    if (card.kind === 'fingerprint') {
+      expect(card.bars).toHaveLength(2)
+      expect(card.bars[0]).toMatchObject({ key: 'nausea', label: 'label:nausea', value: 5 })
+      expect(card.bars[1]).toMatchObject({ key: 'insomnia', value: 4 })
+      expect(card.daysLogged).toBe(2)
+    }
+  })
+
+  it('aucune saisie récente → carte « en attente »', () => {
+    const card = medCard(['nausea'], [{ date: iso(90), nausea: 5 }] as MedEffectPoint[], e => e, NOW)
+    expect(card.kind).toBe('empty')
   })
 })
 
