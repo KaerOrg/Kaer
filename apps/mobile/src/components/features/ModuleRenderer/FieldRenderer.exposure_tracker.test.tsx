@@ -97,7 +97,14 @@ describe('FieldRenderer — exposure_tracker (parcours unifié)', () => {
     expect(await screen.findByTestId('step-sit-1')).toBeTruthy()
   })
 
-  it('ouvre le formulaire d\'ajout de marche depuis le FAB', async () => {
+  it('ouvre le formulaire d\'ajout depuis le CTA de l\'état vide', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('ladder-empty-cta'))
+    expect(await screen.findByTestId('exposure-step-form')).toBeTruthy()
+  })
+
+  it('ouvre le formulaire d\'ajout depuis le FAB (liste non vide)', async () => {
+    ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_STEP])
     renderLayout()
     fireEvent.press(await screen.findByTestId('add-step-fab'))
     expect(await screen.findByTestId('exposure-step-form')).toBeTruthy()
@@ -105,7 +112,7 @@ describe('FieldRenderer — exposure_tracker (parcours unifié)', () => {
 
   it('enregistre une nouvelle marche', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('add-step-fab'))
+    fireEvent.press(await screen.findByTestId('ladder-empty-cta'))
     await screen.findByTestId('exposure-step-form')
     fireEvent.changeText(screen.getByTestId('step-label-input'), 'Prendre l\'avion')
     await act(async () => { fireEvent.press(screen.getByTestId('step-save')) })
@@ -116,16 +123,20 @@ describe('FieldRenderer — exposure_tracker (parcours unifié)', () => {
     })
   })
 
-  it('coche une marche comme franchie', async () => {
+  it('affiche la difficulté et « Pas encore essayée » (aucune coche)', async () => {
     ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_STEP])
     renderLayout()
-    const checkbox = await screen.findByTestId('step-done-sit-1')
-    await act(async () => { fireEvent.press(checkbox) })
-    await waitFor(() => {
-      expect(service.saveFearSituation).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'sit-1', is_done: 1 }),
-      )
-    })
+    expect(await screen.findByText('Difficulté initiale estimée 40')).toBeTruthy()
+    expect(screen.getByText('Pas encore essayée')).toBeTruthy()
+    // Plus aucune coche « terminé » dans l'UI (donnée conservée en base).
+    expect(screen.queryByTestId('step-done-sit-1')).toBeNull()
+  })
+
+  it('affiche la pastille « Dernier pic » quand une exposition existe', async () => {
+    ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_STEP])
+    ;(database.getAllFearEntries as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    renderLayout()
+    expect(await screen.findByText('Dernier pic 85')).toBeTruthy()
   })
 
   it('ouvre le détail d\'une marche', async () => {
@@ -194,5 +205,33 @@ describe('FieldRenderer — exposure_tracker (parcours unifié)', () => {
     await waitFor(() => {
       expect(service.deleteFearSituation).toHaveBeenCalledWith('sit-1')
     })
+  })
+
+  it('enregistre un brouillon (avant seul), pic et final nuls', async () => {
+    ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_STEP])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('step-sit-1'))
+    fireEvent.press(await screen.findByTestId('do-exposure-btn'))
+    await screen.findByTestId('exposure-form')
+    fireEvent.changeText(screen.getByTestId('expectation-input'), 'Je vais paniquer')
+    await act(async () => { fireEvent.press(screen.getByTestId('exposure-save-draft')) })
+    await waitFor(() => {
+      expect(service.saveFearEntry).toHaveBeenCalledWith(
+        expect.objectContaining({
+          situation_id: 'sit-1',
+          expectation_text: 'Je vais paniquer',
+          suds_peak: null,
+          suds_after: null,
+        }),
+      )
+    })
+  })
+
+  it('ouvre la ré-évaluation de la difficulté depuis le détail', async () => {
+    ;(database.getAllFearSituations as jest.Mock).mockResolvedValue([MOCK_STEP])
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('step-sit-1'))
+    fireEvent.press(await screen.findByTestId('detail-reevaluate'))
+    expect(await screen.findByTestId('exposure-step-form')).toBeTruthy()
   })
 })

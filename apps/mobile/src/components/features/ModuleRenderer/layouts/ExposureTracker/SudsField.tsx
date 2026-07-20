@@ -20,11 +20,13 @@ export interface SudsFieldProps {
   onChange: (v: number | null) => void
   /** Si fourni, propose de laisser la valeur vide (mesure optionnelle). */
   skip?: SudsFieldSkip
+  /** Légende affichée sous les pastilles (ex. « 0 = aucun stress… »). */
+  legend?: string
   testID?: string
 }
 
 /** Carte de saisie d'un SUDS (0–max) — affichage brut, sans label de gravité. */
-export function SudsField({ label, hint, value, max, color, sudsSteps, onChange, skip, testID }: SudsFieldProps) {
+export function SudsField({ label, hint, value, max, color, sudsSteps, onChange, skip, legend, testID }: SudsFieldProps) {
   return (
     <View style={etStyles.card} testID={testID}>
       <View style={etStyles.sudsHeader}>
@@ -34,7 +36,7 @@ export function SudsField({ label, hint, value, max, color, sudsSteps, onChange,
         </View>
         <View style={etStyles.sudsValueBox}>
           {value === null ? (
-            <Text style={etStyles.sudsValueNull}>—</Text>
+            <Text style={etStyles.sudsValueNull}>-</Text>
           ) : (
             <Text style={[etStyles.sudsValueBig, { color }]}>{value}</Text>
           )}
@@ -50,6 +52,7 @@ export function SudsField({ label, hint, value, max, color, sudsSteps, onChange,
         showHeader={false}
         onPress={onChange}
       />
+      {legend ? <Text style={etStyles.sudsLegend}>{legend}</Text> : null}
       {skip ? (
         <Pressable
           style={etStyles.skipBtn}

@@ -53,14 +53,18 @@ export function ExposureTrackerLayout({ fields, moduleId }: ExposureTrackerLayou
   // ── Résolution config / stratégies / libellés ────────────────────────────
   const configField = useMemo(() => fields.find(f => f.field_type === 'exposure_tracker_config'), [fields])
 
+  // Palette neutralisée (#183) : les défauts eux-mêmes sont neutres (lavande /
+  // teal / sauge), jamais de couleur de valence, même si le seed est absent.
   const config = useMemo<ExposureConfig>(() => ({
     sudsMin: parseInt(configField?.props['suds_min'] ?? '0', 10),
     sudsMax: parseInt(configField?.props['suds_max'] ?? '100', 10),
     sudsStep: parseInt(configField?.props['suds_step'] ?? '10', 10),
     sudsDefaultBefore: parseInt(configField?.props['suds_default_before'] ?? '50', 10),
-    beforeColor: configField?.props['suds_before_color'] ?? colors.danger,
-    peakColor: configField?.props['suds_peak_color'] ?? colors.primary,
-    afterColor: configField?.props['suds_after_color'] ?? colors.success,
+    beforeColor: configField?.props['suds_before_color'] ?? '#C9B8E4',
+    peakColor: configField?.props['suds_peak_color'] ?? '#6dbfc3',
+    afterColor: configField?.props['suds_after_color'] ?? '#A8D8C0',
+    ladderBarColor: configField?.props['ladder_bar_color'] ?? '#9AD3D6',
+    lastPeakTextColor: configField?.props['last_peak_text_color'] ?? '#3E7C82',
   }), [configField])
 
   const sudsSteps = useMemo(
@@ -103,17 +107,6 @@ export function ExposureTrackerLayout({ fields, moduleId }: ExposureTrackerLayou
   }, [strategyLabelByKey])
 
   // ── Marches ───────────────────────────────────────────────────────────────
-  const handleToggleDone = useCallback(async (step: FearSituation) => {
-    await saveFearSituation({
-      id: step.id,
-      label: step.label,
-      hierarchy_id: step.hierarchy_id,
-      target_suds: step.target_suds,
-      is_done: step.is_done === 1 ? 0 : 1,
-    })
-    await reload()
-  }, [reload])
-
   const handleSaveStep = useCallback(async (label: string, target: number) => {
     const editingId = mode.kind === 'step_form' ? mode.stepId : null
     const existing = editingId ? situations.find(s => s.id === editingId) : null
@@ -203,6 +196,8 @@ export function ExposureTrackerLayout({ fields, moduleId }: ExposureTrackerLayou
         initialLabel={editing?.label ?? ''}
         initialTarget={editing?.target_suds ?? config.sudsDefaultBefore}
         sudsSteps={sudsSteps}
+        sudsMax={config.sudsMax}
+        color={config.peakColor}
         isNew={editing == null}
         lbl={lbl}
         tCommon={t}
@@ -259,11 +254,8 @@ export function ExposureTrackerLayout({ fields, moduleId }: ExposureTrackerLayou
       steps={sortedSteps}
       entries={entries}
       config={config}
-      moduleKey={moduleId}
-      isTeenMode={isTeenMode}
       lbl={lbl}
       onOpenStep={(id) => setMode({ kind: 'detail', stepId: id })}
-      onToggleDone={handleToggleDone}
       onAddStep={() => setMode({ kind: 'step_form', stepId: null })}
     />
   )

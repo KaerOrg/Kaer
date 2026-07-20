@@ -15,7 +15,7 @@ export function SudsBar({ label, value, color, max }: SudsBarProps) {
     return (
       <View style={etStyles.sudsRow}>
         <Text style={etStyles.sudsLabel}>{label}</Text>
-        <Text style={etStyles.sudsPending}>—</Text>
+        <Text style={etStyles.sudsPending}>-</Text>
       </View>
     )
   }
