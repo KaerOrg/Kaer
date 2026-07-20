@@ -42,110 +42,8 @@
   border: 1px solid var(--color-border);
 }
 
-.evolution-card__heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.evolution-card--archived {
-  opacity: 0.85;
-}
-
-/* ── Section sommeil (grille + tableau fenêtre + courbes, composant partagé) ── */
-
-.evolution__sleep {
-  margin-bottom: 24px;
-}
-
-/* ── Cards grid ────────────────────────────────────────────────────────────── */
-
-.evolution__cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.evolution-card {
-  background: white;
-  border: 1px solid #F1F5F9;
-  border-radius: 16px;
-  padding: 20px 20px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
-  transition: box-shadow 0.2s;
-}
-
-.evolution-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06);
-}
-
-.evolution-card--wide {
-  grid-column: 1 / -1;
-}
-
-.evolution-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.evolution-card__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1E293B;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.evolution-card__score {
-  display: block;
-  font-size: 22px;
-  font-weight: 700;
-  margin-top: 2px;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.evolution-card__count {
-  font-size: 11px;
-  color: #94A3B8;
-  white-space: nowrap;
-  margin-top: 3px;
-  font-weight: 500;
-}
-
-.evolution-card__chart {
-  margin-top: 4px;
-}
-
-.evolution-card__no-data {
-  font-size: 13px;
-  color: #94A3B8;
-  text-align: center;
-  padding: 32px 0;
-  margin: 0;
-}
-
-/* ── Section headers (mood / med effects) ─────────────────────────────────── */
-
-.evolution__section-header {
-  grid-column: 1 / -1;
-  padding-top: 8px;
-  border-top: 1px solid #F1F5F9;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Contrôles de comparaison à une période de référence (sommeil) */
+/* Contrôles de comparaison à une période de référence (sommeil). */
 .evolution__compare {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -153,23 +51,54 @@
   margin-bottom: 12px;
 }
 
-.evolution__section-title {
-  font-size: 15px;
+/* ── Sous-graphes d'une section (effets indésirables : un tracé par effet) ──── */
+
+.evolution__subchart {
+  margin-bottom: 20px;
+}
+
+.evolution__subchart:last-child {
+  margin-bottom: 0;
+}
+
+.evolution__subchart-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.evolution__subchart-title {
+  font-size: 14px;
   font-weight: 600;
-  color: #64748B;
+  color: var(--color-text);
+}
+
+.evolution__subchart-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.evolution__subchart-last {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.evolution__subchart-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.evolution-card__no-data {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 32px 0;
   margin: 0;
-  letter-spacing: 0.01em;
-}
-
-/* ── Card enter animation ──────────────────────────────────────────────────── */
-
-@keyframes evolutionCardIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.evolution-card--animate-in {
-  animation: evolutionCardIn 0.25s ease forwards;
 }
 
 /* ── Empty / loading ───────────────────────────────────────────────────────── */
@@ -193,7 +122,7 @@
 
 .evolution-empty__desc {
   font-size: 14px;
-  color: #94A3B8;
+  color: var(--color-text-muted);
   margin: 0;
   max-width: 340px;
   line-height: 1.5;
@@ -202,6 +131,6 @@
 .evolution-loading {
   padding: 40px;
   text-align: center;
-  color: #94A3B8;
+  color: var(--color-text-muted);
   font-size: 14px;
 }

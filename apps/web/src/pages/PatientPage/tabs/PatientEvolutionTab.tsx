@@ -91,11 +91,9 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       return next
     })
   }, [])
-  // Lien « Voir les données → » : un handler stable par section (closure sur le
-  // ModuleType littéral, évite tout cast string vers ModuleType).
-  const openSleepData = useCallback(() => onOpenModuleData?.('sleep_diary'), [onOpenModuleData])
-  const openActivationData = useCallback(() => onOpenModuleData?.('behavioral_activation'), [onOpenModuleData])
-  const openBeckData = useCallback(() => onOpenModuleData?.('beck_columns'), [onOpenModuleData])
+  // Lien « Voir les données → » : handler générique (la clé de section EST le
+  // ModuleType du module — `ModuleType` est un alias de `string`, aucun cast).
+  const handleViewData = useCallback((key: string) => onOpenModuleData?.(key), [onOpenModuleData])
   // Comparaison à une période de référence (sommeil) — décochée par défaut (graphe épuré).
   const [sleepCompare, setSleepCompare] = useState(false)
   const [sleepRefKind, setSleepRefKind] = useState<ReferenceKind>('previous')
@@ -238,7 +236,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           expanded={isExpanded('sleep_diary')}
           onToggle={handleToggleSection}
           viewDataLabel={t('evolution.view_data')}
-          onViewData={openSleepData}
+          onViewData={handleViewData}
         >
           <div className="evolution__compare">
             <Toggle
@@ -272,7 +270,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           expanded={isExpanded('behavioral_activation')}
           onToggle={handleToggleSection}
           viewDataLabel={t('evolution.view_data')}
-          onViewData={openActivationData}
+          onViewData={handleViewData}
         >
           <BehavioralActivationPanel
             entries={filterByRange(activityEntries, days)}
@@ -292,186 +290,159 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           expanded={isExpanded('beck_columns')}
           onToggle={handleToggleSection}
           viewDataLabel={t('evolution.view_data')}
-          onViewData={openBeckData}
+          onViewData={handleViewData}
         >
           <ColumnFormDataPanel moduleType="beck_columns" entries={beckEntries} />
         </EvolutionSection>
       )}
 
-      <div className="evolution__cards">
-
-        {/* ── Échelles cliniques ──────────────────────────────── */}
-        {scales.filter(mt => isShown(mt)).map(mt => {
-          const points = filterByRange(scaleData[mt] ?? [], days)
-          const cfg = SCALE_CONFIG[mt] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
-          const chartData = points.map(p => ({ date: p.date, score: p.score }))
-          const last = points.at(-1)?.score
-          return (
-            <EvolutionCard
-              key={mt}
-              title={t(`evolution.scale_${mt}`)}
-              badge={t('evolution.n_sessions', { count: points.length })}
-              score={last != null ? t('evolution.last_score', { score: last }) : undefined}
-              scoreColor={cfg.color}
-              archived={isArchived(mt)}
-              archivedLabel={t('evolution.archived_badge')}
-            >
-              {chartData.length >= 2 ? (
-                <LineChart
-                  data={chartData}
-                  series={[{ key: 'score', color: cfg.color, label: t(`evolution.scale_${mt}`) }]}
-                  yDomain={[0, cfg.yMax]}
-                  locale={i18n.language}
-                />
-              ) : (
-                <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
-              )}
-            </EvolutionCard>
-          )
-        })}
-
-        {/* ── Mood tracker — frise 6 dimensions (#164) ─────────── */}
-        {moodData.length > 0 && isShown('mood_tracker') && (
-          <>
-            <div className="evolution__section-header" id="evo-section-mood_tracker">
-              <h3 className="evolution__section-title">{t('evolution.mood_title')}</h3>
-              {isArchived('mood_tracker') && (
-                <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-              )}
-            </div>
-            <MoodEvolutionBlock
-              points={moodData}
-              markers={moodMarkersQuery.data ?? []}
-              locale={i18n.language}
-              periodDays={days}
-            />
-          </>
-        )}
-
-        {/* ── Effets indésirables — 1 carte par effet ───────────── */}
-        {medData.length > 0 && isShown('medication_side_effects') && (
-          <div className="evolution__section-header">
-            <h3 className="evolution__section-title">{t('evolution.med_effects_title')}</h3>
-            {isArchived('medication_side_effects') && (
-              <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-            )}
-          </div>
-        )}
-        {medData.length > 0 && isShown('medication_side_effects') && medEffects.map((effect, i) => {
-          const points = filterByRange(medData, days).filter(p => p[effect] != null)
-          if (points.length < 2) return null
-          const chartData = points.map(p => ({ date: p.date, [effect]: p[effect] }))
-          const last = points.at(-1)?.[effect]
-          const color = colorAt(i)
-          return (
-            <EvolutionCard
-              key={effect}
-              title={t(`evolution.med_effect_${effect}`, { defaultValue: effect })}
-              badge={t('evolution.n_sessions', { count: points.length })}
-              score={last != null ? String(last) + ' / 10' : undefined}
-              scoreColor={color}
-              archived={isArchived('medication_side_effects')}
-              archivedLabel={t('evolution.archived_badge')}
-            >
+      {/* ── Échelles cliniques (une section repliable par échelle) ─── */}
+      {scales.filter(mt => isShown(mt)).map(mt => {
+        const points = filterByRange(scaleData[mt] ?? [], days)
+        const cfg = SCALE_CONFIG[mt] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
+        const chartData = points.map(p => ({ date: p.date, score: p.score }))
+        const last = points.at(-1)?.score
+        return (
+          <EvolutionSection
+            key={mt}
+            sectionKey={mt}
+            anchorId={`evo-section-${mt}`}
+            title={t(`evolution.scale_${mt}`)}
+            badge={t('evolution.n_sessions', { count: points.length })}
+            metricReminder={last != null ? t('evolution.last_score', { score: last }) : undefined}
+            archivedLabel={isArchived(mt) ? t('evolution.archived_badge') : undefined}
+            expanded={isExpanded(mt)}
+            onToggle={handleToggleSection}
+            viewDataLabel={t('evolution.view_data')}
+            onViewData={handleViewData}
+          >
+            {chartData.length >= 2 ? (
               <LineChart
                 data={chartData}
-                series={[{ key: effect, color, label: t(`evolution.med_effect_${effect}`, { defaultValue: effect }) }]}
-                yDomain={[0, 10]}
+                series={[{ key: 'score', color: cfg.color, label: t(`evolution.scale_${mt}`) }]}
+                yDomain={[0, cfg.yMax]}
                 locale={i18n.language}
               />
-            </EvolutionCard>
-          )
-        })}
+            ) : (
+              <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
+            )}
+          </EvolutionSection>
+        )
+      })}
 
-        {/* ── Thermomètre de la peur — SUDS avant/après ─────────── */}
-        {fearData.length > 0 && isShown('fear_thermometer') && (() => {
-          const points = filterByRange(fearData, days)
-          const chartData = points.map(p => ({
-            date: p.date,
-            suds_before: p.suds_before,
-            suds_after:  p.suds_after,
-          }))
-          return (
-            <EvolutionCard
-              id="evo-section-fear_thermometer"
-              title={t('evolution.fear_title')}
-              badge={t('evolution.n_sessions', { count: points.length })}
-              wide
-              archived={isArchived('fear_thermometer')}
-              archivedLabel={t('evolution.archived_badge')}
-            >
-              {chartData.length >= 2 ? (
+      {/* ── Thermomètre de l'humeur : frise 6 dimensions (#164) ───── */}
+      {moodData.length > 0 && isShown('mood_tracker') && (
+        <EvolutionSection
+          sectionKey="mood_tracker"
+          anchorId="evo-section-mood_tracker"
+          title={t('evolution.mood_title')}
+          badge={t('evolution.n_sessions', { count: moodData.length })}
+          archivedLabel={isArchived('mood_tracker') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('mood_tracker')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={handleViewData}
+        >
+          <MoodEvolutionBlock
+            points={moodData}
+            markers={moodMarkersQuery.data ?? []}
+            locale={i18n.language}
+            periodDays={days}
+          />
+        </EvolutionSection>
+      )}
+
+      {/* ── Effets indésirables : une section, un sous-graphe par effet ── */}
+      {medData.length > 0 && isShown('medication_side_effects') && (
+        <EvolutionSection
+          sectionKey="medication_side_effects"
+          anchorId="evo-section-medication_side_effects"
+          title={t('evolution.med_effects_title')}
+          badge={t('evolution.n_sessions', { count: medData.length })}
+          archivedLabel={isArchived('medication_side_effects') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('medication_side_effects')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={handleViewData}
+        >
+          {medEffects.map((effect, i) => {
+            const points = filterByRange(medData, days).filter(p => p[effect] != null)
+            if (points.length < 2) return null
+            const chartData = points.map(p => ({ date: p.date, [effect]: p[effect] }))
+            const last = points.at(-1)?.[effect]
+            const color = colorAt(i)
+            return (
+              <div key={effect} className="evolution__subchart">
+                <div className="evolution__subchart-head">
+                  <span className="evolution__subchart-title">{t(`evolution.med_effect_${effect}`, { defaultValue: effect })}</span>
+                  <span className="evolution__subchart-meta">
+                    {last != null ? <span className="evolution__subchart-last" style={{ color }}>{last} / 10</span> : null}
+                    <span className="evolution__subchart-count">{t('evolution.n_sessions', { count: points.length })}</span>
+                  </span>
+                </div>
                 <LineChart
                   data={chartData}
-                  series={[
-                    { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
-                    { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
-                  ]}
-                  yDomain={[0, 100]}
-                  showLegend
+                  series={[{ key: effect, color, label: t(`evolution.med_effect_${effect}`, { defaultValue: effect }) }]}
+                  yDomain={[0, 10]}
                   locale={i18n.language}
                 />
-              ) : (
-                <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
-              )}
-            </EvolutionCard>
-          )
-        })()}
+              </div>
+            )
+          })}
+        </EvolutionSection>
+      )}
 
-        {/* ── Rythmes & régularité ────────────────────────────── */}
-        {chronoEntries.length > 0 && (
-          <div className="evolution-card evolution-card--wide">
-            <ChronoTrackingCard entries={chronoEntries} />
-          </div>
-        )}
+      {/* ── Thermomètre de la peur : SUDS avant/après ─────────────── */}
+      {fearData.length > 0 && isShown('fear_thermometer') && (() => {
+        const points = filterByRange(fearData, days)
+        const chartData = points.map(p => ({
+          date: p.date,
+          suds_before: p.suds_before,
+          suds_after:  p.suds_after,
+        }))
+        return (
+          <EvolutionSection
+            sectionKey="fear_thermometer"
+            anchorId="evo-section-fear_thermometer"
+            title={t('evolution.fear_title')}
+            badge={t('evolution.n_sessions', { count: points.length })}
+            metricReminder={metricReminders.get('fear_thermometer')}
+            archivedLabel={isArchived('fear_thermometer') ? t('evolution.archived_badge') : undefined}
+            expanded={isExpanded('fear_thermometer')}
+            onToggle={handleToggleSection}
+            viewDataLabel={t('evolution.view_data')}
+            onViewData={handleViewData}
+          >
+            {chartData.length >= 2 ? (
+              <LineChart
+                data={chartData}
+                series={[
+                  { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
+                  { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
+                ]}
+                yDomain={[0, 100]}
+                showLegend
+                locale={i18n.language}
+              />
+            ) : (
+              <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
+            )}
+          </EvolutionSection>
+        )
+      })()}
 
-      </div>
-    </div>
-  )
-}
-
-// ─── EvolutionCard ────────────────────────────────────────────────────────────
-
-interface EvolutionCardProps {
-  /** Ancre de scroll pour le bandeau d'aperçu (#159). */
-  id?: string
-  title: string
-  badge?: string
-  score?: string
-  scoreColor?: string
-  wide?: boolean
-  animateIn?: boolean
-  archived?: boolean
-  archivedLabel?: string
-  children: React.ReactNode
-}
-
-function EvolutionCard({ id, title, badge, score, scoreColor, wide, animateIn, archived, archivedLabel, children }: EvolutionCardProps) {
-  const cls = [
-    'evolution-card',
-    wide ? 'evolution-card--wide' : '',
-    animateIn ? 'evolution-card--animate-in' : '',
-    archived ? 'evolution-card--archived' : '',
-  ].filter(Boolean).join(' ')
-  return (
-    <div className={cls} id={id}>
-      <div className="evolution-card__header">
-        <div className="evolution-card__heading">
-          <h3 className="evolution-card__title">{title}</h3>
-          {archived && archivedLabel != null && (
-            <span className="evolution__archived-badge">{archivedLabel}</span>
-          )}
-          {score != null && (
-            <span className="evolution-card__score" style={{ color: scoreColor }}>
-              {score}
-            </span>
-          )}
-        </div>
-        {badge != null && (
-          <span className="evolution-card__count">{badge}</span>
-        )}
-      </div>
-      {children}
+      {/* ── Rythmes & régularité (chronobiologie) ─────────────────── */}
+      {chronoEntries.length > 0 && (
+        <EvolutionSection
+          sectionKey="chronobiology_tracker"
+          anchorId="evo-section-chronobiology_tracker"
+          title={t('evolution.chrono_section_title')}
+          expanded={isExpanded('chronobiology_tracker')}
+          onToggle={handleToggleSection}
+        >
+          <ChronoTrackingCard entries={chronoEntries} />
+        </EvolutionSection>
+      )}
     </div>
   )
 }
