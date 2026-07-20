@@ -4,10 +4,11 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string, opts?: { count?: number }) => (opts?.count != null ? `${key}:${opts.count}` : key) }),
 }))
 
-// Stub du graphique recharts (non rendu en jsdom) : on expose séries et données.
+// Stub des graphiques (non rendus en jsdom) : chaque dimension ressentie = un
+// TrendChart. On expose le nombre de points et la présence de la politique de trous.
 vi.mock('../../../components/ui/Chart', () => ({
-  LineChart: ({ series }: { series: { key: string }[] }) => (
-    <div data-testid="linechart" data-series={series.length} />
+  TrendChart: ({ data, gaps }: { data: unknown[]; gaps?: unknown }) => (
+    <div data-testid="trendchart" data-points={Array.isArray(data) ? data.length : 0} data-gaps={gaps ? 'y' : 'n'} />
   ),
 }))
 
@@ -38,7 +39,7 @@ describe('BehavioralActivationPanel', () => {
       makeEntry({ id: 'a1', date: '2026-07-01', label: 'Marche en forêt', done: true, pleasure: 7, mastery: 5 }),
       makeEntry({ id: 'a2', date: '2026-06-10', label: 'Vieille activité' }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     // Semaine du 29 juin au 5 juillet : l'activité du 1er juillet est visible,
     // celle du 10 juin non.
@@ -52,7 +53,7 @@ describe('BehavioralActivationPanel', () => {
       makeEntry({ id: 'a2', date: '2026-07-02', done: false, expected_pleasure: 4 }),
       makeEntry({ id: 'a3', date: '2026-07-03', done: false }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     expect(screen.getByText(/evolution\.ba_done_count:1/)).toBeInTheDocument()
     expect(screen.getByText(/evolution\.ba_planned_count:2/)).toBeInTheDocument()
@@ -66,7 +67,7 @@ describe('BehavioralActivationPanel', () => {
       }),
       makeEntry({ id: 'a2', date: '2026-07-02', label: 'Appel', done: false }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     // Yoga : les deux lignes attendu + ressenti
     expect(screen.getByText(/evolution\.ba_pleasure_short 4 · evolution\.ba_mastery_short 3/)).toBeInTheDocument()
@@ -81,7 +82,7 @@ describe('BehavioralActivationPanel', () => {
       makeEntry({ id: 'a1', date: '2026-07-01', label: 'Activité récente' }),
       makeEntry({ id: 'a2', date: '2026-06-24', label: 'Semaine précédente' }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     expect(screen.getByText('Activité récente')).toBeInTheDocument()
     expect(screen.queryByText('Semaine précédente')).not.toBeInTheDocument()
@@ -101,27 +102,40 @@ describe('BehavioralActivationPanel', () => {
       makeEntry({ id: 'a3', date: '2026-06-20', done: false }),
       makeEntry({ id: 'a4', date: '2026-08-20', done: false }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     // Stats brutes : 2 réalisées, 1 non réalisée (passée), 1 à venir
     expect(screen.getByText('evolution.ba_stat_done').previousSibling?.textContent).toBe('2')
     expect(screen.getByText('evolution.ba_stat_missed').previousSibling?.textContent).toBe('1')
     expect(screen.getByText('evolution.ba_stat_upcoming').previousSibling?.textContent).toBe('1')
-    // Courbe à 2 séries (P et A ressentis)
-    expect(screen.getByTestId('linechart').getAttribute('data-series')).toBe('2')
+    // Deux courbes ressenties (Plaisir + Accomplissement), empilées.
+    expect(screen.getAllByTestId('trendchart')).toHaveLength(2)
   })
 
   it('sans activité réalisée notée, la courbe est absente', () => {
     const entries = [makeEntry({ id: 'a1', date: '2026-07-01', done: false })]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
-    expect(screen.queryByTestId('linechart')).toBeNull()
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
+    expect(screen.queryByTestId('trendchart')).toBeNull()
+  })
+
+  it('agrège par défaut (politique des trous) et bascule vers les saisies brutes', () => {
+    const entries = [
+      makeEntry({ id: 'a1', date: '2026-07-01', done: true, pleasure: 7, mastery: 5 }),
+      makeEntry({ id: 'a2', date: '2026-07-08', done: true, pleasure: 6, mastery: 4 }),
+    ]
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
+    // Mode agrégé (défaut) : les deux courbes portent la politique de trous.
+    expect(screen.getAllByTestId('trendchart').every(c => c.getAttribute('data-gaps') === 'y')).toBe(true)
+    // Bascule « voir chaque saisie » → plus d'agrégat, plus de trous.
+    fireEvent.click(screen.getByText('evolution.show_each_entry'))
+    expect(screen.getAllByTestId('trendchart').every(c => c.getAttribute('data-gaps') === 'n')).toBe(true)
   })
 
   it('affiche heure prévue et notes brutes quand présentes', () => {
     const entries = [
       makeEntry({ id: 'a1', date: '2026-07-01', label: 'Marche', planned_time: '17:30', notes: 'Avec le chien' }),
     ]
-    render(<BehavioralActivationPanel entries={entries} locale="fr" />)
+    render(<BehavioralActivationPanel entries={entries} locale="fr" periodDays={365} />)
 
     expect(screen.getByText(/17:30/)).toBeInTheDocument()
     expect(screen.getByText('Avec le chien')).toBeInTheDocument()

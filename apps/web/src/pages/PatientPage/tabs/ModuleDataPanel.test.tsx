@@ -4,11 +4,13 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'fr' } }),
 }))
 
-// Stub du graphique recharts (non rendu en jsdom) : on expose juste le nb de séries.
+// Stub des graphiques (non rendus en jsdom) : LineChart (échelles/effets) + TrendChart
+// (activation, courbes P/A agrégées).
 vi.mock('../../../components/ui/Chart', () => ({
   LineChart: ({ series }: { series: { key: string }[] }) => (
     <div data-testid="linechart" data-series={series.length} />
   ),
+  TrendChart: () => <div data-testid="trendchart" />,
 }))
 
 const mockFetchScaleEvolution = vi.fn()

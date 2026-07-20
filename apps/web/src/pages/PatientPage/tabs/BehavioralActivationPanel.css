@@ -10,6 +10,31 @@
   margin-bottom: 16px;
 }
 
+/* Courbes P/A ressenties : deux TrendCharts empilés (axe X aligné) + bascule agrégé/brut. */
+.ba-felt {
+  margin-bottom: 12px;
+}
+
+.ba-felt__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.ba-felt__chart {
+  margin-bottom: 12px;
+}
+
+.ba-felt__metric {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
 .ba-stats__item {
   display: flex;
   flex-direction: column;
