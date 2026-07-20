@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ShieldAlert, Plus } from 'lucide-react'
@@ -59,6 +59,10 @@ type Props = {
   themes: PsyEduTheme[]
   comingSoonIds: Set<string>
   onReloadModules: () => Promise<void>
+  /** Commande externe (page Évolution) : ouvrir la modale Données de ce module. */
+  openDataFor?: ModuleType | null
+  /** Accusé de réception de `openDataFor` (le parent remet la commande à null). */
+  onOpenDataHandled?: () => void
 }
 
 export function PatientModulesTab({
@@ -71,6 +75,8 @@ export function PatientModulesTab({
   themes,
   comingSoonIds,
   onReloadModules,
+  openDataFor,
+  onOpenDataHandled,
 }: Props) {
   const { t, i18n } = useTranslation()
 
@@ -85,6 +91,14 @@ export function PatientModulesTab({
   // une seule modale à la fois (exclusivité structurelle), l'onglet actif remplace les
   // anciens states séparés aperçu / données / notifications.
   const [activeModule, setActiveModule] = useState<{ module: ModuleType; tab: ModuleActionTab } | null>(null)
+
+  // Commande externe « Voir les données → » (page Évolution) : ouvre la modale sur
+  // l'onglet Données du module demandé, puis accuse réception pour ne pas rouvrir.
+  useEffect(() => {
+    if (openDataFor == null) return
+    setActiveModule({ module: openDataFor, tab: 'data' })
+    onOpenDataHandled?.()
+  }, [openDataFor, onOpenDataHandled])
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')

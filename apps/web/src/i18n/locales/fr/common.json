@@ -2232,6 +2232,7 @@
     "not_enough_data": "Pas encore assez de saisies pour afficher une courbe.",
     "n_sessions": "{{count}} saisie",
     "n_sessions_plural": "{{count}} saisies",
+    "view_data": "Voir les données",
     "last_score": "Dernier score : {{score}}",
     "range_3m": "3 mois",
     "range_6m": "6 mois",
