@@ -77,6 +77,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sleep-trend__cadence {
+  display: flex;
+  justify-content: flex-end;
+  margin: 8px 0;
+}
+
 /* ── Grille agenda du sommeil ─────────────────────────────────────────────── */
 
 .sleep-grid {

@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ModuleType } from '../../../lib/database.types'
 import { engagementQueries, type ChartKind, type ModuleDataResult } from '../../../hooks/queries'
 import { colorAt } from '../../../lib/chartConfig'
+import { spanDays } from '../../../lib/chartAggregation'
 import {
   SCALE_CONFIG,
   DEFAULT_SCALE_COLOR,
@@ -68,8 +69,9 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   }
 
   // Agenda du sommeil : panneau dédié (grille + courbes + stats), cadre propre.
+  // Pas de sélecteur de période ici → fenêtre couvrant tout l'historique.
   if (state.status === 'sleep') {
-    return <SleepDataPanel points={state.points} locale={i18n.language} />
+    return <SleepDataPanel points={state.points} locale={i18n.language} periodDays={spanDays(state.points)} />
   }
 
   // « Rythmes & régularité » : rythmogramme mensuel (horaires bruts, MDR-safe).

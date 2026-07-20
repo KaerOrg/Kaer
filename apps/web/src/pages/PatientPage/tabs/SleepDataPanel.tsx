@@ -4,6 +4,8 @@ import type { SleepPoint } from '@services/engagementService'
 import { ProgressRing } from '@ui/ProgressRing'
 import { Chip } from '@ui/Chip'
 import { TrendChart, type TrendPoint, computeTrendMean, formatTrendValue } from '@ui/Chart'
+import { Toggle } from '../../../components/ui/Toggle/Toggle'
+import { buildCadenceTrend } from '../../../lib/chartAggregation'
 import { barGeometry, formatMinutes, avg } from './sleepGrid'
 import { SLEEP_METRICS, metricDomain, type SleepMetricKey } from './sleepMetrics'
 import { MetricChip } from './MetricChip'
@@ -12,12 +14,18 @@ import './SleepDataPanel.css'
 interface Props {
   points: SleepPoint[]
   locale: string
+  /** Fenêtre de la courbe, pilotée par le sélecteur de période de la page (#159). */
+  periodDays: number
   /**
    * Période de référence optionnelle (page Évolution) : nuits déjà re-datées sur
    * l'axe courant. Superpose une courbe de comparaison + un delta chiffré.
    */
   comparison?: { points: SleepPoint[]; label: string }
 }
+
+// Cadence d'agrégation du sommeil (`MODULE_EVOLUTION_CONFIG.sleep_diary.cadence`) :
+// le sommeil est un auto-relevé quotidien → moyenne lissée à la semaine par défaut.
+const SLEEP_CADENCE = 'weekly'
 
 // Repères horaires de l'axe noon→noon (toutes les 6 h).
 const AXIS_TICKS = [
@@ -36,10 +44,13 @@ const AXIS_TICKS = [
  * Côté praticien, le codage visuel des métriques est autorisé (analyse soignant) ;
  * les valeurs restent brutes, sans seuil de jugement automatique.
  */
-export function SleepDataPanel({ points, locale, comparison }: Props) {
+export function SleepDataPanel({ points, locale, periodDays, comparison }: Props) {
   const { t } = useTranslation()
   const [metric, setMetric] = useState<SleepMetricKey>('efficiency')
   const handleSelectMetric = useCallback((key: SleepMetricKey) => setMetric(key), [])
+  // Courbe : moyenne hebdomadaire + politique des trous par défaut (#159), avec
+  // bascule « voir chaque saisie » (une nuit = un point, sans agrégat ni bande).
+  const [rawMode, setRawMode] = useState(false)
 
   const stats = useMemo(() => {
     const eff = points.map(p => p.efficiency).filter((v): v is number => v != null)
@@ -56,7 +67,9 @@ export function SleepDataPanel({ points, locale, comparison }: Props) {
 
   const activeMetric = useMemo(() => SLEEP_METRICS.find(m => m.key === metric) ?? SLEEP_METRICS[0], [metric])
 
-  const trendData = useMemo<TrendPoint[]>(
+  // Saisies brutes (une nuit = un point). Base des stats et du delta (N = nuits
+  // renseignées) ; l'agrégation ne sert qu'au tracé de la courbe.
+  const rawTrend = useMemo<TrendPoint[]>(
     () => points.map(p => ({
       date: p.date,
       value: activeMetric.value(p),
@@ -64,18 +77,31 @@ export function SleepDataPanel({ points, locale, comparison }: Props) {
     })),
     [points, activeMetric],
   )
-  const trendDomain = useMemo(() => metricDomain(activeMetric, points), [activeMetric, points])
-
-  const comparisonTrend = useMemo<TrendPoint[] | null>(
+  const rawComparison = useMemo<TrendPoint[] | null>(
     () => comparison ? comparison.points.map(p => ({ date: p.date, value: activeMetric.value(p) })) : null,
     [comparison, activeMetric],
   )
+  const trendDomain = useMemo(() => metricDomain(activeMetric, points), [activeMetric, points])
+
+  // Courbe : moyenne hebdomadaire + trous (pont/bande) par défaut, ou points bruts.
+  const aggregated = useMemo(
+    () => rawMode ? null : buildCadenceTrend(rawTrend, SLEEP_CADENCE, periodDays),
+    [rawMode, rawTrend, periodDays],
+  )
+  const trendData = aggregated ? aggregated.data : rawTrend
+  const gaps = aggregated?.gaps
+  const comparisonTrend = useMemo<TrendPoint[] | null>(() => {
+    if (!rawComparison) return null
+    return rawMode ? rawComparison : buildCadenceTrend(rawComparison, SLEEP_CADENCE, periodDays).data
+  }, [rawComparison, rawMode, periodDays])
+
+  // Delta : écart des moyennes BRUTES (indépendant du lissage de la courbe).
   const delta = useMemo(() => {
-    if (!comparisonTrend) return null
-    const main = computeTrendMean(trendData)
-    const ref = computeTrendMean(comparisonTrend)
+    if (!rawComparison) return null
+    const main = computeTrendMean(rawTrend)
+    const ref = computeTrendMean(rawComparison)
     return main != null && ref != null ? Math.round((main - ref) * 10) / 10 : null
-  }, [comparisonTrend, trendData])
+  }, [rawComparison, rawTrend])
 
   // Grille : nuits les plus récentes en premier, plafonnées à 21 pour la lisibilité.
   const gridNights = useMemo(() => points.slice(-21).reverse(), [points])
@@ -177,12 +203,17 @@ export function SleepDataPanel({ points, locale, comparison }: Props) {
             </span>
           ) : null}
         </div>
+        <div className="sleep-trend__cadence">
+          <Toggle checked={rawMode} onChange={setRawMode} label={t('evolution.show_each_entry')} />
+        </div>
         <TrendChart
           data={trendData}
           unit={activeMetric.unit}
           yDomain={trendDomain}
           meanLabel={t('evolution.trend_mean')}
           comparison={comparisonTrend ? { data: comparisonTrend, label: comparison?.label ?? '' } : undefined}
+          gaps={gaps}
+          noDataLabel={t('evolution.no_data_band')}
           locale={locale}
         />
       </div>
