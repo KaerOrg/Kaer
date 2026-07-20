@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { aggregateByCadence, computeGapSegments, buildCadenceTrend, type AggregatedPoint, type RawDatedPoint } from './chartAggregation'
+import { aggregateByCadence, computeGapSegments, buildCadenceTrend, spanDays, type AggregatedPoint, type RawDatedPoint } from './chartAggregation'
 
 // Ancre « now » fixe pour des fenêtres déterministes (mardi 14 juillet 2026, midi local).
 const NOW = new Date(2026, 6, 14, 12, 0, 0).getTime()
@@ -77,5 +77,26 @@ describe('buildCadenceTrend', () => {
     expect(data.find(p => p.date === '2026-07-06')?.value).toBe(7)
     expect(gaps).toHaveProperty('bridges')
     expect(gaps).toHaveProperty('bands')
+  })
+})
+
+describe('spanDays', () => {
+  it('couvre de la plus ancienne saisie à now (+ marge)', () => {
+    const points = [at(2026, 5, 14, 5), at(2026, 6, 6, 8)] // plus ancienne : 14 juin
+    // 14 juin midi → 14 juillet midi = 30 jours, + marge de 2.
+    expect(spanDays(points, NOW)).toBe(32)
+  })
+
+  it('ignore l’ordre des points (min sur toutes les dates)', () => {
+    const points = [at(2026, 6, 6, 8), at(2026, 5, 14, 5), at(2026, 6, 1, 7)]
+    expect(spanDays(points, NOW)).toBe(32)
+  })
+
+  it('repli à 30 jours si aucune saisie', () => {
+    expect(spanDays([], NOW)).toBe(30)
+  })
+
+  it('plancher à 30 jours pour un historique très court', () => {
+    expect(spanDays([at(2026, 6, 13, 5)], NOW)).toBe(30) // 1 jour → plancher 30
   })
 })

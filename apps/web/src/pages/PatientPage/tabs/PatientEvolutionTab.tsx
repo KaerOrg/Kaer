@@ -220,7 +220,7 @@ export function PatientEvolutionTab({ patientId }: Props) {
               />
             )}
           </div>
-          <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} comparison={sleepComparison} />
+          <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} periodDays={days} comparison={sleepComparison} />
         </section>
       )}
 

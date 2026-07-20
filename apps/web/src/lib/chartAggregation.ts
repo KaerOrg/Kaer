@@ -104,6 +104,23 @@ export function buildCadenceTrend(
   return { data, gaps: computeGapSegments(data) }
 }
 
+/**
+ * Nombre de jours entre la plus ancienne saisie et `now` (+ marge). Fenêtre
+ * couvrant tout l'historique, pour les vues SANS sélecteur de période (modale
+ * « Données ») : `aggregateByCadence` écarte les points hors `rangeDays`, donc on
+ * lui passe la portée réelle des données. Durée (pas une date métier) → le calcul
+ * en millisecondes est sans risque de fuseau. Repli à 30 j si aucune saisie.
+ */
+export function spanDays(points: readonly { readonly date: string }[], now: number = Date.now()): number {
+  let oldest = Infinity
+  for (const p of points) {
+    const t = new Date(p.date).getTime()
+    if (!Number.isNaN(t) && t < oldest) oldest = t
+  }
+  if (!Number.isFinite(oldest)) return 30
+  return Math.max(30, Math.ceil((now - oldest) / DAY_MS) + 2)
+}
+
 export interface GapSegments {
   /** Trous d'UNE unité, à ponter en pointillé (dates des deux points encadrants). */
   readonly bridges: { readonly from: string; readonly to: string }[]
