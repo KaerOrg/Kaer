@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { LineChart } from '../../../components/ui/Chart'
@@ -17,9 +17,11 @@ import type {
 import type { RhythmEntry } from '@kaer/shared'
 import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, patientQueries } from '../../../hooks/queries'
+import type { ModuleType } from '../../../lib/database.types'
 import { SleepDataPanel } from './SleepDataPanel'
 import { MoodEvolutionBlock } from './MoodEvolutionBlock'
 import { EvolutionOverviewBand } from '../../../components/features/EvolutionOverviewBand'
+import { EvolutionSection } from '../../../components/features/EvolutionSection'
 import { sleepCard, moodCard, activationCard, fearCard, type OverviewCard } from './overviewMetrics'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
@@ -41,7 +43,11 @@ import './PatientEvolutionTab.css'
 
 export type { TimeRange }
 
-type Props = { patientId: string }
+type Props = {
+  patientId: string
+  /** Ouvre l'onglet Données du module (lien « Voir les données → » des sections). */
+  onOpenModuleData?: (moduleType: ModuleType) => void
+}
 
 type EvolutionData = {
   scales: string[]
@@ -69,10 +75,27 @@ const EMPTY_EVOLUTION: EvolutionData = {
   activityEntries: [],
 }
 
-export function PatientEvolutionTab({ patientId }: Props) {
+export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
   const { t, i18n } = useTranslation()
   const [range, setRange] = useState<TimeRange>('1y')
   const [showArchived, setShowArchived] = useState(false)
+  // Sections repliables (#159) : plusieurs ouvertes à la fois, état possédé par la
+  // page. On mémorise les sections REPLIÉES (défaut = toutes dépliées).
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
+  const isExpanded = useCallback((key: string) => !collapsed.has(key), [collapsed])
+  const handleToggleSection = useCallback((key: string) => {
+    setCollapsed(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }, [])
+  // Lien « Voir les données → » : un handler stable par section (closure sur le
+  // ModuleType littéral, évite tout cast string vers ModuleType).
+  const openSleepData = useCallback(() => onOpenModuleData?.('sleep_diary'), [onOpenModuleData])
+  const openActivationData = useCallback(() => onOpenModuleData?.('behavioral_activation'), [onOpenModuleData])
+  const openBeckData = useCallback(() => onOpenModuleData?.('beck_columns'), [onOpenModuleData])
   // Comparaison à une période de référence (sommeil) — décochée par défaut (graphe épuré).
   const [sleepCompare, setSleepCompare] = useState(false)
   const [sleepRefKind, setSleepRefKind] = useState<ReferenceKind>('previous')
@@ -111,6 +134,14 @@ export function PatientEvolutionTab({ patientId }: Props) {
     if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
     return cards
   }, [sleepData, moodData, activityEntries, fearData, activeTypes, showArchived, t])
+
+  // Rappel de métrique clé pour l'en-tête des sections repliables (réutilise la
+  // métrique 30 j des cartes d'aperçu ; humeur = empreinte, donc pas de rappel).
+  const metricReminders = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const c of overviewCards) if (c.kind === 'metric') map.set(c.moduleType, `${c.value ?? '-'} ${c.unit}`)
+    return map
+  }, [overviewCards])
 
   // Nuits de la période de référence, re-datées sur l'axe courant (undefined si off/vide).
   const sleepComparison = useMemo(() => {
@@ -197,13 +228,18 @@ export function PatientEvolutionTab({ patientId }: Props) {
 
       {/* ── Agenda du sommeil (grille + tableau fenêtre + courbes) ─────── */}
       {sleepData.length > 0 && isShown('sleep_diary') && (
-        <section className="evolution__sleep" id="evo-section-sleep_diary">
-          <div className="evolution__section-header">
-            <h3 className="evolution__section-title">{t('evolution.sleep_section_title')}</h3>
-            {isArchived('sleep_diary') && (
-              <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-            )}
-          </div>
+        <EvolutionSection
+          sectionKey="sleep_diary"
+          anchorId="evo-section-sleep_diary"
+          title={t('evolution.sleep_section_title')}
+          badge={t('evolution.n_sessions', { count: sleepData.length })}
+          metricReminder={metricReminders.get('sleep_diary')}
+          archivedLabel={isArchived('sleep_diary') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('sleep_diary')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={openSleepData}
+        >
           <div className="evolution__compare">
             <Toggle
               checked={sleepCompare}
@@ -221,37 +257,45 @@ export function PatientEvolutionTab({ patientId }: Props) {
             )}
           </div>
           <SleepDataPanel points={filterByRange(sleepData, days)} locale={i18n.language} periodDays={days} comparison={sleepComparison} />
-        </section>
+        </EvolutionSection>
       )}
 
       {/* ── Activation comportementale (compteurs + courbe P/A + grille hebdo) ── */}
       {activityEntries.length > 0 && isShown('behavioral_activation') && (
-        <section className="evolution__sleep" id="evo-section-behavioral_activation">
-          <div className="evolution__section-header">
-            <h3 className="evolution__section-title">{t('evolution.ba_section_title')}</h3>
-            {isArchived('behavioral_activation') && (
-              <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-            )}
-          </div>
+        <EvolutionSection
+          sectionKey="behavioral_activation"
+          anchorId="evo-section-behavioral_activation"
+          title={t('evolution.ba_section_title')}
+          badge={t('evolution.n_sessions', { count: activityEntries.length })}
+          metricReminder={metricReminders.get('behavioral_activation')}
+          archivedLabel={isArchived('behavioral_activation') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('behavioral_activation')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={openActivationData}
+        >
           <BehavioralActivationPanel
             entries={filterByRange(activityEntries, days)}
             locale={i18n.language}
           />
-        </section>
+        </EvolutionSection>
       )}
 
       {/* ── Colonnes de Beck — fiches complètes (maître-détail, identique à
           l'onglet « Données » du module) ─────────────────────────────────── */}
       {beckEntries.length > 0 && isShown('beck_columns') && (
-        <section className="evolution__sleep">
-          <div className="evolution__section-header">
-            <h3 className="evolution__section-title">{t('evolution.beck_section_title')}</h3>
-            {isArchived('beck_columns') && (
-              <span className="evolution__archived-badge">{t('evolution.archived_badge')}</span>
-            )}
-          </div>
+        <EvolutionSection
+          sectionKey="beck_columns"
+          title={t('evolution.beck_section_title')}
+          badge={t('evolution.n_sessions', { count: beckEntries.length })}
+          archivedLabel={isArchived('beck_columns') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('beck_columns')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={openBeckData}
+        >
           <ColumnFormDataPanel moduleType="beck_columns" entries={beckEntries} />
-        </section>
+        </EvolutionSection>
       )}
 
       <div className="evolution__cards">

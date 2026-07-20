@@ -117,6 +117,29 @@ describe('PatientEvolutionTab — section Colonnes de Beck', () => {
   })
 })
 
+describe('PatientEvolutionTab — sections repliables', () => {
+  it('replie la section au clic sur l’en-tête (corps masqué)', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'beck_columns' }])
+    const { getByTestId, queryByTestId, getByRole } = renderTab()
+    await waitFor(() => expect(getByTestId('beck-panel')).toBeTruthy())
+    fireEvent.click(getByRole('button', { name: /evolution\.beck_section_title/ }))
+    expect(queryByTestId('beck-panel')).toBeNull()
+  })
+
+  it('« Voir les données → » demande l’ouverture de l’onglet Données du module', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'beck_columns' }])
+    const onOpen = vi.fn()
+    const { getByTestId, getByRole } = render(
+      <QueryClientProvider client={makeClient()}>
+        <PatientEvolutionTab patientId="p1" onOpenModuleData={onOpen} />
+      </QueryClientProvider>,
+    )
+    await waitFor(() => expect(getByTestId('beck-panel')).toBeTruthy())
+    fireEvent.click(getByRole('button', { name: /evolution\.view_data/ }))
+    expect(onOpen).toHaveBeenCalledWith('beck_columns')
+  })
+})
+
 describe('PatientEvolutionTab — comparaison période de référence (sommeil)', () => {
   it('le bouton « Comparer » révèle le choix de période de référence (off par défaut)', async () => {
     mockFetchPatientModules.mockResolvedValue([{ module_type: 'sleep_diary' }])

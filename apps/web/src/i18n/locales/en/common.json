@@ -2086,6 +2086,7 @@
     "not_enough_data": "Not enough entries yet to display a chart.",
     "n_sessions": "{{count}} session",
     "n_sessions_plural": "{{count}} sessions",
+    "view_data": "View data",
     "last_score": "Last score: {{score}}",
     "range_3m": "3 months",
     "range_6m": "6 months",

@@ -398,6 +398,18 @@ d'aperçu Évolution (`EvolutionOverviewBand`). À préférer à `MiniLineChart`
 > attente de saisies » si aucune donnée sur la fenêtre. Modèles de carte purs :
 > `overviewMetrics.ts` (`sleepCard` / `moodCard` / `fearCard` / `activationCard` / `scaleCard`).
 
+> **Section module repliable (`components/features/EvolutionSection/`, #159).**
+> Coquille d'une section de la page Évolution : en-tête = contrôle de dévoilement
+> (`ui/Button` ghost pleine largeur, `aria-expanded`) portant icône + titre + pastille
+> « n saisies » (`badge`) + rappel de métrique clé (`metricReminder`) + chevron, plus un
+> lien **« Voir les données → »** SÉPARÉ (`viewDataLabel` + `onViewData`, jamais imbriqué
+> dans le bouton de repli) qui ouvre l'onglet Données du module. Plusieurs sections
+> ouvertes simultanément (pas d'accordéon exclusif) : l'état de repli est **possédé par la
+> page** (`expanded` + `onToggle(sectionKey)`), le corps n'est monté que déplié. `anchorId`
+> = ancre ciblée par le bandeau d'aperçu. Présentationnel, aucune donnée métier. Props :
+> `sectionKey`, `anchorId?`, `icon?`, `title`, `badge?`, `metricReminder?`, `archivedLabel?`,
+> `expanded`, `onToggle`, `viewDataLabel?`, `onViewData?`, `children`.
+
 #### `DimensionFingerprint` — empreinte multi-dimensions (`components/features/`)
 
 Miroir web du composant mobile (#161) : mini-graphe à barres verticales, une barre

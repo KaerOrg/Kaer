@@ -10,7 +10,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
 import { Tooltip } from '../../components/ui/Tooltip'
-import type { PatientModule } from '../../lib/database.types'
+import type { PatientModule, ModuleType } from '../../lib/database.types'
 import type { ModuleCategory } from '@services/moduleCatalogService'
 import type { PractitionerNote } from '@services/noteService'
 import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
@@ -147,6 +147,16 @@ export function PatientPage() {
 
   const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv' | 'evolution'>('overview')
 
+  // Commande « ouvrir l'onglet Données d'un module » depuis la page Évolution :
+  // bascule sur l'onglet Modules et transmet le module à PatientModulesTab (qui
+  // détient la modale d'actions). Remis à null une fois la modale ouverte.
+  const [openModuleData, setOpenModuleData] = useState<ModuleType | null>(null)
+  const handleOpenModuleData = useCallback((moduleType: ModuleType) => {
+    setOpenModuleData(moduleType)
+    setActiveTab('modules')
+  }, [])
+  const handleModuleDataOpened = useCallback(() => setOpenModuleData(null), [])
+
   // Prêt = patient résolu ET toutes les données chargées.
   const loading =
     id == null ||
@@ -275,6 +285,8 @@ export function PatientPage() {
                 themes={themes}
                 comingSoonIds={comingSoonIds}
                 onReloadModules={reloadModules}
+                openDataFor={openModuleData}
+                onOpenDataHandled={handleModuleDataOpened}
               />
             )}
 
@@ -298,7 +310,7 @@ export function PatientPage() {
             )}
 
             {activeTab === 'evolution' && id && (
-              <PatientEvolutionTab patientId={id} />
+              <PatientEvolutionTab patientId={id} onOpenModuleData={handleOpenModuleData} />
             )}
           </>
         )}
