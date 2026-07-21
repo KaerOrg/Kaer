@@ -231,7 +231,48 @@ zéro impact dispatcher/seed/type partagé.
   - Dormant (laissé, inoffensif) : helpers SQLite bas-niveau `exposure_hierarchies`
     dans `lib/database.ts`.
 
+## 9sexies. Redesign 2026-07 (#183) — mobile
+
+Redesign de l'existant (pas une refonte), branche `refonte/exposition-graduee-mobile`.
+Épic #185 (mobile #183 puis web #184). Objectif : neutralisation totale de la palette
+(fin de tout codage de valence / gravité), saisie SUDS unique, restitution passive du
+couple prédiction / résultat (apprentissage inhibiteur, Craske 2014).
+
+- **Palette neutralisée** (`field_props` de `et.cfg`, jamais en dur) : anticipé lavande
+  `#C9B8E4` (remplace `#EF4444`), pic teal `#6dbfc3` (nouveau `suds_peak_color`), final
+  sauge `#A8D8C0` (remplace `#059669`). Barre de difficulté `ladder_bar_color`
+  `#9AD3D6` ; texte de la pastille « Dernier pic » `last_peak_text_color` `#3E7C82`
+  (teal assombri, contraste WCAG AA). Les défauts côté code sont eux-mêmes neutres.
+- **Coche « terminé » (`is_done`) retirée de l'UI** (colonne conservée en base pour
+  rétrocompat). Remplacée sur la carte marche par une **barre de difficulté
+  proportionnelle** + la pastille passive **« Dernier pic X »** / « Pas encore essayée »
+  + le **nombre d'expositions sur sa propre ligne**.
+- **Une seule mécanique SUDS** : pastilles 0 à 100 (`RatingSelector variant="numbered"`)
+  partout, création de marche incluse (le `variant="track"` de `StepFormView` est
+  supprimé ; le variant reste dans le primitive partagé pour les autres modules).
+  `SudsField` gagne une prop `legend` (légende « 0 = aucun stress… » sous les pastilles).
+- **État vide (écran 0)** : composant `LadderEmpty` (illustration escalier pastel + CTA
+  « Créer ma première situation » + nudge). Le bandeau `DisclaimerBanner` est retiré de
+  la tête de l'échelle.
+- **Brouillon (écran 3)** : bouton « Enregistrer et compléter après l'exposition »
+  (`exposure_save_draft`) qui persiste la prédiction (avant seul) ; pic / final restent
+  nuls et se complètent en rouvrant la même séance.
+- **Détail (écran 5)** : carte « Difficulté estimée · X / Ré-évaluer » (re-cotation TCC,
+  conserve l'historique) ; carte séance avec « Je redoutais : / Ce qui s'est passé : » ;
+  CTA « + Faire une exposition » **dans le flux** (ne recouvre plus la dernière carte).
+- **Renommages i18n** (nouvelles clés) : `step_target_suds_label` / `step_target_suds_short`
+  (« Difficulté initiale estimée »), `step_difficulty`, `step_last_peak`, `step_not_tried`,
+  `ladder_empty_cta` / `ladder_empty_nudge` / `ladder_sort_hint`, `exposure_save_draft(_hint)`,
+  `detail_difficulty`, `detail_reevaluate`, `session_predicted_label`. Variante teen
+  systématique (tutoiement professionnel). Anciennes clés `step_done` / `step_target` /
+  `step_target_label` supprimées.
+- **Design system** : tous les boutons d'action ad hoc (`Pressable + styles.xxxBtn`)
+  migrés vers `@ui/Button` (FAB, CTA, retour, dates, suppression, icônes édition/poubelle).
+- **Accessibilité** : textes secondaires ≥ 12,5 px, gris assombri `#7A8891` (AA 4,5:1),
+  cibles ≥ 44 px (mode icône-seule de `ui/Button`).
+
 ## 10. Hors périmètre (suite)
 
 - Rappels programmés d'exposition.
 - Nettoyage optionnel des helpers SQLite `exposure_hierarchies` dormants.
+- **Web praticien (#184)** : parité stricte avec ce redesign mobile (ticket suivant).

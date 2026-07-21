@@ -410,17 +410,33 @@ Badge d'état coloré, lecture seule. Pendant mobile du `StatusBadge` web.
 
 ### EmptyState (`src/components/ui/EmptyState/`)
 
-État vide — icône + titre + description + action optionnelle.
+État vide — illustration + titre + description + action optionnelle + nudge.
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `icon` | `string` | Emoji ou symbole texte rendu via `<Text>` (ex. `"📋"`, `"📅"`) |
+| `icon` | `string \| ReactNode` | Emoji / symbole texte (rendu via `<Text>`), **ou** un nœud d'illustration personnalisé (rendu tel quel — ex. escalier pastel de l'exposition graduée) |
 | `title` | `string` | Titre (obligatoire) |
 | `description` | `string` | Texte explicatif |
-| `action` | `{ label: string; onPress: () => void }` | Bouton d'action optionnel |
+| `action` | `{ label; onPress; variant?; icon?; testID? }` | Bouton d'action optionnel — `variant` (défaut `secondary`), `icon` (nœud à gauche du libellé), `testID` |
+| `footer` | `string` | Ligne d'aide (nudge) affichée **sous** l'action |
 | `style` | `ViewStyle` | Style additionnel |
+| `testID` | `string` | testID du conteneur |
+
+```tsx
+// Emoji simple
+<EmptyState icon="📋" title="Aucune saisie" description="…" />
+// Illustration + CTA primaire à icône + nudge
+<EmptyState
+  icon={<StairsIllustration />}
+  title="Construisez votre échelle"
+  description="…"
+  action={{ label: 'Créer', onPress, variant: 'primary', icon: <Plus /> }}
+  footer="Commencez par une situation facile."
+/>
+```
 
 > **Règle : tout bloc `View + icon + Text + Text` en état vide doit utiliser `EmptyState`.**
+> Une illustration non-emoji passe par `icon={<Node/>}` ; une ligne d'aide sous le CTA par `footer`.
 
 ### ScreenLoader (`src/components/ui/ScreenLoader/`)
 

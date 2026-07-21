@@ -1,7 +1,9 @@
 import React from 'react'
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import type { FearEntry, FearSituation } from '../../../../../lib/database'
 import { DesensitizationChart } from '@ui/Chart'
 import type { ExposureConfig } from './types'
@@ -24,7 +26,7 @@ export interface StepDetailProps {
   onDeleteExposure: (entry: FearEntry) => void
 }
 
-/** Détail d'une marche : courbe de progression + historique des expositions. */
+/** Détail d'une marche : courbe de désensibilisation + historique des expositions. */
 export function StepDetail({
   step, entries, config, lbl, tCommon, resolveStrategyLabels,
   onBack, onEditStep, onDeleteStep, onDoExposure, onEditExposure, onDeleteExposure,
@@ -37,16 +39,28 @@ export function StepDetail({
   return (
     <View style={etStyles.container} testID="exposure-step-detail">
       <View style={etStyles.entryHeaderBar}>
-        <Pressable onPress={onBack} style={etStyles.backBtn} accessibilityLabel={tCommon('common.back')} testID="detail-back">
-          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-        </Pressable>
+        <Button
+          variant="ghost"
+          onPress={onBack}
+          accessibilityLabel={tCommon('common.back')}
+          iconLeft={<MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />}
+          testID="detail-back"
+        />
         <Text style={etStyles.headerTitle} numberOfLines={1}>{step.label}</Text>
-        <Pressable onPress={onEditStep} hitSlop={8} accessibilityLabel={tCommon('common.edit')} testID="detail-edit-step">
-          <MaterialCommunityIcons name="pencil-outline" size={20} color={colors.primary} />
-        </Pressable>
-        <Pressable onPress={onDeleteStep} hitSlop={8} accessibilityLabel={tCommon('common.delete')} testID="detail-delete-step">
-          <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.textMuted} />
-        </Pressable>
+        <Button
+          variant="ghost"
+          onPress={onEditStep}
+          accessibilityLabel={tCommon('common.edit')}
+          iconLeft={<MaterialCommunityIcons name="pencil-outline" size={20} color={colors.primary} />}
+          testID="detail-edit-step"
+        />
+        <Button
+          variant="ghost"
+          onPress={onDeleteStep}
+          accessibilityLabel={tCommon('common.delete')}
+          iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.textMuted} />}
+          testID="detail-delete-step"
+        />
       </View>
 
       <ScrollView contentContainerStyle={etStyles.listContent}>
@@ -57,12 +71,27 @@ export function StepDetail({
             <DesensitizationChart
               points={series}
               width={300}
-              accentColor={colors.primary}
+              accentColor={config.peakColor}
               yAxisLabel={lbl('chart_y_axis')}
               xAxisLabel={lbl('chart_x_axis')}
             />
           )}
         </View>
+
+        {/* Difficulté estimée + ré-évaluation (re-cotation TCC, conserve l'historique) */}
+        <Card style={etStyles.difficultyCard}>
+          <Text style={etStyles.difficultyText}>
+            {lbl('detail_difficulty', { value: step.target_suds ?? 0 })}
+          </Text>
+          <Button
+            variant="ghost"
+            size="sm"
+            label={lbl('detail_reevaluate')}
+            iconRight={<MaterialCommunityIcons name="chevron-right" size={18} color={colors.primary} />}
+            onPress={onEditStep}
+            testID="detail-reevaluate"
+          />
+        </Card>
 
         {sessions.length > 0 ? (
           <Text style={etStyles.historyTitle}>{lbl('detail_history_title')}</Text>
@@ -79,18 +108,17 @@ export function StepDetail({
             onDelete={() => onDeleteExposure(e)}
           />
         ))}
-      </ScrollView>
 
-      <Pressable
-        style={etStyles.doExposureBtn}
-        onPress={onDoExposure}
-        accessibilityRole="button"
-        accessibilityLabel={lbl('detail_do_exposure')}
-        testID="do-exposure-btn"
-      >
-        <MaterialCommunityIcons name="thermometer-plus" size={22} color={colors.white} />
-        <Text style={etStyles.doExposureText}>{lbl('detail_do_exposure')}</Text>
-      </Pressable>
+        {/* CTA pleine largeur, dans le flux — ne recouvre jamais la dernière carte. */}
+        <Button
+          variant="primary"
+          label={lbl('detail_do_exposure')}
+          iconLeft={<MaterialCommunityIcons name="plus" size={22} color={colors.white} />}
+          onPress={onDoExposure}
+          style={etStyles.ctaBtn}
+          testID="do-exposure-btn"
+        />
+      </ScrollView>
     </View>
   )
 }

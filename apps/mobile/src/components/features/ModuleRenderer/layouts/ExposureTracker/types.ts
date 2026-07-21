@@ -11,6 +11,7 @@ export type ExposureMode =
   | { kind: 'exposure'; stepId: string; entryId: string | null }
 
 // Config numérique + couleurs résolues depuis le field `exposure_tracker_config`.
+// Palette neutralisée (#183) : aucune valence, aucune couleur de gravité.
 export interface ExposureConfig {
   sudsMin: number
   sudsMax: number
@@ -19,6 +20,10 @@ export interface ExposureConfig {
   beforeColor: string
   peakColor: string
   afterColor: string
+  /** Barre de difficulté proportionnelle sur la carte marche (teal clair). */
+  ladderBarColor: string
+  /** Texte de la pastille « Dernier pic » (teal assombri, contraste AA). */
+  lastPeakTextColor: string
 }
 
 // Brouillon produit par le formulaire d'exposition, mappé en FearEntry par l'orchestrateur.

@@ -1,4 +1,5 @@
 import React from 'react'
+import { Text } from 'react-native'
 import { render, screen, fireEvent } from '@testing-library/react-native'
 import { EmptyState } from './EmptyState'
 
@@ -33,5 +34,29 @@ describe('EmptyState', () => {
   it("n'affiche pas le bouton si action absente", () => {
     render(<EmptyState title="T" />)
     expect(screen.queryByText('Créer')).toBeNull()
+  })
+
+  it('rend un nœud d\'illustration personnalisé à la place d\'un emoji', () => {
+    render(<EmptyState title="T" icon={<Text>illustration-node</Text>} />)
+    expect(screen.getByText('illustration-node')).toBeTruthy()
+  })
+
+  it('affiche la ligne d\'aide (footer) si fournie', () => {
+    render(<EmptyState title="T" footer="Petit conseil" />)
+    expect(screen.getByText('Petit conseil')).toBeTruthy()
+  })
+
+  it('expose le testID du conteneur et de l\'action', () => {
+    const onPress = jest.fn()
+    render(
+      <EmptyState
+        testID="es-root"
+        title="T"
+        action={{ label: 'Créer', onPress, variant: 'primary', testID: 'es-cta' }}
+      />,
+    )
+    expect(screen.getByTestId('es-root')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('es-cta'))
+    expect(onPress).toHaveBeenCalledTimes(1)
   })
 })

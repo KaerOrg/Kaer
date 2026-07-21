@@ -1,7 +1,8 @@
 import React from 'react'
-import { View, Text, Pressable } from 'react-native'
+import { View, Text } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '@ui/Button'
 import { formatDateShortYear } from '../../../../../lib/dateUtils'
 import type { FearEntry } from '../../../../../lib/database'
 import type { ExposureConfig } from './types'
@@ -29,12 +30,20 @@ export function SessionCard({
       <View style={etStyles.cardHeader}>
         <Text style={etStyles.cardDate}>{formatDateShortYear(entry.date)}</Text>
         <View style={etStyles.cardActions}>
-          <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel={tCommon('common.edit')} testID={`edit-${entry.id}`}>
-            <MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />
-          </Pressable>
-          <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel={tCommon('common.delete')} testID={`delete-${entry.id}`}>
-            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
-          </Pressable>
+          <Button
+            variant="ghost"
+            onPress={onEdit}
+            accessibilityLabel={tCommon('common.edit')}
+            iconLeft={<MaterialCommunityIcons name="pencil-outline" size={18} color={colors.primary} />}
+            testID={`edit-${entry.id}`}
+          />
+          <Button
+            variant="ghost"
+            onPress={onDelete}
+            accessibilityLabel={tCommon('common.delete')}
+            iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
+            testID={`delete-${entry.id}`}
+          />
         </View>
       </View>
 
@@ -46,7 +55,7 @@ export function SessionCard({
 
       {entry.expectation_text ? (
         <Text style={etStyles.cardNotes}>
-          <Text style={etStyles.sudsLabel}>{lbl('expectation_label')} </Text>
+          <Text style={etStyles.sudsLabel}>{lbl('session_predicted_label')} </Text>
           {entry.expectation_text}
         </Text>
       ) : null}

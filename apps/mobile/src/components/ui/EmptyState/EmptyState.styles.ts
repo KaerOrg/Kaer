@@ -12,4 +12,5 @@ export const styles = StyleSheet.create({
   icon:        { fontSize: 40, opacity: 0.4 },
   title:       { fontSize: 18, fontWeight: '600', color: colors.text, textAlign: 'center' },
   description: { fontSize: 14, color: colors.textMuted, textAlign: 'center', maxWidth: 280 },
+  footer:      { fontSize: 12.5, color: colors.textMuted, textAlign: 'center', maxWidth: 280 },
 })

@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import {
-  View, Text, Pressable, ScrollView, TextInput, ActivityIndicator,
+  View, Text, Pressable, ScrollView, TextInput,
   KeyboardAvoidingView, Platform,
 } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '@ui/Button'
 import type { FearEntry, FearSituation } from '../../../../../lib/database'
 import type { ExposureConfig, ExposureDraft } from './types'
 import { deserializeStrategies } from './exposureLogic'
@@ -49,6 +50,10 @@ export interface ExposureFormProps {
  * Formulaire d'exposition vécu comme une expérience (modèle d'inhibitory learning) :
  * AVANT « ce que je redoute » + angoisse anticipée → PENDANT pic → APRÈS angoisse
  * finale + « ce qui s'est passé ». MDR : aucune comparaison ni conclusion automatique.
+ *
+ * Brouillon (#183) : le bouton « Enregistrer et compléter après l'exposition »
+ * persiste la prédiction (avant seul) ; pic / final restent nuls et se complètent
+ * plus tard en rouvrant la même séance.
  */
 export function ExposureForm({
   step, existing, config, sudsSteps, strategyOptions, saving, lbl, tCommon, onBack, onSave, onDelete,
@@ -88,9 +93,13 @@ export function ExposureForm({
       testID="exposure-form"
     >
       <View style={etStyles.entryHeaderBar}>
-        <Pressable onPress={onBack} style={etStyles.backBtn} accessibilityLabel={tCommon('common.back')} testID="exposure-back">
-          <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
-        </Pressable>
+        <Button
+          variant="ghost"
+          onPress={onBack}
+          accessibilityLabel={tCommon('common.back')}
+          iconLeft={<MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />}
+          testID="exposure-back"
+        />
         <Text style={etStyles.headerTitle} numberOfLines={1}>{step.label}</Text>
       </View>
 
@@ -98,17 +107,14 @@ export function ExposureForm({
         {/* DATE — éditable (saisie possible le lendemain) */}
         <View style={etStyles.section}>
           <Text style={etStyles.sectionLabel}>{lbl('exposure_date')}</Text>
-          <Pressable
-            style={etStyles.dateBtn}
+          <Button
+            variant="secondary"
+            label={entryDate.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
+            iconLeft={<MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />}
             onPress={() => setShowDatePicker(true)}
-            accessibilityRole="button"
+            style={etStyles.dateFieldBtn}
             testID="exposure-date-btn"
-          >
-            <MaterialCommunityIcons name="calendar-outline" size={20} color={colors.textMuted} />
-            <Text style={etStyles.dateValue}>
-              {entryDate.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}
-            </Text>
-          </Pressable>
+          />
           {showDatePicker ? (
             <DateTimePicker
               value={entryDate}
@@ -122,9 +128,14 @@ export function ExposureForm({
             />
           ) : null}
           {showDatePicker && Platform.OS === 'ios' ? (
-            <Pressable style={etStyles.dateConfirmBtn} onPress={() => setShowDatePicker(false)} testID="exposure-date-confirm">
-              <Text style={etStyles.dateConfirmText}>{tCommon('common.ok')}</Text>
-            </Pressable>
+            <Button
+              variant="ghost"
+              size="sm"
+              label={tCommon('common.ok')}
+              onPress={() => setShowDatePicker(false)}
+              style={etStyles.dateConfirmAlign}
+              testID="exposure-date-confirm"
+            />
           ) : null}
         </View>
 
@@ -153,6 +164,20 @@ export function ExposureForm({
             onChange={(v) => setSudsBefore(v ?? config.sudsMin)}
             testID="suds-before-field"
           />
+        </View>
+
+        {/* BROUILLON — enregistrer la prédiction avant l'exposition */}
+        <View style={etStyles.section}>
+          <Button
+            variant="secondary"
+            label={lbl('exposure_save_draft')}
+            loading={saving}
+            disabled={saving}
+            onPress={submit}
+            style={etStyles.ctaBtn}
+            testID="exposure-save-draft"
+          />
+          <Text style={etStyles.draftHint}>{lbl('exposure_save_draft_hint')}</Text>
         </View>
 
         {/* PENDANT */}
@@ -250,26 +275,25 @@ export function ExposureForm({
           </View>
         </View>
 
-        <Pressable
-          style={[etStyles.saveBtn, saving && etStyles.btnDisabled]}
-          onPress={submit}
+        <Button
+          variant="primary"
+          label={existing ? tCommon('common.update') : tCommon('common.save')}
+          iconLeft={<MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />}
+          loading={saving}
           disabled={saving}
-          accessibilityRole="button"
+          onPress={submit}
+          style={etStyles.ctaBtn}
           testID="exposure-save"
-        >
-          {saving ? (
-            <ActivityIndicator color={colors.white} size="small" />
-          ) : (
-            <>
-              <MaterialCommunityIcons name="content-save-outline" size={20} color={colors.white} />
-              <Text style={etStyles.saveBtnText}>{existing ? tCommon('common.update') : tCommon('common.save')}</Text>
-            </>
-          )}
-        </Pressable>
+        />
         {existing ? (
-          <Pressable style={etStyles.deleteBtn} onPress={onDelete} accessibilityRole="button" testID="exposure-delete">
-            <Text style={etStyles.deleteBtnText}>{tCommon('common.delete')}</Text>
-          </Pressable>
+          <Button
+            variant="danger"
+            size="sm"
+            label={tCommon('common.delete')}
+            onPress={onDelete}
+            style={etStyles.deleteAlign}
+            testID="exposure-delete"
+          />
         ) : null}
       </ScrollView>
     </KeyboardAvoidingView>

@@ -1144,8 +1144,14 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'suds_max',                     '100'),
   ('et.cfg', 'suds_step',                    '10'),
   ('et.cfg', 'suds_default_before',          '50'),
-  ('et.cfg', 'suds_before_color',            '#EF4444'),
-  ('et.cfg', 'suds_after_color',             '#059669'),
+  -- Palette neutralisée (fin de tout codage de valence / gravité — cf. #183).
+  -- Anticipé lavande, pic teal, final sauge. Barre de difficulté + pastille
+  -- « Dernier pic » en teal neutre (texte assombri pour contraste WCAG AA).
+  ('et.cfg', 'suds_before_color',            '#C9B8E4'),
+  ('et.cfg', 'suds_peak_color',              '#6dbfc3'),
+  ('et.cfg', 'suds_after_color',             '#A8D8C0'),
+  ('et.cfg', 'ladder_bar_color',             '#9AD3D6'),
+  ('et.cfg', 'last_peak_text_color',         '#3E7C82'),
   ('et.cfg', 'tab_entries_label',            'modules.fear_thermometer.tab_entries'),
   ('et.cfg', 'tab_situations_label',         'modules.fear_thermometer.tab_situations'),
   ('et.cfg', 'add_btn',                      'modules.fear_thermometer.new_entry'),
@@ -1182,6 +1188,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'situation_placeholder',        'modules.fear_thermometer.situation_placeholder'),
   ('et.cfg', 'situation_empty',              'modules.fear_thermometer.situation_empty')
 on conflict (field_id, prop_key) do nothing;
+
+-- Redesign #183 : neutralisation de la palette. Les clés couleur préexistantes
+-- (#EF4444 / #059669) ne sont pas réécrites par l'INSERT ci-dessus (ON CONFLICT
+-- DO NOTHING) → on force les valeurs neutralisées de façon idempotente.
+update public.field_props set prop_value = '#C9B8E4' where field_id = 'et.cfg' and prop_key = 'suds_before_color';
+update public.field_props set prop_value = '#A8D8C0' where field_id = 'et.cfg' and prop_key = 'suds_after_color';
 
 
 -- ============================================================

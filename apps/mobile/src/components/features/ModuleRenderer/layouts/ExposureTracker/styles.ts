@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing, radius, shadows } from '@theme'
 
 export const etStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
@@ -24,11 +24,18 @@ export const etStyles = StyleSheet.create({
   tabText: { fontSize: 14, fontWeight: '600', color: colors.textMuted },
   tabTextActive: { color: colors.primary },
 
-  // List
-  listContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: 96 },
-  empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+  // List — padding bas ≥ hauteur du FAB (56) + marge, pour ne masquer aucune carte.
+  listContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: 120 },
+  // Placeholder « aucune séance » du détail (le reste passe par ui/EmptyState).
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+
+  // ── État vide (écran 0) — illustration escalier pastel (icon de ui/EmptyState) ─
+  emptyStairs: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.xs, height: 72, marginBottom: spacing.sm },
+  emptyStep: { width: 26, borderRadius: radius.sm },
+  emptyCheck: {
+    width: 26, height: 26, borderRadius: radius.full,
+    alignItems: 'center', justifyContent: 'center', marginLeft: 2, marginBottom: 2,
+  },
 
   // Entry card
   entryCard: {
@@ -69,22 +76,16 @@ export const etStyles = StyleSheet.create({
   sudsValue: { fontSize: 13, fontWeight: '700', minWidth: 28, textAlign: 'right' },
   sudsPending: { fontSize: 13, color: colors.border, marginLeft: spacing.xs },
 
-  // FAB
+  // FAB — CTA flottant (ui/Button + override de positionnement).
   fab: {
     position: 'absolute',
     bottom: spacing.xl,
     right: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
     paddingHorizontal: spacing.lg,
     height: 56,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2, shadowRadius: 8, elevation: 6,
+    ...shadows.lg,
   },
-  fabText: { color: colors.white, fontSize: 14, fontWeight: '700' },
 
   // Entry form
   entryHeaderBar: {
@@ -157,8 +158,9 @@ export const etStyles = StyleSheet.create({
   sudsValueBig: { fontSize: 22, fontWeight: '800' },
   sudsValueNull: { fontSize: 22, fontWeight: '800', color: colors.textMuted },
   sudsValueMax: { fontSize: 12, color: colors.textMuted },
+  sudsLegend: { fontSize: 12.5, color: colors.textMuted },
   skipBtn: { alignSelf: 'flex-start', paddingVertical: 4 },
-  skipText: { fontSize: 12, color: colors.textMuted, textDecorationLine: 'underline' },
+  skipText: { fontSize: 12.5, color: colors.textMuted, textDecorationLine: 'underline' },
 
   // Strategies
   stratHint: { fontSize: 12, color: colors.textMuted },
@@ -202,16 +204,8 @@ export const etStyles = StyleSheet.create({
     textAlignVertical: 'top',
   },
 
-  // Save / delete
-  saveBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.sm, backgroundColor: colors.primary, borderRadius: radius.md,
-    paddingVertical: spacing.sm + 4,
-  },
-  btnDisabled: { opacity: 0.6 },
-  saveBtnText: { color: colors.white, fontSize: 16, fontWeight: '700' },
-  deleteBtn: { alignItems: 'center', paddingVertical: spacing.sm },
-  deleteBtnText: { color: colors.danger, fontSize: 14, fontWeight: '600' },
+  // CTA pleine largeur (ui/Button + étirement) — save de formulaire / detail.
+  ctaBtn: { alignSelf: 'stretch', marginTop: spacing.xs },
 
   // Situations panel
   panelContent: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
@@ -259,33 +253,23 @@ export const etStyles = StyleSheet.create({
   infoBox:        { flexDirection: 'row', gap: 6, alignItems: 'flex-start', marginTop: 12, marginHorizontal: spacing.md, marginBottom: 4, padding: 10, backgroundColor: colors.neutral, borderRadius: radius.sm },
   footerText:     { fontSize: 12, color: colors.textMuted, flex: 1, lineHeight: 17 },
 
-  // ── Parcours unifié — échelle (ladder) ──────────────────────────────────
-  ladderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.md,
+  // ── Parcours unifié — échelle (ladder), la carte = ui/Card ──────────────
+  ladderTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  ladderRowTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: colors.text },
+  // Barre de difficulté proportionnelle — teal clair, aucune valence.
+  ladderDiffTrack: { height: 6, borderRadius: radius.full, backgroundColor: colors.neutral, overflow: 'hidden' },
+  ladderDiffFill: { height: '100%', borderRadius: radius.full },
+  ladderRowMeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  // Contraste WCAG AA : gris assombri (≥ 4,5:1) pour les textes secondaires.
+  ladderMetaText: { flex: 1, fontSize: 12.5, color: colors.textMuted },
+  ladderSessions: { fontSize: 12.5, color: colors.textMuted },
+  // Fond teinté dérivé de la couleur de texte (alpha) — cf. LadderList.
+  lastPeakChip: {
+    paddingHorizontal: spacing.sm, paddingVertical: 3,
+    borderRadius: radius.full,
   },
-  ladderCheckbox: {
-    width: 26, height: 26, borderRadius: radius.full,
-    borderWidth: 2, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  ladderCheckboxDone: { borderColor: colors.primary, backgroundColor: colors.primary },
-  ladderRowText: { flex: 1, gap: 3 },
-  ladderRowTitle: { fontSize: 15, fontWeight: '600', color: colors.text },
-  ladderRowMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  ladderMetaText: { fontSize: 12, color: colors.textMuted },
-  targetChip: {
-    paddingHorizontal: spacing.sm, paddingVertical: 2,
-    borderRadius: radius.full, backgroundColor: colors.primaryLight,
-  },
-  targetChipText: { fontSize: 11, fontWeight: '700', color: colors.primary },
+  lastPeakChipText: { fontSize: 11.5, fontWeight: '700' },
+  notTriedText: { fontSize: 12.5, color: colors.textMuted },
 
   // ── En-tête de niveau (detail / form) ───────────────────────────────────
   headerTitle: { flex: 1, fontSize: 16, fontWeight: '700', color: colors.text },
@@ -301,24 +285,16 @@ export const etStyles = StyleSheet.create({
     gap: spacing.sm,
   },
   historyTitle: {
-    fontSize: 12, fontWeight: '700', color: colors.textMuted,
+    fontSize: 12.5, fontWeight: '700', color: colors.textMuted,
     textTransform: 'uppercase', letterSpacing: 0.8,
     marginTop: spacing.md, marginBottom: spacing.xs,
   },
-  doExposureBtn: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    left: spacing.lg,
-    right: spacing.lg,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.xs,
-    height: 56,
-    borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2, shadowRadius: 8, elevation: 6,
+  // Layout only — surface (bg/bordure/radius) fournie par ui/Card.
+  difficultyCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: spacing.xs, paddingLeft: spacing.md, paddingRight: spacing.xs,
   },
-  doExposureText: { color: colors.white, fontSize: 15, fontWeight: '700' },
+  difficultyText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
   // ── Step form ───────────────────────────────────────────────────────────
   stepInput: {
@@ -348,26 +324,11 @@ export const etStyles = StyleSheet.create({
     textAlignVertical: 'top',
   },
 
-  // ── Exposure form — sélecteur de date ───────────────────────────────────
-  dateBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  dateValue: { fontSize: 15, fontWeight: '500', color: colors.text, textTransform: 'capitalize' },
-  dateConfirmBtn: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.primaryLight,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  dateConfirmText: { color: colors.primary, fontSize: 14, fontWeight: '700' },
+  // ── Exposure form — sélecteur de date (ui/Button secondary, aligné à gauche) ─
+  dateFieldBtn: { alignSelf: 'stretch', justifyContent: 'flex-start' },
+  dateConfirmAlign: { alignSelf: 'flex-end', marginTop: spacing.xs },
+
+  // ── Exposure form — brouillon / suppression ─────────────────────────────
+  draftHint: { fontSize: 12.5, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
+  deleteAlign: { alignSelf: 'center', marginTop: spacing.xs },
 })
