@@ -14,10 +14,11 @@ export function SessionCardPreview({ session, lbl, strategyLabel }: Props) {
   const dateText = new Date(dateDaysAgo(session.daysAgo)).toLocaleDateString('fr-FR', {
     weekday: 'short', day: 'numeric', month: 'short',
   })
+  // Palette neutralisée (#184) : lavande / teal / sauge, aucune valence (MDR).
   const bars: BarSpec[] = [
-    { label: lbl('suds_anticipated'), value: session.before, color: 'var(--color-danger)' },
-    { label: lbl('suds_peak'), value: session.peak, color: 'var(--color-primary)' },
-    { label: lbl('suds_final'), value: session.after, color: 'var(--color-success)' },
+    { label: lbl('suds_anticipated'), value: session.before, color: 'var(--ej-before)' },
+    { label: lbl('suds_peak'), value: session.peak, color: 'var(--ej-peak)' },
+    { label: lbl('suds_final'), value: session.after, color: 'var(--ej-after)' },
   ]
   return (
     <article className="ej-session-card">

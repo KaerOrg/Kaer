@@ -101,6 +101,14 @@
   margin: 0;
 }
 
+/* Mention passive sous une courbe (MDR : contexte, aucune interprétation). */
+.evolution-card__mention {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 8px 0 0;
+}
+
 /* ── Empty / loading ───────────────────────────────────────────────────────── */
 
 .evolution-empty {

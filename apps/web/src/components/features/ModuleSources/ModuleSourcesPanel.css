@@ -39,12 +39,8 @@
   gap: 4px;
 }
 
-.sources-item--guideline { --source-accent: #16a34a; }
-.sources-item--rct { --source-accent: #2563eb; }
-.sources-item--cohort_study { --source-accent: #7c3aed; }
-.sources-item--meta_analysis,
-.sources-item--systematic_review { --source-accent: #ea580c; }
-.sources-item--expert_opinion { --source-accent: #64748b; }
+/* Aucune couleur d'accent par type (#184) : le bord gauche reste neutre
+   (`--color-border`), pas de hiérarchie de « qualité » encodée en couleur. */
 
 .sources-item__header {
   display: flex;
@@ -55,6 +51,9 @@
 
 /* ── Badge type de source ────────────────────────────────────────────────────── */
 
+/* Teinte pastel NEUTRE, identique pour tous les types (#184) : le badge nomme
+   le type de source, il n'encode aucune hiérarchie de « qualité » par la couleur.
+   Le type reste porté par le libellé, jamais par une couleur de valence. */
 .sources-item__type-badge {
   display: inline-flex;
   align-items: center;
@@ -65,34 +64,8 @@
   letter-spacing: 0.05em;
   padding: 2px 6px;
   border-radius: 3px;
-  background: var(--color-primary-light, #eef2ff);
-  color: var(--color-primary, #6366f1);
-}
-
-.sources-item__type-badge--guideline {
-  background: #f0fdf4;
-  color: #16a34a;
-}
-
-.sources-item__type-badge--rct {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.sources-item__type-badge--cohort_study {
-  background: #faf5ff;
-  color: #7c3aed;
-}
-
-.sources-item__type-badge--meta_analysis,
-.sources-item__type-badge--systematic_review {
-  background: #fff7ed;
-  color: #ea580c;
-}
-
-.sources-item__type-badge--expert_opinion {
-  background: #f8fafc;
-  color: #64748b;
+  background: var(--color-neutral, #f1f5f9);
+  color: var(--color-text-secondary, #64748b);
 }
 
 /* ── Grade de preuve ────────────────────────────────────────────────────────── */

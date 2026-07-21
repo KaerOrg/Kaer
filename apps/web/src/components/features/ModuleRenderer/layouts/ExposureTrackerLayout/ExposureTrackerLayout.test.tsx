@@ -36,10 +36,14 @@ function fields(): ContentField[] {
 }
 
 describe('ExposureTrackerLayout (aperçu parcours d\'exposition)', () => {
-  it('affiche l\'échelle de la peur avec ses marches, le bandeau MDR et le FAB', () => {
+  it('affiche l\'échelle de la peur (marches, tri, barre de difficulté, sans coche) et le FAB', () => {
     const { container } = render(<ExposureTrackerLayout fields={fields()} t={t} />)
     expect(screen.getByTestId('ej-ladder')).toBeTruthy()
-    expect(container.querySelector('.ej-disclaimer')).toBeTruthy()
+    // Redesign #184 : indice de tri + barre de difficulté, plus aucune coche.
+    expect(container.querySelector('.ej-sort-hint')).toBeTruthy()
+    expect(container.querySelectorAll('.ej-diff-bar')).toHaveLength(3)
+    expect(container.querySelector('.ej-ladder-row__check')).toBeNull()
+    expect(container.querySelector('.ej-last-peak')).toBeTruthy()
     expect(container.querySelectorAll('.ej-ladder-row')).toHaveLength(3)
     expect(screen.getByText('modules.fear_thermometer.add_step')).toBeTruthy()
   })

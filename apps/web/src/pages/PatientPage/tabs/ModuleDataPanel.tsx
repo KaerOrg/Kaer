@@ -8,10 +8,9 @@ import { spanDays } from '../../../lib/chartAggregation'
 import {
   SCALE_CONFIG,
   DEFAULT_SCALE_COLOR,
-  FEAR_BEFORE_COLOR,
-  FEAR_AFTER_COLOR,
 } from './clinicalChartConfig'
 import { ModuleChart } from './ModuleChart'
+import { ExposureDataPanel } from './ExposureDataPanel'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
 import { MoodDataPanel } from './MoodDataPanel'
 import { SleepDataPanel } from './SleepDataPanel'
@@ -90,6 +89,11 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
     return <BehavioralActivationPanel entries={state.entries} locale={i18n.language} periodDays={spanDays(state.entries)} />
   }
 
+  // Exposition graduée : courbe SUDS 3 séries + filtre situation + période (#184).
+  if (state.status === 'fear') {
+    return <ExposureDataPanel points={state.points} locale={i18n.language} />
+  }
+
   const locale = i18n.language
 
   return (
@@ -115,21 +119,6 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
           />
         )
       })()}
-
-      {state.status === 'fear' && (
-        <ModuleChart
-          title={t('evolution.fear_title')}
-          count={state.points.length}
-          data={state.points.map(p => ({ date: p.date, suds_before: p.suds_before, suds_after: p.suds_after }))}
-          series={[
-            { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
-            { key: 'suds_after', color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
-          ]}
-          yDomain={[0, 100]}
-          showLegend
-          locale={locale}
-        />
-      )}
 
       {state.status === 'med' && (
         <ModuleChart

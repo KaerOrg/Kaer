@@ -271,8 +271,43 @@ couple prédiction / résultat (apprentissage inhibiteur, Craske 2014).
 - **Accessibilité** : textes secondaires ≥ 12,5 px, gris assombri `#7A8891` (AA 4,5:1),
   cibles ≥ 44 px (mode icône-seule de `ui/Button`).
 
+## 9septies. Redesign 2026-07 (#184) — web praticien
+
+Parité stricte avec le mobile #183 (épic #185). Aucune nouvelle table, aucun
+nouveau `preview_kind`. Surfaces : modale d'actions du module (4 onglets) + page
+Évolution + couche données.
+
+- **Couche données** (`engagementService.ts`) : `FearPoint` gagne `suds_peak: number | null`
+  (nullable = brouillon) et `situation: string` (libellé de marche, lu depuis
+  `patient_entries.payload.situation_label` / `suds_peak` synchronisés par le mobile).
+- **Palette neutralisée** (`clinicalChartConfig.ts`, partagée Données ≡ Évolution) :
+  `FEAR_BEFORE_COLOR='#C9B8E4'`, `FEAR_PEAK_COLOR='#6dbfc3'` (nouveau),
+  `FEAR_AFTER_COLOR='#8FCBB4'` (remplacent l'orange `#F59E0B` / le vert `#10B981`).
+- **Onglet Données** → nouveau `ExposureDataPanel` (branché dans `ModuleDataPanel`,
+  status `fear`) : courbe SUDS **3 séries** (anticipé / pic pointillé / final),
+  **filtre par situation** (`ui/Chip selectable`), **sélecteur de période**
+  1m/3m/6m/1an (`ui/SegmentedControl` ; `'1m'` ajouté à `TIME_RANGES` de
+  `lib/chartConfig`), badge « n saisies », légende, mention passive.
+- **Onglet Vue patient** → `ExposureLadderView` aligné sur l'écran 1 mobile : barre de
+  difficulté proportionnelle, « Difficulté initiale estimée X », pastille « Dernier
+  pic X » / « Pas encore essayée » (`white-space: nowrap`), nombre d'expositions sur sa
+  ligne, **aucune coche** (`ej-ladder-row__check--done` supprimé), disclaimer retiré de
+  la tête de liste. Cartes de séance neutralisées (`SessionCardPreview` : lavande / teal
+  / sauge au lieu de `--color-danger`/`--color-success`). Palette locale en variables CSS
+  `--ej-*` scopées à `.ej`.
+- **Onglet Sources** : badges de type et bord gauche **neutralisés** (teinte pastel
+  unique) — le type reste porté par le libellé, aucune hiérarchie de « qualité » en
+  couleur.
+- **Onglet Notifications** : inchangé fonctionnellement.
+- **Page Évolution** (`PatientEvolutionTab`) : la carte « Exposition graduée (SUDS) »
+  **reste globale** (toutes situations), 2 séries (avant / après) neutralisées, **points
+  marqués** (`LineChart showDots`), mention « moyenne de toutes les situations… ». Le lien
+  « Voir les données → » (pattern `EvolutionSection` `view_data`) ouvre déjà l'onglet
+  Données du module.
+- **`ui/LineChart` étendu** : `showDots?` (1 point = 1 saisie) + `SeriesConfig.dashed?`
+  (série « pic » en pointillés) ; `data` accepte `null` (gap de brouillon).
+
 ## 10. Hors périmètre (suite)
 
 - Rappels programmés d'exposition.
 - Nettoyage optionnel des helpers SQLite `exposure_hierarchies` dormants.
-- **Web praticien (#184)** : parité stricte avec ce redesign mobile (ticket suivant).

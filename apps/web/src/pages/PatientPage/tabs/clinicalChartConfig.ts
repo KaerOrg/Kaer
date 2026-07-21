@@ -28,9 +28,12 @@ export const MOOD_DIMENSIONS = [
   { key: 'alimentation', color: CHART_PALETTE[5]  },
 ] as const
 
-// Thermomètre de la peur — SUDS avant / après exposition.
-export const FEAR_BEFORE_COLOR = CHART_PALETTE[2]
-export const FEAR_AFTER_COLOR = CHART_PALETTE[1]
+// Exposition graduée — SUDS anticipé / pic / final. Palette neutralisée (#184,
+// parité mobile #183) : aucune valence, aucune couleur de gravité (fin de
+// l'orange/vert d'alarme). Lavande / teal / sauge.
+export const FEAR_BEFORE_COLOR = '#C9B8E4'
+export const FEAR_PEAK_COLOR = '#6dbfc3'
+export const FEAR_AFTER_COLOR = '#8FCBB4'
 
 // Activation comportementale — P/A ressentis (mêmes teintes que l'app patient).
 export const BA_PLEASURE_COLOR = CHART_PALETTE[1]

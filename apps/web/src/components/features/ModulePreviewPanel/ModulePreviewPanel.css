@@ -3305,20 +3305,29 @@
 
 /* ── Exposure journey (fear_thermometer) ─────────────────────────────────── */
 
-.ej { display: flex; flex-direction: column; gap: 14px; }
-
-.ej-disclaimer {
+/* Palette neutralisée de l'exposition graduée (parité mobile #183, MDR : aucune
+   valence). Variables locales au module — teal de difficulté + pastille pic. */
+.ej {
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  background: var(--color-primary-light);
-  border-radius: var(--radius-md);
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--color-primary);
-  line-height: 1.45;
+  flex-direction: column;
+  gap: 14px;
+  --ej-diff-fill: #9AD3D6;
+  --ej-diff-track: #EEF4F4;
+  --ej-peak-text: #3E7C82;
+  --ej-peak-bg: #EAF2F2;
+  --ej-before: #C9B8E4;
+  --ej-peak: #6dbfc3;
+  --ej-after: #A8D8C0;
 }
-.ej-disclaimer__icon { flex-shrink: 0; margin-top: 1px; }
+
+.ej-sort-hint {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
 
 /* Échelle (ladder) */
 .ej-ladder { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; }
@@ -3326,8 +3335,8 @@
 .ej-ladder-row {
   width: 100%;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -3338,31 +3347,31 @@
 }
 .ej-ladder-row:hover { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
 
-.ej-ladder-row__check {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--color-border);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: white;
+.ej-ladder-row__top { display: flex; align-items: center; gap: 8px; }
+.ej-ladder-row__title { flex: 1; font-size: 14px; font-weight: 700; color: var(--color-text); min-width: 0; }
+
+/* Barre de difficulté proportionnelle (teal neutre, aucune valence) */
+.ej-diff-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ej-diff-track);
+  overflow: hidden;
 }
-.ej-ladder-row__check--done { border-color: var(--color-primary); background: var(--color-primary); }
+.ej-diff-bar__fill { display: block; height: 100%; border-radius: 999px; background: var(--ej-diff-fill); }
 
-.ej-ladder-row__body { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.ej-ladder-row__title { font-size: 14px; font-weight: 600; color: var(--color-text); }
-.ej-ladder-row__meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-.ej-target-chip {
+.ej-ladder-row__meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ej-diff-label { font-size: 12px; color: var(--color-text-muted); }
+.ej-last-peak {
   font-size: 11px;
   font-weight: 700;
-  background: var(--color-primary-light);
-  color: var(--color-primary);
+  color: var(--ej-peak-text);
+  background: var(--ej-peak-bg);
   border-radius: 999px;
-  padding: 2px 8px;
+  padding: 3px 8px;
+  white-space: nowrap;
 }
+.ej-not-tried { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
+
 .ej-ladder-row__count { font-size: 12px; color: var(--color-text-muted); }
 .ej-ladder-row__chevron { color: var(--color-text-muted); flex-shrink: 0; }
 
