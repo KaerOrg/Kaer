@@ -231,18 +231,18 @@ describe('engagementService.fetchMoodMarkers', () => {
 })
 
 describe('engagementService.fetchFearEvolution', () => {
-  it('mappe suds_before/suds_after', async () => {
+  it('mappe suds_before/peak/after + situation', async () => {
     const rows = [
-      { client_created_at: '2026-01-01', payload: { suds_before: 80, suds_after: 40 } },
+      { client_created_at: '2026-01-01', payload: { suds_before: 80, suds_peak: 90, suds_after: 40, situation_label: 'Métro' } },
     ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
     expect(await fetchFearEvolution('p1')).toEqual([
-      { date: '2026-01-01', suds_before: 80, suds_after: 40 },
+      { date: '2026-01-01', suds_before: 80, suds_peak: 90, suds_after: 40, situation: 'Métro' },
     ])
   })
 
-  it('défaut suds_after=0 si absent, ignore si suds_before manquant', async () => {
+  it('peak=null (brouillon), suds_after=0 par défaut, situation vide si absente, ignore si suds_before manquant', async () => {
     const rows = [
       { client_created_at: '2026-01-01', payload: { suds_before: 60 } },
       { client_created_at: '2026-02-01', payload: { suds_after: 10 } },
@@ -250,7 +250,7 @@ describe('engagementService.fetchFearEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
     expect(await fetchFearEvolution('p1')).toEqual([
-      { date: '2026-01-01', suds_before: 60, suds_after: 0 },
+      { date: '2026-01-01', suds_before: 60, suds_peak: null, suds_after: 0, situation: '' },
     ])
   })
 })

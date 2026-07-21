@@ -3,10 +3,10 @@
 // cliniques (bornes d'échelles, dimensions d'humeur…) vivent à côté de leur
 // feature et consomment cette palette.
 
-export type TimeRange = '3m' | '6m' | '1y'
+export type TimeRange = '1m' | '3m' | '6m' | '1y'
 
-export const RANGE_DAYS: Record<TimeRange, number> = { '3m': 90, '6m': 180, '1y': 365 }
-export const TIME_RANGES: readonly TimeRange[] = ['3m', '6m', '1y']
+export const RANGE_DAYS: Record<TimeRange, number> = { '1m': 30, '3m': 90, '6m': 180, '1y': 365 }
+export const TIME_RANGES: readonly TimeRange[] = ['1m', '3m', '6m', '1y']
 
 // Palette de séries : couleurs distinctes, assez nombreuses pour des graphes
 // multi-séries. À utiliser via `colorAt` pour des séries dynamiques.

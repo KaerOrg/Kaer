@@ -328,13 +328,34 @@ type ChartDataPoint = number | null
 interface ChartProps { data: ChartDataPoint[]; color: string; maxY?: number }
 ```
 
-#### `LineChart` — courbe avec gaps
+#### `LineChart` — courbe multi-séries (Recharts)
 
-Segments interrompus sur les `null`, marqueurs circulaires sur les points présents.
+Courbe datée à une ou plusieurs séries. Gaps sur les `null` (`connectNulls={false}`),
+marqueur au survol ; `showDots` marque chaque point, `SeriesConfig.dashed` trace une
+série en pointillés.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `data` | `Record<string, number \| string \| null>[]` | Points (clé `xKey` = date) ; `null` = gap |
+| `series` | `SeriesConfig[]` | `{ key, color, label?, dashed? }` par série |
+| `yDomain` | `[number, number]` | Bornes de l'axe Y |
+| `showLegend` | `boolean` | Légende sous le graphe |
+| `showDots` | `boolean` | Marque chaque point (1 point = 1 saisie) |
+| `xKey` / `height` / `locale` | — | Clé d'axe X (défaut `date`), hauteur, locale |
 
 ```tsx
 import { LineChart } from '../components/ui/Chart'
-<LineChart data={[1, 2, null, 3, 2]} color="#8B5CF6" maxY={3} />
+<LineChart
+  data={[{ date: '2026-06-01', before: 70, peak: 80, after: 40 }, /* … */]}
+  series={[
+    { key: 'before', color: '#C9B8E4', label: 'Avant' },
+    { key: 'peak', color: '#6dbfc3', label: 'Pic', dashed: true },
+    { key: 'after', color: '#8FCBB4', label: 'Après' },
+  ]}
+  yDomain={[0, 100]}
+  showLegend
+  showDots
+/>
 ```
 
 #### `BarChart` — barres verticales

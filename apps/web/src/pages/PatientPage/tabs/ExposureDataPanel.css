@@ -1,0 +1,59 @@
+/* ── Onglet « Données » de l'exposition graduée (courbe SUDS 3 séries) ─────── */
+/* Affichage passif conforme MDR : valeurs brutes, aucune interprétation. */
+
+.exposure-data-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.exposure-data-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exposure-data-panel__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.exposure-data-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.exposure-data-panel__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.exposure-data-panel__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exposure-data-panel__note {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 24px 16px;
+  margin: 0;
+}
+
+.exposure-data-panel__mention {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0;
+}

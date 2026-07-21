@@ -16,15 +16,21 @@ export interface SeriesConfig {
   key: string
   color: string
   label?: string
+  /** Trait pointillé (ex. série « pic » de l'exposition graduée). */
+  dashed?: boolean
 }
 
 interface Props {
-  data: Record<string, number | string>[]
+  // `null` = donnée manquante (ex. pic non renseigné en brouillon) → gap dans la
+  // courbe (Recharts, `connectNulls={false}`).
+  data: Record<string, number | string | null>[]
   series: SeriesConfig[]
   yDomain?: [number, number]
   xKey?: string
   height?: number
   showLegend?: boolean
+  /** Marque chaque point (1 point = 1 saisie). Défaut : points visibles au survol seulement. */
+  showDots?: boolean
   locale?: string
 }
 
@@ -93,6 +99,7 @@ export function LineChart({
   xKey = 'date',
   height = 200,
   showLegend = false,
+  showDots = false,
   locale = 'fr-FR',
 }: Props) {
   const formatTick = useCallback(
@@ -192,7 +199,8 @@ export function LineChart({
             dataKey={s.key}
             stroke={s.color}
             strokeWidth={2}
-            dot={false}
+            strokeDasharray={s.dashed ? '5 4' : undefined}
+            dot={showDots ? { r: 3, fill: s.color, stroke: 'white', strokeWidth: 1 } : false}
             activeDot={{ r: 5, fill: s.color, stroke: 'white', strokeWidth: 2 }}
             name={s.key}
             connectNulls={false}

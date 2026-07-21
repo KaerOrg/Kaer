@@ -423,16 +423,20 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
             onViewData={handleViewData}
           >
             {chartData.length >= 2 ? (
-              <LineChart
-                data={chartData}
-                series={[
-                  { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
-                  { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
-                ]}
-                yDomain={[0, 100]}
-                showLegend
-                locale={i18n.language}
-              />
+              <>
+                <LineChart
+                  data={chartData}
+                  series={[
+                    { key: 'suds_before', color: FEAR_BEFORE_COLOR, label: t('evolution.fear_before') },
+                    { key: 'suds_after',  color: FEAR_AFTER_COLOR, label: t('evolution.fear_after') },
+                  ]}
+                  yDomain={[0, 100]}
+                  showLegend
+                  showDots
+                  locale={i18n.language}
+                />
+                <p className="evolution-card__mention">{t('evolution.fear_global_note')}</p>
+              </>
             ) : (
               <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
             )}

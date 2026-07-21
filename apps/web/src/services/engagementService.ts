@@ -13,7 +13,15 @@ export type MoodPoint = {
   alimentation?: number
 }
 
-export type FearPoint = { date: string; suds_before: number; suds_after: number }
+// Un point = une exposition. `suds_peak` nullable (brouillon / non renseigné) ;
+// `situation` = libellé de la marche, pour le filtre par situation de l'onglet Données.
+export type FearPoint = {
+  date: string
+  suds_before: number
+  suds_peak: number | null
+  suds_after: number
+  situation: string
+}
 
 // Repère temporel (Life Chart) posé par le patient sur le mood_tracker (#161),
 // lu par le praticien. Type en liste fermée ; `date` = jour métier du repère
@@ -173,10 +181,13 @@ export async function fetchFearEvolution(patientId: string): Promise<FearPoint[]
   for (const row of data) {
     const before = toNumber(row.payload.suds_before)
     if (before == null) continue
+    const situation = typeof row.payload.situation_label === 'string' ? row.payload.situation_label : ''
     points.push({
       date: row.client_created_at,
       suds_before: before,
+      suds_peak: toNumber(row.payload.suds_peak) ?? null,
       suds_after: toNumber(row.payload.suds_after) ?? 0,
+      situation,
     })
   }
   return points

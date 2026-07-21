@@ -15,9 +15,8 @@ export interface PreviewStep {
   id: string
   /** Clé i18n du libellé d'exemple. */
   labelKey: string
-  /** Niveau de stress estimé au départ (0–100). */
+  /** Difficulté initiale estimée (0–100). */
   target: number
-  done: boolean
   /** Séances ordonnées de la plus ancienne à la plus récente. */
   sessions: PreviewSession[]
 }
@@ -30,14 +29,12 @@ export const PREVIEW_STEPS: readonly PreviewStep[] = [
     id: 'prev-meeting',
     labelKey: 'preview_step_meeting',
     target: 30,
-    done: true,
     sessions: [{ daysAgo: 8, before: 40, peak: 50, after: 20 }],
   },
   {
     id: 'prev-drive',
     labelKey: 'preview_step_drive',
     target: 50,
-    done: false,
     sessions: [
       { daysAgo: 14, before: 50, peak: 60, after: 40 },
       { daysAgo: 5, before: 40, peak: 50, after: 30 },
@@ -47,7 +44,6 @@ export const PREVIEW_STEPS: readonly PreviewStep[] = [
     id: 'prev-mall',
     labelKey: 'preview_step_mall',
     target: 80,
-    done: false,
     sessions: [
       { daysAgo: 21, before: 70, peak: 80, after: 50 },
       { daysAgo: 12, before: 60, peak: 70, after: 40 },
