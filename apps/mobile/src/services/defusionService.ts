@@ -52,18 +52,29 @@ export async function removeDefusionSession(id: string): Promise<void> {
 }
 
 /**
- * Techniques activées par le praticien pour ce patient
- * (`patient_modules.config.enabled_techniques`, écrit par le web, epic #201 story 5).
+ * Techniques activées par le praticien, dérivées d'une config déjà chargée
+ * (`patient_modules.config`). Pur — partagé par `fetchEnabledTechniques` (service)
+ * et `DefusionLayout` (qui reçoit déjà `patientConfig` et évite un second appel).
  * Défaut robuste = les deux techniques : au déblocage le web initialise les deux,
  * mais une config absente, vide ou malformée ne doit jamais masquer le module au
  * patient. L'ordre canonique de `ALL_TECHNIQUES` est préservé.
+ */
+export function enabledTechniquesFromConfig(
+  config: Record<string, unknown> | null,
+): DefusionTechnique[] {
+  const raw = config?.enabled_techniques
+  if (!Array.isArray(raw)) return [...ALL_TECHNIQUES]
+  const enabled = ALL_TECHNIQUES.filter((technique) => raw.includes(technique))
+  return enabled.length > 0 ? enabled : [...ALL_TECHNIQUES]
+}
+
+/**
+ * Techniques activées pour ce patient, lues depuis Supabase
+ * (`patient_modules.config.enabled_techniques`, écrit par le web, epic #201 story 5).
  */
 export async function fetchEnabledTechniques(
   patientId: string,
 ): Promise<DefusionTechnique[]> {
   const config = await fetchPatientModuleConfig(patientId, MODULE_ID)
-  const raw = config?.enabled_techniques
-  if (!Array.isArray(raw)) return [...ALL_TECHNIQUES]
-  const enabled = ALL_TECHNIQUES.filter((technique) => raw.includes(technique))
-  return enabled.length > 0 ? enabled : [...ALL_TECHNIQUES]
+  return enabledTechniquesFromConfig(config)
 }

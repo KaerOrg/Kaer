@@ -22,6 +22,7 @@ import {
   removeDefusionSession,
   fetchDefusionSessions,
   fetchEnabledTechniques,
+  enabledTechniquesFromConfig,
   ALL_TECHNIQUES,
 } from './defusionService'
 import type { DefusionSession } from '../lib/database'
@@ -139,5 +140,25 @@ describe('defusionService — fetchEnabledTechniques', () => {
   it('retombe sur les deux techniques si la config n\'active rien de connu', async () => {
     mockFetchConfig.mockResolvedValueOnce({ enabled_techniques: [] })
     expect(await fetchEnabledTechniques('p1')).toEqual([...ALL_TECHNIQUES])
+  })
+})
+
+describe('defusionService — enabledTechniquesFromConfig (pur)', () => {
+  it('défaut = deux techniques quand config null', () => {
+    expect(enabledTechniquesFromConfig(null)).toEqual([...ALL_TECHNIQUES])
+  })
+
+  it('filtre et préserve l\'ordre canonique', () => {
+    expect(enabledTechniquesFromConfig({ enabled_techniques: ['linguistic_distancing', 'word_repetition'] }))
+      .toEqual(['word_repetition', 'linguistic_distancing'])
+  })
+
+  it('une seule technique activée', () => {
+    expect(enabledTechniquesFromConfig({ enabled_techniques: ['word_repetition'] }))
+      .toEqual(['word_repetition'])
+  })
+
+  it('défaut robuste quand enabled_techniques n\'est pas un tableau', () => {
+    expect(enabledTechniquesFromConfig({ enabled_techniques: 42 })).toEqual([...ALL_TECHNIQUES])
   })
 })
