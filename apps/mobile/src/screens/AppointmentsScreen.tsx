@@ -93,16 +93,19 @@ function AppointmentItem({
         {canAct && (
           <View style={styles.itemActions}>
             <Button
-              variant="secondary"
+              variant="ghost"
               size="sm"
               label={t('agenda.appointment.reschedule_btn')}
               onPress={handleReschedule}
+              style={styles.itemActionBtn}
             />
             <Button
-              variant="danger"
+              variant="ghostDanger"
               size="sm"
-              label={t('agenda.appointment.cancel_btn')}
+              label={t('agenda.appointment.cancel_short')}
               onPress={handleCancel}
+              accessibilityLabel={t('agenda.appointment.cancel_btn')}
+              style={styles.itemActionBtn}
             />
           </View>
         )}
@@ -268,8 +271,13 @@ const styles = StyleSheet.create({
   },
   itemActions: {
     flexDirection: 'row',
-    gap: 8,
     marginTop: 4,
-    flexWrap: 'wrap',
+    // Actions discrètes : alignées sur le texte de la carte, d'où le retrait du
+    // padding horizontal que ui/Button pose sur son premier élément.
+    marginLeft: -spacing.md,
+  },
+  itemActionBtn: {
+    minHeight: 0,
+    paddingVertical: spacing.xs,
   },
 })

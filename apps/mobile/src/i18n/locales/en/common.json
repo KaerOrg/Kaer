@@ -1684,6 +1684,7 @@
     "appointment": {
       "new": "Book an appointment",
       "cancel_btn": "Cancel appointment",
+      "cancel_short": "Cancel",
       "cancel_confirm": "Are you sure you want to cancel this appointment?",
       "reschedule_btn": "Reschedule",
       "status_pending": "Pending confirmation",

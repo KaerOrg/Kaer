@@ -2381,6 +2381,7 @@
     "appointment": {
       "new": "Prendre un rendez-vous",
       "cancel_btn": "Annuler le rendez-vous",
+      "cancel_short": "Annuler",
       "cancel_confirm": "Confirmez-vous l'annulation de ce rendez-vous ?",
       "reschedule_btn": "Reprogrammer",
       "status_pending": "En attente de confirmation",

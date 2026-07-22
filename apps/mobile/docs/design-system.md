@@ -158,14 +158,17 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 | `primary` | `colors.primary` | — | `colors.white` |
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
-| `danger` | `#FEE2E2` | `colors.danger` (1px) | `colors.danger` |
+| `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |
+| `ghostDanger` | transparent | — | `colors.danger` |
 
 | Taille | paddingV | paddingH | minHeight | label |
 |---|---|---|---|---|
 | `md` (défaut) | 12 | 24 | 50 | 16 |
 | `sm` | 8 | 16 | 36 | 14 |
 
-`borderRadius: 10` dans les deux cas. La taille ne porte **que** les dimensions ; la
+`ghostDanger` est le pendant discret de `danger` : action destructive sans habillage,
+seul le libellé porte la couleur d'alerte (ex. « Annuler » dans une carte de rendez-vous,
+où un bouton plein alourdirait la carte). `borderRadius: 10` dans les deux cas. La taille ne porte **que** les dimensions ; la
 couleur reste pilotée par `variant`. `sm` sert aux actions inline compactes (ex. le
 « pont effets indésirables » de MedicationTracker) sans réécrire un `Pressable` ad hoc.
 

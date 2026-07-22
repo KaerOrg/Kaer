@@ -1,6 +1,7 @@
 import React from 'react'
 import { Text } from 'react-native'
 import { render, screen, fireEvent } from '@testing-library/react-native'
+import { colors } from '@theme'
 import { Button } from './Button'
 
 describe('Button', () => {
@@ -39,6 +40,14 @@ describe('Button', () => {
     render(<Button label="Compact" onPress={() => {}} size="sm" testID="btn" />)
     const styleArray = screen.getByText('Compact').props.style.flat()
     expect(styleArray).toContainEqual({ fontSize: 14 })
+  })
+
+  it('variant="ghostDanger" : fond transparent et libellé en couleur d\'alerte', () => {
+    render(<Button label="Annuler" onPress={() => {}} variant="ghostDanger" testID="btn" />)
+    const containerStyle = screen.getByTestId('btn').props.style.flat()
+    expect(containerStyle).toContainEqual({ backgroundColor: 'transparent' })
+    const labelStyle = screen.getByText('Annuler').props.style.flat()
+    expect(labelStyle).toContainEqual({ color: colors.danger })
   })
 
   it('size par défaut (md) : label en taille standard (16)', () => {
