@@ -30,7 +30,9 @@ export interface FriseMarker {
  * renseignées ne produisent aucun marqueur (pas de placeholder).
  */
 export function buildDayMarkers(
-  values: Readonly<Record<string, string | number | null | undefined>>,
+  // Valeurs de formulaire opaques (élargies #204 : peuvent porter booléens / listes).
+  // Chaque ancre est narrowée à une chaîne d'horaire avant usage.
+  values: Readonly<Record<string, unknown>>,
 ): FriseMarker[] {
   const markers: FriseMarker[] = []
   for (const anchor of CHRONO_ANCHORS) {

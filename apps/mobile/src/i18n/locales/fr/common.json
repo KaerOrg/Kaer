@@ -77,7 +77,8 @@
     "exercise_steps_overview": "Les étapes",
     "optional_info_label": "Informations complémentaires (facultatif)",
     "step": "Étape",
-    "read_sheet": "Lire la fiche"
+    "read_sheet": "Lire la fiche",
+    "add_custom_chip": "+ Autre…"
   },
   "global": {
     "greeting": "Bienvenue",

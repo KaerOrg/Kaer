@@ -107,6 +107,7 @@
     "wardrobe_empty": "Kein Modul für diesen Patienten aktiviert. Klicken Sie auf „Modul hinzufügen“, um zu beginnen.",
     "add_module_button": "Modul hinzufügen",
     "add_module_title": "Modul hinzufügen",    "unlock_button": "Freischalten",
+    "unlock_error": "Das Modul konnte nicht freigeschaltet werden: {{message}}",
     "revoke_button": "Widerrufen",
     "preview_button": "Vorschau",
     "patient_view": "Was Ihr Patient sehen wird",

@@ -63,7 +63,8 @@
     "notes_placeholder": "Context, remarks...",
     "step": "Step",
     "read_sheet": "Read the sheet",
-    "close": "Close"
+    "close": "Close",
+    "add_custom_chip": "+ Other…"
   },
   "global": {
     "greeting": "Welcome",

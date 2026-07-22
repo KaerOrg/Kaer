@@ -6,7 +6,7 @@ import { isFilledValue } from '@kaer/shared'
 // Statut de workflow (non clinique) — aucune interprétation (MDR 2017/745).
 
 export function isEntryComplete(
-  values: Record<string, string | number>,
+  values: Record<string, unknown>,
   completeKeys: readonly string[],
 ): boolean {
   if (completeKeys.length === 0) return true

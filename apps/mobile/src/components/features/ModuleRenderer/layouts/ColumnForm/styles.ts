@@ -76,6 +76,12 @@ export const styles = StyleSheet.create({
   suggestions: {
     flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs,
   },
+  // Champs de choix / chips (column_choice_field, column_chips_field).
+  chipsGroupLabel: {
+    fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase',
+    color: colors.textMuted, marginBottom: spacing.xs,
+  },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   // ── Actions de saisie (date rétroactive, « comme d'habitude ») — ui/Button
   // compact aligné à gauche (le primitive porte fond/bordure/radius).
   entryActionBtn: { alignSelf: 'flex-start', minHeight: 0, paddingVertical: spacing.sm },

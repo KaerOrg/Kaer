@@ -13,6 +13,7 @@ import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
+import { useToast } from '../../../contexts/ToastContext'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
@@ -82,6 +83,7 @@ export function PatientModulesTab({
   onOpenDataHandled,
 }: Props) {
   const { t, i18n } = useTranslation()
+  const toast = useToast()
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   // Opération de bascule en cours — une seule à la fois. `unlock` cible un type de
@@ -225,9 +227,12 @@ export function PatientModulesTab({
       ? { enabled_techniques: [...DEFUSION_TECHNIQUES] }
       : undefined
     const result = await unlockStandardModule(patientId, practitionerId, moduleType, config)
+    // Sans ce retour, un échec d'insertion (RLS, contrainte d'unicité…) laissait le
+    // toggle inerte sans aucun message : le praticien croyait à une UI figée.
     if (result.ok) await onReloadModules()
+    else toast.error(t('patient.unlock_error', { message: result.message ?? '' }))
     setBusyModule(null)
-  }, [patientId, practitionerId, onReloadModules])
+  }, [patientId, practitionerId, onReloadModules, toast, t])
 
   const revokeModule = useCallback(async (moduleId: string) => {
     setBusyModule({ op: 'revoke', id: moduleId })

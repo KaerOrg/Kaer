@@ -1795,10 +1795,15 @@ export async function deleteCustomChip(id: string): Promise<void> {
   await database.runAsync('DELETE FROM custom_chips WHERE id = ?', [id])
 }
 
+// Valeur d'un champ de formulaire. Élargie (#204) pour les champs multi-sélection
+// (`string[]` : chips lieu/émotion/stratégie) et booléens (`surfed`) du craving_journal,
+// en plus des textes et curseurs existants. Sérialisée en JSON opaque côté serveur.
+export type FormValue = string | number | boolean | string[]
+
 export interface FormEntry {
   id: string
   module_id: string
-  values: Record<string, string | number>
+  values: Record<string, FormValue>
   created_at: string
 }
 
@@ -1815,7 +1820,7 @@ export async function getAllFormEntries(moduleId: string): Promise<FormEntry[]> 
   )
   return rows.map(r => ({
     ...r,
-    values: JSON.parse(r.values) as Record<string, string | number>,
+    values: JSON.parse(r.values) as Record<string, FormValue>,
   }))
 }
 
@@ -1828,7 +1833,7 @@ export async function getFormEntry(id: string): Promise<FormEntry | null> {
     created_at: string
   }>('SELECT * FROM form_entries WHERE id = ?', [id])
   if (!row) return null
-  return { ...row, values: JSON.parse(row.values) as Record<string, string | number> }
+  return { ...row, values: JSON.parse(row.values) as Record<string, FormValue> }
 }
 
 export async function saveFormEntry(

@@ -15,7 +15,10 @@ import { collectIndexed, readSliderParams } from '@kaer/shared'
 import { Slider } from '@ui/Slider'
 import { Chip } from '@ui/Chip'
 import type { ContentField } from '@services/moduleService'
+import type { FormValue } from '../../../../../lib/database'
 import { ColumnTimeField } from './ColumnTimeField'
+import { ColumnChoiceField } from './ColumnChoiceField'
+import { ColumnChipsField } from './ColumnChipsField'
 import { hasToken, toggleToken } from './textSuggestions'
 import { styles } from './styles'
 
@@ -23,12 +26,14 @@ export interface ColumnFieldsProps {
   /** Champs enfants de la colonne (déjà résolus par le layout). */
   fields: ContentField[]
   /** Valeurs courantes du formulaire. */
-  values: Record<string, string | number>
+  values: Record<string, FormValue>
+  /** Module courant — persistance des chips personnelles (`column_chips_field`). */
+  moduleId: string
   /** Couleur d'accent de la colonne. */
   accent: string
   t: (key: string) => string
   /** Écriture d'une valeur (clé `form_entries` → valeur). */
-  onChangeValue: (key: string, value: string | number) => void
+  onChangeValue: (key: string, value: FormValue) => void
   /**
    * Teinte la bordure des champs texte à la couleur d'accent de la colonne.
    * Activé uniquement en mode wizard (refonte 1B) : une seule colonne à l'écran,
@@ -39,7 +44,7 @@ export interface ColumnFieldsProps {
 }
 
 export const ColumnFields = memo(function ColumnFields({
-  fields, values, accent, t, onChangeValue, accentInputBorder = false,
+  fields, values, moduleId, accent, t, onChangeValue, accentInputBorder = false,
 }: ColumnFieldsProps) {
   return (
     <>
@@ -114,6 +119,48 @@ export const ColumnFields = memo(function ColumnFields({
                 onChange={(v) => onChangeValue(key, v)}
               />
             </View>
+          )
+        }
+
+        if (child.field_type === 'column_choice_field') {
+          const codes = collectIndexed(child.props, 'option_code')
+          const labelCodes = collectIndexed(child.props, 'option_label')
+          const options = codes.map((code, i) => ({ code, label: t(labelCodes[i] ?? code) }))
+          const variant = child.props['variant'] === 'radio' ? 'radio' : 'pills'
+          const current = typeof values[key] === 'string' ? (values[key] as string) : ''
+          return (
+            <ColumnChoiceField
+              key={child.id}
+              fieldKey={key}
+              label={labelOrPlaceholder}
+              options={options}
+              variant={variant}
+              value={current}
+              accent={child.props['accent_color'] ?? accent}
+              onChange={(code) => onChangeValue(key, code)}
+            />
+          )
+        }
+
+        if (child.field_type === 'column_chips_field') {
+          const codes = collectIndexed(child.props, 'option_code')
+          const labelCodes = collectIndexed(child.props, 'option_label')
+          const options = codes.map((code, i) => ({ code, label: t(labelCodes[i] ?? code) }))
+          const current = Array.isArray(values[key]) ? (values[key] as string[]) : []
+          return (
+            <ColumnChipsField
+              key={child.id}
+              fieldKey={key}
+              moduleId={moduleId}
+              groupKey={child.props['group_key'] ?? key}
+              label={labelOrPlaceholder}
+              options={options}
+              allowCustom={child.props['allow_custom'] === '1'}
+              accent={child.props['accent_color'] ?? accent}
+              value={current}
+              addLabel={t('common.add_custom_chip')}
+              onChange={(next) => onChangeValue(key, next)}
+            />
           )
         }
 
