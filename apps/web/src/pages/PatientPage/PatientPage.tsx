@@ -34,6 +34,7 @@ import './PatientPage.css'
 const GRAPHABLE_MODULE_TYPES = new Set([
   'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
   'mood_tracker', 'fear_thermometer', 'medication_side_effects',
+  'cognitive_saturation',
 ])
 
 // Snapshot d'identité dérivé de fetchPatientHeader : ces champs sont écrits au même

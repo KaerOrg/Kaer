@@ -1,0 +1,8 @@
+/* ── Configuration de « Décrocher d'une pensée » — toggles des techniques ──── */
+
+.defusion-config__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 4px;
+}

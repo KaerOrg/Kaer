@@ -377,7 +377,54 @@
     "preview_banner": "Preview matching the patient screen (mobile).",
     "exposure_data_title": "Graded exposure (SUDS)",
     "exposure_all_situations": "All situations",
-    "exposure_data_note": "Raw values entered by the patient: 0 = no stress, 100 = maximum stress, no interpretation."
+    "exposure_data_note": "Raw values entered by the patient: 0 = no stress, 100 = maximum stress, no interpretation.",
+    "defusion_data_title": "Unhooking from a thought data",
+    "defusion_data_note": "Raw values, as entered by the patient. \"-\": measure skipped by the patient (optional step).",
+    "defusion_stat_sessions": "Sessions",
+    "defusion_stat_last": "Last session",
+    "defusion_stat_with_measures": "Sessions with measures",
+    "defusion_technique_all": "All",
+    "defusion_period_1m": "30 d",
+    "defusion_period_3m": "90 d",
+    "defusion_period_6m": "6 months",
+    "defusion_period_all": "All",
+    "defusion_series_before": "Before",
+    "defusion_series_after": "After",
+    "defusion_chart_discomfort": "Discomfort",
+    "defusion_chart_belief": "Belief",
+    "defusion_col_date": "Date",
+    "defusion_col_technique": "Technique",
+    "defusion_col_duration": "Duration",
+    "defusion_col_discomfort": "Discomfort",
+    "defusion_col_belief": "Belief",
+    "defusion_col_word": "Word or thought",
+    "defusion_reveal_word": "••• Show",
+    "defusion_load_older": "Show earlier sessions ({{count}} in {{month}})",
+    "dpv_filter_all": "Full journey",
+    "dpv_filter_home": "Home",
+    "dpv_filter_history": "History",
+    "dpv_cap_home": "Home",
+    "dpv_cap_word_input": "Repetition: the word",
+    "dpv_cap_word_before": "Repetition: measure before",
+    "dpv_cap_word_exercise": "Repetition: exercise",
+    "dpv_cap_word_pause": "Repetition: pause",
+    "dpv_cap_word_after": "Repetition: measure after",
+    "dpv_cap_word_finish": "Repetition: end",
+    "dpv_cap_dist_input": "Distancing: the thought",
+    "dpv_cap_dist_paliers": "Distancing: steps",
+    "dpv_cap_dist_finish": "Distancing: end",
+    "dpv_cap_history": "History",
+    "dpv_start": "Start",
+    "dpv_word_title": "Which word?",
+    "dpv_thought_title": "Which thought?",
+    "dpv_privacy": "Visible to you and your practitioner",
+    "dpv_before_title": "Before you start",
+    "dpv_after_title": "And now?",
+    "dpv_remaining": "18 s left",
+    "dpv_paused": "Paused",
+    "dpv_finish_note": "Numbers saved as they are",
+    "dpv_palier_2": "I am having the thought that {{thought}}",
+    "dpv_history_line": "Discomfort {{d1}} then {{d2}} · Belief {{b1}} then {{b2}}"
   },
   "modules": {
     "nav_link": "Library",
@@ -1387,11 +1434,15 @@
       "empty_text": "Use the button above to start your first session."
     },
     "cognitive_saturation": {
-      "label": "Cognitive Saturation",
-      "description": "Rapid repetition exercise to interrupt ruminations.",
+      "label": "Unhooking from a thought",
+      "description": "Cognitive defusion: creating distance from a recurring thought.",
       "new_btn": "New session",
       "empty_title": "No session yet",
-      "empty_text": "Use the button above to start your first session."
+      "empty_text": "Use the button above to start your first session.",
+      "technique_word_repetition_name": "Word repetition",
+      "technique_linguistic_distancing_name": "Linguistic distancing",
+      "config_title": "Suggested techniques",
+      "config_hint": "Enable the techniques offered to the patient. A disabled technique disappears from their home screen; past sessions stay visible."
     },
     "craving_journal": {
       "label": "Craving Journal",
@@ -1744,8 +1795,8 @@
       "footer": "Animated guide at a fixed pace, no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
     },
     "cognitive_saturation": {
-      "label": "Cognitive Saturation",
-      "description": "Rapid repetition exercise to interrupt ruminations."
+      "label": "Unhooking from a thought",
+      "description": "Cognitive defusion: creating distance from a recurring thought."
     },
     "craving_journal": {
       "label": "Craving Journal",
@@ -2213,6 +2264,8 @@
     "ba_curve_title": "Felt pleasure and mastery (daily average)",
     "ba_curve_pleasure": "Pleasure",
     "ba_curve_mastery": "Mastery",
-    "ba_section_title": "Behavioral activation"
+    "ba_section_title": "Behavioral activation",
+    "defusion_title": "Unhooking from a thought",
+    "defusion_note": "Raw values; each point is a session. The thoughts worked on may differ from one session to another."
   }
 }

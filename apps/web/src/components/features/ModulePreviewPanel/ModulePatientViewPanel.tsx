@@ -6,6 +6,7 @@ import { type PreviewKind } from '@services/moduleService'
 import { moduleQueries } from '../../../hooks/queries'
 import { Banner } from '../../ui/Banner'
 import { FieldRenderer } from '../ModuleRenderer'
+import { DefusionPatientView } from './DefusionPatientView'
 import './ModulePreviewPanel.css'
 
 // Layouts dont le contenu vit dans une autre table que module_content_fields
@@ -15,6 +16,8 @@ const FIELDLESS_LAYOUTS = new Set<PreviewKind>(['psyedu', 'chrono_month'])
 
 interface Props {
   moduleType: string
+  /** Row `patient_modules.id` — pilote l'aperçu config-driven du module défusion. */
+  patientModuleId?: string
 }
 
 /**
@@ -23,7 +26,7 @@ interface Props {
  * Extrait de `ModulePreviewPanel` pour être monté seul comme onglet Aperçu de la
  * modale d'actions, ou sous les sous-onglets de `ModulePreviewPanel` (page standalone).
  */
-export function ModulePatientViewPanel({ moduleType }: Props) {
+export function ModulePatientViewPanel({ moduleType, patientModuleId }: Props) {
   const { t } = useTranslation()
   const { data: result = null, isLoading: loading } = useQuery(moduleQueries.fields(moduleType))
   const [expandedCard, setExpandedCard] = useState<string | null>(null)
@@ -37,6 +40,12 @@ export function ModulePatientViewPanel({ moduleType }: Props) {
   const handleToggleCard = useCallback((id: string) => {
     setExpandedCard(prev => (prev === id ? null : id))
   }, [])
+
+  // « Décrocher d'une pensée » : aperçu multi-écrans dédié (rail du parcours patient),
+  // pas le rendu générique FieldRenderer (module fieldless côté moteur).
+  if (moduleType === 'cognitive_saturation') {
+    return <DefusionPatientView patientModuleId={patientModuleId} />
+  }
 
   const meaningfulFieldsCount = result
     ? result.fields.filter(

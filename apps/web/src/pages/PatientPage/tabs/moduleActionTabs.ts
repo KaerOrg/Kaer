@@ -41,6 +41,7 @@ const CONFIG_AFTER_UNLOCK: ReadonlySet<ModuleType> = new Set([
   'medication_side_effects',
   'medication_adherence',
   'behavioral_activation',
+  'cognitive_saturation',
 ])
 
 export interface ModuleTabContext {

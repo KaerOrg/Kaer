@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { RhythmEntry } from '@kaer/shared'
+import type { DefusionTechnique } from '../lib/defusionTechniques'
+import { DEFUSION_TECHNIQUES } from '../lib/defusionTechniques'
 
 export type ScorePoint = { date: string; score: number }
 
@@ -21,6 +23,21 @@ export type FearPoint = {
   suds_peak: number | null
   suds_after: number
   situation: string
+}
+
+// Une séance de défusion (« Décrocher d'une pensée »). Mesures inconfort/conviction
+// avant·après, nullables PAR PAIRE (« Passer » saute une étape entière — MDR).
+// `word` = mot/pensée travaillé (masqué par défaut côté praticien). `technique`
+// distingue répétition de mot et distanciation. `duration_seconds` = 0 en distanciation.
+export type DefusionPoint = {
+  date: string
+  technique: DefusionTechnique
+  discomfort_before: number | null
+  discomfort_after: number | null
+  belief_before: number | null
+  belief_after: number | null
+  duration_seconds: number
+  word: string
 }
 
 // Repère temporel (Life Chart) posé par le patient sur le mood_tracker (#161),
@@ -188,6 +205,38 @@ export async function fetchFearEvolution(patientId: string): Promise<FearPoint[]
       suds_peak: toNumber(row.payload.suds_peak) ?? null,
       suds_after: toNumber(row.payload.suds_after) ?? 0,
       situation,
+    })
+  }
+  return points
+}
+
+// ── Évolution de la défusion (« Décrocher d'une pensée », inconfort/conviction) ──
+
+function toDefusionTechnique(value: unknown): DefusionTechnique {
+  return DEFUSION_TECHNIQUES.find(technique => technique === value) ?? 'word_repetition'
+}
+
+export async function fetchDefusionEvolution(patientId: string): Promise<DefusionPoint[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'defusion_session')
+    .eq('module_id', 'cognitive_saturation')
+    .order('client_created_at')
+
+  if (error || !data) return []
+  const points: DefusionPoint[] = []
+  for (const row of data) {
+    points.push({
+      date: row.client_created_at,
+      technique: toDefusionTechnique(row.payload.technique),
+      discomfort_before: toNumber(row.payload.discomfort_before) ?? null,
+      discomfort_after: toNumber(row.payload.discomfort_after) ?? null,
+      belief_before: toNumber(row.payload.belief_before) ?? null,
+      belief_after: toNumber(row.payload.belief_after) ?? null,
+      duration_seconds: toNumber(row.payload.duration_seconds) ?? 0,
+      word: typeof row.payload.word_or_thought === 'string' ? row.payload.word_or_thought : '',
     })
   }
   return points

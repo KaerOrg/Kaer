@@ -78,10 +78,29 @@ objet `{ discomfort, belief } | null`).
 - Aucune notification déclenchée par le contenu saisi ; curseurs vides au départ
   (`value = null`, aucune valeur d'ancrage).
 
-## Vues praticien (web)
+## Vues praticien (web) : epic #201
 
-Déblocage, onglet Données, Évolution, Configuration des techniques et Vue patient :
-voir l'epic web #201.
+Le module rejoint les mécaniques praticien existantes (carte armoire catégorie
+Cognitif, modale d'actions à onglets, ordre canonique Données → Configuration →
+Notifications → Vue patient → Sources). Au déblocage, `config.enabled_techniques`
+est initialisé avec les deux techniques.
+
+| Vue | Composant | Contenu |
+|---|---|---|
+| Données | `DefusionDataPanel` | Synthèse 3 cartes, filtre technique + période, 2 graphes Inconfort/Conviction (avant = neutre, après = teal), tableau groupé par mois + pagination par ancienneté, mot masqué ligne par ligne |
+| Évolution | `DefusionEvolutionSection` | 2 sous-graphes séparés Inconfort/Conviction + filtre technique ; `cognitive_saturation` dans `GRAPHABLE_MODULE_TYPES` + `patientEvolution` |
+| Configuration | `DefusionConfigPanel` (+ `useDefusionConfigEditor`) | Un toggle par technique, garde ≥ 1 active, Annuler/Enregistrer |
+| Vue patient | `DefusionPatientView` | Rail des 11 écrans du parcours (numérotés, données d'exemple, lecture seule), filtre par étape, reflète `enabled_techniques` |
+| Sources | `module_sources` (seed) | 3 sources vérifiées (PMID 38615492, 14998740, 19716550) |
+
+Lecture web des séances : `engagementService.fetchDefusionEvolution` →
+`DefusionPoint[]` (query status `defusion`). Config : `fetchDefusionTechniques` /
+`updateDefusionTechniques` (`patient_modules.config.enabled_techniques`).
+
+MDR côté praticien : valeurs brutes, « avant · après » au point médian (jamais
+« → »), aucun écart calculé, aucune couleur selon la valeur ; le grade des sources
+qualifie l'étude, jamais une donnée patient.
 
 Module type : `cognitive_saturation`
-Table : `defusion_sessions` · Service : `defusionService.ts`
+Table : `defusion_sessions` · Services : `defusionService.ts` (mobile),
+`engagementService.ts` / `moduleAssignmentService.ts` (web)

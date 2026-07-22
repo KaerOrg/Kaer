@@ -10,6 +10,7 @@ import {
   fetchMoodEvolution,
   fetchMoodMarkers,
   fetchFearEvolution,
+  fetchDefusionEvolution,
   fetchMedSideEffectsEvolution,
   fetchSleepEvolution,
   fetchAvailableScales,
@@ -68,6 +69,37 @@ describe('engagementService.fetchScaleEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
     expect(await fetchScaleEvolution('p1', 'phq9')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchDefusionEvolution', () => {
+  it('mappe le payload de défusion (mesures nullables par paire, technique)', async () => {
+    const rows = [
+      { client_created_at: '2026-07-10T10:00:00Z', payload: { technique: 'word_repetition', word_or_thought: 'rater', duration_seconds: 30, discomfort_before: 8, discomfort_after: 5, belief_before: 7, belief_after: 6 } },
+      { client_created_at: '2026-07-11T10:00:00Z', payload: { technique: 'linguistic_distancing', word_or_thought: 'nul', duration_seconds: 0, discomfort_before: null, discomfort_after: 4, belief_before: null, belief_after: 3 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchDefusionEvolution('p1')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result).toEqual([
+      { date: '2026-07-10T10:00:00Z', technique: 'word_repetition', word: 'rater', duration_seconds: 30, discomfort_before: 8, discomfort_after: 5, belief_before: 7, belief_after: 6 },
+      { date: '2026-07-11T10:00:00Z', technique: 'linguistic_distancing', word: 'nul', duration_seconds: 0, discomfort_before: null, discomfort_after: 4, belief_before: null, belief_after: 3 },
+    ])
+  })
+
+  it('technique inconnue → repli sur word_repetition', async () => {
+    const rows = [{ client_created_at: '2026-07-10T10:00:00Z', payload: { technique: 'bogus', word_or_thought: 'x', duration_seconds: 30 } }]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+    const result = await fetchDefusionEvolution('p1')
+    expect(result[0].technique).toBe('word_repetition')
+    expect(result[0].discomfort_before).toBeNull()
+  })
+
+  it('retourne [] en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+    expect(await fetchDefusionEvolution('p1')).toEqual([])
   })
 })
 

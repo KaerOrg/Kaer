@@ -38,6 +38,9 @@ const READ_ALLOWLIST = new Set<string>([
   'fetchMedications',
   // Idem : activités co-construites (useBAActivitiesEditor.openEditor).
   'fetchBAActivities',
+  // Idem : techniques de défusion amorcées à l'ouverture de l'éditeur de config
+  // (useDefusionConfigEditor.openEditor) — one-shot, brouillon local éditable.
+  'fetchDefusionTechniques',
 ])
 
 // (b) Les invalidations doivent référencer `xxxQueries.y(...).queryKey` (ou un prefix

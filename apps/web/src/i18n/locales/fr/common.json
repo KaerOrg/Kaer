@@ -363,7 +363,54 @@
     "preview_banner": "Aperçu conforme à l'écran patient (mobile).",
     "exposure_data_title": "Exposition graduée (SUDS)",
     "exposure_all_situations": "Toutes les situations",
-    "exposure_data_note": "Valeurs brutes saisies par le patient : 0 = aucun stress, 100 = stress maximal, aucune interprétation."
+    "exposure_data_note": "Valeurs brutes saisies par le patient : 0 = aucun stress, 100 = stress maximal, aucune interprétation.",
+    "defusion_data_title": "Données du module Décrocher d'une pensée",
+    "defusion_data_note": "Valeurs brutes, telles que saisies par le patient. « - » : mesure passée par le patient (étape optionnelle).",
+    "defusion_stat_sessions": "Séances",
+    "defusion_stat_last": "Dernière séance",
+    "defusion_stat_with_measures": "Séances avec mesures",
+    "defusion_technique_all": "Toutes",
+    "defusion_period_1m": "30 j",
+    "defusion_period_3m": "90 j",
+    "defusion_period_6m": "6 mois",
+    "defusion_period_all": "Tout",
+    "defusion_series_before": "Avant",
+    "defusion_series_after": "Après",
+    "defusion_chart_discomfort": "Inconfort",
+    "defusion_chart_belief": "Conviction",
+    "defusion_col_date": "Date",
+    "defusion_col_technique": "Technique",
+    "defusion_col_duration": "Durée",
+    "defusion_col_discomfort": "Inconfort",
+    "defusion_col_belief": "Conviction",
+    "defusion_col_word": "Mot ou pensée",
+    "defusion_reveal_word": "••• Afficher",
+    "defusion_load_older": "Afficher les séances antérieures ({{count}} en {{month}})",
+    "dpv_filter_all": "Tout le parcours",
+    "dpv_filter_home": "Accueil",
+    "dpv_filter_history": "Historique",
+    "dpv_cap_home": "Accueil",
+    "dpv_cap_word_input": "Répétition : le mot",
+    "dpv_cap_word_before": "Répétition : mesure avant",
+    "dpv_cap_word_exercise": "Répétition : exercice",
+    "dpv_cap_word_pause": "Répétition : pause",
+    "dpv_cap_word_after": "Répétition : mesure après",
+    "dpv_cap_word_finish": "Répétition : fin",
+    "dpv_cap_dist_input": "Distanciation : la pensée",
+    "dpv_cap_dist_paliers": "Distanciation : paliers",
+    "dpv_cap_dist_finish": "Distanciation : fin",
+    "dpv_cap_history": "Historique",
+    "dpv_start": "Commencer",
+    "dpv_word_title": "Quel mot travailler ?",
+    "dpv_thought_title": "Quelle pensée travailler ?",
+    "dpv_privacy": "Visible par vous et votre praticien",
+    "dpv_before_title": "Avant de commencer",
+    "dpv_after_title": "Et maintenant ?",
+    "dpv_remaining": "encore 18 s",
+    "dpv_paused": "En pause",
+    "dpv_finish_note": "Chiffres enregistrés tels quels",
+    "dpv_palier_2": "J'ai la pensée que {{thought}}",
+    "dpv_history_line": "Inconfort {{d1}} puis {{d2}} · Conviction {{b1}} puis {{b2}}"
   },
   "modules": {
     "nav_link": "Bibliothèque",
@@ -1109,8 +1156,12 @@
       "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
-      "label": "Saturation cognitive",
-      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+      "label": "Décrocher d'une pensée",
+      "description": "Défusion cognitive : prendre de la distance avec une pensée qui revient.",
+      "technique_word_repetition_name": "Répétition de mot",
+      "technique_linguistic_distancing_name": "Distanciation par le langage",
+      "config_title": "Techniques proposées",
+      "config_hint": "Activez les techniques proposées au patient. Une technique désactivée disparaît de son accueil ; ses séances passées restent visibles."
     },
     "craving_journal": {
       "label": "Journal de craving",
@@ -1890,8 +1941,8 @@
       "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
-      "label": "Saturation cognitive",
-      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+      "label": "Décrocher d'une pensée",
+      "description": "Défusion cognitive : prendre de la distance avec une pensée qui revient."
     },
     "craving_journal": {
       "label": "Journal de craving",
@@ -2359,6 +2410,8 @@
     "ba_curve_title": "Plaisir et accomplissement ressentis (moyenne par jour)",
     "ba_curve_pleasure": "Plaisir",
     "ba_curve_mastery": "Accomplissement",
-    "ba_section_title": "Activation comportementale"
+    "ba_section_title": "Activation comportementale",
+    "defusion_title": "Décrocher d'une pensée",
+    "defusion_note": "Valeurs brutes ; chaque point est une séance. Les pensées travaillées peuvent différer d'une séance à l'autre."
   }
 }
