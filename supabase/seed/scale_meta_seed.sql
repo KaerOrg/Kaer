@@ -12,7 +12,7 @@ values
   ('cape42', 'assessments', 'coming_soon', 80, false, 'brain',        '',            '#6366F1'),
   ('audit',  'assessments', 'coming_soon', 90, false, 'clipboard-list', '',          '#6366F1'),
   ('cssrs',  'assessments', 'coming_soon', 95, false, 'shield-alert', '',            '#DC2626')
-on conflict (id) do nothing;
+on conflict (id) do update set category_id = excluded.category_id, preview_kind = excluded.preview_kind, sort_order = excluded.sort_order, is_invite_excluded = excluded.is_invite_excluded, icon = excluded.icon, mobile_icon = excluded.mobile_icon, color = excluded.color;
 
 -- ── Champs scale_meta (1 par échelle) ───────────────────────────────────────
 -- sort_order = ordre d'affichage dans l'accordéon "Échelles et questionnaires"
@@ -32,7 +32,7 @@ values
   ('asrs6.scale_meta',   'asrs6',   'scale_meta', 'scales.descriptions.asrs6',   100),
   ('snap_iv.scale_meta', 'snap_iv', 'scale_meta', 'scales.descriptions.snap_iv', 110),
   ('cssrs.scale_meta',   'cssrs',   'scale_meta', 'scales.descriptions.cssrs',   120)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── Props des champs scale_meta ──────────────────────────────────────────────
 

@@ -57,7 +57,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),
   ('motivational_balance',    'motivation',  'tabbed',      23, false)
-on conflict (id) do nothing;
+on conflict (id) do update set category_id = excluded.category_id, preview_kind = excluded.preview_kind, sort_order = excluded.sort_order, is_invite_excluded = excluded.is_invite_excluded;
 
 -- Icônes / couleurs : appliqué uniquement sur les rangs où icon est vide
 -- (n'écrase pas les modifs faites depuis la BDD).
@@ -173,12 +173,12 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('phq9.q8',     'phq9', 'scale_question',     'modules.phq9.q8',             107),
   ('phq9.q9',     'phq9', 'scale_question',     'modules.phq9.q9',             108),
   ('phq9.footer', 'phq9', 'footer_note',         'modules.phq9.footer',         999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('phq9.opt0', 'value', '0'), ('phq9.opt1', 'value', '1'),
   ('phq9.opt2', 'value', '2'), ('phq9.opt3', 'value', '3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── GAD-7 ─────────────────────────────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -196,12 +196,12 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('gad7.q6',     'gad7', 'scale_question',     'modules.gad7.q6',             105),
   ('gad7.q7',     'gad7', 'scale_question',     'modules.gad7.q7',             106),
   ('gad7.footer', 'gad7', 'footer_note',         'modules.gad7.footer',         999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('gad7.opt0', 'value', '0'), ('gad7.opt1', 'value', '1'),
   ('gad7.opt2', 'value', '2'), ('gad7.opt3', 'value', '3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── BSL-23 ────────────────────────────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -241,14 +241,14 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('bsl23.q22',    'bsl23', 'scale_question',     'modules.bsl23.q22',            121),
   ('bsl23.q23',    'bsl23', 'scale_question',     'modules.bsl23.q23',            122),
   ('bsl23.footer', 'bsl23', 'footer_note',         'modules.bsl23.footer',         999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('bsl23.opt0', 'value', '0'), ('bsl23.opt1', 'value', '1'), ('bsl23.opt2', 'value', '2'),
   ('bsl23.opt3', 'value', '3'), ('bsl23.opt4', 'value', '4'),
   ('bsl23.leg0', 'value', '0'), ('bsl23.leg1', 'value', '1'), ('bsl23.leg2', 'value', '2'),
   ('bsl23.leg3', 'value', '3'), ('bsl23.leg4', 'value', '4')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── SNAP-IV ───────────────────────────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -289,12 +289,12 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('snap_iv.q25',     'snap_iv', 'scale_question',     'modules.snap_iv.q25',                   307),
   ('snap_iv.q26',     'snap_iv', 'scale_question',     'modules.snap_iv.q26',                   308),
   ('snap_iv.footer',  'snap_iv', 'footer_note',         'modules.snap_iv.footer',                999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('snap_iv.opt0', 'value', '0'), ('snap_iv.opt1', 'value', '1'),
   ('snap_iv.opt2', 'value', '2'), ('snap_iv.opt3', 'value', '3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── ASRS-6 ────────────────────────────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -312,12 +312,12 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('asrs6.q5',     'asrs6', 'scale_question',     'modules.asrs6.q5',             104),
   ('asrs6.q6',     'asrs6', 'scale_question',     'modules.asrs6.q6',             105),
   ('asrs6.footer', 'asrs6', 'footer_note',         'modules.asrs6.footer',         999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('asrs6.opt0', 'value', '0'), ('asrs6.opt1', 'value', '1'), ('asrs6.opt2', 'value', '2'),
   ('asrs6.opt3', 'value', '3'), ('asrs6.opt4', 'value', '4')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── ASRS-18 ───────────────────────────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -349,12 +349,12 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('asrs18.q17',    'asrs18', 'scale_question',     'modules.asrs18.q17',            211),
   ('asrs18.q18',    'asrs18', 'scale_question',     'modules.asrs18.q18',            212),
   ('asrs18.footer', 'asrs18', 'footer_note',         'modules.asrs18.footer',         999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('asrs18.opt0', 'value', '0'), ('asrs18.opt1', 'value', '1'), ('asrs18.opt2', 'value', '2'),
   ('asrs18.opt3', 'value', '3'), ('asrs18.opt4', 'value', '4')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -380,7 +380,7 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('madh.rsn_better',   'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_felt_better', 42),
   ('madh.rsn_stock',    'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_out_of_stock', 43),
   ('madh.rsn_other',    'medication_adherence', 'medication_reason_option',  'modules.medication_adherence.reason_other',    44)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- Re-exécution sur une base existante : aligner field_type si le module était en daily_checkin.
 update public.module_content_fields set field_type = 'medication_tracker_config' where id = 'madh.cfg';
@@ -439,7 +439,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('madh.rsn_stock',    'icon',     'package-variant'),
   ('madh.rsn_other',    'value',    'other'),
   ('madh.rsn_other',    'icon',     'dots-horizontal')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -644,7 +644,7 @@ update public.modules set preview_kind = 'tree_selector' where id = 'emotion_whe
 -- 2) Config du sélecteur d'arbre
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('ew.cfg', 'emotion_wheel', 'tree_selector_config', null, 0)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'enable_intensity',      '1'),
@@ -692,7 +692,7 @@ on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 -- 3) Note de bas de page (sources)
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('ew.footer', 'emotion_wheel', 'footer_note', 'modules.emotion_wheel.footer', 999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- 4) Niveau 1 — familles (8)
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
@@ -704,7 +704,7 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.self_conscious', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.self_conscious', 150),
   ('ew.powerful',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful',       160),
   ('ew.peaceful',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful',       170)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.joy',            'color', '#F59E0B'), ('ew.joy',            'emoji', '😊'), ('ew.joy',            'icon', 'emoticon-happy-outline'),
@@ -764,7 +764,7 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.peaceful.securite',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__securite',      'ew.peaceful', 3),
   ('ew.peaceful.comprehension', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__comprehension', 'ew.peaceful', 4),
   ('ew.peaceful.acceptation',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__acceptation',   'ew.peaceful', 5)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, parent_field_id = excluded.parent_field_id, sort_order = excluded.sort_order;
 
 -- 6) Niveau 3 — mots précis (74)
 insert into public.module_content_fields (id, module_id, field_type, text_code, parent_field_id, sort_order) values
@@ -850,7 +850,7 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.peaceful.comprehension.ecoute','emotion_wheel','tree_node', 'modules.emotion_wheel.node.peaceful__comprehension__ecoute','ew.peaceful.comprehension', 2),
   ('ew.peaceful.acceptation.reconcilie','emotion_wheel','tree_node','modules.emotion_wheel.node.peaceful__acceptation__reconcilie','ew.peaceful.acceptation', 1),
   ('ew.peaceful.acceptation.libere','emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__acceptation__libere','ew.peaceful.acceptation', 2)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, parent_field_id = excluded.parent_field_id, sort_order = excluded.sort_order;
 
 
 -- ============================================================
@@ -869,7 +869,7 @@ update public.modules set preview_kind = 'sleep_journal' where id = 'sleep_diary
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('sj.cfg', 'sleep_diary', 'sleep_journal_config', null, 0)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'history_days',                '14'),
@@ -967,7 +967,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sj.cfg', 'evolution_nightly_title',     'modules.sleep_diary.evolution_nightly_title'),
   ('sj.cfg', 'evolution_weekly_title',      'modules.sleep_diary.evolution_weekly_title'),
   ('sj.cfg', 'evolution_mdr_note',          'modules.sleep_diary.evolution_mdr_note')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -1026,7 +1026,7 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('al.sug_help',           'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_help',       126),
   ('al.sug_learn',          'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_learn',      127),
   ('al.sug_work_task',      'behavioral_activation', 'activity_log_suggestion',              'modules.behavioral_activation.suggestion_work_task',  128)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- Domaine de chaque suggestion (prop atomique : une valeur = un domaine)
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -1059,7 +1059,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.sug_help',        'domain', 'al.dom_meaning'),
   ('al.sug_learn',       'domain', 'al.dom_work'),
   ('al.sug_work_task',   'domain', 'al.dom_work')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'engagement_event_type',  'SAVE_BEHAVIORAL_ACTIVATION'),
@@ -1109,7 +1109,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('al.cfg', 'my_activities_title',    'modules.behavioral_activation.my_activities'),
   ('al.cfg', 'linked_value_prefix',    'modules.behavioral_activation.linked_value'),
   ('al.cfg', 'back_label',             'modules.behavioral_activation.back_btn')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -1132,11 +1132,11 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('et.strategy_exposure',    'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_exposure',         103),
   ('et.strategy_distraction', 'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_distraction',      104),
   ('et.strategy_contact',     'fear_thermometer', 'exposure_tracker_strategy', 'modules.fear_thermometer.strategy_contact',          105)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('et.footer', 'fear_thermometer', 'footer_note', 'modules.fear_thermometer.footer', 999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'engagement_event_type',        'SAVE_FEAR_ENTRY'),
@@ -1187,7 +1187,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('et.cfg', 'situations_panel_hint',        'modules.fear_thermometer.situations_hint'),
   ('et.cfg', 'situation_placeholder',        'modules.fear_thermometer.situation_placeholder'),
   ('et.cfg', 'situation_empty',              'modules.fear_thermometer.situation_empty')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- Redesign #183 : neutralisation de la palette. Les clés couleur préexistantes
 -- (#EF4444 / #059669) ne sont pas réécrites par l'INSERT ci-dessus (ON CONFLICT
@@ -1209,14 +1209,14 @@ update public.modules set preview_kind = 'decision_grid' where id = 'decisional_
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, sort_order) values
   ('db.cfg', 'decisional_balance', 'decision_grid_config', null, 0)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, sort_order) values
   ('db.q1.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_pros_change_title',  'pros_change',     10),
   ('db.q2.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_cons_change_title',  'cons_change',     20),
   ('db.q3.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_pros_status_title',  'pros_status_quo', 30),
   ('db.q4.h', 'decisional_balance', 'column_header', 'modules.decisional_balance.quadrant_cons_status_title',  'cons_status_quo', 40)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, section_id = excluded.section_id, sort_order = excluded.sort_order;
 
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('db.cfg', 'engagement_event_type', 'UPDATE_DECISIONAL_BALANCE'),
@@ -1253,7 +1253,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('db.q4.h', 'bg_color',      '#FDF4FF'),
   ('db.q4.h', 'icon',          'alert-outline'),
   ('db.q4.h', 'subtitle_code', 'modules.decisional_balance.quadrant_cons_status_subtitle')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -1312,7 +1312,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('cape42', 'assessments', 'coming_soon',   80,  false, 'brain-circuit', 'head-cog-outline', '#6366F1'),
   ('audit',  'assessments', 'coming_soon',   90,  false, 'droplets',      'water-outline',    '#6366F1'),
   ('cssrs',  'assessments', 'coming_soon',   95,  false, 'shield-alert',  'shield-alert-outline', '#6366F1')
-on conflict (id) do nothing;
+on conflict (id) do update set category_id = excluded.category_id, preview_kind = excluded.preview_kind, sort_order = excluded.sort_order, is_invite_excluded = excluded.is_invite_excluded, icon = excluded.icon, mobile_icon = excluded.mobile_icon, color = excluded.color;
 
 -- ── preview_kind ajustés en remote (pas d'override si déjà migré ailleurs) ───
 -- crisis_plan : vue de consultation « Je suis en crise » par défaut (safety_plan) ;
@@ -1494,7 +1494,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   -- Numéros d'urgence (exercise_safety) : affichés en tête de la vue de consultation
   ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 130),
   ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : EPDS ─────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1510,7 +1510,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('epds.q9', 'epds', NULL, NULL, 'scale_question', 'modules.epds.q9', 108),
   ('epds.q10', 'epds', NULL, NULL, 'scale_question', 'modules.epds.q10', 109),
   ('epds.footer', 'epds', NULL, NULL, 'footer_note', 'modules.epds.footer', 999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- EPDS : options par question (parent_field_id = id de la question)
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1554,7 +1554,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('epds.q10.opt1', 'epds', NULL, 'epds.q10', 'scale_option', 'modules.epds.q10_opt1', 1),
   ('epds.q10.opt2', 'epds', NULL, 'epds.q10', 'scale_option', 'modules.epds.q10_opt2', 2),
   ('epds.q10.opt3', 'epds', NULL, 'epds.q10', 'scale_option', 'modules.epds.q10_opt3', 3)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : grounding (guided_exercise) ──────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1582,7 +1582,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('gr.taste.title', 'grounding', 'gr.sec_taste', NULL, 'step_title', 'modules.grounding.step_taste_sense', 501),
   ('gr.taste.instr', 'grounding', 'gr.sec_taste', NULL, 'step_hint', 'modules.grounding.step_taste_instruction', 502),
   ('gr.taste.tip', 'grounding', 'gr.sec_taste', NULL, 'step_hint', 'modules.grounding.step_taste_tip', 503)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : NSI ──────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1607,7 +1607,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('nsi.theme_2', 'nsi', NULL, NULL, 'scale_text_input', '', 32),
   ('nsi.theme_3', 'nsi', NULL, NULL, 'scale_text_input', '', 33),
   ('nsi.footer', 'nsi', NULL, NULL, 'footer_note', 'modules.nsi.footer', 99)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : RCADS ────────────────────────────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1642,7 +1642,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('rcads.q24', 'rcads', NULL, NULL, 'scale_question', 'modules.rcads.q24', 124),
   ('rcads.q25', 'rcads', NULL, NULL, 'scale_question', 'modules.rcads.q25', 125),
   ('rcads.footer', 'rcads', NULL, NULL, 'footer_note', 'modules.rcads.footer', 999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : RIM (patient_scenario) ───────────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1661,7 +1661,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('rim.safety_3114', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_3114', 130),
   ('rim.safety_15', 'rim', NULL, NULL, 'exercise_safety', 'modules.rim.safety_15', 140),
   ('rim.footer', 'rim', NULL, NULL, 'footer_note', 'modules.rim.footer', 999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : mood_tracker (questionnaire avec sliders) ────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1674,7 +1674,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('mood_tracker.q_food', 'mood_tracker', NULL, NULL, 'scale_slider_question', 'modules.mood_tracker.dim_food', 58),
   ('mood_tracker.notes', 'mood_tracker', NULL, NULL, 'scale_text_input', 'modules.mood_tracker.notes_label', 60),
   ('mood_tracker.footer', 'mood_tracker', NULL, NULL, 'footer_note', 'modules.mood_tracker.footer', 99)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── medication_side_effects : refonte « tracker multi-dimensions » ───────────
 -- 12 effets indésirables suivis en intensité 0–10 (base 0 = absent, pas de repère
@@ -1700,7 +1700,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('mse.q_sexual',      'medication_side_effects', NULL, NULL, 'scale_slider_question', 'modules.medication_side_effects.dim_sexual',    120),
   ('mse.notes',         'medication_side_effects', NULL, NULL, 'scale_text_input',      'modules.medication_side_effects.notes_label',   990),
   ('mse.footer',        'medication_side_effects', NULL, NULL, 'footer_note',           'modules.medication_side_effects.footer',        999)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── accent_color : couleur d'identité visuelle des trackers slider_dashboard ──
 -- Lue par le layout générique (SliderDashboardLayout) — onglet actif, calendrier,
@@ -1708,7 +1708,7 @@ on conflict (id) do nothing;
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('mood_tracker.instruction', 'accent_color', '#4FA5A9'),
   ('mse.instruction',          'accent_color', '#8B5CF6')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── module_content_fields : breathing_techniques (fields) ────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1721,7 +1721,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('bt.field_5', 'breathing_techniques', NULL, NULL, 'field_row', 'module.breathing_techniques.field_5.label', 50),
   ('bt.field_6', 'breathing_techniques', NULL, NULL, 'field_row', 'module.breathing_techniques.field_6.label', 60),
   ('bt.footer', 'breathing_techniques', NULL, NULL, 'footer_note', 'module.breathing_techniques.footer', 99)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : breathing_techniques (config des 5 techniques) ────
 -- Config-first (issue #69) : la définition des techniques (couleur, durée
@@ -1760,7 +1760,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('bt.tech.pleine_conscience.phase_2',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 2),
   ('bt.tech.pleine_conscience.phase_3',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 3),
   ('bt.tech.pleine_conscience.phase_4',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 4)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : modules "coming_soon" (placeholders) ─────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
@@ -1784,7 +1784,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('tc.soon',            'therapeutic_commitment', NULL, NULL, 'coming_soon',        NULL, 99),
   ('mb.label',           'motivational_balance',   NULL, NULL, 'module_label',       'module.motivational_balance.label', 0),
   ('mb.desc',            'motivational_balance',   NULL, NULL, 'module_description', 'module.motivational_balance.description', 1)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 
 -- ── module_content_fields : psychoeducation — parents (cards + sections) ─────
@@ -1907,7 +1907,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('cbt_card.li_c3', 'psychoeducation', 'card_cbt_01', NULL, 'card_numbered_item', 'card.cbt_01.li_c3', 113),
   ('cbt_card.divider_2', 'psychoeducation', 'card_cbt_01', NULL, 'card_divider', NULL, 119),
   ('cbt_card.note', 'psychoeducation', 'card_cbt_01', NULL, 'card_paragraph', 'card.cbt_01.note', 120)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : psychoeducation — children (inline spans) ────────
 -- Doivent venir APRÈS les parents (FK parent_field_id).
@@ -1945,7 +1945,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('sleep_card.p_temp_seg1', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg1', 1),
   ('sleep_card.p_temp_seg2', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg2', 2),
   ('sleep_card.p_temp_seg3', 'psychoeducation', 'card_sleep_01', 'sleep_card.p_temp', 'card_inline', 'card.sleep_01.p_temp_seg3', 3)
-on conflict (id) do nothing;
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 
 -- ============================================================
@@ -1966,7 +1966,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.field_5', 'icon', 'circle'),
   ('bt.field_6', 'detail_code', 'module.breathing_techniques.field_6.detail'),
   ('bt.field_6', 'icon', 'calendar')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- breathing_techniques : config atomique des techniques (issue #69)
 -- technique : technique_key + color (hex) + recommended_duration_min
@@ -2017,7 +2017,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.tech.pleine_conscience.phase_3',   'phase_seconds',            '6'),
   ('bt.tech.pleine_conscience.phase_4',   'phase_type',               'hold_out'),
   ('bt.tech.pleine_conscience.phase_4',   'phase_seconds',            '1')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2067,7 +2067,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_6.title', 'color', '#15803D'),
   ('crisis_plan.step_6.title', 'icon', 'shield-home-outline'),
   ('crisis_plan.step_6.title', 'step_number', '6')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- EPDS : valeurs (certaines questions sont à scoring inversé : opt0=3 ... opt3=0)
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2081,7 +2081,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('epds.q8.opt0', 'value', '3'), ('epds.q8.opt1', 'value', '2'), ('epds.q8.opt2', 'value', '1'), ('epds.q8.opt3', 'value', '0'),
   ('epds.q9.opt0', 'value', '3'), ('epds.q9.opt1', 'value', '2'), ('epds.q9.opt2', 'value', '1'), ('epds.q9.opt3', 'value', '0'),
   ('epds.q10.opt0', 'value', '3'), ('epds.q10.opt1', 'value', '2'), ('epds.q10.opt2', 'value', '1'), ('epds.q10.opt3', 'value', '0')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- grounding : config labels + couleurs/icônes par sens
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2110,7 +2110,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('gr.touch.title', 'color', '#2563EB'),
   ('gr.touch.title', 'icon', 'hand-back-left-outline'),
   ('gr.touch.title', 'step_number', '4')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- medication_side_effects : sliders 0-10 + couleurs/icônes par effet
 -- Hints partagés (Absent / Très intense), AUCUN mid_hint (échelle unidirectionnelle).
@@ -2166,7 +2166,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('mse.notes', 'placeholder_code', 'modules.medication_side_effects.notes_placeholder'),
   ('mse.notes', 'subscale_key', 'notes'),
   ('mse.notes', 'optional', 'true')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- mood_tracker : sliders 1-10 + couleurs/icônes/hints par dimension
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2223,7 +2223,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('mood_tracker.q_food', 'mid_hint_code', 'modules.mood_tracker.dim_mid_normal'),
   ('mood_tracker.q_food', 'max', '10'),
   ('mood_tracker.q_food', 'min', '1')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- Refonte palette mood_tracker (épique #162) : les valeurs `color`/`accent_color`
 -- préexistantes doivent être RÉÉCRITES sur une base déjà semée (le `do nothing`
@@ -2254,7 +2254,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('nsi.theme_2', 'subscale_key', 'theme_2'),
   ('nsi.theme_3', 'placeholder_code', 'modules.nsi.theme_placeholder_3'),
   ('nsi.theme_3', 'subscale_key', 'theme_3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- psychoeducation : variantes callout + numérotations + définitions
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2270,7 +2270,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('lith_card.li_r1', 'item_number', '1'),
   ('lith_card.li_r2', 'item_number', '2'),
   ('lith_card.li_r3', 'item_number', '3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- RCADS : valeurs des options
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2278,7 +2278,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('rcads.opt1', 'value', '1'),
   ('rcads.opt2', 'value', '2'),
   ('rcads.opt3', 'value', '3')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- RIM : numérotation steps + sons ambiants (clés/icônes/disponibilité)
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2306,7 +2306,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('rim.step_3', 'step_number', '3'),
   ('rim.step_4', 'step_number', '4'),
   ('rim.step_5', 'step_number', '5')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
@@ -2340,7 +2340,7 @@ from (values
   ('bt.field_6', 'widget_type', 'text')
 ) as v(field_id, prop_key, prop_value)
 where exists (select 1 from public.module_content_fields where id = v.field_id)
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- Nettoyage des widget_type morts laissés en base par les modules migrés hors
 -- 'fields'. Seul `medication_adherence` a encore des lignes parentes vivantes
@@ -2763,7 +2763,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('gr_card.h_3',        'level', '4'),
   ('gr_card.h_4',        'level', '4'),
   ('gr_card.h_5',        'level', '4')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- bold prop pour les card_inline (ex card_inline_bold)
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2778,14 +2778,14 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('sleep_card.p_sie_seg2','bold','true'),
   ('sleep_card.p_sport_seg2','bold','true'),
   ('sleep_card.p_temp_seg2','bold','true')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- bold prop pour les card_paragraph (ex card_paragraph_bold)
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('sleep_card.p_horaires', 'bold', 'true'),
   ('gr_card.p_inspir',      'bold', 'true'),
   ('gr_card.p_retenir_1',   'bold', 'true')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- italic prop pour les card_paragraph (ex card_italic_note)
 insert into public.field_props (field_id, prop_key, prop_value) values
@@ -2795,7 +2795,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('gr_card.note',        'italic', 'true'),
   ('sleep_card.note',     'italic', 'true'),
   ('cbt_card.note',       'italic', 'true')
-on conflict (field_id, prop_key) do nothing;
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 
 -- ============================================================
