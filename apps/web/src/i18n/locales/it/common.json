@@ -107,6 +107,7 @@
     "wardrobe_empty": "Nessun modulo attivato per questo paziente. Clicca su «Aggiungi un modulo» per iniziare.",
     "add_module_button": "Aggiungi un modulo",
     "add_module_title": "Aggiungi un modulo",    "unlock_button": "Sblocca",
+    "unlock_error": "Impossibile sbloccare il modulo: {{message}}",
     "revoke_button": "Revoca",
     "preview_button": "Anteprima",
     "patient_view": "Cosa vedrà il tuo paziente",

@@ -2,7 +2,6 @@ import { useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Eye, ChevronRight, Play, Pause, ArrowLeft } from 'lucide-react'
-import { Banner } from '../../ui/Banner'
 import { Chip } from '../../ui/Chip'
 import { moduleQueries } from '../../../hooks/queries'
 import { DEFUSION_TECHNIQUES, type DefusionTechnique } from '../../../lib/defusionTechniques'
@@ -314,8 +313,6 @@ export function DefusionPatientView({ patientModuleId }: Props) {
 
   return (
     <div className="preview-panel__inner">
-      <Banner variant="info" icon={<Eye size={16} />}>{t('patient.preview_banner')}</Banner>
-
       <div className="dpv-filters">
         {stageFilters.map(f => (
           <Chip key={f.value} label={f.label} selectable selected={stageFilter === f.value} onClick={() => setStageFilter(f.value)} />

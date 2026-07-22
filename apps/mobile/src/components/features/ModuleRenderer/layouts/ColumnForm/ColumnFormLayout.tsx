@@ -19,7 +19,7 @@ import { colors } from '@theme'
 import { collectIndexed, readEnabledGroups, buildColumnSpecs } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import {
-  getAllFormEntries, generateId, type FormEntry,
+  getAllFormEntries, generateId, type FormEntry, type FormValue,
 } from '../../../../../lib/database'
 import { saveFormEntry, deleteFormEntry } from '@services/formEntryService'
 import { formatDateNumeric } from '../../../../../lib/dateUtils'
@@ -128,7 +128,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
   const [editingId, setEditingId] = useState<string | null>(null)
   // Fiche dépliée en mode liste (textes intégraux + toutes les valeurs) — une à la fois.
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [values, setValues] = useState<Record<string, string | number>>({})
+  const [values, setValues] = useState<Record<string, FormValue>>({})
   const [saving, setSaving] = useState(false)
   // Étape courante du wizard (mode entry_mode=wizard) — une colonne par étape.
   const [stepIndex, setStepIndex] = useState(0)
@@ -149,8 +149,8 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
   // que le patient n'a pas touché le curseur (pas de faux « 50 » d'ancrage dans
   // les données ni dans les courbes praticien). Seuls les champs texte/horaire
   // sont initialisés à vide.
-  const initialValuesFor = useCallback((cols: ColumnSpec[]): Record<string, string | number> => {
-    const init: Record<string, string | number> = {}
+  const initialValuesFor = useCallback((cols: ColumnSpec[]): Record<string, FormValue> => {
+    const init: Record<string, FormValue> = {}
     for (const col of cols) {
       for (const child of col.children) {
         const key = child.props['key']
@@ -179,7 +179,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
   }, [initialValuesFor, columns])
 
   // Écriture d'une valeur — callback stable partagé par ColumnFields (scroll + wizard).
-  const handleChangeValue = useCallback((key: string, value: string | number) => {
+  const handleChangeValue = useCallback((key: string, value: FormValue) => {
     setValues(prev => ({ ...prev, [key]: value }))
   }, [])
 
@@ -318,6 +318,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
                 <ColumnFields
                   fields={textChildren}
                   values={values}
+                  moduleId={moduleId}
                   accent={stepAccent}
                   t={t}
                   onChangeValue={handleChangeValue}
@@ -337,6 +338,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
                   <ColumnFields
                     fields={restChildren}
                     values={values}
+                    moduleId={moduleId}
                     accent={stepAccent}
                     t={t}
                     onChangeValue={handleChangeValue}
@@ -450,6 +452,7 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
                   <ColumnFields
                     fields={col.children}
                     values={values}
+                    moduleId={moduleId}
                     accent={colAccent}
                     t={t}
                     onChangeValue={handleChangeValue}

@@ -999,5 +999,8 @@
       "label": "C-SSRS, Risque suicidaire",
       "description": ""
     }
+  },
+  "common": {
+    "add_custom_chip": "+ Autre…"
   }
 }

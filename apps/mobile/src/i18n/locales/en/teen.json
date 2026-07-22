@@ -996,5 +996,8 @@
       "description_placeholder": "E.g. Taking the lift alone to the 5th floor",
       "session_question_teen": "What is your anxiety level towards this situation right now?"
     }
+  },
+  "common": {
+    "add_custom_chip": "+ Other…"
   }
 }

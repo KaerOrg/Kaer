@@ -244,6 +244,14 @@ Deux field_types propres :
 | `column_text_field` | Champ texte dans colonne | `placeholder_code`, `column_index`, `suggestion_1..n` (codes i18n rendus en chips : ajoutent/retirent leur mot dans le champ, texte libre roi) |
 | `column_time_field` | Champ heure dans colonne | `column_index` |
 | `column_slider_field` | Curseur continu (`@ui/Slider`) dans colonne | `key`, `min`, `max`, `step` (1 = continu), `unit` (ex. `%`), `color` |
+| `column_choice_field` | Choix EXCLUSIF dans colonne (`@ui/Chip` en `pills` / `@ui/Radio` en `radio`) | `key`, `variant` (`pills` \| `radio`), `option_code_1..n` (code stable stocké), `option_label_1..n` (clés i18n), `accent_color`. Stocke un code unique ; recliquer l'option active la décoche |
+| `column_chips_field` | MULTI-sélection dans colonne (`@ui/Chip`) | `key`, `group_key` (persistance des chips perso), `option_code_1..n`, `option_label_1..n`, `accent_color`, `allow_custom` (`1` = « + Autre… » crée une chip perso réutilisable via `customChipService`, code `custom:<label>`). Stocke un `string[]` de codes |
+
+> **Codes stables, jamais les libellés** (`column_choice_field` / `column_chips_field`,
+> #204) : la valeur stockée est le `option_code_*` (ou `custom:<label>`), jamais le
+> libellé rendu — l'agrégation praticien en dépend. `accent_color` code l'identité du
+> champ, jamais une gravité (MDR). Génériques : aucun id de module en dur, options en
+> clés indexées lues par `collectIndexed` (config-first, `field_props` atomiques).
 
 > **Curseur continu** : le `column_slider_field` est rendu par le primitive
 > `@ui/Slider` (glissement / tap). `value = null` tant que le patient n'a pas touché
