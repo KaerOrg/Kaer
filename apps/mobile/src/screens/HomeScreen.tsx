@@ -174,10 +174,14 @@ export default function HomeScreen() {
   const loading = modulesQuery.isLoading || routinesQuery.isLoading
   const refreshing = modulesQuery.isRefetching || routinesQuery.isRefetching
 
+  // Dépendre des `refetch` (stables, liés à l'observer TanStack Query) et non des
+  // objets query, recréés à chaque rendu.
+  const { refetch: refetchModules } = modulesQuery
+  const { refetch: refetchRoutines } = routinesQuery
   const handleRefresh = useCallback(() => {
-    modulesQuery.refetch()
-    routinesQuery.refetch()
-  }, [modulesQuery, routinesQuery])
+    refetchModules()
+    refetchRoutines()
+  }, [refetchModules, refetchRoutines])
 
   // Rafraîchit au retour sur l'écran (déblocage de module ailleurs, etc.).
   useRefreshOnFocus(handleRefresh)
@@ -232,9 +236,6 @@ export default function HomeScreen() {
         }
       >
         <Text style={styles.heading}>{tg('modulesTitle')}</Text>
-        <Text style={styles.subheading}>
-          {isTeenMode ? t('home.subheading', { ns: 'teen' }) : t('home.subheading')}
-        </Text>
 
         {modules.some(m => m.module_type === 'crisis_plan') && (
           <Pressable
@@ -279,7 +280,6 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.md },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
   heading: { fontSize: 28, fontWeight: '700', color: colors.text },
-  subheading: { fontSize: 14, color: colors.textMuted, marginTop: -spacing.xs },
   urgencyBtn: {
     flexDirection: 'row',
     alignItems: 'center',

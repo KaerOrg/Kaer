@@ -4,10 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Pressable,
   ActivityIndicator,
 } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +19,7 @@ import { appointmentQueries, useCancelAppointment } from '../hooks/queries'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { colors, spacing, radius, fontSize } from '@theme'
 import type { AppStackParamList } from '../navigation/AppStack'
+import { Button } from '@ui/Button'
 import { EmptyState } from '@ui/EmptyState'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
@@ -34,9 +34,10 @@ const STATUS_COLORS: Record<string, string> = {
   completed: colors.success,
 }
 
-function formatDateTime(iso: string): string {
+/** Horodatage du RDV dans la langue active de l'app (jamais une locale figée). */
+function formatDateTime(iso: string, locale: string): string {
   const d = new Date(iso)
-  return d.toLocaleString('fr-FR', {
+  return d.toLocaleString(locale, {
     weekday: 'short', day: 'numeric', month: 'short',
     hour: '2-digit', minute: '2-digit',
   })
@@ -52,47 +53,57 @@ function isUpcoming(appt: Appointment): boolean {
 
 function AppointmentItem({
   appt,
+  upcoming,
+  practitionerName,
   onCancel,
   onReschedule,
 }: {
   appt: Appointment
+  /** Rendez-vous encore à venir : seul cas où annuler ou reprogrammer a un sens. */
+  upcoming: boolean
+  /** Soignant qui suit le patient, `null` tant que la requête n'a pas répondu. */
+  practitionerName: string | null
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
 }) {
-  const { t } = useTranslation()
-  const canAct = appt.status === 'pending' || appt.status === 'confirmed'
+  const { t, i18n } = useTranslation()
+  const canAct = upcoming && (appt.status === 'pending' || appt.status === 'confirmed')
   const statusColor = STATUS_COLORS[appt.status] ?? colors.textMuted
+
+  const handleCancel = useCallback(() => onCancel(appt.id), [onCancel, appt.id])
+  const handleReschedule = useCallback(() => onReschedule(appt.id), [onReschedule, appt.id])
 
   return (
     <View style={styles.item}>
       <View style={[styles.statusBar, { backgroundColor: statusColor }]} />
       <View style={styles.itemContent}>
-        <Text style={styles.itemTime}>{formatDateTime(appt.starts_at)}</Text>
-        <Text style={styles.itemStatus}>
-          {t(`agenda.appointment.status_${
-            appt.status
-              .replace('cancelled_by_patient', 'cancelled')
-              .replace('cancelled_by_practitioner', 'cancelled')
-          }`)}
-        </Text>
+        <Text style={styles.itemTime}>{formatDateTime(appt.starts_at, i18n.language)}</Text>
+        <View style={styles.itemMeta}>
+          {practitionerName ? (
+            <Text style={styles.itemPractitioner} numberOfLines={1}>{practitionerName}</Text>
+          ) : null}
+          <Text style={styles.itemStatus}>
+            {t(`agenda.appointment.status_${
+              appt.status
+                .replace('cancelled_by_patient', 'cancelled')
+                .replace('cancelled_by_practitioner', 'cancelled')
+            }`)}
+          </Text>
+        </View>
         {canAct && (
           <View style={styles.itemActions}>
-            <Pressable
-              style={styles.rescheduleBtn}
-              onPress={() => onReschedule(appt.id)}
-            >
-              <Text style={styles.rescheduleBtnText}>
-                {t('agenda.appointment.reschedule_btn')}
-              </Text>
-            </Pressable>
-            <Pressable
-              style={styles.cancelBtn}
-              onPress={() => onCancel(appt.id)}
-            >
-              <Text style={styles.cancelBtnText}>
-                {t('agenda.appointment.cancel_btn')}
-              </Text>
-            </Pressable>
+            <Button
+              variant="secondary"
+              size="sm"
+              label={t('agenda.appointment.reschedule_btn')}
+              onPress={handleReschedule}
+            />
+            <Button
+              variant="danger"
+              size="sm"
+              label={t('agenda.appointment.cancel_btn')}
+              onPress={handleCancel}
+            />
           </View>
         )}
       </View>
@@ -102,7 +113,6 @@ function AppointmentItem({
 
 export default function AppointmentsScreen() {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const navigation = useNavigation<Nav>()
   const { patient } = useAuthStore()
   const { showConfirm } = useConfirmDialog()
@@ -113,6 +123,7 @@ export default function AppointmentsScreen() {
 
   const appointments = appointmentsQuery.data ?? EMPTY_APPTS
   const practitionerId = practitionerQuery.data?.id ?? null
+  const practitionerName = practitionerQuery.data?.name || null
   const loading = appointmentsQuery.isLoading || practitionerQuery.isLoading
 
   const refetch = useCallback(() => {
@@ -134,6 +145,11 @@ export default function AppointmentsScreen() {
   const handleReschedule = useCallback((id: string) => {
     if (!practitionerId) return
     navigation.navigate('BookAppointment', { practitionerId, appointmentId: id })
+  }, [navigation, practitionerId])
+
+  const handleBook = useCallback(() => {
+    if (!practitionerId) return
+    navigation.navigate('BookAppointment', { practitionerId })
   }, [navigation, practitionerId])
 
   const upcoming = appointments.filter(isUpcoming)
@@ -162,7 +178,7 @@ export default function AppointmentsScreen() {
               <>
                 <Text style={styles.sectionTitle}>{t('agenda.section_upcoming')}</Text>
                 {upcoming.map(appt => (
-                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} onReschedule={handleReschedule} />
+                  <AppointmentItem key={appt.id} appt={appt} upcoming practitionerName={practitionerName} onCancel={handleCancel} onReschedule={handleReschedule} />
                 ))}
               </>
             )}
@@ -171,23 +187,19 @@ export default function AppointmentsScreen() {
               <>
                 <Text style={styles.sectionTitle}>{t('agenda.section_past')}</Text>
                 {past.map(appt => (
-                  <AppointmentItem key={appt.id} appt={appt} onCancel={handleCancel} onReschedule={handleReschedule} />
+                  <AppointmentItem key={appt.id} appt={appt} upcoming={false} practitionerName={practitionerName} onCancel={handleCancel} onReschedule={handleReschedule} />
                 ))}
               </>
             )}
           </ScrollView>
 
           {practitionerId && (
-            <View style={[styles.bookBtnWrapper, { paddingBottom: insets.bottom + spacing.md }]}>
-              <Pressable
-                style={styles.bookBtn}
-                onPress={() =>
-                  navigation.navigate('BookAppointment', { practitionerId })
-                }
-              >
-                <Plus size={18} color="#fff" />
-                <Text style={styles.bookBtnText}>{t('agenda.appointment.new')}</Text>
-              </Pressable>
+            <View style={styles.bookBtnWrapper}>
+              <Button
+                label={t('agenda.appointment.new')}
+                onPress={handleBook}
+                iconLeft={<Plus size={18} color={colors.white} />}
+              />
             </View>
           )}
         </>
@@ -201,26 +213,12 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   scroll: { flexGrow: 1, padding: spacing.md, gap: spacing.sm },
   emptyWrapper: { flex: 1, justifyContent: 'center' },
+  // Pas de safe-area en bas : la barre d'onglets, sous cet écran, la porte déjà.
   bookBtnWrapper: {
     padding: spacing.md,
-    paddingBottom: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     backgroundColor: colors.background,
-  },
-  bookBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  bookBtnText: {
-    color: '#fff',
-    fontSize: fontSize.body,
-    fontWeight: '600',
   },
   sectionTitle: {
     fontSize: fontSize.caption,
@@ -251,6 +249,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
+  // Nom du soignant à gauche, statut à droite. Le nom se compresse (flexShrink)
+  // pour que le statut reste lisible, jamais de débordement latéral.
+  itemMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+  },
+  itemPractitioner: {
+    flexShrink: 1,
+    fontSize: fontSize.caption,
+    color: colors.text,
+  },
   itemStatus: {
     fontSize: fontSize.caption,
     color: colors.textMuted,
@@ -260,27 +271,5 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 4,
     flexWrap: 'wrap',
-  },
-  rescheduleBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  rescheduleBtnText: {
-    fontSize: 13,
-    color: colors.primary,
-  },
-  cancelBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.danger,
-  },
-  cancelBtnText: {
-    fontSize: 13,
-    color: colors.danger,
   },
 })

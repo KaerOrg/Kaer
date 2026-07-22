@@ -4,7 +4,7 @@
 
 Système de prise de rendez-vous entre praticien et patient.
 - **Praticien (web)** : configure ses plages horaires, visualise la semaine dans une grille pixel, accepte ou refuse les RDV.
-- **Patient (mobile)** : consulte le calendrier mois par mois, choisit un créneau disponible, annule un RDV passé.
+- **Patient (mobile)** : consulte le calendrier mois par mois, choisit un créneau disponible, annule ou reprogramme un RDV à venir.
 
 ## Règles métier
 
@@ -12,7 +12,9 @@ Système de prise de rendez-vous entre praticien et patient.
 - Il peut ajouter des **exceptions** ponctuelles (fermeture ou horaire alternatif pour une date précise).
 - Le champ `auto_confirm_appointments` sur `practitioners` détermine si un RDV est créé directement en `confirmed` ou en `pending`.
 - Un patient ne peut réserver que chez **son propre praticien** (celui lié via `practitioner_patients`).
-- L'annulation par le patient passe le statut à `cancelled_by_patient` — le créneau redevient disponible côté praticien.
+- L'annulation par le patient passe le statut à `cancelled_by_patient` : le créneau redevient disponible côté praticien.
+- **Annuler et reprogrammer ne concernent que les RDV à venir** : sur un RDV passé, aucune action n'est proposée (un rendez-vous déjà écoulé ne s'annule pas).
+- Chaque carte de RDV affiche le **nom du soignant** suivant le patient, lu via la RPC `get_my_practitioner` (`practitioners_own` interdit au patient de lire la table en direct ; la RPC dérive le patient de `auth.uid()` et n'expose que id / nom / titre).
 
 ## Schéma de données
 
@@ -72,7 +74,7 @@ JS `Date.getDay()` renvoie `0 = Dimanche` → conversion : `jsDay === 0 ? 6 : js
 
 ### Côté patient (mobile)
 
-1. `AppointmentsScreen` liste les RDV à venir et passés via `fetchPatientAppointments`.
+1. `AppointmentsScreen` liste les RDV à venir et passés via `fetchPatientAppointments`, chaque carte portant le nom du soignant (`fetchMyPractitioner`). Les actions Annuler / Reprogrammer ne s'affichent que sur les RDV à venir encore `pending` ou `confirmed`.
 2. Bouton "Prendre un RDV" → `BookAppointmentScreen` avec `practitionerId`.
 3. `BookAppointmentScreen` : grille mois maison → sélection date → liste de créneaux calculés localement par `computeAvailableSlots`.
 4. Tap sur un créneau → `bookAppointment` → bannière de succès.

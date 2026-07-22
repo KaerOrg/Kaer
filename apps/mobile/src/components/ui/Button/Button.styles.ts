@@ -14,7 +14,9 @@ export const styles = StyleSheet.create({
   primary:   { backgroundColor: colors.primary },
   secondary: { backgroundColor: colors.primaryLight, borderWidth: 1.5, borderColor: colors.primary },
   ghost:     { backgroundColor: 'transparent' },
-  danger:    { backgroundColor: '#FEE2E2', borderWidth: 1, borderColor: colors.danger },
+  danger:    { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger },
+  // Destructif discret : aucun habillage, seul le libellé porte la couleur d'alerte.
+  ghostDanger: { backgroundColor: 'transparent' },
   disabled:   { opacity: 0.5 },
   withIcon:   { flexDirection: 'row', gap: spacing.xs },
   // Mode icône seule : annule le « chrome » CTA (hauteur min + padding large).
@@ -29,4 +31,5 @@ export const styles = StyleSheet.create({
   secondaryLabel: { color: colors.primary },
   ghostLabel:     { color: colors.primary },
   dangerLabel:    { color: colors.danger },
+  ghostDangerLabel: { color: colors.danger },
 })

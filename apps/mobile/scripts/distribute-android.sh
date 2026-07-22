@@ -7,7 +7,10 @@ set -e
 FIREBASE_APP_ID="1:243014828303:android:13b120c5865e5794283e7a"
 APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
 RELEASE_NOTES="${RELEASE_NOTES:-Nouvelle version}"
-GROUPS=""
+# Groupe de testeurs par défaut. Le CLI Firebase tente l'étape de distribution même
+# sans --groups et échoue alors en HTTP 404 : il faut toujours une cible explicite.
+# Groupes disponibles : firebase appdistribution:group:list --project kaer-84ba7
+GROUPS="${GROUPS:-kaer-test-group}"
 
 # Récupérer les arguments optionnels
 while [[ "$#" -gt 0 ]]; do

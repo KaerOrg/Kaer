@@ -6,10 +6,16 @@ import { useRefreshOnFocus } from './useRefreshOnFocus'
 // useFocusEffect exécute son callback immédiatement au montage (simulant le focus).
 // On capture chaque exécution via la ref interne du helper.
 let focusCallback: (() => void) | null = null
+// Reproduit le contrat de react-navigation : le callback n'est ré-exécuté que si
+// son identité change (comparaison par référence, comme les deps d'un effect).
+let mockLastCallback: (() => void) | null = null
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (cb: () => void) => {
     focusCallback = cb
-    cb()
+    if (cb !== mockLastCallback) {
+      mockLastCallback = cb
+      cb()
+    }
   },
 }))
 
@@ -21,6 +27,7 @@ function Probe({ refetch }: { refetch: () => void }) {
 describe('useRefreshOnFocus', () => {
   beforeEach(() => {
     focusCallback = null
+    mockLastCallback = null
   })
 
   it('ne refetch pas au premier focus (montage initial)', () => {
@@ -36,5 +43,25 @@ describe('useRefreshOnFocus', () => {
     focusCallback?.()
     focusCallback?.()
     expect(refetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('ne reboucle pas quand l appelant recrée son callback à chaque rendu', () => {
+    const refetch = jest.fn()
+    const { rerender } = render(<Probe refetch={() => refetch()} />)
+    // Chaque rendu fournit une NOUVELLE fonction : le callback de focus doit rester
+    // stable, sinon react-navigation le rejoue et déclenche une boucle de refetch.
+    rerender(<Probe refetch={() => refetch()} />)
+    rerender(<Probe refetch={() => refetch()} />)
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
+  it('appelle toujours la derniere version du callback', () => {
+    const first = jest.fn()
+    const second = jest.fn()
+    const { rerender } = render(<Probe refetch={first} />)
+    rerender(<Probe refetch={second} />)
+    focusCallback?.()
+    expect(first).not.toHaveBeenCalled()
+    expect(second).toHaveBeenCalledTimes(1)
   })
 })

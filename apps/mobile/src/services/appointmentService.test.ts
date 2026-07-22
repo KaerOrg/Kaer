@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals'
 
 jest.mock('../lib/supabase', () => ({
-  supabase: { from: jest.fn() },
+  supabase: { from: jest.fn(), rpc: jest.fn() },
 }))
 
 import { supabase } from '../lib/supabase'
@@ -12,6 +12,7 @@ import {
   bookAppointment,
   cancelAppointment,
   rescheduleAppointment,
+  fetchMyPractitioner,
 } from './appointmentService'
 import type { AvailabilityRule, AvailabilityException, Appointment } from './appointmentService'
 
@@ -204,5 +205,36 @@ describe('rescheduleAppointment', () => {
     const result = await rescheduleAppointment(params)
     expect(result.ok).toBe(false)
     expect(result.error).toBe('slot_conflict')
+  })
+})
+
+
+// ─── fetchMyPractitioner ──────────────────────────────────────────────────────
+
+describe('fetchMyPractitioner', () => {
+  const mockedRpc = supabase.rpc as jest.MockedFunction<typeof supabase.rpc>
+
+  it('renvoie l\'identité du praticien lié', async () => {
+    mockedRpc.mockResolvedValue({
+      data: [{ id: 'prac-1', name: 'Camille Roy', professional_title: 'Psychologue' }],
+      error: null,
+    } as never)
+
+    await expect(fetchMyPractitioner()).resolves.toEqual({
+      id: 'prac-1',
+      name: 'Camille Roy',
+      professional_title: 'Psychologue',
+    })
+    expect(mockedRpc).toHaveBeenCalledWith('get_my_practitioner')
+  })
+
+  it('renvoie null si le patient n\'est lié à aucun praticien', async () => {
+    mockedRpc.mockResolvedValue({ data: [], error: null } as never)
+    await expect(fetchMyPractitioner()).resolves.toBeNull()
+  })
+
+  it('renvoie null en cas d\'erreur RPC', async () => {
+    mockedRpc.mockResolvedValue({ data: null, error: { message: 'denied' } } as never)
+    await expect(fetchMyPractitioner()).resolves.toBeNull()
   })
 })

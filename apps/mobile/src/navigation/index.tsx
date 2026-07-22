@@ -39,7 +39,7 @@ function BootSpinner() {
 }
 
 export default function Navigation() {
-  const { patient, loading, loadSession } = useAuthStore()
+  const { patient, loading, loadSession, restoreLanguage } = useAuthStore()
   const [notifGate, setNotifGate] = useState<NotifGate>('checking')
   useSyncOnForeground()
 
@@ -58,6 +58,12 @@ export default function Navigation() {
       // Enregistré en premier, avant toute arrivée de notification, pour que les
       // notifications reçues app ouverte soient bien affichées (bannière + son).
       configureForegroundNotifications()
+      // Avant tout rendu de texte : restaure la langue choisie précédemment.
+      try {
+        await withTimeout(restoreLanguage(), 2000, 'restoreLanguage')
+      } catch (e) {
+        logger.error('[Boot] restoreLanguage failed', e)
+      }
       try {
         logger.log('[Boot] initDatabase...')
         await withTimeout(initDatabase(), 8000, 'initDatabase')

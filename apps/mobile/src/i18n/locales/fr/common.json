@@ -117,7 +117,6 @@
   },
   "home": {
     "title": "Mes modules",
-    "subheading": "Activés par votre praticien",
     "coming_soon": "Bientôt disponible",
     "empty_title": "Aucun module disponible",
     "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.",
@@ -2391,7 +2390,6 @@
     }
   },
   "notifications": {
-    "panel_title": "Rappels",
     "my_time_label": "Mon heure :",
     "pause": "Suspendre",
     "resume": "Reprendre",

@@ -11,10 +11,47 @@ export interface PatientProfile {
   avatar_url: string | null
 }
 
+/**
+ * Utilisateur porté par la session Supabase Auth. Volontairement distinct de
+ * `PatientProfile` : la session ne contient QUE l'identité d'authentification
+ * (id + email), jamais l'identité civile (nom, prénom, téléphone, avatar) qui vit
+ * dans la table `patients`. Les confondre revient à propager un profil vide.
+ */
+export interface AuthSessionUser {
+  id: string
+  email: string
+}
+
 export interface TeenContext {
   teenMode: boolean
   moduleColors: Record<string, string>
   shareConsent: boolean
+}
+
+/**
+ * Lecture pure du profil patient (table `patients`). Retourne `null` si la ligne
+ * n'existe pas — la décision de purger/déconnecter appartient à l'appelant.
+ */
+export async function fetchPatientProfile(
+  userId: string,
+  email: string
+): Promise<PatientProfile | null> {
+  const { data: profile } = await supabase
+    .from('patients')
+    .select('first_name, last_name, phone, avatar_url')
+    .eq('id', userId)
+    .single()
+
+  if (!profile) return null
+
+  return {
+    id: userId,
+    email,
+    first_name: profile.first_name ?? '',
+    last_name: profile.last_name ?? '',
+    phone: profile.phone ?? null,
+    avatar_url: profile.avatar_url ?? null,
+  }
 }
 
 export async function getCurrentSessionPatient(): Promise<PatientProfile | null> {
@@ -23,11 +60,7 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
   } = await supabase.auth.getSession()
   if (!session?.user) return null
 
-  const { data: profile } = await supabase
-    .from('patients')
-    .select('first_name, last_name, phone, avatar_url')
-    .eq('id', session.user.id)
-    .single()
+  const profile = await fetchPatientProfile(session.user.id, session.user.email!)
 
   if (!profile) {
     // Session présente mais profil absent → compte effacé côté serveur (RGPD art. 17,
@@ -38,18 +71,18 @@ export async function getCurrentSessionPatient(): Promise<PatientProfile | null>
     return null
   }
 
-  return {
-    id: session.user.id,
-    email: session.user.email!,
-    first_name: profile.first_name ?? '',
-    last_name: profile.last_name ?? '',
-    phone: profile.phone ?? null,
-    avatar_url: profile.avatar_url ?? null,
-  }
+  return profile
 }
 
+/**
+ * S'abonne aux changements de session Auth. Le callback ne reçoit QUE l'utilisateur
+ * de session (id + email) : c'est tout ce que Supabase fournit ici. L'appelant est
+ * responsable de charger le profil patient (`fetchPatientProfile`) — fabriquer un
+ * `PatientProfile` aux champs vides depuis cet événement écraserait l'identité déjà
+ * chargée à chaque `TOKEN_REFRESHED`.
+ */
 export function onAuthChange(
-  cb: (patient: PatientProfile | null) => void | Promise<void>
+  cb: (user: AuthSessionUser | null) => void | Promise<void>
 ): { unsubscribe: () => void } {
   const { data } = supabase.auth.onAuthStateChange((_event, session) => {
     logger.log('[onAuthChange] event', _event, 'userId', session?.user?.id ?? 'null')
@@ -57,14 +90,7 @@ export function onAuthChange(
       void cb(null)
       return
     }
-    void cb({
-      id: session.user.id,
-      email: session.user.email!,
-      first_name: '',
-      last_name: '',
-      phone: null,
-      avatar_url: null,
-    })
+    void cb({ id: session.user.id, email: session.user.email! })
   })
   return { unsubscribe: () => data.subscription.unsubscribe() }
 }

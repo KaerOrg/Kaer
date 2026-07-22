@@ -8,8 +8,15 @@ import { useFocusEffect } from '@react-navigation/native'
 // changeant d'onglet — `refetchOnMount` ne se redéclenche donc pas. Ce helper
 // rétablit le comportement « les données se rafraîchissent quand je reviens sur
 // l'écran » sans casser la déduplication apportée par `staleTime`.
+// Le callback passé à `useFocusEffect` doit rester STABLE : react-navigation le
+// ré-exécute à chaque changement d'identité, écran focalisé compris. Un appelant
+// qui passe une fonction recréée à chaque rendu (ex. `useCallback` dépendant de
+// l'objet query) provoquerait sinon une boucle refetch -> rendu -> refetch, visible
+// à l'écran comme un indicateur de chargement permanent. On passe donc par une ref.
 export function useRefreshOnFocus(refetch: () => void): void {
   const firstTimeRef = useRef(true)
+  const refetchRef = useRef(refetch)
+  refetchRef.current = refetch
 
   useFocusEffect(
     useCallback(() => {
@@ -17,7 +24,7 @@ export function useRefreshOnFocus(refetch: () => void): void {
         firstTimeRef.current = false
         return
       }
-      refetch()
-    }, [refetch]),
+      refetchRef.current()
+    }, []),
   )
 }

@@ -238,16 +238,27 @@ export async function rescheduleAppointment(params: {
   return { ok: !error, error: error?.message }
 }
 
-/** Praticien lié au patient courant (pour la réservation). */
-export async function fetchPatientPractitioner(
-  patientId: string,
-): Promise<{ id: string } | null> {
-  const { data: rel } = await supabase
-    .from('practitioner_patients')
-    .select('practitioner_id')
-    .eq('patient_id', patientId)
-    .limit(1)
-    .single()
-  if (!rel) return null
-  return { id: rel.practitioner_id as string }
+export interface PractitionerIdentity {
+  id: string
+  name: string
+  professional_title: string | null
+}
+
+/**
+ * Praticien lié au patient connecté : identité d'affichage (réservation, cartes RDV).
+ *
+ * Passe par la RPC `get_my_practitioner` et non par un select direct : la policy
+ * `practitioners_own` réserve la table au praticien lui-même, un patient ne peut donc
+ * pas lire le nom de son soignant en direct. La RPC dérive le patient de `auth.uid()`
+ * côté serveur : aucun identifiant n'est accepté du client.
+ */
+export async function fetchMyPractitioner(): Promise<PractitionerIdentity | null> {
+  const { data, error } = await supabase.rpc('get_my_practitioner')
+  if (error || !data || data.length === 0) return null
+  const row = data[0]
+  return {
+    id: row.id,
+    name: row.name,
+    professional_title: row.professional_title,
+  }
 }

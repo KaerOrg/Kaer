@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchPatientAppointments,
-  fetchPatientPractitioner,
+  fetchMyPractitioner,
   fetchPractitionerRules,
   fetchPractitionerExceptions,
   fetchBookedSlots,
@@ -20,7 +20,7 @@ export const appointmentQueries = {
   patientPractitioner: (patientId: string | undefined) =>
     queryOptions({
       queryKey: ['appointments', 'practitioner', patientId ?? ''],
-      queryFn: () => fetchPatientPractitioner(patientId!),
+      queryFn: () => fetchMyPractitioner(),
       enabled: patientId != null,
     }),
 

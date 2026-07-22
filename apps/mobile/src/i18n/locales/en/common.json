@@ -103,7 +103,6 @@
   },
   "home": {
     "title": "My modules",
-    "subheading": "Activated by your practitioner",
     "coming_soon": "Coming soon",
     "empty_title": "No modules available",
     "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
@@ -1694,7 +1693,6 @@
     }
   },
   "notifications": {
-    "panel_title": "Reminders",
     "my_time_label": "My time:",
     "pause": "Pause",
     "resume": "Resume",

@@ -2239,6 +2239,26 @@ begin
 end;
 $$;
 
+-- Identité minimale du praticien qui suit le patient connecté.
+-- La policy `practitioners_own` limite la table à sa propre ligne : un patient ne
+-- peut donc PAS lire le nom de son praticien en direct. Cette RPC SECURITY DEFINER
+-- est la seule voie — elle dérive le patient de auth.uid() (jamais d'un paramètre
+-- client) et n'expose que l'identité d'affichage (id, nom, titre), jamais l'email,
+-- l'adresse, le téléphone ni is_admin.
+create or replace function public.get_my_practitioner()
+returns table (id uuid, name text, professional_title text)
+language sql
+security definer set search_path = public
+stable
+as $$
+  select p.id, p.name, p.professional_title
+  from public.practitioner_patients pp
+  join public.practitioners p on p.id = pp.practitioner_id
+  where pp.patient_id = auth.uid()
+  order by pp.created_at
+  limit 1;
+$$;
+
 -- Droits : fn_is_admin est un helper INTERNE (appelé par les RPC SECURITY DEFINER,
 -- en tant qu'owner) — aucun rôle client, pas d'exposition REST inutile. Le front
 -- n'en a pas besoin : il lit `practitioner.is_admin` (déjà chargé en session).
@@ -2252,6 +2272,8 @@ grant execute on function public.export_patient_data(uuid) to authenticated, ser
 grant execute on function public.erase_patient_data(uuid)  to authenticated, service_role;
 grant execute on function public.admin_list_users(text, text, text, text, text, int, int) to authenticated, service_role;
 grant execute on function public.admin_list_practitioner_names()                          to authenticated, service_role;
+revoke all on function public.get_my_practitioner()                                      from public, anon;
+grant execute on function public.get_my_practitioner()                                   to authenticated, service_role;
 
 
 -- ============================================================

@@ -15,6 +15,8 @@ jest.mock('../lib/supabase', () => ({
   },
 }))
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 import { useAuthStore } from './authStore'
 import { supabase } from '../lib/supabase'
 
@@ -59,6 +61,34 @@ describe('authStore — loadSession', () => {
       avatar_url: null,
     })
     expect(state.loading).toBe(false)
+  })
+
+  it('conserve le profil complet quand un événement auth survient pour le même patient', async () => {
+    // Reproduit un TOKEN_REFRESHED : la session Auth ne porte que id + email, jamais
+    // nom/prénom/téléphone. Le profil déjà chargé doit rester intact.
+    jest.mocked(supabase.auth.getSession).mockResolvedValue({
+      data: { session: { user: { id: 'pat-1', email: 'patient@example.com' } } },
+      error: null,
+    } as never)
+    mockFrom({ first_name: 'Jean', last_name: 'Dupont', phone: '0600000000', avatar_url: null })
+
+    let authCallback: ((event: string, session: unknown) => void) | null = null
+    jest.mocked(supabase.auth.onAuthStateChange).mockImplementation(((
+      cb: (event: string, session: unknown) => void
+    ) => {
+      authCallback = cb
+      return { data: { subscription: { unsubscribe: jest.fn() } } }
+    }) as never)
+
+    await useAuthStore.getState().loadSession()
+    const before = useAuthStore.getState().patient
+
+    authCallback!('TOKEN_REFRESHED', { user: { id: 'pat-1', email: 'patient@example.com' } })
+    await Promise.resolve()
+
+    expect(useAuthStore.getState().patient).toBe(before)
+    expect(useAuthStore.getState().patient?.first_name).toBe('Jean')
+    expect(useAuthStore.getState().patient?.phone).toBe('0600000000')
   })
 
   it('met patient à null si pas de session', async () => {
@@ -159,5 +189,33 @@ describe('authStore — logout', () => {
     await useAuthStore.getState().logout()
 
     expect(supabase.auth.signOut).toHaveBeenCalled()
+  })
+})
+
+describe('authStore — langue', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear()
+    useAuthStore.setState({ language: 'fr' })
+  })
+
+  it('persiste la langue choisie', async () => {
+    await useAuthStore.getState().setLanguage('en')
+
+    expect(useAuthStore.getState().language).toBe('en')
+    expect(await AsyncStorage.getItem('kaer.language')).toBe('en')
+  })
+
+  it('restaure la langue persistée au démarrage', async () => {
+    await AsyncStorage.setItem('kaer.language', 'es')
+
+    await useAuthStore.getState().restoreLanguage()
+
+    expect(useAuthStore.getState().language).toBe('es')
+  })
+
+  it('conserve la langue de l’appareil si aucun choix n’a été mémorisé', async () => {
+    await useAuthStore.getState().restoreLanguage()
+
+    expect(useAuthStore.getState().language).toBe('fr')
   })
 })

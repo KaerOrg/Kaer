@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import i18next, { initialLanguage } from '../i18n'
 import { logger } from '@kaer/shared'
 import {
+  fetchPatientProfile,
   fetchTeenContext,
   getCurrentSessionPatient,
   onAuthChange,
@@ -11,6 +12,7 @@ import {
   signOut,
   type PatientProfile,
 } from '@services/authService'
+import { loadStoredLanguage, persistLanguage } from '@services/languageService'
 import { updatePatientProfile, type PatientProfileUpdate } from '@services/patientProfileService'
 import { registerPushTokenIfGranted } from '@services/notificationService'
 import { RemoteSyncService } from '@services/sync'
@@ -25,6 +27,7 @@ interface AuthState {
   loadSession: () => Promise<void>
   fetchTeenMode: () => Promise<void>
   setShareConsent: (enabled: boolean) => Promise<boolean>
+  restoreLanguage: () => Promise<void>
   setLanguage: (lng: string) => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (token: string, password: string) => Promise<void>
@@ -62,10 +65,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     onAuthChange(async (incoming) => {
       if (incoming) {
-        set((state) => ({
-          patient: { ...incoming, avatar_url: state.patient?.avatar_url ?? null },
-        }))
-        await get().fetchTeenMode()
+        // Même utilisateur que celui déjà chargé (TOKEN_REFRESHED, INITIAL_SESSION…) :
+        // le profil en mémoire est à jour et fait autorité. Le réécrire depuis
+        // l'événement de session viderait nom/prénom/téléphone, absents de la session.
+        const current = get().patient
+        if (current?.id === incoming.id) return
+        const patient = await fetchPatientProfile(incoming.id, incoming.email)
+        set({ patient })
+        if (patient) await get().fetchTeenMode()
       } else {
         RemoteSyncService.getInstance().setConsentEnabled(false)
         set({ patient: null, teenMode: false, moduleColors: {}, shareConsent: true })
@@ -73,9 +80,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     })
   },
 
+  // Applique au boot la langue choisie lors d'une session précédente. Sans choix
+  // mémorisé, on garde `initialLanguage` (langue de l'appareil).
+  restoreLanguage: async () => {
+    const stored = await loadStoredLanguage()
+    if (!stored || stored === get().language) return
+    await i18next.changeLanguage(stored)
+    set({ language: stored })
+  },
+
   setLanguage: async (lng: string) => {
     await i18next.changeLanguage(lng)
     set({ language: lng })
+    await persistLanguage(lng)
   },
 
   fetchTeenMode: async () => {

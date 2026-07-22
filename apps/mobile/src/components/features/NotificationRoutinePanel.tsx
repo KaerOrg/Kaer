@@ -313,8 +313,6 @@ export function NotificationRoutinePanel(props: Props) {
 
   return (
     <View style={panelStyles.container}>
-      <Text style={panelStyles.sectionTitle}>{t('notifications.panel_title')}</Text>
-
       {loading ? (
         <View style={panelStyles.center}>
           <ActivityIndicator color={colors.primary} />
@@ -353,13 +351,6 @@ export function NotificationRoutinePanel(props: Props) {
 const panelStyles = StyleSheet.create({
   container: { gap: spacing.sm },
   center: { padding: spacing.md, alignItems: 'center' },
-  sectionTitle: {
-    fontSize: fontSize.caption,
-    fontWeight: '700',
-    color: colors.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
   empty: {
     fontSize: fontSize.caption,
     color: colors.textMuted,
