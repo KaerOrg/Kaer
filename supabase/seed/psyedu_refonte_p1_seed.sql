@@ -87,4 +87,4 @@ insert into public.module_topics (module_id, topic_id, sort_order) values
   ('medication_side_effects', '00000001-0000-0000-0000-000000000011', 5),
   ('sleep_diary', '00000001-0000-0000-0000-000000000001', 0),
   ('sleep_diary', '00000001-0000-0000-0000-000000000009', 1)
-on conflict (module_id, topic_id) do nothing;
+on conflict (module_id, topic_id) do update set sort_order = excluded.sort_order;

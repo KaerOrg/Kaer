@@ -104,6 +104,45 @@ Ajouter une nouvelle échelle = **INSERT en base uniquement, zéro redéploiemen
 
 C'est un effort constant, pas croissant. La dette du tableau statique, elle, est croissante : chaque nouvelle échelle amplifie le problème.
 
+## Seeds de config : `ON CONFLICT … DO UPDATE`, jamais `DO NOTHING`
+
+> **Un seed de config est la source de vérité re-jouable : il doit rendre la base
+> IDENTIQUE au seed à chaque exécution.** Un `INSERT` de config en
+> `ON CONFLICT … DO NOTHING` n'insère que les lignes *nouvelles* et **ignore
+> silencieusement toute valeur modifiée** sur une ligne déjà présente. Résultat :
+> une couleur neutralisée, un libellé corrigé, un `sort_order` réordonné dans le
+> seed **n'atteint jamais** une base déjà semée → dérive silencieuse qui s'accumule
+> à chaque refonte.
+
+**Règle : tout `INSERT` sur une table de config utilise
+`ON CONFLICT (<clé>) DO UPDATE SET <col = excluded.col …>`** (toutes les colonnes
+non-clés). Tables concernées : `field_props`, `module_content_fields`, `modules`,
+`module_categories`, `module_sources`, `psyedu_topics`/`psyedu_blocks`, `tags`,
+`tag_dimensions`, etc.
+
+```sql
+-- ❌ la valeur modifiée d'une ligne existante n'est jamais propagée
+insert into public.field_props values ('et.cfg','suds_before_color','#C9B8E4')
+on conflict (field_id, prop_key) do nothing;
+-- ✅ la base s'aligne sur le seed à chaque ré-exécution
+insert into public.field_props values ('et.cfg','suds_before_color','#C9B8E4')
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
+```
+
+**Exception : tables de jonction pures** (toutes les colonnes sont dans la clé de
+conflit, ex. `module_tags (module_id, tag_id)`) → **garder `DO NOTHING`** (un
+`DO UPDATE` n'aurait aucune colonne à mettre à jour).
+
+**Corollaire — ré-exécution au déploiement.** `DO UPDATE` ne sert à rien si le seed
+n'est jamais relancé : la CI/CD doit **ré-exécuter les seeds** à chaque release pour
+que `base == seed`. Un `DO UPDATE` sans ré-exécution laisse la dérive intacte.
+
+**Incident de référence** (2026-07) : les couleurs neutralisées des refontes
+Exposition graduée (#183/#184) et Thermomètre de l'humeur (#161) étaient restées
+sur les anciennes valeurs saturées (rouge/vert d'alarme) en **production** — enjeu
+MDR — parce que le seed était en `DO NOTHING` et jamais ré-exécuté. Cause systémique
+traitée par le passage généralisé en `DO UPDATE`.
+
 ## Leçon générale
 
 > Quand une donnée change à la vitesse du métier (nouvelles échelles, nouvelles fiches, nouveau contenu), elle va en base.  
