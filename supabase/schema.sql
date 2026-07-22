@@ -518,9 +518,21 @@ drop policy if exists "invitations_by_token" on public.invitations;
 create policy "invitations_by_token" on public.invitations
   for select using (true);
 
+-- Co-suivi : un module est débloqué UNE fois par patient (contrainte
+-- unique(patient_id, module_type)), donc tout praticien qui suit ce patient doit
+-- le voir et pouvoir le gérer. Restreindre la lecture au seul praticien qui a
+-- posé la ligne rendait les modules d'un confrère invisibles : l'app les
+-- proposait à l'activation et l'INSERT échouait en 23505 (toggle inerte).
+-- `practitioner_id` reste la trace de qui a débloqué, pas un droit d'accès.
 drop policy if exists "modules_practitioner" on public.patient_modules;
 create policy "modules_practitioner" on public.patient_modules
-  for all using (auth.uid() = practitioner_id);
+  for all using (
+    exists (
+      select 1 from public.practitioner_patients
+      where practitioner_patients.patient_id = patient_modules.patient_id
+        and practitioner_patients.practitioner_id = auth.uid()
+    )
+  );
 
 drop policy if exists "modules_patient" on public.patient_modules;
 create policy "modules_patient" on public.patient_modules
