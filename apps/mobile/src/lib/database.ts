@@ -56,7 +56,7 @@ export async function initDatabase(): Promise<void> {
     () => createBehavioralActivationTable(database),
     () => createBreathingSessionsTable(database),
     () => createEmotionEntriesTable(database),
-    () => createCognitiveSaturationTable(database),
+    () => createDefusionSessionsTable(database),
     () => createPHQ9Table(database),
     () => createBSL23Table(database),
     () => createGAD7Table(database),
@@ -341,7 +341,7 @@ export function generateId(): string {
 // = ajouter sa table ici, sinon l'effacement laisserait des données résiduelles).
 const PATIENT_DATA_TABLES = [
   'activity_records', 'asrs18_entries', 'asrs6_entries', 'beck_thought_records',
-  'breathing_sessions', 'bsl23_entries', 'cognitive_saturation_sessions',
+  'breathing_sessions', 'bsl23_entries', 'defusion_sessions',
   'crisis_anchors', 'crisis_plan_items', 'custom_dimensions', 'daily_entries',
   'decisional_balance', 'em_balance_items', 'em_rulers', 'em_values',
   'emotion_entries', 'exposure_hierarchies', 'fear_entries', 'fear_situations',
@@ -1079,66 +1079,93 @@ export async function getEmotionEntriesForMonth(yearMonth: string): Promise<Emot
   )
 }
 
-// ─── Types Saturation Cognitive ───────────────────────────────────────────────
+// ─── Types Décrocher d'une pensée (défusion cognitive) ───────────────────────
 //
-// Technique de saturation sémantique (Hayes et al., 1999 — ACT, défusion cognitive).
-// Le patient répète un mot/pensée rapidement jusqu'à ce qu'il perde sa charge
-// émotionnelle. Aucun score interprété — conformité MDR 2017/745.
+// Refonte du module `cognitive_saturation` : deux techniques ACT de défusion
+// (répétition de mot, distanciation par le langage). Le patient mesure inconfort
+// et conviction avant/après, sur deux curseurs 0 à 10 séparés — jamais un score
+// unique, jamais d'écart calculé. Conformité MDR 2017/745 : le code stocke les
+// chiffres bruts, il ne conclut jamais.
 
-export interface CognitiveSaturationSession {
+/** Les deux techniques de défusion proposées par le module. */
+export type DefusionTechnique = 'word_repetition' | 'linguistic_distancing'
+
+export interface DefusionSession {
   id: string
-  word: string            // mot ou courte pensée travaillée (max 40 chars)
-  repetitions: number     // nombre de tapotements enregistrés
-  duration_seconds: number // durée effective de l'exercice
+  technique: DefusionTechnique
+  /** Mot répété ou pensée travaillée — la donnée intime, synchronisée côté praticien. */
+  word_or_thought: string
+  /** Durée effective de l'exercice en secondes (répétition de mot ; 0 pour la distanciation, sans minuteur). */
+  duration_seconds: number
+  // Mesures 0 à 10. NULL = étape « Passer » (mesure passée par le patient).
+  // Nullabilité PAR PAIRE : « Passer » saute une étape entière, donc
+  // (discomfort_before, belief_before) sont null ensemble, idem _after — jamais
+  // une dimension seule (garantie applicative, cf. defusionService).
+  discomfort_before: number | null
+  discomfort_after: number | null
+  belief_before: number | null
+  belief_after: number | null
   created_at: string
 }
 
-// ─── SQLite Saturation Cognitive ─────────────────────────────────────────────
+// ─── SQLite Décrocher d'une pensée ───────────────────────────────────────────
 
-export async function createCognitiveSaturationTable(
+export async function createDefusionSessionsTable(
   database: SQLite.SQLiteDatabase
 ): Promise<void> {
   await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS cognitive_saturation_sessions (
+    CREATE TABLE IF NOT EXISTS defusion_sessions (
       id TEXT PRIMARY KEY,
-      word TEXT NOT NULL,
-      repetitions INTEGER NOT NULL DEFAULT 0,
+      technique TEXT NOT NULL,
+      word_or_thought TEXT NOT NULL,
       duration_seconds INTEGER NOT NULL DEFAULT 0,
+      discomfort_before INTEGER,
+      discomfort_after INTEGER,
+      belief_before INTEGER,
+      belief_after INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
 }
 
-/** Enregistre une session terminée */
-export async function saveCognitiveSaturationSession(
-  session: Omit<CognitiveSaturationSession, 'created_at'>
+/** Enregistre une séance terminée. */
+export async function saveDefusionSession(
+  session: Omit<DefusionSession, 'created_at'>
 ): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT INTO cognitive_saturation_sessions (id, word, repetitions, duration_seconds)
-     VALUES (?, ?, ?, ?)`,
-    [session.id, session.word, session.repetitions, session.duration_seconds]
+    `INSERT OR REPLACE INTO defusion_sessions
+       (id, technique, word_or_thought, duration_seconds,
+        discomfort_before, discomfort_after, belief_before, belief_after)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      session.id,
+      session.technique,
+      session.word_or_thought,
+      session.duration_seconds,
+      session.discomfort_before,
+      session.discomfort_after,
+      session.belief_before,
+      session.belief_after,
+    ]
   )
 }
 
-/** Récupère les N dernières sessions, de la plus récente à la plus ancienne */
-export async function getAllCognitiveSaturationSessions(
-  limit = 30
-): Promise<CognitiveSaturationSession[]> {
+/** Récupère les N dernières séances, de la plus récente à la plus ancienne. */
+export async function getAllDefusionSessions(
+  limit = 200
+): Promise<DefusionSession[]> {
   const database = getDb()
-  return database.getAllAsync<CognitiveSaturationSession>(
-    'SELECT * FROM cognitive_saturation_sessions ORDER BY created_at DESC LIMIT ?',
+  return database.getAllAsync<DefusionSession>(
+    'SELECT * FROM defusion_sessions ORDER BY created_at DESC LIMIT ?',
     [limit]
   )
 }
 
-/** Supprime une session */
-export async function deleteCognitiveSaturationSession(id: string): Promise<void> {
+/** Supprime une séance. */
+export async function deleteDefusionSession(id: string): Promise<void> {
   const database = getDb()
-  await database.runAsync(
-    'DELETE FROM cognitive_saturation_sessions WHERE id = ?',
-    [id]
-  )
+  await database.runAsync('DELETE FROM defusion_sessions WHERE id = ?', [id])
 }
 
 // ─── PHQ-9 / BSL-23 / GAD-7 legacy tables (migration source only) ─────────────

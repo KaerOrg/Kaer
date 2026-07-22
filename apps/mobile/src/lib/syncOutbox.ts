@@ -16,7 +16,7 @@ export type EntryKind =
   | 'fear_entry'
   | 'fear_situation'
   | 'breathing_session'
-  | 'cognitive_saturation_session'
+  | 'defusion_session'
   | 'crisis_anchor'
   | 'em_ruler'
   | 'em_balance_item'
