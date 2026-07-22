@@ -1683,7 +1683,7 @@ create table if not exists public.patient_entries (
     'fear_situation',
     'exposure_hierarchy',
     'breathing_session',
-    'cognitive_saturation_session',
+    'defusion_session',
     'crisis_anchor',
     'em_ruler',
     'em_balance_item',

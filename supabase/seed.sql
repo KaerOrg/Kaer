@@ -53,7 +53,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
   ('breathing_techniques',    'anxiety',     'breathing_pacer', 19, false),
-  ('cognitive_saturation',    'anxiety',     'coming_soon', 20, false),
+  ('cognitive_saturation',    'anxiety',     'defusion',    20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),
   ('motivational_balance',    'motivation',  'tabbed',      23, false)
@@ -1322,7 +1322,8 @@ update public.modules set preview_kind = 'slider_dashboard'  where id = 'mood_tr
 update public.modules set preview_kind = 'slider_dashboard'  where id = 'medication_side_effects' and preview_kind in ('fields', 'questionnaire', 'medication_side_effects');
 update public.modules set preview_kind = 'patient_scenario'  where id = 'rim'                     and preview_kind = 'coming_soon';
 update public.modules set preview_kind = 'guided_exercise'   where id = 'grounding'               and preview_kind = 'coming_soon';
-update public.modules set preview_kind = 'guided_exercise'   where id = 'cognitive_saturation'    and preview_kind = 'coming_soon';
+-- cognitive_saturation : refonte « Décrocher d'une pensée » → layout `defusion`
+-- (preview_kind posé directement dans l'INSERT ci-dessus, propagé par ON CONFLICT DO UPDATE).
 
 
 -- ============================================================
@@ -1772,7 +1773,6 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('cd.soon',            'cognitive_distortions',  NULL, NULL, 'coming_soon',        NULL, 99),
   ('cs.label',           'cognitive_saturation',   NULL, NULL, 'module_label',       'module.cognitive_saturation.label', 0),
   ('cs.desc',            'cognitive_saturation',   NULL, NULL, 'module_description', 'module.cognitive_saturation.description', 1),
-  ('cs.soon',            'cognitive_saturation',   NULL, NULL, 'coming_soon',        NULL, 99),
   ('cj.label',           'craving_journal',        NULL, NULL, 'module_label',       'module.craving_journal.label', 0),
   ('cj.desc',            'craving_journal',        NULL, NULL, 'module_description', 'module.craving_journal.description', 1),
   ('cj.soon',            'craving_journal',        NULL, NULL, 'coming_soon',        NULL, 99),

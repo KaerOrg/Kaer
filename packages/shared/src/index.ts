@@ -196,6 +196,7 @@ export const PREVIEW_KINDS = [
   'dual_ruler',
   'weighted_balance',
   'breathing_pacer',
+  'defusion',
 ] as const
 
 export type PreviewKind = (typeof PREVIEW_KINDS)[number]
@@ -212,6 +213,9 @@ export const FIELDLESS_LAYOUTS: ReadonlySet<PreviewKind> = new Set<PreviewKind>(
   'stage_wheel',
   'dual_ruler',
   'weighted_balance',
+  // « Décrocher d'une pensée » : 2 techniques fixes + historique SQLite, aucun
+  // module_content_field (le contenu vit dans le code + i18n, pas en base).
+  'defusion',
 ])
 
 // ─── Observabilité du moteur de rendu (issue #90) ────────────────────────────

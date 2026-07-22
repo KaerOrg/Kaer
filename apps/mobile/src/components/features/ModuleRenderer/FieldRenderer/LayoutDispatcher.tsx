@@ -28,6 +28,7 @@ import { StageWheelLayout } from '../layouts/StageWheel'
 import { StepsLayout } from '../layouts/Steps'
 import { TabsLayout } from '../layouts/Tabs'
 import { TreeSelectorLayout } from '../layouts/TreeSelector'
+import { DefusionLayout } from '../layouts/Defusion'
 import { DualRulerLayout } from '../layouts/DualRuler'
 import { WeightedBalanceLayout } from '../layouts/WeightedBalance'
 import { partitionBySection } from './partitionBySection'
@@ -122,6 +123,7 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'weighted_balance') return <WeightedBalanceLayout fields={visibleFields} moduleId={moduleId ?? ''} accentColor={accentColor} />
   if (preview_kind === 'breathing_pacer') return <BreathingPacerLayout fields={visibleFields} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'defusion') return <DefusionLayout moduleId={moduleId ?? ''} accentColor={accentColor} patientConfig={patientConfig ?? null} />
 
   return null
 }
