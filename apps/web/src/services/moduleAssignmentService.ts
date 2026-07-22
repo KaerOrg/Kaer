@@ -7,6 +7,7 @@ import type {
 } from '../lib/database.types'
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
 import type { BAConfiguredActivity, Medication } from '@kaer/shared'
+import { enabledTechniquesFromConfig, type DefusionTechnique } from '../lib/defusionTechniques'
 
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
   const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)
@@ -139,6 +140,37 @@ export async function updateTrackedEffects(
   const existingConfig = (current?.config ?? {}) as Record<string, unknown>
   const update: Database['public']['Tables']['patient_modules']['Update'] = {
     config: { ...existingConfig, tracked_effects: effects },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
+// ── cognitive_saturation (« Décrocher d'une pensée ») — techniques proposées ────
+// Le praticien active/désactive chaque technique (patient_modules.config.enabled_techniques,
+// lu par le mobile #197). Une technique désactivée disparaît de l'accueil patient ; ses
+// séances passées restent visibles (historique, Données, Évolution).
+
+export async function fetchDefusionTechniques(moduleId: string): Promise<DefusionTechnique[]> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  return enabledTechniquesFromConfig((data?.config ?? null) as Record<string, unknown> | null)
+}
+
+export async function updateDefusionTechniques(
+  moduleId: string,
+  techniques: DefusionTechnique[],
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: { ...existingConfig, enabled_techniques: techniques },
   }
   const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
   return { ok: !error }

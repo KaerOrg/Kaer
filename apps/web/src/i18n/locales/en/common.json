@@ -1415,7 +1415,9 @@
       "empty_title": "No session yet",
       "empty_text": "Use the button above to start your first session.",
       "technique_word_repetition_name": "Word repetition",
-      "technique_linguistic_distancing_name": "Linguistic distancing"
+      "technique_linguistic_distancing_name": "Linguistic distancing",
+      "config_title": "Suggested techniques",
+      "config_hint": "Enable the techniques offered to the patient. A disabled technique disappears from their home screen; past sessions stay visible."
     },
     "craving_journal": {
       "label": "Craving Journal",

@@ -9,6 +9,8 @@ import {
   fetchBAActivities,
   fetchPatientModules,
   fetchMedications,
+  fetchDefusionTechniques,
+  updateDefusionTechniques,
   revokeModule,
   unlockModule,
   unlockPsychoeducation,
@@ -31,6 +33,28 @@ function makeChain(result: { data: unknown; error?: unknown } = { data: null, er
 }
 
 beforeEach(() => vi.clearAllMocks())
+
+describe('moduleAssignmentService.fetchDefusionTechniques', () => {
+  it('lit config.enabled_techniques', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: { config: { enabled_techniques: ['linguistic_distancing'] } }, error: null }) as never)
+    expect(await fetchDefusionTechniques('pm1')).toEqual(['linguistic_distancing'])
+  })
+
+  it('défaut robuste = deux techniques quand config absente', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: { config: {} }, error: null }) as never)
+    expect(await fetchDefusionTechniques('pm1')).toEqual(['word_repetition', 'linguistic_distancing'])
+  })
+})
+
+describe('moduleAssignmentService.updateDefusionTechniques', () => {
+  it('fusionne enabled_techniques dans la config existante', async () => {
+    const chain = makeChain({ data: { config: { other: 1 } }, error: null })
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+    const res = await updateDefusionTechniques('pm1', ['word_repetition'])
+    expect(res).toEqual({ ok: true })
+    expect(chain.update).toHaveBeenCalledWith({ config: { other: 1, enabled_techniques: ['word_repetition'] } })
+  })
+})
 
 describe('moduleAssignmentService.fetchPatientModules', () => {
   it('retourne les modules débloqués', async () => {

@@ -1134,7 +1134,9 @@
       "label": "Décrocher d'une pensée",
       "description": "Défusion cognitive : prendre de la distance avec une pensée qui revient.",
       "technique_word_repetition_name": "Répétition de mot",
-      "technique_linguistic_distancing_name": "Distanciation par le langage"
+      "technique_linguistic_distancing_name": "Distanciation par le langage",
+      "config_title": "Techniques proposées",
+      "config_hint": "Activez les techniques proposées au patient. Une technique désactivée disparaît de son accueil ; ses séances passées restent visibles."
     },
     "craving_journal": {
       "label": "Journal de craving",
