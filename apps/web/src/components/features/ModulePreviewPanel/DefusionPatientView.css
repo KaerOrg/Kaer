@@ -1,0 +1,135 @@
+/* ── Vue patient « Décrocher d'une pensée » — rail des écrans du parcours ────── */
+/* Aperçu praticien, lecture seule. MDR : données d'exemple brutes, aucun jugement. */
+
+.dpv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.dpv-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.dpv-screen {
+  flex: 0 0 auto;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dpv-screen__frame {
+  height: 320px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface, #fff);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.dpv-screen__caption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.dpv-screen__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dpv-screen__label { flex: 1; }
+
+/* Contenus d'écran (statiques) */
+.dpv-intro { font-size: 12px; color: var(--color-text-muted); margin: 0; }
+.dpv-title { font-size: 13px; font-weight: 700; color: var(--color-text); margin: 0; }
+.dpv-label { font-size: 11px; color: var(--color-text-muted); }
+.dpv-hint { font-size: 11px; color: var(--color-text-muted); font-style: italic; margin: 0; }
+
+.dpv-card {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dpv-card--primary { border-left: 3px solid var(--color-primary); }
+
+.dpv-btn {
+  align-self: flex-start;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.dpv-input {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+.dpv-input--multiline { min-height: 56px; }
+
+.dpv-slider {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+.dpv-slider__fill { height: 6px; border-radius: 3px; }
+
+.dpv-exercise { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.dpv-halo { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.dpv-halo--paused { opacity: 0.5; }
+.dpv-word { font-size: 22px; font-weight: 700; color: var(--color-text); }
+.dpv-word--paused { opacity: 0.4; }
+.dpv-progress { width: 100%; height: 4px; border-radius: 2px; background: var(--color-border); overflow: hidden; }
+.dpv-progress__fill { width: 40%; height: 4px; border-radius: 2px; }
+
+.dpv-paliers { display: flex; flex-direction: column; gap: 8px; }
+.dpv-palier { border: 1px solid var(--color-border); border-radius: 10px; padding: 8px; font-size: 12px; color: var(--color-text-muted); }
+.dpv-palier--active { color: var(--color-text); font-weight: 600; }
+.dpv-palier--ghost { border-style: dashed; height: 32px; }
+
+.dpv-grid { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.dpv-grid__row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; align-items: center; }
+.dpv-grid__row span { text-align: center; color: var(--color-text); }
+.dpv-grid__row span:first-child { text-align: left; }
+.dpv-grid__row--head span { font-size: 10px; text-transform: uppercase; color: var(--color-text-muted); }
+
+.dpv-history { display: flex; flex-direction: column; gap: 8px; }
+.dpv-history__row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text); }
+.dpv-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dpv-chip {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 3px 10px;
+}

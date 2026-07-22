@@ -110,7 +110,7 @@ export function ModuleActionsModal({
         </div>
 
         <div className="module-actions-modal__panel">
-          {activeTab === 'preview' && <ModulePatientViewPanel moduleType={module} />}
+          {activeTab === 'preview' && <ModulePatientViewPanel moduleType={module} patientModuleId={patientModuleId ?? undefined} />}
           {activeTab === 'sources' && <ModuleSourcesPanel moduleId={module} />}
           {activeTab === 'data' && <ModuleDataPanel patientId={patientId} moduleType={module} />}
           {activeTab === 'notifications' && patientModuleId && (
