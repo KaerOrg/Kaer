@@ -2237,6 +2237,8 @@
     "ba_curve_title": "Felt pleasure and mastery (daily average)",
     "ba_curve_pleasure": "Pleasure",
     "ba_curve_mastery": "Mastery",
-    "ba_section_title": "Behavioral activation"
+    "ba_section_title": "Behavioral activation",
+    "defusion_title": "Unhooking from a thought",
+    "defusion_note": "Raw values; each point is a session. The thoughts worked on may differ from one session to another."
   }
 }

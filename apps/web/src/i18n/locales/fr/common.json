@@ -2383,6 +2383,8 @@
     "ba_curve_title": "Plaisir et accomplissement ressentis (moyenne par jour)",
     "ba_curve_pleasure": "Plaisir",
     "ba_curve_mastery": "Accomplissement",
-    "ba_section_title": "Activation comportementale"
+    "ba_section_title": "Activation comportementale",
+    "defusion_title": "Décrocher d'une pensée",
+    "defusion_note": "Valeurs brutes ; chaque point est une séance. Les pensées travaillées peuvent différer d'une séance à l'autre."
   }
 }

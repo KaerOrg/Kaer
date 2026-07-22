@@ -54,6 +54,7 @@ vi.mock('@services/engagementService', () => ({
   fetchScaleEvolution: (...args: unknown[]) => mockFetchScaleEvolution(...args),
   fetchMoodEvolution: async () => [],
   fetchFearEvolution: async () => [],
+  fetchDefusionEvolution: async () => [],
   fetchMedSideEffectsEvolution: (...args: unknown[]) => mockFetchMed(...args),
   fetchSleepEvolution: (...args: unknown[]) => mockFetchSleepEvolution(...args),
   fetchChronoEntries: async () => [],

@@ -52,10 +52,11 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, med, sleep, chronoEntries, beckEntries, activityEntries] = await Promise.all([
+        const [scaleResults, mood, fear, defusion, med, sleep, chronoEntries, beckEntries, activityEntries] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
+          fetchDefusionEvolution(patientId),
           fetchMedSideEffectsEvolution(patientId),
           fetchSleepEvolution(patientId),
           fetchChronoEntries(patientId),
@@ -71,6 +72,7 @@ export const engagementQueries = {
           scaleData,
           moodData: mood,
           fearData: fear,
+          defusionData: defusion,
           medEffects: med.effects,
           medData: med.data,
           sleepData: sleep,

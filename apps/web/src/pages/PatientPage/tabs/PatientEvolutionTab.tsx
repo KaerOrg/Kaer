@@ -9,6 +9,7 @@ import type {
   ScorePoint,
   MoodPoint,
   FearPoint,
+  DefusionPoint,
   MedEffectPoint,
   SleepPoint,
   FormEntryRow,
@@ -22,6 +23,7 @@ import { SleepDataPanel } from './SleepDataPanel'
 import { MoodEvolutionBlock } from './MoodEvolutionBlock'
 import { EvolutionOverviewBand } from '../../../components/features/EvolutionOverviewBand'
 import { EvolutionSection } from '../../../components/features/EvolutionSection'
+import { DefusionEvolutionSection } from './DefusionEvolutionSection'
 import { sleepCard, moodCard, activationCard, fearCard, scaleCard, medCard, type OverviewCard } from './overviewMetrics'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
@@ -54,6 +56,7 @@ type EvolutionData = {
   scaleData: Record<string, ScorePoint[]>
   moodData: MoodPoint[]
   fearData: FearPoint[]
+  defusionData: DefusionPoint[]
   medEffects: string[]
   medData: MedEffectPoint[]
   sleepData: SleepPoint[]
@@ -67,6 +70,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   scaleData: {},
   moodData: [],
   fearData: [],
+  defusionData: [],
   medEffects: [],
   medData: [],
   sleepData: [],
@@ -105,7 +109,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     ...engagementQueries.moodMarkers(patientId),
     enabled: (evolutionQuery.data?.moodData.length ?? 0) > 0,
   })
-  const { scales, scaleData, moodData, fearData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries } =
+  const { scales, scaleData, moodData, fearData, defusionData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
 
@@ -170,6 +174,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     scales.length > 0 ||
     moodData.length > 0 ||
     fearData.length > 0 ||
+    defusionData.length > 0 ||
     medData.length > 0 ||
     sleepData.length > 0 ||
     chronoEntries.length > 0 ||
@@ -181,12 +186,13 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     const types = [...scales]
     if (moodData.length > 0) types.push('mood_tracker')
     if (fearData.length > 0) types.push('fear_thermometer')
+    if (defusionData.length > 0) types.push('cognitive_saturation')
     if (medData.length > 0) types.push('medication_side_effects')
     if (sleepData.length > 0) types.push('sleep_diary')
     if (beckEntries.length > 0) types.push('beck_columns')
     if (activityEntries.length > 0) types.push('behavioral_activation')
     return types
-  }, [scales, moodData.length, fearData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length])
+  }, [scales, moodData.length, fearData.length, defusionData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length])
   const hasArchived = dataTypes.some(mt => !activeTypes.has(mt))
   const hasActiveData = dataTypes.some(mt => activeTypes.has(mt))
 
@@ -443,6 +449,20 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           </EvolutionSection>
         )
       })()}
+
+      {/* ── Décrocher d'une pensée (défusion) : 2 sous-graphes + filtre technique ── */}
+      {defusionData.length > 0 && isShown('cognitive_saturation') && (
+        <DefusionEvolutionSection
+          points={defusionData}
+          days={days}
+          locale={i18n.language}
+          expanded={isExpanded('cognitive_saturation')}
+          archivedLabel={isArchived('cognitive_saturation') ? t('evolution.archived_badge') : undefined}
+          onToggle={handleToggleSection}
+          onViewData={handleViewData}
+          viewDataLabel={t('evolution.view_data')}
+        />
+      )}
 
       {/* ── Rythmes & régularité (chronobiologie) ─────────────────── */}
       {chronoEntries.length > 0 && (
