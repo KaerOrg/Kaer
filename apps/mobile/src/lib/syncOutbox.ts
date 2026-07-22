@@ -23,6 +23,7 @@ export type EntryKind =
   | 'em_value'
   | 'module_setting'
   | 'mood_marker'
+  | 'custom_chip'
 
 export interface OutboxItem {
   id: string

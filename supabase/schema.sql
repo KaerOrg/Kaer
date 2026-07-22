@@ -1688,7 +1688,8 @@ create table if not exists public.patient_entries (
     'em_ruler',
     'em_balance_item',
     'em_value',
-    'module_setting'
+    'module_setting',
+    'custom_chip'
   )),
   payload           jsonb       not null default '{}'::jsonb,
   client_created_at timestamptz not null,

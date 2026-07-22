@@ -71,6 +71,7 @@ export async function initDatabase(): Promise<void> {
     () => createDailyEntriesTable(database),
     () => createMedicationIntakesTable(database),
     () => createFormEntriesTable(database),
+    () => createCustomChipsTable(database),
     () => createTreeSelectionsTable(database),
     () => createModuleSettingsTable(database),
     () => createCrisisAnchorsTable(database),
@@ -341,7 +342,7 @@ export function generateId(): string {
 // = ajouter sa table ici, sinon l'effacement laisserait des données résiduelles).
 const PATIENT_DATA_TABLES = [
   'activity_records', 'asrs18_entries', 'asrs6_entries', 'beck_thought_records',
-  'breathing_sessions', 'bsl23_entries', 'defusion_sessions',
+  'breathing_sessions', 'bsl23_entries', 'defusion_sessions', 'custom_chips',
   'crisis_anchors', 'crisis_plan_items', 'custom_dimensions', 'daily_entries',
   'decisional_balance', 'em_balance_items', 'em_rulers', 'em_values',
   'emotion_entries', 'exposure_hierarchies', 'fear_entries', 'fear_situations',
@@ -1738,6 +1739,60 @@ export async function createFormEntriesTable(database: SQLite.SQLiteDatabase): P
     );
     CREATE INDEX IF NOT EXISTS idx_form_entries_module ON form_entries(module_id, created_at DESC);
   `)
+}
+
+// ─── Chips personnelles (craving_journal, #204) ──────────────────────────────
+// Options de chips créées par le patient via « + Autre… », réutilisables par groupe.
+// Le code stocké dans les saisies est `custom:<label>` ; cette table restitue le
+// libellé. Synchronisée pour que le web (#209) affiche le libellé derrière le code.
+
+export interface CustomChip {
+  id: string
+  module_id: string
+  group_key: string
+  label: string
+  created_at: string
+}
+
+export async function createCustomChipsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS custom_chips (
+      id         TEXT PRIMARY KEY,
+      module_id  TEXT NOT NULL,
+      group_key  TEXT NOT NULL,
+      label      TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_chips_group ON custom_chips(module_id, group_key, created_at DESC);
+  `)
+}
+
+export async function saveCustomChip(chip: Omit<CustomChip, 'created_at'>): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT OR REPLACE INTO custom_chips (id, module_id, group_key, label) VALUES (?, ?, ?, ?)`,
+    [chip.id, chip.module_id, chip.group_key, chip.label],
+  )
+}
+
+/** Chips personnelles d'un module, optionnellement filtrées par groupe, plus récentes d'abord. */
+export async function getCustomChips(moduleId: string, groupKey?: string): Promise<CustomChip[]> {
+  const database = getDb()
+  if (groupKey != null) {
+    return database.getAllAsync<CustomChip>(
+      'SELECT * FROM custom_chips WHERE module_id = ? AND group_key = ? ORDER BY created_at DESC',
+      [moduleId, groupKey],
+    )
+  }
+  return database.getAllAsync<CustomChip>(
+    'SELECT * FROM custom_chips WHERE module_id = ? ORDER BY created_at DESC',
+    [moduleId],
+  )
+}
+
+export async function deleteCustomChip(id: string): Promise<void> {
+  const database = getDb()
+  await database.runAsync('DELETE FROM custom_chips WHERE id = ?', [id])
 }
 
 export interface FormEntry {
