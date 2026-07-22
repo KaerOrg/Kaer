@@ -7,17 +7,14 @@ interface Props {
 }
 
 /**
- * Cadre « écran mobile » d'un pas du parcours patient (aperçu praticien, lecture
- * seule) : une vignette numérotée et légendée, contenu statique de démonstration.
+ * Vignette « écran mobile » d'un pas du parcours patient (aperçu praticien, lecture
+ * seule) : le contenu d'écran statique + une légende « N · libellé » sous la carte.
  */
 export function DefusionScreenCard({ number, caption, children }: Props) {
   return (
     <article className="dpv-screen">
       <div className="dpv-screen__frame">{children}</div>
-      <div className="dpv-screen__caption">
-        <span className="dpv-screen__num">{number}</span>
-        <span className="dpv-screen__label">{caption}</span>
-      </div>
+      <div className="dpv-screen__caption">{number} · {caption}</div>
     </article>
   )
 }
