@@ -33,6 +33,9 @@ describe('DefusionPatientView', () => {
     const { container } = render(<DefusionPatientView patientModuleId="pm1" />)
     // accueil (1) + distanciation (3) + historique (1) = 5, jamais les écrans de répétition.
     expect(container.querySelectorAll('.dpv-screen')).toHaveLength(5)
-    expect(screen.queryByText('modules.cognitive_saturation.technique_word_repetition_name')).toBeNull()
+    // La technique désactivée disparaît des filtres (mais ses séances passées restent
+    // visibles dans l'historique — d'où la vérification ciblée sur la barre de filtres).
+    const filters = container.querySelector('.dpv-filters')
+    expect(filters?.textContent).not.toContain('technique_word_repetition_name')
   })
 })
