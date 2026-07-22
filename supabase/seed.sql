@@ -53,7 +53,7 @@ insert into public.modules (id, category_id, preview_kind, sort_order, is_invite
   ('rim',                     'cognitive',   'coming_soon', 16, true),
   ('fear_thermometer',        'anxiety',     'fields',      17, false),
   ('breathing_techniques',    'anxiety',     'breathing_pacer', 19, false),
-  ('cognitive_saturation',    'anxiety',     'defusion',    20, false),
+  ('cognitive_saturation',    'cognitive',   'defusion',    20, false),
   ('craving_journal',         'addiction',   'coming_soon', 21, false),
   ('decisional_balance',      'addiction',   'decision_grid', 22, false),
   ('motivational_balance',    'motivation',  'tabbed',      23, false)
@@ -1443,7 +1443,7 @@ insert into public.module_tags (module_id, tag_id) values
 
   ('cognitive_saturation', 'anxiety'),
   ('cognitive_saturation', 'teen'), ('cognitive_saturation', 'adult'),
-  ('cognitive_saturation', 'cbt'),
+  ('cognitive_saturation', 'cbt'), ('cognitive_saturation', 'act'),
 
   ('craving_journal', 'addiction'),
   ('craving_journal', 'teen'), ('craving_journal', 'adult'),

@@ -35,6 +35,11 @@ export const FEAR_BEFORE_COLOR = '#C9B8E4'
 export const FEAR_PEAK_COLOR = '#6dbfc3'
 export const FEAR_AFTER_COLOR = '#8FCBB4'
 
+// « Décrocher d'une pensée » — inconfort/conviction, série avant (neutre) / après
+// (teal d'identité). Palette neutralisée, aucune valence ni couleur de gravité (MDR).
+export const DEFUSION_BEFORE_COLOR = '#94A3B8' // neutralBar (parité mobile #197)
+export const DEFUSION_AFTER_COLOR = '#6dbfc3'  // primary
+
 // Activation comportementale — P/A ressentis (mêmes teintes que l'app patient).
 export const BA_PLEASURE_COLOR = CHART_PALETTE[1]
 export const BA_MASTERY_COLOR = CHART_PALETTE[0]

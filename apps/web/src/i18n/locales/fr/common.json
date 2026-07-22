@@ -363,7 +363,29 @@
     "preview_banner": "Aperçu conforme à l'écran patient (mobile).",
     "exposure_data_title": "Exposition graduée (SUDS)",
     "exposure_all_situations": "Toutes les situations",
-    "exposure_data_note": "Valeurs brutes saisies par le patient : 0 = aucun stress, 100 = stress maximal, aucune interprétation."
+    "exposure_data_note": "Valeurs brutes saisies par le patient : 0 = aucun stress, 100 = stress maximal, aucune interprétation.",
+    "defusion_data_title": "Données du module Décrocher d'une pensée",
+    "defusion_data_note": "Valeurs brutes, telles que saisies par le patient. « - » : mesure passée par le patient (étape optionnelle).",
+    "defusion_stat_sessions": "Séances",
+    "defusion_stat_last": "Dernière séance",
+    "defusion_stat_with_measures": "Séances avec mesures",
+    "defusion_technique_all": "Toutes",
+    "defusion_period_1m": "30 j",
+    "defusion_period_3m": "90 j",
+    "defusion_period_6m": "6 mois",
+    "defusion_period_all": "Tout",
+    "defusion_series_before": "Avant",
+    "defusion_series_after": "Après",
+    "defusion_chart_discomfort": "Inconfort",
+    "defusion_chart_belief": "Conviction",
+    "defusion_col_date": "Date",
+    "defusion_col_technique": "Technique",
+    "defusion_col_duration": "Durée",
+    "defusion_col_discomfort": "Inconfort",
+    "defusion_col_belief": "Conviction",
+    "defusion_col_word": "Mot ou pensée",
+    "defusion_reveal_word": "••• Afficher",
+    "defusion_load_older": "Afficher les séances antérieures ({{count}} en {{month}})"
   },
   "modules": {
     "nav_link": "Bibliothèque",
@@ -1109,8 +1131,10 @@
       "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
-      "label": "Saturation cognitive",
-      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+      "label": "Décrocher d'une pensée",
+      "description": "Défusion cognitive : prendre de la distance avec une pensée qui revient.",
+      "technique_word_repetition_name": "Répétition de mot",
+      "technique_linguistic_distancing_name": "Distanciation par le langage"
     },
     "craving_journal": {
       "label": "Journal de craving",
@@ -1890,8 +1914,8 @@
       "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
     },
     "cognitive_saturation": {
-      "label": "Saturation cognitive",
-      "description": "Exercice de répétition rapide pour interrompre les ruminations."
+      "label": "Décrocher d'une pensée",
+      "description": "Défusion cognitive : prendre de la distance avec une pensée qui revient."
     },
     "craving_journal": {
       "label": "Journal de craving",

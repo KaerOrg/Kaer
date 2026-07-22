@@ -1,0 +1,144 @@
+/* ── Onglet « Données » de « Décrocher d'une pensée » (défusion) ───────────── */
+/* Affichage passif conforme MDR : valeurs brutes, aucune interprétation, aucune
+   couleur selon la valeur. */
+
+.defusion-data-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Synthèse — 3 cartes brutes */
+.defusion-data-panel__synth {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.defusion-stat__label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.defusion-stat__value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Barre d'outils : filtre technique + période */
+.defusion-data-panel__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.defusion-data-panel__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Deux graphes côte à côte, empilés sous 720px */
+.defusion-data-panel__charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.defusion-data-panel__chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 8px;
+}
+
+.defusion-data-panel__note {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+  padding: 24px 16px;
+  margin: 0;
+}
+
+/* Tableau chronologique groupé par mois */
+.defusion-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.defusion-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--color-text-muted);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.defusion-table__num {
+  text-align: right;
+}
+
+.defusion-table__group td {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted, var(--color-background));
+  padding: 8px 10px;
+}
+
+.defusion-table__row td {
+  /* MDR : même couleur pour tous les chiffres, avant comme après. */
+  color: var(--color-text);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.defusion-table__technique {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.defusion-table__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.defusion-table__word {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.defusion-data-panel__more {
+  align-self: flex-start;
+}
+
+.defusion-data-panel__mention {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .defusion-data-panel__synth {
+    grid-template-columns: 1fr;
+  }
+  .defusion-data-panel__charts {
+    grid-template-columns: 1fr;
+  }
+}

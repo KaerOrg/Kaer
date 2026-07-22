@@ -4,6 +4,7 @@ import {
   fetchMoodEvolution,
   fetchMoodMarkers,
   fetchFearEvolution,
+  fetchDefusionEvolution,
   fetchMedSideEffectsEvolution,
   fetchSleepEvolution,
   fetchAvailableScales,
@@ -15,6 +16,7 @@ import {
   type MoodPoint,
   type MoodMarkerRow,
   type FearPoint,
+  type DefusionPoint,
   type MedEffectPoint,
   type SleepPoint,
   type ModuleSummary,
@@ -24,7 +26,7 @@ import {
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'med' | 'sleep' | 'form'
+export type ChartKind = 'scale' | 'mood' | 'fear' | 'defusion' | 'med' | 'sleep' | 'form'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -34,6 +36,7 @@ export type ModuleDataResult =
   | { status: 'scale'; points: ScorePoint[] }
   | { status: 'mood'; points: MoodPoint[] }
   | { status: 'fear'; points: FearPoint[] }
+  | { status: 'defusion'; points: DefusionPoint[] }
   | { status: 'med'; effects: string[]; points: MedEffectPoint[] }
   | { status: 'sleep'; points: SleepPoint[] }
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
@@ -95,6 +98,10 @@ export const engagementQueries = {
         if (kind === 'fear') {
           const points = await fetchFearEvolution(patientId)
           return points.length === 0 ? { status: 'empty' } : { status: 'fear', points }
+        }
+        if (kind === 'defusion') {
+          const points = await fetchDefusionEvolution(patientId)
+          return points.length === 0 ? { status: 'empty' } : { status: 'defusion', points }
         }
         if (kind === 'med') {
           const res = await fetchMedSideEffectsEvolution(patientId)

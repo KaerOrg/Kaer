@@ -25,6 +25,7 @@ import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
+import { DEFUSION_TECHNIQUES } from '../../../lib/defusionTechniques'
 import { scaleQueries } from '../../../hooks/queries'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
@@ -213,7 +214,13 @@ export function PatientModulesTab({
 
   const unlockModule = useCallback(async (moduleType: ModuleType) => {
     setBusyModule({ op: 'unlock', type: moduleType })
-    const result = await unlockStandardModule(patientId, practitionerId, moduleType)
+    // « Décrocher d'une pensée » : au déblocage, les deux techniques sont proposées
+    // (config.enabled_techniques, épic mobile #197). Le praticien peut en désactiver
+    // ensuite via l'onglet Configuration.
+    const config = moduleType === 'cognitive_saturation'
+      ? { enabled_techniques: [...DEFUSION_TECHNIQUES] }
+      : undefined
+    const result = await unlockStandardModule(patientId, practitionerId, moduleType, config)
     if (result.ok) await onReloadModules()
     setBusyModule(null)
   }, [patientId, practitionerId, onReloadModules])

@@ -11,6 +11,7 @@ import {
 } from './clinicalChartConfig'
 import { ModuleChart } from './ModuleChart'
 import { ExposureDataPanel } from './ExposureDataPanel'
+import { DefusionDataPanel } from './DefusionDataPanel'
 import { ModuleSummaryPanel } from './ModuleSummaryPanel'
 import { MoodDataPanel } from './MoodDataPanel'
 import { SleepDataPanel } from './SleepDataPanel'
@@ -24,6 +25,7 @@ import './ModuleDataPanel.css'
 function chartKind(moduleType: string): ChartKind | null {
   if (moduleType === 'mood_tracker') return 'mood'
   if (moduleType === 'fear_thermometer') return 'fear'
+  if (moduleType === 'cognitive_saturation') return 'defusion'
   if (moduleType === 'medication_side_effects') return 'med'
   if (moduleType === 'sleep_diary') return 'sleep'
   if (moduleType === 'beck_columns') return 'form'
@@ -92,6 +94,12 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // Exposition graduée : courbe SUDS 3 séries + filtre situation + période (#184).
   if (state.status === 'fear') {
     return <ExposureDataPanel points={state.points} locale={i18n.language} />
+  }
+
+  // « Décrocher d'une pensée » : synthèse + 2 graphes inconfort/conviction + tableau
+  // groupé par mois, filtrable par technique et période, mot masqué (#201).
+  if (state.status === 'defusion') {
+    return <DefusionDataPanel points={state.points} locale={i18n.language} />
   }
 
   const locale = i18n.language

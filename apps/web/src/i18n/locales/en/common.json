@@ -377,7 +377,29 @@
     "preview_banner": "Preview matching the patient screen (mobile).",
     "exposure_data_title": "Graded exposure (SUDS)",
     "exposure_all_situations": "All situations",
-    "exposure_data_note": "Raw values entered by the patient: 0 = no stress, 100 = maximum stress, no interpretation."
+    "exposure_data_note": "Raw values entered by the patient: 0 = no stress, 100 = maximum stress, no interpretation.",
+    "defusion_data_title": "Unhooking from a thought data",
+    "defusion_data_note": "Raw values, as entered by the patient. \"-\": measure skipped by the patient (optional step).",
+    "defusion_stat_sessions": "Sessions",
+    "defusion_stat_last": "Last session",
+    "defusion_stat_with_measures": "Sessions with measures",
+    "defusion_technique_all": "All",
+    "defusion_period_1m": "30 d",
+    "defusion_period_3m": "90 d",
+    "defusion_period_6m": "6 months",
+    "defusion_period_all": "All",
+    "defusion_series_before": "Before",
+    "defusion_series_after": "After",
+    "defusion_chart_discomfort": "Discomfort",
+    "defusion_chart_belief": "Belief",
+    "defusion_col_date": "Date",
+    "defusion_col_technique": "Technique",
+    "defusion_col_duration": "Duration",
+    "defusion_col_discomfort": "Discomfort",
+    "defusion_col_belief": "Belief",
+    "defusion_col_word": "Word or thought",
+    "defusion_reveal_word": "••• Show",
+    "defusion_load_older": "Show earlier sessions ({{count}} in {{month}})"
   },
   "modules": {
     "nav_link": "Library",
@@ -1387,11 +1409,13 @@
       "empty_text": "Use the button above to start your first session."
     },
     "cognitive_saturation": {
-      "label": "Cognitive Saturation",
-      "description": "Rapid repetition exercise to interrupt ruminations.",
+      "label": "Unhooking from a thought",
+      "description": "Cognitive defusion: creating distance from a recurring thought.",
       "new_btn": "New session",
       "empty_title": "No session yet",
-      "empty_text": "Use the button above to start your first session."
+      "empty_text": "Use the button above to start your first session.",
+      "technique_word_repetition_name": "Word repetition",
+      "technique_linguistic_distancing_name": "Linguistic distancing"
     },
     "craving_journal": {
       "label": "Craving Journal",
@@ -1744,8 +1768,8 @@
       "footer": "Animated guide at a fixed pace, no biofeedback, no sensors. Session history (technique + duration) is accessible. MDR 2017/745 compliance: no algorithmic interpretation."
     },
     "cognitive_saturation": {
-      "label": "Cognitive Saturation",
-      "description": "Rapid repetition exercise to interrupt ruminations."
+      "label": "Unhooking from a thought",
+      "description": "Cognitive defusion: creating distance from a recurring thought."
     },
     "craving_journal": {
       "label": "Craving Journal",

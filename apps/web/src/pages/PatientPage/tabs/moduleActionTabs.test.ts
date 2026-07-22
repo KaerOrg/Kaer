@@ -43,4 +43,10 @@ describe('computeModuleTabs', () => {
     expect(computeModuleTabs('medication_side_effects', locked)).toEqual([])
     expect(computeModuleTabs('medication_side_effects', unlocked)).toEqual(['data', 'config', 'notifications', 'preview', 'sources'])
   })
+
+  it('cognitive_saturation (défusion) : ordre canonique complet une fois déverrouillé', () => {
+    expect(computeModuleTabs('cognitive_saturation', unlocked)).toEqual(['data', 'config', 'notifications', 'preview', 'sources'])
+    // Verrouillé : aperçu + sources (l'aperçu ne requiert pas le déblocage).
+    expect(computeModuleTabs('cognitive_saturation', locked)).toEqual(['preview', 'sources'])
+  })
 })
