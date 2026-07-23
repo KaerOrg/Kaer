@@ -61,8 +61,25 @@
     "empty_title": "Keine Module verfügbar",
     "empty_description": "Ihr Therapeut hat noch keine Module aktiviert.\nSie erscheinen hier, sobald eines freigeschaltet wird."
   },
+  "wip": {
+    "title": "In Bearbeitung",
+    "description": "Dieser Bildschirm wird gerade gestaltet. Bald verfügbar."
+  },
   "profile": {
     "title": "Mein Profil",
+    "since": "Begleitet seit {{date}}",
+    "settings_label": "Einstellungen",
+    "section_my_tracking": "Meine Begleitung",
+    "section_settings": "Einstellungen",
+    "row_practitioner": "Meine Fachkraft",
+    "row_documents": "Meine Dokumente",
+    "row_notifications": "Benachrichtigungen",
+    "row_privacy": "Datenschutz",
+    "stats": {
+      "tracking_days": "Tage begleitet",
+      "active_modules": "Aktive Module",
+      "sessions": "Sitzungen"
+    },
     "avatar_change_title": "Foto ändern",
     "avatar_source_prompt": "Quelle wählen",
     "avatar_gallery": "Fotogalerie",

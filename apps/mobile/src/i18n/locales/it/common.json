@@ -61,8 +61,25 @@
     "empty_title": "Nessun modulo disponibile",
     "empty_description": "Il tuo professionista non ha ancora attivato moduli.\nAppariranno qui non appena ne sblocca uno."
   },
+  "wip": {
+    "title": "Pagina in costruzione",
+    "description": "Questa schermata è in fase di progettazione. Presto disponibile."
+  },
   "profile": {
     "title": "Il mio profilo",
+    "since": "Monitoraggio dal {{date}}",
+    "settings_label": "Impostazioni",
+    "section_my_tracking": "Il mio percorso",
+    "section_settings": "Impostazioni",
+    "row_practitioner": "Il mio professionista",
+    "row_documents": "I miei documenti",
+    "row_notifications": "Notifiche",
+    "row_privacy": "Riservatezza",
+    "stats": {
+      "tracking_days": "giorni di monitoraggio",
+      "active_modules": "moduli attivi",
+      "sessions": "sedute"
+    },
     "avatar_change_title": "Cambia foto",
     "avatar_source_prompt": "Scegli una fonte",
     "avatar_gallery": "Libreria foto",

@@ -1059,6 +1059,28 @@ Tokens de marque ajoutés (`@kaer/shared`) : `primaryDark` (#2C6E72, fond turquo
 portant du texte blanc — contraste AA) et `primaryPale` (#CFE9EA, sous-libellé
 décoratif sur `primaryDark`).
 
+### Profil patient — « Profil »
+
+Composé par `screens/ProfileScreen.tsx` : un **hub** (identité + résumé de suivi +
+listes-registre) qui navigue vers `SettingsScreen` (roue crantée) et des écrans
+« en chantier » (`WorkInProgressScreen`), même grammaire visuelle que l'accueil et
+l'agenda.
+
+| Composant | Rôle |
+|---|---|
+| `features/ProfileIdentityHeader` | En-tête d'identité **compact** : `ui/Avatar` (fond `primary`, initiales blanches) + nom serif + ligne d'ancienneté, et bouton réglages (roue crantée, `ui/Button variant="ghost"`) **sur la même ligne**. Props : `name`, `sinceLabel` (masquée si vide), `onSettingsPress`, `settingsLabel`. Pas de marque KAER (gain de hauteur). |
+| `features/ProfileStatsCard` | Résumé de suivi : `ui/Card` à 2 ou 3 colonnes séparées par des filets verticaux `colors.neutral`. Chiffre serif `primaryDark` (AA) + libellé atténué. Props : `stats: ProfileStat[]` (`{ value, label }`). Valeurs **brutes, neutres** — couleur = identité, jamais gravité (MDR 2017/745). |
+| `features/RegisterList` | Conteneur **liste-registre générique** : `ui/Card variant="elevated"` unique, coins 16, lignes séparées par un filet `colors.neutral`. Props : `items: RegisterItem[]`. Réutilisable par tout écran (le hub Profil s'en sert pour « Mon suivi » et « Réglages »). |
+| `features/RegisterList/RegisterRow` | Une ligne : `ui/IconChip` (couleur de pastille fournie) + libellé + chevron optionnel. `RegisterItem = { key, icon, label, chipColor, onPress, labelColor?, showChevron? }`. SURFACE de liste (`Pressable` justifié, imbriquée dans une `Card`). Ligne danger = `chipColor: dangerLight`, `labelColor: dangerText`, `showChevron: false`. |
+| `features/AvatarEditor` | Éditeur d'avatar (photo ronde tappable → `ActionSheet` galerie/appareil photo + badge crayon). Props : `uri`, `uploading`, `onPickSource`. Utilisé par `SettingsScreen`. |
+
+Résumé de suivi : service `profileStatsService.fetchProfileStats` (created_at, modules
+actifs, séances honorées) via `hooks/queries/profileQueries` ; helpers purs
+`lib/profileStats.ts` (`trackingDays`, `formatSince`). Les fonctions RGPD (consentement,
+export/effacement) et l'identité éditable vivent dans `SettingsScreen` (accessible via
+la roue crantée) — légalement obligatoires, donc toujours joignables. Le hub **affiche**
+des faits bruts, il ne conclut rien (MDR 2017/745).
+
 ---
 
 ## Teen Mode

@@ -1,178 +1,72 @@
-import React, { useState, useCallback } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Pressable,
-  TextInput,
-  Share,
-} from 'react-native'
+import React, { useCallback, useMemo } from 'react'
+import { View, Text, StyleSheet, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation, type CompositeNavigationProp } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import type { AppStackParamList, TabParamList } from '../navigation/AppStack'
 import { useAuthStore } from '../store/authStore'
-import { useToast } from '../contexts/ToastContext'
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
-import { useActionSheet } from '../contexts/ActionSheetContext'
-import Button from '@ui/Button'
-import { colors, spacing, radius } from '@theme'
-import { SUPPORTED } from '../i18n'
-import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
-import { pickAvatarImage, uploadAvatar, saveAvatarUrl, type AvatarSource } from '@services/avatarService'
-import { exportMyData, eraseMyAccount } from '@services/patientDataRightsService'
+import { profileQueries } from '../hooks/queries'
+import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
+import { trackingDays, formatSince } from '../lib/profileStats'
+import { ProfileIdentityHeader } from '../components/features/ProfileIdentityHeader'
+import { ProfileStatsCard, type ProfileStat } from '../components/features/ProfileStatsCard'
+import { RegisterList, type RegisterItem } from '../components/features/RegisterList'
+import { colors, spacing } from '@theme'
 
-const AVATAR_SIZE = 84
+// Navigation composite : l'écran vit dans le Tab (accès aux onglets) imbriqué dans
+// le Stack (accès à `Settings`, `WorkInProgress`). Évite tout cast.
+type ProfileNavigation = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList, 'Profile'>,
+  NativeStackNavigationProp<AppStackParamList>
+>
 
-const LANGUAGE_LABELS: Record<string, string> = {
-  fr: 'Français',
-  en: 'English',
-  es: 'Español',
-  de: 'Deutsch',
-  it: 'Italiano',
-  pt: 'Português',
-}
-
-interface AvatarSectionProps {
-  uri: string | null
-  uploading: boolean
-  onPickSource: (source: AvatarSource) => void
-}
-
-function AvatarSection({ uri, uploading, onPickSource }: AvatarSectionProps) {
-  const { t } = useTranslation()
-  const { showActionSheet } = useActionSheet()
-
-  const handlePress = useCallback(() => {
-    showActionSheet({
-      title: t('profile.avatar_change_title'),
-      options: [
-        { label: t('profile.avatar_gallery'), onPress: () => onPickSource('library') },
-        { label: t('profile.avatar_camera'), onPress: () => onPickSource('camera') },
-      ],
-    })
-  }, [onPickSource, t, showActionSheet])
-
-  return (
-    <View style={avatarStyles.wrapper}>
-      <Pressable
-        onPress={handlePress}
-        style={avatarStyles.container}
-        accessibilityRole="button"
-        accessibilityLabel={t('profile.avatar_edit_label')}
-      >
-        {uri ? (
-          <Image source={{ uri }} style={avatarStyles.image} />
-        ) : (
-          <View style={avatarStyles.placeholder}>
-            <Text style={avatarStyles.placeholderText}>{t('profile.avatar_placeholder')}</Text>
-          </View>
-        )}
-        <View style={avatarStyles.badge}>
-          <Text style={avatarStyles.badgeText}>✎</Text>
-        </View>
-      </Pressable>
-      {uploading && (
-        <ActivityIndicator size="small" color={colors.primary} style={avatarStyles.spinner} />
-      )}
-    </View>
-  )
-}
-
-const avatarStyles = StyleSheet.create({
-  wrapper: { alignItems: 'center', gap: spacing.xs },
-  container: { width: AVATAR_SIZE, height: AVATAR_SIZE },
-  image: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, borderWidth: 2, borderColor: colors.primary },
-  placeholder: { width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: AVATAR_SIZE / 2, backgroundColor: colors.primaryLight, borderWidth: 2, borderColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  placeholderText: { fontSize: 13, color: colors.primary, fontWeight: '600' },
-  badge: { position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: 13, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.white },
-  badgeText: { color: colors.white, fontSize: 12 },
-  spinner: { marginTop: spacing.xs },
-})
+const ICON_SIZE = 20
 
 export default function ProfileScreen() {
-  const { t } = useTranslation()
-  const { patient, logout, updateAvatar, updateProfile, language, setLanguage, shareConsent, setShareConsent } = useAuthStore()
-  const { showToast } = useToast()
+  const navigation = useNavigation<ProfileNavigation>()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language
+  const patient = useAuthStore((s) => s.patient)
+  const logout = useAuthStore((s) => s.logout)
   const { showConfirm } = useConfirmDialog()
-  const { showActionSheet } = useActionSheet()
 
-  const [firstName, setFirstName] = useState(patient?.first_name ?? '')
-  const [lastName, setLastName] = useState(patient?.last_name ?? '')
-  const [phone, setPhone] = useState(patient?.phone ?? '')
-  const [savingProfile, setSavingProfile] = useState(false)
+  const statsQuery = useQuery(profileQueries.stats(patient?.id))
+  const { refetch } = statsQuery
+  const refresh = useCallback(() => { refetch() }, [refetch])
+  useRefreshOnFocus(refresh)
 
-  const [avatarUploading, setAvatarUploading] = useState(false)
-  const [exportingData, setExportingData] = useState(false)
+  const fullName = useMemo(
+    () => `${patient?.first_name ?? ''} ${patient?.last_name ?? ''}`.trim(),
+    [patient?.first_name, patient?.last_name],
+  )
 
-  const handleExportData = useCallback(async () => {
-    if (!patient) return
-    setExportingData(true)
-    const result = await exportMyData(patient.id)
-    setExportingData(false)
-    if (!result.ok) {
-      showToast(t('profile.data_rights.export_error'), 'error')
-      return
-    }
-    await Share.share({ message: JSON.stringify(result.data, null, 2) })
-  }, [patient, showToast, t])
+  const sinceLabel = useMemo(() => {
+    const since = formatSince(statsQuery.data?.createdAt ?? null, locale)
+    return since ? t('profile.since', { date: since }) : ''
+  }, [statsQuery.data?.createdAt, locale, t])
 
-  const handleEraseAccount = useCallback(() => {
-    showConfirm({
-      title: t('profile.data_rights.erase_title'),
-      message: t('profile.data_rights.erase_message'),
-      confirmLabel: t('profile.data_rights.erase_confirm'),
-      destructive: true,
-      onConfirm: async () => {
-        if (!patient) return
-        const result = await eraseMyAccount(patient.id)
-        // Succès → eraseMyAccount a déjà purgé le local et fermé la session
-        // (onAuthChange route vers l'écran de connexion). On ne signale que l'échec.
-        if (!result.ok) showToast(t('profile.data_rights.erase_error'), 'error')
-      },
-    })
-  }, [patient, showConfirm, showToast, t])
+  const stats = useMemo<ProfileStat[]>(() => {
+    const data = statsQuery.data
+    if (!data) return []
+    return [
+      { value: String(trackingDays(data.createdAt ?? '', new Date())), label: t('profile.stats.tracking_days') },
+      { value: String(data.activeModules), label: t('profile.stats.active_modules') },
+      { value: String(data.sessions), label: t('profile.stats.sessions') },
+    ]
+  }, [statsQuery.data, t])
 
-  const handleToggleConsent = useCallback(async (value: boolean) => {
-    const ok = await setShareConsent(value)
-    if (!ok) showToast(t('profile.share_data_error'), 'error')
-  }, [setShareConsent, showToast, t])
+  const goToSettings = useCallback(() => navigation.navigate('Settings'), [navigation])
+  const goToWip = useCallback(
+    (title: string) => navigation.navigate('WorkInProgress', { title }),
+    [navigation],
+  )
 
-  const handlePickSource = useCallback(async (source: AvatarSource) => {
-    if (!patient) return
-    const uri = await pickAvatarImage(source)
-    if (!uri) return
-    setAvatarUploading(true)
-    try {
-      const publicUrl = await uploadAvatar(patient.id, uri)
-      await saveAvatarUrl(patient.id, publicUrl)
-      updateAvatar(publicUrl)
-    } catch {
-      showToast(t('profile.avatar_error'), 'error')
-    } finally {
-      setAvatarUploading(false)
-    }
-  }, [patient, updateAvatar, t])
-
-  const handleSaveProfile = useCallback(async () => {
-    setSavingProfile(true)
-    const result = await updateProfile({
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone || null,
-    })
-    setSavingProfile(false)
-    if (result.ok) {
-      showToast(t('profile.save_profile_success'), 'success')
-    } else {
-      showToast(t('profile.save_profile_error'), 'error')
-    }
-  }, [firstName, lastName, phone, updateProfile, t])
-
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     showConfirm({
       title: t('profile.logout_title'),
       message: t('profile.logout_message'),
@@ -180,152 +74,72 @@ export default function ProfileScreen() {
       destructive: true,
       onConfirm: logout,
     })
-  }
+  }, [showConfirm, logout, t])
 
-  const handleLanguageChange = () => {
-    showActionSheet({
-      title: t('profile.language_label'),
-      options: SUPPORTED.map((lng) => ({
-        label: LANGUAGE_LABELS[lng] ?? lng,
-        onPress: () => setLanguage(lng),
-      })),
-    })
-  }
+  const trackingItems = useMemo<RegisterItem[]>(() => [
+    {
+      key: 'practitioner',
+      label: t('profile.row_practitioner'),
+      chipColor: colors.primary,
+      icon: <MaterialCommunityIcons name="account-outline" size={ICON_SIZE} color={colors.white} />,
+      onPress: () => goToWip(t('profile.row_practitioner')),
+    },
+    {
+      key: 'documents',
+      label: t('profile.row_documents'),
+      chipColor: colors.primary,
+      icon: <MaterialCommunityIcons name="file-document-outline" size={ICON_SIZE} color={colors.white} />,
+      onPress: () => goToWip(t('profile.row_documents')),
+    },
+  ], [t, goToWip])
 
-  const profileDirty =
-    firstName !== (patient?.first_name ?? '') ||
-    lastName !== (patient?.last_name ?? '') ||
-    phone !== (patient?.phone ?? '')
+  const settingsItems = useMemo<RegisterItem[]>(() => [
+    {
+      key: 'notifications',
+      label: t('profile.row_notifications'),
+      chipColor: colors.primaryLight,
+      icon: <MaterialCommunityIcons name="bell-outline" size={ICON_SIZE} color={colors.primary} />,
+      onPress: () => goToWip(t('profile.row_notifications')),
+    },
+    {
+      key: 'privacy',
+      label: t('profile.row_privacy'),
+      chipColor: colors.primaryLight,
+      icon: <MaterialCommunityIcons name="lock-outline" size={ICON_SIZE} color={colors.primary} />,
+      onPress: () => goToWip(t('profile.row_privacy')),
+    },
+    {
+      key: 'logout',
+      label: t('profile.logout_button'),
+      chipColor: colors.dangerLight,
+      labelColor: colors.dangerText,
+      showChevron: false,
+      icon: <MaterialCommunityIcons name="logout" size={ICON_SIZE} color={colors.danger} />,
+      onPress: handleLogout,
+    },
+  ], [t, goToWip, handleLogout])
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.heading}>{t('profile.title')}</Text>
-
-        <AvatarSection
-          uri={patient?.avatar_url ?? null}
-          uploading={avatarUploading}
-          onPickSource={handlePickSource}
+        <ProfileIdentityHeader
+          name={fullName}
+          sinceLabel={sinceLabel}
+          onSettingsPress={goToSettings}
+          settingsLabel={t('profile.settings_label')}
         />
 
+        {stats.length > 0 ? <ProfileStatsCard stats={stats} /> : null}
+
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.section_identity')}</Text>
-          <View style={styles.card}>
-            <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>{t('profile.first_name_label')}</Text>
-              <TextInput
-                style={styles.input}
-                value={firstName}
-                onChangeText={setFirstName}
-                placeholder={t('profile.first_name_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="words"
-                returnKeyType="next"
-              />
-            </View>
-            <View style={styles.separator} />
-            <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>{t('profile.last_name_label')}</Text>
-              <TextInput
-                style={styles.input}
-                value={lastName}
-                onChangeText={setLastName}
-                placeholder={t('profile.last_name_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                autoCapitalize="words"
-                returnKeyType="next"
-              />
-            </View>
-            <View style={styles.separator} />
-            <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>{t('profile.phone_label')}</Text>
-              <TextInput
-                style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder={t('profile.phone_placeholder')}
-                placeholderTextColor={colors.textMuted}
-                keyboardType="phone-pad"
-                returnKeyType="done"
-              />
-            </View>
-          </View>
-          {profileDirty && (
-            <Button
-              label={t('profile.save_profile_button')}
-              onPress={handleSaveProfile}
-              loading={savingProfile}
-            />
-          )}
+          <Text style={styles.sectionLabel}>{t('profile.section_my_tracking')}</Text>
+          <RegisterList items={trackingItems} />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.section_account')}</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <Text style={styles.rowLabel}>{t('profile.email_label')}</Text>
-              <Text style={styles.rowValue} numberOfLines={1}>{patient?.email}</Text>
-            </View>
-          </View>
+          <Text style={styles.sectionLabel}>{t('profile.section_settings')}</Text>
+          <RegisterList items={settingsItems} />
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.section_language')}</Text>
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.row} onPress={handleLanguageChange}>
-              <Text style={styles.rowLabel}>{t('profile.language_label')}</Text>
-              <Text style={styles.timeValue}>{LANGUAGE_LABELS[language] ?? language}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.section_reminders')}</Text>
-          {patient?.id != null && (
-            <NotificationRoutinePanel patientId={patient.id} />
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.section_privacy')}</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <View style={styles.rowInfo}>
-                <Text style={styles.rowLabel}>{t('profile.share_data_label')}</Text>
-                <Text style={styles.rowHint}>{t('profile.share_data_hint')}</Text>
-              </View>
-              <Switch
-                value={shareConsent}
-                onValueChange={handleToggleConsent}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={colors.white}
-              />
-            </View>
-          </View>
-          <Text style={styles.disclaimer}>{t('profile.privacy_disclaimer')}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.data_rights.section')}</Text>
-          <Text style={styles.disclaimer}>{t('profile.data_rights.hint')}</Text>
-          <Button
-            label={t('profile.data_rights.export_button')}
-            onPress={handleExportData}
-            loading={exportingData}
-            variant="secondary"
-          />
-          <Button
-            label={t('profile.data_rights.erase_button')}
-            onPress={handleEraseAccount}
-            variant="danger"
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Button label={t('profile.logout_button')} onPress={handleLogout} variant="danger" />
-        </View>
-
-        <Text style={styles.version}>{t('profile.version')}</Text>
       </ScrollView>
     </SafeAreaView>
   )
@@ -333,21 +147,14 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
-  heading: { fontSize: 28, fontWeight: '700', color: colors.text },
+  container: { padding: spacing.lg, gap: spacing.lg },
   section: { gap: spacing.sm },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
-  separator: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.md },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.md, minHeight: 56 },
-  rowInfo: { flex: 1, marginRight: spacing.md },
-  rowLabel: { fontSize: 16, fontWeight: '500', color: colors.text },
-  rowValue: { fontSize: 14, color: colors.textMuted, maxWidth: 200 },
-  rowHint: { fontSize: 13, color: colors.textMuted, marginTop: 2, lineHeight: 17 },
-  timeValue: { fontSize: 18, fontWeight: '600', color: colors.primary },
-  disclaimer: { fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-  version: { fontSize: 12, color: colors.border, textAlign: 'center', marginTop: spacing.md },
-  inputRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.md, minHeight: 56 },
-  inputLabel: { fontSize: 16, fontWeight: '500', color: colors.text, flex: 1 },
-  input: { flex: 2, fontSize: 15, color: colors.text, textAlign: 'right', paddingVertical: spacing.sm },
+  sectionLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginLeft: spacing.xs,
+  },
 })

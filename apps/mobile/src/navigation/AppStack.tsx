@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
 import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
+import SettingsScreen from '../screens/SettingsScreen'
+import WorkInProgressScreen from '../screens/WorkInProgressScreen'
 import AppointmentsScreen from '../screens/AppointmentsScreen'
 import BookAppointmentScreen from '../screens/BookAppointmentScreen'
 import ScaleHistoryScreen from '../screens/modules/ScaleHistoryScreen'
@@ -30,6 +32,10 @@ export type AppStackParamList = {
     entry_id?: string
   }
   MoodTracker: undefined
+  Settings: undefined
+  // Placeholder « page en chantier » : `title` porte le libellé de l'en-tête natif
+  // (déjà traduit par l'écran appelant).
+  WorkInProgress: { title: string }
 }
 
 export type TabParamList = {
@@ -69,6 +75,7 @@ function Tabs() {
 }
 
 export default function AppStack() {
+  const { t } = useTranslation()
   return (
     <Stack.Navigator
       screenOptions={{
@@ -78,6 +85,16 @@ export default function AppStack() {
       }}
     >
       <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ title: t('profile.settings_label') }}
+      />
+      <Stack.Screen
+        name="WorkInProgress"
+        component={WorkInProgressScreen}
+        options={({ route }) => ({ title: route.params.title })}
+      />
       <Stack.Screen
         name="BookAppointment"
         component={BookAppointmentScreen}

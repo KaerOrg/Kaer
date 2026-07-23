@@ -4,3 +4,4 @@
 export { homeQueries } from './homeQueries'
 export { appointmentQueries, useCancelAppointment } from './appointmentQueries'
 export { moduleQueries } from './moduleQueries'
+export { profileQueries } from './profileQueries'

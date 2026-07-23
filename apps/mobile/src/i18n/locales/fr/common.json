@@ -130,8 +130,25 @@
     "today_section": "Prévu aujourd'hui",
     "crisis_subtitle": "Aide immédiate, à toute heure"
   },
+  "wip": {
+    "title": "Page en chantier",
+    "description": "Cet écran est en cours de conception. Il arrive bientôt."
+  },
   "profile": {
     "title": "Mon profil",
+    "since": "Suivi depuis {{date}}",
+    "settings_label": "Réglages",
+    "section_my_tracking": "Mon suivi",
+    "section_settings": "Réglages",
+    "row_practitioner": "Mon praticien",
+    "row_documents": "Mes documents",
+    "row_notifications": "Notifications",
+    "row_privacy": "Confidentialité",
+    "stats": {
+      "tracking_days": "jours de suivi",
+      "active_modules": "modules actifs",
+      "sessions": "séances"
+    },
     "avatar_change_title": "Changer la photo",
     "avatar_source_prompt": "Choisissez une source",
     "avatar_gallery": "Galerie photo",
