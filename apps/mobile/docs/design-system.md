@@ -7,6 +7,7 @@
 `apps/mobile/src/theme/index.ts` re-exporte `@kaer/shared` et ajoute les objets propres à React Native :
 
 ```ts
+import { Platform } from 'react-native'
 import { colors, spacing, radius, fontSize } from '@kaer/shared'
 
 export const typography = {
@@ -25,10 +26,23 @@ export const shadows = {
   lg: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 },  // FAB, éléments flottants
         shadowOpacity: 0.2, shadowRadius: 8, elevation: 6 },
 }
+
+// Familles de police — serif SYSTÈME (aucun asset bundlé) : Georgia (iOS) / Noto Serif (Android).
+export const fonts = {
+  serif: Platform.select({ ios: 'Georgia', default: 'serif' }),
+}
 ```
 
-Import dans les composants : `import { colors, spacing, radius } from '@theme'`
+Import dans les composants : `import { colors, spacing, radius, fonts } from '@theme'`
 (jamais `@kaer/shared` directement dans le mobile).
+
+**Token `fonts.serif`** : direction éditoriale des titres/libellés de l'accueil patient
+(titre « Mes modules », titres de ligne de module, bandeau de crise). À référencer via
+`fontFamily: fonts.serif`, jamais un nom de police en dur.
+
+**Token `colors.dangerText` (`#DC2626`)** : rouge foncé réservé au **texte** de crise
+(titre du bandeau) — contraste AA sur blanc (≈ 4.9:1). `colors.danger` (`#EF4444`) reste
+l'accent/icône. Aucun de ces rouges n'est conditionné par une donnée patient (MDR 2017/745).
 
 **Token `colors.neutralBar` (`#94A3B8`, partagé web ≡ mobile)** : gris imposé des
 barres **purement descriptives** (écarts en minutes, plages horaires) — jamais une
@@ -217,11 +231,33 @@ Base : `borderRadius: 10`, `padding: 16`, `gap: 8`
 | `actions` | `ReactNode` | Zone d'actions (coins droits — ex. icônes crayon/poubelle) |
 | `children` | `ReactNode` | Contenu principal |
 | `variant` | `'default' \| 'outlined' \| 'elevated' \| 'active'` | Style visuel (défaut `'default'`) |
-| `accentColor` | `string` | Couleur de bordure d'accentuation |
+| `accentColor` | `string` | Couleur de bordure d'accentuation (2px, tout le tour) |
+| `leftAccentColor` | `string` | Filet d'accent vertical (4px) sur le bord gauche, motif « bandeau » (ex. carte de crise en `colors.danger`). Rendu comme bande absolue rognée (`overflow: hidden`) pour garder les coins arrondis sur iOS : incompatible avec l'ombre du variant `elevated` |
 | `onPress` | `() => void` | Rend la carte pressable (`Pressable` au lieu de `View`) |
 | `accessibilityLabel` | `string` | Label accessibilité quand `onPress` est fourni |
 
 > **Règle : toute liste d'items tappables utilise `Card` avec `onPress`, jamais `Pressable + View` ad hoc.**
+
+---
+
+### IconChip (`src/components/ui/IconChip/`)
+
+Pastille d'icône : carré arrondi (`radius.md`) au fond coloré, icône centrée en `children`
+(couleur gérée par l'appelant). Réutilisée par les lignes de module, le bandeau de crise
+et les listes de réglages (accueil / profil patient).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `color` | `string` | Couleur de fond (token de thème) |
+| `children` | `ReactNode` | Icône centrée (ex. `<MaterialCommunityIcons color={colors.white} />`) |
+| `size` | `number` | Côté du carré. Défaut `38` |
+| `testID` | `string` | — |
+
+```tsx
+<IconChip color={colors.primary}>
+  <MaterialCommunityIcons name="target" size={20} color={colors.white} />
+</IconChip>
+```
 
 ---
 
@@ -984,6 +1020,21 @@ Les types de repère et leurs couleurs d'identité vivent dans `src/lib/markerTh
 (`MARKER_TYPES`, `MARKER_TYPE_COLORS`, `MARKER_TYPE_ICONS`) ; le type `MarkerType`
 dans `src/lib/database.ts`. Écriture des repères **toujours** via
 `services/timelineMarkerService` (SQLite + synchronisation).
+
+### Accueil patient — « Mes modules »
+
+Composés par `screens/HomeScreen.tsx`. Direction éditoriale sobre (serif, palette de
+marque), cartes détachées du fond, bandeau de crise non alarmant (MDR 2017/745).
+
+| Composant | Rôle |
+|---|---|
+| `features/BrandHeader` | En-tête de marque (pastille logo « k » + wordmark « KAER ») + bouton rond d'action optionnel à droite (`rightAction: { icon, onPress, accessibilityLabel }`). Réutilisable sur les écrans patient (accueil → profil, profil → réglages). |
+| `features/CrisisBanner` | Bandeau de crise : `Card` à `leftAccentColor={colors.danger}` + `IconChip` danger + titre `colors.dangerText` + sous-titre atténué. Élément FIXE (jamais déclenché par la donnée). |
+| `features/ModuleSections` | Modules débloqués groupés par catégorie : un label de section (uppercase atténué) + une `Card variant="elevated"` unique dont les `ModuleRow` sont séparées par un filet `colors.neutral`. En-têtes masqués s'il n'y a qu'un groupe. |
+| `features/ModuleSections/ModuleRow` | Ligne de module (SURFACE de liste tappable, `Pressable` justifié car imbriqué dans une `Card`) : `IconChip` primary + titre serif + sous-titre + chevron. Atténuée + non tappable si `available={false}`. |
+
+Ordre d'affichage : helper pur `moduleGrouping.ts` (`groupModulesByCategory`, miroir de
+`module_categories.sort_order`). L'accueil ne **conclut** rien : il liste et navigue.
 
 ---
 

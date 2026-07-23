@@ -3,13 +3,22 @@ import { View, Text, Pressable } from 'react-native'
 import { styles } from './Card.styles'
 import type { CardProps } from './Card.types'
 
-export const Card = React.memo(function Card({ header, actions, children, variant = 'default', state, style, accentColor, onPress, accessibilityLabel, testID }: CardProps) {
+export const Card = React.memo(function Card({ header, actions, children, variant = 'default', state, style, accentColor, leftAccentColor, onPress, accessibilityLabel, testID }: CardProps) {
   const accentStyle = useMemo(
     () => accentColor ? { borderColor: accentColor, borderWidth: 2 } : null,
     [accentColor],
   )
+  const stripeColor = useMemo(
+    () => leftAccentColor ? { backgroundColor: leftAccentColor } : null,
+    [leftAccentColor],
+  )
+  // Filet gauche rendu comme bande absolue (et non `borderLeftWidth`) : une largeur
+  // de bordure non uniforme supprime les coins arrondis sur iOS. `overflow: hidden`
+  // (via styles.clipped) rogne la bande au rayon de la carte. Incompatible avec une
+  // ombre portée (variant `elevated`) — réservé aux bandeaux bordés (crise…).
   const inner = (
     <>
+      {stripeColor ? <View pointerEvents="none" style={[styles.leftStripe, stripeColor]} testID="card-left-accent" /> : null}
       {header ? (
         <View style={styles.header}>
           {header.icon ? <Text style={styles.icon}>{header.icon}</Text> : null}
@@ -24,10 +33,19 @@ export const Card = React.memo(function Card({ header, actions, children, varian
     </>
   )
 
+  const containerStyle = [
+    styles.base,
+    styles[variant],
+    state ? styles[state] : null,
+    accentStyle,
+    stripeColor ? styles.clipped : null,
+    style,
+  ]
+
   if (onPress) {
     return (
       <Pressable
-        style={[styles.base, styles[variant], state ? styles[state] : null, accentStyle, style]}
+        style={containerStyle}
         onPress={onPress}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
@@ -39,7 +57,7 @@ export const Card = React.memo(function Card({ header, actions, children, varian
   }
 
   return (
-    <View style={[styles.base, styles[variant], state ? styles[state] : null, accentStyle, style]} testID={testID}>
+    <View style={containerStyle} testID={testID}>
       {inner}
     </View>
   )

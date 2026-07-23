@@ -2,6 +2,7 @@ import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
+import { useTranslation } from 'react-i18next'
 import HomeScreen from '../screens/HomeScreen'
 import ProfileScreen from '../screens/ProfileScreen'
 import AppointmentsScreen from '../screens/AppointmentsScreen'
@@ -41,6 +42,7 @@ const Stack = createNativeStackNavigator<AppStackParamList>()
 const Tab = createBottomTabNavigator<TabParamList>()
 
 function Tabs() {
+  const { t } = useTranslation()
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -59,9 +61,9 @@ function Tabs() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Modules' }} />
-      <Tab.Screen name="Appointments" component={AppointmentsScreen} options={{ title: 'Agenda' }} />
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profil' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: t('nav.modules') }} />
+      <Tab.Screen name="Appointments" component={AppointmentsScreen} options={{ title: t('nav.agenda') }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: t('nav.profile') }} />
     </Tab.Navigator>
   )
 }

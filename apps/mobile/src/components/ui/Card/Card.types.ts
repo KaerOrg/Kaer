@@ -15,6 +15,11 @@ export interface CardProps {
   state?: 'active' | 'disabled'
   style?: ViewStyle
   accentColor?: string
+  /**
+   * Filet d'accent vertical sur le bord gauche (4px), le reste de la bordure
+   * inchangé. Motif « bandeau » (ex. carte de crise en `colors.danger`).
+   */
+  leftAccentColor?: string
   /** Rend la carte pressable (navigation). */
   onPress?: () => void
   accessibilityLabel?: string

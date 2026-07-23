@@ -101,6 +101,11 @@
     "password_too_short_message": "Your password must be at least 8 characters.",
     "register_error_title": "Registration error"
   },
+  "nav": {
+    "modules": "Modules",
+    "agenda": "Schedule",
+    "profile": "Profile"
+  },
   "home": {
     "title": "My modules",
     "coming_soon": "Coming soon",
@@ -108,7 +113,8 @@
     "empty_description": "Your practitioner hasn't activated any modules yet.\nThey will appear here once unlocked.",
     "section_tools": "Therapeutic tools",
     "section_scales": "Scales & questionnaires",
-    "today_section": "Planned for today"
+    "today_section": "Planned for today",
+    "crisis_subtitle": "Immediate help, any time"
   },
   "profile": {
     "title": "My profile",

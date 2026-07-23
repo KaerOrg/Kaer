@@ -21,6 +21,9 @@ export const styles = StyleSheet.create({
   },
   active:   { borderColor: colors.primary, backgroundColor: colors.primaryLight },
   disabled: { opacity: 0.5 },
+  // Filet gauche (motif « bandeau ») : bande absolue rognée par `clipped`.
+  clipped:    { overflow: 'hidden' },
+  leftStripe: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
   header:   { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   icon:     { fontSize: 20, lineHeight: 24 },
   titles:   { flex: 1, gap: 2 },
