@@ -9,6 +9,13 @@
     "empty_description": "Pas encore d'outil débloqué, ton soignant s'en occupe.",
     "today_section": "Prévu aujourd'hui"
   },
+  "agenda": {
+    "section_next": "Ton prochain rendez-vous",
+    "empty_description": "Tes rendez-vous à venir apparaîtront ici.",
+    "appointment": {
+      "cancel_confirm": "Confirmes-tu l'annulation de ce rendez-vous ?"
+    }
+  },
   "modules": {
     "crisis_plan": {
       "title": "Mon plan si ça ne va pas",

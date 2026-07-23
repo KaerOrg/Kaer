@@ -1,6 +1,15 @@
 export const colors = {
   primary: '#6dbfc3',
   primaryLight: '#EFF6FF',
+  // Turquoise foncé de marque : fond des surfaces turquoise portant du TEXTE BLANC
+  // (pastille du jour sélectionné dans l'agenda). `primary` (#6dbfc3) échoue le ratio
+  // AA avec du blanc (≈ 2.1:1) ; `primaryDark` le porte à ≈ 5.9:1. Accent d'identité,
+  // jamais une teinte de gravité clinique (MDR 2017/745). Partagé web ≡ mobile.
+  primaryDark: '#2C6E72',
+  // Turquoise pâle de marque : sous-libellés décoratifs POSÉS SUR `primaryDark`
+  // (abréviation du jour dans la pastille sélectionnée). Hiérarchie visuelle, pas une
+  // donnée. Partagé web ≡ mobile.
+  primaryPale: '#CFE9EA',
   background: '#F8F9FA',
   card: '#FFFFFF',
   text: '#111827',

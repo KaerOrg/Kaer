@@ -1680,15 +1680,19 @@
     }
   },
   "agenda": {
+    "title": "Schedule",
     "empty_title": "No appointments",
     "empty_description": "Your upcoming appointments will appear here.",
     "empty_week": "No available slots on this day.",
+    "section_next": "Next appointment",
     "section_upcoming": "Upcoming",
     "section_past": "Past",
     "book_success": "Your appointment has been booked.",
     "reschedule_success": "Your appointment has been successfully rescheduled.",
     "appointment": {
       "new": "Book an appointment",
+      "default_title": "Appointment",
+      "manage_title": "Manage appointment",
       "cancel_btn": "Cancel appointment",
       "cancel_short": "Cancel",
       "cancel_confirm": "Are you sure you want to cancel this appointment?",
