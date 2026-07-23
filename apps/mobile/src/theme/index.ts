@@ -1,7 +1,15 @@
+import { Platform } from 'react-native'
 import { colors, spacing, radius, fontSize } from '@kaer/shared'
 
 export { colors, spacing, radius, fontSize }
 export { TEEN_DEFAULT_COLOR } from './teen'
+
+// Familles de police. `serif` = serif système (aucun asset à bundler) : Georgia sur
+// iOS, Noto Serif ('serif') sur Android/web. Utilisée pour la direction éditoriale
+// des titres et libellés de l'accueil patient.
+export const fonts = {
+  serif: Platform.select({ ios: 'Georgia', default: 'serif' }),
+} as const
 
 export const typography = {
   h1: { fontSize: fontSize.h1, fontWeight: '700' as const, color: colors.text },

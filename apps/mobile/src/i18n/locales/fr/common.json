@@ -115,6 +115,11 @@
     "password_too_short_message": "Votre mot de passe doit contenir au moins 8 caractères.",
     "register_error_title": "Erreur d'inscription"
   },
+  "nav": {
+    "modules": "Modules",
+    "agenda": "Agenda",
+    "profile": "Profil"
+  },
   "home": {
     "title": "Mes modules",
     "coming_soon": "Bientôt disponible",
@@ -122,7 +127,8 @@
     "empty_description": "Votre praticien n'a pas encore activé de modules pour vous.\nIls apparaîtront ici dès qu'il en déverrouille un.",
     "section_tools": "Outils thérapeutiques",
     "section_scales": "Échelles et questionnaires",
-    "today_section": "Prévu aujourd'hui"
+    "today_section": "Prévu aujourd'hui",
+    "crisis_subtitle": "Aide immédiate, à toute heure"
   },
   "profile": {
     "title": "Mon profil",

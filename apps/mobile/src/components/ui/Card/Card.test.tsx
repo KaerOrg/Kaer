@@ -28,4 +28,16 @@ describe('Card', () => {
     render(<Card><Text>body</Text></Card>)
     expect(screen.queryByText('Action')).toBeNull()
   })
+
+  it('rend une bande d\'accent gauche colorée quand leftAccentColor est fourni', () => {
+    render(<Card leftAccentColor="#EF4444"><Text>body</Text></Card>)
+    const stripe = screen.getByTestId('card-left-accent')
+    const style = Object.assign({}, ...(stripe.props.style as unknown[]))
+    expect(style.backgroundColor).toBe('#EF4444')
+  })
+
+  it("n'affiche aucune bande d'accent gauche par défaut", () => {
+    render(<Card><Text>body</Text></Card>)
+    expect(screen.queryByTestId('card-left-accent')).toBeNull()
+  })
 })
