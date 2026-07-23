@@ -116,8 +116,25 @@
     "today_section": "Planned for today",
     "crisis_subtitle": "Immediate help, any time"
   },
+  "wip": {
+    "title": "Under construction",
+    "description": "This screen is being designed. Coming soon."
+  },
   "profile": {
     "title": "My profile",
+    "since": "Tracked since {{date}}",
+    "settings_label": "Settings",
+    "section_my_tracking": "My tracking",
+    "section_settings": "Settings",
+    "row_practitioner": "My practitioner",
+    "row_documents": "My documents",
+    "row_notifications": "Notifications",
+    "row_privacy": "Privacy",
+    "stats": {
+      "tracking_days": "days tracked",
+      "active_modules": "active modules",
+      "sessions": "sessions"
+    },
     "avatar_change_title": "Change photo",
     "avatar_source_prompt": "Choose a source",
     "avatar_gallery": "Photo library",

@@ -61,8 +61,25 @@
     "empty_title": "Nenhum módulo disponível",
     "empty_description": "O seu profissional ainda não ativou módulos.\nAparecerão aqui assim que desbloquear um."
   },
+  "wip": {
+    "title": "Página em construção",
+    "description": "Este ecrã está a ser desenhado. Disponível em breve."
+  },
   "profile": {
     "title": "O meu perfil",
+    "since": "Acompanhamento desde {{date}}",
+    "settings_label": "Definições",
+    "section_my_tracking": "O meu acompanhamento",
+    "section_settings": "Definições",
+    "row_practitioner": "O meu profissional",
+    "row_documents": "Os meus documentos",
+    "row_notifications": "Notificações",
+    "row_privacy": "Privacidade",
+    "stats": {
+      "tracking_days": "dias de acompanhamento",
+      "active_modules": "módulos ativos",
+      "sessions": "sessões"
+    },
     "avatar_change_title": "Alterar foto",
     "avatar_source_prompt": "Escolha uma fonte",
     "avatar_gallery": "Biblioteca de fotos",

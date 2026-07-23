@@ -1,0 +1,1 @@
+export { ProfileIdentityHeader } from './ProfileIdentityHeader'
