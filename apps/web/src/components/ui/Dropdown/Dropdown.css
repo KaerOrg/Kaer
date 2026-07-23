@@ -132,7 +132,7 @@
   gap: var(--spacing-sm, 8px);
   padding: 7px var(--spacing-sm, 8px);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
   cursor: pointer;
 }
@@ -167,7 +167,7 @@
 
 .dropdown__empty {
   padding: var(--spacing-sm, 8px);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   text-align: center;
 }

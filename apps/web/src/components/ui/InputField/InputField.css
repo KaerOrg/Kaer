@@ -10,7 +10,7 @@
 }
 
 .input-field__label {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -69,6 +69,6 @@
 }
 
 .input-field__error {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-danger);
 }

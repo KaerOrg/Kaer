@@ -20,7 +20,7 @@
 }
 
 .exercise-safety-field__label {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   opacity: 0.85;
   line-height: 1.3;
 }

@@ -1,5 +1,5 @@
 .scale-meta__desc {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted, #6B7280);
   margin: 0 0 8px;
   line-height: 1.5;
@@ -14,7 +14,7 @@
 
 .scale-meta__eval-badge {
   display: inline-block;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 20px;
@@ -32,7 +32,7 @@
 }
 
 .scale-meta__category-chip {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 500;
   padding: 2px 7px;
   border-radius: 20px;

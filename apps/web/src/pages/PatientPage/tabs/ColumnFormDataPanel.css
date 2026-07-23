@@ -29,7 +29,7 @@
 
 .cfd-list__title {
   margin: 0 0 4px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -60,7 +60,7 @@
 }
 
 .cfd-entry__date {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text);
   text-transform: capitalize;
@@ -70,7 +70,7 @@
   display: flex;
   align-items: baseline;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -101,7 +101,7 @@
 
 .cfd-detail__date {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-weight: 700;
   color: var(--color-text);
   text-transform: capitalize;
@@ -115,7 +115,7 @@
 
 .cfd-detail__nav-label {
   min-width: 60px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
   text-transform: capitalize;
@@ -148,14 +148,14 @@
 }
 
 .cfd-move__title {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .cfd-move__caption {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -175,12 +175,12 @@
 }
 
 .cfd-move__label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }
 
 .cfd-move__value {
-  font-size: 28px;
+  font-size: var(--font-size-h1);
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -189,7 +189,7 @@
 .cfd-move__arrow {
   align-self: center;
   margin-bottom: 2px;
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
 }
 
@@ -198,7 +198,7 @@
   margin-left: auto;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-muted);
@@ -222,7 +222,7 @@
 
 .cfd-col__title {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -230,7 +230,7 @@
 
 .cfd-col__text {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.45;
   color: var(--color-text);
   white-space: pre-wrap;
@@ -245,12 +245,12 @@
 }
 
 .cfd-col__value-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
 .cfd-col__value {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
   font-variant-numeric: tabular-nums;

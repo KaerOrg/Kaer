@@ -35,7 +35,7 @@
 }
 
 .sleep-hero__label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted);
 }
@@ -71,7 +71,7 @@
 }
 
 .sleep-trend__delta {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
@@ -102,7 +102,7 @@
 .sleep-grid__tick {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
 }
@@ -124,7 +124,7 @@
 
 .sleep-grid__date {
   width: 44px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
   text-align: right;
@@ -178,7 +178,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }
 

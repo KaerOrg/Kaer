@@ -1,5 +1,5 @@
 .confirm-dialog__message {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   line-height: 1.5;
   color: var(--color-text-muted);
 }

@@ -66,7 +66,7 @@
 }
 
 .activity-feed__header-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text);
 }
@@ -81,7 +81,7 @@
 }
 
 .activity-feed__empty {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   text-align: center;
   padding: 24px 16px;
@@ -121,12 +121,12 @@
 }
 
 .activity-feed__item-text {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text);
   line-height: 1.4;
 }
 
 .activity-feed__item-time {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
 }

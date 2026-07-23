@@ -16,7 +16,7 @@
 }
 
 .exposure-data-panel__title {
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -30,7 +30,7 @@
 }
 
 .exposure-data-panel__count {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted);
   white-space: nowrap;
@@ -43,7 +43,7 @@
 }
 
 .exposure-data-panel__note {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-style: italic;
   text-align: center;
@@ -52,7 +52,7 @@
 }
 
 .exposure-data-panel__mention {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
   margin: 0;

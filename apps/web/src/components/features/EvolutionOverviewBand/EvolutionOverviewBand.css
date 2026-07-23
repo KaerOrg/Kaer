@@ -67,7 +67,7 @@
 }
 
 .evo-ov-card__name {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text, #111827);
   overflow: hidden;
@@ -78,7 +78,7 @@
 }
 
 .evo-ov-card__badge {
-  font-size: 9px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -92,19 +92,19 @@
 }
 
 .evo-ov-card__value {
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   color: var(--color-text, #111827);
 }
 
 .evo-ov-card__unit {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
 }
 
 .evo-ov-card__sub,
 .evo-ov-card__window {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
 }
 
@@ -118,7 +118,7 @@
 }
 
 .evo-ov-card__empty {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
   font-style: italic;
   padding: 6px 0;

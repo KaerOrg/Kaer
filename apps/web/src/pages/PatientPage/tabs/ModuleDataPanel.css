@@ -12,7 +12,7 @@
 }
 
 .module-data-panel__message {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
   text-align: center;
@@ -34,21 +34,21 @@
 }
 
 .module-data-panel__chart-title {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
 }
 
 .module-data-panel__chart-count {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
 .module-data-panel__note {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-style: italic;
   text-align: center;

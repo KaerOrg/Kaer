@@ -8,7 +8,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 500;
   color: var(--color-text-secondary);
   text-decoration: none;

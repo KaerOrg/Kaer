@@ -14,7 +14,7 @@
 }
 
 .dim-fingerprint__value {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text, #111827);
 }
@@ -33,7 +33,7 @@
 }
 
 .dim-fingerprint__label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
   white-space: nowrap;
   overflow: hidden;

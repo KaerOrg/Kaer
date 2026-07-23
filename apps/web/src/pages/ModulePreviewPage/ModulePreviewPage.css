@@ -14,14 +14,14 @@
 }
 
 .preview-page__title {
-  font-size: 22px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   color: #111827;
   margin: 0 0 8px;
 }
 
 .preview-page__desc {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: #6B7280;
   margin: 0;
   line-height: 1.5;
@@ -31,7 +31,7 @@
   text-align: center;
   padding: 48px;
   color: #9CA3AF;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
 }
 
 .preview-page__coming-soon {
@@ -40,7 +40,7 @@
   border: 1.5px dashed #D1D5DB;
   background: #F9FAFB;
   color: #6B7280;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   line-height: 1.6;
   text-align: center;
 }

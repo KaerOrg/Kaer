@@ -13,7 +13,7 @@
 }
 
 .evolution__title {
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
@@ -35,7 +35,7 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
   background: var(--color-bg);
@@ -70,7 +70,7 @@
 }
 
 .evolution__subchart-title {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -83,18 +83,18 @@
 }
 
 .evolution__subchart-last {
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .evolution__subchart-count {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }
 
 .evolution-card__no-data {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   text-align: center;
   padding: 32px 0;
@@ -103,7 +103,7 @@
 
 /* Mention passive sous une courbe (MDR : contexte, aucune interprétation). */
 .evolution-card__mention {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
   margin: 8px 0 0;
@@ -122,14 +122,14 @@
 }
 
 .evolution-empty__title {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
 }
 
 .evolution-empty__desc {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   margin: 0;
   max-width: 340px;
@@ -140,5 +140,5 @@
   padding: 40px;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
 }

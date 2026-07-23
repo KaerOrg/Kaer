@@ -98,10 +98,10 @@
 }
 
 /* Sizes */
-.btn--xs { padding: 4px 8px; font-size: 12px; gap: 4px; }
-.btn--sm { padding: 6px 12px; font-size: 13px; }
-.btn--md { padding: 9px 18px; font-size: 14px; }
-.btn--lg { padding: 12px 24px; font-size: 15px; }
+.btn--xs { padding: 4px 8px; font-size: var(--font-size-xs); gap: 4px; }
+.btn--sm { padding: 6px 12px; font-size: var(--font-size-sm); }
+.btn--md { padding: 9px 18px; font-size: var(--font-size-caption); }
+.btn--lg { padding: 12px 24px; font-size: var(--font-size-label); }
 
 /* Icône-seule : padding carré, l'horizontal s'aligne sur le vertical de la taille. */
 .btn--icon-only.btn--xs { padding: 4px; }

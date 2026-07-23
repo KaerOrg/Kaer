@@ -30,7 +30,7 @@
 .layout__logo-icon { display: flex; align-items: center; color: var(--color-primary)}
 
 .layout__logo-text {
-  font-size: 30px;
+  font-size: var(--font-size-h1);
   font-weight: 700;
   color: var(--color-primary);
   letter-spacing: -0.3px;

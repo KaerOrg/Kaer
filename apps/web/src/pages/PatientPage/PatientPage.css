@@ -2,7 +2,7 @@
   background: none;
   border: none;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   cursor: pointer;
   padding: 0;
   margin-bottom: 24px;
@@ -52,17 +52,17 @@
 }
 
 .teen-mode-toggle__icon {
-  font-size: 16px;
+  font-size: var(--font-size-body);
 }
 
 .teen-mode-toggle__label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .teen-mode-toggle__pill {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 999px;
@@ -85,20 +85,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .patient-page__name {
-  font-size: 24px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.3px;
 }
 
 .patient-page__email {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   margin-top: 2px;
 }
@@ -116,7 +116,7 @@
 }
 
 .patient-notes__title {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: 700;
   color: var(--color-text);
   margin-bottom: 16px;
@@ -189,7 +189,7 @@
 }
 
 .patient-notes__error {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-danger);
 }
 
@@ -236,7 +236,7 @@
 }
 
 .patient-notes__empty {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
 }
@@ -256,7 +256,7 @@
 }
 
 .patient-notes__item-content {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
   line-height: 1.6;
   white-space: pre-wrap;
@@ -277,7 +277,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
@@ -303,7 +303,7 @@
 }
 
 .patient-notes__appt-select-label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -328,7 +328,7 @@
 }
 
 .patient-notes__item-date {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -340,7 +340,7 @@
 }
 
 .patient-notes__confirm-label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
 }
 
@@ -378,7 +378,7 @@
 .patient-notes__tag-input {
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-family: inherit;
   color: var(--color-text);
   background: transparent;
@@ -415,7 +415,7 @@
 .patient-notes__filter-search {
   border: none;
   outline: none;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-family: inherit;
   color: var(--color-text);
   background: transparent;
@@ -476,20 +476,20 @@
 }
 
 .patient-overview__stat-value {
-  font-size: 28px;
+  font-size: var(--font-size-h1);
   font-weight: 700;
   color: var(--color-primary);
   line-height: 1;
 }
 
 .patient-overview__stat-value--date {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   line-height: 1.4;
 }
 
 .patient-overview__stat-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -518,14 +518,14 @@
 }
 
 .patient-overview__block-title {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
 }
 
 .patient-overview__block-link {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-primary);
   background: none;
   border: none;
@@ -539,7 +539,7 @@
 }
 
 .patient-overview__empty {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
@@ -572,13 +572,13 @@
 
 .patient-overview__module-name {
   flex: 1;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--color-text);
 }
 
 .patient-overview__module-date {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
@@ -599,7 +599,7 @@
 }
 
 .patient-overview__note-content {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
   margin: 0 0 8px;
   line-height: 1.5;
@@ -623,7 +623,7 @@
 }
 
 .patient-overview__note-date {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
   white-space: nowrap;
   flex-shrink: 0;
@@ -641,7 +641,7 @@
   padding: 48px 24px;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-style: italic;
   background: var(--color-neutral, #F3F4F6);
   border-radius: var(--radius-md);
@@ -666,7 +666,7 @@
 }
 
 .patient-rdv__section-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -675,7 +675,7 @@
 }
 
 .patient-rdv__empty {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
   margin: 0;
@@ -708,7 +708,7 @@
 }
 
 .patient-rdv__item-date {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
 }
 
@@ -727,20 +727,20 @@
 }
 
 .wardrobe__title {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: 700;
   color: var(--color-text);
   margin-bottom: 6px;
 }
 
 .wardrobe__desc {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   margin: 0;
 }
 
 .wardrobe__empty {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-muted);
   font-style: italic;
   padding: var(--spacing-md);
@@ -789,7 +789,7 @@
 }
 
 .module-card__date {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
   margin-top: 6px;
 }
@@ -819,7 +819,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
 }
 
 .psycho-observance-item__title {
@@ -844,7 +844,7 @@
 }
 
 .psycho-card-picker__label {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   margin-bottom: 12px;
 }
@@ -874,13 +874,13 @@
 }
 
 .psycho-card-option__title {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .psycho-card-option__desc {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin-top: 1px;
 }
@@ -892,11 +892,11 @@
   margin-bottom: 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .psycho-card-picker__theme {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -912,13 +912,13 @@
 }
 
 .psycho-card-picker__empty {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   padding: 8px 0;
 }
 
 .psycho-card-picker__error {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-danger);
   margin-bottom: 10px;
 }
@@ -964,7 +964,7 @@
 }
 
 .med-row__name {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -1007,7 +1007,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .med-add__input:focus {
@@ -1028,7 +1028,7 @@
 }
 
 .med-effects-config__custom-title {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -1048,7 +1048,7 @@
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 /* ── Éditeurs de config module (champs partagés : crisis_plan, rim…) ──────── */
@@ -1087,7 +1087,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   resize: vertical;
   box-sizing: border-box;
 }
@@ -1118,7 +1118,7 @@
 }
 
 .crisis-card__text {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
 }
 
@@ -1136,7 +1136,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-danger);
 }
 
@@ -1195,7 +1195,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1204,7 +1204,7 @@
 }
 
 .preview-panel__footer {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   background: var(--color-primary-light);
   border-radius: var(--radius-sm);
@@ -1217,7 +1217,7 @@
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   background: var(--color-primary-light);
   border-radius: var(--radius-sm);
@@ -1237,7 +1237,7 @@
 }
 
 .preview-panel__coming-soon {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-style: italic;
 }
@@ -1262,7 +1262,7 @@
   height: 24px;
   border-radius: 50%;
   color: white;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -1272,13 +1272,13 @@
 }
 
 .preview-step__title {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .preview-step__hint {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   font-style: italic;
   margin-top: 2px;
@@ -1304,19 +1304,19 @@
 }
 
 .preview-field__icon {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   flex-shrink: 0;
 }
 
 .preview-field__label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
   flex: 1;
 }
 
 .preview-field__detail {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -1338,12 +1338,12 @@
 }
 
 .preview-quadrant__title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
 }
 
 .preview-quadrant__subtitle {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
   margin-top: 2px;
 }
@@ -1388,18 +1388,18 @@
 }
 
 .preview-card__title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .preview-card__summary {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
 }
 
 .preview-card__toggle {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
   flex-shrink: 0;
 }
@@ -1408,27 +1408,27 @@
 .preview-card__body {
   padding: 12px 16px;
   border-top: 1px solid var(--color-border);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
   line-height: 1.6;
 }
 
 .preview-card__body h2 {
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-weight: 700;
   margin: 0 0 12px;
   color: var(--color-text);
 }
 
 .preview-card__body h3 {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   margin: 14px 0 6px;
   color: var(--color-text);
 }
 
 .preview-card__body h4 {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   margin: 10px 0 4px;
   color: var(--color-text);
@@ -1474,7 +1474,7 @@
 }
 
 .scale-subgroup__label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -1526,14 +1526,14 @@
 
 .dispensaire-entry__label {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: #9D174D;
 }
 
 .dispensaire-entry__sub {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: #BE185D;
   opacity: 0.75;
   margin-top: 1px;
@@ -1551,7 +1551,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: #DC2626;
   background: #FEF2F2;
@@ -1584,7 +1584,7 @@
 }
 
 .diet-sources-popover__title {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--color-text-secondary, #6b7280);
   text-transform: uppercase;
@@ -1602,7 +1602,7 @@
 }
 
 .diet-sources-popover__list li {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text, #111827);
   line-height: 1.5;
   padding-left: 10px;

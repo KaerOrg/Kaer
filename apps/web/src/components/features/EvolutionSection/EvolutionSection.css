@@ -32,7 +32,7 @@
 }
 
 .evo-section__title {
-  font-size: 15px;
+  font-size: var(--font-size-label);
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -42,7 +42,7 @@
 
 .evo-section__badge {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
   background: var(--color-bg);
@@ -55,7 +55,7 @@
 .evo-section__metric {
   flex-shrink: 1;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -66,7 +66,7 @@
 .evo-section__viewdata.btn {
   flex-shrink: 0;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 }
 

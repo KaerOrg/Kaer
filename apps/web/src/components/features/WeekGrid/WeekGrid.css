@@ -25,7 +25,7 @@
 .week-grid__day-header {
   padding: 10px 8px;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-weight: 500;
   border-right: 1px solid var(--color-border);
@@ -46,12 +46,12 @@
 
 .week-grid__day-label {
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   letter-spacing: 0.05em;
 }
 
 .week-grid__day-number {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: 600;
   color: var(--color-text);
   margin-top: 2px;
@@ -75,7 +75,7 @@
 .week-grid__time-label {
   position: absolute;
   right: 8px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
   transform: translateY(-50%);
   white-space: nowrap;
@@ -124,7 +124,7 @@
 }
 
 .week-grid__slot-label {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-primary);
   white-space: nowrap;
@@ -184,7 +184,7 @@
 }
 
 .week-grid__appt-name {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -193,7 +193,7 @@
 }
 
 .week-grid__appt-time {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }
 
@@ -203,5 +203,5 @@
   padding: 48px;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
 }
