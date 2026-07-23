@@ -1028,7 +1028,6 @@ marque), cartes détachées du fond, bandeau de crise non alarmant (MDR 2017/745
 
 | Composant | Rôle |
 |---|---|
-| `features/BrandHeader` | En-tête de marque (pastille logo « k » + wordmark « KAER ») + bouton rond d'action optionnel à droite (`rightAction: { icon, onPress, accessibilityLabel }`). Réutilisable sur les écrans patient (accueil → profil, profil → réglages). |
 | `features/CrisisBanner` | Bandeau de crise : `Card` à `leftAccentColor={colors.danger}` + `IconChip` danger + titre `colors.dangerText` + sous-titre atténué. Élément FIXE (jamais déclenché par la donnée). |
 | `features/ModuleSections` | Modules débloqués groupés par catégorie : un label de section (uppercase atténué) + une `Card variant="elevated"` unique dont les `ModuleRow` sont séparées par un filet `colors.neutral`. En-têtes masqués s'il n'y a qu'un groupe. |
 | `features/ModuleSections/ModuleRow` | Ligne de module (SURFACE de liste tappable, `Pressable` justifié car imbriqué dans une `Card`) : `IconChip` primary + titre serif + sous-titre + chevron. Atténuée + non tappable si `available={false}`. |
@@ -1039,8 +1038,9 @@ Ordre d'affichage : helper pur `moduleGrouping.ts` (`groupModulesByCategory`, mi
 ### Agenda patient — « Agenda »
 
 Composé par `screens/AppointmentsScreen.tsx`, même grammaire visuelle que l'accueil
-(serif, cartes détachées, accents turquoise). Réutilise `BrandHeader` (bouton `+` de
-prise de RDV) et `EmptyState`.
+(serif, cartes détachées, accents turquoise). En-tête : titre « Agenda » et bouton `+`
+de prise de RDV (`ui/Button variant="secondary"`, icône seule) sur la même ligne.
+Utilise `EmptyState`.
 
 | Composant | Rôle |
 |---|---|

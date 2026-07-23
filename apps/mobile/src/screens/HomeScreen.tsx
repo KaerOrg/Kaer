@@ -11,7 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, type CompositeNavigationProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
-import { Ionicons } from '@expo/vector-icons'
 import { useTranslation } from 'react-i18next'
 import { AppStackParamList, TabParamList } from '../navigation/AppStack'
 import { useQuery } from '@tanstack/react-query'
@@ -20,7 +19,6 @@ import type { UnlockedModule, TodayRoutine } from '@services/homeService'
 import { homeQueries } from '../hooks/queries'
 import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
 import { TodaySchedule } from '../components/features/TodaySchedule'
-import { BrandHeader } from '../components/features/BrandHeader'
 import { CrisisBanner } from '../components/features/CrisisBanner'
 import { ModuleSections } from '../components/features/ModuleSections'
 import { colors, spacing, fonts } from '@theme'
@@ -72,10 +70,6 @@ export default function HomeScreen() {
 
   // Rafraîchit au retour sur l'écran (déblocage de module ailleurs, etc.).
   useRefreshOnFocus(handleRefresh)
-
-  const handleProfilePress = useCallback(() => {
-    navigation.navigate('Profile')
-  }, [navigation])
 
   const handleCrisisPress = useCallback(() => {
     navigation.navigate('ModuleContent', { moduleType: 'crisis_plan' })
@@ -132,14 +126,6 @@ export default function HomeScreen() {
           />
         }
       >
-        <BrandHeader
-          rightAction={{
-            icon: <Ionicons name="person-outline" size={20} color={colors.textMuted} />,
-            onPress: handleProfilePress,
-            accessibilityLabel: t('profile.title'),
-          }}
-        />
-
         <Text style={styles.heading}>{tg('modulesTitle')}</Text>
 
         {hasCrisisPlan ? <CrisisBanner onPress={handleCrisisPress} /> : null}

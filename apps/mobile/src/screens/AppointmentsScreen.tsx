@@ -18,7 +18,7 @@ import { buildAgendaData } from '../lib/agendaData'
 import { dayAbbrev, dayNumber, formatTime, formatLongDate } from '../lib/agendaFormat'
 import { colors, spacing, fonts } from '@theme'
 import type { AppStackParamList } from '../navigation/AppStack'
-import { BrandHeader } from '../components/features/BrandHeader'
+import { Button } from '@ui/Button'
 import { WeekStrip, type WeekDay } from '../components/features/WeekStrip'
 import { NextAppointmentCard } from '../components/features/NextAppointmentCard'
 import { AppointmentRegister, type AppointmentRegisterItem } from '../components/features/AppointmentRegister'
@@ -158,14 +158,6 @@ export default function AppointmentsScreen() {
     if (agenda.next && isActionable(agenda.next.status)) handleSelectAppointment(agenda.next.id)
   }, [agenda.next, handleSelectAppointment])
 
-  const bookAction = practitionerId
-    ? {
-        icon: <Plus size={20} color={colors.primary} />,
-        onPress: handleBook,
-        accessibilityLabel: t('agenda.appointment.new'),
-      }
-    : undefined
-
   const isEmpty = !agenda.next && upcomingItems.length === 0 && pastItems.length === 0
   const next = agenda.next
 
@@ -177,8 +169,17 @@ export default function AppointmentsScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.container}>
-          <BrandHeader rightAction={bookAction} />
-          <Text style={styles.heading}>{t('agenda.title')}</Text>
+          <View style={styles.header}>
+            <Text style={styles.heading}>{t('agenda.title')}</Text>
+            {practitionerId ? (
+              <Button
+                variant="secondary"
+                onPress={handleBook}
+                iconLeft={<Plus size={22} color={colors.primary} />}
+                accessibilityLabel={t('agenda.appointment.new')}
+              />
+            ) : null}
+          </View>
 
           <WeekStrip days={weekCells} onSelectDay={setSelectedDay} />
 
@@ -229,7 +230,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   container: { padding: spacing.lg, gap: spacing.lg },
-  heading: { fontSize: 40, fontWeight: '700', color: colors.text, fontFamily: fonts.serif },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
+  heading: { flexShrink: 1, fontSize: 40, fontWeight: '700', color: colors.text, fontFamily: fonts.serif },
   section: { gap: spacing.sm },
   sectionLabel: {
     fontSize: 13,
