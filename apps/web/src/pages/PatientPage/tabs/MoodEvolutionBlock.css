@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-sm, 8px);
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted, #6B7280);
 }
 
@@ -52,7 +52,7 @@
 }
 
 .mood-frise__label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text, #111827);
   width: 92px;
@@ -78,18 +78,18 @@
 }
 
 .mood-frise__last {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   font-weight: 700;
 }
 
 .mood-frise__last small {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 400;
   color: var(--color-text-muted, #6B7280);
 }
 
 .mood-frise__stat {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
 }
 

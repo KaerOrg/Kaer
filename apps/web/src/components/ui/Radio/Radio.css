@@ -38,12 +38,12 @@
 }
 
 .radio__label {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
 }
 
 .radio__sublabel {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
@@ -59,7 +59,7 @@
   background: var(--color-surface);
   border-radius: var(--radius-full);
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
 }
 
@@ -90,20 +90,20 @@
 }
 
 .radio__card-badge {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   font-weight: 700;
   line-height: 1;
   color: var(--color-text);
 }
 
 .radio__card-label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .radio__card-detail {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   line-height: 1.3;
   color: var(--color-text-muted);
 }

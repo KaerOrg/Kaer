@@ -7,7 +7,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin: 0;
 }
@@ -54,18 +54,18 @@
 }
 
 .nr-row__days {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .nr-row__time {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
 .nr-row__note {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
   font-style: italic;
   white-space: nowrap;
@@ -74,7 +74,7 @@
 }
 
 .nr-row__paused {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: #f59e0b;
   font-weight: 500;
 }
@@ -95,7 +95,7 @@
 }
 
 .nr-form__label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -112,7 +112,7 @@
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -130,7 +130,7 @@
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
   background: var(--color-surface);
   width: fit-content;
@@ -156,14 +156,14 @@
 
 .nr-form__preview-title {
   margin: 0 0 2px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--color-primary);
 }
 
 .nr-form__preview-body {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   line-height: 1.45;
   color: var(--color-text);
 }

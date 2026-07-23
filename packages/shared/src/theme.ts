@@ -52,8 +52,18 @@ export const radius = {
   full: 999,
 } as const
 
+// Échelle typographique complète, partagée web ≡ mobile. Valeurs NUMÉRIQUES (px) :
+// React Native ne connaît pas `rem` et exige des nombres. La couche web les convertit
+// en `rem` dans `injectTheme()` (division par 16) ; le mobile les consomme tels quels.
+// Les paliers couvrent la distribution réelle des tailles pour qu'aucune surface n'ait
+// à hardcoder : xxs/xs/sm (libellés denses), caption/label/body (texte courant),
+// h3/h2/h1 (titres). Voir issue #199.
 export const fontSize = {
+  xxs: 11,
+  xs: 12,
+  sm: 13,
   caption: 14,
+  label: 15,
   body: 16,
   h3: 18,
   h2: 22,

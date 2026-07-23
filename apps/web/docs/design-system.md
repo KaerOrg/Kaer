@@ -31,8 +31,10 @@ Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 --shadow-lg   0 8px 24px rgba(0,0,0,0.10)
 
 --font-family -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
---font-size-caption 14px  --font-size-body  16px
---font-size-h3      18px  --font-size-h2    22px  --font-size-h1  28px
+/* Échelle typographique — injectée en rem (base 16) : 1 palier = px / 16. */
+--font-size-xxs 11px (0.6875rem)  --font-size-xs   12px (0.75rem)   --font-size-sm   13px (0.8125rem)
+--font-size-caption 14px (0.875rem)  --font-size-label 15px (0.9375rem)  --font-size-body 16px (1rem)
+--font-size-h3  18px (1.125rem)  --font-size-h2   22px (1.375rem)  --font-size-h1   28px (1.75rem)
 
 /* Contrôles de formulaire — dimensionnement partagé (InputField, Dropdown, SearchInput) */
 --control-pad-y      10px  --control-pad-x      14px  --control-font-size    15px
@@ -41,6 +43,18 @@ Elle écrit tous les tokens comme propriétés CSS custom sur `:root` :
 ```
 
 Dans le CSS : `color: var(--color-primary)` — jamais de valeur hex directe.
+
+> **Taille de police — pilotée par le theme, jamais en dur.** Toute taille passe par
+> un palier `--font-size-*` : aucun `font-size: Npx` codé en dur dès qu'un palier
+> correspond. L'échelle est numérique (px) dans `@kaer/shared` (partagée avec le
+> mobile) ; la couche web `injectTheme()` la convertit en **`rem`** (division par 16)
+> pour respecter la préférence de taille de police du navigateur (accessibilité). La
+> base racine est `html { font-size: 100% }` — jamais figée en px. Garde-fou :
+> `src/test/fontSizeTokens.guard.test.ts` échoue sur tout `font-size:Npx` égal à un
+> palier. **Exception « très spec » :** une taille d'affichage vraiment bespoke, hors
+> échelle et non récurrente (gros score SUDS 32/36px, emoji illustratif 40px), peut
+> rester en dur — annotée d'un commentaire. Dès qu'elle devient récurrente, elle
+> rejoint l'échelle (nouveau palier).
 
 > **Contrôles de formulaire — une seule hauteur, deux tailles.** `InputField`,
 > `Dropdown` et `SearchInput` dérivent **tous** padding et `font-size` des tokens

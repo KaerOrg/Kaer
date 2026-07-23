@@ -14,7 +14,7 @@
 }
 
 .availability-editor__section-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -31,13 +31,13 @@
 }
 
 .availability-editor__auto-confirm-label {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 500;
   color: var(--color-text);
 }
 
 .availability-editor__auto-confirm-hint {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   margin-top: 2px;
 }
@@ -61,19 +61,19 @@
 
 .availability-editor__rule-day {
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-primary);
   min-width: 80px;
 }
 
 .availability-editor__rule-time {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text);
   flex: 1;
 }
 
 .availability-editor__rule-duration {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
@@ -81,7 +81,7 @@
 /* Bouton de suppression de règle via <Button variant="ghost" category="danger" />. */
 
 .availability-editor__no-rules {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   text-align: center;
   padding: 12px 0;
@@ -96,7 +96,7 @@
 
 .availability-editor__day-pill {
   padding: 4px 8px;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   font-family: inherit;
   border: 1px solid var(--color-border);
@@ -134,7 +134,7 @@
 }
 
 .availability-editor__form-row label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   min-width: 32px;
 }
@@ -144,7 +144,7 @@
 .availability-editor__form-row input[type="number"] {
   flex: 1;
   padding: 6px 8px;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm, 6px);
   background: var(--color-card);
@@ -157,6 +157,6 @@
 }
 
 .availability-editor__error {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-danger, #ef4444);
 }

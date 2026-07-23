@@ -12,7 +12,7 @@
   color: var(--color-text-muted);
   margin: 0 0 8px;
   font-weight: 600;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   letter-spacing: 0.02em;
 }
 

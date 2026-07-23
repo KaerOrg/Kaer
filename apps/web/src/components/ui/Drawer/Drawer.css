@@ -123,7 +123,7 @@ body.drawer-resizing {
 }
 
 .drawer__title {
-  font-size: 16px;
+  font-size: var(--font-size-body);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
@@ -133,7 +133,7 @@ body.drawer-resizing {
 }
 
 .drawer__subtitle {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   margin: 0;
   white-space: nowrap;

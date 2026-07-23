@@ -37,7 +37,7 @@
 .card__icon {
   padding-top: 6px;
   flex-shrink: 0;
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   line-height: 1;
 }
 

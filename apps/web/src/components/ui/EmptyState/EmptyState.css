@@ -9,6 +9,7 @@
 }
 
 .empty-state__icon {
+  /* Emoji illustratif : taille d'affichage bespoke, hors échelle type du theme (#199). */
   font-size: 40px;
   line-height: 1;
   opacity: 0.4;

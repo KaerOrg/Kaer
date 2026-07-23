@@ -11,7 +11,7 @@
 }
 
 .time-picker__label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -48,7 +48,7 @@
   border: none;
   background: none;
   outline: none;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
@@ -58,6 +58,6 @@
 }
 
 .time-picker__hint {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }

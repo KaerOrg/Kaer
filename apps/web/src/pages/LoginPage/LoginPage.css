@@ -30,7 +30,7 @@
 }
 
 .login-card__title {
-  font-size: 28px;
+  font-size: var(--font-size-h1);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.5px;
@@ -38,7 +38,7 @@
 }
 
 .login-card__subtitle {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
 }
 
@@ -54,7 +54,7 @@
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
 }
 
 .login-card__submit {
@@ -65,7 +65,7 @@
 .login-card__footer {
   text-align: center;
   margin-top: 24px;
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
 }
 
@@ -73,7 +73,7 @@
   background: none;
   border: none;
   color: var(--color-primary);
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 500;
   cursor: pointer;
   padding: 0;
@@ -89,19 +89,20 @@
 }
 
 .login-card__confirm-icon {
+  /* Emoji de confirmation : taille d'affichage bespoke, hors échelle type du theme (#199). */
   font-size: 40px;
   margin-bottom: 16px;
 }
 
 .login-card__confirm-email h2 {
-  font-size: 18px;
+  font-size: var(--font-size-h3);
   font-weight: 600;
   color: var(--color-text);
   margin-bottom: 12px;
 }
 
 .login-card__confirm-email p {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   color: var(--color-text-secondary);
   line-height: 1.6;
   margin-bottom: 20px;

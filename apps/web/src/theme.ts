@@ -28,6 +28,16 @@ export const control = {
   iconRoom: 22,
 } as const
 
+/**
+ * Base de conversion `px → rem` côté web. Alignée sur la taille de police racine par
+ * défaut du navigateur (`html { font-size: 100% }` = 16px non forcés). Émettre les
+ * tokens en `rem` (et non en `px`) fait respecter à toute l'UI la préférence de taille
+ * de police de l'utilisateur — gain d'accessibilité, cf. issue #199. La valeur reste
+ * numérique dans `@kaer/shared` pour le mobile ; seule cette couche divise par 16.
+ */
+export const REM_BASE = 16
+export const rem = (px: number): string => `${px / REM_BASE}rem`
+
 export function injectTheme(): void {
   const root = document.documentElement.style
   root.setProperty('--color-primary', colors.primary)
@@ -57,11 +67,11 @@ export function injectTheme(): void {
   root.setProperty('--radius-lg', `${radius.lg}px`)
   root.setProperty('--radius-full', `${radius.full}px`)
 
-  root.setProperty('--font-size-caption', `${fontSize.caption}px`)
-  root.setProperty('--font-size-body', `${fontSize.body}px`)
-  root.setProperty('--font-size-h3', `${fontSize.h3}px`)
-  root.setProperty('--font-size-h2', `${fontSize.h2}px`)
-  root.setProperty('--font-size-h1', `${fontSize.h1}px`)
+  // Émis en `rem` (accessibilité) — cf. `rem()` ci-dessus. Mobile inchangé (px).
+  // Dérivé de l'échelle : ajouter un palier dans `@kaer/shared` l'injecte d'office.
+  for (const [name, px] of Object.entries(fontSize)) {
+    root.setProperty(`--font-size-${name}`, rem(px))
+  }
 
   root.setProperty('--shadow-sm', shadows.sm)
   root.setProperty('--shadow-md', shadows.md)

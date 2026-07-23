@@ -18,11 +18,18 @@ html, body, #root {
   height: 100%;
 }
 
+/* Base racine des `rem` : 100% = taille de police par défaut du navigateur, jamais
+   figée en px, pour respecter la préférence d'accessibilité de l'utilisateur (#199).
+   Tous les `--font-size-*` (injectés en rem) en dérivent. */
+html {
+  font-size: 100%;
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-size-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }

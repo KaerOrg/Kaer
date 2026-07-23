@@ -25,18 +25,18 @@
 }
 
 .rating-selector__label {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .rating-selector__sublabel {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
 }
 
 .rating-selector__value {
-  font-size: 22px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -62,7 +62,7 @@
 }
 
 .rating-selector__step-num {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
 }
 
@@ -142,7 +142,7 @@
 }
 
 .rating-selector__inline-label {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   min-width: 96px;
 }
@@ -154,7 +154,7 @@
 }
 
 .rating-selector__hint {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }
 

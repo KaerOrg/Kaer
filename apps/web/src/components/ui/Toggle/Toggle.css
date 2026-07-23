@@ -54,7 +54,7 @@
 }
 
 .toggle-field__label {
-  font-size: 14px;
+  font-size: var(--font-size-caption);
   font-weight: 500;
   color: var(--color-text);
 }

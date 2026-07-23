@@ -30,7 +30,7 @@
 
 .ba-felt__metric {
   display: inline-block;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   margin-bottom: 2px;
 }
@@ -47,13 +47,13 @@
 }
 
 .ba-stats__value {
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   font-weight: 800;
   color: var(--color-primary);
 }
 
 .ba-stats__label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
   text-align: center;
@@ -71,7 +71,7 @@
 }
 
 .ba-week__range {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text);
   min-width: 120px;
@@ -80,7 +80,7 @@
 
 .ba-week__counts {
   margin-left: auto;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
 }
@@ -108,7 +108,7 @@
 }
 
 .ba-week__day-head {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   color: var(--color-text-muted);
   text-align: center;
@@ -148,7 +148,7 @@
 }
 
 .ba-week__label {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text);
   overflow-wrap: anywhere;
@@ -159,14 +159,14 @@
   align-items: center;
   gap: 3px;
   margin-top: 2px;
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--color-text-muted);
 }
 
 .ba-week__scores {
   margin: 3px 0 0;
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text);
 }
 
@@ -177,7 +177,7 @@
 
 .ba-week__notes {
   margin: 4px 0 0;
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-style: italic;
   color: var(--color-text-muted);
   overflow-wrap: anywhere;
@@ -194,6 +194,6 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-muted);
 }

@@ -17,14 +17,14 @@
 
 .defusion-stat__label {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   margin-bottom: 4px;
 }
 
 .defusion-stat__value {
   display: block;
-  font-size: 20px;
+  font-size: var(--font-size-h2);
   font-weight: 700;
   color: var(--color-text);
 }
@@ -52,14 +52,14 @@
 }
 
 .defusion-data-panel__chart-title {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 8px;
 }
 
 .defusion-data-panel__note {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-muted);
   font-style: italic;
   text-align: center;
@@ -71,12 +71,12 @@
 .defusion-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .defusion-table th {
   text-align: left;
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -90,7 +90,7 @@
 }
 
 .defusion-table__group td {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--color-text-muted);
   background: var(--color-surface-muted, var(--color-background));
@@ -128,7 +128,7 @@
 }
 
 .defusion-data-panel__mention {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
   margin: 0;

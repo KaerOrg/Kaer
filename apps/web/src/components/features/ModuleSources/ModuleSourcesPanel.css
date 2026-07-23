@@ -1,14 +1,14 @@
 /* ── Intro ──────────────────────────────────────────────────────────────────── */
 
 .sources-panel__intro {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin: 0 0 14px;
   line-height: 1.5;
 }
 
 .sources-panel__empty {
-  font-size: 13px;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   text-align: center;
   padding: 24px 0;
@@ -58,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -71,7 +71,7 @@
 /* ── Grade de preuve ────────────────────────────────────────────────────────── */
 
 .sources-item__grade {
-  font-size: 10px;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 3px;
@@ -95,7 +95,7 @@
 /* ── Lien ────────────────────────────────────────────────────────────────────── */
 
 .sources-item__label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--color-text-primary);
   line-height: 1.4;
@@ -118,7 +118,7 @@
 /* ── Description ────────────────────────────────────────────────────────────── */
 
 .sources-item__description {
-  font-size: 11px;
+  font-size: var(--font-size-xxs);
   color: var(--color-text-secondary);
   margin: 2px 0 0;
   line-height: 1.5;
