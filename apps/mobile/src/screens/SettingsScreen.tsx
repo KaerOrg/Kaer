@@ -16,7 +16,7 @@ import { useToast } from '../contexts/ToastContext'
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
 import { useActionSheet } from '../contexts/ActionSheetContext'
 import Button from '@ui/Button'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing, radius, shadows } from '@theme'
 import { SUPPORTED } from '../i18n'
 import { NotificationRoutinePanel } from '../components/features/NotificationRoutinePanel'
 import { AvatarEditor } from '../components/features/AvatarEditor'
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   container: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   section: { gap: spacing.sm },
   sectionTitle: { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.8 },
-  card: { backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+  card: { backgroundColor: colors.card, borderRadius: radius.lg, overflow: 'hidden', ...shadows.sm },
   separator: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.md, minHeight: 56 },
   rowInfo: { flex: 1, marginRight: spacing.md },
