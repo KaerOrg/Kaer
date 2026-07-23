@@ -50,7 +50,37 @@ vérification parce que « ça a l'air d'aller ».
 2. Lire **tout** : description, critères d'acceptation, périmètre technique, fichiers
    clés cités, commentaires, labels, et les tickets/PR liés s'il y en a.
 
-3. Extraire et reformuler dans la conversation, en quelques lignes :
+3. **Voir les maquettes du ticket — jamais se contenter de leur URL.** `gh issue view`
+   ne renvoie que du markdown : une image apparaît sous la forme `![alt](url)`, dont
+   tu ne vois **que le lien, pas les pixels**. Sur un ticket de refonte UI, la maquette
+   **EST la spec** — implémenter à partir du seul texte, c'est passer à côté de la
+   référence visuelle. Donc, pour **chaque** image référencée dans le corps ou les
+   commentaires (`![…](…)`, `<img src="…">`, lien finissant par `.png`/`.jpg`/`.jpeg`
+   /`.webp`) :
+
+   - **Image versionnée dans le repo** (`docs/spec/assets/…`, chemin relatif ou blob
+     GitHub) → la lire directement depuis le disque (outil `Read` sur le fichier local
+     après `git fetch`), c'est le plus fiable.
+   - **Pièce jointe GitHub / URL de contenu privé** → la télécharger puis l'ouvrir :
+
+     ```bash
+     # blob épinglé au repo : passer par l'API contents (gère l'auth du repo privé)
+     gh api "repos/KaerOrg/Kaer/contents/<chemin>?ref=<sha-ou-branche>" \
+       --jq '.content' | base64 -d > /tmp/maquette.png
+     # pièce jointe user-attachment (githubusercontent) :
+     # gh api "<url>" > /tmp/maquette.png   (ou curl -L avec le token gh)
+     ```
+
+     puis **`Read` sur `/tmp/maquette.png`** pour réellement voir l'écran.
+
+   - Décrire la maquette dans la conversation (structure, composants, tokens visibles)
+     et la garder comme **grille de référence visuelle** pendant l'implémentation :
+     l'écran livré doit être fidèle à la maquette, pas seulement au texte.
+
+   Si une image référencée est inaccessible (404, lien mort, attachement supprimé) :
+   le signaler à l'utilisateur et demander la maquette avant de coder une refonte UI.
+
+4. Extraire et reformuler dans la conversation, en quelques lignes :
    - **Objectif métier** (ce que veut l'utilisateur final, praticien ou patient).
    - **Critères d'acceptation** sous forme de liste cochable — ils deviennent la grille
      de vérification finale.
