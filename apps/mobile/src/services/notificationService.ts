@@ -35,14 +35,18 @@ export interface NotificationRoutine {
 
 /**
  * Configure l'affichage des notifications reçues alors que l'app est ouverte
- * au premier plan. Sans ce handler, expo-notifications n'affiche rien tant que
- * l'app est visible — la notification n'apparaît que si l'app est en arrière-plan
- * ou l'écran verrouillé. À appeler une seule fois, le plus tôt possible au boot.
+ * au premier plan. À appeler une seule fois, le plus tôt possible au boot.
+ *
+ * En foreground, la bannière OS est supprimée (`shouldShowBanner: false`) : la
+ * notification est présentée à la place par le Toast in-app via le hook
+ * `useForegroundNotificationToast` (`addNotificationReceivedListener`). La notif
+ * reste listée dans le centre de notifications (`shouldShowList: true`) et joue
+ * son son. En arrière-plan / écran verrouillé, l'OS affiche la bannière normalement.
  */
 export function configureForegroundNotifications(): void {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldShowBanner: true,
+      shouldShowBanner: false,
       shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false,

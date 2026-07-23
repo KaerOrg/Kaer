@@ -124,6 +124,7 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileIdentityHeader
           name={fullName}
+          avatarUri={patient?.avatar_url ?? null}
           sinceLabel={sinceLabel}
           onSettingsPress={goToSettings}
           settingsLabel={t('profile.settings_label')}

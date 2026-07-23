@@ -6,8 +6,10 @@ import { Button } from '@ui/Button'
 import { colors, spacing, radius, fonts } from '@theme'
 
 interface ProfileIdentityHeaderProps {
-  /** Nom complet du patient — les initiales de l'avatar en sont dérivées. */
+  /** Nom complet du patient — les initiales de l'avatar en sont dérivées à défaut de photo. */
   name: string
+  /** Photo de profil du patient, ou null pour afficher les initiales. */
+  avatarUri: string | null
   /** Ligne d'ancienneté déjà formatée (ex. « Suivi depuis mars 2025 »). Masquée si vide. */
   sinceLabel: string
   onSettingsPress: () => void
@@ -23,11 +25,11 @@ const AVATAR_SIZE = 56
  * de marque KAER ici — l'écran gagne en hauteur utile.
  */
 export const ProfileIdentityHeader = React.memo(function ProfileIdentityHeader({
-  name, sinceLabel, onSettingsPress, settingsLabel,
+  name, avatarUri, sinceLabel, onSettingsPress, settingsLabel,
 }: ProfileIdentityHeaderProps) {
   return (
     <View style={styles.row}>
-      <Avatar name={name} size={AVATAR_SIZE} backgroundColor={colors.primary} color={colors.white} />
+      <Avatar name={name} uri={avatarUri} size={AVATAR_SIZE} backgroundColor={colors.primary} color={colors.white} />
       <View style={styles.identity}>
         <Text style={styles.name} numberOfLines={1}>{name}</Text>
         {sinceLabel ? <Text style={styles.since} numberOfLines={1}>{sinceLabel}</Text> : null}

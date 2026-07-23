@@ -18,8 +18,16 @@ describe('initialsFromName', () => {
 })
 
 describe('Avatar', () => {
-  it('affiche les initiales dérivées du nom', () => {
+  it('affiche les initiales dérivées du nom sans photo', () => {
     const { getByText } = render(<Avatar name="Dr Claire Lemoine" />)
     expect(getByText('CL')).toBeTruthy()
+  })
+
+  it('affiche la photo à la place des initiales quand uri est fourni', () => {
+    const { getByTestId, queryByText } = render(
+      <Avatar name="Dr Claire Lemoine" uri="https://example.com/a.jpg" testID="avatar-img" />,
+    )
+    expect(getByTestId('avatar-img')).toBeTruthy()
+    expect(queryByText('CL')).toBeNull()
   })
 })

@@ -1044,7 +1044,7 @@ Utilise `EmptyState`.
 
 | Composant | Rôle |
 |---|---|
-| `ui/Avatar` | Avatar rond à initiales (dérivées du nom via `initialsFromName`, deux derniers mots). Props : `name`, `size?` (52), `backgroundColor?` (`primaryLight`), `color?` (`primary`). Pas de photo. |
+| `ui/Avatar` | Avatar rond : affiche la photo (`uri`) si fournie, sinon les initiales (dérivées du nom via `initialsFromName`, deux derniers mots). Props : `name`, `uri?` (photo, prime sur les initiales), `size?` (52), `backgroundColor?` (`primaryLight`), `color?` (`primary`). |
 | `features/WeekStrip` | Bande semaine : rangée fluide de jours tappables (`WeekDay[]` = `{ iso, weekday, dayNumber, selected, hasEvent }`). Jour sélectionné = pastille pleine `primaryDark` (blanc sur turquoise foncé, AA ≈ 5.9:1) ; point `primary` sous les jours porteurs d'un RDV. Navigation temporelle pure. |
 | `features/NextAppointmentCard` | Carte « Prochain rendez-vous » : `Card variant="elevated"` + `Avatar` + nom serif + rôle atténué + `StatusBadge` (statut réel, jamais une modalité inventée) ; pied filet date/heure (icônes `primary`). |
 | `features/AppointmentRegister` | Liste-registre de RDV (`AppointmentRegisterItem[]`) : une `Card` unique, lignes séparées par un filet `colors.neutral`, chaque ligne = bloc date (jour abrégé + numéro serif turquoise) + titre + détail. Ligne `tappable` → feuille d'actions. |
@@ -1068,7 +1068,7 @@ l'agenda.
 
 | Composant | Rôle |
 |---|---|
-| `features/ProfileIdentityHeader` | En-tête d'identité **compact** : `ui/Avatar` (fond `primary`, initiales blanches) + nom serif + ligne d'ancienneté, et bouton réglages (roue crantée, `ui/Button variant="ghost"`) **sur la même ligne**. Props : `name`, `sinceLabel` (masquée si vide), `onSettingsPress`, `settingsLabel`. Pas de marque KAER (gain de hauteur). |
+| `features/ProfileIdentityHeader` | En-tête d'identité **compact** : `ui/Avatar` (photo `avatarUri` si définie, sinon initiales blanches sur fond `primary`) + nom serif + ligne d'ancienneté, et bouton réglages (roue crantée, `ui/Button variant="ghost"`) **sur la même ligne**. Props : `name`, `avatarUri` (photo ou null), `sinceLabel` (masquée si vide), `onSettingsPress`, `settingsLabel`. Pas de marque KAER (gain de hauteur). |
 | `features/ProfileStatsCard` | Résumé de suivi : `ui/Card` à 2 ou 3 colonnes séparées par des filets verticaux `colors.neutral`. Chiffre serif `primaryDark` (AA) + libellé atténué. Props : `stats: ProfileStat[]` (`{ value, label }`). Valeurs **brutes, neutres** — couleur = identité, jamais gravité (MDR 2017/745). |
 | `features/RegisterList` | Conteneur **liste-registre générique** : `ui/Card variant="elevated"` unique, coins 16, lignes séparées par un filet `colors.neutral`. Props : `items: RegisterItem[]`. Réutilisable par tout écran (le hub Profil s'en sert pour « Mon suivi » et « Réglages »). |
 | `features/RegisterList/RegisterRow` | Une ligne : `ui/IconChip` (couleur de pastille fournie) + libellé + chevron optionnel. `RegisterItem = { key, icon, label, chipColor, onPress, labelColor?, showChevron? }`. SURFACE de liste (`Pressable` justifié, imbriquée dans une `Card`). Ligne danger = `chipColor: dangerLight`, `labelColor: dangerText`, `showChevron: false`. |

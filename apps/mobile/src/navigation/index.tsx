@@ -11,6 +11,7 @@ import {
   shouldShowNotificationOnboarding,
 } from '@services/notificationService'
 import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
+import { useForegroundNotificationToast } from '../hooks/useForegroundNotificationToast'
 import AuthStack from './AuthStack'
 import AppStack from './AppStack'
 import NotificationPermissionScreen from '../screens/NotificationPermissionScreen'
@@ -42,6 +43,7 @@ export default function Navigation() {
   const { patient, loading, loadSession, restoreLanguage } = useAuthStore()
   const [notifGate, setNotifGate] = useState<NotifGate>('checking')
   useSyncOnForeground()
+  useForegroundNotificationToast()
 
   useEffect(() => {
     const withTimeout = (p: Promise<void>, ms: number, label: string): Promise<void> =>

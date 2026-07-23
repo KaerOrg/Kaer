@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { Image } from 'expo-image'
 import { colors, radius, fonts } from '@theme'
 
 /**
@@ -19,6 +20,8 @@ export function initialsFromName(name: string): string {
 interface AvatarProps {
   /** Nom complet — les initiales en sont dérivées (deux derniers mots). */
   name: string
+  /** Photo de profil. Si fournie, elle prime sur les initiales ; sinon fallback initiales. */
+  uri?: string | null
   /** Diamètre en points. Défaut : 52. */
   size?: number
   /** Couleur de fond du disque (token de thème). Défaut : `primaryLight`. */
@@ -29,12 +32,13 @@ interface AvatarProps {
 }
 
 /**
- * Avatar rond à initiales. Primitive présentationnelle : pas de photo, juste les
- * initiales dérivées du nom sur un disque coloré. Réutilisable (cartes RDV, en-têtes
- * de fiche praticien…).
+ * Avatar rond. Primitive présentationnelle : affiche la photo (`uri`) si elle est
+ * fournie, sinon les initiales dérivées du nom sur un disque coloré. Réutilisable
+ * (Profil, cartes RDV, en-têtes de fiche praticien…).
  */
 export const Avatar = React.memo(function Avatar({
   name,
+  uri,
   size = 52,
   backgroundColor = colors.primaryLight,
   color = colors.primary,
@@ -45,10 +49,19 @@ export const Avatar = React.memo(function Avatar({
     () => ({ width: size, height: size, borderRadius: size / 2, backgroundColor }),
     [size, backgroundColor],
   )
+  const imageStyle = useMemo(
+    () => ({ width: size, height: size, borderRadius: size / 2 }),
+    [size],
+  )
   const textStyle = useMemo(
     () => ({ color, fontSize: Math.round(size * 0.36) }),
     [color, size],
   )
+  if (uri) {
+    return (
+      <Image source={{ uri }} style={imageStyle} contentFit="cover" testID={testID} />
+    )
+  }
   return (
     <View style={[styles.circle, circleStyle]} testID={testID}>
       <Text style={[styles.initials, textStyle]}>{initials}</Text>

@@ -4,6 +4,7 @@ import { ProfileIdentityHeader } from './ProfileIdentityHeader'
 
 const BASE = {
   name: 'Guillaume Morel',
+  avatarUri: null,
   sinceLabel: 'Suivi depuis mars 2025',
   onSettingsPress: jest.fn(),
   settingsLabel: 'Réglages',
@@ -15,6 +16,13 @@ describe('ProfileIdentityHeader', () => {
     expect(getByText('Guillaume Morel')).toBeTruthy()
     expect(getByText('Suivi depuis mars 2025')).toBeTruthy()
     expect(getByText('GM')).toBeTruthy()
+  })
+
+  it('affiche la photo à la place des initiales quand avatarUri est fourni', () => {
+    const { queryByText } = render(
+      <ProfileIdentityHeader {...BASE} avatarUri="https://example.com/avatar.jpg" />,
+    )
+    expect(queryByText('GM')).toBeNull()
   })
 
   it('omet la ligne d’ancienneté quand elle est vide', () => {

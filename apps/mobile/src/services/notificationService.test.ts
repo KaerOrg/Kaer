@@ -63,14 +63,14 @@ beforeEach(() => jest.clearAllMocks())
 // ── Affichage au premier plan ─────────────────────────────────────────────────
 
 describe('configureForegroundNotifications', () => {
-  it('enregistre un handler qui affiche bannière, liste et son sans badge', async () => {
+  it('supprime la bannière OS en foreground (toast in-app à la place), garde liste et son sans badge', async () => {
     configureForegroundNotifications()
     expect(Notifications.setNotificationHandler).toHaveBeenCalledTimes(1)
 
     const arg = jest.mocked(Notifications.setNotificationHandler).mock.calls[0][0]
     const behavior = await arg?.handleNotification({} as never)
     expect(behavior).toEqual({
-      shouldShowBanner: true,
+      shouldShowBanner: false,
       shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false,
