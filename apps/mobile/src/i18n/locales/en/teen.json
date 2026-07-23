@@ -9,6 +9,13 @@
     "empty_description": "No tools unlocked yet, your care team is on it.",
     "today_section": "Planned for today"
   },
+  "agenda": {
+    "section_next": "Your next appointment",
+    "empty_description": "Your upcoming appointments will appear here.",
+    "appointment": {
+      "cancel_confirm": "Are you sure you want to cancel this appointment?"
+    }
+  },
   "modules": {
     "crisis_plan": {
       "title": "My plan for tough times",

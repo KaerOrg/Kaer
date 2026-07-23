@@ -2377,15 +2377,19 @@
     }
   },
   "agenda": {
+    "title": "Agenda",
     "empty_title": "Aucun rendez-vous",
     "empty_description": "Vos rendez-vous à venir apparaîtront ici.",
     "empty_week": "Aucun créneau disponible ce jour.",
+    "section_next": "Prochain rendez-vous",
     "section_upcoming": "À venir",
     "section_past": "Passés",
     "book_success": "Votre rendez-vous a bien été enregistré.",
     "reschedule_success": "Votre rendez-vous a bien été reprogrammé.",
     "appointment": {
       "new": "Prendre un rendez-vous",
+      "default_title": "Rendez-vous",
+      "manage_title": "Gérer le rendez-vous",
       "cancel_btn": "Annuler le rendez-vous",
       "cancel_short": "Annuler",
       "cancel_confirm": "Confirmez-vous l'annulation de ce rendez-vous ?",

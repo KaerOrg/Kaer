@@ -1036,6 +1036,29 @@ marque), cartes détachées du fond, bandeau de crise non alarmant (MDR 2017/745
 Ordre d'affichage : helper pur `moduleGrouping.ts` (`groupModulesByCategory`, miroir de
 `module_categories.sort_order`). L'accueil ne **conclut** rien : il liste et navigue.
 
+### Agenda patient — « Agenda »
+
+Composé par `screens/AppointmentsScreen.tsx`, même grammaire visuelle que l'accueil
+(serif, cartes détachées, accents turquoise). Réutilise `BrandHeader` (bouton `+` de
+prise de RDV) et `EmptyState`.
+
+| Composant | Rôle |
+|---|---|
+| `ui/Avatar` | Avatar rond à initiales (dérivées du nom via `initialsFromName`, deux derniers mots). Props : `name`, `size?` (52), `backgroundColor?` (`primaryLight`), `color?` (`primary`). Pas de photo. |
+| `features/WeekStrip` | Bande semaine : rangée fluide de jours tappables (`WeekDay[]` = `{ iso, weekday, dayNumber, selected, hasEvent }`). Jour sélectionné = pastille pleine `primaryDark` (blanc sur turquoise foncé, AA ≈ 5.9:1) ; point `primary` sous les jours porteurs d'un RDV. Navigation temporelle pure. |
+| `features/NextAppointmentCard` | Carte « Prochain rendez-vous » : `Card variant="elevated"` + `Avatar` + nom serif + rôle atténué + `StatusBadge` (statut réel, jamais une modalité inventée) ; pied filet date/heure (icônes `primary`). |
+| `features/AppointmentRegister` | Liste-registre de RDV (`AppointmentRegisterItem[]`) : une `Card` unique, lignes séparées par un filet `colors.neutral`, chaque ligne = bloc date (jour abrégé + numéro serif turquoise) + titre + détail. Ligne `tappable` → feuille d'actions. |
+
+Helpers purs : `lib/agendaData.ts` (`buildAgendaData` → next / upcoming / past / eventDays)
+et `lib/agendaFormat.ts` (`dayAbbrev`, `dayNumber`, `formatTime`, `formatLongDate`,
+localisés). Tap sur un RDV à venir → `ActionSheet` (reprogrammer / annuler), équivalent
+mobile de la modale RDV web. L'écran **affiche** l'état administratif des RDV, il ne
+conclut rien (MDR 2017/745).
+
+Tokens de marque ajoutés (`@kaer/shared`) : `primaryDark` (#2C6E72, fond turquoise
+portant du texte blanc — contraste AA) et `primaryPale` (#CFE9EA, sous-libellé
+décoratif sur `primaryDark`).
+
 ---
 
 ## Teen Mode
