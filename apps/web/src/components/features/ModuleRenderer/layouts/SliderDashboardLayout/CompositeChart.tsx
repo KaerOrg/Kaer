@@ -12,19 +12,17 @@ interface Props {
   t: (key: string) => string
 }
 
-// Graphique composite (aperçu praticien) : une courbe fine par dimension + la
-// moyenne en surimpression, avec repères temporels datés. Données mock — aucune
-// interprétation clinique, aucun seuil (conformité MDR 2017/745).
+// Graphique composite (aperçu praticien) : une courbe fine par dimension, avec
+// repères temporels datés. Aucune moyenne agrégée : les 6 dimensions sont
+// hétérogènes (humeur, énergie, anxiété…), une moyenne les mélangeant fabrique un
+// « score de bien-être » trompeur, retiré pour conformité MDR 2017/745 (parité avec
+// le mobile). Données mock, aucune interprétation clinique, aucun seuil.
 export function CompositeChart({ series, range, markers, moduleId, t }: Props) {
   const plotTop = 6, plotBottom = 84, plotH = plotBottom - plotTop
   const labelY = 96
   const totalH = 100
   const n = series[0]?.values.length ?? 0
   const xLabels = buildXLabels(range)
-
-  const avg = Array.from({ length: n }, (_, i) =>
-    series.reduce((s, d) => s + d.values[i], 0) / series.length)
-  const avgMean = (avg.reduce((s, v) => s + v, 0) / (avg.length || 1)).toFixed(1)
 
   const yAt = (v: number) => plotTop + plotH - (v / 10) * plotH
   const xFrac = (f: number) => PAD_LEFT + f * (VB_W - PAD_LEFT - PAD_R)
@@ -39,9 +37,6 @@ export function CompositeChart({ series, range, markers, moduleId, t }: Props) {
     <div className="mt-chart-card">
       <div className="mt-chart-card__header">
         <span className="mt-chart-card__title">{t(`modules.${moduleId}.chart_composite`)}</span>
-        <span className="mt-chart-card__avg">
-          {t(`modules.${moduleId}.chart_avg`).replace('{{value}}', avgMean)}
-        </span>
       </div>
       <svg viewBox={`0 0 ${VB_W} ${totalH}`} className="mt-svg" preserveAspectRatio="xMidYMid meet">
         {Y_TICKS.map(v => (
@@ -61,12 +56,8 @@ export function CompositeChart({ series, range, markers, moduleId, t }: Props) {
         ))}
         {series.map(d => (
           <polyline key={d.id} points={lineFor(d.values, plotTop, plotH)} fill="none"
-            stroke={d.color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" opacity={0.7} />
+            stroke={d.color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" opacity={0.9} />
         ))}
-        <polyline points={lineFor(avg, plotTop, plotH)} fill="none" stroke="#fff" strokeWidth={3.5}
-          strokeLinejoin="round" strokeLinecap="round" />
-        <polyline points={lineFor(avg, plotTop, plotH)} fill="none" stroke="#64748B" strokeWidth={2}
-          strokeLinejoin="round" strokeLinecap="round" />
         {xLabels.map(({ i, label }) => {
           const x = PAD_LEFT + (i / (n - 1)) * (VB_W - PAD_LEFT - PAD_R)
           return <text key={i} x={x} y={labelY} textAnchor="middle" fontSize={7} fill="#9CA3AF">{label}</text>

@@ -121,4 +121,13 @@ describe('SliderDashboardLayout — conformité MDR', () => {
     expect(txt).not.toContain('anormal')
     expect(txt).not.toContain('alerte')
   })
+
+  it("n'affiche aucune moyenne composite agrégée (dimensions hétérogènes — MDR)", async () => {
+    const user = userEvent.setup()
+    render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={footer} t={t} />)
+    await user.click(screen.getByText('modules.mood_tracker.tab_charts'))
+    const compositeCard = screen.getByText('modules.mood_tracker.chart_composite').closest('.mt-chart-card')
+    expect(compositeCard).toBeTruthy()
+    expect(compositeCard?.querySelector('.mt-chart-card__avg')).toBeNull()
+  })
 })
