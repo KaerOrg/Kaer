@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Bell, BellOff, Loader, Plus, X } from 'lucide-react'
+import { Bell, BellOff, Loader, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import { Tooltip } from '@ui/Tooltip'
 import { InputField } from '@ui/InputField'
 import { TimeDial, minutesToHHMM } from '@ui/TimeDial'
@@ -71,10 +72,6 @@ export function NotificationRoutinePanel({
   // Source de vérité de l'heure : minutes depuis minuit. Le cadran, le résumé et
   // l'enregistrement en dérivent.
   const [reminderMinutes, setReminderMinutes] = useState(DEFAULT_MINUTES)
-  // Ouverture explicite du formulaire par l'utilisateur. Le formulaire est aussi
-  // affiché d'office quand il n'existe aucun rappel (rien d'autre à montrer).
-  const [formRequested, setFormRequested] = useState(false)
-  const showForm = formRequested || routines.length === 0
 
   const noteRef = useRef<HTMLTextAreaElement>(null)
 
@@ -124,7 +121,6 @@ export function NotificationRoutinePanel({
     setSelectedDays(DEFAULT_DAYS)
     setReminderMinutes(DEFAULT_MINUTES)
     if (noteRef.current) noteRef.current.value = ''
-    setFormRequested(false)
   }, [selectedDays, reminderMinutes, patientModuleId, practitionerId, patientId, createMutation])
 
   const handleToggleActive = useCallback(
@@ -149,26 +145,14 @@ export function NotificationRoutinePanel({
       {loading ? (
         <div className="nr-loading"><Loader size={20} className="nr-spinner" /></div>
       ) : (
-        <>
-          {routines.map(routine => (
-            <RoutineRow
-              key={routine.id}
-              routine={routine}
-              onToggle={() => void handleToggleActive(routine)}
-              onDelete={() => void handleDelete(routine.id)}
-              t={t}
-            />
-          ))}
-
-          {showForm ? (
-            <div className="nr-form">
-              <div className="nr-form__cols">
+        <div className="nr-panel">
+          <div className="nr-form">
+            <div className="nr-form__cols">
                 <TimeDial
                   minutes={reminderMinutes}
                   onChange={setReminderMinutes}
                   title={t('notifications.reminder_at')}
                   caption={t(`notifications.${periodKey(reminderMinutes)}`)}
-                  hint={t('notifications.drag_hint')}
                   hoursLabel={t('notifications.hours_label')}
                   minutesLabel={t('notifications.minutes_label')}
                   markerLabel={t('notifications.marker_label')}
@@ -208,11 +192,6 @@ export function NotificationRoutinePanel({
                     : t('notifications.preview_empty')}
                 </p>
                 <div className="nr-form__actions">
-                  {routines.length > 0 && (
-                    <Button variant="ghost" size="sm" onClick={() => setFormRequested(false)}>
-                      {t('common.cancel')}
-                    </Button>
-                  )}
                   <Button
                     variant="primary"
                     size="sm"
@@ -225,19 +204,18 @@ export function NotificationRoutinePanel({
                 </div>
               </div>
             </div>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              fullWidth
-              onClick={() => setFormRequested(true)}
-              icon={<Plus size={15} />}
-            >
-              {t('notifications.add_routine')}
-            </Button>
-          )}
-        </>
+
+          {/* Liste des rappels déjà programmés, sous le formulaire de saisie. */}
+          {routines.map(routine => (
+            <RoutineRow
+              key={routine.id}
+              routine={routine}
+              onToggle={() => void handleToggleActive(routine)}
+              onDelete={() => void handleDelete(routine.id)}
+              t={t}
+            />
+          ))}
+        </div>
       )}
     </>
   )
@@ -257,45 +235,52 @@ const DAY_ISO_TO_KEY: Record<number, string> = {
 function RoutineRow({ routine, onToggle, onDelete, t }: RoutineRowProps) {
   const effectiveTime = routine.patient_time_override ?? routine.time_of_day
   const dayLabels = routine.days_of_week
-    .map(d => t(`notifications.day_${DAY_ISO_TO_KEY[d] ?? ''}`))
+    .map(d => t(`notifications.day_abbr_${DAY_ISO_TO_KEY[d] ?? ''}`))
     .join(', ')
 
-  return (
-    <div className={`nr-row ${routine.is_active ? '' : 'nr-row--inactive'}`}>
-      <div className="nr-row__info">
-        <span className="nr-row__days">{dayLabels}</span>
-        <span className="nr-row__time">{effectiveTime}</span>
-        {routine.practitioner_note ? (
-          <span className="nr-row__note">{routine.practitioner_note}</span>
-        ) : null}
-        {routine.patient_paused ? (
-          <span className="nr-row__paused">{t('notifications.patient_paused')}</span>
-        ) : null}
-      </div>
-      <div className="nr-row__actions">
-        <Tooltip label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="xs"
-            icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
-            onClick={onToggle}
-            aria-pressed={routine.is_active}
-            aria-label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
-          />
-        </Tooltip>
-        <Tooltip label={t('common.delete')}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="xs"
-            category="danger"
-            icon={<X size={15} />}
-            onClick={onDelete}
-            aria-label={t('common.delete')}
-          />
-        </Tooltip>
-      </div>
+  const actions = (
+    <div className="nr-row__actions">
+      <Tooltip label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
+          onClick={onToggle}
+          aria-pressed={routine.is_active}
+          aria-label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
+        />
+      </Tooltip>
+      <Tooltip label={t('common.delete')}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          category="danger"
+          icon={<X size={15} />}
+          onClick={onDelete}
+          aria-label={t('common.delete')}
+        />
+      </Tooltip>
     </div>
+  )
+
+  return (
+    <Card
+      variant="default"
+      className={`nr-card ${routine.is_active ? '' : 'nr-card--inactive'}`}
+      header={{ title: effectiveTime, subtitle: dayLabels, right: actions }}
+    >
+      {routine.practitioner_note || routine.patient_paused ? (
+        <div className="nr-card__meta">
+          {routine.practitioner_note ? (
+            <span className="nr-row__note">{routine.practitioner_note}</span>
+          ) : null}
+          {routine.patient_paused ? (
+            <span className="nr-row__paused">{t('notifications.patient_paused')}</span>
+          ) : null}
+        </div>
+      ) : null}
+    </Card>
   )
 }
