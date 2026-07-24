@@ -62,6 +62,8 @@ Planifier et rappeler (calendrier) ne poursuit pas en soi une finalité médical
 
 Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état « en retard » est un fait administratif (date dépassée), pas un signal clinique : teinte ambre neutre, pas de rouge de gravité.
 
+> Analyse détaillée + checklist de garde-fous : voir l'annexe [« Analyse MDR (document de travail) »](#annexe--analyse-mdr-document-de-travail) en fin de document.
+
 ## Portée
 
 - Modules : cartes vers tableau, sous-onglets Actifs / Évolution.
@@ -190,3 +192,72 @@ K-1 → K-2 → K-3 (Modules complets), puis K-4 → K-5 → K-6 → K-7 (Échel
 | K-5 | `K-2_modules-evolution_3c` (réf.) + `K-5-K-7_programmee_5a` |
 | K-6 | `K-6_encart-auto_6a` + `K-6_encart-hetero_6b` |
 | K-7 | `K-5-K-7_programmee_5a` |
+
+---
+
+## Annexe · Analyse MDR (document de travail)
+
+> **Statut** : document de travail interne, rédigé **en l'absence de référent qualité/réglementaire** à ce stade du projet. Il sert (1) de checklist de garde-fous pour l'implémentation et (2) de pièce de cadrage à présenter à un expert « dispositif médical logiciel » (SaMD), à rechercher via l'incubateur.
+>
+> **Ce document n'est ni un avis juridique, ni une auto-déclaration de conformité.** La qualification (DM ou non) et la classification relèvent d'une analyse par une personne qualifiée (consultant affaires réglementaires DM, ou juriste santé). Objectif ici : cadrer la question, pas la trancher.
+
+### 1. Le test de qualification
+
+Un logiciel est un dispositif médical au sens du **MDR 2017/745 (Art. 2)** si **deux conditions cumulatives** sont réunies :
+
+1. **Finalité médicale** revendiquée par le fabricant : diagnostic, prévention, **surveillance**, prédiction, pronostic, traitement ou atténuation d'une maladie.
+2. **Action sur les données** au-delà de stocker, archiver, communiquer, rechercher ou compresser sans perte (critère du **MDCG 2019-11**, guide de qualification des logiciels). Créer ou modifier une information médicale par calcul/interprétation peut qualifier ; afficher une donnée brute, non.
+
+Kær, en carnet de bord passif (données brutes, restituées sans interprétation), reste **hors dispositif médical par construction**. La règle d'or « le code affiche, jamais il ne conclut » est précisément la garantie de non-franchissement de la condition 2.
+
+### 2. Où se situe Kær aujourd'hui
+
+- **Cœur de l'app** : hors DM (stockage + restitution brute, opt-in, aucune conclusion serveur).
+- **Zone déjà grise, préexistante à cet Epic** : le **calcul de score** d'échelles validées (PHQ-9, GAD-7…) par `engagementService`. Le calcul sur donnée à finalité médicale figure parmi les actions qui *peuvent* qualifier (MDCG 2019-11). Ce qui maintient Kær du bon côté : le score est **brut, non interprété, restitué à un humain** (aucun label de sévérité, aucune couleur de gravité, aucun seuil, aucune alerte).
+
+### 3. Checklist de garde-fous (cette feature)
+
+Chaque ligne doit rester vraie. La colonne « Bascule en DM si » liste les franchissements à refuser en revue.
+
+| Garde-fou | Conforme (non-DM) si | Bascule en DM si | Verrou dans la spec |
+|---|---|---|---|
+| **Cadence** | Choisie par le praticien, préréglages neutres | Suggérée/adaptée par l'app selon l'état clinique | K-6 : préréglages, aucune reco |
+| **Rappel patient** | Calendaire, neutre (« passation prévue »), non conditionnel | Déclenché par une donnée ou un score (« ton score a monté → … ») | K-6/K-7 : wording neutre |
+| **État « en retard »** | Fait administratif (date dépassée), ambre neutre | Signal clinique (rouge de gravité, escalade, priorisation clinique) | K-7 : dérivé de la date, ambre |
+| **Score** | Brut, restitué à un humain | Interprété : label sévérité, seuil, alerte, code couleur de gravité | K-5 : scores bruts, pas de couleur |
+| **C-SSRS** | Capture + interprétation humaine | Flag de risque suicidaire automatique | Hors-scope : aucun flag auto |
+| **Mode de passation** | « En séance » (accompagné) proposé | (voir Q2 ci-dessous : l'auto-domicile récurrent change la prémisse) | K-6 : mode « en séance » offert |
+| **Comparaison / norme** | Aucune | « Vous dormez moins que la moyenne », courbe impliquant une dégradation | Règle d'or Kær |
+
+### 4. Deux questions de fond à instruire avec l'expert
+
+**Q1 · Position sur le calcul de score.** Question déjà ouverte, indépendante de cet Epic, mais que la mesure répétée rend plus visible. À clarifier : le calcul d'un total d'échelle validée, restitué brut sans interprétation, reste-t-il hors MDSW ? (Position défendable, mais à faire confirmer.)
+
+**Q2 · La mesure récurrente autonome change la prémisse du positionnement non-DM.** L'argumentaire actuel repose sur : *échelles remplies en consultation avec le clinicien, pas en autonomie, aucune réponse automatique*. Or K-6 introduit un mode **« à domicile (auto) », hebdomadaire/mensuel, envoyé au patient** : on passe d'une passation accompagnée à une **auto-évaluation récurrente autonome structurée par l'outil**. « Surveillance » étant explicitement une finalité médicale du MDR, il faut **ré-instruire** l'argument non-DM pour ce cas précis (le mode « en séance » reste, lui, couvert par l'ancien raisonnement).
+
+### 5. Conséquence si la qualification bascule (pourquoi border dès la spec)
+
+Si Kær était qualifié MDSW, la **Règle 11 (Annexe VIII)** placerait un logiciel « fournissant une information servant à des décisions à finalité diagnostique ou thérapeutique » en **classe IIa au minimum**. Cela implique : organisme notifié, évaluation clinique, système qualité **ISO 13485**, marquage CE. Le saut réglementaire et financier est majeur : d'où l'intérêt de tenir la ligne non-DM par conception tant que le modèle économique ne justifie pas d'assumer un statut DM.
+
+### 6. Revendications d'usage (l'*intended purpose* qualifie autant que le code)
+
+La qualification dépend de ce que le fabricant **revendique**, pas seulement de ce que le code fait. Une même fonction bascule selon la phrase marketing.
+
+| Revendications autorisées (non-DM) | Revendications interdites (qualifient en DM) |
+|---|---|
+| « Organiser et planifier des passations d'échelles » | « Surveiller l'évolution de la dépression » |
+| « Carnet de bord numérique », « journal de suivi » | « Détecter une aggravation », « alerter en cas de risque » |
+| « Restituer au praticien les scores bruts saisis » | « Évaluer la sévérité », « recommander une réévaluation » |
+| « Rappel calendaire des passations prévues » | « Relancer selon l'état clinique du patient » |
+
+À verrouiller de façon transverse : site, pitch incubateur, CGU, textes in-app. Une seule revendication de « surveillance/détection » suffit à ouvrir la qualification, indépendamment du code.
+
+### 7. À apporter à l'incubateur / expertise à rechercher
+
+- **Profil d'expert à viser** : consultant en **affaires réglementaires dispositifs médicaux logiciels (SaMD)**, ou avocat/juriste en droit de la santé et du numérique. Un incubateur santé (type biocluster, French Tech Santé, structures type Eurasanté / Genopole / incubateurs hospitaliers) a en général ce réseau.
+- **Questions précises à poser** : (a) le calcul de score brut non interprété qualifie-t-il ? (b) le mode auto-domicile récurrent constitue-t-il de la « surveillance » au sens MDR ? (c) quelles revendications d'usage tenir pour rester non-DM ? (d) à quel horizon anticiper un statut DM classe IIa si la roadmap l'exige ?
+- **Pièces à préparer** : cette spec, la « règle d'or » (CLAUDE.md), l'inventaire des échelles + leur calcul de score, les maquettes K-6/K-7, l'argumentaire de positionnement non-DM existant.
+
+### 8. Décision de gouvernance (à tracer)
+
+Tant qu'aucun expert n'a statué, l'implémentation de K-6/K-7 tient les garde-fous du §3 **par défaut** (position conservatrice = non-DM). Toute demande qui franchirait une ligne du §3 est mise en veto jusqu'à instruction par un référent qualifié.
