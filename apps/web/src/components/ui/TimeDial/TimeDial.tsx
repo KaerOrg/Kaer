@@ -81,9 +81,8 @@ export function TimeDial({
   // uniquement quand la valeur change de l'EXTÉRIEUR (glisser, parent), pas quand c'est
   // notre propre émission — `lastEmitted` distingue les deux et évite le reformatage
   // du texte en cours de saisie.
-  const parts = splitMinutes(minutes)
-  const [hoursText, setHoursText] = useState(() => pad2(parts.hours))
-  const [minutesText, setMinutesText] = useState(() => pad2(parts.minutes))
+  const [hoursText, setHoursText] = useState(() => pad2(splitMinutes(minutes).hours))
+  const [minutesText, setMinutesText] = useState(() => pad2(splitMinutes(minutes).minutes))
   const lastEmitted = useRef(minutes)
 
   useEffect(() => {
