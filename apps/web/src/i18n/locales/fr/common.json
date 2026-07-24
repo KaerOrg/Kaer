@@ -2057,8 +2057,15 @@
     "minutes_label": "Minutes",
     "marker_label": "Heure du rappel",
     "note_optional": "optionnel",
-    "summary_one": "{{count}} rappel / semaine, {{days}} à {{time}}.",
-    "summary_other": "{{count}} rappels / semaine, {{days}} à {{time}}."
+    "summary_one": "{{count}} rappel / semaine · {{days}} à {{time}}",
+    "summary_other": "{{count}} rappels / semaine · {{days}} à {{time}}",
+    "day_abbr_lun": "lun",
+    "day_abbr_mar": "mar",
+    "day_abbr_mer": "mer",
+    "day_abbr_jeu": "jeu",
+    "day_abbr_ven": "ven",
+    "day_abbr_sam": "sam",
+    "day_abbr_dim": "dim"
   },
   "notes": {
     "section_title": "Notes",

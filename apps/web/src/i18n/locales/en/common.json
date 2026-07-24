@@ -1911,8 +1911,15 @@
     "minutes_label": "Minutes",
     "marker_label": "Reminder time",
     "note_optional": "optional",
-    "summary_one": "{{count}} reminder / week, {{days}} at {{time}}.",
-    "summary_other": "{{count}} reminders / week, {{days}} at {{time}}."
+    "summary_one": "{{count}} reminder / week · {{days}} at {{time}}",
+    "summary_other": "{{count}} reminders / week · {{days}} at {{time}}",
+    "day_abbr_lun": "Mon",
+    "day_abbr_mar": "Tue",
+    "day_abbr_mer": "Wed",
+    "day_abbr_jeu": "Thu",
+    "day_abbr_ven": "Fri",
+    "day_abbr_sam": "Sat",
+    "day_abbr_dim": "Sun"
   },
   "notes": {
     "section_title": "Notes",

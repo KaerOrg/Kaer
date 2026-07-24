@@ -104,9 +104,10 @@ export function NotificationRoutinePanel({
     [t],
   )
 
-  // Récap lisible des jours sélectionnés pour la barre de résumé.
+  // Récap lisible des jours sélectionnés pour la barre de résumé (abréviations 3 lettres,
+  // distinctes des libellés d'une lettre du cadran de jours).
   const previewDays = useMemo(
-    () => selectedDays.map(iso => t(`notifications.day_${DAY_KEYS[iso - 1]}`)).join(', '),
+    () => selectedDays.map(iso => t(`notifications.day_abbr_${DAY_KEYS[iso - 1]}`)).join(', '),
     [selectedDays, t],
   )
 
