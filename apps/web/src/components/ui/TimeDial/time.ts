@@ -64,13 +64,19 @@ export function minutesToTurn(total: number): number {
 }
 
 /**
- * Coordonnées `{ x, y }` du repère sur un cercle de rayon `radius` centré en
- * `(radius, radius)`, pour l'heure donnée. 0 h en haut, sens horaire.
+ * Coordonnées `{ x, y }` du repère pour l'heure donnée, sur un cercle d'orbite
+ * `orbitRadius` centré en `(center, center)`. 0 h en haut, sens horaire.
+ * `orbitRadius` est distinct du centre pour poser le repère sur la **bande** de
+ * l'anneau (rayon d'orbite < rayon extérieur), pas sur son bord extérieur.
  */
-export function markerPosition(total: number, radius: number): { x: number; y: number } {
+export function markerPosition(
+  total: number,
+  center: number,
+  orbitRadius: number,
+): { x: number; y: number } {
   const theta = minutesToTurn(total) * 2 * Math.PI
   return {
-    x: radius + radius * Math.sin(theta),
-    y: radius - radius * Math.cos(theta),
+    x: center + orbitRadius * Math.sin(theta),
+    y: center - orbitRadius * Math.cos(theta),
   }
 }

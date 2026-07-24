@@ -56,19 +56,27 @@ describe('time helpers', () => {
   })
 
   it('markerPosition place le repère (0 h en haut, sens horaire)', () => {
-    const r = 100
-    // Minuit : en haut (x = r, y = 0).
-    let p = markerPosition(0, r)
+    const c = 100 // centre
+    const o = 100 // rayon d'orbite (= centre → repère sur le bord)
+    // Minuit : en haut (x = c, y = c - o = 0).
+    let p = markerPosition(0, c, o)
     expect(p.x).toBeCloseTo(100)
     expect(p.y).toBeCloseTo(0)
-    // 6 h = quart de tour : à droite (x = 2r, y = r).
-    p = markerPosition(6 * 60, r)
+    // 6 h = quart de tour : à droite (x = c + o, y = c).
+    p = markerPosition(6 * 60, c, o)
     expect(p.x).toBeCloseTo(200)
     expect(p.y).toBeCloseTo(100)
-    // 12 h = demi-tour : en bas (x = r, y = 2r).
-    p = markerPosition(12 * 60, r)
+    // 12 h = demi-tour : en bas (x = c, y = c + o).
+    p = markerPosition(12 * 60, c, o)
     expect(p.x).toBeCloseTo(100)
     expect(p.y).toBeCloseTo(200)
+  })
+
+  it('markerPosition : rayon d\'orbite < centre place le repère en retrait du bord', () => {
+    // Centre 120, orbite 112 (bande d'anneau de 16px). À minuit, y = 120 - 112 = 8.
+    const p = markerPosition(0, 120, 112)
+    expect(p.x).toBeCloseTo(120)
+    expect(p.y).toBeCloseTo(8)
   })
 
   describe('pointerToMinutes', () => {

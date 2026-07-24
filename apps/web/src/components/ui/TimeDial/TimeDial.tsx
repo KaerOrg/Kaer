@@ -49,6 +49,8 @@ export interface TimeDialProps {
 }
 
 const DEFAULT_ACCENT = 'var(--color-primary)'
+/** Épaisseur de l'anneau, en px. DOIT rester égale à `inset` de `.time-dial__hole`. */
+const RING_THICKNESS = 16
 
 /**
  * Cadran horaire radial 24 h : un anneau dont l'arc teal est proportionnel à l'heure,
@@ -93,7 +95,9 @@ export function TimeDial({
     setMinutesText(pad2(p.minutes))
   }, [minutes])
 
-  const emit = useCallback((m: number) => {
+  // Émission depuis la FRAPPE : marque `lastEmitted` pour que l'effet NE reformate PAS
+  // le texte en cours de saisie (l'utilisateur garde son texte brut jusqu'au blur).
+  const emitTyped = useCallback((m: number) => {
     lastEmitted.current = m
     onChange(m)
   }, [onChange])
@@ -103,7 +107,7 @@ export function TimeDial({
       const digits = raw.replace(/\D/g, '').slice(0, 2)
       setHoursText(digits)
       const h = clampInt(Number(digits || 0), 0, 23)
-      emit(joinMinutes(h, Number(minutesText || 0)))
+      emitTyped(joinMinutes(h, Number(minutesText || 0)))
       // Passage auto aux minutes dès 2 chiffres, ou dès un 1er chiffre > 2 (qui ne
       // peut être qu'une heure complète : 3–9).
       if (digits.length === 2 || (digits.length === 1 && Number(digits) > 2)) {
@@ -111,7 +115,7 @@ export function TimeDial({
         minutesInputRef.current?.select()
       }
     },
-    [emit, minutesText],
+    [emitTyped, minutesText],
   )
 
   const handleMinutesChange = useCallback(
@@ -119,9 +123,9 @@ export function TimeDial({
       const digits = raw.replace(/\D/g, '').slice(0, 2)
       setMinutesText(digits)
       const m = clampInt(Number(digits || 0), 0, 59)
-      emit(joinMinutes(Number(hoursText || 0), m))
+      emitTyped(joinMinutes(Number(hoursText || 0), m))
     },
-    [emit, hoursText],
+    [emitTyped, hoursText],
   )
 
   // À la perte de focus, refléter la valeur committée, complétée à deux chiffres.
@@ -140,6 +144,8 @@ export function TimeDial({
   // d'un coup au relâchement (pointerup) ou au démontage — sans handler auto-référent.
   const dragAbort = useRef<AbortController | null>(null)
 
+  // Glisser et flèches : `onChange` direct SANS marquer `lastEmitted`, pour que l'effet
+  // resynchronise les champs texte (l'heure affichée suit le geste en direct).
   const handlePointerMove = useCallback(
     (e: globalThis.PointerEvent) => {
       const el = dialRef.current
@@ -147,9 +153,9 @@ export function TimeDial({
       const rect = el.getBoundingClientRect()
       const cx = rect.left + rect.width / 2
       const cy = rect.top + rect.height / 2
-      emit(pointerToMinutes(e.clientX - cx, e.clientY - cy, dragStepMinutes))
+      onChange(pointerToMinutes(e.clientX - cx, e.clientY - cy, dragStepMinutes))
     },
-    [emit, dragStepMinutes],
+    [onChange, dragStepMinutes],
   )
 
   const handleMarkerPointerDown = useCallback(
@@ -174,13 +180,15 @@ export function TimeDial({
       else if (e.key === 'Home') next = 0
       if (next === null) return
       e.preventDefault()
-      emit(((next % 1440) + 1440) % 1440)
+      onChange(((next % 1440) + 1440) % 1440)
     },
-    [emit, minutes, dragStepMinutes],
+    [onChange, minutes, dragStepMinutes],
   )
 
   const turn = minutesToTurn(minutes)
-  const marker = markerPosition(minutes, radius)
+  // Repère centré sur la bande de l'anneau : rayon d'orbite = rayon extérieur moins la
+  // moitié de l'épaisseur de l'anneau (le hole a `inset: RING_THICKNESS` en CSS).
+  const marker = markerPosition(minutes, radius, radius - RING_THICKNESS / 2)
 
   const ringStyle: CSSProperties = {
     background: `conic-gradient(from 0deg, ${accentColor} 0 ${turn}turn, var(--color-border) ${turn}turn 1turn)`,
