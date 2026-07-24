@@ -91,7 +91,38 @@
 .nr-form {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+/* Deux colonnes : cadran (gauche) + jours & note (droite). Repli en une colonne
+   sur petit écran pour ne jamais provoquer de débordement horizontal. */
+.nr-form__cols {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.nr-form__cols > .time-dial {
+  flex: 0 0 240px;
+}
+
+.nr-form__right {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
+  padding-top: 8px;
+}
+
+@media (max-width: 560px) {
+  .nr-form__cols {
+    flex-direction: column;
+    align-items: center;
+  }
+  .nr-form__right {
+    width: 100%;
+  }
 }
 
 .nr-form__label {
@@ -102,68 +133,39 @@
   letter-spacing: 0.4px;
 }
 
-.nr-form__days {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.nr-form__day {
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xxs);
-  font-weight: 600;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: background 0.12s, border-color 0.12s, color 0.12s;
-}
-
-.nr-form__day--on {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-}
-
-.nr-form__time {
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  font-size: var(--font-size-caption);
-  color: var(--color-text);
-  background: var(--color-surface);
-  width: fit-content;
+.nr-form__optional {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 500;
+  opacity: 0.75;
 }
 
 .nr-form__actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 4px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
 }
 
-/* Bloc d'aperçu : récapitule ce que recevra le patient (teinte primaire douce). */
-.nr-form__preview {
-  margin-top: 10px;
-  padding: 10px 12px;
+/* Barre de résumé (pied) : récapitule le créneau en clair + actions. */
+.nr-form__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   background: var(--color-primary-light, #eff6ff);
   border: 1px solid var(--color-primary);
 }
 
-.nr-form__preview-title {
-  margin: 0 0 2px;
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.nr-form__preview-body {
+.nr-form__summary-text {
   margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: var(--font-size-sm);
-  line-height: 1.45;
+  line-height: 1.4;
+  font-weight: 500;
   color: var(--color-text);
 }
