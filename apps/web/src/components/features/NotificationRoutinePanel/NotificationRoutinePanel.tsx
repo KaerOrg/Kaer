@@ -31,7 +31,6 @@ interface Props {
 }
 
 const DAY_KEYS = ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'] as const
-const DAY_ISO = [1, 2, 3, 4, 5, 6, 7] as const
 const DEFAULT_MINUTES = 9 * 60 // 09:00
 const DEFAULT_DAYS = [1, 3, 5]
 

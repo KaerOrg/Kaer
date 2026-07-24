@@ -77,11 +77,6 @@ export function TimeDial({
   const dialRef = useRef<HTMLDivElement>(null)
   const minutesInputRef = useRef<HTMLInputElement>(null)
 
-  // `onChange` gardé dans une ref pour que les handlers de glisser (attachés au
-  // document) restent stables sans se réabonner à chaque frappe.
-  const onChangeRef = useRef(onChange)
-  onChangeRef.current = onChange
-
   // Champs affichés en texte libre pendant la frappe ; resynchronisés depuis `minutes`
   // uniquement quand la valeur change de l'EXTÉRIEUR (glisser, parent), pas quand c'est
   // notre propre émission — `lastEmitted` distingue les deux et évite le reformatage
@@ -101,8 +96,8 @@ export function TimeDial({
 
   const emit = useCallback((m: number) => {
     lastEmitted.current = m
-    onChangeRef.current(m)
-  }, [])
+    onChange(m)
+  }, [onChange])
 
   const handleHoursChange = useCallback(
     (raw: string) => {
@@ -141,10 +136,13 @@ export function TimeDial({
     e.currentTarget.select()
   }, [])
 
-  // Glisser du repère : écoute pointermove/up au niveau document pour ne pas perdre
-  // le geste si le pointeur sort du cadran.
+  // Glisser du repère : écoute pointermove/up au niveau document (pour ne pas perdre
+  // le geste si le pointeur sort du cadran). L'AbortController retire les deux écouteurs
+  // d'un coup au relâchement (pointerup) ou au démontage — sans handler auto-référent.
+  const dragAbort = useRef<AbortController | null>(null)
+
   const handlePointerMove = useCallback(
-    (e: PointerEvent | globalThis.PointerEvent) => {
+    (e: globalThis.PointerEvent) => {
       const el = dialRef.current
       if (!el) return
       const rect = el.getBoundingClientRect()
@@ -155,27 +153,19 @@ export function TimeDial({
     [emit, dragStepMinutes],
   )
 
-  const handlePointerUp = useCallback(() => {
-    document.removeEventListener('pointermove', handlePointerMove)
-    document.removeEventListener('pointerup', handlePointerUp)
-  }, [handlePointerMove])
-
   const handleMarkerPointerDown = useCallback(
     (e: PointerEvent<HTMLDivElement>) => {
       e.preventDefault()
-      document.addEventListener('pointermove', handlePointerMove)
-      document.addEventListener('pointerup', handlePointerUp)
+      dragAbort.current?.abort()
+      const ctrl = new AbortController()
+      dragAbort.current = ctrl
+      document.addEventListener('pointermove', handlePointerMove, { signal: ctrl.signal })
+      document.addEventListener('pointerup', () => ctrl.abort(), { signal: ctrl.signal })
     },
-    [handlePointerMove, handlePointerUp],
+    [handlePointerMove],
   )
 
-  useEffect(
-    () => () => {
-      document.removeEventListener('pointermove', handlePointerMove)
-      document.removeEventListener('pointerup', handlePointerUp)
-    },
-    [handlePointerMove, handlePointerUp],
-  )
+  useEffect(() => () => dragAbort.current?.abort(), [])
 
   const handleMarkerKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
