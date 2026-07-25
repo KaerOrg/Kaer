@@ -1,0 +1,93 @@
+/* ── Ruban multi-symptômes (heatmap dimensions × jours) ──────────────────────
+   Teinte = identité de la dimension, opacité = magnitude brute (MDR). Cellule
+   vide à contour = jour non renseigné. Largeur fluide : cellules `flex: 1`. */
+
+.symptom-ribbon {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.symptom-ribbon__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.symptom-ribbon__title {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  flex-shrink: 1;
+}
+
+.symptom-ribbon__assiduity {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.symptom-ribbon__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.symptom-ribbon__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symptom-ribbon__row-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 78px;
+  flex-shrink: 0;
+}
+
+.symptom-ribbon__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.symptom-ribbon__dim {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.symptom-ribbon__cells {
+  flex: 1;
+  display: flex;
+  gap: 1px;
+}
+
+.symptom-ribbon__cell {
+  flex: 1;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.symptom-ribbon__cell--empty {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+
+.symptom-ribbon__legend {
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}

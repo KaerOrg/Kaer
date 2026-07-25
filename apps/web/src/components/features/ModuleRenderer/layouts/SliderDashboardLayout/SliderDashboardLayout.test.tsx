@@ -54,26 +54,32 @@ function sliderFields(): ContentField[] {
 const instruction = field('scale_instruction', {
   id: 'mood_tracker.instruction',
   text_code: 'modules.mood_tracker.instructions',
-  props: { accent_color: '#F97316' },
+  props: { accent_color: '#4FA5A9' },
 })
 const footer = field('footer_note', { text_code: 'modules.mood_tracker.footer' })
 
 describe('SliderDashboardLayout — onglet Saisie (défaut)', () => {
-  it('rend les 3 onglets via ui/Tabs, l\'instruction et une carte slider par dimension', () => {
+  it('rend 2 onglets (Saisie / Suivi), l\'instruction et une carte slider par dimension', () => {
     const fields = [instruction, ...sliderFields(), field('scale_text_input', { text_code: 'modules.mood_tracker.notes_label' })]
     const { container } = render(<SliderDashboardLayout fields={fields} footer={footer} t={t} />)
 
     expect(container.querySelector('.mt')).toBeTruthy()
     const tabs = container.querySelectorAll('[role="tab"]')
-    expect(tabs).toHaveLength(3)
+    expect(tabs).toHaveLength(2)
     expect(tabs[0].textContent).toBe('modules.mood_tracker.tab_entry')
-    expect(tabs[1].textContent).toBe('modules.mood_tracker.tab_charts')
-    expect(tabs[2].textContent).toBe('modules.mood_tracker.tab_month')
+    expect(tabs[1].textContent).toBe('modules.mood_tracker.tab_tracking')
     expect(tabs[0].getAttribute('aria-selected')).toBe('true')
 
     expect(container.querySelector('.mt__instruction')?.textContent).toBe('modules.mood_tracker.instructions')
     expect(container.querySelectorAll('.mt-slider-card')).toHaveLength(3)
     expect(container.querySelector('.btn--full')?.textContent).toBe('common.save')
+  })
+
+  it('affiche un historique en mini-empreinte (aucune moyenne globale) sous la saisie', () => {
+    const { container } = render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={undefined} t={t} />)
+    // Deux cartes d'historique, chacune rendue par DimensionFingerprint (barres par dimension).
+    expect(container.querySelectorAll('.mt-hist__card')).toHaveLength(2)
+    expect(container.querySelectorAll('.mt-hist .dim-fingerprint').length).toBe(2)
   })
 
   it('trie les sliders par sort_order', () => {
@@ -93,27 +99,32 @@ describe('SliderDashboardLayout — onglet Saisie (défaut)', () => {
   })
 })
 
-describe('SliderDashboardLayout — onglets Évolution & Vue d\'ensemble', () => {
-  it('Évolution : graphique composite, sélecteur de période et carte par dimension', async () => {
+describe('SliderDashboardLayout — onglet Suivi', () => {
+  it('ruban « Vue par symptôme » (une ligne par dimension), repères, sélecteur de période et carte par dimension', async () => {
     const user = userEvent.setup()
     const { container } = render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={footer} t={t} />)
-    await user.click(screen.getByText('modules.mood_tracker.tab_charts'))
+    await user.click(screen.getByText('modules.mood_tracker.tab_tracking'))
 
-    expect(screen.getByText('modules.mood_tracker.chart_composite')).toBeTruthy()
+    // Ruban générique : une ligne par dimension.
+    expect(container.querySelector('.symptom-ribbon')).toBeTruthy()
+    expect(container.querySelectorAll('.symptom-ribbon__row')).toHaveLength(3)
+    // Sélecteur de période + une carte par dimension.
     expect(container.querySelectorAll('.segmented--pills .segmented__btn').length).toBe(4)
     expect(container.querySelectorAll('.mt-chart-card').length).toBeGreaterThanOrEqual(sliderFields().length)
     expect(container.querySelector('.preview-panel__info')).toBeTruthy()
   })
-
-  it('Vue d\'ensemble : heatmap calendrier', async () => {
-    const user = userEvent.setup()
-    const { container } = render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={footer} t={t} />)
-    await user.click(screen.getByText('modules.mood_tracker.tab_month'))
-    expect(container.querySelector('.mt-cal')).toBeTruthy()
-  })
 })
 
 describe('SliderDashboardLayout — conformité MDR', () => {
+  it('aucune moyenne composite agrégée : ni graphe composite, ni calendrier mensuel', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={footer} t={t} />)
+    await user.click(screen.getByText('modules.mood_tracker.tab_tracking'))
+    // La légende composite et le calendrier mensuel de l'ancienne version sont supprimés.
+    expect(container.querySelector('.mt-legend')).toBeNull()
+    expect(container.querySelector('.mt-cal')).toBeNull()
+  })
+
   it('aucun label interprétatif (sévère / anormal / alerte) dans le rendu', () => {
     const { container } = render(<SliderDashboardLayout fields={[instruction, ...sliderFields()]} footer={footer} t={t} />)
     const txt = (container.textContent ?? '').toLowerCase()

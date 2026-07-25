@@ -455,9 +455,22 @@ par dimension (valeur au-dessus, libellé court dessous, teinte = identité). Re
 toute **moyenne globale** — on lit N symptômes bruts. Largeur fluide (`flex: 1` par
 barre). Utilisé par le panneau « Données » de l'humeur (moyennes récentes) **et** par
 la carte d'aperçu de la frise Humeur de la page Évolution (`MoodEvolutionBlock`, 30 j
-glissants). Props :
+glissants) **et** l'historique de l'onglet Saisie de l'aperçu module
+(`SliderDashboardLayout`). Props :
 `bars: FingerprintBar[]` (`{ key, label, value: number | null, color }`), `yMax`,
 `barAreaHeight?`, `showValues?`. Conformité MDR : couleur = identité, hauteur = magnitude.
+
+#### `SymptomRibbon` — ruban multi-symptômes (`components/features/`)
+
+Miroir web du ruban mobile (#161) : heatmap **N dimensions × jours**. Une ligne par
+dimension (pastille + libellé), une cellule par jour. Teinte = identité de la dimension,
+**opacité = magnitude brute** (helper partagé `ribbonCellOpacity` de `@kaer/shared`,
+parité web ≡ mobile). Jour non renseigné = cellule vide à contour (aucune valeur
+inventée). Largeur fluide (cellules `flex: 1`, jamais de scroll horizontal). Générique :
+ne connaît aucun module, dimensions/couleurs/libellés fournis par l'appelant. Utilisé par
+l'onglet Suivi de l'aperçu module (`SliderDashboardLayout`). Props :
+`rows: RibbonRow[]` (`{ key, label, color, values: (number | null)[] }`), `yMax`, `title`,
+`assiduityLabel`, `legendLabel`. Conformité MDR : magnitude seule, aucun agrégat ni seuil.
 
 #### `ProgressRing` — anneau de valeur (jauge circulaire)
 

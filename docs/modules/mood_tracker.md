@@ -90,12 +90,12 @@ Composants extraits, partagés avec `MedicationSideEffectsHistoryScreen` :
 - Pas de `@react-native-community/datetimepicker` (non supporté dans Expo Go SDK 53+)
 
 ### Aperçu web praticien — `SliderDashboardLayout` (`preview_kind='slider_dashboard'`, générique)
-**Parité complète avec le mobile** — le praticien navigue dans les **3 mêmes onglets** :
-- **Saisie** : 6 sliders (avec repère « Normal ») + notes + section rappel
-- **Évolution** : badge streak + sélecteur 7J/1M/3M/1A + CompositeChart SVG (axe Y, 6 lignes + moyenne, repères verticaux) + liste des repères + 6 graphiques par dimension (barres 7J / courbes sinon, axe Y)
-- **Vue d'ensemble** : calendrier mensuel heatmap (cercles colorés, opacité ∝ score, badge de complétude)
-- Données 100% mock (preview uniquement — aucun appel Supabase). Les repères apparaissent/disparaissent selon la plage choisie, comme sur mobile.
-- Toutes les clés i18n `modules.mood_tracker.*` copiées du mobile vers `apps/web/src/i18n/locales/{fr,en}/common.json`.
+**Parité avec le mobile refondu (#161)** : le praticien navigue dans les **2 mêmes onglets** :
+- **Saisie** : badge streak + 6 sliders (avec repère « Normal ») + notes + bouton Enregistrer + historique en mini-empreinte (`DimensionFingerprint`) + section rappel
+- **Suivi** : ruban « Vue par symptôme » (`SymptomRibbon` : heatmap 6 dimensions × 30 jours, opacité ∝ magnitude brute, cellule vide = jour non renseigné) + liste des repères + sélecteur 7J/1M/3M/1A + 6 graphiques par dimension (barres 7J / courbes sinon, axe Y)
+- **Aucune moyenne composite agrégée** (le `CompositeChart` et le calendrier mensuel `MonthCalendar` ont été retirés, score « bien-être » interdit MDR).
+- Données 100% mock (preview uniquement, aucun appel Supabase). Les repères apparaissent/disparaissent selon la plage choisie, comme sur mobile.
+- Clés i18n `modules.mood_tracker.*` (dont `tab_tracking`, `ribbon_title`, `ribbon_legend`, `assiduity`) dans `apps/web/src/i18n/locales/{fr,en}/common.json`.
 
 ### Scoring
 - `scaleScoring.ts` : `items_count=6`, formule moyenne des valeurs non-nulles
