@@ -104,6 +104,19 @@ describe('ColumnFormRecordDetail', () => {
     expect(props.onOlder).toHaveBeenCalledTimes(1)
   })
 
+  it('parité web (#118) : restitue le thème déclaré par le patient (situation_theme)', () => {
+    // Le champ thème (#118) est un column_text_field standard : le praticien le
+    // voit via le rendu générique, sans code web dédié (parité avec le mobile).
+    const columnsWithTheme = buildColumnSpecs([
+      header('h1', 'entry_col_1_title', 10, [text('c1', 'situation', 11), text('c1t', 'situation_theme', 12)]),
+    ])
+    const { container } = renderDetail(
+      { date: '2026-07-06T10:00:00Z', values: { situation: 'réunion d’équipe', situation_theme: 'Réunions' } },
+      { columns: columnsWithTheme },
+    )
+    expect(container.querySelector('.cfd-cols')?.textContent).toContain('Réunions')
+  })
+
   it('conformité MDR : valeur brute restituée sans qualificatif de gravité', () => {
     const { container } = renderDetail({ date: '2026-07-06T10:00:00Z', values: { emotion_intensity: 95, outcome_intensity: 90 } })
     expect(container.textContent).toContain('95')

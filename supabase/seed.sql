@@ -474,6 +474,11 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
 
 insert into public.module_content_fields (id, module_id, field_type, text_code, section_id, parent_field_id, sort_order) values
   ('beck.col1.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_1_placeholder', 'beck.col_situation', 'beck.col1.h', 11),
+  -- Thème facultatif de la situation (#118) : étiquette LIBRE choisie par le
+  -- patient pour regrouper ses situations semblables. Rend possible la
+  -- réassurance par thème (voir beck.cfg). Auto-étiquetage, aucune taxonomie
+  -- imposée (MDR 2017/745).
+  ('beck.col1.theme',  'beck_columns', 'column_text_field',   'modules.beck_columns.theme_placeholder',       'beck.col_situation', 'beck.col1.h', 12),
   ('beck.col2.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_2_placeholder', 'beck.col_emotion',   'beck.col2.h', 21),
   ('beck.col2.slider', 'beck_columns', 'column_slider_field', 'modules.beck_columns.entry_col_2_intensity',   'beck.col_emotion',   'beck.col2.h', 22),
   ('beck.col3.text',   'beck_columns', 'column_text_field',   'modules.beck_columns.entry_col_3_placeholder', 'beck.col_thought',   'beck.col3.h', 31),
@@ -531,6 +536,22 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.cfg', 'narrative_reframe_key',  'rational_response'),
   ('beck.cfg', 'narrative_reframe_label','modules.beck_columns.narrative_reframe'),
   ('beck.cfg', 'narrative_expand_label', 'modules.beck_columns.see_reasoning'),
+  --   Réassurance par thème (#118) — OPT-IN, propre à beck_columns : quand le
+  --   patient renseigne un THÈME qu'il a lui-même choisi / réutilisé, on lui
+  --   ré-affiche BRUT ses colonnes passées portant le MÊME thème (preuves
+  --   contre, réponse rationnelle, résultat), datées. Affichage 100 % passif :
+  --   zéro synthèse, zéro reformulation, zéro LLM. La « réassurance » EST le
+  --   propre travail cognitif du patient. MDR 2017/745 : c'est le patient qui
+  --   déclare la similarité (même étiquette de thème) ; le code ne conclut rien,
+  --   il filtre par simple égalité de thème. Les clés ré-affichées sont
+  --   indexées (reassurance_key_1..n) — valeurs atomiques.
+  ('beck.cfg', 'theme_key',           'situation_theme'),
+  ('beck.cfg', 'theme_chips_label',   'modules.beck_columns.theme_chips_label'),
+  ('beck.cfg', 'reassurance_title',   'modules.beck_columns.reassurance_title'),
+  ('beck.cfg', 'reassurance_hint',    'modules.beck_columns.reassurance_hint'),
+  ('beck.cfg', 'reassurance_key_1',   'evidence_against'),
+  ('beck.cfg', 'reassurance_key_2',   'rational_response'),
+  ('beck.cfg', 'reassurance_key_3',   'outcome_intensity'),
   ('beck.col1.h', 'color',       '#0EA5E9'),
   ('beck.col1.h', 'step_number', '1'),
   ('beck.col1.h', 'hint_code',   'modules.beck_columns.entry_col_1_hint'),
@@ -571,6 +592,8 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('beck.col1.text', 'key',        'situation'),
   ('beck.col1.text', 'multiline',  '1'),
   ('beck.col1.text', 'min_height', '72'),
+  ('beck.col1.theme', 'key',       'situation_theme'),
+  ('beck.col1.theme', 'multiline', '0'),
   ('beck.col2.text', 'key',        'emotion'),
   ('beck.col2.text', 'multiline',  '0'),
   -- Chips d'aide au vocabulaire émotionnel (le texte libre reste roi)

@@ -1049,7 +1049,11 @@
       "arc_todo": "Terminez la ré-évaluation pour voir votre avant → après.",
       "narrative_strike": "JE PENSAIS",
       "narrative_reframe": "JE ME DIS",
-      "see_reasoning": "Voir le raisonnement complet"
+      "see_reasoning": "Voir le raisonnement complet",
+      "theme_placeholder": "Un thème, ex. réunions (facultatif)",
+      "theme_chips_label": "Vos thèmes",
+      "reassurance_title": "Vos réflexions passées sur ce thème",
+      "reassurance_hint": "Ce que vous aviez écrit à l'époque, mot pour mot."
     },
     "cognitive_distortions": {
       "label": "Distorsions cognitives",

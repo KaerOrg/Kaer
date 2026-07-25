@@ -102,7 +102,11 @@
       "arc_todo": "Termine la ré-évaluation pour voir ton avant → après.",
       "narrative_strike": "JE PENSAIS",
       "narrative_reframe": "JE ME DIS",
-      "see_reasoning": "Voir le raisonnement complet"
+      "see_reasoning": "Voir le raisonnement complet",
+      "theme_placeholder": "Un thème, ex. réunions (facultatif)",
+      "theme_chips_label": "Tes thèmes",
+      "reassurance_title": "Tes réflexions passées sur ce thème",
+      "reassurance_hint": "Ce que tu avais écrit à l'époque, mot pour mot."
     },
     "grounding": {
       "title": "Revenir ici et maintenant",
