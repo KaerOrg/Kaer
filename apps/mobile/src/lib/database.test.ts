@@ -4,6 +4,9 @@ import {
   needsActivityRecordsRebuild,
   ACTIVITY_RECORDS_REBUILD_STATEMENTS,
   ACTIVITY_RECORDS_SCHEMA_V2,
+  toBreathingSession,
+  toBreathingFeeling,
+  toAmbientSound,
 } from './database'
 
 describe('computeSleepDuration', () => {
@@ -78,5 +81,58 @@ describe('migration activity_records v2 (refonte prédire/faire/constater)', () 
   it('le CREATE du rebuild cible activity_records_v2 sans toucher la table source', () => {
     const create = ACTIVITY_RECORDS_REBUILD_STATEMENTS[0]
     expect(create).toContain('CREATE TABLE IF NOT EXISTS activity_records_v2')
+  })
+})
+
+describe('breathing — toBreathingFeeling', () => {
+  it('accepte les 3 valeurs valides', () => {
+    expect(toBreathingFeeling('calmer')).toBe('calmer')
+    expect(toBreathingFeeling('same')).toBe('same')
+    expect(toBreathingFeeling('tenser')).toBe('tenser')
+  })
+
+  it('retombe sur null pour null ou une valeur inconnue', () => {
+    expect(toBreathingFeeling(null)).toBeNull()
+    expect(toBreathingFeeling('great')).toBeNull()
+  })
+})
+
+describe('breathing — toAmbientSound', () => {
+  it('accepte une clé connue', () => {
+    expect(toAmbientSound('waves')).toBe('waves')
+    expect(toAmbientSound('bowl')).toBe('bowl')
+  })
+
+  it("retombe sur 'river' pour une clé inconnue", () => {
+    expect(toAmbientSound('birds')).toBe('river')
+    expect(toAmbientSound('')).toBe('river')
+  })
+})
+
+describe('breathing — toBreathingSession', () => {
+  it('mappe une ligne complète (booléen depuis INTEGER)', () => {
+    expect(toBreathingSession({
+      id: 's1', technique_key: 'carree', started_at: '2025-02-10T07:00:00.000Z',
+      date: '2025-02-10', duration_seconds: 240, planned_duration_seconds: 300,
+      cycles_completed: 15, completed: 0, feeling: 'tenser', created_at: '2025-02-10T07:05:00.000Z',
+    })).toEqual({
+      id: 's1', technique_key: 'carree', started_at: '2025-02-10T07:00:00.000Z',
+      date: '2025-02-10', duration_seconds: 240, planned_duration_seconds: 300,
+      cycles_completed: 15, completed: false, feeling: 'tenser', created_at: '2025-02-10T07:05:00.000Z',
+    })
+  })
+
+  it('coalesce les colonnes legacy nulles (started_at, planned, cycles, completed)', () => {
+    const s = toBreathingSession({
+      id: 's2', technique_key: 'coherence', started_at: null, date: '2024-12-01',
+      duration_seconds: 180, planned_duration_seconds: null, cycles_completed: null,
+      completed: null, feeling: null, created_at: '2024-12-01T10:00:00.000Z',
+    })
+    // started_at absent → reconstruit depuis la date locale ; completed legacy → true
+    expect(s.started_at).toBe('2024-12-01T00:00:00')
+    expect(s.planned_duration_seconds).toBe(180)
+    expect(s.cycles_completed).toBe(0)
+    expect(s.completed).toBe(true)
+    expect(s.feeling).toBeNull()
   })
 })

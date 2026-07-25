@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite'
+import { dateToIso } from '@kaer/shared'
 import { getSyncOutboxStore } from './syncOutbox'
 import { getRenderMismatchOutboxStore } from './renderMismatchOutbox'
 import { getAppErrorOutboxStore } from './appErrorOutbox'
@@ -55,6 +56,7 @@ export async function initDatabase(): Promise<void> {
     () => createFearThermometerTables(database),
     () => createBehavioralActivationTable(database),
     () => createBreathingSessionsTable(database),
+    () => createBreathingSettingsTable(database),
     () => createEmotionEntriesTable(database),
     () => createDefusionSessionsTable(database),
     () => createPHQ9Table(database),
@@ -133,6 +135,14 @@ export async function initDatabase(): Promise<void> {
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_status_quo) AS arg`,
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_status_quo',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_status_quo) AS arg`,
     `INSERT OR IGNORE INTO module_settings (module_id,key,value,updated_at) SELECT 'decisional_balance','target_behavior',target_behavior,COALESCE(updated_at,CURRENT_TIMESTAMP) FROM decisional_balance WHERE target_behavior <> ''`,
+    // Refonte Techniques de respiration (epic #195 T0) : enrichissement des sessions.
+    // ADD COLUMN sans NOT NULL (SQLite interdit un défaut CURRENT_TIMESTAMP en ALTER) :
+    // les inserts renseignent toujours ces champs, les lectures coalescent les legacy.
+    `ALTER TABLE breathing_sessions ADD COLUMN started_at TEXT`,
+    `ALTER TABLE breathing_sessions ADD COLUMN planned_duration_seconds INTEGER DEFAULT 0`,
+    `ALTER TABLE breathing_sessions ADD COLUMN cycles_completed INTEGER DEFAULT 0`,
+    `ALTER TABLE breathing_sessions ADD COLUMN completed INTEGER DEFAULT 1`,
+    `ALTER TABLE breathing_sessions ADD COLUMN feeling TEXT`,
   ]
   for (const sql of migrations) {
     try { await database.execAsync(sql) } catch { /* colonne déjà présente ou table absente */ }
@@ -341,7 +351,7 @@ export function generateId(): string {
 // = ajouter sa table ici, sinon l'effacement laisserait des données résiduelles).
 const PATIENT_DATA_TABLES = [
   'activity_records', 'asrs18_entries', 'asrs6_entries', 'beck_thought_records',
-  'breathing_sessions', 'bsl23_entries', 'defusion_sessions',
+  'breathing_sessions', 'breathing_settings', 'bsl23_entries', 'defusion_sessions',
   'crisis_anchors', 'crisis_plan_items', 'custom_dimensions', 'daily_entries',
   'decisional_balance', 'em_balance_items', 'em_rulers', 'em_values',
   'emotion_entries', 'exposure_hierarchies', 'fear_entries', 'fear_situations',
@@ -951,12 +961,73 @@ export async function deleteActivityRecord(id: string): Promise<void> {
 // Aucune donnée physiologique — le patient déclare simplement avoir complété
 // un exercice à rythme fixe. Conformité MDR 2017/745.
 
+export type BreathingFeeling = 'calmer' | 'same' | 'tenser'
+export type BreathingAmbientSound = 'river' | 'waves' | 'rain' | 'wind' | 'bowl'
+
+// Modèle enrichi (epic #195 T0). Les colonnes ajoutées vs le modèle legacy
+// (started_at, planned_duration_seconds, cycles_completed, completed, feeling)
+// sont propagées à Supabase via le payload de patient_entries (breathingService).
 export interface BreathingSession {
   id: string
-  date: string              // YYYY-MM-DD
-  technique_key: string     // field_props.technique_key d'une technique (ex: 'coherence_cardiaque')
-  duration_seconds: number  // durée effective de la session
+  technique_key: string             // field_props.technique_key (ex: 'coherence_cardiaque')
+  started_at: string                // ISO — début de la session
+  date: string                      // YYYY-MM-DD dérivé de started_at ; regroupement / streak local, non synchronisé
+  duration_seconds: number          // durée réellement pratiquée
+  planned_duration_seconds: number  // durée choisie avant de démarrer
+  cycles_completed: number
+  completed: boolean                // menée au bout (true) vs interrompue (false)
+  feeling: BreathingFeeling | null  // ressenti brut facultatif — MDR : jamais agrégé ni jugé
   created_at: string
+}
+
+// Entrée d'écriture d'une session : seuls id / technique / durée sont requis.
+// Les champs enrichis reçoivent un défaut, pour rester rétrocompatible avec le
+// lecteur legacy (BreathingPacer) tant que M3/M4 ne l'ont pas remplacé.
+export interface BreathingSessionInput {
+  id: string
+  technique_key: string
+  duration_seconds: number
+  started_at?: string
+  date?: string
+  planned_duration_seconds?: number
+  cycles_completed?: number
+  completed?: boolean
+  feeling?: BreathingFeeling | null
+}
+
+interface BreathingSessionRow {
+  id: string
+  technique_key: string
+  started_at: string | null
+  date: string
+  duration_seconds: number
+  planned_duration_seconds: number | null
+  cycles_completed: number | null
+  completed: number | null
+  feeling: string | null
+  created_at: string
+}
+
+// Exporté pour test unitaire (pur, sans I/O) : valide le ressenti brut.
+export function toBreathingFeeling(v: string | null): BreathingFeeling | null {
+  return v === 'calmer' || v === 'same' || v === 'tenser' ? v : null
+}
+
+// Exporté pour test unitaire (pur) : mappe une ligne SQLite (colonnes legacy
+// possiblement nulles) vers le modèle enrichi, en coalescant les défauts.
+export function toBreathingSession(r: BreathingSessionRow): BreathingSession {
+  return {
+    id: r.id,
+    technique_key: r.technique_key,
+    started_at: r.started_at ?? `${r.date}T00:00:00`,
+    date: r.date,
+    duration_seconds: r.duration_seconds,
+    planned_duration_seconds: r.planned_duration_seconds ?? r.duration_seconds,
+    cycles_completed: r.cycles_completed ?? 0,
+    completed: (r.completed ?? 1) === 1,
+    feeling: toBreathingFeeling(r.feeling),
+    created_at: r.created_at,
+  }
 }
 
 // ─── SQLite Sessions de Respiration ──────────────────────────────────────────
@@ -965,32 +1036,190 @@ export async function createBreathingSessionsTable(database: SQLite.SQLiteDataba
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS breathing_sessions (
       id TEXT PRIMARY KEY,
-      date TEXT NOT NULL,
       technique_key TEXT NOT NULL,
+      started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      date TEXT NOT NULL,
       duration_seconds INTEGER NOT NULL DEFAULT 0,
+      planned_duration_seconds INTEGER NOT NULL DEFAULT 0,
+      cycles_completed INTEGER NOT NULL DEFAULT 0,
+      completed INTEGER NOT NULL DEFAULT 1,
+      feeling TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `)
 }
 
-/** Enregistre une session complétée */
+/**
+ * Enregistre une session déjà résolue (défauts métier appliqués en amont par le
+ * service). lib/ ne gère que le stockage : dérivation de `date` (jour local depuis
+ * `started_at`) et conversion booléen → INTEGER.
+ */
 export async function saveBreathingSession(
-  session: Omit<BreathingSession, 'created_at'>
+  session: Omit<BreathingSession, 'created_at' | 'date'>
 ): Promise<void> {
   const database = getDb()
+  const date = dateToIso(new Date(session.started_at))
   await database.runAsync(
-    `INSERT INTO breathing_sessions (id, date, technique_key, duration_seconds)
-     VALUES (?, ?, ?, ?)`,
-    [session.id, session.date, session.technique_key, session.duration_seconds]
+    `INSERT INTO breathing_sessions
+       (id, technique_key, started_at, date, duration_seconds, planned_duration_seconds, cycles_completed, completed, feeling)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      session.id,
+      session.technique_key,
+      session.started_at,
+      date,
+      session.duration_seconds,
+      session.planned_duration_seconds,
+      session.cycles_completed,
+      session.completed ? 1 : 0,
+      session.feeling,
+    ]
   )
 }
 
-/** Récupère les N dernières sessions, de la plus récente à la plus ancienne */
-export async function getAllBreathingSessions(limit = 30): Promise<BreathingSession[]> {
+/** Récupère les N dernières sessions, de la plus récente à la plus ancienne. */
+export async function getAllBreathingSessions(limit = 200): Promise<BreathingSession[]> {
   const database = getDb()
-  return database.getAllAsync<BreathingSession>(
-    'SELECT * FROM breathing_sessions ORDER BY created_at DESC LIMIT ?',
+  const rows = await database.getAllAsync<BreathingSessionRow>(
+    'SELECT * FROM breathing_sessions ORDER BY COALESCE(started_at, created_at) DESC LIMIT ?',
     [limit]
+  )
+  return rows.map(toBreathingSession)
+}
+
+// ─── SQLite Config du module Respiration (breathing_settings) ─────────────────
+// Une seule ligne par appareil (id = 'local'). Les tableaux sont stockés en JSON.
+// enabled_techniques / primary_technique sont posés par le praticien ; l'objectif,
+// les rappels et les préférences sensorielles sont ajustables par le patient.
+
+export interface BreathingSettings {
+  enabled_techniques: string[]
+  primary_technique: string | null
+  weekly_goal_sessions: number
+  reminder_enabled: boolean
+  reminder_time: string | null       // "HH:MM"
+  reminder_days: number[]            // 0-6 (0 = dimanche … 6 = samedi, Date.getDay())
+  haptics: boolean
+  ambient_sound: boolean
+  ambient_sound_key: BreathingAmbientSound
+  breath_sound: boolean
+  preferred_duration_min: number
+}
+
+export const BREATHING_SETTINGS_DEFAULTS: BreathingSettings = {
+  enabled_techniques: [],
+  primary_technique: null,
+  weekly_goal_sessions: 5,
+  reminder_enabled: false,
+  reminder_time: null,
+  reminder_days: [],
+  haptics: true,
+  ambient_sound: false,
+  ambient_sound_key: 'river',
+  breath_sound: false,
+  preferred_duration_min: 5,
+}
+
+interface BreathingSettingsRow {
+  enabled_techniques: string
+  primary_technique: string | null
+  weekly_goal_sessions: number
+  reminder_enabled: number
+  reminder_time: string | null
+  reminder_days: string
+  haptics: number
+  ambient_sound: number
+  ambient_sound_key: string
+  breath_sound: number
+  preferred_duration_min: number
+}
+
+const AMBIENT_SOUND_KEYS: readonly BreathingAmbientSound[] = ['river', 'waves', 'rain', 'wind', 'bowl']
+
+// Exporté pour test unitaire (pur) : retombe sur 'river' pour une valeur inconnue.
+export function toAmbientSound(v: string): BreathingAmbientSound {
+  return (AMBIENT_SOUND_KEYS as readonly string[]).includes(v)
+    ? (v as BreathingAmbientSound)
+    : 'river'
+}
+
+export async function createBreathingSettingsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS breathing_settings (
+      id TEXT PRIMARY KEY DEFAULT 'local',
+      enabled_techniques TEXT NOT NULL DEFAULT '[]',
+      primary_technique TEXT,
+      weekly_goal_sessions INTEGER NOT NULL DEFAULT 5,
+      reminder_enabled INTEGER NOT NULL DEFAULT 0,
+      reminder_time TEXT,
+      reminder_days TEXT NOT NULL DEFAULT '[]',
+      haptics INTEGER NOT NULL DEFAULT 1,
+      ambient_sound INTEGER NOT NULL DEFAULT 0,
+      ambient_sound_key TEXT NOT NULL DEFAULT 'river',
+      breath_sound INTEGER NOT NULL DEFAULT 0,
+      preferred_duration_min INTEGER NOT NULL DEFAULT 5,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+/** Config du module pour cet appareil ; défauts si aucune ligne enregistrée. */
+export async function getBreathingSettings(): Promise<BreathingSettings> {
+  const database = getDb()
+  const row = await database.getFirstAsync<BreathingSettingsRow>(
+    `SELECT * FROM breathing_settings WHERE id = 'local'`
+  )
+  if (!row) return { ...BREATHING_SETTINGS_DEFAULTS }
+  return {
+    enabled_techniques: JSON.parse(row.enabled_techniques) as string[],
+    primary_technique: row.primary_technique,
+    weekly_goal_sessions: row.weekly_goal_sessions,
+    reminder_enabled: row.reminder_enabled === 1,
+    reminder_time: row.reminder_time,
+    reminder_days: JSON.parse(row.reminder_days) as number[],
+    haptics: row.haptics === 1,
+    ambient_sound: row.ambient_sound === 1,
+    ambient_sound_key: toAmbientSound(row.ambient_sound_key),
+    breath_sound: row.breath_sound === 1,
+    preferred_duration_min: row.preferred_duration_min,
+  }
+}
+
+/** Écrit (upsert) la config du module pour cet appareil. */
+export async function saveBreathingSettings(settings: BreathingSettings): Promise<void> {
+  const database = getDb()
+  await database.runAsync(
+    `INSERT INTO breathing_settings
+       (id, enabled_techniques, primary_technique, weekly_goal_sessions, reminder_enabled,
+        reminder_time, reminder_days, haptics, ambient_sound, ambient_sound_key, breath_sound,
+        preferred_duration_min, updated_at)
+     VALUES ('local', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+     ON CONFLICT(id) DO UPDATE SET
+       enabled_techniques = excluded.enabled_techniques,
+       primary_technique = excluded.primary_technique,
+       weekly_goal_sessions = excluded.weekly_goal_sessions,
+       reminder_enabled = excluded.reminder_enabled,
+       reminder_time = excluded.reminder_time,
+       reminder_days = excluded.reminder_days,
+       haptics = excluded.haptics,
+       ambient_sound = excluded.ambient_sound,
+       ambient_sound_key = excluded.ambient_sound_key,
+       breath_sound = excluded.breath_sound,
+       preferred_duration_min = excluded.preferred_duration_min,
+       updated_at = CURRENT_TIMESTAMP`,
+    [
+      JSON.stringify(settings.enabled_techniques),
+      settings.primary_technique,
+      settings.weekly_goal_sessions,
+      settings.reminder_enabled ? 1 : 0,
+      settings.reminder_time,
+      JSON.stringify(settings.reminder_days),
+      settings.haptics ? 1 : 0,
+      settings.ambient_sound ? 1 : 0,
+      settings.ambient_sound_key,
+      settings.breath_sound ? 1 : 0,
+      settings.preferred_duration_min,
+    ]
   )
 }
 

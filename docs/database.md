@@ -236,6 +236,67 @@ Si aucune ligne n'existe pour un praticien → tous les modules sont disponibles
 
 ---
 
+### `breathing_sessions` — Sessions de respiration (module `breathing_techniques`, T0 #195)
+
+Une ligne par session de respiration. **Données 100 % descriptives** (MDR 2017/745) :
+aucun score, aucune moyenne, aucune tendance. `feeling` est un ressenti brut facultatif,
+restitué tel quel.
+
+| Colonne | Type | Description |
+|---------|------|-------------|
+| `id` | uuid PK, default gen_random_uuid() | – |
+| `patient_id` | uuid NOT NULL FK → patients (on delete cascade) | – |
+| `technique_key` | text NOT NULL | Clé de la technique (`field_props.technique_key`) |
+| `started_at` | timestamptz NOT NULL | Instant de début de session |
+| `duration_seconds` | integer NOT NULL, default 0 | Durée réellement pratiquée |
+| `planned_duration_seconds` | integer NOT NULL, default 0 | Durée choisie avant de démarrer |
+| `cycles_completed` | integer NOT NULL, default 0 | – |
+| `completed` | boolean NOT NULL, default false | Menée au bout vs interrompue |
+| `feeling` | text, nullable | `calmer` \| `same` \| `tenser` \| null (facultatif) |
+| `created_at` | timestamptz NOT NULL, default now() | – |
+
+RLS : le patient a un CRUD complet sur ses propres lignes (`auth.uid() = patient_id`) ;
+le praticien a une **lecture seule** sur les patients liés **et consentants**
+(`share_consent = true`), même gate que `patient_entries`.
+
+> **Note d'architecture (couture T0 à câbler en phases M).** La sync mobile
+> offline-first passe par `patient_entries` (`entry_kind='breathing_session'`,
+> payload jsonb) via `syncHelpers`, comme les autres modules : c'est là que les
+> sessions sont réellement capturées aujourd'hui. Cette table dédiée est le modèle
+> relationnel canonique déclaré par l'epic ; son alimentation directe (projection
+> depuis `patient_entries` et/ou écriture praticien) sera câblée dans les
+> sous-tickets M. T0 ne modifie pas `RemoteSyncService`.
+
+---
+
+### `breathing_settings` — Config du module respiration par patient (T0 #195)
+
+Une ligne par patient. `enabled_techniques` / `primary_technique` sont posés par le
+praticien ; l'objectif, les rappels et les préférences sensorielles sont ajustables par
+le patient.
+
+| Colonne | Type | Description |
+|---------|------|-------------|
+| `patient_id` | uuid PK FK → patients (on delete cascade) | – |
+| `enabled_techniques` | text[] NOT NULL, default '{}' | Techniques activées (géré praticien) |
+| `primary_technique` | text, nullable | Technique « en séance » |
+| `weekly_goal_sessions` | integer NOT NULL, default 5 | `check` entre 1 et 14 |
+| `reminder_enabled` | boolean NOT NULL, default false | Rappels opt-in |
+| `reminder_time` | time, nullable | Heure du rappel |
+| `reminder_days` | smallint[] NOT NULL, default '{}' | Jours 0-6 (`check` sous-ensemble de 0..6) |
+| `haptics` | boolean NOT NULL, default true | – |
+| `ambient_sound` | boolean NOT NULL, default false | – |
+| `ambient_sound_key` | text NOT NULL, default 'river' | `river` \| `waves` \| `rain` \| `wind` \| `bowl` |
+| `breath_sound` | boolean NOT NULL, default false | – |
+| `preferred_duration_min` | integer NOT NULL, default 5 | – |
+| `created_at` / `updated_at` | timestamptz NOT NULL, default now() | – |
+
+RLS : le patient a un CRUD complet sur sa propre config (`auth.uid() = patient_id`) ; le
+praticien a un accès **lecture + écriture** sur la config de ses patients liés (même
+modèle que `crisis_plan_configs` : config praticien, pas une donnée clinique).
+
+---
+
 ## Trigger: création automatique de profil
 
 ```sql
