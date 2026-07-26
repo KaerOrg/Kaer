@@ -10,7 +10,11 @@ import {
   Share,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useTranslation } from 'react-i18next'
+import type { AppStackParamList } from '../navigation/AppStack'
+import { isTestAccount } from '@services/demo/types'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from '../contexts/ToastContext'
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext'
@@ -40,6 +44,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
  */
 export default function SettingsScreen() {
   const { t } = useTranslation()
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>()
   const { patient, updateAvatar, updateProfile, language, setLanguage, shareConsent, setShareConsent } = useAuthStore()
   const { showToast } = useToast()
   const { showConfirm } = useConfirmDialog()
@@ -131,6 +136,11 @@ export default function SettingsScreen() {
     firstName !== (patient?.first_name ?? '') ||
     lastName !== (patient?.last_name ?? '') ||
     phone !== (patient?.phone ?? '')
+
+  // Outils développeur : visibles uniquement en build dev ET sur compte de test.
+  // Double barrière avec la garde du service (qui refuse la génération hors
+  // compte de test). Un patient réel ne voit jamais cette section.
+  const showDevTools = __DEV__ && isTestAccount(patient?.email)
 
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
@@ -251,6 +261,17 @@ export default function SettingsScreen() {
             variant="danger"
           />
         </View>
+
+        {showDevTools ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('dev.section')}</Text>
+            <Button
+              label={t('dev.demo.open_button')}
+              onPress={() => navigation.navigate('DemoData')}
+              variant="secondary"
+            />
+          </View>
+        ) : null}
 
         <Text style={styles.version}>{t('profile.version')}</Text>
       </ScrollView>

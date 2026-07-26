@@ -39,6 +39,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`spec/module-taxonomy.md`](spec/module-taxonomy.md) | Taxonomie & filtres par facettes de l'armoire (tags indication/public/approche, `tag_dimensions`/`tags`/`module_tags`) |
 | [`spec/refonte-roue-emotions.md`](spec/refonte-roue-emotions.md) | Refonte roue des émotions — taxonomie Willcox (8 familles / nuances / mots), profondeur libre, étapes intensité/contexte/notes |
 | [`patient-data-sync.md`](patient-data-sync.md) | Circuit sync données patient : SQLite → Supabase via `RemoteSyncService` + gate consentement |
+| [`demo-data.md`](demo-data.md) | Moteur de données de démo (2 mois) cohérent web ≡ mobile — écran dev caché, garde compte de test, contrat `DemoGenerator`, purge `demo-` |
 | [`practitioner-notes.md`](practitioner-notes.md) | Notes praticien par patient (privées, Supabase, `practitioner_patient_notes`) |
 
 ## Documentation par module thérapeutique

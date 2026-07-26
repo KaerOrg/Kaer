@@ -15,6 +15,7 @@ import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideE
 import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
+import DemoDataScreen from '../screens/DemoDataScreen'
 import type { PreviewKind } from '@kaer/shared'
 import { colors } from '@theme'
 
@@ -33,6 +34,9 @@ export type AppStackParamList = {
   }
   MoodTracker: undefined
   Settings: undefined
+  // Écran développeur caché : accessible uniquement en build dev sur compte de
+  // test (garde de visibilité dans SettingsScreen). Génère/purge les données de démo.
+  DemoData: undefined
   // Placeholder « page en chantier » : `title` porte le libellé de l'en-tête natif
   // (déjà traduit par l'écran appelant).
   WorkInProgress: { title: string }
@@ -131,6 +135,11 @@ export default function AppStack() {
         name="MoodTracker"
         component={MoodTrackerScreen}
         options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="DemoData"
+        component={DemoDataScreen}
+        options={{ title: t('dev.demo.title') }}
       />
     </Stack.Navigator>
   )

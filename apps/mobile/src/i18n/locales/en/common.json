@@ -1,4 +1,24 @@
 {
+  "dev": {
+    "section": "Developer",
+    "demo": {
+      "title": "Demo data",
+      "open_button": "Demo data",
+      "disclaimer": "Screen reserved for test accounts on development builds. The generated data is fake and lets you preview modules with two months of history.",
+      "module_hint": "Generates about two months of fake entries",
+      "generate_button": "Generate 2 months",
+      "purge_button": "Purge demo",
+      "confirm_generate_title": "Generate demo data?",
+      "confirm_generate_message": "About two months of fake entries will be added for this module.",
+      "confirm_generate_confirm": "Generate",
+      "confirm_purge_title": "Purge demo data?",
+      "confirm_purge_message": "All demo entries (demo- prefix) will be removed, on the device and on the server.",
+      "confirm_purge_confirm": "Purge",
+      "generated": "{{count}} demo entries generated",
+      "purged": "{{count}} demo entries removed",
+      "error": "Operation not allowed on this account"
+    }
+  },
   "common": {
     "save": "Save",
     "prefill_from_last": "Same as usual",

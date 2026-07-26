@@ -1,4 +1,24 @@
 {
+  "dev": {
+    "section": "Développeur",
+    "demo": {
+      "title": "Données de démo",
+      "open_button": "Données de démo",
+      "disclaimer": "Écran réservé aux comptes de test en build de développement. Les données générées sont factices et servent à visualiser les modules avec 2 mois d'historique.",
+      "module_hint": "Génère environ 2 mois de saisies factices",
+      "generate_button": "Générer 2 mois",
+      "purge_button": "Purger la démo",
+      "confirm_generate_title": "Générer les données de démo ?",
+      "confirm_generate_message": "Environ 2 mois de saisies factices vont être ajoutées pour ce module.",
+      "confirm_generate_confirm": "Générer",
+      "confirm_purge_title": "Purger les données de démo ?",
+      "confirm_purge_message": "Toutes les saisies de démo (préfixe demo-) vont être supprimées, sur l'appareil et sur le serveur.",
+      "confirm_purge_confirm": "Purger",
+      "generated": "{{count}} saisies de démo générées",
+      "purged": "{{count}} saisies de démo supprimées",
+      "error": "Opération impossible sur ce compte"
+    }
+  },
   "common": {
     "save": "Enregistrer",
     "prefill_from_last": "Comme d'habitude",

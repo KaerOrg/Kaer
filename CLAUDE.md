@@ -94,6 +94,7 @@ Infrastructure complète (monorepo, auth, RLS, sync). 30+ modules livrés. Featu
 - **Feedback web** : toujours `useToast()` pour les opérations réseau — jamais d'état local. Doc : [`apps/web/docs/components/toast.md`](apps/web/docs/components/toast.md).
 - **Zéro SQL dans un composant** : toute opération passe par `apps/<app>/src/services/<domaine>Service.ts`. Détail : [`.claude/rules/coding-standards.md`](.claude/rules/coding-standards.md).
 - **Nouveau module** : passer par le skill `module-builder`. Lecture préalable : [`docs/module-engine.md`](docs/module-engine.md).
+- **Un module n'est pas terminé sans son générateur de 2 mois de démo** : chaque module fournit un `DemoGenerator` (mobile) écrivant ~2 mois d'utilisation réaliste via ses services réels (→ sync → cohérence web ≡ mobile). Comptes de test uniquement, `local_id` préfixés `demo-`, données brutes (MDR). Détail : [`docs/demo-data.md`](docs/demo-data.md).
 - **Résoudre un ticket GitHub** : passer par le skill `ticket-resolve` (analyse → porte « déjà fait ? » → branche → implémentation → tests/doc → `pr-review` → `simplify` → merge `main`/conflits → CI → PR `Closes #N` → clôture du ticket).
 - **Avant tout merge** : skill `pr-review` puis procédure [`.claude/rules/merge-procedure.md`](.claude/rules/merge-procedure.md) (fetch → merge → conflits → tests → tsc, les deux apps).
 - **Ordre web-puis-mobile** pour tout nouveau module (praticien doit pouvoir le débloquer avant que le patient y accède).

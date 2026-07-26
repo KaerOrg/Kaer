@@ -746,6 +746,29 @@ cd packages/shared && npx tsc --noEmit
 
 Tout est `tsc --noEmit` clean avant de considérer la tâche terminée.
 
+### 6.5 Générateur de données de démo (2 mois) — OBLIGATOIRE
+
+> **Un module n'est pas terminé sans son générateur de 2 mois de démo.** Un module
+> ne se juge pas à vide : ses défauts d'UX n'apparaissent qu'avec des données
+> réalistes, cohérentes web ≡ mobile. Aucun module n'est « done » tant que ce
+> générateur n'existe pas.
+
+Ajouter un `DemoGenerator` pour le nouveau module (voir [`docs/demo-data.md`](../../../docs/demo-data.md)) :
+
+1. `apps/mobile/src/services/demo/<module>DemoGenerator.ts` : fonction pure
+   `build<Module>DemoEntries(today)` produisant ~2 mois d'entrées **réalistes et non
+   uniformes** (pattern propre au module, pas du bruit), `local_id` **préfixés
+   `demo-`**, **dates locales** via `@kaer/shared` (jamais `toISOString`).
+2. `generate()` écrit via le **service réel** du module (→ `syncUpsert`) ;
+   `listEntryIds()` renvoie tous les ids du module ; `deleteEntry(id)` supprime via le
+   **service réel** (→ `syncDelete`). Le filtre de purge `demo-` est appliqué par
+   l'infra (`purgeAllDemo`), jamais recopié dans le générateur ; côté écriture, le
+   préfixe vient du helper `demoLocalId(suffix)`.
+3. Enregistrer le générateur dans `GENERATORS` de `demoDataService.ts`.
+4. Tests : builder pur (longueur, dates locales, valeurs bornées, déterminisme) +
+   `generate`/`listEntryIds`/`deleteEntry` (mock du service réel).
+5. **MDR** : que des données brutes, aucun label/score interprétatif.
+
 ---
 
 ## Phase 7 — Documentation
