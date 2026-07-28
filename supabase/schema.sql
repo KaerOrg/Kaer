@@ -832,7 +832,7 @@ begin
   end if;
 end $$;
 
--- Les trois drapeaux de `modules` répondent à trois questions distinctes — ne pas
+-- Les trois drapeaux de `modules` répondent à trois questions distinctes. Ne pas
 -- les confondre (issue #247) :
 --   is_hidden          : le module existe-t-il pour l'app ? `true` = invisible partout
 --                        (catalogue praticien, invitation, aperçu, liste patient), non

@@ -15,7 +15,7 @@ export interface ModuleCategory {
   modules: ModuleItem[]
 }
 
-// #247 — Un module `is_hidden` est retiré de l'app sans être supprimé : il ne doit
+// #247. Un module `is_hidden` est retiré de l'app sans être supprimé : il ne doit
 // sortir d'AUCUNE lecture de catalogue. Le filtre est posé côté requête, jamais dans
 // un composant, pour qu'aucun appelant ne puisse l'oublier.
 export async function fetchModuleCategories(): Promise<ModuleCategory[]> {

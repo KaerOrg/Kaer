@@ -42,7 +42,7 @@ const PINNED_FIRST: readonly string[] = ['crisis_plan']
 /**
  * Modules débloqués du patient.
  *
- * #247 — Un module masqué côté base (droits de reproduction non acquis) disparaît
+ * #247 : Un module masqué côté base (droits de reproduction non acquis) disparaît
  * de la liste même s'il reste débloqué : sa ligne `patient_modules` et les saisies
  * déjà faites restent intactes, elles réapparaissent si le module est réactivé.
  */
@@ -108,7 +108,7 @@ export async function fetchTodayRoutines(patientId: string): Promise<TodayRoutin
       const pm = getOneEmbed(r.patient_module)
       if (pm?.module_type == null) return null
       const mod = getOneEmbed(pm.module)
-      // #247 — un module masqué ne doit plus rappeler le patient à son sujet.
+      // #247 : un module masqué ne doit plus rappeler le patient à son sujet.
       if (mod?.is_hidden === true) return null
       return {
         id: r.id as string,

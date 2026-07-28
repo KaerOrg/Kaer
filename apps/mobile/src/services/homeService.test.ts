@@ -59,7 +59,7 @@ describe('homeService.fetchUnlockedModules', () => {
     expect(result).toEqual([])
   })
 
-  // #247 — module masqué en base (droits non acquis) : il disparaît de la liste
+  // #247. Un module masqué en base (droits non acquis) disparaît de la liste
   // patient même s'il reste débloqué. La ligne patient_modules n'est pas supprimée.
   it('écarte un module masqué (is_hidden) même s\'il est encore débloqué', async () => {
     mockOrder.mockResolvedValue({
@@ -195,7 +195,7 @@ describe('homeService.fetchTodayRoutines', () => {
     expect(result[0].id).toBe('r-ok')
   })
 
-  // #247 — un module masqué ne doit plus rappeler le patient à son sujet.
+  // #247 : un module masqué ne doit plus rappeler le patient à son sujet.
   it('écarte les routines dont le module est masqué', async () => {
     mockContains.mockResolvedValue({
       data: [

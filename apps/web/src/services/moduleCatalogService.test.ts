@@ -61,9 +61,9 @@ describe('moduleCatalogService.fetchModuleCategories', () => {
   })
 })
 
-// ── #247 — modules masqués (droits de reproduction non acquis) ───────────────
+// ── #247 : modules masqués (droits de reproduction non acquis) ───────────────
 
-describe('moduleCatalogService — filtrage des modules masqués (#247)', () => {
+describe('moduleCatalogService : filtrage des modules masqués (#247)', () => {
   it('fetchModuleCategories exclut les modules masqués côté requête', async () => {
     const modChain = makeChain({ data: [], error: null })
     vi.mocked(supabase.from)

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
-// ─── Garde-fou anti-régression — modules masqués (issue #247) ────────────────
+// ─── Garde-fou anti-régression : modules masqués (issue #247) ────────────────
 //
 // Kær est un produit commercial : plusieurs échelles reproduisent des items dont
 // nous n'avons pas le droit de reproduction dans ce cadre. Elles ne sont pas
@@ -37,7 +37,7 @@ function seededHiddenIds(): string[] {
   return [...stmt[1].matchAll(/'([^']+)'/g)].map(m => m[1])
 }
 
-describe('modules masqués — garde-fou (#247)', () => {
+describe('modules masqués : garde-fou (#247)', () => {
   it('le schéma porte la colonne is_hidden', () => {
     expect(schemaSql).toMatch(/is_hidden\s+boolean\s+not null\s+default false/)
   })

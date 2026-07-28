@@ -22,7 +22,7 @@ export async function fetchModuleFields(moduleId: string): Promise<ModuleFieldsR
   return result
 }
 
-// #247 — L'aperçu praticien rend les items du module : c'est une reproduction au
+// #247. L'aperçu praticien rend les items du module : c'est une reproduction au
 // même titre que l'écran patient. Un module masqué retombe donc sur 'coming_soon',
 // ce qui neutralise aussi l'accès par URL directe à /modules/<id>.
 export async function fetchModulePreviewKind(moduleId: string): Promise<PreviewKind> {

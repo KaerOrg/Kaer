@@ -45,7 +45,7 @@ describe('moduleService.fetchModulePreviewKind', () => {
     expect(result).toBe('questionnaire')
   })
 
-  // #247 — l'aperçu praticien rend les items : un module masqué ne doit rien rendre,
+  // #247. L'aperçu praticien rend les items : un module masqué ne doit rien rendre,
   // y compris si l'URL /modules/<id> est ouverte directement.
   it("retombe sur 'coming_soon' pour un module masqué, même s'il a un preview_kind", async () => {
     vi.mocked(supabase.from).mockReturnValue(

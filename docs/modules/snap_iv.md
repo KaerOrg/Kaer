@@ -1,5 +1,11 @@
 # SNAP-IV — Module Kær
 
+> 🔒 **Module masqué (#247).** Droits de reproduction non acquis en usage
+> commercial : © J. M. Swanson, autorisation écrite requise.
+> Le module est retiré de l'app (`modules.is_hidden`) mais **rien n'est supprimé** :
+> cette doc, les items, l'i18n, le scoring et les tests restent en place, prêts pour
+> une réactivation. Voir [`database.md`](../database.md) § `modules`.
+
 ## Description clinique
 
 Le **SNAP-IV** (Swanson, Nolan and Pelham Rating Scale, version IV) est une grille comportementale standardisée de dépistage du Trouble Déficit de l'Attention avec ou sans Hyperactivité (TDAH) chez l'enfant et l'adolescent (6–18 ans).

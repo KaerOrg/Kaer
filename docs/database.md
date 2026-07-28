@@ -159,6 +159,15 @@ au-dessus de l'instruction de masquage.
 seed **et** de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`,
 puis rejouer le seed. Rien d'autre à toucher.
 
+**Pourquoi le filtre est dans les services et non dans la policy RLS.** Descendre
+`is_hidden = false` dans `modules_read` semble plus sûr (impossible à oublier), mais
+rendrait l'app **aveugle** à ces modules : `fetchHiddenModuleIds` ne verrait plus rien,
+donc un module masqué **déjà débloqué** ne pourrait plus être écarté de la fiche
+patient ni de la liste mobile. Pire côté mobile, le join `module:modules(...)`
+renverrait `null` pour un module masqué, cas que le code traite comme « module à
+garder » : les modules masqués **réapparaîtraient**. Le filtre reste donc dans la
+couche service, et le garde-fou de test vérifie qu'aucune lecture ne l'oublie.
+
 **Catalogue complet (35 modules) :**
 
 | `id` | Catégorie | `preview_kind` | `is_invite_excluded` |

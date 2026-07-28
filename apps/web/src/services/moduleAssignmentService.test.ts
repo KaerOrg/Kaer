@@ -74,7 +74,7 @@ describe('moduleAssignmentService.fetchPatientModules', () => {
     expect(result).toEqual([])
   })
 
-  // #247 — la carte d'un module masqué rendrait ses items (aperçu + panneau de
+  // #247 : la carte d'un module masqué rendrait ses items (aperçu + panneau de
   // données). On l'écarte de la lecture ; la ligne patient_modules reste en base.
   it('écarte un module masqué même s\'il est encore débloqué', async () => {
     const rows = [

@@ -263,7 +263,7 @@ export interface Database {
           preview_kind: string
           sort_order: number
           is_invite_excluded: boolean
-          /** Module retiré de l'app sans suppression (droits non acquis) — issue #247. */
+          /** Module retiré de l'app sans suppression (droits non acquis), issue #247. */
           is_hidden: boolean
           icon: string
           mobile_icon: string
