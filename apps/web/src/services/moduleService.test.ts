@@ -37,12 +37,24 @@ beforeEach(() => vi.clearAllMocks())
 describe('moduleService.fetchModulePreviewKind', () => {
   it("renvoie le preview_kind de la table modules", async () => {
     vi.mocked(supabase.from).mockReturnValue(
-      makeChain({ data: { preview_kind: 'questionnaire' }, error: null }) as never
+      makeChain({ data: { preview_kind: 'questionnaire', is_hidden: false }, error: null }) as never
     )
 
     const result = await fetchModulePreviewKind('phq9')
 
     expect(result).toBe('questionnaire')
+  })
+
+  // #247 — l'aperçu praticien rend les items : un module masqué ne doit rien rendre,
+  // y compris si l'URL /modules/<id> est ouverte directement.
+  it("retombe sur 'coming_soon' pour un module masqué, même s'il a un preview_kind", async () => {
+    vi.mocked(supabase.from).mockReturnValue(
+      makeChain({ data: { preview_kind: 'questionnaire', is_hidden: true }, error: null }) as never
+    )
+
+    const result = await fetchModulePreviewKind('epds')
+
+    expect(result).toBe('coming_soon')
   })
 
   it("retombe sur 'coming_soon' si aucune ligne", async () => {

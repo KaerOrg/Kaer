@@ -8,10 +8,23 @@ import type {
 import type { TrackedEffect } from '../lib/sideEffectsCatalog'
 import type { BAConfiguredActivity, Medication } from '@kaer/shared'
 import { enabledTechniquesFromConfig, type DefusionTechnique } from '../lib/defusionTechniques'
+import { fetchHiddenModuleIds } from './moduleCatalogService'
 
+/**
+ * Modules débloqués d'un patient, vus par le praticien.
+ *
+ * #247 — Les modules masqués (droits de reproduction non acquis) sont écartés du
+ * résultat : leur carte rendrait leurs items dans l'aperçu et le panneau de données.
+ * Les lignes `patient_modules` correspondantes ne sont PAS supprimées et les saisies
+ * du patient restent en base ; elles redeviennent visibles si le module est réactivé.
+ * Les deux lectures partent en parallèle : aucun coût de latence.
+ */
 export async function fetchPatientModules(patientId: string): Promise<PatientModule[]> {
-  const { data } = await supabase.from('patient_modules').select('*').eq('patient_id', patientId)
-  return data ?? []
+  const [{ data }, hiddenIds] = await Promise.all([
+    supabase.from('patient_modules').select('*').eq('patient_id', patientId),
+    fetchHiddenModuleIds(),
+  ])
+  return (data ?? []).filter(m => !hiddenIds.has(m.module_type))
 }
 
 export async function unlockModule(

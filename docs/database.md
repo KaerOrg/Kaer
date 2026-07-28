@@ -130,9 +130,34 @@ Une ligne par module. `preview_kind` pilote le moteur de rendu.
 | `preview_kind` | text | Layout cible (voir `docs/module-engine.md` pour la table complète) |
 | `sort_order` | int | Ordre dans la catégorie |
 | `is_invite_excluded` | boolean | Si true : exclu de la pré-sélection à l'invitation (config spéciale requise) |
+| `is_hidden` | boolean | Si true : module retiré de l'app sans suppression (droits non acquis). Voir ci-dessous |
 | `icon` | text nullable | Icône Lucide (web) |
 | `mobile_icon` | text nullable | Icône MaterialCommunityIcons (mobile) |
 | `color` | text nullable | Couleur accent hex |
+
+**Trois drapeaux, trois questions distinctes** (issue #247) : ne pas les confondre.
+
+| Drapeau | Question à laquelle il répond |
+|---|---|
+| `is_hidden` | Le module existe-t-il pour l'app ? `true` = invisible partout et non déblocable |
+| `is_invite_excluded` | Le module est visible, mais se propose-t-il à l'invitation ? |
+| `preview_kind` | **Comment** le module se rend (`coming_soon` = pas encore d'écran) |
+
+**`is_hidden` : masquer sans supprimer.** Kær est un produit commercial : un
+instrument téléchargeable gratuitement n'est pas pour autant reproductible dans
+l'app. Les modules concernés sont **masqués, pas supprimés** : items, i18n,
+scoring, écrans et tests restent en place, ainsi que les lignes `patient_modules`
+et les saisies déjà faites par les patients. Un module masqué disparaît du
+catalogue praticien, de l'invitation, de l'aperçu, de la liste patient mobile et
+des routines de rappel.
+
+Modules actuellement masqués : `asrs18`, `epds`, `snap_iv`, `rcads`, `nsi`,
+`bsl23`. Le motif juridique de chacun est documenté dans `supabase/seed.sql`,
+au-dessus de l'instruction de masquage.
+
+**Réactivation** le jour où les droits sont acquis : retirer l'id de la liste du
+seed **et** de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`,
+puis rejouer le seed. Rien d'autre à toucher.
 
 **Catalogue complet (35 modules) :**
 

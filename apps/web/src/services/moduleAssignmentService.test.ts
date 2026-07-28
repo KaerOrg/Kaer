@@ -73,6 +73,22 @@ describe('moduleAssignmentService.fetchPatientModules', () => {
 
     expect(result).toEqual([])
   })
+
+  // #247 — la carte d'un module masqué rendrait ses items (aperçu + panneau de
+  // données). On l'écarte de la lecture ; la ligne patient_modules reste en base.
+  it('écarte un module masqué même s\'il est encore débloqué', async () => {
+    const rows = [
+      { id: 'pm-1', patient_id: 'pat-1', module_type: 'sleep_diary' },
+      { id: 'pm-2', patient_id: 'pat-1', module_type: 'epds' },
+    ]
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(makeChain({ data: rows, error: null }) as never)
+      .mockReturnValueOnce(makeChain({ data: [{ id: 'epds' }], error: null }) as never)
+
+    const result = await fetchPatientModules('pat-1')
+
+    expect(result.map(m => m.module_type)).toEqual(['sleep_diary'])
+  })
 })
 
 describe('moduleAssignmentService.unlockModule', () => {

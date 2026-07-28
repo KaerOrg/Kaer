@@ -15,10 +15,17 @@ export interface ModuleCategory {
   modules: ModuleItem[]
 }
 
+// #247 — Un module `is_hidden` est retiré de l'app sans être supprimé : il ne doit
+// sortir d'AUCUNE lecture de catalogue. Le filtre est posé côté requête, jamais dans
+// un composant, pour qu'aucun appelant ne puisse l'oublier.
 export async function fetchModuleCategories(): Promise<ModuleCategory[]> {
   const [{ data: cats }, { data: mods }] = await Promise.all([
     supabase.from('module_categories').select('id, sort_order, icon').order('sort_order'),
-    supabase.from('modules').select('id, category_id, sort_order, icon, mobile_icon, color').order('sort_order'),
+    supabase
+      .from('modules')
+      .select('id, category_id, sort_order, icon, mobile_icon, color')
+      .eq('is_hidden', false)
+      .order('sort_order'),
   ])
 
   if (!cats || !mods) return []
@@ -85,7 +92,22 @@ export async function fetchComingSoonModuleIds(): Promise<Set<string>> {
   const { data } = await supabase
     .from('modules')
     .select('id')
+    .eq('is_hidden', false)
     .eq('preview_kind', 'coming_soon')
+  return new Set((data ?? []).map(m => m.id))
+}
+
+/**
+ * Ids des modules masqués (#247) : droits de reproduction non acquis, retirés de
+ * l'app sans suppression de code ni de données. Sert aux lectures qui partent des
+ * `patient_modules` (déjà débloqués) et ne peuvent donc pas filtrer sur `modules`
+ * directement. Table de config, quelques lignes : lecture bon marché.
+ */
+export async function fetchHiddenModuleIds(): Promise<Set<string>> {
+  const { data } = await supabase
+    .from('modules')
+    .select('id')
+    .eq('is_hidden', true)
   return new Set((data ?? []).map(m => m.id))
 }
 
@@ -95,6 +117,7 @@ export async function fetchInviteCategories(): Promise<ModuleCategory[]> {
     supabase
       .from('modules')
       .select('id, category_id, sort_order, icon, mobile_icon, color, is_invite_excluded, preview_kind')
+      .eq('is_hidden', false)
       .order('sort_order'),
   ])
 
