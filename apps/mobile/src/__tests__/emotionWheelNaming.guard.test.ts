@@ -1,4 +1,4 @@
-// ─── Garde-fou — le module `emotion_wheel` s'appelle « Nommer ce que je ressens » ──
+// ─── Garde-fou : le module `emotion_wheel` s'appelle « Nommer ce que je ressens » ──
 //
 // Ticket #249 (K-1) : le titre « Roue des émotions » promettait une roue que l'app
 // n'affiche pas, et la description réduisait le module à la seule alexithymie. Le
@@ -50,7 +50,7 @@ function readModule(rel: string): Record<string, string> {
   return raw.modules?.emotion_wheel ?? {}
 }
 
-describe('emotion_wheel — renommage « Nommer ce que je ressens » (#249)', () => {
+describe('emotion_wheel : renommage « Nommer ce que je ressens » (#249)', () => {
   it('ne laisse aucune occurrence de l’ancien nom dans les locales mobile', () => {
     const offenders: string[] = []
     for (const { rel, content } of localeFiles()) {
