@@ -43,9 +43,13 @@ function localeFiles(): { rel: string; content: string }[] {
   return out
 }
 
-function readModule(rel: string): Record<string, string> {
+// Seules les clés vérifiées ici sont typées : le bloc en contient d'autres (dont des
+// sous-objets `context` / `node`), hors périmètre de ce garde-fou.
+type EmotionWheelBlock = { label?: string; description?: string; title?: string }
+
+function readModule(rel: string): EmotionWheelBlock {
   const raw = JSON.parse(readFileSync(join(LOCALES_DIR, rel), 'utf8')) as {
-    modules?: Record<string, Record<string, string>>
+    modules?: Record<string, EmotionWheelBlock>
   }
   return raw.modules?.emotion_wheel ?? {}
 }
