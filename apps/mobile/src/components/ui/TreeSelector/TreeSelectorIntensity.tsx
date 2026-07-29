@@ -10,6 +10,10 @@ import { resolveAccentColor, buildBreadcrumb } from './helpers'
 import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
 
+// États d'accessibilité figés hors du render : la sélection n'est plus portée par
+// la seule couleur de fond depuis la passe K-10 (un lecteur d'écran doit l'entendre).
+const ACTIVE_STATE = { on: { selected: true }, off: { selected: false } } as const
+
 interface TreeSelectorIntensityProps {
   path: TreeSelectorNode[]
   intensity: number
@@ -42,8 +46,8 @@ export function TreeSelectorIntensity({
         {texts.intensityHint ? <Text style={styles.stepHint}>{texts.intensityHint}</Text> : null}
 
         <View style={styles.intensityCard} testID="intensity-card">
-          <View style={[styles.intensityDisplay, { backgroundColor: accentColor + '1A' }]}>
-            <Text style={[styles.intensityValue, { color: accentColor }]} testID="intensity-value">
+          <View style={styles.intensityDisplay}>
+            <Text style={styles.intensityValue} testID="intensity-value">
               {intensity}
             </Text>
             <Text style={styles.intensityMax}>/{config.intensityMax}</Text>
@@ -54,19 +58,14 @@ export function TreeSelectorIntensity({
               return (
                 <Pressable
                   key={v}
-                  style={[
-                    styles.intensityBtn,
-                    isActive && { backgroundColor: accentColor, borderColor: accentColor },
-                  ]}
+                  style={[styles.intensityBtn, isActive ? styles.intensityBtnActive : null]}
                   onPress={() => onChangeIntensity(v)}
                   accessibilityRole="button"
                   accessibilityLabel={String(v)}
+                  accessibilityState={ACTIVE_STATE[isActive ? 'on' : 'off']}
                   testID={`intensity-btn-${v}`}
                 >
-                  <Text style={[
-                    styles.intensityBtnText,
-                    isActive && styles.intensityBtnTextActive,
-                  ]}>{v}</Text>
+                  <Text style={styles.intensityBtnText}>{v}</Text>
                 </Pressable>
               )
             })}
@@ -74,14 +73,14 @@ export function TreeSelectorIntensity({
         </View>
 
         <Pressable
-          style={[styles.continueBtn, { backgroundColor: accentColor }]}
+          style={styles.continueBtn}
           onPress={onConfirm}
           accessibilityRole="button"
           accessibilityLabel={texts.continueBtn}
           testID="continue-intensity"
         >
           <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
+          <MaterialCommunityIcons name="arrow-right" size={20} color={colors.text} />
         </Pressable>
       </ScrollView>
     </View>

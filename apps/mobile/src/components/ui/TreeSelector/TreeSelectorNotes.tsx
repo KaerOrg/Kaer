@@ -28,7 +28,7 @@ export function TreeSelectorNotes({
   const accentColor = resolveAccentColor(path)
   const breadcrumb = buildBreadcrumb(path)
   const tintStyle = path.length > 0 ? { backgroundColor: accentColor + '08' } : null
-  const summary = path.map(n => n.label).filter(Boolean).join(' — ')
+  const summary = path.map(n => n.label).filter(Boolean).join(' · ')
 
   return (
     <KeyboardAvoidingView
@@ -50,7 +50,7 @@ export function TreeSelectorNotes({
 
         {summary ? (
           <View style={[styles.summaryCard, { borderLeftColor: accentColor }]} testID="summary-card">
-            <Text style={[styles.summaryPrimary, { color: accentColor }]}>{summary}</Text>
+            <Text style={styles.summaryPrimary}>{summary}</Text>
             {config.enableIntensity ? (
               <Text style={styles.summaryMeta}>{intensity}/{config.intensityMax}</Text>
             ) : null}
@@ -81,7 +81,7 @@ export function TreeSelectorNotes({
             <Text style={styles.cancelBtnText}>{texts.cancel}</Text>
           </Pressable>
           <Pressable
-            style={[styles.saveBtn, { backgroundColor: accentColor }, saving && styles.btnDisabled]}
+            style={[styles.saveBtn, saving ? styles.btnDisabled : null]}
             onPress={onSave}
             disabled={saving}
             accessibilityRole="button"
@@ -89,7 +89,7 @@ export function TreeSelectorNotes({
             testID="save-entry"
           >
             <Text style={styles.saveBtnText}>{saving ? '…' : texts.saveBtn}</Text>
-            {!saving && <MaterialCommunityIcons name="check" size={20} color={colors.white} />}
+            {saving ? null : <MaterialCommunityIcons name="check" size={20} color={colors.text} />}
           </Pressable>
         </View>
       </ScrollView>

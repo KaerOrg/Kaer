@@ -6,6 +6,32 @@
 
 > Refonte 2026 (branche `refonte/roue-des-emotions`). Conception et décisions
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).
+> Refonte UX en cours : epic #248 (mobile) et #260 (web praticien).
+
+## Rédaction et accessibilité (passe K-10, ticket #258)
+
+L'écriture du module suit trois principes, tenus par les locales et par
+`ui/TreeSelector` :
+
+- **On ne dit jamais au patient qu'il pourrait mal répondre.** Le mot « facultatif »
+  a disparu des intitulés, et la phrase « c'est juste une valeur, il n'y a pas de
+  bonne ou mauvaise note » a été supprimée : elle répondait à une accusation que
+  personne n'avait portée.
+- **Aucun jargon d'interface.** « Valider à ce niveau : Effroi » est devenu
+  « Je ne sais pas », avec le niveau conservé en ligne secondaire
+  (« on garde « Peur » »). Les intitulés disent ce qu'ils demandent :
+  « En lien avec », « Qu'est-ce qui s'est passé ? ».
+- **Les mots précis sont des étiquettes, pas des phrases sur la personne.** Ils
+  s'écrivent en minuscule et sans marque d'accord (« ravi », « tendu »), là où le
+  seed portait « Ravi(e) », « Inquiet/ète ». Aucun champ de genre n'existe côté
+  patient : la formulation neutre est la seule voie, et elle évite d'imposer un
+  accord à qui ne s'y reconnaît pas.
+
+Charte de couleur et cibles tactiles : voir
+[`apps/mobile/docs/design-system.md`](../../apps/mobile/docs/design-system.md)
+§ `TreeSelector`. En résumé : le turquoise `colors.primary` porte les actions avec
+un libellé sombre, la couleur de famille ne porte jamais de texte, rien sous 11 px,
+aucune cible sous 44 px.
 
 ## Base clinique
 

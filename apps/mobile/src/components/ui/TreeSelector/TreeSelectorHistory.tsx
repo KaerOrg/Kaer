@@ -28,7 +28,7 @@ export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, on
         accessibilityLabel={texts.newBtn}
         testID="start-new-button"
       >
-        <MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.white} />
+        <MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.text} />
         <Text style={styles.startBtnText}>{texts.newBtn}</Text>
       </Pressable>
 
@@ -67,7 +67,7 @@ export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, on
                   </View>
                   <View style={styles.entryLabels}>
                     {entry.primaryLabel ? (
-                      <Text style={[styles.entryPrimary, { color: entry.accentColor }]}>{entry.primaryLabel}</Text>
+                      <Text style={styles.entryPrimary}>{entry.primaryLabel}</Text>
                     ) : null}
                     {entry.secondaryLabel ? (
                       <Text style={styles.entrySecondary}>{entry.secondaryLabel}</Text>
@@ -75,10 +75,8 @@ export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, on
                   </View>
                   <View style={styles.entryRight}>
                     {entry.intensityLabel != null ? (
-                      <View style={[styles.intensityBadge, { backgroundColor: entry.accentColor + '1A' }]}>
-                        <Text style={[styles.intensityText, { color: entry.accentColor }]}>
-                          {entry.intensityLabel}
-                        </Text>
+                      <View style={styles.intensityBadge}>
+                        <Text style={styles.intensityText}>{entry.intensityLabel}</Text>
                       </View>
                     ) : null}
                     <Pressable
