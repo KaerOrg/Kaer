@@ -789,6 +789,20 @@ import { TreeSelector } from '@ui/TreeSelector'
 />
 ```
 
+**Charte de couleur et d'accessibilité** (passe K-10, ticket #258) : trois règles
+tenues par `styles.ts`, à ne pas contourner en style inline depuis un appelant :
+
+| Rôle | Couleur | Pourquoi |
+|---|---|---|
+| Surfaces d'**action** (démarrer, continuer, enregistrer, cran sélectionné) | fond `colors.primary`, libellé `colors.text` | `colors.primary` avec du blanc échoue AA (≈ 2.1:1), ce que documente `packages/shared/src/theme.ts` |
+| Couleur de **famille** (`node.color`) | filet gauche, fond très pâle, icône | elle **identifie**, elle ne porte **jamais** de texte : ces teintes sont pastel et échouent AA en petit corps |
+| Texte secondaire (date, méta) | `colors.textMuted` | `colors.border` en couleur de texte est illisible |
+
+Aucun texte sous `fontSize.xxs` (11), aucune cible tactile sous 44 px (crans
+d'intensité, bouton retour, cartes de niveau 1). La sélection d'un cran d'intensité
+est annoncée par `accessibilityState.selected` : elle n'est pas portée par la seule
+couleur de fond.
+
 > **Conformité MDR** : aucune couleur ne code une gravité — les teintes/emojis codent
 > l'**identité de famille** (transmise par l'appelant). Le primitive affiche la valeur
 > brute d'intensité sans label interprétatif.
