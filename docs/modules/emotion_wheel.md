@@ -1,4 +1,8 @@
-# Roue des émotions (`emotion_wheel`)
+# Nommer ce que je ressens (`emotion_wheel`)
+
+> Renommé en juillet 2026 (ex « Roue des émotions », ticket #249). L'identifiant
+> technique `emotion_wheel` ne change pas : seuls le libellé et la description
+> affichés bougent. Le nom praticien côté web suit dans le ticket #261.
 
 > Refonte 2026 (branche `refonte/roue-des-emotions`). Conception et décisions
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).

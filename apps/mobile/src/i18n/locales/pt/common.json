@@ -227,9 +227,9 @@
       "dim_pleasure_high": "Plenamente sentido"
     },
     "emotion_wheel": {
-      "label": "Roda das emoções",
-      "description": "Explorar e nomear as suas emoções",
-      "title": "Roda das emoções",
+      "label": "Nomear o que sinto",
+      "description": "Encontrar a palavra exata para o que sente.",
+      "title": "Nomear o que sinto",
       "intro": "Explore e nomeie as suas emoções.",
       "stat_entries": "Entradas",
       "stat_days": "Dias",
