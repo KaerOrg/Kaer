@@ -46,9 +46,9 @@ export function buildRawNodes(fields: ContentField[]): RawTreeNode[] {
   const convert = (f: ContentField): RawTreeNode => ({
     id: f.id,
     text_code: f.text_code,
+    def_code: f.props['def'],
     color: f.props['color'],
     icon: f.props['icon'],
-    emoji: f.props['emoji'],
     children: (f.children ?? [])
       .filter(c => c.field_type === 'tree_node')
       .slice()
@@ -80,9 +80,9 @@ export function toUiNodes(nodes: RawTreeNode[], t: (key: string) => string): Tre
   return nodes.map(n => ({
     id: n.id,
     label: n.text_code ? t(n.text_code) : '',
+    definition: n.def_code ? t(n.def_code) : undefined,
     color: n.color,
     icon: n.icon,
-    emoji: n.emoji,
     children: toUiNodes(n.children, t),
   }))
 }
@@ -101,7 +101,6 @@ export function reconstructPath(
       text_code: node.text_code ?? undefined,
       color: node.color,
       icon: node.icon,
-      emoji: node.emoji,
     })
   }
   return path
@@ -113,21 +112,30 @@ function resolvePathLabel(node: TreeSelectionPathNode, t: (key: string) => strin
   return node.id
 }
 
-/** Convertit une entrée persistée en view-model d'historique pour le primitive. */
+/**
+ * Convertit une entrée persistée en view-model d'historique pour le primitive.
+ *
+ * La teinte et l'icône sont relues dans la **taxonomie courante** (`nodeMap`) et non
+ * dans le chemin persisté : une entrée saisie avant la pastellisation des familles
+ * (K-4) porte encore l'ancienne couleur saturée dans son `path`. La donnée du patient
+ * n'est pas réécrite, seul l'affichage suit la config. La valeur stockée reste le
+ * repli si la famille a disparu du seed.
+ */
 export function toEntryVM(
   entry: TreeSelection,
   t: (key: string) => string,
   intensityMax: number,
   formatDate: (iso: string) => string,
+  nodeMap: Map<string, RawTreeNode>,
 ): TreeSelectorEntry {
   const rootNode = entry.path[0]
-  const accentColor = rootNode?.color ?? colors.primary
+  const current = rootNode ? nodeMap.get(rootNode.id) : undefined
+  const accentColor = current?.color ?? rootNode?.color ?? colors.primary
   const labels = entry.path.map(n => resolvePathLabel(n, t)).filter(Boolean)
   return {
     id: entry.id,
     accentColor,
-    icon: (rootNode?.icon ?? 'palette-outline') as McIcon,
-    emoji: rootNode?.emoji,
+    icon: (current?.icon ?? rootNode?.icon ?? 'palette-outline') as McIcon,
     primaryLabel: labels[0] ?? '',
     secondaryLabel: labels.slice(1).join(' · '),
     intensityLabel: entry.intensity != null ? `${entry.intensity}/${intensityMax}` : null,

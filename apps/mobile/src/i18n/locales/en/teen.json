@@ -686,6 +686,7 @@
       "step_3_hint": "Pick the most accurate word, or just validate the nuance.",
       "validate_here_btn": "I don’t know",
       "validate_here_keep": "keeping “{{label}}”",
+      "stop_hint": "You can stop at the family: it already counts as an answer.",
       "intensity_title": "How strong is it?",
       "intensity_hint": "From 1 to 10.",
       "continue_btn": "Continue",

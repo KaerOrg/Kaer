@@ -37,10 +37,16 @@ export interface TreeSelectorProps {
   /** Appelé à la validation finale — le parent persiste puis l'historique se recharge. */
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>
   onDelete: (id: string) => void
+  /**
+   * Sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le bouton
+   * n'apparaît que si ce callback est fourni : un arbre sans porte de sortie
+   * n'en affiche pas.
+   */
+  onSkip?: () => void
 }
 
 export function TreeSelector({
-  nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete,
+  nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete, onSkip,
 }: TreeSelectorProps) {
   const flow = useTreeSelectorFlow(config, onSubmit)
 
@@ -75,6 +81,7 @@ export function TreeSelector({
         onBack={flow.handleBack}
         onSelectNode={flow.handleSelectNode}
         onValidateHere={flow.handleValidateHere}
+        onSkip={onSkip}
       />
     )
   }

@@ -59,11 +59,7 @@ export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, on
               >
                 <View style={styles.entryHeader}>
                   <View style={[styles.entryIcon, { backgroundColor: entry.accentColor + '1A' }]}>
-                    {entry.emoji ? (
-                      <Text style={styles.entryEmoji}>{entry.emoji}</Text>
-                    ) : (
-                      <MaterialCommunityIcons name={entry.icon} size={20} color={entry.accentColor} />
-                    )}
+                    <MaterialCommunityIcons name={entry.icon} size={20} color={entry.accentColor} />
                   </View>
                   <View style={styles.entryLabels}>
                     {entry.primaryLabel ? (
