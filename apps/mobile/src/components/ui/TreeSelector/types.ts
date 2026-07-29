@@ -17,9 +17,13 @@ export type TreeSelectorMode = 'history' | 'selection' | 'intensity' | 'context'
 export interface TreeSelectorNode {
   id: string
   label: string
+  /**
+   * Ligne de définition affichée sous le titre, au niveau 1 (« menace,
+   * incertitude »). Déjà traduite. Absente : la carte n'affiche que son titre.
+   */
+  definition?: string
   color?: string
   icon?: string
-  emoji?: string
   children: TreeSelectorNode[]
 }
 
@@ -35,7 +39,6 @@ export interface TreeSelectorEntry {
   id: string
   accentColor: string
   icon: McIcon
-  emoji?: string
   primaryLabel: string
   secondaryLabel: string
   /** Ex. « 6/10 » — déjà formaté, ou null si pas d'intensité. */
@@ -81,6 +84,13 @@ export interface TreeSelectorTexts {
    * (« on garde « Peur » »). Reçoit le libellé du dernier nœud du chemin.
    */
   validateHereKeep: (label: string) => string
+  /**
+   * Sortie du niveau 1 pour qui n'arrive pas à nommer (« Je ne sais pas trop »).
+   * Le bouton n'est rendu que si `onSkip` est fourni.
+   */
+  skipBtn: string
+  /** Rappel sous le niveau 1 : s'arrêter à la racine est déjà une réponse. */
+  stopHint: string
   cancel: string
   back: string
   delete: string

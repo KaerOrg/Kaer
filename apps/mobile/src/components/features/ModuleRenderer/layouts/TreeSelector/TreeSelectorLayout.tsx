@@ -79,6 +79,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     saveBtn: lbl('save_btn') || t('common.save'),
     validateHereBtn: lbl('validate_here_btn') || t('common.validate'),
     validateHereKeep: (label: string) => lbl('validate_here_keep', { label }),
+    skipBtn: lbl('skip_btn'),
+    stopHint: lbl('stop_hint'),
     cancel: t('common.cancel'),
     back: t('common.back'),
     delete: t('common.delete'),
@@ -87,8 +89,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   }), [lbl, t, config.props])
 
   const uiEntries = useMemo<TreeSelectorEntry[]>(
-    () => entries.map(e => toEntryVM(e, t, config.intensityMax, formatDateTime)),
-    [entries, t, config.intensityMax],
+    () => entries.map(e => toEntryVM(e, t, config.intensityMax, formatDateTime, config.nodeMap)),
+    [entries, t, config.intensityMax, config.nodeMap],
   )
 
   const footerText = footer != null ? t(footer.text_code ?? '') : null

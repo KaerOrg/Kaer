@@ -15,7 +15,8 @@ import type {
 
 const NODES: TreeSelectorNode[] = [
   {
-    id: 'joy', label: 'Joie', color: '#F59E0B', icon: 'emoticon-happy-outline',
+    id: 'joy', label: 'Joie', color: '#EFC98A', icon: 'emoticon-happy-outline',
+    definition: 'plaisir, élan, gratitude',
     children: [
       {
         id: 'joy.serenity', label: 'Sérénité',
@@ -26,7 +27,10 @@ const NODES: TreeSelectorNode[] = [
       },
     ],
   },
-  { id: 'fear', label: 'Peur', color: '#6EE7B7', icon: 'alert-circle-outline', children: [] },
+  {
+    id: 'fear', label: 'Peur', color: '#AC9BDE', icon: 'alert-circle-outline',
+    definition: 'menace, incertitude', children: [],
+  },
 ]
 
 const BASE_TEXTS: TreeSelectorTexts = {
@@ -36,6 +40,7 @@ const BASE_TEXTS: TreeSelectorTexts = {
   notesTitle: 'Notes', notesHint: 'Libre', notesPlaceholder: 'Écrivez…',
   continueBtn: 'Continuer', saveBtn: 'Enregistrer', validateHereBtn: 'Je ne sais pas',
   validateHereKeep: (label: string) => `on garde « ${label} »`,
+  skipBtn: 'Je ne sais pas trop', stopHint: 'S’arrêter à la famille est déjà une réponse.',
   cancel: 'Annuler', back: 'Retour', delete: 'Supprimer',
   stepTitles: { 1: 'Émotion principale', 3: 'Émotion spécifique' },
   stepHints: { 1: 'Indice 1', 2: 'Indice 2', 3: 'Indice 3' },
@@ -51,7 +56,7 @@ function makeConfig(over: Partial<TreeSelectorConfig> = {}): TreeSelectorConfig 
 }
 
 const ENTRY: TreeSelectorEntry = {
-  id: 'sel-1', accentColor: '#F59E0B', icon: 'emoticon-happy-outline', emoji: undefined,
+  id: 'sel-1', accentColor: '#EFC98A', icon: 'emoticon-happy-outline',
   primaryLabel: 'Joie', secondaryLabel: 'Sérénité · Calme', intensityLabel: '6/10',
   contextLabels: ['Travail'], notes: 'au lever', dateLabel: '05/05/2026',
 }
@@ -65,6 +70,7 @@ interface Overrides {
   footerText?: string | null
   onSubmit?: (r: TreeSelectorSubmit) => Promise<void>
   onDelete?: (id: string) => void
+  onSkip?: () => void
 }
 
 function renderTree(over: Overrides = {}) {
@@ -81,6 +87,7 @@ function renderTree(over: Overrides = {}) {
       saving={over.saving ?? false}
       onSubmit={onSubmit}
       onDelete={onDelete}
+      onSkip={over.onSkip}
     />
   )
   return { onSubmit, onDelete }
@@ -208,6 +215,46 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('intensity-btn-7'))
     expect(screen.getByTestId('intensity-btn-7').props.accessibilityState).toEqual({ selected: true })
     expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: false })
+  })
+
+  // ── Choix de la famille (K-4, ticket #252) ────────────────────────────────
+
+  it('affiche la définition sous le titre de chaque famille, sans emoji ni pictogramme', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    expect(screen.getByText('plaisir, élan, gratitude')).toBeTruthy()
+    expect(screen.getByText('menace, incertitude')).toBeTruthy()
+  })
+
+  it('l\'étiquette d\'accessibilité d\'une famille porte son titre et sa définition', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    expect(screen.getByTestId('node-fear').props.accessibilityLabel)
+      .toBe('Peur, menace, incertitude')
+  })
+
+  it('n\'affiche la sortie « Je ne sais pas trop » que si onSkip est fourni', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    // Sans callback : pas de porte de sortie, donc pas de bouton mort.
+    expect(screen.queryByTestId('skip-emotion')).toBeNull()
+  })
+
+  it('appelle onSkip et rappelle qu\'on peut s\'arrêter à la famille', () => {
+    const onSkip = jest.fn()
+    renderTree({ onSkip })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    expect(screen.getByText('S’arrêter à la famille est déjà une réponse.')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('skip-emotion'))
+    expect(onSkip).toHaveBeenCalledTimes(1)
+  })
+
+  it('la sortie n\'apparaît qu\'au niveau 1', () => {
+    const onSkip = jest.fn()
+    renderTree({ onSkip })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.queryByTestId('skip-emotion')).toBeNull()
   })
 
   it('enchaîne l\'étape contexte et renvoie les codes sélectionnés', async () => {

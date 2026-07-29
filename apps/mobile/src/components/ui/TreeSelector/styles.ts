@@ -53,7 +53,6 @@ export const styles = StyleSheet.create({
   entryPrimary:     { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
   entrySecondary:   { fontSize: fontSize.sm, color: colors.textMuted },
   entryRight:       { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  entryEmoji:       { fontSize: fontSize.h3 },
   entryChips:       { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
   intensityBadge: {
     paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.full,
@@ -86,19 +85,32 @@ export const styles = StyleSheet.create({
   stepTitle:        { fontSize: fontSize.h2, fontWeight: '700', color: colors.text, marginBottom: spacing.xs },
   stepHint:         { fontSize: fontSize.caption, color: colors.textMuted, lineHeight: 20, marginBottom: spacing.md },
   gridContainer:    { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  // Carte de famille (niveau 1) : filet d'accent à gauche, titre en noir, ligne de
+  // définition. Aucun emoji ni pictogramme de visage : un visage a déjà décidé ce
+  // qu'est l'émotion, à un patient à qui l'on demande de trouver la sienne (K-4).
+  // Deux colonnes, quatre rangées : les 8 familles tiennent sans défilement.
   primaryCard: {
-    width: '47%', backgroundColor: colors.card, borderRadius: radius.lg,
-    padding: spacing.md, alignItems: 'center', gap: spacing.sm, borderWidth: 1.5,
-    minHeight: TOUCH_TARGET,
+    width: '48%', backgroundColor: colors.card, borderRadius: radius.md,
+    paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.sm + 4,
+    gap: 2, borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
+    minHeight: 62, justifyContent: 'center',
     ...shadows.sm,
   },
-  primaryIconCircle: {
-    width: 56, height: 56, borderRadius: radius.full,
-    alignItems: 'center', justifyContent: 'center',
+  primaryLabel:     { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
+  primaryDefinition:{ fontSize: fontSize.xs, color: colors.textMuted, lineHeight: 16 },
+  cardPressed:      { opacity: 0.9, transform: [{ scale: 0.98 }] },
+  // Sortie « Je ne sais pas trop » : bouton fantôme, bordure pointillée. Il ne
+  // rivalise pas avec les familles, il reste atteignable.
+  skipBtn: {
+    borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed',
+    borderColor: colors.border, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
+    alignItems: 'center', justifyContent: 'center', marginTop: spacing.sm,
   },
-  primaryLabel:     { fontSize: fontSize.label, fontWeight: '700', textAlign: 'center', color: colors.text },
-  primaryEmoji:     { fontSize: 30 },
-  cardPressed:      { opacity: 0.7, transform: [{ scale: 0.98 }] },
+  skipBtnText:      { fontSize: fontSize.label, fontWeight: '600', color: colors.textMuted },
+  stopHint: {
+    fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center',
+    lineHeight: 17, marginTop: spacing.xs,
+  },
   validateHereBtn: {
     alignItems: 'center', justifyContent: 'center', gap: 2,
     borderRadius: radius.lg, borderWidth: 1.5, paddingVertical: spacing.md,

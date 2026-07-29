@@ -8,7 +8,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
-import type { McIcon, TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
+import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
 
 interface TreeSelectorNavigationProps {
@@ -20,10 +20,12 @@ interface TreeSelectorNavigationProps {
   onBack: () => void
   onSelectNode: (node: TreeSelectorNode) => void
   onValidateHere: () => void
+  /** Sortie sans rien nommer, niveau 1 seulement. Absent : pas de bouton. */
+  onSkip?: () => void
 }
 
 export function TreeSelectorNavigation({
-  nodes, path, config, texts, footerText, onBack, onSelectNode, onValidateHere,
+  nodes, path, config, texts, footerText, onBack, onSelectNode, onValidateHere, onSkip,
 }: TreeSelectorNavigationProps) {
   const accentColor = resolveAccentColor(path)
   const breadcrumb = buildBreadcrumb(path)
@@ -70,26 +72,18 @@ export function TreeSelectorNavigation({
                   key={node.id}
                   style={({ pressed }) => [
                     styles.primaryCard,
-                    { borderColor: nodeColor, backgroundColor: nodeColor + '12' },
-                    pressed && styles.cardPressed,
+                    { borderLeftColor: nodeColor },
+                    pressed ? [styles.cardPressed, { backgroundColor: nodeColor + '14', borderColor: nodeColor }] : null,
                   ]}
                   onPress={() => onSelectNode(node)}
                   accessibilityRole="button"
-                  accessibilityLabel={node.label}
+                  accessibilityLabel={node.definition ? `${node.label}, ${node.definition}` : node.label}
                   testID={`node-${node.id}`}
                 >
-                  <View style={[styles.primaryIconCircle, { backgroundColor: nodeColor + '22' }]}>
-                    {node.emoji ? (
-                      <Text style={styles.primaryEmoji}>{node.emoji}</Text>
-                    ) : (
-                      <MaterialCommunityIcons
-                        name={(node.icon ?? 'circle-outline') as McIcon}
-                        size={26}
-                        color={nodeColor}
-                      />
-                    )}
-                  </View>
                   <Text style={styles.primaryLabel}>{node.label}</Text>
+                  {node.definition ? (
+                    <Text style={styles.primaryDefinition}>{node.definition}</Text>
+                  ) : null}
                 </Pressable>
               )
             })}
@@ -130,6 +124,21 @@ export function TreeSelectorNavigation({
             <Text style={styles.validateHereText}>{texts.validateHereBtn}</Text>
             {keepLabel ? <Text style={styles.validateHereKeep}>{keepLabel}</Text> : null}
           </Pressable>
+        ) : null}
+
+        {level === 1 && onSkip ? (
+          <>
+            <Pressable
+              style={styles.skipBtn}
+              onPress={onSkip}
+              accessibilityRole="button"
+              accessibilityLabel={texts.skipBtn}
+              testID="skip-emotion"
+            >
+              <Text style={styles.skipBtnText}>{texts.skipBtn}</Text>
+            </Pressable>
+            {texts.stopHint ? <Text style={styles.stopHint}>{texts.stopHint}</Text> : null}
+          </>
         ) : null}
 
         {level === 1 && footerText ? (

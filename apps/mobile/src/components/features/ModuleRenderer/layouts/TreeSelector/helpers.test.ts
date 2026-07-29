@@ -91,11 +91,30 @@ describe('TreeSelector helpers (feature layer)', () => {
   })
 
   describe('toUiNodes', () => {
-    it('résout les libellés et préserve couleur/emoji/icon', () => {
+    it('résout les libellés et préserve couleur/icon', () => {
       const ui = toUiNodes(buildRawNodes([
-        field({ id: 'a', text_code: 'n.a', props: { color: '#F00', emoji: '😊', icon: 'star' } }),
+        field({ id: 'a', text_code: 'n.a', props: { color: '#F00', icon: 'star' } }),
       ]), t)
-      expect(ui[0]).toMatchObject({ id: 'a', label: 'T:n.a', color: '#F00', emoji: '😊', icon: 'star' })
+      expect(ui[0]).toMatchObject({ id: 'a', label: 'T:n.a', color: '#F00', icon: 'star' })
+    })
+
+    it('résout la ligne de définition depuis la prop `def` (K-4)', () => {
+      const ui = toUiNodes(buildRawNodes([
+        field({ id: 'a', text_code: 'n.a', props: { def: 'n_def.a' } }),
+      ]), t)
+      expect(ui[0].definition).toBe('T:n_def.a')
+    })
+
+    it('laisse la définition absente quand la prop `def` manque', () => {
+      const ui = toUiNodes(buildRawNodes([field({ id: 'a', text_code: 'n.a' })]), t)
+      expect(ui[0].definition).toBeUndefined()
+    })
+
+    it('ne propage plus d\'emoji : ils sont supprimés du module (K-4)', () => {
+      const ui = toUiNodes(buildRawNodes([
+        field({ id: 'a', text_code: 'n.a', props: { emoji: '😊' } }),
+      ]), t)
+      expect(ui[0]).not.toHaveProperty('emoji')
     })
   })
 
@@ -108,8 +127,8 @@ describe('TreeSelector helpers (feature layer)', () => {
     it('reconstruit le chemin avec text_code/couleur depuis les ids', () => {
       const path = reconstructPath(['a', 'a1'], map)
       expect(path).toEqual([
-        { id: 'a', text_code: 'n.a', color: '#F00', icon: undefined, emoji: undefined },
-        { id: 'a1', text_code: 'n.a1', color: undefined, icon: undefined, emoji: undefined },
+        { id: 'a', text_code: 'n.a', color: '#F00', icon: undefined },
+        { id: 'a1', text_code: 'n.a1', color: undefined, icon: undefined },
       ])
     })
     it('ignore silencieusement un id inconnu', () => {
@@ -126,18 +145,32 @@ describe('TreeSelector helpers (feature layer)', () => {
       ],
       intensity: 6, notes: 'note', context: ['c.work'], created_at: '2026-05-05T10:00:00Z',
     }
+    // Taxonomie courante : la famille « a » a été pastellisée depuis la saisie.
+    const CURRENT = buildNodeMap(buildRawNodes([
+      field({ id: 'a', text_code: 'n.a', props: { color: '#EFC98A', icon: 'star' } }),
+    ]))
+
     it('mappe libellés, badge d\'intensité, contexte et date', () => {
-      const vm = toEntryVM(entry, t, 10, iso => `D:${iso}`)
+      const vm = toEntryVM(entry, t, 10, iso => `D:${iso}`, CURRENT)
       expect(vm).toMatchObject({
-        id: 'sel-1', accentColor: '#F59E0B', icon: 'star',
+        id: 'sel-1', icon: 'star',
         primaryLabel: 'T:n.a', secondaryLabel: 'T:n.a1',
         intensityLabel: '6/10', contextLabels: ['T:c.work'],
         notes: 'note', dateLabel: 'D:2026-05-05T10:00:00Z',
       })
     })
     it('intensityLabel null quand pas d\'intensité', () => {
-      const vm = toEntryVM({ ...entry, intensity: null }, t, 10, iso => iso)
+      const vm = toEntryVM({ ...entry, intensity: null }, t, 10, iso => iso, CURRENT)
       expect(vm.intensityLabel).toBeNull()
+    })
+    it('relit la teinte dans la taxonomie courante, pas dans le chemin persisté (K-4)', () => {
+      // L'entrée a été saisie avec l'ancienne teinte saturée : l'affichage suit le seed.
+      const vm = toEntryVM(entry, t, 10, iso => iso, CURRENT)
+      expect(vm.accentColor).toBe('#EFC98A')
+    })
+    it('retombe sur la teinte persistée si la famille a disparu du seed', () => {
+      const vm = toEntryVM(entry, t, 10, iso => iso, new Map())
+      expect(vm.accentColor).toBe('#F59E0B')
     })
   })
 })
