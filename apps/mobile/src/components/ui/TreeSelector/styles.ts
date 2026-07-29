@@ -111,22 +111,34 @@ export const styles = StyleSheet.create({
     fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center',
     lineHeight: 17, marginTop: spacing.xs,
   },
+  // Bas d'écran des niveaux ≥ 2 : sortie « je ne sais pas » à gauche, validation de
+  // la carte dépliée à droite. La seconde n'apparaît que si une carte est dépliée.
+  stepActions:      { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  stepContinueBtn: {
+    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md,
+    backgroundColor: colors.primary, minHeight: TOUCH_TARGET,
+    alignItems: 'center', justifyContent: 'center',
+  },
   validateHereBtn: {
-    alignItems: 'center', justifyContent: 'center', gap: 2,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2,
     borderRadius: radius.lg, borderWidth: 1.5, paddingVertical: spacing.md,
-    marginTop: spacing.sm, backgroundColor: colors.card, minHeight: TOUCH_TARGET,
+    backgroundColor: colors.card, minHeight: TOUCH_TARGET,
   },
   validateHereText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
   validateHereKeep: { fontSize: fontSize.xs, color: colors.textMuted },
   chipsWrap:        { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
   listContainer:    { gap: spacing.sm },
+  // Carte de nuance (niveaux ≥ 2) : titre, définition, et mots en chips une fois
+  // dépliée. Le niveau 3 n'a plus d'écran à lui (K-5).
   optionCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderLeftWidth: 4, minHeight: TOUCH_TARGET,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
+    minHeight: TOUCH_TARGET, gap: spacing.xs,
     ...shadows.sm,
   },
   optionLabel:      { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
+  optionDefinition: { fontSize: fontSize.sm, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
+  optionChips:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
   // ── Intensité
   intensityCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,

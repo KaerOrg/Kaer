@@ -20,11 +20,14 @@ const NODES: TreeSelectorNode[] = [
     children: [
       {
         id: 'joy.serenity', label: 'Sérénité',
+        definition: 'tournée vers ce qui vient de se passer',
         children: [
           { id: 'joy.serenity.calm', label: 'Calme', children: [] },
           { id: 'joy.serenity.peace', label: 'Paix', children: [] },
         ],
       },
+      // Nuance sans mots : un tap suffit, aucune chip (cas des 16 nuances élaguées).
+      { id: 'joy.calm', label: 'Quiétude', definition: 'rien ne presse', children: [] },
     ],
   },
   {
@@ -133,8 +136,10 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-joy'))
     expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    // La nuance porte des mots : elle se déplie sur place, sans écran de plus (K-5).
     fireEvent.press(screen.getByTestId('node-joy.serenity'))
-    fireEvent.press(screen.getByTestId('node-joy.serenity.calm'))
+    expect(screen.getByTestId('chips-of-joy.serenity')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('leaf-joy.serenity.calm'))
     expect(screen.getByTestId('intensity-card')).toBeTruthy()
   })
 
@@ -255,6 +260,95 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-joy'))
     expect(screen.queryByTestId('skip-emotion')).toBeNull()
+  })
+
+  // ── Nuances : définition, mots en chips, plus d'écran de niveau 3 (K-5, #253) ──
+
+  it('affiche la définition de chaque nuance sous son nom', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.getByText('tournée vers ce qui vient de se passer')).toBeTruthy()
+  })
+
+  it('une nuance sans mots enchaîne directement : trois taps pour une saisie', () => {
+    renderTree({ config: makeConfig({ enableIntensity: false, enableContext: false }) })
+    fireEvent.press(screen.getByTestId('start-new-button'))   // 1
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.calm'))      // nuance sans chips
+    // Pas de chips, pas d'écran de plus : on est déjà sur la fiche finale.
+    expect(screen.getByTestId('notes-input')).toBeTruthy()
+  })
+
+  it('déplier une nuance ne descend pas d\'un niveau : les mots sont des chips', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    // Toujours la liste des nuances, avec les mots dépliés dedans.
+    expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    expect(screen.getByTestId('chips-of-joy.serenity')).toBeTruthy()
+    expect(screen.getByText('Calme')).toBeTruthy()
+    expect(screen.getByText('Paix')).toBeTruthy()
+  })
+
+  it('re-taper une nuance dépliée la referme', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    expect(screen.queryByTestId('chips-of-joy.serenity')).toBeNull()
+  })
+
+  it('« Continuer » valide la nuance dépliée sans descendre au mot', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false, enableEarlyValidate: true })
+    renderTree({ config, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    await act(async () => { fireEvent.press(screen.getByTestId('continue-selection')) })
+    expect(onSubmit).toHaveBeenCalledWith({
+      pathIds: ['joy', 'joy.serenity'], intensity: null, context: [], notes: '',
+    })
+  })
+
+  it('choisir un mot conserve la nuance dans le chemin enregistré', async () => {
+    // Régression : la carte dépliée n'est pas « traversée », elle n'entre donc pas
+    // dans le chemin toute seule. Sans l'insérer, l'entrée perdait sa nuance.
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false })
+    renderTree({ config, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    await act(async () => { fireEvent.press(screen.getByTestId('leaf-joy.serenity.calm')) })
+    expect(onSubmit).toHaveBeenCalledWith({
+      pathIds: ['joy', 'joy.serenity', 'joy.serenity.calm'],
+      intensity: null, context: [], notes: '',
+    })
+  })
+
+  it('« Continuer » n\'apparaît qu\'une fois une nuance dépliée', () => {
+    renderTree({ config: makeConfig({ enableEarlyValidate: true }) })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.queryByTestId('continue-selection')).toBeNull()
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    expect(screen.getByTestId('continue-selection')).toBeTruthy()
+  })
+
+  it('le retour referme la carte dépliée avant de remonter d\'un niveau', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    fireEvent.press(screen.getByTestId('back-button'))
+    expect(screen.queryByTestId('chips-of-joy.serenity')).toBeNull()
+    expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('back-button'))
+    expect(screen.getByTestId('level-1-grid')).toBeTruthy()
   })
 
   it('enchaîne l\'étape contexte et renvoie les codes sélectionnés', async () => {

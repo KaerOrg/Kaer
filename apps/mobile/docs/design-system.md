@@ -762,6 +762,19 @@ La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque étape est un
 composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `…Context`
 / `…Notes`) — un fichier = un composant.
 
+**Deux façons de descendre dans l'arbre** (K-5) :
+
+| Niveau | Rendu | Comportement au tap |
+|---|---|---|
+| 1 | grille 2 colonnes (`TreeSelectorOptionCard` non utilisé) | descend d'un niveau |
+| ≥ 2, nœud **sans** feuille | carte, titre + définition | sélectionne et enchaîne les étapes |
+| ≥ 2, nœud **avec** feuilles | carte dépliable | se **déplie sur place**, ses feuilles apparaissent en chips ; un tap sur une chip sélectionne la feuille, le bouton « continuer » valide la carte sans descendre |
+
+Autrement dit, **les feuilles d'un nœud de niveau ≥ 2 n'ouvrent jamais un écran de
+plus** : elles sont des chips dans la carte de leur parent. Un nœud déplié n'est pas
+« traversé » : `handleSelectLeaf` l'insère dans le chemin, sinon la sélection sauterait
+un niveau à la persistance.
+
 | Prop | Type | Rôle |
 |---|---|---|
 | `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `definition`/`color`/`icon` optionnels). `definition` est la ligne affichée sous le titre au niveau 1 |

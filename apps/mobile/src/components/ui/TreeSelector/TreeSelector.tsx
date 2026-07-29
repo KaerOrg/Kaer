@@ -78,8 +78,12 @@ export function TreeSelector({
         config={config}
         texts={texts}
         footerText={footerText}
+        expanded={flow.expanded}
         onBack={flow.handleBack}
         onSelectNode={flow.handleSelectNode}
+        onSelectLeaf={flow.handleSelectLeaf}
+        onToggleExpand={flow.handleToggleExpand}
+        onContinue={flow.handleContinue}
         onValidateHere={flow.handleValidateHere}
         onSkip={onSkip}
       />

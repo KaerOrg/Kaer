@@ -782,11 +782,63 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.peaceful.acceptation',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__acceptation',   'ew.peaceful', 5)
 on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, parent_field_id = excluded.parent_field_id, sort_order = excluded.sort_order;
 
--- 6) Niveau 3 — mots précis (74)
+-- Définition de chaque nuance, affichée sous son nom (K-5, #253). Sans elle le
+-- patient choisit au jugé entre des mots que la spec distingue finement : la
+-- granularité devient de façade et la donnée inexploitable en séance. Les 16
+-- nuances qui ne portent plus de mots au choix intègrent leur mot conservé dans
+-- leur définition (« Serein, rien ne pèse. »).
+insert into public.field_props (field_id, prop_key, prop_value) values
+  ('ew.joy.plaisir',                'def', 'modules.emotion_wheel.node_def.joy__plaisir'),
+  ('ew.joy.enthousiasme',           'def', 'modules.emotion_wheel.node_def.joy__enthousiasme'),
+  ('ew.joy.amour',                  'def', 'modules.emotion_wheel.node_def.joy__amour'),
+  ('ew.joy.emerveillement',         'def', 'modules.emotion_wheel.node_def.joy__emerveillement'),
+  ('ew.joy.gratitude',              'def', 'modules.emotion_wheel.node_def.joy__gratitude'),
+  ('ew.sadness.abattement',         'def', 'modules.emotion_wheel.node_def.sadness__abattement'),
+  ('ew.sadness.solitude',           'def', 'modules.emotion_wheel.node_def.sadness__solitude'),
+  ('ew.sadness.chagrin',            'def', 'modules.emotion_wheel.node_def.sadness__chagrin'),
+  ('ew.sadness.vide',               'def', 'modules.emotion_wheel.node_def.sadness__vide'),
+  ('ew.sadness.nostalgie',          'def', 'modules.emotion_wheel.node_def.sadness__nostalgie'),
+  ('ew.anger.irritation',           'def', 'modules.emotion_wheel.node_def.anger__irritation'),
+  ('ew.anger.frustration',          'def', 'modules.emotion_wheel.node_def.anger__frustration'),
+  ('ew.anger.hostilite',            'def', 'modules.emotion_wheel.node_def.anger__hostilite'),
+  ('ew.anger.indignation',          'def', 'modules.emotion_wheel.node_def.anger__indignation'),
+  ('ew.anger.susceptibilite',       'def', 'modules.emotion_wheel.node_def.anger__susceptibilite'),
+  ('ew.fear.anxiete',               'def', 'modules.emotion_wheel.node_def.fear__anxiete'),
+  ('ew.fear.insecurite',            'def', 'modules.emotion_wheel.node_def.fear__insecurite'),
+  ('ew.fear.effroi',                'def', 'modules.emotion_wheel.node_def.fear__effroi'),
+  ('ew.fear.mefiance',              'def', 'modules.emotion_wheel.node_def.fear__mefiance'),
+  ('ew.fear.impuissance',           'def', 'modules.emotion_wheel.node_def.fear__impuissance'),
+  ('ew.disgust.repulsion',          'def', 'modules.emotion_wheel.node_def.disgust__repulsion'),
+  ('ew.disgust.mepris',             'def', 'modules.emotion_wheel.node_def.disgust__mepris'),
+  ('ew.disgust.desapprobation',     'def', 'modules.emotion_wheel.node_def.disgust__desapprobation'),
+  ('ew.self_conscious.honte',       'def', 'modules.emotion_wheel.node_def.self_conscious__honte'),
+  ('ew.self_conscious.culpabilite', 'def', 'modules.emotion_wheel.node_def.self_conscious__culpabilite'),
+  ('ew.self_conscious.gene',        'def', 'modules.emotion_wheel.node_def.self_conscious__gene'),
+  ('ew.self_conscious.devalorisation', 'def', 'modules.emotion_wheel.node_def.self_conscious__devalorisation'),
+  ('ew.powerful.confiance',         'def', 'modules.emotion_wheel.node_def.powerful__confiance'),
+  ('ew.powerful.fierte',            'def', 'modules.emotion_wheel.node_def.powerful__fierte'),
+  ('ew.powerful.courage',           'def', 'modules.emotion_wheel.node_def.powerful__courage'),
+  ('ew.powerful.espoir',            'def', 'modules.emotion_wheel.node_def.powerful__espoir'),
+  ('ew.powerful.valorisation',      'def', 'modules.emotion_wheel.node_def.powerful__valorisation'),
+  ('ew.peaceful.calme',             'def', 'modules.emotion_wheel.node_def.peaceful__calme'),
+  ('ew.peaceful.serenite',          'def', 'modules.emotion_wheel.node_def.peaceful__serenite'),
+  ('ew.peaceful.securite',          'def', 'modules.emotion_wheel.node_def.peaceful__securite'),
+  ('ew.peaceful.comprehension',     'def', 'modules.emotion_wheel.node_def.peaceful__comprehension'),
+  ('ew.peaceful.acceptation',       'def', 'modules.emotion_wheel.node_def.peaceful__acceptation')
+on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
+
+-- 6) Niveau 3 : mots précis (42, après l'élagage K-5)
+--
+-- Élagage : une paire de mots ne se justifie que si elle sépare DEUX DIMENSIONS
+-- (tête/corps, moi/l'autre, état/mouvement), jamais deux degrés. « écœuré » et
+-- « révulsé » ne sont qu'une différence d'intensité : c'est le curseur qui la porte,
+-- pas l'arbre (règle QUOI / COMBIEN appliquée jusqu'au mot).
+-- Les 16 nuances réduites à un seul mot n'ont plus AUCUN nœud de niveau 3 : le mot
+-- conservé vit dans leur définition, et le patient valide directement sur la nuance.
+-- Les clés i18n des mots retirés restent dans les locales : une entrée déjà saisie
+-- qui pointe vers l'un d'eux doit rester lisible (rétrogradée, jamais perdue).
 insert into public.module_content_fields (id, module_id, field_type, text_code, parent_field_id, sort_order) values
   -- Joie
-  ('ew.joy.plaisir.rejoui',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__plaisir__rejoui',         'ew.joy.plaisir', 1),
-  ('ew.joy.plaisir.ravi',           'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__plaisir__ravi',           'ew.joy.plaisir', 2),
   ('ew.joy.enthousiasme.enjoue',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__enthousiasme__enjoue',    'ew.joy.enthousiasme', 1),
   ('ew.joy.enthousiasme.stimule',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__enthousiasme__stimule',   'ew.joy.enthousiasme', 2),
   ('ew.joy.amour.affectueux',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.joy__amour__affectueux',       'ew.joy.amour', 1),
@@ -798,8 +850,6 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   -- Tristesse
   ('ew.sadness.abattement.decourage','emotion_wheel','tree_node', 'modules.emotion_wheel.node.sadness__abattement__decourage','ew.sadness.abattement', 1),
   ('ew.sadness.abattement.accable', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__abattement__accable', 'ew.sadness.abattement', 2),
-  ('ew.sadness.solitude.seul',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__solitude__seul',      'ew.sadness.solitude', 1),
-  ('ew.sadness.solitude.isole',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__solitude__isole',     'ew.sadness.solitude', 2),
   ('ew.sadness.chagrin.peine',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__chagrin__peine',      'ew.sadness.chagrin', 1),
   ('ew.sadness.chagrin.blesse',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__chagrin__blesse',     'ew.sadness.chagrin', 2),
   ('ew.sadness.vide.eteint',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__vide__eteint',        'ew.sadness.vide', 1),
@@ -807,65 +857,37 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.sadness.nostalgie.melancolique','emotion_wheel','tree_node','modules.emotion_wheel.node.sadness__nostalgie__melancolique','ew.sadness.nostalgie', 1),
   ('ew.sadness.nostalgie.regrets',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.sadness__nostalgie__regrets',  'ew.sadness.nostalgie', 2),
   -- Colère
-  ('ew.anger.irritation.agace',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__irritation__agace',     'ew.anger.irritation', 1),
-  ('ew.anger.irritation.contrarie', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__irritation__contrarie', 'ew.anger.irritation', 2),
   ('ew.anger.frustration.empeche',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__frustration__empeche',  'ew.anger.frustration', 1),
   ('ew.anger.frustration.decu',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__frustration__decu',     'ew.anger.frustration', 2),
   ('ew.anger.hostilite.rancunier',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__hostilite__rancunier',  'ew.anger.hostilite', 1),
   ('ew.anger.hostilite.amer',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__hostilite__amer',       'ew.anger.hostilite', 2),
-  ('ew.anger.indignation.revolte',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__indignation__revolte',  'ew.anger.indignation', 1),
-  ('ew.anger.indignation.outre',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__indignation__outre',    'ew.anger.indignation', 2),
-  ('ew.anger.susceptibilite.vexe',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.anger__susceptibilite__vexe',  'ew.anger.susceptibilite', 1),
-  ('ew.anger.susceptibilite.froisse','emotion_wheel','tree_node', 'modules.emotion_wheel.node.anger__susceptibilite__froisse','ew.anger.susceptibilite', 2),
   -- Peur
   ('ew.fear.anxiete.inquiet',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__anxiete__inquiet',       'ew.fear.anxiete', 1),
   ('ew.fear.anxiete.tendu',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__anxiete__tendu',         'ew.fear.anxiete', 2),
-  ('ew.fear.insecurite.vulnerable', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__insecurite__vulnerable', 'ew.fear.insecurite', 1),
-  ('ew.fear.insecurite.fragile',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__insecurite__fragile',    'ew.fear.insecurite', 2),
-  ('ew.fear.effroi.effraye',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__effroi__effraye',        'ew.fear.effroi', 1),
-  ('ew.fear.effroi.alarme',         'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__effroi__alarme',         'ew.fear.effroi', 2),
   ('ew.fear.mefiance.mefiant',      'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__mefiance__mefiant',      'ew.fear.mefiance', 1),
   ('ew.fear.mefiance.gardes',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__mefiance__gardes',       'ew.fear.mefiance', 2),
   ('ew.fear.impuissance.demuni',    'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__impuissance__demuni',    'ew.fear.impuissance', 1),
   ('ew.fear.impuissance.paralyse',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.fear__impuissance__paralyse',  'ew.fear.impuissance', 2),
   -- Dégoût
-  ('ew.disgust.repulsion.ecoeure',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__repulsion__ecoeure',  'ew.disgust.repulsion', 1),
-  ('ew.disgust.repulsion.revulse',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__repulsion__revulse',  'ew.disgust.repulsion', 2),
-  ('ew.disgust.mepris.dedaigneux',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__mepris__dedaigneux',  'ew.disgust.mepris', 1),
-  ('ew.disgust.mepris.meprisant',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.disgust__mepris__meprisant',   'ew.disgust.mepris', 2),
   ('ew.disgust.desapprobation.reprobateur','emotion_wheel','tree_node','modules.emotion_wheel.node.disgust__desapprobation__reprobateur','ew.disgust.desapprobation', 1),
   ('ew.disgust.desapprobation.choque',     'emotion_wheel','tree_node','modules.emotion_wheel.node.disgust__desapprobation__choque',     'ew.disgust.desapprobation', 2),
   -- Honte et culpabilité
   ('ew.self_conscious.honte.honteux',      'emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__honte__honteux',      'ew.self_conscious.honte', 1),
   ('ew.self_conscious.honte.humilie',      'emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__honte__humilie',      'ew.self_conscious.honte', 2),
-  ('ew.self_conscious.culpabilite.coupable','emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__culpabilite__coupable','ew.self_conscious.culpabilite', 1),
-  ('ew.self_conscious.culpabilite.remords','emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__culpabilite__remords','ew.self_conscious.culpabilite', 2),
-  ('ew.self_conscious.gene.gene',          'emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__gene__gene',          'ew.self_conscious.gene', 1),
-  ('ew.self_conscious.gene.malaise',       'emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__gene__malaise',       'ew.self_conscious.gene', 2),
   ('ew.self_conscious.devalorisation.incapable','emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__devalorisation__incapable','ew.self_conscious.devalorisation', 1),
   ('ew.self_conscious.devalorisation.insuffisant','emotion_wheel','tree_node','modules.emotion_wheel.node.self_conscious__devalorisation__insuffisant','ew.self_conscious.devalorisation', 2),
   -- Force
-  ('ew.powerful.confiance.assure',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__confiance__assure',  'ew.powerful.confiance', 1),
-  ('ew.powerful.confiance.sur',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__confiance__sur',     'ew.powerful.confiance', 2),
   ('ew.powerful.fierte.fier',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__fierte__fier',       'ew.powerful.fierte', 1),
   ('ew.powerful.fierte.accompli',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__fierte__accompli',   'ew.powerful.fierte', 2),
   ('ew.powerful.courage.determine', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__courage__determine', 'ew.powerful.courage', 1),
   ('ew.powerful.courage.audacieux', 'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__courage__audacieux', 'ew.powerful.courage', 2),
-  ('ew.powerful.espoir.optimiste',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__espoir__optimiste',  'ew.powerful.espoir', 1),
-  ('ew.powerful.espoir.confiant',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.powerful__espoir__confiant',   'ew.powerful.espoir', 2),
-  ('ew.powerful.valorisation.respecte','emotion_wheel','tree_node','modules.emotion_wheel.node.powerful__valorisation__respecte','ew.powerful.valorisation', 1),
-  ('ew.powerful.valorisation.reconnu','emotion_wheel','tree_node', 'modules.emotion_wheel.node.powerful__valorisation__reconnu','ew.powerful.valorisation', 2),
   -- Apaisement
   ('ew.peaceful.calme.detendu',     'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__calme__detendu',     'ew.peaceful.calme', 1),
   ('ew.peaceful.calme.pose',        'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__calme__pose',        'ew.peaceful.calme', 2),
-  ('ew.peaceful.serenite.serein',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__serenite__serein',   'ew.peaceful.serenite', 1),
-  ('ew.peaceful.serenite.enpaix',   'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__serenite__enpaix',   'ew.peaceful.serenite', 2),
   ('ew.peaceful.securite.rassure',  'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__securite__rassure',  'ew.peaceful.securite', 1),
   ('ew.peaceful.securite.confiance','emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__securite__confiance','ew.peaceful.securite', 2),
   ('ew.peaceful.comprehension.compris','emotion_wheel','tree_node','modules.emotion_wheel.node.peaceful__comprehension__compris','ew.peaceful.comprehension', 1),
-  ('ew.peaceful.comprehension.ecoute','emotion_wheel','tree_node', 'modules.emotion_wheel.node.peaceful__comprehension__ecoute','ew.peaceful.comprehension', 2),
-  ('ew.peaceful.acceptation.reconcilie','emotion_wheel','tree_node','modules.emotion_wheel.node.peaceful__acceptation__reconcilie','ew.peaceful.acceptation', 1),
-  ('ew.peaceful.acceptation.libere','emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful__acceptation__libere','ew.peaceful.acceptation', 2)
+  ('ew.peaceful.comprehension.ecoute','emotion_wheel','tree_node', 'modules.emotion_wheel.node.peaceful__comprehension__ecoute','ew.peaceful.comprehension', 2)
 on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, parent_field_id = excluded.parent_field_id, sort_order = excluded.sort_order;
 
 
