@@ -8,6 +8,23 @@
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).
 > Refonte UX en cours : epic #248 (mobile) et #260 (web praticien).
 
+## Modifier une entrée (K-8, ticket #256)
+
+Une entrée ne pouvait qu'être supprimée : une erreur de saisie obligeait à tout
+refaire. L'écran de première ouverture promet pourtant par écrit qu'on peut modifier.
+
+- **⋯ puis « Modifier cette entrée »** rouvre le parcours **à l'étape 1**, ce qui permet
+  de corriger l'émotion elle-même, et de **nommer enfin une entrée « Sans mot »**.
+- Les **champs facultatifs sont rechargés** (intensité, contexte, contexte libre, note) :
+  on ne fait pas ressaisir ce qui n'a pas changé.
+- L'entrée **conserve son identifiant et son horodatage d'origine**. C'est un point
+  technique à ne pas perdre : `INSERT OR REPLACE` supprime puis réinsère la ligne, donc
+  sans passer `created_at` explicitement, une simple correction ferait **remonter
+  l'entrée en tête d'historique** et changerait son jour. `saveTreeSelection` accepte
+  donc un `created_at` optionnel, transmis jusqu'au payload de synchronisation.
+- Une entrée « Sans mot » rouverte peut être **réenregistrée telle quelle** : la
+  modification ne force personne à nommer.
+
 ## L'accueil et l'historique (K-3, ticket #251)
 
 L'accueil poussait l'historique sous la ligne de flottaison, coincé entre un bandeau de

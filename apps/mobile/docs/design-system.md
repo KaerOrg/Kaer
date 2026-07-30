@@ -784,6 +784,7 @@ un niveau à la persistance.
 | `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `definition`/`color`/`icon` optionnels). `definition` est la ligne affichée sous le titre au niveau 1 |
 | `sections` | `TreeSelectorEntrySection[]` | Historique **déjà groupé et titré par le parent** (« AUJOURD'HUI », « HIER », une date). Le primitive ne calcule aucune date : il rend des groupes reçus |
 | `onOpenEntryMenu` | `(id: string) => void` | Tap sur le ⋯ d'une entrée. Le parent ouvre la feuille d'actions (modifier / supprimer) |
+| `editRequest` | `TreeSelectorEditRequest \| null` | Rouvre le parcours **à l'étape 1** avec les champs facultatifs rechargés. Le parent incrémente `token` à chaque demande, sinon rouvrir deux fois la même entrée ne relancerait rien. `editingId` revient dans `onSubmit` |
 | `onOpenInfo` | `() => void` (optionnel) | Ouvre la fiche ⓘ. **Absent : l'icône n'est pas rendue** |
 | `nextReminderLabel` / `onEditReminder` | `string \| null` / `() => void` | Ligne « Prochain rappel : … » et son action. Absents : la ligne n'apparaît pas |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |

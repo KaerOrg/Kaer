@@ -7,7 +7,8 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native'
 import { colors } from '@theme'
 import { TreeSelector } from './TreeSelector'
 import type {
-  TreeSelectorConfig, TreeSelectorEntry, TreeSelectorEntrySection, TreeSelectorNode,
+  TreeSelectorConfig, TreeSelectorEditRequest, TreeSelectorEntry,
+  TreeSelectorEntrySection, TreeSelectorNode,
   TreeSelectorSubmit, TreeSelectorTexts,
 } from './types'
 
@@ -85,29 +86,41 @@ interface Overrides {
   onOpenEntryMenu?: (id: string) => void
   onOpenInfo?: () => void
   onEditReminder?: () => void
+  editRequest?: TreeSelectorEditRequest | null
   allowWordless?: boolean
 }
 
 function renderTree(over: Overrides = {}) {
+  return renderTreeRaw(over)
+}
+
+/** Variante exposant `rerender`, pour tester une nouvelle demande de modification. */
+function renderTreeRaw(over: Overrides = {}) {
   const onSubmit = over.onSubmit ?? jest.fn().mockResolvedValue(undefined)
   const onOpenEntryMenu = over.onOpenEntryMenu ?? jest.fn()
-  render(
+  const tree = (o: Overrides) => (
     <TreeSelector
       nodes={NODES}
-      sections={over.sections ?? []}
-      config={over.config ?? makeConfig()}
-      texts={over.texts ?? BASE_TEXTS}
-      loading={over.loading ?? false}
-      saving={over.saving ?? false}
-      nextReminderLabel={over.nextReminderLabel}
+      sections={o.sections ?? []}
+      config={o.config ?? makeConfig()}
+      texts={o.texts ?? BASE_TEXTS}
+      loading={o.loading ?? false}
+      saving={o.saving ?? false}
+      nextReminderLabel={o.nextReminderLabel}
       onSubmit={onSubmit}
       onOpenEntryMenu={onOpenEntryMenu}
-      onOpenInfo={over.onOpenInfo}
-      onEditReminder={over.onEditReminder}
-      allowWordless={over.allowWordless}
+      editRequest={o.editRequest}
+      onOpenInfo={o.onOpenInfo}
+      onEditReminder={o.onEditReminder}
+      allowWordless={o.allowWordless}
     />
   )
-  return { onSubmit, onOpenEntryMenu }
+  const view = render(tree(over))
+  return {
+    onSubmit,
+    onOpenEntryMenu,
+    rerender: (next: Overrides) => view.rerender(tree({ ...over, ...next })),
+  }
 }
 
 // ─── Tests ─────────────────────────────────────────────────────────────────
@@ -209,6 +222,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.changeText(screen.getByTestId('notes-input'), 'au lever')
     await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: ['fear'], intensity: 4, context: [], contextOther: '', notes: 'au lever',
     })
   })
@@ -221,6 +235,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('node-joy'))
     await act(async () => { fireEvent.press(screen.getByTestId('validate-here')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: ['joy'], intensity: null, context: [], contextOther: '', notes: '',
     })
   })
@@ -350,6 +365,86 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(screen.queryByTestId('context-other-input')).toBeNull()
   })
 
+  // ── Modification d'une entrée (K-8, ticket #256) ──────────────────────────
+
+  const EDIT_REQUEST = {
+    id: 'sel-1',
+    wasWordless: false,
+    intensity: 3,
+    context: ['ctx.work'],
+    contextOther: 'trajet',
+    notes: 'texte d’origine',
+    token: 1,
+  }
+
+  it('une demande de modification rouvre le parcours à l\'étape 1', () => {
+    renderTree({ editRequest: EDIT_REQUEST })
+    // On repart du choix de la famille : c'est ce qui permet de corriger l'émotion.
+    expect(screen.getByTestId('level-1-grid')).toBeTruthy()
+    expect(screen.queryByTestId('list-empty')).toBeNull()
+  })
+
+  it('la modification conserve l\'identifiant de l\'entrée', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false })
+    renderTree({ config, onSubmit, editRequest: EDIT_REQUEST })
+    fireEvent.press(screen.getByTestId('node-joy'))
+    await act(async () => { fireEvent.press(screen.getByTestId('node-joy.calm')) })
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ editingId: 'sel-1' }))
+  })
+
+  it('les champs facultatifs sont rechargés : on ne fait pas ressaisir l\'inchangé', () => {
+    const config = makeConfig({
+      enableContext: true,
+      contextOptions: [{ code: 'ctx.work', label: 'Travail', icon: 'briefcase-outline' }],
+    })
+    renderTree({ config, editRequest: EDIT_REQUEST })
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.calm'))   // nuance sans mots : va à la fiche
+    expect(screen.getByTestId('notes-input').props.value).toBe('texte d’origine')
+    expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: true })
+    // Le contexte libre est rouvert avec sa saisie.
+    expect(screen.getByTestId('context-other-input').props.value).toBe('trajet')
+  })
+
+  it('une entrée sans mot peut recevoir une émotion par modification', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false })
+    renderTree({
+      config, onSubmit, allowWordless: true,
+      editRequest: { ...EDIT_REQUEST, wasWordless: true, intensity: null, contextOther: '' },
+    })
+    expect(screen.getByTestId('level-1-grid')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('node-joy'))
+    await act(async () => { fireEvent.press(screen.getByTestId('node-joy.calm')) })
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      editingId: 'sel-1', pathIds: ['joy', 'joy.calm'],
+    }))
+  })
+
+  it('une entrée sans mot rouverte peut être réenregistrée telle quelle', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: true })
+    renderTree({
+      config, onSubmit, allowWordless: true,
+      editRequest: { ...EDIT_REQUEST, wasWordless: true, contextOther: '' },
+    })
+    fireEvent.press(screen.getByTestId('skip-emotion'))
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      editingId: 'sel-1', pathIds: [],
+    }))
+  })
+
+  it('rouvrir deux fois la même entrée relance le parcours', () => {
+    const { rerender } = renderTreeRaw({ editRequest: EDIT_REQUEST })
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    // Même entrée, jeton incrémenté : le parcours doit repartir de l'étape 1.
+    rerender({ editRequest: { ...EDIT_REQUEST, token: 2 } })
+    expect(screen.getByTestId('level-1-grid')).toBeTruthy()
+  })
+
   // ── Choix de la famille (K-4, ticket #252) ────────────────────────────────
 
   it('affiche la définition sous le titre de chaque famille, sans emoji ni pictogramme', () => {
@@ -417,6 +512,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.changeText(screen.getByTestId('notes-input'), 'réveil difficile')
     await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: [], intensity: null, context: [], contextOther: '', notes: 'réveil difficile',
     })
   })
@@ -478,6 +574,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('node-joy.serenity'))
     await act(async () => { fireEvent.press(screen.getByTestId('continue-selection')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: ['joy', 'joy.serenity'], intensity: null, context: [], contextOther: '', notes: '',
     })
   })
@@ -493,6 +590,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('node-joy.serenity'))
     await act(async () => { fireEvent.press(screen.getByTestId('leaf-joy.serenity.calm')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: ['joy', 'joy.serenity', 'joy.serenity.calm'],
       intensity: null, context: [], contextOther: '', notes: '',
     })
@@ -533,6 +631,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('context-ctx.work'))
     await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
     expect(onSubmit).toHaveBeenCalledWith({
+      editingId: null,
       pathIds: ['joy'], intensity: null, context: ['ctx.work'], contextOther: '', notes: '',
     })
   })

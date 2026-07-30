@@ -663,6 +663,7 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- qu'on ne lit plus ne protège personne ; atteignable en un tap, il reste
   -- consultable quand la question se pose. La section « sources » est ajoutée par
   -- le code depuis le champ `footer_note` existant.
+  ('ew.cfg', 'edit_entry_btn',        'modules.emotion_wheel.edit_entry_btn'),
   ('ew.cfg', 'info_title',            'modules.emotion_wheel.info_title'),
   ('ew.cfg', 'info_title_1',          'modules.emotion_wheel.info_purpose_title'),
   ('ew.cfg', 'info_body_1',           'modules.emotion_wheel.info_purpose_body'),

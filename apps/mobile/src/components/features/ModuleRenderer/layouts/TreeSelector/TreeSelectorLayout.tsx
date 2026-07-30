@@ -20,8 +20,9 @@ import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { useActionSheet } from '../../../../../contexts/ActionSheetContext'
 import {
   TreeSelector,
-  type TreeSelectorConfig, type TreeSelectorEntry, type TreeSelectorEntrySection,
-  type TreeSelectorNode, type TreeSelectorSubmit, type TreeSelectorTexts,
+  type TreeSelectorConfig, type TreeSelectorEditRequest, type TreeSelectorEntry,
+  type TreeSelectorEntrySection, type TreeSelectorNode, type TreeSelectorSubmit,
+  type TreeSelectorTexts,
 } from '@ui/TreeSelector'
 import { useTreeSelectorConfig } from './useTreeSelectorConfig'
 import { useTreeSelectorData } from './useTreeSelectorData'
@@ -148,8 +149,15 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     // Sans cette autorisation, un chemin vide reste un état incohérent qu'on refuse.
     if (path.length === 0 && !config.enableWordless) return
     const leaf = path.length > 0 ? path[path.length - 1] : null
-    const selection: Omit<TreeSelection, 'created_at'> = {
-      id: generateId(),
+    // Modification : on réécrit l'entrée d'origine (même id, même horodatage) plutôt
+    // que d'en créer une seconde. Sans `created_at`, `INSERT OR REPLACE` remettrait la
+    // date à maintenant et l'entrée changerait de jour dans l'historique.
+    const edited = result.editingId != null
+      ? entries.find(e => e.id === result.editingId)
+      : undefined
+    const selection: Omit<TreeSelection, 'created_at'> & { created_at?: string } = {
+      id: edited?.id ?? generateId(),
+      created_at: edited?.created_at,
       module_id: moduleId,
       selected_id: leaf?.id ?? WORDLESS_SELECTED_ID,
       selected_label: leaf?.text_code ?? null,
@@ -160,7 +168,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       context_other: result.contextOther.trim() || null,
     }
     await persist(selection)
-  }, [config.nodeMap, moduleId, persist])
+    setEditRequest(null)
+  }, [config.nodeMap, config.enableWordless, entries, moduleId, persist])
 
   const handleDelete = useCallback((id: string) => {
     showConfirm({
@@ -172,8 +181,26 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     })
   }, [showConfirm, lbl, t, remove])
 
-  // ⋯ d'une entrée : rappel de l'entrée en titre, puis modifier / supprimer. L'entrée
-  // « Modifier » n'apparaît que si l'appelant sait éditer (branché par #256, K-8).
+  // Modification (K-8) : on rouvre le flux pré-rempli à la première étape. L'entrée
+  // conserve son identifiant ET son horodatage : une correction de saisie ne doit pas
+  // faire remonter l'entrée en tête d'historique.
+  const [editRequest, setEditRequest] = useState<TreeSelectorEditRequest | null>(null)
+
+  const handleEdit = useCallback((id: string) => {
+    const entry = entries.find(e => e.id === id)
+    if (!entry) return
+    setEditRequest(prev => ({
+      id: entry.id,
+      wasWordless: entry.path.length === 0,
+      intensity: entry.intensity,
+      context: entry.context,
+      contextOther: entry.context_other ?? '',
+      notes: entry.notes ?? '',
+      token: (prev?.token ?? 0) + 1,
+    }))
+  }, [entries])
+
+  // ⋯ d'une entrée : rappel de l'entrée en titre, puis modifier / supprimer.
   const handleOpenEntryMenu = useCallback((id: string) => {
     const entry = uiEntries.find(e => e.id === id)
     const recap = entry
@@ -181,9 +208,12 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       : ''
     showActionSheet({
       title: recap,
-      options: [{ label: t('common.delete'), destructive: true, onPress: () => handleDelete(id) }],
+      options: [
+        { label: lbl('edit_entry_btn') || t('common.modify'), onPress: () => handleEdit(id) },
+        { label: t('common.delete'), destructive: true, onPress: () => handleDelete(id) },
+      ],
     })
-  }, [uiEntries, showActionSheet, t, handleDelete])
+  }, [uiEntries, showActionSheet, lbl, t, handleEdit, handleDelete])
 
   return (
     <>
@@ -196,6 +226,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
         saving={saving}
         onSubmit={handleSubmit}
         onOpenEntryMenu={handleOpenEntryMenu}
+        editRequest={editRequest}
         onOpenInfo={infoSections.length > 0 ? openInfo : undefined}
         allowWordless={config.enableWordless}
       />
