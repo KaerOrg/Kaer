@@ -651,8 +651,17 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'enable_notes',          '1'),
   ('ew.cfg', 'enable_context',        '1'),
   ('ew.cfg', 'enable_early_validate', '1'),
+  -- Échelle 1 à 5 (K-6, #254) : 10 cibles tactiles de 44 px ne tiennent pas sur la
+  -- largeur d'un téléphone, et l'écart 6 contre 7 sur 10 n'est pas fiable d'un jour
+  -- à l'autre chez un même patient. Le champ reste facultatif : pas de 0, sinon
+  -- « a mis zéro » et « n'a rien mis » deviendraient indistinguables.
   ('ew.cfg', 'intensity_min',         '1'),
-  ('ew.cfg', 'intensity_max',         '10'),
+  ('ew.cfg', 'intensity_max',         '5'),
+  ('ew.cfg', 'entry_title',           'modules.emotion_wheel.entry_title'),
+  ('ew.cfg', 'intensity_anchor_min',  'modules.emotion_wheel.intensity_anchor_min'),
+  ('ew.cfg', 'intensity_anchor_max',  'modules.emotion_wheel.intensity_anchor_max'),
+  ('ew.cfg', 'context_other_btn',     'modules.emotion_wheel.context_other_btn'),
+  ('ew.cfg', 'context_other_placeholder', 'modules.emotion_wheel.context_other_placeholder'),
   ('ew.cfg', 'intro',                 'modules.emotion_wheel.intro'),
   ('ew.cfg', 'new_btn',               'modules.emotion_wheel.new_btn'),
   ('ew.cfg', 'step_1_title',          'modules.emotion_wheel.step_1_title'),
@@ -671,7 +680,6 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'skip_btn',              'modules.emotion_wheel.skip_btn'),
   ('ew.cfg', 'stop_hint',             'modules.emotion_wheel.stop_hint'),
   ('ew.cfg', 'intensity_title',       'modules.emotion_wheel.intensity_title'),
-  ('ew.cfg', 'intensity_hint',        'modules.emotion_wheel.intensity_hint'),
   ('ew.cfg', 'continue_btn',          'modules.emotion_wheel.continue_btn'),
   ('ew.cfg', 'context_title',         'modules.emotion_wheel.context_title'),
   ('ew.cfg', 'context_hint',          'modules.emotion_wheel.context_hint'),

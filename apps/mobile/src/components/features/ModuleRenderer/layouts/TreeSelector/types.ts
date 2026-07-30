@@ -34,7 +34,6 @@ export interface ParsedTreeConfig {
   enableEarlyValidate: boolean
   intensityMin: number
   intensityMax: number
-  midIntensity: number
   intensityValues: number[]
   rawContextOptions: RawContextOption[]
 }

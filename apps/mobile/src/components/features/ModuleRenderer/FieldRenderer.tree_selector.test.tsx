@@ -116,7 +116,7 @@ const PRIMARY_FEAR = makeField({
 const MOCK_FIELDS: ContentField[] = [
   makeField({
     id: 'ew.cfg', field_type: 'tree_selector_config', sort_order: 0,
-    props: { enable_intensity: '1', enable_notes: '1', intensity_min: '1', intensity_max: '10' },
+    props: { enable_intensity: '1', enable_notes: '1', intensity_min: '1', intensity_max: '5' },
   }),
   makeField({ id: 'ew.intro',           field_type: 'tree_selector_intro',           sort_order: 1, text_code: 'modules.emotion_wheel.intro' }),
   makeField({ id: 'ew.step1.title',     field_type: 'tree_selector_step_1_title',    sort_order: 2, text_code: 'modules.emotion_wheel.step_primary_title' }),
@@ -150,6 +150,7 @@ const MOCK_ENTRY: database.TreeSelection = {
   intensity: 6,
   notes: 'au lever',
   context: ['modules.emotion_wheel.context.work'],
+  context_other: null,
   created_at: '2026-05-05T10:00:00Z',
 }
 
@@ -159,7 +160,7 @@ const MOCK_FIELDS_FULL: ContentField[] = [
     id: 'ew.cfg', field_type: 'tree_selector_config', sort_order: 0,
     props: {
       enable_intensity: '1', enable_notes: '1', enable_context: '1',
-      enable_early_validate: '1', intensity_min: '1', intensity_max: '10',
+      enable_early_validate: '1', intensity_min: '1', intensity_max: '5',
       context_opt_1: 'modules.emotion_wheel.context.work',
       context_opt_2: 'modules.emotion_wheel.context.family',
       context_icon_1: 'briefcase-outline', context_icon_2: 'home-heart',
@@ -237,29 +238,28 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
     fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
-    expect(await screen.findByTestId('intensity-card')).toBeTruthy()
-    expect(screen.getByTestId('intensity-value')).toBeTruthy()
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('notes-section')).toBeTruthy()
   })
 
-  it('met à jour l\'intensité au tap sur un bouton', async () => {
+  it('met à jour le cran d\'intensité sélectionné au tap', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
     fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
-    fireEvent.press(screen.getByTestId('intensity-btn-8'))
-    expect(screen.getByTestId('intensity-value').props.children).toBe(8)
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
+    expect(screen.getByTestId('intensity-btn-4').props.accessibilityState).toEqual({ selected: true })
   })
 
-  it('passe à l\'étape notes après confirmation de l\'intensité', async () => {
+  it('la note se saisit sur le même écran que l\'intensité (K-6)', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
     fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
     expect(await screen.findByTestId('notes-input')).toBeTruthy()
-    expect(screen.getByTestId('summary-card')).toBeTruthy()
+    expect(screen.getByTestId('intensity-section')).toBeTruthy()
   })
 
   it('enregistre une nouvelle sélection avec intensité et notes', async () => {
@@ -268,8 +268,7 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
     fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
-    fireEvent.press(screen.getByTestId('intensity-btn-7'))
-    fireEvent.press(screen.getByTestId('continue-intensity'))
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
     fireEvent.changeText(await screen.findByTestId('notes-input'), 'au lever')
     await act(async () => {
       fireEvent.press(screen.getByTestId('save-entry'))
@@ -280,7 +279,7 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
         expect.objectContaining({
           module_id: 'emotion_wheel',
           selected_id: 'ew.joy.serenity.calm',
-          intensity: 7,
+          intensity: 4,
           notes: 'au lever',
           path: expect.arrayContaining([
             expect.objectContaining({ id: 'ew.joy' }),
@@ -298,7 +297,6 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
     fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
     fireEvent.press(await screen.findByTestId('cancel-entry'))
     await waitFor(() => expect(screen.getByTestId('list-empty')).toBeTruthy())
   })
@@ -330,23 +328,22 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     expect(await screen.findByTestId('validate-here')).toBeTruthy()
   })
 
-  it('valider une famille seule passe à l\'étape intensité', async () => {
+  it('valider une famille seule ouvre la fiche unique', async () => {
     renderFull()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    expect(await screen.findByTestId('intensity-card')).toBeTruthy()
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
   })
 
-  it('étape contexte après l\'intensité, puis notes', async () => {
+  it('intensité, contexte et note tiennent sur le même écran (K-6)', async () => {
     renderFull()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
-    expect(await screen.findByTestId('context-chips')).toBeTruthy()
-    fireEvent.press(await screen.findByTestId('continue-context'))
-    expect(await screen.findByTestId('notes-input')).toBeTruthy()
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('context-chips')).toBeTruthy()
+    expect(screen.getByTestId('notes-input')).toBeTruthy()
   })
 
   it('enregistre le contexte sélectionné', async () => {
@@ -354,9 +351,7 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
     fireEvent.press(await screen.findByTestId('context-modules.emotion_wheel.context.work'))
-    fireEvent.press(screen.getByTestId('continue-context'))
     await act(async () => {
       fireEvent.press(await screen.findByTestId('save-entry'))
     })

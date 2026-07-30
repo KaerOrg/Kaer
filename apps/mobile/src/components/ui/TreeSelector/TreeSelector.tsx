@@ -14,9 +14,7 @@ import { colors } from '@theme'
 import { useTreeSelectorFlow } from './useTreeSelectorFlow'
 import { TreeSelectorHistory } from './TreeSelectorHistory'
 import { TreeSelectorNavigation } from './TreeSelectorNavigation'
-import { TreeSelectorIntensity } from './TreeSelectorIntensity'
-import { TreeSelectorContext } from './TreeSelectorContext'
-import { TreeSelectorNotes } from './TreeSelectorNotes'
+import { TreeSelectorEntrySheet } from './TreeSelectorEntrySheet'
 import { styles } from './styles'
 import type {
   TreeSelectorConfig, TreeSelectorEntry, TreeSelectorNode,
@@ -90,43 +88,22 @@ export function TreeSelector({
     )
   }
 
-  if (flow.mode === 'intensity') {
-    return (
-      <TreeSelectorIntensity
-        path={flow.path}
-        intensity={flow.intensity}
-        config={config}
-        texts={texts}
-        onBack={flow.handleBack}
-        onChangeIntensity={flow.setIntensity}
-        onConfirm={flow.handleConfirmIntensity}
-      />
-    )
-  }
-
-  if (flow.mode === 'context') {
-    return (
-      <TreeSelectorContext
-        path={flow.path}
-        context={flow.context}
-        config={config}
-        texts={texts}
-        onBack={flow.handleBack}
-        onToggleContext={flow.toggleContext}
-        onConfirm={flow.handleConfirmContext}
-      />
-    )
-  }
-
   return (
-    <TreeSelectorNotes
+    <TreeSelectorEntrySheet
       path={flow.path}
-      notes={flow.notes}
       intensity={flow.intensity}
+      context={flow.context}
+      contextOther={flow.contextOther}
+      contextOtherOpen={flow.contextOtherOpen}
+      notes={flow.notes}
       config={config}
       texts={texts}
       saving={saving}
       onBack={flow.handleBack}
+      onChangeIntensity={flow.setIntensity}
+      onToggleContext={flow.toggleContext}
+      onToggleContextOther={flow.toggleContextOther}
+      onChangeContextOther={flow.setContextOther}
       onChangeNotes={flow.setNotes}
       onCancel={flow.handleCancel}
       onSave={flow.handleSaveFinal}

@@ -10,8 +10,12 @@ import type MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIco
 
 export type McIcon = ComponentProps<typeof MaterialCommunityIcons>['name']
 
-/** Étapes internes du flux de sélection. */
-export type TreeSelectorMode = 'history' | 'selection' | 'intensity' | 'context' | 'notes'
+/**
+ * Étapes internes du flux de sélection. Depuis K-6, les trois étapes facultatives
+ * (intensité, contexte, note) sont fusionnées en une seule fiche scrollable : trois
+ * écrans traversés en file indienne étaient le premier prédicteur d'abandon.
+ */
+export type TreeSelectorMode = 'history' | 'selection' | 'entry'
 
 /** Nœud d'arbre prêt à afficher — `label` déjà résolu, `id` opaque. */
 export interface TreeSelectorNode {
@@ -57,8 +61,6 @@ export interface TreeSelectorConfig {
   enableEarlyValidate: boolean
   intensityMax: number
   intensityValues: number[]
-  /** Valeur d'intensité par défaut (centre de la plage). */
-  midIntensity: number
   contextOptions: TreeSelectorContextOption[]
 }
 
@@ -69,10 +71,17 @@ export interface TreeSelectorTexts {
   historyLabel: string
   emptyTitle: string
   emptyText: string
+  /** Titre de la fiche unique (« Vous pouvez enregistrer, ou préciser. »). */
+  entryTitle: string
   intensityTitle: string
-  intensityHint: string
+  /** Ancrages aux bornes de l'échelle : ils la bornent, ils ne qualifient pas la valeur. */
+  intensityAnchorMin: string
+  intensityAnchorMax: string
   contextTitle: string
   contextHint: string
+  /** Chip d'ouverture du champ de contexte libre (« + Autre »). */
+  contextOtherBtn: string
+  contextOtherPlaceholder: string
   notesTitle: string
   notesHint: string
   notesPlaceholder: string
@@ -105,5 +114,7 @@ export interface TreeSelectorSubmit {
   pathIds: string[]
   intensity: number | null
   context: string[]
+  /** Contexte libre saisi via « + Autre » : vide si non renseigné. */
+  contextOther: string
   notes: string
 }

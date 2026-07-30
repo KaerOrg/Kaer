@@ -758,9 +758,13 @@ service, aucune persistance, aucune clé i18n de domaine**. Tout entre par props
 (`onSubmit`, `onDelete`). Les identités (ids de nœuds, codes de contexte) sont
 opaques — le primitive les renvoie tels quels, le parent les interprète.
 
-La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque étape est un
-composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `…Context`
-/ `…Notes`) — un fichier = un composant.
+La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque mode est un composant
+dédié (`TreeSelectorHistory` / `…Navigation` / `…EntrySheet`), un fichier = un composant.
+
+**Trois modes seulement** (K-6) : `history`, `selection`, `entry`. Les trois anciens
+écrans facultatifs (intensité, contexte, note) sont fusionnés dans `…EntrySheet`, une
+fiche scrollable unique. L'intensité y démarre à `null` : le champ est facultatif, donc
+aucune valeur par défaut, et re-taper le cran actif le désélectionne.
 
 **Deux façons de descendre dans l'arbre** (K-5) :
 

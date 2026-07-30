@@ -139,6 +139,22 @@ export const styles = StyleSheet.create({
   optionLabel:      { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
   optionDefinition: { fontSize: fontSize.sm, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
   optionChips:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
+  // ── Fiche unique (intensité + contexte + note sur un seul écran, K-6)
+  sheetSection:     { gap: spacing.sm, marginBottom: spacing.lg },
+  sheetSectionLabel: {
+    fontSize: fontSize.xs, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  // Les 5 crans sur une seule ligne : 10 cibles de 44 px ne tiennent pas sur la
+  // largeur d'un téléphone, c'est ce qui a décidé le passage de 1-10 à 1-5.
+  intensityRow:     { flexDirection: 'row', gap: spacing.sm },
+  intensityAnchors: { flexDirection: 'row', justifyContent: 'space-between' },
+  intensityAnchor:  { fontSize: fontSize.xs, color: colors.textMuted },
+  otherInput: {
+    backgroundColor: colors.card, borderRadius: radius.md, paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm, fontSize: fontSize.label, color: colors.text,
+    borderWidth: 1, borderColor: colors.border, minHeight: TOUCH_TARGET,
+  },
   // ── Intensité
   intensityCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
@@ -157,7 +173,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center',
   },
   intensityBtn: {
-    width: TOUCH_TARGET, height: TOUCH_TARGET, borderRadius: radius.full, borderWidth: 1.5,
+    flex: 1, minWidth: TOUCH_TARGET, height: TOUCH_TARGET, borderRadius: radius.md, borderWidth: 1.5,
     borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
     backgroundColor: colors.card,
   },

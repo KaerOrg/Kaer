@@ -143,7 +143,8 @@ describe('TreeSelector helpers (feature layer)', () => {
         { id: 'a', text_code: 'n.a', color: '#F59E0B', icon: 'star' },
         { id: 'a1', text_code: 'n.a1' },
       ],
-      intensity: 6, notes: 'note', context: ['c.work'], created_at: '2026-05-05T10:00:00Z',
+      intensity: 6, notes: 'note', context: ['c.work'], context_other: null,
+      created_at: '2026-05-05T10:00:00Z',
     }
     // Taxonomie courante : la famille « a » a été pastellisée depuis la saisie.
     const CURRENT = buildNodeMap(buildRawNodes([
