@@ -7,24 +7,26 @@ correspondant ; l'utilisateur navigue ensuite librement entre les onglets.
 
 ## Onglets
 
-Ordre d'affichage canonique : **Données → Configuration → Notifications → Sources →
-Vue patient** (porté par `computeModuleTabs`).
+Ordre d'affichage canonique : **Données → Configuration → Notifications → Vue patient →
+Sources** (porté par `computeModuleTabs`, figé par `TAB_ORDER`).
 
 | Onglet | Contenu | Composant |
 |---|---|---|
 | **Données** (`data`) | Vraies données patient synchronisées (graphiques / fiches / résumé) | `ModuleDataPanel` (routeur) |
 | **Configuration** (`config`) | Éditeur de config propre au module (voir plus bas) | panneaux dédiés |
 | **Notifications** (`notifications`) | CRUD des routines de rappel | `NotificationRoutinePanel` |
-| **Sources & recommandations** (`sources`) | Références bibliographiques du module | `ModuleSourcesPanel` |
-| **Vue patient** (`preview`) | Rendu de l'écran patient (FieldRenderer) | `ModulePatientViewPanel` |
+| **Vue patient** (`preview`) | Rendu de l'écran patient (FieldRenderer), ou rail des écrans d'un parcours | `ModulePatientViewPanel` |
+| **Sources & recommandations** (`sources`) | Bloc Indications (taxonomie) + références groupées par niveau de preuve | `ModuleSourcesPanel` |
 
 > **Onglet Données — panneaux dédiés par module.** `ModuleDataPanel` route selon le
 > type : agenda du sommeil → `SleepDataPanel`, **humeur → `MoodDataPanel`** (moyennes
 > récentes 7 j / 1 mois + empreinte 6 barres, petits multiples par dimension avec
 > « agrandir », détail au clic via `TrendChart` + repères + comparaison mois -1, liste
 > des repères typés posés par le patient), rythmes → `ChronoDataPanel`, colonnes →
-> `ColumnFormDataPanel`, activation → `BehavioralActivationPanel` ; sinon graphe
-> générique `ModuleChart` ou tableau `ModuleSummaryPanel`. Le bloc humeur lit les
+> `ColumnFormDataPanel`, activation → `BehavioralActivationPanel`, **nommer ce que je
+> ressens → `EmotionNamingDataPanel`** (matrice du répertoire, croisement contexte ×
+> famille replié, maître-détail des saisies : des comptages, jamais une courbe) ; sinon
+> graphe générique `ModuleChart` ou tableau `ModuleSummaryPanel`. Le bloc humeur lit les
 > repères via `engagementQueries.moodMarkers` (parité mobile #161). Aucune moyenne
 > « bien-être » globale (MDR).
 
@@ -36,7 +38,7 @@ Vue patient** (porté par `computeModuleTabs`).
 ## Disponibilité des onglets
 
 `moduleActionTabs.ts` → `computeModuleTabs(type, ctx)` calcule les onglets disponibles
-(ordre canonique Données → Configuration → Notifications → Sources → Vue patient) selon
+(ordre canonique Données → Configuration → Notifications → Vue patient → Sources) selon
 le module, l'état déverrouillé et les métadonnées d'échelle. Règles clés :
 
 - **Vue patient / Sources** : selon `hasPreview` pour les échelles ; conditionné au
