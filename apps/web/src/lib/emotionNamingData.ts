@@ -76,8 +76,16 @@ export interface NamingTaxonomy {
   families: string[]
   /** Codes de nuances, groupés par code de famille. */
   nuancesByFamily: Record<string, string[]>
+  /** Codes de mots précis, groupés par code de nuance. */
+  wordsByNuance: Record<string, string[]>
   /** Tous les codes de mots précis de l'arbre. */
   words: string[]
+  /**
+   * Teinte de chaque famille, telle que posée en base. Elle sert de FILET et de fond
+   * très pâle, jamais de couleur de texte : ces pastels échouent AA en petit corps.
+   * C'est une identité de famille, jamais une gravité clinique (MDR).
+   */
+  colorByFamily: Record<string, string>
 }
 
 export interface RepertoireCell {
@@ -103,29 +111,42 @@ export interface Repertoire {
   wordsTotal: number
 }
 
+/** Niveau affiché par la matrice : les nuances, ou les mots précis. */
+export type RepertoireLevel = 'nuance' | 'word'
+
 /**
  * Matrice du répertoire : une ligne par famille, une cellule par nuance, y compris
  * celles jamais employées (`count: 0`). Ce vide est le propos de l'écran : il montre
  * de quoi le patient n'arrive jamais à parler. Il n'est donc pas filtré.
+ *
+ * Au niveau `'word'`, les cellules deviennent les mots précis de la famille : mêmes
+ * règles, même absence de filtrage.
  */
 export function repertoire(
   entries: EmotionNamingEntry[],
   taxonomy: NamingTaxonomy,
+  level: RepertoireLevel = 'nuance',
 ): Repertoire {
   const nuanceHits = new Map<string, number>()
+  const wordCounts = new Map<string, number>()
   const familyHits = new Set<string>()
   const wordHits = new Set<string>()
   for (const entry of entries) {
     if (entry.familyCode) familyHits.add(entry.familyCode)
     if (entry.nuanceCode) nuanceHits.set(entry.nuanceCode, (nuanceHits.get(entry.nuanceCode) ?? 0) + 1)
-    if (entry.wordCode) wordHits.add(entry.wordCode)
+    if (entry.wordCode) {
+      wordHits.add(entry.wordCode)
+      wordCounts.set(entry.wordCode, (wordCounts.get(entry.wordCode) ?? 0) + 1)
+    }
   }
 
   const rows = taxonomy.families.map(familyCode => {
-    const cells = (taxonomy.nuancesByFamily[familyCode] ?? []).map(nuanceCode => ({
-      nuanceCode,
-      count: nuanceHits.get(nuanceCode) ?? 0,
-    }))
+    const nuanceCodes = taxonomy.nuancesByFamily[familyCode] ?? []
+    const cells = level === 'nuance'
+      ? nuanceCodes.map(nuanceCode => ({ nuanceCode, count: nuanceHits.get(nuanceCode) ?? 0 }))
+      : nuanceCodes.flatMap(nuanceCode =>
+          (taxonomy.wordsByNuance[nuanceCode] ?? [])
+            .map(wordCode => ({ nuanceCode: wordCode, count: wordCounts.get(wordCode) ?? 0 })))
     return {
       familyCode,
       total: cells.reduce((sum, cell) => sum + cell.count, 0),
@@ -216,6 +237,7 @@ export interface TaxonomyField {
   id: string
   field_type: string
   text_code: string | null
+  props?: Record<string, string>
   children?: TaxonomyField[]
 }
 
@@ -230,23 +252,31 @@ export function buildNamingTaxonomy(fields: TaxonomyField[]): NamingTaxonomy {
   const roots = fields.filter(f => f.field_type === 'tree_node')
   const families: string[] = []
   const nuancesByFamily: Record<string, string[]> = {}
+  const wordsByNuance: Record<string, string[]> = {}
+  const colorByFamily: Record<string, string> = {}
   const words: string[] = []
 
   for (const family of roots) {
     if (!family.text_code) continue
     families.push(family.text_code)
+    if (family.props?.color) colorByFamily[family.text_code] = family.props.color
     const nuances: string[] = []
     for (const nuance of family.children ?? []) {
       if (nuance.field_type !== 'tree_node' || !nuance.text_code) continue
       nuances.push(nuance.text_code)
+      const nuanceWords: string[] = []
       for (const word of nuance.children ?? []) {
-        if (word.field_type === 'tree_node' && word.text_code) words.push(word.text_code)
+        if (word.field_type === 'tree_node' && word.text_code) {
+          nuanceWords.push(word.text_code)
+          words.push(word.text_code)
+        }
       }
+      wordsByNuance[nuance.text_code] = nuanceWords
     }
     nuancesByFamily[family.text_code] = nuances
   }
 
-  return { families, nuancesByFamily, words }
+  return { families, nuancesByFamily, wordsByNuance, words, colorByFamily }
 }
 
 /**
