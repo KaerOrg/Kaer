@@ -60,8 +60,10 @@ export type ModuleCadence = 'weekly' | 'per_session' | 'per_passation'
 //   - metric      : une métrique clé chiffrée + courbe (sommeil, activation) ;
 //   - fingerprint : mini-empreinte multi-dimensions, aucun agrégat (humeur, #161) ;
 //   - scale       : score brut d'échelle sur l'axe 0..max ;
+//   - counts      : le module ne produit AUCUNE série (catégories, texte libre) →
+//                   la carte d'aperçu porte des effectifs et rien d'autre ;
 //   - text        : non chiffrable → section « Journaux & notes », hors courbes.
-export type ModuleEvolutionKind = 'metric' | 'fingerprint' | 'scale' | 'text'
+export type ModuleEvolutionKind = 'metric' | 'fingerprint' | 'scale' | 'counts' | 'text'
 
 export interface ModuleEvolutionConfig {
   readonly key: string
@@ -105,6 +107,17 @@ export const MODULE_EVOLUTION_CONFIG: Record<string, ModuleEvolutionConfig> = {
     key: 'medication_side_effects', labelKey: 'evolution.med_effects_title', color: CHART_PALETTE[11],
     unit: '/10', yDomain: [0, 10], overviewMetricKey: 'evolution.med_effects_title',
     cadence: 'weekly', kind: 'fingerprint',
+  },
+  // « Nommer ce que je ressens » : le module produit une CATÉGORIE et un texte libre,
+  // pas une série numérique. Ni chiffre clé, ni sparkline, ni empreinte n'auraient de
+  // sens : la carte porte des effectifs. `unit`, `yDomain` et `overviewMetricKey` ne
+  // sont donc lus par personne pour ce module ; ils restent neutres.
+  emotion_wheel: {
+    // Teinte d'identité volontairement neutre (violet, libre dans la palette) : ni
+    // rouge ni orange, qui se liraient comme une alarme sur un module d'émotions.
+    key: 'emotion_wheel', labelKey: 'evolution.naming_section_title', color: CHART_PALETTE[10],
+    unit: '', yDomain: [0, 0], overviewMetricKey: 'evolution.naming_section_title',
+    cadence: 'weekly', kind: 'counts',
   },
 }
 

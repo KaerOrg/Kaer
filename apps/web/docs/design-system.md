@@ -399,6 +399,24 @@ l'onglet Données et la section Évolution clinique.
   gravité clinique. La rampe est en quatre paliers grossiers, à dessein : un dégradé
   continu inviterait à comparer les cases une à une.
 
+### Page Évolution : section « Nommer ce que je ressens » (#266)
+
+`NamingEvolutionPanel` (`src/pages/PatientPage/tabs/`) est le corps de la section : la
+table de croisement (le **même composant** que l'onglet Données) plus deux bandes de
+comptages bruts, « Jusqu'où il est allé » (profondeurs) et « Répertoire » (couverture).
+Elle suit le **sélecteur de période de la page** et n'en ajoute aucun autre.
+
+**Seuil.** Sous `NAMING_MIN_ENTRIES` (8) saisies dans la fenêtre, **aucune section
+n'est rendue** et la carte d'aperçu reste « en attente de saisies ».
+
+**Carte du bandeau d'aperçu, `kind: 'counts'`.** Les autres modules y posent un chiffre
+clé et un sparkline. Ici ni l'un ni l'autre n'a de sens : le module produit une
+catégorie, pas une série. La carte porte donc des **effectifs et rien d'autre** («41
+saisies · 13 nuances sur 37 »), sans sparkline ni empreinte, et sert d'ancre de scroll.
+Une carte muette vaut mieux qu'une carte qui invente une métrique. Un `kind` `counts`
+existe pour ça dans `overviewMetrics` et dans `ModuleEvolutionKind` ; son `yDomain`
+neutre `[0, 0]` n'est lu par personne, un test le fige.
+
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
 `components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.

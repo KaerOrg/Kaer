@@ -64,6 +64,17 @@ export const EvolutionOverviewCard = memo(function EvolutionOverviewCard({
         </>
       ) : null}
 
+      {/* Carte sans métrique : des effectifs, et rien d'autre. Ni chiffre clé, ni
+          sparkline, ni empreinte : le module ne produit pas de série. */}
+      {card.kind === 'counts' ? (
+        <span className="evo-ov-card__counts">
+          {card.lines.map(line => (
+            <span key={line} className="evo-ov-card__count-line">{line}</span>
+          ))}
+          <span className="evo-ov-card__window">{t('evolution.overview_window')}</span>
+        </span>
+      ) : null}
+
       {card.kind === 'empty' ? (
         <span className="evo-ov-card__empty">{t('evolution.overview_empty')}</span>
       ) : null}
