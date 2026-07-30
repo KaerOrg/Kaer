@@ -429,6 +429,7 @@ export interface Database {
           practitioner_note: string | null
           is_active: boolean
           patient_paused: boolean
+          patient_paused_at: string | null
           created_at: string
           updated_at: string
         }
@@ -442,6 +443,7 @@ export interface Database {
           practitioner_note?: string | null
           is_active?: boolean
           patient_paused?: boolean
+          patient_paused_at?: string | null
         }
         Update: {
           days_of_week?: number[]
@@ -450,6 +452,7 @@ export interface Database {
           practitioner_note?: string | null
           is_active?: boolean
           patient_paused?: boolean
+          patient_paused_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -902,6 +905,8 @@ export interface NotificationRoutine {
   practitioner_note: string | null
   is_active: boolean
   patient_paused: boolean
+  /** Instant de la mise en pause par le patient. `null` si inconnu (pause antérieure). */
+  patient_paused_at: string | null
   created_at: string
   updated_at: string
 }

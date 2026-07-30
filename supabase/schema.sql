@@ -1179,6 +1179,10 @@ create policy "push_tokens_patient_delete"
 -- days_of_week : tableau ISO (1=lundi … 7=dimanche).
 -- time_of_day : heure fixée par le praticien ("HH:MM").
 -- patient_time_override : décalage optionnel du patient ("HH:MM").
+-- patient_paused_at : instant de la mise en pause par le patient. Le praticien lit
+--   « mis en pause le 12 juil. » : un rappel éteint depuis un mois explique une absence
+--   de saisies mieux qu'un graphique. Nullable : les pauses antérieures à cette colonne
+--   restent sans date, l'UI le gère.
 -- practitioner_note : texte libre affiché dans le corps de la notification.
 
 create table if not exists public.notification_routines (
@@ -1192,9 +1196,14 @@ create table if not exists public.notification_routines (
   practitioner_note     text,
   is_active             boolean     not null default true,
   patient_paused        boolean     not null default false,
+  patient_paused_at     timestamptz,
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );
+
+-- Idempotent : la colonne a été ajoutée après coup (#268).
+alter table public.notification_routines
+  add column if not exists patient_paused_at timestamptz;
 
 create index if not exists idx_notification_routines_patient
   on public.notification_routines(patient_id);
@@ -1228,7 +1237,8 @@ create policy "notif_routines_practitioner_delete"
   on public.notification_routines for delete
   using (auth.uid() = practitioner_id);
 
--- Patient : lecture + mise à jour de ses seules colonnes (patient_paused, patient_time_override)
+-- Patient : lecture + mise à jour de ses seules colonnes
+-- (patient_paused, patient_paused_at, patient_time_override)
 drop policy if exists "notif_routines_patient_select" on public.notification_routines;
 create policy "notif_routines_patient_select"
   on public.notification_routines for select
