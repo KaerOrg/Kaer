@@ -115,8 +115,10 @@ export const MODULE_EVOLUTION_CONFIG: Record<string, ModuleEvolutionConfig> = {
   emotion_wheel: {
     // Teinte d'identité volontairement neutre (violet, libre dans la palette) : ni
     // rouge ni orange, qui se liraient comme une alarme sur un module d'émotions.
-    key: 'emotion_wheel', labelKey: 'evolution.naming_section_title', color: CHART_PALETTE[10],
-    unit: '', yDomain: [0, 0], overviewMetricKey: 'evolution.naming_section_title',
+    // Un seul libellé pour ce module : la modale d'actions, la section Évolution et la
+    // carte d'aperçu lisent tous `modules.emotion_wheel.label` (#261).
+    key: 'emotion_wheel', labelKey: 'modules.emotion_wheel.label', color: CHART_PALETTE[10],
+    unit: '', yDomain: [0, 0], overviewMetricKey: 'modules.emotion_wheel.label',
     cadence: 'weekly', kind: 'counts',
   },
 }

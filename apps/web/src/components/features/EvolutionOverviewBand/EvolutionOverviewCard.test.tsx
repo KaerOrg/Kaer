@@ -23,7 +23,7 @@ const empty: OverviewCard = {
   kind: 'empty', moduleType: 'fear_thermometer', labelKey: 'evolution.fear_title', color: '#F59E0B',
 }
 const counts: OverviewCard = {
-  kind: 'counts', moduleType: 'emotion_wheel', labelKey: 'evolution.naming_section_title',
+  kind: 'counts', moduleType: 'emotion_wheel', labelKey: 'modules.emotion_wheel.label',
   color: '#7C3AED', lines: ['41 saisies', '13 nuances sur 37'],
 }
 

@@ -69,6 +69,8 @@ function entryCard(opts: { path: string; intensity: string; note?: string; meta:
 export function buildNamingScreens({ t, families, colorByFamily, intensityMax }: ScreenInput): PatientScreen<NamingStage>[] {
   const e = (key: string, opts?: Record<string, unknown>) => t(`patient.enpv_${key}`, opts)
   const node = (key: string) => t(`modules.emotion_wheel.node.${key}`)
+  // Un seul libellé de module dans toute l'app praticien (#261).
+  const moduleTitle = t('modules.emotion_wheel.label')
   const intensity = `${SAMPLE_INTENSITY}/${intensityMax}`
 
   const sampleEntry = {
@@ -83,7 +85,7 @@ export function buildNamingScreens({ t, families, colorByFamily, intensityMax }:
       id: 'first_open', stage: 'discovery', caption: e('cap_first_open'),
       body: (
         <>
-          <p className="enpv-app-title">{e('module_title')}</p>
+          <p className="enpv-app-title">{moduleTitle}</p>
           <h6 className="enpv-title">{e('first_title')}</h6>
           <p className="enpv-sub">{e('first_intro')}</p>
           <ul className="enpv-bullets">
@@ -99,7 +101,7 @@ export function buildNamingScreens({ t, families, colorByFamily, intensityMax }:
       id: 'home', stage: 'discovery', caption: e('cap_home'),
       body: (
         <>
-          {header(e('module_title'), true)}
+          {header(moduleTitle, true)}
           <span className="enpv-btn enpv-btn--full">{e('new_btn')}</span>
           <div className="enpv-reminder">
             <span>{e('reminder_next', { time: '18:00' })}</span>
@@ -202,7 +204,7 @@ export function buildNamingScreens({ t, families, colorByFamily, intensityMax }:
       id: 'entry_menu', stage: 'review', caption: e('cap_menu'),
       body: (
         <>
-          {header(e('module_title'), true)}
+          {header(moduleTitle, true)}
           {entryCard({ ...sampleEntry, menu: true })}
           <div className="enpv-menu">
             <span className="enpv-menu__item"><Pencil size={13} /> {e('menu_edit')}</span>
