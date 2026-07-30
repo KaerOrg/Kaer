@@ -5,18 +5,14 @@
 // puis journalise dans notification_logs.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { buildPushMessage, selectDueRoutines, type DueRoutine } from './logic.ts'
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 const FCM_PROJECT_ID = 'kaer-84ba7'
 
-interface NotificationRoutine {
-  id: string
-  patient_id: string
-  days_of_week: number[]
-  time_of_day: string
-  patient_time_override: string | null
-  practitioner_note: string | null
-}
+// Le contenu du rappel et la sélection des routines dues vivent dans `logic.ts`,
+// avec leur test : c'est là qu'est écrit l'invariant du rappel neutre (MDR).
+type NotificationRoutine = DueRoutine
 
 interface PushTokenRow {
   patient_id: string
@@ -135,7 +131,9 @@ Deno.serve(async () => {
 
   const { data: routines, error: routinesErr } = await supabase
     .from('notification_routines')
-    .select('id, patient_id, days_of_week, time_of_day, patient_time_override, practitioner_note')
+    // `practitioner_note` n'est PAS lu : la consigne du praticien s'affiche en tête du
+    // module, jamais dans le corps du rappel (cf. NOTIFICATION_BODY ci-dessus).
+    .select('id, patient_id, days_of_week, time_of_day, patient_time_override')
     .eq('is_active', true)
     .eq('patient_paused', false)
     .contains('days_of_week', [currentDay])
@@ -149,10 +147,7 @@ Deno.serve(async () => {
     return new Response(JSON.stringify({ sent: 0 }), { status: 200 })
   }
 
-  const due = (routines as NotificationRoutine[]).filter(r => {
-    const effectiveTime = r.patient_time_override ?? r.time_of_day
-    return effectiveTime === currentTime
-  })
+  const due = selectDueRoutines(routines as NotificationRoutine[], currentDay, currentTime)
 
   if (due.length === 0) {
     return new Response(JSON.stringify({ sent: 0 }), { status: 200 })
@@ -177,8 +172,8 @@ Deno.serve(async () => {
 
   for (const routine of due) {
     const routineTokens = tokensByPatient.get(routine.patient_id) ?? []
-    const msgTitle = 'Kær'
-    const msgBody = routine.practitioner_note ?? 'Vous avez un exercice à faire aujourd\'hui.'
+    // Corps constant : ni la consigne du praticien ni aucune donnée patient n'y entre.
+    const { title: msgTitle, body: msgBody } = buildPushMessage(routine)
 
     for (const row of routineTokens) {
       if (row.token_type === 'fcm') {

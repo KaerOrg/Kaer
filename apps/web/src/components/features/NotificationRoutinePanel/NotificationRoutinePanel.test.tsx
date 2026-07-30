@@ -111,3 +111,26 @@ describe('NotificationRoutinePanel', () => {
     })
   })
 })
+
+describe('NotificationRoutinePanel : la consigne n est pas le texte du rappel (#269)', () => {
+  it('nomme le champ par sa destination reelle et dit ou la phrase ne va pas', async () => {
+    mockGet.mockResolvedValue([])
+    open()
+    await screen.findByText('notifications.days_label')
+    expect(screen.getByText('notifications.note_label')).toBeInTheDocument()
+    expect(screen.getByText('notifications.note_help')).toBeInTheDocument()
+  })
+
+  it('transmet la consigne au service, qui la stocke sans la mettre dans le push', async () => {
+    mockGet.mockResolvedValue([])
+    mockCreate.mockResolvedValue(routine())
+    open()
+    await screen.findByText('notifications.days_label')
+
+    await userEvent.type(screen.getByLabelText('notifications.note_label'), 'On en reparle en seance')
+    await userEvent.click(screen.getByText('notifications.save_routine'))
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1))
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({ practitioner_note: 'On en reparle en seance' })
+  })
+})
