@@ -23,7 +23,7 @@ import {
 } from '@ui/TreeSelector'
 import { useTreeSelectorConfig } from './useTreeSelectorConfig'
 import { useTreeSelectorData } from './useTreeSelectorData'
-import { toUiNodes, toEntryVM, reconstructPath, buildStepLabels } from './helpers'
+import { toUiNodes, toEntryVM, reconstructPath, buildStepLabels, WORDLESS_SELECTED_ID } from './helpers'
 
 export interface TreeSelectorLayoutProps {
   /** Fields du module (config + nœuds d'arbre). */
@@ -68,6 +68,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     emptyTitle: lbl('empty_title'),
     emptyText: lbl('empty_text'),
     entryTitle: lbl('entry_title'),
+    wordlessTitle: lbl('wordless_title'),
+    wordlessHint: lbl('wordless_hint'),
     intensityTitle: lbl('intensity_title'),
     intensityAnchorMin: lbl('intensity_anchor_min'),
     intensityAnchorMax: lbl('intensity_anchor_max'),
@@ -92,8 +94,9 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   }), [lbl, t, config.props])
 
   const uiEntries = useMemo<TreeSelectorEntry[]>(
-    () => entries.map(e => toEntryVM(e, t, config.intensityMax, formatDateTime, config.nodeMap)),
-    [entries, t, config.intensityMax, config.nodeMap],
+    () => entries.map(e =>
+      toEntryVM(e, t, config.intensityMax, formatDateTime, config.nodeMap, lbl('wordless_label'))),
+    [entries, t, config.intensityMax, config.nodeMap, lbl],
   )
 
   const footerText = footer != null ? t(footer.text_code ?? '') : null
@@ -101,13 +104,15 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   // ── Callbacks métier ────────────────────────────────────────────────────────
   const handleSubmit = useCallback(async (result: TreeSelectorSubmit) => {
     const path = reconstructPath(result.pathIds, config.nodeMap)
-    if (path.length === 0) return
-    const leaf = path[path.length - 1]
+    // Chemin vide = entrée « sans mot » (K-7), légitime dès que la config l'autorise.
+    // Sans cette autorisation, un chemin vide reste un état incohérent qu'on refuse.
+    if (path.length === 0 && !config.enableWordless) return
+    const leaf = path.length > 0 ? path[path.length - 1] : null
     const selection: Omit<TreeSelection, 'created_at'> = {
       id: generateId(),
       module_id: moduleId,
-      selected_id: leaf.id,
-      selected_label: leaf.text_code ?? null,
+      selected_id: leaf?.id ?? WORDLESS_SELECTED_ID,
+      selected_label: leaf?.text_code ?? null,
       path,
       intensity: result.intensity,
       notes: result.notes.trim() || null,
@@ -138,6 +143,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       saving={saving}
       onSubmit={handleSubmit}
       onDelete={handleDelete}
+      allowWordless={config.enableWordless}
     />
   )
 }
