@@ -1914,14 +1914,23 @@ export async function getAllTreeSelections(moduleId: string, limit = 100): Promi
   }))
 }
 
+/**
+ * Écrit une sélection, en création comme en modification (`INSERT OR REPLACE`).
+ *
+ * `created_at` est **optionnel et à fournir en modification** : `INSERT OR REPLACE`
+ * supprime puis réinsère la ligne, ce qui remettrait l'horodatage à l'instant présent
+ * et ferait « remonter » l'entrée dans l'historique du patient. En création, l'omettre
+ * laisse le `DEFAULT CURRENT_TIMESTAMP` faire son travail.
+ */
 export async function saveTreeSelection(
-  entry: Omit<TreeSelection, 'created_at'>
+  entry: Omit<TreeSelection, 'created_at'> & { created_at?: string }
 ): Promise<void> {
   const database = getDb()
+  const keepsDate = entry.created_at != null
   await database.runAsync(
     `INSERT OR REPLACE INTO tree_selections
-       (id, module_id, selected_id, selected_label, path_json, intensity, notes, context_json, context_other)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, module_id, selected_id, selected_label, path_json, intensity, notes, context_json, context_other${keepsDate ? ', created_at' : ''})
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?${keepsDate ? ', ?' : ''})`,
     [
       entry.id,
       entry.module_id,
@@ -1932,6 +1941,7 @@ export async function saveTreeSelection(
       entry.notes,
       JSON.stringify(entry.context ?? []),
       entry.context_other,
+      ...(keepsDate ? [entry.created_at as string] : []),
     ]
   )
 }

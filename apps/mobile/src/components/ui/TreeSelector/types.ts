@@ -125,8 +125,31 @@ export interface TreeSelectorEntrySection {
   entries: TreeSelectorEntry[]
 }
 
+/**
+ * Demande de modification d'une entrée existante : rouvre le flux **pré-rempli** à la
+ * première étape. Le `token` est incrémenté à chaque demande, pour que rouvrir deux
+ * fois la même entrée relance bien le flux.
+ */
+export interface TreeSelectorEditRequest {
+  /** Identifiant de l'entrée éditée, renvoyé tel quel à la soumission. */
+  id: string
+  /**
+   * L'entrée éditée portait-elle déjà une émotion ? Sert uniquement à autoriser
+   * l'enregistrement sans sélection : une entrée « sans mot » qu'on rouvre doit
+   * pouvoir être réenregistrée telle quelle, ou enfin recevoir une émotion.
+   */
+  wasWordless: boolean
+  intensity: number | null
+  context: string[]
+  contextOther: string
+  notes: string
+  token: number
+}
+
 /** Résultat d'une sélection validée — identités opaques, le parent persiste. */
 export interface TreeSelectorSubmit {
+  /** Entrée modifiée, ou `null` en création. Le parent met à jour au lieu d'insérer. */
+  editingId: string | null
   pathIds: string[]
   intensity: number | null
   context: string[]

@@ -320,6 +320,33 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     }))
   })
 
+  it('modifier une entrée conserve son identifiant et son horodatage (K-8)', async () => {
+    ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
+    renderLayout()
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    const config = (showActionSheet as jest.Mock).mock.calls.at(-1)?.[0]
+    const edit = config.options.find((o: { destructive?: boolean }) => !o.destructive)
+    await act(async () => { edit.onPress() })
+
+    // Le parcours rouvre à l'étape 1 : on re-choisit, puis on enregistre.
+    fireEvent.press(await screen.findByTestId('node-ew.joy'))
+    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
+    await act(async () => { fireEvent.press(await screen.findByTestId('save-entry')) })
+
+    await waitFor(() => {
+      expect(database.saveTreeSelection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'sel-1',                       // pas un nouvel identifiant
+          created_at: '2026-05-05T10:00:00Z', // ni un nouvel horodatage
+        })
+      )
+    })
+  })
+
   it('supprime une entrée après confirmation depuis la feuille d\'actions', async () => {
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
     const { showActionSheet } = useActionSheet()

@@ -17,8 +17,8 @@ import { TreeSelectorNavigation } from './TreeSelectorNavigation'
 import { TreeSelectorEntrySheet } from './TreeSelectorEntrySheet'
 import { styles } from './styles'
 import type {
-  TreeSelectorConfig, TreeSelectorEntrySection, TreeSelectorNode,
-  TreeSelectorSubmit, TreeSelectorTexts,
+  TreeSelectorConfig, TreeSelectorEditRequest, TreeSelectorEntrySection,
+  TreeSelectorNode, TreeSelectorSubmit, TreeSelectorTexts,
 } from './types'
 
 export interface TreeSelectorProps {
@@ -41,6 +41,11 @@ export interface TreeSelectorProps {
   /** Ouvre le menu d'une entrée d'historique (modifier / supprimer). */
   onOpenEntryMenu: (id: string) => void
   /**
+   * Demande de modification d'une entrée : rouvre le flux pré-rempli. Le parent
+   * incrémente son `token` à chaque demande.
+   */
+  editRequest?: TreeSelectorEditRequest | null
+  /**
    * Autorise la sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le
    * bouton n'apparaît que si l'appelant l'active : un arbre dont toutes les entrées
    * doivent porter une sélection n'affiche pas de porte de sortie.
@@ -50,9 +55,9 @@ export interface TreeSelectorProps {
 
 export function TreeSelector({
   nodes, sections, config, texts, loading, saving, onSubmit, onOpenEntryMenu,
-  nextReminderLabel, onEditReminder, onOpenInfo, allowWordless = false,
+  nextReminderLabel, onEditReminder, onOpenInfo, editRequest, allowWordless = false,
 }: TreeSelectorProps) {
-  const flow = useTreeSelectorFlow(config, onSubmit)
+  const flow = useTreeSelectorFlow(config, onSubmit, editRequest)
 
   if (loading) {
     return (
