@@ -473,7 +473,6 @@
     "enpv_cap_menu": "Menu d'une entrée",
     "enpv_cap_info": "Fiche du module",
     "enpv_cap_reminders": "Réglage des rappels, côté patient",
-    "enpv_module_title": "Nommer ce que je ressens",
     "enpv_first_title": "Avant de commencer",
     "enpv_first_intro": "Ce module sert à mettre un mot précis sur ce que vous ressentez, et à en reparler avec votre praticien.",
     "enpv_first_bullet_1": "Vos notes sont là pour être relues en consultation.",
@@ -924,9 +923,9 @@
       "month_legend": "Plus la moyenne des scores du jour est élevée, plus le cercle est foncé (1 = clair, 10 = foncé)."
     },
     "emotion_wheel": {
-      "label": "Roue des émotions",
-      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l’alexithymie.",
-      "title": "Roue des émotions",
+      "label": "Nommer ce que je ressens",
+      "description": "Mettre un mot précis sur ce que vous ressentez.",
+      "title": "Nommer ce que je ressens",
       "intro": "Nommez vos émotions avec précision : c’est un moyen reconnu de mieux les reconnaître et d’en parler avec votre praticien. Allez aussi loin que vous le souhaitez dans le détail.",
       "new_btn": "Identifier une émotion",
       "step_1_title": "Quelle famille d’émotion ?",
@@ -1967,8 +1966,8 @@
       "footer": "Saisie quotidienne unique. Historique consultable avec mini-graphiques par dimension (30 derniers jours). Données stockées localement sur l'appareil."
     },
     "emotion_wheel": {
-      "label": "Roue des émotions",
-      "description": "Explorer et nommer ses émotions avec précision pour lutter contre l'alexithymie."
+      "label": "Nommer ce que je ressens",
+      "description": "Mettre un mot précis sur ce que vous ressentez."
     },
     "behavioral_activation": {
       "label": "Journal d'activation comportementale",
@@ -2431,7 +2430,6 @@
     "n_sessions": "{{count}} saisie",
     "n_sessions_plural": "{{count}} saisies",
     "view_data": "Voir les données",
-    "naming_section_title": "Nommer ce que je ressens",
     "naming_last": "dernière le {{date}}",
     "naming_depth_label": "Jusqu'où il est allé",
     "naming_depth_none": "Sans mot",

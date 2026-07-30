@@ -487,7 +487,6 @@
     "enpv_cap_menu": "Entry menu",
     "enpv_cap_info": "Module info sheet",
     "enpv_cap_reminders": "Reminder settings, patient side",
-    "enpv_module_title": "Naming what I feel",
     "enpv_first_title": "Before you start",
     "enpv_first_intro": "This module helps you put a precise word on what you feel, and talk about it with your practitioner.",
     "enpv_first_bullet_1": "Your notes are meant to be read back in session.",
@@ -1187,9 +1186,9 @@
       "month_legend": "The higher the day's average score, the darker the circle (1 = light, 10 = dark)."
     },
     "emotion_wheel": {
-      "label": "Emotion wheel",
-      "description": "Explore and name your emotions precisely to counter alexithymia.",
-      "title": "Emotion wheel",
+      "label": "Naming what I feel",
+      "description": "Put a precise word on what you feel.",
+      "title": "Naming what I feel",
       "intro": "Naming your emotions precisely is a recognised way to recognise them better and talk about them with your practitioner. Go into as much detail as you like.",
       "new_btn": "Identify an emotion",
       "step_1_title": "Which emotion family?",
@@ -1821,8 +1820,8 @@
       "footer": "Single daily entry. History available with mini-charts per dimension (last 30 days). Data stored locally on the device."
     },
     "emotion_wheel": {
-      "label": "Emotion Wheel",
-      "description": "Explore and precisely name emotions to address alexithymia."
+      "label": "Naming what I feel",
+      "description": "Put a precise word on what you feel."
     },
     "behavioral_activation": {
       "label": "Behavioral Activation Journal",
@@ -2285,7 +2284,6 @@
     "n_sessions": "{{count}} session",
     "n_sessions_plural": "{{count}} sessions",
     "view_data": "View data",
-    "naming_section_title": "Naming what I feel",
     "naming_last": "latest on {{date}}",
     "naming_depth_label": "How far they went",
     "naming_depth_none": "No word",

@@ -136,7 +136,7 @@ describe('PatientEvolutionTab, section « Nommer ce que je ressens »', () => {
     const { queryByText, getByTestId } = renderTab()
 
     await waitFor(() => expect(getByTestId('overview-band')).toBeTruthy())
-    expect(queryByText('evolution.naming_section_title')).toBeNull()
+    expect(queryByText('modules.emotion_wheel.label')).toBeNull()
   })
 
   it('à partir de 8 saisies, rend la section avec ses comptages bruts', async () => {
@@ -144,7 +144,7 @@ describe('PatientEvolutionTab, section « Nommer ce que je ressens »', () => {
     mockFetchNaming.mockResolvedValue(namingEntries(12))
     const { getByText, getByTestId } = renderTab()
 
-    await waitFor(() => expect(getByText('evolution.naming_section_title')).toBeTruthy())
+    await waitFor(() => expect(getByText('modules.emotion_wheel.label')).toBeTruthy())
     expect(getByTestId('naming-depth-band')).toBeTruthy()
     expect(getByTestId('naming-repertoire-band')).toBeTruthy()
     // Le lien « Voir les données » de CETTE section porte bien sa clé de module.
