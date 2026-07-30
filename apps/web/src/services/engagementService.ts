@@ -242,6 +242,62 @@ export async function fetchDefusionEvolution(patientId: string): Promise<Defusio
   return points
 }
 
+// ── « Nommer ce que je ressens » : saisies brutes, non agrégées ───────────────
+//
+// Ce module ne produit pas de série numérique mais une catégorie (famille · nuance ·
+// mot), une profondeur de choix, un contexte et un texte libre. Le service se contente
+// donc de LIRE : les comptages descriptifs vivent dans `lib/emotionNamingData.ts`
+// (fonctions pures testées), et la traduction des codes reste aux composants.
+
+/** Une saisie du module, identités opaques (clés i18n) et valeurs brutes. */
+export interface EmotionNamingRow {
+  date: string
+  familyCode: string | null
+  nuanceCode: string | null
+  wordCode: string | null
+  intensity: number | null
+  context: string[]
+  contextOther: string | null
+  notes: string | null
+}
+
+/** Élément du chemin persisté par le mobile : `{ id, text_code, color, icon }`. */
+function pathCodeAt(payload: Record<string, unknown>, level: number): string | null {
+  const path = payload.path
+  if (!Array.isArray(path)) return null
+  const node: unknown = path[level]
+  if (typeof node !== 'object' || node === null) return null
+  const code = (node as { text_code?: unknown }).text_code
+  return typeof code === 'string' ? code : null
+}
+
+function toStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : []
+}
+
+export async function fetchEmotionNamingEntries(patientId: string): Promise<EmotionNamingRow[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'tree_selection')
+    .eq('module_id', 'emotion_wheel')
+    .order('client_created_at')
+
+  if (error || !data) return []
+  return data.map(row => ({
+    date: row.client_created_at,
+    // Un chemin vide est une entrée « sans mot » : légitime, jamais dégradée.
+    familyCode: pathCodeAt(row.payload, 0),
+    nuanceCode: pathCodeAt(row.payload, 1),
+    wordCode: pathCodeAt(row.payload, 2),
+    intensity: toNumber(row.payload.intensity) ?? null,
+    context: toStringList(row.payload.context),
+    contextOther: typeof row.payload.context_other === 'string' ? row.payload.context_other : null,
+    notes: typeof row.payload.notes === 'string' ? row.payload.notes : null,
+  }))
+}
+
 // ── Évolution des effets indésirables (subscores dynamiques) ─────────────────
 
 export async function fetchMedSideEffectsEvolution(patientId: string): Promise<{
