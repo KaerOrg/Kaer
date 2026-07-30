@@ -104,10 +104,41 @@ source), revue granularité 2025, ECR alexithymie 2019, revue émotions auto-con
 (honte/culpabilité), Geneva Emotion Wheel (alternative validée).
 
 ## Écrans impactés
-- Web : `ModulePreviewPanel` → `TreeSelectorLayout` — aperçu praticien **interactif**,
+- Web : `ModulePreviewPanel` → `TreeSelectorLayout` : aperçu praticien **interactif**,
   miroir du flux mobile (familles → nuances → mots → intensité → contexte → note),
   navigable en lecture seule (« Enregistrer » ne persiste pas).
+- Web, onglet **Vue patient** : `ModulePatientViewPanel` dévie vers
+  `EmotionNamingPatientView` (#267), rail des **neuf écrans** du parcours patient,
+  numérotés et légendés, avec puces de filtre par étape. Voir ci-dessous.
 - Mobile : `ModuleContentScreen` → `TreeSelector/TreeSelectorLayout` (saisie patient).
+
+### Vue patient : le rail des neuf écrans
+
+| # | Écran | Étape (filtre) |
+|---|---|---|
+| 1 | Première ouverture | Découverte |
+| 2 | Accueil et historique | Découverte |
+| 3 | Étape 1, la famille | Saisie |
+| 4 | Étape 2, la nuance et ses mots | Saisie |
+| 5 | Étape 3, la fiche | Saisie |
+| 6 | Sans émotion nommée | Sans émotion nommée |
+| 7 | Menu d'une entrée | Relire et corriger |
+| 8 | Fiche du module | Découverte |
+| 9 | Réglage des rappels, côté patient | Réglages |
+
+- La coquille (bandeau, filtres, rail, pied) est **partagée** avec la vue patient de
+  « Décrocher d'une pensée » : `PatientScreenRail`. Un troisième module de parcours n'a
+  plus qu'à fournir ses écrans.
+- La **numérotation suit le parcours complet** : filtrer réduit le rail sans
+  renuméroter. L'écran 9 reste l'écran 9, même seul à l'écran.
+- **Rien n'est actionnable** dans le rail : ce sont des vignettes, pas un parcours
+  rejouable. Un test le vérifie (aucun `button`, `input`, `a`, `select` dans le rail).
+- Ce qui vient de la **base** : la liste des familles, leur teinte pastel, la borne de
+  l'échelle d'intensité. Ce qui vient du **code** : la composition des écrans.
+  **Contrepartie assumée** (comme pour la défusion) : une refonte du parcours mobile
+  désynchronise cet aperçu, qu'il faut alors remettre à jour à la main. Le
+  `FieldRenderer` générique suit la base tout seul, mais ne sait montrer qu'un écran.
+  Pas de troisième voie sans moteur de parcours partagé mobile/web.
 
 ## Décisions et trade-offs
 - Taxonomie Willcox (qualitative) plutôt que Plutchik (paliers d'intensité) : voir spec.
