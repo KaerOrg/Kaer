@@ -699,6 +699,8 @@
         "peaceful": "safe, at rest"
       },
       "entry_title": "You can save, or add detail.",
+      "welcome_intro": "This module is here to help you put a precise word on what you feel, and to talk about it with your carer.",
+      "welcome_point_2": "You can delete or edit one whenever you want. No need to explain why.",
       "intensity_title": "Strength",
       "intensity_anchor_min": "barely",
       "intensity_anchor_max": "at most",

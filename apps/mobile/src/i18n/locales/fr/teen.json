@@ -700,6 +700,11 @@
         "peaceful": "en sécurité, au repos"
       },
       "entry_title": "Tu peux enregistrer, ou préciser.",
+      "welcome_intro": "Ce module sert à mettre un mot précis sur ce que tu ressens, et à en reparler avec ton soignant.",
+      "welcome_point_1": "Tes notes sont là pour être relues en consultation.",
+      "welcome_point_2": "Tu peux en effacer ou en modifier une quand tu veux. Sans avoir à te justifier.",
+      "welcome_crisis": "En cas de crise, ce module n’est pas le bon endroit. Utilise les numéros d’urgence de ton profil.",
+      "welcome_footer": "Tu retrouveras tout ceci à tout moment dans le ⓘ du module.",
       "wordless_hint": "Ne pas trouver le mot est une réponse valable. Tu pourras le nommer plus tard en modifiant l’entrée.",
       "intensity_title": "Force",
       "intensity_anchor_min": "à peine",
