@@ -27,6 +27,25 @@ describe('DataTable', () => {
     expect(screen.getByText('Alan Turing')).toBeInTheDocument()
   })
 
+  it('rend la ligne de pied telle que fournie, sans rien calculer', () => {
+    render(
+      <DataTable
+        columns={COLUMNS}
+        rows={PEOPLE}
+        getRowId={p => p.id}
+        footer={<tr data-testid="foot"><td>Total</td><td>2</td></tr>}
+      />
+    )
+    const foot = screen.getByTestId('foot')
+    expect(foot.closest('tfoot')).toBeInTheDocument()
+    expect(foot.textContent).toBe('Total2')
+  })
+
+  it('ne rend aucun tfoot sans prop footer', () => {
+    const { container } = render(<DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} />)
+    expect(container.querySelector('tfoot')).toBeNull()
+  })
+
   it('affiche l\'état vide quand il n\'y a aucune ligne', () => {
     render(
       <DataTable

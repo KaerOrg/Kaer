@@ -83,6 +83,12 @@ export interface DataTableProps<T> {
   readonly rowClassName?: (row: T) => string | undefined
   /** Affiché à la place de la table quand `rows` est vide. */
   readonly emptyState?: ReactNode
+  /**
+   * Ligne de pied de table, rendue dans un `<tfoot>` : typiquement les marges
+   * (totaux de colonne) d'un tableau croisé. L'appelant fournit le `<tr>` complet,
+   * la table ne calcule jamais rien elle-même.
+   */
+  readonly footer?: ReactNode
   /** Libellé accessible de la table. */
   readonly ariaLabel?: string
   /** Tri actif (en-têtes triables). Sans lui, aucun indicateur n'est affiché. */
