@@ -2186,7 +2186,15 @@
     "stat_nuances": "Nuances used",
     "stat_words": "Words used",
     "stat_wordless": "No word",
-    "legend": "Fill density: number of entries. The tint is the family's identity, never a severity. A dashed cell has never been used."
+    "legend": "Fill density: number of entries. The tint is the family's identity, never a severity. A dashed cell has never been used.",
+    "entries_title": "Entries, one by one",
+    "entries_count": "{{count}} entries · most recent first",
+    "entries_count_one": "{{count}} entry",
+    "filter_with_notes": "With a written note ({{count}})",
+    "wordless": "No word",
+    "intensity": "Intensity",
+    "notes_title": "What happened?",
+    "no_note_entry": "No entry carries a written note over this period."
   },
   "evolution": {
     "title": "Clinical Evolution",

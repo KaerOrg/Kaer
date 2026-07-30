@@ -357,6 +357,16 @@ Nuances / Mots précis et le `SegmentedControl` de période.
   base : jamais de constante dans le code.
 - Aucune moyenne, aucune tendance, aucun pourcentage. Un test le vérifie sur le rendu.
 
+Sous la matrice, il monte `EmotionNamingEntryList` (maître-détail des saisies, #264) :
+liste à gauche, fiche complète à droite. Trois règles y sont testées :
+
+- la **note est affichée intégralement**, sans troncature ni « voir plus » : c'est le
+  champ le plus riche cliniquement ;
+- une saisie **sans intensité n'affiche aucun cran**, et surtout pas un zéro, qui serait
+  une valeur que le patient n'a pas donnée ;
+- une entrée **« Sans mot » s'ouvre comme les autres**, en italique atténué, sans chemin
+  d'émotion. Entrée légitime, pas entrée dégradée.
+
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
 `components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.
