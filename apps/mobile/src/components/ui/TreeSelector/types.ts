@@ -67,7 +67,6 @@ export interface TreeSelectorConfig {
 /** Libellés d'interface, déjà traduits par le parent. */
 export interface TreeSelectorTexts {
   newBtn: string
-  intro: string
   historyLabel: string
   emptyTitle: string
   emptyText: string
@@ -107,10 +106,26 @@ export interface TreeSelectorTexts {
   cancel: string
   back: string
   delete: string
+  /** Étiquette d'accessibilité de l'icône ⓘ de l'en-tête d'historique. */
+  infoBtn: string
+  /** Étiquette d'accessibilité du menu ⋯ d'une entrée. */
+  entryMenuBtn: string
+  /** Libellé de l'action de la ligne « Prochain rappel ». */
+  editReminderBtn: string
   /** Titres d'étape de navigation indexés par niveau (1-based). */
   stepTitles: Record<number, string>
   /** Indices d'étape de navigation indexés par niveau (1-based). */
   stepHints: Record<number, string>
+}
+
+/**
+ * Groupe d'entrées d'historique sous un en-tête (« AUJOURD'HUI », « HIER », une date).
+ * Le regroupement est une **navigation**, pas une analyse : aucun total, aucune moyenne,
+ * aucune comparaison d'un groupe à l'autre (MDR 2017/745).
+ */
+export interface TreeSelectorEntrySection {
+  title: string
+  entries: TreeSelectorEntry[]
 }
 
 /** Résultat d'une sélection validée — identités opaques, le parent persiste. */

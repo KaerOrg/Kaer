@@ -42,6 +42,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
+import { useActionSheet } from '../../../contexts/ActionSheetContext'
 import type { ContentField } from '@services/moduleService'
 
 jest.setTimeout(15000)
@@ -301,11 +302,36 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     await waitFor(() => expect(screen.getByTestId('list-empty')).toBeTruthy())
   })
 
-  it('supprime une entrée après confirmation', async () => {
+  it('⋯ ouvre une feuille d\'actions rappelant l\'entrée', async () => {
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
     renderLayout()
-    const deleteBtn = await screen.findByTestId('delete-sel-1')
-    await act(async () => { fireEvent.press(deleteBtn) })
+    // Attendre le rendu de la carte : le chargement asynchrone de l'historique doit
+    // être retombé avant d'interroger le menu.
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    expect(showActionSheet).toHaveBeenCalledWith(expect.objectContaining({
+      // Le titre rappelle de quelle entrée il s'agit (K-3, écran E3a).
+      title: expect.stringContaining('modules.emotion_wheel.node.joy'),
+      options: expect.arrayContaining([
+        expect.objectContaining({ destructive: true }),
+      ]),
+    }))
+  })
+
+  it('supprime une entrée après confirmation depuis la feuille d\'actions', async () => {
+    ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
+    renderLayout()
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    // La doublure de test n'affiche pas la feuille : on déclenche l'option nous-mêmes.
+    // `showConfirm` auto-valide (jest.setup), donc la suppression va jusqu'au bout.
+    const config = (showActionSheet as jest.Mock).mock.calls.at(-1)?.[0]
+    const destructive = config.options.find((o: { destructive?: boolean }) => o.destructive)
+    await act(async () => { destructive.onPress() })
 
     await waitFor(() => {
       expect(database.deleteTreeSelection).toHaveBeenCalledWith('sel-1')

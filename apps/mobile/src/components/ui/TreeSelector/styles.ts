@@ -23,7 +23,15 @@ export const styles = StyleSheet.create({
   },
   startBtnText:     { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   // ── Historique
+  historyHeader:    { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: spacing.md, paddingTop: spacing.sm },
+  reminderRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginHorizontal: spacing.lg, marginTop: spacing.sm, gap: spacing.sm,
+  },
+  reminderText:     { flex: 1, flexShrink: 1, fontSize: fontSize.xs, color: colors.textMuted },
   historyContent:   { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  entryTitleRow:    { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap' },
+  entryFooter:      { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs },
   introCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
     flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm,

@@ -782,7 +782,10 @@ un niveau à la persistance.
 | Prop | Type | Rôle |
 |---|---|---|
 | `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `definition`/`color`/`icon` optionnels). `definition` est la ligne affichée sous le titre au niveau 1 |
-| `entries` | `TreeSelectorEntry[]` | View-models d'historique déjà résolus (libellés, date, badge intensité formatés) |
+| `sections` | `TreeSelectorEntrySection[]` | Historique **déjà groupé et titré par le parent** (« AUJOURD'HUI », « HIER », une date). Le primitive ne calcule aucune date : il rend des groupes reçus |
+| `onOpenEntryMenu` | `(id: string) => void` | Tap sur le ⋯ d'une entrée. Le parent ouvre la feuille d'actions (modifier / supprimer) |
+| `onOpenInfo` | `() => void` (optionnel) | Ouvre la fiche ⓘ. **Absent : l'icône n'est pas rendue** |
+| `nextReminderLabel` / `onEditReminder` | `string \| null` / `() => void` | Ligne « Prochain rappel : … » et son action. Absents : la ligne n'apparaît pas |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
 | `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits. `validateHereKeep(label)` est une **fonction** : elle rend la ligne secondaire du bouton « valider ici » (« on garde « Peur » »), le niveau conservé étant interpolé par l'appelant |
 | `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |

@@ -7,7 +7,7 @@ import { render, screen, fireEvent, act } from '@testing-library/react-native'
 import { colors } from '@theme'
 import { TreeSelector } from './TreeSelector'
 import type {
-  TreeSelectorConfig, TreeSelectorEntry, TreeSelectorNode,
+  TreeSelectorConfig, TreeSelectorEntry, TreeSelectorEntrySection, TreeSelectorNode,
   TreeSelectorSubmit, TreeSelectorTexts,
 } from './types'
 
@@ -37,7 +37,7 @@ const NODES: TreeSelectorNode[] = [
 ]
 
 const BASE_TEXTS: TreeSelectorTexts = {
-  newBtn: 'Identifier', intro: 'Choisissez une émotion', historyLabel: 'Historique',
+  newBtn: 'Noter un moment', historyLabel: 'Historique',
   emptyTitle: 'Rien encore', emptyText: 'Commencez',
   entryTitle: 'Vous pouvez enregistrer, ou préciser.',
   wordlessTitle: 'On garde le moment, sans le nommer.',
@@ -51,6 +51,7 @@ const BASE_TEXTS: TreeSelectorTexts = {
   validateHereKeep: (label: string) => `on garde « ${label} »`,
   skipBtn: 'Je ne sais pas trop', stopHint: 'S’arrêter à la famille est déjà une réponse.',
   cancel: 'Annuler', back: 'Retour', delete: 'Supprimer',
+  infoBtn: 'À propos', entryMenuBtn: 'Options', editReminderBtn: 'Modifier',
   stepTitles: { 1: 'Émotion principale', 3: 'Émotion spécifique' },
   stepHints: { 1: 'Indice 1', 2: 'Indice 2', 3: 'Indice 3' },
 }
@@ -66,40 +67,47 @@ function makeConfig(over: Partial<TreeSelectorConfig> = {}): TreeSelectorConfig 
 
 const ENTRY: TreeSelectorEntry = {
   id: 'sel-1', accentColor: '#EFC98A', icon: 'emoticon-happy-outline',
-  primaryLabel: 'Joie', secondaryLabel: 'Sérénité · Calme', intensityLabel: '6/10',
-  contextLabels: ['Travail'], notes: 'au lever', dateLabel: '05/05/2026',
+  primaryLabel: 'Joie', secondaryLabel: 'Sérénité · Calme', intensityLabel: '4/5',
+  contextLabels: ['Travail'], notes: 'au lever', dateLabel: '09:36',
 }
 
+// Le parent fournit les groupes déjà titrés : le primitive ne calcule aucune date.
+const SECTIONS: TreeSelectorEntrySection[] = [{ title: 'AUJOURD’HUI', entries: [ENTRY] }]
+
 interface Overrides {
-  entries?: TreeSelectorEntry[]
+  sections?: TreeSelectorEntrySection[]
   config?: TreeSelectorConfig
   texts?: TreeSelectorTexts
   loading?: boolean
   saving?: boolean
-  footerText?: string | null
+  nextReminderLabel?: string | null
   onSubmit?: (r: TreeSelectorSubmit) => Promise<void>
-  onDelete?: (id: string) => void
+  onOpenEntryMenu?: (id: string) => void
+  onOpenInfo?: () => void
+  onEditReminder?: () => void
   allowWordless?: boolean
 }
 
 function renderTree(over: Overrides = {}) {
   const onSubmit = over.onSubmit ?? jest.fn().mockResolvedValue(undefined)
-  const onDelete = over.onDelete ?? jest.fn()
+  const onOpenEntryMenu = over.onOpenEntryMenu ?? jest.fn()
   render(
     <TreeSelector
       nodes={NODES}
-      entries={over.entries ?? []}
+      sections={over.sections ?? []}
       config={over.config ?? makeConfig()}
       texts={over.texts ?? BASE_TEXTS}
-      footerText={over.footerText ?? null}
       loading={over.loading ?? false}
       saving={over.saving ?? false}
+      nextReminderLabel={over.nextReminderLabel}
       onSubmit={onSubmit}
-      onDelete={onDelete}
+      onOpenEntryMenu={onOpenEntryMenu}
+      onOpenInfo={over.onOpenInfo}
+      onEditReminder={over.onEditReminder}
       allowWordless={over.allowWordless}
     />
   )
-  return { onSubmit, onDelete }
+  return { onSubmit, onOpenEntryMenu }
 }
 
 // ─── Tests ─────────────────────────────────────────────────────────────────
@@ -113,20 +121,62 @@ describe('ui/TreeSelector (primitive)', () => {
   it('affiche l\'état vide quand aucune entrée', () => {
     renderTree()
     expect(screen.getByTestId('list-empty')).toBeTruthy()
-    expect(screen.getByTestId('intro-card')).toBeTruthy()
   })
 
   it('rend les entrées passées + chips de contexte', () => {
-    renderTree({ entries: [ENTRY] })
+    renderTree({ sections: SECTIONS })
     expect(screen.getByTestId('entry-card-sel-1')).toBeTruthy()
     expect(screen.getByTestId('chips-sel-1')).toBeTruthy()
   })
 
-  it('appelle onDelete au tap sur la corbeille', () => {
-    const onDelete = jest.fn()
-    renderTree({ entries: [ENTRY], onDelete })
-    fireEvent.press(screen.getByTestId('delete-sel-1'))
-    expect(onDelete).toHaveBeenCalledWith('sel-1')
+  // ── Accueil : historique groupé par jour (K-3, ticket #251) ───────────────
+
+  it('groupe l\'historique sous les en-têtes fournis par le parent', () => {
+    renderTree({ sections: SECTIONS })
+    expect(screen.getByTestId('day-AUJOURD’HUI')).toBeTruthy()
+    expect(screen.getByText('AUJOURD’HUI')).toBeTruthy()
+  })
+
+  it('le groupement n\'affiche aucun total, moyenne ni comparaison', () => {
+    renderTree({ sections: SECTIONS })
+    const header = screen.getByTestId('day-AUJOURD’HUI')
+    // Un en-tête de jour porte son seul libellé : pas de « (2) », pas de moyenne.
+    expect(header.props.children).toBeTruthy()
+    expect(screen.queryByText(/moyenne|total|\(\d+\)/i)).toBeNull()
+  })
+
+  it('ouvre le menu d\'une entrée au tap sur ⋯', () => {
+    const onOpenEntryMenu = jest.fn()
+    renderTree({ sections: SECTIONS, onOpenEntryMenu })
+    fireEvent.press(screen.getByTestId('menu-sel-1'))
+    expect(onOpenEntryMenu).toHaveBeenCalledWith('sel-1')
+  })
+
+  it('n\'affiche plus le bandeau de psychoéducation ni le disclaimer en pied', () => {
+    renderTree({ sections: SECTIONS })
+    // Tout est passé dans la fiche ⓘ (K-3).
+    expect(screen.queryByTestId('intro-card')).toBeNull()
+  })
+
+  it('n\'affiche l\'icône ⓘ que si une fiche est fournie', () => {
+    renderTree({ sections: SECTIONS })
+    expect(screen.queryByTestId('open-info')).toBeNull()
+    const onOpenInfo = jest.fn()
+    screen.unmount()
+    renderTree({ sections: SECTIONS, onOpenInfo })
+    fireEvent.press(screen.getByTestId('open-info'))
+    expect(onOpenInfo).toHaveBeenCalledTimes(1)
+  })
+
+  it('n\'affiche la ligne de rappel que si un rappel est programmé', () => {
+    renderTree({ sections: SECTIONS })
+    expect(screen.queryByTestId('next-reminder')).toBeNull()
+    screen.unmount()
+    const onEditReminder = jest.fn()
+    renderTree({ sections: SECTIONS, nextReminderLabel: 'Prochain rappel : aujourd’hui 18:00', onEditReminder })
+    expect(screen.getByText('Prochain rappel : aujourd’hui 18:00')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('edit-reminder'))
+    expect(onEditReminder).toHaveBeenCalledTimes(1)
   })
 
   it('passe en navigation niveau 1 au tap sur Nouveau', () => {
@@ -495,8 +545,4 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(screen.getByTestId('list-empty')).toBeTruthy()
   })
 
-  it('affiche la note de bas de page quand fournie', () => {
-    renderTree({ footerText: 'Sources : Plutchik (1980)' })
-    expect(screen.getByText('Sources : Plutchik (1980)')).toBeTruthy()
-  })
 })
