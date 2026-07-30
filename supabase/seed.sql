@@ -664,6 +664,16 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- consultable quand la question se pose. La section « sources » est ajoutée par
   -- le code depuis le champ `footer_note` existant.
   ('ew.cfg', 'edit_entry_btn',        'modules.emotion_wheel.edit_entry_btn'),
+  -- Écran de première ouverture (K-2) : affiché UNE FOIS, jamais revu. Ce n'est pas
+  -- une modale (une modale se balaie par réflexe) et « J'ai compris » est un accusé
+  -- de lecture, pas un consentement : rien n'est journalisé.
+  ('ew.cfg', 'welcome_title',         'modules.emotion_wheel.welcome_title'),
+  ('ew.cfg', 'welcome_intro',         'modules.emotion_wheel.welcome_intro'),
+  ('ew.cfg', 'welcome_point_1',       'modules.emotion_wheel.welcome_point_1'),
+  ('ew.cfg', 'welcome_point_2',       'modules.emotion_wheel.welcome_point_2'),
+  ('ew.cfg', 'welcome_crisis',        'modules.emotion_wheel.welcome_crisis'),
+  ('ew.cfg', 'welcome_ack_btn',       'modules.emotion_wheel.welcome_ack_btn'),
+  ('ew.cfg', 'welcome_footer',        'modules.emotion_wheel.welcome_footer'),
   ('ew.cfg', 'info_title',            'modules.emotion_wheel.info_title'),
   ('ew.cfg', 'info_title_1',          'modules.emotion_wheel.info_purpose_title'),
   ('ew.cfg', 'info_body_1',           'modules.emotion_wheel.info_purpose_body'),

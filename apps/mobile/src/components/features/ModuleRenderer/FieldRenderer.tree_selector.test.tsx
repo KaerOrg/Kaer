@@ -35,6 +35,13 @@ jest.mock('../../../store/authStore', () => ({
     selector({ patient: { id: 'patient-test-id' } }),
 }))
 
+const mockHasSeen = jest.fn().mockResolvedValue(false)
+const mockMarkSeen = jest.fn().mockResolvedValue(undefined)
+jest.mock('@services/moduleOnboardingService', () => ({
+  hasSeenModuleOnboarding: (...a: unknown[]) => mockHasSeen(...a),
+  markModuleOnboardingSeen: (...a: unknown[]) => mockMarkSeen(...a),
+}))
+
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
@@ -191,12 +198,79 @@ function renderFull() {
   )
 }
 
+// Config portant l'écran de première ouverture (K-2).
+const MOCK_FIELDS_WELCOME: ContentField[] = MOCK_FIELDS.map(f =>
+  f.id === 'ew.cfg'
+    ? makeField({
+        ...f,
+        props: {
+          ...f.props,
+          welcome_title: 'modules.emotion_wheel.welcome_title',
+          welcome_point_1: 'modules.emotion_wheel.welcome_point_1',
+          welcome_ack_btn: 'modules.emotion_wheel.welcome_ack_btn',
+        },
+      })
+    : f
+)
+
+function renderWelcome() {
+  return render(
+    <FieldRenderer
+      preview_kind="tree_selector"
+      fields={MOCK_FIELDS_WELCOME}
+      moduleId="emotion_wheel"
+    />
+  )
+}
+
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([])
+    mockHasSeen.mockResolvedValue(false)
+    mockMarkSeen.mockResolvedValue(undefined)
+  })
+
+  // ── Écran de première ouverture (K-2, ticket #250) ────────────────────────
+
+  it('affiche l\'écran de première ouverture au premier accès', async () => {
+    renderWelcome()
+    expect(await screen.findByTestId('module-welcome')).toBeTruthy()
+    // Le module lui-même n'est pas encore accessible derrière.
+    expect(screen.queryByTestId('start-new-button')).toBeNull()
+  })
+
+  it('« J\'ai compris » mémorise le passage et ouvre le module', async () => {
+    renderWelcome()
+    const btn = await screen.findByTestId('acknowledge-welcome')
+    await act(async () => { fireEvent.press(btn) })
+    expect(mockMarkSeen).toHaveBeenCalledWith('emotion_wheel')
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+  })
+
+  it('ne réaffiche jamais l\'écran une fois vu', async () => {
+    mockHasSeen.mockResolvedValue(true)
+    renderWelcome()
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+  })
+
+  it('n\'affiche pas d\'écran d\'introduction si la config n\'en porte pas', async () => {
+    renderLayout()
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+    // Aucune lecture inutile : le module sans écran d'intro ne consulte même pas l'état.
+    expect(mockHasSeen).not.toHaveBeenCalled()
+  })
+
+  it('ouvre le module malgré un échec de lecture de l\'état', async () => {
+    mockHasSeen.mockRejectedValue(new Error('sqlite down'))
+    renderWelcome()
+    // On n'impose pas l'écran à cause d'une panne technique.
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
   })
 
   it('charge l\'historique au montage', async () => {

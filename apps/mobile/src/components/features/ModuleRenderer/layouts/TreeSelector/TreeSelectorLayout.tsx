@@ -9,7 +9,7 @@
 // Conformité MDR 2017/745 : aucun seuil, aucune couleur de gravité — les
 // couleurs/emojis codent l'identité de famille, l'affichage reste brut.
 
-import { useMemo, useCallback, useState } from 'react'
+import { useMemo, useCallback, useState, useEffect } from 'react'
 import { collectIndexed } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import type { TreeSelection } from '../../../../../lib/database'
@@ -27,6 +27,10 @@ import {
 import { useTreeSelectorConfig } from './useTreeSelectorConfig'
 import { useTreeSelectorData } from './useTreeSelectorData'
 import { TreeSelectorInfoSheet } from './TreeSelectorInfoSheet'
+import { TreeSelectorWelcome, type WelcomeTexts } from './TreeSelectorWelcome'
+import {
+  hasSeenModuleOnboarding, markModuleOnboardingSeen,
+} from '@services/moduleOnboardingService'
 import {
   toUiNodes, toEntryVM, reconstructPath, buildStepLabels, groupEntriesByDay,
   WORDLESS_SELECTED_ID,
@@ -142,6 +146,34 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   const openInfo = useCallback(() => setInfoOpen(true), [])
   const closeInfo = useCallback(() => setInfoOpen(false), [])
 
+  // Écran de première ouverture (K-2). `null` tant qu'on ne sait pas : on n'affiche
+  // ni l'écran ni le module, pour éviter qu'il apparaisse puis disparaisse.
+  const [welcomeSeen, setWelcomeSeen] = useState<boolean | null>(null)
+  const welcomeTexts = useMemo<WelcomeTexts>(() => ({
+    title: lbl('welcome_title'),
+    intro: lbl('welcome_intro'),
+    points: collectIndexed(config.props, 'welcome_point').map(code => t(code)),
+    crisis: lbl('welcome_crisis'),
+    ackBtn: lbl('welcome_ack_btn'),
+    footer: lbl('welcome_footer'),
+  }), [lbl, t, config.props])
+  const hasWelcome = welcomeTexts.title.length > 0
+
+  useEffect(() => {
+    if (!hasWelcome) { setWelcomeSeen(true); return }
+    let active = true
+    hasSeenModuleOnboarding(moduleId)
+      .then(seen => { if (active) setWelcomeSeen(seen) })
+      // Échec de lecture : on n'impose pas l'écran, on laisse le module s'ouvrir.
+      .catch(() => { if (active) setWelcomeSeen(true) })
+    return () => { active = false }
+  }, [hasWelcome, moduleId])
+
+  const handleAcknowledge = useCallback(() => {
+    setWelcomeSeen(true)
+    void markModuleOnboardingSeen(moduleId).catch(() => {})
+  }, [moduleId])
+
   // ── Callbacks métier ────────────────────────────────────────────────────────
   const handleSubmit = useCallback(async (result: TreeSelectorSubmit) => {
     const path = reconstructPath(result.pathIds, config.nodeMap)
@@ -214,6 +246,10 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       ],
     })
   }, [uiEntries, showActionSheet, lbl, t, handleEdit, handleDelete])
+
+  if (welcomeSeen === false) {
+    return <TreeSelectorWelcome texts={welcomeTexts} onAcknowledge={handleAcknowledge} />
+  }
 
   return (
     <>
