@@ -22,11 +22,14 @@ import {
   type ModuleSummary,
   type FormEntryRow,
   type ActivityEntryPoint,
+  fetchEmotionNamingEntries,
+  type EmotionNamingRow,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'defusion' | 'med' | 'sleep' | 'form'
+export type ChartKind =
+  | 'scale' | 'mood' | 'fear' | 'defusion' | 'med' | 'sleep' | 'form' | 'emotion_naming'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -42,6 +45,9 @@ export type ModuleDataResult =
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
   | { status: 'form'; entries: FormEntryRow[] }
   | { status: 'activity'; entries: ActivityEntryPoint[] }
+  // « Nommer ce que je ressens » : des saisies brutes, pas une série. Les comptages
+  // descriptifs sont calculés par `lib/emotionNamingData.ts` au rendu.
+  | { status: 'emotion_naming'; entries: EmotionNamingRow[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -116,6 +122,10 @@ export const engagementQueries = {
         if (kind === 'form') {
           const entries = await fetchFormEntries(patientId, moduleType)
           return entries.length === 0 ? { status: 'empty' } : { status: 'form', entries }
+        }
+        if (kind === 'emotion_naming') {
+          const entries = await fetchEmotionNamingEntries(patientId)
+          return entries.length === 0 ? { status: 'empty' } : { status: 'emotion_naming', entries }
         }
         if (moduleType === 'chronobiology_tracker') {
           const entries = await fetchChronoEntries(patientId)
