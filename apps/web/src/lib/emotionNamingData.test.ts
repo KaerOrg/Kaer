@@ -20,7 +20,15 @@ const TAXONOMY: NamingTaxonomy = {
     'fam.fear': ['n.fear.anxiety', 'n.fear.terror'],
     'fam.disgust': ['n.disgust.repulsion'],
   },
+  wordsByNuance: {
+    'n.joy.pleasure': ['w.a'],
+    'n.joy.love': ['w.b', 'w.c'],
+    'n.fear.anxiety': [],
+    'n.fear.terror': [],
+    'n.disgust.repulsion': [],
+  },
   words: ['w.a', 'w.b', 'w.c'],
+  colorByFamily: { 'fam.joy': '#EFC98A', 'fam.fear': '#AC9BDE', 'fam.disgust': '#AFBE8B' },
 }
 
 describe('depthOf', () => {
@@ -118,6 +126,19 @@ describe('repertoire', () => {
     expect(rep.rows).toHaveLength(3)
     expect(rep.rows.every(r => r.total === 0)).toBe(true)
     expect(rep.nuancesUsed).toBe(0)
+  })
+
+  it('bascule sur les mots précis sans changer les règles', () => {
+    const rep = repertoire([
+      entry({ familyCode: 'fam.joy', nuanceCode: 'n.joy.love', wordCode: 'w.b' }),
+    ], TAXONOMY, 'word')
+    const joy = rep.rows.find(r => r.familyCode === 'fam.joy')
+    // Les mots des deux nuances de la famille, employés ou non.
+    expect(joy?.cells).toEqual([
+      { nuanceCode: 'w.a', count: 0 },
+      { nuanceCode: 'w.b', count: 1 },
+      { nuanceCode: 'w.c', count: 0 },
+    ])
   })
 
   it('ignore une nuance disparue du seed sans casser la matrice', () => {
@@ -223,7 +244,24 @@ describe('buildNamingTaxonomy', () => {
   })
 
   it('supporte un arbre vide', () => {
-    expect(buildNamingTaxonomy([])).toEqual({ families: [], nuancesByFamily: {}, words: [] })
+    expect(buildNamingTaxonomy([])).toEqual({
+      families: [], nuancesByFamily: {}, wordsByNuance: {}, words: [], colorByFamily: {},
+    })
+  })
+
+  it('relève la teinte de chaque famille depuis ses props', () => {
+    const fields = [{
+      id: 'ew.joy', field_type: 'tree_node', text_code: 'fam.joy',
+      props: { color: '#EFC98A' }, children: [],
+    }]
+    expect(buildNamingTaxonomy(fields).colorByFamily).toEqual({ 'fam.joy': '#EFC98A' })
+  })
+
+  it('groupe les mots sous leur nuance, pour la vue « mots précis »', () => {
+    expect(buildNamingTaxonomy(FIELDS).wordsByNuance).toEqual({
+      'n.joy.love': ['w.a', 'w.b'],
+      'n.joy.calm': [],
+    })
   })
 })
 

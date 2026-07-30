@@ -17,6 +17,7 @@ import { MoodDataPanel } from './MoodDataPanel'
 import { SleepDataPanel } from './SleepDataPanel'
 import { ChronoDataPanel } from './ChronoDataPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
+import { EmotionNamingDataPanel } from './EmotionNamingDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import './ModuleDataPanel.css'
 
@@ -29,6 +30,8 @@ function chartKind(moduleType: string): ChartKind | null {
   if (moduleType === 'medication_side_effects') return 'med'
   if (moduleType === 'sleep_diary') return 'sleep'
   if (moduleType === 'beck_columns') return 'form'
+  // Pas une série numérique mais une catégorie : matrice du répertoire (#263).
+  if (moduleType === 'emotion_wheel') return 'emotion_naming'
   if (moduleType in SCALE_CONFIG) return 'scale'
   return null
 }
@@ -67,6 +70,17 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // + repères), cadre propre. Miroir de l'app patient refondue (#161).
   if (state.status === 'mood') {
     return <MoodDataPanel points={state.points} markers={markersQuery.data ?? []} locale={i18n.language} />
+  }
+
+  // « Nommer ce que je ressens » : matrice du répertoire, cadre propre.
+  if (state.status === 'emotion_naming') {
+    return (
+      <EmotionNamingDataPanel
+        entries={state.entries}
+        moduleType={moduleType}
+        locale={i18n.language}
+      />
+    )
   }
 
   // Agenda du sommeil : panneau dédié (grille + courbes + stats), cadre propre.

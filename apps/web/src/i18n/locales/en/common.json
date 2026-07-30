@@ -2177,6 +2177,17 @@
     "error_save": "Could not save the change. Please try again.",
     "archived": "Case archived"
   },
+  "emotion_naming": {
+    "level_label": "Displayed level",
+    "level_nuance": "Nuances",
+    "level_word": "Precise words",
+    "stat_entries": "Entries",
+    "stat_last": "Latest",
+    "stat_nuances": "Nuances used",
+    "stat_words": "Words used",
+    "stat_wordless": "No word",
+    "legend": "Fill density: number of entries. The tint is the family's identity, never a severity. A dashed cell has never been used."
+  },
   "evolution": {
     "title": "Clinical Evolution",
     "show_archived": "Show archived tracks",

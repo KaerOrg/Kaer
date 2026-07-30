@@ -331,6 +331,32 @@ préférer un menu / popover quand c'est plus adapté.
 
 Props : `open`, `title?`, `options: {label, onClick, destructive?}[]`, `cancelLabel`, `onClose()`.
 
+### `EmotionNamingDataPanel` (`src/pages/PatientPage/tabs/`)
+
+Panneau « Données » du module « Nommer ce que je ressens ». **Pas un graphique** : ce
+module produit une catégorie (famille · nuance · mot), pas une série numérique.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `entries` | `EmotionNamingRow[]` | Saisies brutes, identités en clés i18n |
+| `moduleType` | `string` | Sert à charger la taxonomie (`moduleQueries.fields`) |
+| `locale` | `string` | Formatage de la date de dernière saisie |
+
+Il assemble une synthèse (4 `Card variant="outlined"`), la **matrice du répertoire**
+(une ligne par famille, une cellule par nuance ou par mot), une bascule `Chip`
+Nuances / Mots précis et le `SegmentedControl` de période.
+
+**Règles de rendu à ne pas contourner :**
+
+- Les nuances **jamais employées restent affichées**, en bordure pointillée et **sans
+  chiffre** : leur absence est du contenu, pas un manque de données à masquer.
+- L'opacité du fond code un **nombre de saisies**, jamais une intensité ni une gravité.
+  La teinte est l'identité de la famille, appliquée en style inline parce qu'elle vient
+  de la config du module (`field_props.color`).
+- Les **dénominateurs** (« sur 8 », « sur 37 ») sont dérivés de la taxonomie lue en
+  base : jamais de constante dans le code.
+- Aucune moyenne, aucune tendance, aucun pourcentage. Un test le vérifie sur le rendu.
+
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
 `components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.

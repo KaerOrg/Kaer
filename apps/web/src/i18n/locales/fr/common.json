@@ -2323,6 +2323,17 @@
     "error_save": "Impossible d'enregistrer la modification. Réessayez.",
     "archived": "Dossier archivé"
   },
+  "emotion_naming": {
+    "level_label": "Niveau affiché",
+    "level_nuance": "Nuances",
+    "level_word": "Mots précis",
+    "stat_entries": "Saisies",
+    "stat_last": "Dernière",
+    "stat_nuances": "Nuances employées",
+    "stat_words": "Mots employés",
+    "stat_wordless": "Sans mot",
+    "legend": "Intensité du remplissage : nombre de saisies. La teinte est l'identité de la famille, jamais une gravité. Une case pointillée n'a jamais été employée."
+  },
   "evolution": {
     "title": "Évolution clinique",
     "show_archived": "Afficher les suivis archivés",
