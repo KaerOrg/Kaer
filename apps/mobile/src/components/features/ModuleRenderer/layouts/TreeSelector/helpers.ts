@@ -95,6 +95,50 @@ export function toUiNodes(nodes: RawTreeNode[], t: (key: string) => string): Tre
   }))
 }
 
+/** Libellés d'en-tête du groupement par jour, déjà traduits. */
+export interface DayGroupLabels {
+  today: string
+  yesterday: string
+  /** Formate la date d'un jour plus ancien (ex. « 12 juillet »). */
+  older: (iso: string) => string
+}
+
+/**
+ * Groupe des entrées par jour civil, dans l'ordre chronologique inverse.
+ *
+ * Le jour est calculé sur les composants **locaux** de la date, jamais via
+ * `toISOString()` : en fuseau positif, minuit local retombe sur la veille en UTC et
+ * l'entrée changerait de groupe (cf. `.claude/rules/lessons.md` § Dates).
+ *
+ * Conformité MDR : ce groupement est une navigation. Il ne calcule aucun total par
+ * jour, aucune moyenne, aucune comparaison d'un groupe à l'autre.
+ */
+export function groupEntriesByDay<T extends { created_at: string }>(
+  entries: T[],
+  labels: DayGroupLabels,
+  now: Date,
+): { title: string; entries: T[] }[] {
+  const dayKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  const todayKey = dayKey(now)
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  const yesterdayKey = dayKey(yesterday)
+
+  const order: string[] = []
+  const buckets = new Map<string, T[]>()
+  for (const entry of entries) {
+    const key = dayKey(new Date(entry.created_at))
+    if (!buckets.has(key)) { buckets.set(key, []); order.push(key) }
+    buckets.get(key)?.push(entry)
+  }
+
+  return order.map(key => ({
+    title: key === todayKey ? labels.today : key === yesterdayKey ? labels.yesterday : labels.older(key),
+    entries: buckets.get(key) ?? [],
+  }))
+}
+
 /** Reconstruit un chemin de persistance (avec `text_code`) depuis des ids opaques. */
 export function reconstructPath(
   pathIds: string[],

@@ -9,21 +9,27 @@
 // Conformité MDR 2017/745 : aucun seuil, aucune couleur de gravité — les
 // couleurs/emojis codent l'identité de famille, l'affichage reste brut.
 
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
+import { collectIndexed } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import type { TreeSelection } from '../../../../../lib/database'
 import { generateId } from '../../../../../lib/database'
-import { formatDateTime } from '../../../../../lib/dateUtils'
+import { formatDateTime, formatDateFull } from '../../../../../lib/dateUtils'
 import { useModuleTranslation, type ModuleTranslationValues } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
+import { useActionSheet } from '../../../../../contexts/ActionSheetContext'
 import {
   TreeSelector,
-  type TreeSelectorConfig, type TreeSelectorEntry, type TreeSelectorNode,
-  type TreeSelectorSubmit, type TreeSelectorTexts,
+  type TreeSelectorConfig, type TreeSelectorEntry, type TreeSelectorEntrySection,
+  type TreeSelectorNode, type TreeSelectorSubmit, type TreeSelectorTexts,
 } from '@ui/TreeSelector'
 import { useTreeSelectorConfig } from './useTreeSelectorConfig'
 import { useTreeSelectorData } from './useTreeSelectorData'
-import { toUiNodes, toEntryVM, reconstructPath, buildStepLabels, WORDLESS_SELECTED_ID } from './helpers'
+import { TreeSelectorInfoSheet } from './TreeSelectorInfoSheet'
+import {
+  toUiNodes, toEntryVM, reconstructPath, buildStepLabels, groupEntriesByDay,
+  WORDLESS_SELECTED_ID,
+} from './helpers'
 
 export interface TreeSelectorLayoutProps {
   /** Fields du module (config + nœuds d'arbre). */
@@ -37,6 +43,7 @@ export interface TreeSelectorLayoutProps {
 export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLayoutProps) {
   const t = useModuleTranslation()
   const { showConfirm } = useConfirmDialog()
+  const { showActionSheet } = useActionSheet()
   const config = useTreeSelectorConfig(fields)
   const { entries, loading, saving, persist, remove } = useTreeSelectorData(moduleId)
 
@@ -62,7 +69,6 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
 
   const texts = useMemo<TreeSelectorTexts>(() => ({
     newBtn: lbl('new_btn') || t('common.add'),
-    intro: lbl('intro'),
     historyLabel: lbl('history_label'),
     emptyTitle: lbl('empty_title'),
     emptyText: lbl('empty_text'),
@@ -86,6 +92,9 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     cancel: t('common.cancel'),
     back: t('common.back'),
     delete: t('common.delete'),
+    infoBtn: lbl('info_title') || t('common.info'),
+    entryMenuBtn: t('common.options'),
+    editReminderBtn: t('common.edit'),
     stepTitles: buildStepLabels(config.props, t, 'title'),
     stepHints: buildStepLabels(config.props, t, 'hint'),
   }), [lbl, t, config.props])
@@ -96,7 +105,38 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     [entries, t, config.intensityMax, config.nodeMap, lbl],
   )
 
-  const footerText = footer != null ? t(footer.text_code ?? '') : null
+  // Groupement par jour : une navigation, jamais une analyse (aucun total, aucune
+  // moyenne, aucune comparaison d'un jour à l'autre).
+  const sections = useMemo<TreeSelectorEntrySection[]>(() => {
+    const byId = new Map(uiEntries.map(vm => [vm.id, vm]))
+    const groups = groupEntriesByDay(entries, {
+      today: lbl('day_today') || t('common.today'),
+      yesterday: lbl('day_yesterday') || t('common.yesterday'),
+      older: (iso: string) => formatDateFull(iso),
+    }, new Date())
+    return groups.map(g => ({
+      title: g.title,
+      entries: g.entries.map(e => byId.get(e.id)).filter((vm): vm is TreeSelectorEntry => vm != null),
+    }))
+  }, [entries, uiEntries, lbl, t])
+
+  // Fiche ⓘ : à quoi ça sert, qui voit quoi, en cas de crise, sources. Elle reprend le
+  // disclaimer sourcé qui était collé en permanence sur l'accueil (K-3).
+  const infoSections = useMemo(() => {
+    const titles = collectIndexed(config.props, 'info_title')
+    const bodies = collectIndexed(config.props, 'info_body')
+    const sourceNote = footer != null ? t(footer.text_code ?? '') : ''
+    const list = titles.map((code, i) => ({
+      title: t(code),
+      body: bodies[i] ? t(bodies[i]) : '',
+    }))
+    if (sourceNote) list.push({ title: lbl('info_sources_title'), body: sourceNote })
+    return list
+  }, [config.props, footer, t, lbl])
+
+  const [infoOpen, setInfoOpen] = useState(false)
+  const openInfo = useCallback(() => setInfoOpen(true), [])
+  const closeInfo = useCallback(() => setInfoOpen(false), [])
 
   // ── Callbacks métier ────────────────────────────────────────────────────────
   const handleSubmit = useCallback(async (result: TreeSelectorSubmit) => {
@@ -129,18 +169,40 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     })
   }, [showConfirm, lbl, t, remove])
 
+  // ⋯ d'une entrée : rappel de l'entrée en titre, puis modifier / supprimer. L'entrée
+  // « Modifier » n'apparaît que si l'appelant sait éditer (branché par #256, K-8).
+  const handleOpenEntryMenu = useCallback((id: string) => {
+    const entry = uiEntries.find(e => e.id === id)
+    const recap = entry
+      ? [entry.primaryLabel, entry.secondaryLabel].filter(Boolean).join(' · ')
+      : ''
+    showActionSheet({
+      title: recap,
+      options: [{ label: t('common.delete'), destructive: true, onPress: () => handleDelete(id) }],
+    })
+  }, [uiEntries, showActionSheet, t, handleDelete])
+
   return (
-    <TreeSelector
-      nodes={uiNodes}
-      entries={uiEntries}
-      config={uiConfig}
-      texts={texts}
-      footerText={footerText}
-      loading={loading}
-      saving={saving}
-      onSubmit={handleSubmit}
-      onDelete={handleDelete}
-      allowWordless={config.enableWordless}
-    />
+    <>
+      <TreeSelector
+        nodes={uiNodes}
+        sections={sections}
+        config={uiConfig}
+        texts={texts}
+        loading={loading}
+        saving={saving}
+        onSubmit={handleSubmit}
+        onOpenEntryMenu={handleOpenEntryMenu}
+        onOpenInfo={infoSections.length > 0 ? openInfo : undefined}
+        allowWordless={config.enableWordless}
+      />
+      <TreeSelectorInfoSheet
+        visible={infoOpen}
+        title={lbl('info_title')}
+        sections={infoSections}
+        closeLabel={t('common.close')}
+        onClose={closeInfo}
+      />
+    </>
   )
 }

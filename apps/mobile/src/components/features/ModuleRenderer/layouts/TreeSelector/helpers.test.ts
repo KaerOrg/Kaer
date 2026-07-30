@@ -1,6 +1,6 @@
 import {
   parseIntOr, intensityValuesFor, buildStepLabels,
-  buildRawNodes, buildNodeMap, toUiNodes, reconstructPath, toEntryVM,
+  buildRawNodes, buildNodeMap, toUiNodes, reconstructPath, toEntryVM, groupEntriesByDay,
 } from './helpers'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
@@ -134,6 +134,60 @@ describe('TreeSelector helpers (feature layer)', () => {
     })
     it('ignore silencieusement un id inconnu', () => {
       expect(reconstructPath(['a', 'ghost'], map).map(n => n.id)).toEqual(['a'])
+    })
+  })
+
+  describe('groupEntriesByDay', () => {
+    const LABELS = {
+      today: 'AUJOURD’HUI',
+      yesterday: 'HIER',
+      older: (iso: string) => `JOUR:${iso}`,
+    }
+    // Un mardi à 14h locales, pour que « hier » soit sans ambiguïté.
+    const NOW = new Date(2026, 6, 14, 14, 0, 0)
+
+    it('titre les groupes du jour et de la veille', () => {
+      const groups = groupEntriesByDay([
+        { created_at: new Date(2026, 6, 14, 9, 36).toISOString() },
+        { created_at: new Date(2026, 6, 13, 20, 4).toISOString() },
+      ], LABELS, NOW)
+      expect(groups.map(g => g.title)).toEqual(['AUJOURD’HUI', 'HIER'])
+    })
+
+    it('regroupe plusieurs entrées d\'un même jour, dans l\'ordre reçu', () => {
+      const groups = groupEntriesByDay([
+        { id: 'a', created_at: new Date(2026, 6, 14, 9, 36).toISOString() },
+        { id: 'b', created_at: new Date(2026, 6, 14, 7, 12).toISOString() },
+      ], LABELS, NOW)
+      expect(groups).toHaveLength(1)
+      expect(groups[0].entries.map(e => e.id)).toEqual(['a', 'b'])
+    })
+
+    it('titre les jours plus anciens par leur date', () => {
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 2, 10, 0).toISOString() }], LABELS, NOW,
+      )
+      expect(groups[0].title).toBe('JOUR:2026-07-02')
+    })
+
+    it('utilise le jour LOCAL, pas UTC : une saisie de fin de soirée reste au bon jour', () => {
+      // 23h30 locales en fuseau positif tombent le lendemain en UTC : sans getters
+      // locaux, l'entrée changerait de groupe (cf. lessons.md § Dates).
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 13, 23, 30).toISOString() }], LABELS, NOW,
+      )
+      expect(groups[0].title).toBe('HIER')
+    })
+
+    it('ne calcule aucun total : un groupe ne porte que son titre et ses entrées', () => {
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 14, 9, 0).toISOString() }], LABELS, NOW,
+      )
+      expect(Object.keys(groups[0]).sort()).toEqual(['entries', 'title'])
+    })
+
+    it('renvoie une liste vide sans entrée', () => {
+      expect(groupEntriesByDay([], LABELS, NOW)).toEqual([])
     })
   })
 

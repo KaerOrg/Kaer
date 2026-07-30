@@ -17,24 +17,29 @@ import { TreeSelectorNavigation } from './TreeSelectorNavigation'
 import { TreeSelectorEntrySheet } from './TreeSelectorEntrySheet'
 import { styles } from './styles'
 import type {
-  TreeSelectorConfig, TreeSelectorEntry, TreeSelectorNode,
+  TreeSelectorConfig, TreeSelectorEntrySection, TreeSelectorNode,
   TreeSelectorSubmit, TreeSelectorTexts,
 } from './types'
 
 export interface TreeSelectorProps {
   /** Arbre de nœuds prêt à afficher (libellés résolus). */
   nodes: TreeSelectorNode[]
-  /** Entrées d'historique (view-models résolus). */
-  entries: TreeSelectorEntry[]
+  /** Entrées d'historique groupées par jour (view-models résolus, titres fournis). */
+  sections: TreeSelectorEntrySection[]
   config: TreeSelectorConfig
   texts: TreeSelectorTexts
-  /** Note de bas de page (sources) — déjà traduite, optionnelle. */
-  footerText?: string | null
+  /** Ligne « Prochain rappel : … », absente si aucun rappel n'est programmé. */
+  nextReminderLabel?: string | null
+  /** Ouvre le réglage des rappels depuis l'historique. */
+  onEditReminder?: () => void
+  /** Ouvre la fiche ⓘ du module. Absent : l'icône n'est pas rendue. */
+  onOpenInfo?: () => void
   loading: boolean
   saving: boolean
   /** Appelé à la validation finale — le parent persiste puis l'historique se recharge. */
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>
-  onDelete: (id: string) => void
+  /** Ouvre le menu d'une entrée d'historique (modifier / supprimer). */
+  onOpenEntryMenu: (id: string) => void
   /**
    * Autorise la sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le
    * bouton n'apparaît que si l'appelant l'active : un arbre dont toutes les entrées
@@ -44,8 +49,8 @@ export interface TreeSelectorProps {
 }
 
 export function TreeSelector({
-  nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete,
-  allowWordless = false,
+  nodes, sections, config, texts, loading, saving, onSubmit, onOpenEntryMenu,
+  nextReminderLabel, onEditReminder, onOpenInfo, allowWordless = false,
 }: TreeSelectorProps) {
   const flow = useTreeSelectorFlow(config, onSubmit)
 
@@ -60,11 +65,13 @@ export function TreeSelector({
   if (flow.mode === 'history') {
     return (
       <TreeSelectorHistory
-        entries={entries}
+        sections={sections}
         texts={texts}
-        footerText={footerText}
+        nextReminderLabel={nextReminderLabel}
+        onEditReminder={onEditReminder}
         onStartNew={flow.handleStartNew}
-        onDelete={onDelete}
+        onOpenInfo={onOpenInfo}
+        onOpenEntryMenu={onOpenEntryMenu}
       />
     )
   }
@@ -76,7 +83,6 @@ export function TreeSelector({
         path={flow.path}
         config={config}
         texts={texts}
-        footerText={footerText}
         expanded={flow.expanded}
         onBack={flow.handleBack}
         onSelectNode={flow.handleSelectNode}
