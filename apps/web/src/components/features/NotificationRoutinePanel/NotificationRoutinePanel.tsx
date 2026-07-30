@@ -176,6 +176,8 @@ export function NotificationRoutinePanel({
                     placeholder={t('notifications.note_placeholder')}
                     rows={3}
                   />
+                  {/* Là où cette phrase va, et surtout là où elle ne va pas. */}
+                  <p className="nr-form__help">{t('notifications.note_help')}</p>
                 </div>
               </div>
 

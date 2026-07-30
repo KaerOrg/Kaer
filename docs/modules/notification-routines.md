@@ -9,6 +9,15 @@ Système permettant aux praticiens de programmer des rappels push par module pat
 - Le praticien définit : jours de la semaine (ISO 1–7), heure, note optionnelle, actif/inactif.
 - Le patient peut : décaler l'heure (`patient_time_override`), mettre en pause
   (`patient_paused`, horodaté par `patient_paused_at`).
+- **Le corps de la notification est une CONSTANTE** (#269, invariant MDR). Il ne dépend
+  d'aucune donnée saisie, d'aucun score, d'aucun seuil, et **d'aucun texte écrit par le
+  praticien**. `practitioner_note` existe toujours mais s'affiche **dans le module**,
+  côté patient : c'est une consigne clinique, pas le texte d'un rappel. Un rappel dont
+  le texte dépendrait d'une consigne ne serait plus neutre au sens MDR, et cela vaudrait
+  pour les vingt modules. Le contenu et la sélection des routines dues vivent dans
+  `supabase/functions/send-notifications/logic.ts`, avec leur test
+  (`logic.test.ts`, job CI « Edge — Tests ») : deux patients, deux consignes
+  différentes, **même corps**.
 - **Le panneau praticien montre ce que le patient en a fait** (#268) : l'heure
   **effective** en valeur principale, l'heure posée en ligne secondaire quand elles
   diffèrent (« Posé à 09:00 · décalé par le patient »), et « Mis en pause par le patient

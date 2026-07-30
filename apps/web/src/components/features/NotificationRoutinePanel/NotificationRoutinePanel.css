@@ -192,3 +192,9 @@
   line-height: 1.5;
   margin-top: var(--spacing-sm);
 }
+/* Ligne d'aide sous la consigne : dit ou la phrase s'affiche, et ou elle ne va pas. */
+.nr-form__help {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
