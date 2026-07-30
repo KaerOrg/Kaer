@@ -356,6 +356,9 @@
     "sources_type_systematic_review": "Revue systématique",
     "sources_type_guideline": "Recommandation officielle",
     "sources_type_expert_opinion": "Avis d'experts",
+    "sources_group_reviews": "Revues et méta-analyses",
+    "sources_group_trials": "Essais randomisés",
+    "sources_group_mechanism": "Mécanisme et source de l'instrument",
     "scale_read": "Lu",
     "scale_unread": "Non lu",
     "cssrs_modal_title": "C-SSRS, Dépistage suicidaire",
@@ -943,7 +946,7 @@
       "history_label": "Historique",
       "empty_title": "Rien pour l’instant",
       "empty_text": "Appuyez sur le bouton en haut pour identifier votre première émotion.",
-      "footer": "Roue des émotions, support de labellisation émotionnelle inspiré de la Feeling Wheel (Willcox, 1982). Outil de psychoéducation, non un instrument de mesure. Données stockées localement sur l’appareil. Lieberman et al., Psychol Sci 2007.",
+      "footer": "Support de psychoéducation dérivé de la Feeling Wheel (Willcox, 1982). Ce n'est pas un instrument de mesure : il ne produit ni score, ni seuil, ni indice de granularité.",
       "context": {
         "work": "Travail",
         "family": "Famille",
