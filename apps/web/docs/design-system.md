@@ -1016,6 +1016,26 @@ Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 > [`docs/components/`](components/). `Tabs`, `RatingSelector`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
+### Contraste des libellés accentués (`lib/accessibleColor`)
+
+Plusieurs accents du catalogue de modules sont des teintes vives : excellentes sur un
+**filet** ou une **bordure**, elles échouent le ratio AA (4,5:1) dès qu'on les emploie
+comme **couleur de texte** sur fond blanc. L'orange `#F97316` plafonne à 2,8:1, le
+turquoise de marque `#6dbfc3` à 2,1:1.
+
+`accessibleTextColor(accent, background?, minRatio?)` rend l'accent tel quel s'il passe
+déjà, sinon la **même teinte assombrie** jusqu'à ce qu'elle passe. `ui/Tabs` l'applique
+sur l'onglet actif : le filet garde l'accent brut (identité du module), seul le libellé
+bascule. Générique, aucun module n'est nommé, aucune table de correspondance à tenir.
+
+Un test vérifie le ratio pour **tous** les accents du catalogue, et un second audite les
+surfaces teintées de « Nommer ce que je ressens » (cellules de la matrice et du
+croisement, à tous les paliers de densité et pour les huit teintes de famille).
+
+Le module expose aussi `parseColor`, `contrastRatio`, `relativeLuminance` et `blend`
+(composition d'une couleur semi-transparente sur son fond) : à réutiliser pour tout
+nouvel audit plutôt que de recalculer un ratio à la main.
+
 ### `Collapsible`
 
 `components/ui/Collapsible/`. **Section repliable** : un en-tête cliquable qui révèle
