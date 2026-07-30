@@ -1273,6 +1273,14 @@ comme enfant de `Card`.
 |---|---|---|
 | `tagIds` | `ReadonlySet<string> \| undefined` | Tags portés par le module (`taxonomy.tagsByModule`) |
 | `taxonomy` | `Pick<ModuleTaxonomy, 'tagsByDimension'>` | Ordre et regroupement des tags par dimension |
+| `dimensions` | `readonly string[]` | Dimensions à rendre. Défaut : `CARD_DIMENSIONS` (indication seule). Le panneau Sources passe `PANEL_DIMENSIONS` (indication + public) |
+| `showDimensionLabels` | `boolean` | Précède chaque ligne du libellé de sa dimension (`tag_dimensions.<id>.label`). Défaut `false` (les cartes n'en ont pas la place) |
+
+> **Ce composant est la source UNIQUE des puces d'indication** : la carte du module et
+> le bloc « Indications » du panneau Sources l'utilisent tous les deux, sur la même
+> taxonomie. Il n'existe nulle part de liste d'indications écrite à la main : ajouter
+> une indication, c'est **attribuer un tag** dans le seed, et elle apparaît du même coup
+> dans les filtres du catalogue, sur la carte et dans le panneau.
 
 ---
 

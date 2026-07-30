@@ -356,6 +356,9 @@
     "sources_type_systematic_review": "Systematic review",
     "sources_type_guideline": "Official guideline",
     "sources_type_expert_opinion": "Expert opinion",
+    "sources_group_reviews": "Reviews and meta-analyses",
+    "sources_group_trials": "Randomised trials",
+    "sources_group_mechanism": "Mechanism and source of the instrument",
     "cat_safety_label": "Safety & Crisis Management",
     "cat_safety_subtitle": "The vital shield",
     "cat_iatrogenic_label": "Iatrogenic & Somatic Monitoring",
@@ -1206,7 +1209,7 @@
       "history_label": "History",
       "empty_title": "Nothing yet",
       "empty_text": "Tap the button at the top to identify your first emotion.",
-      "footer": "Emotion wheel, an emotion-labelling aid inspired by the Feeling Wheel (Willcox, 1982). A psychoeducation tool, not a measurement instrument. Data stored locally on the device. Lieberman et al., Psychol Sci 2007.",
+      "footer": "A psychoeducation aid derived from the Feeling Wheel (Willcox, 1982). It is not a measurement instrument: it produces no score, no threshold, no granularity index.",
       "context": {
         "work": "Work",
         "family": "Family",

@@ -4,6 +4,7 @@ import {
   moduleMatchesTagFilters,
   filterCategoriesByTags,
   selectCardTagRows,
+  PANEL_DIMENSIONS,
 } from './moduleFilter'
 import type { ModuleCategory, Tag } from '@services/moduleCatalogService'
 
@@ -133,5 +134,19 @@ describe('selectCardTagRows', () => {
   it('renvoie [] pour un module sans tags', () => {
     expect(selectCardTagRows(undefined, taxonomy)).toEqual([])
     expect(selectCardTagRows(new Set(), taxonomy)).toEqual([])
+  })
+
+  it('rend les deux dimensions quand on demande celles du panneau Sources', () => {
+    const ids = new Set(['cbt', 'adult', 'anxiety', 'teen'])
+    const rows = selectCardTagRows(ids, taxonomy, PANEL_DIMENSIONS)
+    expect(rows.map(r => r.dimensionId)).toEqual(['indication', 'population'])
+    expect(rows[1].tags.map(t => t.id)).toEqual(['teen', 'adult'])
+    // L'approche reste hors panneau : elle sert aux filtres du catalogue.
+    expect(rows.some(r => r.dimensionId === 'approach')).toBe(false)
+  })
+
+  it('omet une dimension du panneau dont le module ne porte aucun tag', () => {
+    const rows = selectCardTagRows(new Set(['anxiety']), taxonomy, PANEL_DIMENSIONS)
+    expect(rows.map(r => r.dimensionId)).toEqual(['indication'])
   })
 })
