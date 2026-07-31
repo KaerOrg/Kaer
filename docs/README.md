@@ -7,6 +7,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 - **`docs/`** — documentation transversale au monorepo (architecture, BDD, flux métier, moteur de modules, modules thérapeutiques)
 - **`apps/<app>/docs/`** — documentation spécifique à une application (design system propre, composants UI internes)
 - **`docs/modules/<module_id>.md`** — un fichier par module thérapeutique implémenté
+- **`docs/handoff/<date>-<chantier>.md`** — reprise de chantier : où on s'est arrêté, ce qui est décidé, ce qui bloque
 - **Pas de design system à la racine** : chaque app maintient son propre `apps/<app>/docs/design-system.md`
 
 ## Documentation transversale
@@ -18,6 +19,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`setup.md`](setup.md) | Installation, configuration et lancement |
 | [`invitation-flow.md`](invitation-flow.md) | Flux complet d'invitation patient (web ↔ email ↔ mobile) |
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
+| [`handoff/2026-07-31-plan-de-securite.md`](handoff/2026-07-31-plan-de-securite.md) | **Reprise de chantier** Epic « Mon plan de sécurité » (#315) : état, ordre, pièges, questions ouvertes |
 | [`module-sources.md`](module-sources.md) | Onglet « Sources & recommandations » du panneau praticien (table `module_sources`) |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`audit-log.md`](audit-log.md) | Journal d'audit des accès aux données patient (RGPD/HDS) — table `access_audit_log`, triggers + RPC |
