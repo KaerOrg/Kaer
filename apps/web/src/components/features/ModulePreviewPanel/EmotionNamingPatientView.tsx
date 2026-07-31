@@ -52,7 +52,8 @@ export function EmotionNamingPatientView() {
       onFilterChange={handleFilterChange}
       bannerLabel={t('patient.preview_banner')}
       footerLabel={t('patient.enpv_footer', { count: screens.length })}
-      scrollLabel={t('patient.dpv_scroll')}
+      previousLabel={t('patient.rail_previous')}
+      nextLabel={t('patient.rail_next')}
     />
   )
 }
