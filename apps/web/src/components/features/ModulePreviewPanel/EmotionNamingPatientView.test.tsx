@@ -86,7 +86,9 @@ describe('EmotionNamingPatientView', () => {
 
     // Les seuls boutons de la vue sont les puces de filtre du praticien.
     const buttons = [...container.querySelectorAll('button')]
-    const rail = container.querySelector('.psr-rail')
+    // La piste du primitive `ui/ScrollRail` : les flèches sont HORS de la piste,
+    // ce sont les seuls boutons de la vue et ils appartiennent au praticien.
+    const rail = container.querySelector('.scroll-rail__track')
     expect(buttons.length).toBeGreaterThan(0)
     expect(within(rail as HTMLElement).queryAllByRole('button')).toHaveLength(0)
     expect((rail as HTMLElement).querySelectorAll('input, a, select, textarea')).toHaveLength(0)

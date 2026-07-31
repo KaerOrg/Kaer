@@ -1,7 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { PatientScreenRail, type PatientScreen, type StageFilter } from './PatientScreenRail'
+
+// La mécanique du rail (flèches, pas d'un élément, largeur sans demi-carte) est
+// couverte par `ui/ScrollRail`. Ici on vérifie ce qui appartient à la coquille :
+// la numérotation et le filtrage.
 
 type Stage = 'a' | 'b'
 
@@ -35,24 +39,6 @@ function renderRail(over: Partial<React.ComponentProps<typeof PatientScreenRail<
   return { ...result, onFilterChange }
 }
 
-/**
- * jsdom ne fait pas de mise en page : sans dimensions simulées, un rail est toujours
- * « au bout » et les deux flèches resteraient désactivées. On pose donc une largeur
- * de contenu supérieure à la fenêtre.
- */
-function simulateOverflow(rail: HTMLElement, { scrollLeft = 0 } = {}) {
-  Object.defineProperty(rail, 'scrollWidth', { value: 900, configurable: true })
-  Object.defineProperty(rail, 'clientWidth', { value: 300, configurable: true })
-  Object.defineProperty(rail, 'scrollLeft', { value: scrollLeft, writable: true, configurable: true })
-  // `fireEvent` passe par `act` : sans lui la mise à jour d'état ne serait pas vidée.
-  fireEvent.scroll(rail)
-}
-
-beforeEach(() => {
-  // Non implémenté par jsdom : c'est le geste qu'on veut observer.
-  Element.prototype.scrollBy = vi.fn()
-})
-
 describe('PatientScreenRail', () => {
   it('rend chaque écran, numéroté et légendé', () => {
     const { container } = renderRail()
@@ -60,67 +46,16 @@ describe('PatientScreenRail', () => {
     expect(captions).toEqual(['1 · Premier', '2 · Deuxième', '3 · Troisième'])
   })
 
-  it('propose deux flèches, nommées pour les lecteurs d\'écran', () => {
+  it('confie la navigation au rail, flèches nommées', () => {
     renderRail()
     expect(screen.getByLabelText('Écran précédent')).toBeInTheDocument()
     expect(screen.getByLabelText('Écran suivant')).toBeInTheDocument()
   })
 
-  it('désactive les deux flèches quand tout tient à l\'écran', () => {
-    renderRail()
-    expect(screen.getByLabelText('Écran précédent')).toBeDisabled()
-    expect(screen.getByLabelText('Écran suivant')).toBeDisabled()
-  })
-
-  it('au départ : « suivant » actif, « précédent » désactivé', () => {
-    const { container } = renderRail()
-    simulateOverflow(container.querySelector('.psr-rail') as HTMLElement)
-
-    expect(screen.getByLabelText('Écran précédent')).toBeDisabled()
-    expect(screen.getByLabelText('Écran suivant')).toBeEnabled()
-  })
-
-  it('en bout de rail : « précédent » actif, « suivant » désactivé', () => {
-    const { container } = renderRail()
-    simulateOverflow(container.querySelector('.psr-rail') as HTMLElement, { scrollLeft: 600 })
-
-    expect(screen.getByLabelText('Écran précédent')).toBeEnabled()
-    expect(screen.getByLabelText('Écran suivant')).toBeDisabled()
-  })
-
-  it('un clic fait avancer d\'UN écran, pas d\'une page entière', async () => {
-    const { container } = renderRail()
-    const rail = container.querySelector('.psr-rail') as HTMLElement
-    simulateOverflow(rail)
-    // Largeur d'une vignette, telle que le hook la mesure sur le rendu.
-    const first = rail.firstElementChild as HTMLElement
-    Object.defineProperty(first, 'offsetWidth', { value: 232, configurable: true })
-
-    await userEvent.click(screen.getByLabelText('Écran suivant'))
-
-    expect(rail.scrollBy).toHaveBeenCalledWith(
-      expect.objectContaining({ left: 232, behavior: 'smooth' })
-    )
-  })
-
-  it('la flèche « précédent » recule du même pas', async () => {
-    const { container } = renderRail()
-    const rail = container.querySelector('.psr-rail') as HTMLElement
-    simulateOverflow(rail, { scrollLeft: 600 })
-    const first = rail.firstElementChild as HTMLElement
-    Object.defineProperty(first, 'offsetWidth', { value: 232, configurable: true })
-
-    await userEvent.click(screen.getByLabelText('Écran précédent'))
-
-    expect(rail.scrollBy).toHaveBeenCalledWith(
-      expect.objectContaining({ left: -232, behavior: 'smooth' })
-    )
-  })
-
-  it('filtrer réduit le rail sans renuméroter les écrans', () => {
+  it('filtrer réduit le rail SANS renuméroter les écrans', () => {
     const { container } = renderRail({ activeFilter: 'b' })
     const captions = [...container.querySelectorAll('.psr-screen__caption')].map(c => c.textContent)
-    // Le troisième écran reste le troisième, même seul.
+    // Le troisième écran reste le troisième, même seul dans le rail.
     expect(captions).toEqual(['3 · Troisième'])
   })
 
@@ -128,5 +63,11 @@ describe('PatientScreenRail', () => {
     const { onFilterChange } = renderRail()
     await userEvent.click(screen.getByText('Étape B'))
     expect(onFilterChange).toHaveBeenCalledWith('b')
+  })
+
+  it('rend le bandeau de lecture seule et le pied', () => {
+    renderRail()
+    expect(screen.getByText('Aperçu')).toBeInTheDocument()
+    expect(screen.getByText('3 écrans')).toBeInTheDocument()
   })
 })

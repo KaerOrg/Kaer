@@ -1,9 +1,8 @@
 import { useCallback, type ReactNode } from 'react'
-import { Eye, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { Banner } from '@ui/Banner'
-import { Button } from '@ui/Button'
 import { Chip } from '@ui/Chip'
-import { useRailPaging } from './useRailPaging'
+import { ScrollRail } from '@ui/ScrollRail'
 import './PatientScreenRail.css'
 
 // ─── Coquille commune des « vues patient » multi-écrans (aperçu praticien) ────
@@ -57,8 +56,6 @@ export function PatientScreenRail<Stage extends string>({
         .map((screen, index) => ({ screen, number: index + 1 }))
         .filter(({ screen }) => screen.stage === activeFilter)
 
-  const { railRef, canGoPrevious, canGoNext, goPrevious, goNext } = useRailPaging(visible.length)
-
   return (
     <div className="preview-panel__inner">
       <Banner variant="info" icon={<Eye size={16} />}>{bannerLabel}</Banner>
@@ -74,38 +71,19 @@ export function PatientScreenRail<Stage extends string>({
         ))}
       </div>
 
-      {/* Le rail se parcourt à la FLÈCHE, écran par écran : viser un curseur de
-          défilement de quelques pixels n'est pas un geste qu'on fait en séance. Le
-          glissement à la souris reste possible, il n'est simplement plus le contrôle
-          principal. */}
-      <div className="psr-viewport">
-        <Button
-          variant="ghost"
-          className="psr-arrow psr-arrow--previous"
-          icon={<ChevronLeft size={18} />}
-          onClick={goPrevious}
-          disabled={!canGoPrevious}
-          aria-label={previousLabel}
-        />
-
-        <div className="psr-rail" ref={railRef}>
-          {visible.map(({ screen, number }) => (
-            <article className="psr-screen" key={screen.id}>
-              <div className="psr-screen__frame">{screen.body}</div>
-              <div className="psr-screen__caption">{number} · {screen.caption}</div>
-            </article>
-          ))}
-        </div>
-
-        <Button
-          variant="ghost"
-          className="psr-arrow psr-arrow--next"
-          icon={<ChevronRight size={18} />}
-          onClick={goNext}
-          disabled={!canGoNext}
-          aria-label={nextLabel}
-        />
-      </div>
+      <ScrollRail
+        className="psr-rail-scope"
+        itemCount={visible.length}
+        previousLabel={previousLabel}
+        nextLabel={nextLabel}
+      >
+        {visible.map(({ screen, number }) => (
+          <article className="psr-screen" key={screen.id}>
+            <div className="psr-screen__frame">{screen.body}</div>
+            <div className="psr-screen__caption">{number} · {screen.caption}</div>
+          </article>
+        ))}
+      </ScrollRail>
 
       <div className="psr-footer">
         <span>{footerLabel}</span>

@@ -2490,6 +2490,8 @@
     "fear_delta": "Delta SUDS",
     "overview_window": "30 derniers jours",
     "overview_empty": "En attente de saisies",
+    "overview_previous": "Module précédent",
+    "overview_next": "Module suivant",
     "overview_reading": "en lecture",
     "overview_scale_metric": "Score moyen",
     "show_each_entry": "Voir chaque saisie",
