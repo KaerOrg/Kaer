@@ -14,6 +14,14 @@ export { buildColumnSpecs, readSliderParams, CHILD_FIELD_TYPES } from './service
 export type { ColumnSpec, SliderParams } from './services/columnForm'
 export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
+// Contraste WCAG, partagé web ≡ mobile : sert à VÉRIFIER un couple de couleurs par
+// le calcul dans les tests, plutôt qu'à l'oeil.
+export {
+  parseColor, relativeLuminance, contrastRatio, contrastBetween, blend,
+  AA_TEXT, AA_LARGE_TEXT, AA_NON_TEXT,
+} from './services/contrast'
+export type { Rgb } from './services/contrast'
+
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 

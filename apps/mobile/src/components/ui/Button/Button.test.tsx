@@ -47,7 +47,9 @@ describe('Button', () => {
     const containerStyle = screen.getByTestId('btn').props.style.flat()
     expect(containerStyle).toContainEqual({ backgroundColor: 'transparent' })
     const labelStyle = screen.getByText('Annuler').props.style.flat()
-    expect(labelStyle).toContainEqual({ color: colors.danger })
+    // Rouge foncé, pas `danger` : le rouge clair échouait le seuil AA en libellé
+    // (#274). Les ratios eux-mêmes sont figés par `Button.contrast.test.ts`.
+    expect(labelStyle).toContainEqual({ color: colors.dangerDark })
   })
 
   it('size par défaut (md) : label en taille standard (16)', () => {

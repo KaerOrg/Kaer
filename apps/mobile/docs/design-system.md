@@ -44,6 +44,33 @@ Import dans les composants : `import { colors, spacing, radius, fonts } from '@t
 (titre du bandeau) — contraste AA sur blanc (≈ 4.9:1). `colors.danger` (`#EF4444`) reste
 l'accent/icône. Aucun de ces rouges n'est conditionné par une donnée patient (MDR 2017/745).
 
+**Token `colors.dangerDark` (`#B91C1C`)** : le rouge le plus foncé, pour du texte posé
+sur `dangerLight`, **là où `dangerText` ne suffit pas** (3,95:1, sous le seuil AA). Il y
+atteint 5,3:1. Même statut : habillage fixe, jamais une gravité clinique.
+
+### Les teintes claires de la charte sont bannies du texte (#274)
+
+`colors.primary` (`#6dbfc3`) et `colors.danger` (`#EF4444`) sont faites pour les **fonds,
+les filets, les pastilles et les icônes**. Dès qu'elles portent ou reçoivent du texte,
+elles échouent le seuil AA de 4,5:1 :
+
+| Couple | Ratio |
+|---|---|
+| blanc sur `primary` | **2,12:1** |
+| `primary` sur `primaryLight` | **1,95:1** |
+| `primary` sur le fond d'app | **2,01:1** |
+| `danger` sur `dangerLight` | **3,08:1** |
+| `danger` sur le fond d'app | **3,57:1** |
+
+Pour du texte, employer `primaryDark` (`#2C6E72`) et `dangerDark` (`#B91C1C`) : les mêmes
+couples passent alors à 5,87 / 5,39 / 5,56 / 5,30 / 6,14. Un bouton illisible n'est pas un
+détail d'esthétique dans une app utilisée en situation de détresse.
+
+`Button.contrast.test.ts` fige chaque couple de `ui/Button` : reteinter un libellé en
+clair fait échouer la suite. Le calcul passe par `contrastBetween` de `@kaer/shared`,
+partagé web ≡ mobile — à réutiliser pour tout nouvel audit plutôt que de recalculer un
+ratio à la main.
+
 **Token `colors.neutralBar` (`#94A3B8`, partagé web ≡ mobile)** : gris imposé des
 barres **purement descriptives** (écarts en minutes, plages horaires) — jamais une
 teinte de gravité clinique (MDR 2017/745). À utiliser pour toute barre de mesure

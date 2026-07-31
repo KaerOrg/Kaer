@@ -24,6 +24,10 @@ export const colors = {
   // (≈ 4.9:1), là où `danger` (#EF4444) reste l'accent/icône. Jamais une couleur de
   // gravité clinique conditionnée par la donnée (MDR 2017/745) — élément fixe.
   dangerText: '#DC2626',
+  // Rouge le plus foncé : texte posé sur `dangerLight`, où `dangerText` ne suffit
+  // pas (3,95:1, sous le seuil AA). Sur ce fond rosé il atteint 5,3:1. Même statut
+  // que `dangerText` : un habillage fixe, jamais une gravité clinique (MDR).
+  dangerDark: '#B91C1C',
   dangerLight: '#FEE2E2',
   neutral: '#F3F4F6',
   white: '#FFFFFF',
