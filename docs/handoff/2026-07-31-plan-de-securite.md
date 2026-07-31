@@ -190,10 +190,20 @@ Elles sont détaillées dans l'Epic #315, résumées ici pour éviter de les re-
 |---|---|---|---|
 | 1 | `plan_items` : trois colonnes typées ou un `meta jsonb` ? | #320 | **Tranchée** : trois colonnes. Le schéma SQLite est étroit et suit déjà ce motif |
 | 2 | `Linking.openURL('sms:114')` : comportement réel iOS / Android ? Fallback ? Se limite-t-on au SMS alors que le 114 accepte visio et tchat ? | #318, #326 | **Ouverte** · demande un test sur appareil réel |
-| 3 | Deep-link « Respirer 1 minute » : que fait l'écran d'arrivée si `breathing_techniques` n'est pas déverrouillé ? | #302 | **Ouverte** · deux options posées dans le ticket |
+| 3 | « Respirer 1 minute » : que fait l'écran d'arrivée si `breathing_techniques` n'est pas déverrouillé ? | #302 | **Tranchée le 2026-07-31** · voir § 7.1 |
 | 4 | `isConfigured` : le redéfinir ou le retirer de la carte ? | #329 | **Ouverte** · PW-10 propose de le retirer |
 | 5 | Scinder `NO_DATA_NO_NOTIF` en `NO_DATA` / `NO_NOTIF` ? Touche **tous** les modules | #330 | **Ouverte** · à valider avant |
 | 6 | Les libellés des six étapes attendent-ils une relecture du référent clinique ? | #317 | **Ouverte** · il n'y a pas de référent identifié à ce jour, ce qui pousse vers « poser et itérer » |
+
+### 7.1 · « Respirer 1 minute » est toujours disponible (tranché le 2026-07-31)
+
+**Le bouton fonctionne même si `breathing_techniques` n'est pas déverrouillé.** Motif : tout l'écran d'arrivée repose dessus, c'est la seule action qui ne demande aucun contenu personnel. La faire disparaître viderait l'écran pour les patients dont le praticien n'a encore rien déverrouillé.
+
+Ce n'est **pas** une exception à la règle du lien `distress_tolerance` (#305), qui disparaît quand son module est verrouillé : celui-là est un **lien vers un autre module**, celui-ci est une action **embarquée**.
+
+**Conséquence à ne pas rater : surtout pas un deep-link.** Ouvrir le module verrouillé contournerait le déverrouillage du praticien et exposerait la liste des techniques et les fiches qu'il n'a délibérément pas données. Donc exercice embarqué, **un seul comportement, aucun branchement conditionnel** sur l'état de déverrouillage.
+
+**Piège de réutilisation** : `BreathingExercisePlayer` appelle `saveBreathingSession`. Le réutiliser tel quel casserait l'invariant « zéro persistance » et le test statique sur les imports du layout le refuserait. `BreathCircle` et `PhaseBar`, eux, sont purement présentationnels et réutilisables. Voie recommandée : extraire la machine à phases dans un helper pur et **injecter la persistance par callback** (le module continue d'enregistrer, la Séquence ne passe rien).
 
 **Action hors code, non bloquante** : envoyer la demande d'autorisation Stanley-Brown via le formulaire de suicidesafetyplan.com. Gratuit, courant pour un usage clinique, et ça débloque le verbatim si un clinicien l'exige un jour.
 
