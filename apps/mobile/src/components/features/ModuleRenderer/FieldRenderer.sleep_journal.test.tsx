@@ -57,6 +57,7 @@ import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
 import { useToast } from '../../../contexts/ToastContext'
 import type { ContentField } from '@services/moduleService'
+import { dateToIso } from '@kaer/shared'
 
 jest.setTimeout(15000)
 
@@ -76,11 +77,14 @@ function makeField(overrides: Partial<ContentField> & { children?: ContentField[
   }
 }
 
-// Today's "yesterday" — used for CTA test
+// La nuit précédente, telle que le layout la calcule : composants LOCAUX.
+// `toISOString()` bascule en UTC — entre minuit et 02:00 en heure d'été française,
+// il retire un jour de plus et cette suite devenait rouge alors que le code était
+// juste. Règle projet : une date métier ne passe jamais par `toISOString()`.
 function yesterdayStr(): string {
   const d = new Date()
   d.setDate(d.getDate() - 1)
-  return d.toISOString().slice(0, 10)
+  return dateToIso(d)
 }
 
 const MOCK_FIELDS: ContentField[] = [
