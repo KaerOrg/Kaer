@@ -68,7 +68,7 @@ détail d'esthétique dans une app utilisée en situation de détresse.
 
 `Button.contrast.test.ts` fige chaque couple de `ui/Button` : reteinter un libellé en
 clair fait échouer la suite. Le calcul passe par `contrastBetween` de `@kaer/shared`,
-partagé web ≡ mobile — à réutiliser pour tout nouvel audit plutôt que de recalculer un
+partagé web ≡ mobile : à réutiliser pour tout nouvel audit plutôt que de recalculer un
 ratio à la main.
 
 **Token `colors.neutralBar` (`#94A3B8`, partagé web ≡ mobile)** : gris imposé des
