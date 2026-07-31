@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius, fonts } from '@theme'
+import { colors, spacing, radius, fontSize, fonts } from '@theme'
 
 // Largeurs fluides et textes rétractables partout : la Séquence doit tenir à taille
 // de police système maximale sans jamais provoquer de défilement horizontal (P-12).
@@ -17,17 +17,17 @@ export const styles = StyleSheet.create({
   scroll:        { flex: 1 },
   scrollContent: { padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.md },
 
-  screenTitle:   { fontFamily: fonts.serif, fontSize: 32, lineHeight: 38, color: colors.text, flexShrink: 1 },
+  screenTitle:   { fontFamily: fonts.serif, fontSize: fontSize.display, lineHeight: 38, color: colors.text, flexShrink: 1 },
 
-  stepLabel:     { fontSize: 12, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
-  stepTitle:     { fontFamily: fonts.serif, fontSize: 32, lineHeight: 38, color: colors.text, flexShrink: 1 },
+  stepLabel:     { fontSize: fontSize.xs, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
+  stepTitle:     { fontFamily: fonts.serif, fontSize: fontSize.display, lineHeight: 38, color: colors.text, flexShrink: 1 },
 
   // Items du patient, tels qu'il les a écrits. Séparés par un filet, sans puce ni
   // pastille colorée : une seule couleur d'action sur tout le parcours (P-7).
   item:          { paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
-  itemText:      { fontSize: 22, lineHeight: 30, color: colors.text, flexShrink: 1 },
+  itemText:      { fontSize: fontSize.h2, lineHeight: 30, color: colors.text, flexShrink: 1 },
 
   // Actions ancrées HORS du flux défilant.
   actions:       { paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.md, gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  progress:      { fontSize: 13, color: colors.textMuted, textAlign: 'center' },
+  progress:      { fontSize: fontSize.sm, color: colors.textMuted, textAlign: 'center' },
 })

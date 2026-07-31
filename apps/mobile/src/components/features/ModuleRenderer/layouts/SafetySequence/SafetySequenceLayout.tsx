@@ -6,11 +6,16 @@
 // `@kaer/shared/services/safetySequence` (partagée avec l'aperçu web, une seule
 // source), textes en base (config-first), ZÉRO persistance.
 //
-// Conformité MDR 2017/745, invariant fondateur : ce layout n'écrit RIEN. Aucun
-// `syncUpsert`, aucun `dbSave`, aucun compteur d'ouverture, aucun horodatage. Ne
-// jamais y importer un service d'écriture — le seul accès données autorisé est la
-// LECTURE `getPlanItems`. Corollaire assumé : on ne saura pas si la séquence sert ;
-// l'évaluation appartient à la consultation.
+// Conformité MDR 2017/745, invariant fondateur : ce layout n'écrit AUCUNE donnée
+// patient. Aucun `syncUpsert`, aucun `dbSave`, aucun compteur d'ouverture, aucun
+// horodatage de passage, rien côté praticien. Ne jamais y importer un service
+// d'écriture — le seul accès aux données du plan est la LECTURE `getPlanItems`.
+// Corollaire assumé : on ne saura pas si la séquence sert ; l'évaluation appartient
+// à la consultation.
+//
+// Seule sortie autorisée : `reportFailedOperation`, télémétrie TECHNIQUE du système
+// d'observabilité (#96). Elle ne transmet ni saisie, ni identifiant patient, ni fait
+// clinique — uniquement le fait qu'une lecture locale a échoué. Hors périmètre MDR.
 //
 // Le saut des étapes vides est un routage STRUCTUREL (« existe-t-il quelque chose à
 // afficher ? »), jamais une lecture du contenu — cf. le commentaire de doctrine de
@@ -22,6 +27,7 @@ import { colors } from '@theme'
 import { Button } from '@ui/Button'
 import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
+import { reportFailedOperation } from '@services/errorReportingService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import {
   buildDisplayableSteps,
@@ -61,7 +67,15 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
     // Lecture seule, servie par SQLite : la Séquence doit fonctionner hors ligne (P-12).
     getPlanItems(moduleId)
       .then(data => { if (active) setItems(data) })
-      .catch(() => { /* plan illisible : le parcours reste utilisable sur les ressources */ })
+      .catch((err: unknown) => {
+        // Le parcours reste utilisable : sans items, il mène aux ressources. On
+        // n'affiche AUCUN message d'erreur — en crise, un écran qui se plaint est
+        // pire que rien. Mais l'échec ne doit pas être avalé pour autant : un plan
+        // de sécurité illisible est anormal, donc reporté en télémétrie technique
+        // (aucune donnée patient).
+        reportFailedOperation(`module/${moduleId}/sequence`, 'plan items unreadable',
+          err instanceof Error ? err.message : String(err))
+      })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [moduleId])
@@ -77,11 +91,9 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   }, [items])
 
   // Présence seule : ce Set est le SEUL signal transmis au routage. Ne jamais y
-  // substituer un comptage ni la liste des items (invariant MDR de sequenceLogic).
-  const sectionsWithItems = useMemo(
-    () => new Set([...itemsBySection.keys()].filter(id => (itemsBySection.get(id)?.length ?? 0) > 0)),
-    [itemsBySection],
-  )
+  // substituer un comptage ni la liste des items (invariant MDR de safetySequence).
+  // `itemsBySection` ne contient que des sections non vides, par construction.
+  const sectionsWithItems = useMemo(() => new Set(itemsBySection.keys()), [itemsBySection])
 
   const steps = useMemo(
     () => buildDisplayableSteps([...sections.keys()], sectionsWithItems),

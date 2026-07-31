@@ -103,6 +103,12 @@ Ne jamais élargir ces paramètres à `PlanItem[]`.
 
 ### Zéro persistance, verrouillé par les tests
 
+Le layout n'écrit **aucune donnée patient**. Une seule sortie est autorisée :
+`reportFailedOperation` (observabilité #96), qui remonte le fait qu'une lecture
+locale a échoué — télémétrie **technique**, sans saisie ni identifiant patient, donc
+hors périmètre MDR. En crise, aucun message d'erreur n'est affiché : un écran qui se
+plaint est pire que rien, mais l'échec ne doit pas être avalé pour autant.
+
 Trois garde-fous, dont un statique :
 
 1. Une traversée complète ne déclenche ni `enqueue`, ni `savePlanItem`, ni `deletePlanItem`.

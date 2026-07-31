@@ -68,4 +68,7 @@ export const fontSize = {
   h3: 18,
   h2: 22,
   h1: 28,
+  // Palier au-dessus de h1, pour les écrans où le titre EST le contenu et doit se
+  // lire d'un coup d'œil (Séquence du plan de sécurité, en crise).
+  display: 32,
 } as const
