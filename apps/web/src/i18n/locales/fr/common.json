@@ -474,6 +474,12 @@
     "filter_remove": "Retirer le filtre {{tag}}",
     "empty_filter": "Aucun module ne correspond à ces filtres.",
     "crisis_plan": {
+      "step_label": "Étape {{number}}",
+      "sequence_home_title": "Je suis là avec vous.",
+      "sequence_resources_title": "Voici ce qui est disponible tout de suite",
+      "sequence_closing_title": "Ce qui me donne envie de tenir",
+      "sequence_preview_caption": "Le parcours que suit le patient quand il ouvre « Je suis en crise », dans l'ordre.",
+      "sequence_preview_note": "Rien de ce que le patient fait dans ce parcours n'est enregistré : ni le nombre d'ouvertures, ni jusqu'où il est allé.",
       "label": "Plan de crise",
       "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
       "step_1_title": "Signes avant-coureurs",

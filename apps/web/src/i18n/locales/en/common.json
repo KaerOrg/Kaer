@@ -716,6 +716,12 @@
       "description": "Columbia Suicide Severity Rating Scale, clinician-administered."
     },
     "crisis_plan": {
+      "step_label": "Step {{number}}",
+      "sequence_home_title": "I'm here with you.",
+      "sequence_resources_title": "Here is what is available right now",
+      "sequence_closing_title": "What makes me want to hold on",
+      "sequence_preview_caption": "The path the patient follows when opening « I'm in crisis », in order.",
+      "sequence_preview_note": "Nothing the patient does in this path is recorded: neither how often it is opened, nor how far they went.",
       "label": "Crisis Plan",
       "description": "Personalized action plan for difficult moments (Stanley & Brown).",
       "new_btn": "New entry",

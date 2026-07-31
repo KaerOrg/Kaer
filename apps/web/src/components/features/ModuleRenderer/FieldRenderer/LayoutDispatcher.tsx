@@ -19,6 +19,7 @@ import {
   PsyEduLibraryLayout,
   QuestionnaireLayout,
   SafetyPlanLayout,
+  SafetySequenceLayout,
   SleepJournalLayout,
   SliderDashboardLayout,
   StageWheelLayout,
@@ -103,6 +104,7 @@ export function LayoutDispatcher({ preview_kind, fields, expandedCard, onToggleC
   if (preview_kind === 'column_form') return <ColumnFormLayout fields={contentFields} t={t} />
   if (preview_kind === 'guided_exercise') return <GuidedExerciseLayout fields={contentFields} t={t} />
   if (preview_kind === 'crisis_companion') return <CrisisCompanionLayout fields={contentFields} t={t} moduleId={moduleId ?? ''} />
+  if (preview_kind === 'safety_sequence') return <SafetySequenceLayout fields={contentFields} t={t} moduleId={moduleId ?? ''} />
   if (preview_kind === 'patient_scenario') return <PatientScenarioLayout fields={contentFields} footer={footer} t={t} />
   if (preview_kind === 'stage_wheel') return <StageWheelLayout moduleId={moduleId ?? ''} t={t} />
   if (preview_kind === 'dual_ruler') return <DualRulerLayout moduleId={moduleId ?? ''} t={t} />

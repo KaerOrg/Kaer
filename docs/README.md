@@ -53,6 +53,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 - [`behavioral_activation.md`](modules/behavioral_activation.md) — Activation comportementale
 - [`breathing_techniques.md`](modules/breathing_techniques.md) — Techniques de respiration
 - [`cognitive_saturation.md`](modules/cognitive_saturation.md) — Saturation cognitive (ACT)
+- [`crisis_plan.md`](modules/crisis_plan.md) — Mon plan de sécurité (Stanley & Brown)
 - [`cssrs_screen.md`](modules/cssrs_screen.md) — C-SSRS Dépistage suicidaire
 - [`emotion_wheel.md`](modules/emotion_wheel.md) — Roue des émotions (Plutchik)
 - [`epds.md`](modules/epds.md) — EPDS Dépression post-natale

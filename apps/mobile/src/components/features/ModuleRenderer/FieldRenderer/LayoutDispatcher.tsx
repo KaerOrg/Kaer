@@ -20,6 +20,7 @@ import { GuidedExerciseLayout } from '../layouts/GuidedExercise'
 import { MedicationTrackerLayout } from '../layouts/MedicationTracker'
 import { PatientScenarioLayout } from '../layouts/PatientScenario'
 import { SafetyPlanLayout } from '../layouts/SafetyPlan'
+import { SafetySequenceLayout } from '../layouts/SafetySequence'
 import { PsyEduLayout } from '../layouts/PsyEdu'
 import { PsyEduLibraryLayout } from '../layouts/PsyEduLibrary'
 import { QuestionnaireLayout } from '../layouts/Questionnaire'
@@ -105,6 +106,12 @@ export function LayoutDispatcher({ preview_kind, fields, questionnaire, accentCo
   if (preview_kind === 'safety_plan') {
     const { sections, unsectioned } = partitionBySection(contentFields)
     return <SafetyPlanLayout sections={sections} uiFields={unsectioned} moduleId={moduleId ?? ''} />
+  }
+
+  // safety_sequence : traversée guidée du plan en crise. Zéro persistance (P-5).
+  if (preview_kind === 'safety_sequence') {
+    const { sections, unsectioned } = partitionBySection(contentFields)
+    return <SafetySequenceLayout sections={sections} uiFields={unsectioned} moduleId={moduleId ?? ''} />
   }
 
   if (preview_kind === 'daily_checkin') return <DailyCheckinLayout fields={visibleFields} moduleId={moduleId ?? ''} />

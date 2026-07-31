@@ -204,6 +204,12 @@
       "avg": "Moy. : {{value}}"
     },
     "crisis_plan": {
+      "sequence_home_title": "Je suis là avec vous.",
+      "sequence_resources_title": "Voici ce qui est disponible tout de suite",
+      "sequence_closing_title": "Ce qui me donne envie de tenir",
+      "sequence_advance": "Autre chose que j'ai prévu",
+      "sequence_advance_last": "Ce qui est disponible tout de suite",
+      "sequence_stop": "Je m'arrête là",
       "label": "Plan de crise",
       "description": "Plan personnalisé pour les moments difficiles",
       "title": "Mon Plan de Crise",
