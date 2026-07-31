@@ -2,7 +2,7 @@ import { colors } from '@theme'
 import { contrastBetween, AA_TEXT, AA_NON_TEXT } from '@kaer/shared'
 import { styles } from './Button.styles'
 
-// #274 — Le contraste de CHAQUE variante de bouton, figé par le calcul.
+// #274 : le contraste de CHAQUE variante de bouton, figé par le calcul.
 //
 // Les teintes claires de la charte échouaient le seuil AA dès qu'elles portaient du
 // texte : blanc sur `primary` (#6dbfc3) plafonnait à 2,12:1, `primary` sur
@@ -22,7 +22,7 @@ function ratio(foreground: string, background: string): number {
   return value
 }
 
-describe('Button — contraste des libellés (seuil AA 4,5:1)', () => {
+describe('Button, contraste des libellés (seuil AA 4,5:1)', () => {
   it('primary : libellé sur son fond plein', () => {
     expect(ratio(styles.primaryLabel.color, styles.primary.backgroundColor))
       .toBeGreaterThanOrEqual(AA_TEXT)
@@ -53,7 +53,7 @@ describe('Button — contraste des libellés (seuil AA 4,5:1)', () => {
   })
 })
 
-describe('Button — contraste des bordures (seuil non textuel 3:1)', () => {
+describe('Button, contraste des bordures (seuil non textuel 3:1)', () => {
   it('secondary : le filet se distingue de son propre fond', () => {
     expect(ratio(styles.secondary.borderColor, styles.secondary.backgroundColor))
       .toBeGreaterThanOrEqual(AA_NON_TEXT)
@@ -65,7 +65,7 @@ describe('Button — contraste des bordures (seuil non textuel 3:1)', () => {
   })
 })
 
-describe('Button — les teintes claires restent bannies du texte', () => {
+describe('Button, les teintes claires restent bannies du texte', () => {
   it('aucune variante ne remet `primary` ou `danger` en couleur de libellé', () => {
     // Le garde-fou du garde-fou : si quelqu'un « restaure la charte » sur un
     // libellé, le seuil tombe et ce test le dit avant la revue.
