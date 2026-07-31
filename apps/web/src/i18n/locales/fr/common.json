@@ -2524,6 +2524,8 @@
     "overview_fp_logged": "{{count}} saisie / 30 j",
     "overview_fp_logged_plural": "{{count}} saisies / 30 j",
     "overview_empty": "En attente de saisies",
+    "overview_previous": "Module précédent",
+    "overview_next": "Module suivant",
     "overview_reading": "en lecture",
     "overview_scale_metric": "Score moyen",
     "show_each_entry": "Voir chaque saisie",

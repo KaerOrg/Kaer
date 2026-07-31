@@ -8,15 +8,10 @@
   margin-bottom: var(--spacing-sm, 8px);
 }
 
-/* Rail à défilement horizontal CONTENU : c'est le rail qui scrolle, jamais la page. */
-.evo-overview__rail {
-  display: flex;
-  gap: var(--spacing-sm, 8px);
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  padding-bottom: 4px;
-  /* dégradé de bord pour signaler le débordement */
-  mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+/* Le rail est le primitive `ui/ScrollRail` : on avance à la flèche, carte par carte,
+   et aucune carte n'est montrée à moitié. Ici on ne règle que la gouttière. */
+.evo-overview__scope {
+  --scroll-rail-gap: var(--spacing-sm, 8px);
 }
 
 .evo-ov-card {

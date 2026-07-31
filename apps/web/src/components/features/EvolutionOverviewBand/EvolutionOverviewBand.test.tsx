@@ -29,9 +29,10 @@ describe('EvolutionOverviewBand', () => {
     section.id = 'evo-section-sleep_diary'
     document.body.appendChild(section)
 
-    render(<EvolutionOverviewBand cards={cards} />)
-    const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(2)
+    const { container } = render(<EvolutionOverviewBand cards={cards} />)
+    // Une carte par module. Les deux flèches du rail sont des boutons elles aussi :
+    // on compte donc les cartes, pas tous les boutons de la rangée.
+    expect(container.querySelectorAll('.evo-ov-card')).toHaveLength(2)
     fireEvent.click(screen.getByLabelText('evolution.sleep_section_title'))
     expect(window.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
 

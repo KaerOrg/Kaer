@@ -2378,6 +2378,8 @@
     "overview_fp_logged": "{{count}} entry / 30 d",
     "overview_fp_logged_plural": "{{count}} entries / 30 d",
     "overview_empty": "Awaiting entries",
+    "overview_previous": "Previous module",
+    "overview_next": "Next module",
     "overview_reading": "reading",
     "overview_scale_metric": "Average score",
     "show_each_entry": "Show each entry",
