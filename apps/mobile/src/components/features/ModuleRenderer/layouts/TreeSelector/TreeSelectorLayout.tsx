@@ -24,6 +24,8 @@ import {
   type TreeSelectorEntrySection, type TreeSelectorNode, type TreeSelectorSubmit,
   type TreeSelectorTexts,
 } from '@ui/TreeSelector'
+import { useNextReminder } from './useNextReminder'
+import { useStartOnEntry } from './useStartOnEntry'
 import { useTreeSelectorConfig } from './useTreeSelectorConfig'
 import { useTreeSelectorData } from './useTreeSelectorData'
 import { TreeSelectorInfoSheet } from './TreeSelectorInfoSheet'
@@ -49,6 +51,8 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   const t = useModuleTranslation()
   const { showConfirm } = useConfirmDialog()
   const { showActionSheet } = useActionSheet()
+  const { time: nextReminderTime, openReminders } = useNextReminder(moduleId)
+  const startRequest = useStartOnEntry()
   const config = useTreeSelectorConfig(fields)
   const { entries, loading, saving, persist, remove } = useTreeSelectorData(moduleId)
 
@@ -247,6 +251,12 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     })
   }, [uiEntries, showActionSheet, lbl, t, handleEdit, handleDelete])
 
+  // Ligne « Prochain rappel » de l'accueil : un horaire, jamais un commentaire sur
+  // ce que le patient a saisi. Absente s'il n'a aucun rappel actif.
+  const reminderLabel = nextReminderTime != null
+    ? t('notifications.next_reminder', { time: nextReminderTime })
+    : null
+
   if (welcomeSeen === false) {
     return <TreeSelectorWelcome texts={welcomeTexts} onAcknowledge={handleAcknowledge} />
   }
@@ -263,8 +273,11 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
         onSubmit={handleSubmit}
         onOpenEntryMenu={handleOpenEntryMenu}
         editRequest={editRequest}
+        startRequest={startRequest}
         onOpenInfo={infoSections.length > 0 ? openInfo : undefined}
         allowWordless={config.enableWordless}
+        nextReminderLabel={reminderLabel}
+        onEditReminder={reminderLabel != null ? openReminders : undefined}
       />
       <TreeSelectorInfoSheet
         visible={infoOpen}

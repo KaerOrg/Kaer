@@ -18,7 +18,7 @@ import { TreeSelectorEntrySheet } from './TreeSelectorEntrySheet'
 import { styles } from './styles'
 import type {
   TreeSelectorConfig, TreeSelectorEditRequest, TreeSelectorEntrySection,
-  TreeSelectorNode, TreeSelectorSubmit, TreeSelectorTexts,
+  TreeSelectorNode, TreeSelectorStartRequest, TreeSelectorSubmit, TreeSelectorTexts,
 } from './types'
 
 export interface TreeSelectorProps {
@@ -46,6 +46,11 @@ export interface TreeSelectorProps {
    */
   editRequest?: TreeSelectorEditRequest | null
   /**
+   * Demande d'ouverture directe sur la première étape, sans passer par l'historique
+   * (tap sur un rappel). Le parent incrémente son `token` à chaque demande.
+   */
+  startRequest?: TreeSelectorStartRequest | null
+  /**
    * Autorise la sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le
    * bouton n'apparaît que si l'appelant l'active : un arbre dont toutes les entrées
    * doivent porter une sélection n'affiche pas de porte de sortie.
@@ -55,9 +60,10 @@ export interface TreeSelectorProps {
 
 export function TreeSelector({
   nodes, sections, config, texts, loading, saving, onSubmit, onOpenEntryMenu,
-  nextReminderLabel, onEditReminder, onOpenInfo, editRequest, allowWordless = false,
+  nextReminderLabel, onEditReminder, onOpenInfo, editRequest, startRequest,
+  allowWordless = false,
 }: TreeSelectorProps) {
-  const flow = useTreeSelectorFlow(config, onSubmit, editRequest)
+  const flow = useTreeSelectorFlow(config, onSubmit, editRequest, startRequest)
 
   if (loading) {
     return (

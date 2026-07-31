@@ -8,6 +8,7 @@ export type {
   TreeSelectorEntrySection,
   TreeSelectorEditRequest,
   TreeSelectorNode,
+  TreeSelectorStartRequest,
   TreeSelectorSubmit,
   TreeSelectorTexts,
 } from './types'

@@ -16,7 +16,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type {
   TreeSelectorConfig, TreeSelectorEditRequest, TreeSelectorMode, TreeSelectorNode,
-  TreeSelectorSubmit,
+  TreeSelectorStartRequest, TreeSelectorSubmit,
 } from './types'
 
 export interface TreeSelectorFlow {
@@ -60,6 +60,7 @@ export function useTreeSelectorFlow(
   config: TreeSelectorConfig,
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>,
   editRequest?: TreeSelectorEditRequest | null,
+  startRequest?: TreeSelectorStartRequest | null,
 ): TreeSelectorFlow {
   const { enableIntensity, enableNotes, enableContext } = config
   // Aucune étape facultative activée : la sélection suffit, on enregistre direct.
@@ -108,6 +109,17 @@ export function useTreeSelectorFlow(
     setWordless(editRequest.wasWordless)
     setMode('selection')
   }, [editRequest])
+
+  // Ouverture directe sur l'ÉTAPE 1, sans passer par l'historique : c'est le tap sur
+  // un rappel. Même motif de `token` que la modification, pour qu'un second tap
+  // relance le flux au lieu d'être ignoré.
+  const lastStartToken = useRef<number | null>(null)
+  useEffect(() => {
+    if (!startRequest || startRequest.token === lastStartToken.current) return
+    lastStartToken.current = startRequest.token
+    resetDraft()
+    setMode('selection')
+  }, [startRequest, resetDraft])
 
   const toggleContextOther = useCallback(() => {
     setContextOtherOpen(prev => {

@@ -129,6 +129,15 @@ export interface TreeSelectorEntrySection {
 }
 
 /**
+ * Demande d'ouverture directe sur la **première étape**, sans passer par
+ * l'historique : c'est ce que fait un tap sur un rappel. Même motif de `token` que
+ * la modification, pour qu'un second tap relance le flux au lieu d'être ignoré.
+ */
+export interface TreeSelectorStartRequest {
+  token: number
+}
+
+/**
  * Demande de modification d'une entrée existante : rouvre le flux **pré-rempli** à la
  * première étape. Le `token` est incrémenté à chaque demande, pour que rouvrir deux
  * fois la même entrée relance bien le flux.

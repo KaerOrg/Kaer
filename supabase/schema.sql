@@ -1217,6 +1217,22 @@ create policy "notif_routines_patient_select"
   on public.notification_routines for select
   using (auth.uid() = patient_id);
 
+-- Patient : ajouter et supprimer SES rappels (#257). Le rythme initial est posé en
+-- séance, mais il appartient ensuite au patient : sans répétition, le module n'est
+-- ouvert qu'en pic de crise, et c'est la répétition qui entraîne la granularité.
+-- Le patient ne peut créer une routine que POUR LUI (`patient_id = auth.uid()`) ;
+-- `practitioner_id` et `patient_module_id` viennent de la ligne `patient_modules`
+-- qui lui est déjà affectée, et les FK les vérifient.
+drop policy if exists "notif_routines_patient_insert" on public.notification_routines;
+create policy "notif_routines_patient_insert"
+  on public.notification_routines for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "notif_routines_patient_delete" on public.notification_routines;
+create policy "notif_routines_patient_delete"
+  on public.notification_routines for delete
+  using (auth.uid() = patient_id);
+
 drop policy if exists "notif_routines_patient_update" on public.notification_routines;
 create policy "notif_routines_patient_update"
   on public.notification_routines for update
