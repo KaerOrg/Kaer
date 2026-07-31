@@ -206,6 +206,57 @@ jeu de tokens** (`--color-caseload-header`, `--color-section-actions`…) dans l
 `:root`, puis on la référence. L'habillage reste centralisé et thématisable au lieu
 d'être dispersé dans le CSS d'une feature.
 
+**refonte/safety-sequence-socle (2026-07-31) — la règle vaut aussi pour les ÉCHELLES numériques.**
+Le cas ci-dessus porte sur une couleur, d'où l'angle mort : le même StyleSheet importait
+consciencieusement `colors` et `spacing`, puis figeait ses **tailles de police** en dur,
+parce que la valeur voulue (32 px, pour un titre qui doit se lire en crise) n'existait pas
+dans l'échelle `fontSize` (`xxs`→`h1: 28`).
+```ts
+// ❌ le thème est importé pour les couleurs, mais la taille est figée
+import { colors, spacing, fonts } from '@theme'
+stepTitle: { fontFamily: fonts.serif, fontSize: 32, color: colors.text }
+// ✅ ajouter le palier manquant à l'échelle partagée, puis le référencer
+// packages/shared/src/theme.ts →  display: 32
+import { colors, spacing, fontSize, fonts } from '@theme'
+stepTitle: { fontFamily: fonts.serif, fontSize: fontSize.display, color: colors.text }
+```
+Deux des quatre valeurs existaient déjà sous un autre nom (`22` = `h2`, `13` = `sm`) : elles
+avaient été réécrites en clair faute d'avoir ouvert l'échelle.
+→ **Un token absent s'ajoute, il ne se contourne pas** — couleur, espacement, rayon **ou
+taille**. Réflexe : avant d'écrire un nombre dans un `StyleSheet`, ouvrir
+`packages/shared/src/theme.ts` et vérifier si la valeur y est déjà, sous un autre nom.
+Côté web, ajouter un palier à `fontSize` l'injecte d'office en `--font-size-<nom>`.
+
+---
+
+## Gestion d'erreur : reporter sans afficher
+
+> Règle source : [pr-review § RULE — Gestion d'erreur](../skills/pr-review/SKILL.md) +
+> observabilité #96 (`errorReportingService`).
+
+**refonte/safety-sequence-socle (2026-07-31) — le toast contre-indiqué ne dispense pas du report.**
+La Séquence du plan de sécurité lit le plan au montage. Le `.catch` ne contenait qu'un
+commentaire justifiant l'absence de message : afficher une erreur à quelqu'un en crise
+suicidaire est cliniquement contre-indiqué, un écran qui se plaint est pire que rien.
+Le raisonnement est juste, mais la conclusion tirée était fausse.
+```ts
+// ❌ le motif clinique de ne pas afficher a servi de motif à ne rien faire
+getPlanItems(moduleId)
+  .then(setItems)
+  .catch(() => { /* plan illisible : le parcours reste utilisable */ })
+// ✅ ne rien afficher, MAIS remonter — un plan de sécurité illisible est une anomalie
+  .catch((err: unknown) => {
+    reportFailedOperation(`module/${moduleId}/sequence`, 'plan items unreadable',
+      err instanceof Error ? err.message : String(err))
+  })
+```
+Les cas déjà consignés opposent « avaler » et « afficher ». Celui-ci ajoute le troisième
+terme : **reporter sans afficher**. La télémétrie #96 ne transporte aucune donnée patient,
+elle est donc disponible même là où l'UI doit rester silencieuse.
+→ Réflexe review : devant un `catch` sans toast, ne pas se contenter de vérifier qu'une
+justification est écrite. Demander « et l'échec, qui l'apprend ? ». Si la réponse est
+« personne », c'est une erreur avalée, quelle que soit la qualité du commentaire.
+
 ---
 
 ## Couches : une feuille ne possède pas son cycle de données
