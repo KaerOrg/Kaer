@@ -7,12 +7,53 @@
   margin: 12px 0;
 }
 
-/* Le rail défile HORIZONTALEMENT, la page jamais : le débordement est contenu ici. */
+/* Les flèches encadrent le rail : elles ne défilent pas avec lui. */
+.psr-viewport {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Le rail défile HORIZONTALEMENT, la page jamais : le débordement est contenu ici.
+   La barre de défilement native est masquée : le contrôle, ce sont les flèches.
+   Le glissement à la souris ou au pavé tactile reste actif. */
 .psr-rail {
+  flex: 1;
+  min-width: 0;
   display: flex;
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 8px;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.psr-rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* Flèche de navigation : ronde, posée sur la surface, alignée sur le CADRE de
+   l'écran et non sur la carte entière (la légende ne compte pas dans le calage). */
+.psr-arrow {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 176px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.psr-arrow:disabled {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .psr-rail {
+    scroll-behavior: auto;
+  }
 }
 
 .psr-screen {
@@ -48,10 +89,4 @@
   margin-top: 10px;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-}
-
-.psr-footer__scroll {
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }

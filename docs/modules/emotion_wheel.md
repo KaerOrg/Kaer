@@ -129,6 +129,13 @@ source), revue granularité 2025, ECR alexithymie 2019, revue émotions auto-con
 - La coquille (bandeau, filtres, rail, pied) est **partagée** avec la vue patient de
   « Décrocher d'une pensée » : `PatientScreenRail`. Un troisième module de parcours n'a
   plus qu'à fournir ses écrans.
+- **Le rail se parcourt à la flèche, écran par écran.** Une barre de défilement
+  horizontale est un mauvais contrôle ici : en séance, le praticien veut avancer d'un
+  écran, pas viser un curseur de quelques pixels. Deux flèches encadrent le rail, se
+  désactivent aux extrémités, et le pas est **mesuré sur la vignette rendue**
+  (`useRailPaging`) plutôt que codé en dur : changer la largeur des cartes dans le CSS
+  n'oblige à toucher à rien. Le glissement souris ou pavé tactile reste actif, il n'est
+  simplement plus le contrôle principal, et la barre native est masquée.
 - La **numérotation suit le parcours complet** : filtrer réduit le rail sans
   renuméroter. L'écran 9 reste l'écran 9, même seul à l'écran.
 - **Rien n'est actionnable** dans le rail : ce sont des vignettes, pas un parcours

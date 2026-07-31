@@ -471,6 +471,8 @@
     "dpv_hide_word": "Hide",
     "dpv_footer": "{{count}} screens · example data, read-only",
     "dpv_scroll": "Scroll",
+    "rail_previous": "Previous screen",
+    "rail_next": "Next screen",
     "enpv_footer": "{{count}} screens · example data, read-only",
     "enpv_filter_all": "All",
     "enpv_filter_discovery": "Discovery",

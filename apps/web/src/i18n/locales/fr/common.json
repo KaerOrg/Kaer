@@ -457,6 +457,8 @@
     "dpv_hide_word": "Masquer",
     "dpv_footer": "{{count}} écrans · données d'exemple, lecture seule",
     "dpv_scroll": "Faire défiler",
+    "rail_previous": "Écran précédent",
+    "rail_next": "Écran suivant",
     "enpv_footer": "{{count}} écrans · données d'exemple, lecture seule",
     "enpv_filter_all": "Tout",
     "enpv_filter_discovery": "Découverte",
