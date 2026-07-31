@@ -785,8 +785,9 @@ un niveau à la persistance.
 | `sections` | `TreeSelectorEntrySection[]` | Historique **déjà groupé et titré par le parent** (« AUJOURD'HUI », « HIER », une date). Le primitive ne calcule aucune date : il rend des groupes reçus |
 | `onOpenEntryMenu` | `(id: string) => void` | Tap sur le ⋯ d'une entrée. Le parent ouvre la feuille d'actions (modifier / supprimer) |
 | `editRequest` | `TreeSelectorEditRequest \| null` | Rouvre le parcours **à l'étape 1** avec les champs facultatifs rechargés. Le parent incrémente `token` à chaque demande, sinon rouvrir deux fois la même entrée ne relancerait rien. `editingId` revient dans `onSubmit` |
+| `startRequest` | `TreeSelectorStartRequest \| null` | Ouvre le parcours **directement à l'étape 1**, sans passer par l'historique : c'est le tap sur un rappel (#257). Même motif de `token` que `editRequest`, pour qu'un second tap relance le flux |
 | `onOpenInfo` | `() => void` (optionnel) | Ouvre la fiche ⓘ. **Absent : l'icône n'est pas rendue** |
-| `nextReminderLabel` / `onEditReminder` | `string \| null` / `() => void` | Ligne « Prochain rappel : … » et son action. Absents : la ligne n'apparaît pas |
+| `nextReminderLabel` / `onEditReminder` | `string \| null` / `() => void` | Ligne « Prochain rappel : … » et son action (ouvre `ModuleReminders`). Absents : la ligne n'apparaît pas |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
 | `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits. `validateHereKeep(label)` est une **fonction** : elle rend la ligne secondaire du bouton « valider ici » (« on garde « Peur » »), le niveau conservé étant interpolé par l'appelant |
 | `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |
