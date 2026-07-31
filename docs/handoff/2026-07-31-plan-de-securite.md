@@ -195,15 +195,24 @@ Elles sont détaillées dans l'Epic #315, résumées ici pour éviter de les re-
 | 5 | Scinder `NO_DATA_NO_NOTIF` en `NO_DATA` / `NO_NOTIF` ? Touche **tous** les modules | #330 | **Ouverte** · à valider avant |
 | 6 | Les libellés des six étapes attendent-ils une relecture du référent clinique ? | #317 | **Ouverte** · il n'y a pas de référent identifié à ce jour, ce qui pousse vers « poser et itérer » |
 
-### 7.1 · « Respirer 1 minute » est toujours disponible (tranché le 2026-07-31)
+### 7.1 · Le bouton « Respirer 1 minute » est retiré (tranché le 2026-07-31)
 
-**Le bouton fonctionne même si `breathing_techniques` n'est pas déverrouillé.** Motif : tout l'écran d'arrivée repose dessus, c'est la seule action qui ne demande aucun contenu personnel. La faire disparaître viderait l'écran pour les patients dont le praticien n'a encore rien déverrouillé.
+**Décision : pas de bouton de respiration sur l'écran d'arrivée. « Suivre mon plan » devient l'action dominante.**
 
-Ce n'est **pas** une exception à la règle du lien `distress_tolerance` (#305), qui disparaît quand son module est verrouillé : celui-là est un **lien vers un autre module**, celui-ci est une action **embarquée**.
+Quatre raisons, dans l'ordre où elles pèsent :
 
-**Conséquence à ne pas rater : surtout pas un deep-link.** Ouvrir le module verrouillé contournerait le déverrouillage du praticien et exposerait la liste des techniques et les fiches qu'il n'a délibérément pas données. Donc exercice embarqué, **un seul comportement, aucun branchement conditionnel** sur l'état de déverrouillage.
+1. **C'est une suggestion pré-remplie, et l'Epic se l'interdit.** La décision 4 du lot web pose « aucune suggestion pré-remplie, un item doit être dans les mots du patient ». On ne peut pas s'interdire de proposer « prendre une douche chaude » dans le formulaire d'édition et promouvoir « respirer » en action dominante de l'écran d'entrée.
+2. **Si la respiration aide ce patient, elle est déjà à son étape 2**, travaillée en séance et écrite dans ses mots. Le bouton générique est alors redondant, et surtout **concurrent** : il capte l'appui qui aurait mené au plan personnel.
+3. **L'argument « sinon l'écran est vide » ne tient pas.** Le bandeau d'urgence (3114, 15, 114) est permanent sur tous les écrans, et la variante plan vide garde « Appeler le 3114 ».
+4. **Le barreau intermédiaire existe déjà** : « Traverser la vague » (`distress_tolerance`). La différence n'est pas que de niveau de preuve, elle est **architecturale** : c'est un module **déverrouillé pour ce patient** par un clinicien, donc une décision prise sur cette personne. L'Epic tranche déjà ce point : « le déverrouillage est une décision de clinicien, pas un calcul ».
 
-**Piège de réutilisation** : `BreathingExercisePlayer` appelle `saveBreathingSession`. Le réutiliser tel quel casserait l'invariant « zéro persistance » et le test statique sur les imports du layout le refuserait. `BreathCircle` et `PhaseBar`, eux, sont purement présentationnels et réutilisables. Voie recommandée : extraire la machine à phases dans un helper pur et **injecter la persistance par callback** (le module continue d'enregistrer, la Séquence ne passe rien).
+⚠️ **Reprise de maquette à prévoir** : écran 0 mobile et rail web 1b (écrans 1 et 2) sont dessinés avec la grande carte turquoise « Respirer 1 minute ».
+
+**Ce que dit la littérature, pour mémoire.** La respiration rythmée est bien un exemple canonique de l'étape 2 de Stanley-Brown, mais le même guide exige des stratégies qui **fonctionnent réellement pour cette personne**. Aucun essai ne teste une minute de respiration en crise suicidaire aiguë, et dans l'essai le plus proche de notre cas d'usage, le bénéfice est survenu **quelle que soit l'intervention** (respiration lente, pleine conscience, ou simple report d'attention) : ce qui aide semble être la pause structurée, pas la respiration.
+
+**Si la question revient** : le seul argument résiduel porte sur la **clôture**, pas sur l'entrée (précédent notOK, « on ne laisse pas quelqu'un seul devant un écran statique »). Mais la clôture a déjà son contenu (#307). Ne pas rouvrir sans élément nouveau.
+
+**Correction de source faite au passage** : `docs/modules/distress_tolerance.md` présentait l'urge surfing comme « validé par l'ECR Bowen et al. 2014 ». Cet essai porte sur la **prévention de la rechute dans les troubles de l'usage de substances**, pas sur la crise suicidaire. Ce qui est documenté dans ce contexte, c'est la TCD dans son ensemble (méta-analyse Kothgassner 2021 : automutilations g = -0,44, idéation suicidaire g = -0,31). L'onglet Sources est lu par des cliniciens, la nuance compte.
 
 **Action hors code, non bloquante** : envoyer la demande d'autorisation Stanley-Brown via le formulaire de suicidesafetyplan.com. Gratuit, courant pour un usage clinique, et ça débloque le verbatim si un clinicien l'exige un jour.
 
