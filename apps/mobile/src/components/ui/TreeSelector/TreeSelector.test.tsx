@@ -2,7 +2,9 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
 import React from 'react'
+import { StyleSheet } from 'react-native'
 import { render, screen, fireEvent, act } from '@testing-library/react-native'
+import { colors } from '@theme'
 import { TreeSelector } from './TreeSelector'
 import type {
   TreeSelectorConfig, TreeSelectorEntry, TreeSelectorNode,
@@ -32,7 +34,8 @@ const BASE_TEXTS: TreeSelectorTexts = {
   emptyTitle: 'Rien encore', emptyText: 'Commencez', intensityTitle: 'Intensité',
   intensityHint: 'De 1 à 10', contextTitle: 'Contexte', contextHint: 'Optionnel',
   notesTitle: 'Notes', notesHint: 'Libre', notesPlaceholder: 'Écrivez…',
-  continueBtn: 'Continuer', saveBtn: 'Enregistrer', validateHereBtn: 'Valider ici',
+  continueBtn: 'Continuer', saveBtn: 'Enregistrer', validateHereBtn: 'Je ne sais pas',
+  validateHereKeep: (label: string) => `on garde « ${label} »`,
   cancel: 'Annuler', back: 'Retour', delete: 'Supprimer',
   stepTitles: { 1: 'Émotion principale', 3: 'Émotion spécifique' },
   stepHints: { 1: 'Indice 1', 2: 'Indice 2', 3: 'Indice 3' },
@@ -160,6 +163,51 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(onSubmit).toHaveBeenCalledWith({
       pathIds: ['joy'], intensity: null, context: [], notes: '',
     })
+  })
+
+  // ── Passe rédaction + accessibilité (K-10, ticket #258) ───────────────────
+
+  it('profondeur libre : le bouton dit « Je ne sais pas » et rappelle le niveau gardé en ligne secondaire', () => {
+    const config = makeConfig({ enableEarlyValidate: true })
+    renderTree({ config })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    // Le libellé s'adresse au patient ; le niveau conservé descend en secondaire.
+    expect(screen.getByText('Je ne sais pas')).toBeTruthy()
+    expect(screen.getByText('on garde « Joie »')).toBeTruthy()
+    // Plus aucune trace du libellé concaténé d'ingénieur.
+    expect(screen.queryByText('Je ne sais pas : Joie')).toBeNull()
+  })
+
+  it('profondeur libre : l\'étiquette d\'accessibilité porte les deux lignes', () => {
+    const config = makeConfig({ enableEarlyValidate: true })
+    renderTree({ config })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.getByTestId('validate-here').props.accessibilityLabel)
+      .toBe('Je ne sais pas, on garde « Joie »')
+  })
+
+  it('la couleur de famille ne porte jamais de texte (contraste AA)', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    // Niveau 1 : le libellé de la carte est en couleur de texte, pas en teinte de famille.
+    const joie = screen.getByText('Joie')
+    expect(StyleSheet.flatten(joie.props.style).color).toBe(colors.text)
+    fireEvent.press(screen.getByTestId('node-joy'))
+    // Niveau 2 : idem sur la liste, la teinte ne reste que sur le filet gauche.
+    const serenite = screen.getByText('Sérénité')
+    expect(StyleSheet.flatten(serenite.props.style).color).toBe(colors.text)
+  })
+
+  it('les crans d\'intensité annoncent leur sélection au lecteur d\'écran', () => {
+    renderTree({ config: makeConfig({ enableEarlyValidate: true, enableNotes: false }) })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('validate-here'))
+    fireEvent.press(screen.getByTestId('intensity-btn-7'))
+    expect(screen.getByTestId('intensity-btn-7').props.accessibilityState).toEqual({ selected: true })
+    expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: false })
   })
 
   it('enchaîne l\'étape contexte et renvoie les codes sélectionnés', async () => {

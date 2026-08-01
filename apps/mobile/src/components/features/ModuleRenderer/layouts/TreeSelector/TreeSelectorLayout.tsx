@@ -14,7 +14,7 @@ import type { ContentField } from '@services/moduleService'
 import type { TreeSelection } from '../../../../../lib/database'
 import { generateId } from '../../../../../lib/database'
 import { formatDateTime } from '../../../../../lib/dateUtils'
-import { useModuleTranslation } from '../../../../../hooks/useModuleT'
+import { useModuleTranslation, type ModuleTranslationValues } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import {
   TreeSelector,
@@ -40,9 +40,9 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
   const config = useTreeSelectorConfig(fields)
   const { entries, loading, saving, persist, remove } = useTreeSelectorData(moduleId)
 
-  const lbl = useCallback((key: string): string => {
+  const lbl = useCallback((key: string, values?: ModuleTranslationValues): string => {
     const code = config.props[key]
-    return code ? t(code) : ''
+    return code ? t(code, values) : ''
   }, [config.props, t])
 
   // ── Mapping config → props du primitive ────────────────────────────────────
@@ -78,6 +78,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     continueBtn: lbl('continue_btn') || t('common.continue'),
     saveBtn: lbl('save_btn') || t('common.save'),
     validateHereBtn: lbl('validate_here_btn') || t('common.validate'),
+    validateHereKeep: (label: string) => lbl('validate_here_keep', { label }),
     cancel: t('common.cancel'),
     back: t('common.back'),
     delete: t('common.delete'),

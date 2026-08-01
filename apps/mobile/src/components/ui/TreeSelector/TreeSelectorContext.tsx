@@ -1,9 +1,10 @@
 // Mode « contexte » du primitive TreeSelector : chips multi-choix facultatifs.
 // Les codes sélectionnés sont renvoyés tels quels au parent (identités opaques).
 
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '../Button/Button'
 import { Chip } from '../Chip/Chip'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
@@ -64,16 +65,14 @@ export function TreeSelectorContext({
           })}
         </View>
 
-        <Pressable
-          style={[styles.continueBtn, { backgroundColor: accentColor }]}
+        <Button
+          variant="primary"
           onPress={onConfirm}
-          accessibilityRole="button"
+          label={texts.continueBtn}
+          iconRight={<MaterialCommunityIcons name="arrow-right" size={20} color={colors.text} />}
           accessibilityLabel={texts.continueBtn}
           testID="continue-context"
-        >
-          <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
-        </Pressable>
+        />
       </ScrollView>
     </View>
   )

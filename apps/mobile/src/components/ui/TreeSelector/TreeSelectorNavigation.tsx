@@ -42,7 +42,10 @@ export function TreeSelectorNavigation({
 
   const showValidate = config.enableEarlyValidate && path.length > 0 && currentNodes.length > 0
   const lastLabel = path.length > 0 ? path[path.length - 1].label : ''
-  const validateLabel = lastLabel ? `${texts.validateHereBtn} : ${lastLabel}` : texts.validateHereBtn
+  // Le niveau conservé passe en ligne secondaire (« on garde « Peur » ») : le
+  // libellé principal reste une phrase adressée au patient, pas une instruction
+  // d'ingénieur du type « Valider ici : Effroi ».
+  const keepLabel = lastLabel ? texts.validateHereKeep(lastLabel) : ''
 
   return (
     <View style={[styles.container, tintStyle]}>
@@ -86,7 +89,7 @@ export function TreeSelectorNavigation({
                       />
                     )}
                   </View>
-                  <Text style={[styles.primaryLabel, { color: nodeColor }]}>{node.label}</Text>
+                  <Text style={styles.primaryLabel}>{node.label}</Text>
                 </Pressable>
               )
             })}
@@ -108,7 +111,7 @@ export function TreeSelectorNavigation({
                   accessibilityLabel={node.label}
                   testID={`node-${node.id}`}
                 >
-                  <Text style={[styles.optionLabel, { color: nodeColor }]}>{node.label}</Text>
+                  <Text style={styles.optionLabel}>{node.label}</Text>
                   <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
                 </Pressable>
               )
@@ -121,11 +124,11 @@ export function TreeSelectorNavigation({
             style={[styles.validateHereBtn, { borderColor: accentColor }]}
             onPress={onValidateHere}
             accessibilityRole="button"
-            accessibilityLabel={validateLabel}
+            accessibilityLabel={keepLabel ? `${texts.validateHereBtn}, ${keepLabel}` : texts.validateHereBtn}
             testID="validate-here"
           >
-            <MaterialCommunityIcons name="check" size={18} color={accentColor} />
-            <Text style={[styles.validateHereText, { color: accentColor }]}>{validateLabel}</Text>
+            <Text style={styles.validateHereText}>{texts.validateHereBtn}</Text>
+            {keepLabel ? <Text style={styles.validateHereKeep}>{keepLabel}</Text> : null}
           </Pressable>
         ) : null}
 
