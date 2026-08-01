@@ -227,9 +227,9 @@
       "dim_pleasure_high": "Vollständig gespürt"
     },
     "emotion_wheel": {
-      "label": "Gefühlsrad",
-      "description": "Erkunden und benennen Sie Ihre Gefühle",
-      "title": "Gefühlsrad",
+      "label": "Benennen, was ich fühle",
+      "description": "Ein genaues Wort für das finden, was Sie fühlen.",
+      "title": "Benennen, was ich fühle",
       "intro": "Erkunden und benennen Sie Ihre Gefühle.",
       "stat_entries": "Einträge",
       "stat_days": "Tage",

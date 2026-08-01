@@ -9,7 +9,7 @@ function mk(id: string, category_id: string | null): UnlockedModule {
     unlocked_at: '2026-01-01',
     module: category_id === null
       ? null
-      : { mobile_icon: 'help-circle-outline', color: '#000', preview_kind: 'form', category_id },
+      : { mobile_icon: 'help-circle-outline', color: '#000', preview_kind: 'form', category_id, is_hidden: false },
   }
 }
 

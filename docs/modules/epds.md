@@ -1,5 +1,11 @@
 # EPDS — Edinburgh Postnatal Depression Scale
 
+> 🔒 **Module masqué (#247).** Droits de reproduction non acquis en usage
+> commercial : © Royal College of Psychiatrists. Intégration numérique déjà refusée à un tiers.
+> Le module est retiré de l'app (`modules.is_hidden`) mais **rien n'est supprimé** :
+> cette doc, les items, l'i18n, le scoring et les tests restent en place, prêts pour
+> une réactivation. Voir [`database.md`](../database.md) § `modules`.
+
 ## Référence
 
 Cox, J.L., Holden, J.M., & Sagovsky, R. (1987). Detection of postnatal depression. Development of the 10-item Edinburgh Postnatal Depression Scale. *British Journal of Psychiatry*, 150, 782–786.

@@ -227,9 +227,9 @@
       "dim_pleasure_high": "Plenamente sentido"
     },
     "emotion_wheel": {
-      "label": "Rueda de emociones",
-      "description": "Explora y nombra tus emociones",
-      "title": "Rueda de emociones",
+      "label": "Nombrar lo que siento",
+      "description": "Poner una palabra precisa a lo que sientes.",
+      "title": "Nombrar lo que siento",
       "intro": "Explora y nombra tus emociones.",
       "stat_entries": "Entradas",
       "stat_days": "Días",
