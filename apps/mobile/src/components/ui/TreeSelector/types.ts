@@ -76,6 +76,11 @@ export interface TreeSelectorTexts {
   continueBtn: string
   saveBtn: string
   validateHereBtn: string
+  /**
+   * Ligne secondaire du bouton « valider ici » : rappelle le niveau conservé
+   * (« on garde « Peur » »). Reçoit le libellé du dernier nœud du chemin.
+   */
+  validateHereKeep: (label: string) => string
   cancel: string
   back: string
   delete: string

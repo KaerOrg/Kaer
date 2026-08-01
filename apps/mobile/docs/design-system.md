@@ -169,7 +169,7 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 
 | Variante | Fond | Bordure | Texte |
 |---|---|---|---|
-| `primary` | `colors.primary` | — | `colors.white` |
+| `primary` | `colors.primary` | — | `colors.text` |
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |
@@ -767,7 +767,7 @@ composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `�
 | `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `color`/`icon`/`emoji` optionnels) |
 | `entries` | `TreeSelectorEntry[]` | View-models d'historique déjà résolus (libellés, date, badge intensité formatés) |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
-| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits |
+| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits. `validateHereKeep(label)` est une **fonction** : elle rend la ligne secondaire du bouton « valider ici » (« on garde « Peur » »), le niveau conservé étant interpolé par l'appelant |
 | `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |
 | `loading` / `saving` | `boolean` | États de chargement / persistance |
 | `onSubmit` | `(r: TreeSelectorSubmit) => Promise<void>` | Sélection validée : `{ pathIds, intensity, context, notes }` |

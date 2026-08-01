@@ -663,6 +663,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'empty_title',           'modules.emotion_wheel.empty_title'),
   ('ew.cfg', 'empty_text',            'modules.emotion_wheel.empty_text'),
   ('ew.cfg', 'validate_here_btn',     'modules.emotion_wheel.validate_here_btn'),
+  -- Ligne secondaire du bouton « Je ne sais pas » : rappelle le niveau conservé
+  -- (« on garde « Peur » »). Interpolation i18next {{label}} côté layout (K-10).
+  ('ew.cfg', 'validate_here_keep',    'modules.emotion_wheel.validate_here_keep'),
   ('ew.cfg', 'intensity_title',       'modules.emotion_wheel.intensity_title'),
   ('ew.cfg', 'intensity_hint',        'modules.emotion_wheel.intensity_hint'),
   ('ew.cfg', 'continue_btn',          'modules.emotion_wheel.continue_btn'),
@@ -672,19 +675,21 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'notes_hint',            'modules.emotion_wheel.notes_hint'),
   ('ew.cfg', 'notes_placeholder',     'modules.emotion_wheel.notes_placeholder'),
   ('ew.cfg', 'save_btn',              'modules.emotion_wheel.save_btn'),
-  -- Options de contexte (chips neutres) — clés indexées lues par collectIndexed
+  -- Options de contexte (chips neutres) : clés indexées lues par collectIndexed.
+  -- Ordre d'affichage aligné sur la maquette K-10 : Travail, Famille, Argent,
+  -- Santé, Relation, Moi, Autre.
   ('ew.cfg', 'context_opt_1',         'modules.emotion_wheel.context.work'),
   ('ew.cfg', 'context_opt_2',         'modules.emotion_wheel.context.family'),
-  ('ew.cfg', 'context_opt_3',         'modules.emotion_wheel.context.relationship'),
+  ('ew.cfg', 'context_opt_3',         'modules.emotion_wheel.context.money'),
   ('ew.cfg', 'context_opt_4',         'modules.emotion_wheel.context.health'),
-  ('ew.cfg', 'context_opt_5',         'modules.emotion_wheel.context.money'),
+  ('ew.cfg', 'context_opt_5',         'modules.emotion_wheel.context.relationship'),
   ('ew.cfg', 'context_opt_6',         'modules.emotion_wheel.context.self'),
   ('ew.cfg', 'context_opt_7',         'modules.emotion_wheel.context.other'),
   ('ew.cfg', 'context_icon_1',        'briefcase-outline'),
   ('ew.cfg', 'context_icon_2',        'home-heart'),
-  ('ew.cfg', 'context_icon_3',        'heart-outline'),
+  ('ew.cfg', 'context_icon_3',        'cash'),
   ('ew.cfg', 'context_icon_4',        'heart-pulse'),
-  ('ew.cfg', 'context_icon_5',        'cash'),
+  ('ew.cfg', 'context_icon_5',        'heart-outline'),
   ('ew.cfg', 'context_icon_6',        'account-outline'),
   ('ew.cfg', 'context_icon_7',        'dots-horizontal')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;

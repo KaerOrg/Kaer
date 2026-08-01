@@ -6,9 +6,14 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
+import { Button } from '../Button/Button'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
 import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
+
+// États d'accessibilité figés hors du render : la sélection n'est plus portée par
+// la seule couleur de fond depuis la passe K-10 (un lecteur d'écran doit l'entendre).
+const ACTIVE_STATE = { on: { selected: true }, off: { selected: false } } as const
 
 interface TreeSelectorIntensityProps {
   path: TreeSelectorNode[]
@@ -42,47 +47,43 @@ export function TreeSelectorIntensity({
         {texts.intensityHint ? <Text style={styles.stepHint}>{texts.intensityHint}</Text> : null}
 
         <View style={styles.intensityCard} testID="intensity-card">
-          <View style={[styles.intensityDisplay, { backgroundColor: accentColor + '1A' }]}>
-            <Text style={[styles.intensityValue, { color: accentColor }]} testID="intensity-value">
+          <View style={styles.intensityDisplay}>
+            <Text style={styles.intensityValue} testID="intensity-value">
               {intensity}
             </Text>
             <Text style={styles.intensityMax}>/{config.intensityMax}</Text>
           </View>
+          {/* Sélecteur numérique 1 à N : cellules rondes 44 px d'un même groupe, pas
+              des CTA : `@ui/Button` (pilule/rectangle) ne rend pas cette forme. Restent
+              natifs, mais chaque cran annonce sa sélection via `accessibilityState`. */}
           <View style={styles.intensityBtns}>
             {config.intensityValues.map(v => {
               const isActive = intensity === v
               return (
                 <Pressable
                   key={v}
-                  style={[
-                    styles.intensityBtn,
-                    isActive && { backgroundColor: accentColor, borderColor: accentColor },
-                  ]}
+                  style={[styles.intensityBtn, isActive ? styles.intensityBtnActive : null]}
                   onPress={() => onChangeIntensity(v)}
                   accessibilityRole="button"
                   accessibilityLabel={String(v)}
+                  accessibilityState={ACTIVE_STATE[isActive ? 'on' : 'off']}
                   testID={`intensity-btn-${v}`}
                 >
-                  <Text style={[
-                    styles.intensityBtnText,
-                    isActive && styles.intensityBtnTextActive,
-                  ]}>{v}</Text>
+                  <Text style={styles.intensityBtnText}>{v}</Text>
                 </Pressable>
               )
             })}
           </View>
         </View>
 
-        <Pressable
-          style={[styles.continueBtn, { backgroundColor: accentColor }]}
+        <Button
+          variant="primary"
           onPress={onConfirm}
-          accessibilityRole="button"
+          label={texts.continueBtn}
+          iconRight={<MaterialCommunityIcons name="arrow-right" size={20} color={colors.text} />}
           accessibilityLabel={texts.continueBtn}
           testID="continue-intensity"
-        >
-          <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={colors.white} />
-        </Pressable>
+        />
       </ScrollView>
     </View>
   )
