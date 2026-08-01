@@ -80,15 +80,34 @@ describe('NotificationRoutinePanel', () => {
     expect(await screen.findByText('notifications.days_label')).toBeInTheDocument()
   })
 
-  it('le préréglage « tous les jours » active les 7 jours et le bloc d\'aperçu récapitule', async () => {
+  it('la ligne de la semaine montre 7 jours, 3 actifs par défaut, et se toggle', async () => {
     mockGet.mockResolvedValue([])
     open()
     await screen.findByText('notifications.days_label')
-    // Bloc d'aperçu présent.
-    expect(screen.getByText('notifications.preview')).toBeInTheDocument()
-    // Préréglage « Tous les jours » → les 7 pastilles jour deviennent actives.
-    await userEvent.click(screen.getByText('notifications.freq_daily'))
-    const dayButtons = document.querySelectorAll('.nr-form__day--on')
-    expect(dayButtons).toHaveLength(7)
+    // Barre de résumé présente.
+    expect(screen.getByText('notifications.summary')).toBeInTheDocument()
+    const dots = screen.getAllByRole('checkbox')
+    expect(dots).toHaveLength(7)
+    // lun, mer, ven actifs par défaut.
+    expect(dots.filter(d => d.getAttribute('aria-checked') === 'true')).toHaveLength(3)
+    // mardi (index 1) inactif → clic l'active.
+    await userEvent.click(dots[1])
+    expect(dots[1]).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('crée un rappel avec l\'heure du cadran (09:00) et les jours sélectionnés', async () => {
+    mockGet.mockResolvedValue([])
+    mockCreate.mockResolvedValue(routine())
+    open()
+    await screen.findByText('notifications.days_label')
+
+    await userEvent.click(screen.getByText('notifications.save_routine'))
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1))
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({
+      days_of_week: [1, 3, 5],
+      time_of_day: '09:00',
+      patient_module_id: 'pm1',
+    })
   })
 })
