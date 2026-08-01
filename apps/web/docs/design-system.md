@@ -1024,6 +1024,74 @@ tabulaire sur mesure qui ne passe pas par `columns`.
 - Chaque ligne est **mémoïsée** : passer des `columns` (useMemo) et `renderDetail`
   (useCallback) stables pour éviter les re-rendus inutiles à grande échelle.
 
+### `TimeDial`
+
+`components/ui/TimeDial/`. Cadran horaire radial 24 h : un anneau dont l'arc teal
+(`conic-gradient`) est proportionnel à l'heure, un repère déplaçable au pointeur
+(aimanté au pas) et deux champs saisissables au centre (heures `:` minutes).
+
+**Source de vérité unique : les minutes depuis minuit** (`0`–`1439`). L'arc, l'angle
+du repère et les champs en dérivent. Primitive pur : **aucun métier ni i18n** — tous
+les libellés (titre, légende, indice, libellés a11y) sont fournis déjà traduits.
+Les helpers `minutesToHHMM` / `hhmmToMinutes` sont exportés depuis `@ui/TimeDial` pour
+convertir vers/depuis le format « HH:MM » de persistance.
+
+```tsx
+import { TimeDial, minutesToHHMM } from '@ui/TimeDial'
+
+const [minutes, setMinutes] = useState(9 * 60) // 09:00
+<TimeDial
+  minutes={minutes}
+  onChange={setMinutes}
+  title={t('notifications.reminder_at')}
+  caption={t('notifications.period_morning')}   // dérivé de l'heure par l'appelant
+  hint={t('notifications.drag_hint')}
+  hoursLabel={t('notifications.hours_label')}
+  minutesLabel={t('notifications.minutes_label')}
+  markerLabel={t('notifications.marker_label')}
+/>
+// À l'enregistrement : time_of_day: minutesToHHMM(minutes)
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `minutes` | `number` | — | Heure en minutes depuis minuit (0–1439). Contrôlé |
+| `onChange` | `(minutes: number) => void` | — | Émis à chaque saisie, glisser ou flèche clavier |
+| `dragStepMinutes` | `number` | `15` | Pas d'aimantation au **glisser** et aux flèches. La saisie clavier dans les champs reste **libre** (00–59) |
+| `title` / `caption` / `hint` | `ReactNode` | — | Titre au-dessus des chiffres, légende dessous (ex. « du matin »), indice sous le cadran |
+| `hoursLabel` / `minutesLabel` / `markerLabel` | `string` | — | Libellés accessibles des deux champs et du repère (rôle `slider`) |
+| `accentColor` | `string` | `var(--color-primary)` | Couleur de l'arc et du repère (accepte un accent dynamique inline) |
+| `size` | `number` | `240` | Diamètre en px |
+
+> **Comportement des champs** : passage auto heures → minutes dès 2 chiffres (ou un
+> 1er chiffre > 2) ; valeurs bornées 0–23 / 0–59 ; complétées à 2 chiffres à la perte
+> de focus. Le repère est un `role="slider"` (flèches ± pas, `Home` = minuit) : geste
+> **et** clavier, jamais l'un sans l'autre.
+
+### `WeekRhythmLine`
+
+`components/ui/WeekRhythmLine/`. Sélecteur « ligne de la semaine » : les 7 jours sur un
+rail continu, les jours actifs sont des arrêts pleins reliés à leur voisin actif par un
+fil d'accent. Rend le rythme hebdomadaire lisible d'un coup d'œil (vs cases isolées).
+
+Primitive pur : aucun métier ni i18n. Chaque arrêt est une **case à cocher**
+(`role="checkbox"`), pas un bouton d'action. Jours en **ISO** (1 = lundi … 7 = dimanche).
+
+```tsx
+import { WeekRhythmLine } from '@ui/WeekRhythmLine'
+
+const dayLabels = DAY_KEYS.map(k => t(`notifications.day_${k}`)) // ['L','M','Me',…]
+<WeekRhythmLine selectedDays={selectedDays} onToggle={toggleDay} dayLabels={dayLabels} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `selectedDays` | `readonly number[]` | — | Jours actifs en ISO (1–7) |
+| `onToggle` | `(iso: number) => void` | — | Émis avec l'ISO du jour cliqué |
+| `dayLabels` | `readonly string[]` | — | 7 libellés courts, ordre lundi → dimanche, déjà traduits |
+| `dayAriaLabel` | `(iso, active) => string` | libellé court | Libellé accessible enrichi (sinon `aria-checked` porte l'état) |
+| `accentColor` | `string` | `var(--color-primary)` | Couleur des arrêts actifs et du fil |
+
 ---
 
 ## Composant `ScaleMetaBadges`
