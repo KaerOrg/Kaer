@@ -214,6 +214,20 @@ Quatre raisons, dans l'ordre où elles pèsent :
 
 **Correction de source faite au passage** : `docs/modules/distress_tolerance.md` présentait l'urge surfing comme « validé par l'ECR Bowen et al. 2014 ». Cet essai porte sur la **prévention de la rechute dans les troubles de l'usage de substances**, pas sur la crise suicidaire. Ce qui est documenté dans ce contexte, c'est la TCD dans son ensemble (méta-analyse Kothgassner 2021 : automutilations g = -0,44, idéation suicidaire g = -0,31). L'onglet Sources est lu par des cliniciens, la nuance compte.
 
+### 7.2 · À verser à la passe bibliographique (Olivier), pas à intégrer maintenant
+
+En vérifiant le niveau de preuve de « Traverser la vague », deux choses sont ressorties. **Décision du 2026-07-31 : ne rien changer à l'onglet Sources pour l'instant**, une bibliographie approfondie sera faite à part. Consigné ici pour ne pas se perdre.
+
+**Ce qui étaye le lien** : deux ECR portent sur la tolérance à la détresse délivrée par application chez des jeunes avec idéation suicidaire. LifeBuoy, application autoguidée fondée sur la TCD ciblant la régulation émotionnelle et la tolérance à la détresse, n = 455, réduction de la sévérité de l'idéation (d = 0,45 en post, 0,34 à 3 mois ; Torok et al. 2022, *PLoS Medicine*), répliqué sur n = 692 contre application factice (d = 0,48 à 60 jours ; Torok et al. 2024, *eClinicalMedicine*).
+
+**Le signal défavorable, absent de nos sources** : essai pragmatique sur **18 882 patients** ambulatoires avec pensées suicidaires fréquentes, dont un bras « compétences TCD en ligne » (pleine conscience, action opposée, respiration rythmée). Le groupe compétences a présenté **plus** d'automutilations que les soins habituels (HR 1,29 ; IC 97,5 % 1,02-1,64), et les auteurs concluent que leurs résultats ne soutiennent pas l'implémentation des programmes testés (Simon et al. 2022, *JAMA*).
+
+**Lecture proposée** : la différence tient vraisemblablement à l'**accompagnement**. Dans l'essai JAMA, les compétences étaient proposées par messagerie, sans médiation clinique, à des patients qui ne les avaient pas demandées (39 % d'engagement). Dans LifeBuoy, c'est un programme que le jeune traverse. Kær se situe du côté médié, puisque `distress_tolerance` est **déverrouillé par le clinicien pour ce patient** : c'est cette garde qui justifie de garder le lien, et elle ne doit pas sauter.
+
+**Conséquences déjà appliquées** : ne jamais écrire « validé en crise » (correction faite dans `docs/modules/distress_tolerance.md`), garder la garde de déverrouillage, libellé qui décrit le mécanisme et jamais un bénéfice (#305).
+
+---
+
 **Action hors code, non bloquante** : envoyer la demande d'autorisation Stanley-Brown via le formulaire de suicidesafetyplan.com. Gratuit, courant pour un usage clinique, et ça débloque le verbatim si un clinicien l'exige un jour.
 
 ---
