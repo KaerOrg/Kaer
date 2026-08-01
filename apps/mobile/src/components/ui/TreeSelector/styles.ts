@@ -14,14 +14,9 @@ const TOUCH_TARGET = 44
 export const styles = StyleSheet.create({
   container:        { flex: 1, backgroundColor: colors.background },
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
-  // ── Bouton démarrer (mode historique)
-  startBtn: {
-    backgroundColor: colors.primary, borderRadius: radius.lg,
-    paddingVertical: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.lg,
-    minHeight: TOUCH_TARGET,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-  },
-  startBtnText:     { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
+  // ── Bouton démarrer (mode historique) : habillage via `@ui/Button` (variant
+  // primary, AA-safe) ; ce style ne porte que le positionnement.
+  startBtnLayout:   { marginHorizontal: spacing.lg, marginTop: spacing.lg },
   // ── Historique
   historyContent:   { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   introCard: {
@@ -139,12 +134,7 @@ export const styles = StyleSheet.create({
   },
   intensityBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   intensityBtnText: { fontSize: fontSize.label, fontWeight: '600', color: colors.text },
-  continueBtn: {
-    borderRadius: radius.lg, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
-    backgroundColor: colors.primary,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-  },
-  continueBtnText:  { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
+  // Le bouton « Continuer » passe par `@ui/Button` (variant primary), aucun style local.
   // ── Notes
   summaryCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
@@ -164,13 +154,9 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
   },
   cancelBtnText:    { color: colors.textMuted, fontSize: fontSize.caption, fontWeight: '600' },
-  saveBtn: {
-    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
-    backgroundColor: colors.primary,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-  },
-  saveBtnText:      { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
-  btnDisabled:      { opacity: 0.6 },
+  // Le bouton « Enregistrer » passe par `@ui/Button` (variant primary, état `loading`) ;
+  // ce style ne porte que l'occupation de l'espace restant dans la rangée d'actions.
+  saveBtnFlex:      { flex: 1 },
   // Note de bas de page (footer_note)
   infoBox: {
     flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start',

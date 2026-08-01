@@ -6,6 +6,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
+import { Button } from '../Button/Button'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
 import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
@@ -52,6 +53,9 @@ export function TreeSelectorIntensity({
             </Text>
             <Text style={styles.intensityMax}>/{config.intensityMax}</Text>
           </View>
+          {/* Sélecteur numérique 1 à N : cellules rondes 44 px d'un même groupe, pas
+              des CTA : `@ui/Button` (pilule/rectangle) ne rend pas cette forme. Restent
+              natifs, mais chaque cran annonce sa sélection via `accessibilityState`. */}
           <View style={styles.intensityBtns}>
             {config.intensityValues.map(v => {
               const isActive = intensity === v
@@ -72,16 +76,14 @@ export function TreeSelectorIntensity({
           </View>
         </View>
 
-        <Pressable
-          style={styles.continueBtn}
+        <Button
+          variant="primary"
           onPress={onConfirm}
-          accessibilityRole="button"
+          label={texts.continueBtn}
+          iconRight={<MaterialCommunityIcons name="arrow-right" size={20} color={colors.text} />}
           accessibilityLabel={texts.continueBtn}
           testID="continue-intensity"
-        >
-          <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
-          <MaterialCommunityIcons name="arrow-right" size={20} color={colors.text} />
-        </Pressable>
+        />
       </ScrollView>
     </View>
   )
