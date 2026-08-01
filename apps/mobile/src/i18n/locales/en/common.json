@@ -688,9 +688,9 @@
       "season_dimension": "Dimension"
     },
     "emotion_wheel": {
-      "label": "Emotion wheel",
-      "description": "Explore and name your emotions precisely to counter alexithymia.",
-      "title": "Emotion wheel",
+      "label": "Naming what I feel",
+      "description": "Put a precise word on what you feel.",
+      "title": "Naming what I feel",
       "intro": "Naming your emotions precisely is a recognised way to recognise them better and talk about them with your practitioner. Go into as much detail as you like.",
       "new_btn": "Identify an emotion",
       "step_1_title": "Which emotion family?",
@@ -710,7 +710,7 @@
       "history_label": "History",
       "empty_title": "Nothing yet",
       "empty_text": "Tap the button at the top to identify your first emotion.",
-      "footer": "Emotion wheel, an emotion-labelling aid inspired by the Feeling Wheel (Willcox, 1982). A psychoeducation tool, not a measurement instrument. Data stored locally on the device. Lieberman et al., Psychol Sci 2007.",
+      "footer": "Naming what I feel, an emotion-labelling aid inspired by the Feeling Wheel (Willcox, 1982). A psychoeducation tool, not a measurement instrument. Data stored locally on the device. Lieberman et al., Psychol Sci 2007.",
       "context": {
         "work": "Work",
         "family": "Family",

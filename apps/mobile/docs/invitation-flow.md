@@ -91,7 +91,7 @@ const url = await Linking.getInitialURL()
 | `sleep_diary` | Agenda du sommeil | MVP — à construire en premier |
 | `beck_columns` | Colonnes de Beck | Prévu |
 | `fear_thermometer` | Thermomètre de la peur | Prévu |
-| `emotion_wheel` | Roue des émotions | Prévu |
+| `emotion_wheel` | Nommer ce que je ressens | Prévu |
 | `crisis_plan` | Plan de crise | Prévu |
 | `rim` | RIM — Imagerie mentale | Prévu |
 | `cognitive_saturation` | Saturation cognitive | Prévu |

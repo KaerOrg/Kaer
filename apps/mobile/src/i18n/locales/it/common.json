@@ -227,9 +227,9 @@
       "dim_pleasure_high": "Pienamente sentito"
     },
     "emotion_wheel": {
-      "label": "Ruota delle emozioni",
-      "description": "Esplora e nomina le tue emozioni",
-      "title": "Ruota delle emozioni",
+      "label": "Dare un nome a ciò che sento",
+      "description": "Trovare la parola precisa per ciò che senti.",
+      "title": "Dare un nome a ciò che sento",
       "intro": "Esplora e nomina le tue emozioni.",
       "stat_entries": "Voci",
       "stat_days": "Giorni",

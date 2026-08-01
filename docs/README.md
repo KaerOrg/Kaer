@@ -37,7 +37,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`spec/patient-public-ref.md`](spec/patient-public-ref.md) | Identifiant public opaque dans l'URL patient (`public_ref`) — masque la PK, défense en profondeur |
 | [`spec/admin-users.md`](spec/admin-users.md) | Page admin « Gestion des utilisateurs » — rôle `is_admin`, droits RGPD centralisés, sécurité front + base |
 | [`spec/module-taxonomy.md`](spec/module-taxonomy.md) | Taxonomie & filtres par facettes de l'armoire (tags indication/public/approche, `tag_dimensions`/`tags`/`module_tags`) |
-| [`spec/refonte-roue-emotions.md`](spec/refonte-roue-emotions.md) | Refonte roue des émotions — taxonomie Willcox (8 familles / nuances / mots), profondeur libre, étapes intensité/contexte/notes |
+| [`spec/refonte-roue-emotions.md`](spec/refonte-roue-emotions.md) | Refonte « Nommer ce que je ressens » (ex roue des émotions) : taxonomie Willcox (8 familles / nuances / mots), profondeur libre, étapes intensité/contexte/notes |
 | [`patient-data-sync.md`](patient-data-sync.md) | Circuit sync données patient : SQLite → Supabase via `RemoteSyncService` + gate consentement |
 | [`practitioner-notes.md`](practitioner-notes.md) | Notes praticien par patient (privées, Supabase, `practitioner_patient_notes`) |
 
@@ -54,7 +54,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 - [`breathing_techniques.md`](modules/breathing_techniques.md) — Techniques de respiration
 - [`cognitive_saturation.md`](modules/cognitive_saturation.md) — Saturation cognitive (ACT)
 - [`cssrs_screen.md`](modules/cssrs_screen.md) — C-SSRS Dépistage suicidaire
-- [`emotion_wheel.md`](modules/emotion_wheel.md) — Roue des émotions (Plutchik)
+- [`emotion_wheel.md`](modules/emotion_wheel.md) : Nommer ce que je ressens (taxonomie Willcox)
 - [`epds.md`](modules/epds.md) — EPDS Dépression post-natale
 - [`fear_thermometer.md`](modules/fear_thermometer.md) — Thermomètre de la peur (SUDs)
 - [`grounding.md`](modules/grounding.md) — Ancrage 5-4-3-2-1 (DBT)

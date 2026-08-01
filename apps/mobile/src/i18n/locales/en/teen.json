@@ -677,7 +677,7 @@
       "history_reveal_word": "••• Show the word"
     },
     "emotion_wheel": {
-      "title": "What I’m really feeling",
+      "description": "Find the exact word for what you feel.",
       "intro": "Put precise words on what you feel: it really helps you spot it and talk about it with your carer. Go into as much detail as you want.",
       "new_btn": "Spot an emotion",
       "step_1_title": "Which emotion family?",
@@ -697,7 +697,7 @@
       "history_label": "History",
       "empty_title": "Nothing yet",
       "empty_text": "Tap the button at the top to spot your first emotion.",
-      "footer": "Emotion wheel, an emotion-labelling aid inspired by the Feeling Wheel (Willcox, 1982). A psychoeducation tool, not a measurement instrument. Data stored locally on the device. Lieberman et al., Psychol Sci 2007.",
+      "footer": "Naming what I feel, an emotion-labelling aid inspired by the Feeling Wheel (Willcox, 1982). A psychoeducation tool, not a measurement instrument. Data stored locally on the device. Lieberman et al., Psychol Sci 2007.",
       "context": {
         "work": "Work",
         "family": "Family",
