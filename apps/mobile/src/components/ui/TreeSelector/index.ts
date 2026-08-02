@@ -6,6 +6,7 @@ export type {
   TreeSelectorContextOption,
   TreeSelectorEntry,
   TreeSelectorEntrySection,
+  TreeSelectorEditRequest,
   TreeSelectorNode,
   TreeSelectorSubmit,
   TreeSelectorTexts,

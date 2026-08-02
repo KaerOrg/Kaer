@@ -13,9 +13,10 @@
 // défaut, aucune présélection**. Une valeur pré-cochée serait une réponse que le
 // patient n'a pas donnée.
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type {
-  TreeSelectorConfig, TreeSelectorMode, TreeSelectorNode, TreeSelectorSubmit,
+  TreeSelectorConfig, TreeSelectorEditRequest, TreeSelectorMode, TreeSelectorNode,
+  TreeSelectorSubmit,
 } from './types'
 
 export interface TreeSelectorFlow {
@@ -58,6 +59,7 @@ export interface TreeSelectorFlow {
 export function useTreeSelectorFlow(
   config: TreeSelectorConfig,
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>,
+  editRequest?: TreeSelectorEditRequest | null,
 ): TreeSelectorFlow {
   const { enableIntensity, enableNotes, enableContext } = config
   // Aucune étape facultative activée : la sélection suffit, on enregistre direct.
@@ -72,6 +74,7 @@ export function useTreeSelectorFlow(
   const [contextOtherOpen, setContextOtherOpen] = useState(false)
   const [notes, setNotes] = useState('')
   const [wordless, setWordless] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const resetDraft = useCallback(() => {
     setPath([])
@@ -82,7 +85,29 @@ export function useTreeSelectorFlow(
     setContextOtherOpen(false)
     setNotes('')
     setWordless(false)
+    setEditingId(null)
   }, [])
+
+  // Demande de modification : on rouvre le flux pré-rempli à la première étape. Le
+  // `token` sert de déclencheur (rouvrir deux fois la même entrée doit relancer).
+  const lastToken = useRef<number | null>(null)
+  useEffect(() => {
+    if (!editRequest || editRequest.token === lastToken.current) return
+    lastToken.current = editRequest.token
+    setEditingId(editRequest.id)
+    // On repart de l'ÉTAPE 1, chemin vide : c'est ce qui permet de corriger l'émotion
+    // elle-même, et de nommer enfin une entrée « sans mot ». Les champs facultatifs,
+    // eux, sont rechargés : on ne fait pas ressaisir ce qui n'a pas changé.
+    setPath([])
+    setExpanded(null)
+    setIntensity(editRequest.intensity)
+    setContext(editRequest.context)
+    setContextOther(editRequest.contextOther)
+    setContextOtherOpen(editRequest.contextOther.length > 0)
+    setNotes(editRequest.notes)
+    setWordless(editRequest.wasWordless)
+    setMode('selection')
+  }, [editRequest])
 
   const toggleContextOther = useCallback(() => {
     setContextOtherOpen(prev => {
@@ -103,6 +128,7 @@ export function useTreeSelectorFlow(
     // c'est un état incohérent qu'on refuse de persister.
     if (finalPath.length === 0 && !wordless) return
     await onSubmit({
+      editingId,
       pathIds: finalPath.map(n => n.id),
       intensity: finalIntensity,
       context: finalContext,
@@ -111,7 +137,7 @@ export function useTreeSelectorFlow(
     })
     resetDraft()
     setMode('history')
-  }, [onSubmit, resetDraft])
+  }, [onSubmit, resetDraft, editingId])
 
   // Après une sélection validée : la fiche unique, ou l'enregistrement direct.
   const proceedFrom = useCallback((finalPath: TreeSelectorNode[]) => {
