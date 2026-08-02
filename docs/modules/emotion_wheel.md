@@ -8,6 +8,25 @@
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).
 > Refonte UX en cours : epic #248 (mobile) et #260 (web praticien).
 
+## L'accueil et l'historique (K-3, ticket #251)
+
+L'accueil poussait l'historique sous la ligne de flottaison, coincé entre un bandeau de
+psychoéducation permanent et un pavé de disclaimer en pied. Les deux passent dans la
+**fiche ⓘ** de l'en-tête : un contenu permanent qu'on ne lit plus ne protège personne,
+alors qu'un contenu à un tap reste consultable quand la question se pose.
+
+- **Historique groupé par jour** : « AUJOURD'HUI », « HIER », puis la date. Le
+  groupement est une **navigation**, pas une analyse : aucun total par jour, aucune
+  moyenne, aucune comparaison d'un groupe à l'autre, aucune flèche d'évolution.
+- Le jour est calculé sur les **composants locaux** de la date, jamais via
+  `toISOString()` : en fuseau positif, une saisie de 23 h 30 changerait de groupe.
+  Testé.
+- Chaque carte porte un **⋯** qui ouvre une feuille d'actions (E3a) rappelant l'entrée,
+  avec « Supprimer » (confirmation) et, à partir de #256, « Modifier ».
+- La **fiche ⓘ** (E3b) tient quatre sections : à quoi ça sert, qui voit quoi, en cas de
+  crise, sources. Contenu 100 % en base (`info_title_N` / `info_body_N`), la section
+  « sources » étant alimentée par le champ `footer_note` existant, sans duplication.
+
 ## L'entrée sans émotion nommée (K-7, ticket #255)
 
 Réponse au **défaut n°1 de l'audit** : le module revendiquait l'alexithymie comme

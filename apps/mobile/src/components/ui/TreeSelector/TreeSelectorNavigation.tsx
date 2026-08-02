@@ -4,7 +4,6 @@
 
 import { useMemo } from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
 import { TreeSelectorOptionCard } from './TreeSelectorOptionCard'
@@ -17,7 +16,6 @@ interface TreeSelectorNavigationProps {
   path: TreeSelectorNode[]
   config: TreeSelectorConfig
   texts: TreeSelectorTexts
-  footerText?: string | null
   /** Carte dépliée au niveau courant (ses feuilles sont rendues en chips). */
   expanded: TreeSelectorNode | null
   onBack: () => void
@@ -32,7 +30,7 @@ interface TreeSelectorNavigationProps {
 }
 
 export function TreeSelectorNavigation({
-  nodes, path, config, texts, footerText, expanded,
+  nodes, path, config, texts, expanded,
   onBack, onSelectNode, onSelectLeaf, onToggleExpand, onContinue, onValidateHere, onSkip,
 }: TreeSelectorNavigationProps) {
   const accentColor = resolveAccentColor(path)
@@ -152,12 +150,6 @@ export function TreeSelectorNavigation({
           </>
         ) : null}
 
-        {level === 1 && footerText ? (
-          <View style={styles.infoBox}>
-            <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
-            <Text style={styles.footerText}>{footerText}</Text>
-          </View>
-        ) : null}
       </ScrollView>
     </View>
   )

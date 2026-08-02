@@ -658,6 +658,19 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'wordless_title',        'modules.emotion_wheel.wordless_title'),
   ('ew.cfg', 'wordless_hint',         'modules.emotion_wheel.wordless_hint'),
   ('ew.cfg', 'wordless_label',        'modules.emotion_wheel.wordless_label'),
+  -- Fiche ⓘ (K-3) : elle recueille le bandeau de psychoéducation et le disclaimer
+  -- sourcé qui étaient collés en permanence sur l'accueil. Un contenu permanent
+  -- qu'on ne lit plus ne protège personne ; atteignable en un tap, il reste
+  -- consultable quand la question se pose. La section « sources » est ajoutée par
+  -- le code depuis le champ `footer_note` existant.
+  ('ew.cfg', 'info_title',            'modules.emotion_wheel.info_title'),
+  ('ew.cfg', 'info_title_1',          'modules.emotion_wheel.info_purpose_title'),
+  ('ew.cfg', 'info_body_1',           'modules.emotion_wheel.info_purpose_body'),
+  ('ew.cfg', 'info_title_2',          'modules.emotion_wheel.info_privacy_title'),
+  ('ew.cfg', 'info_body_2',           'modules.emotion_wheel.info_privacy_body'),
+  ('ew.cfg', 'info_title_3',          'modules.emotion_wheel.info_crisis_title'),
+  ('ew.cfg', 'info_body_3',           'modules.emotion_wheel.info_crisis_body'),
+  ('ew.cfg', 'info_sources_title',    'modules.emotion_wheel.info_sources_title'),
   -- Échelle 1 à 5 (K-6, #254) : 10 cibles tactiles de 44 px ne tiennent pas sur la
   -- largeur d'un téléphone, et l'écart 6 contre 7 sur 10 n'est pas fiable d'un jour
   -- à l'autre chez un même patient. Le champ reste facultatif : pas de 0, sinon
@@ -669,7 +682,6 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'intensity_anchor_max',  'modules.emotion_wheel.intensity_anchor_max'),
   ('ew.cfg', 'context_other_btn',     'modules.emotion_wheel.context_other_btn'),
   ('ew.cfg', 'context_other_placeholder', 'modules.emotion_wheel.context_other_placeholder'),
-  ('ew.cfg', 'intro',                 'modules.emotion_wheel.intro'),
   ('ew.cfg', 'new_btn',               'modules.emotion_wheel.new_btn'),
   ('ew.cfg', 'step_1_title',          'modules.emotion_wheel.step_1_title'),
   ('ew.cfg', 'step_1_hint',           'modules.emotion_wheel.step_1_hint'),
