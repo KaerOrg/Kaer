@@ -106,54 +106,60 @@ export const styles = StyleSheet.create({
     fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center',
     lineHeight: 17, marginTop: spacing.xs,
   },
+  // Bas d'écran des niveaux ≥ 2 : sortie « je ne sais pas » à gauche, validation de
+  // la carte dépliée à droite. La seconde n'apparaît que si une carte est dépliée.
+  stepActions:      { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  stepContinueBtn: {
+    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md,
+    backgroundColor: colors.primary, minHeight: TOUCH_TARGET,
+    alignItems: 'center', justifyContent: 'center',
+  },
   validateHereBtn: {
-    alignItems: 'center', justifyContent: 'center', gap: 2,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2,
     borderRadius: radius.lg, borderWidth: 1.5, paddingVertical: spacing.md,
-    marginTop: spacing.sm, backgroundColor: colors.card, minHeight: TOUCH_TARGET,
+    backgroundColor: colors.card, minHeight: TOUCH_TARGET,
   },
   validateHereText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
   validateHereKeep: { fontSize: fontSize.xs, color: colors.textMuted },
   chipsWrap:        { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
   listContainer:    { gap: spacing.sm },
+  // Carte de nuance (niveaux ≥ 2) : titre, définition, et mots en chips une fois
+  // dépliée. Le niveau 3 n'a plus d'écran à lui (K-5).
   optionCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderLeftWidth: 4, minHeight: TOUCH_TARGET,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
+    minHeight: TOUCH_TARGET, gap: spacing.xs,
     ...shadows.sm,
   },
   optionLabel:      { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
-  // ── Intensité
-  intensityCard: {
-    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
-    alignItems: 'center', gap: spacing.lg,
-    ...shadows.sm,
-    marginBottom: spacing.md,
+  optionDefinition: { fontSize: fontSize.sm, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
+  optionChips:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
+  // ── Fiche unique (intensité + contexte + note sur un seul écran, K-6)
+  sheetSection:     { gap: spacing.sm, marginBottom: spacing.lg },
+  sheetSectionLabel: {
+    fontSize: fontSize.xs, fontWeight: '700', color: colors.textMuted,
+    textTransform: 'uppercase', letterSpacing: 0.8,
   },
-  intensityDisplay: {
-    flexDirection: 'row', alignItems: 'baseline', gap: 4,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderRadius: radius.lg,
-    backgroundColor: colors.neutral,
+  // Les 5 crans sur une seule ligne : 10 cibles de 44 px ne tiennent pas sur la
+  // largeur d'un téléphone, c'est ce qui a décidé le passage de 1-10 à 1-5.
+  intensityRow:     { flexDirection: 'row', gap: spacing.sm },
+  intensityAnchors: { flexDirection: 'row', justifyContent: 'space-between' },
+  intensityAnchor:  { fontSize: fontSize.xs, color: colors.textMuted },
+  otherInput: {
+    backgroundColor: colors.card, borderRadius: radius.md, paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm, fontSize: fontSize.label, color: colors.text,
+    borderWidth: 1, borderColor: colors.border, minHeight: TOUCH_TARGET,
   },
-  intensityValue:   { fontSize: 48, fontWeight: '800', color: colors.text },
-  intensityMax:     { fontSize: fontSize.h2, color: colors.textMuted, fontWeight: '600' },
-  intensityBtns: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center',
-  },
+  // ── Intensité (crans de la fiche unique)
   intensityBtn: {
-    width: TOUCH_TARGET, height: TOUCH_TARGET, borderRadius: radius.full, borderWidth: 1.5,
+    flex: 1, minWidth: TOUCH_TARGET, height: TOUCH_TARGET, borderRadius: radius.md, borderWidth: 1.5,
     borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
     backgroundColor: colors.card,
   },
   intensityBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   intensityBtnText: { fontSize: fontSize.label, fontWeight: '600', color: colors.text },
-  // Le bouton « Continuer » passe par `@ui/Button` (variant primary), aucun style local.
+  continueBtnText:  { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   // ── Notes
-  summaryCard: {
-    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    borderLeftWidth: 4, gap: spacing.xs, marginBottom: spacing.md,
-  },
-  summaryPrimary:   { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
-  summaryMeta:      { fontSize: fontSize.sm, color: colors.textMuted },
   notesInput: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
     fontSize: fontSize.label, color: colors.text, minHeight: 100,
@@ -166,8 +172,8 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
   },
   cancelBtnText:    { color: colors.textMuted, fontSize: fontSize.caption, fontWeight: '600' },
-  // Le bouton « Enregistrer » passe par `@ui/Button` (variant primary, état `loading`) ;
-  // ce style ne porte que l'occupation de l'espace restant dans la rangée d'actions.
+  // « Enregistrer » via `@ui/Button` (variant primary) ; ce style ne porte que
+  // l'occupation de l'espace restant à côté d'« Annuler ».
   saveBtnFlex:      { flex: 1 },
   // Note de bas de page (footer_note)
   infoBox: {

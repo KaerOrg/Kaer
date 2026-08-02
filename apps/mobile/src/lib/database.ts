@@ -127,6 +127,8 @@ export async function initDatabase(): Promise<void> {
     `INSERT OR IGNORE INTO tree_selections (id,module_id,selected_id,selected_label,path_json,intensity,notes,created_at) SELECT id,'emotion_wheel',specific_key,specific_label,json_array(json_object('id',primary_key,'label',primary_label),json_object('id',secondary_key,'label',secondary_label),json_object('id',specific_key,'label',specific_label)),intensity,notes,COALESCE(created_at,CURRENT_TIMESTAMP) FROM emotion_entries`,
     // Tag de contexte (refonte roue des émotions) : domaines déclarés, JSON array
     `ALTER TABLE tree_selections ADD COLUMN context_json TEXT`,
+    // Contexte libre « + Autre » (fiche unique, K-6) : texte patient, hors clés i18n
+    `ALTER TABLE tree_selections ADD COLUMN context_other TEXT`,
     // decisional_balance → plan_items (4 quadrants × N args avec weight) + module_settings (target_behavior)
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','pros_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.pros_change) AS arg`,
     `INSERT OR IGNORE INTO plan_items (id,module_id,section_id,text,sort_order,weight,created_at) SELECT json_extract(arg.value,'$.id'),'decisional_balance','cons_change',json_extract(arg.value,'$.text'),arg.key,json_extract(arg.value,'$.weight'),COALESCE(decisional_balance.updated_at,CURRENT_TIMESTAMP) FROM decisional_balance, json_each(decisional_balance.cons_change) AS arg`,
@@ -1831,6 +1833,12 @@ export interface TreeSelection {
   notes: string | null
   /** Domaines de contexte déclarés (clés i18n), optionnels. */
   context: string[]
+  /**
+   * Contexte libre saisi par le patient via « + Autre » (K-6). Séparé de `context`,
+   * qui ne contient que des clés i18n : mélanger les deux ferait passer un texte
+   * patient dans `t()`, avec le risque qu'il tombe sur une clé existante.
+   */
+  context_other: string | null
   created_at: string
 }
 
@@ -1845,6 +1853,7 @@ export async function createTreeSelectionsTable(database: SQLite.SQLiteDatabase)
       intensity       INTEGER,
       notes           TEXT,
       context_json    TEXT,
+      context_other   TEXT,
       created_at      TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_tree_selections_module ON tree_selections(module_id, created_at DESC);
@@ -1860,6 +1869,7 @@ interface TreeSelectionRow {
   intensity: number | null
   notes: string | null
   context_json: string | null
+  context_other: string | null
   created_at: string
 }
 
@@ -1899,6 +1909,7 @@ export async function getAllTreeSelections(moduleId: string, limit = 100): Promi
     intensity: r.intensity,
     notes: r.notes,
     context: parseContext(r.context_json),
+    context_other: r.context_other ?? null,
     created_at: r.created_at,
   }))
 }
@@ -1909,8 +1920,8 @@ export async function saveTreeSelection(
   const database = getDb()
   await database.runAsync(
     `INSERT OR REPLACE INTO tree_selections
-       (id, module_id, selected_id, selected_label, path_json, intensity, notes, context_json)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (id, module_id, selected_id, selected_label, path_json, intensity, notes, context_json, context_other)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       entry.id,
       entry.module_id,
@@ -1920,6 +1931,7 @@ export async function saveTreeSelection(
       entry.intensity,
       entry.notes,
       JSON.stringify(entry.context ?? []),
+      entry.context_other,
     ]
   )
 }

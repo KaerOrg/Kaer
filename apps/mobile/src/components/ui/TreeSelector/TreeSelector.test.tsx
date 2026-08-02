@@ -20,11 +20,14 @@ const NODES: TreeSelectorNode[] = [
     children: [
       {
         id: 'joy.serenity', label: 'Sérénité',
+        definition: 'tournée vers ce qui vient de se passer',
         children: [
           { id: 'joy.serenity.calm', label: 'Calme', children: [] },
           { id: 'joy.serenity.peace', label: 'Paix', children: [] },
         ],
       },
+      // Nuance sans mots : un tap suffit, aucune chip (cas des 16 nuances élaguées).
+      { id: 'joy.calm', label: 'Quiétude', definition: 'rien ne presse', children: [] },
     ],
   },
   {
@@ -35,9 +38,13 @@ const NODES: TreeSelectorNode[] = [
 
 const BASE_TEXTS: TreeSelectorTexts = {
   newBtn: 'Identifier', intro: 'Choisissez une émotion', historyLabel: 'Historique',
-  emptyTitle: 'Rien encore', emptyText: 'Commencez', intensityTitle: 'Intensité',
-  intensityHint: 'De 1 à 10', contextTitle: 'Contexte', contextHint: 'Optionnel',
-  notesTitle: 'Notes', notesHint: 'Libre', notesPlaceholder: 'Écrivez…',
+  emptyTitle: 'Rien encore', emptyText: 'Commencez',
+  entryTitle: 'Vous pouvez enregistrer, ou préciser.',
+  intensityTitle: 'Force',
+  intensityAnchorMin: 'à peine', intensityAnchorMax: 'au maximum',
+  contextTitle: 'En lien avec',
+  contextOtherBtn: 'Autre', contextOtherPlaceholder: 'En lien avec quoi ?',
+  notesTitle: 'Qu’est-ce qui s’est passé ?', notesPlaceholder: 'Écrivez…',
   continueBtn: 'Continuer', saveBtn: 'Enregistrer', validateHereBtn: 'Je ne sais pas',
   validateHereKeep: (label: string) => `on garde « ${label} »`,
   skipBtn: 'Je ne sais pas trop', stopHint: 'S’arrêter à la famille est déjà une réponse.',
@@ -49,8 +56,8 @@ const BASE_TEXTS: TreeSelectorTexts = {
 function makeConfig(over: Partial<TreeSelectorConfig> = {}): TreeSelectorConfig {
   return {
     enableIntensity: true, enableNotes: true, enableContext: false,
-    enableEarlyValidate: false, intensityMax: 10, midIntensity: 5,
-    intensityValues: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], contextOptions: [],
+    enableEarlyValidate: false,
+    intensityValues: [1, 2, 3, 4, 5], contextOptions: [],
     ...over,
   }
 }
@@ -128,22 +135,16 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(screen.getByTestId('node-fear')).toBeTruthy()
   })
 
-  it('descend dans l\'arbre puis atteint l\'intensité sur une feuille', () => {
+  it('descend dans l\'arbre puis atteint la fiche unique sur une feuille', () => {
     renderTree()
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-joy'))
     expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    // La nuance porte des mots : elle se déplie sur place, sans écran de plus (K-5).
     fireEvent.press(screen.getByTestId('node-joy.serenity'))
-    fireEvent.press(screen.getByTestId('node-joy.serenity.calm'))
-    expect(screen.getByTestId('intensity-card')).toBeTruthy()
-  })
-
-  it('met à jour l\'intensité affichée au tap', () => {
-    renderTree()
-    fireEvent.press(screen.getByTestId('start-new-button'))
-    fireEvent.press(screen.getByTestId('node-fear')) // feuille directe
-    fireEvent.press(screen.getByTestId('intensity-btn-8'))
-    expect(screen.getByTestId('intensity-value').props.children).toBe(8)
+    expect(screen.getByTestId('chips-of-joy.serenity')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('leaf-joy.serenity.calm'))
+    expect(screen.getByTestId('intensity-section')).toBeTruthy()
   })
 
   it('soumet pathIds + intensité + notes à l\'enregistrement', async () => {
@@ -151,12 +152,12 @@ describe('ui/TreeSelector (primitive)', () => {
     renderTree({ onSubmit })
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-fear'))
-    fireEvent.press(screen.getByTestId('intensity-btn-7'))
-    fireEvent.press(screen.getByTestId('continue-intensity'))
+    // Un seul écran : intensité, contexte et note se saisissent au même endroit (K-6).
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
     fireEvent.changeText(screen.getByTestId('notes-input'), 'au lever')
     await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
     expect(onSubmit).toHaveBeenCalledWith({
-      pathIds: ['fear'], intensity: 7, context: [], notes: 'au lever',
+      pathIds: ['fear'], intensity: 4, context: [], contextOther: '', notes: 'au lever',
     })
   })
 
@@ -168,7 +169,7 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('node-joy'))
     await act(async () => { fireEvent.press(screen.getByTestId('validate-here')) })
     expect(onSubmit).toHaveBeenCalledWith({
-      pathIds: ['joy'], intensity: null, context: [], notes: '',
+      pathIds: ['joy'], intensity: null, context: [], contextOther: '', notes: '',
     })
   })
 
@@ -212,9 +213,89 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-joy'))
     fireEvent.press(screen.getByTestId('validate-here'))
-    fireEvent.press(screen.getByTestId('intensity-btn-7'))
-    expect(screen.getByTestId('intensity-btn-7').props.accessibilityState).toEqual({ selected: true })
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
+    expect(screen.getByTestId('intensity-btn-4').props.accessibilityState).toEqual({ selected: true })
     expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: false })
+  })
+
+  // ── Fiche unique (K-6, ticket #254) ───────────────────────────────────────
+
+  it('réunit intensité, contexte et note sur un seul écran', () => {
+    const config = makeConfig({
+      enableContext: true,
+      contextOptions: [{ code: 'ctx.work', label: 'Travail', icon: 'briefcase-outline' }],
+    })
+    renderTree({ config })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    expect(screen.getByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('context-section')).toBeTruthy()
+    expect(screen.getByTestId('notes-section')).toBeTruthy()
+    expect(screen.getByTestId('save-entry')).toBeTruthy()
+  })
+
+  it('l\'intensité n\'a aucune valeur par défaut : rien n\'est présélectionné', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderTree({ onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    for (const v of [1, 2, 3, 4, 5]) {
+      expect(screen.getByTestId(`intensity-btn-${v}`).props.accessibilityState).toEqual({ selected: false })
+    }
+    // Enregistrer sans y toucher laisse l'intensité nulle, pas une valeur inventée.
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({ intensity: null }))
+  })
+
+  it('re-taper le cran actif le désélectionne : le champ reste facultatif', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    fireEvent.press(screen.getByTestId('intensity-btn-3'))
+    expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: true })
+    fireEvent.press(screen.getByTestId('intensity-btn-3'))
+    expect(screen.getByTestId('intensity-btn-3').props.accessibilityState).toEqual({ selected: false })
+  })
+
+  it('affiche les ancrages aux bornes de l\'échelle, sans label sur les valeurs', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    expect(screen.getByText('à peine')).toBeTruthy()
+    expect(screen.getByText('au maximum')).toBeTruthy()
+  })
+
+  it('« + Autre » ouvre un champ libre, stocké comme contexte', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({
+      enableContext: true, enableIntensity: false, enableNotes: false,
+      contextOptions: [{ code: 'ctx.work', label: 'Travail', icon: 'briefcase-outline' }],
+    })
+    renderTree({ config, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    expect(screen.queryByTestId('context-other-input')).toBeNull()
+    fireEvent.press(screen.getByTestId('context-other'))
+    fireEvent.changeText(screen.getByTestId('context-other-input'), 'trajet du matin')
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    // Séparé des codes i18n : un texte patient ne passe pas dans t().
+    expect(onSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      context: [], contextOther: 'trajet du matin',
+    }))
+  })
+
+  it('refermer « + Autre » efface la saisie', () => {
+    const config = makeConfig({
+      enableContext: true,
+      contextOptions: [{ code: 'ctx.work', label: 'Travail', icon: 'briefcase-outline' }],
+    })
+    renderTree({ config })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-fear'))
+    fireEvent.press(screen.getByTestId('context-other'))
+    fireEvent.changeText(screen.getByTestId('context-other-input'), 'trajet')
+    fireEvent.press(screen.getByTestId('context-other'))
+    expect(screen.queryByTestId('context-other-input')).toBeNull()
   })
 
   // ── Choix de la famille (K-4, ticket #252) ────────────────────────────────
@@ -257,7 +338,96 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(screen.queryByTestId('skip-emotion')).toBeNull()
   })
 
-  it('enchaîne l\'étape contexte et renvoie les codes sélectionnés', async () => {
+  // ── Nuances : définition, mots en chips, plus d'écran de niveau 3 (K-5, #253) ──
+
+  it('affiche la définition de chaque nuance sous son nom', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.getByText('tournée vers ce qui vient de se passer')).toBeTruthy()
+  })
+
+  it('une nuance sans mots enchaîne directement : trois taps pour une saisie', () => {
+    renderTree({ config: makeConfig({ enableIntensity: false, enableContext: false }) })
+    fireEvent.press(screen.getByTestId('start-new-button'))   // 1
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.calm'))      // nuance sans chips
+    // Pas de chips, pas d'écran de plus : on est déjà sur la fiche finale.
+    expect(screen.getByTestId('notes-input')).toBeTruthy()
+  })
+
+  it('déplier une nuance ne descend pas d\'un niveau : les mots sont des chips', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    // Toujours la liste des nuances, avec les mots dépliés dedans.
+    expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    expect(screen.getByTestId('chips-of-joy.serenity')).toBeTruthy()
+    expect(screen.getByText('Calme')).toBeTruthy()
+    expect(screen.getByText('Paix')).toBeTruthy()
+  })
+
+  it('re-taper une nuance dépliée la referme', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    expect(screen.queryByTestId('chips-of-joy.serenity')).toBeNull()
+  })
+
+  it('« Continuer » valide la nuance dépliée sans descendre au mot', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false, enableEarlyValidate: true })
+    renderTree({ config, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    await act(async () => { fireEvent.press(screen.getByTestId('continue-selection')) })
+    expect(onSubmit).toHaveBeenCalledWith({
+      pathIds: ['joy', 'joy.serenity'], intensity: null, context: [], contextOther: '', notes: '',
+    })
+  })
+
+  it('choisir un mot conserve la nuance dans le chemin enregistré', async () => {
+    // Régression : la carte dépliée n'est pas « traversée », elle n'entre donc pas
+    // dans le chemin toute seule. Sans l'insérer, l'entrée perdait sa nuance.
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    const config = makeConfig({ enableIntensity: false, enableNotes: false })
+    renderTree({ config, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    await act(async () => { fireEvent.press(screen.getByTestId('leaf-joy.serenity.calm')) })
+    expect(onSubmit).toHaveBeenCalledWith({
+      pathIds: ['joy', 'joy.serenity', 'joy.serenity.calm'],
+      intensity: null, context: [], contextOther: '', notes: '',
+    })
+  })
+
+  it('« Continuer » n\'apparaît qu\'une fois une nuance dépliée', () => {
+    renderTree({ config: makeConfig({ enableEarlyValidate: true }) })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    expect(screen.queryByTestId('continue-selection')).toBeNull()
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    expect(screen.getByTestId('continue-selection')).toBeTruthy()
+  })
+
+  it('le retour referme la carte dépliée avant de remonter d\'un niveau', () => {
+    renderTree()
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('node-joy'))
+    fireEvent.press(screen.getByTestId('node-joy.serenity'))
+    fireEvent.press(screen.getByTestId('back-button'))
+    expect(screen.queryByTestId('chips-of-joy.serenity')).toBeNull()
+    expect(screen.getByTestId('level-2-list')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('back-button'))
+    expect(screen.getByTestId('level-1-grid')).toBeTruthy()
+  })
+
+  it('renvoie les codes de contexte sélectionnés', async () => {
     const onSubmit = jest.fn().mockResolvedValue(undefined)
     const config = makeConfig({
       enableContext: true, enableIntensity: false, enableNotes: false, enableEarlyValidate: true,
@@ -269,9 +439,9 @@ describe('ui/TreeSelector (primitive)', () => {
     fireEvent.press(screen.getByTestId('validate-here'))
     expect(screen.getByTestId('context-chips')).toBeTruthy()
     fireEvent.press(screen.getByTestId('context-ctx.work'))
-    await act(async () => { fireEvent.press(screen.getByTestId('continue-context')) })
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
     expect(onSubmit).toHaveBeenCalledWith({
-      pathIds: ['joy'], intensity: null, context: ['ctx.work'], notes: '',
+      pathIds: ['joy'], intensity: null, context: ['ctx.work'], contextOther: '', notes: '',
     })
   })
 
@@ -279,7 +449,6 @@ describe('ui/TreeSelector (primitive)', () => {
     renderTree()
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-fear'))
-    fireEvent.press(screen.getByTestId('continue-intensity'))
     fireEvent.press(screen.getByTestId('cancel-entry'))
     expect(screen.getByTestId('list-empty')).toBeTruthy()
   })

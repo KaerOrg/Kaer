@@ -56,9 +56,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     enableNotes: config.enableNotes,
     enableContext: config.enableContext,
     enableEarlyValidate: config.enableEarlyValidate,
-    intensityMax: config.intensityMax,
     intensityValues: config.intensityValues,
-    midIntensity: config.midIntensity,
     contextOptions: config.rawContextOptions.map(o => ({ ...o, label: t(o.code) })),
   }), [config, t])
 
@@ -68,12 +66,14 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     historyLabel: lbl('history_label'),
     emptyTitle: lbl('empty_title'),
     emptyText: lbl('empty_text'),
+    entryTitle: lbl('entry_title'),
     intensityTitle: lbl('intensity_title'),
-    intensityHint: lbl('intensity_hint'),
+    intensityAnchorMin: lbl('intensity_anchor_min'),
+    intensityAnchorMax: lbl('intensity_anchor_max'),
     contextTitle: lbl('context_title'),
-    contextHint: lbl('context_hint'),
+    contextOtherBtn: lbl('context_other_btn'),
+    contextOtherPlaceholder: lbl('context_other_placeholder'),
     notesTitle: lbl('notes_title'),
-    notesHint: lbl('notes_hint'),
     notesPlaceholder: lbl('notes_placeholder'),
     continueBtn: lbl('continue_btn') || t('common.continue'),
     saveBtn: lbl('save_btn') || t('common.save'),
@@ -109,6 +109,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       intensity: result.intensity,
       notes: result.notes.trim() || null,
       context: result.context,
+      context_other: result.contextOther.trim() || null,
     }
     await persist(selection)
   }, [config.nodeMap, moduleId, persist])

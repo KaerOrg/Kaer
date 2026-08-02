@@ -139,7 +139,12 @@ export function toEntryVM(
     primaryLabel: labels[0] ?? '',
     secondaryLabel: labels.slice(1).join(' · '),
     intensityLabel: entry.intensity != null ? `${entry.intensity}/${intensityMax}` : null,
-    contextLabels: entry.context.map(code => t(code)),
+    // Le contexte libre n'est PAS résolu par `t()` : c'est du texte patient, pas une
+    // clé. Il ferme la liste des chips, après les domaines déclarés.
+    contextLabels: [
+      ...entry.context.map(code => t(code)),
+      ...(entry.context_other ? [entry.context_other] : []),
+    ],
     notes: entry.notes,
     dateLabel: formatDate(entry.created_at),
   }

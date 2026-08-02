@@ -35,7 +35,6 @@ export function useTreeSelectorConfig(fields: ContentField[]): ParsedTreeConfig 
       enableEarlyValidate: (props['enable_early_validate'] ?? '0') === '1',
       intensityMin,
       intensityMax,
-      midIntensity: Math.round((intensityMin + intensityMax) / 2),
       intensityValues: intensityValuesFor(intensityMin, intensityMax),
       rawContextOptions,
     }
