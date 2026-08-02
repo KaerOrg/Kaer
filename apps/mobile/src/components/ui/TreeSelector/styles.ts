@@ -14,9 +14,14 @@ const TOUCH_TARGET = 44
 export const styles = StyleSheet.create({
   container:        { flex: 1, backgroundColor: colors.background },
   center:           { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background },
-  // ── Bouton démarrer (mode historique) : habillage via `@ui/Button` (variant
-  // primary, AA-safe) ; ce style ne porte que le positionnement.
-  startBtnLayout:   { marginHorizontal: spacing.lg, marginTop: spacing.lg },
+  // ── Bouton démarrer (mode historique)
+  startBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.lg,
+    paddingVertical: spacing.md, marginHorizontal: spacing.lg, marginTop: spacing.lg,
+    minHeight: TOUCH_TARGET,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  startBtnText:     { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   // ── Historique
   historyContent:   { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
   introCard: {
@@ -106,22 +111,34 @@ export const styles = StyleSheet.create({
     fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center',
     lineHeight: 17, marginTop: spacing.xs,
   },
+  // Bas d'écran des niveaux ≥ 2 : sortie « je ne sais pas » à gauche, validation de
+  // la carte dépliée à droite. La seconde n'apparaît que si une carte est dépliée.
+  stepActions:      { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  stepContinueBtn: {
+    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md,
+    backgroundColor: colors.primary, minHeight: TOUCH_TARGET,
+    alignItems: 'center', justifyContent: 'center',
+  },
   validateHereBtn: {
-    alignItems: 'center', justifyContent: 'center', gap: 2,
+    flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2,
     borderRadius: radius.lg, borderWidth: 1.5, paddingVertical: spacing.md,
-    marginTop: spacing.sm, backgroundColor: colors.card, minHeight: TOUCH_TARGET,
+    backgroundColor: colors.card, minHeight: TOUCH_TARGET,
   },
   validateHereText: { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
   validateHereKeep: { fontSize: fontSize.xs, color: colors.textMuted },
   chipsWrap:        { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.lg },
   listContainer:    { gap: spacing.sm },
+  // Carte de nuance (niveaux ≥ 2) : titre, définition, et mots en chips une fois
+  // dépliée. Le niveau 3 n'a plus d'écran à lui (K-5).
   optionCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderLeftWidth: 4, minHeight: TOUCH_TARGET,
+    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 4,
+    minHeight: TOUCH_TARGET, gap: spacing.xs,
     ...shadows.sm,
   },
   optionLabel:      { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
+  optionDefinition: { fontSize: fontSize.sm, color: colors.textMuted, lineHeight: 18, marginTop: 2 },
+  optionChips:      { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.xs },
   // ── Intensité
   intensityCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
@@ -146,7 +163,12 @@ export const styles = StyleSheet.create({
   },
   intensityBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   intensityBtnText: { fontSize: fontSize.label, fontWeight: '600', color: colors.text },
-  // Le bouton « Continuer » passe par `@ui/Button` (variant primary), aucun style local.
+  continueBtn: {
+    borderRadius: radius.lg, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
+    backgroundColor: colors.primary,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  continueBtnText:  { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   // ── Notes
   summaryCard: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
@@ -166,9 +188,13 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center',
   },
   cancelBtnText:    { color: colors.textMuted, fontSize: fontSize.caption, fontWeight: '600' },
-  // Le bouton « Enregistrer » passe par `@ui/Button` (variant primary, état `loading`) ;
-  // ce style ne porte que l'occupation de l'espace restant dans la rangée d'actions.
-  saveBtnFlex:      { flex: 1 },
+  saveBtn: {
+    flex: 1, borderRadius: radius.lg, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
+    backgroundColor: colors.primary,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
+  },
+  saveBtnText:      { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
+  btnDisabled:      { opacity: 0.6 },
   // Note de bas de page (footer_note)
   infoBox: {
     flexDirection: 'row', gap: spacing.xs, alignItems: 'flex-start',

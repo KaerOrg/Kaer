@@ -7,6 +7,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
+import { TreeSelectorOptionCard } from './TreeSelectorOptionCard'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
 import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
@@ -17,15 +18,25 @@ interface TreeSelectorNavigationProps {
   config: TreeSelectorConfig
   texts: TreeSelectorTexts
   footerText?: string | null
+  /** Carte dépliée au niveau courant (ses feuilles sont rendues en chips). */
+  expanded: TreeSelectorNode | null
   onBack: () => void
   onSelectNode: (node: TreeSelectorNode) => void
+  /** Feuille choisie dans une carte dépliée : le nœud déplié entre dans le chemin. */
+  onSelectLeaf: (leaf: TreeSelectorNode) => void
+  onToggleExpand: (node: TreeSelectorNode) => void
+  onContinue: () => void
   onValidateHere: () => void
-  /** Sortie sans rien nommer, niveau 1 seulement. Absent : pas de bouton. */
-  onSkip?: () => void
+  /**
+   * Quitte le niveau 1 sans rien nommer. Toujours fourni par le primitive (il
+   * referme la sélection) ; le bouton est piloté par le libellé `texts.skipBtn`.
+   */
+  onSkip: () => void
 }
 
 export function TreeSelectorNavigation({
-  nodes, path, config, texts, footerText, onBack, onSelectNode, onValidateHere, onSkip,
+  nodes, path, config, texts, footerText, expanded,
+  onBack, onSelectNode, onSelectLeaf, onToggleExpand, onContinue, onValidateHere, onSkip,
 }: TreeSelectorNavigationProps) {
   const accentColor = resolveAccentColor(path)
   const breadcrumb = buildBreadcrumb(path)
@@ -90,43 +101,46 @@ export function TreeSelectorNavigation({
           </View>
         ) : (
           <View style={styles.listContainer} testID={`level-${level}-list`}>
-            {currentNodes.map(node => {
-              const nodeColor = node.color ?? accentColor
-              return (
-                <Pressable
-                  key={node.id}
-                  style={({ pressed }) => [
-                    styles.optionCard,
-                    { borderLeftColor: nodeColor },
-                    pressed && styles.cardPressed,
-                  ]}
-                  onPress={() => onSelectNode(node)}
-                  accessibilityRole="button"
-                  accessibilityLabel={node.label}
-                  testID={`node-${node.id}`}
-                >
-                  <Text style={styles.optionLabel}>{node.label}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
-                </Pressable>
-              )
-            })}
+            {currentNodes.map(node => (
+              <TreeSelectorOptionCard
+                key={node.id}
+                node={node}
+                accentColor={accentColor}
+                expanded={expanded?.id === node.id}
+                onPress={node.children.length > 0 ? onToggleExpand : onSelectNode}
+                onSelectLeaf={onSelectLeaf}
+              />
+            ))}
           </View>
         )}
 
         {showValidate ? (
-          <Pressable
-            style={[styles.validateHereBtn, { borderColor: accentColor }]}
-            onPress={onValidateHere}
-            accessibilityRole="button"
-            accessibilityLabel={keepLabel ? `${texts.validateHereBtn}, ${keepLabel}` : texts.validateHereBtn}
-            testID="validate-here"
-          >
-            <Text style={styles.validateHereText}>{texts.validateHereBtn}</Text>
-            {keepLabel ? <Text style={styles.validateHereKeep}>{keepLabel}</Text> : null}
-          </Pressable>
+          <View style={styles.stepActions}>
+            <Pressable
+              style={[styles.validateHereBtn, { borderColor: accentColor }]}
+              onPress={onValidateHere}
+              accessibilityRole="button"
+              accessibilityLabel={keepLabel ? `${texts.validateHereBtn}, ${keepLabel}` : texts.validateHereBtn}
+              testID="validate-here"
+            >
+              <Text style={styles.validateHereText}>{texts.validateHereBtn}</Text>
+              {keepLabel ? <Text style={styles.validateHereKeep}>{keepLabel}</Text> : null}
+            </Pressable>
+            {expanded ? (
+              <Pressable
+                style={styles.stepContinueBtn}
+                onPress={onContinue}
+                accessibilityRole="button"
+                accessibilityLabel={texts.continueBtn}
+                testID="continue-selection"
+              >
+                <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
+              </Pressable>
+            ) : null}
+          </View>
         ) : null}
 
-        {level === 1 && onSkip ? (
+        {level === 1 && texts.skipBtn ? (
           <>
             <Pressable
               style={styles.skipBtn}

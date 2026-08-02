@@ -9,6 +9,7 @@
 // La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque mode est un
 // composant dédié (history / navigation / intensity / context / notes).
 
+import { useCallback } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { colors } from '@theme'
 import { useTreeSelectorFlow } from './useTreeSelectorFlow'
@@ -38,9 +39,10 @@ export interface TreeSelectorProps {
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>
   onDelete: (id: string) => void
   /**
-   * Sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le bouton
-   * n'apparaît que si ce callback est fourni : un arbre sans porte de sortie
-   * n'en affiche pas.
+   * Notification optionnelle quand le patient quitte le niveau 1 sans rien nommer
+   * (« Je ne sais pas trop »). La porte de sortie elle-même est pilotée par le
+   * libellé `texts.skipBtn` (présent = bouton affiché) ; ce callback ne sert qu'à
+   * prévenir le parent — le primitive referme déjà la sélection tout seul.
    */
   onSkip?: () => void
 }
@@ -49,6 +51,15 @@ export function TreeSelector({
   nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete, onSkip,
 }: TreeSelectorProps) {
   const flow = useTreeSelectorFlow(config, onSubmit)
+
+  // « Je ne sais pas trop » : refermer la sélection et revenir à l'historique (rien
+  // n'est persisté), puis notifier le parent s'il le souhaite. Le reset est interne
+  // au primitive — le parent n'a pas la main sur le mode du flux — d'où ce wrapper
+  // plutôt qu'un simple passe-plat du callback parent.
+  const handleSkip = useCallback(() => {
+    flow.handleCancel()
+    onSkip?.()
+  }, [flow, onSkip])
 
   if (loading) {
     return (
@@ -78,10 +89,14 @@ export function TreeSelector({
         config={config}
         texts={texts}
         footerText={footerText}
+        expanded={flow.expanded}
         onBack={flow.handleBack}
         onSelectNode={flow.handleSelectNode}
+        onSelectLeaf={flow.handleSelectLeaf}
+        onToggleExpand={flow.handleToggleExpand}
+        onContinue={flow.handleContinue}
         onValidateHere={flow.handleValidateHere}
-        onSkip={onSkip}
+        onSkip={handleSkip}
       />
     )
   }

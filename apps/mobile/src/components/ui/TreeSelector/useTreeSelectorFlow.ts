@@ -13,6 +13,11 @@ import type {
 export interface TreeSelectorFlow {
   mode: TreeSelectorMode
   path: TreeSelectorNode[]
+  /**
+   * Nœud déplié au niveau courant (ses feuilles sont affichées en chips dans sa
+   * carte, au lieu d'ouvrir un écran de plus). `null` : aucune carte dépliée.
+   */
+  expanded: TreeSelectorNode | null
   intensity: number
   context: string[]
   notes: string
@@ -21,6 +26,9 @@ export interface TreeSelectorFlow {
   toggleContext: (code: string) => void
   handleStartNew: () => void
   handleSelectNode: (node: TreeSelectorNode) => void
+  handleSelectLeaf: (leaf: TreeSelectorNode) => void
+  handleToggleExpand: (node: TreeSelectorNode) => void
+  handleContinue: () => void
   handleValidateHere: () => void
   handleBack: () => void
   handleCancel: () => void
@@ -37,12 +45,14 @@ export function useTreeSelectorFlow(
 
   const [mode, setMode] = useState<TreeSelectorMode>('history')
   const [path, setPath] = useState<TreeSelectorNode[]>([])
+  const [expanded, setExpanded] = useState<TreeSelectorNode | null>(null)
   const [intensity, setIntensity] = useState<number>(midIntensity)
   const [context, setContext] = useState<string[]>([])
   const [notes, setNotes] = useState('')
 
   const resetDraft = useCallback(() => {
     setPath([])
+    setExpanded(null)
     setIntensity(midIntensity)
     setContext([])
     setNotes('')
@@ -83,10 +93,36 @@ export function useTreeSelectorFlow(
     const newPath = [...path, node]
     if (node.children.length > 0) {
       setPath(newPath)
+      setExpanded(null)
       return
     }
+    // Feuille : on enchaîne directement. C'est ce qui tient la promesse d'une
+    // saisie en trois taps (famille, nuance sans mots, enregistrer).
     proceedFrom(newPath)
   }, [path, proceedFrom])
+
+  /**
+   * Carte porteuse de feuilles : elle se déplie sur place pour montrer ses mots en
+   * chips, au lieu d'ouvrir un écran de plus. Re-taper la referme.
+   */
+  const handleToggleExpand = useCallback((node: TreeSelectorNode) => {
+    setExpanded(prev => (prev?.id === node.id ? null : node))
+  }, [])
+
+  /**
+   * Sélection d'une feuille depuis une carte dépliée. Le nœud déplié n'est PAS dans
+   * `path` (il n'a pas été « traversé ») : il faut l'insérer, sinon le chemin
+   * persisté saute un niveau et l'entrée perd sa nuance.
+   */
+  const handleSelectLeaf = useCallback((leaf: TreeSelectorNode) => {
+    proceedFrom(expanded ? [...path, expanded, leaf] : [...path, leaf])
+  }, [expanded, path, proceedFrom])
+
+  /** Valide la carte dépliée sans descendre jusqu'au mot. */
+  const handleContinue = useCallback(() => {
+    if (!expanded) return
+    proceedFrom([...path, expanded])
+  }, [expanded, path, proceedFrom])
 
   const handleValidateHere = useCallback(() => {
     proceedFrom(path)
@@ -103,9 +139,10 @@ export function useTreeSelectorFlow(
       setMode('selection'); return
     }
     if (mode === 'intensity') { setMode('selection'); return }
+    if (expanded) { setExpanded(null); return }
     if (path.length > 0) { setPath(prev => prev.slice(0, -1)); return }
     setMode('history')
-  }, [mode, path, enableContext, enableIntensity])
+  }, [mode, path, expanded, enableContext, enableIntensity])
 
   const handleCancel = useCallback(() => {
     resetDraft()
@@ -132,9 +169,10 @@ export function useTreeSelectorFlow(
   }, [])
 
   return {
-    mode, path, intensity, context, notes,
+    mode, path, expanded, intensity, context, notes,
     setIntensity, setNotes, toggleContext,
-    handleStartNew, handleSelectNode, handleValidateHere, handleBack,
+    handleStartNew, handleSelectNode, handleSelectLeaf, handleToggleExpand, handleContinue,
+    handleValidateHere, handleBack,
     handleCancel, handleConfirmIntensity, handleConfirmContext, handleSaveFinal,
   }
 }

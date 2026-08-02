@@ -18,8 +18,9 @@ export interface TreeSelectorNode {
   id: string
   label: string
   /**
-   * Ligne de définition affichée sous le titre, au niveau 1 (« menace,
-   * incertitude »). Déjà traduite. Absente : la carte n'affiche que son titre.
+   * Ligne de définition affichée sous le titre, à tous les niveaux (familles comme
+   * nuances : « menace, incertitude »). Déjà traduite. Absente : la carte n'affiche
+   * que son titre.
    */
   definition?: string
   color?: string
@@ -86,7 +87,7 @@ export interface TreeSelectorTexts {
   validateHereKeep: (label: string) => string
   /**
    * Sortie du niveau 1 pour qui n'arrive pas à nommer (« Je ne sais pas trop »).
-   * Le bouton n'est rendu que si `onSkip` est fourni.
+   * Chaîne vide : pas de porte de sortie (le bouton n'est pas rendu).
    */
   skipBtn: string
   /** Rappel sous le niveau 1 : s'arrêter à la racine est déjà une réponse. */

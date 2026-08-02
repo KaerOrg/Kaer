@@ -1,11 +1,10 @@
 // Mode « historique » du primitive TreeSelector : bouton démarrer, intro,
 // liste des entrées passées (view-models déjà résolus), état vide, note de pied.
 
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, Pressable, ScrollView } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { Ionicons } from '@expo/vector-icons'
 import { colors } from '@theme'
-import { Button } from '../Button/Button'
 import { Chip } from '../Chip/Chip'
 import type { TreeSelectorEntry, TreeSelectorTexts } from './types'
 import { styles } from './styles'
@@ -22,15 +21,16 @@ interface TreeSelectorHistoryProps {
 export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, onDelete }: TreeSelectorHistoryProps) {
   return (
     <View style={styles.container}>
-      <Button
-        variant="primary"
+      <Pressable
+        style={styles.startBtn}
         onPress={onStartNew}
-        label={texts.newBtn}
-        iconLeft={<MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.text} />}
+        accessibilityRole="button"
         accessibilityLabel={texts.newBtn}
         testID="start-new-button"
-        style={styles.startBtnLayout}
-      />
+      >
+        <MaterialCommunityIcons name="plus-circle-outline" size={20} color={colors.text} />
+        <Text style={styles.startBtnText}>{texts.newBtn}</Text>
+      </Pressable>
 
       <ScrollView contentContainerStyle={styles.historyContent}>
         {texts.intro ? (
@@ -75,13 +75,15 @@ export function TreeSelectorHistory({ entries, texts, footerText, onStartNew, on
                         <Text style={styles.intensityText}>{entry.intensityLabel}</Text>
                       </View>
                     ) : null}
-                    <Button
-                      variant="ghost"
+                    <Pressable
                       onPress={() => onDelete(entry.id)}
+                      accessibilityRole="button"
                       accessibilityLabel={texts.delete}
-                      iconLeft={<MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />}
+                      hitSlop={8}
                       testID={`delete-${entry.id}`}
-                    />
+                    >
+                      <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors.textMuted} />
+                    </Pressable>
                   </View>
                 </View>
                 {entry.contextLabels.length > 0 ? (

@@ -61,8 +61,23 @@ granularité émotionnelle.
 
 ## Taxonomie (Willcox v2)
 
-8 familles, 37 nuances **qualitatives** (jamais des paliers d'intensité), 74 mots
-précis. **Profondeur libre** : le patient valide à n'importe quel niveau.
+8 familles, 37 nuances **qualitatives** (jamais des paliers d'intensité), 42 mots
+précis affichés en chips. **Profondeur libre** : le patient valide à n'importe quel
+niveau.
+
+**Élagage du niveau 3** (K-5, ticket #253). Une paire de mots ne se justifie que si
+elle sépare **deux dimensions** (tête / corps, moi / l'autre, état / mouvement),
+jamais deux degrés : « écœuré » et « révulsé » ne diffèrent que par l'intensité, et
+c'est le curseur qui la porte. Règle QUOI / COMBIEN appliquée jusqu'au mot.
+
+- **21 nuances** portent deux mots au choix, affichés en chips dans leur carte dépliée.
+- **16 nuances** n'en portent aucun : leur mot conservé vit dans leur définition
+  (« Serein, rien ne pèse. ») et le patient valide directement sur la nuance.
+- **L'écran du niveau 3 n'existe plus** : les mots sont des chips dans la carte de la
+  nuance. Un tap de plus pour qui veut le mot exact, zéro écran de plus.
+- Les **clés i18n des mots retirés restent** dans les locales : une entrée déjà saisie
+  qui pointe vers l'un d'eux garde son libellé, résolu depuis le `text_code` de son
+  chemin persisté. Rien n'est perdu, l'entrée est seulement rétrogradée dans l'arbre.
 
 | Famille (`node` key) | Teinte | Définition affichée | Nuances |
 |---|---|---|---|
