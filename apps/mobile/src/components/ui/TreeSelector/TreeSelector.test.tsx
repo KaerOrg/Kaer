@@ -238,14 +238,14 @@ describe('ui/TreeSelector (primitive)', () => {
       .toBe('Peur, menace, incertitude')
   })
 
-  it('n\'affiche la sortie « Je ne sais pas trop » que si onSkip est fourni', () => {
-    renderTree()
+  it('n\'affiche la sortie « Je ne sais pas trop » que si son libellé est fourni', () => {
+    renderTree({ texts: { ...BASE_TEXTS, skipBtn: '' } })
     fireEvent.press(screen.getByTestId('start-new-button'))
-    // Sans callback : pas de porte de sortie, donc pas de bouton mort.
+    // Sans libellé skipBtn : pas de porte de sortie, donc pas de bouton mort.
     expect(screen.queryByTestId('skip-emotion')).toBeNull()
   })
 
-  it('appelle onSkip et rappelle qu\'on peut s\'arrêter à la famille', () => {
+  it('referme la sélection et notifie le parent quand on s\'arrête à la famille', () => {
     const onSkip = jest.fn()
     renderTree({ onSkip })
     fireEvent.press(screen.getByTestId('start-new-button'))

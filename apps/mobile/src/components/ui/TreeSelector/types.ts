@@ -87,7 +87,7 @@ export interface TreeSelectorTexts {
   validateHereKeep: (label: string) => string
   /**
    * Sortie du niveau 1 pour qui n'arrive pas à nommer (« Je ne sais pas trop »).
-   * Le bouton n'est rendu que si `onSkip` est fourni.
+   * Chaîne vide : pas de porte de sortie (le bouton n'est pas rendu).
    */
   skipBtn: string
   /** Rappel sous le niveau 1 : s'arrêter à la racine est déjà une réponse. */

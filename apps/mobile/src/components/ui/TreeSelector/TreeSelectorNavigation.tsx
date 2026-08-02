@@ -27,8 +27,11 @@ interface TreeSelectorNavigationProps {
   onToggleExpand: (node: TreeSelectorNode) => void
   onContinue: () => void
   onValidateHere: () => void
-  /** Sortie sans rien nommer, niveau 1 seulement. Absent : pas de bouton. */
-  onSkip?: () => void
+  /**
+   * Quitte le niveau 1 sans rien nommer. Toujours fourni par le primitive (il
+   * referme la sélection) ; le bouton est piloté par le libellé `texts.skipBtn`.
+   */
+  onSkip: () => void
 }
 
 export function TreeSelectorNavigation({
@@ -137,7 +140,7 @@ export function TreeSelectorNavigation({
           </View>
         ) : null}
 
-        {level === 1 && onSkip ? (
+        {level === 1 && texts.skipBtn ? (
           <>
             <Pressable
               style={styles.skipBtn}
