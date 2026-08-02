@@ -769,6 +769,8 @@
       "step_3_hint": "Choisissez le mot le plus juste, ou validez la nuance telle quelle.",
       "validate_here_btn": "Je ne sais pas",
       "validate_here_keep": "on garde « {{label}} »",
+      "skip_btn": "Je ne sais pas trop",
+      "stop_hint": "Vous pouvez vous arrêter à la famille : c’est déjà une réponse.",
       "intensity_title": "Quelle intensité ?",
       "intensity_hint": "De 1 à 10.",
       "continue_btn": "Continuer",
@@ -790,6 +792,16 @@
         "money": "Argent",
         "self": "Moi",
         "other": "Autre"
+      },
+      "node_def": {
+        "joy": "plaisir, élan, gratitude",
+        "sadness": "perte, vide, chagrin",
+        "anger": "obstacle, injustice",
+        "fear": "menace, incertitude",
+        "disgust": "rejet, mépris",
+        "self_conscious": "soi en cause",
+        "powerful": "capable d’agir",
+        "peaceful": "en sécurité, au repos"
       },
       "node": {
         "joy": "Joie",

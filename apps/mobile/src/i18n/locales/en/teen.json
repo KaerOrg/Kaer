@@ -686,6 +686,18 @@
       "step_3_hint": "Pick the most accurate word, or just validate the nuance.",
       "validate_here_btn": "I don’t know",
       "validate_here_keep": "keeping “{{label}}”",
+      "skip_btn": "I’m not sure",
+      "stop_hint": "You can stop at the family: it already counts as an answer.",
+      "node_def": {
+        "joy": "pleasure, drive, gratitude",
+        "sadness": "loss, emptiness, grief",
+        "anger": "obstacle, injustice",
+        "fear": "threat, uncertainty",
+        "disgust": "rejection, contempt",
+        "self_conscious": "self at stake",
+        "powerful": "able to act",
+        "peaceful": "safe, at rest"
+      },
       "intensity_title": "How strong is it?",
       "intensity_hint": "From 1 to 10.",
       "continue_btn": "Continue",

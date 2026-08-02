@@ -463,6 +463,30 @@ l'habillage applicatif garde une variante teen.
 → Réflexe review : dans `teen.json`, un bloc d'échelle clinique ne doit contenir
 AUCUNE clé `instructions*`, `q*`, `opt_*`, `legend_*`, `section_*`, `warning`.
 
+**refonte/nommer-familles-k4 (2026-08-02) — parité teen PARTIELLE : on ajoute une clé teen, on en oublie deux.**
+Le K-4 a ajouté à `emotion_wheel` trois nouvelles clés applicatives dans `common`
+(`skip_btn`, `stop_hint`, `node_def.*` × 8) mais n'a porté dans `teen.json` (fr + en)
+que **`stop_hint`** — `skip_btn` et les 9 `node_def.*` sont restés absents du teen.
+Le piège : le bloc teen d'`emotion_wheel` est **exhaustif** (il double déjà `node`,
+`validate_here_btn`, tous les libellés), donc ce n'est PAS un « fallback assumé » mais
+un oubli ; et `node_def` est une feature **live** (les définitions s'affichent).
+```jsonc
+// common.json : 3 clés ajoutées
+"skip_btn": "Je ne sais pas trop", "stop_hint": "…", "node_def": { "joy": "plaisir, élan, gratitude", … }
+// ❌ teen.json : une seule des trois portée → parité rompue
+"stop_hint": "Tu peux t'arrêter à la famille : c'est déjà une réponse."
+// ✅ teen.json : les trois (même à contenu identique si registre neutre)
+"skip_btn": "…", "stop_hint": "…", "node_def": { "joy": "plaisir, élan, gratitude", … }
+```
+Le fallback i18next masque le trou au runtime (contenu ici à registre neutre : listes
+nominales, 1ʳᵉ personne), d'où l'invisibilité en test — mais la règle
+(« L'absence dans teen est un bug bloquant pour toute clé de module ») ne connaît
+d'exemption que pour les **échelles validées**. `emotion_wheel` est applicatif.
+→ Réflexe review : ne pas se satisfaire de « il y a des clés teen ». Comparer les
+**ensembles** de clés `modules.<id>.*` entre `common` et `teen` pour chaque langue :
+`python3 -c "import json;c=json.load(open('.../fr/common.json'))['modules']['<id>'];t=json.load(open('.../fr/teen.json'))['modules'].get('<id>',{});print(set(_flatten(c))-set(_flatten(t)))"`
+— l'écart doit être vide (hors contenu psychométrique validé).
+
 ---
 
 ## Internationalisation : texte en dur

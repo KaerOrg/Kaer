@@ -764,7 +764,7 @@ composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `�
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `color`/`icon`/`emoji` optionnels) |
+| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `definition`/`color`/`icon` optionnels). `definition` est la ligne affichée sous le titre au niveau 1 |
 | `entries` | `TreeSelectorEntry[]` | View-models d'historique déjà résolus (libellés, date, badge intensité formatés) |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
 | `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits. `validateHereKeep(label)` est une **fonction** : elle rend la ligne secondaire du bouton « valider ici » (« on garde « Peur » »), le niveau conservé étant interpolé par l'appelant |
@@ -772,6 +772,7 @@ composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `�
 | `loading` / `saving` | `boolean` | États de chargement / persistance |
 | `onSubmit` | `(r: TreeSelectorSubmit) => Promise<void>` | Sélection validée : `{ pathIds, intensity, context, notes }` |
 | `onDelete` | `(id: string) => void` | Suppression d'une entrée d'historique |
+| `onSkip` | `() => void` (optionnel) | Sortie du niveau 1 sans rien nommer. **Le bouton n'est rendu que si ce callback est fourni** : un arbre sans porte de sortie n'affiche pas de bouton mort |
 
 ```tsx
 import { TreeSelector } from '@ui/TreeSelector'
@@ -788,6 +789,20 @@ import { TreeSelector } from '@ui/TreeSelector'
   onDelete={handleDelete}
 />
 ```
+
+**Charte de couleur et d'accessibilité** (passe K-10, ticket #258) : trois règles
+tenues par `styles.ts`, à ne pas contourner en style inline depuis un appelant :
+
+| Rôle | Couleur | Pourquoi |
+|---|---|---|
+| Surfaces d'**action** (démarrer, continuer, enregistrer, cran sélectionné) | fond `colors.primary`, libellé `colors.text` | `colors.primary` avec du blanc échoue AA (≈ 2.1:1), ce que documente `packages/shared/src/theme.ts` |
+| Couleur de **famille** (`node.color`) | filet gauche, fond très pâle, icône | elle **identifie**, elle ne porte **jamais** de texte : ces teintes sont pastel et échouent AA en petit corps |
+| Texte secondaire (date, méta) | `colors.textMuted` | `colors.border` en couleur de texte est illisible |
+
+Aucun texte sous `fontSize.xxs` (11), aucune cible tactile sous 44 px (crans
+d'intensité, bouton retour, cartes de niveau 1). La sélection d'un cran d'intensité
+est annoncée par `accessibilityState.selected` : elle n'est pas portée par la seule
+couleur de fond.
 
 > **Conformité MDR** : aucune couleur ne code une gravité — les teintes/emojis codent
 > l'**identité de famille** (transmise par l'appelant). Le primitive affiche la valeur

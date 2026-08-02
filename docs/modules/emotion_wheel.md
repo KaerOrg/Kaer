@@ -52,7 +52,8 @@ granularité émotionnelle.
 
 ## Conformité MDR 2017/745
 
-- Couleurs et emojis = **identité de famille**, jamais une gravité clinique.
+- Couleurs = **identité de famille**, jamais une gravité clinique. Depuis K-10 elles
+  ne portent aucun texte : filet d'accent, fond très pâle, icône.
 - Intensité = **chiffre brut** (1 à 10), sans label ni couleur de seuil.
 - Historique = liste chronologique neutre, **aucune** tendance ni comparaison.
 - Tag de contexte = donnée brute restituée telle quelle.
@@ -63,16 +64,26 @@ granularité émotionnelle.
 8 familles, 37 nuances **qualitatives** (jamais des paliers d'intensité), 74 mots
 précis. **Profondeur libre** : le patient valide à n'importe quel niveau.
 
-| Famille (`node` key) | Couleur | Emoji | Nuances |
+| Famille (`node` key) | Teinte | Définition affichée | Nuances |
 |---|---|---|---|
-| Joie (`joy`) | `#F59E0B` | 😊 | Plaisir, Enthousiasme, Amour, Émerveillement, Gratitude |
-| Tristesse (`sadness`) | `#3B82F6` | 😢 | Abattement, Solitude, Chagrin, Vide, Nostalgie |
-| Colère (`anger`) | `#EF4444` | 😠 | Irritation, Frustration, Hostilité, Indignation, Susceptibilité |
-| Peur (`fear`) | `#8B5CF6` | 😨 | Anxiété, Insécurité, Effroi, Méfiance, Impuissance |
-| Dégoût (`disgust`) | `#6B8E23` | 🤢 | Répulsion, Mépris, Désapprobation |
-| Honte et culpabilité (`self_conscious`) | `#B0728A` | 😳 | Honte, Culpabilité, Gêne, Dévalorisation |
-| Force (`powerful`) | `#F97316` | 💪 | Confiance, Fierté, Courage, Espoir, Valorisation |
-| Apaisement (`peaceful`) | `#14B8A6` | 🧘 | Calme, Sérénité, Sécurité, Compréhension, Acceptation |
+| Joie (`joy`) | `#EFC98A` | plaisir, élan, gratitude | Plaisir, Enthousiasme, Amour, Émerveillement, Gratitude |
+| Tristesse (`sadness`) | `#9CBEEA` | perte, vide, chagrin | Abattement, Solitude, Chagrin, Vide, Nostalgie |
+| Colère (`anger`) | `#E5A3A3` | obstacle, injustice | Irritation, Frustration, Hostilité, Indignation, Susceptibilité |
+| Peur (`fear`) | `#AC9BDE` | menace, incertitude | Anxiété, Insécurité, Effroi, Méfiance, Impuissance |
+| Dégoût (`disgust`) | `#AFBE8B` | rejet, mépris | Répulsion, Mépris, Désapprobation |
+| Honte et culpabilité (`self_conscious`) | `#CDA6B6` | soi en cause | Honte, Culpabilité, Gêne, Dévalorisation |
+| Force (`powerful`) | `#F0B48D` | capable d'agir | Confiance, Fierté, Courage, Espoir, Valorisation |
+| Apaisement (`peaceful`) | `#8ACFC6` | en sécurité, au repos | Calme, Sérénité, Sécurité, Compréhension, Acceptation |
+
+**Teintes pastellisées et emojis supprimés** (K-4, ticket #252). Les valeurs saturées
+d'origine échouaient WCAG AA sur fond clair (Joie `#F59E0B` ≈ 2:1, Force `#F97316`
+≈ 3:1). Les emojis ont été retirés du seed **et** du primitive, sans être remplacés
+par des pictogrammes de visage : un visage a déjà décidé ce qu'est l'émotion, à un
+patient à qui l'on demande précisément de trouver la sienne, et son rendu varie selon
+l'OS. La **définition** remplace l'illustration : elle aide à choisir sans interpréter.
+
+L'historique relit la teinte dans la taxonomie **courante** : une entrée saisie avant
+la pastellisation s'affiche avec la nouvelle teinte, sans que sa donnée soit réécrite.
 
 > Principe clé : l'arbre encode le **QUOI** (qualité), le curseur encode le **COMBIEN**
 > (intensité). « Panique » n'existe pas dans l'arbre : c'est « Effroi » à intensité

@@ -687,6 +687,18 @@
       "step_3_hint": "Choisis le mot le plus juste, ou valide la nuance telle quelle.",
       "validate_here_btn": "Je ne sais pas",
       "validate_here_keep": "on garde « {{label}} »",
+      "skip_btn": "Je ne sais pas trop",
+      "stop_hint": "Tu peux t’arrêter à la famille : c’est déjà une réponse.",
+      "node_def": {
+        "joy": "plaisir, élan, gratitude",
+        "sadness": "perte, vide, chagrin",
+        "anger": "obstacle, injustice",
+        "fear": "menace, incertitude",
+        "disgust": "rejet, mépris",
+        "self_conscious": "soi en cause",
+        "powerful": "capable d’agir",
+        "peaceful": "en sécurité, au repos"
+      },
       "intensity_title": "À quel point est-ce fort ?",
       "intensity_hint": "De 1 à 10.",
       "continue_btn": "Continuer",

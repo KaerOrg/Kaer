@@ -666,6 +666,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- Ligne secondaire du bouton « Je ne sais pas » : rappelle le niveau conservé
   -- (« on garde « Peur » »). Interpolation i18next {{label}} côté layout (K-10).
   ('ew.cfg', 'validate_here_keep',    'modules.emotion_wheel.validate_here_keep'),
+  -- Sortie du niveau 1 pour qui ne sait pas nommer : bouton fantôme + rappel que
+  -- s'arrêter à la famille est déjà une réponse (K-4).
+  ('ew.cfg', 'skip_btn',              'modules.emotion_wheel.skip_btn'),
+  ('ew.cfg', 'stop_hint',             'modules.emotion_wheel.stop_hint'),
   ('ew.cfg', 'intensity_title',       'modules.emotion_wheel.intensity_title'),
   ('ew.cfg', 'intensity_hint',        'modules.emotion_wheel.intensity_hint'),
   ('ew.cfg', 'continue_btn',          'modules.emotion_wheel.continue_btn'),
@@ -711,15 +715,22 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('ew.peaceful',       'emotion_wheel', 'tree_node', 'modules.emotion_wheel.node.peaceful',       170)
 on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
+-- Teintes de famille : pastellisées (K-4, #252). Les valeurs saturées d'origine
+-- échouaient WCAG AA sur fond clair (Joie #F59E0B ≈ 2:1, Force #F97316 ≈ 3:1).
+-- Depuis K-10 elles ne portent plus de texte : filet d'accent, fond très pâle et
+-- icône seulement. Identité de famille, jamais une gravité clinique (MDR).
+-- `def` = ligne de définition affichée sous le titre de la carte de famille.
+-- Aucun `emoji` : un emoji est déjà une interprétation, et son rendu varie selon
+-- l'OS. Ils ont été supprimés (voir migration_emotion_wheel_familles_k4.sql).
 insert into public.field_props (field_id, prop_key, prop_value) values
-  ('ew.joy',            'color', '#F59E0B'), ('ew.joy',            'emoji', '😊'), ('ew.joy',            'icon', 'emoticon-happy-outline'),
-  ('ew.sadness',        'color', '#3B82F6'), ('ew.sadness',        'emoji', '😢'), ('ew.sadness',        'icon', 'emoticon-sad-outline'),
-  ('ew.anger',          'color', '#EF4444'), ('ew.anger',          'emoji', '😠'), ('ew.anger',          'icon', 'emoticon-angry-outline'),
-  ('ew.fear',           'color', '#8B5CF6'), ('ew.fear',           'emoji', '😨'), ('ew.fear',           'icon', 'emoticon-frown-outline'),
-  ('ew.disgust',        'color', '#6B8E23'), ('ew.disgust',        'emoji', '🤢'), ('ew.disgust',        'icon', 'emoticon-sick-outline'),
-  ('ew.self_conscious', 'color', '#B0728A'), ('ew.self_conscious', 'emoji', '😳'), ('ew.self_conscious', 'icon', 'emoticon-confused-outline'),
-  ('ew.powerful',       'color', '#F97316'), ('ew.powerful',       'emoji', '💪'), ('ew.powerful',       'icon', 'arm-flex-outline'),
-  ('ew.peaceful',       'color', '#14B8A6'), ('ew.peaceful',       'emoji', '🧘'), ('ew.peaceful',       'icon', 'meditation')
+  ('ew.joy',            'color', '#EFC98A'), ('ew.joy',            'icon', 'emoticon-happy-outline'),     ('ew.joy',            'def', 'modules.emotion_wheel.node_def.joy'),
+  ('ew.sadness',        'color', '#9CBEEA'), ('ew.sadness',        'icon', 'emoticon-sad-outline'),       ('ew.sadness',        'def', 'modules.emotion_wheel.node_def.sadness'),
+  ('ew.anger',          'color', '#E5A3A3'), ('ew.anger',          'icon', 'emoticon-angry-outline'),     ('ew.anger',          'def', 'modules.emotion_wheel.node_def.anger'),
+  ('ew.fear',           'color', '#AC9BDE'), ('ew.fear',           'icon', 'emoticon-frown-outline'),     ('ew.fear',           'def', 'modules.emotion_wheel.node_def.fear'),
+  ('ew.disgust',        'color', '#AFBE8B'), ('ew.disgust',        'icon', 'emoticon-sick-outline'),      ('ew.disgust',        'def', 'modules.emotion_wheel.node_def.disgust'),
+  ('ew.self_conscious', 'color', '#CDA6B6'), ('ew.self_conscious', 'icon', 'emoticon-confused-outline'),  ('ew.self_conscious', 'def', 'modules.emotion_wheel.node_def.self_conscious'),
+  ('ew.powerful',       'color', '#F0B48D'), ('ew.powerful',       'icon', 'arm-flex-outline'),           ('ew.powerful',       'def', 'modules.emotion_wheel.node_def.powerful'),
+  ('ew.peaceful',       'color', '#8ACFC6'), ('ew.peaceful',       'icon', 'meditation'),                 ('ew.peaceful',       'def', 'modules.emotion_wheel.node_def.peaceful')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- 5) Niveau 2 — nuances (37)
