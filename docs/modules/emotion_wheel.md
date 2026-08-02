@@ -8,6 +8,25 @@
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).
 > Refonte UX en cours : epic #248 (mobile) et #260 (web praticien).
 
+## L'écran de première ouverture (K-2, ticket #250)
+
+Un **écran plein**, affiché une seule fois au premier accès, jamais revu ensuite. Ce
+n'est volontairement **pas une modale** : une modale se balaie par réflexe, et ce
+contenu dit au patient ce que deviennent ses notes.
+
+- Le libellé est **« J'ai compris »**, pas « J'accepte ». C'est un **accusé de
+  lecture**, pas un consentement : rien n'est journalisé, **aucun objet de consentement**
+  (version, retrait, révocation) n'est créé. En fabriquer un obligerait à le gérer
+  ensuite, pour une information qui n'en demande pas.
+- L'état « déjà vu » est **local à l'appareil** (`module_settings`, clé
+  `onboarding_seen`) et **non synchronisé** : « cet écran a été vu » est un état
+  d'interface, pas une donnée de soin. Le répliquer côté serveur reviendrait à stocker
+  une trace de navigation sans valeur clinique, ce que la minimisation RGPD demande
+  d'éviter. C'est l'exception documentée prévue par `.claude/rules/sync-service.md`.
+- Le même contenu reste consultable à tout moment dans la **fiche ⓘ**.
+- Un échec de lecture de l'état **ouvre le module** plutôt que d'imposer l'écran : une
+  panne technique ne doit pas bloquer l'accès.
+
 ## Modifier une entrée (K-8, ticket #256)
 
 Une entrée ne pouvait qu'être supprimée : une erreur de saisie obligeait à tout
