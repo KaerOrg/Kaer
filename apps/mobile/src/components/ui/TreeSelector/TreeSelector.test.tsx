@@ -42,9 +42,9 @@ const BASE_TEXTS: TreeSelectorTexts = {
   entryTitle: 'Vous pouvez enregistrer, ou préciser.',
   intensityTitle: 'Force',
   intensityAnchorMin: 'à peine', intensityAnchorMax: 'au maximum',
-  contextTitle: 'En lien avec', contextHint: 'Optionnel',
+  contextTitle: 'En lien avec',
   contextOtherBtn: 'Autre', contextOtherPlaceholder: 'En lien avec quoi ?',
-  notesTitle: 'Qu’est-ce qui s’est passé ?', notesHint: 'Libre', notesPlaceholder: 'Écrivez…',
+  notesTitle: 'Qu’est-ce qui s’est passé ?', notesPlaceholder: 'Écrivez…',
   continueBtn: 'Continuer', saveBtn: 'Enregistrer', validateHereBtn: 'Je ne sais pas',
   validateHereKeep: (label: string) => `on garde « ${label} »`,
   skipBtn: 'Je ne sais pas trop', stopHint: 'S’arrêter à la famille est déjà une réponse.',
@@ -56,7 +56,7 @@ const BASE_TEXTS: TreeSelectorTexts = {
 function makeConfig(over: Partial<TreeSelectorConfig> = {}): TreeSelectorConfig {
   return {
     enableIntensity: true, enableNotes: true, enableContext: false,
-    enableEarlyValidate: false, intensityMax: 5,
+    enableEarlyValidate: false,
     intensityValues: [1, 2, 3, 4, 5], contextOptions: [],
     ...over,
   }

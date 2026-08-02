@@ -155,23 +155,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm, fontSize: fontSize.label, color: colors.text,
     borderWidth: 1, borderColor: colors.border, minHeight: TOUCH_TARGET,
   },
-  // ── Intensité
-  intensityCard: {
-    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.lg,
-    alignItems: 'center', gap: spacing.lg,
-    ...shadows.sm,
-    marginBottom: spacing.md,
-  },
-  intensityDisplay: {
-    flexDirection: 'row', alignItems: 'baseline', gap: 4,
-    paddingHorizontal: spacing.lg, paddingVertical: spacing.md, borderRadius: radius.lg,
-    backgroundColor: colors.neutral,
-  },
-  intensityValue:   { fontSize: 48, fontWeight: '800', color: colors.text },
-  intensityMax:     { fontSize: fontSize.h2, color: colors.textMuted, fontWeight: '600' },
-  intensityBtns: {
-    flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, justifyContent: 'center',
-  },
+  // ── Intensité (crans de la fiche unique)
   intensityBtn: {
     flex: 1, minWidth: TOUCH_TARGET, height: TOUCH_TARGET, borderRadius: radius.md, borderWidth: 1.5,
     borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
@@ -179,19 +163,8 @@ export const styles = StyleSheet.create({
   },
   intensityBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   intensityBtnText: { fontSize: fontSize.label, fontWeight: '600', color: colors.text },
-  continueBtn: {
-    borderRadius: radius.lg, paddingVertical: spacing.md, minHeight: TOUCH_TARGET,
-    backgroundColor: colors.primary,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm,
-  },
   continueBtnText:  { fontSize: fontSize.body, fontWeight: '700', color: colors.text },
   // ── Notes
-  summaryCard: {
-    backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
-    borderLeftWidth: 4, gap: spacing.xs, marginBottom: spacing.md,
-  },
-  summaryPrimary:   { fontSize: fontSize.label, fontWeight: '700', color: colors.text },
-  summaryMeta:      { fontSize: fontSize.sm, color: colors.textMuted },
   notesInput: {
     backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md,
     fontSize: fontSize.label, color: colors.text, minHeight: 100,

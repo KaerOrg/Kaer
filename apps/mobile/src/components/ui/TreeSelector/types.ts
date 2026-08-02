@@ -59,7 +59,6 @@ export interface TreeSelectorConfig {
   enableContext: boolean
   /** Autorise la validation à n'importe quel niveau (profondeur libre). */
   enableEarlyValidate: boolean
-  intensityMax: number
   intensityValues: number[]
   contextOptions: TreeSelectorContextOption[]
 }
@@ -78,12 +77,10 @@ export interface TreeSelectorTexts {
   intensityAnchorMin: string
   intensityAnchorMax: string
   contextTitle: string
-  contextHint: string
   /** Chip d'ouverture du champ de contexte libre (« + Autre »). */
   contextOtherBtn: string
   contextOtherPlaceholder: string
   notesTitle: string
-  notesHint: string
   notesPlaceholder: string
   continueBtn: string
   saveBtn: string
