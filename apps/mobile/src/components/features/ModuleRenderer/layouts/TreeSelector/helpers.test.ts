@@ -2,6 +2,7 @@ import {
   parseIntOr, intensityValuesFor, buildStepLabels,
   buildRawNodes, buildNodeMap, toUiNodes, reconstructPath, toEntryVM,
 } from './helpers'
+import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
 import type { TreeSelection } from '../../../../../lib/database'
 
@@ -172,6 +173,22 @@ describe('TreeSelector helpers (feature layer)', () => {
     it('retombe sur la teinte persistée si la famille a disparu du seed', () => {
       const vm = toEntryVM(entry, t, 10, iso => iso, new Map())
       expect(vm.accentColor).toBe('#F59E0B')
+    })
+
+    it('entrée sans mot : libellé dédié et filet gris neutre (K-7)', () => {
+      const wordless = { ...entry, path: [], selected_id: '', selected_label: null }
+      const vm = toEntryVM(wordless, t, 5, iso => iso, CURRENT, 'Sans mot')
+      expect(vm.primaryLabel).toBe('Sans mot')
+      expect(vm.secondaryLabel).toBe('')
+      // Pas la teinte d'une famille qu'elle n'a pas : gris neutre.
+      expect(vm.accentColor).toBe(colors.border)
+    })
+
+    it('le contexte libre ferme la liste des chips, sans passer par t() (K-6)', () => {
+      const vm = toEntryVM(
+        { ...entry, context_other: 'trajet du matin' }, t, 5, iso => iso, CURRENT,
+      )
+      expect(vm.contextLabels).toEqual(['T:c.work', 'trajet du matin'])
     })
   })
 })

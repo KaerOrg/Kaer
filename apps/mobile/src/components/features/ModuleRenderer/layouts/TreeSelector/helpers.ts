@@ -8,6 +8,14 @@ import type { TreeSelection, TreeSelectionPathNode } from '../../../../../lib/da
 import type { McIcon, TreeSelectorEntry, TreeSelectorNode } from '@ui/TreeSelector'
 import type { RawTreeNode } from './types'
 
+/**
+ * Marqueur de `selected_id` pour une entrée « sans mot » (K-7). La colonne SQLite est
+ * `NOT NULL` depuis l'origine et la lever demanderait de reconstruire la table :
+ * l'entrée porte donc cette chaîne vide, et c'est le **chemin vide** (`path.length === 0`)
+ * qui identifie sémantiquement une entrée sans émotion nommée.
+ */
+export const WORDLESS_SELECTED_ID = ''
+
 /** parseInt tolérant : renvoie `fallback` si la valeur est absente ou non numérique. */
 export function parseIntOr(value: string | undefined, fallback: number): number {
   const n = parseInt(value ?? '', 10)
@@ -127,16 +135,19 @@ export function toEntryVM(
   intensityMax: number,
   formatDate: (iso: string) => string,
   nodeMap: Map<string, RawTreeNode>,
+  wordlessLabel = '',
 ): TreeSelectorEntry {
   const rootNode = entry.path[0]
   const current = rootNode ? nodeMap.get(rootNode.id) : undefined
-  const accentColor = current?.color ?? rootNode?.color ?? colors.primary
+  // Entrée sans émotion nommée : filet gris neutre, pas la teinte d'une famille
+  // qu'elle n'a pas. C'est une entrée légitime, pas une entrée dégradée (K-7).
+  const accentColor = rootNode ? (current?.color ?? rootNode.color ?? colors.primary) : colors.border
   const labels = entry.path.map(n => resolvePathLabel(n, t)).filter(Boolean)
   return {
     id: entry.id,
     accentColor,
     icon: (current?.icon ?? rootNode?.icon ?? 'palette-outline') as McIcon,
-    primaryLabel: labels[0] ?? '',
+    primaryLabel: labels[0] ?? wordlessLabel,
     secondaryLabel: labels.slice(1).join(' · '),
     intensityLabel: entry.intensity != null ? `${entry.intensity}/${intensityMax}` : null,
     // Le contexte libre n'est PAS résolu par `t()` : c'est du texte patient, pas une

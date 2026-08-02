@@ -700,6 +700,7 @@
         "peaceful": "en sécurité, au repos"
       },
       "entry_title": "Tu peux enregistrer, ou préciser.",
+      "wordless_hint": "Ne pas trouver le mot est une réponse valable. Tu pourras le nommer plus tard en modifiant l’entrée.",
       "intensity_title": "Force",
       "intensity_anchor_min": "à peine",
       "intensity_anchor_max": "au maximum",

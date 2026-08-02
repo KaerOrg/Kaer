@@ -39,6 +39,12 @@ export interface TreeSelectorFlow {
   setNotes: (v: string) => void
   toggleContext: (code: string) => void
   handleStartNew: () => void
+  /**
+   * Sortie sans rien nommer : ouvre la fiche avec un chemin vide. L'entrée produite
+   * est légitime, pas dégradée : décrire une situation est précisément ce que sait
+   * faire le patient qui ne trouve pas le mot (K-7).
+   */
+  handleSkip: () => void
   handleSelectNode: (node: TreeSelectorNode) => void
   handleSelectLeaf: (leaf: TreeSelectorNode) => void
   handleToggleExpand: (node: TreeSelectorNode) => void
@@ -65,6 +71,7 @@ export function useTreeSelectorFlow(
   const [contextOther, setContextOther] = useState('')
   const [contextOtherOpen, setContextOtherOpen] = useState(false)
   const [notes, setNotes] = useState('')
+  const [wordless, setWordless] = useState(false)
 
   const resetDraft = useCallback(() => {
     setPath([])
@@ -74,6 +81,7 @@ export function useTreeSelectorFlow(
     setContextOther('')
     setContextOtherOpen(false)
     setNotes('')
+    setWordless(false)
   }, [])
 
   const toggleContextOther = useCallback(() => {
@@ -89,8 +97,11 @@ export function useTreeSelectorFlow(
     finalContext: string[],
     finalContextOther: string,
     finalNotes: string,
+    wordless = false,
   ) => {
-    if (finalPath.length === 0) return
+    // Un chemin vide n'est valide QUE par la sortie « je ne sais pas trop » : ailleurs,
+    // c'est un état incohérent qu'on refuse de persister.
+    if (finalPath.length === 0 && !wordless) return
     await onSubmit({
       pathIds: finalPath.map(n => n.id),
       intensity: finalIntensity,
@@ -113,6 +124,15 @@ export function useTreeSelectorFlow(
     resetDraft()
     setMode('selection')
   }, [resetDraft])
+
+  const handleSkip = useCallback(() => {
+    setWordless(true)
+    setExpanded(null)
+    setPath([])
+    // La fiche est le seul contenu restant : sans elle, il n'y aurait rien à saisir.
+    if (hasEntrySheet) { setMode('entry'); return }
+    void submit([], null, [], '', '', true)
+  }, [hasEntrySheet, submit])
 
   const handleSelectNode = useCallback((node: TreeSelectorNode) => {
     const newPath = [...path, node]
@@ -172,8 +192,9 @@ export function useTreeSelectorFlow(
       context,
       enableContext ? contextOther.trim() : '',
       enableNotes ? notes : '',
+      wordless,
     )
-  }, [submit, path, enableIntensity, intensity, context, enableContext, contextOther, enableNotes, notes])
+  }, [submit, path, enableIntensity, intensity, context, enableContext, contextOther, enableNotes, notes, wordless])
 
   const toggleContext = useCallback((code: string) => {
     setContext(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code])
@@ -182,7 +203,7 @@ export function useTreeSelectorFlow(
   return {
     mode, path, expanded, intensity, context, contextOther, contextOtherOpen, notes,
     setIntensity, setContextOther, toggleContextOther, setNotes, toggleContext,
-    handleStartNew, handleSelectNode, handleSelectLeaf, handleToggleExpand, handleContinue,
+    handleStartNew, handleSkip, handleSelectNode, handleSelectLeaf, handleToggleExpand, handleContinue,
     handleValidateHere, handleBack, handleCancel, handleSaveFinal,
   }
 }

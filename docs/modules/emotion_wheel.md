@@ -8,6 +8,30 @@
 > détaillées : [`docs/spec/refonte-roue-emotions.md`](../spec/refonte-roue-emotions.md).
 > Refonte UX en cours : epic #248 (mobile) et #260 (web praticien).
 
+## L'entrée sans émotion nommée (K-7, ticket #255)
+
+Réponse au **défaut n°1 de l'audit** : le module revendiquait l'alexithymie comme
+indication et ouvrait sur « quelle famille d'émotion ? ». Ne pas savoir répondre à
+cette question *est* le trouble, et aucune porte de sortie n'existait.
+
+« Je ne sais pas trop » (E4) ouvre désormais la fiche **sans émotion sélectionnée** :
+mêmes champs, titre « On garde le moment, sans le nommer. », et le rappel qu'on pourra
+nommer plus tard en modifiant l'entrée. Décrire une situation est précisément ce que
+sait faire le patient qui ne trouve pas le mot.
+
+- L'entrée apparaît dans l'historique en **« Sans mot »**, avec un **filet gris neutre**
+  et non la teinte d'une famille qu'elle n'a pas. C'est une entrée légitime, pas une
+  entrée dégradée : aucun message ne présente l'absence de mot comme un échec.
+- Un **chemin vide reste refusé** partout ailleurs : c'est la prop de config
+  `enable_wordless` qui l'autorise, et elle seule.
+- **Limite connue** : `tree_selections.selected_id` est `NOT NULL` depuis l'origine.
+  L'entrée sans mot porte donc une chaîne vide (`WORDLESS_SELECTED_ID`), et c'est le
+  **chemin vide** qui l'identifie sémantiquement. Rendre la colonne nullable demanderait
+  de reconstruire la table SQLite : différé volontairement.
+- La condition de réouverture de « la porte du corps » se mesure sur ces entrées : si
+  leur part ne diminue pas dans le temps chez les mêmes patients, le module n'assure pas
+  son travail d'apprentissage. Voir la note de clôture de l'epic #248.
+
 ## La fiche unique (K-6, ticket #254)
 
 Les trois étapes facultatives (intensité, contexte, note) tiennent sur **un seul

@@ -33,6 +33,7 @@ export function useTreeSelectorConfig(fields: ContentField[]): ParsedTreeConfig 
       enableNotes: (props['enable_notes'] ?? '0') === '1',
       enableContext: (props['enable_context'] ?? '0') === '1',
       enableEarlyValidate: (props['enable_early_validate'] ?? '0') === '1',
+      enableWordless: (props['enable_wordless'] ?? '0') === '1',
       intensityMin,
       intensityMax,
       intensityValues: intensityValuesFor(intensityMin, intensityMax),

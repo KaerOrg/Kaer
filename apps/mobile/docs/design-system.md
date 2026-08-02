@@ -789,7 +789,7 @@ un niveau à la persistance.
 | `loading` / `saving` | `boolean` | États de chargement / persistance |
 | `onSubmit` | `(r: TreeSelectorSubmit) => Promise<void>` | Sélection validée : `{ pathIds, intensity, context, notes }` |
 | `onDelete` | `(id: string) => void` | Suppression d'une entrée d'historique |
-| `onSkip` | `() => void` (optionnel) | Sortie du niveau 1 sans rien nommer. **Le bouton n'est rendu que si ce callback est fourni** : un arbre sans porte de sortie n'affiche pas de bouton mort |
+| `allowWordless` | `boolean` (défaut `false`) | Autorise une entrée **sans aucune sélection**. Ouvre le bouton de sortie au niveau 1, et la fiche prend alors ses libellés `wordlessTitle` / `wordlessHint`. Désactivé : le bouton n'est pas rendu et un chemin vide reste refusé à la soumission |
 
 ```tsx
 import { TreeSelector } from '@ui/TreeSelector'

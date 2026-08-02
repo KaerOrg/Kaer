@@ -32,6 +32,8 @@ export interface ParsedTreeConfig {
   enableNotes: boolean
   enableContext: boolean
   enableEarlyValidate: boolean
+  /** Autorise une entrée sans aucune sélection (« je ne sais pas trop », K-7). */
+  enableWordless: boolean
   intensityMin: number
   intensityMax: number
   intensityValues: number[]
