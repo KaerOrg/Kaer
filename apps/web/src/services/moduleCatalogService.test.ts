@@ -7,6 +7,7 @@ vi.mock('../lib/supabase', () => ({
 import { supabase } from '../lib/supabase'
 import {
   fetchComingSoonModuleIds,
+  fetchHiddenModuleIds,
   fetchInviteCategories,
   fetchModuleCategories,
   fetchModuleTaxonomy,
@@ -57,6 +58,61 @@ describe('moduleCatalogService.fetchModuleCategories', () => {
     const result = await fetchModuleCategories()
 
     expect(result).toEqual([])
+  })
+})
+
+// ── #247 : modules masqués (droits de reproduction non acquis) ───────────────
+
+describe('moduleCatalogService : filtrage des modules masqués (#247)', () => {
+  it('fetchModuleCategories exclut les modules masqués côté requête', async () => {
+    const modChain = makeChain({ data: [], error: null })
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(makeChain({ data: [], error: null }) as never)
+      .mockReturnValueOnce(modChain as never)
+
+    await fetchModuleCategories()
+
+    expect(modChain.eq).toHaveBeenCalledWith('is_hidden', false)
+  })
+
+  it('fetchInviteCategories exclut les modules masqués côté requête', async () => {
+    const modChain = makeChain({ data: [], error: null })
+    vi.mocked(supabase.from)
+      .mockReturnValueOnce(makeChain({ data: [], error: null }) as never)
+      .mockReturnValueOnce(modChain as never)
+
+    await fetchInviteCategories()
+
+    expect(modChain.eq).toHaveBeenCalledWith('is_hidden', false)
+  })
+
+  it('fetchComingSoonModuleIds ne remonte pas un module masqué', async () => {
+    const chain = makeChain({ data: [], error: null })
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    await fetchComingSoonModuleIds()
+
+    expect(chain.eq).toHaveBeenCalledWith('is_hidden', false)
+  })
+})
+
+describe('moduleCatalogService.fetchHiddenModuleIds', () => {
+  it('renvoie un Set des ids masqués', async () => {
+    const chain = makeChain({ data: [{ id: 'epds' }, { id: 'rcads' }], error: null })
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    const result = await fetchHiddenModuleIds()
+
+    expect(chain.eq).toHaveBeenCalledWith('is_hidden', true)
+    expect(result).toEqual(new Set(['epds', 'rcads']))
+  })
+
+  it('renvoie un Set vide si data null', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+
+    const result = await fetchHiddenModuleIds()
+
+    expect(result.size).toBe(0)
   })
 })
 

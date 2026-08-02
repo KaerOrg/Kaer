@@ -1,5 +1,11 @@
 # NSI — Nightmare Severity Index (Index de sévérité des cauchemars)
 
+> 🔒 **Module masqué (#247).** Droits de reproduction non acquis en usage
+> commercial : Échelle de 2024, droits non clarifiés.
+> Le module est retiré de l'app (`modules.is_hidden`) mais **rien n'est supprimé** :
+> cette doc, les items, l'i18n, le scoring et les tests restent en place, prêts pour
+> une réactivation. Voir [`database.md`](../database.md) § `modules`.
+
 ## Référence
 
 Geoffroy PA et al. *The nightmare severity index (NSI): A short new multidimensional tool for assessing nightmares.* J Sleep Res, 2023.  

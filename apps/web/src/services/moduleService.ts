@@ -22,11 +22,16 @@ export async function fetchModuleFields(moduleId: string): Promise<ModuleFieldsR
   return result
 }
 
+// #247. L'aperçu praticien rend les items du module : c'est une reproduction au
+// même titre que l'écran patient. Un module masqué retombe donc sur 'coming_soon',
+// ce qui neutralise aussi l'accès par URL directe à /modules/<id>.
 export async function fetchModulePreviewKind(moduleId: string): Promise<PreviewKind> {
   const { data } = await supabase
     .from('modules')
-    .select('preview_kind')
+    .select('preview_kind, is_hidden')
     .eq('id', moduleId)
     .single()
-  return (data as { preview_kind: PreviewKind } | null)?.preview_kind ?? 'coming_soon'
+  const row = data as { preview_kind: PreviewKind; is_hidden: boolean } | null
+  if (!row || row.is_hidden) return 'coming_soon'
+  return row.preview_kind
 }

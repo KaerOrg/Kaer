@@ -58,6 +58,33 @@ describe('homeService.fetchUnlockedModules', () => {
 
     expect(result).toEqual([])
   })
+
+  // #247. Un module masqué en base (droits non acquis) disparaît de la liste
+  // patient même s'il reste débloqué. La ligne patient_modules n'est pas supprimée.
+  it('écarte un module masqué (is_hidden) même s\'il est encore débloqué', async () => {
+    mockOrder.mockResolvedValue({
+      data: [
+        { id: 'pm-1', module_type: 'sleep_diary', config: {}, unlocked_at: '2026-01-01', module: { mobile_icon: 'bed', color: '#fff', preview_kind: 'fields', category_id: 'c', is_hidden: false } },
+        { id: 'pm-2', module_type: 'epds',        config: {}, unlocked_at: '2026-02-01', module: { mobile_icon: 'hp',  color: '#f0f', preview_kind: 'questionnaire', category_id: 'c', is_hidden: true } },
+      ],
+      error: null,
+    })
+
+    const result = await fetchUnlockedModules('pat-1')
+
+    expect(result.map(m => m.module_type)).toEqual(['sleep_diary'])
+  })
+
+  it('garde un module dont le join modules est absent (module null)', async () => {
+    mockOrder.mockResolvedValue({
+      data: [{ id: 'pm-1', module_type: 'sleep_diary', config: {}, unlocked_at: '2026-01-01', module: null }],
+      error: null,
+    })
+
+    const result = await fetchUnlockedModules('pat-1')
+
+    expect(result).toHaveLength(1)
+  })
 })
 
 // ── fetchTodayRoutines ──────────────────────────────────────────────────────
@@ -166,6 +193,27 @@ describe('homeService.fetchTodayRoutines', () => {
 
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('r-ok')
+  })
+
+  // #247 : un module masqué ne doit plus rappeler le patient à son sujet.
+  it('écarte les routines dont le module est masqué', async () => {
+    mockContains.mockResolvedValue({
+      data: [
+        {
+          id: 'r-hidden',
+          patient_module_id: 'pm-2',
+          time_of_day: '09:00',
+          patient_time_override: null,
+          patient_module: { module_type: 'epds', module: { mobile_icon: 'hp', preview_kind: 'questionnaire', is_hidden: true } },
+        },
+        routine({ id: 'r-ok' }),
+      ],
+      error: null,
+    })
+
+    const result = await fetchTodayRoutines('pat-1')
+
+    expect(result.map(r => r.id)).toEqual(['r-ok'])
   })
 
   it("utilise l'icône par défaut si module est null dans patient_module", async () => {
