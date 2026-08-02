@@ -18,8 +18,9 @@ export interface TreeSelectorNode {
   id: string
   label: string
   /**
-   * Ligne de définition affichée sous le titre, au niveau 1 (« menace,
-   * incertitude »). Déjà traduite. Absente : la carte n'affiche que son titre.
+   * Ligne de définition affichée sous le titre, à tous les niveaux (familles comme
+   * nuances : « menace, incertitude »). Déjà traduite. Absente : la carte n'affiche
+   * que son titre.
    */
   definition?: string
   color?: string

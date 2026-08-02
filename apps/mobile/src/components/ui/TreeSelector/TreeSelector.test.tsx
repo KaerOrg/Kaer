@@ -252,6 +252,8 @@ describe('ui/TreeSelector (primitive)', () => {
     expect(screen.getByText('S’arrêter à la famille est déjà une réponse.')).toBeTruthy()
     fireEvent.press(screen.getByTestId('skip-emotion'))
     expect(onSkip).toHaveBeenCalledTimes(1)
+    // La sortie referme la sélection : retour à l'historique, rien de bloqué.
+    expect(screen.getByTestId('start-new-button')).toBeTruthy()
   })
 
   it('la sortie n\'apparaît qu\'au niveau 1', () => {

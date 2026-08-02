@@ -113,6 +113,13 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
     await persist(selection)
   }, [config.nodeMap, moduleId, persist])
 
+  // Sortie « Je ne sais pas trop » (K-4/K-5) : le patient ne parvient pas à nommer
+  // son ressenti. Rien n'est persisté (une entrée « inconnu » n'aurait pas de sens
+  // et polluerait l'historique) ; le primitive referme la sélection et revient à
+  // l'historique. Le callback active la porte de sortie : sans lui, le bouton n'est
+  // pas rendu.
+  const handleSkip = useCallback(() => {}, [])
+
   const handleDelete = useCallback((id: string) => {
     showConfirm({
       title: lbl('delete_title') || t('common.delete'),
@@ -134,6 +141,7 @@ export function TreeSelectorLayout({ fields, footer, moduleId }: TreeSelectorLay
       saving={saving}
       onSubmit={handleSubmit}
       onDelete={handleDelete}
+      onSkip={handleSkip}
     />
   )
 }

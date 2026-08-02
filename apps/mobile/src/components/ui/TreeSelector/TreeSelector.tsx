@@ -9,6 +9,7 @@
 // La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque mode est un
 // composant dédié (history / navigation / intensity / context / notes).
 
+import { useCallback } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { colors } from '@theme'
 import { useTreeSelectorFlow } from './useTreeSelectorFlow'
@@ -50,6 +51,15 @@ export function TreeSelector({
 }: TreeSelectorProps) {
   const flow = useTreeSelectorFlow(config, onSubmit)
 
+  // « Je ne sais pas trop » : refermer la sélection et revenir à l'historique (rien
+  // n'est persisté), puis notifier le parent. Sans ce reset interne, presser le
+  // bouton laisserait le patient bloqué au niveau 1 — le parent n'a pas la main sur
+  // le mode du flux, possédé par le primitive.
+  const handleSkip = useCallback(() => {
+    flow.handleCancel()
+    onSkip?.()
+  }, [flow, onSkip])
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -85,7 +95,7 @@ export function TreeSelector({
         onToggleExpand={flow.handleToggleExpand}
         onContinue={flow.handleContinue}
         onValidateHere={flow.handleValidateHere}
-        onSkip={onSkip}
+        onSkip={onSkip ? handleSkip : undefined}
       />
     )
   }
