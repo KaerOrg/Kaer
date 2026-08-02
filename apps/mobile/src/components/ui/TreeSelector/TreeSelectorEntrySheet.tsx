@@ -52,6 +52,10 @@ export function TreeSelectorEntrySheet({
   const accentColor = resolveAccentColor(path)
   const breadcrumb = buildBreadcrumb(path)
   const tintStyle = path.length > 0 ? { backgroundColor: accentColor + '08' } : null
+  // Chemin vide : le patient est arrivé ici par « je ne sais pas trop ». La fiche
+  // change de titre pour dire que le moment est gardé, sans présenter l'absence de
+  // mot comme un échec (K-7).
+  const wordless = path.length === 0
 
   return (
     <KeyboardAvoidingView
@@ -68,7 +72,14 @@ export function TreeSelectorEntrySheet({
         backLabel={texts.back}
       />
       <ScrollView contentContainerStyle={styles.selectionContent} keyboardShouldPersistTaps="handled">
-        {texts.entryTitle ? <Text style={styles.stepTitle}>{texts.entryTitle}</Text> : null}
+        {wordless ? (
+          <View testID="wordless-header">
+            <Text style={styles.stepTitle}>{texts.wordlessTitle}</Text>
+            {texts.wordlessHint ? <Text style={styles.stepHint}>{texts.wordlessHint}</Text> : null}
+          </View>
+        ) : (
+          texts.entryTitle ? <Text style={styles.stepTitle}>{texts.entryTitle}</Text> : null
+        )}
 
         {config.enableIntensity ? (
           <View style={styles.sheetSection} testID="intensity-section">

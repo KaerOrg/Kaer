@@ -40,6 +40,8 @@ const BASE_TEXTS: TreeSelectorTexts = {
   newBtn: 'Identifier', intro: 'Choisissez une émotion', historyLabel: 'Historique',
   emptyTitle: 'Rien encore', emptyText: 'Commencez',
   entryTitle: 'Vous pouvez enregistrer, ou préciser.',
+  wordlessTitle: 'On garde le moment, sans le nommer.',
+  wordlessHint: 'Ne pas trouver le mot est une réponse valable.',
   intensityTitle: 'Force',
   intensityAnchorMin: 'à peine', intensityAnchorMax: 'au maximum',
   contextTitle: 'En lien avec',
@@ -77,7 +79,7 @@ interface Overrides {
   footerText?: string | null
   onSubmit?: (r: TreeSelectorSubmit) => Promise<void>
   onDelete?: (id: string) => void
-  onSkip?: () => void
+  allowWordless?: boolean
 }
 
 function renderTree(over: Overrides = {}) {
@@ -94,7 +96,7 @@ function renderTree(over: Overrides = {}) {
       saving={over.saving ?? false}
       onSubmit={onSubmit}
       onDelete={onDelete}
-      onSkip={over.onSkip}
+      allowWordless={over.allowWordless}
     />
   )
   return { onSubmit, onDelete }
@@ -314,28 +316,68 @@ describe('ui/TreeSelector (primitive)', () => {
       .toBe('Peur, menace, incertitude')
   })
 
-  it('n\'affiche la sortie « Je ne sais pas trop » que si onSkip est fourni', () => {
+  it('n\'affiche la sortie « Je ne sais pas trop » que si allowWordless est actif', () => {
     renderTree()
     fireEvent.press(screen.getByTestId('start-new-button'))
-    // Sans callback : pas de porte de sortie, donc pas de bouton mort.
+    // Sans autorisation : pas de porte de sortie, donc pas de bouton mort.
     expect(screen.queryByTestId('skip-emotion')).toBeNull()
   })
 
-  it('appelle onSkip et rappelle qu\'on peut s\'arrêter à la famille', () => {
-    const onSkip = jest.fn()
-    renderTree({ onSkip })
+  it('rappelle qu\'on peut s\'arrêter à la famille', () => {
+    renderTree({ allowWordless: true })
     fireEvent.press(screen.getByTestId('start-new-button'))
     expect(screen.getByText('S’arrêter à la famille est déjà une réponse.')).toBeTruthy()
-    fireEvent.press(screen.getByTestId('skip-emotion'))
-    expect(onSkip).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('skip-emotion')).toBeTruthy()
   })
 
   it('la sortie n\'apparaît qu\'au niveau 1', () => {
-    const onSkip = jest.fn()
-    renderTree({ onSkip })
+    renderTree({ allowWordless: true })
     fireEvent.press(screen.getByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-joy'))
     expect(screen.queryByTestId('skip-emotion')).toBeNull()
+  })
+
+  // ── Entrée sans émotion nommée (K-7, ticket #255) ──────────────────────────
+
+  it('« Je ne sais pas trop » ouvre la fiche sans émotion sélectionnée', () => {
+    renderTree({ allowWordless: true })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('skip-emotion'))
+    expect(screen.getByTestId('wordless-header')).toBeTruthy()
+    expect(screen.getByText('On garde le moment, sans le nommer.')).toBeTruthy()
+    // Les mêmes champs que la fiche normale restent disponibles.
+    expect(screen.getByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('notes-input')).toBeTruthy()
+  })
+
+  it('aucun message ne présente l\'absence de mot comme un échec', () => {
+    renderTree({ allowWordless: true })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('skip-emotion'))
+    expect(screen.getByText('Ne pas trouver le mot est une réponse valable.')).toBeTruthy()
+    // Le titre de la fiche « normale » ne s'affiche pas à la place.
+    expect(screen.queryByText('Vous pouvez enregistrer, ou préciser.')).toBeNull()
+  })
+
+  it('enregistre une entrée sans mot : chemin vide, note conservée', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderTree({ allowWordless: true, onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    fireEvent.press(screen.getByTestId('skip-emotion'))
+    fireEvent.changeText(screen.getByTestId('notes-input'), 'réveil difficile')
+    await act(async () => { fireEvent.press(screen.getByTestId('save-entry')) })
+    expect(onSubmit).toHaveBeenCalledWith({
+      pathIds: [], intensity: null, context: [], contextOther: '', notes: 'réveil difficile',
+    })
+  })
+
+  it('un chemin vide reste refusé hors de la sortie « sans mot »', async () => {
+    const onSubmit = jest.fn().mockResolvedValue(undefined)
+    renderTree({ onSubmit })
+    fireEvent.press(screen.getByTestId('start-new-button'))
+    // Retour depuis le niveau 1 : on quitte la saisie, rien n'est soumis.
+    fireEvent.press(screen.getByTestId('back-button'))
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   // ── Nuances : définition, mots en chips, plus d'écran de niveau 3 (K-5, #253) ──
