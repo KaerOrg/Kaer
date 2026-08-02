@@ -9,7 +9,7 @@ function mk(module_type: string, category_id: string): UnlockedModule {
     module_type,
     config: {},
     unlocked_at: '2026-01-01',
-    module: { mobile_icon: 'target', color: '#000', preview_kind: 'form', category_id },
+    module: { mobile_icon: 'target', color: '#000', preview_kind: 'form', category_id, is_hidden: false },
   }
 }
 

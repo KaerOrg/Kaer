@@ -32,19 +32,27 @@ export interface UnlockedModule {
     color: string
     preview_kind: string
     category_id: string | null
+    is_hidden: boolean
   } | null
 }
 
 // Modules épinglés — toujours affichés en tête de liste quel que soit unlocked_at
 const PINNED_FIRST: readonly string[] = ['crisis_plan']
 
+/**
+ * Modules débloqués du patient.
+ *
+ * #247 : Un module masqué côté base (droits de reproduction non acquis) disparaît
+ * de la liste même s'il reste débloqué : sa ligne `patient_modules` et les saisies
+ * déjà faites restent intactes, elles réapparaissent si le module est réactivé.
+ */
 export async function fetchUnlockedModules(patientId: string): Promise<UnlockedModule[]> {
   const { data } = await supabase
     .from('patient_modules')
-    .select('*, module:modules(mobile_icon, color, preview_kind, category_id)')
+    .select('*, module:modules(mobile_icon, color, preview_kind, category_id, is_hidden)')
     .eq('patient_id', patientId)
     .order('unlocked_at', { ascending: true })
-  const rows = (data ?? []) as UnlockedModule[]
+  const rows = ((data ?? []) as UnlockedModule[]).filter(r => r.module?.is_hidden !== true)
   return rows.sort((a, b) => {
     const pa = PINNED_FIRST.indexOf(a.module_type)
     const pb = PINNED_FIRST.indexOf(b.module_type)
@@ -87,7 +95,7 @@ export async function fetchTodayRoutines(patientId: string): Promise<TodayRoutin
   // prettier-ignore
   const { data } = await supabase
     .from('notification_routines')
-    .select('id, patient_module_id, time_of_day, patient_time_override, patient_module:patient_modules(module_type, module:modules(mobile_icon, preview_kind))')
+    .select('id, patient_module_id, time_of_day, patient_time_override, patient_module:patient_modules(module_type, module:modules(mobile_icon, preview_kind, is_hidden))')
     .eq('patient_id', patientId)
     .eq('is_active', true)
     .eq('patient_paused', false)
@@ -100,6 +108,8 @@ export async function fetchTodayRoutines(patientId: string): Promise<TodayRoutin
       const pm = getOneEmbed(r.patient_module)
       if (pm?.module_type == null) return null
       const mod = getOneEmbed(pm.module)
+      // #247 : un module masqué ne doit plus rappeler le patient à son sujet.
+      if (mod?.is_hidden === true) return null
       return {
         id: r.id as string,
         patient_module_id: r.patient_module_id as string,

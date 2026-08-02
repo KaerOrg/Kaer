@@ -811,6 +811,7 @@ create table if not exists public.modules (
   preview_kind       text    not null default 'coming_soon',
   sort_order         int     not null default 0,
   is_invite_excluded boolean not null default false,
+  is_hidden          boolean not null default false,
   icon               text    not null default '',
   mobile_icon        text    not null default '',
   color              text    not null default '#6366F1'
@@ -825,7 +826,23 @@ begin
     alter table public.modules add column mobile_icon text not null default '';
     alter table public.modules add column color       text not null default '#6366F1';
   end if;
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'modules' and column_name = 'is_hidden') then
+    alter table public.modules add column is_hidden boolean not null default false;
+  end if;
 end $$;
+
+-- Les trois drapeaux de `modules` répondent à trois questions distinctes. Ne pas
+-- les confondre (issue #247) :
+--   is_hidden          : le module existe-t-il pour l'app ? `true` = invisible partout
+--                        (catalogue praticien, invitation, aperçu, liste patient), non
+--                        déblocable, sans que rien ne soit supprimé. Sert aux échelles
+--                        dont Kær n'a pas les droits de reproduction en usage commercial.
+--                        Réactivation = repasser le drapeau à `false` et rejouer le seed.
+--   is_invite_excluded : le module est visible, mais ne se propose pas à l'invitation.
+--   preview_kind       : COMMENT le module se rend ('coming_soon' = pas encore d'écran).
+comment on column public.modules.is_hidden is
+  'Module retiré de l''app sans suppression de code ni de données (droits non acquis). Voir issue #247.';
 
 alter table public.modules enable row level security;
 

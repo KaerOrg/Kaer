@@ -1371,6 +1371,29 @@ update public.modules set preview_kind = 'guided_exercise'   where id = 'groundi
 -- cognitive_saturation : refonte « Décrocher d'une pensée » → layout `defusion`
 -- (preview_kind posé directement dans l'INSERT ci-dessus, propagé par ON CONFLICT DO UPDATE).
 
+-- ── Modules masqués : droits de reproduction non acquis (issue #247) ─────────
+-- Kær est un produit commercial : un instrument « gratuit pour le clinicien »
+-- n'est pas pour autant reproductible dans notre app. Les modules listés ici
+-- sortent donc de l'app (catalogue praticien, invitation, aperçu, liste patient)
+-- SANS que rien ne soit supprimé : items, i18n, scoring, écrans et tests restent
+-- en place, ainsi que les données patient déjà saisies.
+--
+--   asrs18  : NYU ne propose qu'une licence *Commercial Use - Website Integration*
+--             payante et annuelle. Régime distinct de asrs6, qui reste libre.
+--   epds    : © Royal College of Psychiatrists, intégration numérique déjà refusée
+--             à un tiers.
+--   snap_iv : © J. M. Swanson, autorisation écrite requise.
+--   rcads   : UCLA, « Commercial distribution [...] in any form or medium is prohibited ».
+--   nsi     : échelle de 2024, droits non clarifiés.
+--   bsl23   : aucun régime de licence publié, suspendue en attendant ZI Mannheim.
+--
+-- Réactivation le jour où les droits sont acquis : retirer l'id de la liste
+-- ci-dessous et rejouer le seed. Rien d'autre. La forme `set is_hidden = (id in ...)`
+-- est volontairement bidirectionnelle pour que la base s'aligne exactement sur le
+-- seed à chaque rejeu (règle config-first : jamais de dérive silencieuse).
+update public.modules
+set is_hidden = (id in ('asrs18', 'epds', 'snap_iv', 'rcads', 'nsi', 'bsl23'));
+
 
 -- ============================================================
 -- SEED : taxonomie des modules (tag_dimensions, tags, module_tags)

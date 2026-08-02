@@ -169,7 +169,7 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 
 | Variante | Fond | Bordure | Texte |
 |---|---|---|---|
-| `primary` | `colors.primary` | — | `colors.white` |
+| `primary` | `colors.primary` | — | `colors.text` |
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |

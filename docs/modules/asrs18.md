@@ -1,5 +1,11 @@
 # ASRS v1.1 — Bilan Complet (18 items)
 
+> 🔒 **Module masqué (#247).** Droits de reproduction non acquis en usage
+> commercial : Licence NYU *Commercial Use - Website Integration*, payante et annuelle. Régime distinct d'`asrs6`, qui reste visible.
+> Le module est retiré de l'app (`modules.is_hidden`) mais **rien n'est supprimé** :
+> cette doc, les items, l'i18n, le scoring et les tests restent en place, prêts pour
+> une réactivation. Voir [`database.md`](../database.md) § `modules`.
+
 ## Présentation
 
 L'**Adult ADHD Self-Report Scale v1.1 Full Assessment** (ASRS-18) est la version complète de l'échelle ASRS v1.1, développée par Ronald Kessler pour l'Organisation Mondiale de la Santé. Elle comprend les 18 items des Parties A et B, pour un bilan approfondi du TDAH chez l'adulte (18 ans et plus).

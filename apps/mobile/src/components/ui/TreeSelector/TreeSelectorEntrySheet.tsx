@@ -13,6 +13,7 @@
 import { View, Text, Pressable, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
+import { Button } from '../Button/Button'
 import { Chip } from '../Chip/Chip'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
@@ -171,6 +172,9 @@ export function TreeSelectorEntrySheet({
         ) : null}
 
         <View style={styles.actionsRow}>
+          {/* « Annuler » reste natif : aucune variante `@ui/Button` ne rend un bouton
+              NEUTRE (bordure + libellé atténué) ; les variantes sont toutes teintées
+              marque/alerte. Le libellé `colors.textMuted` sur `colors.background` passe AA. */}
           <Pressable
             style={styles.cancelBtn}
             onPress={onCancel}
@@ -180,16 +184,17 @@ export function TreeSelectorEntrySheet({
           >
             <Text style={styles.cancelBtnText}>{texts.cancel}</Text>
           </Pressable>
-          <Pressable
-            style={[styles.saveBtn, saving ? styles.btnDisabled : null]}
+          <Button
+            variant="primary"
             onPress={onSave}
+            label={texts.saveBtn}
+            loading={saving}
             disabled={saving}
-            accessibilityRole="button"
+            iconRight={<MaterialCommunityIcons name="check" size={20} color={colors.text} />}
             accessibilityLabel={texts.saveBtn}
             testID="save-entry"
-          >
-            <Text style={styles.saveBtnText}>{saving ? '…' : texts.saveBtn}</Text>
-          </Pressable>
+            style={styles.saveBtnFlex}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

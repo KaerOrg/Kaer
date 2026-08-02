@@ -8,7 +8,7 @@ const mod: UnlockedModule = {
   module_type: 'crisis_plan',
   config: {},
   unlocked_at: '2026-01-01',
-  module: { mobile_icon: 'target', color: '#000', preview_kind: 'form', category_id: 'safety' },
+  module: { mobile_icon: 'target', color: '#000', preview_kind: 'form', category_id: 'safety', is_hidden: false },
 }
 
 const baseProps = {
