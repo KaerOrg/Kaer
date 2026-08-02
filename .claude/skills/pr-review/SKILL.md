@@ -604,7 +604,9 @@ Pour chaque composant/écran testé :
 
 Si la PR modifie `fr/common.json` en ajoutant des clés `modules.<id>.*` :
 - Vérifier que `en/common.json` est aussi modifié avec les mêmes clés → sinon **violation**
-- Vérifier que `fr/teen.json` et `en/teen.json` sont aussi modifiés (mobile uniquement) → sinon **violation bloquante**
+- Pour chaque clé, se demander : **le texte teen devrait-il différer du common** (registre à adapter : tutoiement, simplification) ?
+  - **Oui** et la clé manque dans `fr/teen.json` / `en/teen.json` (mobile) → **violation bloquante**. Juger langue par langue : une clé peut différer en `fr` (« Vous » → « Tu ») mais être identique en `en` (« you » invariable) → seule la variante divergente est obligatoire.
+  - **Non** (texte teen strictement identique au common : label nominal, titre sans vouvoiement, terme neutre) → clé teen **facultative**, le fallback i18next est le comportement voulu. **Ne pas signaler** l'absence.
 
 #### RULE — Documentation obligatoire pour un nouveau module
 *(source : module-builder SKILL.md § 7)*

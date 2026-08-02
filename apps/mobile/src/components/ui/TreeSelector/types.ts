@@ -72,6 +72,10 @@ export interface TreeSelectorTexts {
   emptyText: string
   /** Titre de la fiche unique (« Vous pouvez enregistrer, ou préciser. »). */
   entryTitle: string
+  /** Titre de la fiche quand rien n'a été nommé (« On garde le moment, sans le nommer. »). */
+  wordlessTitle: string
+  /** Sous-titre correspondant : ne pas trouver le mot est une réponse valable. */
+  wordlessHint: string
   intensityTitle: string
   /** Ancrages aux bornes de l'échelle : ils la bornent, ils ne qualifient pas la valeur. */
   intensityAnchorMin: string

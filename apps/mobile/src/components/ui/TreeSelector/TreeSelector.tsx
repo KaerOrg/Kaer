@@ -36,15 +36,16 @@ export interface TreeSelectorProps {
   onSubmit: (result: TreeSelectorSubmit) => Promise<void>
   onDelete: (id: string) => void
   /**
-   * Sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le bouton
-   * n'apparaît que si ce callback est fourni : un arbre sans porte de sortie
-   * n'en affiche pas.
+   * Autorise la sortie du niveau 1 sans rien nommer (« Je ne sais pas trop »). Le
+   * bouton n'apparaît que si l'appelant l'active : un arbre dont toutes les entrées
+   * doivent porter une sélection n'affiche pas de porte de sortie.
    */
-  onSkip?: () => void
+  allowWordless?: boolean
 }
 
 export function TreeSelector({
-  nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete, onSkip,
+  nodes, entries, config, texts, footerText, loading, saving, onSubmit, onDelete,
+  allowWordless = false,
 }: TreeSelectorProps) {
   const flow = useTreeSelectorFlow(config, onSubmit)
 
@@ -83,7 +84,7 @@ export function TreeSelector({
         onToggleExpand={flow.handleToggleExpand}
         onContinue={flow.handleContinue}
         onValidateHere={flow.handleValidateHere}
-        onSkip={onSkip}
+        onSkip={allowWordless ? flow.handleSkip : undefined}
       />
     )
   }

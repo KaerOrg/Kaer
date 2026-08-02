@@ -651,6 +651,13 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('ew.cfg', 'enable_notes',          '1'),
   ('ew.cfg', 'enable_context',        '1'),
   ('ew.cfg', 'enable_early_validate', '1'),
+  -- Entrée sans émotion nommée (K-7) : c'est la réponse au défaut n°1 de l'audit.
+  -- Le patient qui bloque produit quand même une entrée exploitable ; sans cette
+  -- porte de sortie il ne produit rien.
+  ('ew.cfg', 'enable_wordless',       '1'),
+  ('ew.cfg', 'wordless_title',        'modules.emotion_wheel.wordless_title'),
+  ('ew.cfg', 'wordless_hint',         'modules.emotion_wheel.wordless_hint'),
+  ('ew.cfg', 'wordless_label',        'modules.emotion_wheel.wordless_label'),
   -- Échelle 1 à 5 (K-6, #254) : 10 cibles tactiles de 44 px ne tiennent pas sur la
   -- largeur d'un téléphone, et l'écart 6 contre 7 sur 10 n'est pas fiable d'un jour
   -- à l'autre chez un même patient. Le champ reste facultatif : pas de 0, sinon
