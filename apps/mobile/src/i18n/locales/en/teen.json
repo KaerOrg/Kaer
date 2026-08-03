@@ -18,6 +18,12 @@
   },
   "modules": {
     "crisis_plan": {
+      "sequence_home_title": "I'm here with you.",
+      "sequence_resources_title": "Here is what is available right now",
+      "sequence_closing_title": "What makes me want to hold on",
+      "sequence_advance": "Something else I planned",
+      "sequence_advance_last": "What is available right now",
+      "sequence_stop": "I am stopping here",
       "title": "My plan for tough times",
       "subtitle": "This plan is here to help when things get too hard.",
       "step_1_title": "When I feel things going wrong",

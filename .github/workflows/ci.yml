@@ -45,6 +45,21 @@ jobs:
       - run: npm ci
       - run: cd apps/web && npx vitest run
 
+  # `packages/shared` porte la logique pure partagée par les deux apps (weekDates,
+  # rhythmogram, safetySequence…). Ni le vitest web ni le jest mobile ne la ramassent :
+  # sans ce job, ses tests n'étaient exécutés par personne en CI.
+  test-shared:
+    name: Shared — Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: cd packages/shared && npx vitest run
+
   typecheck-mobile:
     name: Mobile — TypeScript
     runs-on: ubuntu-latest
@@ -96,6 +111,6 @@ jobs:
   ci-ok:
     name: CI — OK
     runs-on: ubuntu-latest
-    needs: [typecheck-web, lint-web, test-web, typecheck-mobile, test-mobile, test-edge, test-sql]
+    needs: [typecheck-web, lint-web, test-web, test-shared, typecheck-mobile, test-mobile, test-edge, test-sql]
     steps:
       - run: echo "All checks passed"

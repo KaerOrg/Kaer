@@ -6,9 +6,16 @@
   tolérance à la détresse est l'un des 4 modules fondateurs, regroupant les
   *compétences de survie en crise* (TIPP, ACCEPTS, self-soothing, IMPROVE, pros & cons).
 - **Urge surfing** — technique introduite par **Marlatt & Gordon (1985)**, reprise par
-  la DBT et l'ACT, validée par l'ECR **Bowen et al. 2014** (JAMA Psychiatry, n=286,
-  PMID 24647726). Métaphore : une pulsion intense est une vague qui monte, atteint un
+  la DBT et l'ACT. Métaphore : une pulsion intense est une vague qui monte, atteint un
   pic, puis redescend ; on la « surfe » sans agir dessus.
+  > ⚠️ **Périmètre de la preuve, à ne pas surestimer.** L'ECR **Bowen et al. 2014**
+  > (JAMA Psychiatry, n=286, PMID 24647726) porte sur la **prévention de la rechute
+  > dans les troubles de l'usage de substances**, pas sur la crise suicidaire. Il étaye
+  > l'urge surfing comme technique, pas son efficacité en crise suicidaire. Ce qui est
+  > documenté dans ce contexte, c'est la **TCD dans son ensemble** : méta-analyse de
+  > 21 études et 1 673 adolescents, automutilations g = -0,44 et idéation suicidaire
+  > g = -0,31 (Kothgassner et al. 2021, *Psychological Medicine*). Ne pas écrire
+  > « validé en crise suicidaire » : l'onglet Sources est lu par des cliniciens.
 - **À qui** : adultes et adolescents (mode ado). Support entre consultations, abordé
   avec le soignant — ne remplace pas le suivi.
 
