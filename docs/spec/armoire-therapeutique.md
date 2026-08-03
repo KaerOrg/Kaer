@@ -152,9 +152,19 @@ libellé) extraite dans `moduleActionTabMeta.tsx` (partagée modale ↔ raccourc
 **Réutiliser.** Composant tableau de K-1, `scaleService` (`fetchScaleMeta`) + `scaleQueries.meta()`, `ScaleMetaBadges`. Retirer la branche échelle de `renderModuleCard` dans `PatientModulesTab`.
 
 **Critères d'acceptation.**
-- [ ] Visuellement et fonctionnellement identique au tableau Modules, au vocabulaire près.
-- [ ] Les échelles n'apparaissent plus dans l'onglet Modules.
-- [ ] Badge Auto/Hétéro sur chaque ligne ; C-SSRS en tête sans toggle ; filtre Type opérationnel.
+- [x] Visuellement et fonctionnellement identique au tableau Modules, au vocabulaire près.
+- [x] Les échelles n'apparaissent plus dans l'onglet Modules.
+- [x] Badge Auto/Hétéro sur chaque ligne ; C-SSRS en tête sans toggle ; filtre Type opérationnel.
+
+**Livré.** Onglet sidebar « Échelles & questionnaires » (`PatientPage`, entre Modules et Notes)
++ page `PatientScalesTab` : sous-onglets Actives/Évolution (`PatientEvolutionTab family="scales"`),
+`ModuleTable` réutilisé (1ʳᵉ colonne = nom + `ScaleEvalBadge` Auto/Hétéro via `titleBadge`),
+colonne INDICATIONS = `ModuleTagChips`, filtre **Type** (Auto/Hétéro) via `ModuleFilterBar.extraControls`
++ filtre Indication. C-SSRS en tête : `noToggle` (toggle visuel non interactif), « Toujours dispo. »
+(`unlockedLabelOverride`), clic → panneau d'évaluations `CSSRSScreenPanel`. Clic ligne → fiche
+`ModuleActionsModal` (K-3). Les échelles sont **exclues** de `PatientModulesTab` (`collectModules` +
+retrait de la branche échelle de `renderModuleCard`/`renderActiveRow` + modale CSSRS). Badge
+Auto/Hétéro = type de passation, jamais une gravité (MDR).
 
 ### K-5 · Échelles : sous-onglet « Évolution » = plan de mesure (maquettes `K-2_modules-evolution_3c` réf. + `K-5-K-7_programmee_5a`)
 

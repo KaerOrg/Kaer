@@ -13,12 +13,22 @@ export interface ModuleTableRow {
   readonly icon: ReactNode
   /** Nom du module / de l'échelle (déjà traduit). */
   readonly title: string
+  /**
+   * Badge accolé au nom (ex. badge Auto/Hétéro d'une échelle, K-4). Rendu à droite du
+   * titre dans la 1ʳᵉ colonne. Absent → nom seul.
+   */
+  readonly titleBadge?: ReactNode
   /** Description tronquée sur une ligne (déjà traduite). */
   readonly description: string
   /** Cellule « Indications » (puces d'indication ou badges d'échelle), déjà rendue. */
   readonly indications: ReactNode
   /** Date de déblocage BRUTE (ISO) ou `null` si non débloqué. */
   readonly unlockedAt: string | null
+  /**
+   * Remplace l'affichage de la cellule « Débloqué le » par ce libellé (ex. « Toujours
+   * dispo. » pour une échelle toujours disponible, C-SSRS). Le tri utilise `unlockedAt`.
+   */
+  readonly unlockedLabelOverride?: string
   /** Date de la dernière activité BRUTE (ISO) ou `null` si aucune saisie. */
   readonly lastActivityAt: string | null
   /** Contrôle de la colonne « Activé » (toggle ou bouton), déjà rendu. */

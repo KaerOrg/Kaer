@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1264,6 +1264,11 @@ const rows: ModuleTableRow[] = items.map(item => ({
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide (filtre sans résultat) |
 | `onRowClick` | `(id: string) => void` | Rend chaque ligne cliquable (ouvre la fiche du module, K-3) et active la **colonne d'actions au survol** (cellule `row.actions`). Reçoit l'`id` de la ligne. Absent ⇒ table non cliquable, pas de colonne d'actions |
 
+Champs de ligne optionnels ajoutés en K-4 (onglet Échelles) : `titleBadge` (`ReactNode`,
+badge accolé au nom, ex. `ScaleEvalBadge` Auto/Hétéro) et `unlockedLabelOverride` (`string`,
+remplace la cellule « Débloqué le » par un libellé, ex. « Toujours dispo. » pour C-SSRS ; le
+tri reste sur `unlockedAt`).
+
 Champ de ligne `actions` (`ReactNode`) : raccourcis révélés au **survol / focus** de la ligne
 (icônes `ui/Button variant="ghost"` : données, notifications, aperçu, config), rendus dans une
 colonne dédiée présente uniquement quand `onRowClick` est fourni. Chaque bouton stoppe la
@@ -1343,6 +1348,21 @@ const dayLabels = DAY_KEYS.map(k => t(`notifications.day_${k}`)) // ['L','M','Me
 | `accentColor` | `string` | `var(--color-primary)` | Couleur des arrêts actifs et du fil |
 
 ---
+
+## Composant `ScaleEvalBadge`
+
+Fichier : `components/features/ScaleEvalBadge/ScaleEvalBadge.tsx`. Badge **Auto** (bleu,
+auto-évaluation) / **Hétéro** (vert, hétéro-évaluation) d'une échelle. Décrit le **type de
+passation** (administratif), jamais une gravité clinique (MDR). Réutilisé par `ScaleMetaBadges`
+et par le tableau des échelles (badge accolé au nom, via `ModuleTable.titleBadge`, K-4).
+
+```tsx
+import { ScaleEvalBadge } from '../components/features/ScaleEvalBadge'
+<ScaleEvalBadge evaluationType={scale.evaluationType} />   // 'auto' | 'hetero'
+```
+
+> Le filtre **Type** (Auto/Hétéro) de l'onglet Échelles passe par le slot `extraControls`
+> de `ModuleFilterBar` (contrôle hors taxonomie rendu dans la rangée des filtres).
 
 ## Composant `ScaleMetaBadges`
 

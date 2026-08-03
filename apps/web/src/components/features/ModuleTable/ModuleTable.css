@@ -28,9 +28,20 @@
   min-width: 0;
 }
 
+/* Ligne « nom + badge » (ex. Auto/Hétéro d'une échelle accolé au nom, K-4). */
+.module-table__module-titleline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
+  min-width: 0;
+}
+
 .module-table__module-title {
   font-weight: 600;
   color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Description sur une seule ligne, coupée par des points de suspension. */

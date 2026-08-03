@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { LayoutDashboard, Package2, FileText, CalendarDays } from 'lucide-react'
+import { LayoutDashboard, Package2, FileText, CalendarDays, ClipboardList } from 'lucide-react'
 
 import { useAuthStore } from '../../store/authStore'
 import { usePatientEntriesRealtime } from '../../hooks/realtime/usePatientEntriesRealtime'
@@ -14,17 +14,20 @@ import type { PatientModule } from '../../lib/database.types'
 import type { ModuleCategory } from '@services/moduleCatalogService'
 import type { PractitionerNote } from '@services/noteService'
 import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
+import type { ScaleMetaRow } from '@services/scaleService'
 import type { AppointmentWithPatient } from '../../lib/calendar.types'
 import {
   patientQueries,
   catalogQueries,
   psyeduQueries,
+  scaleQueries,
   useSetTeenMode,
   useSaveGeneralNote,
 } from '../../hooks/queries'
 
 import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
+import { PatientScalesTab } from './tabs/PatientScalesTab'
 import { PatientNotesTab } from './tabs/PatientNotesTab'
 import { PatientRdvTab } from './tabs/PatientRdvTab'
 
@@ -59,6 +62,7 @@ const EMPTY_APPTS: AppointmentWithPatient[] = []
 const EMPTY_IDS: Set<string> = new Set()
 const EMPTY_TOPICS: LibraryTopic[] = []
 const EMPTY_THEMES: PsyEduTheme[] = []
+const EMPTY_SCALE_META: ScaleMetaRow[] = []
 
 export function PatientPage() {
   // `ref` = identifiant public opaque exposé dans l'URL ; `id` = patient_id réel.
@@ -95,6 +99,7 @@ export function PatientPage() {
   const appointmentsQuery = useQuery(patientQueries.appointments(practitioner?.id, id))
   const categoriesQuery = useQuery(catalogQueries.categories())
   const comingSoonQuery = useQuery(catalogQueries.comingSoonIds())
+  const scaleMetaQuery = useQuery(scaleQueries.meta())
   const enabledModulesQuery = useQuery(catalogQueries.enabledModules(practitioner?.id))
   const libraryTopicsQuery = useQuery(psyeduQueries.libraryTopics())
   const themesQuery = useQuery(psyeduQueries.themes())
@@ -139,7 +144,7 @@ export function PatientPage() {
   const togglingTeen = teenMutation.isPending
   const generalNoteSaving = generalNoteMutation.isPending
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'scales' | 'notes' | 'rdv'>('overview')
 
   // Prêt = patient résolu ET toutes les données chargées.
   const loading =
@@ -187,9 +192,23 @@ export function PatientPage() {
   const fullName = [identity.firstName, identity.lastName].filter(Boolean).join(' ')
   const displayName = identity.alias ?? (fullName || identity.email)
 
+  // Échelles activées = déverrouillées, ou toujours disponibles (C-SSRS noToggle).
+  const scaleMeta = scaleMetaQuery.data ?? EMPTY_SCALE_META
+  const scaleIds = useMemo(() => new Set(scaleMeta.map(s => s.id)), [scaleMeta])
+  const activeScaleCount = useMemo(
+    () => scaleMeta.filter(s => s.noToggle || modules.some(m => m.module_type === s.id)).length,
+    [scaleMeta, modules],
+  )
+  // Modules « outils » = modules assignés hors échelles (elles vivent dans leur onglet).
+  const toolModuleCount = useMemo(
+    () => modules.filter(m => !scaleIds.has(m.module_type)).length,
+    [modules, scaleIds],
+  )
+
   const PATIENT_TABS = [
     { id: 'overview',   label: t('patient.tab_overview'),   icon: <LayoutDashboard size={16} /> },
-    { id: 'modules',    label: t('patient.tab_modules'),    icon: <Package2 size={16} />,       badge: modules.length || undefined },
+    { id: 'modules',    label: t('patient.tab_modules'),    icon: <Package2 size={16} />,        badge: toolModuleCount || undefined },
+    { id: 'scales',     label: t('scales.tab_scales'),      icon: <ClipboardList size={16} />,   badge: activeScaleCount || undefined },
     { id: 'notes',      label: t('patient.tab_notes'),      icon: <FileText size={16} />,        badge: notes.length || undefined },
     { id: 'rdv',        label: t('patient.tab_rdv'),        icon: <CalendarDays size={16} />,    badge: appointments.length || undefined },
   ]
@@ -265,6 +284,17 @@ export function PatientPage() {
                 libraryTopics={libraryTopics}
                 themes={themes}
                 comingSoonIds={comingSoonIds}
+                onReloadModules={reloadModules}
+              />
+            )}
+
+            {activeTab === 'scales' && id && practitioner && (
+              <PatientScalesTab
+                patientId={id}
+                practitionerId={practitioner.id}
+                modules={modules}
+                categories={categories}
+                enabledModules={enabledModules}
                 onReloadModules={reloadModules}
               />
             )}
