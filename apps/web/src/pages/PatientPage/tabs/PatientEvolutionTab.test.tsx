@@ -269,6 +269,66 @@ describe('PatientEvolutionTab — bandeau d’aperçu (échelles + médication)'
   })
 })
 
+describe('PatientEvolutionTab : filtre par famille (K-2)', () => {
+  // Patient avec une échelle (phq9) ET un module (sleep_diary) ayant des données.
+  function seedMixed() {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'phq9' }, { module_type: 'sleep_diary' }])
+    mockFetchAvailableScales.mockResolvedValue(['phq9'])
+    mockFetchScaleEvolution.mockResolvedValue([
+      { date: '2026-05-01', score: 12 },
+      { date: '2026-06-01', score: 8 },
+    ])
+    mockFetchSleepEvolution.mockResolvedValue([
+      {
+        date: '2026-03-15', efficiency: 82, total_sleep_min: 450, onset_min: 12, waso_min: 18,
+        nap_min: 0, quality: 4, in_bed_time: '22:45', bedtime: '23:00', wake_time: '07:00',
+        out_of_bed_time: '07:15', nightmares: false,
+      },
+    ])
+    // Beck désactivé pour cet essai : on veut un module « pur » (sommeil) et une échelle.
+    mockFetchFormEntries.mockResolvedValue([])
+  }
+
+  function renderWithFamily(family?: 'modules' | 'scales') {
+    return render(
+      <QueryClientProvider client={makeClient()}>
+        <PatientEvolutionTab patientId="p1" family={family} />
+      </QueryClientProvider>,
+    )
+  }
+
+  it('family="modules" : garde les sections modules, masque les sections d’échelles', async () => {
+    seedMixed()
+    const { getByText, queryByRole } = renderWithFamily('modules')
+    await waitFor(() => expect(getByText('evolution.sleep_section_title')).toBeTruthy())
+    // La section de l'échelle phq9 ne doit PAS être rendue.
+    expect(queryByRole('button', { name: /evolution\.scale_phq9/ })).toBeNull()
+  })
+
+  it('family="scales" : ne garde que les sections d’échelles, masque les modules', async () => {
+    seedMixed()
+    const { getByRole, queryByText } = renderWithFamily('scales')
+    await waitFor(() => expect(getByRole('button', { name: /evolution\.scale_phq9/ })).toBeTruthy())
+    // La section module (sommeil) ne doit PAS être rendue.
+    expect(queryByText('evolution.sleep_section_title')).toBeNull()
+  })
+
+  it('family="modules" : le bandeau d’aperçu ne compte que les cartes modules', async () => {
+    seedMixed()
+    const { getByTestId } = renderWithFamily('modules')
+    // sommeil = 1 carte ; l'échelle phq9 est exclue de la famille modules.
+    await waitFor(() =>
+      expect(getByTestId('overview-band').getAttribute('data-count')).toBe('1'))
+  })
+
+  it('sans family : affiche les deux familles (comportement historique)', async () => {
+    seedMixed()
+    const { getByText, getByRole } = renderWithFamily(undefined)
+    await waitFor(() => expect(getByRole('button', { name: /evolution\.scale_phq9/ })).toBeTruthy())
+    expect(getByText('evolution.sleep_section_title')).toBeTruthy()
+  })
+})
+
 describe('PatientEvolutionTab — comparaison période de référence (sommeil)', () => {
   it('le bouton « Comparer » révèle le choix de période de référence (off par défaut)', async () => {
     mockFetchPatientModules.mockResolvedValue([{ module_type: 'sleep_diary' }])

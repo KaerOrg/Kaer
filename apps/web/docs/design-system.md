@@ -1170,6 +1170,7 @@ const columns: DataTableColumn<Row>[] = [
 | `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
 | `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |
 | `pagination` | `DataTablePaginationState` | Pagination **contrôlée** (cf. ci-dessous). Absente ⇒ aucune barre |
+| `onRowActivate` | `(row: T) => void` | Rend chaque ligne **cliquable à la souris** (`.data-table__row--clickable`, curseur main). Le `<tr>` ne reçoit **ni `role` ni `tabIndex`** (une ligne contenant des boutons ne peut pas être un `role="button"` valide) : l'accès clavier/lecteur d'écran passe par les contrôles explicites de la ligne. Un clic sur un élément interactif interne (bouton, toggle, lien) est ignoré. Absent ⇒ lignes non cliquables |
 | `className` | `string` | Classe posée sur le conteneur `.data-table-wrap` — permet de **scoper un habillage propre** (couleurs d'en-tête, dégradé de lignes) sans toucher au style générique. Ex. `CaseloadTable` passe `caseload-data-table` et stylise `.caseload-data-table .data-table__th` (en-tête teal). |
 
 **Tri (`sortable`)** — une colonne `{ …, sortable: true }` rend un bouton de tri dans son
@@ -1222,11 +1223,11 @@ d'un patient** (armoire thérapeutique, K-1). Assemble le primitive `ui/DataTabl
 avec les 5 colonnes de l'armoire : **Module** (icône + nom + description tronquée sur
 une ligne), **Indications**, **Débloqué le**, **Dernière activité**, **Activé**.
 Composant métier : il possède l'état de tri (les deux colonnes de date) et réordonne
-lui-même les lignes — `DataTable` ne trie jamais. Les lignes sans date vont toujours
+lui-même les lignes (`DataTable` ne trie jamais). Les lignes sans date vont toujours
 en fin, quel que soit le sens du tri.
 
 Les cellules « libres » (`indications`, `activation`) sont fournies **déjà rendues**
-par l'appelant : puces d'indication (`ModuleTagChips maxChips={2}` — max N puces par
+par l'appelant : puces d'indication (`ModuleTagChips maxChips={2}`, max N puces par
 dimension, le surplus résumé par une puce « +N ») ou badges d'échelle
 (`ScaleMetaBadges chipsOnly`) pour les indications ; toggle d'activation ou bouton pour
 la colonne Activé. Les dates sont passées **brutes** (ISO ou `null`) et formatées à la
@@ -1242,7 +1243,7 @@ const rows: ModuleTableRow[] = items.map(item => ({
   title: t(`modules.${item.id}.label`),
   description: t(`modules.${item.id}.description`),
   indications: <ModuleTagChips tagIds={tags} taxonomy={taxonomy} maxChips={2} />,
-  unlockedAt: mod?.unlocked_at ?? null,        // ISO brut — le tableau formate
+  unlockedAt: mod?.unlocked_at ?? null,        // ISO brut, le tableau formate
   lastActivityAt: lastActivity.get(item.id) ?? null,
   activation: moduleToggle(true, busy, onRevoke),
 }))
@@ -1258,9 +1259,16 @@ const rows: ModuleTableRow[] = items.map(item => ({
 | Prop | Type | Rôle |
 |---|---|---|
 | `rows` | `readonly ModuleTableRow[]` | Lignes (id, icône, titre, description, `indications`, `unlockedAt`, `lastActivityAt`, `activation`) |
-| `firstColumnLabel` | `string` | En-tête de la 1ʳᵉ colonne (« Module » / « Échelle & questionnaire ») — les 4 autres colonnes sont communes |
+| `firstColumnLabel` | `string` | En-tête de la 1ʳᵉ colonne (« Module » / « Échelle & questionnaire ») ; les 4 autres colonnes sont communes |
 | `ariaLabel` | `string` | Libellé accessible de la table |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide (filtre sans résultat) |
+| `onRowClick` | `(id: string) => void` | Rend chaque ligne cliquable (ouvre la fiche du module, K-3) et active la **colonne d'actions au survol** (cellule `row.actions`). Reçoit l'`id` de la ligne. Absent ⇒ table non cliquable, pas de colonne d'actions |
+
+Champ de ligne `actions` (`ReactNode`) : raccourcis révélés au **survol / focus** de la ligne
+(icônes `ui/Button variant="ghost"` : données, notifications, aperçu, config), rendus dans une
+colonne dédiée présente uniquement quand `onRowClick` est fourni. Chaque bouton stoppe la
+propagation pour ne pas déclencher le clic de ligne. Sous pointeur grossier (tactile), les
+actions restent visibles (`@media (hover: none)`).
 
 > La barre de filtres à facettes (`ModuleFilterBar`) est un panneau déjà encadré :
 > l'armoire la rend **au-dessus** de `ModuleTable` (elle n'est pas passée à la table,
@@ -1368,7 +1376,7 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 | `evaluationType` | `'auto' \| 'hetero'` | Badge coloré — bleu (auto-évaluation) ou vert (hétéro-évaluation) |
 | `category` | `string` | Chip nosologique gris (ex. `'Humeur'`, `'Anxiété'`) |
 | `targetAges` | `readonly TargetAge[]` | Chips d'âge colorés — couleurs définies dans `AGE_BADGE_CONFIG` de `data/scales.ts` |
-| `chipsOnly` | `boolean` (défaut `false`) | N'affiche que les puces (badge éval + catégorie), sans la ligne de description — pour les contextes denses (cellule « Indications » de `ModuleTable`) |
+| `chipsOnly` | `boolean` (défaut `false`) | N'affiche que les puces (badge éval + catégorie), sans la ligne de description, pour les contextes denses (cellule « Indications » de `ModuleTable`) |
 
 ### Labels i18n
 

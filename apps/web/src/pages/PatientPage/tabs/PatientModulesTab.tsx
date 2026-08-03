@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, Plus } from 'lucide-react'
+import { ShieldAlert, Plus, Package2, TrendingUp } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Tabs } from '../../../components/ui/Tabs'
 import { ModuleCard } from '../../../components/features/ModuleCard'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -12,12 +13,14 @@ import { Modal } from '../../../components/ui/Modal'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { ModuleTable, type ModuleTableRow } from '../../../components/features/ModuleTable'
+import { PatientEvolutionTab } from './PatientEvolutionTab'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
 import { ModuleActionsModal, type ModuleActionTab } from './ModuleActionsModal'
+import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import { computeModuleTabs } from './moduleActionTabs'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
@@ -63,10 +66,6 @@ type Props = {
   themes: PsyEduTheme[]
   comingSoonIds: Set<string>
   onReloadModules: () => Promise<void>
-  /** Commande externe (page Évolution) : ouvrir la modale Données de ce module. */
-  openDataFor?: ModuleType | null
-  /** Accusé de réception de `openDataFor` (le parent remet la commande à null). */
-  onOpenDataHandled?: () => void
 }
 
 export function PatientModulesTab({
@@ -79,10 +78,11 @@ export function PatientModulesTab({
   themes,
   comingSoonIds,
   onReloadModules,
-  openDataFor,
-  onOpenDataHandled,
 }: Props) {
   const { t, i18n } = useTranslation()
+  // Sous-onglets de l'armoire (K-2) : « Actifs » (le tableau) et « Évolution »
+  // (les courbes des modules, montées à côté de ce qui les produit).
+  const [activeSubTab, setActiveSubTab] = useState<'active' | 'evolution'>('active')
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   // Dernière activité de chaque module (map module_id → horodatage), pour la colonne
@@ -99,13 +99,12 @@ export function PatientModulesTab({
   // anciens states séparés aperçu / données / notifications.
   const [activeModule, setActiveModule] = useState<{ module: ModuleType; tab: ModuleActionTab } | null>(null)
 
-  // Commande externe « Voir les données → » (page Évolution) : ouvre la modale sur
-  // l'onglet Données du module demandé, puis accuse réception pour ne pas rouvrir.
-  useEffect(() => {
-    if (openDataFor == null) return
-    setActiveModule({ module: openDataFor, tab: 'data' })
-    onOpenDataHandled?.()
-  }, [openDataFor, onOpenDataHandled])
+  // « Voir les données → » du sous-onglet Évolution : ouvre la modale sur l'onglet
+  // Données du module (la modale est rendue par cet onglet, quel que soit le sous-onglet).
+  const openModuleDataPanel = useCallback(
+    (moduleType: ModuleType) => setActiveModule({ module: moduleType, tab: 'data' }),
+    [],
+  )
   const [showCSSRSModal, setShowCSSRSModal] = useState(false)
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -195,6 +194,28 @@ export function PatientModulesTab({
   const openConfig = (type: ModuleType) => {
     openConfigEditor(type)
     setActiveModule({ module: type, tab: 'config' })
+  }
+
+  // Ouvre la modale d'actions sur l'onglet demandé. `config` passe par `openConfig`
+  // (amorce l'éditeur du module) ; les autres onglets s'ouvrent directement. Utilisé par
+  // le clic de ligne (K-3) et les actions au survol du tableau.
+  const openModuleTab = (type: ModuleType, tab: ModuleActionTab) => {
+    if (tab === 'config') openConfig(type)
+    else setActiveModule({ module: type, tab })
+  }
+
+  // Clic sur une ligne du tableau : ouvre la fiche du module sur son premier onglet
+  // (ordre canonique de `computeModuleTabs`). Sans onglet disponible → aucune action
+  // (jamais de démarrage de passation en un clic).
+  const openModuleSheet = (type: ModuleType) => {
+    const mod = modules.find(m => m.module_type === type)
+    const scale = scaleMeta.find(s => s.id === type)
+    const tabs = computeModuleTabs(type, {
+      unlocked: !!mod,
+      isScale: !!scale,
+      scaleHasPreview: scale?.hasPreview ?? false,
+    })
+    if (tabs.length > 0) openModuleTab(type, tabs[0])
   }
 
   // Fermeture de la modale : réinitialise l'éditeur de config s'il était ouvert.
@@ -605,6 +626,29 @@ export function PatientModulesTab({
       })
     )
 
+    // Actions rapides au survol (K-3) : un raccourci par onglet disponible, sauf
+    // « Sources » (accessible dans la fiche). L'onglet ouvre la modale directement.
+    const actionTabs = computeModuleTabs(moduleType, {
+      unlocked,
+      isScale: !!scale,
+      scaleHasPreview: scale?.hasPreview ?? false,
+    }).filter(tab => tab !== 'sources')
+
+    const actions = actionTabs.length > 0 ? (
+      <>
+        {actionTabs.map(tab => (
+          <Button
+            key={tab}
+            variant="ghost"
+            size="sm"
+            icon={tabIcon(tab)}
+            aria-label={t(TAB_LABEL_KEY[tab])}
+            onClick={e => { e.stopPropagation(); openModuleTab(moduleType, tab) }}
+          />
+        ))}
+      </>
+    ) : undefined
+
     return {
       id: moduleType,
       icon: RowIcon ? <RowIcon size={18} /> : null,
@@ -623,6 +667,7 @@ export function PatientModulesTab({
       unlockedAt: mod ? mod.unlocked_at : null,
       lastActivityAt: lastActivityByModule?.get(moduleType) ?? null,
       activation,
+      actions,
     }
   }
 
@@ -764,27 +809,47 @@ export function PatientModulesTab({
           </Button>
         </div>
 
-        {activatedModules.length === 0 ? (
-          <p className="wardrobe__empty">{t('patient.wardrobe_empty')}</p>
-        ) : (
-          <div className="wardrobe__active">
-            {showActiveFilterBar && (
-              <ModuleFilterBar
-                taxonomy={taxonomy}
-                activeFilters={activeFilters}
-                onToggleTag={toggleTag}
-                onReset={resetFilters}
-                resultCount={visibleActivatedModules.length}
-                totalCount={activatedModules.length}
+        <div className="wardrobe__subtabs">
+          <Tabs
+            tabs={[
+              { id: 'active', label: t('patient.subtab_active'), icon: <Package2 size={16} />, badge: activatedModules.length || undefined },
+              { id: 'evolution', label: t('patient.tab_evolution'), icon: <TrendingUp size={16} /> },
+            ]}
+            activeTab={activeSubTab}
+            onChange={id => setActiveSubTab(id as 'active' | 'evolution')}
+          />
+        </div>
+
+        {activeSubTab === 'active' ? (
+          activatedModules.length === 0 ? (
+            <p className="wardrobe__empty">{t('patient.wardrobe_empty')}</p>
+          ) : (
+            <div className="wardrobe__active">
+              {showActiveFilterBar && (
+                <ModuleFilterBar
+                  taxonomy={taxonomy}
+                  activeFilters={activeFilters}
+                  onToggleTag={toggleTag}
+                  onReset={resetFilters}
+                  resultCount={visibleActivatedModules.length}
+                  totalCount={activatedModules.length}
+                />
+              )}
+              <ModuleTable
+                rows={displayedActivatedModules.map(renderActiveRow)}
+                firstColumnLabel={t('patient.module_table.col_module')}
+                ariaLabel={t('patient.wardrobe_title')}
+                emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
+                onRowClick={id => openModuleSheet(id as ModuleType)}
               />
-            )}
-            <ModuleTable
-              rows={displayedActivatedModules.map(renderActiveRow)}
-              firstColumnLabel={t('patient.module_table.col_module')}
-              ariaLabel={t('patient.wardrobe_title')}
-              emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
-            />
-          </div>
+            </div>
+          )
+        ) : (
+          <PatientEvolutionTab
+            patientId={patientId}
+            family="modules"
+            onOpenModuleData={openModuleDataPanel}
+          />
         )}
       </section>
 

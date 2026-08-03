@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { LayoutDashboard, Package2, FileText, CalendarDays, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, Package2, FileText, CalendarDays } from 'lucide-react'
 
 import { useAuthStore } from '../../store/authStore'
 import { usePatientEntriesRealtime } from '../../hooks/realtime/usePatientEntriesRealtime'
@@ -10,7 +10,7 @@ import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
 import { Tabs } from '../../components/ui/Tabs'
 import { Tooltip } from '../../components/ui/Tooltip'
-import type { PatientModule, ModuleType } from '../../lib/database.types'
+import type { PatientModule } from '../../lib/database.types'
 import type { ModuleCategory } from '@services/moduleCatalogService'
 import type { PractitionerNote } from '@services/noteService'
 import type { LibraryTopic, PsyEduTheme } from '@services/psyeduService'
@@ -27,15 +27,8 @@ import { PatientOverviewTab } from './tabs/PatientOverviewTab'
 import { PatientModulesTab } from './tabs/PatientModulesTab'
 import { PatientNotesTab } from './tabs/PatientNotesTab'
 import { PatientRdvTab } from './tabs/PatientRdvTab'
-import { PatientEvolutionTab } from './tabs/PatientEvolutionTab'
 
 import './PatientPage.css'
-
-const GRAPHABLE_MODULE_TYPES = new Set([
-  'phq9', 'gad7', 'bsl23', 'epds', 'rcads', 'asrs6', 'snap_iv', 'nsi',
-  'mood_tracker', 'fear_thermometer', 'medication_side_effects',
-  'cognitive_saturation',
-])
 
 // Snapshot d'identité dérivé de fetchPatientHeader : ces champs sont écrits au même
 // instant et ne varient jamais l'un sans les autres → un seul objet.
@@ -146,17 +139,7 @@ export function PatientPage() {
   const togglingTeen = teenMutation.isPending
   const generalNoteSaving = generalNoteMutation.isPending
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv' | 'evolution'>('overview')
-
-  // Commande « ouvrir l'onglet Données d'un module » depuis la page Évolution :
-  // bascule sur l'onglet Modules et transmet le module à PatientModulesTab (qui
-  // détient la modale d'actions). Remis à null une fois la modale ouverte.
-  const [openModuleData, setOpenModuleData] = useState<ModuleType | null>(null)
-  const handleOpenModuleData = useCallback((moduleType: ModuleType) => {
-    setOpenModuleData(moduleType)
-    setActiveTab('modules')
-  }, [])
-  const handleModuleDataOpened = useCallback(() => setOpenModuleData(null), [])
+  const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'notes' | 'rdv'>('overview')
 
   // Prêt = patient résolu ET toutes les données chargées.
   const loading =
@@ -204,14 +187,11 @@ export function PatientPage() {
   const fullName = [identity.firstName, identity.lastName].filter(Boolean).join(' ')
   const displayName = identity.alias ?? (fullName || identity.email)
 
-  const hasEvolutionData = modules.some(m => GRAPHABLE_MODULE_TYPES.has(m.module_type))
-
   const PATIENT_TABS = [
     { id: 'overview',   label: t('patient.tab_overview'),   icon: <LayoutDashboard size={16} /> },
     { id: 'modules',    label: t('patient.tab_modules'),    icon: <Package2 size={16} />,       badge: modules.length || undefined },
     { id: 'notes',      label: t('patient.tab_notes'),      icon: <FileText size={16} />,        badge: notes.length || undefined },
     { id: 'rdv',        label: t('patient.tab_rdv'),        icon: <CalendarDays size={16} />,    badge: appointments.length || undefined },
-    ...(hasEvolutionData ? [{ id: 'evolution', label: t('patient.tab_evolution'), icon: <TrendingUp size={16} /> }] : []),
   ]
 
   const sidebar = (
@@ -286,8 +266,6 @@ export function PatientPage() {
                 themes={themes}
                 comingSoonIds={comingSoonIds}
                 onReloadModules={reloadModules}
-                openDataFor={openModuleData}
-                onOpenDataHandled={handleModuleDataOpened}
               />
             )}
 
@@ -308,10 +286,6 @@ export function PatientPage() {
                 practitionerName={practitioner.name ?? undefined}
                 displayName={displayName}
               />
-            )}
-
-            {activeTab === 'evolution' && id && (
-              <PatientEvolutionTab patientId={id} onOpenModuleData={handleOpenModuleData} />
             )}
           </>
         )}

@@ -285,4 +285,41 @@ describe('DataTable — pagination', () => {
     )
     expect(screen.queryByRole('button', { name: 'Suivant' })).toBeNull()
   })
+
+  describe('onRowActivate (ligne cliquable)', () => {
+    it('active la ligne au clic sur une cellule non interactive', () => {
+      const onActivate = vi.fn()
+      render(<DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} onRowActivate={onActivate} />)
+      fireEvent.click(screen.getByText('Ada Lovelace'))
+      expect(onActivate).toHaveBeenCalledWith(PEOPLE[0])
+    })
+
+    it('n\'active PAS la ligne au clic sur un bouton interne', () => {
+      const onActivate = vi.fn()
+      const cols: DataTableColumn<Person>[] = [
+        { id: 'name', header: 'Nom', cell: row => row.name },
+        { id: 'act', header: '', cell: () => <button type="button">action</button> },
+      ]
+      render(<DataTable columns={cols} rows={PEOPLE} getRowId={p => p.id} onRowActivate={onActivate} />)
+      fireEvent.click(screen.getAllByRole('button', { name: 'action' })[0])
+      expect(onActivate).not.toHaveBeenCalled()
+    })
+
+    it('marque la ligne comme cliquable (surface souris) sans role/tabindex sur le <tr>', () => {
+      const onActivate = vi.fn()
+      const { container } = render(
+        <DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} onRowActivate={onActivate} />,
+      )
+      const row = container.querySelector('.data-table__row--clickable') as HTMLElement
+      // Pas de role/tabindex : une ligne contenant des boutons ne peut pas être un
+      // role="button" valide ; l'accès clavier passe par les contrôles internes.
+      expect(row.getAttribute('role')).toBeNull()
+      expect(row.getAttribute('tabindex')).toBeNull()
+    })
+
+    it('sans onRowActivate, la ligne n\'est pas cliquable', () => {
+      const { container } = render(<DataTable columns={COLUMNS} rows={PEOPLE} getRowId={p => p.id} />)
+      expect(container.querySelector('.data-table__row--clickable')).toBeNull()
+    })
+  })
 })

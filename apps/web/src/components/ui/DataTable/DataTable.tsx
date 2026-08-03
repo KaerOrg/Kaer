@@ -25,6 +25,7 @@ export function DataTable<T>({
   sort,
   onSortChange,
   pagination,
+  onRowActivate,
 }: DataTableProps<T>) {
   return (
     <div className={`data-table-wrap ${className ?? ''}`}>
@@ -50,6 +51,7 @@ export function DataTable<T>({
                     columns={columns}
                     renderDetail={renderDetail}
                     rowClassName={rowClassName?.(row)}
+                    onActivate={onRowActivate}
                   />
                 ))}
               </tbody>
