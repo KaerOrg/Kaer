@@ -30,6 +30,7 @@ import { TechniqueRow } from './TechniqueRow'
 import { GoalSheet } from './GoalSheet'
 import { ReminderSheet, type ReminderDraft } from './ReminderSheet'
 import { TechniqueInfoSheet } from './TechniqueInfoSheet'
+import { PreparationSheet, type PreparationDraft } from './PreparationSheet'
 import { DISPLAY_WEEK_DAY_KEYS, formatReminderDays } from './weekDayOrder'
 import { formatSessionDuration } from './formatDuration'
 import { hubStyles } from './hubStyles'
@@ -47,6 +48,7 @@ type ActiveSheet =
   | { kind: 'goal' }
   | { kind: 'reminder' }
   | { kind: 'info'; technique: BreathingTechnique }
+  | { kind: 'prepare'; technique: BreathingTechnique }
 
 /**
  * Lecture des réglages. Tant qu'ils ne sont pas lus, **rien de ce qui écrit** n'est
@@ -165,13 +167,15 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
     if (activation?.primary != null) setActiveSheet({ kind: 'info', technique: activation.primary })
   }, [activation])
 
+  // Démarrer n'ouvre plus l'exercice directement : la feuille de préparation
+  // s'intercale pour laisser le temps de s'installer et de régler la session.
   const startPrimary = useCallback(() => {
-    if (activation?.primary != null) setActiveTechnique(activation.primary)
+    if (activation?.primary != null) setActiveSheet({ kind: 'prepare', technique: activation.primary })
   }, [activation])
 
   const openTechnique = useCallback((techniqueKey: string) => {
     const found = techniques.find(tech => tech.key === techniqueKey)
-    if (found) setActiveTechnique(found)
+    if (found) setActiveSheet({ kind: 'prepare', technique: found })
   }, [techniques])
 
   // Ferme le lecteur ; si une session a été enregistrée, rafraîchit l'historique.
@@ -206,6 +210,30 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
       reminder_days: draft.days,
     })
   }, [settings, persist])
+
+  // Démarre la session avec les réglages de la feuille, en les mémorisant pour la
+  // prochaine : la feuille se rouvrira sur ces choix.
+  const startSession = useCallback((draft: PreparationDraft) => {
+    if (settings == null) return
+    const technique = activeSheet?.kind === 'prepare' ? activeSheet.technique : null
+    persist({
+      ...settings,
+      preferred_duration_min: draft.durationMin,
+      haptics: draft.haptics,
+      breath_sound: draft.breathSound,
+      ambient_sound: draft.ambientSound,
+      ambient_sound_key: draft.ambientSoundKey,
+    })
+    setActiveTechnique(technique)
+  }, [settings, activeSheet, persist])
+
+  const preparationDraft = useMemo<PreparationDraft>(() => ({
+    durationMin: settings?.preferred_duration_min ?? 0,
+    haptics: settings?.haptics ?? true,
+    breathSound: settings?.breath_sound ?? false,
+    ambientSound: settings?.ambient_sound ?? false,
+    ambientSoundKey: settings?.ambient_sound_key ?? 'river',
+  }), [settings])
 
   const reminderDraft = useMemo<ReminderDraft>(() => ({
     enabled: settings?.reminder_enabled ?? false,
@@ -315,6 +343,20 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
           visible
           technique={activeSheet.technique}
           onClose={closeSheet}
+          lbl={lbl}
+          closeLabel={t('common.close')}
+        />
+      ) : null}
+
+      {activeSheet?.kind === 'prepare' ? (
+        <PreparationSheet
+          visible
+          technique={activeSheet.technique}
+          value={preparationDraft}
+          durations={config.durationsMin}
+          ambientSounds={config.ambientSounds}
+          onClose={closeSheet}
+          onStart={startSession}
           lbl={lbl}
           closeLabel={t('common.close')}
         />

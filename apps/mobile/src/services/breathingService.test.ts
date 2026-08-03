@@ -30,7 +30,7 @@ import {
   breathingConfigFromFields,
   resolveActivation,
 } from './breathingService'
-import type { BreathingSettings, BreathingTechnique } from './breathingService'
+import type { BreathingSettings, BreathingTechnique, BreathingModuleConfig } from './breathingService'
 import type { ContentField } from '@kaer/shared'
 
 beforeEach(() => jest.clearAllMocks())
@@ -249,26 +249,53 @@ describe('breathingService — techniquesFromFields', () => {
 })
 
 describe('breathingService : breathingConfigFromFields', () => {
+  const configField = (props: Record<string, string>) =>
+    makeField({ id: 'bt.config', field_type: 'exercise_config', props })
+
   it('lit la technique par défaut depuis le field exercise_config', () => {
     const config = breathingConfigFromFields([
       makeField({ id: 'bt.label', field_type: 'module_label' }),
-      makeField({
-        id: 'bt.config',
-        field_type: 'exercise_config',
-        props: { default_technique_key: 'coherence_cardiaque' },
-      }),
+      configField({ default_technique_key: 'coherence_cardiaque' }),
     ])
-    expect(config).toEqual({ defaultTechniqueKey: 'coherence_cardiaque' })
+    expect(config.defaultTechniqueKey).toBe('coherence_cardiaque')
   })
 
-  it('rend null sans field de config (aucun repli codé en dur)', () => {
+  it('lit les durées proposées depuis les clés indexées, dans l’ordre', () => {
+    const config = breathingConfigFromFields([
+      configField({ duration_2: '5', duration_1: '2', duration_3: '10' }),
+    ])
+    expect(config.durationsMin).toEqual([2, 5, 10])
+  })
+
+  it('écarte une durée nulle ou non numérique', () => {
+    const config = breathingConfigFromFields([
+      configField({ duration_1: '2', duration_2: '0', duration_3: 'abc' }),
+    ])
+    expect(config.durationsMin).toEqual([2])
+  })
+
+  it('lit les ambiances proposées depuis les clés indexées', () => {
+    const config = breathingConfigFromFields([
+      configField({ ambient_sound_1: 'river', ambient_sound_2: 'waves' }),
+    ])
+    expect(config.ambientSounds).toEqual(['river', 'waves'])
+  })
+
+  it('écarte une ambiance inconnue de l’énumération (la base la refuserait)', () => {
+    const config = breathingConfigFromFields([
+      configField({ ambient_sound_1: 'river', ambient_sound_2: 'thunderstorm' }),
+    ])
+    expect(config.ambientSounds).toEqual(['river'])
+  })
+
+  it('rend une config vide sans field de config (aucun repli codé en dur)', () => {
     expect(breathingConfigFromFields([makeField({ field_type: 'module_label' })]))
-      .toEqual({ defaultTechniqueKey: null })
+      .toEqual({ defaultTechniqueKey: null, durationsMin: [], ambientSounds: [] })
   })
 
-  it('rend null quand le field de config existe sans la clé', () => {
-    expect(breathingConfigFromFields([makeField({ id: 'bt.config', field_type: 'exercise_config' })]))
-      .toEqual({ defaultTechniqueKey: null })
+  it('rend une config vide quand le field existe sans aucune clé', () => {
+    expect(breathingConfigFromFields([configField({})]))
+      .toEqual({ defaultTechniqueKey: null, durationsMin: [], ambientSounds: [] })
   })
 })
 
@@ -278,7 +305,9 @@ describe('breathingService : resolveActivation', () => {
     phases: [{ type: 'inhale', seconds: 5 }, { type: 'exhale', seconds: 5 }],
   })
   const TECHNIQUES = [tech('coherence_cardiaque'), tech('diaphragmatique'), tech('carree')]
-  const CONFIG = { defaultTechniqueKey: 'coherence_cardiaque' }
+  const CONFIG: BreathingModuleConfig = {
+    defaultTechniqueKey: 'coherence_cardiaque', durationsMin: [2, 5, 10], ambientSounds: ['river'],
+  }
 
   const settings = (over: Partial<BreathingSettings> = {}): BreathingSettings => ({
     enabled_techniques: [], primary_technique: null, weekly_goal_sessions: 5,
@@ -344,7 +373,7 @@ describe('breathingService : resolveActivation', () => {
   })
 
   it('rend primary null quand ni activation ni repli ne donnent de technique', () => {
-    expect(resolveActivation(TECHNIQUES, settings(), { defaultTechniqueKey: null }))
+    expect(resolveActivation(TECHNIQUES, settings(), { ...CONFIG, defaultTechniqueKey: null }))
       .toEqual({ primary: null, others: [] })
   })
 })

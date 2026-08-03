@@ -27,7 +27,11 @@ jest.mock('@services/breathingService', () => {
   return {
     ...actual,
     techniquesFromFields: () => TECHNIQUES,
-    breathingConfigFromFields: () => ({ defaultTechniqueKey: 'coherence_cardiaque' }),
+    breathingConfigFromFields: () => ({
+      defaultTechniqueKey: 'coherence_cardiaque',
+      durationsMin: [2, 5, 10],
+      ambientSounds: ['river', 'waves', 'rain', 'wind', 'bowl'],
+    }),
     fetchBreathingSessions: () => mockFetchSessions(),
     fetchBreathingSettings: () => mockFetchSettings(),
     saveBreathingSettings: (...a: unknown[]) => mockSaveSettings(...a),
@@ -138,19 +142,51 @@ describe('BreathingPacerLayout : hub', () => {
     expect(screen.getByTestId('breathing-info-sources')).toBeTruthy()
   })
 
-  it('ouvre le lecteur au démarrage de la technique de séance', async () => {
+  it('ouvre la préparation, et non le lecteur, au démarrage de la technique de séance', async () => {
     renderHub()
     fireEvent.press(await screen.findByTestId('breathing-start-btn'))
-    expect((await screen.findByTestId('player')).props.children).toBe('coherence_cardiaque')
+    expect(await screen.findByTestId('breathing-prep-sheet')).toBeTruthy()
+    expect(screen.queryByTestId('player')).toBeNull()
   })
 
-  it('ouvre le lecteur au tap sur une technique de la liste', async () => {
+  it('ouvre la préparation au tap sur une technique de la liste', async () => {
     mockFetchSettings.mockResolvedValue({
       ...SETTINGS, enabled_techniques: ['coherence_cardiaque', 'carree'], primary_technique: 'coherence_cardiaque',
     })
     renderHub()
     fireEvent.press(await screen.findByTestId('breathing-technique-carree'))
+    expect(await screen.findByTestId('breathing-prep-sheet')).toBeTruthy()
+  })
+
+  it('lance le lecteur sur la technique préparée, une fois « Commencer » appuyé', async () => {
+    mockFetchSettings.mockResolvedValue({
+      ...SETTINGS, enabled_techniques: ['coherence_cardiaque', 'carree'], primary_technique: 'coherence_cardiaque',
+    })
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-technique-carree'))
+    fireEvent.press(await screen.findByTestId('breathing-prep-start'))
     expect((await screen.findByTestId('player')).props.children).toBe('carree')
+  })
+
+  it('mémorise les réglages de préparation pour la session suivante', async () => {
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-start-btn'))
+    fireEvent.press(await screen.findByText('10 min'))
+    fireEvent(screen.getByTestId('breathing-prep-breath-switch'), 'valueChange', true)
+    fireEvent.press(screen.getByTestId('breathing-prep-start'))
+    await waitFor(() => {
+      expect(mockSaveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ preferred_duration_min: 10, breath_sound: true }),
+      )
+    })
+  })
+
+  it('ne démarre rien quand la préparation est refermée', async () => {
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-start-btn'))
+    fireEvent.press(await screen.findByTestId('breathing-prep-sheet-backdrop'))
+    expect(screen.queryByTestId('player')).toBeNull()
+    expect(mockSaveSettings).not.toHaveBeenCalled()
   })
 
   it('dérive les compteurs de la semaine des sessions enregistrées', async () => {

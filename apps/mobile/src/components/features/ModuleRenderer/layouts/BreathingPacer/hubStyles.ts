@@ -78,4 +78,6 @@ export const hubStyles = StyleSheet.create({
   sheetNote: { fontSize: fontSize.xs, color: colors.textMuted, textAlign: 'center', lineHeight: 18 },
   sheetLabel: { fontSize: fontSize.sm, fontWeight: '700', color: colors.text },
   dayPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.sm },
+  prepSegments: { marginTop: spacing.sm },
+  ambientChips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
 })
