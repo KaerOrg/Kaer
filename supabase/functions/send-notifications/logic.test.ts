@@ -5,6 +5,7 @@
 import { assertEquals, assertFalse } from 'jsr:@std/assert@1'
 import {
   buildPushMessage,
+  buildPushData,
   effectiveTime,
   selectDueRoutines,
   NOTIFICATION_BODY,
@@ -44,6 +45,25 @@ Deno.test('le corps ne contient aucun marqueur d interpolation', () => {
 Deno.test('le corps ne cite ni score, ni seuil, ni etat du patient', () => {
   const forbidden = /score|seuil|niveau|resultat|résultat|alerte|elev|élev|faible|grave/i
   assertFalse(forbidden.test(NOTIFICATION_BODY))
+})
+
+Deno.test('data porte le module et l ecran a ouvrir', () => {
+  assertEquals(buildPushData('mood_tracker'), { module_type: 'mood_tracker', screen: 'entry' })
+})
+
+// Sans module, le lecteur mobile laisse l'app ou elle est : mieux vaut ne rien ouvrir
+// qu'ouvrir un module au hasard.
+Deno.test('data est absent quand le module est inconnu', () => {
+  assertEquals(buildPushData(null), undefined)
+  assertEquals(buildPushData(undefined), undefined)
+  assertEquals(buildPushData(''), undefined)
+})
+
+// `data` echappe au corps constant du message : c'est par la qu'une donnee clinique
+// pourrait sortir. Elle ne contient que deux cles, et rien d'autre.
+Deno.test('data ne transporte que l identite du module', () => {
+  const data = buildPushData('phq9')
+  assertEquals(Object.keys(data ?? {}).sort(), ['module_type', 'screen'])
 })
 
 Deno.test('le decalage du patient prime sur l heure posee', () => {

@@ -40,6 +40,25 @@ export function buildPushMessage(_routine: DueRoutine): PushMessage {
   return { title: NOTIFICATION_TITLE, body: NOTIFICATION_BODY }
 }
 
+/**
+ * Charge utile `data` du push : l'identité du module visé, et rien d'autre.
+ *
+ * Elle sert au tap, qui doit ouvrir directement la première étape de saisie plutôt
+ * que l'accueil — trois gestes pour noter une émotion qui en dure dix, c'est ce qui
+ * fait abandonner un rappel.
+ *
+ * ⚠️ **Ne jamais y ajouter une donnée de saisie, un score ou un texte de praticien.**
+ * `data` échappe au corps constant du message, donc c'est précisément par là qu'une
+ * donnée clinique pourrait sortir. Elle transporte le module et l'écran, un point.
+ *
+ * Renvoie `undefined` quand le module est inconnu : sans lui, le lecteur mobile
+ * laisse l'app où elle est, ce qui vaut mieux qu'ouvrir un module au hasard.
+ */
+export function buildPushData(moduleType: string | null | undefined): { module_type: string; screen: string } | undefined {
+  if (moduleType == null || moduleType === '') return undefined
+  return { module_type: moduleType, screen: 'entry' }
+}
+
 /** L'heure à laquelle le rappel part vraiment : le décalage du patient prime. */
 export function effectiveTime(routine: DueRoutine): string {
   return routine.patient_time_override ?? routine.time_of_day

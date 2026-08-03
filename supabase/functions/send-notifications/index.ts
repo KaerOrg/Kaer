@@ -5,14 +5,18 @@
 // puis journalise dans notification_logs.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { buildPushMessage, selectDueRoutines, type DueRoutine } from './logic.ts'
+import { buildPushMessage, buildPushData, selectDueRoutines, type DueRoutine } from './logic.ts'
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 const FCM_PROJECT_ID = 'kaer-84ba7'
 
 // Le contenu du rappel et la sélection des routines dues vivent dans `logic.ts`,
 // avec leur test : c'est là qu'est écrit l'invariant du rappel neutre (MDR).
-type NotificationRoutine = DueRoutine
+// La routine ne porte pas son `module_type` : il est joint depuis `patient_modules`,
+// pour que le tap sur le rappel ouvre le bon module (#295).
+type NotificationRoutine = DueRoutine & {
+  patient_module: { module_type: string } | null
+}
 
 interface PushTokenRow {
   patient_id: string
@@ -98,6 +102,7 @@ async function sendFCMMessage(
   fcmToken: string,
   title: string,
   body: string,
+  data?: Record<string, string>,
 ): Promise<void> {
   await fetch(
     `https://fcm.googleapis.com/v1/projects/${FCM_PROJECT_ID}/messages:send`,
@@ -111,6 +116,9 @@ async function sendFCMMessage(
         message: {
           token: fcmToken,
           notification: { title, body },
+          // FCM n'accepte que des chaînes dans `data` — c'est déjà le contrat de
+          // `buildPushData`, qui ne produit que des chaînes.
+          ...(data ? { data } : {}),
           android: { channel_id: 'psytool-reminders' },
         },
       }),
@@ -133,7 +141,7 @@ Deno.serve(async () => {
     .from('notification_routines')
     // `practitioner_note` n'est PAS lu : la consigne du praticien s'affiche en tête du
     // module, jamais dans le corps du rappel (cf. NOTIFICATION_BODY ci-dessus).
-    .select('id, patient_id, days_of_week, time_of_day, patient_time_override')
+    .select('id, patient_id, days_of_week, time_of_day, patient_time_override, patient_module:patient_modules(module_type)')
     .eq('is_active', true)
     .eq('patient_paused', false)
     .contains('days_of_week', [currentDay])
@@ -167,22 +175,25 @@ Deno.serve(async () => {
   }
 
   const expoMessages: ExpoMessage[] = []
-  const fcmPayloads: { token: string; title: string; body: string }[] = []
+  const fcmPayloads: { token: string; title: string; body: string; data?: Record<string, string> }[] = []
   const logs: { routine_id: string; patient_id: string; status: string }[] = []
 
   for (const routine of due) {
     const routineTokens = tokensByPatient.get(routine.patient_id) ?? []
     // Corps constant : ni la consigne du praticien ni aucune donnée patient n'y entre.
     const { title: msgTitle, body: msgBody } = buildPushMessage(routine)
+    // `data` porte l'identité du module et l'écran à ouvrir, rien d'autre.
+    const msgData = buildPushData(routine.patient_module?.module_type)
 
     for (const row of routineTokens) {
       if (row.token_type === 'fcm') {
-        fcmPayloads.push({ token: row.expo_push_token, title: msgTitle, body: msgBody })
+        fcmPayloads.push({ token: row.expo_push_token, title: msgTitle, body: msgBody, data: msgData })
       } else {
         expoMessages.push({
           to: row.expo_push_token,
           title: msgTitle,
           body: msgBody,
+          data: msgData,
           channelId: 'psytool-reminders',
         })
       }
@@ -211,7 +222,7 @@ Deno.serve(async () => {
       try {
         const accessToken = await getFCMAccessToken(serviceAccountJson)
         for (const payload of fcmPayloads) {
-          await sendFCMMessage(accessToken, payload.token, payload.title, payload.body)
+          await sendFCMMessage(accessToken, payload.token, payload.title, payload.body, payload.data)
         }
       } catch (err) {
         console.error('Erreur envoi FCM:', err)

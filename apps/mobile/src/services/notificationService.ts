@@ -199,9 +199,17 @@ export async function pauseRoutine(
   patientId: string,
   moduleType: string
 ): Promise<boolean> {
+  // `patient_paused_at` est un HORODATAGE D'ÉVÉNEMENT, pas une date métier : UTC est
+  // correct ici. C'est ce qui permet au praticien de lire « en pause depuis le 12 juil. »
+  // plutôt que le seul fait de la pause — un rappel éteint depuis un mois explique une
+  // absence de saisies mieux que n'importe quel graphique (#268).
   const { error } = await supabase
     .from('notification_routines')
-    .update({ patient_paused: true, updated_at: new Date().toISOString() })
+    .update({
+      patient_paused: true,
+      patient_paused_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', routineId)
     .eq('patient_id', patientId)
 
@@ -221,9 +229,15 @@ export async function resumeRoutine(
   routineId: string,
   patientId: string
 ): Promise<boolean> {
+  // La date est remise à null : sans ça, celle d'une pause levée traînerait et le
+  // praticien lirait une pause qui n'existe plus.
   const { error } = await supabase
     .from('notification_routines')
-    .update({ patient_paused: false, updated_at: new Date().toISOString() })
+    .update({
+      patient_paused: false,
+      patient_paused_at: null,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', routineId)
     .eq('patient_id', patientId)
 
