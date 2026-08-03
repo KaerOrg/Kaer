@@ -2188,7 +2188,20 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_6.title', 'bgColor', '#F0FDF4'),
   ('crisis_plan.step_6.title', 'color', '#15803D'),
   ('crisis_plan.step_6.title', 'icon', 'shield-home-outline'),
-  ('crisis_plan.step_6.title', 'step_number', '6')
+  ('crisis_plan.step_6.title', 'step_number', '6'),
+  -- Étape 6 : éditeur de mesures « un arrangement par carte » (P-13).
+  ('crisis_plan.step_6.title', 'measure_editor', 'true'),
+  -- Les six propositions, en clés INDEXÉES (prop_value atomique) : jamais un CSV, et
+  -- jamais un tableau TypeScript. Elles portent sur le VERBE D'ACTION, jamais sur
+  -- l'objet : l'interface ne nomme, ne liste, ne suggère et n'illustre jamais un moyen.
+  -- Le jeu est FIXE et universel : jamais réordonné, filtré ni complété selon les
+  -- saisies passées du patient.
+  ('crisis_plan.step_6.title', 'measure_verb_1', 'modules.crisis_plan.measure_verb_entrust'),
+  ('crisis_plan.step_6.title', 'measure_verb_2', 'modules.crisis_plan.measure_verb_lock'),
+  ('crisis_plan.step_6.title', 'measure_verb_3', 'modules.crisis_plan.measure_verb_out_of_reach'),
+  ('crisis_plan.step_6.title', 'measure_verb_4', 'modules.crisis_plan.measure_verb_keep_minimum'),
+  ('crisis_plan.step_6.title', 'measure_verb_5', 'modules.crisis_plan.measure_verb_step_away'),
+  ('crisis_plan.step_6.title', 'measure_verb_6', 'modules.crisis_plan.measure_verb_other')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- EPDS : valeurs (certaines questions sont à scoring inversé : opt0=3 ... opt3=0)

@@ -141,6 +141,49 @@ describe('deleteSafetyPlanItem', () => {
   })
 })
 
+describe('kind / role / note (P-14)', () => {
+  it('rapatrie les trois champs dans le cache local', async () => {
+    mockFrom.mockReturnValue(makeChain({
+      data: [{ ...row({ id: 'r1' }), kind: 'place', role: 'le square', note: 'à 8 minutes à pied' }],
+    }).proxy)
+
+    await refreshSafetyPlan('pat-1')
+    expect(mockSaveDb).toHaveBeenCalledWith(expect.objectContaining({
+      kind: 'place', role: 'le square', note: 'à 8 minutes à pied',
+    }))
+  })
+
+  it('envoie les trois champs au serveur', async () => {
+    const { proxy, calls } = makeChain({})
+    mockFrom.mockReturnValue(proxy)
+    await saveSafetyPlanItem('pat-1', {
+      id: 'i1', section_id: 'step_3', text: 'Le square', sort_order: 0,
+      kind: 'place', note: 'ouvert le soir',
+    })
+    expect(calls.upsert?.[0]).toMatchObject({ kind: 'place', note: 'ouvert le soir' })
+  })
+
+  // Rien n'est jamais déduit du texte de l'item : un `kind` inconnu ne devient pas
+  // « person » par défaut, il devient rien. Le rendu se dégrade en item simple, ce qui
+  // est exact, plutôt que d'inventer une nature que personne n'a renseignée.
+  it('ne déduit aucun kind d\'une valeur inconnue', async () => {
+    mockFrom.mockReturnValue(makeChain({
+      data: [{ ...row({ id: 'r1' }), kind: 'contact', role: null, note: null }],
+    }).proxy)
+    await refreshSafetyPlan('pat-1')
+    expect(mockSaveDb).toHaveBeenCalledWith(expect.objectContaining({ kind: null }))
+  })
+
+  // Un item enregistré avant la migration n'a pas ces colonnes.
+  it('lit un item ancien, sans les trois champs, sans casser', async () => {
+    mockFrom.mockReturnValue(makeChain({
+      data: [{ ...row({ id: 'r1' }), kind: null, role: null, note: null }],
+    }).proxy)
+    await expect(refreshSafetyPlan('pat-1')).resolves.toBe(true)
+    expect(mockSaveDb).toHaveBeenCalledWith(expect.objectContaining({ id: 'r1', kind: null }))
+  })
+})
+
 describe('invariants du service', () => {
   // Le plan a quitté l'outbox montante : c'est tout l'objet de PW-1.
   it('ne passe jamais par l\'outbox de synchronisation', async () => {

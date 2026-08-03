@@ -24,6 +24,8 @@ import {
   deleteSafetyPlanItem,
 } from '@services/safetyPlanService'
 import { pickContact } from '@services/contactsService'
+import { collectIndexed } from '@kaer/shared'
+import { MeasureEditor } from './MeasureEditor'
 import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
@@ -39,6 +41,10 @@ import { styles } from './styles'
 const SECTION_WIDGETS: Record<string, ComponentType> = {
   crisis_anchors_preview: CrisisAnchorsWidget,
 }
+
+// Proposition « Autre » de l'étape 6 : la seule qui ouvre un champ libre. Sa clé vient
+// du seed, ce qui la rend reconnaissable sans que le layout connaisse les six libellés.
+const OTHER_VERB_CODE = 'modules.crisis_plan.measure_verb_other'
 
 export interface EditableStepsLayoutProps {
   /** Étapes regroupées par `section_id`. */
@@ -145,6 +151,50 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
     setItems(prev => prev.map(i => (i.id === id ? { ...i, text: name, phone: nextPhone } : i)))
   }, [items, patientId])
 
+  // Libellés de l'éditeur de mesures, résolus une fois : le composant ne connaît
+  // aucune clé i18n, il reçoit du texte déjà traduit.
+  const measureLabels = useMemo(() => ({
+    what: t('modules.crisis_plan.measure_what_label'),
+    who: t('modules.crisis_plan.measure_who_label'),
+    whoOptional: t('modules.crisis_plan.measure_who_optional'),
+    until: t('modules.crisis_plan.measure_until_label'),
+    add: t('modules.crisis_plan.add_item'),
+    cancel: t('common.cancel'),
+    temporaryNote: t('modules.crisis_plan.measure_temporary_note'),
+    delete: t('common.delete'),
+  }), [t])
+
+  // Un ajout de mesure par section : le verbe et l'objet forment le texte de l'item,
+  // le tiers va dans `role`, l'échéance dans `note` (P-14). La PHRASE, elle, se compose
+  // au rendu — rien n'est stocké composé.
+  const makeMeasureAdder = useCallback((sectionId: string) =>
+    async (measure: { verb: string; what: string; who: string | null; until: string | null }) => {
+      if (patientId == null) return
+      const existingItems = itemsBySection.get(sectionId) ?? []
+      const newItem: PlanItem = {
+        id: generateId(),
+        module_id: moduleId,
+        section_id: sectionId,
+        text: `${measure.verb} ${measure.what}`.trim(),
+        sort_order: existingItems.length,
+        weight: null,
+        phone: null,
+        contact_source: null,
+        role: measure.who,
+        note: measure.until,
+        created_at: new Date().toISOString(),
+      }
+      await saveSafetyPlanItem(patientId, {
+        id: newItem.id,
+        section_id: sectionId,
+        text: newItem.text,
+        sort_order: newItem.sort_order,
+        role: measure.who,
+        note: measure.until,
+      })
+      setItems(prev => [...prev, newItem])
+    }, [itemsBySection, moduleId, patientId])
+
   const handleDelete = useCallback((item: PlanItem) => {
     showConfirm({
       title: t('modules.crisis_plan.delete_item_title'),
@@ -206,6 +256,9 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
           // Étape « contactable » (proches/pros) : items = contacts nom + numéro appelable.
           // Piloté par la config (`field_props.contactable`), jamais par un numéro d'étape en dur.
           const isContactable = titleField.props['contactable'] === 'true'
+          // Étape à mesures (l'étape 6) : éditeur « un arrangement par carte » (P-13).
+          // Déclaré par la config, comme le reste : le layout ne connaît aucun numéro.
+          const isMeasureStep = titleField.props['measure_editor'] === 'true'
           const isExpanded = expandedSections.has(sectionId)
           const sectionItems = itemsBySection.get(sectionId) ?? []
 
@@ -240,7 +293,16 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
                   {hintField != null && (
                     <Text style={styles.stepHint}>{t(hintField.text_code ?? '')}</Text>
                   )}
-                  {isContactable ? (
+                  {isMeasureStep ? (
+                    <MeasureEditor
+                      measures={sectionItems}
+                      verbs={collectIndexed(titleField.props, 'measure_verb').map(code => ({ code, label: t(code) }))}
+                      otherVerbCode={OTHER_VERB_CODE}
+                      labels={measureLabels}
+                      onAdd={makeMeasureAdder(sectionId)}
+                      onDelete={handleDelete}
+                    />
+                  ) : isContactable ? (
                     <EditableContactsList
                       contacts={sectionItems.map(i => ({ id: i.id, name: i.text, phone: i.phone ?? '' }))}
                       accentColor={iconColor}

@@ -35,6 +35,7 @@ import {
   deletePlanItem as dbDeletePlanItem,
   getAllPlanItemsForModule as dbGetAllPlanItemsForModule,
   type PlanItem,
+  type PlanItemKind,
 } from '../lib/database'
 
 /** Le seul module servi par ce service. Les autres restent sur `planItemService`. */
@@ -71,7 +72,22 @@ function toLocal(row: SafetyPlanRow): Omit<PlanItem, 'created_at'> {
     weight: null,
     phone: row.phone,
     contact_source: null,
+    kind: toKind(row.kind),
+    role: row.role,
+    note: row.note,
   }
+}
+
+/**
+ * `kind` serveur vers l'union fermée locale.
+ *
+ * Une valeur inconnue retombe sur `null`, jamais sur une valeur par défaut : un item
+ * dont on ne sait pas la nature n'est ni une personne ni un lieu, et **rien ne doit
+ * être déduit de son texte** (P-14). Le rendu se dégrade en item simple, ce qui est
+ * exact, plutôt que d'inventer.
+ */
+function toKind(value: string | null): PlanItemKind | null {
+  return value === 'person' || value === 'place' ? value : null
 }
 
 /**
@@ -115,6 +131,12 @@ export interface SafetyPlanItemInput {
   text: string
   sort_order: number
   phone?: string | null
+  /** Nature de l'item (P-14). Jamais déduite du texte : renseignée, ou absente. */
+  kind?: PlanItemKind | null
+  /** Lien au patient ou fonction, deux ou trois mots. */
+  role?: string | null
+  /** Une ligne libre. */
+  note?: string | null
 }
 
 /**
@@ -132,6 +154,9 @@ export async function saveSafetyPlanItem(patientId: string, item: SafetyPlanItem
     text: item.text,
     sort_order: item.sort_order,
     phone: item.phone ?? null,
+    kind: item.kind ?? null,
+    role: item.role ?? null,
+    note: item.note ?? null,
     authored_by: 'patient',
     updated_at: new Date().toISOString(),
   })
@@ -146,6 +171,9 @@ export async function saveSafetyPlanItem(patientId: string, item: SafetyPlanItem
     weight: null,
     phone: item.phone ?? null,
     contact_source: null,
+    kind: item.kind ?? null,
+    role: item.role ?? null,
+    note: item.note ?? null,
   })
   return true
 }
