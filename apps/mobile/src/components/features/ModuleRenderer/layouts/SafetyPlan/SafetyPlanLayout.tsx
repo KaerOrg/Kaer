@@ -61,9 +61,17 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
     return map
   }, [items])
 
-  // La roue crantée ouvre le même module en forçant le layout d'édition `editable_steps`.
+  // « Modifier » ouvre le même module en forçant le layout d'édition. Le libellé est
+  // écrit en toutes lettres : une roue crantée signifie « réglages techniques », ce qui
+  // est un contresens pour l'action « je change le contenu de mon plan » (P-4).
   const openConfig = useCallback(() => {
     navigation.push('ModuleContent', { moduleType: moduleId, previewKindOverride: 'editable_steps' })
+  }, [navigation, moduleId])
+
+  // Escalade vers la Séquence : depuis la relecture, on peut basculer en mode crise.
+  // C'est un ALLER SIMPLE, la Séquence ne revient pas ici (P-1).
+  const openSequence = useCallback(() => {
+    navigation.push('ModuleContent', { moduleType: moduleId, previewKindOverride: 'safety_sequence' })
   }, [navigation, moduleId])
 
   const hasAnchors = useMemo(
@@ -81,18 +89,37 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <MaterialCommunityIcons name="lifebuoy" size={22} color={colors.danger} />
-            <Text style={styles.headerTitle}>{lbl('consultation_title')}</Text>
+            {/* La Consultation nomme l'OBJET (« mon plan »). « Je suis en crise » est
+                l'escalade, plus le titre de l'écran : c'est ce que P-1 sépare. */}
+            <Text style={styles.headerTitle}>{lbl('title')}</Text>
           </View>
           <Button
             variant="ghost"
-            iconLeft={<MaterialCommunityIcons name="cog-outline" size={22} color={colors.textMuted} />}
+            size="sm"
+            label={lbl('edit_plan')}
             onPress={openConfig}
-            accessibilityLabel={lbl('configure_plan')}
+            accessibilityLabel={lbl('edit_plan')}
             testID="safety-plan-configure"
           />
         </View>
 
+        {/* La date de revue (« Élaboré avec Dr X le 12 mars · revu le 4 juin ») viendra
+            de PW-5 (#324), qui crée `created_with_at` et `last_reviewed_at`. Elle n'a
+            aucune source aujourd'hui : la dériver de la date du dernier item serait
+            inventer un sens clinique qu'elle n'a pas. Quand elle existera, elle sera
+            AFFICHÉE et jamais surveillée : aucun rappel, aucune mise en évidence d'une
+            revue ancienne, aucune couleur d'ancienneté. */}
+
         <CrisisEmergencyCalls fields={uiFields} />
+
+        {/* Escalade vers la Séquence : je relisais, et je ne vais pas bien. */}
+        <Button
+          variant="dangerSolid"
+          label={lbl('consultation_title')}
+          onPress={openSequence}
+          accessibilityLabel={lbl('consultation_title')}
+          testID="safety-plan-escalate"
+        />
 
         {[...sections.entries()].map(([sectionId, fields], idx) => {
           const titleField = fields.find(f => f.field_type === 'step_title')
@@ -109,6 +136,13 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
           const isProfessional = titleField.props['professional'] === 'true'
           const sectionItems = itemsBySection.get(sectionId) ?? []
 
+          // Une étape sans item n'existe pas (P-4). Une carte vide en crise ne dit pas
+          // « rien ici », elle dit « tu n'as rien » — et sur un plan neuf, elle le
+          // disait six fois. Masquer se décide sur la PRÉSENCE d'items : routage
+          // structurel, jamais une lecture de leur contenu (même invariant que le saut
+          // d'étape de la Séquence).
+          if (sectionItems.length === 0) return null
+
           return (
             <View key={sectionId} style={styles.card}>
               <View style={styles.stepHeader}>
@@ -124,8 +158,7 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
                 {hintField != null ? (
                   <Text style={styles.stepHint}>{t(hintField.text_code ?? '')}</Text>
                 ) : null}
-                {sectionItems.length > 0 ? (
-                  sectionItems.map(item => (
+                {sectionItems.map(item => (
                     isContactable ? (
                       <CallableContact
                         key={item.id}
@@ -143,16 +176,15 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
                         <Text style={styles.itemText}>{item.text}</Text>
                       </View>
                     )
-                  ))
-                ) : (
-                  <Text style={styles.emptyStep}>{lbl('step_empty')}</Text>
-                )}
+                  ))}
               </View>
             </View>
           )
         })}
 
-        {hasAnchors ? <CrisisAnchorsWidget /> : null}
+        {/* Lecture seule : ni pointillé, ni crayon, ni champ. La vue de consultation
+            ne monte plus le composant d'édition (P-4). */}
+        {hasAnchors ? <CrisisAnchorsWidget readOnly /> : null}
       </ScrollView>
     </View>
   )
