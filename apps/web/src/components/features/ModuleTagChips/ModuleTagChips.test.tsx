@@ -36,6 +36,21 @@ describe('ModuleTagChips', () => {
     expect(screen.queryByText('tags.teen.label')).not.toBeInTheDocument()
   })
 
+  it('tronque à maxChips et résume le surplus par une puce +N', () => {
+    render(<ModuleTagChips tagIds={new Set(['anxiety', 'trauma'])} taxonomy={taxonomy} maxChips={1} />)
+    expect(screen.getByText('tags.anxiety.label')).toBeInTheDocument()
+    // trauma est au-delà de la limite → masqué, résumé par « +1 »
+    expect(screen.queryByText('tags.trauma.label')).not.toBeInTheDocument()
+    expect(screen.getByText('+1')).toBeInTheDocument()
+  })
+
+  it('n affiche pas de puce +N quand le nombre de tags tient dans maxChips', () => {
+    render(<ModuleTagChips tagIds={new Set(['anxiety', 'trauma'])} taxonomy={taxonomy} maxChips={2} />)
+    expect(screen.getByText('tags.anxiety.label')).toBeInTheDocument()
+    expect(screen.getByText('tags.trauma.label')).toBeInTheDocument()
+    expect(screen.queryByText(/^\+/)).not.toBeInTheDocument()
+  })
+
   it('ne rend rien pour un module sans tags', () => {
     const { container: c1 } = render(<ModuleTagChips tagIds={undefined} taxonomy={taxonomy} />)
     expect(c1).toBeEmptyDOMElement()

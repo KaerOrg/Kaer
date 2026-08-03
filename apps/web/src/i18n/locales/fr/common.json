@@ -277,6 +277,13 @@
     "preview_button": "Aperçu",
     "patient_view": "Ce que verra votre patient",
     "unlocked_on": "Débloqué le {{date}}",
+    "module_table": {
+      "col_module": "Module",
+      "col_indications": "Indications",
+      "col_unlocked": "Débloqué le",
+      "col_last_activity": "Dernière activité",
+      "col_activated": "Activé"
+    },
     "coming_soon": "Module en cours de développement, aperçu non disponible.",
     "data_button": "Données",
     "config_tab": "Configuration",

@@ -111,6 +111,13 @@
     "preview_button": "Vista previa",
     "patient_view": "Lo que verá su paciente",
     "unlocked_on": "Desbloqueado el {{date}}",
+    "module_table": {
+      "col_module": "Módulo",
+      "col_indications": "Indicaciones",
+      "col_unlocked": "Desbloqueado el",
+      "col_last_activity": "Última actividad",
+      "col_activated": "Activo"
+    },
     "coming_soon": "Módulo en desarrollo, vista previa no disponible.",
     "data_button": "Datos",
     "summary_empty": "Sin datos sincronizados",

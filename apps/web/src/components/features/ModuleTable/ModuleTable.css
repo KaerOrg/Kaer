@@ -1,0 +1,56 @@
+/* ── Tableau des modules / échelles (K-1) ─────────────────────────────────────
+   Habillage propre à la feature, posé sur le primitive .data-table via la classe
+   .module-table (prop `className` de DataTable). */
+
+/* Colonne Module : largeur bornée pour que l'ellipsis de la description s'applique
+   (la table est en layout auto : sans max-width, la cellule s'étend au contenu). */
+.module-table .module-table__col-module {
+  max-width: 460px;
+}
+
+.module-table__module {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.module-table__module-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.module-table__module-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.module-table__module-title {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Description sur une seule ligne, coupée par des points de suspension. */
+.module-table__module-desc {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Colonnes de date : sur une ligne, teinte secondaire discrète. */
+.module-table__col-date {
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+
+/* Colonne Activé : contrôle aligné à droite (en-tête et cellules). */
+.module-table .data-table__th.module-table__col-activation,
+.module-table .data-table__cell.module-table__col-activation {
+  text-align: right;
+  white-space: nowrap;
+}

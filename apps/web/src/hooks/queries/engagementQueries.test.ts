@@ -3,7 +3,8 @@ import { describe, it, expect } from 'vitest'
 vi.mock('@services/engagementService', () => ({
   fetchScaleEvolution: vi.fn(), fetchMoodEvolution: vi.fn(), fetchFearEvolution: vi.fn(),
   fetchMedSideEffectsEvolution: vi.fn(), fetchSleepEvolution: vi.fn(),
-  fetchAvailableScales: vi.fn(), fetchModuleSummary: vi.fn(), fetchChronoEntries: vi.fn(),
+  fetchAvailableScales: vi.fn(), fetchModuleSummary: vi.fn(), fetchModuleLastActivity: vi.fn(),
+  fetchChronoEntries: vi.fn(),
   fetchFormEntries: vi.fn(),
   fetchActivityEntries: vi.fn(),
 }))
@@ -22,6 +23,7 @@ describe('engagementQueries', () => {
     expect(engagementQueries.patientDataKeys('pt1')).toEqual([
       ['engagement', 'evolution', 'pt1'],
       ['engagement', 'moduleData', 'pt1'],
+      ['engagement', 'lastActivity', 'pt1'],
       ['engagement', 'moodMarkers', 'pt1'],
     ])
   })

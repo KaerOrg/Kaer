@@ -15,6 +15,7 @@ import {
   fetchSleepEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
+  fetchModuleLastActivity,
   fetchChronoEntries,
   fetchFormEntries,
   fetchActivityEntries,
@@ -348,6 +349,38 @@ describe('engagementService.fetchModuleSummary', () => {
       count: 0,
       lastPayload: null,
     })
+  })
+})
+
+describe('engagementService.fetchModuleLastActivity', () => {
+  it('retient la saisie la plus récente de chaque module (tri desc, 1re occurrence)', async () => {
+    // Trié décroissant par client_created_at : la 1re ligne d'un module est sa plus récente.
+    const rows = [
+      { module_id: 'phq9', client_created_at: '2026-03-01T10:00:00Z' },
+      { module_id: 'sleep_diary', client_created_at: '2026-02-20T08:00:00Z' },
+      { module_id: 'phq9', client_created_at: '2026-01-15T09:00:00Z' },
+      { module_id: 'sleep_diary', client_created_at: '2026-01-01T07:00:00Z' },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchModuleLastActivity('p1')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result.get('phq9')).toBe('2026-03-01T10:00:00Z')
+    expect(result.get('sleep_diary')).toBe('2026-02-20T08:00:00Z')
+    expect(result.size).toBe(2)
+  })
+
+  it('retourne une map vide quand aucune entrée', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: [], error: null }) as never)
+
+    expect((await fetchModuleLastActivity('p1')).size).toBe(0)
+  })
+
+  it('retourne une map vide en cas d’erreur réseau', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect((await fetchModuleLastActivity('p1')).size).toBe(0)
   })
 })
 

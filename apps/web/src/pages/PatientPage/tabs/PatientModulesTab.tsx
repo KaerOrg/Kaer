@@ -11,6 +11,7 @@ import { StatusBadge } from '../../../components/ui/StatusBadge'
 import { Modal } from '../../../components/ui/Modal'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
+import { ModuleTable, type ModuleTableRow } from '../../../components/features/ModuleTable'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
@@ -26,7 +27,7 @@ import {
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
 import { DEFUSION_TECHNIQUES } from '../../../lib/defusionTechniques'
-import { scaleQueries } from '../../../hooks/queries'
+import { scaleQueries, engagementQueries } from '../../../hooks/queries'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
@@ -84,6 +85,9 @@ export function PatientModulesTab({
   const { t, i18n } = useTranslation()
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
+  // Dernière activité de chaque module (map module_id → horodatage), pour la colonne
+  // « Dernière activité » du tableau. Lecture brute, aucune interprétation (MDR).
+  const { data: lastActivityByModule } = useQuery(engagementQueries.lastActivity(patientId))
   // Opération de bascule en cours — une seule à la fois. `unlock` cible un type de
   // module (la row n'existe pas encore), `revoke` une row déjà déverrouillée. Un
   // state unique discriminé plutôt que deux states couplés (unlocking + revoking).
@@ -573,6 +577,55 @@ export function PatientModulesTab({
     )
   }
 
+  // ── Rendu d'une ligne du tableau des modules actifs (K-1) ─────────────────
+  // Fonction simple (non mémoïsée), sur le modèle de `renderModuleCard` : les cellules
+  // libres (indications, contrôle d'activation) sont rendues ici, le tableau formate les
+  // dates et gère le tri. Tous les modules du tableau sont déjà activés → le toggle
+  // révoque ; la C-SSRS (`noToggle`) expose son bouton d'évaluations, sans toggle.
+  const renderActiveRow = (item: ModuleItem): ModuleTableRow => {
+    const moduleType = item.id as ModuleType
+    const mod = modules.find(m => m.module_type === moduleType)
+    const unlocked = !!mod
+    const RowIcon = LUCIDE_ICONS[item.icon]
+    const scale = scaleMeta.find(s => s.id === moduleType)
+
+    const activation = scale?.noToggle ? (
+      <Button
+        variant="ghost"
+        size="sm"
+        icon={<ShieldAlert size={13} />}
+        onClick={() => setShowCSSRSModal(true)}
+      >
+        {t('patient.cssrs_evaluations')}
+      </Button>
+    ) : (
+      moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
+        if (unlocked && mod) revokeModule(mod.id)
+        else unlockModule(moduleType)
+      })
+    )
+
+    return {
+      id: moduleType,
+      icon: RowIcon ? <RowIcon size={18} /> : null,
+      title: t(`modules.${moduleType}.label`),
+      description: scale ? t(`scales.full_title.${moduleType}`) : t(`modules.${moduleType}.description`),
+      indications: scale ? (
+        <ScaleMetaBadges
+          scaleId={moduleType}
+          evaluationType={scale.evaluationType}
+          category={scale.category}
+          chipsOnly
+        />
+      ) : (
+        <ModuleTagChips tagIds={taxonomy.tagsByModule.get(moduleType)} taxonomy={taxonomy} maxChips={2} />
+      ),
+      unlockedAt: mod ? mod.unlocked_at : null,
+      lastActivityAt: lastActivityByModule?.get(moduleType) ?? null,
+      activation,
+    }
+  }
+
   // Aplati les modules de toutes les catégories filtrés par `includeModule`, en
   // respectant l'activation praticien et l'exclusion « bientôt ». L'ordre suit
   // celui des catégories puis des modules (tri métier du seed).
@@ -725,13 +778,12 @@ export function PatientModulesTab({
                 totalCount={activatedModules.length}
               />
             )}
-            {displayedActivatedModules.length > 0 ? (
-              <div className="category-modules-grid">
-                {displayedActivatedModules.map(renderModuleCard)}
-              </div>
-            ) : (
-              <p className="wardrobe__empty">{t('modules.empty_filter')}</p>
-            )}
+            <ModuleTable
+              rows={displayedActivatedModules.map(renderActiveRow)}
+              firstColumnLabel={t('patient.module_table.col_module')}
+              ariaLabel={t('patient.wardrobe_title')}
+              emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
+            />
           </div>
         )}
       </section>
