@@ -285,6 +285,8 @@
       "description": "Techniques d'urgence pour traverser une crise",
       "tab_fiches": "Comprendre",
       "tab_now": "Agir en crise",
+      "crisis_link_label": "Traverser la vague",
+      "crisis_link_hint": "Un minuteur m'accompagne 5 ou 15 minutes",
       "crisis_hint": "Appuyez sur une technique pour afficher les étapes.",
       "disclaimer": "Ce module est un support à vos consultations. Les techniques présentées ont été abordées avec votre soignant, il ne remplace pas votre suivi thérapeutique.",
       "crisis": {

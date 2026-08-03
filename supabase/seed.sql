@@ -2226,7 +2226,13 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- disponible à toutes les intensités, sans avoir à épuiser les cinq autres. La
   -- config le déclare ; le layout ne connaît aucun numéro d'étape.
   ('crisis_plan.step_6.title', 'direct_access_label_code', 'modules.crisis_plan.sequence_home_shelter'),
-  ('crisis_plan.step_6.title', 'direct_access_hint_code', 'modules.crisis_plan.sequence_home_shelter_hint')
+  ('crisis_plan.step_6.title', 'direct_access_hint_code', 'modules.crisis_plan.sequence_home_shelter_hint'),
+  -- L'étape 6 porte le lien « Traverser la vague » (P-9), qui n'apparaît que si le
+  -- module distress_tolerance est déverrouillé pour ce patient.
+  ('crisis_plan.step_6.title', 'crisis_link', 'true'),
+  -- L'étape 6 accepte des contacts (le tiers à qui l'on confie un moyen) : ses items
+  -- se rendent avec leurs gestes, comme aux étapes 4 et 5.
+  ('crisis_plan.step_6.title', 'contactable', 'true')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- EPDS : valeurs (certaines questions sont à scoring inversé : opt0=3 ... opt3=0)

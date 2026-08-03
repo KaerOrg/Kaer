@@ -29,6 +29,7 @@ import { Button } from '@ui/Button'
 import { Card } from '@ui/Card'
 import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
+import { isModuleUnlocked } from '@services/moduleService'
 import { reportFailedOperation } from '@services/errorReportingService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import {
@@ -43,8 +44,10 @@ import {
   type SequencePath,
   type SequenceState,
 } from '@kaer/shared'
-import { CrisisEmergencyCalls } from '../shared'
+import { useAuthStore } from '../../../../../store/authStore'
+import { CrisisEmergencyCalls, CallableContact } from '../shared'
 import { SequenceEntryCard } from './SequenceEntryCard'
+import { DistressToleranceLink } from './DistressToleranceLink'
 import { styles } from './styles'
 
 // Retour discret, dessiné comme un chevron et non comme un bouton libellé : il doit
@@ -80,6 +83,22 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   // théorique que le patient n'a pas suivie.
   const [path, setPath] = useState<SequencePath>(INITIAL_PATH)
   const state = currentState(path)
+
+  // « Traverser la vague » n'apparaît que si le clinicien a déverrouillé le module
+  // pour ce patient. Sinon le lien DISPARAÎT : un lien grisé annoncerait un outil
+  // qu'on lui refuse. Le déverrouillage est une décision de clinicien, jamais un
+  // calcul sur une donnée. Hors ligne, la lecture échoue et le lien reste absent.
+  const patientId = useAuthStore(s => s.patient?.id)
+  const [crisisLinkVisible, setCrisisLinkVisible] = useState(false)
+
+  useEffect(() => {
+    if (patientId == null) return
+    let active = true
+    isModuleUnlocked(patientId, 'distress_tolerance')
+      .then(unlocked => { if (active) setCrisisLinkVisible(unlocked) })
+      .catch(() => { /* absence de lien : la dégradation voulue, rien à signaler */ })
+    return () => { active = false }
+  }, [patientId])
 
   useEffect(() => {
     let active = true
@@ -167,6 +186,12 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   // l'étape 2 de l'étape 3. Absent partout ailleurs, sans trou dans la mise en page.
   const stepSubtitleCode = stepTitle?.props['subtitle_code']
   const stepItems = currentStep != null ? itemsBySection.get(currentStep.sectionId) ?? [] : []
+  // Étape « contactable » : ses items sont des personnes ou des lieux, rendus avec
+  // leurs gestes (P-8) plutôt qu'en simple ligne de texte.
+  const stepContactable = stepTitle?.props['contactable'] === 'true'
+  const stepProfessional = stepTitle?.props['professional'] === 'true'
+  // L'étape déclare en config qu'elle porte le lien « Traverser la vague » (l'étape 6).
+  const stepShowsCrisisLink = stepTitle?.props['crisis_link'] === 'true'
   const onLastStep = state.kind === 'step' && isLastStep(state.index, steps.length)
   // Progression affichée sur les seuls écrans d'étape : l'accueil, les ressources et
   // la clôture ne sont pas numérotés.
@@ -252,14 +277,52 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
               // Filet de séparation ENTRE les items seulement : un filet sous le
               // dernier doublerait la bordure de la carte.
               <View key={item.id} style={index < stepItems.length - 1 ? styles.item : styles.itemLast}>
-                <Text style={styles.itemText}>{item.text}</Text>
+                {stepContactable ? (
+                  <CallableContact
+                    name={item.text}
+                    phone={item.phone}
+                    professional={stepProfessional}
+                    accentColor={colors.primary}
+                    callLabel={lbl('call_contact')}
+                    messageLabel={lbl('message_contact')}
+                    testID={`sequence-contact-${item.id}`}
+                  />
+                ) : (
+                  <Text style={styles.itemText}>{item.text}</Text>
+                )}
               </View>
             ))}
           </Card>
         ) : null}
 
+        {/* « Traverser la vague », sur l'étape qui le déclare (l'étape 6). */}
+        {state.kind === 'step' && stepShowsCrisisLink && crisisLinkVisible ? (
+          <DistressToleranceLink testID="safety-sequence-crisis-link" />
+        ) : null}
+
+        {/* Ce qui est disponible tout de suite. Le piège absolu ici est le cul-de-sac :
+            aucun commentaire sur ce qui a été tenté, aucun décompte, aucun « vous avez
+            tout essayé ». Le titre est le MÊME que celui du plan vide — il décrit ce
+            qui reste ouvert, il ne conclut pas sur ce qui a échoué.
+            Les issues ont le même poids : reléguer « ce qui me donne envie de tenir »
+            en lien discret le ferait passer pour secondaire, alors que c'est la section
+            qui demande le moins d'effort, donc celle qui reste accessible en dernier. */}
         {state.kind === 'resources' ? (
-          <Text style={styles.screenTitle}>{lbl('sequence_resources_title')}</Text>
+          <>
+            <Text style={styles.screenTitle}>{lbl('sequence_resources_title')}</Text>
+            <CrisisEmergencyCalls fields={uiFields} density="full" />
+            <View style={styles.resourcesRule} />
+            {crisisLinkVisible ? (
+              <DistressToleranceLink testID="safety-sequence-crisis-link" />
+            ) : null}
+            <SequenceEntryCard
+              target={CLOSING}
+              label={lbl('sequence_home_anchors')}
+              hint={lbl('sequence_home_anchors_hint')}
+              onPress={handleGoTo}
+              testID="safety-sequence-resources-anchors"
+            />
+          </>
         ) : null}
 
         {state.kind === 'closing' ? (
@@ -273,7 +336,7 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
         {/* L'accueil porte ses propres entrées : y ajouter « Autre chose que j'ai
             prévu » ferait deux fois la même promesse, et concurrencerait l'action
             dominante. La clôture, elle, n'a plus d'écran suivant. */}
-        {state.kind === 'step' || state.kind === 'resources' ? (
+        {state.kind === 'step' ? (
           <Button
             variant="primary"
             label={onLastStep ? lbl('sequence_advance_last') : lbl('sequence_advance')}

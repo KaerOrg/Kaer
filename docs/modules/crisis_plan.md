@@ -165,6 +165,36 @@ arbitrage de contraste. Détail des props : `apps/mobile/docs/design-system.md`.
 > (iOS et Android, et l'absence de repli quand aucune application de messagerie n'est
 > installée) reste la question ouverte n° 2 de l'Epic #315.
 
+### L'écran des ressources : ce qui reste ouvert, jamais ce qui a échoué
+
+**Le piège absolu ici est le cul-de-sac.** « Vous avez tout essayé » est le pire message
+possible. L'écran ne porte donc aucun commentaire évaluatif, aucun décompte de ce qui a
+été tenté, et **son titre est exactement celui de la variante plan vide de l'arrivée** :
+il décrit ce qui reste ouvert, il ne conclut pas sur ce qui a échoué. La progression
+« n / m » disparaît, et le bouton d'avancement aussi, puisqu'il se lirait comme « il
+reste encore autre chose ».
+
+Cinq issues de poids égal, une seule en rouge : Appeler le 3114, Appeler le 15, Écrire
+au 114, puis, après un filet, Traverser la vague et Ce qui me donne envie de tenir.
+Hiérarchiser serait une erreur : reléguer « ce qui me donne envie de tenir » en lien
+discret le ferait passer pour secondaire, alors que c'est la section qui demande le moins
+d'effort cognitif, donc celle qui reste accessible quand tout le reste ne l'est plus.
+
+### « Traverser la vague » : présent ou absent, jamais grisé
+
+Le lien vers `distress_tolerance` (onglet « Agir en crise ») apparaît sur l'écran d'étape
+6 et sur l'écran des ressources, **à la seule condition que le module soit déverrouillé
+pour ce patient**. Sinon il **disparaît** : un lien grisé annoncerait un outil qu'on lui
+refuse. Le déverrouillage est une décision de clinicien prise sur cette personne, jamais
+un calcul sur une donnée.
+
+Le libellé décrit le **mécanisme** (« un minuteur m'accompagne 5 ou 15 minutes »), jamais
+un bénéfice : « ça va t'aider à te calmer » serait une allégation. Les clés viennent du
+module cible, pas de `crisis_plan` : c'est lui qui nomme ce qu'il propose.
+
+Hors ligne, la lecture du déverrouillage échoue et le lien reste absent. Mieux vaut ne
+pas proposer une porte que d'en proposer une qui ne s'ouvre pas.
+
 ### Les contacts : un verbe, jamais un numéro
 
 `CallableContact` rend les items des étapes contactables. Trois règles le gouvernent :

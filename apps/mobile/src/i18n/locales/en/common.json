@@ -272,6 +272,8 @@
       "description": "Emergency techniques for getting through a crisis",
       "tab_fiches": "Understand",
       "tab_now": "Act in a crisis",
+      "crisis_link_label": "Ride out the wave",
+      "crisis_link_hint": "A timer stays with me for 5 or 15 minutes",
       "now": {
         "title": "Ride the wave",
         "intro1": "A very strong urge or emotion is like a wave: it rises, reaches a peak, and always comes back down.",
