@@ -1056,7 +1056,11 @@
       "arc_todo": "Finish the re-evaluation to see your before → after.",
       "narrative_strike": "I THOUGHT",
       "narrative_reframe": "I TELL MYSELF",
-      "see_reasoning": "See the full reasoning"
+      "see_reasoning": "See the full reasoning",
+      "theme_placeholder": "A theme, e.g. meetings (optional)",
+      "theme_chips_label": "Your themes",
+      "reassurance_title": "Your past reflections on this theme",
+      "reassurance_hint": "What you wrote back then, word for word."
     },
     "cognitive_distortions": {
       "label": "Cognitive distortions",

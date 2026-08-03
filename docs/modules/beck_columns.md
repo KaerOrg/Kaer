@@ -71,8 +71,8 @@ section `beck_columns`). Détail du contrat : [`docs/module-engine.md`](../modul
 ### Stockage & synchronisation
 
 - **Offline-first** : chaque fiche = une ligne `form_entries` SQLite
-  (`values` JSON indexé par clé logique : `situation`, `emotion`,
-  `emotion_intensity`, `automatic_thought`, `thought_belief`,
+  (`values` JSON indexé par clé logique : `situation`, `situation_theme`,
+  `emotion`, `emotion_intensity`, `automatic_thought`, `thought_belief`,
   `evidence_for`, `evidence_against`, `rational_response`, `outcome_emotion`,
   `outcome_intensity`, `outcome_belief`).
 - **Synchronisation** : `formEntryService.saveFormEntry` passe par
@@ -113,6 +113,40 @@ Refonte UX patient (adulte **et** ado) activée par la config, OPT-IN et propre 
 - **Conformité MDR** : l'arc est **neutre** (mêmes teintes avant/après, flèche
   atténuée) — aucun codage couleur de gravité ni flèche de tendance. Le screenshot de
   handoff colorait « avant » en rouge / « après » en vert : écart volontaire, non retenu.
+
+#### Réassurance par thème (#118)
+
+Refonte de réassurance OPT-IN, propre à `beck_columns` : à l'étape « Situation »
+de la saisie, le patient peut attacher un **thème libre** à sa situation
+(`situation_theme`), puis relire, **en lecture seule**, ses colonnes passées
+portant le **même thème**.
+
+- **Thème déclaré par le patient** : le champ `situation_theme` est un
+  `column_text_field` facultatif de la colonne Situation. Les puces proposées
+  (`ThemeRecallPanel`) reprennent uniquement les **thèmes qu'il a lui-même déjà
+  employés** (dérivés de ses fiches, `distinctThemes`) : aucune taxonomie imposée.
+- **Encart réassurance** : quand le thème courant correspond à des fiches passées
+  (`matchEntriesByTheme`, simple égalité d'étiquette **normalisée**), l'encart
+  ré-affiche **brut et daté** les clés configurées (`reassurance_key_*` :
+  `evidence_against`, `rational_response`, `outcome_intensity`). Les libellés et
+  couleurs sont dérivés des colonnes du module (`buildRecallFields`, zéro clé i18n
+  en double).
+- **Config** (`column_form_config`, opt-in) : `theme_key`, `theme_chips_label`,
+  `reassurance_title`, `reassurance_hint`, `reassurance_key_1..n`. Source de
+  vérité : [`supabase/seed.sql`](../../supabase/seed.sql) § `beck_columns`. Lues
+  par `readReassuranceConfig` / `buildRecallFields` (`themeRecall.ts`).
+- **Conformité MDR 2017/745** : affichage 100 % passif. C'est le **patient** qui
+  déclare la similarité (même thème) ; le code filtre, il ne conclut pas. Aucune
+  synthèse, aucune reformulation, aucun LLM : la « réassurance » **est** la
+  réponse rationnelle que le patient avait lui-même écrite. Les puces ne
+  remplissent **que** le champ thème, jamais un champ de réflexion (on n'oriente
+  pas la nouvelle saisie). Décision réglementaire : l'idée d'un résumé LLM adressé
+  au patient a été explicitement écartée (epic #120).
+- **Parité web** : le champ `situation_theme` étant un `column_text_field`
+  standard, l'aperçu praticien l'affiche et le panneau « Données » restitue le
+  thème de chaque fiche via le rendu générique, sans code web dédié. L'encart de
+  réassurance, lui, dépend des vraies fiches passées du patient : il reste côté
+  mobile (l'aperçu web ne fabrique pas de données patient).
 
 ### Vue praticien (web)
 
@@ -155,6 +189,8 @@ L'aperçu (`ModulePreviewPanel`) reflète le formulaire, chips et boutons inclus
 | `apps/mobile/.../layouts/ColumnForm/RecordCardHeader.tsx` | En-tête commun des deux cartes (date, puce « à finir », crayon/poubelle) |
 | `apps/mobile/.../layouts/ColumnForm/WizardProgress.tsx` | Barre de progression segmentée du wizard |
 | `apps/mobile/.../layouts/ColumnForm/{entryCompletion,textSuggestions,narrativeConfig}.ts` | Helpers purs (statut « à compléter », toggle des chips, config récit/wizard) |
+| `apps/mobile/.../layouts/ColumnForm/ThemeRecallPanel.tsx` | Réassurance (#118) : puces des thèmes passés + encart des colonnes du même thème (lecture seule) |
+| `apps/mobile/.../layouts/ColumnForm/themeRecall.ts` | Helpers purs réassurance (normalisation, thèmes distincts, matching, config, libellés ré-affichés) |
 | `apps/mobile/src/services/formEntryService.ts` | Persistance + sync (`syncUpsert`/`syncDelete`) |
 | `apps/web/.../layouts/ColumnFormLayout/ColumnFormLayout.tsx` | Aperçu praticien |
 | `apps/web/src/pages/PatientPage/tabs/ColumnFormDataPanel.tsx` | Panneau Données praticien (vue maître-détail) |
@@ -185,6 +221,10 @@ HomeScreen
   de suggestions, colonnes optionnelles, curseurs sans pré-sélection, fiche dépliable,
   **wizard** (progression, navigation, scroll conservé par défaut), **carte récit** (arc / encart « à finir »)
 - `apps/mobile/.../ColumnForm/{entryCompletion,textSuggestions,narrativeConfig}.test.ts` : helpers purs
+- `apps/mobile/.../ColumnForm/themeRecall.test.ts` : helpers purs réassurance (#118 : normalisation, thèmes distincts, matching, config, libellés)
+- `apps/mobile/.../ColumnForm/ThemeRecallPanel.test.tsx` : panneau réassurance (puces, réutilisation d'un thème, rappel brut daté, lecture seule, exclusion de la fiche éditée)
+- `apps/mobile/.../FieldRenderer.column_form.test.tsx` § réassurance : intégration wizard (champ thème, encart au tap d'une puce, absence sans `theme_key`)
+- `apps/web/.../ColumnFormRecordDetail.test.tsx` § parité #118 : le praticien voit le thème déclaré
 - `apps/mobile/.../ColumnForm/{WizardProgress,NarrativeRecordCard}.test.tsx` : progression segmentée, carte récit (arc, barré, dépliage)
 - `packages/shared/src/services/patientModuleConfig.test.ts` : `readEnabledGroups`
 - `apps/web/.../ColumnFormDataPanel.test.tsx` : panneau Données maître-détail (liste, sélection, MDR)

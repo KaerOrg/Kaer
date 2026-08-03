@@ -35,6 +35,8 @@ import { ChronoLegend } from './ChronoLegend'
 import { isTimelineConfig } from './chronoFrise'
 import { WizardProgress } from './WizardProgress'
 import { isWizardMode, readNarrativeConfig } from './narrativeConfig'
+import { ThemeRecallPanel } from './ThemeRecallPanel'
+import { readReassuranceConfig, buildRecallFields } from './themeRecall'
 import { styles } from './styles'
 
 interface ColumnSpec {
@@ -85,6 +87,13 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
     () => readNarrativeConfig(configField?.props),
     [configField]
   )
+  // Réassurance par thème (#118), OPT-IN : quand le module porte `theme_key`, le
+  // patient peut réutiliser une étiquette existante et relire, en lecture seule,
+  // ses colonnes passées du même thème (affichage passif — MDR 2017/745).
+  const reassurance = useMemo(
+    () => readReassuranceConfig(configField?.props),
+    [configField]
+  )
 
   // ── Construction des colonnes (sections triées par sort_order de leur column_header)
   // Une colonne portant `optional_group` n'apparaît que si le praticien a activé
@@ -99,6 +108,21 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
       })
       .map(({ header, children }) => ({ sectionId: header.section_id!, header, children }))
   }, [fields, patientConfig])
+
+  // Champs ré-affichés dans l'encart réassurance : libellé + couleur dérivés des
+  // colonnes du module (réutilise les intitulés déjà en base). Vide hors réassurance.
+  const recallFields = useMemo(
+    () => (reassurance ? buildRecallFields(columns, reassurance.recallKeys) : []),
+    [reassurance, columns],
+  )
+  // Index de l'étape (colonne) portant le champ thème — invariant par module,
+  // calculé une fois pour éviter un re-scan des children à chaque frappe. L'encart
+  // réassurance n'est rendu QUE dans le wizard (Beck) : un module column_form en
+  // mode scroll qui poserait `theme_key` aurait un opt-in inerte (contrat implicite).
+  const themeStepIndex = useMemo(
+    () => (reassurance ? columns.findIndex(col => col.children.some(c => c.props['key'] === reassurance.themeKey)) : -1),
+    [reassurance, columns],
+  )
 
   // Découpage des colonnes par type de widget — calculé une fois par module (pas
   // par fiche) et partagé par toutes les cartes de la liste (RecordCard mémoïsée).
@@ -182,6 +206,12 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
   const handleChangeValue = useCallback((key: string, value: string | number) => {
     setValues(prev => ({ ...prev, [key]: value }))
   }, [])
+
+  // Réassurance : le patient réutilise une étiquette de thème existante (remplit
+  // seulement le champ thème, jamais un champ de réflexion — on n'oriente pas).
+  const handlePickTheme = useCallback((theme: string) => {
+    if (reassurance) handleChangeValue(reassurance.themeKey, theme)
+  }, [reassurance, handleChangeValue])
 
   // Capture anti-friction : la dernière saisie sert de base au bouton « comme
   // d'habitude » (le patient reprend ses derniers horaires puis ajuste).
@@ -340,6 +370,24 @@ export function ColumnFormLayout({ fields, footer, moduleId, patientConfig, acce
                     accent={stepAccent}
                     t={t}
                     onChangeValue={handleChangeValue}
+                  />
+                ) : null}
+                {reassurance && stepIndex === themeStepIndex ? (
+                  // Encart réassurance : rendu dans l'étape qui porte le champ
+                  // thème. Lecture seule, apparaît seulement si des thèmes passés
+                  // existent (et l'encart, si des fiches du même thème existent).
+                  <ThemeRecallPanel
+                    entries={entries}
+                    themeKey={reassurance.themeKey}
+                    currentTheme={String(values[reassurance.themeKey] ?? '')}
+                    editingId={editingId}
+                    chipsLabelCode={reassurance.chipsLabelCode}
+                    titleCode={reassurance.titleCode}
+                    hintCode={reassurance.hintCode}
+                    recallFields={recallFields}
+                    accent={stepAccent}
+                    t={t}
+                    onPickTheme={handlePickTheme}
                   />
                 ) : null}
               </View>

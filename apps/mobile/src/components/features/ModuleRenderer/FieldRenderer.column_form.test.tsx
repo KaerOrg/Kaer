@@ -609,3 +609,114 @@ describe('FieldRenderer — column_form : carte récit (list_card_variant=narrat
     expect(screen.queryByTestId('arc-e1')).toBeNull()
   })
 })
+
+// ─── Réassurance par thème (#118) : encart des colonnes passées du même thème ──
+
+const COL1_THEME = makeField({
+  id: 'beck.col1.h', section_id: 'beck.col_situation', sort_order: 10,
+  text_code: 'modules.beck_columns.entry_col_1_title',
+  props: { color: '#0EA5E9', question_code: 'modules.beck_columns.entry_col_1_question' },
+  children: [
+    makeField({
+      id: 'beck.col1.text', section_id: 'beck.col_situation', parent_field_id: 'beck.col1.h',
+      field_type: 'column_text_field', sort_order: 11,
+      text_code: 'modules.beck_columns.entry_col_1_placeholder', props: { key: 'situation', multiline: '1' },
+    }),
+    makeField({
+      id: 'beck.col1.theme', section_id: 'beck.col_situation', parent_field_id: 'beck.col1.h',
+      field_type: 'column_text_field', sort_order: 12,
+      text_code: 'modules.beck_columns.theme_placeholder', props: { key: 'situation_theme', multiline: '0' },
+    }),
+  ],
+})
+const COL_EVA = makeField({
+  id: 'beck.col_eva.h', section_id: 'beck.col_evidence_against', sort_order: 38,
+  text_code: 'modules.beck_columns.entry_col_evidence_against_title', props: { color: '#10B981' },
+  children: [
+    makeField({
+      id: 'beck.col_eva.text', section_id: 'beck.col_evidence_against', parent_field_id: 'beck.col_eva.h',
+      field_type: 'column_text_field', sort_order: 38, props: { key: 'evidence_against', multiline: '1' },
+    }),
+  ],
+})
+const COL4_RAT = makeField({
+  id: 'beck.col4.h', section_id: 'beck.col_rational', sort_order: 40,
+  text_code: 'modules.beck_columns.entry_col_4_title', props: { color: '#6366F1' },
+  children: [
+    makeField({
+      id: 'beck.col4.text', section_id: 'beck.col_rational', parent_field_id: 'beck.col4.h',
+      field_type: 'column_text_field', sort_order: 41, props: { key: 'rational_response', multiline: '1' },
+    }),
+  ],
+})
+const REASSURANCE_CFG = makeField({
+  id: 'beck.cfg', field_type: 'column_form_config', sort_order: 0,
+  props: {
+    entry_mode: 'wizard', required_key_1: 'situation', save_label: 'modules.beck_columns.save',
+    theme_key: 'situation_theme',
+    theme_chips_label: 'modules.beck_columns.theme_chips_label',
+    reassurance_title: 'modules.beck_columns.reassurance_title',
+    reassurance_hint: 'modules.beck_columns.reassurance_hint',
+    reassurance_key_1: 'evidence_against',
+    reassurance_key_2: 'rational_response',
+    reassurance_key_3: 'outcome_intensity',
+  },
+})
+const REASSURANCE_FIELDS: ContentField[] = [REASSURANCE_CFG, COL1_THEME, COL_EVA, COL4_RAT, NARR_OUTCOME]
+
+const PAST_THEME_ENTRY: database.FormEntry = {
+  id: 'past-1', module_id: 'beck_columns',
+  values: {
+    situation: 'réunion d’équipe', situation_theme: 'Réunions',
+    evidence_against: 'ça s’est bien passé la dernière fois',
+    rational_response: 'je peux gérer', outcome_intensity: 30,
+  },
+  created_at: '2026-04-04T10:00:00Z',
+}
+
+describe('FieldRenderer — column_form : réassurance par thème (#118)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([])
+  })
+
+  it('affiche le champ thème et les puces des thèmes passés, sans encart tant qu’aucun thème courant', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([PAST_THEME_ENTRY])
+    renderLayout(REASSURANCE_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.getByTestId('field-situation_theme')).toBeTruthy()
+    expect(screen.getByTestId('theme-recall')).toBeTruthy()
+    expect(screen.getByTestId('theme-chip-Réunions')).toBeTruthy()
+    // Pas encore de thème saisi → aucune fiche passée ré-affichée.
+    expect(screen.queryByTestId('theme-recall-matches')).toBeNull()
+  })
+
+  it('réutiliser une puce ré-affiche BRUT et daté les colonnes passées du même thème', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([PAST_THEME_ENTRY])
+    renderLayout(REASSURANCE_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    fireEvent.press(screen.getByTestId('theme-chip-Réunions'))
+    // Le champ thème est renseigné et l'encart apparaît avec le contenu du patient.
+    expect(screen.getByTestId('field-situation_theme').props.value).toBe('Réunions')
+    expect(screen.getByTestId('theme-recall-matches')).toBeTruthy()
+    expect(screen.getByText('num:2026-04-04T10:00:00Z')).toBeTruthy()
+    expect(screen.getByText('ça s’est bien passé la dernière fois')).toBeTruthy()
+    expect(screen.getByText('je peux gérer')).toBeTruthy()
+    expect(screen.getByText('30%')).toBeTruthy()
+  })
+
+  it('aucun encart de réassurance quand le patient n’a aucune fiche passée', async () => {
+    renderLayout(REASSURANCE_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.getByTestId('field-situation_theme')).toBeTruthy()
+    expect(screen.queryByTestId('theme-recall')).toBeNull()
+  })
+
+  it('un module column_form sans theme_key ne rend jamais l’encart de réassurance', async () => {
+    ;(database.getAllFormEntries as jest.Mock).mockResolvedValue([PAST_THEME_ENTRY])
+    renderLayout(WIZARD_FIELDS)
+    fireEvent.press(await screen.findByTestId('new-entry'))
+    expect(screen.queryByTestId('theme-recall')).toBeNull()
+    expect(screen.queryByTestId('field-situation_theme')).toBeNull()
+  })
+})
