@@ -20,6 +20,7 @@ import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
 import { ModuleActionsModal, type ModuleActionTab } from './ModuleActionsModal'
+import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import { computeModuleTabs } from './moduleActionTabs'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
@@ -193,6 +194,28 @@ export function PatientModulesTab({
   const openConfig = (type: ModuleType) => {
     openConfigEditor(type)
     setActiveModule({ module: type, tab: 'config' })
+  }
+
+  // Ouvre la modale d'actions sur l'onglet demandé. `config` passe par `openConfig`
+  // (amorce l'éditeur du module) ; les autres onglets s'ouvrent directement. Utilisé par
+  // le clic de ligne (K-3) et les actions au survol du tableau.
+  const openModuleTab = (type: ModuleType, tab: ModuleActionTab) => {
+    if (tab === 'config') openConfig(type)
+    else setActiveModule({ module: type, tab })
+  }
+
+  // Clic sur une ligne du tableau : ouvre la fiche du module sur son premier onglet
+  // (ordre canonique de `computeModuleTabs`). Sans onglet disponible → aucune action
+  // (jamais de démarrage de passation en un clic).
+  const openModuleSheet = (type: ModuleType) => {
+    const mod = modules.find(m => m.module_type === type)
+    const scale = scaleMeta.find(s => s.id === type)
+    const tabs = computeModuleTabs(type, {
+      unlocked: !!mod,
+      isScale: !!scale,
+      scaleHasPreview: scale?.hasPreview ?? false,
+    })
+    if (tabs.length > 0) openModuleTab(type, tabs[0])
   }
 
   // Fermeture de la modale : réinitialise l'éditeur de config s'il était ouvert.
@@ -603,6 +626,29 @@ export function PatientModulesTab({
       })
     )
 
+    // Actions rapides au survol (K-3) : un raccourci par onglet disponible, sauf
+    // « Sources » (accessible dans la fiche). L'onglet ouvre la modale directement.
+    const actionTabs = computeModuleTabs(moduleType, {
+      unlocked,
+      isScale: !!scale,
+      scaleHasPreview: scale?.hasPreview ?? false,
+    }).filter(tab => tab !== 'sources')
+
+    const actions = actionTabs.length > 0 ? (
+      <>
+        {actionTabs.map(tab => (
+          <Button
+            key={tab}
+            variant="ghost"
+            size="sm"
+            icon={tabIcon(tab)}
+            aria-label={t(TAB_LABEL_KEY[tab])}
+            onClick={e => { e.stopPropagation(); openModuleTab(moduleType, tab) }}
+          />
+        ))}
+      </>
+    ) : undefined
+
     return {
       id: moduleType,
       icon: RowIcon ? <RowIcon size={18} /> : null,
@@ -621,6 +667,7 @@ export function PatientModulesTab({
       unlockedAt: mod ? mod.unlocked_at : null,
       lastActivityAt: lastActivityByModule?.get(moduleType) ?? null,
       activation,
+      actions,
     }
   }
 
@@ -793,6 +840,7 @@ export function PatientModulesTab({
                 firstColumnLabel={t('patient.module_table.col_module')}
                 ariaLabel={t('patient.wardrobe_title')}
                 emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
+                onRowClick={id => openModuleSheet(id as ModuleType)}
               />
             </div>
           )

@@ -81,6 +81,14 @@ export interface DataTableProps<T> {
   readonly renderDetail?: (row: T, ctx: DataTableRowContext) => ReactNode
   /** Classe additionnelle d'une ligne (ex. mise en avant). */
   readonly rowClassName?: (row: T) => string | undefined
+  /**
+   * Rend chaque ligne cliquable à la **souris** (surface-ligne, curseur main). Le `<tr>`
+   * ne reçoit ni `role` ni `tabIndex` (une ligne contenant des boutons ne peut pas être
+   * un `role="button"` valide) : l'accès clavier/lecteur d'écran passe par les contrôles
+   * explicites de la ligne. Un clic sur un élément interactif de la ligne (bouton, toggle,
+   * lien) est ignoré : seule la surface « vide » déclenche l'activation.
+   */
+  readonly onRowActivate?: (row: T) => void
   /** Affiché à la place de la table quand `rows` est vide. */
   readonly emptyState?: ReactNode
   /**

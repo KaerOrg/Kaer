@@ -99,4 +99,30 @@ describe('ModuleTable', () => {
     expect(screen.getByText('vide')).toBeInTheDocument()
     expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
   })
+
+  describe('clic de ligne + actions au survol (K-3)', () => {
+    it('sans onRowClick : aucune colonne d’actions ni ligne cliquable', () => {
+      const { container } = renderTable()
+      expect(container.querySelector('.module-table__actions')).toBeNull()
+      expect(container.querySelector('.data-table__row--clickable')).toBeNull()
+    })
+
+    it('avec onRowClick : la ligne appelle onRowClick avec son id', () => {
+      const onRowClick = vi.fn()
+      render(
+        <ModuleTable rows={ROWS} firstColumnLabel="MODULE" ariaLabel="modules" onRowClick={onRowClick} />,
+      )
+      fireEvent.click(screen.getByText('Alpha'))
+      expect(onRowClick).toHaveBeenCalledWith('alpha')
+    })
+
+    it('rend la cellule d’actions de chaque ligne quand la table est cliquable', () => {
+      const rows: ModuleTableRow[] = [{ ...ROWS[0], actions: <button>ouvrir données</button> }]
+      const { container } = render(
+        <ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" onRowClick={() => {}} />,
+      )
+      expect(container.querySelector('.module-table__actions')).not.toBeNull()
+      expect(screen.getByRole('button', { name: 'ouvrir données' })).toBeInTheDocument()
+    })
+  })
 })
