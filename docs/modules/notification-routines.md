@@ -25,6 +25,15 @@ Système permettant aux praticiens de programmer des rappels push par module pat
   du payload et ouvre **directement la saisie** (`ModuleContent` avec `startEntry`),
   sans passer par l'accueil. Sans module dans le payload, aucune navigation : mieux vaut
   rester où on est qu'ouvrir un module au hasard.
+- **Le corps de la notification est une CONSTANTE** (#269, invariant MDR). Il ne dépend
+  d'aucune donnée saisie, d'aucun score, d'aucun seuil, et **d'aucun texte écrit par le
+  praticien**. `practitioner_note` existe toujours mais s'affiche **dans le module**,
+  côté patient : c'est une consigne clinique, pas le texte d'un rappel. Un rappel dont
+  le texte dépendrait d'une consigne ne serait plus neutre au sens MDR, et cela vaudrait
+  pour les vingt modules. Le contenu et la sélection des routines dues vivent dans
+  `supabase/functions/send-notifications/logic.ts`, avec leur test
+  (`logic.test.ts`, job CI « Edge — Tests ») : deux patients, deux consignes
+  différentes, **même corps**.
 - La mise en pause génère un événement `NOTIFICATION_PAUSED` dans `notification_events`, visible par le praticien via l'icône cloche de l'en-tête web.
 - **Conformité MDR** : les rappels sont à horaire fixe, jamais déclenchés par une donnée clinique.
 - Un patient peut avoir plusieurs routines actives pour un même module (ex. lun/mer/ven + mar/jeu).
