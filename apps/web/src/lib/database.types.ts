@@ -601,6 +601,48 @@ export interface Database {
         }
         Relationships: []
       }
+      // Plan de sécurité : document co-édité par le patient et son praticien, écrit
+      // des deux côtés (PW-1, #320). À ne pas confondre avec les items de plan de
+      // `patient_entries`, qui restent le journal montant des autres modules.
+      safety_plan_items: {
+        Row: {
+          id: string
+          patient_id: string
+          section_id: string
+          text: string
+          kind: string | null
+          role: string | null
+          note: string | null
+          phone: string | null
+          sort_order: number
+          authored_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          section_id: string
+          text: string
+          kind?: string | null
+          role?: string | null
+          note?: string | null
+          phone?: string | null
+          sort_order?: number
+          authored_by?: string
+        }
+        Update: {
+          section_id?: string
+          text?: string
+          kind?: string | null
+          role?: string | null
+          note?: string | null
+          phone?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       availability_rules: {
         Row: {
           id: string
