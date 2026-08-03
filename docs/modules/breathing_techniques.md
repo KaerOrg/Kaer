@@ -49,8 +49,9 @@ plus une liste académique des cinq techniques.
 | `.../{GoalSheet,ReminderSheet,TechniqueInfoSheet}` + `DayChip` | Feuilles objectif, rappel, « En savoir plus » |
 | `.../PreparationSheet` + `AmbientChip` | Feuille de préparation : durée, vibrations, souffle, ambiance |
 | `.../{rhythmLabels,weekDayOrder,formatDuration,preferredDuration}` | Helpers purs du dossier (rythmes, ordre de semaine, durées) |
-| `layouts/BreathingPacer/BreathingExercisePlayer` | Lecteur animé (modale) : cercle respiratoire, barre de phases, compteurs cycles/durée |
-| `layouts/BreathingPacer/{BreathCircle,PhaseBar}` | Primitives présentationnelles du lecteur |
+| `.../BreathingSessionScreen` | Écran de session immersif (modale plein écran) |
+| `.../{SessionOrb,SessionProgress,SessionControls}` + `sessionStyles` | Orbe animée, jauge + temps restant, commandes |
+| `.../{sessionClock,sessionPhases,sessionAudio}` | Moteur pur de la session (temps, phases, son) |
 
 Côté web praticien, `breathing_pacer` rend l'aperçu descriptif (`field_row`) via
 `FieldsLayout` : le praticien n'exécute pas l'exercice.
@@ -127,6 +128,42 @@ réglages ne sont écrits qu'au « Commencer ».
 > guidé » et « Ambiance sonore » sont réglées et persistées de bout en bout, mais aucun
 > son n'est joué tant que les assets n'ont pas été fournis. La lecture est câblée dans
 > l'écran de session (M3), qui reste silencieux en leur absence.
+
+### L'écran de session (M3)
+
+Plein écran, couleurs sombres **codées en dur** (`sessionStyles.SESSION_COLORS`, gradient
+teal profond, status bar claire). C'est un **choix d'écran**, pas le chantier « dark mode »
+global : le thème ne bouge nulle part ailleurs, et ces teintes ne rejoignent volontairement
+pas les tokens partagés.
+
+**Le moteur est pur, donc testable sans horloge :**
+
+| Fichier | Rôle |
+|---|---|
+| `sessionClock.ts` | Temps réellement pratiqué, mesuré à l'horloge murale, pauses exclues |
+| `sessionPhases.ts` | `cursorAt(phases, elapsed)` : phase courante, décompte, cycles. `isCompleted`, `formatRemaining` |
+| `sessionAudio.ts` | Accompagnement sonore (silencieux tant que les assets manquent) |
+
+`cursorAt` sert **les cinq techniques sans cas particulier** : le nombre de phases (2, 3
+ou 4) vient de la config, jamais du code.
+
+**L'animation ne saccade pas.** L'orbe est animée par `Animated` avec driver natif, relancée
+au changement d'**instance de phase**, jamais au décompte. Le timer de l'écran rafraîchit
+seulement l'affichage (200 ms) et lit l'horloge murale : il ne dérive pas et ne pilote
+aucune taille. Une rétention tient la taille avec une pulsation subtile.
+
+**Comportements :**
+- Vibration à chaque changement de phase si `haptics` (API `Vibration` de React Native).
+- Fin automatique à la durée choisie, sortie anticipée par le bouton d'arrêt ou le retour
+  Android (`stopRequested`, le layout demande, la session conclut).
+- `completed = false` si moins de la moitié de la durée choisie a été pratiquée : la session
+  est enregistrée **quand même**, c'est une donnée et pas un échec.
+- **Keep-awake** actif pendant la session (`useKeepAwake`), verrou relâché au démontage.
+- **Quitter l'app met en pause** : le temps passé en fond n'est jamais compté, et la reprise
+  repart exactement où on en était.
+
+**Couches** : l'écran ne persiste rien. Il remonte un `SessionResult` au hub, qui écrit via
+`saveBreathingSession` : la feuille ne possède pas son cycle de données.
 
 ### Statistiques de la semaine (partagées web ≡ mobile)
 
@@ -205,7 +242,9 @@ npx jest BreathingPacer
 - [x] Mobile : activation praticien + repli `bt.config` (aucune technique non activée affichée)
 - [x] Mobile : objectif en sessions/semaine et ligne de rappel opt-in, écrits dans `breathing_settings`
 - [x] Mobile : feuille de préparation (durée, vibrations, souffle, ambiance), réglages mémorisés (M2, #367)
-- [x] Mobile : `BreathingExercisePlayer` : guide animé (modale) avec cercle, phases, compteurs
+- [x] Mobile : session immersive, orbe animée en continu, keep-awake, pause en arrière-plan (M3, #368)
+- [x] Mobile : sessions interrompues enregistrées (`completed = false`)
+- [x] Mobile : `BreathingSessionScreen` : session immersive animée en continu (remplace `BreathingExercisePlayer`)
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom
 - [x] i18n : clés `fr`/`en` en `common` + `teen`
