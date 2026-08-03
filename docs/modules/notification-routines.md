@@ -8,7 +8,8 @@ Système permettant aux praticiens de programmer des rappels push par module pat
 
 - Le praticien définit : jours de la semaine (ISO 1–7), heure, note optionnelle, actif/inactif.
 - Le patient peut : décaler l'heure (`patient_time_override`), mettre en pause
-  (`patient_paused`), **choisir ses jours, ajouter et supprimer ses rappels** (#257).
+  (`patient_paused`, horodaté par `patient_paused_at`), **choisir ses jours, ajouter et
+  supprimer ses rappels** (#257).
   Le rythme initial est posé en séance, mais il lui appartient ensuite : sans
   sollicitation, un module n'est ouvert qu'en pic de crise, et c'est la répétition qui
   entraîne la granularité. RLS : le patient a désormais `insert` et `delete` sur ses
@@ -34,6 +35,14 @@ Système permettant aux praticiens de programmer des rappels push par module pat
   `supabase/functions/send-notifications/logic.ts`, avec leur test
   (`logic.test.ts`, job CI « Edge — Tests ») : deux patients, deux consignes
   différentes, **même corps**.
+- **Le panneau praticien montre ce que le patient en a fait** (#268) : l'heure
+  **effective** en valeur principale, l'heure posée en ligne secondaire quand elles
+  diffèrent (« Posé à 09:00 · décalé par le patient »), et « Mis en pause par le patient
+  le 12 juil. » sur une carte atténuée. Un rappel éteint depuis un mois explique une
+  absence de saisies mieux qu'un graphique : sans cette ligne, le praticien conclut
+  « le patient ne fait pas ses exercices » quand la bonne lecture est « le rappel est
+  éteint ». `patient_paused_at` est **nullable** : les pauses antérieures à la colonne
+  retombent sur la mention sans date.
 - La mise en pause génère un événement `NOTIFICATION_PAUSED` dans `notification_events`, visible par le praticien via l'icône cloche de l'en-tête web.
 - **Conformité MDR** : les rappels sont à horaire fixe, jamais déclenchés par une donnée clinique.
 - Un patient peut avoir plusieurs routines actives pour un même module (ex. lun/mer/ven + mar/jeu).

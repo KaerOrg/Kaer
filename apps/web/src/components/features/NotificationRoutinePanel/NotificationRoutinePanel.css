@@ -166,3 +166,36 @@
   color: var(--color-text-muted);
   line-height: 1.45;
 }
+
+/* ── Ce que le patient a fait du rappel (#268) ─────────────────────────────── */
+
+/* Ligne secondaire : l'heure posee par le praticien, lisible SANS survol. Ton
+   attenue mais AA sur fond blanc (--color-text-muted = #6B7280, 4,8:1). */
+.nr-row__shifted {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* Rappel eteint par le patient : carte attenuee, sans couleur d'alarme. Ce n'est
+   pas une anomalie clinique, c'est un etat que le praticien doit voir. */
+.nr-card--paused .card__titles {
+  opacity: 0.6;
+}
+
+.nr-form__summary-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nr-form__summary-hand {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.nr-panel__mention {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-top: var(--spacing-sm);
+}
