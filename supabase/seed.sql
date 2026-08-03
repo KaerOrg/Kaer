@@ -1597,8 +1597,11 @@ on conflict (module_id, tag_id) do nothing;
 
 -- ── module_content_fields : crisis_plan (editable_steps) ─────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
-  ('crisis_plan.label', 'crisis_plan', NULL, NULL, 'module_label', 'module.crisis_plan.label', 0),
-  ('crisis_plan.description', 'crisis_plan', NULL, NULL, 'module_description', 'module.crisis_plan.description', 1),
+  -- Un seul namespace pour ce module (P-2) : `modules.crisis_plan.*`. Le doublon
+  -- `module.crisis_plan.*` n'existait qu'en français, donc ces trois libellés
+  -- s'affichaient en clé brute pour un utilisateur anglophone.
+  ('crisis_plan.label', 'crisis_plan', NULL, NULL, 'module_label', 'modules.crisis_plan.label', 0),
+  ('crisis_plan.description', 'crisis_plan', NULL, NULL, 'module_description', 'modules.crisis_plan.description', 1),
   ('crisis_plan.step_1.title', 'crisis_plan', 'step_1', NULL, 'step_title', 'modules.crisis_plan.step_1_title', 10),
   ('crisis_plan.step_1.hint', 'crisis_plan', 'step_1', NULL, 'step_hint', 'modules.crisis_plan.step_1_hint', 11),
   ('crisis_plan.step_2.title', 'crisis_plan', 'step_2', NULL, 'step_title', 'modules.crisis_plan.step_2_title', 20),
@@ -1613,7 +1616,7 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.step_6.hint', 'crisis_plan', 'step_6', NULL, 'step_hint', 'modules.crisis_plan.step_6_hint', 61),
   -- Section VHB-EF « Mes raisons de tenir » (sort_order 70 : après les étapes, avant le footer)
   ('crisis_plan.anchors', 'crisis_plan', NULL, NULL, 'crisis_anchors_preview', 'modules.crisis_plan.anchors_title', 70),
-  ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'module.crisis_plan.footer', 99),
+  ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'modules.crisis_plan.footer', 99),
   -- Ressources d'urgence (exercise_safety), dans leur ordre de présentation : le 3114
   -- (parler à quelqu'un) avant les secours vitaux. Le 114 est le MÊME secours que le
   -- 15 pour qui ne peut pas passer un appel vocal : même rang, même traitement rouge,

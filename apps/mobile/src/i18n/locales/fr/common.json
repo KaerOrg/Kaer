@@ -84,7 +84,7 @@
   },
   "global": {
     "greeting": "Bienvenue",
-    "modulesTitle": "Mes modules",
+    "modulesTitle": "Mon espace",
     "noModules": "Aucun outil débloqué pour le moment."
   },
   "auth": {
@@ -220,10 +220,11 @@
       "sequence_advance": "Autre chose que j'ai prévu",
       "sequence_advance_last": "Ce qui est disponible tout de suite",
       "sequence_stop": "Je m'arrête là",
-      "label": "Plan de crise",
-      "description": "Plan personnalisé pour les moments difficiles",
-      "title": "Mon Plan de Crise",
-      "subtitle": "Remplissez ce plan avec votre praticien. Il vous aidera dans les moments difficiles.",
+      "label": "Mon plan de sécurité",
+      "description": "Ce que j'ai prévu avec mon soignant pour les moments difficiles",
+      "title": "Mon plan de sécurité",
+      "subtitle": "Ce que j'ai prévu avec mon soignant pour les moments difficiles",
+      "footer": "Numéros d'urgence toujours accessibles : 3114 (souffrance psychique), 15 (danger vital), 114 (par écrit)",
       "step_label": "Étape {{number}}",
       "step_1_title": "Signes avant-coureurs",
       "step_1_hint": "Comment est-ce que je me sens quand une crise approche ?",
@@ -237,8 +238,8 @@
       "step_4_hint": "Qui peut m'écouter et m'aider si je me sens en danger ?",
       "step_5_title": "Professionnels et urgences",
       "step_5_hint": "Quels professionnels ou services puis-je contacter ?",
-      "step_6_title": "Sécuriser mon environnement",
-      "step_6_hint": "Comment rendre mon entourage plus sûr ?",
+      "step_6_title": "Mettre à distance ce qui pourrait me faire du mal",
+      "step_6_hint": "Qu'est-ce que nous avons décidé de mettre à distance, qui s'en occupe, et jusqu'à quand ?",
       "add_item": "Ajouter un élément",
       "item_placeholder": "Saisir un élément...",
       "add_contact": "Ajouter un contact",
@@ -267,11 +268,11 @@
       "edit_plan": "Modifier",
       "step_empty": "Rien de noté pour cette étape.",
       "anchors_title": "Mes raisons de tenir",
-      "anchors_subtitle": "Des images et une phrase qui vous rappellent pourquoi la vie vaut la peine d'être vécue.",
+      "anchors_subtitle": "Des photos et une phrase qui me rappellent pourquoi ça en vaut la peine.",
       "practitioner_message_label": "Message de votre soignant",
       "add_photo": "Ajouter une photo",
       "photo_limit": "Maximum 3 photos",
-      "anchor_phrase_placeholder": "Une phrase qui vous ancre dans le présent…",
+      "anchor_phrase_placeholder": "Une phrase qui me ramène à ce qui compte…",
       "anchor_phrase_label": "Ma phrase d'ancrage",
       "anchor_phrase_save": "Enregistrer",
       "delete_photo_title": "Supprimer cette photo ?",
@@ -1945,43 +1946,6 @@
     }
   },
   "module": {
-    "crisis_plan": {
-      "label": "Plan de crise",
-      "description": "Plan d'action personnalisé pour les moments difficiles (Stanley & Brown).",
-      "step_1": {
-        "title": "Signes avant-coureurs",
-        "hint": "Comment est-ce que je me sens quand une crise approche ?"
-      },
-      "step_2": {
-        "title": "Stratégies d'apaisement internes",
-        "hint": "Que puis-je faire seul(e) pour me calmer ?"
-      },
-      "step_3": {
-        "title": "Personnes ou lieux de distraction",
-        "hint": "Qui puis-je voir ou où puis-je aller pour me distraire ?"
-      },
-      "step_4": {
-        "title": "Proches à contacter",
-        "hint": "Qui peut m'écouter et m'aider si je me sens en danger ?"
-      },
-      "step_5": {
-        "title": "Professionnels et urgences",
-        "hint": "Quels professionnels ou services puis-je contacter ?"
-      },
-      "step_6": {
-        "title": "Sécuriser mon environnement",
-        "hint": "Comment rendre mon entourage plus sûr ?"
-      },
-      "footer": "Boutons d'urgence permanents en bas d'écran : 15, SAMU | 3114, Prévention du suicide",
-      "anchors_title": "Mes raisons de tenir",
-      "anchors_subtitle": "Des images et une phrase qui vous rappellent pourquoi la vie vaut la peine d'être vécue.",
-      "practitioner_message_label": "Message de votre soignant",
-      "add_photo": "Ajouter une photo",
-      "photo_limit": "Maximum 3 photos",
-      "anchor_phrase_placeholder": "Une phrase qui vous ancre dans le présent…",
-      "anchor_phrase_label": "Ma phrase d'ancrage",
-      "anchor_phrase_save": "Enregistrer"
-    },
     "therapeutic_commitment": {
       "label": "Contrat d'engagement thérapeutique",
       "description": "Alliance thérapeutique : engagement à utiliser les ressources avant tout passage à l'acte."
@@ -2292,7 +2256,7 @@
       "subtitle": "Le bouclier vital"
     },
     "iatrogenic": {
-      "label": "Surveillance Iatrogénique & Somatique",
+      "label": "Mon traitement au quotidien",
       "subtitle": "Cœur de métier IPA"
     },
     "lifestyle": {
