@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { View, Text } from 'react-native'
 import { ProgressBar } from '@ui/ProgressBar'
 import { SESSION_COLORS, sessionStyles } from './sessionStyles'
-import { formatRemaining } from './sessionPhases'
+import { formatClock } from './sessionPhases'
 
 export interface SessionProgressProps {
   /** Secondes déjà pratiquées. */
@@ -34,7 +34,7 @@ export const SessionProgress = memo(function SessionProgress({
         />
       </View>
       <Text style={sessionStyles.remaining} testID="session-remaining">
-        {formatRemaining(plannedSeconds - elapsedSeconds)}
+        {formatClock(plannedSeconds - elapsedSeconds)}
       </Text>
     </View>
   )

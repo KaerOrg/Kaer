@@ -8,7 +8,7 @@ import { Radio, type RadioOption } from '@ui/Radio'
 import { colors } from '@theme'
 import type { BreathingFeeling } from '@services/breathingService'
 import { SummaryStat } from './SummaryStat'
-import { formatRemaining } from './sessionPhases'
+import { formatClock } from './sessionPhases'
 import { summaryStyles } from './summaryStyles'
 import type { LabelFn } from './types'
 import type { SessionResult } from './BreathingSessionScreen'
@@ -79,7 +79,7 @@ export function SessionSummaryScreen({
 
         <View style={summaryStyles.stats}>
           <SummaryStat
-            value={formatRemaining(result.durationSeconds)}
+            value={formatClock(result.durationSeconds)}
             label={lbl('summary_stat_duration')}
             testID="summary-duration"
           />

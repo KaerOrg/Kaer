@@ -1,4 +1,4 @@
-import { cursorAt, isCompleted, formatRemaining } from './sessionPhases'
+import { cursorAt, isCompleted, formatClock } from './sessionPhases'
 import type { BreathingPhase } from '@services/breathingService'
 
 const COHERENCE: BreathingPhase[] = [{ type: 'inhale', seconds: 5 }, { type: 'exhale', seconds: 5 }]
@@ -82,18 +82,18 @@ describe('isCompleted', () => {
   })
 })
 
-describe('formatRemaining', () => {
+describe('formatClock', () => {
   it('formate en m:ss avec les secondes sur deux chiffres', () => {
-    expect(formatRemaining(194)).toBe('3:14')
-    expect(formatRemaining(65)).toBe('1:05')
+    expect(formatClock(194)).toBe('3:14')
+    expect(formatClock(65)).toBe('1:05')
   })
 
   it('arrondit au supérieur (3:14 tant qu’il reste 3 min 13,2 s)', () => {
-    expect(formatRemaining(193.2)).toBe('3:14')
+    expect(formatClock(193.2)).toBe('3:14')
   })
 
   it('affiche 0:00 en fin de session et jamais de valeur négative', () => {
-    expect(formatRemaining(0)).toBe('0:00')
-    expect(formatRemaining(-5)).toBe('0:00')
+    expect(formatClock(0)).toBe('0:00')
+    expect(formatClock(-5)).toBe('0:00')
   })
 })

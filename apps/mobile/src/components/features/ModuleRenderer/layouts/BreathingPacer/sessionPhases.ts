@@ -75,9 +75,13 @@ export function isCompleted(elapsedSeconds: number, plannedSeconds: number): boo
   return elapsedSeconds >= plannedSeconds / 2
 }
 
-/** Temps restant au format `m:ss`, borné à zéro. */
-export function formatRemaining(remainingSeconds: number): string {
-  const total = Math.max(0, Math.ceil(remainingSeconds))
+/**
+ * Un nombre de secondes au format `m:ss`, borné à zéro. Sert au temps restant de la
+ * session comme à la durée pratiquée affichée à la clôture : le nom décrit le format,
+ * pas ce que la valeur signifie.
+ */
+export function formatClock(seconds: number): string {
+  const total = Math.max(0, Math.ceil(seconds))
   const minutes = Math.floor(total / 60)
   return `${minutes}:${String(total % 60).padStart(2, '0')}`
 }
