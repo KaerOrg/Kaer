@@ -71,8 +71,19 @@ export default function HomeScreen() {
   // Rafraîchit au retour sur l'écran (déblocage de module ailleurs, etc.).
   useRefreshOnFocus(handleRefresh)
 
+  // Deux portes, deux intentions, deux écrans (P-1). Le bandeau déclare un ÉTAT
+  // (« j'ai besoin d'aide maintenant ») : il ouvre la Séquence, qui prend le patient
+  // par la main. La carte du module nomme un OBJET (« mon plan ») : elle ouvre la
+  // Consultation, pour relire, vérifier un numéro, le montrer à quelqu'un.
+  //
+  // Une porte unique vers la Consultation coûterait deux appuis de plus au pire
+  // moment ; une porte unique vers la Séquence obligerait celui qui veut juste
+  // vérifier les horaires du CMP à traverser un parcours de crise.
   const handleCrisisPress = useCallback(() => {
-    navigation.navigate('ModuleContent', { moduleType: 'crisis_plan' })
+    navigation.navigate('ModuleContent', {
+      moduleType: 'crisis_plan',
+      previewKindOverride: 'safety_sequence',
+    })
   }, [navigation])
 
   const handleTodayRoutinePress = useCallback((routine: TodayRoutine) => {

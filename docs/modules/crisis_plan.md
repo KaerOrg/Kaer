@@ -62,6 +62,21 @@ ACCUEIL
 | Consultation | `safety_plan` | Relire son plan à froid, six étapes dépliées |
 | Édition | `editable_steps` | Modifier le plan |
 
+**Deux portes, deux intentions, deux écrans** (P-1). Le bandeau « Je suis en crise »
+déclare un **état** et ouvre la Séquence ; la carte du module nomme un **objet** et ouvre
+la Consultation. Le test qui les sépare : le patient a-t-il besoin d'aide *tout de
+suite*, ou veut-il *regarder* son plan ? Elles ne se concurrencent pas visuellement,
+parce qu'elles ne nomment pas la même nature de chose.
+
+**L'Édition n'est atteignable que par « Modifier » depuis la Consultation.** Un plan vide
+n'ouvre plus l'Édition : `safety_plan` a quitté `SETUP_FALLBACK`. Cette bascule servait à
+contourner le fait que le praticien ne pouvait pas écrire dans le plan ; depuis PW-1, il
+le peut. Elle avait de plus un effet contraire à l'intention : un patient qui ouvrait
+« Mon plan » un jour de vide tombait sur un formulaire, alors qu'il voulait relire.
+
+**L'escalade Consultation vers Séquence est un aller simple** : on ne revient pas de la
+Séquence vers la Consultation.
+
 ## La Séquence (`safety_sequence`)
 
 ### Machine à états
