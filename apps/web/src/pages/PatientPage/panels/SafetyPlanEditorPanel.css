@@ -1,0 +1,69 @@
+.plan-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Deux colonnes : les six étapes à gauche, l'étape ouverte à droite. La grille tombe
+   en une colonne sur un écran étroit — jamais de défilement latéral. */
+.plan-editor__columns {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 2fr;
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 720px) {
+  .plan-editor__columns { grid-template-columns: 1fr; }
+}
+
+.plan-editor__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.plan-editor__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.plan-editor__items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-editor__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.plan-editor__item-text {
+  flex: 1;
+  font-size: var(--font-size-label);
+  color: var(--color-text);
+}
+
+/* Mention neutre d'un item sans numéro : la couleur est celle du texte atténué, JAMAIS
+   une couleur d'alerte. Ce n'est pas une erreur, c'est un état. */
+.plan-editor__item-note {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.plan-editor__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
