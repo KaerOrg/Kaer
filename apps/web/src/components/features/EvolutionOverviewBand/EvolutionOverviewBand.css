@@ -103,7 +103,8 @@
 }
 
 .evo-ov-card__sub,
-.evo-ov-card__window {
+.evo-ov-card__window,
+.evo-ov-card__logged {
   font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
 }

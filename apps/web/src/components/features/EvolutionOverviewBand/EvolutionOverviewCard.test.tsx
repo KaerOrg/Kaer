@@ -35,9 +35,13 @@ describe('EvolutionOverviewCard', () => {
     expect(screen.getByText('evolution.overview_window')).toBeTruthy()
   })
 
-  it('carte empreinte : pas de sparkline, empreinte rendue', () => {
+  it('carte empreinte : empreinte rendue + 2 libellés (moyenne 30 j fixe & assiduité), pas de sparkline', () => {
     const { container } = render(<EvolutionOverviewCard card={fingerprint} active={false} onNavigate={vi.fn()} />)
     expect(container.querySelector('.dim-fingerprint')).toBeTruthy()
+    expect(container.querySelector('.mt-sparkline')).toBeNull()
+    // Ligne 1 : ce que représentent les barres. Ligne 2 : l'assiduité (#164).
+    expect(screen.getByText('evolution.overview_fp_avg')).toBeTruthy()
+    expect(screen.getByText('evolution.overview_fp_logged')).toBeTruthy()
   })
 
   it('carte d\'effectifs : les lignes de comptage, AUCUN sparkline ni empreinte', () => {
