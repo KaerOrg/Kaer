@@ -608,7 +608,22 @@
       "recommended_hint": "Durée conseillée : {{min}} min · {{evidence}}",
       "technique_not_found": "Technique introuvable.",
       "session_count": "{{count}} session",
-      "session_count_plural": "{{count}} sessions"
+      "session_count_plural": "{{count}} sessions",
+      "coherence_cardiaque_benefit": "Apaiser le stress, calmer le rythme du cœur",
+      "diaphragmatique_benefit": "Relâcher les tensions du corps",
+      "carree_benefit": "Reprendre pied quand la tension monte d'un coup",
+      "quatre_sept_huit_benefit": "Ralentir le souffle avant de dormir",
+      "pleine_conscience_benefit": "Revenir à l'instant présent, sans rien forcer",
+      "hub_last_session_none": "Aucune session pour l'instant",
+      "hub_your_techniques": "Tes techniques",
+      "hub_empty_description": "Ton praticien active ici les techniques travaillées en séance.",
+      "goal_sheet_title": "Mon objectif",
+      "goal_sheet_note": "Proposé en séance, tu peux l'ajuster.",
+      "goal_decrement": "Diminuer l'objectif",
+      "goal_increment": "Augmenter l'objectif",
+      "reminder_sheet_note": "Tu choisis l'heure et les jours. Le rappel reste facultatif.",
+      "reminder_enable_sublabel": "Une notification aux jours et à l'heure choisis",
+      "hub_error_description": "Impossible de lire tes réglages pour le moment. Réessaie dans un instant."
     },
     "rim": {
       "title": "Réécrire le cauchemar",

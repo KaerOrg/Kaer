@@ -391,6 +391,124 @@ remplit dans le sens horaire. Usage : anneau d'efficacité de l'agenda du sommei
 
 ---
 
+### ProgressBar (`src/components/ui/ProgressBar/`)
+
+Pendant **linéaire** de `ProgressRing`, pour les progressions qui se lisent en ligne :
+avancement vers un objectif hebdomadaire, temps écoulé d'une session.
+
+> **Même règle MDR que `ProgressRing`** : la couleur est fournie par l'appelant et ne
+> varie **jamais** selon la valeur. Une barre qui virerait au rouge sous un seuil serait
+> un jugement porté sur la donnée, pas un affichage.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number` | Valeur remplie, bornée à `[0, max]` au rendu |
+| `max?` | `number` | Valeur de remplissage complet (défaut `100`) |
+| `color?` | `string` | Couleur de la portion remplie (défaut `colors.primary`) |
+| `trackColor?` | `string` | Couleur de la piste vide (défaut `colors.border`) |
+| `height?` | `number` | Épaisseur en px (défaut `6`) |
+| `accessibilityLabel?` | `string` | Libellé accessible de la jauge |
+| `testID?` | `string` | Identifiant de test : expose aussi `${testID}-fill` |
+
+```tsx
+// Objectif de la semaine : compte brut, couleur constante
+<ProgressBar value={done} max={goal} color={technique.color}
+  accessibilityLabel={lbl('hub_week_progress', { done, goal })} />
+```
+
+---
+
+### Toggle (`src/components/ui/Toggle/`)
+
+Bascule on/off : rangée « label + sous-titre » à gauche, interrupteur à droite.
+Pendant mobile du `Toggle` web. Statique (non interactif) quand `onValueChange` est
+absent. Le bloc texte porte `flex: 1` : un sous-titre long se comprime au lieu de
+pousser l'interrupteur hors écran.
+
+> **À distinguer de `Checkbox`** : `Checkbox` est une **saisie de formulaire**
+> (sémantique case à cocher, validée avec le reste) ; `Toggle` **active un réglage**,
+> avec effet immédiat.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `boolean` | État de la bascule |
+| `onValueChange?` | `(next: boolean) => void` | Bascule ; absent → rendu statique |
+| `label` | `string` | Libellé principal |
+| `sublabel?` | `string` | Ce que la bascule change concrètement |
+| `color?` | `string` | Couleur de la piste active (défaut `colors.primary`) |
+| `disabled?` | `boolean` | Désactive et atténue |
+| `accessibilityLabel?` | `string` | Libellé accessible (défaut `label`) |
+| `testID?` | `string` | Identifiant de test : expose aussi `${testID}-switch` |
+
+```tsx
+<Toggle value={haptics} onValueChange={setHaptics}
+  label={lbl('haptics_label')} sublabel={lbl('haptics_sublabel')} testID="prep-haptics" />
+```
+
+---
+
+### Stepper (`src/components/ui/Stepper/`)
+
+Incrémenteur numérique borné : `− valeur +`. Pour les réglages **discrets à faible
+amplitude** (objectif hebdomadaire de 1 à 14), où un `Slider` demanderait une visée au
+pixel et où la valeur exacte compte. Les commandes sont des `Pressable` nus : un
+primitive ne se construit pas sur un autre.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number` | Valeur courante (jamais `null` : un incrémenteur n'a pas d'état vide) |
+| `min` / `max` | `number` | Bornes incluses ; les boutons se désactivent aux extrêmes |
+| `step?` | `number` | Pas d'incrément (défaut `1`) |
+| `onChange` | `(next: number) => void` | Nouvelle valeur, **déjà bornée** |
+| `unit?` | `string` | Unité sous la valeur (ex. « sessions par semaine ») |
+| `color?` | `string` | Accent des deux boutons (défaut `colors.primary`) |
+| `decrementLabel` / `incrementLabel` | `string` | Libellés accessibles (i18n à la charge de l'appelant) |
+| `testID?` | `string` | Expose `${testID}-minus`, `-value`, `-plus` |
+
+```tsx
+<Stepper value={goal} min={1} max={14} onChange={setGoal} unit={lbl('goal_unit')}
+  decrementLabel={lbl('goal_decrement')} incrementLabel={lbl('goal_increment')} />
+```
+
+---
+
+### Sheet (`src/components/ui/Sheet/`)
+
+Feuille de bas d'écran à **contenu libre** : voile sombre, poignée, titre/sous-titre
+optionnels, puis le contenu de l'appelant. Toute feuille de bas d'écran passe par ce
+primitive, jamais un `Modal transparent` + backdrop + coins arrondis réassemblés dans
+un layout.
+
+> **À distinguer de `ui/ActionSheet`** : `ActionSheet` a un contrat figé (liste
+> d'options, piloté par un provider et `useActionSheet()`). `Sheet` accueille un
+> contenu arbitraire (réglages, formulaire court) et se contrôle par `visible`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `visible` | `boolean` | Ouvre / ferme la feuille |
+| `onClose` | `() => void` | Voile, poignée ou retour Android |
+| `title?` / `subtitle?` | `string` | En-tête (textes déjà traduits) |
+| `closeLabel` | `string` | Libellé accessible du voile (ex. `t('common.close')`) |
+| `children` | `ReactNode` | Contenu |
+| `scrollable?` | `boolean` | Contenu dans un `ScrollView` borné à 70 % de la hauteur d'écran |
+| `testID?` | `string` | Expose aussi `${testID}-backdrop` |
+
+> **Un primitive ne connaît aucune clé i18n de domaine** : `closeLabel` est fourni déjà
+> traduit par l'appelant.
+
+```tsx
+<Sheet visible={open} onClose={close} closeLabel={t('common.close')}
+  title={lbl('goal_sheet_title')} testID="breathing-goal-sheet">
+  <Stepper … />
+  <Button label={t('common.save')} onPress={save} />
+</Sheet>
+```
+
+> **En test** : `Sheet` lit les insets (`useSafeAreaInsets`). Sans provider dans l'arbre,
+> mocker `react-native-safe-area-context` dans le fichier de test.
+
+---
+
 ### TimePicker (`src/components/ui/TimePicker/`)
 
 Saisie d'une heure « HH:MM » — **le picker horaire unique du design system**. Bouton à
