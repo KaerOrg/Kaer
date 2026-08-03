@@ -367,6 +367,38 @@ liste à gauche, fiche complète à droite. Trois règles y sont testées :
 - une entrée **« Sans mot » s'ouvre comme les autres**, en italique atténué, sans chemin
   d'émotion. Entrée légitime, pas entrée dégradée.
 
+Entre les deux, il monte `EmotionNamingCrossTable` dans un `ui/Collapsible` **replié à
+l'arrivée** : le croisement est dense et ne s'impose pas d'emblée.
+
+### `EmotionNamingCrossTable` (`components/features/`)
+
+Croisement **contexte × famille** du module « Nommer ce que je ressens » (#265). Placé
+dans `features/` et non dans un onglet de page parce qu'il sert à **deux endroits** :
+l'onglet Données et la section Évolution clinique.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `entries` | `EmotionNamingEntry[]` | Saisies de la fenêtre, déjà filtrées par l'appelant |
+| `contextCodes` | `string[]` | Domaines de contexte **lus en config** (`readContextCodes`) |
+| `familyCodes` | `string[]` | Familles de la taxonomie lue en base |
+| `rangeDays` | `number` | Largeur de la fenêtre, rappelée dans la phrase du seuil |
+
+**Règles de rendu à ne pas contourner :**
+
+- **Sous `CROSSTAB_MIN_ENTRIES` (12) saisies, la table n'est pas rendue du tout** : 56
+  cases pour une dizaine de saisies, c'est une table presque vide qui invite à
+  surinterpréter le peu qui s'y trouve. Mesure de prudence clinique, pas d'affichage.
+  Le seuil est une constante exportée et nommée, jamais un nombre dans le JSX.
+- Une **case sans saisie ne rend rien** : l'absence est du contenu.
+- Les saisies **« Sans mot » restent hors table** (elles n'ont pas de famille) et sont
+  rappelées dessous. Les diluer dans une colonne inventée fabriquerait une catégorie
+  que le patient n'a pas choisie.
+- Le total de la table somme les **marges de colonne**, jamais les cellules : une saisie
+  qui déclare deux domaines compte dans deux lignes.
+- La teinte code une **densité de comptage** (`lib/emotionNamingDensity`), jamais une
+  gravité clinique. La rampe est en quatre paliers grossiers, à dessein : un dégradé
+  continu inviterait à comparer les cases une à une.
+
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
 `components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.
@@ -966,6 +998,34 @@ Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 > [`docs/components/`](components/). `Tabs`, `RatingSelector`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
+### `Collapsible`
+
+`components/ui/Collapsible/`. **Section repliable** : un en-tête cliquable qui révèle
+son contenu. Non contrôlée (elle possède son ouverture) et **elle ne monte pas son
+contenu tant qu'elle est repliée** : une section lourde (table de croisement, longue
+liste) ne coûte rien tant qu'on ne l'ouvre pas.
+
+Le `<button>` natif de l'en-tête est celui du primitive lui-même : c'est un contrôle de
+divulgation (`aria-expanded` + `aria-controls`), pas un bouton d'action, et il porte
+une surface entière (titre + complément + chevron) que `ui/Button` ne sait pas exprimer.
+
+```tsx
+<Collapsible
+  title={t('emotion_naming.crosstab_title')}
+  meta={t('emotion_naming.crosstab_meta', { count: entries.length })}
+>
+  <EmotionNamingCrossTable … />
+</Collapsible>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `title` | `ReactNode` | Titre de la section, déjà traduit |
+| `meta` | `ReactNode` | Complément d'en-tête, petit corps atténué (compteur, rappel) |
+| `children` | `ReactNode` | Contenu révélé au dépliage, monté seulement à l'ouverture |
+| `defaultOpen` | `boolean` | État initial (défaut `false`) |
+| `className` | `string` | Classe du conteneur, pour scoper l'habillage d'un consommateur |
+
 ### `DataTable<T>`
 
 `components/ui/DataTable/`. **Table de données générique** — structure `table`,
@@ -1011,6 +1071,7 @@ const columns: DataTableColumn<Row>[] = [
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
+| `footer` | `ReactNode` | Ligne de pied rendue dans un `<tfoot>` collant : les **marges** d'un tableau croisé (totaux de colonne). L'appelant fournit le `<tr>` complet, la table ne calcule jamais rien. Ex. `features/EmotionNamingCrossTable` |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
 | `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
 | `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |

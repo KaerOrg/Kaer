@@ -24,6 +24,8 @@
 // (une différenciation faible se traduit par des termes généraux plutôt que précis).
 // Notre arbre EST cette mesure, par construction : le patient s'arrête où il peut.
 
+import { collectIndexed } from '@kaer/shared'
+
 /** Une saisie, telle que lue par le service (identités opaques, non traduites). */
 export interface EmotionNamingEntry {
   /** Horodatage de la saisie (ISO). */
@@ -291,6 +293,18 @@ export function readIntensityMax(fields: TaxonomyField[], fallback = 5): number 
   const raw = config?.props?.intensity_max
   const parsed = raw != null ? Number.parseInt(raw, 10) : Number.NaN
   return Number.isNaN(parsed) ? fallback : parsed
+}
+
+/**
+ * Domaines de contexte proposés au patient, lus dans la config du module
+ * (`context_opt_1`, `context_opt_2`, …).
+ *
+ * Jamais écrits en dur côté praticien : ajouter, retirer ou réordonner un domaine
+ * dans le seed doit se refléter sur les lignes du croisement sans redéploiement.
+ */
+export function readContextCodes(fields: TaxonomyField[]): string[] {
+  const config = fields.find(f => f.field_type === 'tree_selector_config')
+  return collectIndexed(config?.props ?? {}, 'context_opt')
 }
 
 /**

@@ -18,29 +18,22 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Card } from '@ui/Card'
 import { Chip } from '@ui/Chip'
+import { Collapsible } from '@ui/Collapsible'
 import { SegmentedControl } from '@ui/SegmentedControl'
 import { moduleQueries } from '../../../hooks/queries'
 import type { EmotionNamingRow } from '@services/engagementService'
 import {
   buildNamingTaxonomy, repertoire, depthCounts, filterByRange, readIntensityMax,
-  type RepertoireLevel,
+  readContextCodes, type RepertoireLevel,
 } from '../../../lib/emotionNamingData'
+import { densityAlpha } from '../../../lib/emotionNamingDensity'
+import { EmotionNamingCrossTable } from '../../../components/features/EmotionNamingCrossTable'
 import { EmotionNamingEntryList } from './EmotionNamingEntryList'
 import './EmotionNamingDataPanel.css'
 
 // Mêmes fenêtres que la page Évolution : un seul vocabulaire de période dans l'app.
 const RANGES = [30, 90, 180, 365] as const
 type Range = (typeof RANGES)[number]
-
-// Paliers de densité du fond d'une cellule, en canal alpha hexadécimal appliqué à la
-// teinte de famille. Ils codent un NOMBRE DE SAISIES : plus le patient a employé ce
-// mot, plus la case est dense. Aucun lien avec l'intensité, aucune gravité (MDR).
-function fillAlpha(count: number): string {
-  if (count === 1) return '2E'
-  if (count <= 3) return '57'
-  if (count <= 6) return '80'
-  return 'A8'
-}
 
 interface Props {
   entries: EmotionNamingRow[]
@@ -62,6 +55,12 @@ export function EmotionNamingDataPanel({ entries, moduleType, locale }: Props) {
   // redéploiement, et les anciennes saisies gardent leur valeur d'origine.
   const intensityMax = useMemo(
     () => readIntensityMax(fieldsQuery.data?.fields ?? []),
+    [fieldsQuery.data],
+  )
+  // Domaines de contexte lus en config eux aussi : ajouter un domaine au seed suffit
+  // à faire apparaître sa ligne dans le croisement.
+  const contextCodes = useMemo(
+    () => readContextCodes(fieldsQuery.data?.fields ?? []),
     [fieldsQuery.data],
   )
 
@@ -151,7 +150,7 @@ export function EmotionNamingDataPanel({ entries, moduleType, locale }: Props) {
                     // Calcul dynamique ponctuel : la teinte vient de la config du
                     // module, elle ne peut pas vivre dans le CSS.
                     style={cell.count > 0
-                      ? { backgroundColor: `${color}${fillAlpha(cell.count)}` }
+                      ? { backgroundColor: `${color}${densityAlpha(cell.count)}` }
                       : undefined}
                     data-testid={`cell-${cell.nuanceCode}`}
                   >
@@ -168,6 +167,20 @@ export function EmotionNamingDataPanel({ entries, moduleType, locale }: Props) {
       </div>
 
       <p className="enp__legend">{t('emotion_naming.legend')}</p>
+
+      {/* Second bloc, replié à l'arrivée : le croisement est dense et ne s'impose pas
+          d'emblée. Le praticien l'ouvre quand il en a besoin, en séance. */}
+      <Collapsible
+        title={t('emotion_naming.crosstab_title')}
+        meta={t('emotion_naming.crosstab_meta', { count: windowed.length })}
+      >
+        <EmotionNamingCrossTable
+          entries={windowed}
+          contextCodes={contextCodes}
+          familyCodes={taxonomy.families}
+          rangeDays={range}
+        />
+      </Collapsible>
 
       <EmotionNamingEntryList
         entries={windowed}

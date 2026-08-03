@@ -1,8 +1,14 @@
 import { describe, it, expect } from 'vitest'
 import {
   depthOf, depthCounts, repertoire, contextByFamily, filterByRange, buildNamingTaxonomy,
-  CONTEXT_NONE, type EmotionNamingEntry, type NamingTaxonomy,
+  readIntensityMax, readContextCodes,
+  CONTEXT_NONE, type EmotionNamingEntry, type NamingTaxonomy, type TaxonomyField,
 } from './emotionNamingData'
+
+/** Champ de config du module, tel que renvoyé par le moteur de modules. */
+function configField(props: Record<string, string>): TaxonomyField {
+  return { id: 'ew.cfg', field_type: 'tree_selector_config', text_code: null, props }
+}
 
 function entry(over: Partial<EmotionNamingEntry> = {}): EmotionNamingEntry {
   return {
@@ -284,5 +290,42 @@ describe('filterByRange', () => {
     const entries = [entry({ date: '2026-07-29T12:00:00Z' })]
     filterByRange(entries, 30, NOW)
     expect(entries).toHaveLength(1)
+  })
+})
+
+describe('readIntensityMax', () => {
+  it('lit la borne posee en config', () => {
+    expect(readIntensityMax([configField({ intensity_max: '10' })])).toBe(10)
+  })
+
+  it('retombe sur le repli quand la config ne la porte pas', () => {
+    expect(readIntensityMax([])).toBe(5)
+    expect(readIntensityMax([configField({})])).toBe(5)
+    expect(readIntensityMax([configField({ intensity_max: 'abc' })])).toBe(5)
+  })
+
+  it('accepte un repli explicite', () => {
+    expect(readIntensityMax([], 7)).toBe(7)
+  })
+})
+
+describe('readContextCodes', () => {
+  it('collecte les domaines dans l ordre des cles indexees', () => {
+    const fields = [configField({
+      context_opt_2: 'ctx.family',
+      context_opt_1: 'ctx.work',
+      context_opt_3: 'ctx.money',
+      intensity_max: '5',
+    })]
+    expect(readContextCodes(fields)).toEqual(['ctx.work', 'ctx.family', 'ctx.money'])
+  })
+
+  it('tolere un trou dans la numerotation', () => {
+    const fields = [configField({ context_opt_1: 'ctx.work', context_opt_4: 'ctx.self' })]
+    expect(readContextCodes(fields)).toEqual(['ctx.work', 'ctx.self'])
+  })
+
+  it('rend une liste vide quand aucune config n existe', () => {
+    expect(readContextCodes([])).toEqual([])
   })
 })
