@@ -15,6 +15,10 @@ export const styles = StyleSheet.create({
   secondary: { backgroundColor: colors.primaryLight, borderWidth: 1.5, borderColor: colors.primary },
   ghost:     { backgroundColor: 'transparent' },
   danger:    { backgroundColor: colors.dangerLight, borderWidth: 1, borderColor: colors.danger },
+  // Alerte pleine : réservée aux secours vitaux (15, 114), là où l'appel doit se voir
+  // avant tout le reste. Fond `dangerText` (#DC2626) et non `danger` (#EF4444) : c'est
+  // le seul des deux rouges qui porte un libellé blanc à ≈ 4,8:1, donc AA.
+  dangerSolid: { backgroundColor: colors.dangerText },
   // Destructif discret : aucun habillage, seul le libellé porte la couleur d'alerte.
   ghostDanger: { backgroundColor: 'transparent' },
   disabled:   { opacity: 0.5 },
@@ -33,5 +37,6 @@ export const styles = StyleSheet.create({
   secondaryLabel: { color: colors.primary },
   ghostLabel:     { color: colors.primary },
   dangerLabel:    { color: colors.danger },
+  dangerSolidLabel: { color: colors.white },
   ghostDangerLabel: { color: colors.danger },
 })

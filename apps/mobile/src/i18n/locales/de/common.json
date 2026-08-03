@@ -148,12 +148,18 @@
       "carousel_prev": "Vorheriges Foto",
       "carousel_next": "Nächstes Foto",
       "delete_item_title": "Dieses Element löschen",
-      "emergency_samu": "112, Notruf",
-      "emergency_samu_label": "Medizinischer Notfall",
       "emergency_3114": "0800 111 0 111",
-      "emergency_3114_label": "Telefonseelsorge",
-      "emergency_samu_a11y": "112 anrufen, medizinischer Notfall",
-      "emergency_3114_a11y": "Telefonseelsorge anrufen"
+      "emergency_3114_label": "Reden, rund um die Uhr",
+      "emergency_3114_action": "Telefonseelsorge anrufen",
+      "emergency_3114_detail": "Seelische Not · rund um die Uhr · kostenlos · auch für meine Angehörigen",
+      "emergency_samu": "112",
+      "emergency_samu_label": "Lebensgefahr",
+      "emergency_samu_action": "112 anrufen",
+      "emergency_samu_detail": "Unmittelbare Lebensgefahr · europaweit",
+      "emergency_114": "114",
+      "emergency_114_label": "Schriftlich",
+      "emergency_114_action": "An 114 schreiben",
+      "emergency_114_detail": "Dieselbe Hilfe, per SMS oder Video, wenn ich gehörlos oder schwerhörig bin"
     },
     "therapeutic_commitment": {
       "label": "Therapeutische Verpflichtung",

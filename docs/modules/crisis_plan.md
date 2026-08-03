@@ -105,6 +105,35 @@ la prop porte une clé i18n, jamais le texte. Une étape sans sous-titre ne lais
 trou dans la mise en page. Le même mécanisme alimente l'aperçu web, pour que le
 praticien voie exactement l'écran de son patient.
 
+### Ressources d'urgence : 3114, 15, 114
+
+Trois entrées, une hiérarchie explicite, présentes sur **tous** les écrans des trois vues.
+
+| | Entrée | Action | Traitement |
+|---|---|---|---|
+| 1 | **3114**, souffrance psychique, 24h/24, gratuit, aussi pour mes proches | `tel:` | Turquoise, libellé sombre |
+| 2 | **15**, danger immédiat pour ma vie (112 en Europe) | `tel:` | Rouge plein, libellé blanc |
+| 3 | **114**, le même secours par SMS ou visio, si je suis sourd(e) ou malentendant(e) | **`sms:`** | Rouge plein, libellé blanc |
+
+**Le 114 est au même rang que le 15**, pas en dessous : c'est le relais qui donne accès
+aux mêmes secours à qui ne peut pas passer un appel vocal. La couleur code la gravité de
+la situation, jamais le public concerné.
+
+Le 114 est en `sms:` et **pas** en `tel:` : composer vocalement le numéro d'un service
+destiné aux personnes sourdes ou malentendantes le rendrait inutilisable par son public.
+Le libellé porte le verbe correspondant, « Écrire au 114 ».
+
+Un seul composant, `CrisisEmergencyCalls`, rend les deux densités (`compact` pour le
+bandeau permanent, `full` pour l'écran des ressources). Le **nombre d'entrées est libre** :
+les coordonnées viendront d'une configuration serveur. La couleur est portée par le
+composant, à partir d'une `tone` sémantique (`primary` / `danger`) : les `bgColor` en dur
+ont été retirés du seed, ils court-circuitaient les tokens et rendaient impossible tout
+arbitrage de contraste. Détail des props : `apps/mobile/docs/design-system.md`.
+
+> ⚠️ **Non vérifié sur appareil réel** : le comportement de `Linking.openURL('sms:114')`
+> (iOS et Android, et l'absence de repli quand aucune application de messagerie n'est
+> installée) reste la question ouverte n° 2 de l'Epic #315.
+
 ### Logique pure partagée
 
 `packages/shared/src/services/safetySequence.ts` — consommée par le layout mobile

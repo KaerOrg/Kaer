@@ -129,7 +129,7 @@ create table public.module_content_fields (
 >
 > **Correspondances fréquentes à vérifier en priorité :**
 > - Bannière / alerte / disclaimer → `disclaimer_banner` (props : `color`, `icon`, `text_code`, `tone`)
-> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `bgColor`, `label_code`)
+> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code`)
 > - Note de bas d'écran → `footer_note`
 > - Onglet → `tab` (layout `tabbed`)
 
@@ -172,7 +172,7 @@ create table public.module_content_fields (
 | `field_type` | Rendu | Props clés | Contexte |
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
-| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Rangée de boutons d'appel colorés (`CrisisEmergencyCalls`, partagé) en tête de `safety_plan` et en barre de `editable_steps` ; sur web, chip d'aperçu |
+| `exercise_safety` | Ressource d'urgence (appel ou SMS) | `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code` | `CrisisEmergencyCalls` (partagé), deux densités : `compact` (bandeau permanent de `safety_sequence`, tête de `safety_plan`, barre de `editable_steps`) et `full` (écran des ressources). Nombre d'entrées libre. `action='sms'` pour le 114. La couleur vient de `tone` (sémantique), **jamais d'un `bgColor` en dur** ; sur web, chip d'aperçu |
 | `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem via `expo-image`, tap → diaporama plein écran `@ui/PhotoCarousel` ; phrase SQLite ; message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
 
 **Layout `cards`**
@@ -216,7 +216,7 @@ create table public.module_content_fields (
 | `exercise_stop_btn` | Label bouton Annuler | — |
 | `exercise_done_text` | Texte écran fin | — |
 | `exercise_safety_title` | Titre section urgence | — |
-| `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
+| `exercise_safety` | **Ressource d'urgence** | `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code` — utilisable dans tout layout nécessitant un raccourci de secours |
 
 **Layout `crisis_companion` (compagnon de crise — urge surfing)**
 
@@ -391,8 +391,11 @@ create table public.field_props (
 | `subscale_key` | `"mood"` | `scale_slider_question`, `scale_number_input`, `scale_text_input` — clé dans `subscale_scores` JSON |
 | `placeholder_code` | `"modules.mood.notes_placeholder"` | `scale_text_input`, `scale_number_input` |
 | `phone` | `"3114"` | `exercise_safety` — numéro composé au tap |
+| `action` | `"sms"` | `exercise_safety` — canal : `tel` (défaut) ou `sms`. Le 114 est en `sms` : un `tel:` appellerait vocalement un service destiné aux personnes sourdes ou malentendantes |
+| `action_label_code` | `"modules.crisis_plan.emergency_114_action"` | `exercise_safety` — verbe de l'action, et libellé d'accessibilité dans les deux densités |
+| `detail_label_code` | `"modules.crisis_plan.emergency_114_detail"` | `exercise_safety` — sous-libellé long, densité `full` |
 | `text_code` | `"modules.crisis_plan.urgency_title"` | `disclaimer_banner` — clé i18n alternative (override la clé `modules.<module_key>.disclaimer` par défaut) |
-| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge) |
+| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge). `exercise_safety` — `"primary"` (défaut) ou `"danger"` : teinte **sémantique**, traduite en variante par le composant, jamais une couleur en dur |
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 

@@ -173,12 +173,20 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |
+| `dangerSolid` | `colors.dangerText` | — | `colors.white` |
 | `ghostDanger` | transparent | — | `colors.danger` |
 
 | Taille | paddingV | paddingH | minHeight | label |
 |---|---|---|---|---|
 | `md` (défaut) | 12 | 24 | 50 | 16 |
 | `sm` | 8 | 16 | 36 | 14 |
+
+`dangerSolid` est l'alerte pleine, réservée aux secours vitaux (appel du 15, écriture
+au 114) : là où `danger` reste un habillage discret pour une action destructive,
+`dangerSolid` doit se voir avant tout le reste. Son fond est `colors.dangerText`
+(#DC2626) et non `colors.danger` (#EF4444) : c'est le seul des deux rouges qui porte
+un libellé blanc à un contraste AA (≈ 4,8:1). Ne pas l'employer pour une donnée
+clinique : la teinte y coderait une gravité, ce qu'interdit la règle d'or MDR.
 
 `ghostDanger` est le pendant discret de `danger` : action destructive sans habillage,
 seul le libellé porte la couleur d'alerte (ex. « Annuler » dans une carte de rendez-vous,
@@ -908,7 +916,34 @@ passe par `crisisPlanService` (jamais Supabase/SQLite direct), avec `@ui/Button`
 | Widget | `field_type` | Rôle | Persistance |
 |---|---|---|---|
 | `CrisisAnchorsWidget` | `crisis_anchors_preview` | Photos d'ancrage + phrase + message praticien | FileSystem + SQLite + Supabase |
-| `CrisisEmergencyCalls` (shared) | `exercise_safety` | Rangée de boutons d'appel `tel:` colorés (numéro + intitulé). Réutilisé par `SafetyPlanLayout` (tête) et `EditableStepsLayout` (barre) | — (appel) |
+| `CrisisEmergencyCalls` (shared) | `exercise_safety` | Ressources d'urgence, deux densités (voir ci-dessous). Réutilisé par `SafetySequenceLayout`, `SafetyPlanLayout` (tête) et `EditableStepsLayout` (barre) | — (appel / SMS) |
+
+#### CrisisEmergencyCalls : deux densités, un composant
+
+`src/components/features/ModuleRenderer/layouts/shared/CrisisEmergencyCalls.tsx`
+
+```tsx
+<CrisisEmergencyCalls fields={uiFields} />                  // bandeau permanent
+<CrisisEmergencyCalls fields={uiFields} density="full" />   // écran des ressources
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `fields` | `ContentField[]` | Fields du module ; les `exercise_safety` en sont extraits et triés par `sort_order` |
+| `density` | `'compact' \| 'full'` | `compact` (défaut) : pastilles côte à côte, numéro + sous-libellé court. `full` : cartes empilées, verbe d'action + sous-libellé long |
+
+Le **nombre d'entrées est libre** (deux, trois, quatre) : les coordonnées viendront
+d'une configuration serveur, rien n'est figé dans le rendu. Chaque entrée se configure
+par `field_props` :
+
+| Prop de field | Rôle |
+|---|---|
+| `phone` | Numéro composé |
+| `action` | `tel` (défaut) ou `sms`. Le 114 est en `sms` : un `tel:114` appellerait vocalement le service destiné aux personnes sourdes ou malentendantes |
+| `tone` | `primary` (défaut) ou `danger`. **Sémantique, jamais une couleur** : le composant la traduit en variante (`secondary`/`danger` en compact, `primary`/`dangerSolid` en full). Elle code la gravité de la situation, pas le public : le 114 est rouge comme le 15, parce que c'est le même secours |
+| `label_code` | Clé i18n du sous-libellé compact (« Parler, 24h/24 ») |
+| `action_label_code` | Clé i18n du verbe (« Appeler le 15 », « Écrire au 114 »). Sert de libellé d'accessibilité **dans les deux densités** : « 114 » seul ne dit pas ce qu'un appui déclenche |
+| `detail_label_code` | Clé i18n du sous-libellé long, densité `full` |
 
 ---
 

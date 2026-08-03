@@ -819,10 +819,18 @@
       "anchor_phrase_label": "My grounding phrase",
       "anchors_preview_info": "The patient adds up to 3 photos and a personal phrase on their phone.",
       "emergency_bar_label": "Emergency numbers, always accessible",
-      "emergency_samu": "15, Emergency",
-      "emergency_samu_label": "Medical emergency",
-      "emergency_3114": "3114, Prevention",
-      "emergency_3114_label": "National helpline"
+      "emergency_3114": "3114",
+      "emergency_3114_label": "Talk, 24/7",
+      "emergency_3114_action": "Call 3114",
+      "emergency_3114_detail": "Psychological distress · 24/7 · free · also for my loved ones",
+      "emergency_samu": "15",
+      "emergency_samu_label": "Life-threatening",
+      "emergency_samu_action": "Call 15",
+      "emergency_samu_detail": "Immediate danger to my life · 112 in Europe",
+      "emergency_114": "114",
+      "emergency_114_label": "In writing",
+      "emergency_114_action": "Text 114",
+      "emergency_114_detail": "The same emergency services, by text or video, if I am deaf or hard of hearing"
     },
     "therapeutic_commitment": {
       "label": "Therapeutic Commitment",
