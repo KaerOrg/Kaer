@@ -332,6 +332,7 @@
     "crisis_error_save": "Save error. Please try again.",
     "cssrs_evaluations": "Assessments",
     "tab_evolution": "Evolution",
+    "subtab_active": "Active",
     "tab_overview": "Overview",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -2313,6 +2314,7 @@
   },
   "evolution": {
     "title": "Clinical Evolution",
+    "raw_values_caption": "Raw values, to be interpreted in consultation.",
     "show_archived": "Show archived tracks",
     "archived_badge": "Archived",
     "all_archived": "All tracks for this patient are archived. Turn on “Show archived tracks” to view them.",
