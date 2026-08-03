@@ -78,7 +78,10 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onR
           <div className="module-table__module">
             {row.icon != null ? <span className="module-table__module-icon">{row.icon}</span> : null}
             <div className="module-table__module-text">
-              <span className="module-table__module-title">{row.title}</span>
+              <span className="module-table__module-titleline">
+                <span className="module-table__module-title">{row.title}</span>
+                {row.titleBadge != null ? row.titleBadge : null}
+              </span>
               <span className="module-table__module-desc">{row.description}</span>
             </div>
           </div>
@@ -94,7 +97,7 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onR
         header: t('patient.module_table.col_unlocked'),
         sortable: true,
         cellClassName: 'module-table__col-date',
-        cell: row => formatDate(row.unlockedAt),
+        cell: row => row.unlockedLabelOverride ?? formatDate(row.unlockedAt),
       },
       {
         id: 'lastActivity',

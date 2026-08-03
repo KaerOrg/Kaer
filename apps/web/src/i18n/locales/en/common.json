@@ -156,6 +156,17 @@
   "scales": {
     "eval_auto": "Self-report",
     "eval_hetero": "Clinician-rated",
+    "tab_scales": "Scales & questionnaires",
+    "wardrobe_title": "Scales & questionnaires",
+    "wardrobe_desc": "The scales and questionnaires enabled for this patient.",
+    "wardrobe_empty": "No scale enabled for this patient. Click “Add a scale” to get started.",
+    "add_button": "Add a scale",
+    "add_title": "Add a scale",
+    "subtab_active": "Active",
+    "col_scale": "Scale / questionnaire",
+    "search_placeholder": "Search a scale…",
+    "always_available": "Always available",
+    "type_filter_label": "Type",
     "validated_prefix": "Validated",
     "age": {
       "perinatal": "Perinatal",

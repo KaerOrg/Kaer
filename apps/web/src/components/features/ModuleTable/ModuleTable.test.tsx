@@ -67,6 +67,20 @@ describe('ModuleTable', () => {
     expect(screen.getByText('-')).toBeInTheDocument()
   })
 
+  it('rend le badge accolé au nom (titleBadge) quand fourni', () => {
+    const rows: ModuleTableRow[] = [{ ...ROWS[0], titleBadge: <span>badge-x</span> }]
+    render(<ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" />)
+    expect(screen.getByText('badge-x')).toBeInTheDocument()
+  })
+
+  it('remplace la date « Débloqué le » par unlockedLabelOverride quand fourni', () => {
+    const rows: ModuleTableRow[] = [{ ...ROWS[0], unlockedLabelOverride: 'Toujours dispo.' }]
+    render(<ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" />)
+    expect(screen.getByText('Toujours dispo.')).toBeInTheDocument()
+    // La date brute de déblocage n'est plus formatée/affichée.
+    expect(screen.queryByText(new Date('2026-01-10T00:00:00Z').toLocaleDateString('fr'))).not.toBeInTheDocument()
+  })
+
   it('conserve l’ordre métier fourni tant qu’aucun tri n’est actif', () => {
     renderTable()
     expect(titleOrder()).toEqual(['Alpha', 'Beta'])

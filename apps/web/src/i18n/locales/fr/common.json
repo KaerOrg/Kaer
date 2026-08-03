@@ -156,6 +156,17 @@
   "scales": {
     "eval_auto": "Auto",
     "eval_hetero": "Hétéro",
+    "tab_scales": "Échelles & questionnaires",
+    "wardrobe_title": "Échelles & questionnaires",
+    "wardrobe_desc": "Les échelles et questionnaires activés pour ce patient.",
+    "wardrobe_empty": "Aucune échelle activée pour ce patient. Cliquez sur « Ajouter une échelle » pour commencer.",
+    "add_button": "Ajouter une échelle",
+    "add_title": "Ajouter une échelle",
+    "subtab_active": "Actives",
+    "col_scale": "Échelle / questionnaire",
+    "search_placeholder": "Rechercher une échelle…",
+    "always_available": "Toujours dispo.",
+    "type_filter_label": "Type",
     "validated_prefix": "Validé",
     "age": {
       "perinatal": "Périnatal",
