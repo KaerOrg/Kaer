@@ -1615,6 +1615,46 @@ toast.info('Info')
 
 ---
 
+### `SafetyMeasureEditor` (`components/features/`)
+
+Éditeur de l'étape 6 du plan de sécurité, côté praticien (PW-4). Parité de l'éditeur
+patient, avec une contrainte qui change la priorité d'usage : **la plupart des
+arrangements sont décidés en consultation**, donc saisis ici plus que sur le téléphone.
+
+```tsx
+<SafetyMeasureEditor
+  measures={items}                 // mesures déjà décidées
+  verbs={verbOptions}              // propositions, dans l'ordre de la config
+  otherVerbCode={OTHER_VERB_CODE}  // celle qui ouvre le champ libre
+  labels={labels}                  // déjà traduits : le composant ne connaît aucune clé
+  onAdd={handleAdd}
+  onDelete={handleDelete}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `measures` | `readonly ExistingMeasure[]` | Mesures décidées, rendues en phrases au-dessus du formulaire |
+| `verbs` | `readonly MeasureVerbOption[]` | Propositions de verbe, **dans l'ordre de la configuration** |
+| `otherVerbCode` | `string` | Code de la proposition « Autre », qui ouvre la saisie libre du verbe |
+| `labels` | objet | Libellés **déjà traduits**. Le composant ne connaît aucune clé i18n |
+| `onAdd` | `(m: NewMeasure) => void` | Ajout : verbe, quoi, qui (nullable), jusqu'à quand (nullable) |
+| `onDelete` | `(id: string) => void` | Retrait d'une mesure |
+
+**La phrase est composée au rendu**, par `composeMeasureSentence` de `@kaer/shared` :
+la même fonction que le mobile, donc aucune dérive de formulation entre les deux écrans.
+Un morceau absent ne laisse aucun trou.
+
+> **Deux invariants MDR, vérifiés par les tests du composant.** Aucun placeholder ne
+> donne d'exemple d'objet, parce que l'interface ne nomme, ne liste, ne suggère et
+> n'illustre jamais un moyen. Et **aucune date n'est comparée à aujourd'hui** : pas de
+> rappel, pas d'alerte, pas de couleur à l'échéance, ni ici ni dans l'onglet Données.
+
+`MeasureRow` et `MeasureVerbChip` sont deux fichiers voisins : chaque ligne et chaque
+puce portent leur identifiant et rappellent un callback stable du parent.
+
+---
+
 ## Ajouter un nouveau widget
 
 1. Créer `fields/widgets/MonWidget/MonWidget.tsx` — composant `disabled`/`readOnly`

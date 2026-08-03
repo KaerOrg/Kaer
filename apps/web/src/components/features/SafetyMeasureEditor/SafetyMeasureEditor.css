@@ -1,0 +1,51 @@
+.measure-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.measure-editor__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Une mesure décidée : la phrase d'abord, l'action de retrait discrète à droite. */
+.measure-editor__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.measure-editor__sentence {
+  flex: 1;
+  font-size: var(--font-size-label);
+  color: var(--color-text);
+}
+
+/* Les propositions passent à la ligne : aucune ne pousse la colonne hors de sa largeur. */
+.measure-editor__verbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.measure-editor__actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Mention persistante sur le caractère temporaire des mesures : elle reste visible,
+   elle ne s'affiche pas à la suite d'un événement. */
+.measure-editor__note {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
