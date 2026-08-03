@@ -31,6 +31,13 @@ jest.mock('../shared', () => {
   }
 })
 
+const mockGetAnchors = jest.fn()
+const mockGetAnchorPhrase = jest.fn()
+jest.mock('@services/crisisPlanService', () => ({
+  getAnchors: () => mockGetAnchors(),
+  getAnchorPhrase: () => mockGetAnchorPhrase(),
+}))
+
 const mockIsModuleUnlocked = jest.fn()
 jest.mock('@services/moduleService', () => ({
   isModuleUnlocked: (...a: unknown[]) => mockIsModuleUnlocked(...a),
@@ -50,6 +57,7 @@ jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityI
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import React from 'react'
+import { useKeepAwake } from 'expo-keep-awake'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import { SafetySequenceLayout } from './SafetySequenceLayout'
 import type { ContentField } from '@services/moduleService'
@@ -104,6 +112,8 @@ function renderLayout(onExit = jest.fn()) {
 beforeEach(() => {
   jest.clearAllMocks()
   mockIsModuleUnlocked.mockResolvedValue(false)
+  mockGetAnchors.mockResolvedValue([])
+  mockGetAnchorPhrase.mockResolvedValue('')
   mockGetPlanItems.mockResolvedValue([
     planItem('i1', 'step_1', 'Je ne dors plus'),
     planItem('i2', 'step_3', 'Le square derrière l\'école'),
@@ -359,6 +369,80 @@ describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => 
     expect(back.props.accessibilityLabel).toBe('common.back')
     // Icône seule : aucun libellé visible ne concurrence l'action du bas.
     expect(screen.queryByText('common.back')).toBeNull()
+  })
+})
+
+describe('SafetySequenceLayout — clôture (P-11)', () => {
+  async function reachClosing() {
+    fireEvent.press(await screen.findByTestId('safety-sequence-home-anchors'))
+  }
+
+  it('affiche les raisons de tenir comme du contenu', async () => {
+    mockGetAnchors.mockResolvedValue([{ id: 'a1', uri: 'file://a.jpg' }, { id: 'a2', uri: 'file://b.jpg' }])
+    mockGetAnchorPhrase.mockResolvedValue('Ma fille m\'attend')
+    renderLayout()
+    await reachClosing()
+    await waitFor(() => expect(screen.getByTestId('closing-photo-lead')).toBeTruthy())
+    expect(screen.getByText('Ma fille m\'attend')).toBeTruthy()
+  })
+
+  // Section vide : l'écran devient un simple retour, sans texte de manque.
+  it('n\'écrit rien quand la section est vide', async () => {
+    renderLayout()
+    await reachClosing()
+    expect(screen.getByText('modules.crisis_plan.sequence_closing_title')).toBeTruthy()
+    expect(screen.queryByTestId('closing-photo-lead')).toBeNull()
+    expect(screen.queryByTestId('closing-phrase')).toBeNull()
+  })
+
+  it('garde le bandeau de ressources et la sortie sur la clôture', async () => {
+    renderLayout()
+    await reachClosing()
+    expect(screen.getByTestId('emergency-stub-compact')).toBeTruthy()
+    expect(screen.getByTestId('safety-sequence-stop')).toBeTruthy()
+  })
+
+  // C'est l'écran le plus exposé à la tentation d'une mesure de fin de parcours.
+  it('ne propose aucune suite : ni avancement, ni question', async () => {
+    renderLayout()
+    await reachClosing()
+    expect(screen.queryByTestId('safety-sequence-advance')).toBeNull()
+  })
+})
+
+describe('SafetySequenceLayout — conditions d\'exécution (P-12)', () => {
+  it('empêche la mise en veille pendant la traversée', async () => {
+    renderLayout()
+    await screen.findByTestId('safety-sequence-home-follow')
+    expect(useKeepAwake).toHaveBeenCalled()
+  })
+
+  // Un patient qui rouvre l'app n'est pas forcément là où il en était, et restaurer
+  // supposerait d'avoir écrit où il en était. Décision explicite, pas un oubli.
+  it('rouvre sur l\'écran d\'arrivée, sans restaurer le moindre état', async () => {
+    renderLayout()
+    await enterPlan()
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    expect(screen.getByText('modules.crisis_plan.step_3_title')).toBeTruthy()
+
+    screen.unmount()
+    renderLayout()
+    expect(await screen.findByTestId('safety-sequence-home-follow')).toBeTruthy()
+  })
+
+  it('sort sans confirmation depuis chaque écran du parcours', async () => {
+    for (const reach of [
+      async () => { await screen.findByTestId('safety-sequence-home-follow') },
+      async () => { await enterPlan() },
+      async () => { await enterPlan(); fireEvent.press(screen.getByTestId('safety-sequence-advance')); fireEvent.press(screen.getByTestId('safety-sequence-advance')) },
+      async () => { fireEvent.press(await screen.findByTestId('safety-sequence-home-anchors')) },
+    ]) {
+      const onExit = renderLayout()
+      await reach()
+      fireEvent.press(screen.getByTestId('safety-sequence-stop'))
+      expect(onExit).toHaveBeenCalledTimes(1)
+      screen.unmount()
+    }
   })
 })
 

@@ -260,11 +260,46 @@ Trois garde-fous, dont un statique :
    service d'écriture y apparaît. Le test runtime ne verrait pas un appel placé derrière
    une branche non parcourue ; celui-ci le voit.
 
+### La clôture : du contenu, jamais une mesure
+
+C'est l'écran le plus exposé à la tentation d'une mesure de fin de parcours, et il n'en
+porte aucune : **pas d'échelle, pas de score, pas de « comment vous sentez-vous
+maintenant ? », aucun émoticône d'état**. Une question notée en sortie de crise serait
+une mesure, donc une bascule réglementaire.
+
+Les raisons de vivre s'affichent **comme du contenu** : une grande photo, deux petites,
+et la phrase du patient en grande typographie sur un panneau turquoise pâle. Aucune
+affordance d'édition : ni pointillé, ni crayon, ni appui long. Pas de guillemets autour
+de la phrase, c'est la sienne, pas une citation.
+
+**Si la section est vide, elle n'existe pas** : l'écran devient un simple retour, sans le
+moindre texte de manque.
+
+### Conditions d'exécution
+
+- **L'écran ne se met pas en veille** pendant la traversée (`useKeepAwake`), et le verrou
+  est relâché au démontage, y compris sur une sortie par le bouton système.
+- **Aucune reprise d'état.** L'app tuée puis rouverte arrive sur l'écran d'arrivée.
+  C'est une **décision explicite**, corollaire direct de l'invariant « aucune trace » :
+  restaurer supposerait d'avoir écrit où en était le patient. Et quelqu'un qui rouvre
+  l'app n'est pas forcément là où il en était.
+- **Sortie permanente, sans confirmation**, depuis tous les écrans.
+- Le parcours tient à taille de police système maximale : largeurs fluides, textes
+  rétractables, actions ancrées hors du flux défilant.
+
 ### Hors ligne
 
 Le plan est lu depuis SQLite (`getPlanItems`) : la Séquence fonctionne sans réseau.
 C'est une garantie, pas un chantier — les moments où un plan de sécurité est le plus
 nécessaire coïncident avec ceux où le réseau est le plus défaillant.
+
+**Cette garantie est verrouillée par un test statique** sur `planItemService` : il relit
+le source et échoue si un client réseau y apparaît. Un test d'exécution ne verrait pas un
+appel placé derrière une branche non parcourue ; celui-ci le voit.
+
+La seule lecture réseau du parcours est la vérification du déverrouillage de
+`distress_tolerance`, hors du chemin critique : elle échoue silencieusement hors ligne et
+fait disparaître le lien.
 
 ## Données
 

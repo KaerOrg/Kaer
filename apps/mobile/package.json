@@ -23,6 +23,7 @@
     "expo-dev-client": "~6.0.21",
     "expo-image": "~3.0.11",
     "expo-image-picker": "~17.0.10",
+    "expo-keep-awake": "~15.0.8",
     "expo-linking": "~8.0.11",
     "expo-localization": "~17.0.9",
     "expo-notifications": "~0.32.16",
@@ -63,7 +64,8 @@
       "^react-i18next$": "<rootDir>/src/__mocks__/react-i18next.ts",
       "^expo-localization$": "<rootDir>/src/__mocks__/expo-localization.ts",
       "^expo-constants$": "<rootDir>/src/__mocks__/expo-constants.ts",
-      "^expo-asset$": "<rootDir>/src/__mocks__/expo-asset.ts"
+      "^expo-asset$": "<rootDir>/src/__mocks__/expo-asset.ts",
+      "^expo-keep-awake$": "<rootDir>/src/__mocks__/expo-keep-awake.ts"
     }
   },
   "devDependencies": {

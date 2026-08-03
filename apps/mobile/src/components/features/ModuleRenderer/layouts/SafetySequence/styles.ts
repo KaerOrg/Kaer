@@ -30,6 +30,15 @@ export const styles = StyleSheet.create({
   entryLabel:     { fontFamily: fonts.serif, fontSize: fontSize.h2, lineHeight: 28, color: colors.text, flexShrink: 1 },
   entryHint:      { fontSize: fontSize.label, color: colors.textMuted, flexShrink: 1 },
 
+  // Clôture : les raisons de vivre sont du contenu, pas une fiche. Une grande photo,
+  // deux petites, et la phrase sur un panneau turquoise pâle, sans guillemets.
+  closing:            { gap: spacing.md },
+  closingLeadPhoto:   { width: '100%', height: 220, borderRadius: radius.lg },
+  closingPhotoRow:    { flexDirection: 'row', gap: spacing.sm },
+  closingPhoto:       { flex: 1, height: 110, borderRadius: radius.md },
+  closingPhrasePanel: { backgroundColor: colors.primaryPale, borderLeftWidth: 4, borderLeftColor: colors.primary, borderRadius: radius.md, padding: spacing.md },
+  closingPhrase:      { fontFamily: fonts.serif, fontSize: fontSize.h2, lineHeight: 30, color: colors.text, flexShrink: 1 },
+
   // Filet de l'écran des ressources : il sépare les secours des deux autres issues,
   // sans les hiérarchiser — elles gardent le même poids visuel.
   resourcesRule: { height: 1, backgroundColor: colors.border },
