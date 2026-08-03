@@ -165,6 +165,27 @@ arbitrage de contraste. Détail des props : `apps/mobile/docs/design-system.md`.
 > (iOS et Android, et l'absence de repli quand aucune application de messagerie n'est
 > installée) reste la question ouverte n° 2 de l'Epic #315.
 
+### Les contacts : un verbe, jamais un numéro
+
+`CallableContact` rend les items des étapes contactables. Trois règles le gouvernent :
+
+1. **Le numéro n'est jamais affiché.** Le libellé du bouton est un verbe (« Appeler »,
+   « Envoyer un message »). Un plan de sécurité s'ouvre dans un train ou une salle
+   d'attente ; un numéro en clair l'expose à qui regarde par-dessus l'épaule.
+2. **Règle constante** : un numéro existe, les boutons existent ; pas de numéro, ni
+   numéro ni bouton. Aucun bouton grisé, aucun texte de remplacement : un item sans
+   action ne doit jamais se lire comme un défaut.
+3. **Un lieu n'est pas un contact.** L'étape 3 accepte des personnes **et** des lieux ;
+   un lieu porte sa note (« à 8 minutes à pied ») à la place des boutons.
+
+Le SMS n'est pas un confort : chez un adolescent, l'appel vocal est souvent une barrière
+plus haute que la divulgation elle-même. Il est donc proposé pour un proche, et jamais
+pour un professionnel (`professional = 'true'` sur l'étape 5) : un CMP ne se joint pas
+par SMS.
+
+`role` et `note` sont des champs de `plan_items` créés par **PW-1 (#320)** : tant qu'ils
+n'existent pas, le composant les reçoit vides et se rend sans eux, sans laisser de trou.
+
 ### Logique pure partagée
 
 `packages/shared/src/services/safetySequence.ts` — consommée par le layout mobile
