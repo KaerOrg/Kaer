@@ -82,6 +82,37 @@ Trois contrôles distincts, à ne pas confondre :
 | Retour discret | Recule d'un écran. **Obligatoire** : un appui accidentel ne doit pas coûter une étape définitivement. C'est l'argument qui écarte le geste de balayage |
 | « Je m'arrête là » | **Sort** du parcours, sans confirmation, depuis n'importe quel écran |
 
+### L'écran d'arrivée
+
+Quelqu'un dont l'activation émotionnelle est au maximum ne peut pas lire une liste.
+L'écran d'arrivée porte donc **une action dominante et trois entrées calmes**, dans un
+ordre **fixe**, jamais reclassé ni dérivé d'une saisie.
+
+| Entrée | Destination |
+|---|---|
+| **Suivre mon plan** (dominante, carte pleine) | Première étape affichable |
+| Me mettre à l'abri | Étape 6, en un geste |
+| Ce qui me donne envie de tenir | Écran de clôture |
+
+Les raccourcis d'étape ne sont **pas codés dans le layout** : une étape déclare en
+configuration qu'elle est atteignable directement, par `direct_access_label_code` (et
+`direct_access_hint_code`) sur son field `step_title`. Le layout ne connaît aucun numéro
+d'étape, et une étape sans item n'apparaît jamais en raccourci puisqu'elle n'est pas
+affichable.
+
+**Plan jamais rempli** : l'écran affiche « Voici ce qui est disponible tout de suite »
+et les ressources d'urgence en densité pleine. Jamais « votre plan est incomplet »,
+jamais rien qui se lise comme un reproche ou un manque. La bascule se décide sur
+« existe-t-il au moins un item ? », qui est structurel.
+
+> **Décision du 2026-07-31 : pas de bouton « Respirer 1 minute ».** C'est une suggestion
+> pré-remplie, que l'Epic s'interdit ; si la respiration aide ce patient, elle est déjà
+> à son étape 2, dans ses mots, et le bouton générique capterait l'appui qui aurait mené
+> au plan personnel. Le barreau intermédiaire existe déjà, mieux fondé : « Traverser la
+> vague » (`distress_tolerance`), un module **déverrouillé par un clinicien pour ce
+> patient**. Ne pas rouvrir sans élément nouveau ; l'argumentaire complet est dans
+> [`docs/handoff/2026-07-31-plan-de-securite.md`](../handoff/2026-07-31-plan-de-securite.md) § 7.1.
+
 ### Un écran d'étape, et rien d'autre
 
 Le contenu est volontairement pauvre : « ÉTAPE n » en petites capitales, le titre de
@@ -149,9 +180,18 @@ Ne jamais élargir ces paramètres à `PlanItem[]`.
 |---|---|
 | `buildDisplayableSteps(ordre, sectionsNonVides)` | Étapes retenues + rang recalculé après retrait des vides |
 | `advance(state, total)` | Écran suivant. Depuis un plan vide, mène directement aux ressources |
-| `goBack(state, total)` | Écran précédent, ou `null` quand il n'y a plus de retour |
 | `isLastStep(index, total)` | Pilote le changement de libellé du bouton primaire |
 | `formatProgress(index, total)` | « n / m ». Chaîne vide s'il n'y a rien à numéroter |
+| `currentState(path)` / `goTo` / `advancePath` / `backPath` | Chemin parcouru, voir ci-dessous |
+
+**Le retour dépile un chemin, il ne recalcule pas un état.** Depuis que l'accueil ouvre
+des raccourcis (P-6), le parcours n'est plus une ligne : un retour calculé depuis le seul
+écran courant renverrait le patient là où il n'est jamais passé, l'étape 5 qu'il a sautée
+ou l'écran des ressources qu'il n'a pas vu. Le layout conserve donc les écrans
+**réellement traversés** (`SequencePath`, tuple non vide dont le dernier élément est
+l'écran affiché), et `backPath` en retire un. C'est aussi ce qui tient la promesse de
+P-7 : un appui accidentel ne coûte jamais une étape définitivement, quel que soit le
+chemin emprunté.
 
 ### Zéro persistance, verrouillé par les tests
 

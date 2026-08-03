@@ -22,6 +22,14 @@ export const styles = StyleSheet.create({
 
   screenTitle:   { fontFamily: fonts.serif, fontSize: fontSize.display, lineHeight: 38, color: colors.text, flexShrink: 1 },
 
+  // Entrées de l'écran d'arrivée. L'entrée dominante est pleine : sur l'écran d'entrée
+  // en crise, l'action dominante est le plan, et elle doit se lire sans être cherchée.
+  entryLead:      { backgroundColor: colors.primary, borderColor: colors.primary },
+  entryLeadLabel: { fontFamily: fonts.serif, fontSize: fontSize.h1, lineHeight: 34, color: colors.text, flexShrink: 1 },
+  entryLeadHint:  { fontSize: fontSize.label, color: colors.text, flexShrink: 1 },
+  entryLabel:     { fontFamily: fonts.serif, fontSize: fontSize.h2, lineHeight: 28, color: colors.text, flexShrink: 1 },
+  entryHint:      { fontSize: fontSize.label, color: colors.textMuted, flexShrink: 1 },
+
   stepLabel:     { fontSize: fontSize.xs, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
   stepTitle:     { fontFamily: fonts.serif, fontSize: fontSize.display, lineHeight: 38, color: colors.text, flexShrink: 1 },
   // Sous-titre d'une ligne : il distingue deux étapes voisines, il ne les commente pas.
