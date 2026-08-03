@@ -13,6 +13,7 @@ import {
   techniquesFromFields,
   breathingConfigFromFields,
   resolveActivation,
+  type BreathingFeeling,
   type BreathingSession,
   type BreathingSettings,
   type BreathingTechnique,
@@ -26,6 +27,7 @@ import {
 import { generateId } from '../../../../../lib/database'
 import { useTeen } from '../../../../../hooks/useTeen'
 import { BreathingSessionScreen, type SessionResult } from './BreathingSessionScreen'
+import { SessionSummaryScreen } from './SessionSummaryScreen'
 import { PrimaryTechniqueCard } from './PrimaryTechniqueCard'
 import { WeekCard, type ReminderLine } from './WeekCard'
 import { TechniqueRow } from './TechniqueRow'
@@ -64,6 +66,13 @@ type SettingsState =
 
 const LOADING: SettingsState = { status: 'loading' }
 
+/** Une session terminée, en attente de sa clôture (ressenti facultatif). */
+interface FinishedSession {
+  /** Identifiant de l'entrée déjà écrite : l'ajout du ressenti la met à jour. */
+  id: string
+  result: SessionResult
+}
+
 /** Icône de l'état « aucune technique activée » : JSX statique, hors du rendu. */
 const EMPTY_ICON = <MaterialCommunityIcons name="lungs" size={40} color={colors.textMuted} />
 
@@ -95,6 +104,9 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
   // Le retour Android sur la modale de session ne la ferme pas : il DEMANDE l'arrêt,
   // et c'est la session qui conclut (elle seule connaît le temps réellement pratiqué).
   const [stopRequested, setStopRequested] = useState(false)
+  // La session qui vient de se terminer, le temps de sa clôture. L'`id` est conservé
+  // pour que l'ajout du ressenti mette à jour la MÊME entrée, sans en créer une seconde.
+  const [finished, setFinished] = useState<FinishedSession | null>(null)
 
   const lbl = useCallback(
     (key: string, params?: Record<string, string | number>) => t(`modules.${moduleId}.${key}`, params),
@@ -185,19 +197,24 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
 
   const requestStop = useCallback(() => setStopRequested(true), [])
 
-  // Fin de session : la feuille remonte le résultat, le hub l'enregistre. La session
-  // est écrite MÊME interrompue (`completed: false`) : c'est une donnée, pas un échec.
-  const finishSession = useCallback((result: SessionResult) => {
-    setActiveTechnique(null)
-    setStopRequested(false)
+  // Écrit la session. Appelée deux fois pour une même session (même `id`, donc
+  // upsert) : une fois à la fin de la session, une fois si le patient ajoute un
+  // ressenti à la clôture. Écrire dès la fin plutôt qu'à la clôture garantit qu'une
+  // session n'est jamais perdue si l'app est fermée sur l'écran de clôture.
+  const writeSession = useCallback((
+    id: string,
+    result: SessionResult,
+    feeling: BreathingFeeling | null,
+  ) => {
     saveBreathingSession({
-      id: generateId(),
+      id,
       technique_key: result.techniqueKey,
       started_at: result.startedAt,
       duration_seconds: result.durationSeconds,
       planned_duration_seconds: result.plannedDurationSeconds,
       cycles_completed: result.cyclesCompleted,
       completed: result.completed,
+      feeling,
     })
       .then(loadSessions)
       .catch((err: unknown) => {
@@ -205,6 +222,27 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
         reportFailedOperation(`module/${moduleId}/session`, 'breathing session write failed', asReason(err))
       })
   }, [loadSessions, showToast, t, moduleId])
+
+  // Fin de session : l'écran remonte le résultat, le hub l'enregistre puis présente
+  // la clôture. La session est écrite MÊME interrompue (`completed: false`) et MÊME
+  // sans ressenti (`feeling: null`) : c'est une donnée, pas un échec.
+  const finishSession = useCallback((result: SessionResult) => {
+    setActiveTechnique(null)
+    setStopRequested(false)
+    const id = generateId()
+    setFinished({ id, result })
+    writeSession(id, result, null)
+  }, [writeSession])
+
+  // Clôture. « Passer » (feeling `null`) n'écrit rien de plus : la session est déjà
+  // enregistrée, et aucun refus n'est noté nulle part.
+  const closeSummary = useCallback((feeling: BreathingFeeling | null) => {
+    if (finished != null && feeling != null) writeSession(finished.id, finished.result, feeling)
+    setFinished(null)
+  }, [finished, writeSession])
+
+  // Retour Android sur la clôture : équivaut à « Passer », jamais à une perte.
+  const skipSummary = useCallback(() => setFinished(null), [])
 
   // Écriture des réglages : l'état local suit l'écriture pour que le hub reflète
   // immédiatement le choix, la synchro distante étant gérée par le service.
@@ -397,6 +435,23 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
             lbl={lbl}
             stopRequested={stopRequested}
             onFinish={finishSession}
+          />
+        ) : null}
+      </Modal>
+
+      <Modal
+        visible={finished != null}
+        animationType="slide"
+        presentationStyle="fullScreen"
+        onRequestClose={skipSummary}
+      >
+        {finished != null ? (
+          <SessionSummaryScreen
+            result={finished.result}
+            techniqueName={lbl(`${finished.result.techniqueKey}_name`)}
+            streak={streak}
+            lbl={lbl}
+            onClose={closeSummary}
           />
         ) : null}
       </Modal>

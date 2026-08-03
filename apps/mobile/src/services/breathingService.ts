@@ -4,6 +4,7 @@ import {
   getBreathingSettings as dbGetSettings,
   saveBreathingSettings as dbSaveSettings,
   type BreathingAmbientSound,
+  type BreathingFeeling,
   type BreathingSession,
   type BreathingSessionInput,
   type BreathingSettings,
@@ -12,7 +13,9 @@ import { collectIndexed, type ContentField } from '@kaer/shared'
 import { fetchModuleFields } from './moduleService'
 import { syncUpsert } from './syncHelpers'
 
-export type { BreathingAmbientSound, BreathingSession, BreathingSessionInput, BreathingSettings }
+export type {
+  BreathingAmbientSound, BreathingFeeling, BreathingSession, BreathingSessionInput, BreathingSettings,
+}
 
 // local_id stable : la config est une entrée unique par patient (upsert). On garde
 // un entry_kind dédié 'breathing_setting' (plutôt que le 'module_setting' générique)

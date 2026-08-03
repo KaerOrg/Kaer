@@ -24,7 +24,8 @@ Proposer au patient un guide animé pour 5 techniques de respiration validées, 
 |---|---|
 | Guide à rythme fixe | Le minuteur est prédéfini, non conditionnel à des données patient |
 | Pas de biofeedback | Aucun capteur, aucune mesure physiologique réelle |
-| Aucune interprétation | L'historique stocke la technique + la durée — aucun label ("vous êtes plus calme") |
+| Aucune interprétation | L'historique stocke la technique, la durée et un ressenti nommé : aucun score, aucune moyenne, aucun label calculé |
+| Aucune couleur à valence | Les trois ressentis, la barre d'objectif et les pastilles de semaine gardent la même teinte quelle que soit la valeur |
 | Aucune notification conditionnelle | Les rappels éventuels sont programmés à l'avance par le praticien |
 
 ---
@@ -52,6 +53,7 @@ plus une liste académique des cinq techniques.
 | `.../BreathingSessionScreen` | Écran de session immersif (modale plein écran) |
 | `.../{SessionOrb,SessionProgress,SessionControls}` + `sessionStyles` | Orbe animée, jauge + temps restant, commandes |
 | `.../{sessionClock,sessionPhases,sessionAudio}` | Moteur pur de la session (temps, phases, son) |
+| `.../SessionSummaryScreen` + `SummaryStat` + `summaryStyles` | Clôture de session et ressenti facultatif |
 
 Côté web praticien, `breathing_pacer` rend l'aperçu descriptif (`field_row`) via
 `FieldsLayout` : le praticien n'exécute pas l'exercice.
@@ -165,6 +167,34 @@ aucune taille. Une rétention tient la taille avec une pulsation subtile.
 **Couches** : l'écran ne persiste rien. Il remonte un `SessionResult` au hub, qui écrit via
 `saveBreathingSession` : la feuille ne possède pas son cycle de données.
 
+### La clôture de session (M4)
+
+Écran clair présenté à la fin de la session, automatique ou anticipée : coche dans une
+pastille turquoise pâle, « Session terminée » et le nom de la technique, puis trois tuiles
+de **comptes bruts** (durée réellement pratiquée, cycles, jours de suite), la carte
+« Comment vous sentez-vous ? », un encart de régularité et les actions.
+
+**Le ressenti est facultatif et vaut un mot, pas une mesure.** Trois choix exclusifs
+(`calmer` / `same` / `tenser`), stockés bruts dans `breathing_sessions.feeling`, restitués
+bruts. Interdits sans exception : toute note chiffrée, tout score, toute moyenne, toute
+pondération, toute courbe de tendance ou corrélation avec la technique ou la durée, tout
+texte du type « efficace pour vous ».
+
+> **Les trois choix portent la même couleur d'accent.** La palette de l'epic proposait une
+> teinte par ressenti (turquoise « plus calme », orange « plus tendu ») : c'est un codage
+> de valence sur une donnée clinique, que la règle d'or interdit explicitement, y compris
+> statique. Le garde-fou MDR de l'epic, qui l'interdit lui aussi, l'emporte sur sa ligne
+> palette.
+
+L'encart de régularité est un **texte fixe** (« La régularité compte plus que la durée… »),
+jamais dérivé des données : il ne commente pas la session qui vient d'avoir lieu.
+
+**Ordre d'écriture.** La session est écrite **dès la fin de la session**, avant la clôture,
+avec `feeling: null`. Ajouter un ressenti met à jour la **même entrée** (même `id`, donc
+upsert via `syncUpsert`), sans en créer une seconde. « Passer » n'écrit donc rien de plus :
+la session est déjà enregistrée et aucun refus n'est noté nulle part. Ce choix garantit
+qu'une session n'est jamais perdue si l'app est fermée sur l'écran de clôture.
+
 ### Statistiques de la semaine (partagées web ≡ mobile)
 
 Les comptes affichés par le hub viennent de `packages/shared/src/services/breathingStats.ts` :
@@ -244,6 +274,7 @@ npx jest BreathingPacer
 - [x] Mobile : feuille de préparation (durée, vibrations, souffle, ambiance), réglages mémorisés (M2, #367)
 - [x] Mobile : session immersive, orbe animée en continu, keep-awake, pause en arrière-plan (M3, #368)
 - [x] Mobile : sessions interrompues enregistrées (`completed = false`)
+- [x] Mobile : clôture de session et ressenti facultatif, stocké brut (M4, #369)
 - [x] Mobile : `BreathingSessionScreen` : session immersive animée en continu (remplace `BreathingExercisePlayer`)
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom
