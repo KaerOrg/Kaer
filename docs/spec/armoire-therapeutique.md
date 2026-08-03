@@ -130,9 +130,18 @@ le sous-onglet portant déjà le libellé.
 **Réutiliser.** La modale existante `ModuleActionsModal`, ordre d'onglets canonique inchangé (`computeModuleTabs` / `TAB_ORDER` : `data → config → notifications → preview → sources`, config seulement si le module en a un). Panneaux existants (`ExposureDataPanel`, `ModulePatientViewPanel`, etc.).
 
 **Critères d'acceptation.**
-- [ ] Aucune action perdue par rapport aux cartes ; aucune nouvelle modale créée.
-- [ ] Le démarrage d'une passation n'est jamais déclenché en un seul clic depuis le tableau.
-- [ ] La ligne entière est une surface cliquable (primitive de surface, pas un `<button>` nu).
+- [x] Aucune action perdue par rapport aux cartes ; aucune nouvelle modale créée.
+- [x] Le démarrage d'une passation n'est jamais déclenché en un seul clic depuis le tableau.
+- [x] La ligne entière est une surface cliquable (primitive de surface, pas un `<button>` nu).
+
+**Livré.** `ui/DataTable` reçoit `onRowActivate` (ligne cliquable souris) ; `ModuleTable` expose
+`onRowClick` (clic ligne → fiche du module sur le 1ᵉʳ onglet de `computeModuleTabs`) et une colonne
+d'**actions au survol** (raccourci par onglet, sauf Sources). Réutilise `ModuleActionsModal`
+existante (aucune nouvelle modale). Le `<tr>` cliquable n'a **ni `role` ni `tabIndex`** (une ligne
+contenant des boutons ne peut pas être un `role="button"` valide) : le chemin clavier/lecteur
+d'écran passe par les contrôles explicites (toggle + boutons d'action), jamais perdu. Aucune action
+au clic ne démarre une passation (le clic ouvre une fiche). Présentation des onglets (icône +
+libellé) extraite dans `moduleActionTabMeta.tsx` (partagée modale ↔ raccourcis).
 
 ### K-4 · Nouvel onglet « Échelles & questionnaires » : tableau jumeau (maquette `K-4_echelles-tableau_4a`)
 

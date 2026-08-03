@@ -25,11 +25,18 @@ vi.mock('./PatientEvolutionTab', () => ({
   },
 }))
 
+// Taxonomie vide : le tableau rend les lignes sans puce d'indication.
+vi.mock('@services/moduleCatalogService', () => ({
+  fetchModuleTaxonomy: async () => ({ dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }),
+}))
+
 import { render, waitFor, fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ToastProvider } from '../../../contexts/ToastProvider'
 import { PatientModulesTab } from './PatientModulesTab'
+import type { ModuleType, PatientModule } from '../../../lib/database.types'
+import type { ModuleCategory } from '@services/moduleCatalogService'
 
 const makeClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
@@ -81,6 +88,27 @@ describe('PatientModulesTab : sous-onglets Actifs / Évolution (K-2)', () => {
     renderTab()
     goToEvolution()
     fireEvent.click(screen.getByTestId('evo-view-data'))
+    await waitFor(() => expect(modalCalls.length).toBeGreaterThan(0))
+    expect(modalCalls.at(-1)).toEqual({ module: 'sleep_diary', activeTab: 'data' })
+  })
+})
+
+describe('PatientModulesTab : clic de ligne ouvre la fiche du module (K-3)', () => {
+  const CATEGORIES: ModuleCategory[] = [{
+    id: 'cat', icon: '', labelKey: 'c.label', subtitleKey: 'c.sub',
+    modules: [{ id: 'sleep_diary', icon: '', mobile_icon: '', color: '' }],
+  }]
+  const MODULES: PatientModule[] = [{
+    id: 'pm1', patient_id: 'p1', practitioner_id: 'pr1',
+    module_type: 'sleep_diary', config: {}, unlocked_at: '2026-01-01T00:00:00Z',
+  }]
+  const ENABLED = new Set<ModuleType>(['sleep_diary'])
+
+  it('clic sur la ligne ouvre la modale sur le premier onglet (Données)', async () => {
+    renderTab({ categories: CATEGORIES, modules: MODULES, enabledModules: ENABLED })
+    await waitFor(() => expect(screen.getByText('modules.sleep_diary.label')).toBeTruthy())
+    // Clic sur le nom (surface non interactive) → ouverture de la fiche.
+    fireEvent.click(screen.getByText('modules.sleep_diary.label'))
     await waitFor(() => expect(modalCalls.length).toBeGreaterThan(0))
     expect(modalCalls.at(-1)).toEqual({ module: 'sleep_diary', activeTab: 'data' })
   })

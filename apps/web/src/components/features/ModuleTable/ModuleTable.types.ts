@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 /**
  * Une ligne du tableau des modules / échelles. Présentationnel : l'appelant fournit
  * l'icône, les cellules « libres » (indications, contrôle d'activation) déjà rendues,
- * et les dates BRUTES (ISO ou `null`) — le tableau les formate à la locale et gère le
+ * et les dates BRUTES (ISO ou `null`) : le tableau les formate à la locale et gère le
  * tri. Aucune interprétation des dates (MDR : un horodatage est un fait, pas un signal).
  */
 export interface ModuleTableRow {
@@ -23,4 +23,11 @@ export interface ModuleTableRow {
   readonly lastActivityAt: string | null
   /** Contrôle de la colonne « Activé » (toggle ou bouton), déjà rendu. */
   readonly activation: ReactNode
+  /**
+   * Actions rapides révélées au survol de la ligne (icônes déjà rendues : données,
+   * notifications, aperçu, config). Rendues dans une colonne dédiée, uniquement quand
+   * la table est cliquable (`onRowClick`). Chaque bouton doit stopper la propagation
+   * pour ne pas déclencher le clic de ligne.
+   */
+  readonly actions?: ReactNode
 }

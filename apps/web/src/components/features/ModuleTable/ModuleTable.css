@@ -54,3 +54,30 @@
   text-align: right;
   white-space: nowrap;
 }
+
+/* Colonne d'actions au survol (K-3) : étroite, alignée à droite. */
+.module-table .data-table__cell.module-table__col-actions {
+  text-align: right;
+  white-space: nowrap;
+  width: 1%;
+}
+
+/* Groupe d'icônes révélé au survol / focus de la ligne. Visible en permanence sous
+   pointeur grossier (tactile) où le survol n'existe pas. */
+.module-table__actions {
+  display: inline-flex;
+  gap: var(--spacing-xs, 4px);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.module-table .data-table__row:hover .module-table__actions,
+.module-table .data-table__row:focus-within .module-table__actions {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .module-table__actions {
+    opacity: 1;
+  }
+}
