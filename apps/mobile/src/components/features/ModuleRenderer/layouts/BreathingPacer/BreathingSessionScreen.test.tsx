@@ -42,6 +42,18 @@ function advance(ms: number) {
   act(() => { jest.advanceTimersByTime(ms) })
 }
 
+/**
+ * Dernier arbre rendu, démonté par le `afterEach` de ce fichier.
+ *
+ * Le nettoyage automatique de `@testing-library/react-native` est enregistré à
+ * l'import, donc AU NIVEAU RACINE : il s'exécute après les hooks de ce `describe`.
+ * Or une phase de rétention lance une `Animated.loop` infinie ; laissée en vie, elle
+ * garde la file de timers occupée et ce nettoyage n'aboutit jamais (« Exceeded
+ * timeout for a hook »). On démonte donc nous-mêmes, pendant que les faux timers
+ * sont encore en place, pour que l'effet de l'orbe arrête sa boucle.
+ */
+let tree: ReturnType<typeof render> | null = null
+
 function renderSession(over: Partial<React.ComponentProps<typeof BreathingSessionScreen>> = {}) {
   const props = {
     technique: COHERENCE,
@@ -51,7 +63,8 @@ function renderSession(over: Partial<React.ComponentProps<typeof BreathingSessio
     onFinish: jest.fn(),
     ...over,
   }
-  return { ...render(<BreathingSessionScreen {...props} />), props }
+  tree = render(<BreathingSessionScreen {...props} />)
+  return { ...tree, props }
 }
 
 describe('BreathingSessionScreen', () => {
@@ -60,6 +73,8 @@ describe('BreathingSessionScreen', () => {
     jest.setSystemTime(new Date('2026-08-05T10:00:00Z'))
   })
   afterEach(() => {
+    act(() => { tree?.unmount() })
+    tree = null
     jest.clearAllMocks()
     jest.useRealTimers()
   })
