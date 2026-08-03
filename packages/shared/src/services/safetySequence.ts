@@ -77,23 +77,56 @@ export function advance(state: SequenceState, totalSteps: number): SequenceState
   }
 }
 
+// ─── Chemin parcouru ─────────────────────────────────────────────────────────
+//
+// Depuis P-6, l'accueil ouvre des raccourcis : « Me mettre à l'abri » saute
+// directement à l'étape 6, « Ce qui me donne envie de tenir » à la clôture. Le
+// parcours n'est donc plus une ligne, et un retour arrière calculé depuis le seul
+// état courant renverrait le patient là où il n'est jamais passé (l'étape 5 qu'il a
+// sautée, l'écran des ressources qu'il n'a pas vu).
+//
+// Le chemin conserve donc les écrans RÉELLEMENT traversés, et le retour dépile.
+// C'est aussi ce qui tient la promesse de P-7 : un appui accidentel ne coûte jamais
+// une étape définitivement, quel que soit le chemin emprunté.
+//
+// Invariant : le chemin n'est jamais vide, son dernier élément est l'écran courant.
+
+/** Écrans traversés, dans l'ordre. Le dernier est l'écran affiché. */
+export type SequencePath = readonly [SequenceState, ...SequenceState[]]
+
+/** Chemin d'entrée du parcours, et de reprise après un redémarrage de l'app (P-12). */
+export const INITIAL_PATH: SequencePath = [INITIAL_STATE]
+
+// Ces trois fonctions déstructurent le chemin (`[first, ...rest]`) plutôt que de
+// l'indexer : c'est ce qui permet à TypeScript de garder le type « tuple non vide »
+// sans le moindre cast, donc de rendre l'invariant vérifiable à la compilation.
+
+/** Écran affiché. */
+export function currentState(path: SequencePath): SequenceState {
+  const [first, ...rest] = path
+  return rest.at(-1) ?? first
+}
+
+/** Chemin prolongé d'un écran atteint par un raccourci de l'accueil (P-6). */
+export function goTo(path: SequencePath, next: SequenceState): SequencePath {
+  const [first, ...rest] = path
+  return [first, ...rest, next]
+}
+
+/** Chemin prolongé de l'écran suivant du parcours linéaire. */
+export function advancePath(path: SequencePath, totalSteps: number): SequencePath {
+  return goTo(path, advance(currentState(path), totalSteps))
+}
+
 /**
- * État atteint par le retour arrière, ou `null` quand il n'y a plus de retour possible.
- *
- * Le retour arrière est obligatoire (P-7) : un appui accidentel ne doit pas coûter
- * une étape définitivement. C'est l'argument même qui écarte le geste de balayage.
+ * Chemin dépilé d'un écran, ou `null` quand il n'y a plus de retour possible
+ * (on est resté sur l'écran d'arrivée).
  */
-export function goBack(state: SequenceState, totalSteps: number): SequenceState | null {
-  switch (state.kind) {
-    case 'home':
-      return null
-    case 'step':
-      return state.index <= 0 ? { kind: 'home' } : { kind: 'step', index: state.index - 1 }
-    case 'resources':
-      return totalSteps > 0 ? { kind: 'step', index: totalSteps - 1 } : { kind: 'home' }
-    case 'closing':
-      return { kind: 'resources' }
-  }
+export function backPath(path: SequencePath): SequencePath | null {
+  const [first, ...rest] = path
+  if (rest.length === 0) return null
+  rest.pop()
+  return [first, ...rest]
 }
 
 /**

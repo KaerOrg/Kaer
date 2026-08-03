@@ -3,10 +3,15 @@ import {
   buildDisplayableSteps,
   isLastStep,
   advance,
-  goBack,
   formatProgress,
   INITIAL_STATE,
+  INITIAL_PATH,
+  currentState,
+  goTo,
+  advancePath,
+  backPath,
   type SequenceState,
+  type SequencePath,
 } from './safetySequence'
 
 const SIX = ['step_1', 'step_2', 'step_3', 'step_4', 'step_5', 'step_6'] as const
@@ -85,35 +90,65 @@ describe('advance', () => {
   })
 })
 
-describe('goBack', () => {
-  it('ne renvoie rien depuis l\'accueil : c\'est la sortie du parcours', () => {
-    expect(goBack({ kind: 'home' }, 3)).toBeNull()
+describe('chemin parcouru', () => {
+  it('démarre sur l\'accueil, sans retour possible', () => {
+    expect(currentState(INITIAL_PATH)).toEqual({ kind: 'home' })
+    expect(backPath(INITIAL_PATH)).toBeNull()
   })
 
-  it('revient à l\'accueil depuis la première étape', () => {
-    expect(goBack({ kind: 'step', index: 0 }, 3)).toEqual({ kind: 'home' })
+  it('avance d\'un écran et sait revenir sur ses pas après un appui accidentel', () => {
+    const path = advancePath(INITIAL_PATH, 3)
+    expect(currentState(path)).toEqual({ kind: 'step', index: 0 })
+    const back = backPath(path)
+    expect(back).not.toBeNull()
+    expect(currentState(back as SequencePath)).toEqual({ kind: 'home' })
   })
 
-  it('revient à l\'étape précédente', () => {
-    expect(goBack({ kind: 'step', index: 2 }, 3)).toEqual({ kind: 'step', index: 1 })
+  it('enchaîne le parcours linéaire jusqu\'aux ressources puis à la clôture', () => {
+    let path = advancePath(INITIAL_PATH, 2)     // étape 1
+    path = advancePath(path, 2)                 // étape 2
+    path = advancePath(path, 2)                 // ressources
+    expect(currentState(path)).toEqual({ kind: 'resources' })
+    path = advancePath(path, 2)                 // clôture
+    expect(currentState(path)).toEqual({ kind: 'closing' })
   })
 
-  it('revient à la dernière étape depuis les ressources', () => {
-    expect(goBack({ kind: 'resources' }, 3)).toEqual({ kind: 'step', index: 2 })
+  // Le cœur du modèle : un raccourci de l'accueil ne fait pas traverser les écrans
+  // sautés, donc le retour ne doit pas y renvoyer. Un état seul ne saurait pas le dire.
+  it('revient à l\'accueil depuis une étape atteinte par un raccourci, pas à l\'étape précédente', () => {
+    const shortcut: SequenceState = { kind: 'step', index: 5 }
+    const path = goTo(INITIAL_PATH, shortcut)
+    expect(currentState(path)).toEqual(shortcut)
+    expect(currentState(backPath(path) as SequencePath)).toEqual({ kind: 'home' })
   })
 
-  it('revient à l\'accueil depuis les ressources quand le plan est vide', () => {
-    expect(goBack({ kind: 'resources' }, 0)).toEqual({ kind: 'home' })
+  it('revient à l\'accueil depuis la clôture atteinte par un raccourci, pas aux ressources', () => {
+    const path = goTo(INITIAL_PATH, { kind: 'closing' })
+    expect(currentState(backPath(path) as SequencePath)).toEqual({ kind: 'home' })
   })
 
-  it('revient aux ressources depuis la clôture', () => {
-    expect(goBack({ kind: 'closing' }, 3)).toEqual({ kind: 'resources' })
+  it('revient aux ressources depuis la clôture atteinte par le parcours linéaire', () => {
+    let path = advancePath(INITIAL_PATH, 0)     // plan vide : accueil → ressources
+    expect(currentState(path)).toEqual({ kind: 'resources' })
+    path = advancePath(path, 0)                 // → clôture
+    expect(currentState(backPath(path) as SequencePath)).toEqual({ kind: 'resources' })
   })
 
-  it('permet de revenir sur ses pas après un appui accidentel (aller-retour)', () => {
-    const start: SequenceState = { kind: 'step', index: 1 }
-    const forward = advance(start, 4)
-    expect(goBack(forward, 4)).toEqual(start)
+  it('dépile écran par écran, jusqu\'à l\'accueil et pas au-delà', () => {
+    let path = advancePath(INITIAL_PATH, 3)
+    path = advancePath(path, 3)
+    path = backPath(path) as SequencePath
+    path = backPath(path) as SequencePath
+    expect(currentState(path)).toEqual({ kind: 'home' })
+    expect(backPath(path)).toBeNull()
+  })
+
+  it('ne modifie jamais le chemin reçu (fonctions pures)', () => {
+    const path = advancePath(INITIAL_PATH, 3)
+    const before = JSON.stringify(path)
+    goTo(path, { kind: 'closing' })
+    backPath(path)
+    expect(JSON.stringify(path)).toBe(before)
   })
 })
 

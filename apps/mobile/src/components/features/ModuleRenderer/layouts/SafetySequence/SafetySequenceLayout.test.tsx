@@ -64,7 +64,12 @@ const SECTIONS = new Map<string, ContentField[]>([
     id: 's3',
     section_id: 'step_3',
     text_code: 'modules.crisis_plan.step_3_title',
-    props: { subtitle_code: 'modules.crisis_plan.step_3_subtitle' },
+    props: {
+      subtitle_code: 'modules.crisis_plan.step_3_subtitle',
+      // Raccourci déclaré par la CONFIG : le layout ne connaît aucun numéro d'étape.
+      direct_access_label_code: 'modules.crisis_plan.sequence_home_shelter',
+      direct_access_hint_code: 'modules.crisis_plan.sequence_home_shelter_hint',
+    },
   })]],
 ])
 
@@ -83,21 +88,26 @@ beforeEach(() => {
   ])
 })
 
+/** Entre dans le parcours par l'action dominante de l'accueil (P-6). */
+async function enterPlan() {
+  fireEvent.press(await screen.findByTestId('safety-sequence-home-follow'))
+}
+
 describe('SafetySequenceLayout — parcours', () => {
   it('ouvre sur l\'écran d\'arrivée', async () => {
     renderLayout()
-    expect(await screen.findByText('modules.crisis_plan.sequence_home_title')).toBeTruthy()
+    expect(await screen.findByTestId('safety-sequence-home-follow')).toBeTruthy()
   })
 
   it('avance de l\'accueil vers la première étape affichable', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
   })
 
   it('saute les étapes vides et renumérote la progression', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     // step_2 n'a aucun item : l'étape suivante est step_3, affichée « 2 / 2 ».
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     expect(screen.getByText('modules.crisis_plan.step_3_title')).toBeTruthy()
@@ -106,13 +116,13 @@ describe('SafetySequenceLayout — parcours', () => {
 
   it('affiche les items du patient tels qu\'il les a écrits', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(screen.getByText('Je ne dors plus')).toBeTruthy()
   })
 
   it('mène aux ressources depuis la dernière étape, jamais dans un cul-de-sac', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     expect(screen.getByText('modules.crisis_plan.sequence_resources_title')).toBeTruthy()
@@ -120,21 +130,14 @@ describe('SafetySequenceLayout — parcours', () => {
 
   it('affiche « ce qui est disponible » sur la dernière étape, pas « autre chose que j\'ai prévu »', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     expect(screen.getByText('modules.crisis_plan.sequence_advance_last')).toBeTruthy()
   })
 
-  it('va directement aux ressources quand le plan est vide', async () => {
-    mockGetPlanItems.mockResolvedValue([])
-    renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
-    expect(screen.getByText('modules.crisis_plan.sequence_resources_title')).toBeTruthy()
-  })
-
   it('permet de revenir en arrière après un appui accidentel', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     expect(screen.getByText('modules.crisis_plan.step_3_title')).toBeTruthy()
     fireEvent.press(screen.getByTestId('safety-sequence-back'))
@@ -143,13 +146,13 @@ describe('SafetySequenceLayout — parcours', () => {
 
   it('n\'offre aucun retour arrière depuis l\'accueil', async () => {
     renderLayout()
-    await screen.findByTestId('safety-sequence-advance')
+    await screen.findByTestId('safety-sequence-home-follow')
     expect(screen.queryByTestId('safety-sequence-back')).toBeNull()
   })
 
-  it('« Je m\'arrête là » sort du parcours sans confirmation, depuis n\'importe quel écran', async () => {
+  it('la sortie quitte le parcours sans confirmation, depuis n\'importe quel écran', async () => {
     const onExit = renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-stop'))
     expect(onExit).toHaveBeenCalledTimes(1)
   })
@@ -157,7 +160,7 @@ describe('SafetySequenceLayout — parcours', () => {
   it('garde le bandeau d\'urgence présent sur tous les écrans', async () => {
     renderLayout()
     expect(await screen.findByTestId('emergency-stub')).toBeTruthy()
-    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(screen.getByTestId('emergency-stub')).toBeTruthy()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
@@ -165,26 +168,94 @@ describe('SafetySequenceLayout — parcours', () => {
   })
 })
 
+describe('SafetySequenceLayout — écran d\'arrivée (P-6)', () => {
+  it('propose le plan en action dominante, puis les entrées plus calmes', async () => {
+    renderLayout()
+    expect(await screen.findByText('modules.crisis_plan.sequence_home_follow')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.sequence_home_shelter')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.sequence_home_anchors')).toBeTruthy()
+  })
+
+  it('n\'expose en raccourci que les étapes que la config déclare', async () => {
+    renderLayout()
+    await screen.findByTestId('safety-sequence-home-follow')
+    // step_3 porte `direct_access_label_code`, step_1 non.
+    expect(screen.getByTestId('safety-sequence-home-step_3')).toBeTruthy()
+    expect(screen.queryByTestId('safety-sequence-home-step_1')).toBeNull()
+  })
+
+  it('n\'expose pas le raccourci d\'une étape sans item', async () => {
+    // step_3 déclare le raccourci mais n'a plus d'item : elle n'est pas affichable,
+    // donc elle ne peut pas être proposée en raccourci.
+    mockGetPlanItems.mockResolvedValue([planItem('i1', 'step_1', 'Je ne dors plus')])
+    renderLayout()
+    await screen.findByTestId('safety-sequence-home-follow')
+    expect(screen.queryByTestId('safety-sequence-home-step_3')).toBeNull()
+  })
+
+  it('mène en un geste à l\'étape déclarée, sans traverser les précédentes', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-home-step_3'))
+    expect(screen.getByText('modules.crisis_plan.step_3_title')).toBeTruthy()
+    expect(screen.queryByText('modules.crisis_plan.step_1_title')).toBeNull()
+  })
+
+  // Le retour doit ramener d'où l'on vient : après un raccourci, c'est l'accueil, et
+  // surtout pas l'étape précédente, que le patient n'a jamais vue.
+  it('ramène à l\'accueil au retour depuis une étape atteinte en raccourci', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-home-step_3'))
+    fireEvent.press(screen.getByTestId('safety-sequence-back'))
+    expect(screen.getByTestId('safety-sequence-home-follow')).toBeTruthy()
+    expect(screen.queryByText('modules.crisis_plan.step_1_title')).toBeNull()
+  })
+
+  it('mène en un geste à la clôture, et en revient à l\'accueil', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-home-anchors'))
+    expect(screen.getByText('modules.crisis_plan.sequence_closing_title')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('safety-sequence-back'))
+    expect(screen.getByTestId('safety-sequence-home-follow')).toBeTruthy()
+  })
+
+  it('ne propose pas « autre chose que j\'ai prévu » sur l\'accueil', async () => {
+    renderLayout()
+    await screen.findByTestId('safety-sequence-home-follow')
+    expect(screen.queryByTestId('safety-sequence-advance')).toBeNull()
+  })
+
+  it('affiche ce qui est disponible tout de suite quand le plan est vide, sans jamais le qualifier', async () => {
+    mockGetPlanItems.mockResolvedValue([])
+    renderLayout()
+    expect(await screen.findByText('modules.crisis_plan.sequence_resources_title')).toBeTruthy()
+    // Aucune entrée de plan, et surtout aucun mot sur ce qui manquerait.
+    expect(screen.queryByTestId('safety-sequence-home-follow')).toBeNull()
+    expect(screen.queryByTestId('safety-sequence-home-anchors')).toBeNull()
+    // La sortie reste atteignable.
+    expect(screen.getByTestId('safety-sequence-stop')).toBeTruthy()
+  })
+})
+
 describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => {
   it('affiche le sous-titre configuré sur l\'étape qui en porte un', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     expect(screen.getByText('modules.crisis_plan.step_3_subtitle')).toBeTruthy()
   })
 
   it('n\'affiche aucun sous-titre sur une étape qui n\'en configure pas', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
     expect(screen.queryByText('modules.crisis_plan.step_3_subtitle')).toBeNull()
   })
 
   it('ne numérote QUE les écrans d\'étape : ni l\'accueil, ni les ressources', async () => {
     renderLayout()
-    await screen.findByTestId('safety-sequence-advance')
+    await screen.findByTestId('safety-sequence-home-follow')
     expect(screen.queryByText('1 / 2')).toBeNull()   // accueil
-    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(screen.getByText('1 / 2')).toBeTruthy()   // étape 1
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
@@ -193,7 +264,7 @@ describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => 
 
   it('rend le retour en icône seule, avec son libellé d\'accessibilité', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     const back = screen.getByTestId('safety-sequence-back')
     expect(back.props.accessibilityLabel).toBe('common.back')
     // Icône seule : aucun libellé visible ne concurrence l'action du bas.
@@ -204,7 +275,7 @@ describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => 
 describe('SafetySequenceLayout — invariant MDR : zéro persistance', () => {
   it('ne déclenche AUCUNE écriture pendant une traversée complète', async () => {
     const onExit = renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
@@ -219,7 +290,7 @@ describe('SafetySequenceLayout — invariant MDR : zéro persistance', () => {
 
   it('ne lit le plan qu\'une fois, et ne réécrit jamais rien au fil du parcours', async () => {
     renderLayout()
-    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    await enterPlan()
     expect(mockGetPlanItems).toHaveBeenCalledTimes(1)
     expect(mockGetPlanItems).toHaveBeenCalledWith('crisis_plan')
   })

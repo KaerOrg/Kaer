@@ -2218,7 +2218,12 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_6.title', 'bgColor', '#F0FDF4'),
   ('crisis_plan.step_6.title', 'color', '#15803D'),
   ('crisis_plan.step_6.title', 'icon', 'shield-home-outline'),
-  ('crisis_plan.step_6.title', 'step_number', '6')
+  ('crisis_plan.step_6.title', 'step_number', '6'),
+  -- Raccourci de l'écran d'arrivée de la Séquence (P-6) : l'étape 6 est un plancher,
+  -- disponible à toutes les intensités, sans avoir à épuiser les cinq autres. La
+  -- config le déclare ; le layout ne connaît aucun numéro d'étape.
+  ('crisis_plan.step_6.title', 'direct_access_label_code', 'modules.crisis_plan.sequence_home_shelter'),
+  ('crisis_plan.step_6.title', 'direct_access_hint_code', 'modules.crisis_plan.sequence_home_shelter_hint')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- EPDS : valeurs (certaines questions sont à scoring inversé : opt0=3 ... opt3=0)
