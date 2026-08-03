@@ -229,6 +229,49 @@ Côté web, ajouter un palier à `fontSize` l'injecte d'office en `--font-size-<
 
 ---
 
+## Un formulaire rendu avant sa configuration ecrit des donnees fausses
+
+> Regle source : [coding-standards.md § React performance](coding-standards.md) (deriver
+> l'etat pendant le render) + [config-first.md](config-first.md) (la config pilote le rendu).
+
+**refonte/safety-etape6-web-pw4 (2026-08-03) : deux ecritures corrompues, invisibles a
+l'oeil, attrapees par les tests.**
+L'editeur du plan de securite lit sa configuration (les six etapes) et l'etat du plan
+(les deux dates de revue) par deux `useQuery` distincts, puis rend son formulaire d'ajout
+et son bouton de revue. Les deux etaient atteignables **avant** que leur requete ait
+repondu, avec des consequences differentes et toutes deux silencieuses :
+
+```tsx
+// ❌ le formulaire existe avant que les etapes soient connues
+const activeSection = openSection ?? steps[0]?.sectionId ?? ''   // '' tant que la config charge
+saveSafetyPlanItem(patientId, { section_id: activeSection, ... }) // item ecrit avec section_id: ''
+
+// ❌ le bouton « revu aujourd'hui » est cliquable avant que la config soit lue
+const config = configQuery.data ?? { createdWithAt: null, lastReviewedAt: null }
+markPlanReviewedToday(patientId, config)  // created_with_at: null → la PREMIERE elaboration
+                                          // est reecrite avec la date du jour, perte definitive
+```
+```tsx
+// ✅ rien tant que la configuration n'est pas la : une etape se choisit, elle ne se devine pas
+{activeStep == null ? null : <StepDetailPanel ... />}
+// ✅ l'action reste indisponible tant que l'etat lu n'est pas connu
+<PlanStateHeader reviewing={reviewMutation.isPending || config == null} ... />
+```
+
+Le piege : **la valeur de repli (`''`, `null`) rend le code TYPE et NON PLANTANT**, donc
+rien ne signale l'anomalie ; l'utilisateur voit un formulaire normal et son enregistrement
+« reussit ». Les deux cas n'ont ete reveles que parce que les tests assertaient sur les
+ARGUMENTS passes au service (`section_id: 'step_1'`, `createdWithAt: '2026-03-12'`) plutot
+que sur « le service a bien ete appele ».
+
+→ Reflexe review : devant un composant qui **ecrit** et qui derive une valeur d'une requete
+(`data?.x ?? fallback`), demander « que se passe-t-il si l'utilisateur agit avant la
+reponse ? ». Si le repli produit une ecriture, c'est un bug : ne pas rendre le controle,
+ou le desactiver. Et faire assertar les tests sur le **contenu** de l'ecriture, pas sur son
+existence : `expect(save).toHaveBeenCalled()` aurait laisse passer les deux.
+
+---
+
 ## Gestion d'erreur : reporter sans afficher
 
 > Règle source : [pr-review § RULE — Gestion d'erreur](../skills/pr-review/SKILL.md) +

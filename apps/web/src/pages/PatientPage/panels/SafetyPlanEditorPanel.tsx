@@ -14,6 +14,15 @@
 // l'étape 6 et le message de soutien vivent chacun dans leur fichier. Ici : les données,
 // les mutations, et le choix du panneau de droite.
 //
+// **Ce panneau possède ses lectures, contrairement à ses voisins de `tabs/`** (RimConfigPanel,
+// MedicationListConfigPanel…), qui reçoivent un hook d'édition construit par
+// `PatientModulesTab`. La divergence est délibérée, pour deux raisons. D'abord ce n'est pas
+// une feuille : c'est un panneau complet dont les propres enfants sont, eux, strictement
+// présentationnels (données + callbacks par props, zéro service, zéro store). Ensuite le
+// ticket l'exige : les lectures passent par les factories `hooks/queries/` (donc cachées et
+// dédupliquées), jamais par un `useEffect` de fetch, ce qui rend inutile de faire transiter
+// une dizaine de mutations par un `PatientModulesTab` déjà très long.
+//
 // ── Interdits, tenus par ce panneau ────────────────────────────────────────
 //
 // **Aucun pourcentage de complétion.** « 5 étapes remplies sur 6 » est un décompte,
@@ -27,7 +36,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { collectIndexed, type ContentField } from '@kaer/shared'
+import { collectIndexed, PLAN_ITEM_KINDS, type ContentField } from '@kaer/shared'
 import { Banner } from '@ui/Banner'
 import type { SegmentOption } from '@ui/SegmentedControl'
 import { crisisQueries, moduleQueries } from '../../../hooks/queries'
@@ -231,46 +240,49 @@ export function SafetyPlanEditorPanel({ patientId, moduleId }: Props) {
     [i18n.language],
   )
 
-  const kindOptions = useMemo<SegmentOption<PlanItemKind>[]>(() => [
-    { value: 'person', label: lbl('item_kind_person') },
-    { value: 'place', label: lbl('item_kind_place') },
-  ], [lbl])
+  // Les deux natures viennent de la source partagée : en ajouter une là-bas l'ajoute ici,
+  // sans toucher à ce fichier.
+  const kindOptions = useMemo<SegmentOption<PlanItemKind>[]>(
+    () => PLAN_ITEM_KINDS.map(value => ({ value, label: lbl(`item_kind_${value}`) })),
+    [lbl],
+  )
 
+  // « Ce qu'il peut lui dire » sur une étape de contacts, « à noter » ailleurs : la même
+  // colonne ne pose pas la même question selon l'étape.
+  const noteLabel = columns.kind ? lbl('col_note') : lbl('col_note_contact')
+
+  // L'en-tête reçoit des phrases déjà composées, pas des fonctions de composition : il
+  // affiche, il n'assemble rien.
   const headerLabels = useMemo(() => ({
     title: lbl('plan_state_title'),
-    createdWith: (date: string) => t(`modules.${moduleId}.plan_created_with`, { date }),
-    reviewedWith: (date: string) => t(`modules.${moduleId}.plan_reviewed_with`, { date }),
-    neverReviewed: lbl('plan_never_reviewed'),
-    filled: (count: number, total: number) =>
-      t(`modules.${moduleId}.plan_steps_filled`, { count, total }),
     reviewToday: lbl('plan_review_today'),
     readNotMeasured: lbl('plan_read_not_measured'),
-  }), [lbl, t, moduleId])
+  }), [lbl])
 
   const columnLabels = useMemo(() => ({
     text: lbl('col_text'),
     kind: lbl('col_kind'),
     role: lbl('col_role'),
     phone: lbl('col_phone'),
-    note: columns.kind ? lbl('col_note') : lbl('col_note_contact'),
+    note: noteLabel,
     actions: lbl('col_actions'),
     noPhone: lbl('item_no_phone'),
     moveUp: lbl('item_move_up'),
     moveDown: lbl('item_move_down'),
     delete: t('common.delete'),
-  }), [lbl, t, columns.kind])
+  }), [lbl, t, noteLabel])
 
   const formLabels = useMemo(() => ({
     title: lbl('add_item_title'),
     text: lbl('col_text'),
     role: lbl('col_role'),
     phone: lbl('col_phone'),
-    note: columns.kind ? lbl('col_note') : lbl('col_note_contact'),
+    note: noteLabel,
     optional: t('common.optional'),
     add: lbl('add_item'),
     cancel: t('common.cancel'),
     patientCanEdit: lbl('patient_can_edit'),
-  }), [lbl, t, columns.kind])
+  }), [lbl, t, noteLabel])
 
   // Mêmes noms de clés que le mobile (P-13) : les deux écrans lisent le même vocabulaire.
   const measureLabels = useMemo(() => ({
@@ -312,10 +324,13 @@ export function SafetyPlanEditorPanel({ patientId, moduleId }: Props) {
       ) : null}
 
       <PlanStateHeader
-        createdWith={config?.createdWithAt != null ? formatDay(config.createdWithAt) : null}
-        lastReviewed={config?.lastReviewedAt != null ? formatDay(config.lastReviewedAt) : null}
-        filledSteps={filled.filled}
-        totalSteps={filled.total}
+        createdWith={config?.createdWithAt != null
+          ? t(`modules.${moduleId}.plan_created_with`, { date: formatDay(config.createdWithAt) })
+          : null}
+        lastReviewed={config?.lastReviewedAt != null
+          ? t(`modules.${moduleId}.plan_reviewed_with`, { date: formatDay(config.lastReviewedAt) })
+          : lbl('plan_never_reviewed')}
+        filled={t(`modules.${moduleId}.plan_steps_filled`, { count: filled.filled, total: filled.total })}
         labels={headerLabels}
         reviewing={reviewMutation.isPending || config == null}
         onReviewToday={handleReview}

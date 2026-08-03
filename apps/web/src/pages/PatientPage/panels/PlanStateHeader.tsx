@@ -17,25 +17,23 @@
 // date est affichée, jamais surveillée : un plan de six mois s'affiche exactement comme
 // un plan d'hier.
 //
-// **Aucun pourcentage de complétion** : « 5 étapes remplies sur 6 » est un décompte.
-// D'où deux nombres bruts en props, et jamais leur rapport.
+// **Aucun pourcentage de complétion** : « 5 étapes remplies sur 6 » est un décompte. Ce
+// composant reçoit la phrase déjà composée et ne calcule aucun rapport.
+//
+// Toutes les mentions arrivent **déjà traduites et déjà composées** : ce composant
+// affiche, il n'assemble rien et ne connaît aucune clé i18n.
 
 import { Button } from '@ui/Button'
 
 interface Props {
-  /** Jour de la première élaboration conjointe, déjà formaté. `null` si jamais daté. */
+  /** « Élaboré le 12 mars ». `null` quand le plan n'a jamais été daté. */
   createdWith: string | null
-  /** Jour de la dernière revue en consultation, déjà formaté. `null` si jamais revu. */
-  lastReviewed: string | null
-  filledSteps: number
-  totalSteps: number
-  /** Libellés déjà traduits : ce composant ne connaît aucune clé i18n. */
+  /** « revu avec vous le 4 juin », ou la mention « pas encore revu ensemble ». */
+  lastReviewed: string
+  /** « 5 étapes remplies sur 6 ». Un décompte, jamais un taux. */
+  filled: string
   labels: {
     title: string
-    createdWith: (date: string) => string
-    reviewedWith: (date: string) => string
-    neverReviewed: string
-    filled: (filled: number, total: number) => string
     reviewToday: string
     readNotMeasured: string
   }
@@ -44,18 +42,16 @@ interface Props {
 }
 
 export function PlanStateHeader({
-  createdWith, lastReviewed, filledSteps, totalSteps, labels, reviewing, onReviewToday,
+  createdWith, lastReviewed, filled, labels, reviewing, onReviewToday,
 }: Props) {
   return (
     <header className="plan-editor__state">
       <div className="plan-editor__state-text">
         <p className="plan-editor__state-title">{labels.title}</p>
         <p className="plan-editor__state-line">
-          {createdWith != null ? <span>{labels.createdWith(createdWith)}</span> : null}
-          <span>
-            {lastReviewed != null ? labels.reviewedWith(lastReviewed) : labels.neverReviewed}
-          </span>
-          <span>{labels.filled(filledSteps, totalSteps)}</span>
+          {createdWith != null ? <span>{createdWith}</span> : null}
+          <span>{lastReviewed}</span>
+          <span>{filled}</span>
         </p>
         <p className="plan-editor__state-note">{labels.readNotMeasured}</p>
       </div>
