@@ -111,6 +111,13 @@
     "preview_button": "Vorschau",
     "patient_view": "Was Ihr Patient sehen wird",
     "unlocked_on": "Freigeschaltet am {{date}}",
+    "module_table": {
+      "col_module": "Modul",
+      "col_indications": "Indikationen",
+      "col_unlocked": "Freigeschaltet am",
+      "col_last_activity": "Letzte Aktivität",
+      "col_activated": "Aktiv"
+    },
     "coming_soon": "Modul in Entwicklung, Vorschau nicht verfügbar.",
     "data_button": "Daten",
     "summary_empty": "Keine synchronisierten Daten",

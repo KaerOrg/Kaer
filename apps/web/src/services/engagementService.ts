@@ -450,6 +450,33 @@ export async function fetchModuleSummary(
   }
 }
 
+// Dernière activité (date de la saisie la plus récente) de CHAQUE module du patient,
+// pour la colonne « Dernière activité » du tableau des modules (K-1). Une seule
+// requête pour tout le patient : on lit `module_id` + `client_created_at` triés du
+// plus récent au plus ancien, puis on retient la première occurrence par module (donc
+// la plus récente). Restitution BRUTE d'un horodatage, aucune interprétation (MDR).
+export async function fetchModuleLastActivity(
+  patientId: string,
+): Promise<Map<string, string>> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('module_id, client_created_at')
+    .eq('patient_id', patientId)
+    .order('client_created_at', { ascending: false })
+
+  const lastByModule = new Map<string, string>()
+  if (error || !data) return lastByModule
+
+  for (const row of data) {
+    // Données triées décroissant : la première ligne vue pour un module est sa plus
+    // récente ; on ignore les suivantes.
+    if (!lastByModule.has(row.module_id)) {
+      lastByModule.set(row.module_id, row.client_created_at)
+    }
+  }
+  return lastByModule
+}
+
 // ── Rythmes « Rythmes & régularité » (vue praticien) ──────────────────────────
 // Horaires bruts de chaque repère, datés, pour tracer le rythmogramme (heure du
 // repère jour par jour). Valeurs BRUTES, aucune interprétation ni seuil

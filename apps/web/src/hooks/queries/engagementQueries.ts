@@ -9,6 +9,7 @@ import {
   fetchSleepEvolution,
   fetchAvailableScales,
   fetchModuleSummary,
+  fetchModuleLastActivity,
   fetchChronoEntries,
   fetchFormEntries,
   fetchActivityEntries,
@@ -148,6 +149,15 @@ export const engagementQueries = {
       },
     }),
 
+  // Dernière activité de chaque module du patient (map module_id → horodatage),
+  // pour la colonne « Dernière activité » du tableau des modules (K-1). Dérivée de
+  // `patient_entries` → invalidée par `patientDataKeys` (préfixe `['engagement']`).
+  lastActivity: (patientId: string) =>
+    queryOptions({
+      queryKey: ['engagement', 'lastActivity', patientId],
+      queryFn: (): Promise<Map<string, string>> => fetchModuleLastActivity(patientId),
+    }),
+
   // Repères temporels du mood_tracker posés par le patient (lecture seule).
   moodMarkers: (patientId: string) =>
     queryOptions({
@@ -161,6 +171,7 @@ export const engagementQueries = {
   patientDataKeys: (patientId: string): readonly (readonly string[])[] => [
     ['engagement', 'evolution', patientId],
     ['engagement', 'moduleData', patientId],
+    ['engagement', 'lastActivity', patientId],
     ['engagement', 'moodMarkers', patientId],
   ],
 }

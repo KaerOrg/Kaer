@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1215,6 +1215,57 @@ tabulaire sur mesure qui ne passe pas par `columns`.
 - Chaque ligne est **mémoïsée** : passer des `columns` (useMemo) et `renderDetail`
   (useCallback) stables pour éviter les re-rendus inutiles à grande échelle.
 
+### `ModuleTable` (`components/features/`)
+
+`components/features/ModuleTable/`. **Tableau dense des modules / échelles activés
+d'un patient** (armoire thérapeutique, K-1). Assemble le primitive `ui/DataTable`
+avec les 5 colonnes de l'armoire : **Module** (icône + nom + description tronquée sur
+une ligne), **Indications**, **Débloqué le**, **Dernière activité**, **Activé**.
+Composant métier : il possède l'état de tri (les deux colonnes de date) et réordonne
+lui-même les lignes — `DataTable` ne trie jamais. Les lignes sans date vont toujours
+en fin, quel que soit le sens du tri.
+
+Les cellules « libres » (`indications`, `activation`) sont fournies **déjà rendues**
+par l'appelant : puces d'indication (`ModuleTagChips maxChips={2}` — max N puces par
+dimension, le surplus résumé par une puce « +N ») ou badges d'échelle
+(`ScaleMetaBadges chipsOnly`) pour les indications ; toggle d'activation ou bouton pour
+la colonne Activé. Les dates sont passées **brutes** (ISO ou `null`) et formatées à la
+locale par le tableau (placeholder `-` si absente). Réutilisable par l'onglet
+« Échelles & questionnaires » (K-4) via `firstColumnLabel` et ces cellules libres.
+
+```tsx
+import { ModuleTable, type ModuleTableRow } from '@/components/features/ModuleTable'
+
+const rows: ModuleTableRow[] = items.map(item => ({
+  id: item.id,
+  icon: <Icon size={18} />,
+  title: t(`modules.${item.id}.label`),
+  description: t(`modules.${item.id}.description`),
+  indications: <ModuleTagChips tagIds={tags} taxonomy={taxonomy} maxChips={2} />,
+  unlockedAt: mod?.unlocked_at ?? null,        // ISO brut — le tableau formate
+  lastActivityAt: lastActivity.get(item.id) ?? null,
+  activation: moduleToggle(true, busy, onRevoke),
+}))
+
+<ModuleTable
+  rows={rows}
+  firstColumnLabel={t('patient.module_table.col_module')}
+  ariaLabel={t('patient.wardrobe_title')}
+  emptyState={<p>{t('modules.empty_filter')}</p>}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `rows` | `readonly ModuleTableRow[]` | Lignes (id, icône, titre, description, `indications`, `unlockedAt`, `lastActivityAt`, `activation`) |
+| `firstColumnLabel` | `string` | En-tête de la 1ʳᵉ colonne (« Module » / « Échelle & questionnaire ») — les 4 autres colonnes sont communes |
+| `ariaLabel` | `string` | Libellé accessible de la table |
+| `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide (filtre sans résultat) |
+
+> La barre de filtres à facettes (`ModuleFilterBar`) est un panneau déjà encadré :
+> l'armoire la rend **au-dessus** de `ModuleTable` (elle n'est pas passée à la table,
+> ce qui ajouterait un second cadre).
+
 ### `TimeDial`
 
 `components/ui/TimeDial/`. Cadran horaire radial 24 h : un anneau dont l'arc teal
@@ -1317,6 +1368,7 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 | `evaluationType` | `'auto' \| 'hetero'` | Badge coloré — bleu (auto-évaluation) ou vert (hétéro-évaluation) |
 | `category` | `string` | Chip nosologique gris (ex. `'Humeur'`, `'Anxiété'`) |
 | `targetAges` | `readonly TargetAge[]` | Chips d'âge colorés — couleurs définies dans `AGE_BADGE_CONFIG` de `data/scales.ts` |
+| `chipsOnly` | `boolean` (défaut `false`) | N'affiche que les puces (badge éval + catégorie), sans la ligne de description — pour les contextes denses (cellule « Indications » de `ModuleTable`) |
 
 ### Labels i18n
 

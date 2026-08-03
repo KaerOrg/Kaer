@@ -22,6 +22,12 @@ interface ModuleTagChipsProps {
   dimensions?: readonly string[]
   /** Précède chaque ligne du libellé de sa dimension (`tag_dimensions.<id>.label`). */
   showDimensionLabels?: boolean
+  /**
+   * Nombre maximum de puces affichées **par dimension** ; le surplus est résumé par
+   * une puce « +N » (ex. cellule dense du tableau des modules : max 2 + `+N`). Absent
+   * → toutes les puces sont affichées.
+   */
+  maxChips?: number
 }
 
 /**
@@ -29,7 +35,7 @@ interface ModuleTagChipsProps {
  * Présentationnel : aucune logique de données. Source unique des puces d'indication,
  * sur la carte du module comme dans le panneau Sources.
  */
-export function ModuleTagChips({ tagIds, taxonomy, dimensions, showDimensionLabels = false }: ModuleTagChipsProps) {
+export function ModuleTagChips({ tagIds, taxonomy, dimensions, showDimensionLabels = false, maxChips }: ModuleTagChipsProps) {
   const { t } = useTranslation()
   const rows = useMemo(
     () => selectCardTagRows(tagIds, taxonomy, dimensions),
@@ -40,25 +46,30 @@ export function ModuleTagChips({ tagIds, taxonomy, dimensions, showDimensionLabe
 
   return (
     <div className="module-tag-chips">
-      {rows.map(row => (
-        <div key={row.dimensionId} className="module-tag-chips__group">
-          {showDimensionLabels ? (
-            <span className="module-tag-chips__dimension">
-              {t(`tag_dimensions.${row.dimensionId}.label`)}
-            </span>
-          ) : null}
-          <div className="module-tag-chips__row">
-          {row.tags.map(tag => (
-            <Chip
-              key={tag.id}
-              size="sm"
-              label={t(`tags.${tag.id}.label`)}
-              tone={DIMENSION_TONE[row.dimensionId] ?? 'neutral'}
-            />
-          ))}
+      {rows.map(row => {
+        const visible = maxChips != null ? row.tags.slice(0, maxChips) : row.tags
+        const overflow = row.tags.length - visible.length
+        return (
+          <div key={row.dimensionId} className="module-tag-chips__group">
+            {showDimensionLabels ? (
+              <span className="module-tag-chips__dimension">
+                {t(`tag_dimensions.${row.dimensionId}.label`)}
+              </span>
+            ) : null}
+            <div className="module-tag-chips__row">
+              {visible.map(tag => (
+                <Chip
+                  key={tag.id}
+                  size="sm"
+                  label={t(`tags.${tag.id}.label`)}
+                  tone={DIMENSION_TONE[row.dimensionId] ?? 'neutral'}
+                />
+              ))}
+              {overflow > 0 ? <Chip size="sm" label={`+${overflow}`} tone="neutral" /> : null}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
