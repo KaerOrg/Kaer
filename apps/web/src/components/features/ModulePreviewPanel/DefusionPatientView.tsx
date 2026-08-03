@@ -1,13 +1,11 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { Eye, ChevronRight, Play, Pause, ArrowLeft } from 'lucide-react'
-import { Banner } from '../../ui/Banner'
-import { Chip } from '../../ui/Chip'
+import { Eye, Play, Pause, ArrowLeft } from 'lucide-react'
 import { moduleQueries } from '../../../hooks/queries'
 import { DEFUSION_TECHNIQUES, type DefusionTechnique } from '../../../lib/defusionTechniques'
 import { DEFUSION_AFTER_COLOR } from '../../../pages/PatientPage/tabs/clinicalChartConfig'
-import { DefusionScreenCard } from './DefusionScreenCard'
+import { PatientScreenRail, type PatientScreen, type StageFilter } from './PatientScreenRail'
 import './DefusionPatientView.css'
 
 interface Props {
@@ -16,7 +14,6 @@ interface Props {
 }
 
 type DefusionStage = 'home' | 'word_repetition' | 'linguistic_distancing' | 'history'
-type StageFilter = 'all' | DefusionStage
 type TFn = (key: string, opts?: Record<string, unknown>) => string
 
 // Données d'exemple (aperçu praticien, lecture seule) — alignées sur les maquettes.
@@ -71,7 +68,7 @@ function measureGrid(t: TFn, metaLabel: string, dBefore: string, dAfter: string,
 
 // ── Écrans du parcours ───────────────────────────────────────────────────────
 
-interface ScreenDef { id: string; stage: DefusionStage; caption: string; body: ReactNode }
+type ScreenDef = PatientScreen<DefusionStage>
 
 function buildScreens(t: TFn, enabled: DefusionTechnique[]): ScreenDef[] {
   const dpv = (k: string, opts?: Record<string, unknown>) => t(`patient.dpv_${k}`, opts)
@@ -289,7 +286,7 @@ function buildScreens(t: TFn, enabled: DefusionTechnique[]): ScreenDef[] {
  */
 export function DefusionPatientView({ patientModuleId }: Props) {
   const { t } = useTranslation()
-  const [stageFilter, setStageFilter] = useState<StageFilter>('all')
+  const [stageFilter, setStageFilter] = useState<DefusionStage | 'all'>('all')
 
   const techniquesQuery = useQuery({
     ...moduleQueries.defusionTechniques(patientModuleId ?? ''),
@@ -300,7 +297,7 @@ export function DefusionPatientView({ patientModuleId }: Props) {
   const screens = useMemo(() => buildScreens(t, enabled), [t, enabled])
 
   const stageFilters = useMemo(() => {
-    const filters: { value: StageFilter; label: string }[] = [
+    const filters: StageFilter<DefusionStage>[] = [
       { value: 'all', label: t('patient.dpv_filter_all') },
       { value: 'home', label: t('patient.dpv_filter_home') },
     ]
@@ -310,28 +307,17 @@ export function DefusionPatientView({ patientModuleId }: Props) {
     return filters
   }, [t, enabled])
 
-  const visible = stageFilter === 'all' ? screens : screens.filter(s => s.stage === stageFilter)
+  const handleFilterChange = useCallback((value: DefusionStage | 'all') => setStageFilter(value), [])
 
   return (
-    <div className="preview-panel__inner">
-      <Banner variant="info" icon={<Eye size={16} />}>{t('patient.preview_banner')}</Banner>
-
-      <div className="dpv-filters">
-        {stageFilters.map(f => (
-          <Chip key={f.value} label={f.label} selectable selected={stageFilter === f.value} onClick={() => setStageFilter(f.value)} />
-        ))}
-      </div>
-
-      <div className="dpv-rail">
-        {visible.map((s, i) => (
-          <DefusionScreenCard key={s.id} number={i + 1} caption={s.caption}>{s.body}</DefusionScreenCard>
-        ))}
-      </div>
-
-      <div className="dpv-footer">
-        <span>{t('patient.dpv_footer', { count: screens.length })}</span>
-        <span className="dpv-footer__scroll">{t('patient.dpv_scroll')} <ChevronRight size={13} /></span>
-      </div>
-    </div>
+    <PatientScreenRail
+      screens={screens}
+      filters={stageFilters}
+      activeFilter={stageFilter}
+      onFilterChange={handleFilterChange}
+      bannerLabel={t('patient.preview_banner')}
+      footerLabel={t('patient.dpv_footer', { count: screens.length })}
+      scrollLabel={t('patient.dpv_scroll')}
+    />
   )
 }

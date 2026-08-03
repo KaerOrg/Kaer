@@ -1,45 +1,9 @@
 /* ── Vue patient « Décrocher d'une pensée » — rail des écrans du parcours ────── */
 /* Aperçu praticien, lecture seule. MDR : données d'exemple brutes, aucun jugement. */
 
-.dpv-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.dpv-rail {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-}
-
-.dpv-screen {
-  flex: 0 0 auto;
-  width: 232px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.dpv-screen__frame {
-  height: 400px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-surface, #fff);
-  padding: 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow: hidden;
-}
-
-.dpv-screen__caption {
-  text-align: center;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-}
+/* La coquille (filtres, rail, vignette, pied) vit dans PatientScreenRail.css :
+   elle est partagée avec les autres vues patient multi-écrans. Ce fichier ne garde
+   que l'habillage propre au parcours « Décrocher d'une pensée ». */
 
 /* En-têtes / titres */
 .dpv-hdr {
@@ -160,13 +124,3 @@
 .dpv-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; font-size: var(--font-size-xxs); color: var(--color-text-muted); background: var(--color-background); border-radius: 999px; padding: 4px 10px; }
 .dpv-chip--revealed { font-style: italic; }
 
-/* Pied de rail */
-.dpv-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  padding-top: 4px;
-}
-.dpv-footer__scroll { display: inline-flex; align-items: center; gap: 2px; }
