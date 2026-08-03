@@ -2,7 +2,20 @@ jest.mock('../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-jest.mock('../../../store/authStore', () => ({ useAuthStore: () => null }))
+// Le layout d'édition lit le patient courant pour écrire dans le document partagé.
+jest.mock('../../../store/authStore', () => ({
+  useAuthStore: (sel?: (s: { patient: { id: string } | null }) => unknown) =>
+    (sel ? sel({ patient: { id: 'pat-1' } }) : null),
+}))
+
+// Le plan de sécurité s'écrit dans `safety_plan_items` (PW-1), plus dans l'outbox.
+const mockSaveSafetyItem = jest.fn().mockResolvedValue(true)
+const mockDeleteSafetyItem = jest.fn().mockResolvedValue(true)
+jest.mock('@services/safetyPlanService', () => ({
+  refreshSafetyPlan: jest.fn().mockResolvedValue(true),
+  saveSafetyPlanItem: (...a: unknown[]) => mockSaveSafetyItem(...a),
+  deleteSafetyPlanItem: (...a: unknown[]) => mockDeleteSafetyItem(...a),
+}))
 
 jest.mock('../../../lib/database', () => ({
   getAllPlanItemsForModule: jest.fn().mockResolvedValue([]),
@@ -102,13 +115,14 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     fireEvent.press(screen.getByTestId('step-1-validate-new'))
 
     await waitFor(() => {
-      expect(database.savePlanItem).toHaveBeenCalledWith(
+      expect(mockSaveSafetyItem).toHaveBeenCalledWith(
+        'pat-1',
         expect.objectContaining({ module_id: 'crisis_plan', section_id: 'step_1', text: 'Respirer profondément' })
       )
     })
   })
 
-  it("n'appelle pas savePlanItem si le texte est vide", async () => {
+  it("n'écrit rien si le texte est vide", async () => {
     render(<FieldRenderer preview_kind="editable_steps" fields={MOCK_FIELDS} moduleId="crisis_plan" />)
     await waitFor(() => expect(screen.getByTestId('step-header-1')).toBeTruthy())
 
@@ -117,7 +131,7 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     fireEvent.press(screen.getByTestId('step-1-add'))
     fireEvent.press(screen.getByTestId('step-1-validate-new'))
 
-    expect(database.savePlanItem).not.toHaveBeenCalled()
+    expect(mockSaveSafetyItem).not.toHaveBeenCalled()
   })
 
   it('masque le formulaire en appuyant sur Annuler', async () => {
@@ -178,7 +192,8 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     fireEvent.press(screen.getByTestId('step-1-validate-edit-existing-1'))
 
     await waitFor(() => {
-      expect(database.savePlanItem).toHaveBeenCalledWith(
+      expect(mockSaveSafetyItem).toHaveBeenCalledWith(
+        'pat-1',
         expect.objectContaining({ id: 'existing-1', text: 'Mon signe modifié' })
       )
     })
@@ -202,7 +217,8 @@ describe('FieldRenderer — editable_steps (EditableStepsLayout)', () => {
     fireEvent.press(screen.getByTestId('step-4-validate-new'))
 
     await waitFor(() => {
-      expect(database.savePlanItem).toHaveBeenCalledWith(
+      expect(mockSaveSafetyItem).toHaveBeenCalledWith(
+        'pat-1',
         expect.objectContaining({ section_id: 'step_4', text: 'Marie', phone: '0102030405' })
       )
     })

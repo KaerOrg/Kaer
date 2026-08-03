@@ -1,10 +1,20 @@
 const mockGetPlanItems = jest.fn()
-const mockSavePlanItem = jest.fn()
-const mockDeletePlanItem = jest.fn()
 jest.mock('@services/planItemService', () => ({
   getPlanItems: (...a: unknown[]) => mockGetPlanItems(...a),
-  savePlanItem: (...a: unknown[]) => mockSavePlanItem(...a),
-  deletePlanItem: (...a: unknown[]) => mockDeletePlanItem(...a),
+}))
+
+// Le plan de sécurité s'écrit dans le document partagé, plus dans l'outbox montante.
+const mockRefresh = jest.fn().mockResolvedValue(true)
+const mockSavePlanItem = jest.fn().mockResolvedValue(true)
+const mockDeletePlanItem = jest.fn().mockResolvedValue(true)
+jest.mock('@services/safetyPlanService', () => ({
+  refreshSafetyPlan: (...a: unknown[]) => mockRefresh(...a),
+  saveSafetyPlanItem: (...a: unknown[]) => mockSavePlanItem(...a),
+  deleteSafetyPlanItem: (...a: unknown[]) => mockDeletePlanItem(...a),
+}))
+
+jest.mock('../../../../../store/authStore', () => ({
+  useAuthStore: (sel: (s: { patient: { id: string } | null }) => unknown) => sel({ patient: { id: 'pat-1' } }),
 }))
 
 jest.mock('@services/contactsService', () => ({ pickContact: jest.fn() }))
@@ -89,10 +99,18 @@ describe('EditableStepsLayout', () => {
     fireEvent.changeText(screen.getByTestId('step-1-new-input'), 'Appeler mes parents')
     fireEvent.press(screen.getByTestId('step-1-validate-new'))
 
+    // L'écriture est adressée au patient courant, dans le document partagé.
     await waitFor(() =>
       expect(mockSavePlanItem).toHaveBeenCalledWith(
+        'pat-1',
         expect.objectContaining({ section_id: 'step_1', text: 'Appeler mes parents' }),
       ),
     )
+  })
+
+  // Le praticien a pu compléter le plan en consultation depuis la dernière ouverture.
+  it('rafraîchit le document partagé à l\'ouverture du module', async () => {
+    render(<EditableStepsLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
+    await waitFor(() => expect(mockRefresh).toHaveBeenCalledWith('pat-1'))
   })
 })
