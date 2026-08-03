@@ -3545,6 +3545,11 @@
   font-weight: 600;
   color: var(--color-text);
 }
+.sseq__subtitle {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
 .sseq__progress {
   margin-top: auto;
   font-size: var(--font-size-xs);

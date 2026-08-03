@@ -49,12 +49,17 @@ export function SafetySequenceLayout({ fields, t, moduleId }: Props) {
 
         {steps.map(step => {
           const titleField = stepTitles.get(step.sectionId)
+          // Sous-titre porté par la config (`subtitle_code`), sur les seules étapes
+          // que rien d'autre ne distingue. Même source que le mobile : le praticien
+          // voit exactement l'écran que verra son patient (P-7).
+          const subtitleCode = titleField?.props['subtitle_code']
           return (
             <article key={step.sectionId} className="sseq__screen">
               <span className="sseq__step">
                 {lbl('step_label').replace('{{number}}', String(step.position))}
               </span>
               <h3 className="sseq__title">{titleField?.text_code ? t(titleField.text_code) : ''}</h3>
+              {subtitleCode ? <p className="sseq__subtitle">{t(subtitleCode)}</p> : null}
               <span className="sseq__progress">{formatProgress(step.position - 1, steps.length)}</span>
             </article>
           )

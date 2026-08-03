@@ -23,8 +23,10 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
 import { reportFailedOperation } from '@services/errorReportingService'
@@ -40,6 +42,10 @@ import {
 } from '@kaer/shared'
 import { CrisisEmergencyCalls } from '../shared'
 import { styles } from './styles'
+
+// Retour discret, dessiné comme un chevron et non comme un bouton libellé : il doit
+// être atteignable sans jamais concurrencer l'action du bas (P-7, maquette rail 4a).
+const BACK_ICON = <MaterialCommunityIcons name="chevron-left" size={26} color={colors.textMuted} />
 
 export interface SafetySequenceLayoutProps {
   /** Étapes du plan regroupées par `section_id`, dans l'ordre de la config. */
@@ -121,8 +127,15 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   const currentStep = state.kind === 'step' ? steps[state.index] : undefined
   const stepFields = currentStep != null ? sections.get(currentStep.sectionId) ?? [] : []
   const stepTitle = stepFields.find(f => f.field_type === 'step_title')
+  // Sous-titre d'une ligne, porté par la config (`subtitle_code`) et présent sur les
+  // seules étapes que rien d'autre ne distingue : « sans contacter personne » sépare
+  // l'étape 2 de l'étape 3. Absent partout ailleurs, sans trou dans la mise en page.
+  const stepSubtitleCode = stepTitle?.props['subtitle_code']
   const stepItems = currentStep != null ? itemsBySection.get(currentStep.sectionId) ?? [] : []
   const onLastStep = state.kind === 'step' && isLastStep(state.index, steps.length)
+  // Progression affichée sur les seuls écrans d'étape : l'accueil, les ressources et
+  // la clôture ne sont pas numérotés.
+  const progress = state.kind === 'step' ? formatProgress(state.index, steps.length) : ''
 
   return (
     <View style={styles.container}>
@@ -131,15 +144,22 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
         <CrisisEmergencyCalls fields={uiFields} />
       </View>
 
-      {canGoBack ? (
-        <View style={styles.backRow}>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('common.back')}
-            onPress={handleBack}
-            testID="safety-sequence-back"
-          />
+      {/* Rangée de tête : retour à gauche, progression à droite. Les deux sont
+          discrets et hors de la carte de contenu (maquette P-7). */}
+      {canGoBack || progress !== '' ? (
+        <View style={styles.topRow}>
+          {canGoBack ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              iconLeft={BACK_ICON}
+              onPress={handleBack}
+              accessibilityLabel={t('common.back')}
+              testID="safety-sequence-back"
+            />
+          ) : null}
+          <View style={styles.topRowFill} />
+          {progress !== '' ? <Text style={styles.progress}>{progress}</Text> : null}
         </View>
       ) : null}
 
@@ -149,17 +169,22 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
         ) : null}
 
         {state.kind === 'step' && currentStep != null ? (
-          <>
+          <Card>
             <Text style={styles.stepLabel}>
               {lbl('step_label').replace('{{number}}', String(currentStep.position))}
             </Text>
             <Text style={styles.stepTitle}>{t(stepTitle?.text_code ?? '')}</Text>
-            {stepItems.map(item => (
-              <View key={item.id} style={styles.item}>
+            {stepSubtitleCode != null ? (
+              <Text style={styles.stepSubtitle}>{t(stepSubtitleCode)}</Text>
+            ) : null}
+            {stepItems.map((item, index) => (
+              // Filet de séparation ENTRE les items seulement : un filet sous le
+              // dernier doublerait la bordure de la carte.
+              <View key={item.id} style={index < stepItems.length - 1 ? styles.item : styles.itemLast}>
                 <Text style={styles.itemText}>{item.text}</Text>
               </View>
             ))}
-          </>
+          </Card>
         ) : null}
 
         {state.kind === 'resources' ? (
@@ -174,9 +199,6 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
       {/* Actions ANCRÉES hors du flux défilant : les items peuvent défiler à taille de
           police maximale, l'action jamais (P-7). */}
       <View style={styles.actions}>
-        {state.kind === 'step' ? (
-          <Text style={styles.progress}>{formatProgress(state.index, steps.length)}</Text>
-        ) : null}
         {state.kind !== 'closing' ? (
           <Button
             variant="primary"

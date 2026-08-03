@@ -54,6 +54,21 @@ describe('SafetySequenceLayout (aperçu praticien)', () => {
     ])
   })
 
+  it('rend le sous-titre des seules étapes qui en configurent un', () => {
+    const withSubtitle = [
+      FIELDS[0],
+      field({
+        id: 's2', section_id: 'step_2', sort_order: 2,
+        text_code: 'modules.crisis_plan.step_2_title',
+        props: { subtitle_code: 'modules.crisis_plan.step_2_subtitle' },
+      }),
+    ]
+    render(<SafetySequenceLayout fields={withSubtitle} t={t} moduleId="crisis_plan" />)
+    expect(screen.getByText('modules.crisis_plan.step_2_subtitle')).toBeInTheDocument()
+    // L'étape 1 n'en porte pas : aucun placeholder, aucune ligne vide.
+    expect(screen.queryByText('modules.crisis_plan.step_1_subtitle')).not.toBeInTheDocument()
+  })
+
   it('ne rend rien quand aucune étape n\'est configurée', () => {
     const { container } = render(<SafetySequenceLayout fields={[]} t={t} moduleId="crisis_plan" />)
     expect(container).toBeEmptyDOMElement()
