@@ -31,7 +31,20 @@ import {
 
 const MAX_ANCHORS = 3
 
-export function CrisisAnchorsWidget() {
+export interface CrisisAnchorsWidgetProps {
+  /**
+   * Mode lecture seule : **aucune affordance d'édition**. Ni pointillé « + Ajouter
+   * une photo », ni crayon, ni champ, ni appui long qui supprime.
+   *
+   * C'est la vue de Consultation (P-4) : elle donne à relire, pas à modifier. Monter
+   * le composant d'édition à sa place, comme c'était le cas, rendait la « lecture
+   * seule » fausse — et proposait de supprimer une photo d'ancrage d'un appui long,
+   * dans un écran qu'on ouvre précisément quand ça ne va pas.
+   */
+  readOnly?: boolean
+}
+
+export function CrisisAnchorsWidget({ readOnly = false }: CrisisAnchorsWidgetProps) {
   const t = useModuleTranslation()
   const [anchors, setAnchors] = useState<CrisisAnchor[]>([])
   const [practitionerMessage, setPractitionerMessage] = useState('')
@@ -111,22 +124,24 @@ export function CrisisAnchorsWidget() {
             key={anchor.id}
             style={styles.photoWrapper}
             onPress={() => openViewer(index)}
-            onLongPress={() => handleDeletePhoto(anchor)}
+            onLongPress={readOnly ? undefined : () => handleDeletePhoto(anchor)}
             accessibilityRole="imagebutton"
             accessibilityLabel={t('modules.crisis_plan.anchors_title')}
           >
             <Image source={{ uri: anchor.uri }} style={styles.photo} contentFit="cover" />
-            <Pressable
-              style={styles.photoDelete}
-              onPress={() => handleDeletePhoto(anchor)}
-              accessibilityRole="button"
-              accessibilityLabel={t('modules.crisis_plan.delete_photo_title')}
-            >
-              <MaterialCommunityIcons name="close-circle" size={20} color={colors.danger} />
-            </Pressable>
+            {readOnly ? null : (
+              <Pressable
+                style={styles.photoDelete}
+                onPress={() => handleDeletePhoto(anchor)}
+                accessibilityRole="button"
+                accessibilityLabel={t('modules.crisis_plan.delete_photo_title')}
+              >
+                <MaterialCommunityIcons name="close-circle" size={20} color={colors.danger} />
+              </Pressable>
+            )}
           </Pressable>
         ))}
-        {anchors.length < MAX_ANCHORS && (
+        {!readOnly && anchors.length < MAX_ANCHORS && (
           <Pressable
             style={styles.photoAdd}
             onPress={handleAddPhoto}
@@ -138,11 +153,21 @@ export function CrisisAnchorsWidget() {
           </Pressable>
         )}
       </View>
-      {anchors.length >= MAX_ANCHORS && (
+      {!readOnly && anchors.length >= MAX_ANCHORS && (
         <Text style={styles.photoLimit}>{t('modules.crisis_plan.photo_limit')}</Text>
       )}
 
-      {editingPhrase ? (
+      {/* Lecture seule : la phrase du patient est du CONTENU. Pas de crayon, pas de
+          zone tappable, et rien du tout si elle est vide — un placeholder « Une phrase
+          qui vous ancre… » dans une vue de relecture se lit comme un reproche. */}
+      {readOnly ? (
+        anchorPhrase !== '' ? (
+          <View style={styles.phraseView}>
+            <Text style={styles.fieldLabel}>{t('modules.crisis_plan.anchor_phrase_label')}</Text>
+            <Text style={styles.phraseText} testID="anchor-phrase-read">{anchorPhrase}</Text>
+          </View>
+        ) : null
+      ) : editingPhrase ? (
         <View style={styles.phraseEdit}>
           <InputField
             label={t('modules.crisis_plan.anchor_phrase_label')}

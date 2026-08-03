@@ -62,6 +62,31 @@ ACCUEIL
 | Consultation | `safety_plan` | Relire son plan à froid, six étapes dépliées |
 | Édition | `editable_steps` | Modifier le plan |
 
+## La Consultation (`safety_plan`)
+
+Relire son plan à froid : vérifier un numéro, le montrer à quelqu'un, le modifier.
+
+- **Une étape sans item n'est pas rendue du tout.** Une carte vide en crise ne dit pas
+  « rien ici », elle dit « tu n'as rien », et sur un plan neuf elle le disait six fois.
+  Le masquage se décide sur la **présence** d'items : routage structurel, jamais une
+  lecture de leur contenu. Même invariant que le saut d'étape de la Séquence.
+- **Les ancres sont en lecture seule** : `CrisisAnchorsWidget` reçoit `readOnly`. Ni
+  pointillé « + Ajouter une photo », ni crayon, ni champ, ni appui long qui supprime.
+  La vue montait auparavant le composant d'édition, ce qui rendait la lecture seule
+  fausse, et proposait de supprimer une photo d'ancrage dans un écran qu'on ouvre
+  précisément quand ça ne va pas. Les photos restent consultables en plein écran :
+  regarder n'est pas modifier.
+- **Le point d'entrée vers l'Édition est le libellé « Modifier »**, pas une roue
+  crantée : un engrenage signifie « réglages techniques », contresens pour « je change
+  le contenu de mon plan ».
+- **Un bouton « Je suis en crise »** escalade vers la Séquence, en aller simple.
+
+> La **date de dernière revue** (« Élaboré avec Dr X le 12 mars · revu le 4 juin »)
+> attend **PW-5 (#324)**, qui crée `created_with_at` et `last_reviewed_at`. Elle n'a
+> aucune source aujourd'hui, et la dériver de la date du dernier item lui donnerait un
+> sens clinique qu'elle n'a pas. Quand elle existera : **affichée, jamais surveillée**.
+> Aucun rappel, aucune mise en évidence d'une revue ancienne, aucune couleur d'ancienneté.
+
 ## La Séquence (`safety_sequence`)
 
 ### Machine à états
