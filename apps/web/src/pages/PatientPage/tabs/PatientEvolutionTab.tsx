@@ -14,17 +14,23 @@ import type {
   SleepPoint,
   FormEntryRow,
   ActivityEntryPoint,
+  EmotionNamingRow,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 import { ChronoTrackingCard } from './ChronoTrackingCard'
-import { engagementQueries, patientQueries } from '../../../hooks/queries'
+import { engagementQueries, moduleQueries, patientQueries } from '../../../hooks/queries'
 import type { ModuleType } from '../../../lib/database.types'
 import { SleepDataPanel } from './SleepDataPanel'
 import { MoodEvolutionBlock } from './MoodEvolutionBlock'
 import { EvolutionOverviewBand } from '../../../components/features/EvolutionOverviewBand'
 import { EvolutionSection } from '../../../components/features/EvolutionSection'
 import { DefusionEvolutionSection } from './DefusionEvolutionSection'
-import { sleepCard, moodCard, activationCard, fearCard, scaleCard, medCard, type OverviewCard } from './overviewMetrics'
+import {
+  sleepCard, moodCard, activationCard, fearCard, scaleCard, medCard, namingCard,
+  NAMING_MIN_ENTRIES, type OverviewCard,
+} from './overviewMetrics'
+import { NamingEvolutionPanel } from './NamingEvolutionPanel'
+import { buildNamingTaxonomy, readContextCodes } from '../../../lib/emotionNamingData'
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
@@ -63,6 +69,7 @@ type EvolutionData = {
   chronoEntries: RhythmEntry[]
   beckEntries: FormEntryRow[]
   activityEntries: ActivityEntryPoint[]
+  namingEntries: EmotionNamingRow[]
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -77,6 +84,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   chronoEntries: [],
   beckEntries: [],
   activityEntries: [],
+  namingEntries: [],
 }
 
 export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
@@ -109,8 +117,22 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     ...engagementQueries.moodMarkers(patientId),
     enabled: (evolutionQuery.data?.moodData.length ?? 0) > 0,
   })
-  const { scales, scaleData, moodData, fearData, defusionData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries } =
+  const { scales, scaleData, moodData, fearData, defusionData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries, namingEntries } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
+  // Taxonomie du module « Nommer ce que je ressens » : dénominateurs du répertoire et
+  // domaines de contexte, lus en base. Chargée seulement si le patient a des saisies.
+  const namingFieldsQuery = useQuery({
+    ...moduleQueries.fields('emotion_wheel'),
+    enabled: namingEntries.length > 0,
+  })
+  const namingTaxonomy = useMemo(
+    () => buildNamingTaxonomy(namingFieldsQuery.data?.fields ?? []),
+    [namingFieldsQuery.data],
+  )
+  const namingContextCodes = useMemo(
+    () => readContextCodes(namingFieldsQuery.data?.fields ?? []),
+    [namingFieldsQuery.data],
+  )
   const loading = evolutionQuery.isLoading || modulesQuery.isLoading
 
   // Modules actuellement affectés au patient (présence = actif ; la révocation
@@ -142,8 +164,12 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       cards.push(medCard(medEffects, medData, effect => t(`evolution.med_effect_${effect}`, { defaultValue: effect })))
     }
     if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
+    // « Nommer ce que je ressens » : carte d'effectifs, sans sparkline ni empreinte.
+    if (namingEntries.length > 0 && shown('emotion_wheel')) {
+      cards.push(namingCard(namingEntries, namingTaxonomy, (key, values) => t(key, values)))
+    }
     return cards
-  }, [sleepData, moodData, activityEntries, scales, scaleData, medEffects, medData, fearData, activeTypes, showArchived, t])
+  }, [sleepData, moodData, activityEntries, scales, scaleData, medEffects, medData, fearData, namingEntries, namingTaxonomy, activeTypes, showArchived, t])
 
   // Rappel de métrique clé pour l'en-tête des sections repliables (réutilise la
   // métrique 30 j des cartes d'aperçu ; humeur = empreinte, donc pas de rappel).
@@ -179,7 +205,8 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     sleepData.length > 0 ||
     chronoEntries.length > 0 ||
     beckEntries.length > 0 ||
-    activityEntries.length > 0
+    activityEntries.length > 0 ||
+    namingEntries.length > 0
 
   // Types de modules ayant des données ; au moins un est-il archivé ?
   const dataTypes = useMemo(() => {
@@ -191,8 +218,9 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     if (sleepData.length > 0) types.push('sleep_diary')
     if (beckEntries.length > 0) types.push('beck_columns')
     if (activityEntries.length > 0) types.push('behavioral_activation')
+    if (namingEntries.length > 0) types.push('emotion_wheel')
     return types
-  }, [scales, moodData.length, fearData.length, defusionData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length])
+  }, [scales, moodData.length, fearData.length, defusionData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length, namingEntries.length])
   const hasArchived = dataTypes.some(mt => !activeTypes.has(mt))
   const hasActiveData = dataTypes.some(mt => activeTypes.has(mt))
 
@@ -310,6 +338,38 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           <ColumnFormDataPanel moduleType="beck_columns" entries={beckEntries} />
         </EvolutionSection>
       )}
+
+      {/* ── Nommer ce que je ressens : croisement + comptages bruts ─────────
+          Sous 8 saisies sur la fenêtre, aucune section : trop peu de matière pour
+          qu'un croisement veuille dire quoi que ce soit (prudence clinique). */}
+      {namingEntries.length > 0 && isShown('emotion_wheel') && (() => {
+        const windowed = filterByRange(namingEntries, days)
+        if (windowed.length < NAMING_MIN_ENTRIES) return null
+        const last = windowed.at(-1)?.date
+        return (
+          <EvolutionSection
+            sectionKey="emotion_wheel"
+            anchorId="evo-section-emotion_wheel"
+            title={t('evolution.naming_section_title')}
+            badge={t('evolution.n_sessions', { count: windowed.length })}
+            metricReminder={last != null
+              ? t('evolution.naming_last', { date: new Date(last).toLocaleDateString(i18n.language) })
+              : undefined}
+            archivedLabel={isArchived('emotion_wheel') ? t('evolution.archived_badge') : undefined}
+            expanded={isExpanded('emotion_wheel')}
+            onToggle={handleToggleSection}
+            viewDataLabel={t('evolution.view_data')}
+            onViewData={handleViewData}
+          >
+            <NamingEvolutionPanel
+              entries={windowed}
+              taxonomy={namingTaxonomy}
+              contextCodes={namingContextCodes}
+              rangeDays={days}
+            />
+          </EvolutionSection>
+        )
+      })()}
 
       {/* ── Échelles cliniques (une section repliable par échelle) ─── */}
       {scales.filter(mt => isShown(mt)).map(mt => {

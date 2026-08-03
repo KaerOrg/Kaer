@@ -13,9 +13,17 @@ import { moduleEvolutionConfig } from './clinicalChartConfig'
 import { MOOD_WEB_DIMENSIONS } from './moodDimensions'
 import { moodWindowSummary } from './moodTrend'
 import type { FingerprintBar } from '../../../components/features/DimensionFingerprint'
+import { repertoire, type EmotionNamingEntry, type NamingTaxonomy } from '../../../lib/emotionNamingData'
 
 export const OVERVIEW_WINDOW_DAYS = 30
 const DAY_MS = 86_400_000
+
+/**
+ * En deçà de ce nombre de saisies, ni carte d'aperçu chiffrée ni section Évolution
+ * pour « Nommer ce que je ressens » : trop peu de matière pour qu'un croisement ou
+ * une couverture de répertoire veuille dire quoi que ce soit. Prudence clinique.
+ */
+export const NAMING_MIN_ENTRIES = 8
 
 export interface MetricCard {
   readonly kind: 'metric'
@@ -42,7 +50,21 @@ export interface EmptyCard {
   readonly labelKey: string
   readonly color: string
 }
-export type OverviewCard = MetricCard | FingerprintCard | EmptyCard
+/**
+ * Carte sans métrique : pour un module qui ne produit aucune série numérique
+ * (catégories, texte libre). Elle porte des EFFECTIFS et rien d'autre : pas de
+ * chiffre clé, pas de sparkline, pas d'empreinte. Une carte muette vaut mieux
+ * qu'une carte qui invente une métrique.
+ */
+export interface CountsCard {
+  readonly kind: 'counts'
+  readonly moduleType: string
+  readonly labelKey: string
+  readonly color: string
+  /** Lignes de comptage, i18n déjà résolu par l'appelant. */
+  readonly lines: readonly string[]
+}
+export type OverviewCard = MetricCard | FingerprintCard | EmptyCard | CountsCard
 
 interface DatedValue { readonly date: string; readonly value: number | null }
 
@@ -115,6 +137,34 @@ export function medCard(
   })
   const daysLogged = new Set(win.map(p => p.date.slice(0, 10))).size
   return { kind: 'fingerprint', moduleType: 'medication_side_effects', labelKey: cfg.labelKey, color: cfg.color, bars, daysLogged }
+}
+
+/**
+ * « Nommer ce que je ressens » : carte d'effectifs sur la fenêtre 30 j, comme les
+ * autres cartes. Aucun sparkline, aucune empreinte : le module produit une catégorie,
+ * pas une série. Sous le seuil de saisies, carte « en attente de saisies ».
+ */
+export function namingCard(
+  entries: readonly EmotionNamingEntry[],
+  taxonomy: NamingTaxonomy,
+  format: (key: string, values: Record<string, number>) => string,
+  now: number = Date.now(),
+): OverviewCard {
+  const cfg = moduleEvolutionConfig('emotion_wheel')
+  const win = entries.filter(e => withinWindow(e.date, now))
+  if (win.length < NAMING_MIN_ENTRIES) {
+    return { kind: 'empty', moduleType: 'emotion_wheel', labelKey: cfg.labelKey, color: cfg.color }
+  }
+  const rep = repertoire(win, taxonomy)
+  return {
+    kind: 'counts', moduleType: 'emotion_wheel', labelKey: cfg.labelKey, color: cfg.color,
+    lines: [
+      format('evolution.n_sessions', { count: win.length }),
+      format('evolution.naming_overview_nuances', {
+        count: rep.nuancesUsed, used: rep.nuancesUsed, total: rep.nuancesTotal,
+      }),
+    ],
+  }
 }
 
 export function moodCard(
