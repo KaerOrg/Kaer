@@ -128,6 +128,31 @@ nécessaire coïncident avec ceux où le réseau est le plus défaillant.
 `plan_items` (SQLite mobile) — `id`, `module_id`, `section_id`, `text`, `sort_order`,
 `weight`, `phone`, `contact_source`, `created_at`.
 
+### Les trois champs d'un item (P-14)
+
+Un item porte `text`, `phone` et `sort_order`. Trois champs courts s'y ajoutent, tous
+remplis **en consultation**, jamais par l'app :
+
+| Champ | Rôle |
+|---|---|
+| `kind` | `person` ou `place`. Union fermée, jamais un `string` libre |
+| `role` | Le lien ou la fonction, deux ou trois mots : « mon meilleur ami », « psychiatre · CMP Belleville » |
+| `note` | Une ligne libre : « à 8 minutes à pied », « ouvert le soir », « ce que je peux lui dire » |
+
+**`kind` existe parce que le caractère contactable était porté par l'ÉTAPE entière**
+(`contactable` sur le `step_title`), ce qui interdisait de mélanger personnes et lieux
+dans l'étape 3. Le drapeau d'étape reste, mais devient un **défaut** que `kind` surcharge
+au niveau de l'item.
+
+> **Aucune valeur n'est jamais déduite du texte de l'item.** Un `kind` inconnu retombe
+> sur `null`, jamais sur une valeur par défaut : le rendu se dégrade en item simple, ce
+> qui est exact, plutôt que d'inventer une nature que personne n'a renseignée.
+
+Les trois champs sont **optionnels**, et pas seulement nullables : ils sont propres au
+plan de sécurité. La Balance décisionnelle, qui partage la table SQLite `plan_items`,
+n'a pas à écrire trois `null` qui ne veulent rien dire chez elle, et un item enregistré
+avant la migration se lit sans rien casser.
+
 `safety_plan_items` (Supabase) — la table dédiée du plan, écrite **des deux côtés**.
 Schéma, RLS et argumentaire : [`docs/database.md`](../database.md).
 

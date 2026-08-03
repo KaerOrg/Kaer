@@ -102,6 +102,11 @@ export async function initDatabase(): Promise<void> {
     // Contacts appelables du plan de crise (proches/pros, étapes 4 & 5) : numéro + provenance.
     `ALTER TABLE plan_items ADD COLUMN phone TEXT`,
     `ALTER TABLE plan_items ADD COLUMN contact_source TEXT`,
+    // Plan de sécurité (P-14) : kind / role / note. Ces ALTER échouent silencieusement
+    // sur une base déjà migrée (colonne existante), comme les autres de cette liste.
+    `ALTER TABLE plan_items ADD COLUMN kind TEXT`,
+    `ALTER TABLE plan_items ADD COLUMN role TEXT`,
+    `ALTER TABLE plan_items ADD COLUMN note TEXT`,
     // Repères temporels génériques : cloisonnement par module (rétro-compat mood_tracker)
     `ALTER TABLE mood_markers ADD COLUMN scale_id TEXT NOT NULL DEFAULT 'mood_tracker'`,
     // Repères typés (épique #162) : traitement / événement de vie / autre
@@ -1488,6 +1493,13 @@ async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void>
 
 // ─── plan_items — table générique pour les plans éditables (crisis_plan…) ────
 
+/**
+ * Nature d'un item de plan de sécurité : une personne qu'on joint, ou un lieu où l'on
+ * va. Union fermée, jamais un `string` libre : un `kind` inattendu doit être une erreur
+ * de compilation, pas un rendu silencieusement faux.
+ */
+export type PlanItemKind = 'person' | 'place'
+
 export interface PlanItem {
   id: string
   module_id: string
@@ -1500,6 +1512,28 @@ export interface PlanItem {
   phone: string | null
   /** Provenance du contact : 'phonebook' si importé du répertoire, null si saisi à la main. */
   contact_source: string | null
+  /**
+   * Nature de l'item du plan de sécurité (P-14) : une personne qu'on joint, ou un lieu
+   * où l'on va. `null` pour les modules qui n'en ont pas l'usage.
+   *
+   * Le caractère contactable était porté par l'ÉTAPE entière (`contactable` sur le
+   * `step_title`), ce qui interdisait de mélanger personnes et lieux dans l'étape 3.
+   * `kind` reste un défaut d'étape surchargeable au niveau de l'item.
+   *
+   * **Jamais déduit du texte de l'item** : rempli en consultation, ou vide.
+   */
+  kind?: PlanItemKind | null
+  /** Lien au patient ou fonction, deux ou trois mots (« mon meilleur ami »). */
+  role?: string | null
+  /**
+   * Une ligne libre (« à 8 minutes à pied », « ce que je peux lui dire »).
+   *
+   * Les trois champs sont OPTIONNELS, et pas seulement nullables : ils sont propres au
+   * plan de sécurité. Les autres modules qui utilisent `plan_items` (la Balance
+   * décisionnelle) n'ont pas à écrire trois `null` qui ne veulent rien dire chez eux,
+   * et un item enregistré avant cette migration se lit sans rien casser.
+   */
+  note?: string | null
   created_at: string
 }
 
@@ -1514,6 +1548,13 @@ async function createPlanItemsTable(database: SQLite.SQLiteDatabase): Promise<vo
       weight         INTEGER,
       phone          TEXT,
       contact_source TEXT,
+      -- Plan de sécurité (P-14) : trois champs courts remplis EN CONSULTATION, jamais
+      -- par l'app. kind (person | place) permet de mélanger personnes et lieux dans
+      -- une même étape, ce que le drapeau contactable de l'étape interdisait.
+      -- Aucune valeur n'est jamais déduite du texte de l'item.
+      kind           TEXT,
+      role           TEXT,
+      note           TEXT,
       created_at     TEXT DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_plan_items_module ON plan_items(module_id, section_id);
@@ -1532,8 +1573,8 @@ export async function getAllPlanItemsForModule(moduleId: string): Promise<PlanIt
 export async function savePlanItem(item: Omit<PlanItem, 'created_at'>): Promise<void> {
   const database = getDb()
   await database.runAsync(
-    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight, phone, contact_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null, item.phone ?? null, item.contact_source ?? null]
+    `INSERT OR REPLACE INTO plan_items (id, module_id, section_id, text, sort_order, weight, phone, contact_source, kind, role, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [item.id, item.module_id, item.section_id, item.text, item.sort_order, item.weight ?? null, item.phone ?? null, item.contact_source ?? null, item.kind ?? null, item.role ?? null, item.note ?? null]
   )
 }
 
