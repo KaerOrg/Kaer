@@ -19,6 +19,7 @@ export function DataTable<T>({
   renderDetail,
   rowClassName,
   emptyState,
+  footer,
   ariaLabel,
   className,
   sort,
@@ -52,6 +53,7 @@ export function DataTable<T>({
                   />
                 ))}
               </tbody>
+              {footer ? <tfoot className="data-table__foot">{footer}</tfoot> : null}
             </table>
           </div>
           {pagination && pagination.total > 0 ? <DataTablePagination pagination={pagination} /> : null}

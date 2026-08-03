@@ -1,12 +1,15 @@
 // Helpers purs + constantes géométriques partagés par les graphiques du layout
-// générique « slider_dashboard » (CompositeChart, DimensionChart, MonthCalendar).
-// Aucune donnée patient réelle : l'aperçu praticien est alimenté par un mock
-// déterministe dérivé de l'identifiant de la dimension.
+// générique « slider_dashboard » (DimensionChart, ruban). Aucune donnée patient
+// réelle : l'aperçu praticien est alimenté par un mock déterministe dérivé de
+// l'identifiant de la dimension.
 
-export type Tab = 'entry' | 'charts' | 'month'
+export type Tab = 'entry' | 'tracking'
 export type TimeRange = '7J' | '1M' | '3M' | '1A'
 
 export const RANGES: TimeRange[] = ['7J', '1M', '3M', '1A']
+
+// Fenêtre du ruban « Vue par symptôme » : un mois glissant (30 colonnes).
+export const RIBBON_DAYS = 30
 
 // Palette de repli si une dimension n'a pas de couleur en field_props.
 export const FALLBACK_PALETTE = [
@@ -44,6 +47,14 @@ export function mockCurrent(fieldId: string): number {
   return getMockData(fieldId, '7J')[6]
 }
 
+// Masque d'assiduité mock du ruban : true = jour saisi, false = jour non
+// renseigné (cellule vide). Déterministe (dérivé du seed), partagé par toutes
+// les dimensions d'une même saisie, laisse ~1 jour sur 7 non renseigné.
+export function ribbonLoggedMask(seedKey: string, days: number): boolean[] {
+  const h = hashStr(seedKey)
+  return Array.from({ length: days }, (_, i) => ((i * 3 + h) % 7) !== 0)
+}
+
 // ── Repères temporels mock ───────────────────────────────────────────────────
 export const RANGE_SPAN_DAYS: Record<TimeRange, number> = { '7J': 6, '1M': 29, '3M': 84, '1A': 334 }
 
@@ -53,7 +64,6 @@ export function markerFraction(daysAgo: number, range: TimeRange): number | null
 }
 
 export interface MockMarker { id: string; daysAgo: number; labelKey: string }
-export interface DimSeries { id: string; color: string; label: string; values: number[] }
 
 // ── Labels d'axe X ───────────────────────────────────────────────────────────
 export interface XLabel { i: number; label: string }
@@ -90,7 +100,6 @@ export function buildXLabels(range: TimeRange): XLabel[] {
 export const VB_W = 280
 export const PAD_LEFT = 18
 export const PAD_R = 8
-export const Y_TICKS = [10, 5, 0]
 
 export function lineFor(values: number[], plotTop: number, plotH: number): string {
   const n = values.length

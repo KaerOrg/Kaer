@@ -16,6 +16,7 @@ import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import DemoDataScreen from '../screens/DemoDataScreen'
+import ModuleRemindersScreen from '../screens/modules/ModuleRemindersScreen'
 import type { PreviewKind } from '@kaer/shared'
 import { colors } from '@theme'
 
@@ -25,7 +26,12 @@ export type AppStackParamList = {
   ScaleEntry: { scale_id: string; entry_id?: string }
   // previewKindOverride : force un layout précis au lieu de celui du module (ex. la
   // roue crantée du plan de crise ouvre le module en mode édition `editable_steps`).
-  ModuleContent: { moduleType: string; previewKindOverride?: PreviewKind }
+  // startEntry : ouvre directement la saisie plutôt que l'accueil du module. Posé par
+  // le tap sur un rappel : le patient n'a pas à retrouver son module (#257).
+  ModuleContent: { moduleType: string; previewKindOverride?: PreviewKind; startEntry?: boolean }
+  // Rappels d'un module, côté patient : le rythme est posé en séance puis lui
+  // appartient (#257).
+  ModuleReminders: { moduleType: string }
   BookAppointment: { practitionerId: string; appointmentId?: string }
   MedicationSideEffectsHistory: undefined
   MedicationSideEffectsEntry: {
@@ -119,6 +125,11 @@ export default function AppStack() {
       <Stack.Screen
         name="ModuleContent"
         component={ModuleContentScreen}
+        options={{ title: '' }}
+      />
+      <Stack.Screen
+        name="ModuleReminders"
+        component={ModuleRemindersScreen}
         options={{ title: '' }}
       />
       <Stack.Screen

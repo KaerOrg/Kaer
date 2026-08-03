@@ -22,6 +22,10 @@ const fingerprint: OverviewCard = {
 const empty: OverviewCard = {
   kind: 'empty', moduleType: 'fear_thermometer', labelKey: 'evolution.fear_title', color: '#F59E0B',
 }
+const counts: OverviewCard = {
+  kind: 'counts', moduleType: 'emotion_wheel', labelKey: 'modules.emotion_wheel.label',
+  color: '#7C3AED', lines: ['41 saisies', '13 nuances sur 37'],
+}
 
 describe('EvolutionOverviewCard', () => {
   it('carte métrique : valeur + unité + libellé fenêtre + sparkline', () => {
@@ -31,9 +35,22 @@ describe('EvolutionOverviewCard', () => {
     expect(screen.getByText('evolution.overview_window')).toBeTruthy()
   })
 
-  it('carte empreinte : pas de sparkline, empreinte rendue', () => {
+  it('carte empreinte : empreinte rendue + 2 libellés (moyenne 30 j fixe & assiduité), pas de sparkline', () => {
     const { container } = render(<EvolutionOverviewCard card={fingerprint} active={false} onNavigate={vi.fn()} />)
     expect(container.querySelector('.dim-fingerprint')).toBeTruthy()
+    expect(container.querySelector('.mt-sparkline')).toBeNull()
+    // Ligne 1 : ce que représentent les barres. Ligne 2 : l'assiduité (#164).
+    expect(screen.getByText('evolution.overview_fp_avg')).toBeTruthy()
+    expect(screen.getByText('evolution.overview_fp_logged')).toBeTruthy()
+  })
+
+  it('carte d\'effectifs : les lignes de comptage, AUCUN sparkline ni empreinte', () => {
+    const { container } = render(<EvolutionOverviewCard card={counts} active={false} onNavigate={vi.fn()} />)
+    expect(screen.getByText('41 saisies')).toBeTruthy()
+    expect(screen.getByText('13 nuances sur 37')).toBeTruthy()
+    expect(container.querySelector('.evo-ov-card__spark')).toBeNull()
+    expect(container.querySelector('.dim-fingerprint')).toBeNull()
+    expect(container.querySelector('.evo-ov-card__value')).toBeNull()
   })
 
   it('carte vide : « en attente de saisies »', () => {

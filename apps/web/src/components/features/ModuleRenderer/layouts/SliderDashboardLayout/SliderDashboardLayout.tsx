@@ -8,12 +8,12 @@ import type { TabItem } from '../../../../ui/Tabs/Tabs.types'
 import { SegmentedControl } from '../../../../ui/SegmentedControl'
 import type { SegmentOption } from '../../../../ui/SegmentedControl'
 import { RatingSelector } from '../../../../ui/RatingSelector'
-import { CompositeChart } from './CompositeChart'
+import { DimensionFingerprint, type FingerprintBar } from '../../../DimensionFingerprint'
+import { SymptomRibbon, type RibbonRow } from '../../../SymptomRibbon'
 import { DimensionChart } from './DimensionChart'
-import { MonthCalendar } from './MonthCalendar'
 import {
-  FALLBACK_PALETTE, RANGES, getMockData, markerFraction, mockCurrent,
-  type DimSeries, type MockMarker, type Tab, type TimeRange,
+  FALLBACK_PALETTE, RANGES, RIBBON_DAYS, getMockData, markerFraction, mockCurrent,
+  ribbonLoggedMask, type MockMarker, type Tab, type TimeRange,
 } from './chartGeom'
 
 interface Props {
@@ -26,21 +26,26 @@ const DEFAULT_ACCENT = 'var(--color-primary)'
 const RANGE_KEY: Record<TimeRange, string> = {
   '7J': 'range_7j', '1M': 'range_1m', '3M': 'range_3m', '1A': 'range_1a',
 }
+// Deux saisies d'historique fictives (jour courant, veille) pour l'onglet Saisie.
+const HISTORY_OFFSETS = [0, 1]
 
 /**
  * Layout générique « tableau de bord à sliders » (preview_kind `slider_dashboard`).
  * Aperçu praticien d'un module tracker multi-dimensions (mood_tracker,
- * medication_side_effects…) : 3 onglets (Saisie / Évolution / Vue d'ensemble),
- * courbes par dimension + composite, repères temporels, heatmap calendrier.
+ * medication_side_effects…), à parité avec l'app mobile refondue (#161) :
+ * 2 onglets (Saisie / Suivi), curseurs + empreinte à l'entrée, ruban « Vue par
+ * symptôme » + courbes par dimension au suivi.
  *
  * Générique par construction : le `moduleId` est dérivé du `module_id` des fields
  * (aucun module hardcodé), la couleur d'accent est lue dans la config
- * (`accent_color` du field d'instruction). Réutilisable par tout module au même
- * motif sans toucher au code du layout.
+ * (`accent_color` du field d'instruction), les couleurs de dimension dans
+ * `field_props.color`. Réutilisable par tout module au même motif.
  *
- * Conformité MDR : affichage de chiffres bruts uniquement — aucun score
- * interprétatif, seuil, alerte ou couleur de jugement. Données MOCK déterministes
- * (l'aperçu ne lit jamais les vraies données patient, qui vivent sur le téléphone).
+ * Conformité MDR 2017/745 : affichage de chiffres bruts uniquement, aucun score
+ * composite « bien-être » agrégé, aucun seuil, alerte ou couleur de jugement. Le
+ * ruban et l'empreinte lisent N valeurs brutes, jamais une moyenne globale.
+ * Données MOCK déterministes (l'aperçu ne lit jamais les vraies données patient,
+ * qui vivent sur le téléphone).
  */
 export function SliderDashboardLayout({ fields, footer, t }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('entry')
@@ -62,13 +67,12 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
   const tabs = useMemo<TabItem[]>(
     () => [
       { id: 'entry', label: t(`modules.${moduleId}.tab_entry`) },
-      { id: 'charts', label: t(`modules.${moduleId}.tab_charts`) },
-      { id: 'month', label: t(`modules.${moduleId}.tab_month`) },
+      { id: 'tracking', label: t(`modules.${moduleId}.tab_tracking`) },
     ],
     [t, moduleId],
   )
   const onTabChange = useCallback((id: string) => {
-    setActiveTab(id === 'charts' ? 'charts' : id === 'month' ? 'month' : 'entry')
+    setActiveTab(id === 'tracking' ? 'tracking' : 'entry')
   }, [])
 
   const markers = useMemo<MockMarker[]>(
@@ -84,14 +88,56 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
     [t, moduleId],
   )
 
-  const series = useMemo<DimSeries[]>(
-    () => sliders.map((f, idx) => ({
-      id: f.id,
-      color: colorFor(f, idx),
-      label: t(f.text_code ?? ''),
-      values: getMockData(f.id, timeRange),
+  // Historique de l'onglet Saisie : une carte d'empreinte 6 barres par saisie
+  // récente (miroir des cartes mobiles), valeurs brutes mock, aucun agrégat.
+  const history = useMemo(
+    () => HISTORY_OFFSETS.map(offset => ({
+      offset,
+      bars: sliders.map((f, idx): FingerprintBar => ({
+        key: f.id,
+        label: t(f.text_code ?? ''),
+        value: getMockData(f.id, '7J')[6 - offset],
+        color: colorFor(f, idx),
+      })),
     })),
-    [sliders, colorFor, t, timeRange],
+    [sliders, colorFor, t],
+  )
+
+  // Ruban « Vue par symptôme » : une ligne par dimension sur 30 jours, ~1 jour
+  // sur 7 non renseigné (masque d'assiduité mock partagé par les dimensions).
+  const ribbonMask = useMemo(() => ribbonLoggedMask(moduleId, RIBBON_DAYS), [moduleId])
+  const ribbonFilled = useMemo(() => ribbonMask.filter(Boolean).length, [ribbonMask])
+  const ribbonRows = useMemo<RibbonRow[]>(
+    () => sliders.map((f, idx) => {
+      const raw = getMockData(f.id, '1M')
+      return {
+        key: f.id,
+        label: t(f.text_code ?? ''),
+        color: colorFor(f, idx),
+        values: raw.map((v, i) => (ribbonMask[i] ? v : null)),
+      }
+    }),
+    [sliders, colorFor, t, ribbonMask],
+  )
+  const ribbonAssiduity = t(`modules.${moduleId}.assiduity`)
+    .replace('{{done}}', String(ribbonFilled))
+    .replace('{{total}}', String(RIBBON_DAYS))
+
+  // Repères mock visibles dans la fenêtre courante, ordonnés (onglet Suivi).
+  const visibleMarkers = useMemo(
+    () => markers
+      .map(m => ({ ...m, fraction: markerFraction(m.daysAgo, timeRange) }))
+      .filter((m): m is typeof m & { fraction: number } => m.fraction !== null)
+      .sort((a, b) => a.fraction - b.fraction),
+    [markers, timeRange],
+  )
+
+  // Série « jours renseignés » : valorise le suivi, jamais un score (MDR).
+  const streak = (
+    <span className="mt-streak">
+      <Flame size={15} style={{ color: accent }} />
+      {t(`modules.${moduleId}.streak_plural`).replace('{{count}}', '14')}
+    </span>
   )
 
   return (
@@ -101,6 +147,8 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
       {/* ── Onglet SAISIE ── */}
       {activeTab === 'entry' ? (
         <div className="mt__content">
+          {streak}
+
           {instruction ? <p className="mt__instruction">{t(instruction.text_code ?? '')}</p> : null}
 
           {sliders.map((field, idx) => {
@@ -139,6 +187,19 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
 
           <Button type="button" variant="primary" fullWidth disabled>{t('common.save')}</Button>
 
+          {history.length > 0 ? (
+            <>
+              <p className="mt__history-title">{t(`modules.${moduleId}.entries_recent`)}</p>
+              <div className="mt-hist">
+                {history.map(h => (
+                  <div key={h.offset} className="mt-hist__card">
+                    <DimensionFingerprint bars={h.bars} yMax={10} barAreaHeight={38} />
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : null}
+
           <div className="mt-reminder">
             <span className="mt-reminder__title">{t(`modules.${moduleId}.reminder_section`)}</span>
             <div className="mt-reminder__row">
@@ -154,24 +215,18 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
         </div>
       ) : null}
 
-      {/* ── Onglet ÉVOLUTION ── */}
-      {activeTab === 'charts' ? (
+      {/* ── Onglet SUIVI ── */}
+      {activeTab === 'tracking' ? (
         <div className="mt__content">
-          <div className="mt-streak">
-            <Flame size={15} style={{ color: accent }} />
-            {t(`modules.${moduleId}.streak_plural`).replace('{{count}}', '14')}
-          </div>
+          {streak}
 
-          <SegmentedControl
-            variant="pills"
-            options={rangeOptions}
-            value={timeRange}
-            onChange={setTimeRange}
-            accentColor={accent}
-            ariaLabel={t(`modules.${moduleId}.tab_charts`)}
+          <SymptomRibbon
+            rows={ribbonRows}
+            yMax={10}
+            title={t(`modules.${moduleId}.ribbon_title`)}
+            assiduityLabel={ribbonAssiduity}
+            legendLabel={t(`modules.${moduleId}.ribbon_legend`)}
           />
-
-          <CompositeChart series={series} range={timeRange} markers={markers} moduleId={moduleId} t={t} />
 
           <div className="mt-markers">
             <div className="mt-markers__header">
@@ -181,27 +236,26 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
               </Button>
             </div>
             <div className="mt-markers__list">
-              {markers
-                .map(m => ({ ...m, fraction: markerFraction(m.daysAgo, timeRange) }))
-                .filter((m): m is typeof m & { fraction: number } => m.fraction !== null)
-                .sort((a, b) => a.fraction - b.fraction)
-                .map((m, idx) => {
-                  const d = new Date(); d.setDate(d.getDate() - m.daysAgo)
-                  return (
-                    <div key={m.id} className="mt-marker-row">
-                      <span className="mt-marker-row__badge">{idx + 1}</span>
-                      <span className="mt-marker-row__date">
-                        {d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
-                      </span>
-                      <span className="mt-marker-row__label">{t(m.labelKey)}</span>
-                      <Trash2 size={14} className="mt-marker-row__del" />
-                    </div>
-                  )
-                })}
+              {visibleMarkers
+                .map((m, idx) => (
+                  <div key={m.id} className="mt-marker-row">
+                    <span className="mt-marker-row__badge">{idx + 1}</span>
+                    <span className="mt-marker-row__label">{t(m.labelKey)}</span>
+                    <Trash2 size={14} className="mt-marker-row__del" />
+                  </div>
+                ))}
             </div>
           </div>
 
           <p className="mt__history-title">{t(`modules.${moduleId}.chart_section`)}</p>
+          <SegmentedControl
+            variant="pills"
+            options={rangeOptions}
+            value={timeRange}
+            onChange={setTimeRange}
+            accentColor={accent}
+            ariaLabel={t(`modules.${moduleId}.chart_section`)}
+          />
           <div className="mt-dim-grid">
             {sliders.map((field, idx) => (
               <DimensionChart
@@ -216,19 +270,6 @@ export function SliderDashboardLayout({ fields, footer, t }: Props) {
             ))}
           </div>
 
-          {footer ? (
-            <div className="preview-panel__info">
-              <Info size={13} className="preview-panel__info-icon" />
-              <FieldText field={footer} t={t} />
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* ── Onglet VUE D'ENSEMBLE ── */}
-      {activeTab === 'month' ? (
-        <div className="mt__content">
-          <MonthCalendar accent={accent} moduleId={moduleId} t={t} />
           {footer ? (
             <div className="preview-panel__info">
               <Info size={13} className="preview-panel__info-icon" />

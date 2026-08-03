@@ -1,10 +1,8 @@
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Bell, BellOff, Loader, X } from 'lucide-react'
+import { Loader } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@ui/Button'
-import { Card } from '@ui/Card'
-import { Tooltip } from '@ui/Tooltip'
 import { InputField } from '@ui/InputField'
 import { TimeDial, minutesToHHMM } from '@ui/TimeDial'
 import { WeekRhythmLine } from '@ui/WeekRhythmLine'
@@ -16,6 +14,7 @@ import {
   deleteRoutine,
 } from '@services/notificationRoutineService'
 import type { NotificationRoutine } from '../../../lib/database.types'
+import { RoutineRow } from './RoutineRow'
 import './NotificationRoutinePanel.css'
 
 interface Props {
@@ -60,7 +59,7 @@ export function NotificationRoutinePanel({
   moduleLabel,
   moduleIconName,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const ModuleIcon = moduleIconName ? LUCIDE_ICONS[moduleIconName] : undefined
   const queryClient = useQueryClient()
 
@@ -177,20 +176,28 @@ export function NotificationRoutinePanel({
                     placeholder={t('notifications.note_placeholder')}
                     rows={3}
                   />
+                  {/* Là où cette phrase va, et surtout là où elle ne va pas. */}
+                  <p className="nr-form__help">{t('notifications.note_help')}</p>
                 </div>
               </div>
 
-              {/* Barre de résumé : ce que recevra le patient, mis à jour en direct. */}
+              {/* Barre de résumé : ce que le praticien POSE, jamais une promesse au
+                  futur sur ce que le patient recevra. Le patient garde la main. */}
               <div className="nr-form__summary">
-                <p className="nr-form__summary-text">
-                  {selectedDays.length > 0
-                    ? t('notifications.summary', {
-                        count: selectedDays.length,
-                        days: previewDays,
-                        time: minutesToHHMM(reminderMinutes),
-                      })
-                    : t('notifications.preview_empty')}
-                </p>
+                <div className="nr-form__summary-body">
+                  <p className="nr-form__summary-text">
+                    {selectedDays.length > 0
+                      ? t('notifications.summary', {
+                          count: selectedDays.length,
+                          days: previewDays,
+                          time: minutesToHHMM(reminderMinutes),
+                        })
+                      : t('notifications.preview_empty')}
+                  </p>
+                  {selectedDays.length > 0 ? (
+                    <p className="nr-form__summary-hand">{t('notifications.summary_patient_hand')}</p>
+                  ) : null}
+                </div>
                 <div className="nr-form__actions">
                   <Button
                     variant="primary"
@@ -213,74 +220,15 @@ export function NotificationRoutinePanel({
               onToggle={() => void handleToggleActive(routine)}
               onDelete={() => void handleDelete(routine.id)}
               t={t}
+              locale={i18n.language}
             />
           ))}
+
+          {/* Ce que ce panneau ne fait pas, dit une fois pour toutes. */}
+          <p className="nr-panel__mention">{t('notifications.panel_mention')}</p>
         </div>
       )}
     </>
   )
 }
 
-interface RoutineRowProps {
-  routine: NotificationRoutine
-  onToggle: () => void
-  onDelete: () => void
-  t: (key: string) => string
-}
-
-const DAY_ISO_TO_KEY: Record<number, string> = {
-  1: 'lun', 2: 'mar', 3: 'mer', 4: 'jeu', 5: 'ven', 6: 'sam', 7: 'dim',
-}
-
-function RoutineRow({ routine, onToggle, onDelete, t }: RoutineRowProps) {
-  const effectiveTime = routine.patient_time_override ?? routine.time_of_day
-  const dayLabels = routine.days_of_week
-    .map(d => t(`notifications.day_abbr_${DAY_ISO_TO_KEY[d] ?? ''}`))
-    .join(', ')
-
-  const actions = (
-    <div className="nr-row__actions">
-      <Tooltip label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          icon={routine.is_active ? <Bell size={15} /> : <BellOff size={15} />}
-          onClick={onToggle}
-          aria-pressed={routine.is_active}
-          aria-label={routine.is_active ? t('notifications.deactivate') : t('notifications.activate')}
-        />
-      </Tooltip>
-      <Tooltip label={t('common.delete')}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          category="danger"
-          icon={<X size={15} />}
-          onClick={onDelete}
-          aria-label={t('common.delete')}
-        />
-      </Tooltip>
-    </div>
-  )
-
-  return (
-    <Card
-      variant="default"
-      className={`nr-card ${routine.is_active ? '' : 'nr-card--inactive'}`}
-      header={{ title: effectiveTime, subtitle: dayLabels, right: actions }}
-    >
-      {routine.practitioner_note || routine.patient_paused ? (
-        <div className="nr-card__meta">
-          {routine.practitioner_note ? (
-            <span className="nr-row__note">{routine.practitioner_note}</span>
-          ) : null}
-          {routine.patient_paused ? (
-            <span className="nr-row__paused">{t('notifications.patient_paused')}</span>
-          ) : null}
-        </div>
-      ) : null}
-    </Card>
-  )
-}

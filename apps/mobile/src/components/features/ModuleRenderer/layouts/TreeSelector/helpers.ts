@@ -8,6 +8,14 @@ import type { TreeSelection, TreeSelectionPathNode } from '../../../../../lib/da
 import type { McIcon, TreeSelectorEntry, TreeSelectorNode } from '@ui/TreeSelector'
 import type { RawTreeNode } from './types'
 
+/**
+ * Marqueur de `selected_id` pour une entrée « sans mot » (K-7). La colonne SQLite est
+ * `NOT NULL` depuis l'origine et la lever demanderait de reconstruire la table :
+ * l'entrée porte donc cette chaîne vide, et c'est le **chemin vide** (`path.length === 0`)
+ * qui identifie sémantiquement une entrée sans émotion nommée.
+ */
+export const WORDLESS_SELECTED_ID = ''
+
 /** parseInt tolérant : renvoie `fallback` si la valeur est absente ou non numérique. */
 export function parseIntOr(value: string | undefined, fallback: number): number {
   const n = parseInt(value ?? '', 10)
@@ -46,9 +54,9 @@ export function buildRawNodes(fields: ContentField[]): RawTreeNode[] {
   const convert = (f: ContentField): RawTreeNode => ({
     id: f.id,
     text_code: f.text_code,
+    def_code: f.props['def'],
     color: f.props['color'],
     icon: f.props['icon'],
-    emoji: f.props['emoji'],
     children: (f.children ?? [])
       .filter(c => c.field_type === 'tree_node')
       .slice()
@@ -80,10 +88,54 @@ export function toUiNodes(nodes: RawTreeNode[], t: (key: string) => string): Tre
   return nodes.map(n => ({
     id: n.id,
     label: n.text_code ? t(n.text_code) : '',
+    definition: n.def_code ? t(n.def_code) : undefined,
     color: n.color,
     icon: n.icon,
-    emoji: n.emoji,
     children: toUiNodes(n.children, t),
+  }))
+}
+
+/** Libellés d'en-tête du groupement par jour, déjà traduits. */
+export interface DayGroupLabels {
+  today: string
+  yesterday: string
+  /** Formate la date d'un jour plus ancien (ex. « 12 juillet »). */
+  older: (iso: string) => string
+}
+
+/**
+ * Groupe des entrées par jour civil, dans l'ordre chronologique inverse.
+ *
+ * Le jour est calculé sur les composants **locaux** de la date, jamais via
+ * `toISOString()` : en fuseau positif, minuit local retombe sur la veille en UTC et
+ * l'entrée changerait de groupe (cf. `.claude/rules/lessons.md` § Dates).
+ *
+ * Conformité MDR : ce groupement est une navigation. Il ne calcule aucun total par
+ * jour, aucune moyenne, aucune comparaison d'un groupe à l'autre.
+ */
+export function groupEntriesByDay<T extends { created_at: string }>(
+  entries: T[],
+  labels: DayGroupLabels,
+  now: Date,
+): { title: string; entries: T[] }[] {
+  const dayKey = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+  const todayKey = dayKey(now)
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+  const yesterdayKey = dayKey(yesterday)
+
+  const order: string[] = []
+  const buckets = new Map<string, T[]>()
+  for (const entry of entries) {
+    const key = dayKey(new Date(entry.created_at))
+    if (!buckets.has(key)) { buckets.set(key, []); order.push(key) }
+    buckets.get(key)?.push(entry)
+  }
+
+  return order.map(key => ({
+    title: key === todayKey ? labels.today : key === yesterdayKey ? labels.yesterday : labels.older(key),
+    entries: buckets.get(key) ?? [],
   }))
 }
 
@@ -101,7 +153,6 @@ export function reconstructPath(
       text_code: node.text_code ?? undefined,
       color: node.color,
       icon: node.icon,
-      emoji: node.emoji,
     })
   }
   return path
@@ -113,25 +164,42 @@ function resolvePathLabel(node: TreeSelectionPathNode, t: (key: string) => strin
   return node.id
 }
 
-/** Convertit une entrée persistée en view-model d'historique pour le primitive. */
+/**
+ * Convertit une entrée persistée en view-model d'historique pour le primitive.
+ *
+ * La teinte et l'icône sont relues dans la **taxonomie courante** (`nodeMap`) et non
+ * dans le chemin persisté : une entrée saisie avant la pastellisation des familles
+ * (K-4) porte encore l'ancienne couleur saturée dans son `path`. La donnée du patient
+ * n'est pas réécrite, seul l'affichage suit la config. La valeur stockée reste le
+ * repli si la famille a disparu du seed.
+ */
 export function toEntryVM(
   entry: TreeSelection,
   t: (key: string) => string,
   intensityMax: number,
   formatDate: (iso: string) => string,
+  nodeMap: Map<string, RawTreeNode>,
+  wordlessLabel = '',
 ): TreeSelectorEntry {
   const rootNode = entry.path[0]
-  const accentColor = rootNode?.color ?? colors.primary
+  const current = rootNode ? nodeMap.get(rootNode.id) : undefined
+  // Entrée sans émotion nommée : filet gris neutre, pas la teinte d'une famille
+  // qu'elle n'a pas. C'est une entrée légitime, pas une entrée dégradée (K-7).
+  const accentColor = rootNode ? (current?.color ?? rootNode.color ?? colors.primary) : colors.border
   const labels = entry.path.map(n => resolvePathLabel(n, t)).filter(Boolean)
   return {
     id: entry.id,
     accentColor,
-    icon: (rootNode?.icon ?? 'palette-outline') as McIcon,
-    emoji: rootNode?.emoji,
-    primaryLabel: labels[0] ?? '',
+    icon: (current?.icon ?? rootNode?.icon ?? 'palette-outline') as McIcon,
+    primaryLabel: labels[0] ?? wordlessLabel,
     secondaryLabel: labels.slice(1).join(' · '),
     intensityLabel: entry.intensity != null ? `${entry.intensity}/${intensityMax}` : null,
-    contextLabels: entry.context.map(code => t(code)),
+    // Le contexte libre n'est PAS résolu par `t()` : c'est du texte patient, pas une
+    // clé. Il ferme la liste des chips, après les domaines déclarés.
+    contextLabels: [
+      ...entry.context.map(code => t(code)),
+      ...(entry.context_other ? [entry.context_other] : []),
+    ],
     notes: entry.notes,
     dateLabel: formatDate(entry.created_at),
   }

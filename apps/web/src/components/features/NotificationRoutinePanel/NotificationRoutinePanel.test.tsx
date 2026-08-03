@@ -6,7 +6,11 @@ import { renderWithClient } from '../../../test/renderWithClient'
 import { NotificationRoutinePanel } from './NotificationRoutinePanel'
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts ? `${key}:${JSON.stringify(opts)}` : key,
+    i18n: { language: 'fr' },
+  }),
 }))
 
 const mockGet = vi.fn()
@@ -24,7 +28,7 @@ function routine(over: Partial<NotificationRoutine> = {}): NotificationRoutine {
   return {
     id: 'r1', patient_module_id: 'pm1', practitioner_id: 'pr1', patient_id: 'pt1',
     days_of_week: [1, 3, 5], time_of_day: '09:00', patient_time_override: null,
-    practitioner_note: null, is_active: true, patient_paused: false,
+    practitioner_note: null, is_active: true, patient_paused: false, patient_paused_at: null,
     created_at: '', updated_at: '', ...over,
   }
 }
@@ -85,7 +89,7 @@ describe('NotificationRoutinePanel', () => {
     open()
     await screen.findByText('notifications.days_label')
     // Barre de résumé présente.
-    expect(screen.getByText('notifications.summary')).toBeInTheDocument()
+    expect(screen.getByText(/^notifications\.summary:/)).toBeInTheDocument()
     const dots = screen.getAllByRole('checkbox')
     expect(dots).toHaveLength(7)
     // lun, mer, ven actifs par défaut.
@@ -109,5 +113,94 @@ describe('NotificationRoutinePanel', () => {
       time_of_day: '09:00',
       patient_module_id: 'pm1',
     })
+  })
+})
+
+describe('NotificationRoutinePanel : la consigne n est pas le texte du rappel (#269)', () => {
+  it('nomme le champ par sa destination reelle et dit ou la phrase ne va pas', async () => {
+    mockGet.mockResolvedValue([])
+    open()
+    await screen.findByText('notifications.days_label')
+    expect(screen.getByText('notifications.note_label')).toBeInTheDocument()
+    expect(screen.getByText('notifications.note_help')).toBeInTheDocument()
+  })
+
+  it('transmet la consigne au service, qui la stocke sans la mettre dans le push', async () => {
+    mockGet.mockResolvedValue([])
+    mockCreate.mockResolvedValue(routine())
+    open()
+    await screen.findByText('notifications.days_label')
+
+    await userEvent.type(screen.getByLabelText('notifications.note_label'), 'On en reparle en seance')
+    await userEvent.click(screen.getByText('notifications.save_routine'))
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1))
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({ practitioner_note: 'On en reparle en seance' })
+  })
+})
+
+describe('NotificationRoutinePanel : ce que le patient a fait du rappel (#268)', () => {
+  it('montre l heure EFFECTIVE et, dessous, l heure posee par le praticien', async () => {
+    mockGet.mockResolvedValue([routine({ time_of_day: '09:00', patient_time_override: '08:30' })])
+    open()
+
+    // Valeur principale = l'heure a laquelle le rappel part vraiment.
+    expect(await screen.findByText('08:30')).toBeInTheDocument()
+    // Ligne secondaire lisible SANS survol : ni tooltip, ni title.
+    const shifted = screen.getByTestId('routine-shifted')
+    expect(shifted.textContent).toContain('notifications.patient_shifted')
+    expect(shifted.textContent).toContain('09:00')
+  })
+
+  it('ne signale aucun decalage quand le patient n a rien change', async () => {
+    mockGet.mockResolvedValue([routine({ time_of_day: '09:00', patient_time_override: null })])
+    open()
+    await screen.findByText('09:00')
+    expect(screen.queryByTestId('routine-shifted')).toBeNull()
+  })
+
+  it('ne signale aucun decalage si l override vaut la meme heure', async () => {
+    mockGet.mockResolvedValue([routine({ time_of_day: '09:00', patient_time_override: '09:00' })])
+    open()
+    await screen.findByText('09:00')
+    expect(screen.queryByTestId('routine-shifted')).toBeNull()
+  })
+
+  it('affiche la date de mise en pause quand elle est connue', async () => {
+    mockGet.mockResolvedValue([routine({
+      patient_paused: true, patient_paused_at: '2026-07-12T08:00:00Z',
+    })])
+    open()
+    const paused = await screen.findByTestId('routine-paused')
+    expect(paused.textContent).toContain('notifications.patient_paused_on')
+    expect(paused.textContent).toContain('juil')
+  })
+
+  it('retombe sur la mention sans date quand la pause est anterieure a la colonne', async () => {
+    mockGet.mockResolvedValue([routine({ patient_paused: true, patient_paused_at: null })])
+    open()
+    const paused = await screen.findByTestId('routine-paused')
+    expect(paused.textContent).toBe('notifications.patient_paused')
+  })
+
+  it('n affiche rien sur une routine que le patient n a pas touchee', async () => {
+    mockGet.mockResolvedValue([routine()])
+    open()
+    await screen.findByText('09:00')
+    expect(screen.queryByTestId('routine-paused')).toBeNull()
+    expect(screen.queryByTestId('routine-shifted')).toBeNull()
+  })
+
+  it('rappelle en pied que la notification ne depend jamais d une saisie', async () => {
+    mockGet.mockResolvedValue([])
+    open()
+    expect(await screen.findByText('notifications.panel_mention')).toBeInTheDocument()
+  })
+
+  it('annonce ce qui est POSE, et que le patient garde la main', async () => {
+    mockGet.mockResolvedValue([])
+    open()
+    await screen.findByText('notifications.days_label')
+    expect(screen.getByText('notifications.summary_patient_hand')).toBeInTheDocument()
   })
 })

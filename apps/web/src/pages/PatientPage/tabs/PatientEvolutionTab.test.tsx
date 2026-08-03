@@ -25,8 +25,12 @@ vi.mock('../../../components/ui/Chart', async (importActual) => {
 // Le bandeau d'aperçu est couvert par EvolutionOverviewBand.test.tsx ; ici on
 // teste le routage des sections. Stub pour ne pas dupliquer les libellés de module.
 vi.mock('../../../components/features/EvolutionOverviewBand', () => ({
-  EvolutionOverviewBand: ({ cards }: { cards: unknown[] }) => (
-    <div data-testid="overview-band" data-count={cards.length} />
+  EvolutionOverviewBand: ({ cards }: { cards: { kind: string; moduleType: string }[] }) => (
+    <div
+      data-testid="overview-band"
+      data-count={cards.length}
+      data-kinds={cards.map(c => `${c.moduleType}:${c.kind}`).join(',')}
+    />
   ),
 }))
 
@@ -38,7 +42,7 @@ vi.mock('./ColumnFormDataPanel', () => ({
 
 const {
   mockFetchFormEntries, mockFetchPatientModules, mockFetchSleepEvolution,
-  mockFetchAvailableScales, mockFetchScaleEvolution, mockFetchMed,
+  mockFetchAvailableScales, mockFetchScaleEvolution, mockFetchMed, mockFetchNaming,
 } = vi.hoisted(() => ({
   mockFetchFormEntries: vi.fn(),
   mockFetchPatientModules: vi.fn(),
@@ -46,6 +50,24 @@ const {
   mockFetchAvailableScales: vi.fn(),
   mockFetchScaleEvolution: vi.fn(),
   mockFetchMed: vi.fn(),
+  mockFetchNaming: vi.fn(),
+}))
+
+// Taxonomie du module « Nommer ce que je ressens » : deux familles, deux nuances.
+vi.mock('@services/moduleService', () => ({
+  fetchModuleFields: async () => ({
+    fields: [
+      { id: 'ew.cfg', field_type: 'tree_selector_config', text_code: null, props: { context_opt_1: 'ctx.work' } },
+      {
+        id: 'f1', field_type: 'tree_node', text_code: 'fam.joy', props: {},
+        children: [{ id: 'n1', field_type: 'tree_node', text_code: 'n.a', props: {}, children: [] }],
+      },
+      {
+        id: 'f2', field_type: 'tree_node', text_code: 'fam.fear', props: {},
+        children: [{ id: 'n2', field_type: 'tree_node', text_code: 'n.b', props: {}, children: [] }],
+      },
+    ],
+  }),
 }))
 
 // Agrégat d'évolution : les modules non pilotés par un mock restent sans donnée.
@@ -59,6 +81,7 @@ vi.mock('@services/engagementService', () => ({
   fetchSleepEvolution: (...args: unknown[]) => mockFetchSleepEvolution(...args),
   fetchChronoEntries: async () => [],
   fetchActivityEntries: async () => [],
+  fetchEmotionNamingEntries: (...args: unknown[]) => mockFetchNaming(...args),
   fetchModuleSummary: async () => ({ lastDate: null, count: 0, lastPayload: null }),
   fetchFormEntries: (...args: unknown[]) => mockFetchFormEntries(...args),
 }))
@@ -94,6 +117,50 @@ beforeEach(() => {
   mockFetchAvailableScales.mockResolvedValue([])
   mockFetchScaleEvolution.mockResolvedValue([])
   mockFetchMed.mockResolvedValue({ effects: [], data: [] })
+  mockFetchNaming.mockResolvedValue([])
+})
+
+/** N saisies « Nommer ce que je ressens », datées d'aujourd'hui. */
+function namingEntries(count: number) {
+  return Array.from({ length: count }, () => ({
+    date: new Date().toISOString(),
+    familyCode: 'fam.joy', nuanceCode: 'n.a', wordCode: null,
+    intensity: null, context: ['ctx.work'], contextOther: null, notes: null,
+  }))
+}
+
+describe('PatientEvolutionTab, section « Nommer ce que je ressens »', () => {
+  it('sous 8 saisies, aucune section n\'est rendue', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'emotion_wheel' }])
+    mockFetchNaming.mockResolvedValue(namingEntries(7))
+    const { queryByText, getByTestId } = renderTab()
+
+    await waitFor(() => expect(getByTestId('overview-band')).toBeTruthy())
+    expect(queryByText('modules.emotion_wheel.label')).toBeNull()
+  })
+
+  it('à partir de 8 saisies, rend la section avec ses comptages bruts', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'emotion_wheel' }])
+    mockFetchNaming.mockResolvedValue(namingEntries(12))
+    const { getByText, getByTestId } = renderTab()
+
+    await waitFor(() => expect(getByText('modules.emotion_wheel.label')).toBeTruthy())
+    expect(getByTestId('naming-depth-band')).toBeTruthy()
+    expect(getByTestId('naming-repertoire-band')).toBeTruthy()
+    // Le lien « Voir les données » de CETTE section porte bien sa clé de module.
+    expect(document.getElementById('evo-section-emotion_wheel')).toBeTruthy()
+  })
+
+  it('pousse une carte d\'aperçu SANS métrique (kind « counts »)', async () => {
+    // Le rendu de la carte est couvert par EvolutionOverviewCard.test.tsx ; ici on
+    // vérifie que l'onglet lui passe bien une carte d'effectifs, jamais une métrique.
+    mockFetchPatientModules.mockResolvedValue([{ module_type: 'emotion_wheel' }])
+    mockFetchNaming.mockResolvedValue(namingEntries(12))
+    const { getByTestId } = renderTab()
+
+    await waitFor(() =>
+      expect(getByTestId('overview-band').getAttribute('data-kinds')).toContain('emotion_wheel:counts'))
+  })
 })
 
 describe('PatientEvolutionTab — section Colonnes de Beck', () => {

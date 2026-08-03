@@ -14,6 +14,12 @@ export { buildColumnSpecs, readSliderParams, CHILD_FIELD_TYPES } from './service
 export type { ColumnSpec, SliderParams } from './services/columnForm'
 export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
+// Séquence du plan de sécurité : logique pure partagée par le layout mobile (parcours
+// patient) et le layout web (aperçu praticien) — une seule source, zéro duplication.
+export {
+  buildDisplayableSteps, isLastStep, advance, goBack, formatProgress, INITIAL_STATE,
+} from './services/safetySequence'
+export type { SequenceStep, SequenceState } from './services/safetySequence'
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 
@@ -191,6 +197,7 @@ export const PREVIEW_KINDS = [
   'chrono_month',
   'slider_dashboard',
   'safety_plan',
+  'safety_sequence',
   'crisis_companion',
   'stage_wheel',
   'dual_ruler',

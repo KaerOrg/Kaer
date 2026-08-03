@@ -1179,6 +1179,10 @@ create policy "push_tokens_patient_delete"
 -- days_of_week : tableau ISO (1=lundi … 7=dimanche).
 -- time_of_day : heure fixée par le praticien ("HH:MM").
 -- patient_time_override : décalage optionnel du patient ("HH:MM").
+-- patient_paused_at : instant de la mise en pause par le patient. Le praticien lit
+--   « mis en pause le 12 juil. » : un rappel éteint depuis un mois explique une absence
+--   de saisies mieux qu'un graphique. Nullable : les pauses antérieures à cette colonne
+--   restent sans date, l'UI le gère.
 -- practitioner_note : texte libre affiché dans le corps de la notification.
 
 create table if not exists public.notification_routines (
@@ -1192,9 +1196,14 @@ create table if not exists public.notification_routines (
   practitioner_note     text,
   is_active             boolean     not null default true,
   patient_paused        boolean     not null default false,
+  patient_paused_at     timestamptz,
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );
+
+-- Idempotent : la colonne a été ajoutée après coup (#268).
+alter table public.notification_routines
+  add column if not exists patient_paused_at timestamptz;
 
 create index if not exists idx_notification_routines_patient
   on public.notification_routines(patient_id);
@@ -1228,10 +1237,27 @@ create policy "notif_routines_practitioner_delete"
   on public.notification_routines for delete
   using (auth.uid() = practitioner_id);
 
--- Patient : lecture + mise à jour de ses seules colonnes (patient_paused, patient_time_override)
+-- Patient : lecture + mise à jour de ses seules colonnes
+-- (patient_paused, patient_paused_at, patient_time_override)
 drop policy if exists "notif_routines_patient_select" on public.notification_routines;
 create policy "notif_routines_patient_select"
   on public.notification_routines for select
+  using (auth.uid() = patient_id);
+
+-- Patient : ajouter et supprimer SES rappels (#257). Le rythme initial est posé en
+-- séance, mais il appartient ensuite au patient : sans répétition, le module n'est
+-- ouvert qu'en pic de crise, et c'est la répétition qui entraîne la granularité.
+-- Le patient ne peut créer une routine que POUR LUI (`patient_id = auth.uid()`) ;
+-- `practitioner_id` et `patient_module_id` viennent de la ligne `patient_modules`
+-- qui lui est déjà affectée, et les FK les vérifient.
+drop policy if exists "notif_routines_patient_insert" on public.notification_routines;
+create policy "notif_routines_patient_insert"
+  on public.notification_routines for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "notif_routines_patient_delete" on public.notification_routines;
+create policy "notif_routines_patient_delete"
+  on public.notification_routines for delete
   using (auth.uid() = patient_id);
 
 drop policy if exists "notif_routines_patient_update" on public.notification_routines;
@@ -1700,6 +1726,7 @@ create table if not exists public.patient_entries (
     'fear_situation',
     'exposure_hierarchy',
     'breathing_session',
+    'breathing_setting',
     'defusion_session',
     'crisis_anchor',
     'em_ruler',
@@ -1788,6 +1815,152 @@ begin
     alter publication supabase_realtime add table public.patient_entries;
   end if;
 end $$;
+
+
+-- ============================================================
+-- MODULE « Techniques de respiration » — T0 : modèle de données
+-- ============================================================
+-- Fondation posée par l'epic #195 (mobile) / #196 (web). Deux tables :
+--   • breathing_sessions  : une ligne par session de respiration (données brutes).
+--   • breathing_settings  : config par patient (techniques activées, objectif,
+--                           rappels, préférences sensorielles).
+--
+-- ⚠️ Conformité MDR (RÈGLE D'OR) : 100 % descriptif. Aucun score, aucune moyenne,
+-- aucune tendance interprétée, aucune couleur à valence sur une valeur clinique.
+-- `feeling` est un ressenti brut facultatif (calmer | same | tenser | null),
+-- restitué tel quel — jamais agrégé ni jugé.
+--
+-- ── Note d'architecture (couture assumée à câbler en phases M) ────────────────
+-- La sync mobile offline-first passe TOUJOURS par `patient_entries` via
+-- `syncHelpers` (payload jsonb, `entry_kind`), comme les 30+ autres modules :
+-- les sessions sont réellement capturées là (entry_kind='breathing_session'),
+-- les settings patient là aussi (entry_kind='breathing_setting'). Ces deux
+-- tables dédiées sont le MODÈLE RELATIONNEL CANONIQUE déclaré par l'epic ; leur
+-- alimentation directe (projection depuis patient_entries et/ou écriture web
+-- praticien pour `enabled_techniques`/`primary_technique`) sera câblée dans les
+-- sous-tickets M. T0 ne modifie pas `RemoteSyncService` (hors périmètre).
+
+-- ── breathing_sessions ───────────────────────────────────────────────────────
+create table if not exists public.breathing_sessions (
+  id                        uuid        primary key default gen_random_uuid(),
+  patient_id                uuid        not null references public.patients(id) on delete cascade,
+  technique_key             text        not null,
+  started_at                timestamptz not null,
+  duration_seconds          integer     not null default 0,   -- durée réellement pratiquée
+  planned_duration_seconds  integer     not null default 0,   -- durée choisie avant la session
+  cycles_completed          integer     not null default 0,
+  completed                 boolean     not null default false, -- menée au bout vs interrompue
+  feeling                   text        check (feeling in ('calmer', 'same', 'tenser')), -- facultatif (null autorisé)
+  created_at                timestamptz not null default now()
+);
+
+create index if not exists idx_breathing_sessions_patient_started
+  on public.breathing_sessions(patient_id, started_at desc);
+
+alter table public.breathing_sessions enable row level security;
+
+-- Patient : CRUD sur ses propres sessions
+drop policy if exists "breathing_sessions_patient_select" on public.breathing_sessions;
+create policy "breathing_sessions_patient_select"
+  on public.breathing_sessions for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_insert" on public.breathing_sessions;
+create policy "breathing_sessions_patient_insert"
+  on public.breathing_sessions for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_update" on public.breathing_sessions;
+create policy "breathing_sessions_patient_update"
+  on public.breathing_sessions for update
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_delete" on public.breathing_sessions;
+create policy "breathing_sessions_patient_delete"
+  on public.breathing_sessions for delete
+  using (auth.uid() = patient_id);
+
+-- Praticien : lecture seule sur les sessions de ses patients liés,
+-- UNIQUEMENT si le patient a activé le partage (share_consent = true).
+-- Même gate de consentement que patient_entries (MDR 2017/745).
+drop policy if exists "breathing_sessions_practitioner_select" on public.breathing_sessions;
+create policy "breathing_sessions_practitioner_select"
+  on public.breathing_sessions for select
+  using (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.breathing_sessions.patient_id
+    )
+    and exists (
+      select 1 from public.patients pat
+      where pat.id = public.breathing_sessions.patient_id
+        and pat.share_consent = true
+    )
+  );
+
+-- ── breathing_settings ───────────────────────────────────────────────────────
+-- Une ligne par patient (config). `enabled_techniques` / `primary_technique`
+-- sont gérés par le praticien ; l'objectif, les rappels et les préférences
+-- sensorielles sont ajustables par le patient. reminder_days : entiers 0-6
+-- (0 = dimanche … 6 = samedi, convention Date.getDay() côté mobile).
+create table if not exists public.breathing_settings (
+  patient_id              uuid        primary key references public.patients(id) on delete cascade,
+  enabled_techniques      text[]      not null default '{}',
+  primary_technique       text,
+  weekly_goal_sessions    integer     not null default 5 check (weekly_goal_sessions between 1 and 14),
+  reminder_enabled        boolean     not null default false,
+  reminder_time           time,
+  reminder_days           smallint[]  not null default '{}'
+                            check (reminder_days <@ array[0, 1, 2, 3, 4, 5, 6]::smallint[]),
+  haptics                 boolean     not null default true,
+  ambient_sound           boolean     not null default false,
+  ambient_sound_key       text        not null default 'river'
+                            check (ambient_sound_key in ('river', 'waves', 'rain', 'wind', 'bowl')),
+  breath_sound            boolean     not null default false,
+  preferred_duration_min  integer     not null default 5,
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now()
+);
+
+alter table public.breathing_settings enable row level security;
+
+-- Patient : CRUD sur sa propre config
+drop policy if exists "breathing_settings_patient_select" on public.breathing_settings;
+create policy "breathing_settings_patient_select"
+  on public.breathing_settings for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_insert" on public.breathing_settings;
+create policy "breathing_settings_patient_insert"
+  on public.breathing_settings for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_update" on public.breathing_settings;
+create policy "breathing_settings_patient_update"
+  on public.breathing_settings for update
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_delete" on public.breathing_settings;
+create policy "breathing_settings_patient_delete"
+  on public.breathing_settings for delete
+  using (auth.uid() = patient_id);
+
+-- Praticien : lecture + écriture de la config des patients liés (gère
+-- enabled_techniques / primary_technique / objectif proposé). Même modèle que
+-- crisis_plan_configs : config praticien, pas une donnée clinique.
+drop policy if exists "breathing_settings_practitioner_rw" on public.breathing_settings;
+create policy "breathing_settings_practitioner_rw"
+  on public.breathing_settings for all
+  using (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.breathing_settings.patient_id
+    )
+  );
 
 
 -- ============================================================

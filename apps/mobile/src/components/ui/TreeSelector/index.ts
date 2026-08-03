@@ -5,7 +5,10 @@ export type {
   TreeSelectorConfig,
   TreeSelectorContextOption,
   TreeSelectorEntry,
+  TreeSelectorEntrySection,
+  TreeSelectorEditRequest,
   TreeSelectorNode,
+  TreeSelectorStartRequest,
   TreeSelectorSubmit,
   TreeSelectorTexts,
 } from './types'

@@ -25,6 +25,7 @@ describe('treeSelectionService', () => {
       intensity: 8,
       notes: null,
       context: ['modules.emotion_wheel.context.work'],
+      context_other: 'trajet du matin',
     }
     await saveTreeSelection(entry)
     expect(mockSaveDb).toHaveBeenCalledWith(entry)
@@ -33,7 +34,11 @@ describe('treeSelectionService', () => {
       module_id: 'emotion_wheel',
       entry_kind: 'tree_selection',
       operation: 'upsert',
-      payload: expect.objectContaining({ context: ['modules.emotion_wheel.context.work'] }),
+      // Le contexte libre voyage jusqu'au serveur, séparé des clés i18n (K-6).
+      payload: expect.objectContaining({
+        context: ['modules.emotion_wheel.context.work'],
+        context_other: 'trajet du matin',
+      }),
     }))
   })
 

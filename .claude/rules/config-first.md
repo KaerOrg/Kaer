@@ -135,13 +135,24 @@ conflit, ex. `module_tags (module_id, tag_id)`) → **garder `DO NOTHING`** (un
 
 **Corollaire — ré-exécution au déploiement.** `DO UPDATE` ne sert à rien si le seed
 n'est jamais relancé : la CI/CD doit **ré-exécuter les seeds** à chaque release pour
-que `base == seed`. Un `DO UPDATE` sans ré-exécution laisse la dérive intacte.
+que `base == seed`. Un `DO UPDATE` sans ré-exécution laisse la dérive intacte. Le
+rejeu idempotent (schéma + seeds dans l'ordre du manifeste
+`supabase/SEED_MANIFEST.json`) se fait via `node scripts/apply-seeds.mjs`
+(`npm run seed:apply`) ; l'audit anti-dérive seed ↔ base via
+`node scripts/audit-drift.mjs`. Procédure complète :
+[`docs/seed-deployment.md`](../../docs/seed-deployment.md).
+
+**Tout nouveau seed de config doit rejoindre le manifeste** (sinon il n'est jamais
+rejoué au déploiement). Deux garde-fous CI verrouillent la règle :
+`apps/web/src/test/seedIdempotency.guard.test.ts` échoue si un `DO NOTHING` réapparaît
+sur une table de config **ou** si un `seed/*.sql` manque du manifeste.
 
 **Incident de référence** (2026-07) : les couleurs neutralisées des refontes
 Exposition graduée (#183/#184) et Thermomètre de l'humeur (#161) étaient restées
 sur les anciennes valeurs saturées (rouge/vert d'alarme) en **production** — enjeu
 MDR — parce que le seed était en `DO NOTHING` et jamais ré-exécuté. Cause systémique
-traitée par le passage généralisé en `DO UPDATE`.
+traitée (ticket #203) par le passage généralisé en `DO UPDATE`, le manifeste ordonné,
+le runner de rejeu et l'audit de dérive.
 
 ## Leçon générale
 

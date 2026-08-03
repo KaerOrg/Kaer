@@ -4,6 +4,8 @@ export const SchedulableTriggerInputTypes = { DAILY: 'daily' }
 export const setNotificationHandler = jest.fn()
 export const addNotificationReceivedListener = jest.fn(() => ({ remove: jest.fn() }))
 export const addNotificationResponseReceivedListener = jest.fn(() => ({ remove: jest.fn() }))
+// Réponse au tap qui a réveillé l'app (null = lancement normal).
+export const getLastNotificationResponseAsync = jest.fn().mockResolvedValue(null)
 export const getPermissionsAsync = jest.fn().mockResolvedValue({ status: 'undetermined' })
 export const requestPermissionsAsync = jest.fn().mockResolvedValue({ status: 'granted' })
 export const getExpoPushTokenAsync = jest.fn().mockResolvedValue({ data: 'ExponentPushToken[test]' })

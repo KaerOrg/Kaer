@@ -1,0 +1,30 @@
+.nep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Bande de comptages sur une seule ligne, qui passe à la ligne sur petit écran. */
+.nep__band {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text);
+}
+
+.nep__band-label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Séparateur en point médian entre les comptages, jamais avant le premier. */
+.nep__band-item + .nep__band-item::before {
+  content: '·';
+  margin-right: var(--spacing-sm);
+  color: var(--color-text-muted);
+}

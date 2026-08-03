@@ -123,3 +123,36 @@
   margin: 2px 0 0;
   line-height: 1.5;
 }
+
+/* Bloc Indications : puces de taxonomie + mention de non-instrument. */
+.sources-panel__indications {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sources-panel__disclaimer {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-sm);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* Groupe de niveau de preuve. */
+.sources-panel__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sources-panel__group-title {
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}

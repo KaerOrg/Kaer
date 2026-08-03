@@ -22,11 +22,14 @@ import {
   type ModuleSummary,
   type FormEntryRow,
   type ActivityEntryPoint,
+  fetchEmotionNamingEntries,
+  type EmotionNamingRow,
 } from '@services/engagementService'
 import type { RhythmEntry } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
-export type ChartKind = 'scale' | 'mood' | 'fear' | 'defusion' | 'med' | 'sleep' | 'form'
+export type ChartKind =
+  | 'scale' | 'mood' | 'fear' | 'defusion' | 'med' | 'sleep' | 'form' | 'emotion_naming'
 
 // Résultat agrégé du panneau « Données » d'un module (hors état de chargement,
 // porté par la query elle-même).
@@ -42,6 +45,9 @@ export type ModuleDataResult =
   | { status: 'rhythmogram'; entries: RhythmEntry[] }
   | { status: 'form'; entries: FormEntryRow[] }
   | { status: 'activity'; entries: ActivityEntryPoint[] }
+  // « Nommer ce que je ressens » : des saisies brutes, pas une série. Les comptages
+  // descriptifs sont calculés par `lib/emotionNamingData.ts` au rendu.
+  | { status: 'emotion_naming'; entries: EmotionNamingRow[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -52,7 +58,7 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, defusion, med, sleep, chronoEntries, beckEntries, activityEntries] = await Promise.all([
+        const [scaleResults, mood, fear, defusion, med, sleep, chronoEntries, beckEntries, activityEntries, namingEntries] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
@@ -64,6 +70,9 @@ export const engagementQueries = {
           // « Données » du module) rendues en maître-détail dans l'onglet Évolution.
           fetchFormEntries(patientId, 'beck_columns'),
           fetchActivityEntries(patientId),
+          // « Nommer ce que je ressens » : saisies brutes. La section Évolution en
+          // tire des comptages descriptifs, jamais une série ni une tendance.
+          fetchEmotionNamingEntries(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
         available.forEach((mt, i) => { scaleData[mt] = scaleResults[i] })
@@ -79,6 +88,7 @@ export const engagementQueries = {
           chronoEntries,
           beckEntries,
           activityEntries,
+          namingEntries,
         }
       },
     }),
@@ -116,6 +126,10 @@ export const engagementQueries = {
         if (kind === 'form') {
           const entries = await fetchFormEntries(patientId, moduleType)
           return entries.length === 0 ? { status: 'empty' } : { status: 'form', entries }
+        }
+        if (kind === 'emotion_naming') {
+          const entries = await fetchEmotionNamingEntries(patientId)
+          return entries.length === 0 ? { status: 'empty' } : { status: 'emotion_naming', entries }
         }
         if (moduleType === 'chronobiology_tracker') {
           const entries = await fetchChronoEntries(patientId)

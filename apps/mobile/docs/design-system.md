@@ -169,7 +169,7 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 
 | Variante | Fond | Bordure | Texte |
 |---|---|---|---|
-| `primary` | `colors.primary` | — | `colors.white` |
+| `primary` | `colors.primary` | — | `colors.text` |
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |
@@ -758,20 +758,43 @@ service, aucune persistance, aucune clé i18n de domaine**. Tout entre par props
 (`onSubmit`, `onDelete`). Les identités (ids de nœuds, codes de contexte) sont
 opaques — le primitive les renvoie tels quels, le parent les interprète.
 
-La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque étape est un
-composant dédié (`TreeSelectorHistory` / `…Navigation` / `…Intensity` / `…Context`
-/ `…Notes`) — un fichier = un composant.
+La machine d'état du flux vit dans `useTreeSelectorFlow` ; chaque mode est un composant
+dédié (`TreeSelectorHistory` / `…Navigation` / `…EntrySheet`), un fichier = un composant.
+
+**Trois modes seulement** (K-6) : `history`, `selection`, `entry`. Les trois anciens
+écrans facultatifs (intensité, contexte, note) sont fusionnés dans `…EntrySheet`, une
+fiche scrollable unique. L'intensité y démarre à `null` : le champ est facultatif, donc
+aucune valeur par défaut, et re-taper le cran actif le désélectionne.
+
+**Deux façons de descendre dans l'arbre** (K-5) :
+
+| Niveau | Rendu | Comportement au tap |
+|---|---|---|
+| 1 | grille 2 colonnes (`TreeSelectorOptionCard` non utilisé) | descend d'un niveau |
+| ≥ 2, nœud **sans** feuille | carte, titre + définition | sélectionne et enchaîne les étapes |
+| ≥ 2, nœud **avec** feuilles | carte dépliable | se **déplie sur place**, ses feuilles apparaissent en chips ; un tap sur une chip sélectionne la feuille, le bouton « continuer » valide la carte sans descendre |
+
+Autrement dit, **les feuilles d'un nœud de niveau ≥ 2 n'ouvrent jamais un écran de
+plus** : elles sont des chips dans la carte de leur parent. Un nœud déplié n'est pas
+« traversé » : `handleSelectLeaf` l'insère dans le chemin, sinon la sélection sauterait
+un niveau à la persistance.
 
 | Prop | Type | Rôle |
 |---|---|---|
-| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `color`/`icon`/`emoji` optionnels) |
-| `entries` | `TreeSelectorEntry[]` | View-models d'historique déjà résolus (libellés, date, badge intensité formatés) |
+| `nodes` | `TreeSelectorNode[]` | Arbre prêt à afficher (`label` résolu, `id` opaque, `definition`/`color`/`icon` optionnels). `definition` est la ligne affichée sous le titre au niveau 1 |
+| `sections` | `TreeSelectorEntrySection[]` | Historique **déjà groupé et titré par le parent** (« AUJOURD'HUI », « HIER », une date). Le primitive ne calcule aucune date : il rend des groupes reçus |
+| `onOpenEntryMenu` | `(id: string) => void` | Tap sur le ⋯ d'une entrée. Le parent ouvre la feuille d'actions (modifier / supprimer) |
+| `editRequest` | `TreeSelectorEditRequest \| null` | Rouvre le parcours **à l'étape 1** avec les champs facultatifs rechargés. Le parent incrémente `token` à chaque demande, sinon rouvrir deux fois la même entrée ne relancerait rien. `editingId` revient dans `onSubmit` |
+| `startRequest` | `TreeSelectorStartRequest \| null` | Ouvre le parcours **directement à l'étape 1**, sans passer par l'historique : c'est le tap sur un rappel (#257). Même motif de `token` que `editRequest`, pour qu'un second tap relance le flux |
+| `onOpenInfo` | `() => void` (optionnel) | Ouvre la fiche ⓘ. **Absent : l'icône n'est pas rendue** |
+| `nextReminderLabel` / `onEditReminder` | `string \| null` / `() => void` | Ligne « Prochain rappel : … » et son action (ouvre `ModuleReminders`). Absents : la ligne n'apparaît pas |
 | `config` | `TreeSelectorConfig` | Drapeaux d'étapes + plage d'intensité + options de contexte |
-| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits |
+| `texts` | `TreeSelectorTexts` | Tous les libellés d'interface, déjà traduits. `validateHereKeep(label)` est une **fonction** : elle rend la ligne secondaire du bouton « valider ici » (« on garde « Peur » »), le niveau conservé étant interpolé par l'appelant |
 | `footerText` | `string \| null` | Note de bas de page (sources) — optionnelle |
 | `loading` / `saving` | `boolean` | États de chargement / persistance |
 | `onSubmit` | `(r: TreeSelectorSubmit) => Promise<void>` | Sélection validée : `{ pathIds, intensity, context, notes }` |
 | `onDelete` | `(id: string) => void` | Suppression d'une entrée d'historique |
+| `allowWordless` | `boolean` (défaut `false`) | Autorise une entrée **sans aucune sélection**. Ouvre le bouton de sortie au niveau 1, et la fiche prend alors ses libellés `wordlessTitle` / `wordlessHint`. Désactivé : le bouton n'est pas rendu et un chemin vide reste refusé à la soumission |
 
 ```tsx
 import { TreeSelector } from '@ui/TreeSelector'
@@ -788,6 +811,20 @@ import { TreeSelector } from '@ui/TreeSelector'
   onDelete={handleDelete}
 />
 ```
+
+**Charte de couleur et d'accessibilité** (passe K-10, ticket #258) : trois règles
+tenues par `styles.ts`, à ne pas contourner en style inline depuis un appelant :
+
+| Rôle | Couleur | Pourquoi |
+|---|---|---|
+| Surfaces d'**action** (démarrer, continuer, enregistrer, cran sélectionné) | fond `colors.primary`, libellé `colors.text` | `colors.primary` avec du blanc échoue AA (≈ 2.1:1), ce que documente `packages/shared/src/theme.ts` |
+| Couleur de **famille** (`node.color`) | filet gauche, fond très pâle, icône | elle **identifie**, elle ne porte **jamais** de texte : ces teintes sont pastel et échouent AA en petit corps |
+| Texte secondaire (date, méta) | `colors.textMuted` | `colors.border` en couleur de texte est illisible |
+
+Aucun texte sous `fontSize.xxs` (11), aucune cible tactile sous 44 px (crans
+d'intensité, bouton retour, cartes de niveau 1). La sélection d'un cran d'intensité
+est annoncée par `accessibilityState.selected` : elle n'est pas portée par la seule
+couleur de fond.
 
 > **Conformité MDR** : aucune couleur ne code une gravité — les teintes/emojis codent
 > l'**identité de famille** (transmise par l'appelant). Le primitive affiche la valeur

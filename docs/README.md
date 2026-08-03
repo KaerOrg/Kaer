@@ -7,6 +7,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 - **`docs/`** — documentation transversale au monorepo (architecture, BDD, flux métier, moteur de modules, modules thérapeutiques)
 - **`apps/<app>/docs/`** — documentation spécifique à une application (design system propre, composants UI internes)
 - **`docs/modules/<module_id>.md`** — un fichier par module thérapeutique implémenté
+- **`docs/handoff/<date>-<chantier>.md`** — reprise de chantier : où on s'est arrêté, ce qui est décidé, ce qui bloque
 - **Pas de design system à la racine** : chaque app maintient son propre `apps/<app>/docs/design-system.md`
 
 ## Documentation transversale
@@ -15,9 +16,11 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 |---|---|
 | [`architecture.md`](architecture.md) | Vue d'ensemble technique du monorepo |
 | [`database.md`](database.md) | Schéma de la base de données et conventions |
+| [`seed-deployment.md`](seed-deployment.md) | Déploiement des seeds (rejeu idempotent) & audit anti-dérive config seed ↔ base — manifeste, `apply-seeds`, `audit-drift` |
 | [`setup.md`](setup.md) | Installation, configuration et lancement |
 | [`invitation-flow.md`](invitation-flow.md) | Flux complet d'invitation patient (web ↔ email ↔ mobile) |
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
+| [`handoff/2026-07-31-plan-de-securite.md`](handoff/2026-07-31-plan-de-securite.md) | **Reprise de chantier** Epic « Mon plan de sécurité » (#315) : état, ordre, pièges, questions ouvertes |
 | [`module-sources.md`](module-sources.md) | Onglet « Sources & recommandations » du panneau praticien (table `module_sources`) |
 | [`services.md`](services.md) | Couche services web et mobile (architecture en couches) |
 | [`audit-log.md`](audit-log.md) | Journal d'audit des accès aux données patient (RGPD/HDS) — table `access_audit_log`, triggers + RPC |
@@ -54,6 +57,7 @@ Tous les fichiers de modules sont dans [`modules/`](modules/) :
 - [`behavioral_activation.md`](modules/behavioral_activation.md) — Activation comportementale
 - [`breathing_techniques.md`](modules/breathing_techniques.md) — Techniques de respiration
 - [`cognitive_saturation.md`](modules/cognitive_saturation.md) — Saturation cognitive (ACT)
+- [`crisis_plan.md`](modules/crisis_plan.md) — Mon plan de sécurité (Stanley & Brown)
 - [`cssrs_screen.md`](modules/cssrs_screen.md) — C-SSRS Dépistage suicidaire
 - [`emotion_wheel.md`](modules/emotion_wheel.md) : Nommer ce que je ressens (taxonomie Willcox)
 - [`epds.md`](modules/epds.md) — EPDS Dépression post-natale

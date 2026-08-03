@@ -7,7 +7,9 @@ import { syncUpsert, syncDelete } from './syncHelpers'
 
 export type { TreeSelection }
 
-export async function saveTreeSelection(entry: Omit<TreeSelection, 'created_at'>): Promise<void> {
+export async function saveTreeSelection(
+  entry: Omit<TreeSelection, 'created_at'> & { created_at?: string },
+): Promise<void> {
   await syncUpsert(() => dbSave(entry), {
     local_id: entry.id,
     module_id: entry.module_id,
@@ -20,6 +22,10 @@ export async function saveTreeSelection(entry: Omit<TreeSelection, 'created_at'>
       intensity: entry.intensity,
       notes: entry.notes,
       context: entry.context,
+      context_other: entry.context_other,
+      // Modification d'une entrée : l'horodatage d'origine voyage jusqu'au serveur,
+      // sinon la même entrée changerait de jour côté praticien.
+      ...(entry.created_at != null ? { created_at: entry.created_at } : {}),
     },
   })
 }

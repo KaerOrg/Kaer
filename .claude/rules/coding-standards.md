@@ -741,7 +741,13 @@ date métier locale est un bug de fuseau.
 
 ### Mode ado (teen) — règle d'or
 
-Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir une variante correspondante dans `teen.json` (fr + en), **sauf le contenu psychométrique des échelles validées** (voir exception ci-dessous). La variante teen utilise le tutoiement et un registre adapté aux adolescents.
+Une clé `modules.<module_id>.*` ajoutée dans `common.json` a besoin d'une variante dans `teen.json` (fr + en) **uniquement si son texte teen diffère du common** — c'est-à-dire s'il faut adapter le registre (tutoiement, phrase plus courte ou concrète). **Si le texte teen serait strictement identique au common, la clé teen n'est pas obligatoire** : le fallback i18next (`['teen', 'common']`) sert la valeur du common au mode ado, sans duplication inutile.
+
+> **La question à se poser pour chaque clé** : « le texte destiné à l'ado est-il différent du texte adulte ? »
+> - **Oui** (vouvoiement à convertir, vocabulaire à simplifier) → variante teen **obligatoire** (fr + en) ; son absence est un **bug bloquant**.
+> - **Non** (contenu identique : label nominal « Sans mot », titre sans vouvoiement « On garde le moment, sans le nommer. », terme neutre) → clé teen **facultative**, le fallback suffit. Ne pas dupliquer à l'identique juste pour « remplir l'ensemble ».
+>
+> Attention à la parité **par langue** : une clé peut différer en français (« Vous pourrez » → « Tu pourras ») mais être identique en anglais (« you » invariable). Dans ce cas la variante `fr/teen` est obligatoire et la variante `en/teen` facultative — juger clé par clé, langue par langue, sur le **contenu**, pas sur la seule présence.
 
 > **Exception : fidélité aux échelles cliniques validées.** Le contenu
 > psychométrique d'un instrument validé (consignes `instructions*`, items `q*`,
@@ -769,7 +775,7 @@ Chaque clé `modules.<module_id>.*` ajoutée dans `common.json` **doit** avoir u
 >
 > 📌 Cas vécu : voir [lessons.md § Mode ado : registre](lessons.md).
 
-- i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** pour toute clé de module.
+- i18next résout `['teen', 'common']` : si la clé existe dans `teen`, elle prime ; sinon fallback sur `common`. L'absence dans `teen` est un **bug bloquant** uniquement pour une clé dont le texte teen **devrait différer** du common (registre à adapter) ; pour une clé au texte identique, le fallback est le comportement voulu, pas un oubli.
 - `de`, `es`, `it`, `pt` n'ont pas de `teen.json` — aucune traduction teen requise pour ces langues.
 - **Le web n'a pas de mode ado** — `teen.json` est mobile uniquement.
 
@@ -800,6 +806,6 @@ Ne pas appeler `tt()` dans `FieldRenderer` — `text_code` est déjà la clé co
 Avant toute PR introduisant un nouveau module :
 
 - [ ] Toutes les clés `modules.<id>.*` ajoutées dans `fr/common.json` et `en/common.json`
-- [ ] Toutes les clés `modules.<id>.*` ajoutées dans `fr/teen.json` et `en/teen.json` (tutoiement, registre ado)
+- [ ] Clés `modules.<id>.*` **dont le texte teen diffère du common** ajoutées dans `fr/teen.json` et `en/teen.json` (tutoiement, registre ado) ; les clés au texte identique restent sur le fallback common
 - [ ] Clés optionnelles ajoutées dans `de/es/it/pt common.json` (best-effort)
 - [ ] `text_code` en base référencent des clés existantes dans les locales

@@ -2,7 +2,18 @@ import React, { useMemo } from 'react'
 import { View, Pressable, Text, ActivityIndicator } from 'react-native'
 import { colors } from '@theme'
 import { styles } from './Button.styles'
-import type { ButtonProps } from './Button.types'
+import type { ButtonProps, ButtonVariant } from './Button.types'
+
+// Couleur du spinner `loading` : celle du libellé du variant, pour rester lisible
+// sur son fond (le turquoise `primary` porte un libellé sombre depuis la mise en
+// conformité AA, un spinner blanc y serait illisible).
+const SPINNER_COLOR: Record<ButtonVariant, string> = {
+  primary: colors.text,
+  secondary: colors.primary,
+  ghost: colors.primary,
+  danger: colors.danger,
+  ghostDanger: colors.danger,
+}
 
 export const Button = React.memo(function Button({ label, sublabel, onPress, variant = 'primary', size = 'md', loading, disabled, style, iconLeft, iconRight, accessibilityLabel, testID }: ButtonProps) {
   const isDisabled = disabled || loading
@@ -32,7 +43,7 @@ export const Button = React.memo(function Button({ label, sublabel, onPress, var
       testID={testID}
     >
       {loading ? (
-        <ActivityIndicator testID="activity-indicator" color={variant === 'primary' || variant === 'danger' ? colors.white : colors.primary} size="small" />
+        <ActivityIndicator testID="activity-indicator" color={SPINNER_COLOR[variant]} size="small" />
       ) : (
         <>
           {iconLeft}

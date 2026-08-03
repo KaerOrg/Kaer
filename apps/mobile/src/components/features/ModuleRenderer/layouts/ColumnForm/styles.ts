@@ -146,6 +146,23 @@ export const styles = StyleSheet.create({
   labeledLabel:      { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
   labeledValue:      { fontSize: 14, color: colors.text, lineHeight: 20 },
 
+  // ── Réassurance par thème (#118) : chips de rappel + fiches passées ────────
+  // Affichage passif, lecture seule (MDR 2017/745) : valeurs brutes du patient,
+  // couleurs = identité de colonne, jamais une gravité.
+  recallPanel:       { gap: spacing.sm, marginTop: spacing.xs },
+  recallChips:       { gap: spacing.xs },
+  recallChipsLabel:  { fontSize: 12, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
+  recallCard:        { gap: spacing.xs },
+  recallHeader:      { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  recallTitle:       { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
+  recallHint:        { fontSize: 12, color: colors.textMuted, lineHeight: 17 },
+  recallItem:        { gap: 2 },
+  recallItemDivider: { paddingTop: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border },
+  recallDate:        { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
+  recallField:       { gap: 1, marginTop: 2 },
+  recallLabel:       { fontSize: 11, fontWeight: '700', letterSpacing: 0.3 },
+  recallValue:       { fontSize: 14, color: colors.text, lineHeight: 20 },
+
   // ── Journal chronobiologique : légende figée + frise 24 h ──────────────────
   // Légende sous la barre d'onglets : pastilles couleur d'ancre + libellé court.
   legendBar: {

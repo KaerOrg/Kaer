@@ -1,0 +1,99 @@
+.enx {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* La table de croisement n'a ni pagination ni tri : elle tient dans l'écran et
+   n'a pas besoin de la hauteur maximale du primitive. */
+.enx__table .data-table__scroll {
+  max-height: none;
+}
+
+.enx__th-context,
+.enx__td-context {
+  text-align: left;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.enx__th-count,
+.enx__th-total,
+.enx__td-count,
+.enx__td-total {
+  text-align: center;
+}
+
+.enx__th-count {
+  font-weight: 500;
+}
+
+.enx__td-count {
+  padding: var(--spacing-xs, 4px);
+}
+
+.enx__td-total {
+  color: var(--color-text-muted);
+}
+
+/* Cellule renseignée : le fond de densité est une couche à part, sous le chiffre,
+   pour que le comptage reste lisible quelle que soit l'opacité. */
+.enx__cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.enx__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+}
+
+.enx__count {
+  position: relative;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.enx__recap {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.enx__legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.enx__legend-text {
+  flex: 1;
+  min-width: 12rem;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}
+
+.enx__scale {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.enx__scale-step {
+  width: 1.25rem;
+  height: 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+}
+
+.enx__too-few {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}

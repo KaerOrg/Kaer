@@ -35,6 +35,29 @@ jest.mock('../../../store/authStore', () => ({
     selector({ patient: { id: 'patient-test-id' } }),
 }))
 
+// Le layout ouvre l'écran des rappels (#257) : hors NavigationContainer en test.
+const mockNavigate = jest.fn()
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate, setOptions: jest.fn() }),
+  // Sans `startEntry`, le module s'ouvre sur l'historique (comportement par défaut).
+  useRoute: () => ({ params: {} }),
+}))
+
+// Rappels du module : aucun par défaut, la ligne « Prochain rappel » reste masquée.
+const mockGetRoutines = jest.fn().mockResolvedValue([])
+const mockGetModuleRef = jest.fn().mockResolvedValue({ id: 'pm-1', practitioner_id: 'pr-1' })
+jest.mock('@services/notificationService', () => ({
+  getRoutinesForModule: (...a: unknown[]) => mockGetRoutines(...a),
+  getPatientModuleRef: (...a: unknown[]) => mockGetModuleRef(...a),
+}))
+
+const mockHasSeen = jest.fn().mockResolvedValue(false)
+const mockMarkSeen = jest.fn().mockResolvedValue(undefined)
+jest.mock('@services/moduleOnboardingService', () => ({
+  hasSeenModuleOnboarding: (...a: unknown[]) => mockHasSeen(...a),
+  markModuleOnboardingSeen: (...a: unknown[]) => mockMarkSeen(...a),
+}))
+
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }))
 
@@ -42,6 +65,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { FieldRenderer } from './FieldRenderer'
 import * as database from '../../../lib/database'
+import { useActionSheet } from '../../../contexts/ActionSheetContext'
 import type { ContentField } from '@services/moduleService'
 
 jest.setTimeout(15000)
@@ -116,7 +140,7 @@ const PRIMARY_FEAR = makeField({
 const MOCK_FIELDS: ContentField[] = [
   makeField({
     id: 'ew.cfg', field_type: 'tree_selector_config', sort_order: 0,
-    props: { enable_intensity: '1', enable_notes: '1', intensity_min: '1', intensity_max: '10' },
+    props: { enable_intensity: '1', enable_notes: '1', intensity_min: '1', intensity_max: '5' },
   }),
   makeField({ id: 'ew.intro',           field_type: 'tree_selector_intro',           sort_order: 1, text_code: 'modules.emotion_wheel.intro' }),
   makeField({ id: 'ew.step1.title',     field_type: 'tree_selector_step_1_title',    sort_order: 2, text_code: 'modules.emotion_wheel.step_primary_title' }),
@@ -150,6 +174,7 @@ const MOCK_ENTRY: database.TreeSelection = {
   intensity: 6,
   notes: 'au lever',
   context: ['modules.emotion_wheel.context.work'],
+  context_other: null,
   created_at: '2026-05-05T10:00:00Z',
 }
 
@@ -159,7 +184,7 @@ const MOCK_FIELDS_FULL: ContentField[] = [
     id: 'ew.cfg', field_type: 'tree_selector_config', sort_order: 0,
     props: {
       enable_intensity: '1', enable_notes: '1', enable_context: '1',
-      enable_early_validate: '1', intensity_min: '1', intensity_max: '10',
+      enable_early_validate: '1', intensity_min: '1', intensity_max: '5',
       context_opt_1: 'modules.emotion_wheel.context.work',
       context_opt_2: 'modules.emotion_wheel.context.family',
       context_icon_1: 'briefcase-outline', context_icon_2: 'home-heart',
@@ -189,12 +214,79 @@ function renderFull() {
   )
 }
 
+// Config portant l'écran de première ouverture (K-2).
+const MOCK_FIELDS_WELCOME: ContentField[] = MOCK_FIELDS.map(f =>
+  f.id === 'ew.cfg'
+    ? makeField({
+        ...f,
+        props: {
+          ...f.props,
+          welcome_title: 'modules.emotion_wheel.welcome_title',
+          welcome_point_1: 'modules.emotion_wheel.welcome_point_1',
+          welcome_ack_btn: 'modules.emotion_wheel.welcome_ack_btn',
+        },
+      })
+    : f
+)
+
+function renderWelcome() {
+  return render(
+    <FieldRenderer
+      preview_kind="tree_selector"
+      fields={MOCK_FIELDS_WELCOME}
+      moduleId="emotion_wheel"
+    />
+  )
+}
+
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([])
+    mockHasSeen.mockResolvedValue(false)
+    mockMarkSeen.mockResolvedValue(undefined)
+  })
+
+  // ── Écran de première ouverture (K-2, ticket #250) ────────────────────────
+
+  it('affiche l\'écran de première ouverture au premier accès', async () => {
+    renderWelcome()
+    expect(await screen.findByTestId('module-welcome')).toBeTruthy()
+    // Le module lui-même n'est pas encore accessible derrière.
+    expect(screen.queryByTestId('start-new-button')).toBeNull()
+  })
+
+  it('« J\'ai compris » mémorise le passage et ouvre le module', async () => {
+    renderWelcome()
+    const btn = await screen.findByTestId('acknowledge-welcome')
+    await act(async () => { fireEvent.press(btn) })
+    expect(mockMarkSeen).toHaveBeenCalledWith('emotion_wheel')
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+  })
+
+  it('ne réaffiche jamais l\'écran une fois vu', async () => {
+    mockHasSeen.mockResolvedValue(true)
+    renderWelcome()
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+  })
+
+  it('n\'affiche pas d\'écran d\'introduction si la config n\'en porte pas', async () => {
+    renderLayout()
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
+    expect(screen.queryByTestId('module-welcome')).toBeNull()
+    // Aucune lecture inutile : le module sans écran d'intro ne consulte même pas l'état.
+    expect(mockHasSeen).not.toHaveBeenCalled()
+  })
+
+  it('ouvre le module malgré un échec de lecture de l\'état', async () => {
+    mockHasSeen.mockRejectedValue(new Error('sqlite down'))
+    renderWelcome()
+    // On n'impose pas l'écran à cause d'une panne technique.
+    expect(await screen.findByTestId('start-new-button')).toBeTruthy()
   })
 
   it('charge l\'historique au montage', async () => {
@@ -236,30 +328,29 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
-    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity.calm'))
-    expect(await screen.findByTestId('intensity-card')).toBeTruthy()
-    expect(screen.getByTestId('intensity-value')).toBeTruthy()
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('notes-section')).toBeTruthy()
   })
 
-  it('met à jour l\'intensité au tap sur un bouton', async () => {
+  it('met à jour le cran d\'intensité sélectionné au tap', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
-    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity.calm'))
-    fireEvent.press(screen.getByTestId('intensity-btn-8'))
-    expect(screen.getByTestId('intensity-value').props.children).toBe(8)
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
+    expect(screen.getByTestId('intensity-btn-4').props.accessibilityState).toEqual({ selected: true })
   })
 
-  it('passe à l\'étape notes après confirmation de l\'intensité', async () => {
+  it('la note se saisit sur le même écran que l\'intensité (K-6)', async () => {
     renderLayout()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
-    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity.calm'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
     expect(await screen.findByTestId('notes-input')).toBeTruthy()
-    expect(screen.getByTestId('summary-card')).toBeTruthy()
+    expect(screen.getByTestId('intensity-section')).toBeTruthy()
   })
 
   it('enregistre une nouvelle sélection avec intensité et notes', async () => {
@@ -267,9 +358,8 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
-    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity.calm'))
-    fireEvent.press(screen.getByTestId('intensity-btn-7'))
-    fireEvent.press(screen.getByTestId('continue-intensity'))
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
+    fireEvent.press(screen.getByTestId('intensity-btn-4'))
     fireEvent.changeText(await screen.findByTestId('notes-input'), 'au lever')
     await act(async () => {
       fireEvent.press(screen.getByTestId('save-entry'))
@@ -280,7 +370,7 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
         expect.objectContaining({
           module_id: 'emotion_wheel',
           selected_id: 'ew.joy.serenity.calm',
-          intensity: 7,
+          intensity: 4,
           notes: 'au lever',
           path: expect.arrayContaining([
             expect.objectContaining({ id: 'ew.joy' }),
@@ -297,17 +387,68 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
-    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity.calm'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
     fireEvent.press(await screen.findByTestId('cancel-entry'))
     await waitFor(() => expect(screen.getByTestId('list-empty')).toBeTruthy())
   })
 
-  it('supprime une entrée après confirmation', async () => {
+  it('⋯ ouvre une feuille d\'actions rappelant l\'entrée', async () => {
     ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
     renderLayout()
-    const deleteBtn = await screen.findByTestId('delete-sel-1')
-    await act(async () => { fireEvent.press(deleteBtn) })
+    // Attendre le rendu de la carte : le chargement asynchrone de l'historique doit
+    // être retombé avant d'interroger le menu.
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    expect(showActionSheet).toHaveBeenCalledWith(expect.objectContaining({
+      // Le titre rappelle de quelle entrée il s'agit (K-3, écran E3a).
+      title: expect.stringContaining('modules.emotion_wheel.node.joy'),
+      options: expect.arrayContaining([
+        expect.objectContaining({ destructive: true }),
+      ]),
+    }))
+  })
+
+  it('modifier une entrée conserve son identifiant et son horodatage (K-8)', async () => {
+    ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
+    renderLayout()
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    const config = (showActionSheet as jest.Mock).mock.calls.at(-1)?.[0]
+    const edit = config.options.find((o: { destructive?: boolean }) => !o.destructive)
+    await act(async () => { edit.onPress() })
+
+    // Le parcours rouvre à l'étape 1 : on re-choisit, puis on enregistre.
+    fireEvent.press(await screen.findByTestId('node-ew.joy'))
+    fireEvent.press(await screen.findByTestId('node-ew.joy.serenity'))
+    fireEvent.press(await screen.findByTestId('leaf-ew.joy.serenity.calm'))
+    await act(async () => { fireEvent.press(await screen.findByTestId('save-entry')) })
+
+    await waitFor(() => {
+      expect(database.saveTreeSelection).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'sel-1',                       // pas un nouvel identifiant
+          created_at: '2026-05-05T10:00:00Z', // ni un nouvel horodatage
+        })
+      )
+    })
+  })
+
+  it('supprime une entrée après confirmation depuis la feuille d\'actions', async () => {
+    ;(database.getAllTreeSelections as jest.Mock).mockResolvedValue([MOCK_ENTRY])
+    const { showActionSheet } = useActionSheet()
+    renderLayout()
+    await screen.findByTestId('entry-card-sel-1')
+    await act(async () => { fireEvent.press(screen.getByTestId('menu-sel-1')) })
+
+    // La doublure de test n'affiche pas la feuille : on déclenche l'option nous-mêmes.
+    // `showConfirm` auto-valide (jest.setup), donc la suppression va jusqu'au bout.
+    const config = (showActionSheet as jest.Mock).mock.calls.at(-1)?.[0]
+    const destructive = config.options.find((o: { destructive?: boolean }) => o.destructive)
+    await act(async () => { destructive.onPress() })
 
     await waitFor(() => {
       expect(database.deleteTreeSelection).toHaveBeenCalledWith('sel-1')
@@ -330,23 +471,22 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     expect(await screen.findByTestId('validate-here')).toBeTruthy()
   })
 
-  it('valider une famille seule passe à l\'étape intensité', async () => {
+  it('valider une famille seule ouvre la fiche unique', async () => {
     renderFull()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    expect(await screen.findByTestId('intensity-card')).toBeTruthy()
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
   })
 
-  it('étape contexte après l\'intensité, puis notes', async () => {
+  it('intensité, contexte et note tiennent sur le même écran (K-6)', async () => {
     renderFull()
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
-    expect(await screen.findByTestId('context-chips')).toBeTruthy()
-    fireEvent.press(await screen.findByTestId('continue-context'))
-    expect(await screen.findByTestId('notes-input')).toBeTruthy()
+    expect(await screen.findByTestId('intensity-section')).toBeTruthy()
+    expect(screen.getByTestId('context-chips')).toBeTruthy()
+    expect(screen.getByTestId('notes-input')).toBeTruthy()
   })
 
   it('enregistre le contexte sélectionné', async () => {
@@ -354,9 +494,7 @@ describe('FieldRenderer — tree_selector (TreeSelectorLayout)', () => {
     fireEvent.press(await screen.findByTestId('start-new-button'))
     fireEvent.press(screen.getByTestId('node-ew.joy'))
     fireEvent.press(await screen.findByTestId('validate-here'))
-    fireEvent.press(await screen.findByTestId('continue-intensity'))
     fireEvent.press(await screen.findByTestId('context-modules.emotion_wheel.context.work'))
-    fireEvent.press(screen.getByTestId('continue-context'))
     await act(async () => {
       fireEvent.press(await screen.findByTestId('save-entry'))
     })

@@ -10,16 +10,24 @@ import type MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIco
 
 export type McIcon = ComponentProps<typeof MaterialCommunityIcons>['name']
 
-/** Étapes internes du flux de sélection. */
-export type TreeSelectorMode = 'history' | 'selection' | 'intensity' | 'context' | 'notes'
+/**
+ * Étapes internes du flux de sélection. Depuis K-6, les trois étapes facultatives
+ * (intensité, contexte, note) sont fusionnées en une seule fiche scrollable : trois
+ * écrans traversés en file indienne étaient le premier prédicteur d'abandon.
+ */
+export type TreeSelectorMode = 'history' | 'selection' | 'entry'
 
 /** Nœud d'arbre prêt à afficher — `label` déjà résolu, `id` opaque. */
 export interface TreeSelectorNode {
   id: string
   label: string
+  /**
+   * Ligne de définition affichée sous le titre, au niveau 1 (« menace,
+   * incertitude »). Déjà traduite. Absente : la carte n'affiche que son titre.
+   */
+  definition?: string
   color?: string
   icon?: string
-  emoji?: string
   children: TreeSelectorNode[]
 }
 
@@ -35,7 +43,6 @@ export interface TreeSelectorEntry {
   id: string
   accentColor: string
   icon: McIcon
-  emoji?: string
   primaryLabel: string
   secondaryLabel: string
   /** Ex. « 6/10 » — déjà formaté, ou null si pas d'intensité. */
@@ -52,43 +59,110 @@ export interface TreeSelectorConfig {
   enableContext: boolean
   /** Autorise la validation à n'importe quel niveau (profondeur libre). */
   enableEarlyValidate: boolean
-  intensityMax: number
   intensityValues: number[]
-  /** Valeur d'intensité par défaut (centre de la plage). */
-  midIntensity: number
   contextOptions: TreeSelectorContextOption[]
 }
 
 /** Libellés d'interface, déjà traduits par le parent. */
 export interface TreeSelectorTexts {
   newBtn: string
-  intro: string
   historyLabel: string
   emptyTitle: string
   emptyText: string
+  /** Titre de la fiche unique (« Vous pouvez enregistrer, ou préciser. »). */
+  entryTitle: string
+  /** Titre de la fiche quand rien n'a été nommé (« On garde le moment, sans le nommer. »). */
+  wordlessTitle: string
+  /** Sous-titre correspondant : ne pas trouver le mot est une réponse valable. */
+  wordlessHint: string
   intensityTitle: string
-  intensityHint: string
+  /** Ancrages aux bornes de l'échelle : ils la bornent, ils ne qualifient pas la valeur. */
+  intensityAnchorMin: string
+  intensityAnchorMax: string
   contextTitle: string
-  contextHint: string
+  /** Chip d'ouverture du champ de contexte libre (« + Autre »). */
+  contextOtherBtn: string
+  contextOtherPlaceholder: string
   notesTitle: string
-  notesHint: string
   notesPlaceholder: string
   continueBtn: string
   saveBtn: string
   validateHereBtn: string
+  /**
+   * Ligne secondaire du bouton « valider ici » : rappelle le niveau conservé
+   * (« on garde « Peur » »). Reçoit le libellé du dernier nœud du chemin.
+   */
+  validateHereKeep: (label: string) => string
+  /**
+   * Sortie du niveau 1 pour qui n'arrive pas à nommer (« Je ne sais pas trop »).
+   * Le bouton n'est rendu que si `onSkip` est fourni.
+   */
+  skipBtn: string
+  /** Rappel sous le niveau 1 : s'arrêter à la racine est déjà une réponse. */
+  stopHint: string
   cancel: string
   back: string
   delete: string
+  /** Étiquette d'accessibilité de l'icône ⓘ de l'en-tête d'historique. */
+  infoBtn: string
+  /** Étiquette d'accessibilité du menu ⋯ d'une entrée. */
+  entryMenuBtn: string
+  /** Libellé de l'action de la ligne « Prochain rappel ». */
+  editReminderBtn: string
   /** Titres d'étape de navigation indexés par niveau (1-based). */
   stepTitles: Record<number, string>
   /** Indices d'étape de navigation indexés par niveau (1-based). */
   stepHints: Record<number, string>
 }
 
+/**
+ * Groupe d'entrées d'historique sous un en-tête (« AUJOURD'HUI », « HIER », une date).
+ * Le regroupement est une **navigation**, pas une analyse : aucun total, aucune moyenne,
+ * aucune comparaison d'un groupe à l'autre (MDR 2017/745).
+ */
+export interface TreeSelectorEntrySection {
+  title: string
+  entries: TreeSelectorEntry[]
+}
+
+/**
+ * Demande d'ouverture directe sur la **première étape**, sans passer par
+ * l'historique : c'est ce que fait un tap sur un rappel. Même motif de `token` que
+ * la modification, pour qu'un second tap relance le flux au lieu d'être ignoré.
+ */
+export interface TreeSelectorStartRequest {
+  token: number
+}
+
+/**
+ * Demande de modification d'une entrée existante : rouvre le flux **pré-rempli** à la
+ * première étape. Le `token` est incrémenté à chaque demande, pour que rouvrir deux
+ * fois la même entrée relance bien le flux.
+ */
+export interface TreeSelectorEditRequest {
+  /** Identifiant de l'entrée éditée, renvoyé tel quel à la soumission. */
+  id: string
+  /**
+   * L'entrée éditée portait-elle déjà une émotion ? Sert uniquement à autoriser
+   * l'enregistrement sans sélection : une entrée « sans mot » qu'on rouvre doit
+   * pouvoir être réenregistrée telle quelle, ou enfin recevoir une émotion.
+   */
+  wasWordless: boolean
+  intensity: number | null
+  context: string[]
+  contextOther: string
+  notes: string
+  token: number
+}
+
 /** Résultat d'une sélection validée — identités opaques, le parent persiste. */
 export interface TreeSelectorSubmit {
+  /** Entrée modifiée, ou `null` en création. Le parent met à jour au lieu d'insérer. */
+  editingId: string | null
   pathIds: string[]
   intensity: number | null
   context: string[]
+  /** Contexte libre saisi via « + Autre » : vide si non renseigné. */
+  contextOther: string
   notes: string
 }

@@ -7,7 +7,42 @@ Système permettant aux praticiens de programmer des rappels push par module pat
 ## Règles métier
 
 - Le praticien définit : jours de la semaine (ISO 1–7), heure, note optionnelle, actif/inactif.
-- Le patient peut : décaler l'heure (`patient_time_override`), mettre en pause (`patient_paused`).
+- Le patient peut : décaler l'heure (`patient_time_override`), mettre en pause
+  (`patient_paused`, horodaté par `patient_paused_at`), **choisir ses jours, ajouter et
+  supprimer ses rappels** (#257).
+  Le rythme initial est posé en séance, mais il lui appartient ensuite : sans
+  sollicitation, un module n'est ouvert qu'en pic de crise, et c'est la répétition qui
+  entraîne la granularité. RLS : le patient a désormais `insert` et `delete` sur ses
+  propres lignes (`auth.uid() = patient_id`).
+- **Écran patient** : `screens/modules/ModuleRemindersScreen` (E7). Le patient bouge
+  tout localement (heure, jours, pause, ajout, suppression), puis un seul
+  « Enregistrer » applique le minimum d'écritures (`savePlan.ts`, logique pure testée).
+  Revenir à l'heure posée par le praticien **efface** l'override plutôt que de
+  réenregistrer la même valeur : le praticien cesse alors de lire « décalé par le
+  patient » pour un décalage qui n'existe plus.
+- **Un rappel garde au moins un jour** : sans jour il ne partirait jamais, ce qui est
+  une pause déguisée. La pause existe pour ça.
+- **Tap sur la notification** : `hooks/useNotificationNavigation` lit `data.module_type`
+  du payload et ouvre **directement la saisie** (`ModuleContent` avec `startEntry`),
+  sans passer par l'accueil. Sans module dans le payload, aucune navigation : mieux vaut
+  rester où on est qu'ouvrir un module au hasard.
+- **Le corps de la notification est une CONSTANTE** (#269, invariant MDR). Il ne dépend
+  d'aucune donnée saisie, d'aucun score, d'aucun seuil, et **d'aucun texte écrit par le
+  praticien**. `practitioner_note` existe toujours mais s'affiche **dans le module**,
+  côté patient : c'est une consigne clinique, pas le texte d'un rappel. Un rappel dont
+  le texte dépendrait d'une consigne ne serait plus neutre au sens MDR, et cela vaudrait
+  pour les vingt modules. Le contenu et la sélection des routines dues vivent dans
+  `supabase/functions/send-notifications/logic.ts`, avec leur test
+  (`logic.test.ts`, job CI « Edge — Tests ») : deux patients, deux consignes
+  différentes, **même corps**.
+- **Le panneau praticien montre ce que le patient en a fait** (#268) : l'heure
+  **effective** en valeur principale, l'heure posée en ligne secondaire quand elles
+  diffèrent (« Posé à 09:00 · décalé par le patient »), et « Mis en pause par le patient
+  le 12 juil. » sur une carte atténuée. Un rappel éteint depuis un mois explique une
+  absence de saisies mieux qu'un graphique : sans cette ligne, le praticien conclut
+  « le patient ne fait pas ses exercices » quand la bonne lecture est « le rappel est
+  éteint ». `patient_paused_at` est **nullable** : les pauses antérieures à la colonne
+  retombent sur la mention sans date.
 - La mise en pause génère un événement `NOTIFICATION_PAUSED` dans `notification_events`, visible par le praticien via l'icône cloche de l'en-tête web.
 - **Conformité MDR** : les rappels sont à horaire fixe, jamais déclenchés par une donnée clinique.
 - Un patient peut avoir plusieurs routines actives pour un même module (ex. lun/mer/ven + mar/jeu).

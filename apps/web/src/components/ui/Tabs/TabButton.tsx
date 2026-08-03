@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, type CSSProperties } from 'react'
+import { accessibleTextColor } from '../../../lib/accessibleColor'
 import type { TabItem } from './Tabs.types'
 
 export interface TabButtonProps {
@@ -13,8 +14,13 @@ export interface TabButtonProps {
 function TabButtonComponent({ tab, isActive, accentColor, iconOnly = false, onSelect }: TabButtonProps) {
   const handleClick = useCallback(() => onSelect(tab.id), [tab.id, onSelect])
 
+  // Le filet garde l'accent brut (identité du module) ; le LIBELLÉ passe par une
+  // variante assombrie quand l'accent échoue le ratio AA sur fond blanc. Plusieurs
+  // accents du catalogue sont dans ce cas (l'orange #F97316 tombe à 2,9:1).
   const style = useMemo<CSSProperties | undefined>(
-    () => (isActive && accentColor ? { color: accentColor, borderColor: accentColor } : undefined),
+    () => (isActive && accentColor
+      ? { color: accessibleTextColor(accentColor), borderColor: accentColor }
+      : undefined),
     [isActive, accentColor]
   )
 

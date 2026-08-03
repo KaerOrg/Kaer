@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { SleepPoint, FearPoint, MoodPoint, ScorePoint, ActivityEntryPoint, MedEffectPoint } from '@services/engagementService'
-import { sleepCard, fearCard, moodCard, scaleCard, activationCard, medCard } from './overviewMetrics'
+import { sleepCard, fearCard, moodCard, scaleCard, activationCard, medCard, namingCard, NAMING_MIN_ENTRIES } from './overviewMetrics'
+import type { EmotionNamingEntry, NamingTaxonomy } from '../../../lib/emotionNamingData'
 
 const NOW = new Date(2026, 6, 14, 12).getTime()
 const DAY = 86_400_000
@@ -99,5 +100,48 @@ describe('overviewMetrics.moodCard', () => {
   it('aucune saisie récente → carte « en attente »', () => {
     const card = moodCard([{ date: iso(90), humeur: 5 }] as MoodPoint[], k => k, NOW)
     expect(card.kind).toBe('empty')
+  })
+})
+
+describe('overviewMetrics.namingCard', () => {
+  const TAXONOMY: NamingTaxonomy = {
+    families: ['fam.joy', 'fam.fear'],
+    nuancesByFamily: { 'fam.joy': ['n.a', 'n.b'], 'fam.fear': ['n.c'] },
+    wordsByNuance: { 'n.a': ['w.1'], 'n.b': [], 'n.c': [] },
+    words: ['w.1'],
+    colorByFamily: {},
+  }
+  const fmt = (key: string, values: Record<string, number>) => `${key}:${JSON.stringify(values)}`
+  const naming = (daysAgo: number, over: Partial<EmotionNamingEntry> = {}): EmotionNamingEntry => ({
+    date: iso(daysAgo),
+    familyCode: 'fam.joy', nuanceCode: 'n.a', wordCode: null,
+    intensity: null, context: [], contextOther: null, notes: null,
+    ...over,
+  })
+
+  it('rend une carte d effectifs, jamais une metrique ni une sparkline', () => {
+    const entries = Array.from({ length: NAMING_MIN_ENTRIES }, (_, i) => naming(i))
+    const card = namingCard(entries, TAXONOMY, fmt, NOW)
+    expect(card.kind).toBe('counts')
+    expect(card).not.toHaveProperty('sparkline')
+    expect(card).not.toHaveProperty('bars')
+    if (card.kind !== 'counts') throw new Error('kind attendu : counts')
+    expect(card.lines[0]).toContain(`"count":${NAMING_MIN_ENTRIES}`)
+    expect(card.lines[1]).toContain('"used":1,"total":3')
+  })
+
+  it('reste « en attente de saisies » sous le seuil', () => {
+    const entries = Array.from({ length: NAMING_MIN_ENTRIES - 1 }, (_, i) => naming(i))
+    expect(namingCard(entries, TAXONOMY, fmt, NOW).kind).toBe('empty')
+  })
+
+  it('ne compte que la fenetre de 30 jours glissants', () => {
+    const entries = [
+      ...Array.from({ length: NAMING_MIN_ENTRIES }, (_, i) => naming(i)),
+      ...Array.from({ length: 5 }, () => naming(200)),
+    ]
+    const card = namingCard(entries, TAXONOMY, fmt, NOW)
+    if (card.kind !== 'counts') throw new Error('kind attendu : counts')
+    expect(card.lines[0]).toContain(`"count":${NAMING_MIN_ENTRIES}`)
   })
 })

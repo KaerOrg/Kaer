@@ -1,1 +1,1 @@
-export { useModuleTranslation } from './useModuleT'
+export { useModuleTranslation, type ModuleTranslationValues } from './useModuleT'

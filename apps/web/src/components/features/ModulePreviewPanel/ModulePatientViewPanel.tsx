@@ -7,6 +7,7 @@ import { moduleQueries } from '../../../hooks/queries'
 import { Banner } from '../../ui/Banner'
 import { FieldRenderer } from '../ModuleRenderer'
 import { DefusionPatientView } from './DefusionPatientView'
+import { EmotionNamingPatientView } from './EmotionNamingPatientView'
 import './ModulePreviewPanel.css'
 
 // Layouts dont le contenu vit dans une autre table que module_content_fields
@@ -45,6 +46,12 @@ export function ModulePatientViewPanel({ moduleType, patientModuleId }: Props) {
   // pas le rendu générique FieldRenderer (module fieldless côté moteur).
   if (moduleType === 'cognitive_saturation') {
     return <DefusionPatientView patientModuleId={patientModuleId} />
+  }
+
+  // « Nommer ce que je ressens » : même raison, même patron. Le parcours compte neuf
+  // écrans ; le FieldRenderer générique n'en sait montrer qu'un.
+  if (moduleType === 'emotion_wheel') {
+    return <EmotionNamingPatientView />
   }
 
   const meaningfulFieldsCount = result

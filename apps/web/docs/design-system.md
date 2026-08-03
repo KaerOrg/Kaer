@@ -331,6 +331,92 @@ préférer un menu / popover quand c'est plus adapté.
 
 Props : `open`, `title?`, `options: {label, onClick, destructive?}[]`, `cancelLabel`, `onClose()`.
 
+### `EmotionNamingDataPanel` (`src/pages/PatientPage/tabs/`)
+
+Panneau « Données » du module « Nommer ce que je ressens ». **Pas un graphique** : ce
+module produit une catégorie (famille · nuance · mot), pas une série numérique.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `entries` | `EmotionNamingRow[]` | Saisies brutes, identités en clés i18n |
+| `moduleType` | `string` | Sert à charger la taxonomie (`moduleQueries.fields`) |
+| `locale` | `string` | Formatage de la date de dernière saisie |
+
+Il assemble une synthèse (4 `Card variant="outlined"`), la **matrice du répertoire**
+(une ligne par famille, une cellule par nuance ou par mot), une bascule `Chip`
+Nuances / Mots précis et le `SegmentedControl` de période.
+
+**Règles de rendu à ne pas contourner :**
+
+- Les nuances **jamais employées restent affichées**, en bordure pointillée et **sans
+  chiffre** : leur absence est du contenu, pas un manque de données à masquer.
+- L'opacité du fond code un **nombre de saisies**, jamais une intensité ni une gravité.
+  La teinte est l'identité de la famille, appliquée en style inline parce qu'elle vient
+  de la config du module (`field_props.color`).
+- Les **dénominateurs** (« sur 8 », « sur 37 ») sont dérivés de la taxonomie lue en
+  base : jamais de constante dans le code.
+- Aucune moyenne, aucune tendance, aucun pourcentage. Un test le vérifie sur le rendu.
+
+Sous la matrice, il monte `EmotionNamingEntryList` (maître-détail des saisies, #264) :
+liste à gauche, fiche complète à droite. Trois règles y sont testées :
+
+- la **note est affichée intégralement**, sans troncature ni « voir plus » : c'est le
+  champ le plus riche cliniquement ;
+- une saisie **sans intensité n'affiche aucun cran**, et surtout pas un zéro, qui serait
+  une valeur que le patient n'a pas donnée ;
+- une entrée **« Sans mot » s'ouvre comme les autres**, en italique atténué, sans chemin
+  d'émotion. Entrée légitime, pas entrée dégradée.
+
+Entre les deux, il monte `EmotionNamingCrossTable` dans un `ui/Collapsible` **replié à
+l'arrivée** : le croisement est dense et ne s'impose pas d'emblée.
+
+### `EmotionNamingCrossTable` (`components/features/`)
+
+Croisement **contexte × famille** du module « Nommer ce que je ressens » (#265). Placé
+dans `features/` et non dans un onglet de page parce qu'il sert à **deux endroits** :
+l'onglet Données et la section Évolution clinique.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `entries` | `EmotionNamingEntry[]` | Saisies de la fenêtre, déjà filtrées par l'appelant |
+| `contextCodes` | `string[]` | Domaines de contexte **lus en config** (`readContextCodes`) |
+| `familyCodes` | `string[]` | Familles de la taxonomie lue en base |
+| `rangeDays` | `number` | Largeur de la fenêtre, rappelée dans la phrase du seuil |
+
+**Règles de rendu à ne pas contourner :**
+
+- **Sous `CROSSTAB_MIN_ENTRIES` (12) saisies, la table n'est pas rendue du tout** : 56
+  cases pour une dizaine de saisies, c'est une table presque vide qui invite à
+  surinterpréter le peu qui s'y trouve. Mesure de prudence clinique, pas d'affichage.
+  Le seuil est une constante exportée et nommée, jamais un nombre dans le JSX.
+- Une **case sans saisie ne rend rien** : l'absence est du contenu.
+- Les saisies **« Sans mot » restent hors table** (elles n'ont pas de famille) et sont
+  rappelées dessous. Les diluer dans une colonne inventée fabriquerait une catégorie
+  que le patient n'a pas choisie.
+- Le total de la table somme les **marges de colonne**, jamais les cellules : une saisie
+  qui déclare deux domaines compte dans deux lignes.
+- La teinte code une **densité de comptage** (`lib/emotionNamingDensity`), jamais une
+  gravité clinique. La rampe est en quatre paliers grossiers, à dessein : un dégradé
+  continu inviterait à comparer les cases une à une.
+
+### Page Évolution : section « Nommer ce que je ressens » (#266)
+
+`NamingEvolutionPanel` (`src/pages/PatientPage/tabs/`) est le corps de la section : la
+table de croisement (le **même composant** que l'onglet Données) plus deux bandes de
+comptages bruts, « Jusqu'où il est allé » (profondeurs) et « Répertoire » (couverture).
+Elle suit le **sélecteur de période de la page** et n'en ajoute aucun autre.
+
+**Seuil.** Sous `NAMING_MIN_ENTRIES` (8) saisies dans la fenêtre, **aucune section
+n'est rendue** et la carte d'aperçu reste « en attente de saisies ».
+
+**Carte du bandeau d'aperçu, `kind: 'counts'`.** Les autres modules y posent un chiffre
+clé et un sparkline. Ici ni l'un ni l'autre n'a de sens : le module produit une
+catégorie, pas une série. La carte porte donc des **effectifs et rien d'autre** («41
+saisies · 13 nuances sur 37 »), sans sparkline ni empreinte, et sert d'ancre de scroll.
+Une carte muette vaut mieux qu'une carte qui invente une métrique. Un `kind` `counts`
+existe pour ça dans `overviewMetrics` et dans `ModuleEvolutionKind` ; son `yDomain`
+neutre `[0, 0]` n'est lu par personne, un test le fige.
+
 ### Groupe `ui/Chart/` — primitifs graphiques interactifs
 
 `components/ui/Chart/` regroupe les graphiques qui prennent `(number | null)[]` — la valeur `null` représente une donnée manquante (gap dans la courbe). Primitifs purs, aucune logique métier.
@@ -455,9 +541,22 @@ par dimension (valeur au-dessus, libellé court dessous, teinte = identité). Re
 toute **moyenne globale** — on lit N symptômes bruts. Largeur fluide (`flex: 1` par
 barre). Utilisé par le panneau « Données » de l'humeur (moyennes récentes) **et** par
 la carte d'aperçu de la frise Humeur de la page Évolution (`MoodEvolutionBlock`, 30 j
-glissants). Props :
+glissants) **et** l'historique de l'onglet Saisie de l'aperçu module
+(`SliderDashboardLayout`). Props :
 `bars: FingerprintBar[]` (`{ key, label, value: number | null, color }`), `yMax`,
 `barAreaHeight?`, `showValues?`. Conformité MDR : couleur = identité, hauteur = magnitude.
+
+#### `SymptomRibbon` — ruban multi-symptômes (`components/features/`)
+
+Miroir web du ruban mobile (#161) : heatmap **N dimensions × jours**. Une ligne par
+dimension (pastille + libellé), une cellule par jour. Teinte = identité de la dimension,
+**opacité = magnitude brute** (helper partagé `ribbonCellOpacity` de `@kaer/shared`,
+parité web ≡ mobile). Jour non renseigné = cellule vide à contour (aucune valeur
+inventée). Largeur fluide (cellules `flex: 1`, jamais de scroll horizontal). Générique :
+ne connaît aucun module, dimensions/couleurs/libellés fournis par l'appelant. Utilisé par
+l'onglet Suivi de l'aperçu module (`SliderDashboardLayout`). Props :
+`rows: RibbonRow[]` (`{ key, label, color, values: (number | null)[] }`), `yMax`, `title`,
+`assiduityLabel`, `legendLabel`. Conformité MDR : magnitude seule, aucun agrégat ni seuil.
 
 #### `ProgressRing` — anneau de valeur (jauge circulaire)
 
@@ -930,6 +1029,54 @@ Doc dédiée : [`docs/components/banner.md`](components/banner.md).
 > [`docs/components/`](components/). `Tabs`, `RatingSelector`, `ScaleMetaBadges`
 > sont documentés ci-dessus/ci-dessous.
 
+### Contraste des libellés accentués (`lib/accessibleColor`)
+
+Plusieurs accents du catalogue de modules sont des teintes vives : excellentes sur un
+**filet** ou une **bordure**, elles échouent le ratio AA (4,5:1) dès qu'on les emploie
+comme **couleur de texte** sur fond blanc. L'orange `#F97316` plafonne à 2,8:1, le
+turquoise de marque `#6dbfc3` à 2,1:1.
+
+`accessibleTextColor(accent, background?, minRatio?)` rend l'accent tel quel s'il passe
+déjà, sinon la **même teinte assombrie** jusqu'à ce qu'elle passe. `ui/Tabs` l'applique
+sur l'onglet actif : le filet garde l'accent brut (identité du module), seul le libellé
+bascule. Générique, aucun module n'est nommé, aucune table de correspondance à tenir.
+
+Un test vérifie le ratio pour **tous** les accents du catalogue, et un second audite les
+surfaces teintées de « Nommer ce que je ressens » (cellules de la matrice et du
+croisement, à tous les paliers de densité et pour les huit teintes de famille).
+
+Le module expose aussi `parseColor`, `contrastRatio`, `relativeLuminance` et `blend`
+(composition d'une couleur semi-transparente sur son fond) : à réutiliser pour tout
+nouvel audit plutôt que de recalculer un ratio à la main.
+
+### `Collapsible`
+
+`components/ui/Collapsible/`. **Section repliable** : un en-tête cliquable qui révèle
+son contenu. Non contrôlée (elle possède son ouverture) et **elle ne monte pas son
+contenu tant qu'elle est repliée** : une section lourde (table de croisement, longue
+liste) ne coûte rien tant qu'on ne l'ouvre pas.
+
+Le `<button>` natif de l'en-tête est celui du primitive lui-même : c'est un contrôle de
+divulgation (`aria-expanded` + `aria-controls`), pas un bouton d'action, et il porte
+une surface entière (titre + complément + chevron) que `ui/Button` ne sait pas exprimer.
+
+```tsx
+<Collapsible
+  title={t('emotion_naming.crosstab_title')}
+  meta={t('emotion_naming.crosstab_meta', { count: entries.length })}
+>
+  <EmotionNamingCrossTable … />
+</Collapsible>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `title` | `ReactNode` | Titre de la section, déjà traduit |
+| `meta` | `ReactNode` | Complément d'en-tête, petit corps atténué (compteur, rappel) |
+| `children` | `ReactNode` | Contenu révélé au dépliage, monté seulement à l'ouverture |
+| `defaultOpen` | `boolean` | État initial (défaut `false`) |
+| `className` | `string` | Classe du conteneur, pour scoper l'habillage d'un consommateur |
+
 ### `DataTable<T>`
 
 `components/ui/DataTable/`. **Table de données générique** — structure `table`,
@@ -975,6 +1122,7 @@ const columns: DataTableColumn<Row>[] = [
 | `renderDetail` | `(row, ctx) => ReactNode` | Panneau dépliable ; absent ⇒ lignes non dépliables |
 | `rowClassName` | `(row) => string \| undefined` | Classe additionnelle de ligne (mise en avant) |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide |
+| `footer` | `ReactNode` | Ligne de pied rendue dans un `<tfoot>` collant : les **marges** d'un tableau croisé (totaux de colonne). L'appelant fournit le `<tr>` complet, la table ne calcule jamais rien. Ex. `features/EmotionNamingCrossTable` |
 | `ariaLabel` | `string` | Libellé accessible de la `<table>` |
 | `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
 | `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |
@@ -1226,6 +1374,14 @@ comme enfant de `Card`.
 |---|---|---|
 | `tagIds` | `ReadonlySet<string> \| undefined` | Tags portés par le module (`taxonomy.tagsByModule`) |
 | `taxonomy` | `Pick<ModuleTaxonomy, 'tagsByDimension'>` | Ordre et regroupement des tags par dimension |
+| `dimensions` | `readonly string[]` | Dimensions à rendre. Défaut : `CARD_DIMENSIONS` (indication seule). Le panneau Sources passe `PANEL_DIMENSIONS` (indication + public) |
+| `showDimensionLabels` | `boolean` | Précède chaque ligne du libellé de sa dimension (`tag_dimensions.<id>.label`). Défaut `false` (les cartes n'en ont pas la place) |
+
+> **Ce composant est la source UNIQUE des puces d'indication** : la carte du module et
+> le bloc « Indications » du panneau Sources l'utilisent tous les deux, sur la même
+> taxonomie. Il n'existe nulle part de liste d'indications écrite à la main : ajouter
+> une indication, c'est **attribuer un tag** dans le seed, et elle apparaît du même coup
+> dans les filtres du catalogue, sur la carte et dans le panneau.
 
 ---
 

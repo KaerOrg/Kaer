@@ -4,11 +4,11 @@
 
 import { useMemo } from 'react'
 import { View, Text, Pressable, ScrollView } from 'react-native'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { TreeSelectorHeader } from './TreeSelectorHeader'
+import { TreeSelectorOptionCard } from './TreeSelectorOptionCard'
 import { resolveAccentColor, buildBreadcrumb } from './helpers'
-import type { McIcon, TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
+import type { TreeSelectorConfig, TreeSelectorNode, TreeSelectorTexts } from './types'
 import { styles } from './styles'
 
 interface TreeSelectorNavigationProps {
@@ -16,14 +16,22 @@ interface TreeSelectorNavigationProps {
   path: TreeSelectorNode[]
   config: TreeSelectorConfig
   texts: TreeSelectorTexts
-  footerText?: string | null
+  /** Carte dépliée au niveau courant (ses feuilles sont rendues en chips). */
+  expanded: TreeSelectorNode | null
   onBack: () => void
   onSelectNode: (node: TreeSelectorNode) => void
+  /** Feuille choisie dans une carte dépliée : le nœud déplié entre dans le chemin. */
+  onSelectLeaf: (leaf: TreeSelectorNode) => void
+  onToggleExpand: (node: TreeSelectorNode) => void
+  onContinue: () => void
   onValidateHere: () => void
+  /** Sortie sans rien nommer, niveau 1 seulement. Absent : pas de bouton. */
+  onSkip?: () => void
 }
 
 export function TreeSelectorNavigation({
-  nodes, path, config, texts, footerText, onBack, onSelectNode, onValidateHere,
+  nodes, path, config, texts, expanded,
+  onBack, onSelectNode, onSelectLeaf, onToggleExpand, onContinue, onValidateHere, onSkip,
 }: TreeSelectorNavigationProps) {
   const accentColor = resolveAccentColor(path)
   const breadcrumb = buildBreadcrumb(path)
@@ -42,7 +50,10 @@ export function TreeSelectorNavigation({
 
   const showValidate = config.enableEarlyValidate && path.length > 0 && currentNodes.length > 0
   const lastLabel = path.length > 0 ? path[path.length - 1].label : ''
-  const validateLabel = lastLabel ? `${texts.validateHereBtn} : ${lastLabel}` : texts.validateHereBtn
+  // Le niveau conservé passe en ligne secondaire (« on garde « Peur » ») : le
+  // libellé principal reste une phrase adressée au patient, pas une instruction
+  // d'ingénieur du type « Valider ici : Effroi ».
+  const keepLabel = lastLabel ? texts.validateHereKeep(lastLabel) : ''
 
   return (
     <View style={[styles.container, tintStyle]}>
@@ -67,74 +78,78 @@ export function TreeSelectorNavigation({
                   key={node.id}
                   style={({ pressed }) => [
                     styles.primaryCard,
-                    { borderColor: nodeColor, backgroundColor: nodeColor + '12' },
-                    pressed && styles.cardPressed,
+                    { borderLeftColor: nodeColor },
+                    pressed ? [styles.cardPressed, { backgroundColor: nodeColor + '14', borderColor: nodeColor }] : null,
                   ]}
                   onPress={() => onSelectNode(node)}
                   accessibilityRole="button"
-                  accessibilityLabel={node.label}
+                  accessibilityLabel={node.definition ? `${node.label}, ${node.definition}` : node.label}
                   testID={`node-${node.id}`}
                 >
-                  <View style={[styles.primaryIconCircle, { backgroundColor: nodeColor + '22' }]}>
-                    {node.emoji ? (
-                      <Text style={styles.primaryEmoji}>{node.emoji}</Text>
-                    ) : (
-                      <MaterialCommunityIcons
-                        name={(node.icon ?? 'circle-outline') as McIcon}
-                        size={26}
-                        color={nodeColor}
-                      />
-                    )}
-                  </View>
-                  <Text style={[styles.primaryLabel, { color: nodeColor }]}>{node.label}</Text>
+                  <Text style={styles.primaryLabel}>{node.label}</Text>
+                  {node.definition ? (
+                    <Text style={styles.primaryDefinition}>{node.definition}</Text>
+                  ) : null}
                 </Pressable>
               )
             })}
           </View>
         ) : (
           <View style={styles.listContainer} testID={`level-${level}-list`}>
-            {currentNodes.map(node => {
-              const nodeColor = node.color ?? accentColor
-              return (
-                <Pressable
-                  key={node.id}
-                  style={({ pressed }) => [
-                    styles.optionCard,
-                    { borderLeftColor: nodeColor },
-                    pressed && styles.cardPressed,
-                  ]}
-                  onPress={() => onSelectNode(node)}
-                  accessibilityRole="button"
-                  accessibilityLabel={node.label}
-                  testID={`node-${node.id}`}
-                >
-                  <Text style={[styles.optionLabel, { color: nodeColor }]}>{node.label}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
-                </Pressable>
-              )
-            })}
+            {currentNodes.map(node => (
+              <TreeSelectorOptionCard
+                key={node.id}
+                node={node}
+                accentColor={accentColor}
+                expanded={expanded?.id === node.id}
+                onPress={node.children.length > 0 ? onToggleExpand : onSelectNode}
+                onSelectLeaf={onSelectLeaf}
+              />
+            ))}
           </View>
         )}
 
         {showValidate ? (
-          <Pressable
-            style={[styles.validateHereBtn, { borderColor: accentColor }]}
-            onPress={onValidateHere}
-            accessibilityRole="button"
-            accessibilityLabel={validateLabel}
-            testID="validate-here"
-          >
-            <MaterialCommunityIcons name="check" size={18} color={accentColor} />
-            <Text style={[styles.validateHereText, { color: accentColor }]}>{validateLabel}</Text>
-          </Pressable>
-        ) : null}
-
-        {level === 1 && footerText ? (
-          <View style={styles.infoBox}>
-            <MaterialCommunityIcons name="information-outline" size={14} color={colors.textMuted} />
-            <Text style={styles.footerText}>{footerText}</Text>
+          <View style={styles.stepActions}>
+            <Pressable
+              style={[styles.validateHereBtn, { borderColor: accentColor }]}
+              onPress={onValidateHere}
+              accessibilityRole="button"
+              accessibilityLabel={keepLabel ? `${texts.validateHereBtn}, ${keepLabel}` : texts.validateHereBtn}
+              testID="validate-here"
+            >
+              <Text style={styles.validateHereText}>{texts.validateHereBtn}</Text>
+              {keepLabel ? <Text style={styles.validateHereKeep}>{keepLabel}</Text> : null}
+            </Pressable>
+            {expanded ? (
+              <Pressable
+                style={styles.stepContinueBtn}
+                onPress={onContinue}
+                accessibilityRole="button"
+                accessibilityLabel={texts.continueBtn}
+                testID="continue-selection"
+              >
+                <Text style={styles.continueBtnText}>{texts.continueBtn}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
+
+        {level === 1 && onSkip ? (
+          <>
+            <Pressable
+              style={styles.skipBtn}
+              onPress={onSkip}
+              accessibilityRole="button"
+              accessibilityLabel={texts.skipBtn}
+              testID="skip-emotion"
+            >
+              <Text style={styles.skipBtnText}>{texts.skipBtn}</Text>
+            </Pressable>
+            {texts.stopHint ? <Text style={styles.stopHint}>{texts.stopHint}</Text> : null}
+          </>
+        ) : null}
+
       </ScrollView>
     </View>
   )

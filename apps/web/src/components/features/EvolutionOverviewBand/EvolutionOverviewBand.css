@@ -103,7 +103,8 @@
 }
 
 .evo-ov-card__sub,
-.evo-ov-card__window {
+.evo-ov-card__window,
+.evo-ov-card__logged {
   font-size: var(--font-size-xxs);
   color: var(--color-text-muted, #6B7280);
 }
@@ -122,4 +123,17 @@
   color: var(--color-text-muted, #6B7280);
   font-style: italic;
   padding: 6px 0;
+}
+
+/* Carte sans metrique (module a categories) : des effectifs empiles, aucun graphe. */
+.evo-ov-card__counts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.evo-ov-card__count-line {
+  font-size: var(--font-size-caption);
+  color: var(--color-text, #111827);
 }

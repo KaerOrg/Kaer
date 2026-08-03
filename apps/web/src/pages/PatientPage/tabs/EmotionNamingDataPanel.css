@@ -1,0 +1,135 @@
+/* Panneau « Données » du module « Nommer ce que je ressens » (#263).
+   Tous les habillages passent par les tokens : aucune couleur en dur ici. La seule
+   couleur calculée est la teinte de famille, appliquée en style inline parce qu'elle
+   vient de la config du module. */
+
+.enp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.enp__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.enp__level {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* ── Synthèse : quatre chiffres bruts ─────────────────────────────────────── */
+
+.enp__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.enp__stat-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.enp__stat-value {
+  display: block;
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ── Matrice du répertoire ────────────────────────────────────────────────── */
+
+.enp__matrix {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  /* Beaucoup de nuances sur une ligne : le débordement défile DANS la matrice,
+     jamais dans la page. */
+  overflow-x: auto;
+}
+
+.enp__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 200px) minmax(0, 1fr);
+  gap: var(--spacing-sm);
+  align-items: stretch;
+}
+
+.enp__row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  /* La teinte de famille IDENTIFIE : filet d'accent seulement, jamais du texte. */
+  border-left: 4px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.enp__row-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.enp__row-total {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.enp__cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.enp__cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  min-height: 34px;
+}
+
+/* Nuance jamais employée : bordure pointillée, aucun chiffre. Ce vide est le propos
+   de l'écran, pas un manque de données à masquer. */
+.enp__cell--unused {
+  border: 1px dashed var(--color-border);
+  background: transparent;
+}
+
+.enp__cell-name {
+  font-size: var(--font-size-xs);
+  color: var(--color-text);
+}
+
+.enp__cell--unused .enp__cell-name {
+  color: var(--color-text-muted);
+}
+
+.enp__cell-count {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.enp__legend {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}

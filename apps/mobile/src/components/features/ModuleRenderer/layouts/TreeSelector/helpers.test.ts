@@ -1,7 +1,8 @@
 import {
   parseIntOr, intensityValuesFor, buildStepLabels,
-  buildRawNodes, buildNodeMap, toUiNodes, reconstructPath, toEntryVM,
+  buildRawNodes, buildNodeMap, toUiNodes, reconstructPath, toEntryVM, groupEntriesByDay,
 } from './helpers'
+import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
 import type { TreeSelection } from '../../../../../lib/database'
 
@@ -91,11 +92,30 @@ describe('TreeSelector helpers (feature layer)', () => {
   })
 
   describe('toUiNodes', () => {
-    it('résout les libellés et préserve couleur/emoji/icon', () => {
+    it('résout les libellés et préserve couleur/icon', () => {
       const ui = toUiNodes(buildRawNodes([
-        field({ id: 'a', text_code: 'n.a', props: { color: '#F00', emoji: '😊', icon: 'star' } }),
+        field({ id: 'a', text_code: 'n.a', props: { color: '#F00', icon: 'star' } }),
       ]), t)
-      expect(ui[0]).toMatchObject({ id: 'a', label: 'T:n.a', color: '#F00', emoji: '😊', icon: 'star' })
+      expect(ui[0]).toMatchObject({ id: 'a', label: 'T:n.a', color: '#F00', icon: 'star' })
+    })
+
+    it('résout la ligne de définition depuis la prop `def` (K-4)', () => {
+      const ui = toUiNodes(buildRawNodes([
+        field({ id: 'a', text_code: 'n.a', props: { def: 'n_def.a' } }),
+      ]), t)
+      expect(ui[0].definition).toBe('T:n_def.a')
+    })
+
+    it('laisse la définition absente quand la prop `def` manque', () => {
+      const ui = toUiNodes(buildRawNodes([field({ id: 'a', text_code: 'n.a' })]), t)
+      expect(ui[0].definition).toBeUndefined()
+    })
+
+    it('ne propage plus d\'emoji : ils sont supprimés du module (K-4)', () => {
+      const ui = toUiNodes(buildRawNodes([
+        field({ id: 'a', text_code: 'n.a', props: { emoji: '😊' } }),
+      ]), t)
+      expect(ui[0]).not.toHaveProperty('emoji')
     })
   })
 
@@ -108,12 +128,66 @@ describe('TreeSelector helpers (feature layer)', () => {
     it('reconstruit le chemin avec text_code/couleur depuis les ids', () => {
       const path = reconstructPath(['a', 'a1'], map)
       expect(path).toEqual([
-        { id: 'a', text_code: 'n.a', color: '#F00', icon: undefined, emoji: undefined },
-        { id: 'a1', text_code: 'n.a1', color: undefined, icon: undefined, emoji: undefined },
+        { id: 'a', text_code: 'n.a', color: '#F00', icon: undefined },
+        { id: 'a1', text_code: 'n.a1', color: undefined, icon: undefined },
       ])
     })
     it('ignore silencieusement un id inconnu', () => {
       expect(reconstructPath(['a', 'ghost'], map).map(n => n.id)).toEqual(['a'])
+    })
+  })
+
+  describe('groupEntriesByDay', () => {
+    const LABELS = {
+      today: 'AUJOURD’HUI',
+      yesterday: 'HIER',
+      older: (iso: string) => `JOUR:${iso}`,
+    }
+    // Un mardi à 14h locales, pour que « hier » soit sans ambiguïté.
+    const NOW = new Date(2026, 6, 14, 14, 0, 0)
+
+    it('titre les groupes du jour et de la veille', () => {
+      const groups = groupEntriesByDay([
+        { created_at: new Date(2026, 6, 14, 9, 36).toISOString() },
+        { created_at: new Date(2026, 6, 13, 20, 4).toISOString() },
+      ], LABELS, NOW)
+      expect(groups.map(g => g.title)).toEqual(['AUJOURD’HUI', 'HIER'])
+    })
+
+    it('regroupe plusieurs entrées d\'un même jour, dans l\'ordre reçu', () => {
+      const groups = groupEntriesByDay([
+        { id: 'a', created_at: new Date(2026, 6, 14, 9, 36).toISOString() },
+        { id: 'b', created_at: new Date(2026, 6, 14, 7, 12).toISOString() },
+      ], LABELS, NOW)
+      expect(groups).toHaveLength(1)
+      expect(groups[0].entries.map(e => e.id)).toEqual(['a', 'b'])
+    })
+
+    it('titre les jours plus anciens par leur date', () => {
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 2, 10, 0).toISOString() }], LABELS, NOW,
+      )
+      expect(groups[0].title).toBe('JOUR:2026-07-02')
+    })
+
+    it('utilise le jour LOCAL, pas UTC : une saisie de fin de soirée reste au bon jour', () => {
+      // 23h30 locales en fuseau positif tombent le lendemain en UTC : sans getters
+      // locaux, l'entrée changerait de groupe (cf. lessons.md § Dates).
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 13, 23, 30).toISOString() }], LABELS, NOW,
+      )
+      expect(groups[0].title).toBe('HIER')
+    })
+
+    it('ne calcule aucun total : un groupe ne porte que son titre et ses entrées', () => {
+      const groups = groupEntriesByDay(
+        [{ created_at: new Date(2026, 6, 14, 9, 0).toISOString() }], LABELS, NOW,
+      )
+      expect(Object.keys(groups[0]).sort()).toEqual(['entries', 'title'])
+    })
+
+    it('renvoie une liste vide sans entrée', () => {
+      expect(groupEntriesByDay([], LABELS, NOW)).toEqual([])
     })
   })
 
@@ -124,20 +198,51 @@ describe('TreeSelector helpers (feature layer)', () => {
         { id: 'a', text_code: 'n.a', color: '#F59E0B', icon: 'star' },
         { id: 'a1', text_code: 'n.a1' },
       ],
-      intensity: 6, notes: 'note', context: ['c.work'], created_at: '2026-05-05T10:00:00Z',
+      intensity: 6, notes: 'note', context: ['c.work'], context_other: null,
+      created_at: '2026-05-05T10:00:00Z',
     }
+    // Taxonomie courante : la famille « a » a été pastellisée depuis la saisie.
+    const CURRENT = buildNodeMap(buildRawNodes([
+      field({ id: 'a', text_code: 'n.a', props: { color: '#EFC98A', icon: 'star' } }),
+    ]))
+
     it('mappe libellés, badge d\'intensité, contexte et date', () => {
-      const vm = toEntryVM(entry, t, 10, iso => `D:${iso}`)
+      const vm = toEntryVM(entry, t, 10, iso => `D:${iso}`, CURRENT)
       expect(vm).toMatchObject({
-        id: 'sel-1', accentColor: '#F59E0B', icon: 'star',
+        id: 'sel-1', icon: 'star',
         primaryLabel: 'T:n.a', secondaryLabel: 'T:n.a1',
         intensityLabel: '6/10', contextLabels: ['T:c.work'],
         notes: 'note', dateLabel: 'D:2026-05-05T10:00:00Z',
       })
     })
     it('intensityLabel null quand pas d\'intensité', () => {
-      const vm = toEntryVM({ ...entry, intensity: null }, t, 10, iso => iso)
+      const vm = toEntryVM({ ...entry, intensity: null }, t, 10, iso => iso, CURRENT)
       expect(vm.intensityLabel).toBeNull()
+    })
+    it('relit la teinte dans la taxonomie courante, pas dans le chemin persisté (K-4)', () => {
+      // L'entrée a été saisie avec l'ancienne teinte saturée : l'affichage suit le seed.
+      const vm = toEntryVM(entry, t, 10, iso => iso, CURRENT)
+      expect(vm.accentColor).toBe('#EFC98A')
+    })
+    it('retombe sur la teinte persistée si la famille a disparu du seed', () => {
+      const vm = toEntryVM(entry, t, 10, iso => iso, new Map())
+      expect(vm.accentColor).toBe('#F59E0B')
+    })
+
+    it('entrée sans mot : libellé dédié et filet gris neutre (K-7)', () => {
+      const wordless = { ...entry, path: [], selected_id: '', selected_label: null }
+      const vm = toEntryVM(wordless, t, 5, iso => iso, CURRENT, 'Sans mot')
+      expect(vm.primaryLabel).toBe('Sans mot')
+      expect(vm.secondaryLabel).toBe('')
+      // Pas la teinte d'une famille qu'elle n'a pas : gris neutre.
+      expect(vm.accentColor).toBe(colors.border)
+    })
+
+    it('le contexte libre ferme la liste des chips, sans passer par t() (K-6)', () => {
+      const vm = toEntryVM(
+        { ...entry, context_other: 'trajet du matin' }, t, 5, iso => iso, CURRENT,
+      )
+      expect(vm.contextLabels).toEqual(['T:c.work', 'trajet du matin'])
     })
   })
 })

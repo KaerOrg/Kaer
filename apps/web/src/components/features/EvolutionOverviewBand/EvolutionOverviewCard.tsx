@@ -60,8 +60,23 @@ export const EvolutionOverviewCard = memo(function EvolutionOverviewCard({
           <span className="evo-ov-card__fp">
             <DimensionFingerprint bars={card.bars} yMax={10} barAreaHeight={28} showValues={false} />
           </span>
-          <span className="evo-ov-card__window">{t('evolution.overview_window')}</span>
+          {/* Deux fenêtres coexistent sur l'écran (carte 30 j fixes vs frise = période
+              choisie) : la carte doit étiqueter la sienne (#164). Ligne 1 = ce que
+              représentent les barres, ligne 2 = l'assiduité descriptive. */}
+          <span className="evo-ov-card__window">{t('evolution.overview_fp_avg')}</span>
+          <span className="evo-ov-card__logged">{t('evolution.overview_fp_logged', { count: card.daysLogged })}</span>
         </>
+      ) : null}
+
+      {/* Carte sans métrique : des effectifs, et rien d'autre. Ni chiffre clé, ni
+          sparkline, ni empreinte : le module ne produit pas de série. */}
+      {card.kind === 'counts' ? (
+        <span className="evo-ov-card__counts">
+          {card.lines.map(line => (
+            <span key={line} className="evo-ov-card__count-line">{line}</span>
+          ))}
+          <span className="evo-ov-card__window">{t('evolution.overview_window')}</span>
+        </span>
       ) : null}
 
       {card.kind === 'empty' ? (

@@ -8,9 +8,10 @@ import type { McIcon } from '@ui/TreeSelector'
 export interface RawTreeNode {
   id: string
   text_code: string | null
+  /** Clé i18n de la ligne de définition (prop `def`), niveau 1 en pratique. */
+  def_code?: string
   color?: string
   icon?: string
-  emoji?: string
   children: RawTreeNode[]
 }
 
@@ -31,9 +32,10 @@ export interface ParsedTreeConfig {
   enableNotes: boolean
   enableContext: boolean
   enableEarlyValidate: boolean
+  /** Autorise une entrée sans aucune sélection (« je ne sais pas trop », K-7). */
+  enableWordless: boolean
   intensityMin: number
   intensityMax: number
-  midIntensity: number
   intensityValues: number[]
   rawContextOptions: RawContextOption[]
 }

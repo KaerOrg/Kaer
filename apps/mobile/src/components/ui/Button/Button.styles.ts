@@ -27,7 +27,9 @@ export const styles = StyleSheet.create({
   labelMd:        { fontSize: 16 },
   labelSm:        { fontSize: 14 },
   sublabel:       { fontSize: 12, fontWeight: '400', opacity: 0.85, marginTop: 1 },
-  primaryLabel:   { color: colors.white },
+  // Libellé sombre sur le turquoise de marque : `colors.primary` (#6dbfc3) avec du
+  // blanc échoue AA (≈ 2.1:1) ; `colors.text` le porte à ≈ 8:1. Cf. packages/shared/src/theme.ts.
+  primaryLabel:   { color: colors.text },
   secondaryLabel: { color: colors.primary },
   ghostLabel:     { color: colors.primary },
   dangerLabel:    { color: colors.danger },
