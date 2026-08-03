@@ -22,6 +22,8 @@ export {
 export type { SequenceStep, SequenceState } from './services/safetySequence'
 export { composeMeasureSentence, toLocalIsoDate } from './services/safetyMeasure'
 export type { SafetyMeasureParts } from './services/safetyMeasure'
+export { parsePlanItemKind, readStepColumns, PLAN_ITEM_KINDS } from './services/safetyPlanItem'
+export type { PlanItemKind, StepColumns } from './services/safetyPlanItem'
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 

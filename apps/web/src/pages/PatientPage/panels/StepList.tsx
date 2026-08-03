@@ -12,14 +12,16 @@ import { StepListRow } from './StepListRow'
 interface Props {
   summaries: readonly StepSummary[]
   openSection: string
+  /** Libellé accessible de la colonne, déjà traduit. */
+  label: string
   /** Marque des étapes sans item, déjà traduite. */
   emptyLabel: string
   onOpen: (sectionId: string) => void
 }
 
-export function StepList({ summaries, openSection, emptyLabel, onOpen }: Props) {
+export function StepList({ summaries, openSection, label, emptyLabel, onOpen }: Props) {
   return (
-    <nav className="plan-editor__steps" aria-label="steps">
+    <nav className="plan-editor__steps" aria-label={label}>
       {summaries.map(summary => (
         <StepListRow
           key={summary.sectionId}

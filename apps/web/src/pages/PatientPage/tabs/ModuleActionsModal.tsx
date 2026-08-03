@@ -84,9 +84,17 @@ export function ModuleActionsModal({
 }: Props) {
   const { t } = useTranslation()
 
+  // Un module peut renommer un onglet quand « Configuration » décrit mal ce qu'on y
+  // fait : le plan de sécurité y ÉDITE son contenu, ce n'est pas un réglage, d'où
+  // « Le plan » (PW-2). La surcharge est une clé i18n dérivée du module, pas une
+  // condition sur son identifiant : un autre module la posera sans toucher à ce fichier.
   const tabItems = useMemo<TabItem[]>(
-    () => tabs.map(tab => ({ id: tab, label: t(TAB_LABEL_KEY[tab]), icon: tabIcon(tab) })),
-    [tabs, t],
+    () => tabs.map(tab => ({
+      id: tab,
+      label: t(`modules.${module}.tab_${tab}`, { defaultValue: t(TAB_LABEL_KEY[tab]) }),
+      icon: tabIcon(tab),
+    })),
+    [tabs, t, module],
   )
 
   const handleChange = useCallback(

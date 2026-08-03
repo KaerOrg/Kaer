@@ -12,8 +12,11 @@ export type SegmentedControlVariant = 'track' | 'pills'
 
 export interface SegmentedControlProps<T extends string = string> {
   options: readonly SegmentOption<T>[]
-  /** Valeur actuellement sélectionnée. */
-  value: T
+  /**
+   * Valeur actuellement sélectionnée. `null` : aucun segment actif : le choix n'a pas
+   * encore été fait, et rien ne doit être présélectionné à sa place.
+   */
+  value: T | null
   onChange: (value: T) => void
   variant?: SegmentedControlVariant
   /** Couleur d'accent du segment actif (valeur dynamique). Défaut CSS : `var(--color-primary)`. */

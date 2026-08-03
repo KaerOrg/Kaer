@@ -890,15 +890,23 @@ export interface Database {
         Row: {
           patient_id: string
           practitioner_message: string
+          // Dates de la relation autour du plan (PW-5) : « élaboré le », « revu avec
+          // vous le ». Jour, jamais heure. Affichées, jamais surveillées.
+          created_with_at: string | null
+          last_reviewed_at: string | null
           updated_at: string
         }
         Insert: {
           patient_id: string
           practitioner_message?: string
+          created_with_at?: string | null
+          last_reviewed_at?: string | null
           updated_at?: string
         }
         Update: {
           practitioner_message?: string
+          created_with_at?: string | null
+          last_reviewed_at?: string | null
           updated_at?: string
         }
         Relationships: []

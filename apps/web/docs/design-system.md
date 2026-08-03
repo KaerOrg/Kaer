@@ -972,7 +972,7 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `options` | `readonly SegmentOption<T>[]` | — | Liste `{ value, label }` (obligatoire). Mémoïser si dérivée de `t()`. |
-| `value` | `T` | — | Valeur sélectionnée (obligatoire) |
+| `value` | `T \| null` | — | Valeur sélectionnée (obligatoire). **`null` : aucun segment actif**. Le choix n'a pas encore été fait, et rien n'est présélectionné à sa place. |
 | `onChange` | `(value: T) => void` | — | Appelé avec la valeur du segment cliqué |
 | `variant` | `'track' \| 'pills'` | `'track'` | Aspect visuel |
 | `accentColor` | `string` | `var(--color-primary)` (CSS) | Couleur du segment actif (valeur dynamique) |
@@ -982,6 +982,11 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 > **Conformité MDR** : `accentColor` est une couleur de **contexte** (accent du module),
 > jamais l'expression d'une valeur clinique. Ne jamais piloter cette couleur par un score
 > ou un seuil — ce serait du codage couleur interprétatif interdit.
+>
+> **`value={null}` est le bon geste quand le choix n'a pas été fait.** Ne jamais poser une
+> valeur par défaut « pour éviter le vide » : présélectionner, c'est répondre à la place de
+> l'utilisateur. Usage de référence : la colonne « personne ou lieu » de l'éditeur du plan
+> de sécurité (PW-3), où `kind` n'est **jamais** déduit du texte de l'item.
 
 ### `EmptyState`
 

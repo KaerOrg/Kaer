@@ -352,6 +352,43 @@ commun.
 
 ---
 
+### `crisis_plan_configs` : ce que le praticien pose autour du plan (PW-5 #324)
+
+Une ligne par patient. Elle porte le **message de soutien** affiché au patient, et les
+**deux dates de la relation** autour du plan. Le plan lui-même vit dans
+`safety_plan_items` : cette table ne contient aucun item.
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| `patient_id` | uuid PK → `patients(id)` | - |
+| `practitioner_message` | text NOT NULL, default `''` | Message de soutien, affiché à la clôture de la Séquence |
+| `created_with_at` | date, nullable | Jour de la **première élaboration conjointe**. Posé à la première revue, jamais réécrit ensuite. |
+| `last_reviewed_at` | date, nullable | Jour de la **dernière revue en consultation** |
+| `updated_at` | timestamptz NOT NULL, default now() | - |
+
+**Type `date`, pas `timestamptz`** : « élaboré le 12 mars · revu avec vous le 4 juin » est
+un jour, jamais une heure. Le grain à la journée rend aussi l'idempotence **structurelle** :
+deux appuis sur « Nous avons revu le plan aujourd'hui » le même jour écrivent la même
+valeur, il n'y a rien à dédupliquer.
+
+**Trois notions à ne jamais confondre**, et que le vocabulaire de l'interface sépare
+partout :
+
+| Notion | Où elle vit |
+|---|---|
+| « revu avec vous » : le geste praticien | `crisis_plan_configs.last_reviewed_at` |
+| « modifié » : la dernière écriture sur un item | `safety_plan_items.updated_at` |
+| « lu par le patient » | **N'est pas mesuré et ne le sera pas.** Aucune colonne ne l'accueille. |
+
+**MDR 2017/745** : ces dates sont **affichées, jamais surveillées**. Aucune alerte
+d'ancienneté, aucune relance automatique, aucun badge « à revoir », aucune couleur qui
+change quand la revue date. Ne jamais les comparer à la date du jour pour produire un
+signal visuel : un test de rendu verrouille cette règle côté web.
+
+RLS : le patient lit sa propre ligne ; le praticien lit et écrit sur ses patients liés.
+
+---
+
 ### `breathing_settings` — Config du module respiration par patient (T0 #195)
 
 Une ligne par patient. `enabled_techniques` / `primary_technique` sont posés par le

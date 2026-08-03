@@ -31,7 +31,7 @@ import { scaleQueries, engagementQueries } from '../../../hooks/queries'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
-import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
+import { useCrisisPlanSummary } from '../hooks/useCrisisPlanSummary'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { useDefusionConfigEditor } from '../hooks/useDefusionConfigEditor'
 import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
@@ -43,7 +43,7 @@ import { PsychoLibraryPicker } from './PsychoLibraryPicker'
 import { MedicationAdherenceCard } from './MedicationAdherenceCard'
 import { BehavioralActivationCard } from './BehavioralActivationCard'
 import { RimConfigPanel } from './RimConfigPanel'
-import { CrisisPlanConfigPanel } from './CrisisPlanConfigPanel'
+import { SafetyPlanEditorPanel } from '../panels/SafetyPlanEditorPanel'
 import { MedicationEffectsConfigPanel } from './MedicationEffectsConfigPanel'
 import { MedicationListConfigPanel } from './MedicationListConfigPanel'
 import { BAActivitiesConfigPanel } from './BAActivitiesConfigPanel'
@@ -124,7 +124,7 @@ export function PatientModulesTab({
 
   const rim = useRimEditor(modules, patientId, practitionerId, onReloadModules)
   const psycho = usePsychoEducationPicker(modules, patientId, practitionerId, onReloadModules)
-  const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
+  const crisis = useCrisisPlanSummary(patientId, modules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
   const defusionConfig = useDefusionConfigEditor(modules, onReloadModules)
   const medList = useMedicationListEditor(modules, onReloadModules)
@@ -172,7 +172,7 @@ export function PatientModulesTab({
     switch (type) {
       case 'rim': rim.open(unlocked ? 'edit' : 'unlock'); break
       case 'psychoeducation': psycho.open(unlocked ? 'edit' : 'unlock'); break
-      case 'crisis_plan': void crisis.openEditor(); break
+      // crisis_plan : rien à amorcer, `SafetyPlanEditorPanel` possède ses lectures.
       case 'medication_side_effects': void medEffects.openEditor(); break
       case 'medication_adherence': void medList.openEditor(); break
       case 'behavioral_activation': void baList.openEditor(); break
@@ -184,7 +184,6 @@ export function PatientModulesTab({
     switch (type) {
       case 'rim': rim.cancel(); break
       case 'psychoeducation': psycho.cancel(); break
-      case 'crisis_plan': crisis.closeEditor(); break
       case 'medication_side_effects': medEffects.close(); break
       case 'medication_adherence': medList.close(); break
       case 'behavioral_activation': baList.close(); break
@@ -333,7 +332,7 @@ export function PatientModulesTab({
 
     if (moduleType === 'crisis_plan') {
       const handleCrisisToggle = () => {
-        if (unlocked && mod) { crisis.closeEditor(); revokeModule(mod.id) }
+        if (unlocked && mod) revokeModule(mod.id)
         else unlockModule(moduleType)
       }
 
@@ -691,7 +690,9 @@ export function PatientModulesTab({
     if (!activeModule) return null
     switch (activeModule.module) {
       case 'crisis_plan':
-        return <CrisisPlanConfigPanel crisis={crisis} onClose={closeModal} />
+        // L'onglet ne s'appelle plus Configuration : ce n'est pas un réglage, c'est le
+        // contenu du plan (PW-2). Le panneau possède ses lectures et ses écritures.
+        return <SafetyPlanEditorPanel patientId={patientId} moduleId={activeModule.module} />
       case 'rim':
         return <RimConfigPanel rim={rim} onClose={closeModal} />
       case 'psychoeducation':

@@ -13,14 +13,25 @@
 // aucun verrou : chacun peut modifier ce que l'autre a écrit, c'est un document
 // commun. Ne jamais en dériver un droit d'édition ni une conclusion clinique.
 
+import { parsePlanItemKind, type PlanItemKind } from '@kaer/shared'
 import { supabase } from '../lib/supabase'
+
+export type { PlanItemKind }
 
 /** Un item du plan, tel que le serveur le rend. */
 export interface SafetyPlanItem {
   readonly id: string
   readonly section_id: string
   readonly text: string
-  readonly kind: string | null
+  /**
+   * Nature de l'item (P-14 / PW-3) : union fermée, jamais un `string` libre. La colonne
+   * est un `text` en base ; la conversion passe par `parsePlanItemKind`, une
+   * vérification à l'exécution, jamais par une assertion `as` qui mentirait au
+   * compilateur sur ce que le serveur a réellement renvoyé.
+   *
+   * **Jamais déduit du texte de l'item** : rempli en consultation, ou vide.
+   */
+  readonly kind: PlanItemKind | null
   readonly role: string | null
   readonly note: string | null
   readonly phone: string | null
@@ -35,7 +46,7 @@ export interface SafetyPlanItemInput {
   id?: string
   section_id: string
   text: string
-  kind?: string | null
+  kind?: PlanItemKind | null
   role?: string | null
   note?: string | null
   phone?: string | null
@@ -59,7 +70,9 @@ export async function fetchSafetyPlanItems(patientId: string): Promise<SafetyPla
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-  return (data ?? []) as SafetyPlanItem[]
+  // `kind` est un `text` en base : il est vérifié ici, pas asserté. Un item écrit avant
+  // P-14, ou une valeur inconnue, se lit `null` et s'édite sans rien casser.
+  return (data ?? []).map(row => ({ ...row, kind: parsePlanItemKind(row.kind) }))
 }
 
 /**

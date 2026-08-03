@@ -47,11 +47,20 @@ import * as service from '@services/crisisPlanService'
 
 const svc = service as jest.Mocked<typeof service>
 
+/**
+ * Config praticien complète : les dates de la relation autour du plan (PW-5) ne
+ * concernent pas ce widget, mais le contrat les porte. Une fabrique typée plutôt qu'un
+ * objet partiel casté.
+ */
+function practitionerConfig(practitionerMessage: string): service.CrisisPlanPractitionerConfig {
+  return { practitionerMessage, createdWithAt: null, lastReviewedAt: null }
+}
+
 beforeEach(() => {
   jest.clearAllMocks()
   svc.getAnchors.mockResolvedValue([])
   svc.getAnchorPhrase.mockResolvedValue('')
-  svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: '' })
+  svc.fetchPractitionerConfig.mockResolvedValue(practitionerConfig(''))
   svc.pickAndSaveAnchorPhoto.mockResolvedValue(null)
   svc.removeAnchorPhoto.mockResolvedValue(undefined)
   svc.saveAnchorPhrase.mockResolvedValue(undefined)
@@ -69,7 +78,7 @@ describe('CrisisAnchorsWidget', () => {
   })
 
   it('affiche le message du praticien quand présent', async () => {
-    svc.fetchPractitionerConfig.mockResolvedValue({ practitionerMessage: 'Tiens bon' })
+    svc.fetchPractitionerConfig.mockResolvedValue(practitionerConfig('Tiens bon'))
     render(<CrisisAnchorsWidget />)
     expect(await screen.findByText('Tiens bon')).toBeTruthy()
   })

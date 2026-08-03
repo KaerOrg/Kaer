@@ -35,23 +35,25 @@ export interface NewMeasure {
   until: string | null
 }
 
+/** Libellés déjà traduits : le composant ne connaît aucune clé i18n. */
+export interface SafetyMeasureEditorLabels {
+  what: string
+  who: string
+  whoOptional: string
+  until: string
+  add: string
+  cancel: string
+  temporaryNote: string
+  delete: string
+}
+
 interface Props {
   measures: readonly ExistingMeasure[]
   /** Propositions, dans l'ordre de la configuration. */
   verbs: readonly MeasureVerbOption[]
   /** Code de la proposition « Autre », qui ouvre la saisie libre du verbe. */
   otherVerbCode: string
-  /** Libellés déjà traduits : le composant ne connaît aucune clé i18n. */
-  labels: {
-    what: string
-    who: string
-    whoOptional: string
-    until: string
-    add: string
-    cancel: string
-    temporaryNote: string
-    delete: string
-  }
+  labels: SafetyMeasureEditorLabels
   onAdd: (measure: NewMeasure) => void
   onDelete: (id: string) => void
 }
