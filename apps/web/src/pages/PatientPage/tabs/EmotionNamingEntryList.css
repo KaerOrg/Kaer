@@ -1,0 +1,167 @@
+/* Maître-détail des saisies (#264). Tous les habillages passent par les tokens ;
+   la seule couleur calculée est la teinte de famille, en filet d'accent. */
+
+.enl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.enl__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.enl__count {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.enl__body {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: var(--spacing-md);
+  align-items: start;
+}
+
+/* ── Liste ─────────────────────────────────────────────────────────────────── */
+
+.enl__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.enl__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.enl__row--selected {
+  background: var(--color-primary-light);
+}
+
+.enl__row-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* « Sans mot » : atténué et en italique, jamais barré ni signalé comme un manque.
+   C'est une entrée légitime. */
+.enl__wordless {
+  font-style: italic;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.enl__row-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+/* ── Détail ────────────────────────────────────────────────────────────────── */
+
+.enl__detail {
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.enl__path {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.enl__date {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.enl__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.enl__section-label {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.enl__intensity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.enl__steps {
+  display: inline-flex;
+  gap: 3px;
+}
+
+/* Crans neutres : la couleur ne code AUCUN seuil (MDR). */
+.enl__step {
+  width: 18px;
+  height: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border);
+}
+
+.enl__step--on {
+  background: var(--color-text-muted);
+}
+
+.enl__intensity-value {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.enl__notes-body {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.6;
+  /* Note intégrale : on préserve les retours à la ligne, on ne tronque jamais. */
+  white-space: pre-wrap;
+}
+
+.enl__empty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

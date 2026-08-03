@@ -2349,7 +2349,15 @@
     "stat_nuances": "Nuances employées",
     "stat_words": "Mots employés",
     "stat_wordless": "Sans mot",
-    "legend": "Intensité du remplissage : nombre de saisies. La teinte est l'identité de la famille, jamais une gravité. Une case pointillée n'a jamais été employée."
+    "legend": "Intensité du remplissage : nombre de saisies. La teinte est l'identité de la famille, jamais une gravité. Une case pointillée n'a jamais été employée.",
+    "entries_title": "Les saisies, une par une",
+    "entries_count": "{{count}} fiches · la plus récente en haut",
+    "entries_count_one": "{{count}} fiche",
+    "filter_with_notes": "Avec une note écrite ({{count}})",
+    "wordless": "Sans mot",
+    "intensity": "Intensité",
+    "notes_title": "Qu'est-ce qui s'est passé ?",
+    "no_note_entry": "Aucune saisie ne porte de note écrite sur cette période."
   },
   "evolution": {
     "title": "Évolution clinique",

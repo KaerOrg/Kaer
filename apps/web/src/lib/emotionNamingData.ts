@@ -280,6 +280,20 @@ export function buildNamingTaxonomy(fields: TaxonomyField[]): NamingTaxonomy {
 }
 
 /**
+ * Borne haute de l'échelle d'intensité, lue dans la config du module.
+ *
+ * Jamais figée dans le code : le passage de 1-10 à 1-5 côté patient doit se refléter
+ * ici sans redéploiement. Les anciennes saisies gardent leur valeur d'origine, qui
+ * n'est jamais recalculée (règle d'or : on stocke et on restitue, on n'interprète pas).
+ */
+export function readIntensityMax(fields: TaxonomyField[], fallback = 5): number {
+  const config = fields.find(f => f.field_type === 'tree_selector_config')
+  const raw = config?.props?.intensity_max
+  const parsed = raw != null ? Number.parseInt(raw, 10) : Number.NaN
+  return Number.isNaN(parsed) ? fallback : parsed
+}
+
+/**
  * Restreint à une fenêtre de N jours glissants. Découpage de LECTURE, pas fenêtre
  * d'analyse : rien n'est comparé d'une fenêtre à l'autre.
  */

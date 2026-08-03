@@ -22,9 +22,10 @@ import { SegmentedControl } from '@ui/SegmentedControl'
 import { moduleQueries } from '../../../hooks/queries'
 import type { EmotionNamingRow } from '@services/engagementService'
 import {
-  buildNamingTaxonomy, repertoire, depthCounts, filterByRange,
+  buildNamingTaxonomy, repertoire, depthCounts, filterByRange, readIntensityMax,
   type RepertoireLevel,
 } from '../../../lib/emotionNamingData'
+import { EmotionNamingEntryList } from './EmotionNamingEntryList'
 import './EmotionNamingDataPanel.css'
 
 // Mêmes fenêtres que la page Évolution : un seul vocabulaire de période dans l'app.
@@ -55,6 +56,12 @@ export function EmotionNamingDataPanel({ entries, moduleType, locale }: Props) {
   const fieldsQuery = useQuery(moduleQueries.fields(moduleType))
   const taxonomy = useMemo(
     () => buildNamingTaxonomy(fieldsQuery.data?.fields ?? []),
+    [fieldsQuery.data],
+  )
+  // Borne de l'échelle lue en config : le passage de 1-10 à 1-5 se reflète ici sans
+  // redéploiement, et les anciennes saisies gardent leur valeur d'origine.
+  const intensityMax = useMemo(
+    () => readIntensityMax(fieldsQuery.data?.fields ?? []),
     [fieldsQuery.data],
   )
 
@@ -161,6 +168,13 @@ export function EmotionNamingDataPanel({ entries, moduleType, locale }: Props) {
       </div>
 
       <p className="enp__legend">{t('emotion_naming.legend')}</p>
+
+      <EmotionNamingEntryList
+        entries={windowed}
+        colorByFamily={taxonomy.colorByFamily}
+        intensityMax={intensityMax}
+        locale={locale}
+      />
     </div>
   )
 }
