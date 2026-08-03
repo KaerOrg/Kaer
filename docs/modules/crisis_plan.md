@@ -128,6 +128,41 @@ nécessaire coïncident avec ceux où le réseau est le plus défaillant.
 `plan_items` (SQLite mobile) — `id`, `module_id`, `section_id`, `text`, `sort_order`,
 `weight`, `phone`, `contact_source`, `created_at`.
 
+### L'étape 6 en édition : un arrangement par carte (P-13)
+
+Une mesure de mise à distance se saisit en quatre morceaux et se **lit comme une phrase** :
+
+> *« Ma mère garde la boîte. · Jusqu'au 12 septembre. »*
+
+**La phrase est composée au rendu, jamais stockée composée** (`composeMeasureSentence`,
+partagé). Les morceaux restent modifiables un par un, et l'i18n reste possible. C'est
+aussi ce qui a fait écarter la maquette 5a, la « phrase à trous » : la grammaire
+française y résiste, « ma mère **garde** » mais « je **m'éloigne** ».
+
+L'ordre de l'écran n'est pas décoratif : **les mesures déjà décidées sont au-dessus du
+formulaire**, on voit l'accord existant avant d'en ajouter un autre. Puis les
+propositions, puis les trois champs, puis les actions ancrées hors du flux défilant.
+
+| Champ | Nature |
+|---|---|
+| **Quoi** | Texte libre, dans les mots du patient |
+| **Qui s'en occupe** | **Facultatif** : s'éloigner n'implique personne d'autre, et un champ obligatoire aurait bloqué ce cas |
+| **Jusqu'à quand** | Une date **ou** une échéance en texte. Un sélecteur de date seul forcerait une fausse précision là où « mon prochain rendez-vous » est la vraie réponse |
+
+Les six propositions vivent en base, en clés indexées sur le `step_title`
+(`measure_verb_1` à `measure_verb_6`). Elles portent sur le **verbe d'action**, jamais
+sur l'objet, et le jeu est **fixe** : jamais réordonné, filtré ni complété selon les
+saisies passées. « Autre » ouvre un champ libre pour le verbe.
+
+> **Deux invariants MDR, vérifiés par les tests.** Aucun placeholder ne donne d'exemple
+> d'objet : l'interface ne nomme, ne liste, ne suggère et n'illustre jamais un moyen.
+> Et **aucune date n'est comparée à aujourd'hui** : faire dire à l'app « cette mesure a
+> expiré, revoyez-la » serait du contenu piloté par une donnée patient. C'est le soignant
+> qui la revoit en consultation.
+
+Mention persistante sous les boutons : « Ces mesures sont temporaires. Elles servent à
+me donner du temps quand ça va mal. »
+
 ### Les trois champs d'un item (P-14)
 
 Un item porte `text`, `phone` et `sort_order`. Trois champs courts s'y ajoutent, tous
