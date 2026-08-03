@@ -21,8 +21,29 @@ jest.mock('../../../../../hooks/useModuleT', () => ({
 jest.mock('../shared', () => {
   const R = require('react')
   const { Text } = require('react-native')
-  return { CrisisEmergencyCalls: () => R.createElement(Text, { testID: 'emergency-stub' }, 'urgences') }
+  return {
+    // Le testID porte la densité : le bandeau permanent et l'écran des ressources
+    // montent le même composant, il faut pouvoir les distinguer.
+    CrisisEmergencyCalls: ({ density }: { density?: string }) =>
+      R.createElement(Text, { testID: `emergency-stub-${density ?? 'compact'}` }, 'urgences'),
+    CallableContact: ({ name, testID }: { name: string; testID?: string }) =>
+      R.createElement(Text, { testID }, name),
+  }
 })
+
+const mockIsModuleUnlocked = jest.fn()
+jest.mock('@services/moduleService', () => ({
+  isModuleUnlocked: (...a: unknown[]) => mockIsModuleUnlocked(...a),
+}))
+
+jest.mock('../../../../../store/authStore', () => ({
+  useAuthStore: (sel: (s: { patient: { id: string } | null }) => unknown) => sel({ patient: { id: 'pat-1' } }),
+}))
+
+const mockNavigate = jest.fn()
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate }),
+}))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
@@ -82,6 +103,7 @@ function renderLayout(onExit = jest.fn()) {
 
 beforeEach(() => {
   jest.clearAllMocks()
+  mockIsModuleUnlocked.mockResolvedValue(false)
   mockGetPlanItems.mockResolvedValue([
     planItem('i1', 'step_1', 'Je ne dors plus'),
     planItem('i2', 'step_3', 'Le square derrière l\'école'),
@@ -159,12 +181,12 @@ describe('SafetySequenceLayout — parcours', () => {
 
   it('garde le bandeau d\'urgence présent sur tous les écrans', async () => {
     renderLayout()
-    expect(await screen.findByTestId('emergency-stub')).toBeTruthy()
+    expect(await screen.findByTestId('emergency-stub-compact')).toBeTruthy()
     await enterPlan()
-    expect(screen.getByTestId('emergency-stub')).toBeTruthy()
+    expect(screen.getByTestId('emergency-stub-compact')).toBeTruthy()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
-    expect(screen.getByTestId('emergency-stub')).toBeTruthy()
+    expect(screen.getByTestId('emergency-stub-compact')).toBeTruthy()
   })
 })
 
@@ -236,6 +258,74 @@ describe('SafetySequenceLayout — écran d\'arrivée (P-6)', () => {
   })
 })
 
+describe('SafetySequenceLayout — écran des ressources (P-10) et lien de crise (P-9)', () => {
+  /** Traverse le plan jusqu'à l'écran des ressources. */
+  async function reachResources() {
+    await enterPlan()
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+  }
+
+  it('porte le même titre que la variante plan vide de l\'arrivée', async () => {
+    renderLayout()
+    await reachResources()
+    expect(screen.getByText('modules.crisis_plan.sequence_resources_title')).toBeTruthy()
+  })
+
+  it('ne dit jamais rien de ce qui a été tenté', async () => {
+    renderLayout()
+    await reachResources()
+    // Aucune progression ne subsiste : pas de décompte des étapes traversées.
+    expect(screen.queryByText('2 / 2')).toBeNull()
+    // Et plus de bouton d'avancement, qui se lirait comme « il reste autre chose ».
+    expect(screen.queryByTestId('safety-sequence-advance')).toBeNull()
+  })
+
+  it('offre les secours et l\'accès à ce qui donne envie de tenir, au même niveau', async () => {
+    renderLayout()
+    await reachResources()
+    // En densité pleine : les trois secours sont des cartes, pas des pastilles.
+    expect(screen.getByTestId('emergency-stub-full')).toBeTruthy()
+    expect(screen.getByTestId('safety-sequence-resources-anchors')).toBeTruthy()
+  })
+
+  it('mène à la clôture depuis les ressources, et en revient aux ressources', async () => {
+    renderLayout()
+    await reachResources()
+    fireEvent.press(screen.getByTestId('safety-sequence-resources-anchors'))
+    expect(screen.getByText('modules.crisis_plan.sequence_closing_title')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('safety-sequence-back'))
+    expect(screen.getByText('modules.crisis_plan.sequence_resources_title')).toBeTruthy()
+  })
+
+  // Le lien disparaît quand le module est verrouillé : il ne se grise pas.
+  it('n\'affiche pas « Traverser la vague » quand le module est verrouillé', async () => {
+    renderLayout()
+    await reachResources()
+    expect(screen.queryByTestId('safety-sequence-crisis-link')).toBeNull()
+  })
+
+  it('affiche « Traverser la vague » quand le module est déverrouillé', async () => {
+    mockIsModuleUnlocked.mockResolvedValue(true)
+    renderLayout()
+    await reachResources()
+    await waitFor(() => expect(screen.getByTestId('safety-sequence-crisis-link')).toBeTruthy())
+    expect(mockIsModuleUnlocked).toHaveBeenCalledWith('pat-1', 'distress_tolerance')
+  })
+
+  it('ouvre le compagnon de crise, jamais l\'onglet de lecture', async () => {
+    mockIsModuleUnlocked.mockResolvedValue(true)
+    renderLayout()
+    await reachResources()
+    const link = await screen.findByTestId('safety-sequence-crisis-link')
+    fireEvent.press(link)
+    expect(mockNavigate).toHaveBeenCalledWith('ModuleContent', {
+      moduleType: 'distress_tolerance',
+      previewKindOverride: 'crisis_companion',
+    })
+  })
+})
+
 describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => {
   it('affiche le sous-titre configuré sur l\'étape qui en porte un', async () => {
     renderLayout()
@@ -278,7 +368,7 @@ describe('SafetySequenceLayout — invariant MDR : zéro persistance', () => {
     await enterPlan()
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
     fireEvent.press(screen.getByTestId('safety-sequence-advance'))
-    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    fireEvent.press(screen.getByTestId('safety-sequence-resources-anchors'))
     fireEvent.press(screen.getByTestId('safety-sequence-back'))
     fireEvent.press(screen.getByTestId('safety-sequence-stop'))
 
