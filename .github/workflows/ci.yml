@@ -1,8 +1,21 @@
 name: CI
 
+# La CI tourne sur TOUTE pull request, quelle que soit la branche visée.
+#
+# Elle ne se déclenchait que sur les PR ciblant `main` (`branches: [main]`). Or les gros
+# chantiers avancent en PILE : une PR s'appuie sur la précédente, qui s'appuie sur encore
+# une autre, et seule celle du bas vise `main`. Toutes les autres n'avaient donc AUCUN
+# check : ni vert, ni rouge, rien. Au 2026-08-03, 8 des 15 PR ouvertes étaient dans ce cas,
+# dont toute la pile du plan de sécurité (Epic #315). Une relecture se faisait sans aucun
+# signal automatique, sur la seule parole de l'auteur.
+#
+# Le filtre est retiré plutôt qu'élargi à une liste de préfixes : une liste se périme au
+# premier chantier qui invente un nom de branche non prévu, et le silence qu'elle produit
+# est invisible (pas de check = pas d'échec, donc rien qui alerte). Le coût est quelques
+# minutes de calcul supplémentaires ; l'absence de vérification sur une app de santé coûte
+# plus cher.
 on:
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.head_ref }}
