@@ -38,14 +38,11 @@ interface Props<Stage extends string> {
   readonly bannerLabel: string
   /** Pied : « n écrans », déjà composé par l'appelant (il possède le pluriel). */
   readonly footerLabel: string
-  /** Libellés accessibles des deux flèches, déjà traduits. */
-  readonly previousLabel: string
-  readonly nextLabel: string
 }
 
 export function PatientScreenRail<Stage extends string>({
   screens, filters, activeFilter, onFilterChange,
-  bannerLabel, footerLabel, previousLabel, nextLabel,
+  bannerLabel, footerLabel,
 }: Props<Stage>) {
   // La numérotation suit la position de l'écran dans le parcours COMPLET : filtrer
   // réduit le rail sans renuméroter, sinon l'écran 7 deviendrait l'écran 1 et le
@@ -74,8 +71,6 @@ export function PatientScreenRail<Stage extends string>({
       <ScrollRail
         className="psr-rail-scope"
         itemCount={visible.length}
-        previousLabel={previousLabel}
-        nextLabel={nextLabel}
       >
         {visible.map(({ screen, number }) => (
           <article className="psr-screen" key={screen.id}>

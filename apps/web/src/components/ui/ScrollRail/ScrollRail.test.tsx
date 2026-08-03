@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ScrollRail } from './ScrollRail'
@@ -26,12 +26,20 @@ function triggerResize() {
 
 function renderRail(itemCount = 3) {
   return render(
-    <ScrollRail itemCount={itemCount} previousLabel="Précédent" nextLabel="Suivant">
+    <ScrollRail itemCount={itemCount}>
       {Array.from({ length: itemCount }, (_, i) => (
         <article key={i} data-testid={`item-${i}`}>élément {i}</article>
       ))}
     </ScrollRail>
   )
+}
+
+// Les deux flèches se ciblent par leur classe : elles n'ont pas de libellé.
+function arrows(container: HTMLElement) {
+  return {
+    previous: container.querySelector('.scroll-rail__arrow--previous') as HTMLButtonElement,
+    next: container.querySelector('.scroll-rail__arrow--next') as HTMLButtonElement,
+  }
 }
 
 /**
@@ -73,42 +81,36 @@ beforeEach(() => {
 
 describe('ScrollRail', () => {
   it('rend les éléments qu\'on lui donne', () => {
-    renderRail(3)
-    expect(screen.getByTestId('item-0')).toBeInTheDocument()
-    expect(screen.getByTestId('item-2')).toBeInTheDocument()
-  })
-
-  it('expose deux flèches nommées pour les lecteurs d\'écran', () => {
-    renderRail()
-    expect(screen.getByLabelText('Précédent')).toBeInTheDocument()
-    expect(screen.getByLabelText('Suivant')).toBeInTheDocument()
+    const { getByTestId } = renderRail(3)
+    expect(getByTestId('item-0')).toBeInTheDocument()
+    expect(getByTestId('item-2')).toBeInTheDocument()
   })
 
   it('désactive les deux flèches quand tout tient dans la fenêtre', () => {
-    renderRail()
-    expect(screen.getByLabelText('Précédent')).toBeDisabled()
-    expect(screen.getByLabelText('Suivant')).toBeDisabled()
+    const { container } = renderRail()
+    expect(arrows(container).previous).toBeDisabled()
+    expect(arrows(container).next).toBeDisabled()
   })
 
   it('au départ : « suivant » actif, « précédent » désactivé', () => {
     const { container } = renderRail()
     simulateLayout(container)
-    expect(screen.getByLabelText('Précédent')).toBeDisabled()
-    expect(screen.getByLabelText('Suivant')).toBeEnabled()
+    expect(arrows(container).previous).toBeDisabled()
+    expect(arrows(container).next).toBeEnabled()
   })
 
   it('en bout de piste : « précédent » actif, « suivant » désactivé', () => {
     const { container } = renderRail()
     simulateLayout(container, { scrollLeft: 500 })
-    expect(screen.getByLabelText('Précédent')).toBeEnabled()
-    expect(screen.getByLabelText('Suivant')).toBeDisabled()
+    expect(arrows(container).previous).toBeEnabled()
+    expect(arrows(container).next).toBeDisabled()
   })
 
   it('un clic avance d\'UN élément, pas d\'une page entière', async () => {
     const { container } = renderRail()
     const { track } = simulateLayout(container)
 
-    await userEvent.click(screen.getByLabelText('Suivant'))
+    await userEvent.click(arrows(container).next)
 
     expect(track.scrollBy).toHaveBeenCalledWith(
       expect.objectContaining({ left: ITEM_WIDTH + GAP, behavior: 'smooth' })
@@ -119,7 +121,7 @@ describe('ScrollRail', () => {
     const { container } = renderRail()
     const { track } = simulateLayout(container, { scrollLeft: 500 })
 
-    await userEvent.click(screen.getByLabelText('Précédent'))
+    await userEvent.click(arrows(container).previous)
 
     expect(track.scrollBy).toHaveBeenCalledWith(
       expect.objectContaining({ left: -(ITEM_WIDTH + GAP), behavior: 'smooth' })

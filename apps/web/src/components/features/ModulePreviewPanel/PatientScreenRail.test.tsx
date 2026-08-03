@@ -31,8 +31,6 @@ function renderRail(over: Partial<React.ComponentProps<typeof PatientScreenRail<
       onFilterChange={onFilterChange}
       bannerLabel="Aperçu"
       footerLabel="3 écrans"
-      previousLabel="Écran précédent"
-      nextLabel="Écran suivant"
       {...over}
     />
   )
@@ -46,10 +44,10 @@ describe('PatientScreenRail', () => {
     expect(captions).toEqual(['1 · Premier', '2 · Deuxième', '3 · Troisième'])
   })
 
-  it('confie la navigation au rail, flèches nommées', () => {
-    renderRail()
-    expect(screen.getByLabelText('Écran précédent')).toBeInTheDocument()
-    expect(screen.getByLabelText('Écran suivant')).toBeInTheDocument()
+  it('confie la navigation au rail : deux flèches encadrent la piste', () => {
+    const { container } = renderRail()
+    expect(container.querySelector('.scroll-rail__arrow--previous')).toBeInTheDocument()
+    expect(container.querySelector('.scroll-rail__arrow--next')).toBeInTheDocument()
   })
 
   it('filtrer réduit le rail SANS renuméroter les écrans', () => {

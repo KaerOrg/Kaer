@@ -1071,8 +1071,6 @@ largeur des éléments dans le CSS n'oblige à toucher à rien.
 <ScrollRail
   className="evo-overview__scope"      // scope la gouttière et le calage des flèches
   itemCount={cards.length}
-  previousLabel={t('evolution.overview_previous')}
-  nextLabel={t('evolution.overview_next')}
 >
   {cards.map(card => <MaCarte key={card.id} … />)}
 </ScrollRail>
@@ -1082,7 +1080,6 @@ largeur des éléments dans le CSS n'oblige à toucher à rien.
 |---|---|---|
 | `children` | `ReactNode` | Les éléments de la rangée, de largeur fixe |
 | `itemCount` | `number` | Nombre d'éléments rendus. Ramène la piste au début quand la liste change (filtre, chargement) : rester à une position qui n'existe plus n'a aucun sens |
-| `previousLabel` / `nextLabel` | `string` | `aria-label` des flèches, déjà traduits (un primitive ne connaît pas de clé i18n) |
 | `className` | `string` | Scope du consommateur |
 
 **Variables CSS reprises par le consommateur :**

@@ -16,8 +16,7 @@ import './ScrollRail.css'
  * La piste est bornée à un **multiple exact** de la largeur d'un élément : aucun
  * élément n'est jamais montré à moitié.
  *
- * Présentationnel : aucune connaissance métier. Les éléments et les libellés
- * viennent de l'appelant.
+ * Présentationnel : aucune connaissance métier. Les éléments viennent de l'appelant.
  */
 export interface ScrollRailProps {
   readonly children: ReactNode
@@ -26,15 +25,12 @@ export interface ScrollRailProps {
    * (filtre, chargement) : rester à une position qui n'existe plus n'a aucun sens.
    */
   readonly itemCount: number
-  /** `aria-label` des deux flèches, déjà traduits (un primitive ne connaît pas de clé). */
-  readonly previousLabel: string
-  readonly nextLabel: string
   /** Classe posée sur le conteneur, pour scoper gouttière et calage des flèches. */
   readonly className?: string
 }
 
 export function ScrollRail({
-  children, itemCount, previousLabel, nextLabel, className = '',
+  children, itemCount, className = '',
 }: ScrollRailProps) {
   const { viewportRef, railRef, railMaxWidth, canGoPrevious, canGoNext, goPrevious, goNext } =
     useRailPaging(itemCount)
@@ -53,7 +49,6 @@ export function ScrollRail({
         icon={<ChevronLeft size={18} />}
         onClick={goPrevious}
         disabled={!canGoPrevious}
-        aria-label={previousLabel}
       />
 
       <div className="scroll-rail__track" ref={railRef} style={trackStyle}>
@@ -66,7 +61,6 @@ export function ScrollRail({
         icon={<ChevronRight size={18} />}
         onClick={goNext}
         disabled={!canGoNext}
-        aria-label={nextLabel}
       />
     </div>
   )
