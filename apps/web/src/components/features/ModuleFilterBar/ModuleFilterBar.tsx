@@ -1,4 +1,4 @@
-import { useCallback, useMemo, type CSSProperties } from 'react'
+import { useCallback, useMemo, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../ui/Button'
 import { Chip } from '../../ui/Chip'
@@ -25,6 +25,11 @@ interface ModuleFilterBarProps {
   totalCount: number
   /** Recherche par mot-clé, affichée en tête du panneau. Omise → pas de recherche. */
   search?: ModuleFilterSearch
+  /**
+   * Contrôles de filtre supplémentaires (hors taxonomie), rendus dans la rangée des
+   * filtres après les axes. Ex. le filtre « Type » (Auto/Hétéro) de l'onglet Échelles.
+   */
+  extraControls?: ReactNode
 }
 
 /** Un tag sélectionné, prêt à être rendu en puce supprimable. */
@@ -57,6 +62,7 @@ export function ModuleFilterBar({
   resultCount,
   totalCount,
   search,
+  extraControls,
 }: ModuleFilterBarProps) {
   const { t } = useTranslation()
   const hasActive = hasAnyActiveFilter(activeFilters)
@@ -124,6 +130,7 @@ export function ModuleFilterBar({
             />
           )
         })}
+        {extraControls}
       </div>
 
       {selectedGroups.length > 0 ? (

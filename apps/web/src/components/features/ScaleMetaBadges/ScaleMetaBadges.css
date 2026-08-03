@@ -12,24 +12,8 @@
   gap: 6px;
 }
 
-.scale-meta__eval-badge {
-  display: inline-block;
-  font-size: var(--font-size-xxs);
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-
-.scale-meta__eval-badge--auto {
-  background: #DBEAFE;
-  color: #1D4ED8;
-}
-
-.scale-meta__eval-badge--hetero {
-  background: #DCFCE7;
-  color: #15803D;
-}
+/* Le badge Auto/Hétéro vit désormais dans `features/ScaleEvalBadge` (réutilisé par le
+   tableau des échelles). */
 
 .scale-meta__category-chip {
   font-size: var(--font-size-xxs);

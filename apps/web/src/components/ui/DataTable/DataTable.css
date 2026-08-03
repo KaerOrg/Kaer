@@ -79,6 +79,12 @@
   background: var(--color-bg);
 }
 
+/* Ligne cliquable (surface souris) : curseur main. Le chemin clavier/lecteur d'écran
+   passe par les contrôles explicites de la ligne, pas par le `<tr>` lui-même. */
+.data-table__row--clickable {
+  cursor: pointer;
+}
+
 /* Panneau dépliable d'une ligne — occupe toute la largeur. */
 .data-table__detail-row > td {
   background: var(--color-bg);

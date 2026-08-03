@@ -16,6 +16,11 @@ interface ModuleTableProps {
   readonly ariaLabel: string
   /** Affiché à la place de la table quand `rows` est vide (ex. filtre sans résultat). */
   readonly emptyState?: ReactNode
+  /**
+   * Rend chaque ligne cliquable (ouvre la fiche du module, K-3). Reçoit l'`id` de la
+   * ligne. Active aussi la colonne d'actions au survol (cellule `row.actions`).
+   */
+  readonly onRowClick?: (id: string) => void
 }
 
 // Placeholder « valeur absente » : trait d'union simple (jamais un tiret long).
@@ -25,11 +30,11 @@ const EMPTY_DATE = '-'
  * Tableau dense des modules / échelles activés d'un patient (K-1). Assemble le
  * primitive `ui/DataTable` avec les 5 colonnes de l'armoire : Module (icône + nom +
  * description tronquée), Indications, Débloqué le, Dernière activité, Activé. Possède
- * l'état de tri (les deux colonnes de date) et réordonne lui-même les lignes — le
+ * l'état de tri (les deux colonnes de date) et réordonne lui-même les lignes : le
  * primitive `DataTable` ne trie jamais. Réutilisable par l'onglet Échelles (K-4) via
  * `firstColumnLabel` et les cellules libres `indications` / `activation`.
  */
-export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState }: ModuleTableProps) {
+export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onRowClick }: ModuleTableProps) {
   const { t, i18n } = useTranslation()
   const [sort, setSort] = useState<DataTableSort | undefined>(undefined)
 
@@ -73,7 +78,10 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState }: M
           <div className="module-table__module">
             {row.icon != null ? <span className="module-table__module-icon">{row.icon}</span> : null}
             <div className="module-table__module-text">
-              <span className="module-table__module-title">{row.title}</span>
+              <span className="module-table__module-titleline">
+                <span className="module-table__module-title">{row.title}</span>
+                {row.titleBadge != null ? row.titleBadge : null}
+              </span>
               <span className="module-table__module-desc">{row.description}</span>
             </div>
           </div>
@@ -89,7 +97,7 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState }: M
         header: t('patient.module_table.col_unlocked'),
         sortable: true,
         cellClassName: 'module-table__col-date',
-        cell: row => formatDate(row.unlockedAt),
+        cell: row => row.unlockedLabelOverride ?? formatDate(row.unlockedAt),
       },
       {
         id: 'lastActivity',
@@ -105,11 +113,29 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState }: M
         cellClassName: 'module-table__col-activation',
         cell: row => row.activation,
       },
+      // Colonne d'actions au survol : présente uniquement quand la table est cliquable
+      // (K-3). En-tête vide, cellule révélée au hover/focus de la ligne.
+      ...(onRowClick
+        ? [{
+            id: 'actions',
+            header: '',
+            headerClassName: 'module-table__col-actions',
+            cellClassName: 'module-table__col-actions',
+            cell: (row: ModuleTableRow) =>
+              row.actions != null ? <div className="module-table__actions">{row.actions}</div> : null,
+          } satisfies DataTableColumn<ModuleTableRow>]
+        : []),
     ],
-    [firstColumnLabel, t, formatDate],
+    [firstColumnLabel, t, formatDate, onRowClick],
   )
 
   const getRowId = useCallback((row: ModuleTableRow) => row.id, [])
+
+  // Adapte le clic de ligne (id) au contrat `onRowActivate` (ligne) du primitive.
+  const handleRowActivate = useMemo(
+    () => (onRowClick ? (row: ModuleTableRow) => onRowClick(row.id) : undefined),
+    [onRowClick],
+  )
 
   return (
     <DataTable
@@ -121,6 +147,7 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState }: M
       onSortChange={handleSortChange}
       emptyState={emptyState}
       ariaLabel={ariaLabel}
+      onRowActivate={handleRowActivate}
     />
   )
 }

@@ -156,6 +156,17 @@
   "scales": {
     "eval_auto": "Auto",
     "eval_hetero": "Hétéro",
+    "tab_scales": "Échelles & questionnaires",
+    "wardrobe_title": "Échelles & questionnaires",
+    "wardrobe_desc": "Les échelles et questionnaires activés pour ce patient.",
+    "wardrobe_empty": "Aucune échelle activée pour ce patient. Cliquez sur « Ajouter une échelle » pour commencer.",
+    "add_button": "Ajouter une échelle",
+    "add_title": "Ajouter une échelle",
+    "subtab_active": "Actives",
+    "col_scale": "Échelle / questionnaire",
+    "search_placeholder": "Rechercher une échelle…",
+    "always_available": "Toujours dispo.",
+    "type_filter_label": "Type",
     "validated_prefix": "Validé",
     "age": {
       "perinatal": "Périnatal",
@@ -332,6 +343,7 @@
     "crisis_error_save": "Erreur lors de l'enregistrement. Réessayez.",
     "cssrs_evaluations": "Évaluations",
     "tab_evolution": "Évolution",
+    "subtab_active": "Actifs",
     "tab_overview": "Vue d'ensemble",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -2459,6 +2471,7 @@
   },
   "evolution": {
     "title": "Évolution clinique",
+    "raw_values_caption": "Valeurs brutes, à interpréter en consultation.",
     "show_archived": "Afficher les suivis archivés",
     "archived_badge": "Archivé",
     "all_archived": "Tous les suivis de ce patient sont archivés. Activez « Afficher les suivis archivés » pour les consulter.",
