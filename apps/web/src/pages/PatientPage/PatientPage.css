@@ -762,6 +762,11 @@
   gap: 16px;
 }
 
+/* Sous-onglets « Actifs » / « Évolution » de l'armoire (K-2) : espace sous la rangée. */
+.wardrobe__subtabs {
+  margin-bottom: var(--spacing-lg);
+}
+
 /* Vue active : barre de filtres (lentille) + grille des modules actifs */
 .wardrobe__active {
   display: flex;

@@ -332,6 +332,7 @@
     "crisis_error_save": "Erreur lors de l'enregistrement. Réessayez.",
     "cssrs_evaluations": "Évaluations",
     "tab_evolution": "Évolution",
+    "subtab_active": "Actifs",
     "tab_overview": "Vue d'ensemble",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -2459,6 +2460,7 @@
   },
   "evolution": {
     "title": "Évolution clinique",
+    "raw_values_caption": "Valeurs brutes, à interpréter en consultation.",
     "show_archived": "Afficher les suivis archivés",
     "archived_badge": "Archivé",
     "all_archived": "Tous les suivis de ce patient sont archivés. Activez « Afficher les suivis archivés » pour les consulter.",

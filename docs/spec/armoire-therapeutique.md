@@ -90,11 +90,17 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Détails techniques.** Grille CSS en `minmax(0, …fr)` (le `fr` seul se cale sur le contenu et désaligne les colonnes d'une ligne à l'autre). Description sur 1 ligne, `text-overflow: ellipsis`. Le nouveau tableau est un composant `features/` réutilisable (il servira aussi K-4). Réutiliser la barre de filtres existante (`ModuleFilterBar`, dimensions indication/public), le handler du toggle d'activation, l'i18n, les tokens du design system.
 
 **Critères d'acceptation.**
-- [ ] Colonnes strictement alignées sur toutes les lignes.
-- [ ] 15+ modules lisibles sans scroll excessif ; plus aucune carte.
-- [ ] Tri par « Débloqué le » et « Dernière activité ».
-- [ ] Filtres indication/public conservés ; toggle d'activation fonctionnel.
-- [ ] Composant tableau extrait dans `features/`, testé, documenté (design-system.md).
+- [x] Colonnes strictement alignées sur toutes les lignes.
+- [x] 15+ modules lisibles sans scroll excessif ; plus aucune carte.
+- [x] Tri par « Débloqué le » et « Dernière activité ».
+- [x] Filtres indication/public conservés ; toggle d'activation fonctionnel.
+- [x] Composant tableau extrait dans `features/`, testé, documenté (design-system.md).
+
+**Livré.** Composant `features/ModuleTable` (assemble `ui/DataTable`, possède le tri des
+deux colonnes de date) ; source « dernière activité » via `engagementService.fetchModuleLastActivity`
++ query `engagementQueries.lastActivity`. Colonne « Indications » : `ModuleTagChips maxChips={2}`
+(modules) ou `ScaleMetaBadges chipsOnly` (échelles). Documenté dans `apps/web/docs/design-system.md`
+(section `ModuleTable`).
 
 ### K-2 · Modules : sous-onglets « Actifs » / « Évolution » + réintégration de l'Évolution existante (maquette `K-2_modules-evolution_3c`)
 
@@ -105,9 +111,17 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Réutiliser, ne pas recréer.** Le sous-onglet Évolution monte le `PatientEvolutionTab` existant, **filtré aux modules** (hors échelles). Conserver tel quel : `EvolutionOverviewBand`, `EvolutionSection` (repliables), `onOpenModuleData`, toggle « Afficher les archivés », `SegmentedControl` de période.
 
 **Critères d'acceptation.**
-- [ ] L'Évolution affiche exactement les mêmes courbes/sections qu'avant (filtrées aux modules) ; aucun composant de graphe réécrit.
-- [ ] L'ancienne entrée « Évolution » est retirée de la sidebar.
-- [ ] « Voir les données » ouvre bien la modale sur l'onglet Données du module.
+- [x] L'Évolution affiche exactement les mêmes courbes/sections qu'avant (filtrées aux modules) ; aucun composant de graphe réécrit.
+- [x] L'ancienne entrée « Évolution » est retirée de la sidebar.
+- [x] « Voir les données » ouvre bien la modale sur l'onglet Données du module.
+
+**Livré.** `PatientEvolutionTab` reçoit une prop `family?: 'modules' | 'scales'` (absente →
+tout, comportement historique) : `modules` masque les sections d'échelles cliniques, `scales`
+ne garde qu'elles. K-5 réutilisera `family="scales"` dans l'onglet Échelles. Les sous-onglets
+`Actifs`/`Évolution` sont un `ui/Tabs` dans `PatientModulesTab` ; « Voir les données → » ouvre
+la modale d'actions en interne (le flux `openDataFor` de la sidebar est supprimé). Le titre h2
+« Évolution » redondant devient une légende MDR (« Valeurs brutes, à interpréter en consultation. »),
+le sous-onglet portant déjà le libellé.
 
 ### K-3 · Fiche module au clic sur une ligne (maquette `K-3_fiche-module_3b`)
 

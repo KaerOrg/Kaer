@@ -12,12 +12,11 @@
   flex-wrap: wrap;
 }
 
-.evolution__title {
-  font-size: var(--font-size-h2);
-  font-weight: 700;
-  color: var(--color-text);
+/* Légende MDR de l'en-tête (le titre « Évolution » est porté par le sous-onglet). */
+.evolution__caption {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
   margin: 0;
-  letter-spacing: -0.01em;
 }
 
 /* Sélecteur de période : composant ui/SegmentedControl (variante "track"). */
