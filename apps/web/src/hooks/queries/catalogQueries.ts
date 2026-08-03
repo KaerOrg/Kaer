@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchModuleCategories, fetchComingSoonModuleIds } from '@services/moduleCatalogService'
+import { fetchModuleCategories, fetchComingSoonModuleIds, fetchModuleTaxonomy } from '@services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '@services/practitionerSettingsService'
 import { fetchModulePreviewKind } from '@services/moduleService'
 import { CONFIG_QUERY_OPTIONS } from './configCache'
@@ -14,6 +14,15 @@ export const catalogQueries = {
     queryOptions({
       queryKey: ['catalog', 'categories'],
       queryFn: fetchModuleCategories,
+      ...CONFIG_QUERY_OPTIONS,
+    }),
+
+  // Taxonomie de l'armoire (axes, tags, liaisons modules) : référentiel de config,
+  // source UNIQUE des puces d'indication, sur la carte comme dans le panneau Sources.
+  taxonomy: () =>
+    queryOptions({
+      queryKey: ['catalog', 'taxonomy'],
+      queryFn: fetchModuleTaxonomy,
       ...CONFIG_QUERY_OPTIONS,
     }),
 

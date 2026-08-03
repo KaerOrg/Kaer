@@ -68,6 +68,32 @@ describe('ModuleSourcesPanel', () => {
     expect(screen.queryByRole('link')).toBeNull()
   })
 
+  it('groupe les sources par niveau de preuve, du plus lourd au plus léger', async () => {
+    mockedFetch.mockResolvedValue([
+      { ...SOURCE, id: 'a', source_type: 'expert_opinion', label: 'Willcox 1982', sort_order: 1 },
+      { ...SOURCE, id: 'b', source_type: 'rct', label: 'Kircanski 2012', sort_order: 2 },
+      { ...SOURCE, id: 'c', source_type: 'systematic_review', label: 'Revue 2025', sort_order: 3 },
+    ])
+    const { container } = renderWithClient(<ModuleSourcesPanel moduleId="emotion_wheel" />)
+
+    await screen.findByText('Revue 2025')
+    const titles = [...container.querySelectorAll('.sources-panel__group-title')].map(h => h.textContent)
+    expect(titles).toEqual([
+      'patient.sources_group_reviews',
+      'patient.sources_group_trials',
+      'patient.sources_group_mechanism',
+    ])
+  })
+
+  it('n\'affiche que les groupes qui portent une source', async () => {
+    mockedFetch.mockResolvedValue([{ ...SOURCE, source_type: 'rct' }])
+    const { container } = renderWithClient(<ModuleSourcesPanel moduleId="emotion_wheel" />)
+
+    await screen.findByText(SOURCE.label)
+    const titles = [...container.querySelectorAll('.sources-panel__group-title')].map(h => h.textContent)
+    expect(titles).toEqual(['patient.sources_group_trials'])
+  })
+
   it('affiche l’état vide quand aucune source', async () => {
     mockedFetch.mockResolvedValue([])
     renderWithClient(<ModuleSourcesPanel moduleId="crisis_plan" />)

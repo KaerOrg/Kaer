@@ -16,8 +16,31 @@ Cette feature est **passive** : elle affiche des références bibliographiques s
 | `supabase/seed/sources_seed.sql` | Seed idempotent (`ON CONFLICT (id) DO UPDATE`), UUIDs fixes |
 | `packages/shared/src/index.ts` | Types `ModuleSource`, `ModuleSourceType` |
 | `apps/web/src/services/moduleSourcesService.ts` | `fetchSourcesByModule` (cache mémoire) + `clearModuleSourcesCache` |
-| `apps/web/src/components/features/ModuleSources/ModuleSourcesPanel.tsx` | Panneau liste (états loading / vide / erreur / data) |
+| `apps/web/src/components/features/ModuleSources/ModuleSourcesPanel.tsx` | Panneau liste (états loading / vide / erreur / data), groupé par niveau de preuve |
+| `apps/web/src/components/features/ModuleSources/sourceGroups.ts` | Groupement pur par niveau de preuve, dérivé de `source_type` |
+| `apps/web/src/components/features/ModuleSources/ModuleIndicationsBlock.tsx` | Bloc « Indications » : puces de taxonomie + mention de non-instrument |
 | `apps/web/src/components/features/ModulePreviewPanel/ModulePreviewPanel.tsx` | Hôte — 2 onglets via `<Tabs>` (Vue patient / Sources) |
+
+## Ce que le panneau affiche, dans l'ordre (#270)
+
+1. **Bloc « Indications »**, générique à tous les modules et rendu seulement si le
+   module porte des tags. Deux lignes, **lues dans la taxonomie** (`indication` en ton
+   *info*, `population` en ton *neutral*) : ce sont exactement les puces de la carte du
+   module, par le même composant `ModuleTagChips` et la même sélection
+   (`selectCardTagRows`). **Aucune liste d'indications n'existe dans le code.** Ajouter
+   une indication à un module = lui attribuer un tag dans le seed, et elle apparaît du
+   même coup dans les filtres du catalogue, sur la carte et ici. Une seule vérité.
+2. Sous les puces, la **mention qui protège le module** (« ce n'est pas un instrument
+   de mesure… »), lue elle aussi en base : c'est le champ `footer_note` du module,
+   celui que le patient voit en pied d'écran. Pas de texte par module dans le code.
+3. **Les sources, groupées par niveau de preuve** : *Revues et méta-analyses*
+   (`meta_analysis`, `systematic_review`, `guideline`), puis *Essais randomisés*
+   (`rct`, `cohort_study`), puis *Mécanisme et source de l'instrument*
+   (`expert_opinion`). L'ordre dérive de `source_type`, **jamais d'un champ nouveau** ;
+   les six valeurs de `ModuleSourceType` sont réparties, il n'en existe pas d'autre.
+   À l'intérieur d'un groupe, l'ordre du seed (`sort_order`) est conservé.
+
+Un module **sans source** affiche l'état vide, inchangé.
 
 ## Table `module_sources`
 

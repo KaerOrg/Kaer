@@ -56,7 +56,14 @@ export function filterCategoriesByTags(
 }
 
 /** Dimensions affichées en chips sur la carte d'un module (le reste sert aux filtres). */
-const CARD_DIMENSIONS: readonly string[] = ['indication']
+export const CARD_DIMENSIONS: readonly string[] = ['indication']
+
+/**
+ * Dimensions affichées dans le panneau Sources : la carte est étroite et se limite
+ * aux indications, le panneau a la place d'ajouter le public visé. Même taxonomie,
+ * même sélection, seule l'étendue change.
+ */
+export const PANEL_DIMENSIONS: readonly string[] = ['indication', 'population']
 
 /** Une ligne de puces sur la carte : une dimension + ses tags portés par le module. */
 export interface CardTagRow {
@@ -72,10 +79,11 @@ export interface CardTagRow {
 export function selectCardTagRows(
   moduleTagIds: ReadonlySet<string> | undefined,
   taxonomy: Pick<ModuleTaxonomy, 'tagsByDimension'>,
+  dimensions: readonly string[] = CARD_DIMENSIONS,
 ): CardTagRow[] {
   if (!moduleTagIds || moduleTagIds.size === 0) return []
   const rows: CardTagRow[] = []
-  for (const dimensionId of CARD_DIMENSIONS) {
+  for (const dimensionId of dimensions) {
     const dimTags = taxonomy.tagsByDimension.get(dimensionId)
     if (!dimTags) continue
     const tags = dimTags.filter(tag => moduleTagIds.has(tag.id))
