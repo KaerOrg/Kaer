@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { ScrollRail } from '@ui/ScrollRail'
 import type { OverviewCard } from '../../../pages/PatientPage/tabs/overviewMetrics'
 import { EvolutionOverviewCard } from './EvolutionOverviewCard'
 import { useActiveSection } from './useActiveSection'
@@ -33,8 +34,14 @@ export function EvolutionOverviewBand({ cards }: EvolutionOverviewBandProps) {
   if (cards.length === 0) return null
 
   return (
-    <div className="evo-overview" role="navigation" aria-label="modules">
-      <div className="evo-overview__rail">
+    <div className="evo-overview">
+      {/* Même règle que les vues patient : on avance à la flèche, module par module,
+          et aucune carte n'est montrée à moitié. Un dégradé de bord signalait qu'il y
+          avait une suite sans donner le moyen d'y aller. */}
+      <ScrollRail
+        className="evo-overview__scope"
+        itemCount={cards.length}
+      >
         {cards.map(card => (
           <EvolutionOverviewCard
             key={card.moduleType}
@@ -43,7 +50,7 @@ export function EvolutionOverviewBand({ cards }: EvolutionOverviewBandProps) {
             onNavigate={handleNavigate}
           />
         ))}
-      </div>
+      </ScrollRail>
     </div>
   )
 }

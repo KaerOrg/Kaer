@@ -1,7 +1,8 @@
 import { useCallback, type ReactNode } from 'react'
-import { Eye, ChevronRight } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { Banner } from '@ui/Banner'
 import { Chip } from '@ui/Chip'
+import { ScrollRail } from '@ui/ScrollRail'
 import './PatientScreenRail.css'
 
 // ─── Coquille commune des « vues patient » multi-écrans (aperçu praticien) ────
@@ -37,12 +38,11 @@ interface Props<Stage extends string> {
   readonly bannerLabel: string
   /** Pied : « n écrans », déjà composé par l'appelant (il possède le pluriel). */
   readonly footerLabel: string
-  readonly scrollLabel: string
 }
 
 export function PatientScreenRail<Stage extends string>({
   screens, filters, activeFilter, onFilterChange,
-  bannerLabel, footerLabel, scrollLabel,
+  bannerLabel, footerLabel,
 }: Props<Stage>) {
   // La numérotation suit la position de l'écran dans le parcours COMPLET : filtrer
   // réduit le rail sans renuméroter, sinon l'écran 7 deviendrait l'écran 1 et le
@@ -68,18 +68,20 @@ export function PatientScreenRail<Stage extends string>({
         ))}
       </div>
 
-      <div className="psr-rail">
+      <ScrollRail
+        className="psr-rail-scope"
+        itemCount={visible.length}
+      >
         {visible.map(({ screen, number }) => (
           <article className="psr-screen" key={screen.id}>
             <div className="psr-screen__frame">{screen.body}</div>
             <div className="psr-screen__caption">{number} · {screen.caption}</div>
           </article>
         ))}
-      </div>
+      </ScrollRail>
 
       <div className="psr-footer">
         <span>{footerLabel}</span>
-        <span className="psr-footer__scroll">{scrollLabel} <ChevronRight size={13} /></span>
       </div>
     </div>
   )

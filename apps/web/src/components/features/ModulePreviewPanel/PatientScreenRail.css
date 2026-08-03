@@ -1,4 +1,6 @@
-/* Coquille commune des vues patient multi-écrans (aperçu praticien, lecture seule). */
+/* Coquille commune des vues patient multi-écrans (aperçu praticien, lecture seule).
+   Le rail lui-même est le primitive `ui/ScrollRail` : ce fichier n'habille que ce
+   qui est propre à la vignette d'écran. */
 
 .psr-filters {
   display: flex;
@@ -7,12 +9,10 @@
   margin: 12px 0;
 }
 
-/* Le rail défile HORIZONTALEMENT, la page jamais : le débordement est contenu ici. */
-.psr-rail {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 8px;
+/* Calage des flèches : sur le CADRE de l'écran, pas sur la carte entière. La légende
+   sous la vignette ne compte pas dans le repère visuel. */
+.psr-rail-scope {
+  --scroll-rail-arrow-top: 200px;
 }
 
 .psr-screen {
@@ -48,10 +48,4 @@
   margin-top: 10px;
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-}
-
-.psr-footer__scroll {
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }

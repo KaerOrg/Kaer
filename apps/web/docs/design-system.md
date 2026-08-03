@@ -1049,6 +1049,49 @@ Le module expose aussi `parseColor`, `contrastRatio`, `relativeLuminance` et `bl
 (composition d'une couleur semi-transparente sur son fond) : à réutiliser pour tout
 nouvel audit plutôt que de recalculer un ratio à la main.
 
+### `ScrollRail`
+
+`components/ui/ScrollRail/`. **Rangée horizontale parcourue à la flèche**, jamais à la
+barre de défilement.
+
+Une barre de défilement demande de viser un curseur de quelques pixels puis de le faire
+glisser. Ce n'est pas un geste qu'on fait en consultation, en parlant à quelqu'un. Deux
+flèches encadrent la piste, avancent d'**un élément par clic** et se désactivent aux
+extrémités. Le glissement souris et pavé tactile reste actif, il n'est simplement plus
+le contrôle principal, et la barre native est masquée.
+
+**La piste est bornée à un multiple exact de la largeur d'un élément** : aucun élément
+n'est jamais montré à moitié. Un bout de carte qui dépasse au bord droit pollue la
+lecture sans rien apprendre.
+
+Le pas et la gouttière sont **mesurés sur le rendu réel**, pas codés en dur : changer la
+largeur des éléments dans le CSS n'oblige à toucher à rien.
+
+```tsx
+<ScrollRail
+  className="evo-overview__scope"      // scope la gouttière et le calage des flèches
+  itemCount={cards.length}
+>
+  {cards.map(card => <MaCarte key={card.id} … />)}
+</ScrollRail>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `children` | `ReactNode` | Les éléments de la rangée, de largeur fixe |
+| `itemCount` | `number` | Nombre d'éléments rendus. Ramène la piste au début quand la liste change (filtre, chargement) : rester à une position qui n'existe plus n'a aucun sens |
+| `className` | `string` | Scope du consommateur |
+
+**Variables CSS reprises par le consommateur :**
+
+| Variable | Défaut | Rôle |
+|---|---|---|
+| `--scroll-rail-gap` | `16px` | Gouttière entre les éléments |
+| `--scroll-rail-arrow-top` | `50%` | Calage vertical des flèches, quand le centre n'est pas le bon repère (ex. s'aligner sur le cadre d'une vignette, pas sur sa légende) |
+
+**Consommateurs** : `features/PatientScreenRail` (les écrans d'un parcours patient) et
+`features/EvolutionOverviewBand` (les cartes de module de la page Évolution).
+
 ### `Collapsible`
 
 `components/ui/Collapsible/`. **Section repliable** : un en-tête cliquable qui révèle

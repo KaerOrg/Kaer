@@ -317,7 +317,6 @@ export function DefusionPatientView({ patientModuleId }: Props) {
       onFilterChange={handleFilterChange}
       bannerLabel={t('patient.preview_banner')}
       footerLabel={t('patient.dpv_footer', { count: screens.length })}
-      scrollLabel={t('patient.dpv_scroll')}
     />
   )
 }
