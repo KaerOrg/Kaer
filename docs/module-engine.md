@@ -155,8 +155,27 @@ create table public.module_content_fields (
 
 | `field_type` | Rendu | Props clés |
 |---|---|---|
-| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number`, `contactable` |
+| `step_title` | Titre d'étape | `color`, `bgColor`, `icon`, `step_number`, `contactable`, `mixed_kind`, `measure_editor`, `measure_verb_N` |
 | `step_hint` | Sous-titre / question guide | `color`, `step_number` |
+
+> **Étapes « mixtes » (`mixed_kind: 'true'`)** : l'étape mélange des **personnes** et des
+> **lieux** (crisis_plan étape 3, « Où aller, qui voir »). Le seul drapeau `contactable`,
+> porté par l'étape entière, ne savait pas le dire. `mixed_kind` ajoute la colonne
+> « personne ou lieu » sur l'ITEM (`safety_plan_items.kind`, union fermée `person | place`),
+> qui **surcharge** le défaut d'étape. Côté praticien (PW-3), `readStepColumns`
+> (`@kaer/shared`) déduit de ces deux drapeaux les colonnes du tableau d'items : aucune
+> configuration de colonnes n'est écrite en dur, aucun numéro d'étape n'apparaît dans le
+> code. **`kind` n'est jamais déduit du texte de l'item** : il est rempli en consultation,
+> ou il reste vide.
+
+> **Étape à éditeur de mesures (`measure_editor: 'true'`)** : l'étape ne se lit pas en
+> colonnes mais en **phrases** (crisis_plan étape 6, les arrangements de mise à distance).
+> Elle est orientée vers `MeasureEditor` (mobile, P-13) / `SafetyMeasureEditor` (web, PW-4),
+> et les propositions de verbe viennent des clés **indexées** `measure_verb_1` … `measure_verb_N`
+> (lues par `collectIndexed`), dans l'ordre de la configuration, jamais réordonnées,
+> filtrées ni complétées selon les saisies passées. Le code d'une proposition **est** sa clé
+> i18n : les deux écrans désignent la même proposition par la même chaîne. Piloté par la
+> config, jamais par le numéro 6.
 
 > **Étapes « contactables » (`contactable: 'true'`)** : quand un `step_title` porte cette
 > prop (ex. crisis_plan étapes 4 & 5 : proches / professionnels), les items de l'étape

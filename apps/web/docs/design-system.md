@@ -972,7 +972,7 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `options` | `readonly SegmentOption<T>[]` | — | Liste `{ value, label }` (obligatoire). Mémoïser si dérivée de `t()`. |
-| `value` | `T` | — | Valeur sélectionnée (obligatoire) |
+| `value` | `T \| null` | — | Valeur sélectionnée (obligatoire). **`null` : aucun segment actif**. Le choix n'a pas encore été fait, et rien n'est présélectionné à sa place. |
 | `onChange` | `(value: T) => void` | — | Appelé avec la valeur du segment cliqué |
 | `variant` | `'track' \| 'pills'` | `'track'` | Aspect visuel |
 | `accentColor` | `string` | `var(--color-primary)` (CSS) | Couleur du segment actif (valeur dynamique) |
@@ -982,6 +982,11 @@ const options = useMemo<readonly SegmentOption<TimeRange>[]>(
 > **Conformité MDR** : `accentColor` est une couleur de **contexte** (accent du module),
 > jamais l'expression d'une valeur clinique. Ne jamais piloter cette couleur par un score
 > ou un seuil — ce serait du codage couleur interprétatif interdit.
+>
+> **`value={null}` est le bon geste quand le choix n'a pas été fait.** Ne jamais poser une
+> valeur par défaut « pour éviter le vide » : présélectionner, c'est répondre à la place de
+> l'utilisateur. Usage de référence : la colonne « personne ou lieu » de l'éditeur du plan
+> de sécurité (PW-3), où `kind` n'est **jamais** déduit du texte de l'item.
 
 ### `EmptyState`
 
@@ -1612,6 +1617,46 @@ toast.info('Info')
 ```
 
 **Règle :** `useToast` pour les résultats d'opération réseau. État local inline uniquement pour la validation de champ (email invalide, champ vide).
+
+---
+
+### `SafetyMeasureEditor` (`components/features/`)
+
+Éditeur de l'étape 6 du plan de sécurité, côté praticien (PW-4). Parité de l'éditeur
+patient, avec une contrainte qui change la priorité d'usage : **la plupart des
+arrangements sont décidés en consultation**, donc saisis ici plus que sur le téléphone.
+
+```tsx
+<SafetyMeasureEditor
+  measures={items}                 // mesures déjà décidées
+  verbs={verbOptions}              // propositions, dans l'ordre de la config
+  otherVerbCode={OTHER_VERB_CODE}  // celle qui ouvre le champ libre
+  labels={labels}                  // déjà traduits : le composant ne connaît aucune clé
+  onAdd={handleAdd}
+  onDelete={handleDelete}
+/>
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `measures` | `readonly ExistingMeasure[]` | Mesures décidées, rendues en phrases au-dessus du formulaire |
+| `verbs` | `readonly MeasureVerbOption[]` | Propositions de verbe, **dans l'ordre de la configuration** |
+| `otherVerbCode` | `string` | Code de la proposition « Autre », qui ouvre la saisie libre du verbe |
+| `labels` | objet | Libellés **déjà traduits**. Le composant ne connaît aucune clé i18n |
+| `onAdd` | `(m: NewMeasure) => void` | Ajout : verbe, quoi, qui (nullable), jusqu'à quand (nullable) |
+| `onDelete` | `(id: string) => void` | Retrait d'une mesure |
+
+**La phrase est composée au rendu**, par `composeMeasureSentence` de `@kaer/shared` :
+la même fonction que le mobile, donc aucune dérive de formulation entre les deux écrans.
+Un morceau absent ne laisse aucun trou.
+
+> **Deux invariants MDR, vérifiés par les tests du composant.** Aucun placeholder ne
+> donne d'exemple d'objet, parce que l'interface ne nomme, ne liste, ne suggère et
+> n'illustre jamais un moyen. Et **aucune date n'est comparée à aujourd'hui** : pas de
+> rappel, pas d'alerte, pas de couleur à l'échéance, ni ici ni dans l'onglet Données.
+
+`MeasureRow` et `MeasureVerbChip` sont deux fichiers voisins : chaque ligne et chaque
+puce portent leur identifiant et rappellent un callback stable du parent.
 
 ---
 

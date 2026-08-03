@@ -2168,6 +2168,11 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_3.title', 'color', '#4F46E5'),
   ('crisis_plan.step_3.title', 'icon', 'account-group-outline'),
   ('crisis_plan.step_3.title', 'step_number', '3'),
+  -- Étape 3 (« Où aller, qui voir ») : elle MÉLANGE des personnes et des lieux. Le seul
+  -- drapeau `contactable`, porté par l'étape entière, ne savait pas le dire, d'où
+  -- `mixed_kind`, qui ajoute la colonne « personne ou lieu » sur l'item (PW-3, P-14).
+  -- Le `kind` d'un item surcharge alors le défaut d'étape. Jamais déduit du texte.
+  ('crisis_plan.step_3.title', 'mixed_kind', 'true'),
   ('crisis_plan.step_4.hint', 'color', '#9333EA'),
   ('crisis_plan.step_4.hint', 'step_number', '4'),
   ('crisis_plan.step_4.title', 'bgColor', '#FDF4FF'),

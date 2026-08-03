@@ -33,7 +33,7 @@ const READ_ALLOWLIST = new Set<string>([
   // (`onLoadNotes`) — pas un fetch au montage (cf. #100, pattern ObservationBlock).
   'fetchCaseloadNotes',
   // Amorçage de formulaire à l'ouverture d'un éditeur (state local éditable), one-shot
-  // sur action utilisateur — même pattern que useCrisisPlanEditor.openEditor.
+  // sur action utilisateur, même pattern que useBAActivitiesEditor.openEditor.
   'fetchTrackedEffects',
   'fetchMedications',
   // Idem : activités co-construites (useBAActivitiesEditor.openEditor).

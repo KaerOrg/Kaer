@@ -18,6 +18,19 @@ export type { CrisisAnchor }
 
 export interface CrisisPlanPractitionerConfig {
   practitionerMessage: string
+  /**
+   * Jour de la première élaboration conjointe du plan (PW-5, #324). Alimente l'en-tête
+   * de la vue Consultation : « Élaboré avec Dr X le 12 mars · revu le 4 juin ».
+   */
+  createdWithAt: string | null
+  /**
+   * Jour de la dernière revue en consultation. Distinct du « modifié » d'un item, et
+   * distinct d'une lecture par le patient, qui n'est pas mesurée.
+   *
+   * MDR 2017/745 : affichée, jamais surveillée. Ne jamais la comparer à la date du jour
+   * pour produire une alerte d'ancienneté ou un rappel de revue.
+   */
+  lastReviewedAt: string | null
 }
 
 export async function fetchPractitionerConfig(
@@ -25,12 +38,14 @@ export async function fetchPractitionerConfig(
 ): Promise<CrisisPlanPractitionerConfig> {
   const { data } = await supabase
     .from('crisis_plan_configs')
-    .select('practitioner_message')
+    .select('practitioner_message, created_with_at, last_reviewed_at')
     .eq('patient_id', patientId)
     .maybeSingle()
 
   return {
     practitionerMessage: data?.practitioner_message ?? '',
+    createdWithAt: data?.created_with_at ?? null,
+    lastReviewedAt: data?.last_reviewed_at ?? null,
   }
 }
 

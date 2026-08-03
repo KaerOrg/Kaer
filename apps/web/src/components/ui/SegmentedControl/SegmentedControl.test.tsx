@@ -49,6 +49,21 @@ describe('SegmentedControl', () => {
     expect(screen.getByText('3 mois')).not.toHaveStyle({ background: '#F97316' })
   })
 
+  it('value null : aucun segment actif, rien n\'est présélectionné', () => {
+    render(<SegmentedControl options={OPTIONS} value={null} onChange={vi.fn()} />)
+    for (const segment of screen.getAllByRole('radio')) {
+      expect(segment).toHaveAttribute('aria-checked', 'false')
+      expect(segment).not.toHaveClass('segmented__btn--active')
+    }
+  })
+
+  it('value null : le choix reste possible', async () => {
+    const onChange = vi.fn()
+    render(<SegmentedControl options={OPTIONS} value={null} onChange={onChange} />)
+    await userEvent.click(screen.getByText('6 mois'))
+    expect(onChange).toHaveBeenCalledWith('6m')
+  })
+
   it('expose le libellé accessible du groupe', () => {
     render(<SegmentedControl options={OPTIONS} value="3m" onChange={vi.fn()} ariaLabel="Période" />)
     expect(screen.getByRole('radiogroup', { name: 'Période' })).toBeInTheDocument()

@@ -32,8 +32,8 @@ Les **29 tickets** de l'Epic sont écrits et en ligne. **Un seul est implément�
 | [#306](https://github.com/KaerOrg/Kaer/issues/306) | P-10 · Écran des ressources | À faire |
 | [#307](https://github.com/KaerOrg/Kaer/issues/307) | P-11 · Écran de clôture | À faire |
 | [#308](https://github.com/KaerOrg/Kaer/issues/308) | P-12 · Conditions d'exécution (veille, hors ligne, reprise) | À faire |
-| [#309](https://github.com/KaerOrg/Kaer/issues/309) | P-13 · Composant étape 6 en édition | À faire |
-| [#310](https://github.com/KaerOrg/Kaer/issues/310) | P-14 · Champs `kind` / `role` / `note` | À faire · **à réécrire, voir § 5** |
+| [#309](https://github.com/KaerOrg/Kaer/issues/309) | P-13 · Composant étape 6 en édition | **Livré** |
+| [#310](https://github.com/KaerOrg/Kaer/issues/310) | P-14 · Champs `kind` / `role` / `note` | **Livré** · le contrat (`PlanItemKind`, `readStepColumns`) vit dans `@kaer/shared`, partagé avec PW-3 |
 | [#311](https://github.com/KaerOrg/Kaer/issues/311) | P-15 · Suppressions et libellés | À faire |
 | [#312](https://github.com/KaerOrg/Kaer/issues/312) | P-16 · Accessibilité AA et tokens | À faire |
 | [#313](https://github.com/KaerOrg/Kaer/issues/313) | P-17 · Bugs relevés au passage | À faire · sans captures (choix assumé) |
@@ -42,11 +42,11 @@ Les **29 tickets** de l'Epic sont écrits et en ligne. **Un seul est implément�
 
 | Ticket | Sujet | État |
 |---|---|---|
-| [#320](https://github.com/KaerOrg/Kaer/issues/320) | PW-1 · Table `safety_plan_items` + RLS | À faire · **bloque tout le lot web ET #316** |
-| [#321](https://github.com/KaerOrg/Kaer/issues/321) | PW-2 · Onglet « Le plan », l'éditeur | À faire |
-| [#322](https://github.com/KaerOrg/Kaer/issues/322) | PW-3 · Trois champs dans l'éditeur | À faire |
-| [#323](https://github.com/KaerOrg/Kaer/issues/323) | PW-4 · Étape 6 côté praticien | À faire |
-| [#324](https://github.com/KaerOrg/Kaer/issues/324) | PW-5 · Date de revue | À faire |
+| [#320](https://github.com/KaerOrg/Kaer/issues/320) | PW-1 · Table `safety_plan_items` + RLS | **Livré** · débloque le lot web et #316 |
+| [#321](https://github.com/KaerOrg/Kaer/issues/321) | PW-2 · Onglet « Le plan », l'éditeur | **Livré** · `SafetyPlanEditorPanel`, monté par `PatientModulesTab` |
+| [#322](https://github.com/KaerOrg/Kaer/issues/322) | PW-3 · Trois champs dans l'éditeur | **Livré** · colonnes déduites de la config (`contactable`, `mixed_kind`), sans colonne « horaires » |
+| [#323](https://github.com/KaerOrg/Kaer/issues/323) | PW-4 · Étape 6 côté praticien | **Livré** · `SafetyMeasureEditor`, monté par l'éditeur des six étapes |
+| [#324](https://github.com/KaerOrg/Kaer/issues/324) | PW-5 · Date de revue | **Livré** · `created_with_at` / `last_reviewed_at` en `date`, idempotent par construction |
 | [#325](https://github.com/KaerOrg/Kaer/issues/325) | PW-6 · Vue patient, rail des 13 écrans | À faire |
 | [#326](https://github.com/KaerOrg/Kaer/issues/326) | PW-7 · Parité du composant ressources | À faire |
 | [#327](https://github.com/KaerOrg/Kaer/issues/327) | PW-8 · Onglet Données | À faire |
@@ -119,7 +119,25 @@ S'arrêter là et montrer. C'est l'écran qui n'existe pas du tout, c'est le liv
 
 ### Lot 4 — le reste du web
 
-**#321 + #322 + #324** (l'éditeur devient utilisable, et #316 se débloque) → **#325 + #326** → **#327 + #328 + #329 + #330 + #331**.
+**#321 + #322 + #324** (l'éditeur devient utilisable, et #316 se débloque) : **livrés
+ensemble**, les trois se recouvrent trop pour être séparés (l'en-tête d'état de PW-2 porte
+le bouton de PW-5, et le tableau de PW-2 porte les colonnes de PW-3). Suite : **#325 +
+#326** → **#327 + #328 + #329 + #330 + #331**.
+
+> **Deux décisions actées au passage, pour ne pas les rejouer :**
+> - **Pas de colonne « horaires » à l'étape 5.** Le tableau de #322 en annonçait une, mais
+>   le titre du ticket dit « trois champs kind / role / note » et la table n'en porte pas
+>   de quatrième. L'étape 5 rend donc texte · lien ou fonction · téléphone · note (« et en
+>   dehors des horaires ? »), et l'horaire se dit dans la note. Aucun changement de schéma,
+>   parité P-14 intacte.
+> - **Réordonnancement par boutons monter / descendre**, pas par glisser. Le glissement
+>   n'est atteignable ni au clavier ni au lecteur d'écran, ce que P-16 (#312) exige ; et le
+>   web n'embarque aucune bibliothèque de drag-and-drop. Les deux boutons écrivent le même
+>   `sort_order`.
+>
+> **Ce que #321 laisse à PW-11 (#330), délibérément** : le réglage de visibilité du lien
+> `distress_tolerance` sous l'éditeur. Il est mentionné dans la structure de #321, mais
+> c'est le sujet de son propre ticket.
 
 ### Lot 5 — finitions
 

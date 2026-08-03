@@ -3,8 +3,19 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ModuleActionsModal } from './ModuleActionsModal'
 
+// `t` se comporte comme i18next : une clé DÉCLARÉE gagne, sinon on retombe sur
+// `defaultValue`. Les libellés d'onglet passent par une surcharge par module
+// (`modules.<id>.tab_<onglet>`), qui retombe sur le libellé commun quand le module n'en
+// déclare pas. Seul `crisis_plan` en déclare une : son onglet s'appelle « Le plan ».
+const DECLARED: Record<string, string> = {
+  'modules.crisis_plan.tab_config': 'Le plan',
+}
+
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, opts?: { defaultValue?: string }) =>
+      DECLARED[key] ?? opts?.defaultValue ?? key,
+  }),
 }))
 
 // Les panneaux enfants sont mockés : on teste l'orchestration des onglets de la
@@ -65,6 +76,20 @@ describe('ModuleActionsModal', () => {
     expect(screen.getByText('patient.sources_tab')).toBeInTheDocument()
     expect(screen.queryByText('patient.data_button')).not.toBeInTheDocument()
     expect(screen.queryByText('notifications.modal_title')).not.toBeInTheDocument()
+  })
+
+  // Le plan de sécurité y ÉDITE son contenu, ce n'est pas un réglage : son onglet
+  // s'appelle « Le plan » (PW-2). La surcharge est une clé i18n dérivée du module, pas
+  // une condition sur son identifiant.
+  it('un module peut renommer un onglet par une clé dérivée de son identifiant', () => {
+    render(<ModuleActionsModal {...baseProps} module="crisis_plan" tabs={['config']} activeTab="config" />)
+    expect(screen.getByText('Le plan')).toBeInTheDocument()
+    expect(screen.queryByText('patient.config_tab')).not.toBeInTheDocument()
+  })
+
+  it('un module sans surcharge garde le libellé commun de l\'onglet', () => {
+    render(<ModuleActionsModal {...baseProps} tabs={['config']} activeTab="config" />)
+    expect(screen.getByText('patient.config_tab')).toBeInTheDocument()
   })
 
   it('ne rend pas le panneau notifications sans patientModuleId', () => {

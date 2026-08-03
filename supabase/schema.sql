@@ -660,6 +660,26 @@ create table if not exists public.crisis_plan_configs (
   updated_at        timestamptz not null default now()
 );
 
+-- Dates de la relation autour du plan (PW-5, #324). Elles décrivent un GESTE PRATICIEN,
+-- d'où leur place dans la table praticien plutôt que dans le plan lui-même.
+--
+-- Type `date` et non `timestamptz` : « élaboré le 12 mars · revu avec vous le 4 juin »
+-- est un jour, jamais une heure. Le grain à la journée rend aussi l'idempotence
+-- STRUCTURELLE : deux appuis sur « Nous avons revu le plan aujourd'hui » le même jour
+-- écrivent la même valeur, il n'y a rien à dédupliquer.
+--
+-- Trois notions à ne jamais confondre, et que l'interface sépare partout :
+--   • `last_reviewed_at`  → « revu avec vous » : le geste praticien, ici ;
+--   • `updated_at` d'un item de `safety_plan_items` → « modifié » ;
+--   • « lu par le patient » → **n'est pas mesuré et ne le sera pas**. Aucune colonne
+--     ne l'accueille, ici ni ailleurs.
+--
+-- MDR 2017/745 : ces dates sont AFFICHÉES, jamais surveillées. Aucune alerte
+-- d'ancienneté, aucune relance, aucun badge « à revoir », aucune couleur qui change
+-- quand la revue date. Ne jamais les comparer à la date du jour pour produire un signal.
+alter table public.crisis_plan_configs add column if not exists created_with_at date;
+alter table public.crisis_plan_configs add column if not exists last_reviewed_at date;
+
 -- Nettoyage idempotent des vestiges « cartes SOS » / « engagement » (retirés #114) :
 -- la table de coping cards et la colonne d'engagement sont supprimées si présentes.
 drop table if exists public.crisis_plan_coping_cards cascade;

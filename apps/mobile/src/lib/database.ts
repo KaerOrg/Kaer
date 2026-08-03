@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite'
-import { dateToIso } from '@kaer/shared'
+import { dateToIso, type PlanItemKind } from '@kaer/shared'
 import { getSyncOutboxStore } from './syncOutbox'
 import { getRenderMismatchOutboxStore } from './renderMismatchOutbox'
 import { getAppErrorOutboxStore } from './appErrorOutbox'
@@ -1497,8 +1497,11 @@ async function createASRS18Table(database: SQLite.SQLiteDatabase): Promise<void>
  * Nature d'un item de plan de sécurité : une personne qu'on joint, ou un lieu où l'on
  * va. Union fermée, jamais un `string` libre : un `kind` inattendu doit être une erreur
  * de compilation, pas un rendu silencieusement faux.
+ *
+ * Le contrat vit dans `@kaer/shared` : l'éditeur praticien (PW-3) porte les mêmes trois
+ * champs, et deux déclarations divergeraient. Ré-export pour les appelants d'ici.
  */
-export type PlanItemKind = 'person' | 'place'
+export type { PlanItemKind }
 
 export interface PlanItem {
   id: string
