@@ -12,11 +12,10 @@ export const styles = StyleSheet.create({
   // barre qui rognait le contenu en vue Consultation, cf. P-17).
   emergencyBar:  { paddingHorizontal: spacing.md, paddingTop: spacing.sm },
 
-  // Rangée de tête : le retour occupe sa place à gauche, l'espace élastique pousse la
-  // progression à droite. `space-between` ne conviendrait pas — sans retour, la
-  // progression se recalerait à gauche.
+  // Rangée de tête : retour à gauche, progression poussée à droite par sa marge auto.
+  // `space-between` ne conviendrait pas — sans retour, la progression se recalerait
+  // à gauche.
   topRow:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.sm, paddingTop: spacing.xs },
-  topRowFill:    { flex: 1 },
 
   scroll:        { flex: 1 },
   scrollContent: { padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.md },
@@ -36,5 +35,5 @@ export const styles = StyleSheet.create({
 
   // Actions ancrées HORS du flux défilant.
   actions:       { paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.md, gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  progress:      { fontSize: fontSize.sm, color: colors.textMuted },
+  progress:      { fontSize: fontSize.sm, color: colors.textMuted, marginLeft: 'auto' },
 })

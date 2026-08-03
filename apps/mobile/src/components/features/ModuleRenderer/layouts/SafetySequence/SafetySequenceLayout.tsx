@@ -158,7 +158,6 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
               testID="safety-sequence-back"
             />
           ) : null}
-          <View style={styles.topRowFill} />
           {progress !== '' ? <Text style={styles.progress}>{progress}</Text> : null}
         </View>
       ) : null}
