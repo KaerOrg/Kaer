@@ -35,6 +35,22 @@ jest.mock('../../../store/authStore', () => ({
     selector({ patient: { id: 'patient-test-id' } }),
 }))
 
+// Le layout ouvre l'écran des rappels (#257) : hors NavigationContainer en test.
+const mockNavigate = jest.fn()
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate, setOptions: jest.fn() }),
+  // Sans `startEntry`, le module s'ouvre sur l'historique (comportement par défaut).
+  useRoute: () => ({ params: {} }),
+}))
+
+// Rappels du module : aucun par défaut, la ligne « Prochain rappel » reste masquée.
+const mockGetRoutines = jest.fn().mockResolvedValue([])
+const mockGetModuleRef = jest.fn().mockResolvedValue({ id: 'pm-1', practitioner_id: 'pr-1' })
+jest.mock('@services/notificationService', () => ({
+  getRoutinesForModule: (...a: unknown[]) => mockGetRoutines(...a),
+  getPatientModuleRef: (...a: unknown[]) => mockGetModuleRef(...a),
+}))
+
 const mockHasSeen = jest.fn().mockResolvedValue(false)
 const mockMarkSeen = jest.fn().mockResolvedValue(undefined)
 jest.mock('@services/moduleOnboardingService', () => ({

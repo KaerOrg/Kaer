@@ -246,6 +246,89 @@ export async function updateTimeOverride(
   return !error
 }
 
+/**
+ * Le module affecté au patient, pour ce type : identité de la ligne et praticien qui
+ * l'a posée. Nécessaire pour ajouter un rappel, qui reste rattaché à ce praticien.
+ */
+export async function getPatientModuleRef(
+  patientId: string,
+  moduleType: string
+): Promise<{ id: string; practitioner_id: string } | null> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('id, practitioner_id')
+    .eq('patient_id', patientId)
+    .eq('module_type', moduleType)
+    .is('revoked_at', null)
+    .maybeSingle()
+
+  return data ?? null
+}
+
+// ── Jours, création, suppression (actions patient, #257) ───────────────────
+//
+// Le rythme initial est posé en séance avec le praticien, mais il appartient ensuite
+// au patient : sans sollicitation, le module n'est ouvert qu'en pic de crise, et
+// c'est la répétition qui entraîne la granularité. Ces trois fonctions sont donc des
+// actions PATIENT, protégées par RLS sur `patient_id`.
+
+/** Jours de la semaine choisis par le patient (ISO 1=lundi … 7=dimanche). */
+export async function updateRoutineDays(
+  routineId: string,
+  patientId: string,
+  daysOfWeek: number[]
+): Promise<boolean> {
+  if (daysOfWeek.length === 0) return false
+  const { error } = await supabase
+    .from('notification_routines')
+    .update({ days_of_week: [...daysOfWeek].sort((a, b) => a - b), updated_at: new Date().toISOString() })
+    .eq('id', routineId)
+    .eq('patient_id', patientId)
+
+  return !error
+}
+
+/**
+ * Nouveau rappel ajouté par le patient. `practitioner_id` est repris du module
+ * affecté : la ligne reste rattachée au praticien qui suit le patient, comme celles
+ * posées en séance.
+ */
+export async function createPatientRoutine(params: {
+  patientModuleId: string
+  patientId: string
+  practitionerId: string
+  timeOfDay: string
+  daysOfWeek: number[]
+}): Promise<NotificationRoutine | null> {
+  const { data, error } = await supabase
+    .from('notification_routines')
+    .insert({
+      patient_module_id: params.patientModuleId,
+      patient_id: params.patientId,
+      practitioner_id: params.practitionerId,
+      time_of_day: params.timeOfDay,
+      days_of_week: [...params.daysOfWeek].sort((a, b) => a - b),
+    })
+    .select('*')
+    .single()
+
+  if (error) return null
+  return data
+}
+
+export async function deletePatientRoutine(
+  routineId: string,
+  patientId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('notification_routines')
+    .delete()
+    .eq('id', routineId)
+    .eq('patient_id', patientId)
+
+  return !error
+}
+
 // ── Stubs scheduling local (conservés pour compatibilité) ──────────────────
 
 export async function scheduleSleepDiaryReminder(

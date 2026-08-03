@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { View, ActivityIndicator, StyleSheet } from 'react-native'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, type NavigationContainerRef } from '@react-navigation/native'
 import * as Linking from 'expo-linking'
 import { logger } from '@kaer/shared'
 import { useAuthStore } from '../store/authStore'
@@ -12,8 +12,9 @@ import {
 } from '@services/notificationService'
 import { useSyncOnForeground } from '../hooks/useSyncOnForeground'
 import { useForegroundNotificationToast } from '../hooks/useForegroundNotificationToast'
+import { useNotificationNavigation } from '../hooks/useNotificationNavigation'
 import AuthStack from './AuthStack'
-import AppStack from './AppStack'
+import AppStack, { type AppStackParamList } from './AppStack'
 import NotificationPermissionScreen from '../screens/NotificationPermissionScreen'
 import { colors } from '@theme'
 
@@ -27,6 +28,10 @@ const linking = {
     },
   },
 }
+
+// Le conteneur héberge tour à tour les deux piles : sa liste de routes couvre donc
+// l'app connectée ET les écrans d'authentification ciblés par le deep link.
+type RootParamList = AppStackParamList & { Login: undefined; Register: undefined }
 
 // Étape d'onboarding notifications, évaluée une fois le patient connecté.
 type NotifGate = 'checking' | 'show' | 'done'
@@ -42,8 +47,16 @@ function BootSpinner() {
 export default function Navigation() {
   const { patient, loading, loadSession, restoreLanguage } = useAuthStore()
   const [notifGate, setNotifGate] = useState<NotifGate>('checking')
+  // Référence au conteneur : le tap sur un rappel navigue depuis un listener, hors
+  // de tout écran, donc sans `useNavigation` (#257).
+  const navigationRef = useRef<NavigationContainerRef<RootParamList> | null>(null)
+  const [navigationReady, setNavigationReady] = useState(false)
+  const openModule = useCallback((moduleType: string, startEntry: boolean) => {
+    navigationRef.current?.navigate('ModuleContent', { moduleType, startEntry })
+  }, [])
   useSyncOnForeground()
   useForegroundNotificationToast()
+  useNotificationNavigation(navigationReady ? openModule : null)
 
   useEffect(() => {
     const withTimeout = (p: Promise<void>, ms: number, label: string): Promise<void> =>
@@ -100,6 +113,7 @@ export default function Navigation() {
   }, [patient])
 
   const handleNotifDone = useCallback(() => setNotifGate('done'), [])
+  const handleNavigationReady = useCallback(() => setNavigationReady(true), [])
 
   if (loading) return <BootSpinner />
 
@@ -110,7 +124,11 @@ export default function Navigation() {
   }
 
   return (
-    <NavigationContainer linking={patient ? undefined : linking}>
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={handleNavigationReady}
+      linking={patient ? undefined : linking}
+    >
       {patient ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   )
