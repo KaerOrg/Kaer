@@ -350,7 +350,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
           <EvolutionSection
             sectionKey="emotion_wheel"
             anchorId="evo-section-emotion_wheel"
-            title={t('evolution.naming_section_title')}
+            title={t('modules.emotion_wheel.label')}
             badge={t('evolution.n_sessions', { count: windowed.length })}
             metricReminder={last != null
               ? t('evolution.naming_last', { date: new Date(last).toLocaleDateString(i18n.language) })
