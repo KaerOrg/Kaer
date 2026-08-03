@@ -20,6 +20,8 @@ export {
   buildDisplayableSteps, isLastStep, advance, goBack, formatProgress, INITIAL_STATE,
 } from './services/safetySequence'
 export type { SequenceStep, SequenceState } from './services/safetySequence'
+export { composeMeasureSentence, toLocalIsoDate } from './services/safetyMeasure'
+export type { SafetyMeasureParts } from './services/safetyMeasure'
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 
