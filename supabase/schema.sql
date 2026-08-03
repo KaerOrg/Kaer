@@ -1726,6 +1726,7 @@ create table if not exists public.patient_entries (
     'fear_situation',
     'exposure_hierarchy',
     'breathing_session',
+    'breathing_setting',
     'defusion_session',
     'crisis_anchor',
     'em_ruler',
@@ -1814,6 +1815,152 @@ begin
     alter publication supabase_realtime add table public.patient_entries;
   end if;
 end $$;
+
+
+-- ============================================================
+-- MODULE « Techniques de respiration » — T0 : modèle de données
+-- ============================================================
+-- Fondation posée par l'epic #195 (mobile) / #196 (web). Deux tables :
+--   • breathing_sessions  : une ligne par session de respiration (données brutes).
+--   • breathing_settings  : config par patient (techniques activées, objectif,
+--                           rappels, préférences sensorielles).
+--
+-- ⚠️ Conformité MDR (RÈGLE D'OR) : 100 % descriptif. Aucun score, aucune moyenne,
+-- aucune tendance interprétée, aucune couleur à valence sur une valeur clinique.
+-- `feeling` est un ressenti brut facultatif (calmer | same | tenser | null),
+-- restitué tel quel — jamais agrégé ni jugé.
+--
+-- ── Note d'architecture (couture assumée à câbler en phases M) ────────────────
+-- La sync mobile offline-first passe TOUJOURS par `patient_entries` via
+-- `syncHelpers` (payload jsonb, `entry_kind`), comme les 30+ autres modules :
+-- les sessions sont réellement capturées là (entry_kind='breathing_session'),
+-- les settings patient là aussi (entry_kind='breathing_setting'). Ces deux
+-- tables dédiées sont le MODÈLE RELATIONNEL CANONIQUE déclaré par l'epic ; leur
+-- alimentation directe (projection depuis patient_entries et/ou écriture web
+-- praticien pour `enabled_techniques`/`primary_technique`) sera câblée dans les
+-- sous-tickets M. T0 ne modifie pas `RemoteSyncService` (hors périmètre).
+
+-- ── breathing_sessions ───────────────────────────────────────────────────────
+create table if not exists public.breathing_sessions (
+  id                        uuid        primary key default gen_random_uuid(),
+  patient_id                uuid        not null references public.patients(id) on delete cascade,
+  technique_key             text        not null,
+  started_at                timestamptz not null,
+  duration_seconds          integer     not null default 0,   -- durée réellement pratiquée
+  planned_duration_seconds  integer     not null default 0,   -- durée choisie avant la session
+  cycles_completed          integer     not null default 0,
+  completed                 boolean     not null default false, -- menée au bout vs interrompue
+  feeling                   text        check (feeling in ('calmer', 'same', 'tenser')), -- facultatif (null autorisé)
+  created_at                timestamptz not null default now()
+);
+
+create index if not exists idx_breathing_sessions_patient_started
+  on public.breathing_sessions(patient_id, started_at desc);
+
+alter table public.breathing_sessions enable row level security;
+
+-- Patient : CRUD sur ses propres sessions
+drop policy if exists "breathing_sessions_patient_select" on public.breathing_sessions;
+create policy "breathing_sessions_patient_select"
+  on public.breathing_sessions for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_insert" on public.breathing_sessions;
+create policy "breathing_sessions_patient_insert"
+  on public.breathing_sessions for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_update" on public.breathing_sessions;
+create policy "breathing_sessions_patient_update"
+  on public.breathing_sessions for update
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_sessions_patient_delete" on public.breathing_sessions;
+create policy "breathing_sessions_patient_delete"
+  on public.breathing_sessions for delete
+  using (auth.uid() = patient_id);
+
+-- Praticien : lecture seule sur les sessions de ses patients liés,
+-- UNIQUEMENT si le patient a activé le partage (share_consent = true).
+-- Même gate de consentement que patient_entries (MDR 2017/745).
+drop policy if exists "breathing_sessions_practitioner_select" on public.breathing_sessions;
+create policy "breathing_sessions_practitioner_select"
+  on public.breathing_sessions for select
+  using (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.breathing_sessions.patient_id
+    )
+    and exists (
+      select 1 from public.patients pat
+      where pat.id = public.breathing_sessions.patient_id
+        and pat.share_consent = true
+    )
+  );
+
+-- ── breathing_settings ───────────────────────────────────────────────────────
+-- Une ligne par patient (config). `enabled_techniques` / `primary_technique`
+-- sont gérés par le praticien ; l'objectif, les rappels et les préférences
+-- sensorielles sont ajustables par le patient. reminder_days : entiers 0-6
+-- (0 = dimanche … 6 = samedi, convention Date.getDay() côté mobile).
+create table if not exists public.breathing_settings (
+  patient_id              uuid        primary key references public.patients(id) on delete cascade,
+  enabled_techniques      text[]      not null default '{}',
+  primary_technique       text,
+  weekly_goal_sessions    integer     not null default 5 check (weekly_goal_sessions between 1 and 14),
+  reminder_enabled        boolean     not null default false,
+  reminder_time           time,
+  reminder_days           smallint[]  not null default '{}'
+                            check (reminder_days <@ array[0, 1, 2, 3, 4, 5, 6]::smallint[]),
+  haptics                 boolean     not null default true,
+  ambient_sound           boolean     not null default false,
+  ambient_sound_key       text        not null default 'river'
+                            check (ambient_sound_key in ('river', 'waves', 'rain', 'wind', 'bowl')),
+  breath_sound            boolean     not null default false,
+  preferred_duration_min  integer     not null default 5,
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now()
+);
+
+alter table public.breathing_settings enable row level security;
+
+-- Patient : CRUD sur sa propre config
+drop policy if exists "breathing_settings_patient_select" on public.breathing_settings;
+create policy "breathing_settings_patient_select"
+  on public.breathing_settings for select
+  using (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_insert" on public.breathing_settings;
+create policy "breathing_settings_patient_insert"
+  on public.breathing_settings for insert
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_update" on public.breathing_settings;
+create policy "breathing_settings_patient_update"
+  on public.breathing_settings for update
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+drop policy if exists "breathing_settings_patient_delete" on public.breathing_settings;
+create policy "breathing_settings_patient_delete"
+  on public.breathing_settings for delete
+  using (auth.uid() = patient_id);
+
+-- Praticien : lecture + écriture de la config des patients liés (gère
+-- enabled_techniques / primary_technique / objectif proposé). Même modèle que
+-- crisis_plan_configs : config praticien, pas une donnée clinique.
+drop policy if exists "breathing_settings_practitioner_rw" on public.breathing_settings;
+create policy "breathing_settings_practitioner_rw"
+  on public.breathing_settings for all
+  using (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.breathing_settings.patient_id
+    )
+  );
 
 
 -- ============================================================

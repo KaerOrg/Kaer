@@ -23,6 +23,94 @@ export interface Database {
         }
         Relationships: []
       }
+      // Module « Techniques de respiration » — T0 (epic #195 / #196).
+      breathing_sessions: {
+        Row: {
+          id: string
+          patient_id: string
+          technique_key: string
+          started_at: string
+          duration_seconds: number
+          planned_duration_seconds: number
+          cycles_completed: number
+          completed: boolean
+          feeling: 'calmer' | 'same' | 'tenser' | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          patient_id: string
+          technique_key: string
+          started_at: string
+          duration_seconds?: number
+          planned_duration_seconds?: number
+          cycles_completed?: number
+          completed?: boolean
+          feeling?: 'calmer' | 'same' | 'tenser' | null
+          created_at?: string
+        }
+        Update: {
+          patient_id?: string
+          technique_key?: string
+          started_at?: string
+          duration_seconds?: number
+          planned_duration_seconds?: number
+          cycles_completed?: number
+          completed?: boolean
+          feeling?: 'calmer' | 'same' | 'tenser' | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      breathing_settings: {
+        Row: {
+          patient_id: string
+          enabled_techniques: string[]
+          primary_technique: string | null
+          weekly_goal_sessions: number
+          reminder_enabled: boolean
+          reminder_time: string | null
+          reminder_days: number[]
+          haptics: boolean
+          ambient_sound: boolean
+          ambient_sound_key: 'river' | 'waves' | 'rain' | 'wind' | 'bowl'
+          breath_sound: boolean
+          preferred_duration_min: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_id: string
+          enabled_techniques?: string[]
+          primary_technique?: string | null
+          weekly_goal_sessions?: number
+          reminder_enabled?: boolean
+          reminder_time?: string | null
+          reminder_days?: number[]
+          haptics?: boolean
+          ambient_sound?: boolean
+          ambient_sound_key?: 'river' | 'waves' | 'rain' | 'wind' | 'bowl'
+          breath_sound?: boolean
+          preferred_duration_min?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          enabled_techniques?: string[]
+          primary_technique?: string | null
+          weekly_goal_sessions?: number
+          reminder_enabled?: boolean
+          reminder_time?: string | null
+          reminder_days?: number[]
+          haptics?: boolean
+          ambient_sound?: boolean
+          ambient_sound_key?: 'river' | 'waves' | 'rain' | 'wind' | 'bowl'
+          breath_sound?: boolean
+          preferred_duration_min?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       practitioners: {
         Row: {
           id: string
