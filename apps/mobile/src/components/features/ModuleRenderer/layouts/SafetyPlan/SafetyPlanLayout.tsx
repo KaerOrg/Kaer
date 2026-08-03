@@ -105,6 +105,8 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
           const stepNumber = titleField.props['step_number'] ?? String(idx + 1)
           // Étape « contactable » (proches/pros) : items rendus comme contacts appelables.
           const isContactable = titleField.props['contactable'] === 'true'
+          // Un professionnel ne reçoit pas de SMS : un CMP ne se joint pas par message.
+          const isProfessional = titleField.props['professional'] === 'true'
           const sectionItems = itemsBySection.get(sectionId) ?? []
 
           return (
@@ -129,8 +131,10 @@ export function SafetyPlanLayout({ sections, uiFields, moduleId }: SafetyPlanLay
                         key={item.id}
                         name={item.text}
                         phone={item.phone}
+                        professional={isProfessional}
                         accentColor={iconColor}
-                        callAccessibilityLabel={`${lbl('call_contact')} : ${item.text}`}
+                        callLabel={lbl('call_contact')}
+                        messageLabel={lbl('message_contact')}
                         testID={`contact-${item.id}`}
                       />
                     ) : (

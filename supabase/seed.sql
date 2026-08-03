@@ -2213,6 +2213,9 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_5.title', 'icon', 'hospital-box-outline'),
   ('crisis_plan.step_5.title', 'step_number', '5'),
   ('crisis_plan.step_5.title', 'contactable', 'true'),
+  -- Étape 5 : équipe soignante. Pas de bouton « Envoyer un message » — un CMP ne se
+  -- joint pas par SMS (P-8).
+  ('crisis_plan.step_5.title', 'professional', 'true'),
   ('crisis_plan.step_6.hint', 'color', '#15803D'),
   ('crisis_plan.step_6.hint', 'step_number', '6'),
   ('crisis_plan.step_6.title', 'bgColor', '#F0FDF4'),

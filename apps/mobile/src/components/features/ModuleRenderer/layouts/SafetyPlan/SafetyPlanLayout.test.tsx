@@ -104,7 +104,8 @@ describe('SafetyPlanLayout', () => {
     ])
     render(<SafetyPlanLayout sections={sections} uiFields={[]} moduleId="crisis_plan" />)
     await waitFor(() => expect(screen.getByText('Marie')).toBeTruthy())
-    expect(screen.getByText('0102030405')).toBeTruthy()
+    // Le numéro n'est plus affiché : le bouton porte un verbe (P-8).
+    expect(screen.queryByText('0102030405')).toBeNull()
     fireEvent.press(screen.getByTestId('contact-ct1-call'))
     expect(Linking.openURL).toHaveBeenCalledWith('tel:0102030405')
   })
