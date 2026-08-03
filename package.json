@@ -12,6 +12,8 @@
     "test:mobile": "cd apps/mobile && npx jest --no-coverage",
     "test:web": "cd apps/web && npx vitest run",
     "test:shared": "cd packages/shared && npx vitest run",
+    "seed:apply": "node scripts/apply-seeds.mjs",
+    "seed:audit": "node scripts/audit-drift.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },

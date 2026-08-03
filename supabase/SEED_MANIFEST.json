@@ -1,0 +1,17 @@
+{
+  "description": "Ordre canonique d'application du schéma et des seeds de config Kær. Chemins relatifs au dossier supabase/. Rejoué intégralement à chaque déploiement (base == seed) — voir docs/seed-deployment.md. Toute nouvelle config seedée DOIT être ajoutée ici, sinon elle n'est jamais déployée (garde-fou : apps/web/src/test/seedIdempotency.guard.test.ts).",
+  "order": [
+    "schema.sql",
+    "seed.sql",
+    "seed/psyedu_themes_seed.sql",
+    "seed/scale_meta_seed.sql",
+    "seed/sources_seed.sql",
+    "seed/em_seed.sql",
+    "seed/craving_seed.sql",
+    "seed/distress_tolerance_seed.sql",
+    "seed/chrono_seed.sql",
+    "seed/psyedu_seed.sql",
+    "seed/psyedu_refonte_p1_seed.sql",
+    "seed/guide_seed.sql"
+  ]
+}

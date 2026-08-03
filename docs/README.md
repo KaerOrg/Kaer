@@ -15,6 +15,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 |---|---|
 | [`architecture.md`](architecture.md) | Vue d'ensemble technique du monorepo |
 | [`database.md`](database.md) | Schéma de la base de données et conventions |
+| [`seed-deployment.md`](seed-deployment.md) | Déploiement des seeds (rejeu idempotent) & audit anti-dérive config seed ↔ base — manifeste, `apply-seeds`, `audit-drift` |
 | [`setup.md`](setup.md) | Installation, configuration et lancement |
 | [`invitation-flow.md`](invitation-flow.md) | Flux complet d'invitation patient (web ↔ email ↔ mobile) |
 | [`module-engine.md`](module-engine.md) | Circuit module : schéma SQL → service → FieldRenderer → widgets |
