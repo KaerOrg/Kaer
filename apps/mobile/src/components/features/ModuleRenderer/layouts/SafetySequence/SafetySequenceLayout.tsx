@@ -24,11 +24,13 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useKeepAwake } from 'expo-keep-awake'
 import { colors } from '@theme'
 import { Button } from '@ui/Button'
 import { Card } from '@ui/Card'
 import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
+import { getAnchors, getAnchorPhrase } from '@services/crisisPlanService'
 import { isModuleUnlocked } from '@services/moduleService'
 import { reportFailedOperation } from '@services/errorReportingService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
@@ -48,6 +50,7 @@ import { useAuthStore } from '../../../../../store/authStore'
 import { CrisisEmergencyCalls, CallableContact } from '../shared'
 import { SequenceEntryCard } from './SequenceEntryCard'
 import { DistressToleranceLink } from './DistressToleranceLink'
+import { ClosingAnchors } from './ClosingAnchors'
 import { styles } from './styles'
 
 // Retour discret, dessiné comme un chevron et non comme un bouton libellé : il doit
@@ -58,6 +61,9 @@ const BACK_ICON = <MaterialCommunityIcons name="chevron-left" size={26} color={c
 // d'aucune donnée et doivent rester stables pour la mémoïsation des cartes.
 const FIRST_STEP: SequenceState = { kind: 'step', index: 0 }
 const CLOSING: SequenceState = { kind: 'closing' }
+
+/** État initial des ancres : aucune photo, aucune phrase. Constante, jamais recréée. */
+const EMPTY_ANCHORS: { photos: string[]; phrase: string } = { photos: [], phrase: '' }
 
 export interface SafetySequenceLayoutProps {
   /** Étapes du plan regroupées par `section_id`, dans l'ordre de la config. */
@@ -71,6 +77,11 @@ export interface SafetySequenceLayoutProps {
 }
 
 export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: SafetySequenceLayoutProps) {
+  // L'écran ne se met pas en veille pendant la traversée : un plan de sécurité que
+  // l'on relit lentement ne doit pas s'éteindre au milieu d'une étape. Le verrou est
+  // relâché au démontage, y compris sur une sortie par le bouton système (P-12).
+  useKeepAwake()
+
   const t = useModuleTranslation()
   // Clés dérivées du module porté par les fields : `safety_sequence` nomme un motif
   // d'écran réutilisable, jamais un module (config-first).
@@ -90,6 +101,20 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   // calcul sur une donnée. Hors ligne, la lecture échoue et le lien reste absent.
   const patientId = useAuthStore(s => s.patient?.id)
   const [crisisLinkVisible, setCrisisLinkVisible] = useState(false)
+
+  // Ancres de la clôture, en LECTURE SEULE : l'édition appartient à la vue Édition.
+  // Chargées ici plutôt que par l'écran, pour que la clôture reste présentationnelle.
+  const [anchors, setAnchors] = useState<{ photos: string[]; phrase: string }>(EMPTY_ANCHORS)
+
+  useEffect(() => {
+    let active = true
+    Promise.all([getAnchors(), getAnchorPhrase()])
+      .then(([photos, phrase]) => {
+        if (active) setAnchors({ photos: photos.map(a => a.uri), phrase })
+      })
+      .catch(() => { /* section vide : l'écran devient un simple retour, sans texte de manque */ })
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (patientId == null) return
@@ -325,8 +350,13 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
           </>
         ) : null}
 
+        {/* Clôture. Si la section est vide, elle n'existe pas : l'écran devient un
+            simple retour, sans le moindre texte de manque. */}
         {state.kind === 'closing' ? (
-          <Text style={styles.screenTitle}>{lbl('sequence_closing_title')}</Text>
+          <>
+            <Text style={styles.screenTitle}>{lbl('sequence_closing_title')}</Text>
+            <ClosingAnchors photos={anchors.photos} phrase={anchors.phrase} />
+          </>
         ) : null}
       </ScrollView>
 

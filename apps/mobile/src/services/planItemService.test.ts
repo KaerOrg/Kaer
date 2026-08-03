@@ -14,6 +14,8 @@ jest.mock('./sync', () => ({
   RemoteSyncService: { getInstance: () => ({ enqueue: mockEnqueue }) },
 }))
 
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import { getPlanItems, savePlanItem, deletePlanItem, setModuleSetting } from './planItemService'
 
 const item = {
@@ -84,6 +86,24 @@ describe('planItemService', () => {
       await deletePlanItem('pi-1')
       expect(mockDeleteDb).toHaveBeenCalledWith('pi-1')
       expect(mockEnqueue).toHaveBeenCalled()
+    })
+  })
+
+  // Garde-fou hors ligne (P-12) : la Séquence du plan de sécurité s'ouvre précisément
+  // dans les moments où le réseau est le plus défaillant. La lecture du plan doit rester
+  // strictement locale. Le test runtime ci-dessous ne verrait pas un appel réseau placé
+  // derrière une branche non parcourue ; celui-ci relit le source et le voit.
+  describe('lecture du plan : strictement locale', () => {
+    it('lit SQLite, sans le moindre appel réseau', async () => {
+      await getPlanItems('crisis_plan')
+      expect(mockGetAllDb).toHaveBeenCalledWith('crisis_plan')
+      expect(mockEnqueue).not.toHaveBeenCalled()
+    })
+
+    it('n\'importe aucun client réseau dans le service', () => {
+      const source = readFileSync(join(__dirname, 'planItemService.ts'), 'utf-8')
+      const imports = source.match(/^import[\s\S]*?from\s+'[^']+'/gm) ?? []
+      expect(imports.join('\n')).not.toMatch(/lib\/supabase|@supabase|fetch\(/)
     })
   })
 
