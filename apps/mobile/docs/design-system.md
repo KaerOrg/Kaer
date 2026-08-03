@@ -101,7 +101,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressBar, ProgressRing, Radio, RatingSelector, Sheet, Slider, Stepper, TimePicker, Toggle, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
