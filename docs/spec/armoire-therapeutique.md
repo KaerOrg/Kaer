@@ -188,10 +188,24 @@ Auto/Hétéro = type de passation, jamais une gravité (MDR).
 **Trois verbes à ne pas confondre.** Activer ≠ Programmer ≠ Faire passer.
 
 **Critères d'acceptation.**
-- [ ] Geste unique et prévisible ; l'encart est le même pour auto et hétéro, seul le contenu change.
-- [ ] Hétéro sans aucune option de programmation.
-- [ ] Cadence choisie par le praticien, wording neutre, aucune relance déclenchée par un score (MDR).
-- [ ] Accès aux données de programmation par un service dédié (zéro Supabase dans le composant) + RLS ; couvert par tests.
+- [x] Geste unique et prévisible ; l'encart est le même pour auto et hétéro, seul le contenu change.
+- [x] Hétéro sans aucune option de programmation.
+- [x] Cadence choisie par le praticien, wording neutre, aucune relance déclenchée par un score (MDR).
+- [x] Accès aux données de programmation par un service dédié (zéro Supabase dans le composant) + RLS ; couvert par tests.
+
+**Livré (cœur d'abord).** Nouvelle table `scale_schedules` (une programmation par `(patient, échelle)`)
++ RLS (praticien CRUD, patient lecture seule) dans `supabase/schema.sql` + `migration_scale_schedules.sql`.
+Service `scaleScheduleService` (`fetch`/`save` upsert/`delete`) + query `scaleScheduleQueries` + hooks de
+mutation. `computeModuleTabs` ajoute l'onglet de tête **Programmation** (auto → `ScaleProgrammingPanel`) ou
+**Passation** (hétéro → `ScalePassationBlock`, aucune option de programmation) ; l'hétéro n'a pas de Vue
+patient. Panneaux montés via `ModuleActionsModal.schedulePanel`. **MDR** : cadence en préréglages choisie
+par le praticien (aucune suggestion de l'app), rappel calendaire, **aucune relance déclenchée par un
+score**, bandeau MDR repris tel quel. Les actions « Faire passer maintenant » / « Démarrer la passation »
+sont posées avec un câblage minimal (toast) ; la mécanique d'envoi/saisie réelle est un follow-up.
+
+> ⚠️ **Point MDR à instruire** (spec Q2 §4) : le mode « à domicile (auto) récurrent » introduit une
+> auto-évaluation autonome structurée par l'outil, à faire ré-instruire par un référent qualité/réglementaire
+> avant commercialisation. Implémenté conforme aux garde-fous §3 par défaut (position conservatrice non-DM).
 
 ### K-7 · Colonne « Programmée » (remplace « Débloqué le ») + rappel auto en retard (maquette `K-5-K-7_programmee_5a`)
 

@@ -1273,6 +1273,68 @@ create policy "notif_routines_patient_update"
 
 
 -- ============================================================
+-- TABLE : scale_schedules (Programmation des auto-questionnaires, K-6)
+-- ============================================================
+-- Une programmation de passation par (patient, échelle). Le praticien choisit la
+-- cadence ; l'app ne suggère JAMAIS de fréquence et ne déclenche JAMAIS de relance à
+-- partir d'un score (MDR 2017/745 : carnet de bord, jamais interprétation). Socle :
+-- notification_routines. `mode='in_session'` = passation en séance (rien envoyé au
+-- patient) ; `mode='home'` = auto-questionnaire récurrent envoyé au patient.
+create table if not exists public.scale_schedules (
+  id               uuid        primary key default gen_random_uuid(),
+  patient_id       uuid        not null references public.patients(id) on delete cascade,
+  practitioner_id  uuid        not null references public.practitioners(id) on delete cascade,
+  module_id        text        not null,   -- l'échelle (phq9, gad7, …)
+  mode             text        not null default 'home'
+                     check (mode in ('home', 'in_session')),
+  frequency        text        not null
+                     check (frequency in ('weekly', 'biweekly', 'monthly', 'quarterly', 'on_demand')),
+  day_of_week      smallint    check (day_of_week between 1 and 7),  -- 1 = lundi … 7 = dimanche
+  time_of_day      text,        -- « HH:MM » (null si à la demande)
+  ends_on          date,        -- null = sans limite
+  patient_reminder boolean     not null default true,  -- rappel calendaire (jamais lié à un score)
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (patient_id, module_id)
+);
+
+create index if not exists idx_scale_schedules_patient
+  on public.scale_schedules(patient_id);
+create index if not exists idx_scale_schedules_practitioner
+  on public.scale_schedules(practitioner_id);
+
+alter table public.scale_schedules enable row level security;
+
+-- Praticien : CRUD complet sur les programmations de ses patients.
+drop policy if exists "scale_schedules_practitioner_select" on public.scale_schedules;
+create policy "scale_schedules_practitioner_select"
+  on public.scale_schedules for select
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "scale_schedules_practitioner_insert" on public.scale_schedules;
+create policy "scale_schedules_practitioner_insert"
+  on public.scale_schedules for insert
+  with check (auth.uid() = practitioner_id);
+
+drop policy if exists "scale_schedules_practitioner_update" on public.scale_schedules;
+create policy "scale_schedules_practitioner_update"
+  on public.scale_schedules for update
+  using (auth.uid() = practitioner_id);
+
+drop policy if exists "scale_schedules_practitioner_delete" on public.scale_schedules;
+create policy "scale_schedules_practitioner_delete"
+  on public.scale_schedules for delete
+  using (auth.uid() = practitioner_id);
+
+-- Patient : lecture seule de ses programmations (le mobile affichera ses passations
+-- prévues). Il ne modifie pas la cadence ; c'est le praticien qui la fixe.
+drop policy if exists "scale_schedules_patient_select" on public.scale_schedules;
+create policy "scale_schedules_patient_select"
+  on public.scale_schedules for select
+  using (auth.uid() = patient_id);
+
+
+-- ============================================================
 -- TABLE : notification_logs (Historique des envois — audit)
 -- ============================================================
 -- Remplie uniquement par l'Edge Function (service_role).

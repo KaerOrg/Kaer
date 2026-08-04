@@ -14,14 +14,19 @@ describe('computeModuleTabs', () => {
     expect(computeModuleTabs('mood_tracker', locked)).toEqual(['preview', 'sources'])
   })
 
-  it('échelle avec aperçu déverrouillée : données + vue patient + sources, jamais de notifications', () => {
-    const ctx = { unlocked: true, isScale: true, scaleHasPreview: true }
-    expect(computeModuleTabs('phq9', ctx)).toEqual(['data', 'preview', 'sources'])
+  it('échelle auto (K-6) : Programmation en tête + données + vue patient + sources', () => {
+    const ctx = { unlocked: true, isScale: true, scaleHasPreview: true, scaleEvaluationType: 'auto' as const }
+    expect(computeModuleTabs('phq9', ctx)).toEqual(['schedule', 'data', 'preview', 'sources'])
   })
 
-  it('échelle sans aperçu : données seule', () => {
-    const ctx = { unlocked: true, isScale: true, scaleHasPreview: false }
-    expect(computeModuleTabs('phq9', ctx)).toEqual(['data'])
+  it('échelle hétéro (K-6) : Passation en tête + données + sources, JAMAIS de vue patient', () => {
+    const ctx = { unlocked: true, isScale: true, scaleHasPreview: true, scaleEvaluationType: 'hetero' as const }
+    expect(computeModuleTabs('madrs', ctx)).toEqual(['passation', 'data', 'sources'])
+  })
+
+  it('échelle auto non déverrouillée : Programmation + vue patient + sources (pas de données)', () => {
+    const ctx = { unlocked: false, isScale: true, scaleHasPreview: true, scaleEvaluationType: 'auto' as const }
+    expect(computeModuleTabs('phq9', ctx)).toEqual(['schedule', 'preview', 'sources'])
   })
 
   it('psychoéducation : config + vue patient + sources (config disponible même verrouillé)', () => {

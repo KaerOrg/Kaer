@@ -1,4 +1,4 @@
-import { Eye, BookOpen, LineChart, Bell, Settings } from 'lucide-react'
+import { Eye, BookOpen, LineChart, Bell, Settings, CalendarClock, Stethoscope } from 'lucide-react'
 import type { ModuleActionTab } from './ModuleActionsModal'
 
 /**
@@ -13,6 +13,8 @@ export const TAB_LABEL_KEY: Record<ModuleActionTab, string> = {
   data: 'patient.data_button',
   notifications: 'notifications.modal_title',
   config: 'patient.config_tab',
+  schedule: 'scales.schedule.tab',
+  passation: 'scales.passation.tab',
 }
 
 export function tabIcon(tab: ModuleActionTab) {
@@ -20,5 +22,7 @@ export function tabIcon(tab: ModuleActionTab) {
   if (tab === 'sources') return <BookOpen size={15} />
   if (tab === 'data') return <LineChart size={15} />
   if (tab === 'notifications') return <Bell size={15} />
+  if (tab === 'schedule') return <CalendarClock size={15} />
+  if (tab === 'passation') return <Stethoscope size={15} />
   return <Settings size={15} />
 }

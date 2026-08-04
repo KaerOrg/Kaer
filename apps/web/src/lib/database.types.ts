@@ -545,6 +545,45 @@ export interface Database {
         }
         Relationships: []
       }
+      // Programmation des auto-questionnaires (K-6). Une ligne par (patient, échelle).
+      scale_schedules: {
+        Row: {
+          id: string
+          patient_id: string
+          practitioner_id: string
+          module_id: string
+          mode: 'home' | 'in_session'
+          frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week: number | null
+          time_of_day: string | null
+          ends_on: string | null
+          patient_reminder: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_id: string
+          practitioner_id: string
+          module_id: string
+          mode?: 'home' | 'in_session'
+          frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week?: number | null
+          time_of_day?: string | null
+          ends_on?: string | null
+          patient_reminder?: boolean
+          updated_at?: string
+        }
+        Update: {
+          mode?: 'home' | 'in_session'
+          frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week?: number | null
+          time_of_day?: string | null
+          ends_on?: string | null
+          patient_reminder?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notification_logs: {
         Row: {
           id: string
