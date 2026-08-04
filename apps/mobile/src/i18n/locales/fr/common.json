@@ -1434,7 +1434,19 @@
       "session_stop": "Arrêter la session",
       "session_mute": "Couper le son",
       "session_unmute": "Remettre le son",
-      "session_haptic_hint": "Vibration à chaque changement de phase"
+      "session_haptic_hint": "Vibration à chaque changement de phase",
+      "summary_title": "Session terminée",
+      "summary_stat_duration": "durée",
+      "summary_stat_cycles": "cycles",
+      "summary_stat_streak": "de suite",
+      "summary_feeling_title": "Comment vous sentez-vous ?",
+      "summary_feeling_note": "Partagé avec votre praticien, sans interprétation.",
+      "summary_regularity": "La régularité compte plus que la durée : 5 minutes par jour suffisent pour installer l'effet.",
+      "summary_save": "Enregistrer",
+      "summary_skip": "Passer",
+      "feeling_calmer": "Plus calme",
+      "feeling_same": "Pareil",
+      "feeling_tenser": "Plus tendu"
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

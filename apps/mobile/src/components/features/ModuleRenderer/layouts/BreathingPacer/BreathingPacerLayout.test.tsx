@@ -43,10 +43,12 @@ jest.mock('../../../../../hooks/useTeen', () => ({
   useTeen: () => ({ isTeenMode: false, tt: () => '', tg: () => '', teenColor: () => undefined }),
 }))
 
-// `ui/Sheet` lit les insets : sans provider dans l'arbre de test, le hook throw.
-jest.mock('react-native-safe-area-context', () => ({
-  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
-}))
+// `ui/Sheet` lit les insets et l'écran de clôture rend un `SafeAreaView` : sans
+// provider dans l'arbre de test, le hook throw et le composant est indéfini.
+jest.mock('react-native-safe-area-context', () => {
+  const { View } = require('react-native')
+  return { useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }), SafeAreaView: View }
+})
 
 const mockReport = jest.fn()
 jest.mock('@services/errorReportingService', () => ({
@@ -292,12 +294,11 @@ describe('BreathingPacerLayout : hub', () => {
     })
   })
 
-  it('enregistre la session remontée par l’écran, interruption comprise', async () => {
-    renderHub()
+  /** Ouvre la préparation, démarre, puis termine la session avec le résultat donné. */
+  async function runSession(over: Partial<Record<string, unknown>> = {}) {
     fireEvent.press(await screen.findByTestId('breathing-start-btn'))
     fireEvent.press(await screen.findByTestId('breathing-prep-start'))
     await screen.findByTestId('player')
-
     act(() => {
       finishSession?.({
         techniqueKey: 'coherence_cardiaque',
@@ -306,9 +307,14 @@ describe('BreathingPacerLayout : hub', () => {
         plannedDurationSeconds: 300,
         cyclesCompleted: 4,
         completed: false,
+        ...over,
       })
     })
+  }
 
+  it('enregistre la session dès sa fin, interruption comprise', async () => {
+    renderHub()
+    await runSession()
     await waitFor(() => {
       expect(mockSaveSession).toHaveBeenCalledWith(expect.objectContaining({
         technique_key: 'coherence_cardiaque',
@@ -317,25 +323,56 @@ describe('BreathingPacerLayout : hub', () => {
         planned_duration_seconds: 300,
         cycles_completed: 4,
         completed: false,
+        feeling: null,
       }))
     })
     expect(screen.queryByTestId('player')).toBeNull()
   })
 
+  it('présente la clôture après la session', async () => {
+    renderHub()
+    await runSession()
+    expect(await screen.findByTestId('breathing-summary')).toBeTruthy()
+  })
+
+  it('ajoute le ressenti à la MÊME entrée, sans en créer une seconde', async () => {
+    renderHub()
+    await runSession()
+    await screen.findByTestId('breathing-summary')
+    fireEvent.press(screen.getByText('Plus calme'))
+    fireEvent.press(screen.getByTestId('breathing-summary-save'))
+
+    await waitFor(() => expect(mockSaveSession).toHaveBeenCalledTimes(2))
+    const [first] = mockSaveSession.mock.calls[0]
+    const [second] = mockSaveSession.mock.calls[1]
+    expect(second.id).toBe(first.id)
+    expect(first.feeling).toBeNull()
+    expect(second.feeling).toBe('calmer')
+  })
+
+  it('« Passer » n’écrit rien de plus : aucun refus n’est noté', async () => {
+    renderHub()
+    await runSession()
+    await screen.findByTestId('breathing-summary')
+    fireEvent.press(screen.getByTestId('breathing-summary-skip'))
+
+    expect(mockSaveSession).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(screen.queryByTestId('breathing-summary')).toBeNull())
+  })
+
+  it('revient au hub après la clôture', async () => {
+    renderHub()
+    await runSession()
+    await screen.findByTestId('breathing-summary')
+    fireEvent.press(screen.getByTestId('breathing-summary-save'))
+    await waitFor(() => expect(screen.queryByTestId('breathing-summary')).toBeNull())
+    expect(screen.getByTestId('breathing-week-card')).toBeTruthy()
+  })
+
   it('remonte un échec d’enregistrement de session (jamais avalé)', async () => {
     mockSaveSession.mockRejectedValueOnce(new Error('disk full'))
     renderHub()
-    fireEvent.press(await screen.findByTestId('breathing-start-btn'))
-    fireEvent.press(await screen.findByTestId('breathing-prep-start'))
-    await screen.findByTestId('player')
-
-    act(() => {
-      finishSession?.({
-        techniqueKey: 'coherence_cardiaque', startedAt: '2026-08-05T10:00:00.000Z',
-        durationSeconds: 42, plannedDurationSeconds: 300, cyclesCompleted: 4, completed: false,
-      })
-    })
-
+    await runSession()
     await waitFor(() => {
       expect(mockReport).toHaveBeenCalledWith(
         'module/breathing_techniques/session', 'breathing session write failed', 'disk full',

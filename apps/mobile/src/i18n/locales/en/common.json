@@ -1316,7 +1316,19 @@
       "session_stop": "Stop the session",
       "session_mute": "Mute",
       "session_unmute": "Unmute",
-      "session_haptic_hint": "Vibration at every phase change"
+      "session_haptic_hint": "Vibration at every phase change",
+      "summary_title": "Session complete",
+      "summary_stat_duration": "duration",
+      "summary_stat_cycles": "cycles",
+      "summary_stat_streak": "in a row",
+      "summary_feeling_title": "How do you feel?",
+      "summary_feeling_note": "Shared with your practitioner, without interpretation.",
+      "summary_regularity": "Regularity matters more than duration: 5 minutes a day is enough for the effect to settle in.",
+      "summary_save": "Save",
+      "summary_skip": "Skip",
+      "feeling_calmer": "Calmer",
+      "feeling_same": "The same",
+      "feeling_tenser": "More tense"
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",
