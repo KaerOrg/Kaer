@@ -1,0 +1,30 @@
+.scale-passation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.scale-passation__title {
+  margin: 0 0 var(--spacing-xs, 4px);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.scale-passation__desc {
+  margin: 0 0 var(--spacing-md);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}
+
+.scale-passation__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.scale-passation__last {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-muted);
+}

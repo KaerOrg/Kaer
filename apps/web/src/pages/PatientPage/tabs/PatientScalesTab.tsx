@@ -23,6 +23,9 @@ import { ModuleActionsModal, type ModuleActionTab } from './ModuleActionsModal'
 import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import { computeModuleTabs } from './moduleActionTabs'
 import { PatientEvolutionTab } from './PatientEvolutionTab'
+import { ScaleProgrammingPanel } from './ScaleProgrammingPanel'
+import { ScalePassationBlock } from './ScalePassationBlock'
+import { useToast } from '../../../contexts/ToastContext'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type ModuleCategory, type ModuleItem, type ModuleTaxonomy } from '@services/moduleCatalogService'
 import {
@@ -62,6 +65,7 @@ export function PatientScalesTab({
   onReloadModules,
 }: Props) {
   const { t, i18n } = useTranslation()
+  const toast = useToast()
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   const { data: lastActivityByModule } = useQuery(engagementQueries.lastActivity(patientId))
@@ -140,6 +144,7 @@ export function PatientScalesTab({
       unlocked: !!mod,
       isScale: true,
       scaleHasPreview: scale?.hasPreview ?? false,
+      scaleEvaluationType: scale?.evaluationType,
     })
     if (tabs.length > 0) openScaleTab(type, tabs[0])
   }, [scaleById, modules, openScaleTab])
@@ -193,6 +198,7 @@ export function PatientScalesTab({
           unlocked: !!mod,
           isScale: true,
           scaleHasPreview: scale?.hasPreview ?? false,
+          scaleEvaluationType: scale?.evaluationType,
         }).filter(tab => tab !== 'sources')
 
     return {
@@ -335,9 +341,29 @@ export function PatientScalesTab({
       unlocked: !!mod,
       isScale: !!scale,
       scaleHasPreview: scale?.hasPreview ?? false,
+      scaleEvaluationType: scale?.evaluationType,
     })
-    return { patientModuleId: mod?.id, tabs }
+    return { patientModuleId: mod?.id, tabs, evaluationType: scale?.evaluationType }
   }, [activeScale, modules, scaleById])
+
+  // Panneau de l'onglet Programmation (auto) / Passation (hétéro) de l'échelle active.
+  // Câblage minimal des actions « Faire passer » / « Démarrer » en K-6 (envoi/saisie
+  // réelle en follow-up) : un toast neutre, jamais déclenché par un score (MDR).
+  const notYet = useCallback(() => toast.info(t('scales.schedule.action_soon')), [toast, t])
+  const schedulePanel = useMemo(() => {
+    if (!activeScale || activeModalContext?.evaluationType == null) return null
+    if (activeModalContext.evaluationType === 'hetero') {
+      return <ScalePassationBlock onStart={notYet} lastPassationLabel={null} />
+    }
+    return (
+      <ScaleProgrammingPanel
+        patientId={patientId}
+        practitionerId={practitionerId}
+        moduleId={activeScale.module}
+        onRunNow={notYet}
+      />
+    )
+  }, [activeScale, activeModalContext, patientId, practitionerId, notYet])
 
   const activatedScales = collectScales(isActivated)
   const activatableScales = collectScales(type => !isActivated(type))
@@ -490,6 +516,7 @@ export function PatientScalesTab({
           tabs={activeModalContext.tabs}
           activeTab={activeScale.tab}
           onTabChange={changeActiveTab}
+          schedulePanel={schedulePanel}
           onClose={closeModal}
         />
       )}

@@ -105,12 +105,13 @@ describe('PatientScalesTab (K-4)', () => {
     expect(screen.getByText('scales.always_available')).toBeInTheDocument()
   })
 
-  it('clic sur une échelle standard ouvre la fiche sur le 1ᵉʳ onglet (Données)', async () => {
+  it('clic sur une échelle auto ouvre la fiche sur le 1ᵉʳ onglet (Programmation, K-6)', async () => {
     renderTab()
     await waitFor(() => expect(screen.getByText('modules.phq9.label')).toBeTruthy())
     fireEvent.click(screen.getByText('modules.phq9.label'))
     await waitFor(() => expect(modalCalls.length).toBeGreaterThan(0))
-    expect(modalCalls.at(-1)).toEqual({ module: 'phq9', activeTab: 'data' })
+    // phq9 est auto → onglet de tête = Programmation (K-6), plus Données.
+    expect(modalCalls.at(-1)).toEqual({ module: 'phq9', activeTab: 'schedule' })
   })
 
   it('clic sur C-SSRS ouvre le panneau d’évaluations dédié (pas la fiche standard)', async () => {

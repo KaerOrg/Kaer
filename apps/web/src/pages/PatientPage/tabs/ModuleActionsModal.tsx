@@ -16,9 +16,9 @@ import './ModuleActionsModal.css'
  * est Données → Configuration → Notifications → Vue patient → Sources (porté par
  * `computeModuleTabs`) ; cette union sert au typage, `TAB_ORDER` à la validation.
  */
-export type ModuleActionTab = 'preview' | 'sources' | 'data' | 'notifications' | 'config'
+export type ModuleActionTab = 'preview' | 'sources' | 'data' | 'notifications' | 'config' | 'schedule' | 'passation'
 
-const TAB_ORDER: readonly ModuleActionTab[] = ['data', 'config', 'notifications', 'preview', 'sources']
+const TAB_ORDER: readonly ModuleActionTab[] = ['schedule', 'passation', 'data', 'config', 'notifications', 'preview', 'sources']
 
 function isActionTab(id: string): id is ModuleActionTab {
   return (TAB_ORDER as readonly string[]).includes(id)
@@ -43,6 +43,11 @@ interface Props {
    * d'édition et leurs données de synthèse). Requis dès que `tabs` contient `config`.
    */
   configPanel?: ReactNode
+  /**
+   * Contenu de l'onglet Programmation (auto) ou Passation (hétéro) d'une échelle (K-6),
+   * construit par le parent. Requis dès que `tabs` contient `schedule` ou `passation`.
+   */
+  schedulePanel?: ReactNode
   onClose: () => void
 }
 
@@ -64,6 +69,7 @@ export function ModuleActionsModal({
   activeTab,
   onTabChange,
   configPanel,
+  schedulePanel,
   onClose,
 }: Props) {
   const { t } = useTranslation()
@@ -105,6 +111,7 @@ export function ModuleActionsModal({
             />
           )}
           {activeTab === 'config' && configPanel}
+          {(activeTab === 'schedule' || activeTab === 'passation') && schedulePanel}
         </div>
       </div>
     </Modal>
