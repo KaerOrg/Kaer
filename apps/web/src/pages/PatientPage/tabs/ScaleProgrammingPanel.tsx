@@ -19,6 +19,8 @@ type Props = {
   moduleId: string
   /** « Faire passer maintenant » : câblage minimal en K-6 (mécanique d'envoi en follow-up). */
   onRunNow: () => void
+  /** Date de déblocage déjà formatée (K-7 : « Débloqué le » descend de la colonne à la fiche). */
+  unlockedAtLabel: string | null
 }
 
 type ScheduleForm = {
@@ -44,7 +46,7 @@ const DEFAULT_FORM: ScheduleForm = {
  * l'app ne suggère jamais de fréquence et ne déclenche jamais de relance à partir d'un score
  * (MDR 2017/745). Persistance via `scaleScheduleService` (aucun Supabase dans le composant).
  */
-export function ScaleProgrammingPanel({ patientId, practitionerId, moduleId, onRunNow }: Props) {
+export function ScaleProgrammingPanel({ patientId, practitionerId, moduleId, onRunNow, unlockedAtLabel }: Props) {
   const { t } = useTranslation()
   const toast = useToast()
   const scheduleQuery = useQuery(scaleScheduleQueries.byScale(patientId, moduleId))
@@ -191,6 +193,10 @@ export function ScaleProgrammingPanel({ patientId, practitionerId, moduleId, onR
           {t('scales.schedule.save')}
         </Button>
       </div>
+
+      {unlockedAtLabel ? (
+        <p className="scale-prog__unlocked">{t('scales.programmed.unlocked_on', { date: unlockedAtLabel })}</p>
+      ) : null}
     </div>
   )
 }

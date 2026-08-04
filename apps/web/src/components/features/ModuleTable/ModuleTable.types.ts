@@ -29,6 +29,12 @@ export interface ModuleTableRow {
    * dispo. » pour une échelle toujours disponible, C-SSRS). Le tri utilise `unlockedAt`.
    */
   readonly unlockedLabelOverride?: string
+  /**
+   * Cellule « Programmée » (K-7), déjà rendue. Fournie par l'onglet Échelles pour
+   * remplacer la colonne « Débloqué le » quand `ModuleTable` reçoit `programmedColumn`.
+   * Ignorée par l'onglet Modules (colonne « Débloqué le » conservée).
+   */
+  readonly scheduleCell?: ReactNode
   /** Date de la dernière activité BRUTE (ISO) ou `null` si aucune saisie. */
   readonly lastActivityAt: string | null
   /** Contrôle de la colonne « Activé » (toggle ou bouton), déjà rendu. */

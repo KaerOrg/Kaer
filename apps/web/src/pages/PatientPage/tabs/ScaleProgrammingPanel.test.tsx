@@ -23,11 +23,11 @@ import { ScaleProgrammingPanel } from './ScaleProgrammingPanel'
 const onRunNow = vi.fn()
 const makeClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
-function renderPanel() {
+function renderPanel(unlockedAtLabel: string | null = null) {
   return render(
     <QueryClientProvider client={makeClient()}>
       <ToastProvider>
-        <ScaleProgrammingPanel patientId="p1" practitionerId="pr1" moduleId="phq9" onRunNow={onRunNow} />
+        <ScaleProgrammingPanel patientId="p1" practitionerId="pr1" moduleId="phq9" onRunNow={onRunNow} unlockedAtLabel={unlockedAtLabel} />
       </ToastProvider>
     </QueryClientProvider>,
   )
@@ -59,5 +59,10 @@ describe('ScaleProgrammingPanel (K-6)', () => {
     await waitFor(() => expect(screen.getByText('scales.schedule.mdr_note')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: /scales\.schedule\.run_now/ }))
     expect(onRunNow).toHaveBeenCalledTimes(1)
+  })
+
+  it('affiche « Débloqué le » dans la fiche quand la date est fournie (K-7)', async () => {
+    renderPanel('12/07/2026')
+    await waitFor(() => expect(screen.getByText('scales.programmed.unlocked_on')).toBeInTheDocument())
   })
 })

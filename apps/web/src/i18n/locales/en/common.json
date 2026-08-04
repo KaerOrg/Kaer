@@ -165,7 +165,6 @@
     "subtab_active": "Active",
     "col_scale": "Scale / questionnaire",
     "search_placeholder": "Search a scale…",
-    "always_available": "Always available",
     "type_filter_label": "Type",
     "schedule": {
       "tab": "Scheduling",
@@ -201,6 +200,24 @@
       "saved": "Schedule saved.",
       "save_error": "Failed to save the schedule.",
       "action_soon": "Coming soon."
+    },
+    "programmed": {
+      "col": "Scheduled",
+      "unscheduled": "Not scheduled",
+      "program_btn": "Schedule",
+      "in_session": "In session · on demand",
+      "home_on_demand": "At home · on demand",
+      "home": "At home · {{freq}} · {{date}}",
+      "home_overdue": "At home · {{freq}} · {{days}} d overdue",
+      "freq_weekly": "weekly",
+      "freq_biweekly": "every 2 wks",
+      "freq_monthly": "monthly",
+      "freq_quarterly": "quarterly",
+      "reminder_label": "Patient reminder on",
+      "unlocked_on": "Unlocked on {{date}}",
+      "banner_title_one": "1 self-report overdue",
+      "banner_title_other": "{{count}} self-reports overdue",
+      "banner_item": "{{scale}} · {{days}} d overdue"
     },
     "passation": {
       "tab": "Administration",
