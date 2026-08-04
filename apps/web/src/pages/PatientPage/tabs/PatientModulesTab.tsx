@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react'
+import { useState, useCallback, useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { ShieldAlert, Plus } from 'lucide-react'
+import { Plus, Package2, TrendingUp } from 'lucide-react'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
 import { Button } from '../../../components/ui/Button'
 import { Card } from '../../../components/ui/Card'
+import { Tabs } from '../../../components/ui/Tabs'
 import { ModuleCard } from '../../../components/features/ModuleCard'
 import { Toggle } from '../../../components/ui/Toggle/Toggle'
 import { StatusBadge } from '../../../components/ui/StatusBadge'
@@ -12,12 +13,13 @@ import { Modal } from '../../../components/ui/Modal'
 import { ModuleFilterBar } from '../../../components/features/ModuleFilterBar'
 import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { ModuleTable, type ModuleTableRow } from '../../../components/features/ModuleTable'
+import { PatientEvolutionTab } from './PatientEvolutionTab'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
-import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { ModuleCardFooter } from './ModuleCardFooter'
 import { ModuleActionsModal, type ModuleActionTab } from './ModuleActionsModal'
+import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import { computeModuleTabs } from './moduleActionTabs'
 import { type ModuleType, type PatientModule } from '../../../lib/database.types'
 import { type LibraryTopic, type PsyEduTheme } from '@services/psyeduService'
@@ -28,7 +30,6 @@ import {
 } from '@services/moduleAssignmentService'
 import { DEFUSION_TECHNIQUES } from '../../../lib/defusionTechniques'
 import { scaleQueries, engagementQueries } from '../../../hooks/queries'
-import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
@@ -63,10 +64,6 @@ type Props = {
   themes: PsyEduTheme[]
   comingSoonIds: Set<string>
   onReloadModules: () => Promise<void>
-  /** Commande externe (page Évolution) : ouvrir la modale Données de ce module. */
-  openDataFor?: ModuleType | null
-  /** Accusé de réception de `openDataFor` (le parent remet la commande à null). */
-  onOpenDataHandled?: () => void
 }
 
 export function PatientModulesTab({
@@ -79,10 +76,11 @@ export function PatientModulesTab({
   themes,
   comingSoonIds,
   onReloadModules,
-  openDataFor,
-  onOpenDataHandled,
 }: Props) {
   const { t, i18n } = useTranslation()
+  // Sous-onglets de l'armoire (K-2) : « Actifs » (le tableau) et « Évolution »
+  // (les courbes des modules, montées à côté de ce qui les produit).
+  const [activeSubTab, setActiveSubTab] = useState<'active' | 'evolution'>('active')
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   // Dernière activité de chaque module (map module_id → horodatage), pour la colonne
@@ -99,14 +97,12 @@ export function PatientModulesTab({
   // anciens states séparés aperçu / données / notifications.
   const [activeModule, setActiveModule] = useState<{ module: ModuleType; tab: ModuleActionTab } | null>(null)
 
-  // Commande externe « Voir les données → » (page Évolution) : ouvre la modale sur
-  // l'onglet Données du module demandé, puis accuse réception pour ne pas rouvrir.
-  useEffect(() => {
-    if (openDataFor == null) return
-    setActiveModule({ module: openDataFor, tab: 'data' })
-    onOpenDataHandled?.()
-  }, [openDataFor, onOpenDataHandled])
-  const [showCSSRSModal, setShowCSSRSModal] = useState(false)
+  // « Voir les données → » du sous-onglet Évolution : ouvre la modale sur l'onglet
+  // Données du module (la modale est rendue par cet onglet, quel que soit le sous-onglet).
+  const openModuleDataPanel = useCallback(
+    (moduleType: ModuleType) => setActiveModule({ module: moduleType, tab: 'data' }),
+    [],
+  )
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
@@ -197,6 +193,23 @@ export function PatientModulesTab({
     setActiveModule({ module: type, tab: 'config' })
   }
 
+  // Ouvre la modale d'actions sur l'onglet demandé. `config` passe par `openConfig`
+  // (amorce l'éditeur du module) ; les autres onglets s'ouvrent directement. Utilisé par
+  // le clic de ligne (K-3) et les actions au survol du tableau.
+  const openModuleTab = (type: ModuleType, tab: ModuleActionTab) => {
+    if (tab === 'config') openConfig(type)
+    else setActiveModule({ module: type, tab })
+  }
+
+  // Clic sur une ligne du tableau : ouvre la fiche du module sur son premier onglet
+  // (ordre canonique de `computeModuleTabs`). Sans onglet disponible → aucune action
+  // (jamais de démarrage de passation en un clic).
+  const openModuleSheet = (type: ModuleType) => {
+    const mod = modules.find(m => m.module_type === type)
+    const tabs = computeModuleTabs(type, { unlocked: !!mod, isScale: false, scaleHasPreview: false })
+    if (tabs.length > 0) openModuleTab(type, tabs[0])
+  }
+
   // Fermeture de la modale : réinitialise l'éditeur de config s'il était ouvert.
   const closeModal = () => {
     if (activeModule?.tab === 'config') closeConfigEditor(activeModule.module)
@@ -214,11 +227,10 @@ export function PatientModulesTab({
 
   const isUnlocked = (type: ModuleType) => modules.some(m => m.module_type === type)
 
-  // « Activé » = déverrouillé pour ce patient, ou outil toujours disponible sans
-  // verrou (scale noToggle, ex. C-SSRS). L'armoire n'affiche que ces modules ;
-  // les autres (activables) vivent dans la modale « Ajouter un module ».
-  const isActivated = (type: ModuleType) =>
-    isUnlocked(type) || scaleMeta.find(s => s.id === type)?.noToggle === true
+  // « Activé » = déverrouillé pour ce patient. L'armoire n'affiche que ces modules ;
+  // les activables vivent dans la modale « Ajouter un module ». Les échelles sont
+  // exclues (onglet « Échelles & questionnaires », K-4).
+  const isActivated = (type: ModuleType) => isUnlocked(type)
 
   const unlockModule = useCallback(async (moduleType: ModuleType) => {
     setBusyModule({ op: 'unlock', type: moduleType })
@@ -496,55 +508,8 @@ export function PatientModulesTab({
       )
     }
 
-    // Échelle clinique — ScaleMetaBadges + gestion noToggle
-    const scale = scaleMeta.find(s => s.id === moduleType)
-    if (scale) {
-      const right = scale.noToggle
-        ? (
-          <button type="button" className="scales-list__view-btn" onClick={() => setShowCSSRSModal(true)}>
-            <ShieldAlert size={13} />
-            {t('patient.cssrs_evaluations')}
-          </button>
-        )
-        : moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
-            if (unlocked && mod) revokeModule(mod.id)
-            else unlockModule(moduleType)
-          })
-
-      return (
-        <div key={moduleType} className="module-card-wrapper-block">
-          <ModuleCard
-            className={unlocked ? 'module-card--unlocked' : undefined}
-            icon={modIcon}
-            title={t(`modules.${moduleType}.label`)}
-            headerRight={right}
-            description={t(`scales.full_title.${moduleType}`)}
-            tags={
-              <ScaleMetaBadges
-                scaleId={moduleType}
-                evaluationType={scale.evaluationType}
-                category={scale.category}
-              />
-            }
-            actions={
-              <ModuleCardFooter
-                previewOpen={isPreviewOpen(moduleType)}
-                onTogglePreview={scale.hasPreview ? () => togglePreview(moduleType) : undefined}
-                dataOpen={isDataOpen(moduleType)}
-                onToggleData={unlocked && mod ? () => toggleData(moduleType) : undefined}
-              />
-            }
-          >
-            {unlocked && mod && (
-              <div className="module-card__date">
-                {t('patient.unlocked_on', { date: new Date(mod.unlocked_at).toLocaleDateString(i18n.language) })}
-              </div>
-            )}
-          </ModuleCard>
-        </div>
-      )
-    }
-
+    // Les échelles vivent dans l'onglet « Échelles & questionnaires » (K-4) : elles
+    // sont exclues de `collectModules`, donc jamais rendues ici.
     return (
       <div key={moduleType} className="module-card-wrapper-block">
         <ModuleCard
@@ -581,54 +546,61 @@ export function PatientModulesTab({
   // Fonction simple (non mémoïsée), sur le modèle de `renderModuleCard` : les cellules
   // libres (indications, contrôle d'activation) sont rendues ici, le tableau formate les
   // dates et gère le tri. Tous les modules du tableau sont déjà activés → le toggle
-  // révoque ; la C-SSRS (`noToggle`) expose son bouton d'évaluations, sans toggle.
+  // révoque. Les échelles sont exclues (onglet dédié, K-4).
   const renderActiveRow = (item: ModuleItem): ModuleTableRow => {
     const moduleType = item.id as ModuleType
     const mod = modules.find(m => m.module_type === moduleType)
     const unlocked = !!mod
     const RowIcon = LUCIDE_ICONS[item.icon]
-    const scale = scaleMeta.find(s => s.id === moduleType)
 
-    const activation = scale?.noToggle ? (
-      <Button
-        variant="ghost"
-        size="sm"
-        icon={<ShieldAlert size={13} />}
-        onClick={() => setShowCSSRSModal(true)}
-      >
-        {t('patient.cssrs_evaluations')}
-      </Button>
-    ) : (
-      moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
-        if (unlocked && mod) revokeModule(mod.id)
-        else unlockModule(moduleType)
-      })
-    )
+    const activation = moduleToggle(unlocked, isModuleBusy(moduleType, mod?.id), () => {
+      if (unlocked && mod) revokeModule(mod.id)
+      else unlockModule(moduleType)
+    })
+
+    // Actions rapides au survol (K-3) : un raccourci par onglet disponible, sauf
+    // « Sources » (accessible dans la fiche). L'onglet ouvre la modale directement.
+    const actionTabs = computeModuleTabs(moduleType, {
+      unlocked,
+      isScale: false,
+      scaleHasPreview: false,
+    }).filter(tab => tab !== 'sources')
+
+    const actions = actionTabs.length > 0 ? (
+      <>
+        {actionTabs.map(tab => (
+          <Button
+            key={tab}
+            variant="ghost"
+            size="sm"
+            icon={tabIcon(tab)}
+            aria-label={t(TAB_LABEL_KEY[tab])}
+            onClick={e => { e.stopPropagation(); openModuleTab(moduleType, tab) }}
+          />
+        ))}
+      </>
+    ) : undefined
 
     return {
       id: moduleType,
       icon: RowIcon ? <RowIcon size={18} /> : null,
       title: t(`modules.${moduleType}.label`),
-      description: scale ? t(`scales.full_title.${moduleType}`) : t(`modules.${moduleType}.description`),
-      indications: scale ? (
-        <ScaleMetaBadges
-          scaleId={moduleType}
-          evaluationType={scale.evaluationType}
-          category={scale.category}
-          chipsOnly
-        />
-      ) : (
-        <ModuleTagChips tagIds={taxonomy.tagsByModule.get(moduleType)} taxonomy={taxonomy} maxChips={2} />
-      ),
+      description: t(`modules.${moduleType}.description`),
+      indications: <ModuleTagChips tagIds={taxonomy.tagsByModule.get(moduleType)} taxonomy={taxonomy} maxChips={2} />,
       unlockedAt: mod ? mod.unlocked_at : null,
       lastActivityAt: lastActivityByModule?.get(moduleType) ?? null,
       activation,
+      actions,
     }
   }
 
+  // Ids des échelles cliniques : exclues de l'armoire des modules (onglet dédié, K-4).
+  const scaleIds = useMemo(() => new Set(scaleMeta.map(s => s.id)), [scaleMeta])
+
   // Aplati les modules de toutes les catégories filtrés par `includeModule`, en
-  // respectant l'activation praticien et l'exclusion « bientôt ». L'ordre suit
-  // celui des catégories puis des modules (tri métier du seed).
+  // respectant l'activation praticien et l'exclusion « bientôt ». Les échelles sont
+  // exclues (onglet « Échelles & questionnaires »). L'ordre suit celui des catégories
+  // puis des modules (tri métier du seed).
   const collectModules = useCallback(
     (includeModule: (type: ModuleType) => boolean): ModuleItem[] => {
       const out: ModuleItem[] = []
@@ -637,12 +609,12 @@ export function PatientModulesTab({
           ? category.modules
           : category.modules.filter(m => enabledModules.has(m.id as ModuleType))
         for (const m of base) {
-          if (!comingSoonIds.has(m.id) && includeModule(m.id as ModuleType)) out.push(m)
+          if (!comingSoonIds.has(m.id) && !scaleIds.has(m.id) && includeModule(m.id as ModuleType)) out.push(m)
         }
       }
       return out
     },
-    [categories, enabledModules, comingSoonIds],
+    [categories, enabledModules, comingSoonIds, scaleIds],
   )
 
   // Couleur d'accent et nom d'icône d'un module, indexés par type — pour la modale
@@ -668,14 +640,13 @@ export function PatientModulesTab({
   const activeModalContext = useMemo(() => {
     if (!activeModule) return null
     const mod = modules.find(m => m.module_type === activeModule.module)
-    const scale = scaleMeta.find(s => s.id === activeModule.module)
     const tabs = computeModuleTabs(activeModule.module, {
       unlocked: !!mod,
-      isScale: !!scale,
-      scaleHasPreview: scale?.hasPreview ?? false,
+      isScale: false,
+      scaleHasPreview: false,
     })
     return { patientModuleId: mod?.id, tabs }
-  }, [activeModule, modules, scaleMeta])
+  }, [activeModule, modules])
 
   // Confirmation psychoédu : enregistre puis ferme la modale uniquement au succès.
   const handlePsychoConfirm = async () => {
@@ -764,45 +735,49 @@ export function PatientModulesTab({
           </Button>
         </div>
 
-        {activatedModules.length === 0 ? (
-          <p className="wardrobe__empty">{t('patient.wardrobe_empty')}</p>
-        ) : (
-          <div className="wardrobe__active">
-            {showActiveFilterBar && (
-              <ModuleFilterBar
-                taxonomy={taxonomy}
-                activeFilters={activeFilters}
-                onToggleTag={toggleTag}
-                onReset={resetFilters}
-                resultCount={visibleActivatedModules.length}
-                totalCount={activatedModules.length}
+        <div className="wardrobe__subtabs">
+          <Tabs
+            tabs={[
+              { id: 'active', label: t('patient.subtab_active'), icon: <Package2 size={16} />, badge: activatedModules.length || undefined },
+              { id: 'evolution', label: t('patient.tab_evolution'), icon: <TrendingUp size={16} /> },
+            ]}
+            activeTab={activeSubTab}
+            onChange={id => setActiveSubTab(id as 'active' | 'evolution')}
+          />
+        </div>
+
+        {activeSubTab === 'active' ? (
+          activatedModules.length === 0 ? (
+            <p className="wardrobe__empty">{t('patient.wardrobe_empty')}</p>
+          ) : (
+            <div className="wardrobe__active">
+              {showActiveFilterBar && (
+                <ModuleFilterBar
+                  taxonomy={taxonomy}
+                  activeFilters={activeFilters}
+                  onToggleTag={toggleTag}
+                  onReset={resetFilters}
+                  resultCount={visibleActivatedModules.length}
+                  totalCount={activatedModules.length}
+                />
+              )}
+              <ModuleTable
+                rows={displayedActivatedModules.map(renderActiveRow)}
+                firstColumnLabel={t('patient.module_table.col_module')}
+                ariaLabel={t('patient.wardrobe_title')}
+                emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
+                onRowClick={id => openModuleSheet(id as ModuleType)}
               />
-            )}
-            <ModuleTable
-              rows={displayedActivatedModules.map(renderActiveRow)}
-              firstColumnLabel={t('patient.module_table.col_module')}
-              ariaLabel={t('patient.wardrobe_title')}
-              emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
-            />
-          </div>
+            </div>
+          )
+        ) : (
+          <PatientEvolutionTab
+            patientId={patientId}
+            family="modules"
+            onOpenModuleData={openModuleDataPanel}
+          />
         )}
       </section>
-
-      {showCSSRSModal && (
-        <Modal
-          title={t('patient.cssrs_modal_title')}
-          subtitle={t('patient.cssrs_modal_subtitle')}
-          icon={<ShieldAlert size={20} />}
-          onClose={() => setShowCSSRSModal(false)}
-          noPadding
-          maxWidth={860}
-        >
-          <CSSRSScreenPanel
-            patientId={patientId}
-            practitionerId={practitionerId}
-          />
-        </Modal>
-      )}
 
       {showAddModal && (
         <Modal

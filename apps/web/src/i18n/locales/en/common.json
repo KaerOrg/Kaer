@@ -156,6 +156,17 @@
   "scales": {
     "eval_auto": "Self-report",
     "eval_hetero": "Clinician-rated",
+    "tab_scales": "Scales & questionnaires",
+    "wardrobe_title": "Scales & questionnaires",
+    "wardrobe_desc": "The scales and questionnaires enabled for this patient.",
+    "wardrobe_empty": "No scale enabled for this patient. Click “Add a scale” to get started.",
+    "add_button": "Add a scale",
+    "add_title": "Add a scale",
+    "subtab_active": "Active",
+    "col_scale": "Scale / questionnaire",
+    "search_placeholder": "Search a scale…",
+    "always_available": "Always available",
+    "type_filter_label": "Type",
     "validated_prefix": "Validated",
     "age": {
       "perinatal": "Perinatal",
@@ -332,6 +343,7 @@
     "crisis_error_save": "Save error. Please try again.",
     "cssrs_evaluations": "Assessments",
     "tab_evolution": "Evolution",
+    "subtab_active": "Active",
     "tab_overview": "Overview",
     "tab_modules": "Modules",
     "tab_notes": "Notes",
@@ -2313,6 +2325,7 @@
   },
   "evolution": {
     "title": "Clinical Evolution",
+    "raw_values_caption": "Raw values, to be interpreted in consultation.",
     "show_archived": "Show archived tracks",
     "archived_badge": "Archived",
     "all_archived": "All tracks for this patient are archived. Turn on “Show archived tracks” to view them.",

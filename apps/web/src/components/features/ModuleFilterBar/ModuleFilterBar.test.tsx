@@ -45,6 +45,23 @@ function renderBar(activeFilters: ReadonlyMap<string, ReadonlySet<string>> = new
 
 beforeEach(() => vi.clearAllMocks())
 
+describe('ModuleFilterBar : extraControls (filtre hors taxonomie)', () => {
+  it('rend les contrôles supplémentaires dans la rangée des filtres', () => {
+    render(
+      <ModuleFilterBar
+        taxonomy={taxonomy}
+        activeFilters={new Map()}
+        onToggleTag={onToggleTag}
+        onReset={onReset}
+        resultCount={4}
+        totalCount={12}
+        extraControls={<div data-testid="type-filter">Type</div>}
+      />,
+    )
+    expect(screen.getByTestId('type-filter')).toBeInTheDocument()
+  })
+})
+
 describe('ModuleFilterBar — un filtre par axe', () => {
   it('affiche une combobox par dimension ayant des tags (axe sans tag omis)', () => {
     renderBar()

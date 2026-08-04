@@ -55,6 +55,13 @@ type Props = {
   patientId: string
   /** Ouvre l'onglet Données du module (lien « Voir les données → » des sections). */
   onOpenModuleData?: (moduleType: ModuleType) => void
+  /**
+   * Famille de suivis à afficher, pour monter l'Évolution à côté de sa famille (K-2 :
+   * `modules` dans l'onglet Modules ; `scales` dans l'onglet Échelles, K-5). Absente →
+   * tout (comportement historique). `modules` masque les sections d'échelles cliniques,
+   * `scales` ne garde qu'elles.
+   */
+  family?: 'modules' | 'scales'
 }
 
 type EvolutionData = {
@@ -87,8 +94,12 @@ const EMPTY_EVOLUTION: EvolutionData = {
   namingEntries: [],
 }
 
-export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
+export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Props) {
   const { t, i18n } = useTranslation()
+  // Filtre par famille : les échelles cliniques d'un côté, les modules « outils » de
+  // l'autre. `family` absente → les deux (comportement historique).
+  const showModules = family !== 'scales'
+  const showScales = family !== 'modules'
   const [range, setRange] = useState<TimeRange>('1y')
   const [showArchived, setShowArchived] = useState(false)
   // Sections repliables (#159) : plusieurs ouvertes à la fois, état possédé par la
@@ -152,24 +163,28 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
   const overviewCards = useMemo<OverviewCard[]>(() => {
     const shown = (mt: string) => activeTypes.has(mt) || showArchived
     const cards: OverviewCard[] = []
-    if (sleepData.length > 0 && shown('sleep_diary')) cards.push(sleepCard(sleepData))
-    if (moodData.length > 0 && shown('mood_tracker')) cards.push(moodCard(moodData, t))
-    if (activityEntries.length > 0 && shown('behavioral_activation')) cards.push(activationCard(activityEntries))
+    if (showModules) {
+      if (sleepData.length > 0 && shown('sleep_diary')) cards.push(sleepCard(sleepData))
+      if (moodData.length > 0 && shown('mood_tracker')) cards.push(moodCard(moodData, t))
+      if (activityEntries.length > 0 && shown('behavioral_activation')) cards.push(activationCard(activityEntries))
+      // Effets indésirables : empreinte (une barre par effet, aucun composite, MDR).
+      if (medData.length > 0 && shown('medication_side_effects')) {
+        cards.push(medCard(medEffects, medData, effect => t(`evolution.med_effect_${effect}`, { defaultValue: effect })))
+      }
+      if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
+      // « Nommer ce que je ressens » : carte d'effectifs, sans sparkline ni empreinte.
+      if (namingEntries.length > 0 && shown('emotion_wheel')) {
+        cards.push(namingCard(namingEntries, namingTaxonomy, (key, values) => t(key, values)))
+      }
+    }
     // Échelles : une carte par échelle active ayant des saisies (score moyen 30 j).
-    for (const mt of scales) {
-      if ((scaleData[mt]?.length ?? 0) > 0 && shown(mt)) cards.push(scaleCard(mt, scaleData[mt] ?? []))
-    }
-    // Effets indésirables : empreinte (une barre par effet, aucun composite, MDR).
-    if (medData.length > 0 && shown('medication_side_effects')) {
-      cards.push(medCard(medEffects, medData, effect => t(`evolution.med_effect_${effect}`, { defaultValue: effect })))
-    }
-    if (fearData.length > 0 && shown('fear_thermometer')) cards.push(fearCard(fearData))
-    // « Nommer ce que je ressens » : carte d'effectifs, sans sparkline ni empreinte.
-    if (namingEntries.length > 0 && shown('emotion_wheel')) {
-      cards.push(namingCard(namingEntries, namingTaxonomy, (key, values) => t(key, values)))
+    if (showScales) {
+      for (const mt of scales) {
+        if ((scaleData[mt]?.length ?? 0) > 0 && shown(mt)) cards.push(scaleCard(mt, scaleData[mt] ?? []))
+      }
     }
     return cards
-  }, [sleepData, moodData, activityEntries, scales, scaleData, medEffects, medData, fearData, namingEntries, namingTaxonomy, activeTypes, showArchived, t])
+  }, [showModules, showScales, sleepData, moodData, activityEntries, scales, scaleData, medEffects, medData, fearData, namingEntries, namingTaxonomy, activeTypes, showArchived, t])
 
   // Rappel de métrique clé pour l'en-tête des sections repliables (réutilise la
   // métrique 30 j des cartes d'aperçu ; humeur = empreinte, donc pas de rappel).
@@ -196,8 +211,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     [t],
   )
 
-  const hasData =
-    scales.length > 0 ||
+  const hasModuleData =
     moodData.length > 0 ||
     fearData.length > 0 ||
     defusionData.length > 0 ||
@@ -207,20 +221,26 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
     beckEntries.length > 0 ||
     activityEntries.length > 0 ||
     namingEntries.length > 0
+  const hasScaleData = scales.length > 0
+  const hasData = (showModules && hasModuleData) || (showScales && hasScaleData)
 
-  // Types de modules ayant des données ; au moins un est-il archivé ?
+  // Types de suivis ayant des données, restreints à la famille affichée ; au moins un
+  // est-il archivé ?
   const dataTypes = useMemo(() => {
-    const types = [...scales]
-    if (moodData.length > 0) types.push('mood_tracker')
-    if (fearData.length > 0) types.push('fear_thermometer')
-    if (defusionData.length > 0) types.push('cognitive_saturation')
-    if (medData.length > 0) types.push('medication_side_effects')
-    if (sleepData.length > 0) types.push('sleep_diary')
-    if (beckEntries.length > 0) types.push('beck_columns')
-    if (activityEntries.length > 0) types.push('behavioral_activation')
-    if (namingEntries.length > 0) types.push('emotion_wheel')
+    const types: string[] = []
+    if (showScales) types.push(...scales)
+    if (showModules) {
+      if (moodData.length > 0) types.push('mood_tracker')
+      if (fearData.length > 0) types.push('fear_thermometer')
+      if (defusionData.length > 0) types.push('cognitive_saturation')
+      if (medData.length > 0) types.push('medication_side_effects')
+      if (sleepData.length > 0) types.push('sleep_diary')
+      if (beckEntries.length > 0) types.push('beck_columns')
+      if (activityEntries.length > 0) types.push('behavioral_activation')
+      if (namingEntries.length > 0) types.push('emotion_wheel')
+    }
     return types
-  }, [scales, moodData.length, fearData.length, defusionData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length, namingEntries.length])
+  }, [showModules, showScales, scales, moodData.length, fearData.length, defusionData.length, medData.length, sleepData.length, beckEntries.length, activityEntries.length, namingEntries.length])
   const hasArchived = dataTypes.some(mt => !activeTypes.has(mt))
   const hasActiveData = dataTypes.some(mt => activeTypes.has(mt))
 
@@ -242,7 +262,9 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
   return (
     <div className="evolution">
       <div className="evolution__header">
-        <h2 className="evolution__title">{t('evolution.title')}</h2>
+        {/* Rappel MDR : le praticien lit des valeurs brutes, l'app ne conclut rien.
+            Le titre « Évolution » est déjà porté par le sous-onglet (K-2). */}
+        <p className="evolution__caption">{t('evolution.raw_values_caption')}</p>
         <div className="evolution__controls">
           {hasArchived && (
             <Toggle
@@ -267,7 +289,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       )}
 
       {/* ── Agenda du sommeil (grille + tableau fenêtre + courbes) ─────── */}
-      {sleepData.length > 0 && isShown('sleep_diary') && (
+      {showModules && sleepData.length > 0 && isShown('sleep_diary') && (
         <EvolutionSection
           sectionKey="sleep_diary"
           anchorId="evo-section-sleep_diary"
@@ -301,7 +323,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       )}
 
       {/* ── Activation comportementale (compteurs + courbe P/A + grille hebdo) ── */}
-      {activityEntries.length > 0 && isShown('behavioral_activation') && (
+      {showModules && activityEntries.length > 0 && isShown('behavioral_activation') && (
         <EvolutionSection
           sectionKey="behavioral_activation"
           anchorId="evo-section-behavioral_activation"
@@ -324,7 +346,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
 
       {/* ── Colonnes de Beck — fiches complètes (maître-détail, identique à
           l'onglet « Données » du module) ─────────────────────────────────── */}
-      {beckEntries.length > 0 && isShown('beck_columns') && (
+      {showModules && beckEntries.length > 0 && isShown('beck_columns') && (
         <EvolutionSection
           sectionKey="beck_columns"
           title={t('evolution.beck_section_title')}
@@ -342,7 +364,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       {/* ── Nommer ce que je ressens : croisement + comptages bruts ─────────
           Sous 8 saisies sur la fenêtre, aucune section : trop peu de matière pour
           qu'un croisement veuille dire quoi que ce soit (prudence clinique). */}
-      {namingEntries.length > 0 && isShown('emotion_wheel') && (() => {
+      {showModules && namingEntries.length > 0 && isShown('emotion_wheel') && (() => {
         const windowed = filterByRange(namingEntries, days)
         if (windowed.length < NAMING_MIN_ENTRIES) return null
         const last = windowed.at(-1)?.date
@@ -372,7 +394,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       })()}
 
       {/* ── Échelles cliniques (une section repliable par échelle) ─── */}
-      {scales.filter(mt => isShown(mt)).map(mt => {
+      {showScales && scales.filter(mt => isShown(mt)).map(mt => {
         const points = filterByRange(scaleData[mt] ?? [], days)
         const cfg = SCALE_CONFIG[mt] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
         const chartData = points.map(p => ({ date: p.date, score: p.score }))
@@ -406,7 +428,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       })}
 
       {/* ── Thermomètre de l'humeur : frise 6 dimensions (#164) ───── */}
-      {moodData.length > 0 && isShown('mood_tracker') && (
+      {showModules && moodData.length > 0 && isShown('mood_tracker') && (
         <EvolutionSection
           sectionKey="mood_tracker"
           anchorId="evo-section-mood_tracker"
@@ -428,7 +450,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       )}
 
       {/* ── Effets indésirables : une section, un sous-graphe par effet ── */}
-      {medData.length > 0 && isShown('medication_side_effects') && (
+      {showModules && medData.length > 0 && isShown('medication_side_effects') && (
         <EvolutionSection
           sectionKey="medication_side_effects"
           anchorId="evo-section-medication_side_effects"
@@ -468,7 +490,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       )}
 
       {/* ── Thermomètre de la peur : SUDS avant/après ─────────────── */}
-      {fearData.length > 0 && isShown('fear_thermometer') && (() => {
+      {showModules && fearData.length > 0 && isShown('fear_thermometer') && (() => {
         const points = filterByRange(fearData, days)
         const chartData = points.map(p => ({
           date: p.date,
@@ -511,7 +533,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       })()}
 
       {/* ── Décrocher d'une pensée (défusion) : 2 sous-graphes + filtre technique ── */}
-      {defusionData.length > 0 && isShown('cognitive_saturation') && (
+      {showModules && defusionData.length > 0 && isShown('cognitive_saturation') && (
         <DefusionEvolutionSection
           points={defusionData}
           days={days}
@@ -525,7 +547,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData }: Props) {
       )}
 
       {/* ── Rythmes & régularité (chronobiologie) ─────────────────── */}
-      {chronoEntries.length > 0 && (
+      {showModules && chronoEntries.length > 0 && (
         <EvolutionSection
           sectionKey="chronobiology_tracker"
           anchorId="evo-section-chronobiology_tracker"
