@@ -1,5 +1,5 @@
 export const AndroidImportance = { HIGH: 'HIGH' }
-export const SchedulableTriggerInputTypes = { DAILY: 'daily' }
+export const SchedulableTriggerInputTypes = { DAILY: 'daily', WEEKLY: 'weekly' }
 
 export const setNotificationHandler = jest.fn()
 export const addNotificationReceivedListener = jest.fn(() => ({ remove: jest.fn() }))

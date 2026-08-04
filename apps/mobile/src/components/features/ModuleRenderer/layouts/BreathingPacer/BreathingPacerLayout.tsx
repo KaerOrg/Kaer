@@ -20,6 +20,7 @@ import {
 } from '@services/breathingService'
 import type { ContentField } from '@services/moduleService'
 import { reportFailedOperation } from '@services/errorReportingService'
+import { syncBreathingReminders } from '@services/breathingReminderService'
 import { useToast } from '../../../../../contexts/ToastContext'
 import {
   buildWeekPractice, sessionsInWeek, currentStreak, lastSession, todayIso, shiftDate,
@@ -263,13 +264,25 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
 
   const saveReminder = useCallback((draft: ReminderDraft) => {
     if (settings == null) return
-    persist({
+    const next = {
       ...settings,
       reminder_enabled: draft.enabled,
       reminder_time: draft.time,
       reminder_days: draft.days,
-    })
-  }, [settings, persist])
+    }
+    persist(next)
+    // Les notifications de l'appareil suivent le réglage : annulées puis
+    // reprogrammées, donc jamais en double. Le texte part d'ici, déjà traduit et
+    // sans interpolation possible (invariant MDR du rappel neutre).
+    syncBreathingReminders(next, lbl('reminder_notification_title'), lbl('reminder_notification_body'))
+      .then(result => {
+        // Le réglage reste enregistré même si l'OS refuse : on le dit, sans bloquer.
+        if (result.status === 'permission_denied') showToast(lbl('reminder_denied_toast'), 'info')
+      })
+      .catch((err: unknown) => {
+        reportFailedOperation(`module/${moduleId}/reminder`, 'breathing reminder scheduling failed', asReason(err))
+      })
+  }, [settings, persist, lbl, showToast, moduleId])
 
   // Démarre la session avec les réglages de la feuille, en les mémorisant pour la
   // prochaine : la feuille se rouvrira sur ces choix.
