@@ -45,6 +45,19 @@ vi.mock('@services/scaleService', async (importOriginal) => ({
   fetchScaleMeta: async () => SCALE_META,
 }))
 
+// Programmations servies à la colonne « Programmée » (K-7). phq9 est programmée en
+// mensuel depuis longtemps sans passation récente → échéance dépassée (en retard).
+vi.mock('@services/scaleScheduleService', () => ({
+  fetchScaleSchedules: async () => [{
+    id: 's1', patient_id: 'p1', practitioner_id: 'pr1', module_id: 'phq9',
+    mode: 'home', frequency: 'monthly', day_of_week: 1, time_of_day: '09:00',
+    ends_on: null, patient_reminder: true, created_at: '2020-01-01T00:00:00Z',
+  }],
+  fetchScaleSchedule: async () => null,
+  saveScaleSchedule: vi.fn(),
+  deleteScaleSchedule: vi.fn(),
+}))
+
 import { render, waitFor, fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -101,8 +114,8 @@ describe('PatientScalesTab (K-4)', () => {
     // Badge Auto (phq9) + Hétéro (cssrs) accolés au nom.
     expect(screen.getByText('scales.eval_auto')).toBeInTheDocument()
     expect(screen.getAllByText('scales.eval_hetero').length).toBeGreaterThanOrEqual(1)
-    // C-SSRS : « Toujours dispo. » au lieu d'une date de déblocage.
-    expect(screen.getByText('scales.always_available')).toBeInTheDocument()
+    // C-SSRS (hétéro) : sa cellule « Programmée » = « en séance · à la demande » (K-7).
+    expect(screen.getByText('scales.programmed.in_session')).toBeInTheDocument()
   })
 
   it('clic sur une échelle auto ouvre la fiche sur le 1ᵉʳ onglet (Programmation, K-6)', async () => {
@@ -120,5 +133,17 @@ describe('PatientScalesTab (K-4)', () => {
     fireEvent.click(screen.getByText('modules.cssrs.label'))
     await waitFor(() => expect(screen.getByTestId('cssrs-panel')).toBeTruthy())
     expect(modalCalls.length).toBe(0)
+  })
+
+  it('colonne « Programmée » : en-tête + bandeau « auto en retard » quand une échéance est dépassée (K-7)', async () => {
+    renderTab()
+    await waitFor(() => expect(screen.getByText('modules.phq9.label')).toBeTruthy())
+    // En-tête de la colonne « Programmée » (remplace « Débloqué le » côté échelles).
+    await waitFor(() => expect(screen.getByText('scales.programmed.col')).toBeInTheDocument())
+    // phq9 programmée mais échéance dépassée → pastille « en retard » + bandeau de rappel.
+    await waitFor(() => expect(screen.getByText('scales.programmed.home_overdue')).toBeInTheDocument())
+    expect(screen.getByText('scales.programmed.banner_title')).toBeInTheDocument()
+    // C-SSRS (hétéro) : « en séance · à la demande », jamais une date.
+    expect(screen.getByText('scales.programmed.in_session')).toBeInTheDocument()
   })
 })

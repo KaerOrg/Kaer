@@ -217,10 +217,17 @@ sont posées avec un câblage minimal (toast) ; la mécanique d'envoi/saisie ré
 Bandeau fiche patient : rappel des **auto en retard uniquement** (pas de « prévu en séance »).
 
 **Critères d'acceptation.**
-- [ ] Aucune date fantaisiste pour les hétéro.
-- [ ] Rappel strictement administratif (langage neutre, teinte ambre non clinique).
-- [ ] « Débloqué le » toujours consultable dans la fiche (onglet Configuration).
-- [ ] État « en retard » dérivé de la date de programmation (fait administratif), jamais d'un score.
+- [x] Aucune date fantaisiste pour les hétéro. *(hétéro = « En séance · à la demande », sans date ; le modèle `scale_schedules` ne stocke aucune date de passation hétéro ; la maquette montrait « aujourd'hui / au prochain RDV » mais ce serait une date inventée, écarté.)*
+- [x] Rappel strictement administratif (langage neutre, teinte ambre non clinique). *(`features/OverdueScalesReminder` + pastille `ScheduleCell` en `--color-warning`, wording « en retard N j ».)*
+- [x] « Débloqué le » toujours consultable dans la fiche (onglet Configuration). *(descend dans `ScaleProgrammingPanel` (auto) / `ScalePassationBlock` (hétéro) via `unlockedAtLabel`.)*
+- [x] État « en retard » dérivé de la date de programmation (fait administratif), jamais d'un score. *(`lib/scaleScheduleStatus.computeScheduleStatus` : ancre = dernière passation ou `created_at`, + cadence ; en retard = échéance < aujourd'hui.)*
+
+**Livré (K-7).** Colonne « Programmée » (`features/ScheduleCell`) remplaçant « Débloqué le »
+côté échelles (`ModuleTable programmedColumn`), bandeau auto en retard
+(`features/OverdueScalesReminder`), lecture multi-échelles `fetchScaleSchedules` +
+`scaleScheduleQueries.byPatient`, helper pur `lib/scaleScheduleStatus`. Tests : status pur,
+`ScheduleCell`, `OverdueScalesReminder`, `ModuleTable` (variante), `PatientScalesTab`,
+panneaux (« Débloqué le »). Aucun changement de schéma (réutilise la table `scale_schedules` de K-6).
 
 ---
 

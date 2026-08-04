@@ -165,7 +165,6 @@
     "subtab_active": "Actives",
     "col_scale": "Échelle / questionnaire",
     "search_placeholder": "Rechercher une échelle…",
-    "always_available": "Toujours dispo.",
     "type_filter_label": "Type",
     "schedule": {
       "tab": "Programmation",
@@ -201,6 +200,24 @@
       "saved": "Programmation enregistrée.",
       "save_error": "Échec de l'enregistrement de la programmation.",
       "action_soon": "Bientôt disponible."
+    },
+    "programmed": {
+      "col": "Programmée",
+      "unscheduled": "Non programmée",
+      "program_btn": "Programmer",
+      "in_session": "En séance · à la demande",
+      "home_on_demand": "À domicile · à la demande",
+      "home": "À domicile · {{freq}} · {{date}}",
+      "home_overdue": "À domicile · {{freq}} · en retard {{days}} j",
+      "freq_weekly": "hebdomadaire",
+      "freq_biweekly": "toutes les 2 sem.",
+      "freq_monthly": "mensuel",
+      "freq_quarterly": "trimestriel",
+      "reminder_label": "Rappel patient activé",
+      "unlocked_on": "Débloqué le {{date}}",
+      "banner_title_one": "1 échelle auto en retard",
+      "banner_title_other": "{{count}} échelles auto en retard",
+      "banner_item": "{{scale}} · en retard {{days}} j"
     },
     "passation": {
       "tab": "Passation",

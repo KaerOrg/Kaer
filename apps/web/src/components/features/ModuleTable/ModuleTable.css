@@ -59,6 +59,11 @@
   color: var(--color-text-secondary);
 }
 
+/* Colonne « Programmée » (K-7) : cellule libre (icône + texte / pastille en retard). */
+.module-table__col-programmed {
+  white-space: nowrap;
+}
+
 /* Colonne Activé : contrôle aligné à droite (en-tête et cellules). */
 .module-table .data-table__th.module-table__col-activation,
 .module-table .data-table__cell.module-table__col-activation {

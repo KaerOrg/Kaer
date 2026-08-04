@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, ScheduleCell, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1263,11 +1263,13 @@ const rows: ModuleTableRow[] = items.map(item => ({
 | `ariaLabel` | `string` | Libellé accessible de la table |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide (filtre sans résultat) |
 | `onRowClick` | `(id: string) => void` | Rend chaque ligne cliquable (ouvre la fiche du module, K-3) et active la **colonne d'actions au survol** (cellule `row.actions`). Reçoit l'`id` de la ligne. Absent ⇒ table non cliquable, pas de colonne d'actions |
+| `programmedColumn` | `{ label: string }` | K-7 (onglet Échelles) : remplace la colonne triable « Débloqué le » par une colonne « Programmée » (non triable) rendant `row.scheduleCell`. Absent ⇒ colonne « Débloqué le » conservée (onglet Modules) |
 
 Champs de ligne optionnels ajoutés en K-4 (onglet Échelles) : `titleBadge` (`ReactNode`,
 badge accolé au nom, ex. `ScaleEvalBadge` Auto/Hétéro) et `unlockedLabelOverride` (`string`,
-remplace la cellule « Débloqué le » par un libellé, ex. « Toujours dispo. » pour C-SSRS ; le
-tri reste sur `unlockedAt`).
+remplace la cellule « Débloqué le » par un libellé ; le tri reste sur `unlockedAt`).
+Champ K-7 : `scheduleCell` (`ReactNode`, cellule « Programmée » déjà rendue, ex.
+`features/ScheduleCell`, utilisée uniquement avec la prop `programmedColumn`).
 
 Champ de ligne `actions` (`ReactNode`) : raccourcis révélés au **survol / focus** de la ligne
 (icônes `ui/Button variant="ghost"` : données, notifications, aperçu, config), rendus dans une
@@ -1278,6 +1280,35 @@ actions restent visibles (`@media (hover: none)`).
 > La barre de filtres à facettes (`ModuleFilterBar`) est un panneau déjà encadré :
 > l'armoire la rend **au-dessus** de `ModuleTable` (elle n'est pas passée à la table,
 > ce qui ajouterait un second cadre).
+
+### `ScheduleCell` (`components/features/`)
+
+`components/features/ScheduleCell/`. Cellule de la colonne **« Programmée »** du tableau
+des échelles (K-7). Rend le statut de programmation calculé par `lib/scaleScheduleStatus.ts`
+(`computeScheduleStatus`) : **auto à venir** (`🏠` domicile · cadence · prochaine date · cloche
+de rappel si activée), **auto en retard** (`🕐` en **pastille ambre**, teinte `--color-warning`,
+fait administratif, jamais un rouge de gravité ni un signal dérivé d'un score, **MDR**),
+**à la demande** (`🩺` « en séance · à la demande » pour une hétéro, ou domicile à la demande),
+**non programmée** (libellé + bouton `ui/Button variant="outline"` « Programmer » qui stoppe la
+propagation et ouvre l'encart Programmation).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `status` | `ScheduleStatus` | Statut dérivé (`computeScheduleStatus`) : `unscheduled` / `on_demand` / `home` |
+| `onProgram` | `() => void` | Ouvre l'encart Programmation (échelle auto « Non programmée ») |
+
+### `OverdueScalesReminder` (`components/features/`)
+
+`components/features/OverdueScalesReminder/`. Bandeau fiche patient (K-7) rappelant les
+**auto-questionnaires en retard uniquement** (jamais les passations « en séance »). Enveloppe
+`ui/Banner variant="warning"` : titre pluralisé + un `ui/Button variant="ghost"` par échelle en
+retard (nom + jours de retard) qui remonte l'ouverture de la fiche. **MDR** : constat de calendrier
+(échéance dépassée) en ambre neutre, jamais un signal clinique. Rien si aucune échelle en retard.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `items` | `readonly OverdueScaleItem[]` | Échelles en retard (`moduleType`, `label`, `overdueDays`) |
+| `onOpen` | `(moduleType: ModuleType) => void` | Ouvre la fiche de l'échelle (onglet Programmation) |
 
 ### `TimeDial`
 

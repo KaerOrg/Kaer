@@ -14,7 +14,10 @@ import { ModuleTagChips } from '../../../components/features/ModuleTagChips'
 import { ModuleTable, type ModuleTableRow } from '../../../components/features/ModuleTable'
 import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/ScaleMetaBadges'
 import { ScaleEvalBadge } from '../../../components/features/ScaleEvalBadge'
+import { ScheduleCell } from '../../../components/features/ScheduleCell'
+import { OverdueScalesReminder, type OverdueScaleItem } from '../../../components/features/OverdueScalesReminder'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
+import { computeScheduleStatus } from '../../../lib/scaleScheduleStatus'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
 import { useTagFilters } from '../../../hooks/useTagFilters'
 import { matchesAllTokens, tokenizeSearch } from '../../../lib/search'
@@ -32,8 +35,9 @@ import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
-import { scaleQueries, engagementQueries } from '../../../hooks/queries'
+import { scaleQueries, engagementQueries, scaleScheduleQueries } from '../../../hooks/queries'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
+import { todayIso } from '@kaer/shared'
 
 // Au-delà de ce nombre d'échelles actives, la barre de filtres apparaît (comme l'armoire
 // des modules) ; en dessous, la liste est assez courte pour s'en passer.
@@ -69,6 +73,11 @@ export function PatientScalesTab({
 
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   const { data: lastActivityByModule } = useQuery(engagementQueries.lastActivity(patientId))
+  const { data: schedules = [] } = useQuery(scaleScheduleQueries.byPatient(patientId))
+
+  // Ancre « aujourd'hui » stable sur la durée du rendu (colonne « Programmée », K-7).
+  const today = useMemo(() => todayIso(), [])
+  const scheduleByModule = useMemo(() => new Map(schedules.map(s => [s.module_id, s])), [schedules])
 
   const [activeSubTab, setActiveSubTab] = useState<'active' | 'evolution'>('active')
   // Une seule bascule unlock/revoke à la fois (state discriminé).
@@ -85,6 +94,27 @@ export function PatientScalesTab({
   const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 
   const scaleById = useMemo(() => new Map(scaleMeta.map(s => [s.id, s])), [scaleMeta])
+
+  // Bandeau « auto en retard » (K-7) : uniquement les échelles auto dont l'échéance de
+  // calendrier est dépassée (jamais les hétéro « en séance »). Trié du plus en retard au
+  // moins : ordre administratif, pas une priorisation clinique. Rien = pas de bandeau.
+  const overdueItems = useMemo<OverdueScaleItem[]>(() => {
+    const out: OverdueScaleItem[] = []
+    for (const [moduleId, schedule] of scheduleByModule) {
+      if (scaleById.get(moduleId)?.evaluationType !== 'auto') continue
+      const last = lastActivityByModule?.get(moduleId as ModuleType) ?? null
+      const status = computeScheduleStatus({
+        schedule,
+        evaluationType: 'auto',
+        lastActivityIso: last ? last.slice(0, 10) : null,
+        todayIso: today,
+      })
+      if (status.kind === 'home' && status.overdueDays > 0) {
+        out.push({ moduleType: moduleId as ModuleType, label: t(`modules.${moduleId}.label`), overdueDays: status.overdueDays })
+      }
+    }
+    return out.sort((a, b) => b.overdueDays - a.overdueDays)
+  }, [scheduleByModule, scaleById, lastActivityByModule, today, t])
 
   // Taxonomie restreinte à l'indication : l'onglet Échelles ne filtre pas par public
   // (la maquette montre Indication + Type). tagsByModule/tagsByDimension inchangés.
@@ -190,6 +220,15 @@ export function PatientScalesTab({
     const RowIcon = LUCIDE_ICONS[item.icon]
     const noToggle = scale?.noToggle ?? false
 
+    // Statut de programmation (K-7) : fait de calendrier, jamais dérivé d'un score.
+    const lastActivity = lastActivityByModule?.get(moduleType) ?? null
+    const status = computeScheduleStatus({
+      schedule: scheduleByModule.get(moduleType) ?? null,
+      evaluationType: scale?.evaluationType ?? 'auto',
+      lastActivityIso: lastActivity ? lastActivity.slice(0, 10) : null,
+      todayIso: today,
+    })
+
     // Raccourcis survol : onglets disponibles (data/preview), hors sources ; aucun pour
     // C-SSRS (son clic ouvre le panneau d'évaluations).
     const actionTabs = noToggle
@@ -208,10 +247,11 @@ export function PatientScalesTab({
       titleBadge: scale ? <ScaleEvalBadge evaluationType={scale.evaluationType} /> : null,
       description: t(`scales.full_title.${moduleType}`),
       indications: <ModuleTagChips tagIds={taxonomy.tagsByModule.get(moduleType)} taxonomy={taxonomy} maxChips={2} />,
-      // C-SSRS : « Toujours dispo. » au lieu d'une date de déblocage.
+      // Date de déblocage : consultée dans la fiche (K-7), plus dans une colonne dédiée.
       unlockedAt: noToggle ? null : (mod ? mod.unlocked_at : null),
-      unlockedLabelOverride: noToggle ? t('scales.always_available') : undefined,
-      lastActivityAt: lastActivityByModule?.get(moduleType) ?? null,
+      // Colonne « Programmée » (K-7) remplace « Débloqué le » : « Programmer » ouvre l'encart.
+      scheduleCell: <ScheduleCell status={status} onProgram={() => openScaleTab(moduleType, 'schedule')} />,
+      lastActivityAt: lastActivity,
       activation: activationControl(moduleType, mod, noToggle),
       actions: actionTabs.length > 0 ? (
         <>
@@ -228,7 +268,7 @@ export function PatientScalesTab({
         </>
       ) : undefined,
     }
-  }, [scaleById, modules, lastActivityByModule, taxonomy, activationControl, openScaleTab, t])
+  }, [scaleById, modules, lastActivityByModule, scheduleByModule, today, taxonomy, activationControl, openScaleTab, t])
 
   // ── Carte d'une échelle activable (modale « Ajouter une échelle ») ─────────
   const renderScaleCard = useCallback((item: ModuleItem) => {
@@ -352,8 +392,11 @@ export function PatientScalesTab({
   const notYet = useCallback(() => toast.info(t('scales.schedule.action_soon')), [toast, t])
   const schedulePanel = useMemo(() => {
     if (!activeScale || activeModalContext?.evaluationType == null) return null
+    // « Débloqué le » descend de la colonne à la fiche (K-7).
+    const mod = modules.find(m => m.module_type === activeScale.module)
+    const unlockedAtLabel = mod ? new Date(mod.unlocked_at).toLocaleDateString(i18n.language) : null
     if (activeModalContext.evaluationType === 'hetero') {
-      return <ScalePassationBlock onStart={notYet} lastPassationLabel={null} />
+      return <ScalePassationBlock onStart={notYet} lastPassationLabel={null} unlockedAtLabel={unlockedAtLabel} />
     }
     return (
       <ScaleProgrammingPanel
@@ -361,9 +404,10 @@ export function PatientScalesTab({
         practitionerId={practitionerId}
         moduleId={activeScale.module}
         onRunNow={notYet}
+        unlockedAtLabel={unlockedAtLabel}
       />
     )
-  }, [activeScale, activeModalContext, patientId, practitionerId, notYet])
+  }, [activeScale, activeModalContext, modules, patientId, practitionerId, notYet, i18n.language])
 
   const activatedScales = collectScales(isActivated)
   const activatableScales = collectScales(type => !isActivated(type))
@@ -396,6 +440,9 @@ export function PatientScalesTab({
     ],
     [t],
   )
+
+  // En-tête de la colonne « Programmée » (K-7) qui remplace « Débloqué le » pour les échelles.
+  const programmedColumnLabel = useMemo(() => ({ label: t('scales.programmed.col') }), [t])
 
   const typeFilterControl = (
     <Dropdown
@@ -438,6 +485,7 @@ export function PatientScalesTab({
             <p className="wardrobe__empty">{t('scales.wardrobe_empty')}</p>
           ) : (
             <div className="wardrobe__active">
+              <OverdueScalesReminder items={overdueItems} onOpen={openScaleSheet} />
               {showActiveFilterBar && (
                 <ModuleFilterBar
                   taxonomy={indicationTaxonomy}
@@ -452,6 +500,7 @@ export function PatientScalesTab({
               <ModuleTable
                 rows={displayedActivatedScales.map(renderScaleRow)}
                 firstColumnLabel={t('scales.col_scale')}
+                programmedColumn={programmedColumnLabel}
                 ariaLabel={t('scales.wardrobe_title')}
                 emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
                 onRowClick={id => openScaleSheet(id as ModuleType)}

@@ -21,6 +21,12 @@ interface ModuleTableProps {
    * ligne. Active aussi la colonne d'actions au survol (cellule `row.actions`).
    */
   readonly onRowClick?: (id: string) => void
+  /**
+   * Remplace la colonne « Débloqué le » par une colonne « Programmée » (K-7, onglet
+   * Échelles) rendant `row.scheduleCell`. Fournir le libellé d'en-tête. Absent → colonne
+   * « Débloqué le » (triable) conservée, comme dans l'onglet Modules.
+   */
+  readonly programmedColumn?: { readonly label: string }
 }
 
 // Placeholder « valeur absente » : trait d'union simple (jamais un tiret long).
@@ -34,7 +40,7 @@ const EMPTY_DATE = '-'
  * primitive `DataTable` ne trie jamais. Réutilisable par l'onglet Échelles (K-4) via
  * `firstColumnLabel` et les cellules libres `indications` / `activation`.
  */
-export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onRowClick }: ModuleTableProps) {
+export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onRowClick, programmedColumn }: ModuleTableProps) {
   const { t, i18n } = useTranslation()
   const [sort, setSort] = useState<DataTableSort | undefined>(undefined)
 
@@ -92,13 +98,22 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onR
         header: t('patient.module_table.col_indications'),
         cell: row => row.indications,
       },
-      {
-        id: 'unlocked',
-        header: t('patient.module_table.col_unlocked'),
-        sortable: true,
-        cellClassName: 'module-table__col-date',
-        cell: row => row.unlockedLabelOverride ?? formatDate(row.unlockedAt),
-      },
+      // Colonne « Programmée » (K-7, échelles) OU « Débloqué le » (Modules). La
+      // programmation n'est pas une date brute triable : cellule libre, non triable.
+      programmedColumn
+        ? {
+            id: 'programmed',
+            header: programmedColumn.label,
+            cellClassName: 'module-table__col-programmed',
+            cell: (row: ModuleTableRow) => row.scheduleCell ?? null,
+          }
+        : {
+            id: 'unlocked',
+            header: t('patient.module_table.col_unlocked'),
+            sortable: true,
+            cellClassName: 'module-table__col-date',
+            cell: (row: ModuleTableRow) => row.unlockedLabelOverride ?? formatDate(row.unlockedAt),
+          },
       {
         id: 'lastActivity',
         header: t('patient.module_table.col_last_activity'),
@@ -126,7 +141,7 @@ export function ModuleTable({ rows, firstColumnLabel, ariaLabel, emptyState, onR
           } satisfies DataTableColumn<ModuleTableRow>]
         : []),
     ],
-    [firstColumnLabel, t, formatDate, onRowClick],
+    [firstColumnLabel, t, formatDate, onRowClick, programmedColumn],
   )
 
   const getRowId = useCallback((row: ModuleTableRow) => row.id, [])

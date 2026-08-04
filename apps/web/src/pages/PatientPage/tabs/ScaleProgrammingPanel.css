@@ -59,3 +59,10 @@
   gap: var(--spacing-md);
   flex-wrap: wrap;
 }
+
+/* Rappel « Débloqué le » (K-7) : la date de déblocage descend de la colonne à la fiche. */
+.scale-prog__unlocked {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}

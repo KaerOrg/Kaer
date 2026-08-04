@@ -11,13 +11,15 @@ type Props = {
   onPreview?: () => void
   /** Dernière passation (date déjà formatée) ou `null` si aucune. */
   lastPassationLabel: string | null
+  /** Date de déblocage déjà formatée (K-7 : « Débloqué le » consultable dans la fiche). */
+  unlockedAtLabel: string | null
 }
 
 /**
  * Onglet **Passation** d'une échelle **hétéro** (K-6). Remplie en séance avec le patient :
  * rien n'est envoyé sur son application, **aucune programmation**. Wording neutre (MDR).
  */
-export function ScalePassationBlock({ onStart, onPreview, lastPassationLabel }: Props) {
+export function ScalePassationBlock({ onStart, onPreview, lastPassationLabel, unlockedAtLabel }: Props) {
   const { t } = useTranslation()
   return (
     <div className="scale-passation">
@@ -39,6 +41,10 @@ export function ScalePassationBlock({ onStart, onPreview, lastPassationLabel }: 
           </Button>
         ) : null}
       </div>
+
+      {unlockedAtLabel ? (
+        <p className="scale-passation__unlocked">{t('scales.programmed.unlocked_on', { date: unlockedAtLabel })}</p>
+      ) : null}
     </div>
   )
 }

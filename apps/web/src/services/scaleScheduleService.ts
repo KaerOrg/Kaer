@@ -19,6 +19,9 @@ export interface ScaleSchedule {
   readonly time_of_day: string | null
   readonly ends_on: string | null
   readonly patient_reminder: boolean
+  /** Date de mise en place de la programmation (ancre de calcul de la prochaine
+   *  échéance quand aucune passation n'a encore eu lieu). */
+  readonly created_at: string
 }
 
 /** Payload d'enregistrement (upsert) d'une programmation. */
@@ -34,7 +37,7 @@ export interface ScaleScheduleInput {
   patientReminder: boolean
 }
 
-const COLUMNS = 'id, patient_id, practitioner_id, module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder'
+const COLUMNS = 'id, patient_id, practitioner_id, module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, created_at'
 
 /** Programmation d'une échelle pour un patient, ou `null` si non programmée. */
 export async function fetchScaleSchedule(
@@ -50,6 +53,18 @@ export async function fetchScaleSchedule(
 
   if (error) throw error
   return data
+}
+
+/** Toutes les programmations d'un patient (une par échelle programmée). Alimente la
+ *  colonne « Programmée » du tableau des échelles (K-7). */
+export async function fetchScaleSchedules(patientId: string): Promise<ScaleSchedule[]> {
+  const { data, error } = await supabase
+    .from('scale_schedules')
+    .select(COLUMNS)
+    .eq('patient_id', patientId)
+
+  if (error) throw error
+  return data ?? []
 }
 
 /** Enregistre (upsert) la programmation d'une échelle. Une seule ligne par

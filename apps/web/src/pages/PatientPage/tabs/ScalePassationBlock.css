@@ -28,3 +28,10 @@
   font-size: var(--font-size-caption);
   color: var(--color-text-muted);
 }
+
+/* Rappel « Débloqué le » (K-7) : date de déblocage consultable dans la fiche. */
+.scale-passation__unlocked {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-secondary);
+}

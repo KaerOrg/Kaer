@@ -139,4 +139,29 @@ describe('ModuleTable', () => {
       expect(screen.getByRole('button', { name: 'ouvrir données' })).toBeInTheDocument()
     })
   })
+
+  describe('colonne « Programmée » (K-7)', () => {
+    it('remplace « Débloqué le » par l’en-tête fourni et rend scheduleCell', () => {
+      const rows: ModuleTableRow[] = [{ ...ROWS[0], scheduleCell: <span>prog-a</span> }]
+      render(
+        <ModuleTable
+          rows={rows}
+          firstColumnLabel="ÉCHELLE"
+          ariaLabel="échelles"
+          programmedColumn={{ label: 'PROGRAMMÉE' }}
+        />,
+      )
+      // En-tête « Programmée » présent, en-tête « Débloqué le » absent.
+      expect(screen.getByText('PROGRAMMÉE')).toBeInTheDocument()
+      expect(screen.queryByText('patient.module_table.col_unlocked')).not.toBeInTheDocument()
+      // La cellule de programmation est rendue ; la date de déblocage ne l’est pas.
+      expect(screen.getByText('prog-a')).toBeInTheDocument()
+      expect(screen.queryByText(new Date('2026-01-10T00:00:00Z').toLocaleDateString('fr'))).not.toBeInTheDocument()
+    })
+
+    it('sans programmedColumn : la colonne « Débloqué le » reste (onglet Modules)', () => {
+      render(<ModuleTable rows={ROWS} firstColumnLabel="MODULE" ariaLabel="modules" />)
+      expect(screen.getByText('patient.module_table.col_unlocked')).toBeInTheDocument()
+    })
+  })
 })

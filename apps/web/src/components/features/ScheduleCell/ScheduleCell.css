@@ -1,0 +1,43 @@
+.schedule-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.schedule-cell__icon {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.schedule-cell__text {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.schedule-cell__bell {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.schedule-cell--unscheduled {
+  gap: var(--spacing-sm);
+}
+
+.schedule-cell__none {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* État « en retard » : fait administratif (échéance dépassée), teinte ambre neutre.
+   Jamais un rouge de gravité ni un signal clinique (MDR 2017/745). */
+.schedule-cell--overdue {
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  background: var(--color-warning-light);
+}
+
+.schedule-cell--overdue .schedule-cell__icon,
+.schedule-cell--overdue .schedule-cell__text {
+  color: var(--color-warning);
+}
