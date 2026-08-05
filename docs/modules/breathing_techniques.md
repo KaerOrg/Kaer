@@ -93,6 +93,43 @@ quoi enregistrer écraserait l'activation réelle par une activation vide.
 **Repli au déverrouillage** : la cohérence cardiaque est activée d'office, pour qu'un
 patient n'ouvre jamais un module vide.
 
+### L'onglet « Données » (W1, web)
+
+Vue praticien complète : barre de contrôle (période 30 jours / 3 mois / 6 mois / Tout,
+filtre par technique, export CSV), quatre tuiles de synthèse, ressentis par technique,
+moment de pratique, et journal paginé.
+
+**D'où viennent les sessions.** De `patient_entries` filtré sur
+`entry_kind = 'breathing_session'`, comme les vingt autres modules, **pas** de la table
+`breathing_sessions` que personne n'alimente. `client_created_at` porte l'instant métier
+(le mobile y recopie `started_at`), ce qui place une session au bon jour même
+enregistrée plus tard.
+
+Les agrégations vivent dans `packages/shared/services/breathingReport.ts`, pures et
+testées : filtres de période, synthèse, comptes de ressenti, moments de la journée,
+lignes CSV.
+
+> **MDR 2017/745, à relire avant toute évolution de cet écran.** Tout ce qui s'affiche
+> est un **compte brut** ou une durée. Sont interdits : moyenne pondérée du ressenti,
+> courbe de tendance, corrélation technique × ressenti, et tout texte qui désignerait
+> une technique comme efficace. L'ordre des segments d'une barre est fixe, jamais trié
+> par effectif, pour qu'aucune lecture de classement ne s'installe.
+>
+> **Les trois ressentis portent chacun leur couleur ici**, ce que le ticket autorise
+> explicitement (« la couleur code l'identité d'un ressenti nommé »). C'est l'inverse de
+> l'écran de clôture mobile (M4), où les trois **choix** partagent une teinte unique :
+> proposer un « bon » et un « mauvais » bouton au moment de répondre orienterait la
+> réponse. Ici, la saisie est déjà faite.
+
+**Le rythme hebdomadaire** rapporte les jours de pratique à une semaine sur la fenêtre
+observée. Sur « Tout », la fenêtre est l'écart réel entre la première et la dernière
+session, sans quoi une fenêtre arbitraire fausserait le chiffre. Une fenêtre plus courte
+qu'une semaine est ramenée à une semaine, pour ne pas afficher « 3,5 jours par semaine »
+sur deux jours d'observation.
+
+**L'export CSV** sort les lignes brutes, sans colonne calculée interprétative, avec un
+BOM UTF-8 pour qu'Excel n'affiche pas « CohÃ©rence » à l'ouverture.
+
 ### Configuration des techniques (config-first, issue #69)
 
 La définition des 5 techniques (couleur, durée recommandée, séquence de phases) vit

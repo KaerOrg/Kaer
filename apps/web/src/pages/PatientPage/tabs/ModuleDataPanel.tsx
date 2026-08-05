@@ -19,6 +19,7 @@ import { ChronoDataPanel } from './ChronoDataPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
 import { EmotionNamingDataPanel } from './EmotionNamingDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
+import { BreathingDataPanel } from './BreathingDataPanel'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -114,6 +115,12 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // groupé par mois, filtrable par technique et période, mot masqué (#201).
   if (state.status === 'defusion') {
     return <DefusionDataPanel points={state.points} locale={i18n.language} />
+  }
+
+  // Respiration : synthèse, ressentis par technique, moment de pratique, journal
+  // paginé et export CSV. Comptes bruts uniquement (W1 #373).
+  if (state.status === 'breathing') {
+    return <BreathingDataPanel sessions={state.sessions} patientRef={patientId} locale={i18n.language} />
   }
 
   const locale = i18n.language
