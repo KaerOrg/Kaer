@@ -20,6 +20,7 @@ import { ColumnFormDataPanel } from './ColumnFormDataPanel'
 import { EmotionNamingDataPanel } from './EmotionNamingDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { BreathingDataPanel } from './BreathingDataPanel'
+import { useBreathingReminderSummary } from '../hooks/useBreathingReminderSummary'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -61,6 +62,13 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
     ...engagementQueries.moodMarkers(patientId),
     enabled: moduleType === 'mood_tracker',
   })
+  // Rappel patient : lu seulement pour la respiration, il légende la carte
+  // « Moment de pratique ». Même clé que l'onglet Notifications, donc un seul fetch.
+  const reminderQuery = useQuery({
+    ...engagementQueries.breathingReminder(patientId),
+    enabled: moduleType === 'breathing_techniques',
+  })
+  const reminderSummary = useBreathingReminderSummary(reminderQuery.data ?? null)
 
   // Tableau résumé : ModuleSummaryPanel porte son propre cadre (chrome identique).
   if (state.status === 'summary') {
@@ -120,7 +128,14 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
   // Respiration : synthèse, ressentis par technique, moment de pratique, journal
   // paginé et export CSV. Comptes bruts uniquement (W1 #373).
   if (state.status === 'breathing') {
-    return <BreathingDataPanel sessions={state.sessions} patientRef={patientId} locale={i18n.language} />
+    return (
+      <BreathingDataPanel
+        sessions={state.sessions}
+        patientRef={patientId}
+        reminderSummary={reminderSummary}
+        locale={i18n.language}
+      />
+    )
   }
 
   const locale = i18n.language

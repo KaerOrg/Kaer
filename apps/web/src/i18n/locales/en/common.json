@@ -646,7 +646,16 @@
     "breathing_interrupted": "interrupted",
     "breathing_page_of": "Page {{page}} of {{total}}",
     "breathing_since": "since {{date}}",
-    "breathing_data_footer": "The feeling is optional for the patient · self-reported data, no sensor and no algorithmic interpretation."
+    "breathing_data_footer": "The feeling is optional for the patient · self-reported data, no sensor and no algorithmic interpretation.",
+    "breathing_reminder_intro": "The practice reminder is created and set by the patient in their app (time and days).",
+    "breathing_reminder_card_title": "Patient current reminder",
+    "breathing_reminder_none_created": "No reminder created.",
+    "breathing_reminder_state": "State",
+    "breathing_reminder_active": "Active",
+    "breathing_reminder_time": "Time",
+    "breathing_reminder_days": "Days",
+    "breathing_reminder_set_on": "Set by the patient on",
+    "breathing_reminder_summary": "Patient reminder set at {{time}} · chosen days: {{days}}"
   },
   "modules": {
     "nav_link": "Library",

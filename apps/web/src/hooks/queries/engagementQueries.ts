@@ -25,6 +25,7 @@ import {
   type ActivityEntryPoint,
   fetchEmotionNamingEntries,
   fetchBreathingSessions,
+  fetchBreathingReminder,
   type EmotionNamingRow,
 } from '@services/engagementService'
 import type { RhythmEntry, BreathingSessionRow } from '@kaer/shared'
@@ -155,6 +156,15 @@ export const engagementQueries = {
         const summary = await fetchModuleSummary(patientId, moduleType)
         return summary.count === 0 ? { status: 'empty' } : { status: 'summary', summary }
       },
+    }),
+
+  // Rappel de respiration réglé par le patient : lu par l'onglet Notifications
+  // (lecture seule) et par la carte « Moment de pratique » de l'onglet Données.
+  // Une seule clé, donc un seul fetch pour les deux.
+  breathingReminder: (patientId: string) =>
+    queryOptions({
+      queryKey: ['engagement', 'breathingReminder', patientId],
+      queryFn: () => fetchBreathingReminder(patientId),
     }),
 
   // Dernière activité de chaque module du patient (map module_id → horodatage),

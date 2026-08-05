@@ -8,6 +8,7 @@ import { ModuleSourcesPanel } from '../../../components/features/ModuleSources/M
 import { NotificationRoutinePanel } from '../../../components/features/NotificationRoutinePanel/NotificationRoutinePanel'
 import type { ModuleType } from '../../../lib/database.types'
 import { ModuleDataPanel } from './ModuleDataPanel'
+import { BreathingReminderPanel } from './BreathingReminderPanel'
 import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import './ModuleActionsModal.css'
 
@@ -72,7 +73,7 @@ export function ModuleActionsModal({
   schedulePanel,
   onClose,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const tabItems = useMemo<TabItem[]>(
     () => tabs.map(tab => ({ id: tab, label: t(TAB_LABEL_KEY[tab]), icon: tabIcon(tab) })),
@@ -103,7 +104,12 @@ export function ModuleActionsModal({
           {activeTab === 'preview' && <ModulePatientViewPanel moduleType={module} patientModuleId={patientModuleId ?? undefined} />}
           {activeTab === 'sources' && <ModuleSourcesPanel moduleId={module} />}
           {activeTab === 'data' && <ModuleDataPanel patientId={patientId} moduleType={module} />}
-          {activeTab === 'notifications' && patientModuleId && (
+          {/* Respiration : le rappel est réglé par le patient, le praticien le lit
+              seulement (W3 #375). Les autres modules gardent l'éditeur de routine. */}
+          {activeTab === 'notifications' && module === 'breathing_techniques' && (
+            <BreathingReminderPanel patientId={patientId} locale={i18n.language} />
+          )}
+          {activeTab === 'notifications' && module !== 'breathing_techniques' && patientModuleId && (
             <NotificationRoutinePanel
               patientModuleId={patientModuleId}
               practitionerId={practitionerId}

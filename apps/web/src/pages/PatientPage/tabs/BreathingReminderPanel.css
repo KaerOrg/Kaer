@@ -1,0 +1,54 @@
+/* Onglet Notifications du module respiration, en lecture seule (W3). */
+
+.breathing-reminder-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Encart d'explication : dit pourquoi il n'y a rien à régler ici. */
+.breathing-reminder-panel__intro {
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.breathing-reminder-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+}
+
+.breathing-reminder-panel__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.breathing-reminder-panel__row dt {
+  width: 150px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-reminder-panel__row dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+/* Teinte d'état, pas de valence clinique : un rappel actif n'est pas « mieux ». */
+.breathing-reminder-panel__state {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+.breathing-reminder-panel__muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
