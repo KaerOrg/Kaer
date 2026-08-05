@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react-native'
 import { BreathingPacerLayout } from './BreathingPacerLayout'
 import type { BreathingTechnique, BreathingSettings } from '@services/breathingService'
 
@@ -35,6 +35,7 @@ jest.mock('@services/breathingService', () => {
     fetchBreathingSessions: () => mockFetchSessions(),
     fetchBreathingSettings: () => mockFetchSettings(),
     saveBreathingSettings: (...a: unknown[]) => mockSaveSettings(...a),
+    saveBreathingSession: (...a: unknown[]) => mockSaveSession(...a),
   }
 })
 
@@ -52,12 +53,21 @@ jest.mock('@services/errorReportingService', () => ({
   reportFailedOperation: (...a: unknown[]) => mockReport(...a),
 }))
 
-jest.mock('./BreathingExercisePlayer', () => ({
-  BreathingExercisePlayer: ({ technique }: { technique: { key: string } }) => {
+// L'écran de session a son propre test : ici, un stub qui expose la technique active
+// et permet de déclencher une fin de session depuis le layout.
+let finishSession: ((result: unknown) => void) | null = null
+jest.mock('./BreathingSessionScreen', () => ({
+  BreathingSessionScreen: ({ technique, onFinish }: {
+    technique: { key: string }
+    onFinish: (result: unknown) => void
+  }) => {
     const { Text } = require('react-native')
+    finishSession = onFinish
     return <Text testID="player">{technique.key}</Text>
   },
 }))
+
+const mockSaveSession = jest.fn()
 
 const session = (over: Partial<{ id: string; date: string; started_at: string; technique_key: string; duration_seconds: number }> = {}) => ({
   id: 's1', date: '2026-04-14', started_at: '2026-04-14T10:00:00', technique_key: 'coherence_cardiaque',
@@ -78,6 +88,8 @@ describe('BreathingPacerLayout : hub', () => {
     mockFetchSessions.mockResolvedValue([])
     mockFetchSettings.mockResolvedValue(SETTINGS)
     mockSaveSettings.mockResolvedValue(undefined)
+    mockSaveSession.mockResolvedValue(undefined)
+    finishSession = null
   })
 
   it('n’affiche rien tant que la config n’est pas lue (aucune écriture possible avant)', () => {
@@ -276,6 +288,57 @@ describe('BreathingPacerLayout : hub', () => {
     await waitFor(() => {
       expect(mockReport).toHaveBeenCalledWith(
         'module/breathing_techniques/hub', 'breathing settings write failed', 'disk full',
+      )
+    })
+  })
+
+  it('enregistre la session remontée par l’écran, interruption comprise', async () => {
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-start-btn'))
+    fireEvent.press(await screen.findByTestId('breathing-prep-start'))
+    await screen.findByTestId('player')
+
+    act(() => {
+      finishSession?.({
+        techniqueKey: 'coherence_cardiaque',
+        startedAt: '2026-08-05T10:00:00.000Z',
+        durationSeconds: 42,
+        plannedDurationSeconds: 300,
+        cyclesCompleted: 4,
+        completed: false,
+      })
+    })
+
+    await waitFor(() => {
+      expect(mockSaveSession).toHaveBeenCalledWith(expect.objectContaining({
+        technique_key: 'coherence_cardiaque',
+        started_at: '2026-08-05T10:00:00.000Z',
+        duration_seconds: 42,
+        planned_duration_seconds: 300,
+        cycles_completed: 4,
+        completed: false,
+      }))
+    })
+    expect(screen.queryByTestId('player')).toBeNull()
+  })
+
+  it('remonte un échec d’enregistrement de session (jamais avalé)', async () => {
+    mockSaveSession.mockRejectedValueOnce(new Error('disk full'))
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-start-btn'))
+    fireEvent.press(await screen.findByTestId('breathing-prep-start'))
+    await screen.findByTestId('player')
+
+    act(() => {
+      finishSession?.({
+        techniqueKey: 'coherence_cardiaque', startedAt: '2026-08-05T10:00:00.000Z',
+        durationSeconds: 42, plannedDurationSeconds: 300, cyclesCompleted: 4, completed: false,
+      })
+    })
+
+    await waitFor(() => {
+      expect(mockReport).toHaveBeenCalledWith(
+        'module/breathing_techniques/session', 'breathing session write failed', 'disk full',
       )
     })
   })

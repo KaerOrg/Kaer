@@ -1308,7 +1308,15 @@
       "ambient_waves": "Waves",
       "ambient_rain": "Rain",
       "ambient_wind": "Wind",
-      "ambient_bowl": "Singing bowl"
+      "ambient_bowl": "Singing bowl",
+      "session_progress_a11y": "Session progress",
+      "session_cycle": "Cycle {{count}} · {{technique}}",
+      "session_pause": "Pause",
+      "session_resume": "Resume",
+      "session_stop": "Stop the session",
+      "session_mute": "Mute",
+      "session_unmute": "Unmute",
+      "session_haptic_hint": "Vibration at every phase change"
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",

@@ -1426,7 +1426,15 @@
       "ambient_waves": "Vagues",
       "ambient_rain": "Pluie",
       "ambient_wind": "Vent",
-      "ambient_bowl": "Bol tibétain"
+      "ambient_bowl": "Bol tibétain",
+      "session_progress_a11y": "Progression de la session",
+      "session_cycle": "Cycle {{count}} · {{technique}}",
+      "session_pause": "Mettre en pause",
+      "session_resume": "Reprendre",
+      "session_stop": "Arrêter la session",
+      "session_mute": "Couper le son",
+      "session_unmute": "Remettre le son",
+      "session_haptic_hint": "Vibration à chaque changement de phase"
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

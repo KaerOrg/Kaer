@@ -8,6 +8,7 @@ import { colors } from '@theme'
 import {
   fetchBreathingSessions,
   fetchBreathingSettings,
+  saveBreathingSession,
   saveBreathingSettings,
   techniquesFromFields,
   breathingConfigFromFields,
@@ -22,8 +23,9 @@ import { useToast } from '../../../../../contexts/ToastContext'
 import {
   buildWeekPractice, sessionsInWeek, currentStreak, lastSession, todayIso, shiftDate,
 } from '@kaer/shared'
+import { generateId } from '../../../../../lib/database'
 import { useTeen } from '../../../../../hooks/useTeen'
-import { BreathingExercisePlayer } from './BreathingExercisePlayer'
+import { BreathingSessionScreen, type SessionResult } from './BreathingSessionScreen'
 import { PrimaryTechniqueCard } from './PrimaryTechniqueCard'
 import { WeekCard, type ReminderLine } from './WeekCard'
 import { TechniqueRow } from './TechniqueRow'
@@ -90,6 +92,9 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
   const [settingsState, setSettingsState] = useState<SettingsState>(LOADING)
   const [activeSheet, setActiveSheet] = useState<ActiveSheet | null>(null)
   const [activeTechnique, setActiveTechnique] = useState<BreathingTechnique | null>(null)
+  // Le retour Android sur la modale de session ne la ferme pas : il DEMANDE l'arrêt,
+  // et c'est la session qui conclut (elle seule connaît le temps réellement pratiqué).
+  const [stopRequested, setStopRequested] = useState(false)
 
   const lbl = useCallback(
     (key: string, params?: Record<string, string | number>) => t(`modules.${moduleId}.${key}`, params),
@@ -178,11 +183,28 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
     if (found) setActiveSheet({ kind: 'prepare', technique: found })
   }, [techniques])
 
-  // Ferme le lecteur ; si une session a été enregistrée, rafraîchit l'historique.
-  const closePlayer = useCallback((saved: boolean) => {
+  const requestStop = useCallback(() => setStopRequested(true), [])
+
+  // Fin de session : la feuille remonte le résultat, le hub l'enregistre. La session
+  // est écrite MÊME interrompue (`completed: false`) : c'est une donnée, pas un échec.
+  const finishSession = useCallback((result: SessionResult) => {
     setActiveTechnique(null)
-    if (saved) loadSessions()
-  }, [loadSessions])
+    setStopRequested(false)
+    saveBreathingSession({
+      id: generateId(),
+      technique_key: result.techniqueKey,
+      started_at: result.startedAt,
+      duration_seconds: result.durationSeconds,
+      planned_duration_seconds: result.plannedDurationSeconds,
+      cycles_completed: result.cyclesCompleted,
+      completed: result.completed,
+    })
+      .then(loadSessions)
+      .catch((err: unknown) => {
+        showToast(t('common.save_error'), 'error')
+        reportFailedOperation(`module/${moduleId}/session`, 'breathing session write failed', asReason(err))
+      })
+  }, [loadSessions, showToast, t, moduleId])
 
   // Écriture des réglages : l'état local suit l'écriture pour que le hub reflète
   // immédiatement le choix, la synchro distante étant gérée par le service.
@@ -366,10 +388,16 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
         visible={activeTechnique != null}
         animationType="slide"
         presentationStyle="fullScreen"
-        onRequestClose={() => closePlayer(false)}
+        onRequestClose={requestStop}
       >
         {activeTechnique != null ? (
-          <BreathingExercisePlayer technique={activeTechnique} moduleId={moduleId} onClose={closePlayer} />
+          <BreathingSessionScreen
+            technique={activeTechnique}
+            settings={settings}
+            lbl={lbl}
+            stopRequested={stopRequested}
+            onFinish={finishSession}
+          />
         ) : null}
       </Modal>
     </>
