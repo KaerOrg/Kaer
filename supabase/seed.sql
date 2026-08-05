@@ -2104,6 +2104,18 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- (L'objectif hebdomadaire par défaut, lui, est déjà porté par la colonne :
   --  `breathing_settings.weekly_goal_sessions integer not null default 5`.)
   ('bt.config',                           'default_technique_key',        'coherence_cardiaque'),
+  -- Durées proposées par la feuille de préparation (minutes, clés indexées atomiques).
+  ('bt.config',                           'duration_1',                   '2'),
+  ('bt.config',                           'duration_2',                   '5'),
+  ('bt.config',                           'duration_3',                   '10'),
+  -- Ambiances sonores proposées quand la bascule est active. Les valeurs sont les
+  -- clés de `breathing_settings.ambient_sound_key` (check en base) ; les libellés
+  -- restent en i18n (`modules.breathing_techniques.ambient_<clé>`).
+  ('bt.config',                           'ambient_sound_1',              'river'),
+  ('bt.config',                           'ambient_sound_2',              'waves'),
+  ('bt.config',                           'ambient_sound_3',              'rain'),
+  ('bt.config',                           'ambient_sound_4',              'wind'),
+  ('bt.config',                           'ambient_sound_5',              'bowl'),
   -- Palette de la refonte (epic #195) : teal Kær, en remplacement des teintes
   -- indigo / émeraude d'origine.
   ('bt.tech.coherence_cardiaque',         'technique_key',            'coherence_cardiaque'),

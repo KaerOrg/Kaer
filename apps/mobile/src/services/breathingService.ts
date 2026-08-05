@@ -3,15 +3,16 @@ import {
   getAllBreathingSessions as dbGetAll,
   getBreathingSettings as dbGetSettings,
   saveBreathingSettings as dbSaveSettings,
+  type BreathingAmbientSound,
   type BreathingSession,
   type BreathingSessionInput,
   type BreathingSettings,
 } from '../lib/database'
-import type { ContentField } from '@kaer/shared'
+import { collectIndexed, type ContentField } from '@kaer/shared'
 import { fetchModuleFields } from './moduleService'
 import { syncUpsert } from './syncHelpers'
 
-export type { BreathingSession, BreathingSessionInput, BreathingSettings }
+export type { BreathingAmbientSound, BreathingSession, BreathingSessionInput, BreathingSettings }
 
 // local_id stable : la config est une entrée unique par patient (upsert). On garde
 // un entry_kind dédié 'breathing_setting' (plutôt que le 'module_setting' générique)
@@ -107,15 +108,35 @@ export async function fetchBreathingTechniques(): Promise<BreathingTechnique[]> 
 export interface BreathingModuleConfig {
   /** Technique activée par défaut tant que le praticien n'en a activé aucune. */
   defaultTechniqueKey: string | null
+  /** Durées proposées avant une session, en minutes, dans l'ordre d'affichage. */
+  durationsMin: number[]
+  /** Ambiances sonores proposées, dans l'ordre d'affichage. */
+  ambientSounds: BreathingAmbientSound[]
+}
+
+/** Ambiances déclarées en base (`check` sur `breathing_settings.ambient_sound_key`). */
+const AMBIENT_SOUNDS: readonly BreathingAmbientSound[] = ['river', 'waves', 'rain', 'wind', 'bowl']
+
+function isAmbientSound(value: string): value is BreathingAmbientSound {
+  return (AMBIENT_SOUNDS as readonly string[]).includes(value)
 }
 
 /**
  * Lit la config du module depuis ses fields. Pure : partagée par le hub (qui reçoit
  * déjà les fields) et tout appelant qui les a chargés.
+ *
+ * Les listes viennent de clés indexées atomiques (`duration_1`, `ambient_sound_1`…),
+ * jamais d'une valeur packée en CSV. Une ambiance inconnue de l'énumération est
+ * écartée plutôt que propagée : la colonne en base la refuserait à l'écriture.
  */
 export function breathingConfigFromFields(fields: ContentField[]): BreathingModuleConfig {
   const config = fields.find((f) => f.field_type === 'exercise_config')
-  return { defaultTechniqueKey: config?.props.default_technique_key ?? null }
+  const props = config?.props ?? {}
+  return {
+    defaultTechniqueKey: props.default_technique_key ?? null,
+    durationsMin: collectIndexed(props, 'duration').map(Number).filter((min) => min > 0),
+    ambientSounds: collectIndexed(props, 'ambient_sound').filter(isAmbientSound),
+  }
 }
 
 /** Ce que le patient voit : sa technique de séance, et les autres techniques activées. */

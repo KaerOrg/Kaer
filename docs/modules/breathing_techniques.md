@@ -47,7 +47,8 @@ plus une liste académique des cinq techniques.
 | `.../WeekCard` + `WeekDots` + `ReminderRow` | Carte « Cette semaine » : pastilles, série, objectif, ligne de rappel |
 | `.../TechniqueRow` | Une ligne de la liste « Vos techniques » |
 | `.../{GoalSheet,ReminderSheet,TechniqueInfoSheet}` + `DayChip` | Feuilles objectif, rappel, « En savoir plus » |
-| `.../{rhythmLabels,weekDayOrder,formatDuration}` | Helpers purs du dossier (rythmes, ordre de semaine, durées) |
+| `.../PreparationSheet` + `AmbientChip` | Feuille de préparation : durée, vibrations, souffle, ambiance |
+| `.../{rhythmLabels,weekDayOrder,formatDuration,preferredDuration}` | Helpers purs du dossier (rythmes, ordre de semaine, durées) |
 | `layouts/BreathingPacer/BreathingExercisePlayer` | Lecteur animé (modale) : cercle respiratoire, barre de phases, compteurs cycles/durée |
 | `layouts/BreathingPacer/{BreathCircle,PhaseBar}` | Primitives présentationnelles du lecteur |
 
@@ -99,6 +100,34 @@ technique de séance, objectif hebdomadaire, rappel (`reminder_enabled` / `_time
 `_days`), accompagnements de session (`haptics`, `breath_sound`, `ambient_sound`,
 `ambient_sound_key`) et `preferred_duration_min`. Détail : [`docs/database.md`](../database.md).
 
+### La préparation de session (M2)
+
+Une feuille de bas d'écran s'intercale entre « Démarrer » (ou le tap sur une technique
+de la liste) et la session. Elle donne le temps de s'installer, et laisse régler :
+
+| Réglage | Défaut | Persisté dans |
+|---|---|---|
+| Durée (2 / 5 / 10 min, lues en config) | `preferred_duration_min` | `preferred_duration_min` |
+| Vibrations | ON | `haptics` |
+| Souffle guidé | OFF | `breath_sound` |
+| Ambiance sonore (+ choix parmi 5) | OFF, `river` | `ambient_sound`, `ambient_sound_key` |
+
+Les durées proposées et la liste des ambiances viennent de `bt.config` (clés indexées
+`duration_1..3`, `ambient_sound_1..5`) : les changer ne demande pas de redéploiement.
+Une ambiance inconnue de l'énumération `BreathingAmbientSound` est écartée à la lecture
+(la colonne en base la refuserait de toute façon).
+
+Les trois accompagnements sont **cumulables**. Le souffle guidé est un enregistrement
+de respiration calé sur les phases, **jamais une voix parlée** (aucune voix en v1).
+
+Revenir en arrière (voile, retour Android) ne démarre rien et n'enregistre rien : les
+réglages ne sont écrits qu'au « Commencer ».
+
+> **Les fichiers audio n'existent pas encore dans le projet.** Les bascules « Souffle
+> guidé » et « Ambiance sonore » sont réglées et persistées de bout en bout, mais aucun
+> son n'est joué tant que les assets n'ont pas été fournis. La lecture est câblée dans
+> l'écran de session (M3), qui reste silencieux en leur absence.
+
 ### Statistiques de la semaine (partagées web ≡ mobile)
 
 Les comptes affichés par le hub viennent de `packages/shared/src/services/breathingStats.ts` :
@@ -120,9 +149,11 @@ La définition des 5 techniques (couleur, durée recommandée, séquence de phas
 - **`field_props`** (atomiques) :
   - technique → `technique_key`, `color` (hex), `recommended_duration_min`
   - phase → `phase_type` (`inhale`|`hold_in`|`exhale`|`hold_out`), `phase_seconds`
-- **`bt.config`** (field `exercise_config`) → `default_technique_key` : la technique
-  activée par défaut tant que le praticien n'a rien activé (repli avant W0). Lu par
-  `breathingService.breathingConfigFromFields()`.
+- **`bt.config`** (field `exercise_config`), lu par `breathingService.breathingConfigFromFields()` :
+  - `default_technique_key` : la technique activée par défaut tant que le praticien
+    n'a rien activé (repli avant W0)
+  - `duration_1..3` : durées proposées par la feuille de préparation (minutes)
+  - `ambient_sound_1..5` : ambiances proposées (clés de `ambient_sound_key`)
 - **Lecture mobile** : le layout `breathing_pacer` reçoit déjà les fields et les
   convertit via `breathingService.techniquesFromFields()` (helper pur) ;
   `breathingService.fetchBreathingTechniques()` réutilise ce même helper après
@@ -173,6 +204,7 @@ npx jest BreathingPacer
 - [x] Mobile : `BreathingPacerLayout` : hub en trois blocs (M1, #366)
 - [x] Mobile : activation praticien + repli `bt.config` (aucune technique non activée affichée)
 - [x] Mobile : objectif en sessions/semaine et ligne de rappel opt-in, écrits dans `breathing_settings`
+- [x] Mobile : feuille de préparation (durée, vibrations, souffle, ambiance), réglages mémorisés (M2, #367)
 - [x] Mobile : `BreathingExercisePlayer` : guide animé (modale) avec cercle, phases, compteurs
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom
