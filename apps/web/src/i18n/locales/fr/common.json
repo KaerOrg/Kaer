@@ -1353,7 +1353,14 @@
     "breathing_techniques": {
       "label": "Techniques de respiration",
       "description": "Guide visuel de respiration carrée et cohérence cardiaque avec compteur local.",
-      "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique."
+      "footer": "Guide animé à rythme fixe, pas de biofeedback, aucun capteur. L'historique des sessions (technique + durée) est consultable. Conformité MDR 2017/745 : aucune interprétation algorithmique.",
+      "config_title": "Techniques activées et objectif",
+      "config_hint": "Le patient ne voit que les techniques activées. Activez-les au fil des séances, une fois travaillées ensemble.",
+      "config_in_session": "En séance",
+      "config_set_in_session": "Désigner comme travaillée en séance",
+      "config_goal_label": "Objectif proposé",
+      "config_goal_unit": "sessions / semaine",
+      "config_goal_note": "Le patient peut l’ajuster librement dans son app."
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

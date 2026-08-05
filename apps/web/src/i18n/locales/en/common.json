@@ -1631,7 +1631,14 @@
       "description": "Visual guide to box breathing and cardiac coherence with local counter.",
       "new_btn": "New session",
       "empty_title": "No session yet",
-      "empty_text": "Use the button above to start your first session."
+      "empty_text": "Use the button above to start your first session.",
+      "config_title": "Activated techniques and goal",
+      "config_hint": "The patient only sees activated techniques. Activate them session after session, once you have worked on them together.",
+      "config_in_session": "In session",
+      "config_set_in_session": "Set as worked on in session",
+      "config_goal_label": "Suggested goal",
+      "config_goal_unit": "sessions / week",
+      "config_goal_note": "The patient can adjust it freely in their app."
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",

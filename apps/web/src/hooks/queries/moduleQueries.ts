@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import { fetchModuleFields } from '@services/moduleService'
-import { fetchDefusionTechniques } from '@services/moduleAssignmentService'
+import { fetchDefusionTechniques, fetchBreathingPractitionerConfig } from '@services/moduleAssignmentService'
 import { CONFIG_QUERY_OPTIONS } from './configCache'
 
 // Config de rendu d'un module (module_content_fields + field_props). Quasi-statique
@@ -19,5 +19,14 @@ export const moduleQueries = {
     queryOptions({
       queryKey: ['module', 'defusionTechniques', patientModuleId],
       queryFn: () => fetchDefusionTechniques(patientModuleId),
+    }),
+
+  // Activation praticien du module respiration (config.enabled_techniques,
+  // primary_technique, weekly_goal_sessions). Lue par l'onglet « Techniques &
+  // objectif » et par l'aperçu Vue patient : une seule clé, donc un seul fetch.
+  breathingConfig: (patientModuleId: string) =>
+    queryOptions({
+      queryKey: ['module', 'breathingConfig', patientModuleId],
+      queryFn: () => fetchBreathingPractitionerConfig(patientModuleId),
     }),
 }

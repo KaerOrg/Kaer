@@ -189,6 +189,79 @@ export async function updateDefusionTechniques(
   return { ok: !error }
 }
 
+// ── breathing_techniques : activation praticien et objectif proposé (W0 #372) ──
+//
+// L'activation EST le geste clinique du module : le patient ne voit que les techniques
+// travaillées en séance. Elle vit dans `patient_modules.config`, comme pour
+// `cognitive_saturation` (#201), parce que c'est le seul canal que le mobile lit déjà.
+//
+// ⚠️ Ne PAS écrire dans la table `breathing_settings` : elle porte les préférences
+// d'appareil du patient (durées, sons, rappel), alimentées par ses propres saisies via
+// `patient_entries`. Rien ne projette aujourd'hui l'une vers l'autre : une écriture
+// praticien y serait invisible côté patient (couture assumée, cf. schema.sql).
+
+/** Ce que le praticien pose pour ce patient. */
+export interface BreathingPractitionerConfig {
+  /** Clés des techniques visibles par le patient. Vide = repli sur la config en base. */
+  enabledTechniques: string[]
+  /** Technique portant le badge « en séance ». */
+  primaryTechnique: string | null
+  /** Objectif proposé, en sessions par semaine. `null` = aucun objectif proposé. */
+  weeklyGoalSessions: number | null
+}
+
+const BREATHING_CONFIG_EMPTY: BreathingPractitionerConfig = {
+  enabledTechniques: [], primaryTechnique: null, weeklyGoalSessions: null,
+}
+
+/** Lit la config praticien d'un `patient_modules.config`. Pure, testable sans réseau. */
+export function breathingConfigFromModuleConfig(
+  config: Record<string, unknown> | null,
+): BreathingPractitionerConfig {
+  if (config == null) return BREATHING_CONFIG_EMPTY
+  const enabled = config.enabled_techniques
+  const primary = config.primary_technique
+  const goal = config.weekly_goal_sessions
+  return {
+    enabledTechniques: Array.isArray(enabled) ? enabled.filter((k): k is string => typeof k === 'string') : [],
+    primaryTechnique: typeof primary === 'string' ? primary : null,
+    weeklyGoalSessions: typeof goal === 'number' && Number.isFinite(goal) ? goal : null,
+  }
+}
+
+export async function fetchBreathingPractitionerConfig(
+  moduleId: string,
+): Promise<BreathingPractitionerConfig> {
+  const { data } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  return breathingConfigFromModuleConfig((data?.config ?? null) as Record<string, unknown> | null)
+}
+
+export async function updateBreathingPractitionerConfig(
+  moduleId: string,
+  next: BreathingPractitionerConfig,
+): Promise<{ ok: boolean }> {
+  const { data: current } = await supabase
+    .from('patient_modules')
+    .select('config')
+    .eq('id', moduleId)
+    .maybeSingle()
+  const existingConfig = (current?.config ?? {}) as Record<string, unknown>
+  const update: Database['public']['Tables']['patient_modules']['Update'] = {
+    config: {
+      ...existingConfig,
+      enabled_techniques: next.enabledTechniques,
+      primary_technique: next.primaryTechnique,
+      weekly_goal_sessions: next.weeklyGoalSessions,
+    },
+  }
+  const { error } = await supabase.from('patient_modules').update(update).eq('id', moduleId)
+  return { ok: !error }
+}
+
 // ── medication_adherence — liste de molécules co-éditée patient↔praticien ──────
 
 // Liste des médicaments (traitement de fond + si-besoin) configurée pour ce patient,
