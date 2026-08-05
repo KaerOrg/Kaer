@@ -17,6 +17,17 @@ export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/w
 // Techniques de respiration déclarées en base (config-first) : le web praticien et le
 // mobile patient lisent la même config, donc les mêmes rythmes et les mêmes couleurs.
 export { readBreathingTechniques, formatRhythm } from './services/breathingTechniques'
+
+// Synthèse praticien des sessions de respiration : comptes bruts uniquement, aucun
+// score de ressenti, aucune tendance, aucune corrélation (MDR 2017/745).
+export {
+  periodStart, filterSessions, summarize, countFeelings, momentOfDay, countMoments,
+  toCsvRows, buildCsv, BREATHING_PERIODS, DAY_MOMENTS, CSV_COLUMNS,
+} from './services/breathingReport'
+export type {
+  BreathingSessionRow, BreathingPeriod, BreathingSummary, FeelingCounts,
+  DayMoment, BreathingFeelingValue,
+} from './services/breathingReport'
 export type {
   BreathingTechniqueSpec, BreathingPhaseSpec, BreathingPhaseType,
 } from './services/breathingTechniques'

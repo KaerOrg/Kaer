@@ -24,9 +24,10 @@ import {
   type FormEntryRow,
   type ActivityEntryPoint,
   fetchEmotionNamingEntries,
+  fetchBreathingSessions,
   type EmotionNamingRow,
 } from '@services/engagementService'
-import type { RhythmEntry } from '@kaer/shared'
+import type { RhythmEntry, BreathingSessionRow } from '@kaer/shared'
 
 // Type d'écran de données pour un module donné (calculé par l'appelant).
 export type ChartKind =
@@ -49,6 +50,9 @@ export type ModuleDataResult =
   // « Nommer ce que je ressens » : des saisies brutes, pas une série. Les comptages
   // descriptifs sont calculés par `lib/emotionNamingData.ts` au rendu.
   | { status: 'emotion_naming'; entries: EmotionNamingRow[] }
+  // Respiration : sessions brutes, les comptes se calculent au rendu
+  // (`@kaer/shared/breathingReport`), jamais ici.
+  | { status: 'breathing'; sessions: BreathingSessionRow[] }
 
 // Factories `queryOptions` des données d'évolution / engagement patient (lecture
 // seule, alimente les graphiques). L'agrégat d'évolution regroupe en UNE query la
@@ -131,6 +135,10 @@ export const engagementQueries = {
         if (kind === 'emotion_naming') {
           const entries = await fetchEmotionNamingEntries(patientId)
           return entries.length === 0 ? { status: 'empty' } : { status: 'emotion_naming', entries }
+        }
+        if (moduleType === 'breathing_techniques') {
+          const sessions = await fetchBreathingSessions(patientId)
+          return sessions.length === 0 ? { status: 'empty' } : { status: 'breathing', sessions }
         }
         if (moduleType === 'chronobiology_tracker') {
           const entries = await fetchChronoEntries(patientId)

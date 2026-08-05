@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase'
-import type { RhythmEntry } from '@kaer/shared'
+import type { RhythmEntry, BreathingSessionRow, BreathingFeelingValue } from '@kaer/shared'
 import type { DefusionTechnique } from '../lib/defusionTechniques'
 import { DEFUSION_TECHNIQUES } from '../lib/defusionTechniques'
 
@@ -240,6 +240,55 @@ export async function fetchDefusionEvolution(patientId: string): Promise<Defusio
     })
   }
   return points
+}
+
+// ── Respiration : sessions brutes, non agrégées (W1 #373) ────────────────────
+//
+// Les sessions arrivent par la sync mobile dans `patient_entries`
+// (`entry_kind = 'breathing_session'`), pas dans la table dédiée `breathing_sessions`
+// qui n'est alimentée par personne (couture assumée, cf. schema.sql). Le service se
+// contente de LIRE : les comptes vivent dans `@kaer/shared/breathingReport`.
+//
+// `client_created_at` porte l'instant métier de la session (le mobile y recopie
+// `started_at`), ce qui place une session au bon jour même enregistrée plus tard.
+
+function toFeeling(value: unknown): BreathingFeelingValue | null {
+  return value === 'calmer' || value === 'same' || value === 'tenser' ? value : null
+}
+
+export async function fetchBreathingSessions(patientId: string): Promise<BreathingSessionRow[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'breathing_session')
+    .eq('module_id', 'breathing_techniques')
+    .order('client_created_at', { ascending: false })
+
+  if (error || !data) return []
+
+  const sessions: BreathingSessionRow[] = []
+  for (const row of data) {
+    const techniqueKey = row.payload.technique_key
+    if (typeof techniqueKey !== 'string') continue
+    const duration = toNumber(row.payload.duration_seconds) ?? 0
+    sessions.push({
+      // `started_at` du payload fait foi ; `client_created_at` couvre une entrée
+      // ancienne écrite avant que le payload ne le porte.
+      startedAt: typeof row.payload.started_at === 'string'
+        ? row.payload.started_at
+        : row.client_created_at,
+      techniqueKey,
+      durationSeconds: duration,
+      plannedDurationSeconds: toNumber(row.payload.planned_duration_seconds) ?? duration,
+      cyclesCompleted: toNumber(row.payload.cycles_completed) ?? 0,
+      // Une entrée sans le champ est une session menée au bout (défaut du service
+      // mobile) : seul un `false` explicite marque une interruption.
+      completed: row.payload.completed !== false,
+      feeling: toFeeling(row.payload.feeling),
+    })
+  }
+  return sessions
 }
 
 // ── « Nommer ce que je ressens » : saisies brutes, non agrégées ───────────────

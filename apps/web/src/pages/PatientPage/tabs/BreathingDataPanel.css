@@ -1,0 +1,239 @@
+/* Onglet « Données » du module respiration (W1). */
+
+.breathing-data-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.breathing-data-panel__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.breathing-data-panel__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.breathing-data-panel__tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.breathing-tile__label {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-tile__value {
+  display: block;
+  color: var(--color-text);
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  margin-top: var(--spacing-xs);
+}
+
+/* ── Ressenti par technique ─────────────────────────────────────────────── */
+
+.breathing-feeling-row {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.breathing-feeling-row:last-of-type {
+  border-bottom: none;
+}
+
+.breathing-feeling-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.breathing-feeling-row__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.breathing-feeling-row__total {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-feeling-row__bar {
+  display: flex;
+  height: 10px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: var(--spacing-xs) 0;
+}
+
+.breathing-feeling-row__segment,
+.breathing-feeling-row__empty {
+  display: block;
+  height: 100%;
+}
+
+.breathing-feeling-row__empty {
+  width: 100%;
+}
+
+.breathing-feeling-row__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-feeling-row__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breathing-feeling-row__count--muted {
+  opacity: 0.8;
+}
+
+.breathing-feeling-row__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+/* ── Moment de pratique ─────────────────────────────────────────────────── */
+
+.breathing-moments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.breathing-moment {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.breathing-moment__label {
+  width: 84px;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-moment__track {
+  flex: 1;
+  min-width: 0;
+  height: 10px;
+  background: var(--color-neutral);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+/* Teinte d'identité unique : aucun moment n'est « meilleur » qu'un autre. */
+.breathing-moment__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+}
+
+.breathing-moment__value {
+  width: 32px;
+  text-align: right;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.breathing-moments__reminder {
+  margin-top: var(--spacing-xs);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+/* ── Journal ────────────────────────────────────────────────────────────── */
+
+.breathing-journal__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.breathing-journal__table th {
+  text-align: left;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding-bottom: var(--spacing-xs);
+}
+
+.breathing-journal__table td {
+  padding: var(--spacing-xs) 0;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.breathing-journal__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  margin-right: 6px;
+}
+
+.breathing-journal__badge {
+  margin-left: var(--spacing-xs);
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xxs);
+}
+
+.breathing-journal__pill {
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xxs);
+  color: var(--color-text);
+}
+
+.breathing-journal__muted {
+  color: var(--color-text-muted);
+}
+
+.breathing-journal__empty,
+.breathing-data-panel__note,
+.breathing-data-panel__footer {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}
+
+.breathing-data-panel__note {
+  margin-top: var(--spacing-sm);
+}
+
+.breathing-journal__pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.breathing-journal__page {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
